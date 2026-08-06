@@ -50,6 +50,7 @@ failures fit the existing bounded path and `FileError` contracts.
 ## Evidence
 
 - `internal/cstdlib/stage0_windows_file.c` owns the two one-call Windows adapters.
-- `internal/cstdlib/stage0_windows_file_probe.c` executes raw failures and cleanup.
+- `internal/cstdlib/stage0_windows_file_directory_probe.c` executes raw failures and cleanup through
+  the combined Windows File probe translation unit.
 - `internal/sdkstdlib/sources/std/fs.fy` owns the public wrappers.
 - `examples/std_fs_quickstart/src/path_ops.fy` executes the generated-Fairy lifecycle.

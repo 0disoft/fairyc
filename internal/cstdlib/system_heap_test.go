@@ -527,6 +527,46 @@ func TestWindowsFileCopyProbeHasDedicatedSourceOwner(t *testing.T) {
 	}
 }
 
+func TestWindowsFileDirectoryProbeHasDedicatedSourceOwner(t *testing.T) {
+	t.Parallel()
+
+	mainProbe, err := os.ReadFile("stage0_windows_file_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	directoryProbe, err := os.ReadFile("stage0_windows_file_directory_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mainText := string(mainProbe)
+	directoryText := string(directoryProbe)
+	for _, residual := range []string{
+		"directory_path[]", "directory_rename_source[]", "directory_all_leaf[]",
+	} {
+		if strings.Contains(mainText, residual) {
+			t.Errorf("main Windows File probe retained directory proof marker %q", residual)
+		}
+	}
+	if strings.Count(mainText, "int fy_std_windows_file_directory_probe_v0(void);") != 1 ||
+		strings.Count(mainText, "fy_std_windows_file_directory_probe_v0();") != 1 {
+		t.Fatal("main Windows File probe must declare and invoke the directory proof exactly once")
+	}
+	if strings.Count(directoryText, "int fy_std_windows_file_directory_probe_v0(void)") != 1 ||
+		!strings.Contains(directoryText, "fy_std_windows_directory_create_v0") ||
+		!strings.Contains(directoryText, "fy_std_windows_directory_rename_v0") ||
+		!strings.Contains(directoryText, "fy_std_windows_directory_ensure_v0") ||
+		!strings.Contains(directoryText, "directory_all_partial") {
+		t.Fatal("dedicated Windows File directory probe lost its definition or proof body")
+	}
+	combined, err := WindowsFileProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(combined, "int fy_std_windows_file_directory_probe_v0(void)") != 2 {
+		t.Fatal("combined Windows File probe must contain one directory declaration and one definition")
+	}
+}
+
 func TestWindowsFilePathKindProbeHasDedicatedSourceOwner(t *testing.T) {
 	t.Parallel()
 

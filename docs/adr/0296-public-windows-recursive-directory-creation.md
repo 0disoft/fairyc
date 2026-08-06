@@ -62,7 +62,7 @@ no allocation or new library dependency.
 ## Evidence
 
 - `internal/cstdlib/stage0_windows_file.c` owns validation and prefix creation.
-- `internal/cstdlib/stage0_windows_file_probe.c` executes raw validation, success, failure, and
+- `internal/cstdlib/stage0_windows_file_directory_probe.c` executes raw validation, success, failure, and
   partial-prefix cleanup.
 - `internal/sdkstdlib/sources/std/fs.fy` owns the public wrapper.
 - `examples/std_fs_quickstart/src/path_ops.fy` executes the generated-Fairy lifecycle.

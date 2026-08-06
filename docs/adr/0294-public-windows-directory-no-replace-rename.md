@@ -51,7 +51,7 @@ keeping those larger policies excluded.
 ## Evidence
 
 - `internal/cstdlib/stage0_windows_file.c` owns the one-call Windows adapter.
-- `internal/cstdlib/stage0_windows_file_probe.c` executes raw kind, collision, preservation, and
+- `internal/cstdlib/stage0_windows_file_directory_probe.c` executes raw kind, collision, preservation, and
   cleanup evidence.
 - `internal/sdkstdlib/sources/std/fs.fy` owns the public wrapper.
 - `examples/std_fs_quickstart/src/path_ops.fy` executes the generated-Fairy path lifecycle.
