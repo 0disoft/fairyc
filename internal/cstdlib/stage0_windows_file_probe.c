@@ -38,6 +38,12 @@ struct fy_std_windows_file_kind_result_v0 {
     uint32_t kind;
 };
 
+struct fy_std_windows_file_attribute_result_v0 {
+    uint32_t status;
+    uint32_t os_code;
+    uint32_t enabled;
+};
+
 struct fy_std_windows_file_id_v0 {
     uint32_t volume_low;
     uint32_t volume_high;
@@ -118,6 +124,7 @@ uint32_t fy_std_windows_file_drop_v0(void *);
 int fy_std_windows_file_copy_probe_v0(void);
 int fy_std_windows_file_path_kind_probe_v0(void);
 int fy_std_windows_file_seek_probe_v0(void);
+int fy_std_windows_file_metadata_probe_v0(void);
 
 static int fy_std_windows_file_closed_v0(const struct fy_std_windows_file_v0 *file) {
     return file->handle == NULL && file->open == UINT8_C(0);
@@ -717,5 +724,7 @@ int main(void) {
     if (path_kind_code != 0) return path_kind_code;
     int seek_code = fy_std_windows_file_seek_probe_v0();
     if (seek_code != 0) return seek_code;
+    int metadata_code = fy_std_windows_file_metadata_probe_v0();
+    if (metadata_code != 0) return metadata_code;
     return fy_std_windows_file_copy_probe_v0();
 }

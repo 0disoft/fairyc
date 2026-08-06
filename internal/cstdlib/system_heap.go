@@ -75,6 +75,9 @@ var stage0WindowsFilePathKindProbe string
 //go:embed stage0_windows_file_seek_probe.c
 var stage0WindowsFileSeekProbe string
 
+//go:embed stage0_windows_file_metadata_probe.c
+var stage0WindowsFileMetadataProbe string
+
 //go:embed stage0_windows_process_args.c
 var stage0WindowsProcessArgs string
 
@@ -264,7 +267,11 @@ func WindowsFileProbeSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return probe + "\n" + pathKindProbe + "\n" + seekProbe + "\n" + copyProbe, nil
+	metadataProbe, err := canonicalSource("Windows File metadata probe", stage0WindowsFileMetadataProbe)
+	if err != nil {
+		return "", err
+	}
+	return probe + "\n" + pathKindProbe + "\n" + seekProbe + "\n" + metadataProbe + "\n" + copyProbe, nil
 }
 
 // WindowsProcessArgsSource returns the target-specific UTF-8 process argument implementation.

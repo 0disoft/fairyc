@@ -15,6 +15,10 @@ import (
 var processArgsProofArguments = []string{"", "Fairy", "--locked", "a b\"c\\d\\", "한글λ"}
 
 func runStdlibQuickstartProof(root string, directory string, artifactBase string, module string, expectedResult int32, freshFiles ...string) (int, error) {
+	return runStdlibQuickstartProofWithReadOnly(root, directory, artifactBase, module, expectedResult, nil, freshFiles...)
+}
+
+func runStdlibQuickstartProofWithReadOnly(root string, directory string, artifactBase string, module string, expectedResult int32, readOnlyFiles []string, freshFiles ...string) (int, error) {
 	workspaceRoot := filepath.Join(root, "examples", directory)
 	artifactPath := filepath.Join(workspaceRoot, "build", artifactBase+".exe")
 	profiles := []struct {
@@ -49,8 +53,41 @@ func runStdlibQuickstartProof(root string, directory string, artifactBase string
 				return 0, fmt.Errorf("remove %s %s pre-run file %q: %w", module, profile.name, name, err)
 			}
 		}
-		if err := executeExpectResult(artifactPath, expectedResult); err != nil {
-			return 0, fmt.Errorf("execute %s %s artifact: %w", module, profile.name, err)
+		for _, name := range readOnlyFiles {
+			path := filepath.Join(filepath.Dir(artifactPath), name)
+			if err := os.Chmod(path, 0o666); err != nil && !errors.Is(err, os.ErrNotExist) {
+				return 0, fmt.Errorf("reset %s %s read-only fixture %q: %w", module, profile.name, name, err)
+			}
+			if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+				return 0, fmt.Errorf("remove %s %s read-only fixture %q: %w", module, profile.name, name, err)
+			}
+			if err := os.WriteFile(path, []byte("metadata"), 0o666); err != nil {
+				return 0, fmt.Errorf("create %s %s read-only fixture %q: %w", module, profile.name, name, err)
+			}
+			if err := os.Chmod(path, 0o444); err != nil {
+				return 0, fmt.Errorf("mark %s %s fixture %q read-only: %w", module, profile.name, name, err)
+			}
+		}
+		executeErr := executeExpectResult(artifactPath, expectedResult)
+		var cleanupErr error
+		for _, name := range readOnlyFiles {
+			path := filepath.Join(filepath.Dir(artifactPath), name)
+			if err := os.Chmod(path, 0o666); err != nil && cleanupErr == nil {
+				cleanupErr = fmt.Errorf("reset %s %s read-only fixture %q after execution: %w", module, profile.name, name, err)
+				continue
+			}
+			if err := os.Remove(path); err != nil && cleanupErr == nil {
+				cleanupErr = fmt.Errorf("remove %s %s read-only fixture %q after execution: %w", module, profile.name, name, err)
+			}
+		}
+		if executeErr != nil {
+			if cleanupErr != nil {
+				executeErr = errors.Join(executeErr, cleanupErr)
+			}
+			return 0, fmt.Errorf("execute %s %s artifact: %w", module, profile.name, executeErr)
+		}
+		if cleanupErr != nil {
+			return 0, cleanupErr
 		}
 	}
 	return len(profiles), nil

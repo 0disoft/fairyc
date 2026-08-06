@@ -451,8 +451,9 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, required := range []string{
-		"CreateFileW", "ReadFile", "WriteFile", "GetFileSizeEx", "GetFileInformationByHandleEx", "FileIdInfo", "SetFileInformationByHandle", "FileEndOfFileInfo", "SetFilePointerEx", "FILE_BEGIN", "FILE_CURRENT", "FILE_END", "FlushFileBuffers", "CloseHandle",
+		"CreateFileW", "ReadFile", "WriteFile", "GetFileSizeEx", "GetFileInformationByHandleEx", "FileBasicInfo", "FileIdInfo", "SetFileInformationByHandle", "FileEndOfFileInfo", "SetFilePointerEx", "FILE_BEGIN", "FILE_CURRENT", "FILE_END", "FlushFileBuffers", "CloseHandle",
 		"fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0",
+		"fy_std_windows_file_read_only_v0", "FILE_ATTRIBUTE_READONLY",
 		"fy_std_windows_file_path_kind_v0", "GetFileAttributesW", "FILE_ATTRIBUTE_REPARSE_POINT", "FY_STD_WINDOWS_PATH_KIND_OTHER_V0",
 		"FY_STD_WINDOWS_FILE_PATH_ENCODING_V0", "FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0",
 		"struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(",
@@ -595,6 +596,41 @@ func TestWindowsFileSeekProbeHasDedicatedSourceOwner(t *testing.T) {
 	}
 }
 
+func TestWindowsFileMetadataProbeHasDedicatedSourceOwner(t *testing.T) {
+	t.Parallel()
+
+	mainProbe, err := os.ReadFile("stage0_windows_file_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	metadataProbe, err := os.ReadFile("stage0_windows_file_metadata_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mainText := string(mainProbe)
+	metadataText := string(metadataProbe)
+	if strings.Contains(mainText, "fy_std_windows_file_read_only_v0") ||
+		strings.Contains(mainText, "metadata_read_only") {
+		t.Fatal("main Windows File probe retained metadata proof ownership")
+	}
+	if strings.Count(mainText, "int fy_std_windows_file_metadata_probe_v0(void);") != 1 ||
+		strings.Count(mainText, "fy_std_windows_file_metadata_probe_v0();") != 1 {
+		t.Fatal("main Windows File probe must declare and invoke the metadata proof exactly once")
+	}
+	if strings.Count(metadataText, "int fy_std_windows_file_metadata_probe_v0(void)") != 1 ||
+		!strings.Contains(metadataText, "fy_std_windows_file_read_only_v0") ||
+		!strings.Contains(metadataText, "FILE_ATTRIBUTE_READONLY") {
+		t.Fatal("dedicated Windows File metadata probe lost its definition or proof body")
+	}
+	combined, err := WindowsFileProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(combined, "int fy_std_windows_file_metadata_probe_v0(void)") != 2 {
+		t.Fatal("combined Windows File probe must contain one metadata declaration and one definition")
+	}
+}
+
 func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_windows_file_open_v0"})
@@ -604,7 +640,7 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	for _, required := range []string{
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0",
 		"fy_std_windows_file_position_v0", "fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0", "fy_std_windows_file_seek_start_v0",
-		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_set_len_v0",
+		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_read_only_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_set_len_v0",
 		"fy_std_windows_file_id_v0",
 		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",

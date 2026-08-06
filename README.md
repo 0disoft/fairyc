@@ -381,7 +381,13 @@ ADR 0305 moves the SDK to `0.0.0-stage0.39` with bounded
 `std::fs::seek_current(ref mut File, i32)` and `std::fs::seek_end(ref mut File, i32)`. Both reuse
 the live Windows handle, return the resulting absolute `usize` position, preserve the cursor when a
 negative delta would cross byte zero, and do not extend the file merely by moving beyond EOF.
-The query distinguishes ordinary files, directories, and other observed attributes without opening
+ADR 0306 moves the SDK to `0.0.0-stage0.40` with
+`std::fs::is_read_only(ref File) -> Result<bool, FileError>`. It observes
+`FILE_ATTRIBUTE_READONLY` through the same live handle without path lookup, allocation, cursor
+movement, or length change. The boolean is observed metadata rather than a guarantee that a write
+will succeed; handle access, ACLs, sharing, filesystem policy, and later external changes remain
+independent.
+The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,
 never replaces an existing destination, returns exact copied bytes, and preserves any completed

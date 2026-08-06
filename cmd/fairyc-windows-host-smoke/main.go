@@ -365,6 +365,7 @@ const checkedInStdFSManifestPath = "examples/std_fs_quickstart/fairy.toml"
 const checkedInStdFSMainPath = "examples/std_fs_quickstart/src/main.fy"
 const checkedInStdFSPathOpsPath = "examples/std_fs_quickstart/src/path_ops.fy"
 const checkedInStdFSPositioningPath = "examples/std_fs_quickstart/src/positioning.fy"
+const checkedInStdFSMetadataPath = "examples/std_fs_quickstart/src/metadata.fy"
 const checkedInRegionsManifestPath = "examples/regions/fairy.toml"
 const checkedInRegionsMainPath = "examples/regions/src/main.fy"
 const checkedInProcessArgsManifestPath = "examples/process_args_quickstart/fairy.toml"
@@ -504,6 +505,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in std::fs positioning operations: %w", err)
 	}
+	stdFSMetadata, err := os.ReadFile(filepath.FromSlash(checkedInStdFSMetadataPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::fs metadata operations: %w", err)
+	}
 	regionsManifest, err := os.ReadFile(filepath.FromSlash(checkedInRegionsManifestPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Region workspace manifest: %w", err)
@@ -595,6 +600,7 @@ func run() error {
 		checkedInStdFSMainPath:                 string(stdFSMain),
 		checkedInStdFSPathOpsPath:              string(stdFSPathOps),
 		checkedInStdFSPositioningPath:          string(stdFSPositioning),
+		checkedInStdFSMetadataPath:             string(stdFSMetadata),
 		checkedInRegionsManifestPath:           string(regionsManifest),
 		checkedInRegionsMainPath:               string(regionsMain),
 		checkedInProcessArgsManifestPath:       string(processArgsManifest),
@@ -987,12 +993,13 @@ func run() error {
 		return err
 	}
 	workspaceBuildExecutions += stdTextFromBufferBuildExecutions
-	stdFSBuildExecutions, err := runStdlibQuickstartProof(
+	stdFSBuildExecutions, err := runStdlibQuickstartProofWithReadOnly(
 		root,
 		"std_fs_quickstart",
 		"std-fs-quickstart",
 		"std::fs",
 		42,
+		[]string{"fairyc-std-fs-read-only-metadata.tmp"},
 		"fairyc-std-fs-data.tmp",
 		"fairyc-std-fs-drop.tmp",
 		"fairyc-std-fs-open-or-create.tmp",
@@ -1214,7 +1221,7 @@ func run() error {
 	fmt.Printf("Generated-Fairy CString failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering cstring_from_text initial-allocation failure, exact statuses 1/1, automatic CString drop, and zero retained probe allocations\n", cstringFailureCases, cstringFailureProbeImages)
 	fmt.Printf("Generated-Fairy String copy failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering text::copy initial-allocation failure, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringCopyFailureCases, stringCopyFailureProbeImages)
 	fmt.Printf("Generated-Fairy Buffer-to-String conversion proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering zero-copy valid UTF-8 transfer under a fail-after-two schedule, invalid UTF-8 ownership return with preserved len/capacity/bytes, empty String success, automatic String and Buffer drop, and zero retained probe allocations\n", stringFromBufferProbeCases, stringFromBufferProbeImages)
-	fmt.Printf("Generated-Fairy std::fs one-call write, owned-Buffer read append/read-to-end, file and directory creation/removal/no-replace rename, recursive parent creation, no-replace byte copy, path-kind snapshot, absolute/current/end seek, append, file-kind, exact-read, and file-identity proof passed: %d native executions across %d inspected low/optimized MSVC images, covering one-call prefix success, read-only write failure with zero progress, write-all completion, initialized-prefix Buffer append, current-position read-to-end, short read, EOF, write-only read failure with preserved bytes, open-or-create preservation, exclusive create collision, exact file remove success plus missing-path and open-sharing failures, no-replace file rename collision preservation plus open-sharing failure and exact final bytes, exact byte-copy completion plus collision preservation and missing-source no-create behavior, path-level ordinary file and directory classification plus exact missing failure, one-level and nested directory creation, existing-directory success, missing-parent and file/directory collision failures, partial-prefix preservation after a later invalid-name failure, non-empty removal failure, child cleanup, exact empty-directory removal, no-replace directory rename collision, moved-child preservation, old-path disappearance, bounded negative seek, start-preserving failure, beyond-EOF cursor movement with unchanged size, write-only append creation, seek-resistant EOF writes, exact retained bytes, disk files, the NUL character device, complete reads, unexpected-EOF prefix preservation, same-file handles, and distinct live files\n", stdFSBuildExecutions, stdFSBuildExecutions)
+	fmt.Printf("Generated-Fairy std::fs one-call write, owned-Buffer read append/read-to-end, file and directory creation/removal/no-replace rename, recursive parent creation, no-replace byte copy, path-kind snapshot, absolute/current/end seek, same-handle read-only metadata, append, file-kind, exact-read, and file-identity proof passed: %d native executions across %d inspected low/optimized MSVC images, covering one-call prefix success, read-only write failure with zero progress, write-all completion, initialized-prefix Buffer append, current-position read-to-end, short read, EOF, write-only read failure with preserved bytes, open-or-create preservation, exclusive create collision, exact file remove success plus missing-path and open-sharing failures, no-replace file rename collision preservation plus open-sharing failure and exact final bytes, exact byte-copy completion plus collision preservation and missing-source no-create behavior, path-level ordinary file and directory classification plus exact missing failure, one-level and nested directory creation, existing-directory success, missing-parent and file/directory collision failures, partial-prefix preservation after a later invalid-name failure, non-empty removal failure, child cleanup, exact empty-directory removal, no-replace directory rename collision, moved-child preservation, old-path disappearance, bounded negative seek, start-preserving failure, beyond-EOF cursor movement with unchanged size, ordinary and host-created read-only file metadata with unchanged cursor and size, write-only append creation, seek-resistant EOF writes, exact retained bytes, disk files, the NUL character device, complete reads, unexpected-EOF prefix preservation, same-file handles, and distinct live files\n", stdFSBuildExecutions, stdFSBuildExecutions)
 	fmt.Printf("Stable run program-argument forwarding proof passed: %d native executions across %d inspected low/optimized MSVC images, covering argv[0] inclusion and ordering, empty, flag-looking, space/quote/trailing-backslash, and non-ASCII UTF-8 argument round-trips, out-of-range status 1, too-small status 3 with exact needed and an unchanged caller buffer, CLI embedded-NUL and delimiter rejection, and low-level invalid-surrogate status 2 with an unchanged buffer\n", processArgsExecutions+processArgsDecodeExecutions, processArgsBuildImages+processArgsDecodeImages)
 	fmt.Printf("std::io scalar output proof passed: %d native executions across %d inspected low/optimized MSVC images, covering stdout u32 0/1/max, usize 0/1/max, bool true/false, plus stderr i32 0/negative/min/max, u32 0/max, usize 0/max, and bool true/false exact ASCII bytes with exact written counts\n", stdIoScalarBuildExecutions, stdIoScalarBuildExecutions)
 	fmt.Println("Generated-Fairy user-enum Result proof passed: 4 native executions across low/optimized MSVC, covering .ok enum construction, enum payload extraction, exhaustive enum switching, .err inert-struct extraction, and ? propagation of enum errors")

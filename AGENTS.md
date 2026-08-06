@@ -150,6 +150,7 @@ regenerate, or override compiler source.
 
 - Allocation-free scalar stderr output, target-neutral numeric symbols, shared stack formatting, and low/optimized generated-Fairy evidence: internal/sdkstdlib/sources/std/io.fy, internal/cstdlib/stage0_linux_console.c, internal/cstdlib/stage0_windows_console.c, internal/cstdlibcontract/, examples/std_io_scalar_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0303-allocation-free-scalar-stderr-output.md
 - Bounded Windows File current/end seek, same-handle target symbols, dedicated raw probe, and low/optimized private/public generated-Fairy evidence: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file.c, internal/cstdlib/stage0_windows_file_seek_probe.c, internal/cstdlibcontract/, examples/windows_file/, examples/std_fs_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0305-public-windows-relative-end-seek.md
+- Same-handle Windows File read-only metadata, target-neutral bool mapping, dedicated raw probe, and low/optimized public generated-Fairy evidence: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0306-public-windows-file-read-only-metadata.md
 
 ## Hard Rules
 

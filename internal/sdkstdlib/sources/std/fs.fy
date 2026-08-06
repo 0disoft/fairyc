@@ -31,6 +31,13 @@ struct raw_file_kind_result {
 }
 
 @repr(C)
+struct raw_file_attribute_result {
+    u32 status;
+    u32 os_code;
+    u32 enabled;
+}
+
+@repr(C)
 struct raw_file_buffer_result {
     u32 file_status;
     u32 os_code;
@@ -167,6 +174,10 @@ unsafe extern C fn raw_file_size_result file_size_raw(ptr void file) ;
 unsafe extern C fn raw_file_kind_result file_kind_raw(ptr void file) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_read_only_v0")
+unsafe extern C fn raw_file_attribute_result file_read_only_raw(ptr void file) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_path_kind_v0")
 unsafe extern C fn raw_file_kind_result file_path_kind_raw(ptr u8 path) ;
 
@@ -235,6 +246,14 @@ fn FileError size_error(raw_file_size_result result) {
 }
 
 fn FileError kind_error(raw_file_kind_result result) {
+    return FileError {
+        .status = result.status,
+        .os_code = result.os_code,
+        .completed = 0,
+    };
+}
+
+fn FileError attribute_error(raw_file_attribute_result result) {
     return FileError {
         .status = result.status,
         .os_code = result.os_code,
@@ -581,6 +600,19 @@ pub fn Result<FileKind, FileError> kind(ref File file) {
         .ok(.Pipe)
     } else {
         .ok(.Unknown)
+    };
+}
+
+/// Reports whether the object behind this open handle currently has read-only metadata.
+@effects(filesystem)
+pub fn Result<bool, FileError> is_read_only(ref File file) {
+    let raw_file_attribute_result result = unsafe {
+        file_read_only_raw(file as ptr void)
+    };
+    return if (result.status == 0) {
+        .ok(result.enabled != 0)
+    } else {
+        .err(attribute_error(result))
     };
 }
 

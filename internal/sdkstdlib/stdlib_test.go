@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.39" {
+	if Version != "0.0.0-stage0.40" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -42,6 +42,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	copyFileBytesPublic := false
 	pathKindPublic := false
 	seekFunctions := make(map[string]bool)
+	readOnlyPublic := false
 	appendBytePublic := false
 	asBytesPublic := false
 	stderrScalarFunctions := make(map[string]bool)
@@ -114,6 +115,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			if function.Name == "path_kind" {
 				pathKindPublic = function.Public
 			}
+			if function.Name == "is_read_only" {
+				readOnlyPublic = function.Public
+			}
 		}
 	}
 	if !slices.Equal(fileKindVariants, []string{"Unknown", "Disk", "Character", "Pipe"}) {
@@ -130,6 +134,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !pathKindPublic {
 		t.Fatal("std::fs::path_kind is not public")
+	}
+	if !readOnlyPublic {
+		t.Fatal("std::fs::is_read_only is not public")
 	}
 	for _, name := range []string{"seek_current", "seek_end"} {
 		if !seekFunctions[name] {

@@ -807,10 +807,17 @@ dedicated raw probe plus private-wrapper and public generated-Fairy paths run un
 optimized MSVC. Wider signed offsets, sparse-gap content guarantees, portable offsets, and Linux
 public linkage remain later gates.
 
+ADR 0306 closes the first general same-handle metadata gap in SDK `0.0.0-stage0.40` with
+`is_read_only(ref File) -> Result<bool, FileError>`. The Windows target queries `FileBasicInfo`
+through the live handle and exposes only `FILE_ATTRIBUTE_READONLY` as target-neutral bool. A
+dedicated raw probe plus public generated-Fairy normal/read-only fixtures run under low and
+optimized MSVC while proving cursor and size preservation. Timestamps, compound metadata records,
+attribute mutation, writable-access guarantees, ACLs, and Linux public linkage remain later gates.
+
 ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe
-both 9-byte and empty-file sizes through shared owner borrows under low and optimized MSVC. General
+both 9-byte and empty-file sizes through shared owner borrows under low and optimized MSVC. Compound
 metadata records, timestamps, path-based queries, concurrent external-write snapshots,
 and Linux public linkage remain later gates.
 

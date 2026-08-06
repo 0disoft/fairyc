@@ -4,6 +4,7 @@ import std::bytes as bytes;
 import std::fs as fs;
 import path_ops as paths;
 import positioning as positions;
+import metadata as metadata;
 
 @effects(filesystem)
 fn i32 resize_round_trip(ref mut fs::File file, ref u8[] replacement) {
@@ -864,6 +865,7 @@ fn i32 main() {
     let ref CStr create_new_path = c"fairyc-std-fs-create-new.tmp";
     let ref CStr append_path = c"fairyc-std-fs-append.tmp";
     let ref CStr read_append_error_path = c"fairyc-std-fs-read-append-error.tmp";
+    let ref CStr read_only_metadata_path = c"fairyc-std-fs-read-only-metadata.tmp";
     let ref CStr remove_path = c"fairyc-std-fs-remove.tmp";
     let ref CStr rename_source_path = c"fairyc-std-fs-rename-source.tmp";
     let ref CStr rename_destination_path = c"fairyc-std-fs-rename-destination.tmp";
@@ -948,6 +950,11 @@ fn i32 main() {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
     };
+    let i32 metadata_code = if (write_code != 0) {
+        write_code
+    } else {
+        metadata::check_read_only(data_path, read_only_metadata_path)
+    };
     return if (invalid_code != 0) {
         invalid_code
     } else if (missing_update_code != 0) {
@@ -978,6 +985,8 @@ fn i32 main() {
         directory_all_code
     } else if (write_code != 0) {
         write_code
+    } else if (metadata_code != 0) {
+        metadata_code
     } else {
         let i32 update_code = switch (fs::open_update(data_path)) {
             case .ok(file) : { update_then_close(file) }
