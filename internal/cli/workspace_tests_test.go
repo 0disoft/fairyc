@@ -191,9 +191,19 @@ fn void member_passes() { assert(answer::value() == 42); }
 	if code != ExitSuccess || stdout != "test tests::member::member_passes ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
 		t.Fatalf("selected member file = (%d, %q, %q)", code, stdout, stderr)
 	}
+	code, stdout, stderr = runForTest([]string{
+		"test", "--package", "example.member-test.answer", "--dir", "libs/answer/tests", "--locked",
+	}, root)
+	if code != ExitSuccess || stdout != "test tests::member::member_passes ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
+		t.Fatalf("selected member directory = (%d, %q, %q)", code, stdout, stderr)
+	}
 	code, stdout, stderr = runForTest([]string{"test", "--workspace", "--file", "tests/root.fy", "--locked"}, root)
 	if code != ExitSuccess || stdout != "test example.member-test.app::tests::root::root_passes ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
 		t.Fatalf("workspace root file = (%d, %q, %q)", code, stdout, stderr)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--workspace", "--dir", "tests", "--locked"}, root)
+	if code != ExitSuccess || stdout != "test example.member-test.app::tests::root::root_passes ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
+		t.Fatalf("workspace root directory = (%d, %q, %q)", code, stdout, stderr)
 	}
 	code, stdout, stderr = runForTest([]string{
 		"test", "--package", "example.member-test.answer", "--file", "tests/member.fy", "--locked",
@@ -405,6 +415,97 @@ fn void invalid_unselected_file() { missing(); }
 	code, stdout, stderr = runForTest([]string{"test", "--file", "tests/alpha.fy", "--locked"}, root)
 	if code != ExitSourceDiagnostics || stdout != "" || stderr == "" {
 		t.Fatalf("selected file with invalid unselected overlay = (%d, %q, %q)", code, stdout, stderr)
+	}
+}
+
+func TestStableWorkspaceTestSelectsExactPortableDirectories(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "tests/unit/alpha.fy", `module tests::unit::alpha;
+@test
+fn void first() { assert(true); }
+`)
+	writeWorkspaceFile(t, root, "tests/unit/nested/beta.fy", `module tests::unit::nested::beta;
+@test
+fn void second() { assert(true); }
+`)
+	writeWorkspaceFile(t, root, "tests/integration/failure.fy", `module tests::integration::failure;
+@test
+fn void excluded_failure() { assert(false); }
+`)
+	writeWorkspaceFile(t, root, "tests/empty/helpers.fy", `module tests::empty::helpers;
+fn bool helper() { return true; }
+`)
+
+	code, stdout, stderr := runForTest([]string{"test", "--dir", "tests/unit"}, root)
+	want := "test tests::unit::alpha::first ... ok\n" +
+		"test tests::unit::nested::beta::second ... ok\n" +
+		"test result: ok. 2 passed; 0 failed; lock updated\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("directory-selected test = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--json", "--locations", "--dir", "tests/unit/nested", "--locked"}, root)
+	if code != ExitSuccess || stderr != "" {
+		t.Fatalf("directory-selected located list = (%d, %q, %q)", code, stdout, stderr)
+	}
+	var listed struct {
+		SchemaVersion string `json:"schemaVersion"`
+		Tests         []string
+		Locations     []stableTestLocation
+	}
+	if err := json.Unmarshal([]byte(stdout), &listed); err != nil {
+		t.Fatal(err)
+	}
+	if listed.SchemaVersion != "fairyc.test-list/v3" ||
+		!slices.Equal(listed.Tests, []string{"tests::unit::nested::beta::second"}) ||
+		len(listed.Locations) != 1 || listed.Locations[0].Source.Path != "tests/unit/nested/beta.fy" {
+		t.Fatalf("directory-selected located list = %+v", listed)
+	}
+
+	code, stdout, stderr = runForTest([]string{
+		"test", "--list", "--dir", "tests/integration", "--dir", "tests/unit/nested", "--locked",
+	}, root)
+	want = "test tests::integration::failure::excluded_failure\n" +
+		"test tests::unit::nested::beta::second\n" +
+		"test list: 2 discovered; lock verified\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("multi-directory selected list = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--dir", "tests/empty", "--locked"}, root)
+	if code != ExitSuccess || stdout != "test result: ok. 0 passed; 0 failed; lock verified\n" || stderr != "" {
+		t.Fatalf("empty admitted test directory = (%d, %q, %q)", code, stdout, stderr)
+	}
+
+	for _, testCase := range []struct {
+		arguments []string
+		wantError string
+	}{
+		{arguments: []string{"test", "--dir"}, wantError: "requires a test directory after --dir"},
+		{arguments: []string{"test", "--dir", "tests/missing"}, wantError: `test directory selection was not found: "tests/missing"`},
+		{arguments: []string{"test", "--dir", `tests\unit`}, wantError: `test directory selection was not found: "tests\\unit"`},
+		{arguments: []string{"test", "--dir", "Tests/unit"}, wantError: `test directory selection was not found: "Tests/unit"`},
+		{arguments: []string{"test", "--dir", "tests/../tests/unit"}, wantError: `test directory selection was not found: "tests/../tests/unit"`},
+		{arguments: []string{"test", "--dir", "tests/unit/"}, wantError: `test directory selection was not found: "tests/unit/"`},
+		{arguments: []string{"test", "--dir", "tests/unit", "--dir", "tests/unit"}, wantError: `received test directory "tests/unit" more than once`},
+		{arguments: []string{"test", "--dir", "tests/unit", "--file", "tests/unit/alpha.fy"}, wantError: "does not combine --dir with --file or --exact"},
+		{arguments: []string{"test", "--dir", "tests/unit", "--exact", "tests::unit::alpha::first"}, wantError: "does not combine --dir with --file or --exact"},
+	} {
+		code, stdout, stderr = runForTest(testCase.arguments, root)
+		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, testCase.wantError) {
+			t.Fatalf("invalid directory selection %v = (%d, %q, %q), want %q", testCase.arguments, code, stdout, stderr, testCase.wantError)
+		}
+	}
+
+	writeWorkspaceFile(t, root, "tests/integration/failure.fy", `module tests::integration::failure;
+@test
+fn void invalid_unselected_directory() { missing(); }
+`)
+	code, stdout, stderr = runForTest([]string{"test", "--dir", "tests/unit", "--locked"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || stderr == "" {
+		t.Fatalf("selected directory with invalid unselected overlay = (%d, %q, %q)", code, stdout, stderr)
 	}
 }
 

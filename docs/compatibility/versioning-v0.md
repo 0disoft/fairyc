@@ -915,6 +915,16 @@ ordering and complete-overlay compiler admission, adds no output field, and leav
 text and JSON bytes unchanged. Language, SDK, runtime ABI, manifest, lockfile, package, interface,
 target, MIR, and generated-code versions remain unchanged.
 
+ADR 0304 additively admits repeatable `--dir <portable-test-directory>` for stable test listing and
+execution. Values match only the exact ancestor-directory catalog derived from admitted portable
+test-source paths, recurse by a `/` segment boundary, and never trigger a second filesystem read.
+Unknown, duplicate, missing, host-separated, case-mismatched, dot-segment, and trailing-slash values
+fail closed. Directories backed only by admitted zero-test sources succeed, while empty filesystem
+directories are not cataloged. `--dir` is mutually exclusive with `--file` and `--exact`, preserves
+canonical ordering and complete-overlay compiler admission, adds no output field, and leaves all
+v1/v2/v3 text and JSON bytes unchanged. Language, SDK, runtime ABI, manifest, lockfile, package,
+interface, target, MIR, and generated-code versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

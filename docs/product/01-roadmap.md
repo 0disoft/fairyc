@@ -718,9 +718,9 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic-by-default
-  and explicit Windows-native `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`
-  plus compiler-admitted `fairyc test --list [--package <package-uid>] [--locked]` discovery with canonical exact selection
-  and singular root-reachable member selection separate from catalog-unreachable aggregation, fuzzy/tag/glob/directory filters,
+  and explicit Windows-native `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`
+  plus compiler-admitted `fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` discovery with canonical exact selection
+  and singular root-reachable member selection separate from catalog-unreachable aggregation, fuzzy/tag/glob filters,
   shared fixtures, portable targets, program streams,
   benchmarks, and host-environment policy.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
@@ -985,7 +985,17 @@ listing. Values reuse `--locations` portable workspace-relative paths, including
 unknown, duplicate, host-separated, and case-mismatched values fail closed, while an admitted
 zero-test file succeeds. `--file` and `--exact` are mutually exclusive, and complete-overlay
 compiler admission remains unchanged. Low and optimized isolated MSVC evidence selects one file
-while excluding another admitted failing file. Fuzzy/tag/glob/directory selection remains later.
+while excluding another admitted failing file.
+
+ADR 0304 closes exact recursive directory selection with repeatable
+`--dir <portable-test-directory>` in execution and listing. The directory catalog comes only from
+already admitted portable test-source paths, includes each package's `tests` root and descendants,
+and performs no selection-time directory walk. Matching is byte-exact, case-sensitive, and `/`-only;
+unknown, duplicate, host-separated, dot-segment, and trailing-slash values fail as code 2. Distinct
+directories form a union, admitted zero-test directories succeed, and `--dir` is mutually exclusive
+with `--file` and `--exact`. Complete-overlay compiler admission and report bytes remain unchanged;
+low and optimized isolated MSVC evidence selects one directory while excluding another admitted
+failing directory. Fuzzy/tag/glob selection remains later.
 
 ADR 0295 closes the opt-in root-reachable multi-package gap with `fairyc test --workspace` for
 execution and listing. Every unambiguous local package in the production graph receives its isolated
@@ -1001,7 +1011,7 @@ execution modes. Existing output remains byte-for-byte unchanged when omitted. L
 the portable workspace-relative path and 1-based position; located JSON uses v3 schemas with package
 UID, exact name byte span, and `fyfile1`/`fylm1` identities so tools can reject stale anchors.
 Standalone low and optimized native trap-continuation execution proves the same locations survive
-real isolated MSVC runs. Source text, absolute paths, durations, attachments, and tag/glob/directory filters
+real isolated MSVC runs. Source text, absolute paths, durations, attachments, and tag/glob filters
 remain separate.
 
 ADR 0287 closes the machine-report gap for execution with atomic `fairyc.test-report/v1` output.

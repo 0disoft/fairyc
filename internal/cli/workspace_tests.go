@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path"
 	"slices"
 	"strings"
 
@@ -28,16 +29,17 @@ const stableLocatedTestListSchema = "fairyc.test-list/v3"
 const stableLocatedTestReportSchema = "fairyc.test-report/v3"
 
 type stableTestOptions struct {
-	locked     bool
-	native     bool
-	release    bool
-	list       bool
-	json       bool
-	locations  bool
-	workspace  bool
-	packageUID string
-	files      []string
-	exact      []string
+	locked      bool
+	native      bool
+	release     bool
+	list        bool
+	json        bool
+	locations   bool
+	workspace   bool
+	packageUID  string
+	files       []string
+	directories []string
+	exact       []string
 }
 
 type stableTestListReport struct {
@@ -132,6 +134,7 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	}
 	var tests []workspaceTest
 	var testFiles []string
+	var testDirectories []string
 	for _, packagePath := range packagePaths {
 		packageUID := ""
 		if options.workspace {
@@ -147,10 +150,19 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		}
 		tests = append(tests, packageTests...)
 		testFiles = append(testFiles, packageTestFiles...)
+		testDirectories = append(testDirectories, workspaceTestDirectories(
+			packageTestFiles,
+			workspaceTestSourcePath(packagePath, "tests"),
+		)...)
 	}
 	slices.SortFunc(tests, func(left, right workspaceTest) int { return strings.Compare(left.display, right.display) })
 	slices.Sort(testFiles)
+	slices.Sort(testDirectories)
 	code := ExitSuccess
+	tests, err = selectWorkspaceTestDirectories(tests, testDirectories, options.directories)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
 	tests, err = selectWorkspaceTestFiles(tests, testFiles, options.files)
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -408,6 +420,7 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
 	seen := make(map[string]bool, 5)
 	files := make(map[string]bool)
+	directories := make(map[string]bool)
 	exact := make(map[string]bool)
 	for index := 0; index < len(arguments); index++ {
 		argument := arguments[index]
@@ -449,8 +462,21 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			index++
 			continue
 		}
+		if argument == "--dir" {
+			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test directory after --dir`)
+			}
+			directory := arguments[index+1]
+			if directories[directory] {
+				return stableTestOptions{}, fmt.Errorf(`command "test" received test directory %q more than once`, directory)
+			}
+			directories[directory] = true
+			options.directories = append(options.directories, directory)
+			index++
+			continue
+		}
 		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --workspace, --package <package-uid>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -478,6 +504,9 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	}
 	if len(options.files) != 0 && len(options.exact) != 0 {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --file with --exact`)
+	}
+	if len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0) {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --dir with --file or --exact`)
 	}
 	if options.list && (options.native || options.release || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, or --exact`)
@@ -588,6 +617,60 @@ func selectWorkspaceTestFiles(tests []workspaceTest, available, requested []stri
 	for _, test := range tests {
 		if _, found := wanted[test.file]; found {
 			selected = append(selected, test)
+		}
+	}
+	return selected, nil
+}
+
+func workspaceTestDirectories(files []string, root string) []string {
+	known := make(map[string]struct{})
+	for _, file := range files {
+		for directory := path.Dir(file); directory != "."; directory = path.Dir(directory) {
+			known[directory] = struct{}{}
+			if directory == root {
+				break
+			}
+		}
+	}
+	directories := make([]string, 0, len(known))
+	for directory := range known {
+		directories = append(directories, directory)
+	}
+	slices.Sort(directories)
+	return directories
+}
+
+func selectWorkspaceTestDirectories(tests []workspaceTest, available, requested []string) ([]workspaceTest, error) {
+	if len(requested) == 0 {
+		return tests, nil
+	}
+	known := make(map[string]struct{}, len(available))
+	for _, directory := range available {
+		known[directory] = struct{}{}
+	}
+	wanted := make(map[string]struct{}, len(requested))
+	var missing []string
+	for _, directory := range requested {
+		if _, found := known[directory]; !found {
+			missing = append(missing, directory)
+			continue
+		}
+		wanted[directory] = struct{}{}
+	}
+	if len(missing) != 0 {
+		slices.Sort(missing)
+		for index := range missing {
+			missing[index] = fmt.Sprintf("%q", missing[index])
+		}
+		return nil, fmt.Errorf(`command "test" test directory selection was not found: %s`, strings.Join(missing, ", "))
+	}
+	selected := make([]workspaceTest, 0, len(tests))
+	for _, test := range tests {
+		for directory := range wanted {
+			if strings.HasPrefix(test.file, directory+"/") {
+				selected = append(selected, test)
+				break
+			}
 		}
 	}
 	return selected, nil

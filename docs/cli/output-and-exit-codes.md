@@ -133,7 +133,7 @@ manifest, workspace, graph, and lock failures use code `7`. The command writes n
 but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
 lock without writing.
 
-`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
 admission. Default and singular-package identities are `<module>::<function>`; workspace identities
 are `<package-uid>::<module>::<function>`. Completed tests use `test <identity> ... ok` or `test
 <identity> ... FAILED (<trap-category>)`, followed by `test result:
@@ -151,7 +151,12 @@ feature-instance-ambiguous package selection also uses code `2` with no report. 
 Exact file selectors use the portable workspace-relative path domain emitted by `--locations`,
 preserve canonical report order, and likewise reject missing, duplicate, or unknown paths with code
 `2`. A known zero-test file succeeds with the ordinary zero-test report. `--file` and `--exact` are
-mutually exclusive, while the complete selected test overlay is still compiler-admitted.
+mutually exclusive, while the complete selected test overlay is still compiler-admitted. Exact
+directory selectors use only ancestor directories derived from that admitted file catalog, recurse
+by a `/` segment boundary, preserve canonical order, and reject missing, duplicate, alternate-
+separator, case-mismatched, dot-segment, and trailing-slash spellings with code `2`. A directory
+containing only admitted zero-test files succeeds; an empty filesystem directory is not cataloged.
+`--dir` is mutually exclusive with `--file` and `--exact`.
 Compilation/capability failure emits no report;
 an external writer may still accept a report prefix before returning code `4`. Ordinary lock
 maintenance can precede later failure, while `--locked` is the no-write form.
@@ -167,7 +172,7 @@ report likewise produce no JSON report, and writer failure remains code 4 after 
 With `--locations`, JSON uses `fairyc.test-report/v3` and every outcome adds the exact-current
 portable source anchor. Without it, root/package v1 and workspace v2 bytes remain unchanged.
 
-`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]` buffers one `test <identity>` line per admitted test in
+`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` buffers one `test <identity>` line per admitted test in
 canonical order, followed by `test list: <count> discovered; lock
 <updated|unchanged|verified>`. Zero tests emit only the final line. Listing performs the complete
 test-overlay compiler admission but executes no test, backend, toolchain, or subprocess and writes

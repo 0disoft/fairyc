@@ -994,7 +994,7 @@ adds `--json` for the versioned identity array, count, and lock state without ch
 execution. ADR 0287 additionally admits execution-mode `--json` and freezes
 `fairyc.test-report/v1` with canonical semantic/native outcomes, engine/target/profile identity,
 totals, status, and lock state while preserving text bytes and exit codes. Catalog-wide member recursion,
-fuzzy/tag/glob/directory filters, setup/teardown, portable native targets,
+fuzzy/tag/glob filters, setup/teardown, portable native targets,
 program streams, benchmarks, and host-environment policy remain separate contracts.
 
 ADR 0289 adds singular `--package <package-uid>` selection to execution and listing. The UID must
@@ -1022,6 +1022,16 @@ missing, duplicate, or unknown values fail as code 2, while an admitted file wit
 succeeds. `--file` is mutually exclusive with `--exact`. Selection limits only listing or execution:
 the complete selected test overlay still passes declaration, semantic, Flow, MIR, and verifier
 admission. Existing text and v1/v2/v3 JSON bytes remain unchanged.
+
+ADR 0304 adds repeatable `--dir <portable-test-directory>` to execution and listing. Selectable
+directories are derived only from admitted portable test-source paths and extend from each file's
+parent to that package's exact `tests` root, never above it. Matching is byte-exact, case-sensitive,
+and `/`-only; recursive membership requires the selected directory plus one `/` boundary. Distinct
+values form a union, an admitted directory containing zero tests succeeds, and missing, duplicate,
+host-separated, dot-segment, trailing-slash, or otherwise uncataloged values fail as code 2.
+`--dir` is mutually exclusive with `--file` and `--exact`. Selection performs no filesystem walk,
+does not weaken complete-overlay compiler admission, and leaves text and v1/v2/v3 JSON bytes
+unchanged.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

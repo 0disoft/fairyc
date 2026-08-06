@@ -28,8 +28,8 @@ The Go frontend currently exposes stable starter creation
 `fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, the stable semantic-by-default or Windows-native
-`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and execution-free
-`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]`, plus the stable source-independent
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and execution-free
+`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
 report, and stable target-explicit
 `fairyc emit c --target <target-id> [--locked]`, plus `fairyc experimental parse <file.fy>`,
@@ -281,7 +281,7 @@ stderr is preserved, and the canonical trap line uses code 5. The two captured s
 64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, a `--` delimiter,
 retained build output, input forwarding for other native commands, and cache policy remain absent.
 
-`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. `--package` instead selects exactly one
 root-reachable local package by its manifest UID and overlays only that package. Paths keep their `tests/` prefix for module
 identity, and argument-free `@test` selects private safe zero-argument `void` functions. Default
@@ -294,13 +294,18 @@ fail instead of broadening or silently selecting nothing. Traps are reported per
 stop later selected tests. Repeatable `--file` selects exact portable workspace-relative test paths
 from the same admitted catalog as `--locations`; member paths include their workspace prefix.
 Unknown, duplicate, host-separated, or case-mismatched paths fail, while a known zero-test file
-succeeds. `--file` and `--exact` are mutually exclusive, and neither hides complete-overlay
-compiler failures. `fairyc test --list [--package <package-uid>] [--file <portable-test-path>]... [--locked]` runs the same complete compiler admission,
+succeeds. Repeatable `--dir` recursively selects the descendants of exact admitted test-source
+directories. The catalog includes only `tests`-root ancestors backed by admitted `.fy` sources;
+it never reopens a user-supplied path. Empty filesystem directories are unknown, while a directory
+containing admitted zero-test sources is valid. Matching is exact, case-sensitive, `/`-only, and
+rejects alternate dot-segment or trailing-slash spellings. `--dir`, `--file`, and `--exact` are
+mutually exclusive, and none hides complete-overlay compiler failures.
+`fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` runs the same complete compiler admission,
 then reports every canonical identity without invoking an execution engine or target toolchain;
 listing `--json` selects the compact versioned `fairyc.test-list/v1` report, while execution
 `--json` selects `fairyc.test-report/v1` with engine/target/profile identity, canonical outcomes,
 totals, status, and lock. `--native`, `--release`, and `--exact` do not combine with listing. Native program streams, catalog-unreachable member aggregation,
-fuzzy/tag/glob/directory selection, setup/teardown, benchmarks, and portable targets remain outside this contract.
+fuzzy/tag/glob selection, setup/teardown, benchmarks, and portable targets remain outside this contract.
 `--locations` is valid in listing or execution and preserves canonical identity and selection
 semantics. Text lines gain `at <workspace-relative-path>:<line>:<byte-column>` only when requested.
 JSON switches to `fairyc.test-list/v3` or `fairyc.test-report/v3` and includes package UID, portable

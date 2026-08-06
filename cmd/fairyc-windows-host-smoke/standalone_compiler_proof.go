@@ -69,8 +69,8 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]") ||
 		!strings.Contains(helpStdout, "every\nunambiguous root-reachable local package with --workspace") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
@@ -218,6 +218,32 @@ fn void excluded_fails() { assert(false); }
 	if err := os.WriteFile(filepath.Join(starterRoot, "tests", "excluded.fy"), []byte(starterExcludedNativeTestSource), 0o600); err != nil {
 		return 0, fmt.Errorf("write standalone compiler excluded native test file: %w", err)
 	}
+	const starterDirectoryNativeTestSource = `module tests::focused::directory;
+
+import std::process as process;
+
+@test
+fn void directory_passes() { assert(process::arg_count() >= 1); }
+`
+	focusedDirectory := filepath.Join(starterRoot, "tests", "focused")
+	if err := os.MkdirAll(focusedDirectory, 0o700); err != nil {
+		return 0, fmt.Errorf("create standalone compiler focused native test directory: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(focusedDirectory, "directory.fy"), []byte(starterDirectoryNativeTestSource), 0o600); err != nil {
+		return 0, fmt.Errorf("write standalone compiler focused native directory test: %w", err)
+	}
+	const starterExcludedDirectoryNativeTestSource = `module tests::other::directory;
+
+@test
+fn void directory_excluded_fails() { assert(false); }
+`
+	otherDirectory := filepath.Join(starterRoot, "tests", "other")
+	if err := os.MkdirAll(otherDirectory, 0o700); err != nil {
+		return 0, fmt.Errorf("create standalone compiler excluded native test directory: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(otherDirectory, "directory.fy"), []byte(starterExcludedDirectoryNativeTestSource), 0o600); err != nil {
+		return 0, fmt.Errorf("write standalone compiler excluded native directory test: %w", err)
+	}
 	starterNativeCode, starterNativeStdout, starterNativeStderr, err := runStandaloneCommand(
 		starterRoot,
 		executablePath,
@@ -254,6 +280,40 @@ fn void excluded_fails() { assert(false); }
 	)
 	if starterNativeJSONCode != cli.ExitProgramTrap || starterNativeJSONStderr != "" || starterNativeJSONStdout != wantStarterNativeJSON {
 		return 0, fmt.Errorf("standalone compiler native JSON test returned code %d, stdout %q, stderr %q", starterNativeJSONCode, starterNativeJSONStdout, starterNativeJSONStderr)
+	}
+	starterDirectoryCode, starterDirectoryStdout, starterDirectoryStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"test", "--native", "--locations",
+		"--dir", "tests/focused",
+		"--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler native directory-selected test: %w", err)
+	}
+	wantStarterDirectory := "test tests::focused::directory::directory_passes at tests/focused/directory.fy:6:9 ... ok\n" +
+		"test result: ok. 1 passed; 0 failed; lock verified\n"
+	if starterDirectoryCode != cli.ExitSuccess || starterDirectoryStderr != "" || starterDirectoryStdout != wantStarterDirectory {
+		return 0, fmt.Errorf("standalone compiler native directory-selected test returned code %d, stdout %q, stderr %q", starterDirectoryCode, starterDirectoryStdout, starterDirectoryStderr)
+	}
+	starterDirectoryJSONCode, starterDirectoryJSONStdout, starterDirectoryJSONStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"test", "--json", "--locations", "--native", "--release",
+		"--dir", "tests/focused",
+		"--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler optimized native directory-selected test: %w", err)
+	}
+	directoryFileIdentity, directoryLineMapIdentity := packagecontent.ComputeFileIdentities([]byte(starterDirectoryNativeTestSource))
+	directoryStart := strings.Index(starterDirectoryNativeTestSource, "directory_passes")
+	wantStarterDirectoryJSON := fmt.Sprintf(
+		`{"schemaVersion":"fairyc.test-report/v3","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::focused::directory::directory_passes","outcome":"passed","trapCategory":null,"source":{"packageUid":"smoke.starter","path":"tests/focused/directory.fy","line":6,"byteColumn":9,"startByte":%d,"endByte":%d,"fileIdentity":"%s","lineMapIdentity":"%s"}}],"count":1,"passed":1,"failed":0,"status":"ok","lock":"verified"}`+"\n",
+		directoryStart, directoryStart+len("directory_passes"), directoryFileIdentity, directoryLineMapIdentity,
+	)
+	if starterDirectoryJSONCode != cli.ExitSuccess || starterDirectoryJSONStderr != "" || starterDirectoryJSONStdout != wantStarterDirectoryJSON {
+		return 0, fmt.Errorf("standalone compiler optimized native directory-selected test returned code %d, stdout %q, stderr %q", starterDirectoryJSONCode, starterDirectoryJSONStdout, starterDirectoryJSONStderr)
 	}
 	starterRunCode, starterRunStdout, starterRunStderr, err := runStandaloneCommand(
 		starterRoot,

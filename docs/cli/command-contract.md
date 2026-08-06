@@ -541,9 +541,9 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v9
+## Stable workspace test v10
 
-`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. `--package` instead selects one
 exact local manifest package UID that has exactly one root-reachable resolved instance and overlays
 only that package's tree. Unknown, unreachable, SDK, or feature-instance-ambiguous selections are
@@ -585,7 +585,20 @@ unknown values are code-2 invocation errors. A known admitted file with zero tes
 existing zero-test report. `--file` does not combine with `--exact`, and selection still occurs only
 after complete-overlay test declaration and compiler admission.
 
-`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]` is a separate discovery mode and does not combine with `--native`,
+Repeatable `--dir` values recursively select descendants of exact portable test-source directories.
+The directory catalog is derived only from admitted file paths and includes each file's parent plus
+its ancestors down to that package's `tests` root. It never reopens a user-supplied path and never
+admits ancestors above `tests`. Root directories look like `tests/unit`; member directories retain
+their workspace prefix, such as `libs/answer/tests/unit`. Matching is byte-for-byte, case-sensitive,
+and `/`-only. A backslash, absolute spelling, dot segment, trailing slash, duplicate, missing value,
+or directory absent from the admitted catalog is a code-2 invocation error. An empty filesystem
+directory is not cataloged; a directory backed by admitted files with zero `@test` declarations is
+valid and produces the existing zero-test report. Distinct directory selectors form a recursive
+union. `--dir` does not combine with `--file` or `--exact`, and selection still occurs only after
+complete-overlay test declaration and compiler admission. Text and v1/v2/v3 JSON report bytes remain
+unchanged.
+
+`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` is a separate discovery mode and does not combine with `--native`,
 `--release`, or `--exact`. It retains the complete overlay's syntax, declaration, semantic, Flow,
 MIR, and verifier admission, then emits `test <identity>` in canonical order without invoking the
 interpreter, backend, MSVC, PE inspector, or a test process. Its final line is
@@ -641,13 +654,13 @@ separators. Consumers must match both identities before treating a retained span
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output and optional exact-current source anchors | Optional temporary native images |
-| `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]` | Compile-admit the complete selected test overlay and list all or exact-file canonical identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
+| `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output and optional exact-current source anchors | Optional temporary native images |
+| `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` | Compile-admit the complete selected test overlay and list all or exact-directory/file canonical identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Catalog-unreachable or feature-instance-ambiguous workspace test aggregation, fuzzy/tag/glob/directory test filtering, parallel scheduling, portable native-test targets, target triples beyond
+Catalog-unreachable or feature-instance-ambiguous workspace test aggregation, fuzzy/tag/glob test filtering, parallel scheduling, portable native-test targets, target triples beyond
   the declared emit profiles and build/run's fixed local Windows path,
 additional program-input routing beyond stable run,
 feature flags, and configuration precedence

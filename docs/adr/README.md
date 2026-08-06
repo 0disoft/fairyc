@@ -313,6 +313,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0301-stable-test-file-selection.md`: adds exact portable workspace-relative test-file selection to listing and execution, including zero-test files, strict fail-closed matching, complete-overlay admission, and low/optimized native evidence.
 - `0302-public-allocation-free-text-byte-view.md`: adds `std::text::as_bytes(ref str) -> ref u8[]` with exact owner-bound immutable bytes, no allocation/copy/runtime symbol, `E2105` owner protection, low/optimized native evidence, and SDK `0.0.0-stage0.37`.
 - `0303-allocation-free-scalar-stderr-output.md`: adds allocation-free decimal `write_stderr_i32`/`write_stderr_u32`/`write_stderr_usize` plus ASCII `write_stderr_bool`, exact progress-preserving failures, low/optimized native evidence, and SDK `0.0.0-stage0.38`.
+- `0304-stable-test-directory-selection.md`: adds repeatable exact recursive `--dir <portable-test-directory>` selection without filesystem re-observation, preserving complete-overlay admission and report bytes with low/optimized isolated native evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

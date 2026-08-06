@@ -470,8 +470,8 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
-`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and the execution-free
-`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]`, plus source-independent
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and the execution-free
+`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
 `fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
 program output, arguments, and status without pre-reading input. Native tests compile each selected
@@ -603,7 +603,7 @@ standard-library support unit is intentionally absent, so redirected output is i
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
 `--locked` verifies it without writing.
 
-The stable `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
+The stable `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
 the root package's optional lowercase `tests/` directory after the production lock is handled, or
 exactly one root-reachable local member when its manifest UID is selected with `--package`;
 `tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument
@@ -615,8 +615,13 @@ stdin and no arguments; `--release` selects optimized MSVC. Repeatable `--exact`
 canonical `<module>::<function>` identities byte-for-byte while retaining canonical report order;
 repeatable `--file` instead selects exact portable workspace-relative test-source paths, including
 member workspace prefixes and known files with zero tests. Unknown, duplicate, host-separated, or
-case-mismatched paths fail; `--file` and `--exact` do not combine. The complete selected-package test
-overlay is still compiled. `fairyc test --list [--package <package-uid>] [--file <portable-test-path>]... [--locked]` performs that complete
+case-mismatched paths fail; `--file` and `--exact` do not combine. Repeatable `--dir` recursively
+selects exact admitted directory descendants using the same portable path spelling. Known directories
+come only from admitted test-source ancestors, so empty filesystem directories are not selection
+targets; a directory containing only zero-test sources is valid. Unknown, duplicate, host-separated,
+case-mismatched, dot-segment, and trailing-slash spellings fail, and `--dir` does not combine with
+`--file` or `--exact`. The complete selected-package test overlay is still compiled.
+`fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` performs that complete
 compiler admission and prints the canonical identities without running the interpreter, backend,
 toolchain, or test process. Listing with `--json` emits the stable `fairyc.test-list/v1` schema with
 the canonical identity array, count, and lock state. Execution with `--json` emits the stable
@@ -626,7 +631,7 @@ tests still run in fresh processes. `--locations` adds an exact-current source a
 selects `fairyc.test-list/v3` or `fairyc.test-report/v3` for JSON. Each anchor contains package UID,
 portable workspace-relative path, 1-based line and byte column, exact name byte span, and matching
 `fyfile1`/`fylm1` identities without exposing an absolute path or source text. Native program output,
-portable targets, benchmarks, fuzzy/tag/glob/directory filters, catalog-wide unreachable aggregation, and
+portable targets, benchmarks, fuzzy/tag/glob filters, catalog-wide unreachable aggregation, and
 feature-instance selection remain separate contracts.
 
 Phase 4 now has its first executable boundary: `internal/semanticsnapshot` turns successful typed
