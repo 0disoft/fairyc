@@ -305,6 +305,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0293-public-windows-directory-lifecycle.md`: adds one-level Windows `std::fs::create_dir` and exact empty `remove_dir`, proving missing-parent, collision, non-empty, cleanup, success, and repeated-missing behavior under low/optimized raw and generated-Fairy execution with SDK `0.0.0-stage0.31`.
 - `0294-public-windows-directory-no-replace-rename.md`: adds directory-only Windows `std::fs::rename_dir` without destination replacement or cross-volume copy fallback, proving kind rejection, collision, moved-child preservation, old-path disappearance, cleanup, and repeated-missing behavior under low/optimized raw and generated-Fairy execution with SDK `0.0.0-stage0.32`.
 - `0295-stable-root-reachable-workspace-tests.md`: adds opt-in stable `fairyc test --workspace` aggregation over every unambiguous root-reachable local package, package-qualified exact identities, v2 list/execution JSON schemas, and semantic plus low/optimized native standalone evidence while preserving root and `--package` v1 behavior.
+- `0296-public-windows-recursive-directory-creation.md`: adds Windows `std::fs::create_dir_all` with pre-effect lexical validation, ordinary root handling, existing-directory success, file-collision rejection, explicit partial-prefix preservation, and low/optimized raw plus generated-Fairy evidence with SDK `0.0.0-stage0.33`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

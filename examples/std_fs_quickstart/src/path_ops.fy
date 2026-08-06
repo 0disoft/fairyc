@@ -404,3 +404,88 @@ pub fn i32 check_rename_dir(
         }
     } };
 }
+
+@effects(filesystem)
+pub fn i32 check_create_dir_all(
+    ref CStr root,
+    ref CStr nested,
+    ref CStr leaf,
+    ref CStr collision,
+    ref CStr collision_child,
+    ref CStr partial_failure,
+    ref CStr partial_prefix,
+    ref CStr partial_root
+) {
+    let i32 create_code = switch (fs::create_dir_all(leaf)) {
+        case .ok(value) : { if (value == 0) { 0 } else { 272 } }
+        case .err(_) : { 273 }
+    };
+    let i32 existing_code = if (create_code != 0) {
+        create_code
+    } else { switch (fs::create_dir_all(leaf)) {
+        case .ok(value) : { if (value == 0) { 0 } else { 274 } }
+        case .err(_) : { 275 }
+    } };
+    let i32 collision_setup_code = if (existing_code != 0) {
+        existing_code
+    } else { switch (fs::create_truncate(collision)) {
+        case .ok(file) : { close_directory_file(file, 276) }
+        case .err(_) : { 277 }
+    } };
+    let i32 collision_code = if (collision_setup_code != 0) {
+        collision_setup_code
+    } else { switch (fs::create_dir_all(collision_child)) {
+        case .ok(_) : { 278 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 183 &&
+                fs::error_completed(error) == 0) { 0 } else { 279 }
+        }
+    } };
+    let i32 collision_cleanup_code = if (collision_code != 0) {
+        collision_code
+    } else { switch (fs::remove_file(collision)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 280 }
+    } };
+    let i32 leaf_cleanup_code = if (collision_cleanup_code != 0) {
+        collision_cleanup_code
+    } else { switch (fs::remove_dir(leaf)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 281 }
+    } };
+    let i32 nested_cleanup_code = if (leaf_cleanup_code != 0) {
+        leaf_cleanup_code
+    } else { switch (fs::remove_dir(nested)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 282 }
+    } };
+    let i32 root_cleanup_code = if (nested_cleanup_code != 0) {
+        nested_cleanup_code
+    } else { switch (fs::remove_dir(root)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 283 }
+    } };
+    let i32 partial_code = if (root_cleanup_code != 0) {
+        root_cleanup_code
+    } else { switch (fs::create_dir_all(partial_failure)) {
+        case .ok(_) : { 284 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 123 &&
+                fs::error_completed(error) == 0) { 0 } else { 285 }
+        }
+    } };
+    let i32 partial_prefix_code = if (partial_code != 0) {
+        partial_code
+    } else { switch (fs::remove_dir(partial_prefix)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 286 }
+    } };
+    return if (partial_prefix_code != 0) {
+        partial_prefix_code
+    } else { switch (fs::remove_dir(partial_root)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 287 }
+    } };
+}

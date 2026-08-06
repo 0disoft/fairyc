@@ -61,6 +61,12 @@ struct fy_std_windows_open_options_v0 {
     uint8_t append;
 };
 
+static int fy_result_is(
+    struct fy_std_windows_file_result_v0 value, uint32_t status, DWORD os_code
+) {
+    return value.status == status && value.os_code == (uint32_t)os_code && value.count == 0;
+}
+
 struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     const uint8_t *,
     const struct fy_std_windows_open_options_v0 *,
@@ -68,6 +74,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
 );
 struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_directory_create_v0(const uint8_t *);
+struct fy_std_windows_file_result_v0 fy_std_windows_directory_ensure_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_directory_remove_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_directory_rename_v0(
     const uint8_t *,
@@ -685,5 +692,21 @@ int main(void) {
     );
     if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 166;
+    static const uint8_t directory_all_leaf[] = "fy-dir-all\\n\\leaf";
+    static const uint8_t directory_all_dot[] = "fy-dir-dot\\..\\escape";
+    static const uint8_t directory_all_partial[] = "fy-dir-partial\\created\\bad?name";
+    result = fy_std_windows_directory_ensure_v0(NULL);
+    if (!fy_result_is(result, FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0, ERROR_SUCCESS)) return 167;
+    result = fy_std_windows_directory_ensure_v0(directory_all_dot);
+    if (!fy_result_is(result, FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0, ERROR_SUCCESS)) return 169;
+    result = fy_std_windows_directory_ensure_v0(directory_all_leaf);
+    if (!fy_result_is(result, FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS)) return 170;
+    if (!RemoveDirectoryW(L"fy-dir-all\\n\\leaf")) return 172;
+    if (!RemoveDirectoryW(L"fy-dir-all\\n")) return 173;
+    if (!RemoveDirectoryW(L"fy-dir-all")) return 174;
+    result = fy_std_windows_directory_ensure_v0(directory_all_partial);
+    if (!fy_result_is(result, FY_STD_WINDOWS_FILE_IO_ERROR_V0, ERROR_INVALID_NAME)) return 175;
+    if (!RemoveDirectoryW(L"fy-dir-partial\\created")) return 176;
+    if (!RemoveDirectoryW(L"fy-dir-partial")) return 177;
     return 0;
 }

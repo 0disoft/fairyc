@@ -74,10 +74,11 @@ an explicit package UID. "fairyc check" verifies the local workspace. "fairyc bu
 creates or replaces build/<package-name>.exe on Windows. "fairyc run" builds and executes a temporary
 Windows image, forwards caller stdin, bounded program output, and any arguments after "--" as the
 program's process arguments, preserves ordinary program status, and retains no artifact.
-"fairyc test" checks the root package or one explicitly selected root-reachable local package plus
-its isolated tests/ sources, lists canonical test identities, or runs all or exact identities through
-the semantic interpreter or as isolated Windows images with --native; --json selects a stable machine
-report for listing or execution. "fairyc emit c" writes one
+"fairyc test" checks the root package, one explicitly selected root-reachable local package, or every
+unambiguous root-reachable local package with --workspace plus their isolated tests/ sources. It lists
+canonical test identities or runs all or exact identities through the semantic interpreter or as
+isolated Windows images with --native; --json selects a stable machine report for listing or execution.
+"fairyc emit c" writes one
 explicitly targeted C11 application unit to stdout without invoking a toolchain. Pass --release to
 build, run, or native test for optimization. All five workspace commands read fairy.toml and refresh fairy.lock
 unless --locked is supplied.

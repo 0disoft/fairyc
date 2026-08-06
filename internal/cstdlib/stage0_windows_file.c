@@ -157,6 +157,83 @@ static uint32_t fy_std_windows_path_v0(const uint8_t *path, WCHAR *wide_path) {
     return FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0;
 }
 
+static int fy_std_windows_path_separator_v0(WCHAR value) {
+    return value == L'\\' || value == L'/';
+}
+
+static int fy_std_windows_ascii_letter_v0(WCHAR value) {
+    return (value >= L'A' && value <= L'Z') || (value >= L'a' && value <= L'z');
+}
+
+static uint32_t fy_std_windows_directory_root_length_v0(
+    const WCHAR *path,
+    size_t length,
+    size_t *root_length
+) {
+    if (path == NULL || root_length == NULL || length == 0) {
+        return FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0;
+    }
+    if (length >= 2 && fy_std_windows_path_separator_v0(path[0]) &&
+        fy_std_windows_path_separator_v0(path[1])) {
+        if (length >= 4 && (path[2] == L'?' || path[2] == L'.') &&
+            fy_std_windows_path_separator_v0(path[3])) {
+            return FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0;
+        }
+        size_t server_end = 2;
+        while (server_end < length && !fy_std_windows_path_separator_v0(path[server_end])) {
+            ++server_end;
+        }
+        if (server_end == 2 || server_end == length) {
+            return FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0;
+        }
+        size_t share_start = server_end + 1;
+        if (share_start == length || fy_std_windows_path_separator_v0(path[share_start])) {
+            return FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0;
+        }
+        size_t share_end = share_start;
+        while (share_end < length && !fy_std_windows_path_separator_v0(path[share_end])) {
+            ++share_end;
+        }
+        *root_length = share_end < length ? share_end + 1 : share_end;
+        return FY_STD_WINDOWS_FILE_OK_V0;
+    }
+    if (length >= 2 && fy_std_windows_ascii_letter_v0(path[0]) && path[1] == L':') {
+        if (length < 3 || !fy_std_windows_path_separator_v0(path[2])) {
+            return FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0;
+        }
+        *root_length = 3;
+        return FY_STD_WINDOWS_FILE_OK_V0;
+    }
+    *root_length = fy_std_windows_path_separator_v0(path[0]) ? 1 : 0;
+    return FY_STD_WINDOWS_FILE_OK_V0;
+}
+
+static uint32_t fy_std_windows_directory_components_valid_v0(
+    const WCHAR *path,
+    size_t length,
+    size_t root_length
+) {
+    size_t component_start = root_length;
+    while (component_start < length) {
+        if (fy_std_windows_path_separator_v0(path[component_start])) {
+            return FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0;
+        }
+        size_t component_end = component_start;
+        while (component_end < length &&
+               !fy_std_windows_path_separator_v0(path[component_end])) {
+            ++component_end;
+        }
+        size_t component_length = component_end - component_start;
+        if ((component_length == 1 && path[component_start] == L'.') ||
+            (component_length == 2 && path[component_start] == L'.' &&
+             path[component_start + 1] == L'.')) {
+            return FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0;
+        }
+        component_start = component_end + 1;
+    }
+    return FY_STD_WINDOWS_FILE_OK_V0;
+}
+
 static int fy_std_windows_open_options_valid_v0(
     const struct fy_std_windows_open_options_v0 *options
 ) {
@@ -265,6 +342,89 @@ struct fy_std_windows_file_result_v0 fy_std_windows_directory_create_v0(
             GetLastError(),
             0
         );
+    }
+    return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
+}
+
+struct fy_std_windows_file_result_v0 fy_std_windows_directory_ensure_v0(
+    const uint8_t *path
+) {
+    WCHAR wide_path[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t status = fy_std_windows_path_v0(path, wide_path);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    size_t length = 0;
+    while (wide_path[length] != L'\0') {
+        ++length;
+    }
+    size_t root_length = 0;
+    status = fy_std_windows_directory_root_length_v0(wide_path, length, &root_length);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    while (length > root_length && fy_std_windows_path_separator_v0(wide_path[length - 1])) {
+        --length;
+        wide_path[length] = L'\0';
+    }
+    status = fy_std_windows_directory_components_valid_v0(wide_path, length, root_length);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    if (length == root_length) {
+        DWORD root_attributes = GetFileAttributesW(wide_path);
+        if (root_attributes == INVALID_FILE_ATTRIBUTES) {
+            return fy_std_windows_file_result_v0(
+                FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+                GetLastError(),
+                0
+            );
+        }
+        if ((root_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+            return fy_std_windows_file_result_v0(
+                FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+                ERROR_ALREADY_EXISTS,
+                0
+            );
+        }
+        return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
+    }
+    size_t component_start = root_length;
+    while (component_start < length) {
+        size_t component_end = component_start;
+        while (component_end < length &&
+               !fy_std_windows_path_separator_v0(wide_path[component_end])) {
+            ++component_end;
+        }
+        WCHAR separator = wide_path[component_end];
+        wide_path[component_end] = L'\0';
+        if (!CreateDirectoryW(wide_path, NULL)) {
+            DWORD create_error = GetLastError();
+            if (create_error != ERROR_ALREADY_EXISTS) {
+                return fy_std_windows_file_result_v0(
+                    FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+                    create_error,
+                    0
+                );
+            }
+            DWORD attributes = GetFileAttributesW(wide_path);
+            if (attributes == INVALID_FILE_ATTRIBUTES) {
+                return fy_std_windows_file_result_v0(
+                    FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+                    GetLastError(),
+                    0
+                );
+            }
+            if ((attributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+                return fy_std_windows_file_result_v0(
+                    FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+                    create_error,
+                    0
+                );
+            }
+        }
+        wide_path[component_end] = separator;
+        component_start = component_end + 1;
     }
     return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
 }

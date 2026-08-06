@@ -915,6 +915,14 @@ fn i32 main() {
     let ref CStr directory_rename_destination_path = c"fairyc-std-fs-directory-rename-destination";
     let ref CStr directory_rename_source_child_path = c"fairyc-std-fs-directory-rename-source\\child.tmp";
     let ref CStr directory_rename_destination_child_path = c"fairyc-std-fs-directory-rename-destination\\child.tmp";
+    let ref CStr directory_all_root_path = c"fairyc-std-fs-directory-all";
+    let ref CStr directory_all_nested_path = c"fairyc-std-fs-directory-all\\nested";
+    let ref CStr directory_all_leaf_path = c"fairyc-std-fs-directory-all\\nested\\leaf";
+    let ref CStr directory_all_collision_path = c"fairyc-std-fs-directory-all\\collision.tmp";
+    let ref CStr directory_all_collision_child_path = c"fairyc-std-fs-directory-all\\collision.tmp\\child";
+    let ref CStr directory_all_partial_path = c"fairyc-std-fs-directory-all-partial\\created\\bad?name";
+    let ref CStr directory_all_partial_prefix_path = c"fairyc-std-fs-directory-all-partial\\created";
+    let ref CStr directory_all_partial_root_path = c"fairyc-std-fs-directory-all-partial";
     let i32 invalid_code = check_invalid_path();
     let i32 missing_update_code = check_missing_update();
     let i32 character_code = switch (fs::open_read(c"NUL")) {
@@ -948,6 +956,16 @@ fn i32 main() {
         directory_rename_source_child_path,
         directory_rename_destination_child_path
     );
+    let i32 directory_all_code = paths::check_create_dir_all(
+        directory_all_root_path,
+        directory_all_nested_path,
+        directory_all_leaf_path,
+        directory_all_collision_path,
+        directory_all_collision_child_path,
+        directory_all_partial_path,
+        directory_all_partial_prefix_path,
+        directory_all_partial_root_path
+    );
     let i32 write_code = switch (fs::create_truncate(data_path)) {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
@@ -974,6 +992,8 @@ fn i32 main() {
         directory_code
     } else if (directory_rename_code != 0) {
         directory_rename_code
+    } else if (directory_all_code != 0) {
+        directory_all_code
     } else if (write_code != 0) {
         write_code
     } else {

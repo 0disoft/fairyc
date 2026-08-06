@@ -914,7 +914,7 @@ ADR 0293 extends the SDK to `0.0.0-stage0.31` with
 only the final path component and `RemoveDirectoryW` for only an empty directory. Raw and
 generated-Fairy low/optimized MSVC execution proves missing-parent and file/directory collision
 failures, non-empty removal failure, child cleanup, exact removal, and repeated missing failure.
-Parent creation, recursive deletion, directory rename, iteration, explicit permissions, durability,
+Recursive deletion, directory rename, iteration, explicit permissions, durability,
 portable Unicode paths, and Linux public linkage remain later gates.
 
 ADR 0294 extends the SDK to `0.0.0-stage0.32` with
@@ -923,6 +923,14 @@ ADR 0294 extends the SDK to `0.0.0-stage0.32` with
 generated-Fairy low/optimized MSVC execution proves missing and wrong-kind rejection, destination
 collision, successful nonempty rename, old-path disappearance, moved-child preservation, cleanup,
 and repeated missing failure. Destination replacement, cross-volume movement, atomic exchange,
+portable Unicode paths, durability, and Linux public linkage remain later gates.
+
+ADR 0296 extends the SDK to `0.0.0-stage0.33` with
+`create_dir_all(ref CStr) -> Result<i32, FileError>`. It validates the complete lexical path before
+effects, then creates missing prefixes while accepting existing directories. Raw and
+generated-Fairy low/optimized MSVC execution proves nested creation, idempotent success, file
+collision, exact later invalid-name failure, retained partial prefixes, and explicit cleanup.
+Recursive deletion, rollback, device namespaces, drive-relative paths, explicit permissions,
 portable Unicode paths, durability, and Linux public linkage remain later gates.
 
 ADR 0268 closes the discovery side of exact test selection with

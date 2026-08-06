@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.32` exposes
+  The compiler-bundled SDK `0.0.0-stage0.33` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -696,6 +696,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   use the bounded ASCII path contract, and do not change the process current directory. Recursive
   deletion, directory iteration, explicit permission policy, and portable link semantics remain
   outside this slice.
+  `create_dir_all(ref CStr path)` validates the complete lexical path before effects, rejects
+  parent/self traversal plus ambiguous drive-relative and device-namespace paths, and creates each
+  missing directory prefix. Existing directories succeed only when their observed kind is a
+  directory. A later target failure preserves every prefix already created; no rollback,
+  enumeration, deletion, ACL choice, or metadata-durability promise is implied.
   `rename_dir(ref CStr source, ref CStr destination)` changes one existing directory path without
   replacing an existing destination or falling back to cross-volume copy-and-delete. It rejects an
   observed non-directory source, preserves exact target failures, and moves a nonempty directory
@@ -745,7 +750,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `NUL` character kinds, owned-Buffer prefix append, short read, EOF, write-only failure,
   forced growth-allocation failure with zero retained allocations, explicit close, implicit-drop
   reopen, exact file removal, no-replace file rename, one-level directory creation and removal,
-  no-replace nonempty directory rename, old-path disappearance, and moved-child preservation under both Windows
+  recursive parent creation with idempotency and partial-prefix preservation, no-replace nonempty
+  directory rename, old-path disappearance, and moved-child preservation under both Windows
   profiles. The path is
   still bounded ASCII bootstrap input; portable Unicode paths and Linux public linkage remain
   excluded.
@@ -881,7 +887,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.32` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.33` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -895,7 +901,8 @@ ADR 0279's bounded same-handle file identity, ADR 0281's exhaustive public file-
 ADR 0285's one-call partial file write, ADR 0288's bounded owned-Buffer file read append, ADR 0290's
 source-level read from the current cursor through EOF, ADR 0291's exact one-file removal, ADR 0292's
 file-only no-replace rename without cross-volume copy fallback, ADR 0293's one-level directory
-creation and exact empty-directory removal, ADR 0294's directory-only no-replace rename,
+creation and exact empty-directory removal, ADR 0294's directory-only no-replace rename, ADR 0296's
+pre-effect validation and recursive parent creation with explicit partial-prefix preservation,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

@@ -68,8 +68,9 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test --list [--json] [--package <package-uid>] [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]") ||
+		!strings.Contains(helpStdout, "every\nunambiguous root-reachable local package with --workspace") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||

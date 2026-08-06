@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.32" {
+	if Version != "0.0.0-stage0.33" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -37,6 +37,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 		t.Fatalf("source identity = %q", definition.SourceIdentity)
 	}
 	var fileKindVariants []string
+	createDirAllPublic := false
 	for _, source := range definition.Sources {
 		if source.Path != "std/fs.fy" {
 			continue
@@ -60,8 +61,16 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 				fileKindVariants = append(fileKindVariants, variant.Name)
 			}
 		}
+		for _, function := range source.Module.Functions {
+			if function.Name == "create_dir_all" {
+				createDirAllPublic = function.Public
+			}
+		}
 	}
 	if !slices.Equal(fileKindVariants, []string{"Unknown", "Disk", "Character", "Pipe"}) {
 		t.Fatalf("FileKind variants = %v", fileKindVariants)
+	}
+	if !createDirAllPublic {
+		t.Fatal("std::fs::create_dir_all is not public")
 	}
 }
