@@ -951,6 +951,13 @@ handle-pinned identity, authorization, containment, or a race-free precheck. Gen
 timestamps, permissions, reparse details, portable Unicode/link policy, and Linux public linkage
 remain later gates.
 
+ADR 0299 extends the SDK to `0.0.0-stage0.36` with
+`std::bytes::append_byte(ref mut Buffer, u8) -> Result<usize, BufferError>`. The C-friendly explicit
+name reuses the existing Buffer append primitive instead of adding a runtime symbol or a language
+`push` convention. Generated-Fairy quickstart execution proves the success path; low and optimized
+MSVC failure execution proves exact allocation status, unchanged empty metadata, and leak-free
+automatic cleanup. Bulk append, reserve, resize, truncate, and clear remain unchanged.
+
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete selected-package test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.

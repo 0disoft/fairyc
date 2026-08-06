@@ -127,6 +127,29 @@ func TestGeneratedFairyBufferResizeFailureProbeWrapsOnlyTheGeneratedEntry(t *tes
 	}
 }
 
+func TestGeneratedFairyBufferAppendByteFailureProbeWrapsOnlyTheGeneratedEntry(t *testing.T) {
+	t.Parallel()
+	generated := "#include <stddef.h>\nint fy_std_buffer_initialize_v0(void);\nint fy_std_buffer_append_v0(void);\nint fy_std_buffer_drop_v0(void);\nint main(void) { return 42; }\n"
+
+	probe, err := generatedFairyBufferAppendByteFailureProbeSource(generated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{
+		"#define main fy_generated_buffer_append_byte_failure_main",
+		generated,
+		"fy_std_system_heap_probe_fail_after_allocations_v0(0)",
+		"fy_std_system_heap_probe_live_allocations_v0() != 0",
+	} {
+		if !strings.Contains(probe, fragment) {
+			t.Fatalf("probe source lost required fragment %q", fragment)
+		}
+	}
+	if strings.Count(probe, "int main(void)") != 2 {
+		t.Fatalf("probe source must contain the renamed generated entry and one test entry: %q", probe)
+	}
+}
+
 func TestGeneratedFairyBufferFailureProbeRejectsIncompleteGeneratedC(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
@@ -140,6 +163,9 @@ func TestGeneratedFairyBufferFailureProbeRejectsIncompleteGeneratedC(t *testing.
 		{name: "resize empty", generated: "", wrap: generatedFairyBufferResizeFailureProbeSource},
 		{name: "resize missing entry", generated: "int fy_std_buffer_resize_zeroed_v0(void);\n", wrap: generatedFairyBufferResizeFailureProbeSource},
 		{name: "resize missing Buffer calls", generated: "int main(void) { return 0; }\n", wrap: generatedFairyBufferResizeFailureProbeSource},
+		{name: "append_byte empty", generated: "", wrap: generatedFairyBufferAppendByteFailureProbeSource},
+		{name: "append_byte missing entry", generated: "int fy_std_buffer_append_v0(void);\n", wrap: generatedFairyBufferAppendByteFailureProbeSource},
+		{name: "append_byte missing Buffer calls", generated: "int main(void) { return 0; }\n", wrap: generatedFairyBufferAppendByteFailureProbeSource},
 	} {
 		if _, err := tc.wrap(tc.generated); err == nil {
 			t.Fatalf("incomplete generated C %q was accepted for %s", tc.generated, tc.name)
@@ -443,6 +469,11 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			name: "resize_zeroed growth failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferResizeFailureSource,
 			expect:         []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0"},
 			foreignSymbols: []string{"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0"},
+		},
+		{
+			name: "append_byte growth failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferAppendByteFailureSource,
+			expect:         []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_append_v0", "fy_std_buffer_drop_v0"},
+			foreignSymbols: []string{"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0"},
 		},
 		{
 			name: "region failure", manifest: "regions", source: generatedFairyRegionFailureSource,

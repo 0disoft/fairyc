@@ -649,6 +649,13 @@ identities, generated locks, and whole-package cache keys change. Language remai
 `fairyc-language/9`, runtime ABI remains `fairyc-runtime/0`, and the raw result layout and target
 symbol remain Windows x86-64 MSVC-only pre-1 implementation compatibility data.
 
+ADR 0299 moves the SDK to `0.0.0-stage0.36` because it adds public
+`std::bytes::append_byte(ref mut Buffer, u8) -> Result<usize, BufferError>`. Existing SDK operations
+remain source-compatible. The wrapper reuses `fy_std_buffer_append_v0`, so the SDK source digest,
+public-interface hash, package instance, dependent identities, generated locks, and whole-package
+cache keys change without a new target symbol. Language remains `fairyc-language/10` and runtime
+ABI remains `fairyc-runtime/0`.
+
 ADR 0286 cuts the exact language pin from `fairyc-language/9` to `fairyc-language/10` because the
 previously unsupported explicit pairs `i32 -> c::int` and `c::int -> i32` become valid when the
 selected target declares signed 32-bit `c.int`. Existing `/9` source remains valid; migration
@@ -759,7 +766,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.35`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.36`, language
 `fairyc-language/10`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

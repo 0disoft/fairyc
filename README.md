@@ -368,8 +368,9 @@ Windows MSVC-only and does
 not claim portable Unicode paths, general uninitialized-memory access, a supported target, or public layout.
 
 ADR 0294 adds directory-only no-replace rename, ADR 0296 adds recursive parent creation with
-pre-effect lexical validation, ADR 0297 adds no-replace byte copy, and ADR 0298 moves the SDK to
-`0.0.0-stage0.35` with `std::fs::PathKind` and `path_kind`.
+pre-effect lexical validation, ADR 0297 adds no-replace byte copy, and ADR 0298 adds
+`std::fs::PathKind` plus `path_kind`. ADR 0299 moves the SDK to `0.0.0-stage0.36` with
+`std::bytes::append_byte`, a single-byte wrapper over the existing fallible Buffer append primitive.
 The query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

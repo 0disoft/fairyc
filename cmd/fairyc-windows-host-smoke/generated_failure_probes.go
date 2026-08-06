@@ -85,6 +85,29 @@ fn i32 main() {
 }
 `
 
+const generatedFairyBufferAppendByteFailureSource = `module main;
+
+import std::bytes as bytes;
+
+fn i32 check_append_byte_failure(bytes::Buffer input) {
+    var bytes::Buffer buffer = input;
+    let bool failed = switch (bytes::append_byte(ref mut buffer, 42)) {
+        case .ok(_) : { false }
+        case .err(error) : { bytes::error_status(error) == 1 }
+    };
+    let bool preserved = bytes::len(ref buffer) == 0 &&
+        bytes::capacity(ref buffer) == 0;
+    return if (failed && preserved) { 42 } else { 4 };
+}
+
+fn i32 main() {
+    return switch (bytes::with_capacity(0)) {
+        case .ok(buffer) : { check_append_byte_failure(buffer) }
+        case .err(_) : { 5 }
+    };
+}
+`
+
 const generatedFairyStringAppendFailureSource = `module main;
 
 import std::text as text;
@@ -269,6 +292,7 @@ func runGeneratedFairyBufferFailureProbe(repositoryRoot, sourceRoot string, tool
 	}{
 		{name: "with_capacity initial allocation failure", source: generatedFairyBufferInitialFailureSource, wrap: generatedFairyBufferInitialFailureProbeSource},
 		{name: "resize_zeroed growth failure", source: generatedFairyBufferResizeFailureSource, wrap: generatedFairyBufferResizeFailureProbeSource},
+		{name: "append_byte growth failure", source: generatedFairyBufferAppendByteFailureSource, wrap: generatedFairyBufferAppendByteFailureProbeSource},
 	} {
 		workspaceRoot, err := os.MkdirTemp("", "fairyc-buffer-failure-probe-")
 		if err != nil {
@@ -381,6 +405,34 @@ int main(void) {
     }
     if (fy_std_system_heap_probe_live_allocations_v0() != 0) {
         return 13;
+    }
+    return 0;
+}
+`, nil
+}
+
+func generatedFairyBufferAppendByteFailureProbeSource(generated string) (string, error) {
+	if generated == "" || !strings.Contains(generated, "int main(void)") {
+		return "", fmt.Errorf("generated-Fairy Buffer append-byte-failure C must contain a main wrapper")
+	}
+	if !strings.Contains(generated, "fy_std_buffer_initialize_v0") ||
+		!strings.Contains(generated, "fy_std_buffer_append_v0") ||
+		!strings.Contains(generated, "fy_std_buffer_drop_v0") {
+		return "", fmt.Errorf("generated-Fairy Buffer append-byte-failure C lost required initialize, append, or drop calls")
+	}
+	return "#define main fy_generated_buffer_append_byte_failure_main\n" + generated + `
+#undef main
+
+void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
+size_t fy_std_system_heap_probe_live_allocations_v0(void);
+
+int main(void) {
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    if (fy_generated_buffer_append_byte_failure_main() != 42) {
+        return 14;
+    }
+    if (fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 15;
     }
     return 0;
 }

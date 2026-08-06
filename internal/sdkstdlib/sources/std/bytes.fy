@@ -146,6 +146,18 @@ pub fn Result<usize, BufferError> append(ref mut Buffer buffer, ref u8[] source)
     };
 }
 
+/// Appends one byte and returns the new initialized byte count.
+pub fn Result<usize, BufferError> append_byte(ref mut Buffer buffer, u8 value) {
+    let u32 status = unsafe {
+        buffer_append_raw(buffer as ptr mut void, ref value as ptr u8, 1)
+    };
+    return if (status == 0) {
+        .ok(buffer.length)
+    } else {
+        .err(buffer_error(status))
+    };
+}
+
 /// Changes the initialized byte count, zero-filling every newly exposed byte.
 pub fn Result<usize, BufferError> resize_zeroed(ref mut Buffer buffer, usize new_length) {
     let u32 status = unsafe {

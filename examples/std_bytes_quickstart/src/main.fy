@@ -26,20 +26,24 @@ fn i32 check_buffer(bytes::Buffer input) {
         case .ok(length) : { length == 6 }
         case .err(_) : { false }
     };
-    let bool resized = switch (bytes::resize_zeroed(ref mut buffer, 8)) {
-        case .ok(length) : { length == 8 }
+    let bool appended_byte = switch (bytes::append_byte(ref mut buffer, 33)) {
+        case .ok(length) : { length == 7 }
+        case .err(_) : { false }
+    };
+    let bool resized = switch (bytes::resize_zeroed(ref mut buffer, 9)) {
+        case .ok(length) : { length == 9 }
         case .err(_) : { false }
     };
     let ref mut u8[] writable = bytes::view_mut(ref mut buffer);
-    let bool zeroed = writable[6] == 0 && writable[7] == 0;
-    writable[6] = 33;
+    let bool zeroed = writable[7] == 0 && writable[8] == 0;
     writable[7] = 42;
-    let bool mutated = writable[6] == 33 && writable[7] == 42;
+    writable[8] = 43;
+    let bool mutated = writable[7] == 42 && writable[8] == 43;
     let ref u8[] readable = bytes::view(ref buffer);
-    let bool contents = readable.len == 8 &&
+    let bool contents = readable.len == 9 &&
         readable[0] == 70 && readable[1] == 97 && readable[2] == 105 &&
         readable[3] == 114 && readable[4] == 121 && readable[5] == 67 &&
-        readable[6] == 33 && readable[7] == 42;
+        readable[6] == 33 && readable[7] == 42 && readable[8] == 43;
     let bool truncated = switch (bytes::truncate(ref mut buffer, 4)) {
         case .ok(length) : { length == 4 }
         case .err(_) : { false }
@@ -48,7 +52,7 @@ fn i32 check_buffer(bytes::Buffer input) {
         case .ok(length) : { length == 0 && bytes::is_empty(ref buffer) }
         case .err(_) : { false }
     };
-    return if (copied && reserved && appended && resized && zeroed && mutated && contents && truncated && cleared) {
+    return if (copied && reserved && appended && appended_byte && resized && zeroed && mutated && contents && truncated && cleared) {
         0
     } else {
         1
