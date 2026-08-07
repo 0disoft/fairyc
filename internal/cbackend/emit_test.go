@@ -1904,6 +1904,43 @@ func TestEmitKeepsCScalarFieldsInsideReprCStructs(t *testing.T) {
 	}
 }
 
+func TestEmitStructWithEnumFieldInDependencyOrder(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+enum Kind { Unknown; Disk; }
+struct Metadata { usize size; Kind kind; bool read_only; }
+fn i32 score(Metadata value) {
+    return if (value.size == 42 && value.read_only) { switch (value.kind) {
+        case .Unknown : { 1 }
+        case .Disk : { 42 }
+    } } else { 2 };
+}
+fn i32 main() { return score(Metadata { .size = 42, .kind = .Disk, .read_only = true }); }
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"typedef struct { uint32_t tag; fy_enum_payload_0 payload; } fy_enum_0;",
+		"fy_enum_0 f_1;",
+		"fy_l_1 = (fy_enum_0){ .tag = UINT32_C(1) };",
+		"fy_l_2 = (fy_struct_0){ .f_0 = ((uintptr_t)UINT64_C(42)), .f_1 = fy_l_1, .f_2 = INT32_C(1) };",
+		".f_1;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Index(unit.Source, "fy_enum_0;") > strings.Index(unit.Source, "fy_enum_0 f_1;") {
+		t.Fatalf("enum definition follows its by-value struct field:\n%s", unit.Source)
+	}
+}
+
 func TestEmitRestrictedEnumConstructionPayloadAndSwitch(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

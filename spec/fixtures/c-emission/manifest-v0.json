@@ -725,6 +725,22 @@
       }
     },
     {
+      "id": "pass.c-emission.inert-enum-struct-field",
+      "sourceRoot": "cases/pass/inert-enum-struct-field/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main", "main::score"],
+        "features": ["inert-enum", "inert-struct", "scalar-call", "scalar-comparison", "scalar-control-flow", "trap"]
+      }
+    },
+    {
       "id": "pass.c-emission.assert",
       "sourceRoot": "cases/pass/assert/src",
       "sources": ["main.fy"],

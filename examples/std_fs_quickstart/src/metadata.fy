@@ -11,45 +11,32 @@ fn i32 inspect_then_close(fs::File input, bool expected_read_only, usize expecte
         case .err(_) : { base }
     };
     var usize before_size = 0;
-    let i32 before_size_code = if (before_position_code != 0) {
+    let i32 metadata_code = if (before_position_code != 0) {
         before_position_code
-    } else { switch (fs::size(ref file)) {
-        case .ok(size) : { before_size = size; 0 }
-        case .err(_) : { base + 1 }
+    } else { switch (fs::metadata(ref file)) {
+        case .ok(metadata) : {
+            before_size = metadata.size;
+            if (fs::kind_is_disk(metadata.kind) && metadata.read_only == expected_read_only &&
+                metadata.hard_link_count == expected_links &&
+                metadata.allocated_size >= metadata.size) { 0 } else { base + 1 }
+        }
+        case .err(_) : { base + 2 }
     } };
-    let i32 attribute_code = if (before_size_code != 0) {
-        before_size_code
-    } else { switch (fs::is_read_only(ref file)) {
-        case .ok(read_only) : { if (read_only == expected_read_only) { 0 } else { base + 2 } }
-        case .err(_) : { base + 3 }
-    } };
-    let i32 link_count_code = if (attribute_code != 0) {
-        attribute_code
-    } else { switch (fs::hard_link_count(ref file)) {
-        case .ok(count) : { if (count == expected_links) { 0 } else { base + 4 } }
-        case .err(_) : { base + 5 }
-    } };
-    let i32 allocated_size_code = if (link_count_code != 0) {
-        link_count_code
-    } else { switch (fs::allocated_size(ref file)) {
-        case .ok(allocated) : { if (allocated >= before_size) { 0 } else { base + 6 } }
-        case .err(_) : { base + 7 }
-    } };
-    let i32 position_code = if (allocated_size_code != 0) {
-        allocated_size_code
+    let i32 position_code = if (metadata_code != 0) {
+        metadata_code
     } else { switch (fs::position(ref mut file)) {
-        case .ok(position) : { if (position == before_position) { 0 } else { base + 8 } }
-        case .err(_) : { base + 9 }
+        case .ok(position) : { if (position == before_position) { 0 } else { base + 3 } }
+        case .err(_) : { base + 4 }
     } };
     let i32 size_code = if (position_code != 0) {
         position_code
     } else { switch (fs::size(ref file)) {
-        case .ok(size) : { if (size == before_size) { 0 } else { base + 10 } }
-        case .err(_) : { base + 11 }
+        case .ok(size) : { if (size == before_size) { 0 } else { base + 5 } }
+        case .err(_) : { base + 6 }
     } };
     return switch (fs::close(file)) {
         case .ok(_) : { size_code }
-        case .err(_) : { base + 12 }
+        case .err(_) : { base + 7 }
     };
 }
 

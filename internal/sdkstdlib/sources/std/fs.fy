@@ -104,6 +104,16 @@ pub struct FileId {
     u32 file_high_1;
 }
 
+/// Collects sequential target-neutral observations from one open file handle.
+/// The fields are not an atomic filesystem snapshot.
+pub struct FileMetadata {
+    usize size;
+    usize allocated_size;
+    usize hard_link_count;
+    FileKind kind;
+    bool read_only;
+}
+
 /// Owns one Windows file handle and closes it automatically at scope exit.
 @effects(filesystem)
 pub resource File {
@@ -702,6 +712,24 @@ pub fn Result<usize, FileError> allocated_size(ref File file) {
     } else {
         .err(size_error(result))
     };
+}
+
+/// Collects the current size, allocation, link, kind, and read-only observations.
+/// External mutation may occur between fields; this is not an atomic snapshot.
+@effects(filesystem)
+pub fn Result<FileMetadata, FileError> metadata(ref File file) {
+    let usize observed_size = size(file)?;
+    let usize observed_allocated_size = allocated_size(file)?;
+    let usize observed_hard_link_count = hard_link_count(file)?;
+    let FileKind observed_kind = kind(file)?;
+    let bool observed_read_only = is_read_only(file)?;
+    return .ok(FileMetadata {
+        .size = observed_size,
+        .allocated_size = observed_allocated_size,
+        .hard_link_count = observed_hard_link_count,
+        .kind = observed_kind,
+        .read_only = observed_read_only,
+    });
 }
 
 /// Observes whether one bounded path currently names a file, directory, or other object.

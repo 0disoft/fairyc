@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.47" {
+	if Version != "0.0.0-stage0.48" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -48,6 +48,8 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	setReadOnlyPublic := false
 	hardLinkCountPublic := false
 	allocatedSizePublic := false
+	fileMetadataPublic := false
+	metadataPublic := false
 	hardLinkPublic := false
 	appendBytePublic := false
 	emptyBufferPublic := false
@@ -89,6 +91,16 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 		for _, structure := range source.Module.Structs {
 			if structure.Name == "FileKind" {
 				t.Fatal("FileKind remains a struct")
+			}
+			if structure.Name == "FileMetadata" {
+				fileMetadataPublic = structure.Public
+				fields := make([]string, 0, len(structure.Fields))
+				for _, field := range structure.Fields {
+					fields = append(fields, field.Name)
+				}
+				if !slices.Equal(fields, []string{"size", "allocated_size", "hard_link_count", "kind", "read_only"}) {
+					t.Fatalf("FileMetadata fields = %v", fields)
+				}
 			}
 		}
 		for _, enumeration := range source.Module.Enums {
@@ -147,6 +159,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			if function.Name == "allocated_size" {
 				allocatedSizePublic = function.Public
 			}
+			if function.Name == "metadata" {
+				metadataPublic = function.Public
+			}
 			if function.Name == "hard_link" {
 				hardLinkPublic = function.Public
 			}
@@ -186,6 +201,12 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !allocatedSizePublic {
 		t.Fatal("std::fs::allocated_size is not public")
+	}
+	if !fileMetadataPublic {
+		t.Fatal("std::fs::FileMetadata is not public")
+	}
+	if !metadataPublic {
+		t.Fatal("std::fs::metadata is not public")
 	}
 	if !hardLinkPublic {
 		t.Fatal("std::fs::hard_link is not public")
