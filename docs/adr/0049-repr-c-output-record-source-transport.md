@@ -30,6 +30,8 @@ undefined-behavior surface before provenance, alignment, and alias rules exist.
    without `restrict` or `noalias`; the interpreter fails closed at the native-only operation.
 5. Public `@repr(C)` tags and field names are emitted verbatim after C11 identifier checks. Target-
    computed `sizeof`, `_Alignof`, and every `offsetof` are asserted in generated C.
+   ADR 0320 later strengthens those checks with namespace-aware implementation, header-macro, and
+   backend-name guards.
 6. The closed `fy_std_` allowlist admits `fy_std_text_validate_utf8_v0` in addition to the existing
    predicate. It does not open the prefix generally.
 7. A generated Fairy caller initializes a sentinel output record, passes its raw address to the

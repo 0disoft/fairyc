@@ -2007,6 +2007,50 @@ func TestEmitRejectsInvalidReprCStructName(t *testing.T) {
 	}
 }
 
+func TestEmitRejectsReservedReprCNames(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		source  string
+		feature string
+	}{
+		{name: "header macro tag", source: "module main;\n@repr(C)\nstruct NULL { u32 value; }\nfn i32 main() { return 0; }\n", feature: `repr(C) struct name "NULL"`},
+		{name: "backend tag", source: "module main;\n@repr(C)\nstruct fy_region { u32 value; }\nfn i32 main() { return 0; }\n", feature: `repr(C) struct name "fy_region"`},
+		{name: "file scope underscore", source: "module main;\n@repr(C)\nstruct _Fairy { u32 value; }\nfn i32 main() { return 0; }\n", feature: `repr(C) struct name "_Fairy"`},
+		{name: "null macro field", source: "module main;\n@repr(C)\nstruct Packet { u32 NULL; }\nfn i32 main() { return 0; }\n", feature: `repr(C) struct "Packet" field name "NULL"`},
+		{name: "header macro field", source: "module main;\n@repr(C)\nstruct Packet { u32 INT64_MAX; }\nfn i32 main() { return 0; }\n", feature: `repr(C) struct "Packet" field name "INT64_MAX"`},
+		{name: "double underscore field", source: "module main;\n@repr(C)\nstruct Packet { u32 __value; }\nfn i32 main() { return 0; }\n", feature: `repr(C) struct "Packet" field name "__value"`},
+		{name: "backend macro field", source: "module main;\n@repr(C)\nstruct Packet { u32 FY_TRAP_ASSERTION_FAILED; }\nfn i32 main() { return 0; }\n", feature: `repr(C) struct "Packet" field name "FY_TRAP_ASSERTION_FAILED"`},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			program := lowerSource(t, test.source)
+			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			var capability cbackend.CapabilityError
+			if !errors.As(err, &capability) || capability.Function != "" || capability.Feature != test.feature {
+				t.Fatalf("Emit() error = %v", err)
+			}
+		})
+	}
+}
+
+func TestEmitRejectsReservedExternalCNames(t *testing.T) {
+	t.Parallel()
+	for _, linkName := range []string{"NULL", "_fairy_entry", "__fairy_entry", "FY_TRAP_ASSERTION_FAILED"} {
+		linkName := linkName
+		t.Run(linkName, func(t *testing.T) {
+			t.Parallel()
+			program := lowerSource(t, fmt.Sprintf("module main;\n@link_name(%q)\nunsafe extern C fn i32 call();\nfn i32 main() { return unsafe { call() }; }\n", linkName))
+			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			var capability cbackend.CapabilityError
+			if !errors.As(err, &capability) || capability.Function != "main::call" || capability.Feature != fmt.Sprintf("external C symbol %q", linkName) {
+				t.Fatalf("Emit() error = %v", err)
+			}
+		})
+	}
+}
+
 func TestEmitAcceptsSafeScalarBorrowParameter(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 inspect(ref i32 value) { return 0; }\nfn i32 main() { var i32 value = 0; return inspect(ref value); }\n")

@@ -1025,6 +1025,12 @@ ADR 0319 advances the compiler-bundled SDK to `0.0.0-stage0.48` with additive pu
 as a by-value field of a private struct and emits aggregate definitions in dependency order. No
 target symbol, language revision, runtime ABI, resource layout, or prior API changes.
 
+ADR 0320 changes no version identity. It narrows only constrained C emission that previously
+accepted a verbatim C tag, member, or external symbol capable of colliding with implementation,
+header-macro, or backend-owned namespaces. Those programs now fail at the backend capability gate
+instead of producing unreliable C11; valid `_lowercase` members and closed `fy_std_` integrations
+remain accepted.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

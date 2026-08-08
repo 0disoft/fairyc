@@ -343,7 +343,9 @@ named-field variants, exact exhaustive shallow switching, and admitted scalar/ra
 payload fields are supported; nested user enums and built-in tags inside their payloads fail closed.
 Nonempty source `@repr(C)` structs over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw
 pointers, and acyclic nested `@repr(C)` records preserve their public C tag and field names, emit
-dependencies before users, and receive target-computed layout assertions. The same records may be
+dependencies before users, and receive target-computed layout assertions. Namespace-aware guards
+first reject applicable C implementation-reserved forms, generated-header macros, and
+backend-owned names while retaining `_lowercase` members and the closed `fy_std_` paths. The same records may be
 foreign results by value; foreign aggregate parameters remain rejected. An exact direct-
 local `ref T -> ptr T`, `ref mut T -> ptr T`, or `ref mut T -> ptr mut T` cast inside `unsafe` lowers to verified
 raw-address MIR and generated C `&local`; the exact `ref mut ptr mut void` output slot is included. Nested

@@ -424,6 +424,10 @@ ADR 0319 moves the SDK to `0.0.0-stage0.48` with public
 hard-link count, kind, and read-only state sequentially through the existing same-handle operations;
 the compiler now emits enum-containing private structs in aggregate dependency order without a new
 runtime symbol or atomic-snapshot promise.
+
+ADR 0320 closes the verbatim C-name false-acceptance gap without changing language, SDK, or runtime
+ABI identities. `@repr(C)` tags and fields plus external symbols now reject C implementation-reserved
+forms, generated-header macros, and backend-owned names before any invalid or colliding C11 is emitted.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

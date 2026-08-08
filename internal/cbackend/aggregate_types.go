@@ -69,7 +69,7 @@ func prepareAggregateTypes(
 	publicNames := make(map[string]hir.Type)
 	for _, definition := range orderedStructs {
 		if definition.ReprC {
-			if !validCABIIdentifier(definition.Name) {
+			if !validCABIRecordIdentifier(definition.Name) {
 				return nil, nil, nil, nil, CapabilityError{Feature: "repr(C) struct name " + strconv.Quote(definition.Name)}
 			}
 			if previous, duplicate := publicNames[definition.Name]; duplicate {
@@ -79,7 +79,7 @@ func prepareAggregateTypes(
 		}
 		fieldIndex := make(map[string]int, len(definition.Fields))
 		for index, field := range definition.Fields {
-			if definition.ReprC && !validCABIIdentifier(field.Name) {
+			if definition.ReprC && !validCABIMemberIdentifier(field.Name) {
 				return nil, nil, nil, nil, CapabilityError{Feature: "repr(C) struct " + strconv.Quote(definition.Name) + " field name " + strconv.Quote(field.Name)}
 			}
 			fieldIndex[field.Name] = index

@@ -573,7 +573,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   capability boundaries. `Result<T, UserEnum>` propagation preserves and reconstructs the exact
   error enum on the enclosing return path. No public
   tagged or resource ABI is claimed.
-  Nonempty admitted `@repr(C)` structs preserve public tags and field names; their layout and private
+  Nonempty admitted `@repr(C)` structs preserve public tags and field names after namespace-aware
+  rejection of C implementation-reserved, generated-header macro, and backend-owned collisions; their layout and private
   resource layout are computed from the target description and guarded by generated C11 size,
   alignment, and offset assertions. Its emission fixtures do not compile, link, or execute C and do
   not establish a target support level.
@@ -1156,6 +1157,12 @@ returning the first error and adding no target symbol. The C backend now lays ou
 by-value dependencies together and emits their complete definitions topologically, preserving
 enum-containing private-struct construction, field reads, and switches. The result is not an atomic
 filesystem snapshot, and enum fields in `@repr(C)` structs remain closed.
+
+ADR 0320 keeps language `fairyc-language/10`, SDK `0.0.0-stage0.48`, and runtime ABI
+`fairyc-runtime/0` while fixing the constrained C emitter's verbatim-name boundary. Public C tags,
+members, and external symbols now reject their applicable implementation-reserved forms,
+generated-header macros, and backend-owned names before emission. `_lowercase` remains valid for a
+C member but not for a file-scope tag or symbol; the closed `fy_std_` paths remain intact.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

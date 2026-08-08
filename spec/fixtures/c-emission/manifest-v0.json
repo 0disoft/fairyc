@@ -755,6 +755,22 @@
         "functions": ["main::main"],
         "features": ["assert", "scalar-control-flow", "trap"]
       }
+    },
+    {
+      "id": "pass.c-emission.repr-c-safe-identifiers",
+      "sourceRoot": "cases/pass/repr-c-safe-identifiers/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["inert-struct", "repr-c-struct"]
+      }
     }
   ]
 }

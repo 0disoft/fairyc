@@ -175,7 +175,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 44 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 45 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -221,6 +221,11 @@ semantics, and it is emitted only in functions containing checked division or re
   names. Any emitted struct, enum, resource, or generic tagged record owns the required
   `<stddef.h>` include directly rather than depending on another feature. General nested resources
   and the remaining contracted `@repr(C)` field families fail closed.
+- Verbatim `@repr(C)` tags and fields plus external C symbols pass namespace-specific guards before
+  emission. File-scope names reject every leading underscore; members reject `__*` and `_[A-Z]*`
+  while retaining `_lowercase`. Header macros, the backend `FY_` macro prefix, generated scalar
+  names, and exact private record tags fail closed. Target-admitted `fy_std_` symbols and existing
+  public `fy_std_*` record tags retain their closed paths.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
 - `Option<i32>` and `Result<i32, i32>` currently use distinct private structs with a `uint32_t` tag
   and `int32_t` payload. Generated C extracts payload only in the selected variant block and traps

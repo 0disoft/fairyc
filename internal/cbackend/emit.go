@@ -948,59 +948,6 @@ func (e *emitter) foreignPointerElementCType(value hir.Type) (string, error) {
 	}
 }
 
-func validCABIIdentifier(value string) bool {
-	if value == "" {
-		return false
-	}
-	if _, reserved := generatedCNames[value]; reserved {
-		return false
-	}
-	for index, character := range value {
-		if character > 0x7f || !(character == '_' || character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' || index > 0 && character >= '0' && character <= '9') {
-			return false
-		}
-	}
-	_, keyword := c11Keywords[value]
-	return !keyword
-}
-
-func validExternalCIdentifier(value string, targetID target.ID) bool {
-	if value == "" || value == "main" || strings.HasPrefix(value, "FY_") {
-		return false
-	}
-	if strings.HasPrefix(value, "fy_") {
-		if !cstdlibcontract.AdmittedForTarget(value, targetID) {
-			return false
-		}
-	}
-	if _, reserved := generatedCNames[value]; reserved {
-		return false
-	}
-	for index, character := range value {
-		if character > 0x7f || !(character == '_' || character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' || index > 0 && character >= '0' && character <= '9') {
-			return false
-		}
-	}
-	_, keyword := c11Keywords[value]
-	return !keyword
-}
-
-var generatedCNames = map[string]struct{}{
-	"uint8_t": {}, "int32_t": {}, "uint32_t": {}, "uint64_t": {}, "uintptr_t": {}, "size_t": {}, "ssize_t": {},
-	"UINT8_C": {}, "INT32_C": {}, "UINT32_C": {}, "UINT64_C": {},
-	"INT32_MIN": {}, "INT32_MAX": {}, "UINT8_MAX": {}, "UINT32_MAX": {}, "UINTPTR_MAX": {},
-}
-
-var c11Keywords = map[string]struct{}{
-	"auto": {}, "break": {}, "case": {}, "char": {}, "const": {}, "continue": {}, "default": {},
-	"do": {}, "double": {}, "else": {}, "enum": {}, "extern": {}, "float": {}, "for": {}, "goto": {},
-	"if": {}, "inline": {}, "int": {}, "long": {}, "register": {}, "restrict": {}, "return": {},
-	"short": {}, "signed": {}, "sizeof": {}, "static": {}, "struct": {}, "switch": {}, "typedef": {},
-	"union": {}, "unsigned": {}, "void": {}, "volatile": {}, "while": {}, "_Alignas": {}, "_Alignof": {},
-	"_Atomic": {}, "_Bool": {}, "_Complex": {}, "_Generic": {}, "_Imaginary": {}, "_Noreturn": {},
-	"_Static_assert": {}, "_Thread_local": {},
-}
-
 func assignLocalType(localTypes map[mir.LocalID]hir.Type, local mir.LocalID, value hir.Type) (bool, error) {
 	if local < 0 {
 		return false, fmt.Errorf("local has invalid id %d", local)

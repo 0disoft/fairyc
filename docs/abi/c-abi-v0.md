@@ -35,6 +35,14 @@ success, including bidirectional Clang/GCC ABI probes. The runner does not provi
 the complete product runtime, or the complete target profile. That narrow
 capability does not advance the target itself to `emittable`.
 
+Verbatim C names are admitted only after namespace-aware validation. File-scope `@repr(C)` tags and
+external symbols reject every leading underscore; members reject double underscore and underscore
+followed by uppercase while retaining `_lowercase`. All three surfaces reject C11 keywords,
+generated-header macro names, the backend `FY_` macro prefix, and conflicting generated names.
+Public record tags additionally reject the exact private tags `fy_region`, `fy_byte_slice`,
+`fy_mut_byte_slice`, and `fy_str`. The closed target-specific `fy_std_` symbol allowlist and existing
+public `fy_std_*` record tags remain admitted; neither prefix is opened generally.
+
 ## No native Fairy ABI
 
 Stage 0 does not stabilize Fairy function mangling, ordinary Fairy calling conventions, `Option` or `Result` layout, resource layout, slice layout, drop symbols, or dynamic-library exports. Calls within one compilation are compiler-private.
