@@ -418,6 +418,12 @@ ADR 0318 moves the SDK to `0.0.0-stage0.47` with allocation-free `std::bytes::em
 `std::text::into_buffer(String) -> bytes::Buffer`. The latter transfers the exact String allocation
 without copying, returns mutable bytes, and requires `from_buffer` to validate UTF-8 again after any
 mutation.
+
+ADR 0319 moves the SDK to `0.0.0-stage0.48` with public
+`std::fs::metadata(ref File) -> Result<FileMetadata, FileError>`. It collects size, allocated size,
+hard-link count, kind, and read-only state sequentially through the existing same-handle operations;
+the compiler now emits enum-containing private structs in aggregate dependency order without a new
+runtime symbol or atomic-snapshot promise.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

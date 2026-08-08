@@ -83,7 +83,7 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.47` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.48` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, Windows MSVC `std::fs`, console I/O,
 scalar output, and effect-free `std::process` argument slices recorded by ADRs 0205 through 0311.
 The current Windows filesystem slice includes owned File I/O and metadata, bounded path mutation,
@@ -345,7 +345,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.47` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.48` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -772,7 +772,7 @@ ADR 0306 extends it to `0.0.0-stage0.40` with
 `is_read_only(ref File) -> Result<bool, FileError>`. The target queries `FileBasicInfo` through the
 same live handle and exposes only whether `FILE_ATTRIBUTE_READONLY` is present. A dedicated raw
 probe and the public generated-Fairy quickstart cover normal/read-only files, closed and invalid
-storage, and cursor/size preservation under low and optimized MSVC. Timestamps, compound metadata,
+storage, and cursor/size preservation under low and optimized MSVC. Timestamps, atomic metadata,
 attribute mutation, writable-access guarantees, ACLs, and Linux public linkage remain separate.
 
 ADR 0307 extends it to `0.0.0-stage0.41` with
@@ -816,6 +816,12 @@ filesystem-defined, and this is not an atomic, rollback-capable, race-free conta
 ADR 0317 extends it to `0.0.0-stage0.46` with effect-free `path_kind_is_file` and
 `path_kind_is_directory`. Both predicates exhaust all three `PathKind` variants and return false
 for `.Other`; they add no C symbol and do not strengthen the underlying snapshot semantics.
+
+ADR 0319 extends it to `0.0.0-stage0.48` with public
+`metadata(ref File) -> Result<FileMetadata, FileError>`. The SDK sequentially calls the existing
+same-handle size, allocated-size, hard-link-count, kind, and read-only operations, returning the
+first error in that order. The result allocates nothing, moves no cursor or owner, adds no target
+symbol, and is not an atomic snapshot.
 
 The public slice remains specific to
 `x86_64-windows-msvc`; it is not a portable Unicode path, Linux public linkage, general

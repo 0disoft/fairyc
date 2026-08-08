@@ -113,6 +113,10 @@ accepted only in nonempty `@repr(C)` structs and share the same transport table 
 An admitted struct may contain another acyclic nonempty `@repr(C)` struct by value. The backend
 orders complete definitions by dependency and reuses the child target layout when computing the
 containing field; recursive value dependencies and non-`@repr(C)` nested structs fail closed.
+Private inert structs may also contain admitted inert enums by value. Struct and enum layouts share
+one acyclic aggregate dependency graph, and complete definitions are emitted topologically while
+preserving prior root order when no dependency requires movement. Enum fields in `@repr(C)` structs,
+enums nested inside enums, and recursive aggregate dependencies fail closed.
 The same admitted records may be foreign results by value. MIR retains the nominal destination type
 and generated C uses the exact public tag plus ordinary assignment. Foreign aggregate parameters
 remain closed. The native matrix includes an 8-byte register result and a 20-byte hidden-memory
@@ -171,7 +175,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 43 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 44 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -209,7 +213,8 @@ semantics, and it is emitted only in functions containing checked division or re
   pointer, stack, classifier, and object-format facts.
 - `internal/layout` now computes checked array and aggregate size, alignment, field offset, and
   padding from that description. The C emitter consumes those results for flat all-`i32` private
-  resources, their permitted resource-bearing built-in tags, and nonempty source `@repr(C)` structs
+  resources, their permitted resource-bearing built-in tags, private enum-containing inert structs,
+  and nonempty source `@repr(C)` structs
   over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw pointers, and acyclic nested
   `@repr(C)` records. It emits dependencies before their users plus `_Static_assert` checks for
   `sizeof`, `_Alignof`, and every `offsetof`; public C records preserve their declared tag and field

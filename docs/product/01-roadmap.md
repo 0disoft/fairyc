@@ -323,8 +323,8 @@ pointers, alignment, statuses, and normalized drops. The raw Windows probe addit
 exact bytes, terminator contents, invalid UTF-8, self-overlap, null/malformed storage, failure
 preservation, size overflow, and repeated drop. A probe-only allocator now deterministically forces
 initial String/CString allocation and String append reallocation failures, proves preservation, and
-returns its live-allocation count to zero. Public layouts, mutable text bytes, consuming Buffer
-conversion, Unicode algorithms, and general user-defined raw-parts reconstruction remain later
+returns its live-allocation count to zero. Public layouts, mutable text bytes, Unicode algorithms,
+and general user-defined raw-parts reconstruction remain later
 gates. ADR 0248 moves the SDK to `0.0.0-stage0.9` and adds explicit allocation-free arbitrary
 byte-view validation. Its success payload is an owner-bound `ref str`; invalid input returns text
 status `2` with allocation status `0`. It adds no implicit conversion or public view ABI.
@@ -811,7 +811,7 @@ ADR 0306 closes the first general same-handle metadata gap in SDK `0.0.0-stage0.
 `is_read_only(ref File) -> Result<bool, FileError>`. The Windows target queries `FileBasicInfo`
 through the live handle and exposes only `FILE_ATTRIBUTE_READONLY` as target-neutral bool. A
 dedicated raw probe plus public generated-Fairy normal/read-only fixtures run under low and
-optimized MSVC while proving cursor and size preservation. Timestamps, compound metadata records,
+optimized MSVC while proving cursor and size preservation. Timestamps, atomic metadata records,
 attribute mutation, writable-access guarantees, ACLs, and Linux public linkage remain later gates.
 
 ADR 0307 closes the next bounded same-handle metadata gap in SDK `0.0.0-stage0.41` with
@@ -819,7 +819,7 @@ ADR 0307 closes the next bounded same-handle metadata gap in SDK `0.0.0-stage0.4
 `FileStandardInfo.NumberOfLinks` through the live handle. A dedicated raw probe observes a real
 one-to-two link transition, and public generated-Fairy paths observe count two through both names
 of a host-created hard-link pair under low and optimized MSVC while preserving cursor and size.
-Hard-link mutation, path enumeration, allocation size, timestamps, compound metadata records, and
+Hard-link mutation, path enumeration, allocation size, timestamps, atomic metadata records, and
 Linux public linkage remain later gates.
 
 ADR 0308 closes the paired bounded mutation gap in SDK `0.0.0-stage0.42` with
@@ -853,6 +853,13 @@ ADR 0318 closes the owned-text reverse-transfer gap in SDK `0.0.0-stage0.47` wit
 `bytes::empty` and zero-copy `text::into_buffer`. Closed C and generated-Fairy low/optimized proofs
 retain the exact allocation through Buffer-to-String-to-Buffer, mutate the returned bytes, preserve
 invalid UTF-8 ownership, cover empty storage, and finish with zero live allocations.
+
+ADR 0319 closes the sequential compound-metadata gap in SDK `0.0.0-stage0.48` with public
+`FileMetadata` and `metadata(ref File)`. One aggregate dependency graph now lays out and emits
+enum-containing private structs before their users; the 44th C-emission fixture freezes construct,
+field-read, and switch transport. Existing low/optimized generated-Fairy filesystem executions use
+the five existing raw symbols. Atomic snapshots, timestamps, ACLs, and Linux public linkage remain
+later gates.
 
 ADR 0311 closes the bounded recursive-removal gap in SDK `0.0.0-stage0.45` with
 `remove_dir_all(ref CStr) -> Result<usize, FileError>`. The Windows target rejects roots and
