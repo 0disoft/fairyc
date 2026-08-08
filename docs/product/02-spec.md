@@ -1029,7 +1029,7 @@ retains no image, preserves an existing stable-build artifact, and keeps program
 target choice, cache policy, and target support outside the stable contract.
 
 ADR 0207 supersedes that v1 result-receipt boundary with program-facing run v2. It forwards bounded
-stdout/stderr, preserves ordinary 32-bit program status, strips only the exact private trap suffix,
+stdout/stderr, preserves ordinary 32-bit program status, classifies traps through a separate private control pipe,
 keeps canonical trap reporting, and still admits no program arguments or stdin forwarding.
 
 ADR 0212 supersedes run v2 with stable run v3. It attaches caller stdin only after compilation,
@@ -1126,8 +1126,8 @@ runtime ABI, and generated C remain unchanged.
 
 ADR 0314 advances native JSON execution to explicit `--capture-output` and
 `fairyc.test-report/v4`. Each canonical outcome requires padded base64 stdout/stderr so arbitrary
-binary and pre-trap bytes survive without UTF-8 decoding; recognized trap classification removes
-only the private receipt suffix. The flag requires `--native --json`, composes with optional
+binary and pre-trap bytes survive without UTF-8 decoding; recognized trap classification uses a
+separate private control pipe and leaves stderr unchanged. The flag requires `--native --json`, composes with optional
 `--locations`, and preserves the shared bounded-capture ceiling without claiming cross-stream order.
 Without it, native program output remains code-2 rejection and all text/v1-v3 JSON bytes remain
 unchanged. SDK, language, runtime ABI, and generated C remain unchanged.

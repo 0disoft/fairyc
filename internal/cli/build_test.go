@@ -38,10 +38,10 @@ func TestProductRunSupportSourceAddsReceiptOnlyToRunRuntime(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(ordinary, cruntime.RunTrapReceiptPrefix) ||
-		strings.Count(run, cruntime.RunTrapReceiptPrefix) != 1 ||
-		!strings.Contains(run, "_write(2,") {
-		t.Fatalf("ordinary/run support receipt boundary is not closed")
+	if strings.Contains(ordinary, cruntime.RunTrapControlEnvironment) ||
+		strings.Count(run, cruntime.RunTrapControlEnvironment) != 1 ||
+		!strings.Contains(run, "WriteFile(") || strings.Contains(run, "_write(2,") {
+		t.Fatalf("ordinary/run support trap control boundary is not closed")
 	}
 }
 

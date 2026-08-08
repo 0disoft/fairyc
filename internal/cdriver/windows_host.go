@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
 
@@ -43,6 +44,7 @@ type WindowsHostArtifact struct {
 	Toolchain       WindowsHostToolchain
 	Profile         Profile
 	ConsumerMode    ConsumerMode
+	TrapControl     bool
 }
 
 // WindowsMSVCArchiveArtifact preserves one exact input-order link result together with the
@@ -64,10 +66,12 @@ type WindowsMSVCWeakSearchArtifact struct {
 
 // WindowsHostOutcome is one bounded local MSVC execution result. ExitCode preserves the program's i32 bits.
 // Stdout and Stderr preserve stream identity but do not claim ordering across the two OS pipes.
+// TrapControl is compiler-private control data received outside both program streams.
 type WindowsHostOutcome struct {
-	ExitCode int32
-	Stdout   string
-	Stderr   string
+	ExitCode    int32
+	Stdout      string
+	Stderr      string
+	TrapControl string
 }
 
 // ResolveWindowsHostMSVC locates the latest complete x64 MSVC and Windows SDK installation.
@@ -789,9 +793,18 @@ func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtif
 	output := newBoundedProcessOutput(maxProcessOutput)
 	command.Stdout = output.stdoutWriter()
 	command.Stderr = output.stderrWriter()
-	err = command.Run()
+	trapControl := ""
+	trapControlOverflow := false
+	if artifact.TrapControl {
+		trapControl, trapControlOverflow, err = runWindowsProcessWithTrapControl(command, cruntime.RunTrapControlEnvironment)
+	} else {
+		err = command.Run()
+	}
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s", label, timeout)
+	}
+	if trapControlOverflow {
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded the private trap control bound", label)
 	}
 	stdout, stderr, truncated := output.values()
 	if truncated {
@@ -806,9 +819,10 @@ func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtif
 		exitCode = exitError.ExitCode()
 	}
 	return WindowsHostOutcome{
-		ExitCode: int32(uint32(exitCode)),
-		Stdout:   stdout,
-		Stderr:   stderr,
+		ExitCode:    int32(uint32(exitCode)),
+		Stdout:      stdout,
+		Stderr:      stderr,
+		TrapControl: trapControl,
 	}, nil
 }
 

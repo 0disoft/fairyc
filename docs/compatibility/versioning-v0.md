@@ -859,10 +859,15 @@ that all normal `i32` results remain distinct from traps.
 
 ADR 0207 explicitly replaces the v1 normal-result receipt with stable run v2. After launch, exact
 bounded stdout/stderr forwarding, no success banner, ordinary 32-bit program-status propagation,
-private trap-suffix removal, preceding-stderr preservation, canonical trap status 5, the shared
+off-stream private trap classification, complete stderr preservation, canonical trap status 5, the shared
 64 KiB ceiling, and unspecified cross-stream order are compatibility data. Pre-launch compiler codes
 remain unchanged, but equal post-launch values may be program-owned. Program arguments, stdin, live
 streaming, Linux stable execution, runtime distribution, and target maturity remain outside v2.
+
+ADR 0321 replaces the compiler-private stderr suffix with a dedicated inherited Windows control
+pipe. The transport spelling and handle are not compatibility data; the observable obligation is
+that receipt-like program stderr remains unchanged, ordinary colliding statuses remain ordinary,
+and only matching off-stream control produces the canonical trap outcome.
 
 ADR 0212 replaces guaranteed stdin EOF with stable run v3 caller-input forwarding. Attaching stdin
 only after successful compilation and image inspection, consuming no input on pre-launch failure,
@@ -993,7 +998,7 @@ interface, target, MIR, and generated-code versions remain unchanged.
 
 ADR 0314 additively admits `--capture-output` only with native JSON execution and introduces
 `fairyc.test-report/v4`. Every v4 outcome requires canonical padded base64 `stdoutBase64` and
-`stderrBase64`; arbitrary binary and pre-trap bytes are exact, the private trap receipt is excluded,
+`stderrBase64`; arbitrary binary and pre-trap bytes are exact, private trap control stays off-stream,
 and `source` remains conditional on `--locations`. Omission preserves native-output rejection and
 all text plus v1/v2/v3 JSON bytes. V4 is a new opt-in schema rather than an in-place v1-v3 field
 addition. Language, SDK, runtime ABI, manifest, lockfile, package, interface, target, MIR, and

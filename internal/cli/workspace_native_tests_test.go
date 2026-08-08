@@ -4,14 +4,12 @@ import (
 	"bytes"
 	"io"
 	"slices"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
-	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 )
@@ -72,8 +70,8 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 				t.Fatal("assertion-failed trap code is missing")
 			}
 			return cdriver.WindowsHostOutcome{
-				ExitCode: int32(productTrapExitBase + code),
-				Stderr:   cruntime.RunTrapReceiptPrefix + strconv.Itoa(int(code)),
+				ExitCode:    int32(productTrapExitBase + code),
+				TrapControl: string([]byte{byte(code)}),
 			}, nil
 		}
 		return cdriver.WindowsHostOutcome{}, nil
@@ -155,7 +153,7 @@ func TestNativeWorkspaceTestsReplayFixtureInputFromByteZero(t *testing.T) {
 	}
 }
 
-func TestNativeWorkspaceTestsCaptureExactProgramStreamsAndStripTrapReceipt(t *testing.T) {
+func TestNativeWorkspaceTestsCaptureExactProgramStreamsApartFromTrapControl(t *testing.T) {
 	t.Parallel()
 	program := nativeTestFixtureProgram()
 	tests := []workspaceTest{
@@ -174,9 +172,10 @@ func TestNativeWorkspaceTestsCaptureExactProgramStreamsAndStripTrapReceipt(t *te
 				t.Fatal("assertion-failed trap code is missing")
 			}
 			return cdriver.WindowsHostOutcome{
-				ExitCode: int32(productTrapExitBase + code),
-				Stdout:   string([]byte{0, 0xff}),
-				Stderr:   string([]byte{0x80}) + cruntime.RunTrapReceiptPrefix + strconv.Itoa(int(code)),
+				ExitCode:    int32(productTrapExitBase + code),
+				Stdout:      string([]byte{0, 0xff}),
+				Stderr:      string([]byte{0x80}),
+				TrapControl: string([]byte{byte(code)}),
 			}, nil
 		}
 		return cdriver.WindowsHostOutcome{Stdout: "pass", Stderr: "warn"}, nil
@@ -206,7 +205,7 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 		contains string
 	}{
 		{name: "stdout", outcome: cdriver.WindowsHostOutcome{Stdout: "unexpected"}, wantCode: ExitInvalidInvocation, contains: "produced program output"},
-		{name: "unreceipted exit", outcome: cdriver.WindowsHostOutcome{ExitCode: 42}, wantCode: ExitBuildFailure, contains: "without a valid trap receipt"},
+		{name: "uncontrolled exit", outcome: cdriver.WindowsHostOutcome{ExitCode: 42}, wantCode: ExitBuildFailure, contains: "without valid trap control"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			var stderr bytes.Buffer

@@ -24,8 +24,8 @@ would also replace invalid UTF-8 and lose exact process output.
 2. Emit `fairyc.test-report/v4`. Every outcome adds required `stdoutBase64` and `stderrBase64`
    strings using canonical padded RFC 4648 base64. Empty streams are empty strings. `source` remains
    present only when `--locations` is requested.
-3. Preserve exact captured bytes without UTF-8 decoding. For a recognized language trap, remove only
-   the exact private trap receipt suffix before encoding stderr; retain all preceding program bytes.
+3. Preserve exact captured bytes without UTF-8 decoding. ADR 0321 moves recognized language-trap
+   control to a separate private pipe, so encode every program stderr byte unchanged.
 4. Preserve canonical test order, pass/trap continuation, target/profile identity, totals, status,
    lock state, exit codes, argument and stdin behavior, temporary-directory isolation, and artifact
    non-retention. Existing bounded process capture and its shared 64 KiB ceiling remain fail-closed;
@@ -39,7 +39,7 @@ would also replace invalid UTF-8 and lose exact process output.
 ## Evidence
 
 - Go tests cover flag-domain validation, v4 schema/struct field closure, exact invalid-UTF-8-safe
-  base64 encoding, empty streams, default output rejection, trap-receipt stripping, and continuation.
+  base64 encoding, empty streams, default output rejection, off-stream trap control, and continuation.
 - The checked-in `examples/native_test_output_quickstart` writes binary stdout from a passing test
   and binary stderr before a runtime-dependent trap in a later test.
 - The configured Windows host smoke runs both tests in development and release, verifies exact v4

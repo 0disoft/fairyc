@@ -216,7 +216,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0204-stable-starter-project-creation-v1.md`: explicit package identity, a contained no-overwrite child directory, exact starter bytes, ordinary-failure rollback, and generated-project check/test evidence for stable `fairyc new`.
 - `0205-target-neutral-stage0-stdout-write.md`: compiler-bundled safe `std::io::write`, progress-preserving target-neutral linkage, target-owned Linux/Windows adapters, and exact Windows native output evidence.
 - `0206-starter-project-guide-v2.md`: exact compiler-owned generated README with honest lock, run-stream, retained-artifact, and safe `std::io::write` guidance while preserving the output-free starter source.
-- `0207-stable-windows-workspace-run-v2.md`: program-facing stable run with bounded stream forwarding, exact 32-bit normal status propagation, private trap-receipt removal, and no retained image.
+- `0207-stable-windows-workspace-run-v2.md`: program-facing stable run with bounded stream forwarding, exact 32-bit normal status propagation, and no retained image; ADR 0321 replaces its stderr receipt transport.
 - `0208-starter-project-guide-v3.md`: conventional zero-status starter entry and generated guide aligned with direct safe stdout execution through stable run v2.
 - `0209-target-neutral-stage0-stderr-write.md`: safe `std::io::write_stderr`, shared target-owned console adapters, SDK stage0.3 identity, and exact separated Windows stream evidence.
 - `0210-target-neutral-stage0-byte-output.md`: safe immutable byte-view stdout/stderr operations, SDK stage0.4 identity, signature-only C transport declaration hardening, and exact Windows native binary-output evidence.
@@ -323,13 +323,14 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0311-public-windows-recursive-directory-removal.md`: adds root-protected recursive directory removal with reparse-leaf handling, exact partial progress, low/optimized native evidence, and SDK `0.0.0-stage0.45`.
 - `0312-stable-native-test-program-arguments.md`: forwards arguments after the first `--` to every selected isolated native test, rejects semantic/list and NUL misuse, preserves report schemas, and proves exact low/optimized generated-Fairy `std::process` bytes.
 - `0313-stable-single-native-test-stdin.md`: explicitly attaches caller stdin to exactly one selected isolated native test after complete compiler admission and PE inspection, preserves default EOF and report schemas, and proves binary low/optimized generated-Fairy `std::io` input.
-- `0314-stable-native-test-output-attachments.md`: adds opt-in native JSON v4 stdout/stderr base64 attachments with exact binary preservation, trap-receipt stripping, unchanged legacy reports, and low/optimized generated-Fairy evidence.
+- `0314-stable-native-test-output-attachments.md`: adds opt-in native JSON v4 stdout/stderr base64 attachments with exact binary preservation, unchanged legacy reports, and low/optimized generated-Fairy evidence; ADR 0321 moves trap control off-stream.
 - `0315-stable-native-test-stdin-file-replay.md`: replays one bounded contained workspace file from byte zero into every isolated native test.
 - `0316-stable-native-test-timeout.md`: bounds each isolated native test process with canonical explicit seconds and proves fail-closed low/optimized termination.
 - `0317-public-path-kind-predicates.md`: adds effect-free public file/directory predicates for `PathKind` with SDK `0.0.0-stage0.46` and low/optimized generated-Fairy proof.
 - `0318-zero-copy-string-to-buffer-transfer.md`: adds an allocation-free empty Buffer constructor and zero-copy String-to-mutable-Buffer ownership transfer with SDK `0.0.0-stage0.47` and low/optimized generated-Fairy proof.
 - `0319-public-file-metadata-snapshot.md`: adds sequential same-handle `FileMetadata`, dependency-ordered enum-containing struct emission, SDK `0.0.0-stage0.48`, and low/optimized generated-Fairy proof.
 - `0320-c-abi-identifier-namespace-guards.md`: rejects C implementation, header-macro, and backend-owned name collisions before verbatim `@repr(C)` or external-symbol emission.
+- `0321-dedicated-native-trap-control-channel.md`: moves run-only Windows trap evidence from program stderr to a bounded inherited control pipe, preserving forged receipt-like stderr as data.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

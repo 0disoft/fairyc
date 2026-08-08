@@ -94,6 +94,7 @@ func compileWindowsProgramWithRunReceipt(program mir.Program, entryName string, 
 	if err != nil {
 		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, err)
 	}
+	artifact.TrapControl = runReceipt
 	if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
 		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, fmt.Errorf("inspect Windows target PE: %w", err))
 	}

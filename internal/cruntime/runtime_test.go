@@ -12,7 +12,7 @@ func TestScalarSourceBindsTrapBase(t *testing.T) {
 		t.Fatal(err)
 	}
 	if strings.Contains(source, trapBasePlaceholder) || strings.Contains(source, trapReceiptIncludePlaceholder) ||
-		strings.Contains(source, trapReceiptWritePlaceholder) || strings.Contains(source, RunTrapReceiptPrefix) ||
+		strings.Contains(source, trapReceiptWritePlaceholder) || strings.Contains(source, RunTrapControlEnvironment) ||
 		!strings.Contains(source, "UINT32_C(192)") || !strings.Contains(source, "fy_runtime_trap") {
 		t.Fatalf("ScalarSource() = %q", source)
 	}
@@ -22,15 +22,16 @@ func TestScalarSourceBindsTrapBase(t *testing.T) {
 	}
 }
 
-func TestWindowsRunSourceAddsClosedTrapReceipt(t *testing.T) {
+func TestWindowsRunSourceAddsClosedTrapControlWrite(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsRunSource(128)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if strings.Contains(source, trapBasePlaceholder) || strings.Contains(source, trapReceiptIncludePlaceholder) ||
-		strings.Contains(source, trapReceiptWritePlaceholder) || !strings.Contains(source, "#include <io.h>") ||
-		strings.Count(source, RunTrapReceiptPrefix) != 1 || !strings.Contains(source, "_write(2,") {
+		strings.Contains(source, trapReceiptWritePlaceholder) || !strings.Contains(source, "#include <windows.h>") ||
+		strings.Count(source, RunTrapControlEnvironment) != 1 || !strings.Contains(source, "WriteFile(") ||
+		strings.Contains(source, "_write(2,") {
 		t.Fatalf("WindowsRunSource() = %q", source)
 	}
 	repeated, err := WindowsRunSource(128)

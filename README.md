@@ -156,7 +156,7 @@ closed support linkage, MSVC resolution, and PE/unwind validation, but executes 
 instead of retaining it. It reports signed `i32` results outside the runtime's reserved trap-status
 range or the corresponding canonical product-trap category and rejects program output. The
 reserved-result collision remains an experimental-command limitation; stable workspace run uses a
-separate run-only trap receipt and has no such collision. This direct target command remains
+separate run-only trap control pipe and has no such collision. This direct target command remains
 experimental and does not promote target maturity.
 The package-aware `experimental build-workspace` and `run-workspace` commands now start from the
 current directory's strict `fairy.toml` instead of a positional source list. They resolve local
@@ -689,7 +689,7 @@ selects `fairyc.test-list/v3` or `fairyc.test-report/v3` for JSON. Each anchor c
 portable workspace-relative path, 1-based line and byte column, exact name byte span, and matching
 `fyfile1`/`fylm1` identities without exposing an absolute path or source text. Native JSON
 `--capture-output` uses `fairyc.test-report/v4` and adds required canonical base64 stdout/stderr to
-every outcome, preserving binary and pre-trap bytes without exposing the private trap receipt.
+every outcome, preserving binary and pre-trap bytes while the private trap control stays off-stream.
 Without that flag, native output remains rejected and legacy report bytes do not change. Shared
 multi-test input, live output streaming,
 portable targets, benchmarks, fuzzy/tag/glob filters, catalog-wide unreachable aggregation, and

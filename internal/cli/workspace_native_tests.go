@@ -90,7 +90,10 @@ func runNativeWorkspaceTestsWith(
 		if err != nil {
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}
-		programStderr, category := classifyStableRunOutcome(outcome)
+		programStderr, category, err := classifyStableRunOutcome(outcome)
+		if err != nil {
+			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
+		}
 		if !captureOutput && (outcome.Stdout != "" || programStderr != "") {
 			return nil, workspaceSubsetCapabilityError(
 				workspaceCompilePolicy{stableDiagnostics: true},
@@ -102,7 +105,7 @@ func runNativeWorkspaceTestsWith(
 		if category == "" && outcome.ExitCode != 0 {
 			return nil, buildFailure(
 				stderr,
-				fmt.Errorf("native test %s exited with status %d without a valid trap receipt", test.display, outcome.ExitCode),
+				fmt.Errorf("native test %s exited with status %d without valid trap control", test.display, outcome.ExitCode),
 			)
 		}
 		outcomes = append(outcomes, workspaceTestOutcome{

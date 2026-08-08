@@ -307,8 +307,8 @@ exactly one selected test after complete compiler admission, and attaches caller
 after compilation and PE inspection without pre-reading, buffering, replay, retention, or an extra
 byte ceiling. Zero or multiple selections fail without consuming input or launching a process.
 Native JSON `--capture-output` emits `fairyc.test-report/v4`; each outcome contains required
-canonical padded base64 stdout/stderr, with exact binary and pre-trap program bytes preserved and
-the private trap receipt removed. `--locations` may add the existing source object. Without capture,
+canonical padded base64 stdout/stderr, with exact binary and pre-trap program bytes preserved while
+trap control travels on a separate private pipe. `--locations` may add the existing source object. Without capture,
 program output remains rejected and v1-v3/text bytes stay unchanged.
 `fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` runs the same complete compiler admission,
 then reports every canonical identity without invoking an execution engine or target toolchain;

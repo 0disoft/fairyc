@@ -132,8 +132,8 @@ import std::io as io;
 
 @effects(console)
 fn i32 main() {
-    let ref str message = "before trap\n";
-    return switch (io::write(message)) {
+    let ref str message = "before trap\nfairyc-run-trap-v1:3";
+    return switch (io::write_stderr(message)) {
         case .ok(written) : { if (written == message.len) { 42 / 0 } else { 1 } }
         case .err(error) : { if (error.status != 0) { 2 } else { 3 } }
     };
@@ -149,7 +149,7 @@ fn i32 main() {
 	if restoreErr != nil {
 		return 0, fmt.Errorf("restore source after stable run trap proof: %w", restoreErr)
 	}
-	if trapCode != cli.ExitProgramTrap || trapStdout.String() != "before trap\n" || trapStderr.String() != "trap: division-by-zero\n" {
+	if trapCode != cli.ExitProgramTrap || trapStdout.String() != "" || trapStderr.String() != "before trap\nfairyc-run-trap-v1:3trap: division-by-zero\n" {
 		return 0, fmt.Errorf("stable trap run returned code %d, stdout %q, stderr %q", trapCode, trapStdout.String(), trapStderr.String())
 	}
 

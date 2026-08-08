@@ -530,9 +530,9 @@ Input liveness remains bounded by the existing process timeout.
 
 A normal return across the full `i32` range becomes the `fairyc` process status. After launch, a
 status numerically equal to 2, 3, 4, 5, 6, or 7 is still program-owned. A compiler-private run-only
-trap suffix distinguishes reserved trap statuses from equal normal results: the suffix alone is
-removed, preceding program stderr is forwarded, `trap: <category>` is appended, and the command
-returns 5. The receipt is not public runtime ABI, authentication, or hostile-code isolation.
+trap-control pipe distinguishes reserved trap statuses from equal normal results: every program
+stderr byte is forwarded, `trap: <category>` is appended, and the command returns 5. The control
+channel is not public runtime ABI, authentication, or hostile-code isolation.
 Pre-execution invocation, source, internal/output, build/execution, and package failures retain codes
 2, 3, 4, 6, and 7 respectively without promoting target maturity or persistent-cache defaults.
 An input transport failure after launch is an execution failure and cannot roll back program effects.
@@ -653,7 +653,7 @@ Explicit `--capture-output` is accepted only with native JSON execution. Before 
 selects `fairyc.test-report/v4`; after the delimiter it is an ordinary program argument. Every v4
 outcome requires canonical padded base64 `stdoutBase64` and `stderrBase64` strings, including empty
 strings for empty streams. Exact process bytes are encoded without UTF-8 decoding. A recognized trap
-removes only the private receipt suffix from stderr before encoding and preserves preceding bytes.
+uses the separate private control pipe, so stderr is encoded unchanged.
 `source` remains opt-in through `--locations`. The existing shared 64 KiB capture ceiling remains
 fail-closed and the report does not claim cross-stream ordering. Without the flag, native output
 remains a code-2 capability rejection and all text plus v1-v3 JSON bytes remain unchanged.

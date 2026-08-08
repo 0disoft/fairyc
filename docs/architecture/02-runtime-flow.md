@@ -117,9 +117,9 @@ contains it behind a safe local `ref str` helper; `main` uses only safe borrowed
 private generated-C descriptors carry data and length between internal functions.
 Stable workspace run v3 uses the same bounded driver for manifest-owned programs and compiler-bundled
 SDK linkage. After successful compilation and inspection it attaches caller stdin without pre-reading
-or retaining it. It forwards both output streams, preserves ordinary status, and compiles one private trap suffix
-so the CLI can remove only control metadata while retaining preceding program stderr and a canonical
-trap line. It provides no live output interleaving, arguments, input forwarding for other native
+or retaining it. It forwards both output streams, preserves ordinary status, and gives run-only
+artifacts one inherited private trap-control pipe so program stderr remains entirely data while the
+CLI appends a canonical trap line. It provides no live output interleaving, arguments, input forwarding for other native
 commands, or hostile-code isolation. The SDK's `read_stdin(ref mut u8[])` is observable through both
 direct execution of a built artifact and ordinary stable run.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,

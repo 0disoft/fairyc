@@ -36,13 +36,13 @@ bounded process per selected test while reusing the existing source-overlay and 
    target-support components from used foreign symbols, compile one temporary PE, and inspect its
    PE32+ and AMD64 unwind structures before execution. Each test receives a fresh process and
    temporary working directory, EOF stdin, no program arguments, and no retained artifact.
-5. A validated runtime trap receipt produces the existing `FAILED (<trap-category>)` line and does
-   not stop later tests. A normal zero exit produces `ok`. A nonzero exit without the exact receipt,
+5. A validated runtime trap control byte produces the existing `FAILED (<trap-category>)` line and
+   does not stop later tests. A normal zero exit produces `ok`. A nonzero exit without exact control,
    toolchain/build/inspection/execution failure, or internal harness failure aborts without a test
    report rather than inventing a language outcome.
 6. Native stdout or ordinary stderr is outside this report-only contract. Any such output rejects
    the requested native subset with code 2 and no report. Program-stream testing, snapshots,
-   inherited environment policy, arguments, shared fixtures, and output attachment require later
+   general inherited environment policy, arguments, shared fixtures, and output attachment require later
    contracts.
 7. Native success and trap reports retain ADR 0181's exact text and codes 0/5. Invocation and
    unsupported backend/output capabilities use 2, source or `E9001` diagnostics use 3, internal or

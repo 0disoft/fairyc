@@ -9,7 +9,6 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
-	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
@@ -107,7 +106,10 @@ func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	programStderr, category := classifyStableRunOutcome(outcome)
+	programStderr, category, err := classifyStableRunOutcome(outcome)
+	if err != nil {
+		return buildFailure(stderr, err)
+	}
 	if category != "" {
 		programStderr += fmt.Sprintf("trap: %s\n", category)
 	}
@@ -378,17 +380,23 @@ func workspaceSubsetCapabilityError(policy workspaceCompilePolicy, stderr io.Wri
 	return ExitInvalidInvocation
 }
 
-func classifyStableRunOutcome(outcome cdriver.WindowsHostOutcome) (string, string) {
+func classifyStableRunOutcome(outcome cdriver.WindowsHostOutcome) (string, string, error) {
 	category, trapped := windowsHostTrapCategory(outcome.ExitCode)
 	if !trapped {
-		return outcome.Stderr, ""
+		if outcome.TrapControl != "" {
+			return "", "", fmt.Errorf("Windows workspace executable produced unexpected trap control data")
+		}
+		return outcome.Stderr, "", nil
 	}
 	trapCode := int(outcome.ExitCode) - productTrapExitBase
-	receipt := fmt.Sprintf("%s%d", cruntime.RunTrapReceiptPrefix, trapCode)
-	if !strings.HasSuffix(outcome.Stderr, receipt) {
-		return outcome.Stderr, ""
+	receipt := string([]byte{byte(trapCode)})
+	if outcome.TrapControl == "" {
+		return outcome.Stderr, "", nil
 	}
-	return strings.TrimSuffix(outcome.Stderr, receipt), category
+	if outcome.TrapControl != receipt {
+		return "", "", fmt.Errorf("Windows workspace executable produced invalid trap control data")
+	}
+	return outcome.Stderr, category, nil
 }
 
 func classifyWorkspaceRunOutcome(outcome cdriver.WindowsHostOutcome) (int32, string, error) {
@@ -403,9 +411,9 @@ func classifyWorkspaceRunOutcome(outcome cdriver.WindowsHostOutcome) (int32, str
 		return 0, "", fmt.Errorf("Windows workspace executable produced unexpected output")
 	}
 	trapCode := int(outcome.ExitCode) - productTrapExitBase
-	expected := fmt.Sprintf("%s%d", cruntime.RunTrapReceiptPrefix, trapCode)
-	if outcome.Stderr != expected {
-		return 0, "", fmt.Errorf("Windows workspace executable produced an invalid trap receipt")
+	expected := string([]byte{byte(trapCode)})
+	if outcome.Stderr != "" || outcome.TrapControl != expected {
+		return 0, "", fmt.Errorf("Windows workspace executable produced invalid trap control data")
 	}
 	return 0, category, nil
 }
