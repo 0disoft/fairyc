@@ -1437,21 +1437,13 @@ func TestEmitRejectsLinkNameThatIsNotAC11Identifier(t *testing.T) {
 	}
 }
 
-func TestEmitGuardsExternalSymbolAgainstHeaderMacro(t *testing.T) {
+func TestEmitRejectsExternalSymbolThatCollidesWithHeaderMacro(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nunsafe extern C fn i32 INT64_MIN(i32 value) ;\nfn i32 main() { return unsafe { INT64_MIN(41) }; }\n")
-	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	if err != nil {
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || capability.Function != "main::INT64_MIN" || capability.Feature != `external C symbol "INT64_MIN"` {
 		t.Fatalf("Emit() error = %v", err)
-	}
-	for _, required := range []string{
-		"#ifdef INT64_MIN\n#undef INT64_MIN\n#endif",
-		"extern int32_t INT64_MIN(int32_t fy_a_0);",
-		"INT64_MIN(INT32_C(41));",
-	} {
-		if !strings.Contains(unit.Source, required) {
-			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
-		}
 	}
 }
 

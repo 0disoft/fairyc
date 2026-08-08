@@ -57,6 +57,7 @@
         "non-empty-resource-drop",
         "resource-option",
         "resource-result",
+        "repr-c-struct",
         "scalar-bitwise",
         "scalar-call",
         "scalar-cast",
