@@ -741,6 +741,22 @@
       }
     },
     {
+      "id": "pass.c-emission.nested-inert-enum-payload",
+      "sourceRoot": "cases/pass/nested-inert-enum-payload/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main", "main::score"],
+        "features": ["inert-enum", "scalar-call", "scalar-control-flow", "trap"]
+      }
+    },
+    {
       "id": "pass.c-emission.assert",
       "sourceRoot": "cases/pass/assert/src",
       "sources": ["main.fy"],

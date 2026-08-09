@@ -572,9 +572,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   nonempty empty-drop resource transport over Fairy copy scalars or raw pointers, and built-in
   resource-bearing tags whose payloads are exactly `i32` or direct admitted resources, plus private
   restricted user-enum tags
-  whose payload fields are admitted scalars, raw pointers, or admitted inert structs. Nested user
-  enums and built-in tags inside a user-enum payload remain C-backend
-  capability boundaries. `Result<T, UserEnum>` propagation preserves and reconstructs the exact
+  whose payload fields are admitted scalars, raw pointers, admitted inert structs, or acyclic
+  restricted inert user enums. Built-in tags inside a user-enum payload, recursive aggregate
+  dependencies, and resource-bearing user enums remain C-backend capability boundaries.
+  `Result<T, UserEnum>` propagation preserves and reconstructs the exact
   error enum on the enclosing return path. No public
   tagged or resource ABI is claimed.
   Nonempty admitted `@repr(C)` structs preserve public tags and field names after namespace-aware

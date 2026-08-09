@@ -543,6 +543,9 @@ func run() error {
 		if err := runHostCase(root, "copy fixed-array Option/Result "+profile, "tagged_array.fy", "", profile, cli.ExitSuccess, "native result: 42 (windows/amd64 host-smoke, msvc ", ""); err != nil {
 			return err
 		}
+		if err := runHostCase(root, "nested inert enum payload "+profile, "nested_enum.fy", "", profile, cli.ExitSuccess, "native result: 42 (windows/amd64 host-smoke, msvc ", ""); err != nil {
+			return err
+		}
 	}
 	windowsFileExecutions, err := runWindowsFileProbe(toolchain)
 	if err != nil {

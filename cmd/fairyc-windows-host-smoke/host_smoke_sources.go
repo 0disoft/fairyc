@@ -291,5 +291,6 @@ func loadHostSmokeSources() (map[string]string, error) {
 		"enum_result_propagation.fy":           enumResultPropagationSource,
 		"enum_option.fy":                       enumOptionSource,
 		"tagged_array.fy":                      taggedArraySource,
+		"nested_enum.fy":                       nestedEnumSource,
 	}, nil
 }

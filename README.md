@@ -74,7 +74,7 @@ cleanup. A nonempty resource may declare drop effects, and Resource Flow require
 actual cleanup edges; whole-root moves transfer the obligation without charging the sender.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition;
 host effect implementations remain target-runtime work rather than interpreter emulation.
-The constrained C backend emits deterministic C11 for 38 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 46 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty move-only resources over Fairy copy
 scalars or raw pointers with empty or pure nonempty drop bodies, copy-scalar/inert-struct and resource-bearing
 built-in `Option` and `Result` values,
@@ -425,6 +425,11 @@ hard-link count, kind, and read-only state sequentially through the existing sam
 the compiler now emits enum-containing private structs in aggregate dependency order without a new
 runtime symbol or atomic-snapshot promise.
 
+ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
+46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
+construction, by-value transport, extraction, exhaustive switching, and result 42 without changing
+language, SDK, runtime ABI, or public ABI identities.
+
 ADR 0320 closes the verbatim C-name false-acceptance gap without changing language, SDK, or runtime
 ABI identities. `@repr(C)` tags and fields plus external symbols now reject C implementation-reserved
 forms, generated-header macros, and backend-owned names before any invalid or colliding C11 is emitted.
@@ -452,7 +457,8 @@ opaque `void` pointers, and acyclic nested `@repr(C)` records; generated definit
 dependency and guarded by target-derived nested layout assertions. One pointer-to-opaque-pointer
 output-slot shape is admitted for Arena allocation. A generated FY caller now receives both an
 8-byte register result and a 20-byte hidden-memory result from hand-written C in the four-way native
-matrix. Raw dereference or arithmetic, arbitrary casts, nested enum or built-in-tag fields, array
+matrix. Raw dereference or arithmetic, arbitrary casts, nested enums in public C records,
+built-in-tag fields, array
 fields or foreign array signatures,
 callbacks, by-value aggregate parameters, exports, and public standard-library wrappers remain
 unimplemented.

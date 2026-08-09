@@ -332,6 +332,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0320-c-abi-identifier-namespace-guards.md`: rejects C implementation, header-macro, and backend-owned name collisions before verbatim `@repr(C)` or external-symbol emission.
 - `0321-dedicated-native-trap-control-channel.md`: moves run-only Windows trap evidence from program stderr to a bounded inherited control pipe, preserving forged receipt-like stderr as data.
 - `0322-no-textual-preprocessing.md`: fixes direct `.fy` lexing, rejects preprocessor directives, confines variability to explicit graph inputs, and keeps C preprocessing behind the unsafe transport boundary.
+- `0323-nested-inert-enum-c-transport.md`: admits acyclic inert enums inside user-enum payloads with dependency-ordered C definitions and low/optimized generated-Fairy MSVC execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

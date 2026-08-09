@@ -116,7 +116,8 @@ containing field; recursive value dependencies and non-`@repr(C)` nested structs
 Private inert structs may also contain admitted inert enums by value. Struct and enum layouts share
 one acyclic aggregate dependency graph, and complete definitions are emitted topologically while
 preserving prior root order when no dependency requires movement. Enum fields in `@repr(C)` structs,
-enums nested inside enums, and recursive aggregate dependencies fail closed.
+and recursive aggregate dependencies fail closed. Private restricted inert enums may contain other
+restricted inert enums by value; the same graph orders and lays out both complete definitions.
 The same admitted records may be foreign results by value. MIR retains the nominal destination type
 and generated C uses the exact public tag plus ordinary assignment. Foreign aggregate parameters
 remain closed. The native matrix includes an 8-byte register result and a 20-byte hidden-memory
@@ -164,8 +165,8 @@ placement.
 
 The emitter rejects empty, nested-struct/array/C-scalar/Region/nested-resource or partially
 initialized resources, and nonempty drops without verifier-matched glue;
-nested tags, raw-pointer/C-scalar tagged payloads, nested or
-resource-bearing user enums, and other tagged payload
+nested built-in tags, raw-pointer/C-scalar tagged payloads, recursive or resource-bearing user
+enums, and other tagged payload
 combinations; returning a safe borrow through the C function boundary;
 safe-borrow operations other than exact verified local borrowing and dereference, array-view construction, owner-bound text
 raw-parts construction, view metadata, borrowed resource field reads, immutable
@@ -175,7 +176,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 45 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 46 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 

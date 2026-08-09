@@ -802,6 +802,7 @@ func TestAnalyzeRejectsNonInertEnumPayloads(t *testing.T) {
 		code string
 	}{
 		{name: "borrow", text: "module main;\nenum Bad { Value { ref i32 payload; }; }\nfn i32 main() { return 0; }\n", code: "E1004"},
+		{name: "recursive", text: "module main;\nenum Chain { End; Next { Chain value; }; }\nfn i32 main() { return 0; }\n", code: "E1004"},
 		{name: "region", text: "module main;\nenum Bad { Value { Region payload; }; }\nfn i32 main() { return 0; }\n", code: "E3103"},
 		{name: "resource", text: "module main;\nresource Token { i32 value; cleanup {} }\nenum Bad { Value { Token payload; }; }\nfn i32 main() { return 0; }\n", code: "E1004"},
 	}

@@ -17,7 +17,8 @@
 3. Extend constrained C emission so private structs and inert enums participate in one acyclic
    by-value dependency graph. Complete aggregate definitions are emitted topologically while prior
    root declaration order remains stable when no dependency requires movement. Enum-containing
-   `@repr(C)` structs and enums nested inside enums remain closed.
+   `@repr(C)` structs and, at this decision, enums nested inside enums remain closed. ADR 0323 later
+   admits acyclic private inert-enum nesting without opening public C records.
 4. Add no target C symbol and preserve language `fairyc-language/10` and runtime ABI
    `fairyc-runtime/0`. Advance the compiler-bundled SDK to `0.0.0-stage0.48` because the public
    metadata type and function are additive.

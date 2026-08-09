@@ -226,7 +226,7 @@ func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type,
 		return r.resolve(value)
 	}
 	if _, found := r.enumerations[value]; found {
-		return layout.Type{}, fmt.Errorf("unsupported enum field type %q", value)
+		return r.resolve(value)
 	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:

@@ -1036,6 +1036,11 @@ header-macro, or backend-owned namespaces. Those programs now fail at the backen
 instead of producing unreliable C11; valid `_lowercase` members and closed `fy_std_` integrations
 remain accepted.
 
+ADR 0323 changes no version identity. It additively transports an acyclic restricted inert enum as
+a by-value field of another private restricted inert enum through the existing aggregate layout and
+emission dependency graphs. Language, SDK, runtime ABI, target, MIR, cache, lockfile, public API,
+and public ABI identities remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

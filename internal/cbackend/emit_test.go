@@ -1978,13 +1978,42 @@ fn i32 main() { return score(.Pair { .left = 20, .right = 22 }); }
 	}
 }
 
-func TestEmitRejectsNestedEnumPayloadUntilDependencyOrderingExists(t *testing.T) {
+func TestEmitNestedEnumPayloadInDependencyOrder(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nenum Inner { Ready; }\nenum Outer { Wrapped { Inner value; }; }\nfn i32 main() { return 0; }\n")
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "enum type \"main::Outer\"") || !strings.Contains(capability.Feature, "field \"value\" of type \"main::Inner\"") {
+	program := lowerSource(t, `module main;
+enum Envelope { Missing; Present { State state; }; }
+enum State { Empty; Code { i32 value; }; }
+fn i32 score(Envelope envelope) {
+    return switch (envelope) {
+        case .Missing : { 0 }
+        case .Present { .state = state } : { switch (state) {
+            case .Empty : { 1 }
+            case .Code { .value = value } : { value }
+        } }
+    };
+}
+fn i32 main() { return score(.Present { .state = .Code { .value = 42 } }); }
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"typedef struct { uint32_t tag; fy_enum_payload_1 payload; } fy_enum_1;",
+		"fy_enum_1 f_0;",
+		"typedef struct { uint32_t tag; fy_enum_payload_0 payload; } fy_enum_0;",
+		".payload.v_1.f_0;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Index(unit.Source, "fy_enum_1;") > strings.Index(unit.Source, "fy_enum_1 f_0;") {
+		t.Fatalf("nested enum definition follows its by-value payload field:\n%s", unit.Source)
 	}
 }
 

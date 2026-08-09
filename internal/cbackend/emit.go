@@ -869,6 +869,9 @@ func (e *emitter) enumPayloadCType(value hir.Type) (string, error) {
 	if _, structure := e.structByType[canonical]; structure {
 		return e.cValueType(canonical)
 	}
+	if _, enumeration := e.enumByType[canonical]; enumeration {
+		return e.cValueType(canonical)
+	}
 	return "", fmt.Errorf("unsupported enum payload type %q", value)
 }
 

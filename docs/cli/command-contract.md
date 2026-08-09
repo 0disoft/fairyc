@@ -340,7 +340,8 @@ resource-bearing tags whose payloads are exactly `i32` or direct admitted resour
 numeric structs whose size, alignment, and field offsets are asserted against target-layout results.
 Restricted user enums use private numeric tags and private union payload storage. Payloadless and
 named-field variants, exact exhaustive shallow switching, and admitted scalar/raw-pointer/flat-struct
-payload fields are supported; nested user enums and built-in tags inside their payloads fail closed.
+or acyclic inert-enum payload fields are supported; recursive user enums and built-in tags inside
+their payloads fail closed.
 Nonempty source `@repr(C)` structs over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw
 pointers, and acyclic nested `@repr(C)` records preserve their public C tag and field names, emit
 dependencies before users, and receive target-computed layout assertions. Namespace-aware guards
