@@ -2,13 +2,19 @@
 
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
-- Decision source: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
+- Decision sources: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`,
+  `docs/adr/0322-no-textual-preprocessing.md`
 - Normative grammar: `spec/grammar/stage0.ebnf`
 - Parser fixtures: `spec/fixtures/parser/manifest-v0.json`
 
 ## Parser boundary
 
 The Stage 0 parser is a batch compiler parser. Its input is the original source byte sequence; its outputs are a trivia-preserving token stream, a compact lossless CST, structured diagnostics, and—only when lexing and parsing succeed—a lowered AST.
+
+No preprocessing phase runs before this boundary. Textual includes, macro expansion, token pasting,
+ambient definitions, and conditional token removal are not Fairy source operations. A `#` outside a
+literal or comment is retained as invalid input and reported as `E0001`, not interpreted as a
+directive.
 
 Every original byte belongs to exactly one raw token, trivia token, invalid-input token, or error node. Synthetic missing tokens have zero width and record their insertion point and repair identity. The parser consumes the entire file or reports why it could not.
 

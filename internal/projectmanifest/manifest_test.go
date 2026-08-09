@@ -107,6 +107,7 @@ source = "src"
 		field  string
 	}{
 		{name: "unknown", input: base + "mystery = true\n", reason: ReasonUnknownField, field: "package.mystery"},
+		{name: "preprocessor defines", input: base + "defines = [\"target_windows\"]\n", reason: ReasonUnknownField, field: "package.defines"},
 		{name: "duplicate", input: strings.Replace(base, "name = \"app\"", "name = \"app\"\nname = \"again\"", 1), reason: ReasonParse},
 		{name: "missing package field", input: strings.Replace(base, "source = \"src\"\n", "", 1), reason: ReasonMissingField, field: "package.source"},
 		{name: "unknown schema", input: strings.Replace(base, SchemaVersion, "fairyc.manifest/v2", 1), reason: ReasonUnsupportedSchema, field: "schema"},

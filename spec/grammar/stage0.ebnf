@@ -14,6 +14,10 @@
    VALID_BYTE_LITERAL_SOURCE_SCALAR, and END_OF_FILE_TOKEN are external lexer
    terminals defined by the source-byte contract rather than expanded Unicode
    range tables.
+
+   The compiler lexes these source bytes directly. There is no textual include,
+   macro expansion, token pasting, or conditional token-removal phase, and '#'
+   is not a directive introducer.
 *)
 
 source = module_decl import_decl* item* EOF ;

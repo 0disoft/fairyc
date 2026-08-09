@@ -38,11 +38,15 @@ Name resolution, canonical type selection, phase ownership, cascade suppression,
 ## Stage 0 surface
 
 - Source files use `.fy`, source is UTF-8, and Stage 0 identifiers are ASCII.
-- Written declarations put one complete type before one name. C name-splitting declarators, C casts,
-  preprocessing, and textual includes are absent.
+- Written declarations put one complete type before one name. C name-splitting declarators and C
+  casts are absent. Source bytes reach the lexer without macro expansion, token pasting,
+  conditional token removal, ambient defines, or textual includes; `#` is not a directive prefix.
 - Simple statements use explicit semicolons; compound `if`, standalone blocks, and standalone
   `unsafe` blocks do not. Assignment is a statement, and integer values are not implicit booleans.
 - Every file declares one module. Imports require aliases and cannot be wildcard, selective, cyclic, or re-exported.
+- Target or feature variation must select explicit package/module graph inputs. It cannot rewrite or
+  hide tokens inside a `.fy` file. Manifest v1 feature lists identify dependency instances only and
+  do not enable source-level conditional compilation.
 - `let` prevents reassignment, `var` permits reassignment and mutable borrowing, and both require initializers.
 - Parameters use `Type name`. A callee that needs an assignable place initializes a `var` local from
   the parameter without changing the call type or ownership transfer.

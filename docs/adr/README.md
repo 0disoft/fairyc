@@ -331,6 +331,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0319-public-file-metadata-snapshot.md`: adds sequential same-handle `FileMetadata`, dependency-ordered enum-containing struct emission, SDK `0.0.0-stage0.48`, and low/optimized generated-Fairy proof.
 - `0320-c-abi-identifier-namespace-guards.md`: rejects C implementation, header-macro, and backend-owned name collisions before verbatim `@repr(C)` or external-symbol emission.
 - `0321-dedicated-native-trap-control-channel.md`: moves run-only Windows trap evidence from program stderr to a bounded inherited control pipe, preserving forged receipt-like stderr as data.
+- `0322-no-textual-preprocessing.md`: fixes direct `.fy` lexing, rejects preprocessor directives, confines variability to explicit graph inputs, and keeps C preprocessing behind the unsafe transport boundary.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -61,7 +61,10 @@ Dependency table names are bindings. Each dependency contains exactly:
 - `features`: explicit sorted unique per-edge feature set.
 
 `features = []` is required for no features. Manifest v1 does not silently apply default features
-or unify two edges. The resolved graph may contain feature-distinct package instances.
+or unify two edges. The resolved graph may contain feature-distinct package instances. Features are
+identity and graph inputs only: they do not define source macros, remove tokens, choose headers, or
+activate an in-file conditional-compilation language. Fields such as `defines`, `include_paths`, and
+`cflags` are not part of manifest v1 and reject under the closed-field rule.
 
 ## Parse and validation boundary
 

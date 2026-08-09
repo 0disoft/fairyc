@@ -117,6 +117,32 @@ func TestInvalidUTF8PreservesRawByteAndReportsE0001(t *testing.T) {
 	}
 }
 
+func TestPreprocessorDirectivesRemainInvalidInBothCurrentRevisions(t *testing.T) {
+	t.Parallel()
+	for _, directive := range []string{"#include", "#define", "#if"} {
+		directive := directive
+		t.Run(directive[1:], func(t *testing.T) {
+			t.Parallel()
+			input := []byte(directive)
+			file := source.NewFile("directive.fy", input)
+			for _, result := range []Result{
+				Lex(file, source.NewBudget(source.DefaultLimits(), len(input))),
+				LexPreviousRevision(file, source.NewBudget(source.DefaultLimits(), len(input))),
+			} {
+				if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E0001" || result.Diagnostics[0].Span.StartByte != 0 || result.Diagnostics[0].Span.EndByte != 1 {
+					t.Fatalf("Lex(%q) diagnostics = %+v", directive, result.Diagnostics)
+				}
+				if len(result.Tokens) == 0 || result.Tokens[0].Kind != Invalid || result.Tokens[0].Text(result.Source) != "#" {
+					t.Fatalf("Lex(%q) first token = %+v", directive, result.Tokens)
+				}
+				if reconstructed, ok := result.Reconstruct(); !ok || !slices.Equal(reconstructed, input) {
+					t.Fatalf("Reconstruct(%q) = %q, %v; want exact input", directive, reconstructed, ok)
+				}
+			}
+		})
+	}
+}
+
 func TestNumericAndStringCooking(t *testing.T) {
 	t.Parallel()
 	input := []byte("1_024.5e-2 0xDEAD_BEEF \"line\\n\\u{03BB}\" b\"\\x00A\" c\"fairy\"")
