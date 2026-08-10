@@ -1289,6 +1289,7 @@ non-authority to separate executable oracles and records what each still does no
 - Immutable green tree, incremental reparse, formatter, LSP, and SCIP: require an editor product slice and measured parser needs.
 - `impact`, semantic `diff`, stable anchors, MCP, and structural edits: require `.fymap` identity and completeness evidence from real use.
 - Custom allocators, portable paths, resource-aware arenas, closures, concurrency capabilities, async, sockets, and freestanding or embedded support each require a separate ownership and target contract.
+- Production workloads: ADR 0328 records candidate-only gates for independently promoted Linux profiles, verified cancellation and structured task ownership, bounded I/O and generated declarations, and vendor-neutral operational context. It accepts no server framework, database, scheduler, trait, macro, registry, or telemetry protocol; each implementation remains a separate evidence-backed vertical slice.
 
 ## Self-hosting gate
 

@@ -106,6 +106,12 @@ iteration, checked narrowing, and expression bodies outside `/6` until their exa
 reopen. ADR 0221 owns the current implemented `/6` cutover; later candidate statements do
 not change the current language or Stage 0 grammar.
 
+ADR 0328 records production-workload admission gates for Linux target promotion, cancellation and
+structured task ownership, bounded data interchange and generated declarations, and vendor-neutral
+operational context. Those gates are candidates only. They reserve no syntax or public API, accept
+no server or database framework, scheduler, trait, macro system, registry, deployment platform, or
+telemetry protocol, and change no current target maturity, SDK, runtime ABI, or language identity.
+
 ## Value categories
 
 ### Inert values
