@@ -322,6 +322,10 @@ func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
 	foundAggregate := false
 	for _, payload := range tagged.payloads {
 		payload = canonicalCValueType(payload)
+		if _, found := copyScalarTaggedAggregateLayout(payload); found {
+			foundAggregate = true
+			continue
+		}
 		if _, found := e.structByType[payload]; found {
 			foundAggregate = true
 			continue

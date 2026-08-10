@@ -15,8 +15,9 @@ neither the public Fairy ABI nor the language, SDK, or runtime identity.
 ## Boundary
 
 General tag-to-tag dependency graphs, nested resource-bearing tags, recursive tags, and nested tagged
-fields inside aggregates remain unsupported. Expanding those cases requires a separate dependency and
-ownership decision rather than recursive admission through this rule.
+fields outside ADR 0329's direct compact-payload subset remain unsupported. Expanding those cases
+requires a separate dependency and ownership decision rather than recursive admission through this
+rule.
 
 ## Evidence
 

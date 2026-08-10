@@ -154,9 +154,10 @@ Direct copy-scalar tags and acyclic tags whose payloads are admitted inert struc
 user enums may be fields of private inert structs or user enums. One combined graph places complete
 payload aggregates before their tagged records and tagged records before containing aggregates.
 Only the already-fixed compact `Option<i32>` and `Result<i32, i32>` records may be direct payloads
-of another copy-only tag. General nested-tag, array-, borrow-, raw-pointer/C-scalar-, and
-resource-bearing tags remain outside
-aggregate fields, and all tagged fields remain outside `@repr(C)`.
+of another copy-only tag. Those outer copy-only tags may also be fields of private inert structs or
+restricted user enums. General nested-tag, array-, borrow-, raw-pointer/C-scalar-, and
+resource-bearing tags remain outside aggregate fields, and all tagged fields remain outside
+`@repr(C)`.
 Payload extraction must agree with the MIR move marker. Result propagation reconstructs the
 enclosing function's declared Result type on the error path, including restricted inert user-enum
 errors without converting the enum into a scalar or target constant.
@@ -183,7 +184,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 50 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 51 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 

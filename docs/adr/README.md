@@ -338,6 +338,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0326-aggregate-bearing-tagged-field-graph.md`: topologically lays out and emits acyclic inert structs, user enums, and aggregate-bearing `Option`/`Result` fields with low/optimized generated-Fairy MSVC execution.
 - `0327-nested-compact-tag-transport.md`: admits compact scalar `Option`/`Result` records as direct copy-only tag payloads while keeping general tag graphs and nested aggregate fields closed.
 - `0328-production-workload-capability-admission-gates.md`: records candidate-only Linux promotion, structured cancellation, bounded data generation, and operational-context gates without accepting server APIs, schedulers, traits, macros, or telemetry vendors.
+- `0329-nested-compact-tag-aggregate-fields.md`: composes nested compact scalar tags with private struct and user-enum fields through dependency-ordered layout and emission plus low/optimized generated-Fairy MSVC execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

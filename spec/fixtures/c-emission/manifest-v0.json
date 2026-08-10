@@ -851,6 +851,22 @@
         "functions": ["main::main", "main::score_option_result", "main::score_result_nested"],
         "features": ["checked-arithmetic", "copy-option", "copy-result", "scalar-call", "scalar-control-flow", "scalar-option", "scalar-result", "trap"]
       }
+    },
+    {
+      "id": "pass.c-emission.nested-compact-tag-aggregate-fields",
+      "sourceRoot": "cases/pass/nested-compact-tag-aggregate-fields/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main", "main::score"],
+        "features": ["checked-arithmetic", "copy-option", "copy-result", "inert-enum", "inert-struct", "scalar-call", "scalar-control-flow", "scalar-option", "scalar-result", "trap"]
+      }
     }
   ]
 }

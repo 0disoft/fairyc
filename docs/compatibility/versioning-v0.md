@@ -1056,6 +1056,12 @@ enums, and aggregate-bearing built-in tags in one private layout and emission gr
 unsupported payload classes, recursion, and public tagged layout remain rejected. Language, SDK,
 runtime ABI, target, MIR, cache, lockfile, public API, and public ABI identities remain unchanged.
 
+ADR 0329 changes no version identity. It additively stores copy-only tags whose direct payload is
+the compact `Option<i32>` or `Result<i32, i32>` record in private inert structs and restricted user
+enums. General tag-to-tag graphs, recursion, resources, unsupported payload classes, and public
+tagged layout remain rejected. Language, SDK, runtime ABI, target, MIR, cache, lockfile, public API,
+and public ABI identities remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an
