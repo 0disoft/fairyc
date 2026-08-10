@@ -298,26 +298,60 @@ func (e *emitter) emitTaggedTypes(output *strings.Builder, directCopyScalar bool
 		if direct != directCopyScalar {
 			continue
 		}
-		output.WriteString("typedef struct {\n")
-		output.WriteString("    uint32_t tag;\n")
-		for payloadIndex, payload := range tagged.payloads {
-			cType, err := e.cValueType(payload)
-			if err != nil {
-				return fmt.Errorf("tagged type %q payload %d: %w", tagged.typ, payloadIndex, err)
-			}
-			fmt.Fprintf(output, "    %s p_%d;\n", cType, payloadIndex)
+		if !direct && e.taggedParticipatesInAggregateGraph(index) {
+			continue
 		}
-		fmt.Fprintf(output, "} fy_tagged_%d;\n", index)
-		fmt.Fprintf(output, "_Static_assert(sizeof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d size\");\n", index, tagged.layout.SizeBytes, index)
-		fmt.Fprintf(output, "_Static_assert(_Alignof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d alignment\");\n", index, tagged.layout.AlignmentBytes, index)
-		for fieldIndex, field := range tagged.layout.Fields {
-			fieldName := "tag"
-			if fieldIndex > 0 {
-				fieldName = fmt.Sprintf("p_%d", fieldIndex-1)
-			}
-			fmt.Fprintf(output, "_Static_assert(offsetof(fy_tagged_%d, %s) == UINT64_C(%d), \"fairyc tagged %d field %d offset\");\n", index, fieldName, field.OffsetBytes, index, fieldIndex)
+		if err := e.emitTaggedType(output, index); err != nil {
+			return err
 		}
-		output.WriteByte('\n')
 	}
+	return nil
+}
+
+func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
+	tagged := e.taggedTypes[index]
+	if _, direct := copyScalarTaggedAggregateLayout(tagged.typ); direct || tagged.needsDrop {
+		return false
+	}
+	foundAggregate := false
+	for _, payload := range tagged.payloads {
+		payload = canonicalCValueType(payload)
+		if _, found := e.structByType[payload]; found {
+			foundAggregate = true
+			continue
+		}
+		if _, found := e.enumByType[payload]; found {
+			foundAggregate = true
+			continue
+		}
+		if payload != hir.TypeU8 && payload != hir.TypeI32 && payload != hir.TypeU32 && payload != hir.TypeUSize {
+			return false
+		}
+	}
+	return foundAggregate
+}
+
+func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
+	tagged := e.taggedTypes[index]
+	output.WriteString("typedef struct {\n")
+	output.WriteString("    uint32_t tag;\n")
+	for payloadIndex, payload := range tagged.payloads {
+		cType, err := e.cValueType(payload)
+		if err != nil {
+			return fmt.Errorf("tagged type %q payload %d: %w", tagged.typ, payloadIndex, err)
+		}
+		fmt.Fprintf(output, "    %s p_%d;\n", cType, payloadIndex)
+	}
+	fmt.Fprintf(output, "} fy_tagged_%d;\n", index)
+	fmt.Fprintf(output, "_Static_assert(sizeof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d size\");\n", index, tagged.layout.SizeBytes, index)
+	fmt.Fprintf(output, "_Static_assert(_Alignof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d alignment\");\n", index, tagged.layout.AlignmentBytes, index)
+	for fieldIndex, field := range tagged.layout.Fields {
+		fieldName := "tag"
+		if fieldIndex > 0 {
+			fieldName = fmt.Sprintf("p_%d", fieldIndex-1)
+		}
+		fmt.Fprintf(output, "_Static_assert(offsetof(fy_tagged_%d, %s) == UINT64_C(%d), \"fairyc tagged %d field %d offset\");\n", index, fieldName, field.OffsetBytes, index, fieldIndex)
+	}
+	output.WriteByte('\n')
 	return nil
 }

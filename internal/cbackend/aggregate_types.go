@@ -132,6 +132,8 @@ func (r *aggregateLayoutResolver) resolve(typ hir.Type) (layout.Type, error) {
 		value, err = r.resolveStruct(definition)
 	} else if definition, found := r.enumerations[typ]; found {
 		value, err = r.resolveEnum(definition)
+	} else if tagged, found, taggedErr := r.resolveAggregateTagged(typ); found {
+		value, err = tagged, taggedErr
 	} else {
 		err = fmt.Errorf("missing aggregate type %q", typ)
 	}
@@ -184,6 +186,14 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 	if tagged, found := copyScalarTaggedAggregateLayout(value); found && !reprC {
 		return tagged, nil
 	}
+	if !reprC {
+		if _, option := hir.OptionElement(value); option {
+			return r.resolve(value)
+		}
+		if _, _, result := hir.ResultElements(value); result {
+			return r.resolve(value)
+		}
+	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
@@ -234,6 +244,12 @@ func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type,
 	if tagged, found := copyScalarTaggedAggregateLayout(value); found {
 		return tagged, nil
 	}
+	if _, option := hir.OptionElement(value); option {
+		return r.resolve(value)
+	}
+	if _, _, result := hir.ResultElements(value); result {
+		return r.resolve(value)
+	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
@@ -243,6 +259,60 @@ func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type,
 		}
 		return layout.Type{}, fmt.Errorf("unsupported enum field type %q", value)
 	}
+}
+
+func (r *aggregateLayoutResolver) resolveAggregateTagged(value hir.Type) (layout.Type, bool, error) {
+	tag := layout.Field{Name: "tag", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"}}
+	if element, option := hir.OptionElement(value); option {
+		payload, found, err := r.resolveAggregateTaggedPayload(element)
+		if err != nil {
+			return layout.Type{}, true, err
+		}
+		if !found {
+			return layout.Type{}, true, fmt.Errorf("unsupported aggregate-bearing tagged type %q", value)
+		}
+		return layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{
+			tag,
+			{Name: "p_0", Type: payload},
+		}}, true, nil
+	}
+	success, failure, result := hir.ResultElements(value)
+	if !result {
+		return layout.Type{}, false, nil
+	}
+	successLayout, successFound, err := r.resolveAggregateTaggedPayload(success)
+	if err != nil {
+		return layout.Type{}, true, err
+	}
+	failureLayout, failureFound, err := r.resolveAggregateTaggedPayload(failure)
+	if err != nil {
+		return layout.Type{}, true, err
+	}
+	if !successFound || !failureFound {
+		return layout.Type{}, true, fmt.Errorf("unsupported aggregate-bearing tagged type %q", value)
+	}
+	return layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{
+		tag,
+		{Name: "p_0", Type: successLayout},
+		{Name: "p_1", Type: failureLayout},
+	}}, true, nil
+}
+
+func (r *aggregateLayoutResolver) resolveAggregateTaggedPayload(value hir.Type) (layout.Type, bool, error) {
+	value = canonicalCValueType(value)
+	switch value {
+	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true, nil
+	}
+	if _, found := r.structures[value]; found {
+		resolved, err := r.resolve(value)
+		return resolved, true, err
+	}
+	if _, found := r.enumerations[value]; found {
+		resolved, err := r.resolve(value)
+		return resolved, true, err
+	}
+	return layout.Type{}, false, nil
 }
 
 func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, error) {
@@ -294,15 +364,23 @@ type aggregateEmissionNode struct {
 	typ         hir.Type
 	structure   int
 	enumeration int
+	tagged      int
 }
 
 func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 	nodes := make(map[hir.Type]aggregateEmissionNode, len(e.structTypes)+len(e.enumTypes))
 	for index, value := range e.structTypes {
-		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: index, enumeration: -1}
+		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: index, enumeration: -1, tagged: -1}
 	}
 	for index, value := range e.enumTypes {
-		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: -1, enumeration: index}
+		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: -1, enumeration: index, tagged: -1}
+	}
+	for index := range e.taggedTypes {
+		if !e.taggedParticipatesInAggregateGraph(index) {
+			continue
+		}
+		value := e.taggedTypes[index]
+		nodes[value.typ] = aggregateEmissionNode{typ: value.typ, structure: -1, enumeration: -1, tagged: index}
 	}
 	roots := make([]hir.Type, 0, len(nodes))
 	for _, value := range e.structTypes {
@@ -310,6 +388,11 @@ func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 	}
 	for _, value := range e.enumTypes {
 		roots = append(roots, value.definition.Type)
+	}
+	for index := range e.taggedTypes {
+		if e.taggedParticipatesInAggregateGraph(index) {
+			roots = append(roots, e.taggedTypes[index].typ)
+		}
 	}
 	state := make(map[hir.Type]uint8, len(nodes))
 	ordered := make([]aggregateEmissionNode, 0, len(nodes))
@@ -330,12 +413,18 @@ func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 					dependencies = append(dependencies, canonicalCValueType(field.Type))
 				}
 			}
-		} else {
+		} else if node.enumeration >= 0 {
 			for _, variant := range e.enumTypes[node.enumeration].definition.Variants {
 				for _, field := range variant.Fields {
 					if _, found := nodes[canonicalCValueType(field.Type)]; found {
 						dependencies = append(dependencies, canonicalCValueType(field.Type))
 					}
+				}
+			}
+		} else {
+			for _, payload := range e.taggedTypes[node.tagged].payloads {
+				if _, found := nodes[canonicalCValueType(payload)]; found {
+					dependencies = append(dependencies, canonicalCValueType(payload))
 				}
 			}
 		}
@@ -367,7 +456,11 @@ func (e *emitter) emitAggregateTypes(output *strings.Builder) error {
 			if err := e.emitStructType(output, node.structure); err != nil {
 				return err
 			}
-		} else if err := e.emitEnumType(output, node.enumeration); err != nil {
+		} else if node.enumeration >= 0 {
+			if err := e.emitEnumType(output, node.enumeration); err != nil {
+				return err
+			}
+		} else if err := e.emitTaggedType(output, node.tagged); err != nil {
 			return err
 		}
 	}

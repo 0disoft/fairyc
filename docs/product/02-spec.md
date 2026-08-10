@@ -574,10 +574,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   restricted user-enum tags
   whose payload fields are admitted scalars, raw pointers, admitted inert structs, acyclic
   restricted inert user enums, or direct `Option<T>` and `Result<T, E>` transports whose payloads
-  are canonical Fairy copy scalars. Those direct copy-scalar tags are also admitted as private
-  inert-struct fields and are emitted before every by-value aggregate use. Aggregate-, fixed-array-,
-  borrow-, raw-pointer/C-scalar-, or resource-bearing built-in tags inside aggregates, recursive
-  aggregate dependencies, and resource-bearing user enums remain C-backend capability boundaries.
+  are canonical Fairy copy scalars, admitted inert structs, or restricted inert user enums. Those
+  acyclic tags are also admitted as private inert-struct fields; one combined graph emits every
+  payload aggregate before its tag and every tag before its by-value containing aggregate. Nested
+  tags and fixed-array-, borrow-, raw-pointer/C-scalar-, or resource-bearing built-in tags inside
+  aggregates, recursive dependencies, and resource-bearing user enums remain C-backend capability
+  boundaries.
   `Result<T, UserEnum>` propagation preserves and reconstructs the exact
   error enum on the enclosing return path. No public
   tagged or resource ABI is claimed.

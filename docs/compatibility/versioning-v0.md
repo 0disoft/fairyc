@@ -1051,6 +1051,11 @@ special cases to direct `Option<T>` and `Result<T, E>` values whose payloads are
 copy scalars. Aggregate-bearing tags and public tagged layout remain rejected. Language, SDK,
 runtime ABI, target, MIR, cache, lockfile, public API, and public ABI identities remain unchanged.
 
+ADR 0326 changes no version identity. It additively joins acyclic inert structs, restricted user
+enums, and aggregate-bearing built-in tags in one private layout and emission graph. Nested tags,
+unsupported payload classes, recursion, and public tagged layout remain rejected. Language, SDK,
+runtime ABI, target, MIR, cache, lockfile, public API, and public ABI identities remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

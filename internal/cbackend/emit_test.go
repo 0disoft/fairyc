@@ -2079,17 +2079,79 @@ fn i32 main() {
 	}
 }
 
-func TestEmitRejectsAggregateBearingTaggedFieldInsidePrivateStruct(t *testing.T) {
+func TestEmitAggregateBearingTaggedFieldsInsidePrivateAggregates(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 struct Inner { i32 value; }
-struct Outer { Option<Inner> inner; }
-fn i32 main() { return 0; }
+enum Failure { Missing; Code { i32 value; }; }
+struct Outer {
+    Option<Inner> inner;
+    Result<Inner, Failure> result;
+}
+enum Envelope {
+    Missing;
+    Present { Outer outer; Option<Failure> fallback; };
+}
+fn i32 score(Envelope envelope) {
+    return switch (envelope) {
+        case .Missing : { 0 }
+        case .Present { .outer = outer, .fallback = fallback } : {
+            let i32 base = switch (outer.inner) {
+                case .some(inner) : { inner.value }
+                case .none : { switch (fallback) {
+                    case .some(failure) : { switch (failure) {
+                        case .Missing : { 1 }
+                        case .Code { .value = value } : { value }
+                    } }
+                    case .none : { 0 }
+                } }
+            };
+            switch (outer.result) {
+                case .ok(inner) : { base + inner.value }
+                case .err(failure) : { switch (failure) {
+                    case .Missing : { base }
+                    case .Code { .value = value } : { base + value }
+                } }
+            }
+        }
+    };
+}
+fn i32 main() {
+    let Outer outer = Outer {
+        .inner = .some(Inner { .value = 40 }),
+        .result = .err(.Code { .value = 2 }),
+    };
+    return score(.Present { .outer = outer, .fallback = .none });
+}
 `)
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, `struct type "main::Outer" field "inner" of type "Option<main::Inner>": unsupported struct field type "Option<main::Inner>"`) {
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"checked-arithmetic", "copy-option", "copy-result", "inert-enum", "inert-struct", "scalar-call", "scalar-control-flow", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"fy_enum_1 p_0;",
+		"fy_struct_0 p_0;",
+		"fy_enum_1 p_1;",
+		"fy_tagged_1 f_0;",
+		"fy_tagged_2 f_1;",
+		"fy_tagged_0 f_1;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Index(unit.Source, "fy_enum_1;") > strings.Index(unit.Source, "fy_enum_1 p_0;") ||
+		strings.Index(unit.Source, "} fy_tagged_1;") > strings.Index(unit.Source, "fy_tagged_1 f_0;") ||
+		strings.Index(unit.Source, "} fy_struct_1;") > strings.Index(unit.Source, "fy_struct_1 f_0;") {
+		t.Fatalf("aggregate/tagged definition order is invalid:\n%s", unit.Source)
 	}
 }
 

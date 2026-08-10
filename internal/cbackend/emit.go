@@ -899,6 +899,9 @@ func (e *emitter) enumPayloadCType(value hir.Type) (string, error) {
 	if _, direct := copyScalarTaggedAggregateLayout(canonical); direct {
 		return e.cValueType(canonical)
 	}
+	if index, found := e.taggedByType[canonical]; found && e.taggedParticipatesInAggregateGraph(index) {
+		return e.cValueType(canonical)
+	}
 	if _, structure := e.structByType[canonical]; structure {
 		return e.cValueType(canonical)
 	}

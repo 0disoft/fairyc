@@ -335,6 +335,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0323-nested-inert-enum-c-transport.md`: admits acyclic inert enums inside user-enum payloads with dependency-ordered C definitions and low/optimized generated-Fairy MSVC execution.
 - `0324-scalar-tagged-aggregate-fields.md`: admits compact `Option<i32>` and `Result<i32, i32>` fields inside private aggregates with early typedef emission and low/optimized generated-Fairy MSVC execution.
 - `0325-copy-scalar-tagged-aggregate-fields.md`: extends private aggregate fields to direct copy-scalar `Option` and `Result` transports while keeping aggregate/resource-bearing tags and public C layout closed.
+- `0326-aggregate-bearing-tagged-field-graph.md`: topologically lays out and emits acyclic inert structs, user enums, and aggregate-bearing `Option`/`Result` fields with low/optimized generated-Fairy MSVC execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

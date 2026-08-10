@@ -162,7 +162,7 @@ Verified resource definitions now preserve ordered fields and
   verifier-linked private functions and execute before reverse field cleanup. Resource-declared
   effects are preserved and required only at actual cleanup edges. Restricted inert enums now preserve named payloads,
   construct through contextual leading-dot variants, require exhaustive shallow switches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 48
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 49
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, switch, calls, and propagation,
   copy-scalar/inert-struct tagged transport, private
@@ -191,8 +191,8 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 ## Phase 2: first hosted executable slice
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command
-requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It runs all 48 emission
-cases at low and optimized profiles for 192 process-status and exact
+requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It runs all 49 emission
+cases at low and optimized profiles for 196 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -200,7 +200,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `ref u8[]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-  and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 96 fail-closed sanitizer
+  and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 98 fail-closed sanitizer
 executions. GitHub Actions run `30442310794` passed the complete lane for exact commit `0bb4199`;
 ADR 0214 records that first hosted receipt. It closes the receipt marker only, not native
 conformance. A shared bounded C driver and embedded
@@ -878,6 +878,12 @@ ADR 0325 extends that private aggregate composition to every direct canonical co
 `Result<u8, usize>`, and `Option<usize>` across a struct and enum; low and optimized generated-Fairy
 `run-host` executions both return 42 through MSVC. Aggregate-, array-, borrow-, raw-pointer/C-scalar-,
 and resource-bearing tagged fields plus public C layout remain closed.
+
+ADR 0326 joins acyclic inert structs, restricted user enums, and aggregate-bearing built-in tags in
+one layout and emission graph. The 49th C-emission fixture carries `Option<Inner>`,
+`Result<Inner, Failure>`, and `Option<Failure>` through containing struct and enum fields; low and
+optimized generated-Fairy `run-host` executions both return 42 through MSVC. Nested tags, arrays,
+borrows, raw/C scalars, resources, recursion, and public C tagged layout remain closed.
 
 ADR 0311 closes the bounded recursive-removal gap in SDK `0.0.0-stage0.45` with
 `remove_dir_all(ref CStr) -> Result<usize, FileError>`. The Windows target rejects roots and

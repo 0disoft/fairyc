@@ -12,7 +12,7 @@ output, LF-only text, and no absolute fixture path. It also creates a determinis
 `drop-trace-v0` unit, proves every interpreter-observed drop has a source/type/span site, and keeps
 that unit separate from the production translation unit.
 
-These 48 cases are emission evidence, not native-code evidence. They cover scalar control,
+These 49 cases are emission evidence, not native-code evidence. They cover scalar control,
 checked arithmetic, direct `i32` minimum emission as `INT32_MIN`, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
 failure, copy-only `Result<usize, inert-struct>`, user-enum-bearing `Result` transport and
 propagation, user-enum-bearing `Option` Some and None, and copy fixed-array `Option` Some/None plus
@@ -22,6 +22,8 @@ named payload extraction, exhaustive switch, and acyclic inert enums nested insi
 payloads with dependency-ordered complete definitions,
 direct copy-scalar `Option` and `Result` fields inside private inert structs and user enums with
 their private typedefs emitted before every by-value aggregate use,
+plus acyclic aggregate-bearing `Option` and `Result` fields whose complete struct or user-enum
+payload definitions precede the tag and whose tag precedes every containing aggregate,
 plus flat move-only resource construction over Fairy copy scalars or raw pointers, field access,
 whole-root call move, empty-drop and compiler-private typed nonempty-drop
 discharge, live reassignment, resource-bearing Option Some and None, resource Result Ok and Err, and
@@ -39,7 +41,7 @@ same cases.
 
 `internal/cbackendnative` is the separate Linux/amd64 lane. It consumes the interpreter-approved
 instrumented units from this runner, requires glibc plus Clang and GCC, links the scalar runtime plus
-a closed four-byte recorder, and plans 192 process-status and exact drop-sequence comparisons at low
+a closed four-byte recorder, and plans 196 process-status and exact drop-sequence comparisons at low
 and optimized profiles. Those executions include scalar fixed-array indexing plus explicit and
 omitted-bound byte-view slicing. This observes compiler-owned empty resource cleanup and active built-in
 payload selection plus pure user drop bodies. Effect-bearing drop remains deferred. The
