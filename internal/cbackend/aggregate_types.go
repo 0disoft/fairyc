@@ -181,7 +181,7 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		}
 		return r.resolve(value)
 	}
-	if tagged, found := scalarTaggedAggregateLayout(value); found && !reprC {
+	if tagged, found := copyScalarTaggedAggregateLayout(value); found && !reprC {
 		return tagged, nil
 	}
 	switch value {
@@ -231,7 +231,7 @@ func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type,
 	if _, found := r.enumerations[value]; found {
 		return r.resolve(value)
 	}
-	if tagged, found := scalarTaggedAggregateLayout(value); found {
+	if tagged, found := copyScalarTaggedAggregateLayout(value); found {
 		return tagged, nil
 	}
 	switch value {
@@ -243,16 +243,6 @@ func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type,
 		}
 		return layout.Type{}, fmt.Errorf("unsupported enum field type %q", value)
 	}
-}
-
-func scalarTaggedAggregateLayout(value hir.Type) (layout.Type, bool) {
-	if !isOptionI32(value) && !isResultI32I32(value) {
-		return layout.Type{}, false
-	}
-	return layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{
-		{Name: "tag", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"}},
-		{Name: "payload", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "i32"}},
-	}}, true
 }
 
 func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, error) {

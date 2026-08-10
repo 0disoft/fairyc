@@ -1046,6 +1046,11 @@ ADR 0324 changes no version identity. It additively reuses the existing private 
 restricted user enums, with their typedefs emitted before aggregate definitions. Language, SDK,
 runtime ABI, target, MIR, cache, lockfile, public API, and public ABI identities remain unchanged.
 
+ADR 0325 changes no version identity. It extends private aggregate fields from the compact `i32`
+special cases to direct `Option<T>` and `Result<T, E>` values whose payloads are canonical Fairy
+copy scalars. Aggregate-bearing tags and public tagged layout remain rejected. Language, SDK,
+runtime ABI, target, MIR, cache, lockfile, public API, and public ABI identities remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

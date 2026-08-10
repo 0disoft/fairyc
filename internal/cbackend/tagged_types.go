@@ -76,6 +76,18 @@ func prepareTaggedTypes(
 			}
 		}
 	}
+	for _, structure := range structures {
+		for _, field := range structure.definition.Fields {
+			consider(field.Type)
+		}
+	}
+	for _, enumeration := range enumerations {
+		for _, variant := range enumeration.definition.Variants {
+			for _, field := range variant.Fields {
+				consider(field.Type)
+			}
+		}
+	}
 	orderedTypes := make([]hir.Type, 0, len(candidates))
 	for value := range candidates {
 		orderedTypes = append(orderedTypes, value)
@@ -107,6 +119,54 @@ func prepareTaggedTypes(
 		result = append(result, candidate)
 	}
 	return result, byType, nil
+}
+
+func copyScalarTaggedAggregateLayout(value hir.Type) (layout.Type, bool) {
+	tag := layout.Field{Name: "tag", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"}}
+	if element, option := hir.OptionElement(value); option {
+		payload, found := copyScalarTaggedPayloadLayout(element)
+		if !found {
+			return layout.Type{}, false
+		}
+		name := "p_0"
+		if isOptionI32(value) {
+			name = "payload"
+		}
+		return layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{
+			tag,
+			{Name: name, Type: payload},
+		}}, true
+	}
+	success, failure, result := hir.ResultElements(value)
+	if !result {
+		return layout.Type{}, false
+	}
+	successLayout, successFound := copyScalarTaggedPayloadLayout(success)
+	failureLayout, failureFound := copyScalarTaggedPayloadLayout(failure)
+	if !successFound || !failureFound {
+		return layout.Type{}, false
+	}
+	if isResultI32I32(value) {
+		return layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{
+			tag,
+			{Name: "payload", Type: successLayout},
+		}}, true
+	}
+	return layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{
+		tag,
+		{Name: "p_0", Type: successLayout},
+		{Name: "p_1", Type: failureLayout},
+	}}, true
+}
+
+func copyScalarTaggedPayloadLayout(value hir.Type) (layout.Type, bool) {
+	value = canonicalCValueType(value)
+	switch value {
+	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
+	default:
+		return layout.Type{}, false
+	}
 }
 
 func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir.Type]int, enumByType map[hir.Type]int, resourceByType map[hir.Type]int, arrayByType map[hir.Type]int) bool {
@@ -232,8 +292,12 @@ func (e *emitter) resultCSpec(value hir.Type) (hir.Type, hir.Type, string, bool)
 	return tagged.payloads[0], tagged.payloads[1], feature, true
 }
 
-func (e *emitter) emitTaggedTypes(output *strings.Builder) error {
+func (e *emitter) emitTaggedTypes(output *strings.Builder, directCopyScalar bool) error {
 	for index, tagged := range e.taggedTypes {
+		_, direct := copyScalarTaggedAggregateLayout(tagged.typ)
+		if direct != directCopyScalar {
+			continue
+		}
 		output.WriteString("typedef struct {\n")
 		output.WriteString("    uint32_t tag;\n")
 		for payloadIndex, payload := range tagged.payloads {

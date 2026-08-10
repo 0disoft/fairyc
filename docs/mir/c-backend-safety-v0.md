@@ -150,6 +150,10 @@ receive numeric private tagged structs. `Option` has one payload field and `Resu
 success and error fields; inactive fields are aggregate-zero-initialized rather than represented
 with an uncontracted C union. Size, alignment, and offsets come from the target layout engine.
 Copy-only tags do not need drop; a generic tag needs drop only when a direct payload is a resource.
+Direct copy-scalar tags may be fields of private inert structs or restricted user enums. Their
+layouts are aggregate-independent, and their private typedefs precede containing aggregate
+definitions. Aggregate-, array-, borrow-, raw-pointer/C-scalar-, and resource-bearing tags remain
+outside aggregate fields, and all tagged fields remain outside `@repr(C)`.
 Payload extraction must agree with the MIR move marker. Result propagation reconstructs the
 enclosing function's declared Result type on the error path, including restricted inert user-enum
 errors without converting the enum into a scalar or target constant.
@@ -165,8 +169,8 @@ placement.
 
 The emitter rejects empty, nested-struct/array/C-scalar/Region/nested-resource or partially
 initialized resources, and nonempty drops without verifier-matched glue;
-nested built-in tags, raw-pointer/C-scalar tagged payloads, recursive or resource-bearing user
-enums, and other tagged payload
+nested built-in tags, unsupported built-in tag fields, raw-pointer/C-scalar tagged payloads,
+recursive or resource-bearing user enums, and other tagged payload
 combinations; returning a safe borrow through the C function boundary;
 safe-borrow operations other than exact verified local borrowing and dereference, array-view construction, owner-bound text
 raw-parts construction, view metadata, borrowed resource field reads, immutable
@@ -176,7 +180,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 47 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 48 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 

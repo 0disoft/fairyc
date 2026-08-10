@@ -773,6 +773,22 @@
       }
     },
     {
+      "id": "pass.c-emission.copy-scalar-tagged-aggregate-fields",
+      "sourceRoot": "cases/pass/copy-scalar-tagged-aggregate-fields/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main", "main::score"],
+        "features": ["copy-option", "copy-result", "inert-enum", "inert-struct", "scalar-call", "scalar-comparison", "scalar-control-flow", "trap"]
+      }
+    },
+    {
       "id": "pass.c-emission.assert",
       "sourceRoot": "cases/pass/assert/src",
       "sources": ["main.fy"],

@@ -861,9 +861,19 @@ func (e *emitter) recordCScalarFeature(value hir.Type) {
 func (e *emitter) recordScalarTaggedFeature(value hir.Type) {
 	if isOptionI32(value) {
 		e.features["scalar-option"] = struct{}{}
+		return
 	}
 	if isResultI32I32(value) {
 		e.features["scalar-result"] = struct{}{}
+		return
+	}
+	if _, direct := copyScalarTaggedAggregateLayout(value); !direct {
+		return
+	}
+	if _, option := hir.OptionElement(value); option {
+		e.features["copy-option"] = struct{}{}
+	} else {
+		e.features["copy-result"] = struct{}{}
 	}
 }
 
@@ -884,6 +894,9 @@ func (e *emitter) enumPayloadCType(value hir.Type) (string, error) {
 	canonical := canonicalCValueType(value)
 	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeU32 || canonical == hir.TypeUSize ||
 		isRawPointer(canonical) || isOptionI32(canonical) || isResultI32I32(canonical) {
+		return e.cValueType(canonical)
+	}
+	if _, direct := copyScalarTaggedAggregateLayout(canonical); direct {
 		return e.cValueType(canonical)
 	}
 	if _, structure := e.structByType[canonical]; structure {
@@ -2897,6 +2910,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if scalarResult {
 		output.WriteString("typedef struct { uint32_t tag; int32_t payload; } fy_result_i32_i32;\n\n")
 	}
+	if err := e.emitTaggedTypes(output, true); err != nil {
+		return err
+	}
 	if err := e.emitScalarArrayTypes(output); err != nil {
 		return err
 	}
@@ -2920,7 +2936,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		}
 		output.WriteByte('\n')
 	}
-	if err := e.emitTaggedTypes(output); err != nil {
+	if err := e.emitTaggedTypes(output, false); err != nil {
 		return err
 	}
 	if e.instrumentation == InstrumentationDropTraceV0 {
