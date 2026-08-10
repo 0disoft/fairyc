@@ -191,8 +191,8 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 ## Phase 2: first hosted executable slice
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command
-requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It runs all 49 emission
-cases at low and optimized profiles for 196 process-status and exact
+requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It runs all 50 emission
+cases at low and optimized profiles for 200 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -200,7 +200,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `ref u8[]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-  and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 98 fail-closed sanitizer
+  and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 100 fail-closed sanitizer
 executions. GitHub Actions run `30442310794` passed the complete lane for exact commit `0bb4199`;
 ADR 0214 records that first hosted receipt. It closes the receipt marker only, not native
 conformance. A shared bounded C driver and embedded

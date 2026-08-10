@@ -835,6 +835,22 @@
         "functions": ["main::main"],
         "features": ["inert-struct", "repr-c-struct"]
       }
+    },
+    {
+      "id": "pass.c-emission.nested-compact-tag",
+      "sourceRoot": "cases/pass/nested-compact-tag/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["copy-option", "scalar-control-flow", "scalar-option", "trap"]
+      }
     }
   ]
 }

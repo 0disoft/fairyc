@@ -171,6 +171,9 @@ func copyScalarTaggedPayloadLayout(value hir.Type) (layout.Type, bool) {
 
 func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir.Type]int, enumByType map[hir.Type]int, resourceByType map[hir.Type]int, arrayByType map[hir.Type]int) bool {
 	value = canonicalCValueType(value)
+	if isOptionI32(value) || isResultI32I32(value) {
+		return true
+	}
 	if value == hir.SharedBorrow(hir.TypeStr) {
 		return true
 	}
@@ -215,6 +218,9 @@ func taggedPayloadLayout(
 	arrayByType map[hir.Type]int,
 ) (layout.Type, bool) {
 	value = canonicalCValueType(value)
+	if tagged, found := copyScalarTaggedAggregateLayout(value); found {
+		return tagged, true
+	}
 	if value == hir.SharedBorrow(hir.TypeStr) {
 		return layout.Type{
 			Kind: layout.KindStruct,

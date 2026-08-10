@@ -2368,7 +2368,7 @@ fn i32 main() {
 	}
 }
 
-func TestEmitRejectsNestedScalarTag(t *testing.T) {
+func TestEmitNestedCompactScalarTag(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 fn i32 main() {
@@ -2382,10 +2382,24 @@ fn i32 main() {
     };
 }
 `)
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "Option construction type") {
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"typedef struct { uint32_t tag; int32_t payload; } fy_option_i32;",
+		"fy_option_i32 p_0;",
+		"(fy_option_i32){ .tag = FY_OPTION_SOME, .payload = INT32_C(42) }",
+		".tag == FY_OPTION_SOME",
+		".payload",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
 	}
 }
 
