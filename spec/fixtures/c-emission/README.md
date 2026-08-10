@@ -24,8 +24,9 @@ direct copy-scalar `Option` and `Result` fields inside private inert structs and
 their private typedefs emitted before every by-value aggregate use,
 plus acyclic aggregate-bearing `Option` and `Result` fields whose complete struct or user-enum
 payload definitions precede the tag and whose tag precedes every containing aggregate,
-plus copy-only tags whose direct payload is the already-fixed compact `Option<i32>` or
-`Result<i32, i32>` record,
+plus copy-only `Option<Result<i32, i32>>` and
+`Result<Option<i32>, Result<i32, i32>>` tags whose direct payloads are already-fixed compact
+`Option<i32>` or `Result<i32, i32>` records,
 plus flat move-only resource construction over Fairy copy scalars or raw pointers, field access,
 whole-root call move, empty-drop and compiler-private typed nonempty-drop
 discharge, live reassignment, resource-bearing Option Some and None, resource Result Ok and Err, and

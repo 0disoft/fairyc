@@ -848,8 +848,8 @@
         "value": 42,
         "target": "x86_64-linux-gnu",
         "dialect": "c11",
-        "functions": ["main::main"],
-        "features": ["copy-option", "scalar-control-flow", "scalar-option", "trap"]
+        "functions": ["main::main", "main::score_option_result", "main::score_result_nested"],
+        "features": ["checked-arithmetic", "copy-option", "copy-result", "scalar-call", "scalar-control-flow", "scalar-option", "scalar-result", "trap"]
       }
     }
   ]

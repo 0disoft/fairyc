@@ -2368,18 +2368,37 @@ fn i32 main() {
 	}
 }
 
-func TestEmitNestedCompactScalarTag(t *testing.T) {
+func TestEmitNestedCompactScalarTags(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn i32 main() {
-    let Option<Option<i32>> nested = .some(.some(42));
-    return switch (nested) {
-        case .some(value) : { switch (value) {
-            case .some(inner) : { inner }
-            case .none : { 0 }
+
+fn i32 score_option_result(Option<Result<i32, i32>> value) {
+    return switch (value) {
+        case .some(result) : { switch (result) {
+            case .ok(inner) : { inner }
+            case .err(error) : { -error }
         } }
         case .none : { 0 }
     };
+}
+
+fn i32 score_result_nested(Result<Option<i32>, Result<i32, i32>> value) {
+    return switch (value) {
+        case .ok(option) : { switch (option) {
+            case .some(inner) : { inner }
+            case .none : { 0 }
+        } }
+        case .err(result) : { switch (result) {
+            case .ok(inner) : { inner }
+            case .err(error) : { -error }
+        } }
+    };
+}
+
+fn i32 main() {
+	let Option<Result<i32, i32>> first = .some(.ok(40));
+	let Result<Option<i32>, Result<i32, i32>> second = .err(.ok(2));
+	return score_option_result(first) + score_result_nested(second);
 }
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
@@ -2392,8 +2411,13 @@ fn i32 main() {
 	}
 	for _, required := range []string{
 		"typedef struct { uint32_t tag; int32_t payload; } fy_option_i32;",
+		"typedef struct { uint32_t tag; int32_t payload; } fy_result_i32_i32;",
 		"fy_option_i32 p_0;",
-		"(fy_option_i32){ .tag = FY_OPTION_SOME, .payload = INT32_C(42) }",
+		"fy_result_i32_i32 p_0;",
+		"fy_result_i32_i32 p_1;",
+		"(fy_result_i32_i32){ .tag = FY_RESULT_OK, .payload = INT32_C(40) }",
+		"(fy_result_i32_i32){ .tag = FY_RESULT_OK, .payload = INT32_C(2) }",
+		"FY_RESULT_OK",
 		".tag == FY_OPTION_SOME",
 		".payload",
 	} {

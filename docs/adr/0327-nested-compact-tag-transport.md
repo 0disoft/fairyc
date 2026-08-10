@@ -20,6 +20,7 @@ ownership decision rather than recursive admission through this rule.
 
 ## Evidence
 
-The 50th C-emission fixture freezes nested construction, read, and switch with interpreter result 42.
-A dedicated Windows test independently compiles and runs the generated Fairy program with low and
-optimized MSVC profiles and requires native result 42.
+The 50th C-emission fixture freezes `Option<Result<i32, i32>>` and
+`Result<Option<i32>, Result<i32, i32>>` construction, read, and switch with interpreter result 42.
+A dedicated Windows test independently compiles and runs the same generated Fairy program with low
+and optimized MSVC profiles and requires native result 42.
