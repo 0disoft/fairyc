@@ -28,8 +28,9 @@ capability and does not define a public Fairy or C ABI.
 ## Boundary
 
 Only direct compact `Option<i32>` and `Result<i32, i32>` payload records enter this composition.
-General tag-to-tag dependencies, nested resources, arrays, borrows, raw-pointer or C-scalar tagged
-payloads, recursion, and every tagged field in `@repr(C)` remain rejected.
+ADR 0330 separately admits acyclic generic copy-only tag-to-tag dependencies. Nested resources,
+arrays, borrows, raw-pointer or C-scalar tagged payloads, recursion, and every tagged field in
+`@repr(C)` remain rejected.
 
 ## Evidence
 

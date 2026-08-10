@@ -1062,6 +1062,11 @@ enums. General tag-to-tag graphs, recursion, resources, unsupported payload clas
 tagged layout remain rejected. Language, SDK, runtime ABI, target, MIR, cache, lockfile, public API,
 and public ABI identities remain unchanged.
 
+ADR 0330 changes no version identity. It additively discovers, lays out, and emits acyclic generic
+copy-only tag-to-tag dependencies and permits those tags in private aggregates. Nested resources,
+unsupported leaf payloads, recursion, and public tagged layout remain rejected. Language, SDK,
+runtime ABI, target, MIR, cache, lockfile, public API, and public ABI identities remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

@@ -303,6 +303,14 @@ func (r *aggregateLayoutResolver) resolveAggregateTaggedPayload(value hir.Type) 
 	if tagged, found := copyScalarTaggedAggregateLayout(value); found {
 		return tagged, true, nil
 	}
+	if _, option := hir.OptionElement(value); option {
+		resolved, err := r.resolve(value)
+		return resolved, true, err
+	}
+	if _, _, result := hir.ResultElements(value); result {
+		resolved, err := r.resolve(value)
+		return resolved, true, err
+	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true, nil

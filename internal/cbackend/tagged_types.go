@@ -35,12 +35,30 @@ func prepareTaggedTypes(
 	engine *layout.Engine,
 ) ([]taggedCType, map[hir.Type]int, error) {
 	candidates := make(map[hir.Type]taggedCType)
-	consider := func(value hir.Type) {
+	var consider func(hir.Type)
+	consider = func(value hir.Type) {
+		value = canonicalCValueType(value)
+		if _, found := candidates[value]; found {
+			return
+		}
 		if element, option := hir.OptionElement(value); option {
-			if isOptionI32(value) || !supportedTaggedPayload(element, true, structByType, enumByType, resourceByType, arrayByType) {
+			if isOptionI32(value) {
 				return
 			}
+			element = canonicalCValueType(element)
+			supported := supportedTaggedPayload(element, true, structByType, enumByType, resourceByType, arrayByType)
 			_, needsDrop := resourceByType[element]
+			if !supported {
+				consider(element)
+				nested, found := candidates[element]
+				if !found || nested.needsDrop {
+					return
+				}
+				supported = true
+			}
+			if !supported {
+				return
+			}
 			candidates[value] = taggedCType{
 				typ: value, kind: taggedOption, payloads: []hir.Type{element}, needsDrop: needsDrop,
 			}
@@ -50,8 +68,21 @@ func prepareTaggedTypes(
 		if !result || isResultI32I32(value) {
 			return
 		}
-		if !supportedTaggedPayload(success, true, structByType, enumByType, resourceByType, arrayByType) ||
-			!supportedTaggedPayload(failure, true, structByType, enumByType, resourceByType, arrayByType) {
+		success = canonicalCValueType(success)
+		failure = canonicalCValueType(failure)
+		successSupported := supportedTaggedPayload(success, true, structByType, enumByType, resourceByType, arrayByType)
+		failureSupported := supportedTaggedPayload(failure, true, structByType, enumByType, resourceByType, arrayByType)
+		if !successSupported {
+			consider(success)
+			nested, found := candidates[success]
+			successSupported = found && !nested.needsDrop
+		}
+		if !failureSupported {
+			consider(failure)
+			nested, found := candidates[failure]
+			failureSupported = found && !nested.needsDrop
+		}
+		if !successSupported || !failureSupported {
 			return
 		}
 		_, successNeedsDrop := resourceByType[success]
@@ -97,24 +128,60 @@ func prepareTaggedTypes(
 	})
 	result := make([]taggedCType, 0, len(orderedTypes))
 	byType := make(map[hir.Type]int, len(orderedTypes))
-	for _, value := range orderedTypes {
-		candidate := candidates[value]
+	layoutTypes := make(map[hir.Type]layout.Type, len(orderedTypes))
+	layoutState := make(map[hir.Type]uint8, len(orderedTypes))
+	var resolveLayout func(hir.Type) (layout.Type, error)
+	resolveLayout = func(value hir.Type) (layout.Type, error) {
+		if resolved, found := layoutTypes[value]; found {
+			return resolved, nil
+		}
+		if layoutState[value] == 1 {
+			return layout.Type{}, fmt.Errorf("recursive tagged layout dependency involving %q", value)
+		}
+		candidate, found := candidates[value]
+		if !found {
+			return layout.Type{}, fmt.Errorf("missing tagged layout candidate %q", value)
+		}
+		layoutState[value] = 1
 		fields := []layout.Field{{
 			Name: "tag",
 			Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"},
 		}}
 		for index, payload := range candidate.payloads {
-			payloadType, ok := taggedPayloadLayout(payload, structures, structByType, enumerations, enumByType, resources, resourceByType, arrayByType)
+			payload = canonicalCValueType(payload)
+			var payloadType layout.Type
+			var ok bool
+			if _, nested := candidates[payload]; nested {
+				var err error
+				payloadType, err = resolveLayout(payload)
+				if err != nil {
+					return layout.Type{}, err
+				}
+				ok = true
+			} else {
+				payloadType, ok = taggedPayloadLayout(payload, structures, structByType, enumerations, enumByType, resources, resourceByType, arrayByType)
+			}
 			if !ok {
-				return nil, nil, fmt.Errorf("tagged type %q has unsupported payload %q", value, payload)
+				return layout.Type{}, fmt.Errorf("tagged type %q has unsupported payload %q", value, payload)
 			}
 			fields = append(fields, layout.Field{Name: fmt.Sprintf("p_%d", index), Type: payloadType})
 		}
-		computed, err := engine.Of(layout.Type{Kind: layout.KindStruct, Fields: fields})
+		resolved := layout.Type{Kind: layout.KindStruct, Fields: fields}
+		computed, err := engine.Of(resolved)
 		if err != nil {
-			return nil, nil, fmt.Errorf("compute C transport layout for tagged type %q: %w", value, err)
+			return layout.Type{}, fmt.Errorf("compute C transport layout for tagged type %q: %w", value, err)
 		}
 		candidate.layout = computed
+		candidates[value] = candidate
+		layoutState[value] = 2
+		layoutTypes[value] = resolved
+		return resolved, nil
+	}
+	for _, value := range orderedTypes {
+		if _, err := resolveLayout(value); err != nil {
+			return nil, nil, err
+		}
+		candidate := candidates[value]
 		byType[value] = len(result)
 		result = append(result, candidate)
 	}
@@ -323,6 +390,13 @@ func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
 	for _, payload := range tagged.payloads {
 		payload = canonicalCValueType(payload)
 		if _, found := copyScalarTaggedAggregateLayout(payload); found {
+			foundAggregate = true
+			continue
+		}
+		if nested, found := e.taggedByType[payload]; found {
+			if e.taggedTypes[nested].needsDrop {
+				return false
+			}
 			foundAggregate = true
 			continue
 		}

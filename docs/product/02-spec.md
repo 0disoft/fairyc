@@ -581,11 +581,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   whose payload fields are admitted scalars, raw pointers, admitted inert structs, acyclic
   restricted inert user enums, or direct `Option<T>` and `Result<T, E>` transports whose payloads
   are canonical Fairy copy scalars, admitted inert structs, or restricted inert user enums. Those
-  acyclic tags and copy-only tags directly containing the compact `Option<i32>` or
-  `Result<i32, i32>` records are also admitted as private inert-struct or user-enum fields; one
+  acyclic copy-only tag graphs whose leaves are admitted Fairy copy scalars, inert structs, or
+  restricted user enums are also admitted as private inert-struct or user-enum fields; one
   combined graph emits every
-  payload aggregate before its tag and every tag before its by-value containing aggregate. General
-  nested tags and fixed-array-, borrow-, raw-pointer/C-scalar-, or resource-bearing built-in tags inside
+  payload aggregate or inner tag before its dependent tag and every tag before its by-value
+  containing aggregate. Fixed-array-, borrow-, raw-pointer/C-scalar-, recursive, or
+  resource-bearing built-in tags inside
   aggregates, recursive dependencies, and resource-bearing user enums remain C-backend capability
   boundaries.
   `Result<T, UserEnum>` propagation preserves and reconstructs the exact
