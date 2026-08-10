@@ -362,10 +362,20 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		value.features["inert-enum"] = struct{}{}
 	}
 	for _, structure := range structTypes {
+		for _, field := range structure.definition.Fields {
+			value.recordScalarTaggedFeature(field.Type)
+		}
 		if structure.definition.ReprC {
 			value.features["repr-c-struct"] = struct{}{}
 			for _, field := range structure.definition.Fields {
 				value.recordCScalarFeature(field.Type)
+			}
+		}
+	}
+	for _, enumeration := range enumTypes {
+		for _, variant := range enumeration.definition.Variants {
+			for _, field := range variant.Fields {
+				value.recordScalarTaggedFeature(field.Type)
 			}
 		}
 	}
@@ -848,6 +858,15 @@ func (e *emitter) recordCScalarFeature(value hir.Type) {
 	}
 }
 
+func (e *emitter) recordScalarTaggedFeature(value hir.Type) {
+	if isOptionI32(value) {
+		e.features["scalar-option"] = struct{}{}
+	}
+	if isResultI32I32(value) {
+		e.features["scalar-result"] = struct{}{}
+	}
+}
+
 func (e *emitter) inspectEnumTypes() error {
 	for _, enumeration := range e.enumTypes {
 		for _, variant := range enumeration.definition.Variants {
@@ -863,7 +882,8 @@ func (e *emitter) inspectEnumTypes() error {
 
 func (e *emitter) enumPayloadCType(value hir.Type) (string, error) {
 	canonical := canonicalCValueType(value)
-	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeU32 || canonical == hir.TypeUSize || isRawPointer(canonical) {
+	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeU32 || canonical == hir.TypeUSize ||
+		isRawPointer(canonical) || isOptionI32(canonical) || isResultI32I32(canonical) {
 		return e.cValueType(canonical)
 	}
 	if _, structure := e.structByType[canonical]; structure {
@@ -2857,6 +2877,26 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		}
 		output.WriteByte('\n')
 	}
+	_, scalarOption := e.features["scalar-option"]
+	_, copyOption := e.features["copy-option"]
+	_, resourceOption := e.features["resource-option"]
+	if scalarOption || copyOption || resourceOption {
+		output.WriteString("#define FY_OPTION_NONE UINT32_C(0)\n")
+		output.WriteString("#define FY_OPTION_SOME UINT32_C(1)\n")
+	}
+	if scalarOption {
+		output.WriteString("typedef struct { uint32_t tag; int32_t payload; } fy_option_i32;\n\n")
+	}
+	_, scalarResult := e.features["scalar-result"]
+	_, copyResult := e.features["copy-result"]
+	_, resourceResult := e.features["resource-result"]
+	if scalarResult || copyResult || resourceResult {
+		output.WriteString("#define FY_RESULT_OK UINT32_C(0)\n")
+		output.WriteString("#define FY_RESULT_ERR UINT32_C(1)\n")
+	}
+	if scalarResult {
+		output.WriteString("typedef struct { uint32_t tag; int32_t payload; } fy_result_i32_i32;\n\n")
+	}
 	if err := e.emitScalarArrayTypes(output); err != nil {
 		return err
 	}
@@ -2879,26 +2919,6 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 			fmt.Fprintf(output, "_Static_assert(offsetof(fy_resource_%d, f_%d) == UINT64_C(%d), \"fairyc resource %d field %d offset\");\n", index, fieldIndex, field.OffsetBytes, index, fieldIndex)
 		}
 		output.WriteByte('\n')
-	}
-	_, scalarOption := e.features["scalar-option"]
-	_, copyOption := e.features["copy-option"]
-	_, resourceOption := e.features["resource-option"]
-	if scalarOption || copyOption || resourceOption {
-		output.WriteString("#define FY_OPTION_NONE UINT32_C(0)\n")
-		output.WriteString("#define FY_OPTION_SOME UINT32_C(1)\n")
-	}
-	if scalarOption {
-		output.WriteString("typedef struct { uint32_t tag; int32_t payload; } fy_option_i32;\n\n")
-	}
-	_, scalarResult := e.features["scalar-result"]
-	_, copyResult := e.features["copy-result"]
-	_, resourceResult := e.features["resource-result"]
-	if scalarResult || copyResult || resourceResult {
-		output.WriteString("#define FY_RESULT_OK UINT32_C(0)\n")
-		output.WriteString("#define FY_RESULT_ERR UINT32_C(1)\n")
-	}
-	if scalarResult {
-		output.WriteString("typedef struct { uint32_t tag; int32_t payload; } fy_result_i32_i32;\n\n")
 	}
 	if err := e.emitTaggedTypes(output); err != nil {
 		return err

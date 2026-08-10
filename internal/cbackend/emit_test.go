@@ -1933,6 +1933,86 @@ fn i32 main() { return score(Metadata { .size = 42, .kind = .Disk, .read_only = 
 	}
 }
 
+func TestEmitScalarTaggedFieldsInsidePrivateAggregates(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+struct Snapshot {
+    Option<i32> value;
+    Result<i32, i32> adjustment;
+}
+enum Envelope {
+    Missing;
+    Present { Snapshot snapshot; Option<i32> fallback; };
+}
+fn i32 score(Envelope envelope) {
+    return switch (envelope) {
+        case .Missing : { 0 }
+        case .Present { .snapshot = snapshot, .fallback = fallback } : {
+            let i32 base = switch (snapshot.value) {
+                case .some(value) : { value }
+                case .none : { switch (fallback) {
+                    case .some(value) : { value }
+                    case .none : { 0 }
+                } }
+            };
+            switch (snapshot.adjustment) {
+                case .ok(value) : { base + value }
+                case .err(error) : { base - error }
+            }
+        }
+    };
+}
+fn i32 main() {
+    let Snapshot snapshot = Snapshot {
+        .value = .some(40),
+        .adjustment = .ok(2),
+    };
+    return score(.Present { .snapshot = snapshot, .fallback = .none });
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"checked-arithmetic", "inert-enum", "inert-struct", "scalar-call", "scalar-control-flow", "scalar-option", "scalar-result", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"typedef struct { uint32_t tag; int32_t payload; } fy_option_i32;",
+		"typedef struct { uint32_t tag; int32_t payload; } fy_result_i32_i32;",
+		"fy_option_i32 f_0;",
+		"fy_result_i32_i32 f_1;",
+		"fy_option_i32 f_1;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Index(unit.Source, "fy_option_i32;") > strings.Index(unit.Source, "fy_option_i32 f_0;") ||
+		strings.Index(unit.Source, "fy_result_i32_i32;") > strings.Index(unit.Source, "fy_result_i32_i32 f_1;") {
+		t.Fatalf("scalar tagged typedef follows its by-value aggregate field:\n%s", unit.Source)
+	}
+}
+
+func TestEmitRejectsScalarTaggedFieldInsideReprCStruct(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct PublicSnapshot { Option<i32> value; }
+fn i32 main() { return 0; }
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, `struct type "main::PublicSnapshot" field "value" of type "Option<i32>": unsupported struct field type "Option<i32>"`) {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitRestrictedEnumConstructionPayloadAndSwitch(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
