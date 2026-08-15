@@ -26,7 +26,25 @@ source path. MIR entity identity, scope containment, unsafe provenance, and sour
 compare both fields. Private `$pN` qualification may appear in compiler-only entity strings but not
 in source paths.
 
-The current Go prototype implements the source-linked subset exercised by all twelve MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, classic scalar `for` elimination, `Result` propagation branches, checked division, remainder, arithmetic, shift, byte-view, scalar fixed-array, and assertion traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-two isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all ninety-three interpreter v0 cases for scalar and tagged control, classic scalar `for`, direct `i32` minimum constants, scalar fixed-array construction, calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, typed scalar comparisons, borrowed-view length and emptiness metadata, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and left/right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; resource drop-effect contracts are verified while host-capability runtime behavior remains an unfinished gate.
+The current Go prototype implements the source-linked subset exercised by every case in
+`spec/fixtures/mir/manifest-v0.json`: ordered calls, complete-root and tagged-payload moves,
+RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and
+reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and
+`continue`, classic scalar `for` elimination, `Result` propagation branches, checked division,
+remainder, arithmetic, shift, byte-view, scalar fixed-array, and assertion traps, and non-unwinding
+successors. The same verifier passes every named baseline and rejects every isolated mutation in
+`spec/fixtures/mir-verifier/manifest-v0.json` with its single expected `Vxxxx` result. The bounded
+interpreter executes every case in `spec/fixtures/interpreter/manifest-v0.json` for scalar and tagged
+control, classic scalar `for`, direct `i32` minimum constants, scalar fixed-array construction,
+calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and
+indexed stores, typed scalar comparisons, borrowed-view length and emptiness metadata, checked byte
+indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer
+casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations,
+and left/right shift, resource construction and field reads, whole-root and active-payload moves,
+resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested
+and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test
+output, exact trap and boundary outcomes, and the step and output limits; resource drop-effect
+contracts are verified while host-capability runtime behavior remains an unfinished gate.
 
 Scalar fixed arrays lower to an explicit construction operation followed by ordinary local value
 transport. Exact length observation lowers to `array-length`: it keeps the already-evaluated local

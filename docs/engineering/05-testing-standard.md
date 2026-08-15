@@ -5,6 +5,11 @@
 - Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v1.json`, `spec/fixtures/result/manifest-v0.json`, `spec/fixtures/mir/manifest-v0.json`, `spec/fixtures/mir-verifier/manifest-v0.json`, `spec/fixtures/interpreter/manifest-v0.json`, `spec/fixtures/package/manifest-v1.json`, `docs/language/`, `docs/mir/`, `docs/package/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
+Fixture manifests own exact case membership and counts. This testing standard is the only
+maintained prose count ratchet; focused language, MIR, and backend documents refer to the owning
+manifest without copying its current total. Historical ADR receipts and operational execution
+counts remain immutable evidence rather than current fixture inventories.
+
 The Go frontend executes every case in `spec/fixtures/parser/manifest-v0.json` through
 `internal/parserfixture`. Source, lexer, syntax, AST, budget, containment, and manifest behavior
 also have focused unit tests. Documentation-trivia tests require exact lossless subtype retention,
