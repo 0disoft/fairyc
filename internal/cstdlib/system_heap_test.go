@@ -437,11 +437,19 @@ func TestLinuxConsoleSourcesPreserveWriteProgressAndReadEOF(t *testing.T) {
 		"close(descriptor)", "STDOUT_FILENO", "STDERR_FILENO",
 		"pipe(pipe_descriptors)", "memcmp(buffer, payload, sizeof(payload))",
 		"end.read != (size_t)0", "unavailable.status != UINT32_C(2)",
-		"fy_std_stdout_write_i32_v0(INT32_MIN)", "fy_std_stderr_write_i32_v0(INT32_MIN)", "fy_std_stderr_write_usize_v0((uintptr_t)UINT64_MAX)", "memcmp(observed, expected, sizeof(observed))",
+		"fy_std_stdout_write_i32_v0(INT32_MIN)", "fy_std_stderr_write_i32_v0(INT32_MIN)", "fy_std_stderr_write_usize_v0((uintptr_t)UINT64_MAX)",
+		"fy_std_probe_stderr_expected_i32_min_v0[] = \"-2147483648\"",
+		"fy_std_probe_stderr_expected_u32_max_v0[] = \"4294967295\"",
+		"fy_std_probe_stderr_expected_usize_max_v0[] = \"18446744073709551615\"",
+		"results[index].written != fy_std_probe_stderr_expected_v0[index].length",
+		"fy_std_probe_read_expected_v0(", "completed != (ssize_t)0",
 	} {
 		if !strings.Contains(probe, required) {
 			t.Errorf("Linux console probe is missing %q", required)
 		}
+	}
+	if strings.Contains(probe, "0-42-214748364821474836470142949672950118446744073709551615") {
+		t.Error("Linux console probe retains the malformed concatenated stderr oracle")
 	}
 }
 

@@ -225,13 +225,85 @@ static int fy_std_probe_stdout_unsigned_v0(void) {
     return 0;
 }
 
+struct fy_std_probe_expected_write_v0 {
+    const uint8_t *bytes;
+    size_t length;
+};
+
+static const uint8_t fy_std_probe_stderr_expected_i32_zero_v0[] = "0";
+static const uint8_t fy_std_probe_stderr_expected_i32_negative_v0[] = "-42";
+static const uint8_t fy_std_probe_stderr_expected_i32_min_v0[] = "-2147483648";
+static const uint8_t fy_std_probe_stderr_expected_i32_max_v0[] = "2147483647";
+static const uint8_t fy_std_probe_stderr_expected_u32_zero_v0[] = "0";
+static const uint8_t fy_std_probe_stderr_expected_u32_max_v0[] = "4294967295";
+static const uint8_t fy_std_probe_stderr_expected_usize_zero_v0[] = "0";
+static const uint8_t fy_std_probe_stderr_expected_usize_max_v0[] = "18446744073709551615";
+
+static const struct fy_std_probe_expected_write_v0 fy_std_probe_stderr_expected_v0[] = {
+    {
+        fy_std_probe_stderr_expected_i32_zero_v0,
+        sizeof(fy_std_probe_stderr_expected_i32_zero_v0) - 1,
+    },
+    {
+        fy_std_probe_stderr_expected_i32_negative_v0,
+        sizeof(fy_std_probe_stderr_expected_i32_negative_v0) - 1,
+    },
+    {
+        fy_std_probe_stderr_expected_i32_min_v0,
+        sizeof(fy_std_probe_stderr_expected_i32_min_v0) - 1,
+    },
+    {
+        fy_std_probe_stderr_expected_i32_max_v0,
+        sizeof(fy_std_probe_stderr_expected_i32_max_v0) - 1,
+    },
+    {
+        fy_std_probe_stderr_expected_u32_zero_v0,
+        sizeof(fy_std_probe_stderr_expected_u32_zero_v0) - 1,
+    },
+    {
+        fy_std_probe_stderr_expected_u32_max_v0,
+        sizeof(fy_std_probe_stderr_expected_u32_max_v0) - 1,
+    },
+    {
+        fy_std_probe_stderr_expected_usize_zero_v0,
+        sizeof(fy_std_probe_stderr_expected_usize_zero_v0) - 1,
+    },
+    {
+        fy_std_probe_stderr_expected_usize_max_v0,
+        sizeof(fy_std_probe_stderr_expected_usize_max_v0) - 1,
+    },
+};
+
+enum {
+    FY_STD_PROBE_STDERR_EXPECTED_COUNT_V0 =
+        sizeof(fy_std_probe_stderr_expected_v0) /
+        sizeof(fy_std_probe_stderr_expected_v0[0]),
+};
+
+static int fy_std_probe_read_expected_v0(
+    int descriptor,
+    const struct fy_std_probe_expected_write_v0 *expected
+) {
+    uint8_t observed[sizeof(fy_std_probe_stderr_expected_usize_max_v0) - 1];
+    size_t total = (size_t)0;
+    while (total < expected->length) {
+        ssize_t completed;
+        do {
+            completed = read(descriptor, observed + total, expected->length - total);
+        } while (completed < 0 && errno == EINTR);
+        if (completed <= 0) {
+            return 56;
+        }
+        total += (size_t)completed;
+    }
+    return memcmp(observed, expected->bytes, expected->length) == 0 ? 0 : 57;
+}
+
 static int fy_std_probe_stderr_scalar_v0(void) {
-    static const uint8_t expected[] = "0-42-214748364821474836470142949672950118446744073709551615";
-    uint8_t observed[sizeof(expected) - 1];
     int saved_descriptor = dup(STDERR_FILENO);
     int pipe_descriptors[2];
-    size_t total = (size_t)0;
-    struct fy_std_console_write_result_v0 results[8];
+    struct fy_std_console_write_result_v0 results[FY_STD_PROBE_STDERR_EXPECTED_COUNT_V0];
+    int result = 0;
 
     if (saved_descriptor < 0 || pipe(pipe_descriptors) != 0) {
         return 51;
@@ -250,28 +322,41 @@ static int fy_std_probe_stderr_scalar_v0(void) {
     if (dup2(saved_descriptor, STDERR_FILENO) < 0 || close(saved_descriptor) != 0) {
         return 53;
     }
-    for (size_t index = (size_t)0; index < (size_t)8; ++index) {
+    for (
+        size_t index = (size_t)0;
+        index < (size_t)FY_STD_PROBE_STDERR_EXPECTED_COUNT_V0;
+        ++index
+    ) {
         if (results[index].status != UINT32_C(0)) {
-            return 54;
+            result = 54;
+            break;
+        }
+        if (results[index].written != fy_std_probe_stderr_expected_v0[index].length) {
+            result = 55;
+            break;
+        }
+        result = fy_std_probe_read_expected_v0(
+            pipe_descriptors[0],
+            &fy_std_probe_stderr_expected_v0[index]
+        );
+        if (result != 0) {
+            break;
         }
     }
-    if (results[0].written != (size_t)1 || results[1].written != (size_t)3 ||
-        results[2].written != (size_t)11 || results[3].written != (size_t)10 ||
-        results[4].written != (size_t)1 || results[5].written != (size_t)10 ||
-        results[6].written != (size_t)1 || results[7].written != (size_t)20) {
-        return 55;
-    }
-    while (total < sizeof(observed)) {
-        ssize_t completed = read(pipe_descriptors[0], observed + total, sizeof(observed) - total);
-        if (completed <= 0) {
-            return 56;
+    if (result == 0) {
+        uint8_t unexpected;
+        ssize_t completed;
+        do {
+            completed = read(pipe_descriptors[0], &unexpected, (size_t)1);
+        } while (completed < 0 && errno == EINTR);
+        if (completed != (ssize_t)0) {
+            result = 58;
         }
-        total += (size_t)completed;
     }
-    if (close(pipe_descriptors[0]) != 0 || memcmp(observed, expected, sizeof(observed)) != 0) {
-        return 57;
+    if (close(pipe_descriptors[0]) != 0 && result == 0) {
+        result = 59;
     }
-    return 0;
+    return result;
 }
 
 int main(void) {
