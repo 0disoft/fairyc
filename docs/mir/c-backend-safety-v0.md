@@ -377,11 +377,12 @@ report; they do not expand the twenty interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v32` separately records four `foreignCStructResultCallExecutions`, four
+`fairyc.native-c-report/v33` separately records four `foreignCStructResultCallExecutions`, four
 `systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions` and four
-`linuxFileSourceCallExecutions`, and four `linuxConsoleExecutions`. The console count executes the
+`linuxFileSourceCallExecutions`, four `linuxPublicFileExecutions`, and four
+`linuxConsoleExecutions`. The console count executes the
 target-neutral POSIX stdout and stderr adapter's empty, invalid, redirected-write, and unavailable-
 stream states. The SystemHeap count
 crosses an exact generated `void *`/`size_t` block into the real SystemHeap C unit. The Buffer count
@@ -398,6 +399,10 @@ and close helpers; it observes exact counts, repeated-close status, EOF, reconst
 normalized closed state. These are internal transport probes, not public allocator, Buffer, Arena,
 lexical Region, safe text, or stable safe File APIs. The Windows-only ADR 0124 example is a separate
 source-to-native lifecycle proof.
+The public File count separately compiles the bundled SDK through the ordinary product build, lets
+used-symbol linkage select the target-neutral Linux File component, and executes exact create,
+write-all, sync, consuming close, reopen, partial read, and final close behavior under both compilers
+and profiles in isolated temporary working directories.
 Four `standardLibraryBuildSmokeExecutions` additionally require the ordinary product CLI to select
 the text-view C component from an actual called symbol, link it with the scalar runtime, and execute
 the resulting uninstrumented product under both compilers and profiles.

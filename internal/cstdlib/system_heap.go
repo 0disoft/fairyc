@@ -45,6 +45,9 @@ var stage0SystemHeapProbeAllocator string
 //go:embed stage0_linux_file.c
 var stage0LinuxFile string
 
+//go:embed stage0_linux_file_portable.c
+var stage0LinuxFilePortable string
+
 //go:embed stage0_linux_file_probe.c
 var stage0LinuxFileProbe string
 
@@ -59,6 +62,9 @@ var stage0WindowsConsole string
 
 //go:embed stage0_windows_file.c
 var stage0WindowsFile string
+
+//go:embed stage0_windows_file_portable.c
+var stage0WindowsFilePortable string
 
 //go:embed stage0_windows_file_metadata.c
 var stage0WindowsFileMetadata string
@@ -239,7 +245,15 @@ func WindowsMSVCOwnedTextProbeImplementationSource() (string, error) {
 
 // LinuxFileSource returns the target-specific partial-I/O and consuming-close implementation.
 func LinuxFileSource() (string, error) {
-	return canonicalSource("Linux File", stage0LinuxFile)
+	implementation, err := canonicalSource("Linux File", stage0LinuxFile)
+	if err != nil {
+		return "", err
+	}
+	portable, err := canonicalSource("Linux public File adapter", stage0LinuxFilePortable)
+	if err != nil {
+		return "", err
+	}
+	return implementation + "\n" + portable, nil
 }
 
 // LinuxFileProbeSource returns the closed native conformance probe for Linux File.
@@ -268,6 +282,10 @@ func WindowsFileSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	portable, err := canonicalSource("Windows public File adapter", stage0WindowsFilePortable)
+	if err != nil {
+		return "", err
+	}
 	metadata, err := canonicalSource("Windows File metadata", stage0WindowsFileMetadata)
 	if err != nil {
 		return "", err
@@ -280,7 +298,7 @@ func WindowsFileSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return implementation + "\n" + metadata + "\n" + link + "\n" + removeTree, nil
+	return implementation + "\n" + portable + "\n" + metadata + "\n" + link + "\n" + removeTree, nil
 }
 
 // WindowsFileProbeSource returns the closed native conformance probe for Windows File.
@@ -412,7 +430,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 	case cstdlibcontract.ComponentLinuxConsole:
 		return "Linux console", stage0LinuxConsole, nil
 	case cstdlibcontract.ComponentLinuxFile:
-		return "Linux File", stage0LinuxFile, nil
+		source, err := LinuxFileSource()
+		return "Linux File", source, err
 	case cstdlibcontract.ComponentWindowsConsole:
 		return "Windows console", stage0WindowsConsole, nil
 	case cstdlibcontract.ComponentWindowsFile:

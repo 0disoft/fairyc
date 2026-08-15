@@ -18,6 +18,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/layoutfixture"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -40,6 +41,56 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 	}
 	if strings.Contains(stdout.String(), "fy_runtime_trace_drop") {
 		t.Fatal("product emit-c output contains native conformance instrumentation")
+	}
+}
+
+func TestPublicFileBuildSmokeReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(publicFileBuildSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	definition, err := sdkstdlib.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	arguments := []string{"experimental", "emit-c", "main.fy"}
+	for _, additional := range definition.Sources {
+		path := filepath.Join(root, filepath.FromSlash(additional.Path))
+		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, additional.Bytes, 0o600); err != nil {
+			t.Fatal(err)
+		}
+		arguments = append(arguments, "--source", additional.Path)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run(arguments, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("public File build smoke C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range []string{
+		"fy_std_file_open_v0(",
+		"fy_std_file_read_v0(",
+		"fy_std_file_write_all_v0(",
+		"fy_std_file_sync_v0(",
+		"fy_std_file_close_v0(",
+		"fy_std_file_drop_v0(",
+	} {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("public File build smoke C emission is missing %q", required)
+		}
+	}
+	for _, forbidden := range []string{
+		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
+		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
+		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
+	} {
+		if strings.Contains(stdout.String(), forbidden) {
+			t.Errorf("public File build smoke C emission retains target-specific symbol %q", forbidden)
+		}
 	}
 }
 
@@ -423,7 +474,7 @@ func TestUTF8StringLiteralSourceCallSmokeReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v32" {
+	if reportSchemaVersion != "fairyc.native-c-report/v33" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -444,6 +495,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		LinuxConsoleExecutions:              4,
 		LinuxFileExecutions:                 4,
 		LinuxFileSourceCallExecutions:       4,
+		LinuxPublicFileExecutions:           4,
 		ForeignCallExecutions:               4,
 		ForeignCIntCallExecutions:           4,
 		ForeignCLongCallExecutions:          4,
@@ -467,7 +519,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v32"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v33"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":116`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -488,6 +540,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"linuxConsoleExecutions":4`) ||
 		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) ||
 		!strings.Contains(string(encoded), `"linuxFileSourceCallExecutions":4`) ||
+		!strings.Contains(string(encoded), `"linuxPublicFileExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCIntCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCLongCallExecutions":4`) ||

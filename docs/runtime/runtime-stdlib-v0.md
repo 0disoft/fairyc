@@ -75,7 +75,7 @@ The initial library surface is:
 std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer with fallible bulk and single-byte append
 std::text   String, CStr, CString, allocation-free UTF-8 validation and immutable text-byte views, and zero-copy Buffer-to-String conversion
-std::fs     Windows MSVC File ownership, partial/exact byte I/O, owned-Buffer append/read-through-EOF, file/directory create/open/remove and file rename, no-replace hard-link creation, existing-file updates, length changes, logical and allocated size, kind, read-only observation and mutation, hard-link count, identity, absolute positioning, sync, and close
+std::fs     target-neutral File open/read/write/sync/close core plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, positioning, and metadata
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
@@ -83,8 +83,8 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.48` exports
-the accepted public `std::alloc`, `std::bytes`, `std::text`, Windows MSVC `std::fs`, console I/O,
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.49` exports
+the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, Windows MSVC `std::fs` extensions, console I/O,
 scalar output, and effect-free `std::process` argument slices recorded by ADRs 0205 through 0311.
 The current Windows filesystem slice includes owned File I/O and metadata, bounded path mutation,
 recursive parent creation, and ADR 0311's bounded recursive directory removal with exact completed-
@@ -345,7 +345,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.48` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.49` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -464,7 +464,7 @@ respectively no echo, the exact short echo, and only the first eight bytes. A se
 compiler repeats the locked run with short input plus build and artifact execution. Stable run
 attaches input only after successful compilation and image inspection and does not pre-read or retain
 it.
-Linux Clang/GCC low/optimized executions are configured through the native report v32
+Linux Clang/GCC low/optimized executions are configured through the native report v33
 `linuxConsoleExecutions` field and exercise stdin, stdout, stderr, and the full-domain `i32` decimal
 boundaries, but remain unobserved on this
 Windows host.
@@ -546,7 +546,8 @@ new source should use `std::io::write`.
 
 ## Linux `File` v0
 
-The initial API is explicitly tied to the `x86_64-linux-gnu` target and accepts `ref CStr`, not a purported portable UTF-8 path.
+The C implementation is explicitly tied to `x86_64-linux-gnu`; the shared source API accepts
+`ref CStr`, not a purported portable filesystem-path abstraction.
 
 The minimum operations are fallible open, partial read, partial write, `write_all`, `sync`, and consuming `close`. `write` returns the actual byte count. A `write_all` error reports the number already written.
 
@@ -555,23 +556,29 @@ On the Linux v0 profile, `close(self)` consumes ownership on success and failure
 The provisional Linux C helper now implements bounded C-string paths, closed open options, partial
 read/write counts, progress-reporting `write_all`, `fsync`, consuming close, and silent best-effort
 drop. Close clears ownership before one kernel call, including the failure path. Its native probe
-uses three-byte reads and a forced `EBADF` close failure; four compiler/profile runs are configured
-but unobserved.
+uses three-byte reads and a forced `EBADF` close failure across the configured compiler/profile
+matrix.
 
 A separate generated-Fairy source probe crosses exact operation-result, File, and open-option
 records into the real C unit. It opens a prepared file for truncating writes, writes all nine
 `FairyFile` bytes, synchronizes, consumes close, requires a second close to report the closed status,
 reopens for reading, performs three three-byte reads, observes EOF with count zero, closes, and
 requires the reconstructed bytes and normalized closed record. The companion C code owns only
-bounded inputs and observations; it does not replace the production file operations. Public safe
-File ownership, source effects, typed error resources, and hosted evidence remain disconnected.
-Product build linkage is now automatic only for the five admitted raw File calls; safe source
-construction and effect/error semantics remain disconnected.
+bounded inputs and observations; it does not replace the production file operations.
+
+File ownership, source effects, and typed error resources now connect through ADR 0331's seven
+target-neutral private symbols. The public create/open family, partial `read`/`write`, `write_all`,
+`sync`, consuming `close`, and best-effort drop select this component automatically. Linux validates
+a nonempty terminator within 4096 storage bytes, supports exclusive create and kernel append,
+creates with mode `0666` subject to umask, and stores descriptor-plus-one in private pointer-width
+storage. It performs ordinary POSIX path lookup; containment, no-follow authorization, path
+mutation, metadata, seeking, exact reads, Buffer growth, and Unicode normalization remain outside
+the Linux public slice. Native report v33 requires four generated product executions returning 42.
 
 ## Windows `File` C slice v0
 
-The provisional `x86_64-windows-msvc` component stores one `HANDLE` plus an explicit open byte
-inline and normalizes the closed state to `{ NULL, 0 }`. It performs no hidden allocation. Open
+The provisional `x86_64-windows-msvc` component stores one `HANDLE` token plus an explicit open byte
+inline and normalizes the closed state to `{ 0, 0 }`. It performs no hidden allocation. Open
 accepts a bounded NUL-terminated ASCII byte path and closed read/write/create/truncate options,
 converts the path into a stack-owned `WCHAR[4096]`, and calls `CreateFileW`. Empty paths, non-ASCII
 bytes, missing termination within the bound, invalid option combinations, and non-closed output
@@ -823,9 +830,10 @@ same-handle size, allocated-size, hard-link-count, kind, and read-only operation
 first error in that order. The result allocates nothing, moves no cursor or owner, adds no target
 symbol, and is not an atomic snapshot.
 
-The public slice remains specific to
-`x86_64-windows-msvc`; it is not a portable Unicode path, Linux public linkage, general
-mutable-slice operation set, retained-pointer contract, or public resource-layout contract.
+ADR 0331 makes the create/open family, partial read/write, write-all, sync, close, and drop portable
+across the two implemented targets. The remaining path, metadata, seek, exact-read, and Buffer APIs
+stay specific to `x86_64-windows-msvc`; none of the slice is a portable Unicode path, retained-
+pointer contract, or public resource-layout contract.
 
 ## Stage 0 product linkage
 

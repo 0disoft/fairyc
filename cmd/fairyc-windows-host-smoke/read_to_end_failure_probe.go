@@ -153,10 +153,10 @@ func generatedFairyReadToEndFailureProbeSource(generated string) (string, error)
 		return "", fmt.Errorf("generated-Fairy read_to_end failure C must contain a main wrapper")
 	}
 	for _, required := range []string{
-		"fy_std_windows_file_open_v0",
+		"fy_std_file_open_v0",
 		"fy_std_windows_file_read_append_v0",
 		"fy_std_windows_file_position_v0",
-		"fy_std_windows_file_close_v0",
+		"fy_std_file_close_v0",
 		"fy_std_buffer_initialize_v0",
 		"fy_std_buffer_drop_v0",
 	} {

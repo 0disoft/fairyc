@@ -399,7 +399,14 @@ func TestLinuxFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, required := range []string{"fy_std_linux_file_read_v0", "fy_std_linux_file_write_v0", "fy_std_linux_file_write_all_v0", "file->descriptor = -1", "(void)close(descriptor)"} {
+	for _, required := range []string{
+		"fy_std_linux_file_read_v0", "fy_std_linux_file_write_v0",
+		"fy_std_linux_file_write_all_v0", "file->descriptor = -1", "(void)close(descriptor)",
+		"fy_std_file_open_v0", "fy_std_file_read_v0", "fy_std_file_write_v0",
+		"fy_std_file_write_all_v0", "fy_std_file_sync_v0", "fy_std_file_close_v0",
+		"fy_std_file_drop_v0", "O_EXCL", "O_APPEND", "(mode_t)0666",
+		"memcpy(file, storage, sizeof *file)",
+	} {
 		if !strings.Contains(implementation, required) {
 			t.Errorf("Linux File implementation is missing %q", required)
 		}

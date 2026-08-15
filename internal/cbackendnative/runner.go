@@ -26,13 +26,14 @@ import (
 	"github.com/0disoft/fairyc/internal/foreignstructprobe"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/layoutfixture"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v32"
+	reportSchemaVersion = "fairyc.native-c-report/v33"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -61,6 +62,73 @@ fn i32 main() {
 	return switch (increment(.ok(token))) {
 		case .ok(token) : { token.value }
 		case .err(error) : { -error }
+    };
+}
+`
+
+const publicFileBuildSmokeSource = `module main;
+
+import std::fs as fs;
+
+@effects(filesystem)
+fn i32 write_then_close(fs::File input) {
+    var fs::File file = input;
+    let ref u8[] payload = b"Fairy C";
+    let i32 write_code = switch (fs::write_all(ref mut file, payload)) {
+        case .ok(written) : { if (written == 7) { 0 } else { 1 } }
+        case .err(_) : { 2 }
+    };
+    if (write_code != 0) {
+        return write_code;
+    }
+    let i32 sync_code = switch (fs::sync(ref mut file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 3 }
+    };
+    if (sync_code != 0) {
+        return sync_code;
+    }
+    return switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 4 }
+    };
+}
+
+@effects(filesystem)
+fn i32 read_then_close(fs::File input) {
+    var fs::File file = input;
+    var u8[7] buffer = [0, 0, 0, 0, 0, 0, 0];
+    let i32 read_code = switch (fs::read(ref mut file, ref mut buffer)) {
+        case .ok(read) : {
+            if (read == 7 &&
+                buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
+                buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 32 &&
+                buffer[6] == 67) { 0 } else { 5 }
+        }
+        case .err(_) : { 6 }
+    };
+    if (read_code != 0) {
+        return read_code;
+    }
+    return switch (fs::close(file)) {
+        case .ok(_) : { 42 }
+        case .err(_) : { 7 }
+    };
+}
+
+@effects(filesystem)
+fn i32 main() {
+    let ref CStr path = c"fairyc-public-file-smoke.tmp";
+    let i32 write_code = switch (fs::create_truncate(path)) {
+        case .ok(file) : { write_then_close(file) }
+        case .err(_) : { 8 }
+    };
+    if (write_code != 0) {
+        return write_code;
+    }
+    return switch (fs::open_read(path)) {
+        case .ok(file) : { read_then_close(file) }
+        case .err(_) : { 9 }
     };
 }
 `
@@ -1506,6 +1574,7 @@ type Report struct {
 	LinuxConsoleExecutions              int        `json:"linuxConsoleExecutions"`
 	LinuxFileExecutions                 int        `json:"linuxFileExecutions"`
 	LinuxFileSourceCallExecutions       int        `json:"linuxFileSourceCallExecutions"`
+	LinuxPublicFileExecutions           int        `json:"linuxPublicFileExecutions"`
 	ForeignCallExecutions               int        `json:"foreignCallExecutions"`
 	ForeignCIntCallExecutions           int        `json:"foreignCIntCallExecutions"`
 	ForeignCLongCallExecutions          int        `json:"foreignCLongCallExecutions"`
@@ -1881,6 +1950,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.StandardLibraryBuildSmokeExecutions = standardLibraryBuildSmoke
+	publicFileBuildSmoke, err := runPublicFileBuildSmoke(temporaryRoot)
+	if err != nil {
+		return Report{}, err
+	}
+	report.LinuxPublicFileExecutions = publicFileBuildSmoke
 	byteStringLiteralBuildSmoke, err := runByteStringLiteralBuildSmoke(temporaryRoot)
 	if err != nil {
 		return Report{}, err
@@ -2352,6 +2426,19 @@ func runStandardLibraryBuildSmoke(temporaryRoot string) (int, error) {
 	return runBuildSourceSmoke(temporaryRoot, "stdlib-build-smoke", textValidationSourceCallSmokeSource)
 }
 
+func runPublicFileBuildSmoke(temporaryRoot string) (int, error) {
+	definition, err := sdkstdlib.Load()
+	if err != nil {
+		return 0, fmt.Errorf("load compiler-bundled standard library: %w", err)
+	}
+	return runBuildSourceSmokeWithAdditionalSources(
+		temporaryRoot,
+		"public-file-build-smoke",
+		publicFileBuildSmokeSource,
+		definition.Sources,
+	)
+}
+
 func runByteStringLiteralBuildSmoke(temporaryRoot string) (int, error) {
 	return runBuildSourceSmoke(temporaryRoot, "byte-string-literal-build-smoke", byteStringLiteralBuildSmokeSource)
 }
@@ -2365,6 +2452,15 @@ func runCStringLiteralBuildSmoke(temporaryRoot string) (int, error) {
 }
 
 func runBuildSourceSmoke(temporaryRoot, smokeID, source string) (int, error) {
+	return runBuildSourceSmokeWithAdditionalSources(temporaryRoot, smokeID, source, nil)
+}
+
+func runBuildSourceSmokeWithAdditionalSources(
+	temporaryRoot,
+	smokeID,
+	source string,
+	additionalSources []sdkstdlib.Source,
+) (int, error) {
 	if smokeID == "" || source == "" {
 		return 0, fmt.Errorf("product build smoke identity and source must be non-empty")
 	}
@@ -2375,18 +2471,31 @@ func runBuildSourceSmoke(temporaryRoot, smokeID, source string) (int, error) {
 	if err := os.WriteFile(filepath.Join(sourceRoot, "main.fy"), []byte(source), 0o600); err != nil {
 		return 0, fmt.Errorf("write %s source: %w", smokeID, err)
 	}
+	for _, additional := range additionalSources {
+		path := filepath.Join(sourceRoot, filepath.FromSlash(additional.Path))
+		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+			return 0, fmt.Errorf("create %s additional-source directory: %w", smokeID, err)
+		}
+		if err := os.WriteFile(path, additional.Bytes, 0o600); err != nil {
+			return 0, fmt.Errorf("write %s additional source %s: %w", smokeID, additional.Path, err)
+		}
+	}
 	executions := 0
 	for _, compiler := range []string{"clang", "gcc"} {
 		for _, profile := range nativeProfiles {
 			output := fmt.Sprintf("build/smoke-%s-%s", compiler, profile.Name)
 			var stdout bytes.Buffer
 			var stderr bytes.Buffer
-			code := cli.Run([]string{
-				"experimental", "build", "main.fy",
+			arguments := []string{"experimental", "build", "main.fy"}
+			for _, additional := range additionalSources {
+				arguments = append(arguments, "--source", additional.Path)
+			}
+			arguments = append(arguments,
 				"--cc", compiler,
 				"--profile", profile.Name,
 				"--output", output,
-			}, sourceRoot, &stdout, &stderr)
+			)
+			code := cli.Run(arguments, sourceRoot, &stdout, &stderr)
 			if code != cli.ExitSuccess {
 				return 0, fmt.Errorf("%s with %s/%s failed with code %d: %s", smokeID, compiler, profile.Name, code, strings.TrimSpace(stderr.String()))
 			}
@@ -2394,7 +2503,11 @@ func runBuildSourceSmoke(temporaryRoot, smokeID, source string) (int, error) {
 			if stdout.String() != expectedReceipt || stderr.Len() != 0 {
 				return 0, fmt.Errorf("%s with %s/%s produced stdout %q and stderr %q", smokeID, compiler, profile.Name, stdout.String(), stderr.String())
 			}
-			if err := execute(smokeID, filepath.Join(sourceRoot, filepath.FromSlash(output)), 42, nil); err != nil {
+			runRoot := filepath.Join(sourceRoot, fmt.Sprintf("run-%s-%s", compiler, profile.Name))
+			if err := os.Mkdir(runRoot, 0o700); err != nil {
+				return 0, fmt.Errorf("create %s execution root for %s/%s: %w", smokeID, compiler, profile.Name, err)
+			}
+			if err := executeInDirectory(smokeID, filepath.Join(sourceRoot, filepath.FromSlash(output)), runRoot, 42, nil); err != nil {
 				return 0, fmt.Errorf("%s with %s/%s: %w", smokeID, compiler, profile.Name, err)
 			}
 			executions++
@@ -2416,7 +2529,11 @@ func resolveToolchains() ([]cdriver.Toolchain, error) {
 }
 
 func execute(caseID, executablePath string, expectedExit int, expectedDrops []uint32) error {
-	result, err := executeProcess(executablePath, nil)
+	return executeInDirectory(caseID, executablePath, "", expectedExit, expectedDrops)
+}
+
+func executeInDirectory(caseID, executablePath, workingDirectory string, expectedExit int, expectedDrops []uint32) error {
+	result, err := executeProcessInDirectory(executablePath, workingDirectory, nil)
 	if err != nil {
 		return err
 	}
@@ -2461,10 +2578,17 @@ type processResult struct {
 }
 
 func executeProcess(executablePath string, environment []string) (processResult, error) {
+	return executeProcessInDirectory(executablePath, "", environment)
+}
+
+func executeProcessInDirectory(executablePath, workingDirectory string, environment []string) (processResult, error) {
 	contextValue, cancel := context.WithTimeout(context.Background(), executionTimeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, executablePath)
 	command.Stdin = nil
+	if workingDirectory != "" {
+		command.Dir = workingDirectory
+	}
 	if environment != nil {
 		command.Env = environment
 	}

@@ -103,6 +103,33 @@ func TestTargetNeutralConsoleIOSelectsOneTargetOwnedComponent(t *testing.T) {
 	}
 }
 
+func TestTargetNeutralFileCoreSelectsOneTargetOwnedComponent(t *testing.T) {
+	t.Parallel()
+	symbols := []string{
+		"fy_std_file_open_v0",
+		"fy_std_file_read_v0",
+		"fy_std_file_write_v0",
+		"fy_std_file_write_all_v0",
+		"fy_std_file_sync_v0",
+		"fy_std_file_close_v0",
+		"fy_std_file_drop_v0",
+	}
+	for _, symbol := range symbols {
+		if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664LinuxGNU) ||
+			!AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+			t.Errorf("target-neutral File symbol %q is not admitted for both implemented targets", symbol)
+		}
+	}
+	linux, err := ComponentsForSymbols(symbols)
+	if err != nil || !slices.Equal(linux, []Component{ComponentLinuxFile}) {
+		t.Fatalf("Linux components = %v, %v", linux, err)
+	}
+	windows, err := WindowsMSVCComponentsForSymbols(symbols)
+	if err != nil || !slices.Equal(windows, []Component{ComponentWindowsFile}) {
+		t.Fatalf("Windows components = %v, %v", windows, err)
+	}
+}
+
 func TestScalarOutputExcludesBoolRawSymbol(t *testing.T) {
 	t.Parallel()
 	for _, symbol := range []string{"fy_std_stdout_write_bool_v0", "fy_std_stderr_write_bool_v0"} {

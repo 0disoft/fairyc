@@ -17,6 +17,9 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, required := range []string{
+		"fy_std_file_open_v0", "fy_std_file_read_v0", "fy_std_file_write_v0",
+		"fy_std_file_write_all_v0", "fy_std_file_sync_v0", "fy_std_file_close_v0",
+		"fy_std_file_drop_v0",
 		"CreateFileW", "ReadFile", "WriteFile", "GetFileSizeEx", "GetFileInformationByHandleEx", "FileBasicInfo", "FileStandardInfo", "FileIdInfo", "SetFileInformationByHandle", "FileEndOfFileInfo", "SetFilePointerEx", "FILE_BEGIN", "FILE_CURRENT", "FILE_END", "FlushFileBuffers", "CloseHandle",
 		"fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0",
 		"fy_std_windows_file_read_only_v0", "fy_std_windows_file_set_readonly_v0", "FILE_ATTRIBUTE_READONLY",

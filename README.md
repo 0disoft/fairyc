@@ -425,6 +425,11 @@ hard-link count, kind, and read-only state sequentially through the existing sam
 the compiler now emits enum-containing private structs in aggregate dependency order without a new
 runtime symbol or atomic-snapshot promise.
 
+ADR 0331 moves the SDK to `0.0.0-stage0.49` and makes the File open/read/write/sync/close core
+target-neutral across Linux GNU and Windows MSVC. The closed linker selects a descriptor or HANDLE
+adapter behind seven private common symbols; Windows-only path, seek, exact-read, Buffer-read, and
+metadata extensions remain explicitly target-bound.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

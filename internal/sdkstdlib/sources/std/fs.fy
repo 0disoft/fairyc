@@ -114,10 +114,10 @@ pub struct FileMetadata {
     bool read_only;
 }
 
-/// Owns one Windows file handle and closes it automatically at scope exit.
+/// Owns one native file handle and closes it automatically at scope exit.
 @effects(filesystem)
 pub resource File {
-    ptr mut void handle;
+    usize handle;
     u8 open;
 
     cleanup {
@@ -128,7 +128,7 @@ pub resource File {
 }
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_open_v0")
+@link_name("fy_std_file_open_v0")
 unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_options options, ptr mut void output) ;
 
 @effects(filesystem)
@@ -168,7 +168,7 @@ unsafe extern C fn raw_file_result file_hard_link_raw(ptr u8 source, ptr u8 dest
 unsafe extern C fn raw_file_result file_copy_bytes_raw(ptr u8 source, ptr u8 destination) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_read_v0")
+@link_name("fy_std_file_read_v0")
 unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
 @effects(filesystem)
@@ -232,23 +232,23 @@ unsafe extern C fn raw_file_position_result file_seek_current_raw(ptr mut void f
 unsafe extern C fn raw_file_position_result file_seek_end_raw(ptr mut void file, i32 offset) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_write_v0")
+@link_name("fy_std_file_write_v0")
 unsafe extern C fn raw_file_result file_write_raw(ptr mut void file, ptr u8 data, usize length) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_write_all_v0")
+@link_name("fy_std_file_write_all_v0")
 unsafe extern C fn raw_file_result file_write_all_raw(ptr mut void file, ptr u8 data, usize length) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_sync_v0")
+@link_name("fy_std_file_sync_v0")
 unsafe extern C fn raw_file_result file_sync_raw(ptr mut void file) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_close_v0")
+@link_name("fy_std_file_close_v0")
 unsafe extern C fn raw_file_result file_close_raw(ptr mut void file) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_drop_v0")
+@link_name("fy_std_file_drop_v0")
 unsafe extern C fn u32 file_drop_raw(ptr mut void file) ;
 
 fn FileError file_error(raw_file_result result) {
@@ -306,7 +306,7 @@ fn i32 discard_closed(File file) {
 
 @effects(filesystem)
 fn Result<File, FileError> open_with(ref CStr path, raw_open_options options) {
-    var File file = File { .handle = null, .open = 0 };
+    var File file = File { .handle = 0, .open = 0 };
     let raw_file_result result = unsafe {
         file_open_raw(
             path as ptr u8,

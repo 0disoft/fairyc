@@ -858,8 +858,13 @@ ADR 0319 closes the sequential compound-metadata gap in SDK `0.0.0-stage0.48` wi
 `FileMetadata` and `metadata(ref File)`. One aggregate dependency graph now lays out and emits
 enum-containing private structs before their users; the 44th C-emission fixture freezes construct,
 field-read, and switch transport. Existing low/optimized generated-Fairy filesystem executions use
-the five existing raw symbols. Atomic snapshots, timestamps, ACLs, and Linux public linkage remain
-later gates.
+the five existing raw symbols. Atomic snapshots, timestamps, and ACLs remain later gates.
+
+ADR 0331 closes the public Linux File-core gap in SDK `0.0.0-stage0.49`. Seven target-neutral
+private symbols now select the Linux descriptor or Windows HANDLE adapter for the create/open
+family, partial read/write, write-all, sync, consuming close, and drop. Native report v33 adds four
+ordinary generated-Fairy Linux product executions; portable Unicode paths, containment, metadata,
+seek, exact-read, Buffer-read, and path mutation remain later gates.
 
 ADR 0323 extends the same aggregate graph to acyclic inert enums inside user-enum payloads without
 changing language, SDK, runtime ABI, or public APIs. The 46th C-emission fixture freezes nested
