@@ -20,11 +20,12 @@ pin a runner image or toolchain baseline and does not promote either target.
   `GOPROXY=off`, reuses only the user's checksum-verified Go module download cache, and retains its
   build and temporary caches under the repository-local ignored `.cache/` root.
 - `go vet -mod=readonly ./...` runs before `go test -mod=readonly -count=1 ./...`.
-- After those ordinary checks, only the Windows matrix entry runs
+- After those ordinary checks, only the Windows matrix entry runs the default correctness mode of
   `cmd/fairyc-windows-host-smoke`. The command discovers the hosted runner's local x64 MSVC and
   Windows SDK without WSL, exercises single- and multi-source target-neutral paths plus the declared-target path, safe File and owned-text source lifecycles, layout, ABI,
   raw owned-text and Arena allocation-failure preservation, PE/COFF, and unwind probes, and retains no executable,
-  object, generated C, PDB, or report artifact.
+  object, generated C, PDB, or report artifact. Process-cache, build-time, Atlas scaling, and
+  retained-heap measurements are not part of the push or pull-request gate.
 - The workflow uploads no build artifact and performs no deploy, release, publication, or write to
   repository state.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
@@ -111,6 +112,16 @@ pin a runner image or toolchain baseline and does not promote either target.
   C component from the actual called symbol, supply no companion source, link the scalar runtime,
   and execute exit 42 under both compilers and profiles.
 
+## Scheduled and manual measurements
+
+`.github/workflows/measurements.yml` owns the non-blocking Windows measurement lane. It runs weekly
+and through `workflow_dispatch`, not for pushes or pull requests. The lane invokes
+`cmd/fairyc-windows-host-smoke --with-measurements`, so the existing correctness setup establishes
+the compiler, source-root, MSVC, and workspace identities before collecting process-cache,
+workspace-build, persistent-cache, workspace-session, Atlas process/scaling, and retained-heap
+receipts. Reports remain bounded job-log output; the workflow uploads no artifact and has no
+repository write, deploy, release, or publication permission.
+
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally
 isolate ignored Go caches and disable module network access for local agent verification. The Linux
@@ -118,7 +129,7 @@ native intent remains unavailable on the current Windows host and no WSL path is
 `fairyc_windows_host_smoke` intent uses a bounded temporary source root to exercise both product
 paths through locally discovered x64 MSVC: `build-host` must produce a bounded PE that directly
 returns 42, and `run-host` must independently return 42 before every temporary artifact is removed.
-The same smoke invokes `build-target` for `x86_64-windows-msvc` on the checked-in
+The default correctness smoke invokes `build-target` for `x86_64-windows-msvc` on the checked-in
 `examples/windows_target/main.fy`. Target selection happens before C emission, the generated unit
 uses the LLP64 profile and four-byte `c::long`, calls the real project-owned
 SystemHeap, Buffer, Arena/Region, String/CString/CStr, and UTF-8 C components, constructs one
@@ -184,7 +195,8 @@ separate compiler process to compile and execute `examples/windows_quickstart/ma
 validate temporary PE and unwind data, require the exact target-labelled native-result receipt for
 42, retain no artifact, and use no WSL. The quickstart iterates a byte view with checked `usize`
 arithmetic, while separate low and optimized cases require maximum-`usize` addition to trap.
-That same standalone executable invokes `experimental check-workspace-cache` in nine cold/warm
+With `--with-measurements`, that same standalone executable invokes
+`experimental check-workspace-cache` in nine cold/warm
 pairs with a fresh explicit cache directory per pair and mandatory limits. Each invocation is a new
 process. Cold receipts must report two misses, lowering, and two retained stable records; paired warm
 receipts must retain the same executable build identity and report two verified hits with no

@@ -62,6 +62,20 @@ type hostSmokeReceipt struct {
 	toolchainVersion               string
 }
 
+func reportHostCorrectnessSuccess(receipt hostSmokeReceipt) {
+	fmt.Printf(
+		"Windows host correctness smoke passed: %d target builds, %d workspace builds, %d workspace runs, %d direct target runs, %d native File probes, and %d ABI/layout cases with msvc %s\n",
+		receipt.targetBuildExecutions,
+		receipt.workspaceBuildExecutions,
+		receipt.workspaceRunExecutions,
+		receipt.targetRunExecutions,
+		receipt.windowsFileExecutions,
+		receipt.abiCases+receipt.layoutCases,
+		receipt.toolchainVersion,
+	)
+	fmt.Println("Windows host measurements skipped; use --with-measurements for the scheduled/manual measurement lane")
+}
+
 func reportHostSmokeSuccess(receipt hostSmokeReceipt) {
 	inspectedPEImages := 1 + receipt.targetBuildExecutions + receipt.workspaceBuildExecutions + receipt.windowsFileSourceExecutions + receipt.ownedTextSourceExecutions + receipt.targetRunExecutions + receipt.workspaceRunExecutions + receipt.targetExecExecutions + receipt.windowsFileExecutions + receipt.bufferProbeExecutions + receipt.ownedTextProbeExecutions + receipt.arenaProbeExecutions + receipt.regionFailureProbeImages + receipt.bufferFailureProbeImages + receipt.readAppendFailureProbeImages + receipt.readToEndFailureProbeImages + receipt.stringAppendFailureProbeImages + receipt.cstringFailureProbeImages + receipt.stringCopyFailureProbeImages + receipt.stringFromBufferProbeImages + receipt.processArgsBuildImages + receipt.processArgsDecodeImages + receipt.nativeTestArgsExecutions + receipt.nativeTestStdinExecutions + receipt.nativeTestOutputExecutions + receipt.nativeTestTimeoutExecutions + receipt.layoutExecutions + receipt.abiExecutions + receipt.relocationExecutions + receipt.weakSearchExecutions + receipt.archiveExecutions + receipt.structResultExecutions + receipt.cIntCastExecutions + receipt.unwindExecutions
 	fmt.Printf("Generated-Fairy Region failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering payload-allocation failure, node-allocation rollback, exact status 1, lexical reset, automatic Arena drop, and zero retained probe allocations\n", receipt.regionFailureCases, receipt.regionFailureProbeImages)

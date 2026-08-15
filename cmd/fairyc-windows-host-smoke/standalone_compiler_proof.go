@@ -22,9 +22,6 @@ func runStandaloneCompiler(
 	clockResolution int64,
 	atlasCallProcessMeasurement *buildmeasure.AtlasCallProcessReport,
 ) (int64, error) {
-	if atlasCallProcessMeasurement == nil {
-		return 0, fmt.Errorf("standalone compiler requires an Atlas call process measurement destination")
-	}
 	temporaryRoot, err := os.MkdirTemp("", "fairyc-standalone-compiler-smoke-")
 	if err != nil {
 		return 0, fmt.Errorf("create standalone compiler directory: %w", err)
@@ -344,11 +341,13 @@ fn void directory_excluded_fails() { assert(false); }
 		checkStdout != "check ok: 2 instance(s), 2 source file(s), 2 MIR function(s), lock verified\n" {
 		return 0, fmt.Errorf("standalone compiler stable check returned code %d, stdout %q, stderr %q", checkCode, checkStdout, checkStderr)
 	}
-	measurement, err := measureStandaloneAtlasCallProcesses(sourceRoot, executablePath, clockResolution)
-	if err != nil {
-		return 0, fmt.Errorf("measure standalone Atlas calls: %w", err)
+	if atlasCallProcessMeasurement != nil {
+		measurement, err := measureStandaloneAtlasCallProcesses(sourceRoot, executablePath, clockResolution)
+		if err != nil {
+			return 0, fmt.Errorf("measure standalone Atlas calls: %w", err)
+		}
+		*atlasCallProcessMeasurement = measurement
 	}
-	*atlasCallProcessMeasurement = measurement
 	stableBuildCode, stableBuildStdout, stableBuildStderr, err := runStandaloneCommand(
 		sourceRoot,
 		executablePath,
@@ -607,34 +606,36 @@ fn void directory_excluded_fails() { assert(false); }
 	if workspaceCode != cli.ExitSuccess || workspaceStderr != "" || !strings.HasPrefix(workspaceStdout, "native workspace result: 42 (x86_64-windows-msvc, msvc ") {
 		return 0, fmt.Errorf("standalone compiler run-workspace returned code %d, stdout %q, stderr %q", workspaceCode, workspaceStdout, workspaceStderr)
 	}
-	persistentCacheMeasurement, err := measureStandaloneWorkspaceCache(executablePath, sourceRoot, clockResolution)
-	if err != nil {
-		return 0, err
-	}
-	persistentCacheMeasurementJSON, err := buildmeasure.MarshalPersistentCacheProcess(persistentCacheMeasurement)
-	if err != nil {
-		return 0, fmt.Errorf("encode standalone persistent-cache process measurement: %w", err)
-	}
-	fmt.Printf("Fairy C persistent-cache process measurement: %s\n", persistentCacheMeasurementJSON)
-	persistentCacheGrowth, err := measureStandaloneWorkspaceCacheGrowth(executablePath, sourceRoot)
-	if err != nil {
-		return 0, err
-	}
-	persistentCacheGrowthJSON, err := buildmeasure.MarshalPersistentCacheGrowth(persistentCacheGrowth)
-	if err != nil {
-		return 0, fmt.Errorf("encode standalone persistent-cache growth measurement: %w", err)
-	}
-	fmt.Printf("Fairy C persistent-cache growth measurement: %s\n", persistentCacheGrowthJSON)
+	if atlasCallProcessMeasurement != nil {
+		persistentCacheMeasurement, err := measureStandaloneWorkspaceCache(executablePath, sourceRoot, clockResolution)
+		if err != nil {
+			return 0, err
+		}
+		persistentCacheMeasurementJSON, err := buildmeasure.MarshalPersistentCacheProcess(persistentCacheMeasurement)
+		if err != nil {
+			return 0, fmt.Errorf("encode standalone persistent-cache process measurement: %w", err)
+		}
+		fmt.Printf("Fairy C persistent-cache process measurement: %s\n", persistentCacheMeasurementJSON)
+		persistentCacheGrowth, err := measureStandaloneWorkspaceCacheGrowth(executablePath, sourceRoot)
+		if err != nil {
+			return 0, err
+		}
+		persistentCacheGrowthJSON, err := buildmeasure.MarshalPersistentCacheGrowth(persistentCacheGrowth)
+		if err != nil {
+			return 0, fmt.Errorf("encode standalone persistent-cache growth measurement: %w", err)
+		}
+		fmt.Printf("Fairy C persistent-cache growth measurement: %s\n", persistentCacheGrowthJSON)
 
-	sessionMeasurement, err := measureStandaloneWorkspaceSession(executablePath, sourceRoot)
-	if err != nil {
-		return 0, err
+		sessionMeasurement, err := measureStandaloneWorkspaceSession(executablePath, sourceRoot)
+		if err != nil {
+			return 0, err
+		}
+		sessionMeasurementJSON, err := buildmeasure.MarshalSessionProcess(sessionMeasurement)
+		if err != nil {
+			return 0, fmt.Errorf("encode standalone workspace-session process measurement: %w", err)
+		}
+		fmt.Printf("Fairy C workspace-session process measurement: %s\n", sessionMeasurementJSON)
 	}
-	sessionMeasurementJSON, err := buildmeasure.MarshalSessionProcess(sessionMeasurement)
-	if err != nil {
-		return 0, fmt.Errorf("encode standalone workspace-session process measurement: %w", err)
-	}
-	fmt.Printf("Fairy C workspace-session process measurement: %s\n", sessionMeasurementJSON)
 	return info.Size(), nil
 }
 

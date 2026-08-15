@@ -16,13 +16,18 @@ import (
 )
 
 func main() {
-	if err := run(); err != nil {
+	if err := run(os.Args[1:]); err != nil {
 		fmt.Fprintf(os.Stderr, "fairyc Windows host smoke failed: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
+func run(arguments []string) error {
+	mode, err := parseHostSmokeMode(arguments)
+	if err != nil {
+		return err
+	}
+	includeMeasurements := mode == hostSmokeWithMeasurements
 	repositoryRoot, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("resolve repository root: %w", err)
@@ -106,55 +111,62 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("resolve Windows MSVC probe toolchain: %w", err)
 	}
-	clockResolution, err := observeMonotonicClockResolution()
-	if err != nil {
-		return fmt.Errorf("observe process-cache measurement clock: %w", err)
+	var clockResolution int64
+	var atlasCallScaleMeasurement buildmeasure.AtlasCallScaleReport
+	if includeMeasurements {
+		clockResolution, err = observeMonotonicClockResolution()
+		if err != nil {
+			return fmt.Errorf("observe process-cache measurement clock: %w", err)
+		}
+		cacheMeasurement, err := measureWorkspaceProcessCache(root, clockResolution)
+		if err != nil {
+			return fmt.Errorf("measure process-local workspace cache: %w", err)
+		}
+		cacheMeasurementJSON, err := buildmeasure.MarshalCache(cacheMeasurement)
+		if err != nil {
+			return fmt.Errorf("encode process-local workspace cache measurement: %w", err)
+		}
+		fmt.Printf("Fairy C process-cache measurement: %s\n", cacheMeasurementJSON)
+		cacheEditMeasurement, err := measureWorkspaceProcessCacheEdits(root, clockResolution)
+		if err != nil {
+			return fmt.Errorf("measure process-local workspace cache edits: %w", err)
+		}
+		cacheEditMeasurementJSON, err := buildmeasure.MarshalCacheEdits(cacheEditMeasurement)
+		if err != nil {
+			return fmt.Errorf("encode process-local workspace cache edit measurement: %w", err)
+		}
+		fmt.Printf("Fairy C process-cache edit measurement: %s\n", cacheEditMeasurementJSON)
+		atlasRewriteMeasurement, err := measureAtlasRewrite(root, clockResolution)
+		if err != nil {
+			return fmt.Errorf("measure Atlas whole-package rewrite: %w", err)
+		}
+		atlasRewriteMeasurementJSON, err := buildmeasure.MarshalAtlasRewrite(atlasRewriteMeasurement)
+		if err != nil {
+			return fmt.Errorf("encode Atlas whole-package rewrite measurement: %w", err)
+		}
+		fmt.Printf("Fairy C Atlas rewrite measurement: %s\n", atlasRewriteMeasurementJSON)
+		atlasCallScaleMeasurement, err = measureAtlasCallScale(clockResolution)
+		if err != nil {
+			return fmt.Errorf("measure Atlas workspace-call scaling: %w", err)
+		}
+		atlasCallScaleMeasurementJSON, err := buildmeasure.MarshalAtlasCallScale(atlasCallScaleMeasurement)
+		if err != nil {
+			return fmt.Errorf("encode Atlas workspace-call scaling measurement: %w", err)
+		}
+		fmt.Printf("Fairy C Atlas call scale measurement: %s\n", atlasCallScaleMeasurementJSON)
 	}
-	cacheMeasurement, err := measureWorkspaceProcessCache(root, clockResolution)
-	if err != nil {
-		return fmt.Errorf("measure process-local workspace cache: %w", err)
-	}
-	cacheMeasurementJSON, err := buildmeasure.MarshalCache(cacheMeasurement)
-	if err != nil {
-		return fmt.Errorf("encode process-local workspace cache measurement: %w", err)
-	}
-	fmt.Printf("Fairy C process-cache measurement: %s\n", cacheMeasurementJSON)
-	cacheEditMeasurement, err := measureWorkspaceProcessCacheEdits(root, clockResolution)
-	if err != nil {
-		return fmt.Errorf("measure process-local workspace cache edits: %w", err)
-	}
-	cacheEditMeasurementJSON, err := buildmeasure.MarshalCacheEdits(cacheEditMeasurement)
-	if err != nil {
-		return fmt.Errorf("encode process-local workspace cache edit measurement: %w", err)
-	}
-	fmt.Printf("Fairy C process-cache edit measurement: %s\n", cacheEditMeasurementJSON)
-	atlasRewriteMeasurement, err := measureAtlasRewrite(root, clockResolution)
-	if err != nil {
-		return fmt.Errorf("measure Atlas whole-package rewrite: %w", err)
-	}
-	atlasRewriteMeasurementJSON, err := buildmeasure.MarshalAtlasRewrite(atlasRewriteMeasurement)
-	if err != nil {
-		return fmt.Errorf("encode Atlas whole-package rewrite measurement: %w", err)
-	}
-	fmt.Printf("Fairy C Atlas rewrite measurement: %s\n", atlasRewriteMeasurementJSON)
-	atlasCallScaleMeasurement, err := measureAtlasCallScale(clockResolution)
-	if err != nil {
-		return fmt.Errorf("measure Atlas workspace-call scaling: %w", err)
-	}
-	atlasCallScaleMeasurementJSON, err := buildmeasure.MarshalAtlasCallScale(atlasCallScaleMeasurement)
-	if err != nil {
-		return fmt.Errorf("encode Atlas workspace-call scaling measurement: %w", err)
-	}
-	fmt.Printf("Fairy C Atlas call scale measurement: %s\n", atlasCallScaleMeasurementJSON)
-	measurement := buildmeasure.Report{
-		Schema:              buildmeasure.Schema,
-		Workload:            "workspace_quickstart",
-		Clock:               "process-monotonic-wall-nanoseconds",
-		CacheImplementation: "none",
-		Decision:            "baseline-only",
-		Environment: buildmeasure.Environment{
-			OS: runtime.GOOS, Arch: runtime.GOARCH, Target: "x86_64-windows-msvc", Toolchain: "msvc " + toolchain.Version,
-		},
+	measurement := buildmeasure.Report{}
+	if includeMeasurements {
+		measurement = buildmeasure.Report{
+			Schema:              buildmeasure.Schema,
+			Workload:            "workspace_quickstart",
+			Clock:               "process-monotonic-wall-nanoseconds",
+			CacheImplementation: "none",
+			Decision:            "baseline-only",
+			Environment: buildmeasure.Environment{
+				OS: runtime.GOOS, Arch: runtime.GOARCH, Target: "x86_64-windows-msvc", Toolchain: "msvc " + toolchain.Version,
+			},
+		}
 	}
 	workspaceBuildExecutions := 0
 	for _, profile := range []string{"low", "optimized"} {
@@ -172,9 +184,15 @@ func run() error {
 			arguments = append(arguments, "--output", output)
 			var workspaceBuildStdout bytes.Buffer
 			var workspaceBuildStderr bytes.Buffer
-			started := time.Now()
+			var started time.Time
+			if includeMeasurements {
+				started = time.Now()
+			}
 			workspaceBuildCode := cli.Run(arguments, root, &workspaceBuildStdout, &workspaceBuildStderr)
-			duration := time.Since(started)
+			var duration time.Duration
+			if includeMeasurements {
+				duration = time.Since(started)
+			}
 			lockState := "verified"
 			if condition == buildmeasure.ConditionOrdinary {
 				lockState = "unchanged"
@@ -201,10 +219,12 @@ func run() error {
 			if err := executeExpectResult(workspaceArtifactPath, 42); err != nil {
 				return fmt.Errorf("execute build-workspace %s %s artifact: %w", profile, label, err)
 			}
-			measurement.Samples = append(measurement.Samples, buildmeasure.Sample{
-				Sequence: len(measurement.Samples) + 1, Profile: profile, Condition: condition,
-				LockState: lockState, DurationNS: duration.Nanoseconds(), ArtifactBytes: int64(len(workspaceArtifact)), NativeResult: 42,
-			})
+			if includeMeasurements {
+				measurement.Samples = append(measurement.Samples, buildmeasure.Sample{
+					Sequence: len(measurement.Samples) + 1, Profile: profile, Condition: condition,
+					LockState: lockState, DurationNS: duration.Nanoseconds(), ArtifactBytes: int64(len(workspaceArtifact)), NativeResult: 42,
+				})
+			}
 			workspaceBuildExecutions++
 		}
 	}
@@ -213,11 +233,13 @@ func run() error {
 		return err
 	}
 	workspaceBuildExecutions += stableBuildExecutions
-	measurementJSON, err := buildmeasure.Marshal(measurement)
-	if err != nil {
-		return fmt.Errorf("encode Windows workspace build measurement: %w", err)
+	if includeMeasurements {
+		measurementJSON, err := buildmeasure.Marshal(measurement)
+		if err != nil {
+			return fmt.Errorf("encode Windows workspace build measurement: %w", err)
+		}
+		fmt.Printf("Fairy C build measurement: %s\n", measurementJSON)
 	}
-	fmt.Printf("Fairy C build measurement: %s\n", measurementJSON)
 	windowsFileSourceExecutions := 0
 	for _, profile := range []string{"low", "optimized"} {
 		output := fmt.Sprintf("build/windows-file-%s.exe", profile)
@@ -451,24 +473,31 @@ func run() error {
 	}
 	workspaceBuildExecutions += regionBuildExecutions
 	var atlasCallProcessMeasurement buildmeasure.AtlasCallProcessReport
-	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root, clockResolution, &atlasCallProcessMeasurement)
+	var atlasCallProcessDestination *buildmeasure.AtlasCallProcessReport
+	if includeMeasurements {
+		atlasCallProcessDestination = &atlasCallProcessMeasurement
+	}
+	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root, clockResolution, atlasCallProcessDestination)
 	if err != nil {
 		return err
 	}
-	atlasCallProcessMeasurementJSON, err := buildmeasure.MarshalAtlasCallProcess(atlasCallProcessMeasurement)
-	if err != nil {
-		return fmt.Errorf("encode Atlas call process measurement: %w", err)
+	var atlasCallRetainedMeasurement buildmeasure.AtlasCallRetainedReport
+	if includeMeasurements {
+		atlasCallProcessMeasurementJSON, err := buildmeasure.MarshalAtlasCallProcess(atlasCallProcessMeasurement)
+		if err != nil {
+			return fmt.Errorf("encode Atlas call process measurement: %w", err)
+		}
+		fmt.Printf("Fairy C Atlas call process measurement: %s\n", atlasCallProcessMeasurementJSON)
+		atlasCallRetainedMeasurement, err = measureAtlasCallRetainedHeap()
+		if err != nil {
+			return fmt.Errorf("measure Atlas workspace-call retained heap: %w", err)
+		}
+		atlasCallRetainedMeasurementJSON, err := buildmeasure.MarshalAtlasCallRetained(atlasCallRetainedMeasurement)
+		if err != nil {
+			return fmt.Errorf("encode Atlas workspace-call retained-heap measurement: %w", err)
+		}
+		fmt.Printf("Fairy C Atlas call retained-heap measurement: %s\n", atlasCallRetainedMeasurementJSON)
 	}
-	fmt.Printf("Fairy C Atlas call process measurement: %s\n", atlasCallProcessMeasurementJSON)
-	atlasCallRetainedMeasurement, err := measureAtlasCallRetainedHeap()
-	if err != nil {
-		return fmt.Errorf("measure Atlas workspace-call retained heap: %w", err)
-	}
-	atlasCallRetainedMeasurementJSON, err := buildmeasure.MarshalAtlasCallRetained(atlasCallRetainedMeasurement)
-	if err != nil {
-		return fmt.Errorf("encode Atlas workspace-call retained-heap measurement: %w", err)
-	}
-	fmt.Printf("Fairy C Atlas call retained-heap measurement: %s\n", atlasCallRetainedMeasurementJSON)
 	targetRunExecutions++
 	targetExecExecutions++
 	workspaceBuildExecutions += 2
@@ -651,7 +680,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	reportHostSmokeSuccess(hostSmokeReceipt{
+	receipt := hostSmokeReceipt{
 		artifactBytes:                  len(artifact),
 		validatedSections:              len(peReport.Sections),
 		runtimeFunctions:               unwindReport.RuntimeFunctions,
@@ -709,6 +738,11 @@ func run() error {
 		unwindExecutions:               unwindExecutions,
 		standaloneCompilerBytes:        standaloneCompilerBytes,
 		toolchainVersion:               toolchain.Version,
-	})
+	}
+	if includeMeasurements {
+		reportHostSmokeSuccess(receipt)
+	} else {
+		reportHostCorrectnessSuccess(receipt)
+	}
 	return nil
 }
