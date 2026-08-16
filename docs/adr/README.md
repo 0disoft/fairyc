@@ -342,6 +342,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0330-acyclic-copy-tagged-dependency-graph.md`: recursively discovers, lays out, and topologically emits acyclic generic copy-only tag dependencies with private aggregate fields and low/optimized generated-Fairy MSVC execution.
 - `0331-target-neutral-public-file-core.md`: maps the public File open/read/write/sync/close core to target-owned Linux and Windows adapters under SDK `0.0.0-stage0.49`, with generated product-build evidence.
 - `0332-target-neutral-public-file-positioning.md`: maps public same-handle position and absolute seek to target-owned Linux and Windows adapters under SDK `0.0.0-stage0.50`, with generated product-build evidence.
+- `0333-target-neutral-public-file-size.md`: maps public same-handle size observation to target-owned Linux and Windows adapters under SDK `0.0.0-stage0.51`, with cursor-preserving generated product-build evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

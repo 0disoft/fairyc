@@ -27,7 +27,7 @@ surface without changing the package-discovery boundary established here.
    generation.
 2. The current SDK identity is `fairyc-sdk-stdlib/0`; it requires language
    `fairyc-language/10`, runtime ABI `fairyc-runtime/0`, package UID `fairyc.std`, and version
-   `0.0.0-stage0.50` after ADR 0332. Earlier SDK and language-pin cutovers remain recorded by their
+   `0.0.0-stage0.51` after ADR 0333. Earlier SDK and language-pin cutovers remain recorded by their
    owning ADRs.
 3. The workspace loader injects one `standard-library` node only when a root-reachable package
    imports `std` or `std::*`. Each such package receives a direct dependency with the reserved

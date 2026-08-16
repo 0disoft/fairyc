@@ -184,7 +184,7 @@ unsafe extern C fn raw_file_buffer_result file_read_append_raw(ptr mut void file
 unsafe extern C fn raw_file_position_result file_position_raw(ptr mut void file) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_size_v0")
+@link_name("fy_std_file_size_v0")
 unsafe extern C fn raw_file_size_result file_size_raw(ptr void file) ;
 
 @effects(filesystem)

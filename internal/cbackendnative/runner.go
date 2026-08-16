@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v34"
+	reportSchemaVersion = "fairyc.native-c-report/v35"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -88,6 +88,13 @@ fn i32 write_then_close(fs::File input) {
     if (position_code != 0) {
         return position_code;
     }
+    let i32 size_code = switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == 7) { 0 } else { 22 } }
+        case .err(_) : { 23 }
+    };
+    if (size_code != 0) {
+        return size_code;
+    }
     let i32 seek_code = switch (fs::seek_start(ref mut file, 2)) {
         case .ok(position) : { if (position == 2) { 0 } else { 12 } }
         case .err(_) : { 13 }
@@ -101,6 +108,20 @@ fn i32 write_then_close(fs::File input) {
     };
     if (observed_code != 0) {
         return observed_code;
+    }
+    let i32 preserved_size_code = switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == 7) { 0 } else { 24 } }
+        case .err(_) : { 25 }
+    };
+    if (preserved_size_code != 0) {
+        return preserved_size_code;
+    }
+    let i32 size_position_code = switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == 2) { 0 } else { 26 } }
+        case .err(_) : { 27 }
+    };
+    if (size_position_code != 0) {
+        return size_position_code;
     }
     let usize invalid_offset = 18446744073709551615;
     let i32 rejected_code = switch (fs::seek_start(ref mut file, invalid_offset)) {

@@ -873,6 +873,13 @@ product executions observe seven, seek to and re-observe two, reject `usize` max
 movement, then restore seven before sync and close. Relative/end seek, size, metadata, exact-read,
 Buffer-read, path mutation, portable Unicode paths, and containment remain later gates.
 
+ADR 0333 closes the public Linux logical-size gap in SDK `0.0.0-stage0.51`. The existing shared-
+borrow `size` operation now selects a target-neutral private symbol: Linux calls `fstat` on the
+same descriptor and Windows delegates to `GetFileSizeEx`. Native report v35 makes the four ordinary
+Linux products observe size seven at positions seven and two and prove that both observations leave
+the cursor unchanged. Relative/end seek, other metadata, exact-read, Buffer-read, path mutation,
+portable Unicode paths, and containment remain later gates.
+
 ADR 0323 extends the same aggregate graph to acyclic inert enums inside user-enum payloads without
 changing language, SDK, runtime ABI, or public APIs. The 46th C-emission fixture freezes nested
 construction, by-value transport, two-layer extraction, exhaustive nested switching, and definition

@@ -22,11 +22,21 @@ struct fy_std_file_position_result_v0 {
     size_t position;
 };
 
+struct fy_std_file_size_result_v0 {
+    uint32_t status;
+    uint32_t os_code;
+    size_t size;
+};
+
 _Static_assert(sizeof(off_t) == sizeof(int64_t), "Fairy C Linux File requires 64-bit off_t");
 _Static_assert((off_t)-1 < (off_t)0, "Fairy C Linux File requires signed off_t");
 _Static_assert(
     sizeof(struct fy_std_file_position_result_v0) == (size_t)16,
     "Fairy C Linux File position result layout drift"
+);
+_Static_assert(
+    sizeof(struct fy_std_file_size_result_v0) == (size_t)16,
+    "Fairy C Linux File size result layout drift"
 );
 
 enum { FY_STD_FILE_PATH_CAPACITY_V0 = 4096 };
@@ -145,6 +155,19 @@ static struct fy_std_file_position_result_v0 fy_std_file_position_result_v0(
     return result;
 }
 
+static struct fy_std_file_size_result_v0 fy_std_file_size_result_v0(
+    uint32_t status,
+    int os_code,
+    size_t size
+) {
+    struct fy_std_file_size_result_v0 result = {
+        status,
+        (uint32_t)os_code,
+        size
+    };
+    return result;
+}
+
 struct fy_std_file_result_v0 fy_std_file_open_v0(
     const uint8_t *path,
     const struct fy_std_file_open_options_v0 *options,
@@ -201,6 +224,28 @@ struct fy_std_file_position_result_v0 fy_std_file_position_v0(void *file_storage
         return fy_std_file_position_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0);
     }
     return fy_std_file_position_result_v0(FY_STD_FILE_OK_V0, 0, (size_t)position);
+}
+
+struct fy_std_file_size_result_v0 fy_std_file_size_v0(const void *file_storage) {
+    struct fy_std_linux_file_v0 file;
+    if (!fy_std_file_storage_to_linux_v0(file_storage, &file)) {
+        return fy_std_file_size_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_file_size_result_v0(FY_STD_FILE_CLOSED_V0, 0, 0);
+    }
+    struct stat metadata;
+    int status;
+    do {
+        status = fstat(file.descriptor, &metadata);
+    } while (status < 0 && errno == EINTR);
+    if (status < 0) {
+        return fy_std_file_size_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0);
+    }
+    if (metadata.st_size < (off_t)0) {
+        return fy_std_file_size_result_v0(FY_STD_FILE_IO_ERROR_V0, EOVERFLOW, 0);
+    }
+    return fy_std_file_size_result_v0(FY_STD_FILE_OK_V0, 0, (size_t)metadata.st_size);
 }
 
 struct fy_std_file_position_result_v0 fy_std_file_seek_start_v0(
