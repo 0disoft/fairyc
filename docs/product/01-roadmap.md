@@ -866,6 +866,13 @@ family, partial read/write, write-all, sync, consuming close, and drop. Native r
 ordinary generated-Fairy Linux product executions; portable Unicode paths, containment, metadata,
 seek, exact-read, Buffer-read, and path mutation remain later gates.
 
+ADR 0332 closes the first public Linux positioning gap in SDK `0.0.0-stage0.50`. Two additional
+target-neutral private symbols now observe the current byte position and seek to one absolute
+offset through the same open descriptor or HANDLE. Native report v34 makes the four ordinary Linux
+product executions observe seven, seek to and re-observe two, reject `usize` maximum without cursor
+movement, then restore seven before sync and close. Relative/end seek, size, metadata, exact-read,
+Buffer-read, path mutation, portable Unicode paths, and containment remain later gates.
+
 ADR 0323 extends the same aggregate graph to acyclic inert enums inside user-enum payloads without
 changing language, SDK, runtime ABI, or public APIs. The 46th C-emission fixture freezes nested
 construction, by-value transport, two-layer extraction, exhaustive nested switching, and definition

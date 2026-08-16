@@ -430,6 +430,11 @@ target-neutral across Linux GNU and Windows MSVC. The closed linker selects a de
 adapter behind seven private common symbols; Windows-only path, seek, exact-read, Buffer-read, and
 metadata extensions remain explicitly target-bound.
 
+ADR 0332 moves the SDK to `0.0.0-stage0.50` and makes `std::fs::position` plus absolute
+`std::fs::seek_start` target-neutral. Both operate on the already-open descriptor or HANDLE without
+reopening a path; relative/end seek, size, metadata, exact-read, Buffer-read, and path mutation
+remain target-bound.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

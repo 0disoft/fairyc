@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v33"
+	reportSchemaVersion = "fairyc.native-c-report/v34"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -80,6 +80,49 @@ fn i32 write_then_close(fs::File input) {
     };
     if (write_code != 0) {
         return write_code;
+    }
+    let i32 position_code = switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == 7) { 0 } else { 10 } }
+        case .err(_) : { 11 }
+    };
+    if (position_code != 0) {
+        return position_code;
+    }
+    let i32 seek_code = switch (fs::seek_start(ref mut file, 2)) {
+        case .ok(position) : { if (position == 2) { 0 } else { 12 } }
+        case .err(_) : { 13 }
+    };
+    if (seek_code != 0) {
+        return seek_code;
+    }
+    let i32 observed_code = switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == 2) { 0 } else { 14 } }
+        case .err(_) : { 15 }
+    };
+    if (observed_code != 0) {
+        return observed_code;
+    }
+    let usize invalid_offset = 18446744073709551615;
+    let i32 rejected_code = switch (fs::seek_start(ref mut file, invalid_offset)) {
+        case .ok(_) : { 18 }
+        case .err(error) : { if (fs::error_status(error) == 2) { 0 } else { 19 } }
+    };
+    if (rejected_code != 0) {
+        return rejected_code;
+    }
+    let i32 preserved_code = switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == 2) { 0 } else { 20 } }
+        case .err(_) : { 21 }
+    };
+    if (preserved_code != 0) {
+        return preserved_code;
+    }
+    let i32 restore_code = switch (fs::seek_start(ref mut file, 7)) {
+        case .ok(position) : { if (position == 7) { 0 } else { 16 } }
+        case .err(_) : { 17 }
+    };
+    if (restore_code != 0) {
+        return restore_code;
     }
     let i32 sync_code = switch (fs::sync(ref mut file)) {
         case .ok(_) : { 0 }

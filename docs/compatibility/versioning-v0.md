@@ -834,7 +834,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.49`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.50`, language
 `fairyc-language/10`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
@@ -1042,6 +1042,12 @@ pointer-width token and the open/read/write/write-all/sync/close/drop declaratio
 Windows names to target-neutral private symbols. SDK source digest, package instance, and dependent
 cache identities therefore change. Language `fairyc-language/10`, runtime ABI `fairyc-runtime/0`,
 public ABI policy, target identities, and lockfile schema remain unchanged.
+
+ADR 0332 advances the compiler-bundled SDK to `0.0.0-stage0.50`. Existing public `position` and
+`seek_start` signatures remain source-compatible while their private declarations change from
+Windows names to target-neutral symbols. SDK source digest, package instance, and dependent cache
+identities therefore change. File layout, language `fairyc-language/10`, runtime ABI
+`fairyc-runtime/0`, public ABI policy, target identities, MIR, and lockfile schema remain unchanged.
 
 ADR 0323 changes no version identity. It additively transports an acyclic restricted inert enum as
 a by-value field of another private restricted inert enum through the existing aggregate layout and

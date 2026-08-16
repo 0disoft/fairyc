@@ -16,6 +16,19 @@ struct fy_std_file_open_options_v0 {
     uint8_t append;
 };
 
+struct fy_std_file_position_result_v0 {
+    uint32_t status;
+    uint32_t os_code;
+    size_t position;
+};
+
+_Static_assert(sizeof(off_t) == sizeof(int64_t), "Fairy C Linux File requires 64-bit off_t");
+_Static_assert((off_t)-1 < (off_t)0, "Fairy C Linux File requires signed off_t");
+_Static_assert(
+    sizeof(struct fy_std_file_position_result_v0) == (size_t)16,
+    "Fairy C Linux File position result layout drift"
+);
+
 enum { FY_STD_FILE_PATH_CAPACITY_V0 = 4096 };
 
 static int fy_std_file_storage_valid_v0(const struct fy_std_file_storage_v0 *file) {
@@ -119,6 +132,19 @@ static void fy_std_file_storage_from_linux_v0(
     fy_std_file_storage_store_v0(storage, &stored);
 }
 
+static struct fy_std_file_position_result_v0 fy_std_file_position_result_v0(
+    uint32_t status,
+    int os_code,
+    size_t position
+) {
+    struct fy_std_file_position_result_v0 result = {
+        status,
+        (uint32_t)os_code,
+        position
+    };
+    return result;
+}
+
 struct fy_std_file_result_v0 fy_std_file_open_v0(
     const uint8_t *path,
     const struct fy_std_file_open_options_v0 *options,
@@ -157,6 +183,48 @@ struct fy_std_file_result_v0 fy_std_file_read_v0(
         return fy_std_file_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
     }
     return fy_std_linux_file_read_v0(&file, buffer, length);
+}
+
+struct fy_std_file_position_result_v0 fy_std_file_position_v0(void *file_storage) {
+    struct fy_std_linux_file_v0 file;
+    if (!fy_std_file_storage_to_linux_v0(file_storage, &file)) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_CLOSED_V0, 0, 0);
+    }
+    off_t position;
+    do {
+        position = lseek(file.descriptor, (off_t)0, SEEK_CUR);
+    } while (position < (off_t)0 && errno == EINTR);
+    if (position < (off_t)0) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0);
+    }
+    return fy_std_file_position_result_v0(FY_STD_FILE_OK_V0, 0, (size_t)position);
+}
+
+struct fy_std_file_position_result_v0 fy_std_file_seek_start_v0(
+    void *file_storage,
+    size_t offset
+) {
+    struct fy_std_linux_file_v0 file;
+    if (!fy_std_file_storage_to_linux_v0(file_storage, &file)) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_CLOSED_V0, 0, 0);
+    }
+    if (offset > (size_t)INT64_MAX) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+    }
+    off_t position;
+    do {
+        position = lseek(file.descriptor, (off_t)offset, SEEK_SET);
+    } while (position < (off_t)0 && errno == EINTR);
+    if (position < (off_t)0) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0);
+    }
+    return fy_std_file_position_result_v0(FY_STD_FILE_OK_V0, 0, (size_t)position);
 }
 
 struct fy_std_file_result_v0 fy_std_file_write_v0(

@@ -403,9 +403,11 @@ func TestLinuxFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		"fy_std_linux_file_read_v0", "fy_std_linux_file_write_v0",
 		"fy_std_linux_file_write_all_v0", "file->descriptor = -1", "(void)close(descriptor)",
 		"fy_std_file_open_v0", "fy_std_file_read_v0", "fy_std_file_write_v0",
+		"fy_std_file_position_v0", "fy_std_file_seek_start_v0",
 		"fy_std_file_write_all_v0", "fy_std_file_sync_v0", "fy_std_file_close_v0",
 		"fy_std_file_drop_v0", "O_EXCL", "O_APPEND", "(mode_t)0666",
-		"memcpy(file, storage, sizeof *file)",
+		"memcpy(file, storage, sizeof *file)", "lseek(file.descriptor", "INT64_MAX",
+		"sizeof(off_t) == sizeof(int64_t)", "position result layout drift",
 	} {
 		if !strings.Contains(implementation, required) {
 			t.Errorf("Linux File implementation is missing %q", required)

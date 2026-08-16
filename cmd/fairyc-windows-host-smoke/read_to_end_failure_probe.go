@@ -155,7 +155,7 @@ func generatedFairyReadToEndFailureProbeSource(generated string) (string, error)
 	for _, required := range []string{
 		"fy_std_file_open_v0",
 		"fy_std_windows_file_read_append_v0",
-		"fy_std_windows_file_position_v0",
+		"fy_std_file_position_v0",
 		"fy_std_file_close_v0",
 		"fy_std_buffer_initialize_v0",
 		"fy_std_buffer_drop_v0",

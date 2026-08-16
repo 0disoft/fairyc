@@ -299,7 +299,7 @@ Compiler intrinsics, the thin runtime, and standard-library APIs are separate bo
 
 Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `Region`. Allocation is fallible, zero-size behavior is normalized by Fairy C, and no hidden default allocator or user allocator protocol exists.
 
-`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `u8[]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `ref u8[]` construction and private generated-C transport. Safe borrowed `ref u8[]` and `ref str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `ref u8[]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `ref u8[]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. Mutable fixed scalar-array places support checked exact-type element assignment. A direct contextual `ref mut` borrow of a mutable fixed `u8[N]` place may produce `ref mut u8[]` for an exact internal parameter. It preserves the exclusive origin, exposes canonical `.len`, supports checked `u8` reads and stores, and may derive `ptr mut u8` only inside unsafe code. Indexed assignment checks the receiver and `usize` index before evaluating its right-hand side, so an invalid place traps without value-side effects. Mutable integer locals and admitted indexed scalar places support statement-only checked `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=` with one place evaluation and no promotions. It does not add assignment expressions, increment operators, mutable slicing, resizing, temporary borrowing, retained foreign pointers, or public ABI. Language revision `/9` additionally permits those positive bounded copy-scalar fixed arrays as direct `Option` and `Result` payloads with the same value-copy, indexing, return, switch, and compatible Result-propagation meaning; it does not make an array growable, resource-bearing, nested, public ABI, or foreign ABI data. The public File core accepts `ref CStr`, preserves partial I/O, syncs explicitly, and uses a consuming non-retried close contract on Linux and Windows. Private pointer-width storage selects a descriptor-plus-one Linux adapter or the existing Windows HANDLE adapter without exposing either value. Windows-only exact reads, Buffer reads, path mutation, seek, and metadata remain target-bound. Portable Unicode path semantics, race-resistant containment, embedded support, and resource-aware arenas remain deferred.
+`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `u8[]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `ref u8[]` construction and private generated-C transport. Safe borrowed `ref u8[]` and `ref str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `ref u8[]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `ref u8[]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. Mutable fixed scalar-array places support checked exact-type element assignment. A direct contextual `ref mut` borrow of a mutable fixed `u8[N]` place may produce `ref mut u8[]` for an exact internal parameter. It preserves the exclusive origin, exposes canonical `.len`, supports checked `u8` reads and stores, and may derive `ptr mut u8` only inside unsafe code. Indexed assignment checks the receiver and `usize` index before evaluating its right-hand side, so an invalid place traps without value-side effects. Mutable integer locals and admitted indexed scalar places support statement-only checked `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=` with one place evaluation and no promotions. It does not add assignment expressions, increment operators, mutable slicing, resizing, temporary borrowing, retained foreign pointers, or public ABI. Language revision `/9` additionally permits those positive bounded copy-scalar fixed arrays as direct `Option` and `Result` payloads with the same value-copy, indexing, return, switch, and compatible Result-propagation meaning; it does not make an array growable, resource-bearing, nested, public ABI, or foreign ABI data. The public File core accepts `ref CStr`, preserves partial I/O, syncs explicitly, and uses a consuming non-retried close contract on Linux and Windows. Private pointer-width storage selects a descriptor-plus-one Linux adapter or the existing Windows HANDLE adapter without exposing either value. Same-handle position observation and absolute seek are target-neutral; relative/end seek, exact reads, Buffer reads, path mutation, and metadata remain Windows-only. Portable Unicode path semantics, race-resistant containment, embedded support, and resource-aware arenas remain deferred.
 
 An independent example-level owned-text wrapper exposes move-only Fairy `String` and `CString`
 resources, source `Result` errors, scalar length access, owner-bound `ref str` and `ref CStr` views, and
@@ -612,12 +612,14 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   copy/view/append/drop and from-text/view/drop helpers and observe bytes, termination, statuses, and
   normalized release. Exact Linux File result, handle, and open-option records additionally cross
   the real open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers
-  while observing counts, repeated-close status, normalized state, and bytes. Report v33 adds four
+  while observing counts, repeated-close status, normalized state, and bytes. Report v34 adds four
   `linuxConsoleExecutions` for the target-neutral stdout and stderr adapter's empty, invalid,
   redirected-write, and unavailable-stream cases. It retains
   `linuxFileSourceCallExecutions` alongside the earlier standard-library source-call counters and
   four `linuxPublicFileExecutions` for an ordinary generated-Fairy product that selects the public
-  File component, writes and syncs seven bytes, reopens, reads them exactly, and returns 42 under
+  File component, writes seven bytes, observes position seven, seeks to and re-observes position
+  two, rejects `usize` maximum without moving the cursor, restores position seven, syncs, reopens,
+  reads the exact bytes, and returns 42 under
   Clang/GCC low/optimized execution in isolated temporary working directories. It retains
   `foreignCStructResultCallExecutions` for the register and hidden-memory result pair, plus
   `standardLibraryBuildSmokeExecutions` for a self-contained product build that calls the real UTF-8
@@ -632,7 +634,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.49` exposes
+  The compiler-bundled SDK `0.0.0-stage0.50` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -940,14 +942,15 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.49` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.50` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer` and ADR 0299's fallible single-byte append,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
 `std::text::validate_utf8`, ADR 0302's allocation-free immutable `std::text::as_bytes`, ADR 0263's
-zero-copy `std::text::from_buffer`, and ADR 0264's Windows MSVC
-`std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position/seek surface, ADR 0305's
+zero-copy `std::text::from_buffer`, ADR 0264's Windows MSVC
+`std::fs::File` ownership and byte-I/O surface, ADR 0331's target-neutral File core, ADR 0269's
+original absolute position/seek surface and ADR 0332's target-neutral linkage for it, ADR 0305's
 bounded current- and end-relative seek surface, ADR 0306's same-handle read-only metadata, ADR 0307's
 same-handle hard-link count, ADR 0308's no-replace hard-link creation, ADR 0309's same-handle
 allocated size, ADR 0310's same-handle read-only mutation, ADR 0311's bounded recursive directory
@@ -1187,6 +1190,13 @@ NUL-terminated CStr bytes, ordinary POSIX lookup, `0666` creation subject to uma
 exclusive create, and a descriptor-plus-one private token. Windows delegates to its existing HANDLE
 implementation. Linux path mutation, metadata, seeking, exact-read, Buffer-read, Unicode path, and
 containment promises remain absent.
+
+ADR 0332 advances the compiler-bundled SDK to `0.0.0-stage0.50` while retaining the public
+`position` and `seek_start` signatures. Both now select target-neutral private symbols. Linux uses
+`lseek` on the already-open descriptor, retries `EINTR`, and rejects an absolute offset above
+`INT64_MAX` before effects; Windows delegates to the existing same-HANDLE operations. Relative/end
+seek, size, metadata, exact-read, Buffer-read, path mutation, Unicode path, and containment promises
+remain absent on Linux.
 
 ADR 0320 keeps language `fairyc-language/10`, SDK `0.0.0-stage0.48`, and runtime ABI
 `fairyc-runtime/0` while fixing the constrained C emitter's verbatim-name boundary. Public C tags,

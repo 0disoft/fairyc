@@ -59,7 +59,7 @@ pin a runner image or toolchain baseline and does not promote either target.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v33` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v34` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
   sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux console, Linux File, scalar Fairy-source
   foreign-call, individual exact `c::int`, negative-preserving `c::long`, `c::size_t`, and
@@ -70,8 +70,9 @@ pin a runner image or toolchain baseline and does not promote either target.
   actual owned String/CString source-call, actual Linux File source-call, actual
   text-validation source-call, actual text-view
   output-record source-call, compiler-owned byte-, UTF-8-, and C-string source-calls, ordinary product-build,
-  automatically linked standard-library product-build, public Linux File product-build, and compiler-owned byte-, UTF-8-, and C-string product-build
-  execution counts but no temporary path.
+  automatically linked standard-library product-build, public Linux File product-build with
+  same-descriptor current-position and absolute-seek observations, and compiler-owned byte-, UTF-8-,
+  and C-string product-build execution counts but no temporary path.
   Each foreign-call count is four only after generated Fairy callers and hand-written C callees
   cross as separate Clang/GCC objects in both directions and profiles and return `42` with no output.
   The text-validation source-call count additionally requires linking the generated caller against

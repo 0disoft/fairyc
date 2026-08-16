@@ -75,7 +75,7 @@ The initial library surface is:
 std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer with fallible bulk and single-byte append
 std::text   String, CStr, CString, allocation-free UTF-8 validation and immutable text-byte views, and zero-copy Buffer-to-String conversion
-std::fs     target-neutral File open/read/write/sync/close core plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, positioning, and metadata
+std::fs     target-neutral File open/read/write/sync/close and absolute positioning plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, relative/end seek, and metadata
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
@@ -83,9 +83,10 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.49` exports
-the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, Windows MSVC `std::fs` extensions, console I/O,
-scalar output, and effect-free `std::process` argument slices recorded by ADRs 0205 through 0311.
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.50` exports
+the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core and absolute
+positioning, Windows MSVC `std::fs` extensions, console I/O, scalar output, and effect-free
+`std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through 0332.
 The current Windows filesystem slice includes owned File I/O and metadata, bounded path mutation,
 recursive parent creation, and ADR 0311's bounded recursive directory removal with exact completed-
 object progress. The remaining standard-library list stays planned and may be backed only by
@@ -345,7 +346,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.49` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.50` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -464,7 +465,7 @@ respectively no echo, the exact short echo, and only the first eight bytes. A se
 compiler repeats the locked run with short input plus build and artifact execution. Stable run
 attaches input only after successful compilation and image inspection and does not pre-read or retain
 it.
-Linux Clang/GCC low/optimized executions are configured through the native report v33
+Linux Clang/GCC low/optimized executions are configured through the native report v34
 `linuxConsoleExecutions` field and exercise stdin, stdout, stderr, and the full-domain `i32` decimal
 boundaries, but remain unobserved on this
 Windows host.
@@ -571,9 +572,13 @@ target-neutral private symbols. The public create/open family, partial `read`/`w
 `sync`, consuming `close`, and best-effort drop select this component automatically. Linux validates
 a nonempty terminator within 4096 storage bytes, supports exclusive create and kernel append,
 creates with mode `0666` subject to umask, and stores descriptor-plus-one in private pointer-width
-storage. It performs ordinary POSIX path lookup; containment, no-follow authorization, path
-mutation, metadata, seeking, exact reads, Buffer growth, and Unicode normalization remain outside
-the Linux public slice. Native report v33 requires four generated product executions returning 42.
+storage. ADR 0332 adds two common same-owner operations: `position` queries `lseek(SEEK_CUR)` and
+`seek_start` uses `lseek(SEEK_SET)` after rejecting offsets above `INT64_MAX`. Both retry `EINTR`,
+return the absolute byte position, and never reopen a path. Ordinary POSIX path lookup remains;
+containment, no-follow authorization, path mutation, metadata, relative/end seek, exact reads,
+Buffer growth, and Unicode normalization stay outside the Linux public slice. Native report v34
+requires four generated product executions returning 42 after observing seven, seeking to and
+re-observing two, rejecting `usize` maximum without cursor movement, and restoring seven.
 
 ## Windows `File` C slice v0
 
@@ -651,7 +656,8 @@ The I/O raw result record is `{ status: u32, os_code: u32, count: usize }`; posi
 `{ status: u32, os_code: u32, size: uint64 }`; kind observation returns
 `{ status: u32, os_code: u32, kind: uint32 }`; read-only observation returns
 `{ status: u32, os_code: u32, enabled: uint32 }`; identity observation writes a private six-`u32`
-record only after success and returns the ordinary I/O result. The closed target contract
+record only after success and returns the ordinary I/O result. The Windows-specific portion of the
+closed target contract
 admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_remove_v0`,
 `fy_std_windows_directory_create_v0`, `fy_std_windows_directory_remove_v0`,
 `fy_std_windows_directory_rename_v0`, `fy_std_windows_file_rename_v0`,
@@ -665,7 +671,9 @@ admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_remove_v0`,
 `fy_std_windows_file_read_only_v0`,
 `fy_std_windows_file_link_count_v0`,
 `fy_std_windows_file_id_v0`, and
-`fy_std_windows_file_set_len_v0`. A separate-translation-unit probe
+`fy_std_windows_file_set_len_v0`. The public resolver separately admits nine common File symbols:
+open, read, position, absolute seek, write, write-all, sync, close, and drop. A separate-translation-
+unit probe
 executes create/truncate, write-all, cursor-preserving length shrink/extend, sync, normal and repeated close, three-byte reads, EOF, forced
 `ERROR_INVALID_HANDLE` close and size failures, absolute/current/end position changes, size 9,
 overflow and negative-result rejection with cursor preservation, beyond-EOF movement with unchanged

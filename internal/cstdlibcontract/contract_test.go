@@ -103,11 +103,13 @@ func TestTargetNeutralConsoleIOSelectsOneTargetOwnedComponent(t *testing.T) {
 	}
 }
 
-func TestTargetNeutralFileCoreSelectsOneTargetOwnedComponent(t *testing.T) {
+func TestTargetNeutralFileCoreAndPositioningSelectOneTargetOwnedComponent(t *testing.T) {
 	t.Parallel()
 	symbols := []string{
 		"fy_std_file_open_v0",
 		"fy_std_file_read_v0",
+		"fy_std_file_position_v0",
+		"fy_std_file_seek_start_v0",
 		"fy_std_file_write_v0",
 		"fy_std_file_write_all_v0",
 		"fy_std_file_sync_v0",

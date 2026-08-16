@@ -180,7 +180,7 @@ unsafe extern C fn raw_file_result file_read_exact_raw(ptr mut void file, ptr mu
 unsafe extern C fn raw_file_buffer_result file_read_append_raw(ptr mut void file, ptr mut void buffer, usize maximum) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_position_v0")
+@link_name("fy_std_file_position_v0")
 unsafe extern C fn raw_file_position_result file_position_raw(ptr mut void file) ;
 
 @effects(filesystem)
@@ -220,7 +220,7 @@ unsafe extern C fn raw_file_result file_id_raw(ptr void file, ptr mut raw_file_i
 unsafe extern C fn raw_file_size_result file_set_len_raw(ptr mut void file, usize size) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_seek_start_v0")
+@link_name("fy_std_file_seek_start_v0")
 unsafe extern C fn raw_file_position_result file_seek_start_raw(ptr mut void file, usize offset) ;
 
 @effects(filesystem)
