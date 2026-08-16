@@ -880,6 +880,13 @@ Linux products observe size seven at positions seven and two and prove that both
 the cursor unchanged. Relative/end seek, other metadata, exact-read, Buffer-read, path mutation,
 portable Unicode paths, and containment remain later gates.
 
+ADR 0334 closes the bounded relative/end-seek gap in SDK `0.0.0-stage0.52`. The existing `i32`
+delta operations now select target-neutral private symbols: Linux calls `lseek` with `SEEK_CUR` or
+`SEEK_END`, and Windows delegates to the established same-HANDLE operations. Native report v36
+makes the four ordinary Linux products move from two to one, from end to five, then beyond end to
+ten while logical size remains seven. Other metadata, exact-read, Buffer-read, path mutation,
+portable Unicode paths, and containment remain later gates.
+
 ADR 0323 extends the same aggregate graph to acyclic inert enums inside user-enum payloads without
 changing language, SDK, runtime ABI, or public APIs. The 46th C-emission fixture freezes nested
 construction, by-value transport, two-layer extraction, exhaustive nested switching, and definition

@@ -440,6 +440,11 @@ ADR 0333 moves the SDK to `0.0.0-stage0.51` and makes `std::fs::size` target-neu
 cursor and ownership. Relative/end seek, other metadata, exact-read, Buffer-read, and path mutation
 remain target-bound.
 
+ADR 0334 moves the SDK to `0.0.0-stage0.52` and makes bounded `std::fs::seek_current` plus
+`std::fs::seek_end` target-neutral. Linux uses `lseek` with `SEEK_CUR` or `SEEK_END`; Windows keeps
+the existing `SetFilePointerEx` behavior. Other metadata, exact-read, Buffer-read, and path mutation
+remain target-bound.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

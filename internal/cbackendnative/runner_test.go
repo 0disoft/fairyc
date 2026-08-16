@@ -77,6 +77,8 @@ func TestPublicFileBuildSmokeReachesCEmission(t *testing.T) {
 		"fy_std_file_position_v0(",
 		"fy_std_file_size_v0(",
 		"fy_std_file_seek_start_v0(",
+		"fy_std_file_seek_current_v0(",
+		"fy_std_file_seek_end_v0(",
 		"fy_std_file_write_all_v0(",
 		"fy_std_file_sync_v0(",
 		"fy_std_file_close_v0(",
@@ -89,7 +91,8 @@ func TestPublicFileBuildSmokeReachesCEmission(t *testing.T) {
 	for _, forbidden := range []string{
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
 		"fy_std_windows_file_position_v0", "fy_std_windows_file_size_v0",
-		"fy_std_windows_file_seek_start_v0",
+		"fy_std_windows_file_seek_start_v0", "fy_std_windows_file_seek_current_v0",
+		"fy_std_windows_file_seek_end_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
 	} {
@@ -479,7 +482,7 @@ func TestUTF8StringLiteralSourceCallSmokeReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v35" {
+	if reportSchemaVersion != "fairyc.native-c-report/v36" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -524,7 +527,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v35"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v36"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":116`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||

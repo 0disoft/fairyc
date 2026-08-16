@@ -224,11 +224,11 @@ unsafe extern C fn raw_file_size_result file_set_len_raw(ptr mut void file, usiz
 unsafe extern C fn raw_file_position_result file_seek_start_raw(ptr mut void file, usize offset) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_seek_current_v0")
+@link_name("fy_std_file_seek_current_v0")
 unsafe extern C fn raw_file_position_result file_seek_current_raw(ptr mut void file, i32 offset) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_seek_end_v0")
+@link_name("fy_std_file_seek_end_v0")
 unsafe extern C fn raw_file_position_result file_seek_end_raw(ptr mut void file, i32 offset) ;
 
 @effects(filesystem)

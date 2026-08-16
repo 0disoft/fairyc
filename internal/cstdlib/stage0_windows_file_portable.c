@@ -29,6 +29,20 @@ struct fy_std_windows_file_position_result_v0 fy_std_file_seek_start_v0(
     return fy_std_windows_file_seek_start_v0(file_storage, offset);
 }
 
+struct fy_std_windows_file_position_result_v0 fy_std_file_seek_current_v0(
+    void *file_storage,
+    int32_t offset
+) {
+    return fy_std_windows_file_seek_current_v0(file_storage, offset);
+}
+
+struct fy_std_windows_file_position_result_v0 fy_std_file_seek_end_v0(
+    void *file_storage,
+    int32_t offset
+) {
+    return fy_std_windows_file_seek_end_v0(file_storage, offset);
+}
+
 struct fy_std_windows_file_result_v0 fy_std_file_write_v0(
     void *file_storage,
     const uint8_t *buffer,

@@ -75,7 +75,7 @@ The initial library surface is:
 std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer with fallible bulk and single-byte append
 std::text   String, CStr, CString, allocation-free UTF-8 validation and immutable text-byte views, and zero-copy Buffer-to-String conversion
-std::fs     target-neutral File open/read/write/sync/close, absolute positioning, and logical size plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, relative/end seek, and other metadata
+std::fs     target-neutral File open/read/write/sync/close, absolute and bounded relative/end positioning, and logical size plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, and other metadata
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
@@ -83,11 +83,10 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.51` exports
-the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, absolute
-positioning, and logical size, Windows MSVC `std::fs` extensions, console I/O, scalar output, and
-effect-free `std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through
-0333.
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.52` exports
+the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, positioning,
+and logical size, Windows MSVC `std::fs` extensions, console I/O, scalar output, and effect-free
+`std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through 0334.
 The current Windows filesystem slice includes owned File I/O and metadata, bounded path mutation,
 recursive parent creation, and ADR 0311's bounded recursive directory removal with exact completed-
 object progress. The remaining standard-library list stays planned and may be backed only by
@@ -347,7 +346,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.51` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.52` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -466,7 +465,7 @@ respectively no echo, the exact short echo, and only the first eight bytes. A se
 compiler repeats the locked run with short input plus build and artifact execution. Stable run
 attaches input only after successful compilation and image inspection and does not pre-read or retain
 it.
-Linux Clang/GCC low/optimized executions are configured through the native report v35
+Linux Clang/GCC low/optimized executions are configured through the native report v36
 `linuxConsoleExecutions` field and exercise stdin, stdout, stderr, and the full-domain `i32` decimal
 boundaries, but remain unobserved on this
 Windows host.
@@ -577,12 +576,13 @@ storage. ADR 0332 adds two common same-owner operations: `position` queries `lse
 `seek_start` uses `lseek(SEEK_SET)` after rejecting offsets above `INT64_MAX`. Both retry `EINTR`,
 return the absolute byte position, and never reopen a path. ADR 0333 adds shared-borrow `size`
 through `fstat` on the same descriptor, retries `EINTR`, and maps a negative kernel size to
-`EOVERFLOW`; every result preserves the cursor and owner. Ordinary POSIX path lookup remains;
-containment, no-follow authorization, path mutation, other metadata, relative/end seek, exact
-reads, Buffer growth, and Unicode normalization stay outside the Linux public slice. Native report
-v35 requires four generated product executions returning 42 after observing position and size
-seven, seeking to two, re-observing size seven and position two, rejecting `usize` maximum without
-cursor movement, and restoring seven.
+`EOVERFLOW`; every result preserves the cursor and owner. ADR 0334 adds bounded `i32` current- and
+end-relative movement through `lseek(SEEK_CUR)` and `lseek(SEEK_END)`, including cursor-only
+movement beyond EOF. Ordinary POSIX path lookup remains; containment, no-follow authorization,
+path mutation, other metadata, exact reads, Buffer growth, and Unicode normalization stay outside
+the Linux public slice. Native report v36 requires four generated product executions returning 42
+after observing position and size seven; moving to two, one, five, and ten; preserving logical size
+seven beyond EOF; rejecting `usize` maximum without cursor movement; and restoring seven.
 
 ## Windows `File` C slice v0
 
@@ -675,8 +675,8 @@ admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_remove_v0`,
 `fy_std_windows_file_read_only_v0`,
 `fy_std_windows_file_link_count_v0`,
 `fy_std_windows_file_id_v0`, and
-`fy_std_windows_file_set_len_v0`. The public resolver separately admits ten common File symbols:
-open, read, position, size, absolute seek, write, write-all, sync, close, and drop. A separate-translation-
+`fy_std_windows_file_set_len_v0`. The public resolver separately admits twelve common File symbols:
+open, read, position, size, absolute/current/end seek, write, write-all, sync, close, and drop. A separate-translation-
 unit probe
 executes create/truncate, write-all, cursor-preserving length shrink/extend, sync, normal and repeated close, three-byte reads, EOF, forced
 `ERROR_INVALID_HANDLE` close and size failures, absolute/current/end position changes, size 9,

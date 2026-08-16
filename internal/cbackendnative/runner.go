@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v35"
+	reportSchemaVersion = "fairyc.native-c-report/v36"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -122,6 +122,48 @@ fn i32 write_then_close(fs::File input) {
     };
     if (size_position_code != 0) {
         return size_position_code;
+    }
+    let i32 current_code = switch (fs::seek_current(ref mut file, -1)) {
+        case .ok(position) : { if (position == 1) { 0 } else { 28 } }
+        case .err(_) : { 29 }
+    };
+    if (current_code != 0) {
+        return current_code;
+    }
+    let i32 end_code = switch (fs::seek_end(ref mut file, -2)) {
+        case .ok(position) : { if (position == 5) { 0 } else { 30 } }
+        case .err(_) : { 31 }
+    };
+    if (end_code != 0) {
+        return end_code;
+    }
+    let i32 beyond_end_code = switch (fs::seek_end(ref mut file, 3)) {
+        case .ok(position) : { if (position == 10) { 0 } else { 32 } }
+        case .err(_) : { 33 }
+    };
+    if (beyond_end_code != 0) {
+        return beyond_end_code;
+    }
+    let i32 beyond_end_size_code = switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == 7) { 0 } else { 34 } }
+        case .err(_) : { 35 }
+    };
+    if (beyond_end_size_code != 0) {
+        return beyond_end_size_code;
+    }
+    let i32 beyond_end_position_code = switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == 10) { 0 } else { 36 } }
+        case .err(_) : { 37 }
+    };
+    if (beyond_end_position_code != 0) {
+        return beyond_end_position_code;
+    }
+    let i32 reset_code = switch (fs::seek_start(ref mut file, 2)) {
+        case .ok(position) : { if (position == 2) { 0 } else { 38 } }
+        case .err(_) : { 39 }
+    };
+    if (reset_code != 0) {
+        return reset_code;
     }
     let usize invalid_offset = 18446744073709551615;
     let i32 rejected_code = switch (fs::seek_start(ref mut file, invalid_offset)) {

@@ -272,6 +272,42 @@ struct fy_std_file_position_result_v0 fy_std_file_seek_start_v0(
     return fy_std_file_position_result_v0(FY_STD_FILE_OK_V0, 0, (size_t)position);
 }
 
+static struct fy_std_file_position_result_v0 fy_std_file_seek_relative_v0(
+    void *file_storage,
+    int32_t offset,
+    int origin
+) {
+    struct fy_std_linux_file_v0 file;
+    if (!fy_std_file_storage_to_linux_v0(file_storage, &file)) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_CLOSED_V0, 0, 0);
+    }
+    off_t position;
+    do {
+        position = lseek(file.descriptor, (off_t)offset, origin);
+    } while (position < (off_t)0 && errno == EINTR);
+    if (position < (off_t)0) {
+        return fy_std_file_position_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0);
+    }
+    return fy_std_file_position_result_v0(FY_STD_FILE_OK_V0, 0, (size_t)position);
+}
+
+struct fy_std_file_position_result_v0 fy_std_file_seek_current_v0(
+    void *file_storage,
+    int32_t offset
+) {
+    return fy_std_file_seek_relative_v0(file_storage, offset, SEEK_CUR);
+}
+
+struct fy_std_file_position_result_v0 fy_std_file_seek_end_v0(
+    void *file_storage,
+    int32_t offset
+) {
+    return fy_std_file_seek_relative_v0(file_storage, offset, SEEK_END);
+}
+
 struct fy_std_file_result_v0 fy_std_file_write_v0(
     void *file_storage,
     const uint8_t *buffer,

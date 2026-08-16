@@ -389,7 +389,7 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 	}
 }
 
-func TestLinuxFileSourcesConsumeCloseAndExposePartialIOPositionAndSize(t *testing.T) {
+func TestLinuxFileSourcesConsumeCloseAndExposePartialIOPositionSizeAndSeek(t *testing.T) {
 	t.Parallel()
 	implementation, err := LinuxFileSource()
 	if err != nil {
@@ -404,6 +404,7 @@ func TestLinuxFileSourcesConsumeCloseAndExposePartialIOPositionAndSize(t *testin
 		"fy_std_linux_file_write_all_v0", "file->descriptor = -1", "(void)close(descriptor)",
 		"fy_std_file_open_v0", "fy_std_file_read_v0", "fy_std_file_write_v0",
 		"fy_std_file_position_v0", "fy_std_file_size_v0", "fy_std_file_seek_start_v0",
+		"fy_std_file_seek_current_v0", "fy_std_file_seek_end_v0", "SEEK_CUR", "SEEK_END",
 		"fy_std_file_write_all_v0", "fy_std_file_sync_v0", "fy_std_file_close_v0",
 		"fy_std_file_drop_v0", "O_EXCL", "O_APPEND", "(mode_t)0666",
 		"#include <sys/stat.h>",
