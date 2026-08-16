@@ -442,6 +442,7 @@ func TestLinuxConsoleSourcesPreserveWriteProgressAndReadEOF(t *testing.T) {
 		}
 	}
 	for _, required := range []string{
+		"#include <errno.h>",
 		"open(\"/dev/null\", O_WRONLY)", "dup2(sink, descriptor)",
 		"close(descriptor)", "STDOUT_FILENO", "STDERR_FILENO",
 		"pipe(pipe_descriptors)", "memcmp(buffer, payload, sizeof(payload))",
