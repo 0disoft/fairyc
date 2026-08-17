@@ -39,11 +39,11 @@ The common source form is a C-like label prefix:
 ```fy
 scan_bananas: for (var i32 i = 0; i < banana_count; i += 1) {
     for (var i32 j = 0; j < crate_count; j += 1) {
-        if should_skip(i, j) {
+        if (should_skip(i, j)) {
             continue scan_bananas;
         }
 
-        if found_enough(i, j) {
+        if (found_enough(i, j)) {
             break scan_bananas;
         }
     }
@@ -88,7 +88,7 @@ the loop is clearer and keeps loop fixed-point analysis separate from expression
 ```fy
 let i32 found = search: {
     for (var i32 i = 0; i < values.len(); i += 1) {
-        if matches(values[i]) {
+        if (matches(values[i])) {
             break search(i);
         }
     }
@@ -104,7 +104,7 @@ A later slice may admit a named block as a value-producing local control express
 ```fy
 let i32 banana_index = find_banana: {
     for (var i32 i = 0; i < items.len(); i += 1) {
-        if is_banana(items[i]) {
+        if (is_banana(items[i])) {
             break find_banana(i);
         }
     }
@@ -201,6 +201,8 @@ Typed HIR should expose a closed control table similar to:
 ```go
 type ControlID uint32
 
+type ControlKind string
+
 type ControlCapabilities struct {
     Exit      bool
     Continue  bool
@@ -210,14 +212,14 @@ type ControlCapabilities struct {
 type ControlSymbol struct {
     ID           ControlID
     Name         string
-    Kind         syntax.Kind
-    ExitType     hir.Type
+    Kind         ControlKind
+    ExitType     Type
     Capabilities ControlCapabilities
 }
 
 type ControlTransfer struct {
     Target ControlID
-    Value  *hir.Expression
+    Value  *Expression
 }
 ```
 
@@ -280,7 +282,7 @@ A later tooling slice may add an explicit stable anchor:
 
 ```fy
 @anchor("checkout.count-bananas")
-count_bananas: if x > 3 {
+count_bananas: if (x > 3) {
     // ...
 }
 ```
@@ -299,7 +301,7 @@ A formatter may instead add or update a non-semantic closing comment for suffici
 controls:
 
 ```fy
-count_bananas: if x > 3 {
+count_bananas: if (x > 3) {
     // ...
 } // end count_bananas
 ```
