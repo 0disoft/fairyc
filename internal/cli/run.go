@@ -38,7 +38,6 @@ Usage:
   fairyc run [--release] [--locked] [-- <program-args...>]
   fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]
   fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]
-  fairyc emit c --target <target-id> [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets
   fairyc experimental parse <file.fy>
@@ -58,6 +57,7 @@ Usage:
   fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]
   fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]
   fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]
+  fairyc experimental emit-workspace-c --target <target-id> [--locked]
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <entry.fy> [--source <file.fy>]...
   fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>
@@ -83,11 +83,12 @@ after "--" in every isolated execution. Explicit --stdin attaches caller input o
 native test is selected; native tests otherwise receive EOF. Explicit --capture-output requires
 native JSON execution and adds exact base64 process streams to each outcome.
 Explicit --stdin-file replays one bounded workspace-contained file from byte zero to every native test.
-Explicit --timeout-seconds bounds each native test process and defaults to 60 seconds.
-"fairyc emit c" writes one
-explicitly targeted C11 application unit to stdout without invoking a toolchain. Pass --release to
-build, run, or native test for optimization. All five workspace commands read fairy.toml and refresh fairy.lock
-unless --locked is supplied.
+Explicit --timeout-seconds bounds each isolated native test process and defaults to 60 seconds.
+"fairyc experimental emit-workspace-c" writes one private, explicitly targeted C11 bootstrap unit
+to stdout without invoking a toolchain. Its generated source is compiler-internal transport, not a
+cross-release C API or standalone product artifact. Pass --release to build, run, or native test for
+optimization. All four stable workspace commands read fairy.toml and refresh fairy.lock unless
+--locked is supplied.
 `
 
 // Run executes one bounded command with an already-closed input stream. Commands that explicitly
@@ -151,10 +152,7 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 		return runStableTest(args[1:], sourceRoot, stdin, stdout, stderr)
 	}
 	if args[0] == "emit" {
-		if len(args) == 2 && isHelp(args[1]) {
-			return writeHelp(stdout, stderr)
-		}
-		return runStableEmit(args[1:], sourceRoot, stdout, stderr)
+		return rejectRemovedStableEmit(stderr)
 	}
 	if args[0] != "experimental" {
 		return invocationError(stderr, fmt.Sprintf("unknown command %q", args[0]))
@@ -248,6 +246,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runWorkspaceBuild(args[1:], sourceRoot, stdout, stderr)
 	case "run-workspace":
 		return runWorkspaceTarget(args[1:], sourceRoot, stdout, stderr)
+	case experimentalWorkspaceCCommand:
+		return runExperimentalWorkspaceEmit(args[1:], sourceRoot, stdout, stderr)
 	case "run":
 		return runInterpreter(args[1:], sourceRoot, stdout, stderr)
 	case "target-spec":
