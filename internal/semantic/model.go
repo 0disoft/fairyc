@@ -185,7 +185,7 @@ func AnalyzePackages(input PackageInput) (Result, error) {
 }
 
 func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
-	ordered := append([]File(nil), files...)
+	ordered := cloneResourceAbilityInputs(files)
 	slices.SortFunc(ordered, func(a, b File) int {
 		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
 			return byPackage
