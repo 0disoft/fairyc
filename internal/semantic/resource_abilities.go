@@ -1,6 +1,8 @@
 package semantic
 
 import (
+	"slices"
+
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -26,6 +28,25 @@ type resourceAbilityDeclaration struct {
 
 func (d resourceAbilityDeclaration) has(ability resourceAbility) bool {
 	return d.abilities&ability != 0
+}
+
+// cloneResourceAbilityInputs preserves the semantic input contract as immutable while allowing the
+// analyzer to consume recognized resource-owned attributes on its private resource declarations.
+func cloneResourceAbilityInputs(files []File) []File {
+	cloned := slices.Clone(files)
+	for index := range cloned {
+		module := cloned[index].Module
+		if module == nil || len(module.Resources) == 0 {
+			continue
+		}
+		moduleClone := *module
+		moduleClone.Resources = slices.Clone(module.Resources)
+		for resourceIndex := range moduleClone.Resources {
+			moduleClone.Resources[resourceIndex].Attributes = slices.Clone(moduleClone.Resources[resourceIndex].Attributes)
+		}
+		cloned[index].Module = &moduleClone
+	}
+	return cloned
 }
 
 // prepareResourceAbilities consumes the resource-owned @abilities attribute before the generic
