@@ -1,11 +1,15 @@
 # ADR 0137: Keep ISO C11 as the constrained transport baseline
 
-- Status: Accepted for prototype
+- Status: Accepted for private bootstrap transport; product-surface clauses superseded by ADR 0335
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Backend source: `docs/mir/c-backend-safety-v0.md`
 - ABI source: `docs/abi/c-abi-v0.md`
 - Compatibility source: `docs/compatibility/versioning-v0.md`
+
+ADR 0335 retains ISO C11 as compiler-private bootstrap and differential transport while removing the
+stable generated-C product command. References below to a product C-emission dialect are historical
+and do not create a current user-facing source-output compatibility promise.
 
 ## Context
 
