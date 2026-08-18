@@ -80,6 +80,33 @@ func TestOnchainEffectsClassifyAuthorityAndMutation(t *testing.T) {
 	}
 }
 
+func TestOnchainViewEligibilityIsDerivedFromEffects(t *testing.T) {
+	t.Parallel()
+	readOnly := [][]Effect{
+		nil,
+		{EffectBlockContext},
+		{EffectStorageRead, EffectBlockContext},
+		{EffectFilesystem, EffectStorageRead},
+	}
+	for _, effects := range readOnly {
+		if !OnchainEffectsAreReadOnly(effects) {
+			t.Fatalf("OnchainEffectsAreReadOnly(%v) = false", effects)
+		}
+	}
+
+	mutating := [][]Effect{
+		{EffectEmit},
+		{EffectExternalCall},
+		{EffectStorageWrite},
+		{EffectStorageRead, EffectStorageWrite},
+	}
+	for _, effects := range mutating {
+		if OnchainEffectsAreReadOnly(effects) {
+			t.Fatalf("OnchainEffectsAreReadOnly(%v) = true", effects)
+		}
+	}
+}
+
 func TestMissingEffectsCanonicalizesInputs(t *testing.T) {
 	t.Parallel()
 	declared := []Effect{EffectConsole, EffectConsole}
