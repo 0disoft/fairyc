@@ -648,8 +648,29 @@ func (a *analyzer) checkResourceValueEffects(value *symbol, at hir.Span) {
 }
 
 func (a *analyzer) checkResourceValueEffectsOnce(value *symbol, at hir.Span, seen map[*symbol]struct{}) {
+	if value == nil {
+		return
+	}
+	blockers := a.nonDroppableResourceOwners(value.typ, make(map[hir.Type]struct{}))
+	if len(blockers) > 0 {
+		for _, owner := range blockers {
+			if owner == nil {
+				continue
+			}
+			if _, duplicate := seen[owner]; duplicate {
+				continue
+			}
+			seen[owner] = struct{}{}
+			_, declaration := a.resourceAllowsImplicitDrop(owner)
+			a.addDiagnostic("E1108", at, RelatedSpan{
+				Role: "ability-declaration", Span: span(owner.source, declaration),
+			})
+		}
+		return
+	}
+
 	caller := a.resourceCaller
-	if value == nil || caller == nil || !caller.effectsValid {
+	if caller == nil || !caller.effectsValid {
 		return
 	}
 	for _, requirement := range a.requiredDropEffects(value.typ) {
