@@ -13,48 +13,47 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
-func TestParseStableEmitOptions(t *testing.T) {
+func TestParseExperimentalWorkspaceEmitOptions(t *testing.T) {
 	t.Parallel()
 	for _, id := range []target.ID{target.X8664LinuxGNU, target.X8664WindowsMSVC} {
-		options, err := parseStableEmitOptions([]string{"c", "--locked", "--target", string(id)})
+		options, err := parseExperimentalWorkspaceEmitOptions([]string{"--locked", "--target", string(id)})
 		if err != nil || options.targetID != id || !options.locked {
-			t.Fatalf("parseStableEmitOptions(%q) = %+v, %v", id, options, err)
+			t.Fatalf("parseExperimentalWorkspaceEmitOptions(%q) = %+v, %v", id, options, err)
 		}
 	}
 	for _, test := range []struct {
 		arguments []string
 		contains  string
 	}{
-		{contains: "expects form c"},
-		{arguments: []string{"mir", "--target", string(target.X8664LinuxGNU)}, contains: "only form c"},
-		{arguments: []string{"c"}, contains: "requires --target"},
-		{arguments: []string{"c", "--target"}, contains: "requires a value"},
-		{arguments: []string{"c", "--target", "aarch64-linux-gnu"}, contains: "does not know target"},
-		{arguments: []string{"c", "--target", string(target.X8664LinuxGNU), "--target", string(target.X8664WindowsMSVC)}, contains: "more than once"},
-		{arguments: []string{"c", "--locked", "--locked", "--target", string(target.X8664LinuxGNU)}, contains: "more than once"},
-		{arguments: []string{"c", "--target", string(target.X8664LinuxGNU), "--release"}, contains: "does not accept"},
+		{contains: "requires --target"},
+		{arguments: []string{"c"}, contains: "does not accept argument"},
+		{arguments: []string{"--target"}, contains: "requires a value"},
+		{arguments: []string{"--target", "aarch64-linux-gnu"}, contains: "does not know target"},
+		{arguments: []string{"--target", string(target.X8664LinuxGNU), "--target", string(target.X8664WindowsMSVC)}, contains: "more than once"},
+		{arguments: []string{"--locked", "--locked", "--target", string(target.X8664LinuxGNU)}, contains: "more than once"},
+		{arguments: []string{"--target", string(target.X8664LinuxGNU), "--release"}, contains: "does not accept"},
 	} {
-		if _, err := parseStableEmitOptions(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
-			t.Errorf("parseStableEmitOptions(%q) error = %v; want containing %q", test.arguments, err, test.contains)
+		if _, err := parseExperimentalWorkspaceEmitOptions(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
+			t.Errorf("parseExperimentalWorkspaceEmitOptions(%q) error = %v; want containing %q", test.arguments, err, test.contains)
 		}
 	}
 }
 
-func TestStableEmitWritesDeterministicTargetSelectedCAndMaintainsLock(t *testing.T) {
+func TestExperimentalWorkspaceEmitWritesDeterministicTargetSelectedCAndMaintainsLock(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeEmitWorkspace(t, root, true)
 
-	windowsArgs := []string{"emit", "c", "--target", string(target.X8664WindowsMSVC)}
+	windowsArgs := []string{"experimental", experimentalWorkspaceCCommand, "--target", string(target.X8664WindowsMSVC)}
 	code, windowsC, stderr := runForTest(windowsArgs, root)
 	if code != ExitSuccess || stderr != "" {
-		t.Fatalf("Windows emit = (%d, %q)", code, stderr)
+		t.Fatalf("Windows experimental workspace emit = (%d, %q)", code, stderr)
 	}
 	if !strings.Contains(windowsC, "_Static_assert(sizeof(long) == UINT64_C(4)") ||
 		!strings.Contains(windowsC, "extern long inspect_c_long(void);") ||
 		!strings.Contains(windowsC, "int main(void)") || strings.Contains(windowsC, "emitted:") ||
 		!strings.HasSuffix(windowsC, "\n") {
-		t.Fatalf("Windows C output does not match the raw LLP64 C11 contract:\n%s", windowsC)
+		t.Fatalf("Windows C output does not match the private LLP64 C11 transport:\n%s", windowsC)
 	}
 	lockPath := filepath.Join(root, lockfile.FileName)
 	lockBytes, err := os.ReadFile(lockPath)
@@ -80,23 +79,24 @@ func TestStableEmitWritesDeterministicTargetSelectedCAndMaintainsLock(t *testing
 		t.Fatal(err)
 	}
 	if !bytes.Equal(lockedBytes, lockBytes) || !lockedInfo.ModTime().Equal(lockTimestamp) {
-		t.Fatalf("locked emit modified fairy.lock: bytesEqual=%t modTime=%s", bytes.Equal(lockedBytes, lockBytes), lockedInfo.ModTime())
+		t.Fatalf("locked experimental emit modified fairy.lock: bytesEqual=%t modTime=%s", bytes.Equal(lockedBytes, lockBytes), lockedInfo.ModTime())
 	}
 
-	code, linuxC, stderr := runForTest([]string{"emit", "c", "--target", string(target.X8664LinuxGNU), "--locked"}, root)
+	code, linuxC, stderr := runForTest([]string{"experimental", experimentalWorkspaceCCommand, "--target", string(target.X8664LinuxGNU), "--locked"}, root)
 	if code != ExitSuccess || stderr != "" || linuxC == windowsC ||
 		!strings.Contains(linuxC, "_Static_assert(sizeof(long) == UINT64_C(8)") ||
 		!strings.Contains(linuxC, "int main(void)") {
-		t.Fatalf("Linux emit = (%d, differs=%t, %q)\n%s", code, linuxC != windowsC, stderr, linuxC)
+		t.Fatalf("Linux experimental emit = (%d, differs=%t, %q)\n%s", code, linuxC != windowsC, stderr, linuxC)
 	}
 	if _, err := os.Stat(filepath.Join(root, "build")); !os.IsNotExist(err) {
-		t.Fatalf("emit created a build directory: %v", err)
+		t.Fatalf("experimental emit created a build directory: %v", err)
 	}
 }
 
-func TestStableEmitPreservesFailureCategoriesAndWritesNoPartialArtifact(t *testing.T) {
+func TestExperimentalWorkspaceEmitPreservesFailureCategoriesAndWritesNoPartialArtifact(t *testing.T) {
 	t.Parallel()
-	code, stdout, stderr := runForTest([]string{"emit", "c", "--target", string(target.X8664WindowsMSVC)}, t.TempDir())
+	arguments := []string{"experimental", experimentalWorkspaceCCommand, "--target", string(target.X8664WindowsMSVC)}
+	code, stdout, stderr := runForTest(arguments, t.TempDir())
 	if code != ExitPackageFailure || stdout != "" || !strings.Contains(stderr, "fairy.toml") {
 		t.Fatalf("missing workspace = (%d, %q, %q)", code, stdout, stderr)
 	}
@@ -104,7 +104,7 @@ func TestStableEmitPreservesFailureCategoriesAndWritesNoPartialArtifact(t *testi
 	syntaxRoot := t.TempDir()
 	writeEmitWorkspace(t, syntaxRoot, true)
 	writeWorkspaceFile(t, syntaxRoot, "src/main.fy", "module main;\nfn i32 broken( { return 0; }\n")
-	code, stdout, stderr = runForTest([]string{"emit", "c", "--target", string(target.X8664WindowsMSVC)}, syntaxRoot)
+	code, stdout, stderr = runForTest(arguments, syntaxRoot)
 	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0007") {
 		t.Fatalf("source diagnostics = (%d, %q, %q)", code, stdout, stderr)
 	}
@@ -112,50 +112,72 @@ func TestStableEmitPreservesFailureCategoriesAndWritesNoPartialArtifact(t *testi
 	unsupportedRoot := t.TempDir()
 	writeEmitWorkspace(t, unsupportedRoot, true)
 	writeWorkspaceFile(t, unsupportedRoot, "src/main.fy", "module main;\n@mystery\nfn i32 main() { return 42; }\n")
-	code, stdout, stderr = runForTest([]string{"emit", "c", "--target", string(target.X8664WindowsMSVC)}, unsupportedRoot)
-	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "semantic subset does not support function attribute @mystery") || strings.Contains(stderr, "experimental semantic subset") {
+	code, stdout, stderr = runForTest(arguments, unsupportedRoot)
+	if code != ExitSourceDiagnostics || stdout != "" ||
+		!strings.Contains(stderr, "semantic subset does not support function attribute @mystery") ||
+		!strings.Contains(stderr, "experimental") {
 		t.Fatalf("unsupported semantics = (%d, %q, %q)", code, stdout, stderr)
 	}
 
 	missingEntryRoot := t.TempDir()
 	writeEmitWorkspace(t, missingEntryRoot, false)
-	code, stdout, stderr = runForTest([]string{"emit", "c", "--target", string(target.X8664WindowsMSVC)}, missingEntryRoot)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "root entry") || strings.Contains(stderr, "experimental") {
+	code, stdout, stderr = runForTest(arguments, missingEntryRoot)
+	if code != ExitInvalidInvocation || stdout != "" ||
+		!strings.Contains(stderr, "root entry") || !strings.Contains(stderr, "experimental") {
 		t.Fatalf("missing entry = (%d, %q, %q)", code, stdout, stderr)
 	}
 }
 
-func TestStableEmitHandlesHelpAndOutputFailure(t *testing.T) {
+func TestStableWorkspaceEmitIsRemovedFromProductSurface(t *testing.T) {
+	t.Parallel()
+	code, stdout, stderr := runForTest(
+		[]string{"emit", "c", "--target", string(target.X8664WindowsMSVC)},
+		t.TempDir(),
+	)
+	if code != ExitInvalidInvocation || stdout != "" ||
+		!strings.Contains(stderr, "is not a stable product command") ||
+		!strings.Contains(stderr, "experimental emit-workspace-c") {
+		t.Fatalf("removed stable emit = (%d, %q, %q)", code, stdout, stderr)
+	}
+	if strings.Contains(stderr, "\n  fairyc emit c --target") ||
+		!strings.Contains(stderr, "\n  fairyc experimental emit-workspace-c --target") {
+		t.Fatalf("removed stable emit leaked stale usage:\n%s", stderr)
+	}
+}
+
+func TestExperimentalWorkspaceEmitHandlesHelpAndOutputFailure(t *testing.T) {
 	t.Parallel()
 	for _, flag := range []string{"-h", "--help"} {
-		code, stdout, stderr := runForTest([]string{"emit", flag}, t.TempDir())
-		if code != ExitSuccess || !strings.Contains(stdout, "fairyc emit c --target <target-id> [--locked]") || stderr != "" {
-			t.Fatalf("emit %s = (%d, %q, %q)", flag, code, stdout, stderr)
+		code, stdout, stderr := runForTest([]string{"experimental", experimentalWorkspaceCCommand, flag}, t.TempDir())
+		if code != ExitSuccess ||
+			!strings.Contains(stdout, "fairyc experimental emit-workspace-c --target <target-id> [--locked]") ||
+			strings.Contains(stdout, "\n  fairyc emit c --target") || stderr != "" {
+			t.Fatalf("experimental emit %s = (%d, %q, %q)", flag, code, stdout, stderr)
 		}
 	}
 	root := t.TempDir()
 	writeEmitWorkspace(t, root, true)
 	var failure bytes.Buffer
 	code := Run(
-		[]string{"emit", "c", "--target", string(target.X8664WindowsMSVC)},
+		[]string{"experimental", experimentalWorkspaceCCommand, "--target", string(target.X8664WindowsMSVC)},
 		root,
 		failingWriter{},
 		&failure,
 	)
 	if code != ExitInternalFailure || !strings.Contains(failure.String(), "write output failed") {
-		t.Fatalf("emit output failure = (%d, %q)", code, failure.String())
+		t.Fatalf("experimental emit output failure = (%d, %q)", code, failure.String())
 	}
 	partial := &prefixFailingWriter{limit: 32}
 	failure.Reset()
 	code = Run(
-		[]string{"emit", "c", "--target", string(target.X8664WindowsMSVC), "--locked"},
+		[]string{"experimental", experimentalWorkspaceCCommand, "--target", string(target.X8664WindowsMSVC), "--locked"},
 		root,
 		partial,
 		&failure,
 	)
 	if code != ExitInternalFailure || partial.Len() != partial.limit ||
 		!strings.Contains(failure.String(), "write output failed") {
-		t.Fatalf("emit partial output failure = (%d, bytes=%d, %q)", code, partial.Len(), failure.String())
+		t.Fatalf("experimental emit partial output failure = (%d, bytes=%d, %q)", code, partial.Len(), failure.String())
 	}
 	if _, err := os.Stat(filepath.Join(root, "build")); !os.IsNotExist(err) {
 		t.Fatalf("output failure created a build directory: %v", err)
