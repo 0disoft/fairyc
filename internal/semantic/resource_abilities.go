@@ -4,6 +4,7 @@ import (
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/syntax"
 )
 
 const resourceAbilitiesAttribute = "abilities"
@@ -166,4 +167,43 @@ func (a *analyzer) nonDroppableResourceOwners(value hir.Type, visiting map[hir.T
 		return append(owners, a.nonDroppableResourceOwners(failure, visiting)...)
 	}
 	return nil
+}
+
+// rejectDiscardedLinearResource covers resource-bearing temporaries that never receive a tracked
+// local. Ordinary Resource Flow owns locals and parameters; this companion check prevents direct
+// expression statements and `discard make_asset()` from scheduling an untracked implicit drop.
+func (a *analyzer) rejectDiscardedLinearResource(module *moduleScope, expression *ast.Expression) {
+	if expression == nil || resourcePlaceExpression(expression) {
+		return
+	}
+	value := a.expressionTypes[expression]
+	if !a.isResource(value) {
+		return
+	}
+	owners := a.nonDroppableResourceOwners(value, make(map[hir.Type]struct{}))
+	if len(owners) == 0 {
+		return
+	}
+	at := span(module.file.Path, expression.Span)
+	seen := make(map[*symbol]struct{}, len(owners))
+	for _, owner := range owners {
+		if owner == nil {
+			continue
+		}
+		if _, duplicate := seen[owner]; duplicate {
+			continue
+		}
+		seen[owner] = struct{}{}
+		_, declaration := a.resourceAllowsImplicitDrop(owner)
+		a.addDiagnostic("E1108", at, RelatedSpan{
+			Role: "ability-declaration", Span: span(owner.source, declaration),
+		})
+	}
+}
+
+func resourcePlaceExpression(expression *ast.Expression) bool {
+	for expression != nil && expression.Kind == syntax.KindGroup && len(expression.Children) == 1 {
+		expression = expression.Children[0]
+	}
+	return expression != nil && expression.Kind == syntax.KindPath
 }
