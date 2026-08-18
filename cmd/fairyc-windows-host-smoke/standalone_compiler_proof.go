@@ -66,7 +66,7 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args...>]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]") ||
 		!strings.Contains(helpStdout, "every\nunambiguous root-reachable local package with --workspace") ||
 		!strings.Contains(helpStdout, "native tests receive any process arguments") ||
@@ -74,7 +74,8 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "Explicit --stdin-file replays one bounded") ||
 		!strings.Contains(helpStdout, "Explicit --timeout-seconds bounds each native test process") ||
 		!strings.Contains(helpStdout, "Explicit --capture-output requires") ||
-		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc experimental emit-workspace-c --target <target-id> [--locked]") ||
+		strings.Contains(helpStdout, "\n  fairyc emit c --target") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental check-workspace-session") ||
@@ -504,23 +505,23 @@ fn void directory_excluded_fails() { assert(false); }
 		emitCode, emitStdout, emitStderr, err := runStandaloneCommand(
 			sourceRoot,
 			executablePath,
-			"emit", "c", "--target", targetID, "--locked",
+			"experimental", "emit-workspace-c", "--target", targetID, "--locked",
 		)
 		if err != nil {
-			return 0, fmt.Errorf("execute standalone compiler stable %s C emission: %w", targetID, err)
+			return 0, fmt.Errorf("execute standalone compiler experimental %s C transport: %w", targetID, err)
 		}
 		if emitCode != cli.ExitSuccess || emitStderr != "" ||
 			!strings.Contains(emitStdout, "int main(void)") ||
 			!strings.HasSuffix(emitStdout, "\n") || strings.Contains(emitStdout, "emitted:") {
-			return 0, fmt.Errorf("standalone compiler stable %s emit returned code %d, stdout %q, stderr %q", targetID, emitCode, emitStdout, emitStderr)
+			return 0, fmt.Errorf("standalone compiler experimental %s C transport returned code %d, stdout %q, stderr %q", targetID, emitCode, emitStdout, emitStderr)
 		}
 	}
 	stableArtifactAfterEmit, err := os.ReadFile(stableArtifactPath)
 	if err != nil {
-		return 0, fmt.Errorf("read stable build artifact after standalone emit: %w", err)
+		return 0, fmt.Errorf("read stable build artifact after standalone experimental C transport: %w", err)
 	}
 	if !bytes.Equal(stableArtifactAfterEmit, stableArtifact) {
-		return 0, fmt.Errorf("standalone stable emit modified the retained build artifact")
+		return 0, fmt.Errorf("standalone experimental C transport modified the retained build artifact")
 	}
 
 	runCode, runStdout, runStderr, err := runStandaloneCommand(
