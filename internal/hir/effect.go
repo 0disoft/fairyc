@@ -6,28 +6,85 @@ import "slices"
 type Effect string
 
 const (
-	EffectClock       Effect = "clock"
-	EffectConsole     Effect = "console"
-	EffectEnvironment Effect = "environment"
-	EffectFilesystem  Effect = "filesystem"
-	EffectNetwork     Effect = "network"
-	EffectProcess     Effect = "process"
-	EffectRandom      Effect = "random"
+	EffectBlockContext Effect = "block_context"
+	EffectClock        Effect = "clock"
+	EffectConsole      Effect = "console"
+	EffectEmit         Effect = "emit"
+	EffectEnvironment  Effect = "environment"
+	EffectExternalCall Effect = "external_call"
+	EffectFilesystem   Effect = "filesystem"
+	EffectNetwork      Effect = "network"
+	EffectProcess      Effect = "process"
+	EffectRandom       Effect = "random"
+	EffectStorageRead  Effect = "storage_read"
+	EffectStorageWrite Effect = "storage_write"
 )
 
 var stage0Effects = []Effect{
+	EffectBlockContext,
 	EffectClock,
 	EffectConsole,
+	EffectEmit,
 	EffectEnvironment,
+	EffectExternalCall,
 	EffectFilesystem,
 	EffectNetwork,
 	EffectProcess,
 	EffectRandom,
+	EffectStorageRead,
+	EffectStorageWrite,
 }
 
-// Stage0Effects returns the closed canonical Stage 0 effect vocabulary in lexical order.
+var onchainEffects = []Effect{
+	EffectBlockContext,
+	EffectEmit,
+	EffectExternalCall,
+	EffectStorageRead,
+	EffectStorageWrite,
+}
+
+// external_call is deliberately mutation-capable. Until a target proves a static-call boundary,
+// the callee may mutate its own state, re-enter the caller, or emit consensus-visible output.
+var onchainMutationEffects = []Effect{
+	EffectEmit,
+	EffectExternalCall,
+	EffectStorageWrite,
+}
+
+// Stage0Effects returns the closed canonical effect vocabulary in lexical order.
 func Stage0Effects() []Effect {
 	return slices.Clone(stage0Effects)
+}
+
+// OnchainEffects returns the closed target-neutral on-chain authority vocabulary in lexical order.
+func OnchainEffects() []Effect {
+	return slices.Clone(onchainEffects)
+}
+
+// OnchainMutationEffects returns effects that a conservative view function may not declare.
+func OnchainMutationEffects() []Effect {
+	return slices.Clone(onchainMutationEffects)
+}
+
+// IsOnchainEffect reports whether effect represents target-neutral chain authority.
+func IsOnchainEffect(effect Effect) bool {
+	return slices.Contains(onchainEffects, effect)
+}
+
+// IsOnchainMutationEffect reports whether effect may change consensus-visible state or behavior.
+func IsOnchainMutationEffect(effect Effect) bool {
+	return slices.Contains(onchainMutationEffects, effect)
+}
+
+// MutatingOnchainEffects returns the canonical mutation-capable subset of effects.
+func MutatingOnchainEffects(effects []Effect) []Effect {
+	var result []Effect
+	for _, effect := range CanonicalEffects(effects) {
+		if IsOnchainMutationEffect(effect) {
+			result = append(result, effect)
+		}
+	}
+	return result
 }
 
 // ParseEffect returns the canonical effect for one exact Stage 0 spelling.
