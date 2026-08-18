@@ -61,7 +61,7 @@ func OnchainEffects() []Effect {
 	return slices.Clone(onchainEffects)
 }
 
-// OnchainMutationEffects returns effects that a conservative view function may not declare.
+// OnchainMutationEffects returns effects that a conservative view entry may not declare.
 func OnchainMutationEffects() []Effect {
 	return slices.Clone(onchainMutationEffects)
 }
@@ -85,6 +85,13 @@ func MutatingOnchainEffects(effects []Effect) []Effect {
 		}
 	}
 	return result
+}
+
+// OnchainEffectsAreReadOnly reports whether an effect set is eligible for conservative view
+// execution. Contract-target validation separately rejects host-only authority such as filesystem
+// or process access; this predicate owns only consensus-visible mutation classification.
+func OnchainEffectsAreReadOnly(effects []Effect) bool {
+	return len(MutatingOnchainEffects(effects)) == 0
 }
 
 // ParseEffect returns the canonical effect for one exact Stage 0 spelling.
