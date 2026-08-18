@@ -10,6 +10,7 @@ import (
 
 type resourceInfo struct {
 	symbol        *symbol
+	abilities     resourceAbilityDeclaration
 	fields        map[string]resourceField
 	orderedFields []resourceField
 }
