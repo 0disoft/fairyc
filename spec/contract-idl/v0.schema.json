@@ -1,0 +1,203 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://fairyc.dev/schema/contract-idl/v0.schema.json",
+    "title": "Fairy C chain-neutral contract IDL v0",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema",
+        "module",
+        "contracts",
+        "events"
+    ],
+    "properties": {
+        "schema": {
+            "const": "fairyc.contract-idl/v0"
+        },
+        "module": {
+            "$ref": "#/$defs/path"
+        },
+        "contracts": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/contract"
+            }
+        },
+        "events": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/event"
+            }
+        }
+    },
+    "$defs": {
+        "identifier": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "path": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"
+        },
+        "contract": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "functions"
+            ],
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "functions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/function"
+                    }
+                }
+            }
+        },
+        "function": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "parameters",
+                "result",
+                "view",
+                "payable",
+                "effects"
+            ],
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "parameters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/parameter"
+                    }
+                },
+                "result": {
+                    "$ref": "#/$defs/type"
+                },
+                "view": {
+                    "type": "boolean"
+                },
+                "payable": {
+                    "type": "boolean"
+                },
+                "effects": {
+                    "type": "array",
+                    "prefixItems": [
+                        {
+                            "const": "external_call"
+                        }
+                    ],
+                    "minItems": 1,
+                    "maxItems": 1
+                }
+            }
+        },
+        "parameter": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "type": {
+                    "$ref": "#/$defs/type"
+                }
+            }
+        },
+        "event": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "fields"
+            ],
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/field"
+                    }
+                }
+            }
+        },
+        "field": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "type": {
+                    "$ref": "#/$defs/type"
+                }
+            }
+        },
+        "type": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "kind",
+                        "name"
+                    ],
+                    "properties": {
+                        "kind": {
+                            "const": "named"
+                        },
+                        "name": {
+                            "$ref": "#/$defs/path"
+                        },
+                        "arguments": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/type"
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "kind",
+                        "element",
+                        "length"
+                    ],
+                    "properties": {
+                        "kind": {
+                            "const": "array"
+                        },
+                        "element": {
+                            "$ref": "#/$defs/type"
+                        },
+                        "length": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 65535
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
