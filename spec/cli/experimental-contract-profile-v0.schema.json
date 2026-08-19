@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fairyc.dev/schema/experimental-contract-profile-v0.schema.json",
+  "title": "Fairy C deterministic contract profile report v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profile",
+    "status",
+    "accepted",
+    "costUnit",
+    "loopBudgetSemantics",
+    "persistentStorage",
+    "functions",
+    "sourceDiagnostics",
+    "violations"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "fairyc.contract-profile-report/v0" },
+    "profile": { "const": "fairyc.deterministic-contract/v0" },
+    "status": { "enum": ["accepted", "source-diagnostics", "profile-rejected"] },
+    "accepted": { "type": "boolean" },
+    "costUnit": { "const": "fairyc-abstract-step/v0" },
+    "loopBudgetSemantics": {
+      "const": "maximum aggregate metered cycle-edge traversals per function invocation"
+    },
+    "persistentStorage": { "const": false },
+    "functions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/function" }
+    },
+    "sourceDiagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sourceDiagnostic" }
+    },
+    "violations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/violation" }
+    }
+  },
+  "$defs": {
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "startByte", "endByte"],
+      "properties": {
+        "source": { "type": "string" },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sourceDiagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "location", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "location": { "$ref": "#/$defs/location" },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    },
+    "violation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^CP[0-9]{4}$" },
+        "function": { "type": "string", "minLength": 1 },
+        "location": { "$ref": "#/$defs/location" },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    },
+    "function": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "hasControlFlowCycle",
+        "meteredCycleEdges",
+        "localAbstractCost",
+        "storageGrowthUpperBoundBytes",
+        "bounded",
+        "internalCalls"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "hasControlFlowCycle": { "type": "boolean" },
+        "meteredCycleEdges": { "type": "integer", "minimum": 0 },
+        "declaredLoopBudget": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "localAbstractCost": { "type": "integer", "minimum": 0 },
+        "transitiveCostUpperBound": { "type": "integer", "minimum": 0 },
+        "storageGrowthUpperBoundBytes": { "const": 0 },
+        "bounded": { "type": "boolean" },
+        "internalCalls": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
