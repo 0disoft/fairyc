@@ -903,6 +903,11 @@ public-interface v3 rejects public non-legacy ability sets rather than omitting 
 Stable admission requires an exact language revision and a new public-interface encoding together
 with their package, cache, lock, fixture, and release migrations.
 
+ADR 0337 also leaves `fairyc-language/10` unchanged: direct experimental analysis recognizes the
+new on-chain effects, while stable resolved-package analysis rejects them. Public-interface v3 can
+encode effect strings without a shape change, but stable source admission still requires the exact
+language, manifest, SDK, lock, previous-revision, cache-vector, fixture, and migration cut.
+
 ADR 0181 stabilizes `fairyc test [--locked]`, the root-only optional lowercase `tests/` overlay,
 `tests/`-prefixed module identity, argument-free `@test` declaration shape, canonical test ordering,
 fresh semantic-interpreter execution, human result grammar, production-lock isolation, `E9001`, and

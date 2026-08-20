@@ -2,7 +2,7 @@
 
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
-- Decision sources: `docs/adr/0116-stage-0-source-effects.md`, `docs/adr/0121-resource-drop-effects.md`
+- Decision sources: `docs/adr/0116-stage-0-source-effects.md`, `docs/adr/0121-resource-drop-effects.md`, `docs/adr/0337-onchain-effect-capabilities.md`
 - Semantic fixtures: `spec/fixtures/semantic/manifest-v0.json`
 
 ## Purpose
@@ -16,6 +16,13 @@ Stage 0 call effects are checked before Flow; compiler-scheduled resource cleanu
 checked by Resource Flow. Both survive in typed HIR. They do not by themselves grant a
 backend, interpreter, or standard-library implementation. Real host I/O remains unavailable until
 the corresponding safe API, typed errors, runtime transport, and target evidence exist.
+
+## Experimental availability boundary
+
+ADR 0337 adds target-neutral on-chain effects to direct single-package experimental semantic
+analysis. `Stage0Effects()` and stable resolved-package compilation remain fixed to
+`fairyc-language/10`; workspace check, build, run, test, cache, and native emission reject the new
+spellings as unsupported until an exact language-revision cut.
 
 ## Declaration syntax
 
@@ -62,6 +69,21 @@ has no user cleanup operation to authorize.
 | `clock` | Observe wall, monotonic, or CPU time |
 | `random` | Observe an operating-system or external randomness source |
 
+The experimental vocabulary additionally recognizes:
+
+| Effect | Authority represented |
+| --- | --- |
+| `block_context` | Observe target-supplied chain context through an admitted explicit API |
+| `emit` | Append consensus-visible event or log output |
+| `external_call` | Invoke another contract or chain program |
+| `storage_read` | Observe persistent chain state |
+| `storage_write` | Create, replace, or remove persistent chain state |
+
+`emit`, `external_call`, and `storage_write` are conservatively mutation-capable. `block_context`
+and `storage_read` are read-only with respect to consensus state but remain observable authority.
+No effect implies another. View eligibility is derived from the absence of mutation-capable effects;
+there is no separate source `@view` marker.
+
 `unsafe` is a proof boundary, not an effect. It does not satisfy or erase an effect requirement.
 Allocation is also not a Stage 0 effect: Fairy C has no hidden default allocator, and explicit
 allocator or Region operations already expose their cost and ownership. Traps are defined language
@@ -82,6 +104,10 @@ Raw foreign calls independently require an `unsafe` boundary. `unsafe { raw_call
 the foreign-memory boundary; the enclosing function must still declare every effect named by the
 foreign declaration. A foreign declaration without `@effects` makes no external-authority claim to
 the source checker; authors of a safe wrapper are responsible for assigning the correct contract.
+
+On-chain effects grant no ambient sender, value, block timestamp, storage handle, or contract
+object. Future target APIs must provide explicit compiler-known capability values and separately
+define ownership, borrowing, ABI transport, rollback, metering, and target availability.
 
 ## Implicit cleanup rule
 

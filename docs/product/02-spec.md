@@ -119,6 +119,11 @@ non-legacy abilities. Stable release requires a coordinated language and interfa
 current SDK, package/cache identities, MIR, backend, runtime ABI, and native product surface remain
 unchanged.
 
+ADR 0337 likewise accepts target-neutral on-chain effects only for direct experimental analysis.
+The released `/10` effect vocabulary and stable resolved-package path remain unchanged. No ambient
+chain context, storage API, event/call transport, rollback, metering, runtime, backend, ABI, or target
+support is implied; stable admission requires a coordinated language-revision migration.
+
 ## Value categories
 
 ### Inert values

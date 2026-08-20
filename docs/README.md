@@ -25,6 +25,7 @@
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
 - Public-interface hash v3 fixtures and runner: spec/fixtures/module-interface/manifest-v3.json, with historical v1 and v2 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
 - Experimental resource abilities and linear no-drop analysis: docs/language/0009-resource-abilities-v0.md, docs/adr/0336-resource-abilities-and-linear-assets.md, internal/semantic/resource_abilities.go, internal/hir/hir.go; stable resolved-package admission and public-interface v3 remain closed
+- Experimental target-neutral on-chain effects: docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0337-onchain-effect-capabilities.md, internal/hir/effect.go; released `/10` vocabulary and stable resolved-package admission remain unchanged
 - Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identities: docs/package/source-file-identities-v1.md, internal/packagecontent/file_identity.go
 - Deterministic per-package Atlas logical map plan: docs/atlas/fymap-logical-plan-v1.md, internal/atlasmap/

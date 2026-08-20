@@ -184,7 +184,7 @@ func AnalyzePackages(input PackageInput) (Result, error) {
 	return analyze(input.Files, bindings, false), nil
 }
 
-func analyze(files []File, bindings map[packageImportKey]hir.PackageID, resourceAbilities bool) Result {
+func analyze(files []File, bindings map[packageImportKey]hir.PackageID, experimentalLanguage bool) Result {
 	ordered := cloneResourceAbilityInputs(files)
 	slices.SortFunc(ordered, func(a, b File) int {
 		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
@@ -196,7 +196,7 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID, resource
 		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
 	}
 	analyzer := newAnalyzer(ordered, bindings)
-	analyzer.resourceAbilities = resourceAbilities
+	analyzer.experimentalLanguage = experimentalLanguage
 	analyzer.resolve()
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()

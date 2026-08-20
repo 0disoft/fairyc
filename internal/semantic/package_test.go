@@ -112,6 +112,22 @@ fn void keep(Coin coin) {}`),
 	}
 }
 
+func TestAnalyzePackagesKeepsOnchainEffectsBehindLanguageCutover(t *testing.T) {
+	t.Parallel()
+	result, err := semantic.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parsePackageFile(t, 1, "contract.fy", `module contract;
+@effects(storage_read)
+fn i32 balance() { return 0; }`),
+	}})
+	if err != nil {
+		t.Fatalf("AnalyzePackages() error = %v", err)
+	}
+	if result.FailedPhase != semantic.PhaseNone || len(result.Diagnostics) != 0 ||
+		len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "effect storage_read" {
+		t.Fatalf("AnalyzePackages() result = %+v", result)
+	}
+}
+
 func TestAnalyzePackagesRejectsInvalidImportBindings(t *testing.T) {
 	t.Parallel()
 	files := []semantic.File{

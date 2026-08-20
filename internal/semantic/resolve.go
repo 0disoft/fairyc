@@ -62,7 +62,7 @@ type lexicalScope struct {
 
 type analyzer struct {
 	files                 []File
-	resourceAbilities     bool
+	experimentalLanguage  bool
 	modules               map[moduleKey]*moduleScope
 	packageImports        map[packageImportKey]hir.PackageID
 	moduleOrder           []*moduleScope
