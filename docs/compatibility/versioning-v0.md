@@ -897,6 +897,12 @@ bytes, and private symbols are not cross-release compatibility promises. Public 
 `extern C` contracts, TargetSpec data, runtime/support units, and generated-C consumer evidence
 remain independently versioned.
 
+ADR 0336 does not change the current language revision because stable resolved-package analysis
+continues to reject `@abilities`. Canonical ability metadata in HIR is compiler-internal, and
+public-interface v3 rejects public non-legacy ability sets rather than omitting them from its hash.
+Stable admission requires an exact language revision and a new public-interface encoding together
+with their package, cache, lock, fixture, and release migrations.
+
 ADR 0181 stabilizes `fairyc test [--locked]`, the root-only optional lowercase `tests/` overlay,
 `tests/`-prefixed module identity, argument-free `@test` declaration shape, canonical test ordering,
 fresh semantic-interpreter execution, human result grammar, production-lock isolation, `E9001`, and

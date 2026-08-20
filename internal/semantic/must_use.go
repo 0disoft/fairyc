@@ -102,7 +102,11 @@ func (a *analyzer) mustUseFlowStatement(module *moduleScope, statement *ast.Stat
 		}
 	case syntax.KindExprStmt:
 		a.mustUseFlowExpression(module, statement.Expression, mustUseIgnored)
-	case syntax.KindReturn, syntax.KindDiscard, syntax.KindAssert, syntax.KindDefer:
+		a.rejectDiscardedLinearResource(module, statement.Expression)
+	case syntax.KindDiscard:
+		a.mustUseFlowExpression(module, statement.Expression, mustUseHandled)
+		a.rejectDiscardedLinearResource(module, statement.Expression)
+	case syntax.KindReturn, syntax.KindAssert, syntax.KindDefer:
 		a.mustUseFlowExpression(module, statement.Expression, mustUseHandled)
 	case syntax.KindAssignment:
 		a.mustUseFlowExpression(module, statement.Target, mustUseHandled)

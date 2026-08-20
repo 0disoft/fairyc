@@ -65,6 +65,8 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E1104", Category: categoryResource, Meaning: "Branch join leaves a resource `MaybeLive`."},
 	{Code: "E1105", Category: categoryResource, Meaning: "Loop back edge changes the required ownership state."},
 	{Code: "E1106", Category: categoryResource, Meaning: "Fallible `drop` or ambiguous close ownership."},
+	{Code: "E1107", Category: categoryResource, Meaning: "`@abilities` is empty, duplicated, malformed, names an unknown resource ability, or declares `key` without `store`."},
+	{Code: "E1108", Category: categoryResource, Meaning: "Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`."},
 	{Code: "E2101", Category: categoryBorrow, Meaning: "Access conflicts with an active shared or mutable loan."},
 	{Code: "E2102", Category: categoryBorrow, Meaning: "Returned borrow originates from a local value."},
 	{Code: "E2103", Category: categoryBorrow, Meaning: "Returned borrow has multiple possible input origins."},

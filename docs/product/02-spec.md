@@ -112,6 +112,13 @@ operational context. Those gates are candidates only. They reserve no syntax or 
 no server or database framework, scheduler, trait, macro system, registry, deployment platform, or
 telemetry protocol, and change no current target maturity, SDK, runtime ABI, or language identity.
 
+ADR 0336 accepts resource abilities only as a direct, single-package experimental semantic
+foundation. Stable resolved-package compilation under `fairyc-language/10` continues to reject the
+attribute, while HIR preserves canonical ability metadata and public-interface v3 rejects public
+non-legacy abilities. Stable release requires a coordinated language and interface revision; the
+current SDK, package/cache identities, MIR, backend, runtime ABI, and native product surface remain
+unchanged.
+
 ## Value categories
 
 ### Inert values

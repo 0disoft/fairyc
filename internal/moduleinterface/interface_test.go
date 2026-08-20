@@ -216,6 +216,12 @@ func TestExtractTracksPublicShapesEffectsAndForeignLinks(t *testing.T) {
 		t.Fatalf("resource effect change did not invalidate interface: %s", hash)
 	}
 
+	abilityChange := clonePackage(base)
+	abilityChange.Modules[0].Resources[0].Abilities = []hir.ResourceAbility{hir.ResourceAbilityStore, hir.ResourceAbilityKey}
+	if _, err := Extract(abilityChange, 1, instances); err == nil || !strings.Contains(err.Error(), "newer public-interface encoding") {
+		t.Fatalf("experimental public resource abilities error = %v", err)
+	}
+
 	linkChange := clonePackage(base)
 	linkChange.Modules[0].ForeignFunctions[0].LinkName = "raw_v2"
 	if hash := extractHash(t, linkChange, 1, instances); hash == baseHash {

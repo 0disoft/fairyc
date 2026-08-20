@@ -75,6 +75,7 @@ func (a *analyzer) prepareCallableEffects() {
 			value.effectsValid = resourceValue.effectsValid
 		}
 	}
+	a.prepareResourceAbilities()
 }
 
 func (a *analyzer) parseEffects(source string, declaration diagnostic.Span, attributes []ast.Attribute) ([]hir.Effect, diagnostic.Span, bool) {

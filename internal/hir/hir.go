@@ -480,6 +480,17 @@ const (
 	ResourceDropNonEmpty ResourceDropKind = "non-empty"
 )
 
+// ResourceAbility is one compiler-known property of a move-only resource. The
+// slice stored on Resource is canonical and describes effective abilities, so
+// a legacy declaration carries drop even without an explicit source attribute.
+type ResourceAbility string
+
+const (
+	ResourceAbilityDrop  ResourceAbility = "drop"
+	ResourceAbilityStore ResourceAbility = "store"
+	ResourceAbilityKey   ResourceAbility = "key"
+)
+
 // Resource is one resolved move-only aggregate definition in declaration order.
 type Resource struct {
 	Name              string
@@ -492,6 +503,7 @@ type Resource struct {
 	DropSpan          Span
 	DropSymbol        SymbolID
 	DropEffects       []Effect
+	Abilities         []ResourceAbility
 }
 
 // ResourceField is one resolved resource field with source identity.

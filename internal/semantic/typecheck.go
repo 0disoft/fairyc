@@ -222,6 +222,7 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 		DropEffects:       slices.Clone(value.effects),
 	}
 	if info := a.resourceTypes[value.typ]; info != nil {
+		result.Abilities = info.abilities.canonicalHIR()
 		result.Fields = make([]hir.ResourceField, 0, len(info.orderedFields))
 		for _, field := range info.orderedFields {
 			result.Fields = append(result.Fields, hir.ResourceField{Name: field.name, Type: field.typ, Span: field.span})

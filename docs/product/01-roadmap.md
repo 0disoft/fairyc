@@ -1331,6 +1331,7 @@ non-authority to separate executable oracles and records what each still does no
 - `impact`, semantic `diff`, stable anchors, MCP, and structural edits: require `.fymap` identity and completeness evidence from real use.
 - Custom allocators, portable paths, resource-aware arenas, closures, concurrency capabilities, async, sockets, and freestanding or embedded support each require a separate ownership and target contract.
 - Production workloads: ADR 0328 records candidate-only gates for independently promoted Linux profiles, verified cancellation and structured task ownership, bounded I/O and generated declarations, and vendor-neutral operational context. It accepts no server framework, database, scheduler, trait, macro, registry, or telemetry protocol; each implementation remains a separate evidence-backed vertical slice.
+- Resource abilities: ADR 0336 supplies experimental single-package `drop`, `store`, and `key` analysis plus HIR metadata. Stable package compilation and public-interface v3 remain closed until one coordinated language/interface revision cut, so this is not yet a released language capability.
 
 ## Self-hosting gate
 

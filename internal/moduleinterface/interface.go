@@ -190,6 +190,9 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 		if !resource.Public {
 			continue
 		}
+		if !legacyResourceAbilities(resource.Abilities) {
+			return Module{}, fmt.Errorf("public resource %q uses abilities that require a newer public-interface encoding", resource.Name)
+		}
 		effects, err := stableEffects(resource.DropEffects)
 		if err != nil {
 			return Module{}, fmt.Errorf("public resource %q: %w", resource.Name, err)
@@ -265,6 +268,10 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 		}
 	}
 	return result, nil
+}
+
+func legacyResourceAbilities(abilities []hir.ResourceAbility) bool {
+	return len(abilities) == 0 || len(abilities) == 1 && abilities[0] == hir.ResourceAbilityDrop
 }
 
 func stableStructFields(fields []hir.StructField, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, publicTypes map[hir.Type]bool) ([]Field, error) {
