@@ -134,6 +134,11 @@ deterministic transitive identities, cycle rejection, and explicit expansion lim
 generic evidence question without admitting source syntax, inference, HIR type variables, MIR,
 runtime dispatch, reflection, ABI, or backend emission.
 
+ADR 0340 adds a standalone bounded parser for a separate experimental contract-interface profile,
+canonical chain-neutral IDL v0, and typed Go/TypeScript clients over a consumer-supplied transport.
+It changes neither Stage 0 grammar nor the stable `fairyc` CLI and claims no source-level contract
+call, codec, signing, reentrancy proof, HIR/MIR lowering, backend, deployment, or supported target.
+
 ## Value categories
 
 ### Inert values

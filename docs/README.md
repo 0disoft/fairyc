@@ -28,6 +28,7 @@
 - Experimental target-neutral on-chain effects: docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0337-onchain-effect-capabilities.md, internal/hir/effect.go; released `/10` vocabulary and stable resolved-package admission remain unchanged
 - Experimental typed contract-state transaction oracle: docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md, internal/contractstate/
 - Experimental bounded static generic planner: docs/adr/0339-bounded-static-generic-specialization-kernel.md, internal/genericplan/; no source syntax, HIR substitution, MIR, or backend surface is admitted
+- Experimental chain-neutral contract IDL and bindings: docs/cli/contract-idl.md, docs/adr/0340-experimental-chain-neutral-contract-idl.md, spec/contract-idl/, internal/contractabi/, cmd/fairyc-contract-idl/, examples/contract_idl/
 - Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identities: docs/package/source-file-identities-v1.md, internal/packagecontent/file_identity.go
 - Deterministic per-package Atlas logical map plan: docs/atlas/fymap-logical-plan-v1.md, internal/atlasmap/

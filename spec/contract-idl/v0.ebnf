@@ -1,0 +1,38 @@
+(* Fairy C experimental chain-neutral contract-interface profile v0.
+   This grammar is consumed only by fairyc-contract-idl. It is not part of the Stage 0 product
+   grammar and does not change fairyc-language/10. *)
+
+source = module_decl item+ EOF ;
+
+module_decl = "module" path ";" ;
+item = extern_contract_decl | event_struct_decl ;
+
+extern_contract_decl = "extern" "contract" IDENT "{" contract_function_decl* "}" ;
+contract_function_decl = contract_attribute* "fn" abi_type IDENT
+                         "(" parameter_list? ")" ";" ;
+contract_attribute = "@" ("view" | "payable") ;
+
+parameter_list = parameter ("," parameter)* ","? ;
+parameter = abi_type IDENT ;
+
+event_struct_decl = "@" "event" "struct" IDENT "{" event_field* "}" ;
+event_field = abi_type IDENT ";" ;
+
+abi_type = abi_primary_type abi_array_suffix* ;
+abi_primary_type = path type_arguments? ;
+type_arguments = "<" abi_type ("," abi_type)* ","? ">" ;
+abi_array_suffix = "[" DEC_INTEGER "]" ;
+
+path = IDENT ("::" IDENT)* ;
+IDENT = IDENT_START IDENT_CONTINUE* ;
+IDENT_START = ASCII_LETTER | "_" ;
+IDENT_CONTINUE = IDENT_START | DEC_DIGIT ;
+DEC_INTEGER = DEC_DIGIT ("_"? DEC_DIGIT)* ;
+
+ASCII_LETTER = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+             | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r"
+             | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+             | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I"
+             | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R"
+             | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" ;
+DEC_DIGIT = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;

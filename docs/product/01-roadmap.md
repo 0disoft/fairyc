@@ -1334,6 +1334,7 @@ non-authority to separate executable oracles and records what each still does no
 - Resource abilities: ADR 0336 supplies experimental single-package `drop`, `store`, and `key` analysis plus HIR metadata. Stable package compilation and public-interface v3 remain closed until one coordinated language/interface revision cut, so this is not yet a released language capability.
 - On-chain effects: ADR 0337 supplies experimental chain-neutral authority and mutation classification while leaving the released `/10` vocabulary and stable package compilation closed pending a coordinated revision cut.
 - Contract state: ADR 0338 supplies a host-independent typed layout and failure-atomic transaction oracle only. Source syntax, MIR lowering, production persistence, Merkle proofs, reentrancy, and deployable targets remain separate admission slices.
+- Contract interfaces: ADR 0340 supplies an experimental chain-neutral IDL and typed client generator over consumer-owned transports. Ordinary Fairy source calls, codec selection, signing, reentrancy analysis, MIR lowering, and deployable targets remain closed.
 
 ## Self-hosting gate
 

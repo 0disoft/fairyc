@@ -5,6 +5,7 @@
 - Admission rule: `docs/adr/0218-modern-language-concept-admission-boundary.md`
 - First executable foundation: `docs/adr/0338-typed-persistent-state-transaction-kernel.md`
 - Generic-planning foundation: `docs/adr/0339-bounded-static-generic-specialization-kernel.md`
+- Contract-interface foundation: `docs/adr/0340-experimental-chain-neutral-contract-idl.md`
 
 ## Purpose
 

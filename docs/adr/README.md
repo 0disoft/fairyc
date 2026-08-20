@@ -349,6 +349,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0337-onchain-effect-capabilities.md`: adds experimental target-neutral chain authority classification while keeping the released `/10` effect vocabulary and stable package admission unchanged.
 - `0338-typed-persistent-state-transaction-kernel.md`: adds a host-independent typed layout and failure-atomic transaction oracle for future contract profiles without exposing source syntax or a production state backend.
 - `0339-bounded-static-generic-specialization-kernel.md`: adds a bounded, coherent, deterministic compiler-internal specialization planner while keeping source generics, HIR substitution, MIR, and backend admission closed.
+- `0340-experimental-chain-neutral-contract-idl.md`: adds a bounded standalone contract-interface parser, canonical IDL v0, and typed Go/TypeScript bindings without changing Stage 0 grammar or claiming a chain codec or target.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
