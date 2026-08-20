@@ -189,7 +189,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0177-stable-windows-workspace-run-v1.md`: superseded result-receipt form of stable `fairyc run`; ADR 0207 replaced its output/status contract and ADR 0212 owns the current stdin-aware run contract.
 - `0178-stable-diagnostic-explain-v1.md`: stable `fairyc explain <diagnostic-code>` fixes exact lookup, three-line human shape, side-effect-free behavior, and codes 0, 2, and 4 without promoting the provisional catalog to a released language.
 - `0179-stable-target-maturity-report-v1.md`: stable `fairyc targets` fixes the host-independent human report grammar, canonical ordering, atomic failure, and codes 0, 2, and 4 while TargetSpec evidence continues to evolve independently.
-- `0180-stable-workspace-c-emission-v1.md`: stable `fairyc emit c --target <target-id> [--locked]` emits one target-selected raw C11 application unit without choosing a host, toolchain, support unit, or output file.
+- `0180-stable-workspace-c-emission-v1.md`: historical stable workspace C-emission contract, superseded at the product surface by ADR 0335.
 - `0181-stable-workspace-semantic-test-v1.md`: stable `fairyc test [--locked]` overlays isolated root `tests/`, validates `@test fn void` entries, and runs each through a fresh semantic interpreter without native artifacts.
 - `0182-immutable-semantic-snapshot-v0.md`: one-way path-free HIR/MIR compiler facts, deep immutability, and relation-specific Atlas completeness.
 - `0183-provisional-symbol-id-v1.md`: source-instance-independent declaration identity, canonical signature encoding, and visible/full collision rejection.
@@ -344,6 +344,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0332-target-neutral-public-file-positioning.md`: maps public same-handle position and absolute seek to target-owned Linux and Windows adapters under SDK `0.0.0-stage0.50`, with generated product-build evidence.
 - `0333-target-neutral-public-file-size.md`: maps public same-handle size observation to target-owned Linux and Windows adapters under SDK `0.0.0-stage0.51`, with cursor-preserving generated product-build evidence.
 - `0334-target-neutral-public-file-relative-end-seek.md`: maps public bounded current- and end-relative seek to target-owned Linux and Windows adapters under SDK `0.0.0-stage0.52`, with generated product-build evidence.
+- `0335-private-c11-bootstrap-transport.md`: removes generated C from the stable product surface while retaining explicit target-selected workspace inspection under `fairyc experimental emit-workspace-c`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

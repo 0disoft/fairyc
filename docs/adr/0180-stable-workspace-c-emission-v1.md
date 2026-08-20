@@ -1,12 +1,16 @@
 # ADR 0180: Stabilize workspace C emission v1
 
-- Status: Accepted
+- Status: Superseded by ADR 0335
 - Date: 2026-07-23
 - Product source: `docs/product/02-spec.md`
 - CLI sources: `docs/cli/command-contract.md`, `docs/cli/output-and-exit-codes.md`
 - Transport source: ADR 0137
 - Prototype prerequisite: ADR 0027
 - Implementation: `internal/cli/workspace_emit.go`, `internal/cbackend/`
+
+ADR 0335 removes this stable product surface and retains equivalent target-selected workspace C
+output only as `fairyc experimental emit-workspace-c`. The remainder of this document records the
+historical v1 decision and no longer defines a current stable command.
 
 ## Context
 

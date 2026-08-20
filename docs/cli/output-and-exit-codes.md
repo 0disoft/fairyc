@@ -122,11 +122,12 @@ TargetSpec rows and evidence evolve independently. Success uses code `0`; unexpe
 code `2`; invalid compiler-owned target data and output-write failure use code `4`, without partial
 stdout.
 
-`fairyc emit c --target <target-id> [--locked]` writes exactly one raw deterministic ISO C11
-application translation unit to stdout. It adds no banner, receipt, JSON envelope, ANSI escape,
-absolute path, or FY source text. Compilation and emission failures write no unit; an output writer
-may accept a prefix before returning a code-`4` transport error, and that stream cannot be rolled
-back. Success uses code `0`;
+`fairyc emit c ...` is no longer a stable command. It writes no stdout and returns code `2` with a
+migration direction to `fairyc experimental emit-workspace-c --target <target-id> [--locked]`.
+The experimental command writes exactly one raw same-version deterministic ISO C11 application
+unit to stdout. It adds no banner, receipt, JSON envelope, ANSI escape, absolute path, or FY source
+text. Compilation and emission failures write no unit; an output writer may accept a prefix before
+returning a code-`4` transport error, and that stream cannot be rolled back. Success uses code `0`;
 invalid form/flags, missing or unknown target, missing/invalid root entry, and unsupported backend
 capability use code `2`; source diagnostics use code `3`; internal and output failures use code `4`;
 manifest, workspace, graph, and lock failures use code `7`. The command writes no output artifact,

@@ -69,13 +69,12 @@ grammar, canonical ordering, atomic output, final newline, and codes 0, 2, and 4
 rows and maturity evidence evolve under TargetSpec compatibility. JSON, filtering, target selection,
 and local-toolchain availability remain outside v1.
 
-## Stable workspace C emission v1
+## Private workspace C transport
 
-`fairyc emit c --target <target-id> [--locked]` emits one target-selected application translation
-unit from the current manifest-owned workspace. `c` is the only stable form and `--target` is
-mandatory; the accepted current IDs are `x86_64-linux-gnu` and `x86_64-windows-msvc`. Host target
-inference, default targets, AST/HIR/MIR output, JSON, source maps, headers, objects, and executables
-are outside v1.
+ADR 0335 removes `fairyc emit c --target <target-id> [--locked]` from the stable product surface.
+That spelling now fails with code 2 and directs compiler developers to
+`fairyc experimental emit-workspace-c --target <target-id> [--locked]`. The experimental command
+requires one explicit `x86_64-linux-gnu` or `x86_64-windows-msvc` target and never infers the host.
 
 The command uses the stable workspace/lock boundary and requires root `main::main fn() -> i32`.
 Ordinary mode atomically refreshes a missing or stale canonical `fairy.lock`; `--locked` verifies it
@@ -92,14 +91,14 @@ executable, cache, or build directory and performs no compiler, linker, SDK, sys
 or network probe. Whole-unit bytes and private symbols are deterministic for one exact compiler,
 input, and target but are disposable transport rather than a cross-release C API.
 
-Stable codes are 0 for success, 2 for invocation, entry, target, or backend-capability rejection, 3
+Experimental command codes are 0 for success, 2 for invocation, entry, target, or backend-capability rejection, 3
 for source diagnostics, 4 for internal or output failure, and 7 for manifest, workspace, graph, or
 lock failure. An output failure may follow ordinary lock maintenance; `--locked` is the no-write
 form.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements twenty-three deliberately unstable developer commands:
+The current Go prototype implements twenty-seven deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -120,6 +119,7 @@ The current Go prototype implements twenty-three deliberately unstable developer
 | `fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]` | Run one package-aware semantic and verified-MIR check with explicit bounded cross-process stable disk reuse keyed by the exact executable image | One `fairyc.experimental.workspace-cache-check/v0` JSON object, human diagnostics on stderr, or prototype invocation/package/internal failure |
 | `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe> [--locked]` | Compile the current local-exact workspace's root `main::main` through package-aware verified MIR and the closed Windows target pipeline | A no-overwrite `.exe`, target/toolchain/profile/lock receipt, or package, source, capability, toolchain, link, and artifact diagnostics |
 | `fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low\|optimized> [--locked]` | Compile and execute the same package-aware root entry as a temporary inspected Windows PE | `native workspace result: <i32>` with target/toolchain/profile/lock receipt, a canonical trap, or package/build diagnostics |
+| `fairyc experimental emit-workspace-c --target <target-id> [--locked]` | Inspect the current executable workspace's target-selected private C11 bootstrap transport without invoking a toolchain | Exactly one same-version deterministic application unit on stdout, or package, source, capability, target, lock, and output diagnostics |
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <entry.fy> [--source <file.fy>]...` | Lower one explicit FY module closure in the admitted constrained-C subset through verified MIR and emit the provisional transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source-set diagnostics or capability errors on stderr |
 | `fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one explicitly closed verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source-set, capability, toolchain, link, or artifact diagnostics |
@@ -696,7 +696,6 @@ separators. Consumers must match both identities before treating a retained span
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
 | `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, direct caller stdin for exactly one selected native test or bounded stdin-file replay for every selected native test, an optional bounded process timeout, and opt-in exact binary output attachments in native JSON v4 | Optional temporary native images |
 | `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` | Compile-admit the complete selected test overlay and list all or exact-directory/file canonical identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
-| `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 

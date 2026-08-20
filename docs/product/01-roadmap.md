@@ -716,8 +716,9 @@ quarantines, without selecting a default policy or making a speed claim.
   forwarding after `--`, but no input routing for other native commands, target selection, retained
   artifact, or cache policy. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
-  TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
-  separate from private generated-C bytes and support units. Keep implemented semantic-by-default
+  TargetSpec data lifecycle. Keep target-explicit private C11 inspection under
+  `fairyc experimental emit-workspace-c --target <target-id> [--locked]`; do not promote generated-C
+  bytes or support units to a source-product contract. Keep implemented semantic-by-default
   and explicit Windows-native `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`
   plus compiler-admitted `fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` discovery with canonical exact selection
   and singular root-reachable member selection separate from catalog-unreachable aggregation, fuzzy/tag/glob filters,

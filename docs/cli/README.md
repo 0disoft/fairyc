@@ -15,8 +15,9 @@
 - interoperability: `bindgen`, `abi-check`;
 - semantic navigation: `atlas`.
 
-Stable `new`, `check`, the minimal Windows `build` and `run`, compiler inspection, C emission, and
-semantic or isolated Windows-native test execution now have Stage 0 contracts. The remaining command families are product
+Stable `new`, `check`, the minimal Windows `build` and `run`, compiler inspection, and semantic or
+isolated Windows-native test execution now have Stage 0 contracts. Private C11 workspace transport
+remains available only as an experimental compiler-developer command. The remaining command families are product
 commitments only after their own contracts and implementations exist.
 
 New starter v4 projects keep the same manifest and Fairy sources as v3, while their exact generated
@@ -31,8 +32,8 @@ The Go frontend currently exposes stable starter creation
 `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and execution-free
 `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
-report, and stable target-explicit
-`fairyc emit c --target <target-id> [--locked]`, plus `fairyc experimental parse <file.fy>`,
+report, plus `fairyc experimental emit-workspace-c --target <target-id> [--locked]` for private
+transport inspection, `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The complete implemented
 non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
@@ -322,7 +323,7 @@ JSON switches to `fairyc.test-list/v3` or `fairyc.test-report/v3` and includes p
 path, exact function-name byte span, and exact `fyfile1`/`fylm1` identities. It includes no source
 text, host root, timestamp, or reopened-path observation.
 
-`fairyc emit c --target <target-id> [--locked]` accepts exactly the `c` form and one mandatory
+`fairyc experimental emit-workspace-c --target <target-id> [--locked]` accepts one mandatory
 `x86_64-linux-gnu` or `x86_64-windows-msvc` target. It loads the current manifest-owned workspace,
 maintains or verifies the canonical lock, requires root `main::main fn() -> i32`, and writes exactly
 one raw deterministic ISO C11 application translation unit to stdout. It emits no banner or
@@ -331,7 +332,8 @@ toolchain, SDK, WSL, subprocess, or network. The separate runtime and dependency
 standard-library support unit is not included. Whole-unit bytes and private names may change with
 the compiler even though identical compiler/input/target requests are deterministic; public C ABI
 contracts remain independently versioned. AST, HIR, MIR, JSON, source maps, headers, objects, and
-executables are not stable emit forms.
+executables are not stable emit forms. The removed `fairyc emit c ...` spelling returns code `2`
+with this migration direction instead of silently preserving the old product contract.
 
 `fairyc explain` accepts one exact uppercase `Edddd`, `Adddd`, or `Vdddd` code and writes its
 reserved meaning, category, and catalog identity without reading source, configuration, or the

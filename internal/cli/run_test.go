@@ -1055,8 +1055,8 @@ func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 		"fairyc test --list [--json] [--locations]", "every\nunambiguous root-reachable local package with --workspace",
 		"exact-current portable source anchors", "native tests receive any process arguments",
 		"Explicit --stdin attaches caller input only when exactly one", "Explicit --stdin-file replays one bounded",
-		"Explicit --timeout-seconds bounds each native test process",
-		"Explicit --capture-output requires", "fairyc emit c --target <target-id> [--locked]", "fairyc explain",
+		"Explicit --timeout-seconds bounds each isolated native test process",
+		"Explicit --capture-output requires", "fairyc experimental emit-workspace-c --target <target-id> [--locked]", "fairyc explain",
 		"experimental parse", "experimental check <primary.fy>", "experimental check-workspace",
 		"experimental check-workspace-session", "experimental build-workspace", "experimental run-workspace",
 		"experimental target-spec", "experimental emit-c", "experimental build", "experimental build-target",
@@ -1069,6 +1069,9 @@ func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 		if !strings.Contains(helpOut, want) {
 			t.Fatalf("help is missing %q: %q", want, helpOut)
 		}
+	}
+	if strings.Contains(helpOut, "\n  fairyc emit c --target") {
+		t.Fatalf("help advertises removed stable C emission: %q", helpOut)
 	}
 	errorCode, errorOut, errorErr := runForTest(nil, t.TempDir())
 	if errorCode != ExitInvalidInvocation || errorOut != "" || !strings.Contains(errorErr, "a command is required") {

@@ -26,10 +26,11 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 
 ## Stable workspace inputs
 
-`check`, `build`, `run`, `test`, and `emit c` read the exact `fairy.toml` in the current directory and use
-its explicit local workspace closure. They do not search parent directories, read an environment
-override, or consult another configuration file. All five maintain the canonical `fairy.lock` in
-ordinary mode and verify it without writing under `--locked`.
+`check`, `build`, `run`, and `test` read the exact `fairy.toml` in the current directory and use its
+explicit local workspace closure. They do not search parent directories, read an environment
+override, or consult another configuration file. All four maintain the canonical `fairy.lock` in
+ordinary mode and verify it without writing under `--locked`. The private
+`experimental emit-workspace-c` developer command reuses that same workspace and lock policy.
 
 `test` overlays the root package's conventional exact-lowercase `tests/` directory after the
 production lock boundary. Explicit `--package <package-uid>` selects one root-reachable local
@@ -38,10 +39,11 @@ environment override, recursive or multi-package aggregation, filter, target con
 or native-toolchain setting. Test bytes are not production lock inputs.
 
 `build` and `run` alone accept `--release`; their v1 target remains the fixed local
-`x86_64-windows-msvc` path. `emit c` instead requires one explicit `--target` value and accepts the
-declared `x86_64-linux-gnu` and `x86_64-windows-msvc` profiles without probing the host. There is no
-default emit target, target environment variable, C dialect flag, output-path flag, or implicit
-redirection. These stable inputs do not settle broader configuration precedence.
+`x86_64-windows-msvc` path. `experimental emit-workspace-c` requires one explicit `--target` value
+and accepts the declared `x86_64-linux-gnu` and `x86_64-windows-msvc` profiles without probing the
+host. There is no default transport target, target environment variable, C dialect flag,
+output-path flag, or implicit redirection. This private developer surface does not settle broader
+configuration precedence.
 
 ## Implemented provisional cache inputs
 

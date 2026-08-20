@@ -92,7 +92,7 @@
 - Stable local Windows workspace run v3: internal/cli/workspace_native.go, internal/cli/program_output.go, internal/cdriver/windows_host.go, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0207-stable-windows-workspace-run-v2.md, docs/adr/0212-stable-windows-workspace-run-v3.md
 - Stable diagnostic explanation v1: internal/cli/run.go, internal/diagnostic/catalog.go, docs/adr/0178-stable-diagnostic-explain-v1.md
 - Stable target maturity report v1: internal/cli/target.go, internal/target/spec.go, docs/adr/0179-stable-target-maturity-report-v1.md
-- Stable workspace C emission v1: internal/cli/workspace_emit.go, internal/cbackend/, docs/adr/0180-stable-workspace-c-emission-v1.md
+- Private workspace C11 bootstrap transport: internal/cli/workspace_emit.go, internal/cbackend/, docs/adr/0180-stable-workspace-c-emission-v1.md, docs/adr/0335-private-c11-bootstrap-transport.md
 - Stable isolated workspace semantic and Windows native tests with text/JSON identity listing and exact selection: internal/workspaceloader/test_sources.go, internal/cli/workspace_tests.go, internal/cli/workspace_native_tests.go, internal/interpreter/, internal/cbackend/, internal/cdriver/, spec/cli/stable-test-list-v1.schema.json, docs/adr/0181-stable-workspace-semantic-test-v1.md, docs/adr/0265-stable-isolated-windows-native-tests.md, docs/adr/0267-stable-exact-test-selection.md, docs/adr/0268-stable-test-identity-listing.md, docs/adr/0273-stable-json-test-identity-listing.md
 - Package-aware Windows quickstart: examples/workspace_quickstart/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json

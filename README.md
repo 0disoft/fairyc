@@ -549,8 +549,9 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
 `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and the execution-free
 `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus source-independent
-`fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
-`fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
+`fairyc explain <diagnostic-code>` and `fairyc targets`. Compiler developers can inspect the private
+target-explicit C11 bootstrap through
+`fairyc experimental emit-workspace-c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
 program output, arguments, and status without pre-reading input. Native tests compile each selected
 entry into a separate temporary Windows image, forward values after `--` to every isolated test,
 and explicitly attach caller stdin to exactly one selected test with `--stdin`, and retain exact
@@ -592,8 +593,8 @@ go run ../../cmd/fairyc run --release --locked
 go run ../../cmd/fairyc test --locked
 go run ../../cmd/fairyc test --native --locked
 go run ../../cmd/fairyc test --native --release --locked
-go run ../../cmd/fairyc emit c --target x86_64-windows-msvc --locked
-go run ../../cmd/fairyc emit c --target x86_64-linux-gnu --locked
+go run ../../cmd/fairyc experimental emit-workspace-c --target x86_64-windows-msvc --locked
+go run ../../cmd/fairyc experimental emit-workspace-c --target x86_64-linux-gnu --locked
 go run ../../cmd/fairyc experimental check-workspace
 go run ../../cmd/fairyc experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
 Pop-Location
@@ -674,14 +675,16 @@ stable `fairyc check [--locked]` command now checks the current `fairy.toml` wor
 verified MIR and maintains or verifies `fairy.lock`. `experimental check` remains the explicit-file
 developer surface; stable machine-readable target JSON and broader configuration are still separate work.
 
-The stable `fairyc emit c --target <target-id> [--locked]` command consumes that same manifest-owned
+The private `fairyc experimental emit-workspace-c --target <target-id> [--locked]` command consumes that same manifest-owned
 workspace and root `main::main fn() -> i32`, then writes only the selected Linux GNU or Windows MSVC
 ISO C11 application translation unit to stdout. Target selection is mandatory because LP64 and
 LLP64 are different contracts; the command never guesses from this host. It invokes no C compiler,
 linker, SDK, WSL, subprocess, or network and creates no build artifact. The separate runtime and
 standard-library support unit is intentionally absent, so redirected output is inspection/transport
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
-`--locked` verifies it without writing.
+`--locked` verifies it without writing. Generated C is compiler bootstrap transport rather than a
+cross-release source product; the removed stable `fairyc emit c ...` spelling returns code 2 with
+the experimental migration direction.
 
 The stable `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
 the root package's optional lowercase `tests/` directory after the production lock is handled, or

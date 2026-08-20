@@ -1,11 +1,15 @@
 # ADR 0137: Keep ISO C11 as the constrained transport baseline
 
-- Status: Accepted for prototype
+- Status: Accepted for private bootstrap transport; product-surface clauses superseded by ADR 0335
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Backend source: `docs/mir/c-backend-safety-v0.md`
 - ABI source: `docs/abi/c-abi-v0.md`
 - Compatibility source: `docs/compatibility/versioning-v0.md`
+
+ADR 0335 retains ISO C11 as compiler-private bootstrap and differential transport while removing the
+stable generated-C product command. References below to a product C-emission dialect are historical
+and do not create a current user-facing source-output compatibility promise.
 
 ## Context
 
@@ -21,8 +25,7 @@ would make a validation mode look like a new product backend.
 
 ## Decision
 
-1. ISO C11 remains the only normative Stage 0 transport dialect and the only product C-emission
-   dialect.
+1. ISO C11 remains the only normative Stage 0 bootstrap transport dialect.
 2. There is no C17 emitter. Compiling the identical C11 unit in a C17 mode is consumer validation,
    not a separate output profile.
 3. There is no C23 emitter. A future pinned C23 consumer lane may compile the identical C11 unit to
@@ -35,8 +38,8 @@ would make a validation mode look like a new product backend.
    - target ABI: layout, calling convention, object, and symbol behavior;
    - runtime baseline: headers and functions available for the selected target runtime;
    - instrumentation: validation-only observers and sanitizer or trap evidence.
-6. The product exposes no user-selectable C17 or C23 dialect flag while their output is byte-identical
-   to C11 or unsupported.
+6. The compiler exposes no user-selectable C17 or C23 dialect flag. The experimental workspace C
+   inspection command selects a target but not a transport dialect.
 7. Before enabling a C23 consumer lane, verbatim external C identifiers must be checked against the
    union of keywords reserved by every enabled consumer mode. Internal Fairy names may continue to
    use private mangling and need not be globally restricted for a consumer-only keyword.
@@ -46,12 +49,12 @@ would make a validation mode look like a new product backend.
 9. C standard-library capability belongs to the target runtime and toolchain probe. A newer
    language mode does not prove that a header, allocator, POSIX API, or UCRT function exists.
 
-## C23 output admission gate
+## C23 transport admission gate
 
-A C23 output dialect can be reconsidered only when all of the following are demonstrated:
+A C23 transport dialect can be reconsidered only when all of the following are demonstrated:
 
 - every tier-one consumer has an explicitly supported mode or target-specific support is a declared
-  product policy;
+  compiler policy;
 - C23 emission has a measured correctness, maintenance, code-size, or capability benefit beyond
   cosmetic spelling;
 - the external-identifier keyword policy has shipped before the new mode;

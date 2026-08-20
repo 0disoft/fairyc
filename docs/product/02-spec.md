@@ -1074,11 +1074,11 @@ ADR 0179 stabilizes the source-independent `fairyc targets` human report grammar
 atomic failure, and codes 0, 2, and 4 without freezing TargetSpec rows, evidence, or maturity. The
 report remains distinct from local toolchain availability and experimental target JSON.
 
-ADR 0180 stabilizes `fairyc emit c --target <target-id> [--locked]` for the current executable
-workspace. It requires explicit Linux GNU or Windows MSVC TargetSpec selection and writes one raw
-deterministic ISO C11 application translation unit to stdout without a toolchain or output artifact.
-The runtime/support unit, exact private generated names and bytes across releases, AST/HIR/MIR
-inspection, and target maturity remain separate contracts.
+ADR 0180 historically stabilized `fairyc emit c --target <target-id> [--locked]`. ADR 0335
+supersedes that product-surface decision: the stable spelling now returns code 2 with a migration
+direction, while `fairyc experimental emit-workspace-c --target <target-id> [--locked]` retains
+explicit Linux GNU or Windows MSVC inspection of the private C11 bootstrap unit. Generated C text,
+its private names, formatting, and whole-unit bytes are not cross-release product contracts.
 
 ADR 0181 stabilizes `fairyc test [--locked]` as a root-package semantic lane. Ordinary production
 loading and locking exclude `tests/`; the command overlays that exact contained directory in memory,
@@ -1246,7 +1246,7 @@ Atlas exact declaration-documentation extractor described below is not a documen
 Testing has the bounded stable root semantic
 surface above but no native, recursive, filtered, benchmark, or fixture runner. Checking has the bounded stable
 current-workspace `fairyc check [--locked]` surface; diagnostic explanation has its independent
-stable source-free surface; C emission has the target-explicit workspace surface above.
+stable source-free surface; private target-explicit workspace C inspection is experimental.
 
 ## Compatibility
 

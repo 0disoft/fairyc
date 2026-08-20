@@ -889,12 +889,13 @@ TargetSpec data evolution rather than CLI grammar changes; target removal or rei
 requires an explicit compatibility decision. Local availability and experimental target JSON remain
 separate.
 
-ADR 0180 stabilizes `fairyc emit c --target <target-id> [--locked]`, mandatory explicit target
-selection, raw stdout publication, the C11 transport identity, lock behavior, and codes 0, 2, 3, 4,
-and 7. Exact whole-unit bytes and private symbols are deterministic only for one exact compiler,
-input, and target and remain disposable transport; public `@repr(C)` and `extern C` contracts,
-TargetSpec data, runtime/support units, and generated-C consumer evidence remain independently
-versioned.
+ADR 0180 historically stabilized `fairyc emit c --target <target-id> [--locked]`. ADR 0335 removes
+that spelling from the stable product surface; it now returns code 2 with an explicit migration to
+`fairyc experimental emit-workspace-c`. The experimental command retains explicit target selection,
+lock behavior, and raw same-version transport inspection, but its grammar, diagnostics, whole-unit
+bytes, and private symbols are not cross-release compatibility promises. Public `@repr(C)` and
+`extern C` contracts, TargetSpec data, runtime/support units, and generated-C consumer evidence
+remain independently versioned.
 
 ADR 0181 stabilizes `fairyc test [--locked]`, the root-only optional lowercase `tests/` overlay,
 `tests/`-prefixed module identity, argument-free `@test` declaration shape, canonical test ordering,
