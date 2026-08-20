@@ -129,6 +129,11 @@ contract profiles. It reserves no source syntax and adds no HIR, MIR, SDK, runti
 database, Merkle tree, or supported chain target. Production persistence must preserve the oracle's
 observable layout, limit, rollback, conflict, and append-only upgrade rules through separate evidence.
 
+ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
+deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
+generic evidence question without admitting source syntax, inference, HIR type variables, MIR,
+runtime dispatch, reflection, ABI, or backend emission.
+
 ## Value categories
 
 ### Inert values
