@@ -124,6 +124,11 @@ The released `/10` effect vocabulary and stable resolved-package path remain unc
 chain context, storage API, event/call transport, rollback, metering, runtime, backend, ABI, or target
 support is implied; stable admission requires a coordinated language-revision migration.
 
+ADR 0338 adds a process-local typed state-layout and failure-atomic transaction oracle for future
+contract profiles. It reserves no source syntax and adds no HIR, MIR, SDK, runtime, backend, ABI,
+database, Merkle tree, or supported chain target. Production persistence must preserve the oracle's
+observable layout, limit, rollback, conflict, and append-only upgrade rules through separate evidence.
+
 ## Value categories
 
 ### Inert values

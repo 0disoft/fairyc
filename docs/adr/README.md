@@ -347,6 +347,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0335-private-c11-bootstrap-transport.md`: removes generated C from the stable product surface while retaining explicit target-selected workspace inspection under `fairyc experimental emit-workspace-c`.
 - `0336-resource-abilities-and-linear-assets.md`: accepts experimental single-package `drop`, `store`, and `key` semantics while keeping stable package admission and public-interface v3 closed pending a coordinated revision cut.
 - `0337-onchain-effect-capabilities.md`: adds experimental target-neutral chain authority classification while keeping the released `/10` effect vocabulary and stable package admission unchanged.
+- `0338-typed-persistent-state-transaction-kernel.md`: adds a host-independent typed layout and failure-atomic transaction oracle for future contract profiles without exposing source syntax or a production state backend.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
