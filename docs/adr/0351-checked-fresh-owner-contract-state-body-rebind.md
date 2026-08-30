@@ -68,7 +68,7 @@ artifact versions, runtime ABI, SDK, target, lockfile, Atlas, and CLI schemas re
 ## Consequences
 
 Stable transaction payloads can now enter a fresh compilation without trusting old local numbers,
-old capability tokens, current source operation bodies, or names alone. The next slice may attach
-these payloads to stable package artifacts and cache records, but must still prove exact package
-closure, hit/miss behavior, malformed-entry quarantine, and execution equivalence through the
-workspace reassembly path.
+old capability tokens, current source operation bodies, or names alone. ADR 0352 later attaches
+the payload to stable package MIR through a separately versioned outer artifact. Cache records and
+workspace reassembly must still prove exact package closure, hit/miss behavior, malformed-entry
+quarantine, fresh-symbol alignment, and execution equivalence.

@@ -91,6 +91,11 @@ layout, and byte-identical logical function descriptors before mapping those bod
 package/function symbols and newly verified capabilities. It does not require current HIR source
 operation bodies. The payload is not yet stored or reassembled through package caches.
 
+ADR 0352 pairs that payload with stable package MIR v3 in one exact-version outer artifact and
+requires both nested artifacts to share a package coordinate. It does not change either nested
+format. Cache storage, expected-body lookup, malformed-entry quarantine, combined reassembly, and
+fresh-symbol alignment remain closed.
+
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
 

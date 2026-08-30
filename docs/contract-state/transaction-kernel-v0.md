@@ -17,10 +17,11 @@ experimental compiler-private transaction submodel without opening those stable 
 
 ADR 0350 gives that compiler-private submodel a bounded canonical body payload. Decode never imports
 authority: it reconstructs layouts and operations from data, creates a fresh opaque transaction
-capability, re-enters the MIR verifier, and requires the exact ADR 0348 body hash. Stable package
-artifacts, caches, production storage, and runtime targets still do not consume the payload. ADR 0351
+capability, re-enters the MIR verifier, and requires the exact ADR 0348 body hash. ADR 0351
 additionally binds the expected payload to an exact current HIR layout and fresh function symbols,
-then reconstructs new capability authority without retaining source operation bodies.
+then reconstructs new capability authority without retaining source operation bodies. ADR 0352
+pairs that payload with stable package MIR in a separate exact-version outer artifact; caches,
+production storage, and runtime targets still do not consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
@@ -192,6 +193,7 @@ operation bytes and order, layout identity, and exit while excluding local symbo
 tokens. Public-interface v5 carries only the exact layout hash, while whole-package cache key v4
 adds the exact private body hash to the owner without widening dependency entries. The compiler
 now also proves a bounded capability-free body payload, fresh capability reconstruction, verifier
-re-entry, exact body-hash matching, and checked fresh-HIR-owner rebind. It still does not prove source
-declaration/access rules, package/cache reassembly for transaction bodies, owner-bound borrows, external-call
-exclusion, stable MIR integration, or deterministic target execution.
+re-entry, exact body-hash matching, checked fresh-HIR-owner rebind, and one coordinate-bound outer
+stable package-compilation artifact. It still does not prove source declaration/access rules, cache
+publication or combined transaction-body reassembly, owner-bound borrows, external-call exclusion,
+stable MIR v3 integration, or deterministic target execution.

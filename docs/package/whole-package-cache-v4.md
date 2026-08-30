@@ -37,8 +37,9 @@ authority for safe reassembly.
 
 ## Closed gates
 
-V4 does not serialize state transaction operations into stable MIR or package artifacts. It cannot
-execute cached state transitions. ADR 0350 independently provides a bounded capability-free
-operation payload and verifier re-entry, and ADR 0351 checks the expected hash before fresh HIR owner
-rebind, but no cache record or reassembly path consumes them. Source syntax, package-artifact integration, native backend execution, and
-production persistence remain separate admission gates.
+V4 does not serialize state transaction operations into stable MIR or execute cached state
+transitions. ADR 0350 independently provides a bounded capability-free operation payload and
+verifier re-entry, ADR 0351 checks the expected hash before fresh HIR owner rebind, and ADR 0352
+pairs that payload with stable package MIR in a separate outer compilation artifact. No cache
+record, cache adapter, or combined reassembly path consumes that artifact yet. Source syntax,
+native backend execution, and production persistence remain separate admission gates.

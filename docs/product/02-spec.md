@@ -152,8 +152,9 @@ dependency entries remain public-interface-only. ADR 0350 adds a separate exact-
 canonical payload that reconstructs the layout, creates fresh private capability identity, runs the
 verifier, and recomputes that hash. ADR 0351 additionally requires the expected hash and exact
 current coordinate/layout/function descriptors before mapping the payload to fresh package/function
-symbols and capabilities without current source operation bodies. Stable package artifacts and
-caches do not yet carry it.
+symbols and capabilities without current source operation bodies. ADR 0352 pairs the payload with
+stable package MIR v3 in a coordinate-bound outer artifact. Cache records and workspace reassembly
+do not yet carry or execute that bundle.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -975,9 +976,10 @@ old provider body. Historical cache fixture manifests v1 through v7 remain froze
 
 ADR 0350 separately defines a bounded canonical contract-state body payload over the same coordinate
 and body hash. Its decoder reconstructs layouts and operations, creates fresh private capabilities,
-re-enters the transaction-MIR verifier, and recomputes the hash. No stable package artifact or cache
-record consumes that payload yet. ADR 0351 binds it to an exact expected hash, current HIR layout,
-and fresh package/function symbols while keeping package/cache integration closed.
+re-enters the transaction-MIR verifier, and recomputes the hash. ADR 0351 binds it to an exact
+expected hash, current HIR layout, and fresh package/function symbols. ADR 0352 then pairs it with
+stable package MIR v3 in a separate outer artifact; cache storage, expected-body lookup, quarantine,
+and combined reassembly remain closed.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

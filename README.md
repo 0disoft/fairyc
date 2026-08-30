@@ -497,6 +497,11 @@ HIR function descriptors before mapping that payload to fresh package/function s
 transaction receives another fresh capability and re-enters verification without requiring the
 current HIR source-operation side table. Package/cache integration remains closed.
 
+ADR 0352 adds `fairyc-stable-package-compilation/1`, a bounded canonical outer artifact that pairs
+stable package MIR v3 with the exact state-body payload only when both independently validate and
+share one package coordinate. Existing MIR bytes and cache records remain unchanged; cache
+publication and combined reassembly are the next gates.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing
