@@ -148,7 +148,9 @@ ADR 0348 assigns each verified package transaction set an exact
 `fairyc.contract-state-package-body/v1` identity over stable package/function/type facts, layout,
 effects, operation bytes and order, and exit. It excludes build-local numbering and capability
 tokens. ADR 0349 makes package-cache key v4 consume the exact owning-package body hash while
-dependency entries remain public-interface-only. Stable artifacts still do not carry its payload.
+dependency entries remain public-interface-only. ADR 0350 adds a separate exact-version, bounded
+canonical payload that reconstructs the layout, creates fresh private capability identity, runs the
+verifier, and recomputes that hash. Stable package artifacts and caches do not yet carry it.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -967,6 +969,11 @@ identity. Stable function,
 nominal type, foreign, body, and package artifacts use the same coordinate boundary and still
 re-enter MIR verification, so a private dependency edit can reuse the caller without accepting an
 old provider body. Historical cache fixture manifests v1 through v7 remain frozen.
+
+ADR 0350 separately defines a bounded canonical contract-state body payload over the same coordinate
+and body hash. Its decoder reconstructs layouts and operations, creates fresh private capabilities,
+re-enters the transaction-MIR verifier, and recomputes the hash. No stable package artifact or cache
+record consumes that payload yet.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

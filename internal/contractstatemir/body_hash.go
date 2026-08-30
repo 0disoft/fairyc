@@ -67,10 +67,28 @@ type stableStateTransaction struct {
 	program  Program
 }
 
+type describedStateBody struct {
+	coordinate   packagegraph.CoordinateID
+	layout       Layout
+	transactions []stableStateTransaction
+}
+
 // ComputeHIRStateBodyHashes verifies every transaction once, removes all
 // build-local identities, and hashes each requested package independently.
 // packageIDs may be in any order but must be unique.
 func ComputeHIRStateBodyHashes(input hir.Package, packageIDs []hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[hir.PackageID]StateBodyHash, error) {
+	described, err := describeHIRStateBodyParts(input, packageIDs, coordinates)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[hir.PackageID]StateBodyHash, len(described))
+	for packageID, body := range described {
+		result[packageID] = hashStableStateBody(body.coordinate, body.layout, body.transactions)
+	}
+	return result, nil
+}
+
+func describeHIRStateBodyParts(input hir.Package, packageIDs []hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[hir.PackageID]describedStateBody, error) {
 	requested := slices.Clone(packageIDs)
 	slices.Sort(requested)
 	for index := 1; index < len(requested); index++ {
@@ -103,7 +121,7 @@ func ComputeHIRStateBodyHashes(input hir.Package, packageIDs []hir.PackageID, co
 		transactions[item.Package] = append(transactions[item.Package], stableStateTransaction{function: descriptor, program: item.Program})
 	}
 
-	result := make(map[hir.PackageID]StateBodyHash, len(requested))
+	result := make(map[hir.PackageID]describedStateBody, len(requested))
 	for _, packageID := range requested {
 		coordinate, found := coordinates[packageID]
 		if !found || coordinate == (packagegraph.CoordinateID{}) {
@@ -118,7 +136,7 @@ func ComputeHIRStateBodyHashes(input hir.Package, packageIDs []hir.PackageID, co
 				return nil, fmt.Errorf("package %d state transactions share one stable function identity", packageID)
 			}
 		}
-		result[packageID] = hashStableStateBody(coordinate, layoutByPackage[packageID], items)
+		result[packageID] = describedStateBody{coordinate: coordinate, layout: layoutByPackage[packageID], transactions: items}
 	}
 	return result, nil
 }
@@ -165,32 +183,34 @@ func describeStateBodyFunction(module hir.Module, function hir.Function, coordin
 	if !slices.Equal(function.Effects, hir.CanonicalEffects(function.Effects)) {
 		return nil, fmt.Errorf("state function %q effects are not canonical", logicalName)
 	}
-	var encoded bytes.Buffer
-	writeStateBodyString(&encoded, logicalName)
-	writeStateBodyUint64(&encoded, uint64(len(function.Parameters)))
+	descriptor := stableStateFunctionDescriptor{
+		name:           logicalName,
+		parameterTypes: make([]string, 0, len(function.Parameters)),
+		effects:        make([]string, 0, len(function.Effects)),
+	}
 	for _, parameter := range function.Parameters {
 		stable, err := stableStateBodyType(parameter.Type, coordinates)
 		if err != nil {
 			return nil, fmt.Errorf("state function %q parameter type: %w", logicalName, err)
 		}
-		writeStateBodyString(&encoded, stable)
+		descriptor.parameterTypes = append(descriptor.parameterTypes, stable)
 	}
 	result, err := stableStateBodyType(function.ResultType, coordinates)
 	if err != nil {
 		return nil, fmt.Errorf("state function %q result type: %w", logicalName, err)
 	}
-	writeStateBodyString(&encoded, result)
-	writeStateBodyStrings(&encoded, function.Effects)
-	if function.DropGlueFor == "" {
-		writeStateBodyString(&encoded, "")
-	} else {
+	descriptor.resultType = result
+	for _, effect := range function.Effects {
+		descriptor.effects = append(descriptor.effects, string(effect))
+	}
+	if function.DropGlueFor != "" {
 		stable, err := stableStateBodyType(function.DropGlueFor, coordinates)
 		if err != nil {
 			return nil, fmt.Errorf("state function %q drop-glue type: %w", logicalName, err)
 		}
-		writeStateBodyString(&encoded, stable)
+		descriptor.dropGlueFor = stable
 	}
-	return encoded.Bytes(), nil
+	return encodeStableStateFunctionDescriptor(descriptor), nil
 }
 
 func stableStateBodyType(value hir.Type, coordinates map[hir.PackageID]packagegraph.CoordinateID) (string, error) {

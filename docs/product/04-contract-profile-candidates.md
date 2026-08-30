@@ -56,7 +56,7 @@ store-wide optimistic conflict detection, atomic commit, and rollback on returne
 `internal/contractstatemir` now adds a separate compiler-private layout and straight-line transaction
 submodel. It verifies exact layout identity, canonical cell/map operations, and explicit commit,
 reject, or trap exits before executing them through the oracle. It is not the stable whole-program
-MIR and has no source, stable artifact, backend, or target admission.
+MIR and has no source, stable package-artifact, backend, or target admission.
 
 Source-independent `hir.StateLayout` declarations lower into that submodel. Public-interface v5
 carries the exact layout hash, while whole-package cache key v4 consumes the current package
@@ -79,7 +79,13 @@ spans, and capability tokens are excluded. The hash exists before cache or paylo
 later consumer cannot invent a weaker identity.
 
 ADR 0349 makes whole-package cache key v4 consume that hash before lookup and keeps dependency
-entries public-interface-only. Stable artifact payload transport remains closed.
+entries public-interface-only.
+
+ADR 0350 adds an exact-version, caller-bounded canonical payload for the layout and transaction
+bodies. Decode parses and canonically re-encodes stable function descriptors, reconstructs layout
+and operation values, creates fresh private capabilities, re-enters the verifier, and recomputes the
+ADR 0348 hash. The payload is not yet rebound into stable package owners or stored and reassembled
+through package caches.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

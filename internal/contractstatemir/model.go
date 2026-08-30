@@ -1,6 +1,7 @@
 // Package contractstatemir defines an experimental compiler-private MIR for
 // deterministic persistent-state transactions. It has no source syntax or
-// stable payload artifact; its package-body hash is an identity-only boundary.
+// stable package-artifact integration; its bounded body payload is a
+// capability-free compiler-private transport boundary.
 package contractstatemir
 
 import (

@@ -57,4 +57,5 @@ this hash to a new whole-package cache-key version and prove body-only invalidat
 transport and reassembly remain required before cached state execution can be admitted.
 
 ADR 0349 later completes the cache-key portion with v4. Stable payload transport and reassembly
-remain open.
+remain open at this decision. ADR 0350 later adds bounded capability-free payload transport;
+stable owner rebind and package/cache reassembly remain open.

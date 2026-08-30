@@ -38,6 +38,7 @@ authority for safe reassembly.
 ## Closed gates
 
 V4 does not serialize state transaction operations into stable MIR or package artifacts. It cannot
-rebind a capability, reconstruct an operation payload, or execute cached state transitions. Source
-syntax, stable payload transport, native backend execution, and production persistence remain
-separate admission gates.
+rebind a stable function owner or execute cached state transitions. ADR 0350 independently provides
+a bounded capability-free operation payload and verifier re-entry, but no cache record or reassembly
+path consumes it. Source syntax, package-artifact integration, native backend execution, and
+production persistence remain separate admission gates.

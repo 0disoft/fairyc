@@ -5,6 +5,7 @@
 - Capability and effect source: `docs/adr/0346-contract-state-mir-capability-and-effect-verification.md`
 - HIR lowering source: `docs/adr/0347-source-independent-hir-state-access-lowering.md`
 - Body identity source: `docs/adr/0348-exact-contract-state-package-body-identity.md`
+- Body payload source: `docs/adr/0350-bounded-stable-contract-state-body-payload.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -13,8 +14,9 @@
 
 This submodel proves that one exact persistent-state layout and one explicit transaction exit can be
 verified before execution against the process-local semantic oracle. It is intentionally separate
-from the stable `internal/mir.Program`: no Fairy source form lowers into it, and no package artifact,
-cache, C backend, target runtime, or public compatibility promise serializes it.
+from the stable `internal/mir.Program`: no Fairy source form lowers into it, and no stable package
+artifact, cache, C backend, target runtime, or public compatibility promise consumes it. ADR 0350
+adds a standalone compiler-private stable body payload without opening those integrations.
 
 The separation is temporary but useful. It lets the compiler prove layout and transaction semantics
 before choosing source grammar or allowing a backend to invent commit and rollback behavior.
@@ -93,19 +95,26 @@ transaction set, then hashes one package's stable coordinate, optional exact lay
 function descriptors, canonical effects, exact operation sequence and bytes, and static exit.
 Build-local package/function numbers, spans, and fresh capability tokens do not participate.
 
-The hash is identity only. Package-cache key v4 consumes it for exact owning-package invalidation,
-but no stable artifact transports or rebinds these operation payloads yet.
+Package-cache key v4 consumes the hash for exact owning-package invalidation. ADR 0350 now transports
+the same stable facts through an exact-version, caller-bounded canonical payload. Decode rebuilds
+the layout, parses and re-encodes each stable function descriptor, creates fresh private capability
+identity, re-enters this verifier, and recomputes the hash. Build-local identities, spans, and
+capability tokens are never serialized.
+
+This payload is not yet part of stable package or whole-program MIR artifacts. It has no public
+fresh-owner rebind API, cache record, reassembly coordinator, or cached execution path.
 
 ## Closed gates
 
 This slice does not add source syntax, data-dependent values, branches, loops, calls, owner-bound
-state borrows, external-call rules, stable MIR serialization, package-artifact payload transport,
+state borrows, external-call rules, stable MIR integration, package-artifact payload integration,
 deterministic native
 backend execution, persistence, migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
 v5 carries the exact layout identity. ADR 0346 verifies transaction
 capability identity and storage effects, ADR 0347 lowers source-independent HIR accesses into those
-proofs, ADR 0348 gives the verified bodies an exact stable package hash, and ADR 0349 makes cache
-key v4 consume that hash. A later compiler slice must add payload artifact transport before ordinary
-source or cached compilation consumes the bodies.
+proofs, ADR 0348 gives the verified bodies an exact stable package hash, ADR 0349 makes cache key v4
+consume that hash, and ADR 0350 adds bounded capability-free payload transport with verifier
+re-entry. A later compiler slice must add stable owner rebinding and package/cache reassembly before
+ordinary source or cached compilation consumes the bodies.
