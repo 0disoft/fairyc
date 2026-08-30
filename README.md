@@ -874,9 +874,9 @@ or arbitrary link-input option.
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
 - Resolved acyclic package graph engine, fixture runner, and v1/v0 fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v1.json`
 - PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
-- Public-interface hash v3 extraction, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v3.json`, `internal/moduleinterfacefixture/`
+- Public-interface hash v4 extraction with resource abilities, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v4.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
-- Whole-package cache-key v2, bounded memory store, current v5 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v5.json`, `internal/packagecachefixture/`; fixture manifests v1 through v4 remain historical
+- Whole-package cache-key v2, bounded memory store, current v6 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v6.json`, `internal/packagecachefixture/`; fixture manifests v1 through v5 remain historical
 - Exact-version verified whole-program MIR artifact codec: `internal/mircodec/`
 - Strict local-exact `fairy.toml` v1 parser, fixtures, and runner: `internal/projectmanifest/`, `spec/fixtures/project-manifest/manifest-v1.json`, `internal/projectmanifestfixture/`
 - Filesystem-safe local workspace loader, fixtures, and runner: `internal/workspaceloader/`, `spec/fixtures/workspace-loader/manifest-v1.json`, `internal/workspaceloaderfixture/`

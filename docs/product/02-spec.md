@@ -85,7 +85,7 @@ generic iterators, and formatter behavior retain separate follow-up gates.
 
 ADR 0218 owns the admission boundary for concepts borrowed from modern C++, Java after 17, Go, and
 other languages. ADR 0219 implements a narrow callable `@must_use` contract with `E4201`/`E4202`,
-direct-call Flow, typed-HIR retention, public-interface v3 invalidation, and no runtime marker.
+direct-call Flow, typed-HIR retention, public-interface invalidation, and no runtime marker.
 ADR 0220 implements private `bool`/`u8`/`i32`/`u32` module constants, private
 `@const_eval` straight-line functions, and module-level `static_assert` under deterministic depth
 and step limits. It deliberately avoids the Rust-shaped `const fn` spelling, target-dependent
@@ -114,8 +114,8 @@ telemetry protocol, and change no current target maturity, SDK, runtime ABI, or 
 
 ADR 0336 accepts resource abilities only as a direct, single-package experimental semantic
 foundation. Stable resolved-package compilation under `fairyc-language/10` continues to reject the
-attribute, while HIR preserves canonical ability metadata and public-interface v3 rejects public
-non-legacy abilities. Stable release requires a coordinated language and interface revision; the
+attribute, while HIR preserves canonical ability metadata and public-interface v4 now transports
+every public effective ability set. Stable release still requires the coordinated language revision; the
 current SDK, package/cache identities, MIR, backend, runtime ABI, and native product surface remain
 unchanged.
 
@@ -151,7 +151,9 @@ Shallow switching names every payload field and covers every declared variant ex
 expected enum type resolves the leading-dot form; global best-fit variant lookup is forbidden.
 Built-in `Option` and `Result` may
 contain resources because the compiler owns active-variant move and drop behavior. General
-resource-bearing enums are deferred.
+  resource-bearing enums are deferred. Public-interface v4 transports the canonical effective
+  `drop`, `store`, and `key` abilities of public resources without yet opening stable package
+  admission for the experimental source attribute.
 
 ### Resources
 
@@ -934,12 +936,12 @@ Source-linked MIR normalization assertions are versioned in `spec/fixtures/mir/m
 
 MIR verifier rejection recipes are versioned in `spec/fixtures/mir-verifier/manifest-v0.json`. They require a verified named seed, exactly one typed mutation, and exactly one expected `Vxxxx` result without creating a general serialized MIR or plugin format.
 
-Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v1.json`, which includes all eight historical v0 cases and adds deterministic package-cycle rejection. They fix package-instance equality, one source root per instance, acyclic direct dependency structure, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax. `internal/packagefixture` executes all nine cases through the reusable `internal/packagegraph` validator and resolver, converts passing graphs into build-local semantic package input, and proves isolated equal module paths complete semantic Flow. Region v1 consumes the same validated graph result. The independently versioned `spec/fixtures/package-identity/manifest-v1.json` freezes the canonical resolved-tuple byte encoding, full SHA-256 `PackageInstanceId`, text form, component boundaries, and feature-set rejection reasons without choosing any package-manager format. `PackageCoordinateId` v1 separately identifies the source-independent UID/version/feature coordinate used by public cross-package contracts. Typed HIR retains source `pub` state for every current item category. `spec/fixtures/module-interface/manifest-v3.json` compiles twelve current source variants and freezes the coordinate-based public-interface v3 digest: private must-use, private module-constant, and private source-location state preserve it while public must-use state invalidates it, alongside the existing body, representation, declaration-order, signature, field-order, foreign-link, dependency-source, and dependency-coordinate relations. V1 and v2 manifests remain frozen historical vectors. `spec/fixtures/package-source/manifest-v1.json` separately freezes the exact path-and-source-byte digest used for the current package's own implementation invalidation. Historical `spec/fixtures/package-cache/manifest-v1.json` records the first caller-bounded process-local LRU key baseline.
+Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v1.json`, which includes all eight historical v0 cases and adds deterministic package-cycle rejection. They fix package-instance equality, one source root per instance, acyclic direct dependency structure, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax. `internal/packagefixture` executes all nine cases through the reusable `internal/packagegraph` validator and resolver, converts passing graphs into build-local semantic package input, and proves isolated equal module paths complete semantic Flow. Region v1 consumes the same validated graph result. The independently versioned `spec/fixtures/package-identity/manifest-v1.json` freezes the canonical resolved-tuple byte encoding, full SHA-256 `PackageInstanceId`, text form, component boundaries, and feature-set rejection reasons without choosing any package-manager format. `PackageCoordinateId` v1 separately identifies the source-independent UID/version/feature coordinate used by public cross-package contracts. Typed HIR retains source `pub` state for every current item category. `spec/fixtures/module-interface/manifest-v4.json` compiles thirteen current source variants and freezes the coordinate-based public-interface v4 digest: private must-use, private module-constant, and private source-location state preserve it while public must-use and public resource-ability state invalidate it, alongside the existing body, representation, declaration-order, signature, field-order, foreign-link, dependency-source, and dependency-coordinate relations. V1 through v3 manifests remain frozen historical vectors. `spec/fixtures/package-source/manifest-v1.json` separately freezes the exact path-and-source-byte digest used for the current package's own implementation invalidation. Historical `spec/fixtures/package-cache/manifest-v1.json` records the first caller-bounded process-local LRU key baseline.
 
 ADR 0174's v2 key encoding now uses current vectors in
-`spec/fixtures/package-cache/manifest-v5.json`. The current package keeps exact source identity;
-dependency pairs use source-independent coordinate plus public-interface v3, including public
-must-use state. Stable function,
+`spec/fixtures/package-cache/manifest-v6.json`. The current package keeps exact source identity;
+dependency pairs use source-independent coordinate plus public-interface v4, including public
+must-use and resource-ability state. Stable function,
 nominal type, foreign, body, and package artifacts use the same coordinate boundary and still
 re-enter MIR verification, so a private dependency edit can reuse the caller without accepting an
 old provider body. Historical cache fixture manifests v1 and v2 remain frozen.

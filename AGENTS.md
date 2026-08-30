@@ -85,12 +85,12 @@ regenerate, or override compiler source.
 - PackageInstanceId v1 fixtures: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 encoding and fixture runner: internal/packagegraph/identity.go, internal/packageidentityfixture/
 - PackageCoordinateId v1 encoding and workspace mapping: internal/packagegraph/coordinate.go, internal/workspaceloader/semantic.go, docs/package/package-coordinate-id-v1.md
-- Public-interface hash v3 fixtures: spec/fixtures/module-interface/manifest-v3.json with historical manifest-v1.json and manifest-v2.json coverage
+- Public-interface hash v4 fixtures: spec/fixtures/module-interface/manifest-v4.json with historical manifest-v1.json through manifest-v3.json coverage
 - Public-interface extraction, hashing, and fixture runner: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and fixture runner: internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identities: internal/packagecontent/file_identity.go, docs/package/source-file-identities-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md
-- Whole-package cache-key v2 fixtures: spec/fixtures/package-cache/manifest-v5.json with historical manifest-v1.json through manifest-v4.json coverage
+- Whole-package cache-key v2 fixtures: spec/fixtures/package-cache/manifest-v6.json with historical manifest-v1.json through manifest-v5.json coverage
 - Whole-package cache key, bounded memory store, and fixture runner: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache CLI and schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md
@@ -132,7 +132,7 @@ regenerate, or override compiler source.
 - Acyclic aggregate-bearing Option/Result field graph and native Windows proof: internal/cbackend/aggregate_types.go, internal/cbackend/tagged_types.go, spec/fixtures/c-emission/cases/pass/aggregate-bearing-tagged-fields/, cmd/fairyc-windows-host-smoke/aggregate_tagged_source.go, docs/adr/0326-aggregate-bearing-tagged-field-graph.md
 - Nested compact scalar-tag private C transport and native Windows proof: internal/cbackend/tagged_types.go, spec/fixtures/c-emission/cases/pass/nested-compact-tag/, cmd/fairyc-windows-host-smoke/nested_compact_tag_source.go, docs/adr/0327-nested-compact-tag-transport.md
 - Production-workload capability candidate gates: docs/adr/0328-production-workload-capability-admission-gates.md, docs/product/01-roadmap.md, docs/product/02-spec.md
-- Experimental single-package resource abilities and linear no-drop analysis, with stable package and public-interface v3 admission closed: internal/semantic/resource_abilities.go, internal/hir/hir.go, internal/moduleinterface/, docs/language/0009-resource-abilities-v0.md, docs/adr/0336-resource-abilities-and-linear-assets.md
+- Experimental single-package resource abilities and linear no-drop analysis, with public-interface v4 transport and stable package admission still closed: internal/semantic/resource_abilities.go, internal/hir/hir.go, internal/moduleinterface/, docs/language/0009-resource-abilities-v0.md, docs/adr/0336-resource-abilities-and-linear-assets.md, docs/adr/0341-public-interface-resource-abilities-v4.md
 - Experimental target-neutral on-chain effect classification, with released `/10` vocabulary and stable package admission unchanged: internal/hir/effect.go, internal/semantic/effects.go, docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0337-onchain-effect-capabilities.md
 - Experimental typed contract-state layout and failure-atomic transaction oracle, with no source, MIR, runtime, backend, or production persistence admission: internal/contractstate/, docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md
 - Experimental bounded static generic specialization planner, with source syntax, HIR substitution, MIR, and backend admission closed: internal/genericplan/, docs/adr/0339-bounded-static-generic-specialization-kernel.md, docs/adr/0223-defer-static-interfaces-until-generics.md

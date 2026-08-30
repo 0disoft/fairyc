@@ -218,8 +218,8 @@ func TestExtractTracksPublicShapesEffectsAndForeignLinks(t *testing.T) {
 
 	abilityChange := clonePackage(base)
 	abilityChange.Modules[0].Resources[0].Abilities = []hir.ResourceAbility{hir.ResourceAbilityStore, hir.ResourceAbilityKey}
-	if _, err := Extract(abilityChange, 1, instances); err == nil || !strings.Contains(err.Error(), "newer public-interface encoding") {
-		t.Fatalf("experimental public resource abilities error = %v", err)
+	if hash := extractHash(t, abilityChange, 1, instances); hash == baseHash {
+		t.Fatalf("public resource ability change did not invalidate interface: %s", hash)
 	}
 
 	linkChange := clonePackage(base)
@@ -232,6 +232,44 @@ func TestExtractTracksPublicShapesEffectsAndForeignLinks(t *testing.T) {
 	publicMustUseChange.Modules[0].ForeignFunctions[0].MustUse = true
 	if hash := extractHash(t, publicMustUseChange, 1, instances); hash == baseHash {
 		t.Fatalf("public must-use change did not invalidate interface: %s", hash)
+	}
+}
+
+func TestExtractRejectsNoncanonicalPublicResourceAbilities(t *testing.T) {
+	t.Parallel()
+	self := testCoordinateID(t, "self")
+	coordinates := map[hir.PackageID]packagegraph.CoordinateID{1: self}
+	for _, abilities := range [][]hir.ResourceAbility{
+		{hir.ResourceAbilityKey},
+		{hir.ResourceAbilityStore, hir.ResourceAbilityStore},
+		{hir.ResourceAbilityKey, hir.ResourceAbilityStore},
+		{hir.ResourceAbility("unknown")},
+	} {
+		value := hir.Package{Modules: []hir.Module{{
+			Package: 1,
+			Path:    "api",
+			Resources: []hir.Resource{{
+				Name: "Asset", Public: true, Type: "$p1::api::Asset", Abilities: abilities,
+			}},
+		}}}
+		if _, err := Extract(value, 1, coordinates); err == nil {
+			t.Fatalf("Extract() accepted abilities %v", abilities)
+		}
+	}
+}
+
+func TestComputeRejectsAbilitiesOutsideCanonicalResourceItems(t *testing.T) {
+	t.Parallel()
+	for _, item := range []Item{
+		{Kind: "function", Name: "read", Abilities: []string{"drop"}},
+		{Kind: "resource", Name: "Asset"},
+		{Kind: "resource", Name: "Asset", Abilities: []string{"key"}},
+		{Kind: "resource", Name: "Asset", Abilities: []string{"store", "store"}},
+	} {
+		descriptor := Descriptor{Modules: []Module{{Path: "api", Items: []Item{item}}}}
+		if _, err := Compute(descriptor); err == nil {
+			t.Fatalf("Compute() accepted item %+v", item)
+		}
 	}
 }
 

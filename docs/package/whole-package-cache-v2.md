@@ -2,7 +2,7 @@
 
 - Status: Executable prototype contract
 - Decision: `docs/adr/0174-coordinate-stable-linking-and-cache-key-v2.md`
-- Fixture source: `spec/fixtures/package-cache/manifest-v5.json`
+- Fixture source: `spec/fixtures/package-cache/manifest-v6.json`
 - Implementation: `internal/packagecache/`, `internal/packageartifact/`, `internal/workspacecompiler/`
 
 ## Contract
@@ -10,8 +10,8 @@
 The current package remains exact: its `PackageInstanceId` and source digest invalidate its own
 artifact. Compiler, language, MIR, target, ABI, toolchain, backend, runtime, standard-library,
 profile, and feature inputs remain mandatory. A dependency entry is the sorted unique pair
-`PackageCoordinateId + fyif3 public-interface hash`. The package-cache key encoding remains v2;
-fixture manifest v3 records the newer independently versioned interface component.
+`PackageCoordinateId + fyif4 public-interface hash`. The package-cache key encoding remains v2;
+fixture manifest v6 records the newer independently versioned interface component.
 
 The canonical encoding is `fairyc.package-cache-key/v2`; its only text form is
 `fycache2-sha256-<64 lowercase hexadecimal digits>`. V1 keys are incompatible.

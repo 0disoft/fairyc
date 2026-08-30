@@ -1,0 +1,98 @@
+{
+  "$schema": "./schema-v4.json",
+  "schemaVersion": "fairyc.module-interface-fixtures/v4",
+  "contracts": [
+    "docs/adr/0173-public-interface-coordinate-hash-v2.md",
+    "docs/adr/0219-narrow-must-use-call-contract.md",
+    "docs/adr/0221-explicit-source-location-intrinsic.md",
+    "docs/adr/0341-public-interface-resource-abilities-v4.md",
+    "docs/package/public-interface-hash-v4.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "identity": {
+    "packageUid": "fixture.interface.api",
+    "sourceIdentity": "fixture-source:interface-api",
+    "versionIdentity": "fixture-version:workspace",
+    "features": []
+  },
+  "cases": [
+    {
+      "id": "baseline",
+      "source": "cases/baseline/api.fy",
+      "relation": "baseline",
+      "expectHash": "fyif4-sha256-a8dfa4b0710d83057198d3429db8f044598b65148d845e290f92f24a8d2f0b91"
+    },
+    {
+      "id": "private-body",
+      "source": "cases/private-body/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "public-body",
+      "source": "cases/public-body/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "declaration-order",
+      "source": "cases/declaration-order/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "resource-private-shape",
+      "source": "cases/resource-private-shape/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "private-must-use",
+      "source": "cases/private-must-use/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "private-constant",
+      "source": "cases/private-constant/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "private-source-location",
+      "source": "cases/private-source-location/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "public-signature",
+      "source": "cases/public-signature/api.fy",
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "public-field-order",
+      "source": "cases/public-field-order/api.fy",
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "foreign-link-name",
+      "source": "cases/foreign-link-name/api.fy",
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "public-must-use",
+      "source": "cases/public-must-use/api.fy",
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "public-resource-abilities",
+      "source": "cases/public-resource-abilities/api.fy",
+      "compareTo": "baseline",
+      "relation": "different"
+    }
+  ]
+}

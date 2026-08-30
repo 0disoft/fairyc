@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	schemaVersion = "fairyc.module-interface-fixtures/v3"
+	schemaVersion = "fairyc.module-interface-fixtures/v4"
 	maximumSource = 1 << 20
 )
 

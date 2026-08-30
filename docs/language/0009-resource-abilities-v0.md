@@ -15,7 +15,7 @@ Resource abilities let a declaration opt into a closed set of compiler-known pro
 
 This contract currently governs direct, single-package experimental semantic analysis only. Stable manifest and resolved-package compilation under `fairyc-language/10` reports `@abilities` as unsupported, so workspace check, build, run, test, cache, and native emission do not admit it.
 
-HIR preserves canonical ability metadata, but public-interface v3 cannot encode non-legacy resource abilities and rejects such public resources. Stable release requires a coordinated language revision and public-interface migration; this draft changes no current SDK, runtime ABI, package identity, cache identity, or backend behavior.
+HIR preserves canonical ability metadata, and public-interface v4 now encodes every public effective ability set. Stable release still requires the coordinated language revision; this draft changes no current SDK, runtime ABI, package identity, or backend behavior.
 
 ## Declaration syntax
 

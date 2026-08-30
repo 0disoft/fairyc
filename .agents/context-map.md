@@ -82,12 +82,12 @@
 - PackageInstanceId v1 fixture route: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 runner route: internal/packageidentityfixture/
 - PackageCoordinateId v1 route: internal/packagegraph/coordinate.go, internal/workspaceloader/semantic.go, docs/package/package-coordinate-id-v1.md, docs/adr/0172-source-independent-package-coordinate.md
-- Public-interface hash v3 fixture route: spec/fixtures/module-interface/manifest-v3.json with historical manifest-v1.json and manifest-v2.json
+- Public-interface hash v4 fixture route: spec/fixtures/module-interface/manifest-v4.json with historical manifest-v1.json through manifest-v3.json
 - Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixture route: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identity route: internal/packagecontent/file_identity.go, docs/package/source-file-identities-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md
-- Whole-package cache-key v2 fixture route: spec/fixtures/package-cache/manifest-v5.json with historical manifest-v1.json through manifest-v4.json
+- Whole-package cache-key v2 fixture route: spec/fixtures/package-cache/manifest-v6.json with historical manifest-v1.json through manifest-v5.json
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity route: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache command route: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md

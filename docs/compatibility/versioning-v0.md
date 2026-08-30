@@ -111,7 +111,7 @@ command now exist; ordinary-command policy and default limits remain undecided.
 
 The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
 `fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v5` supplies current vectors because its
-dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/10`; fixture
+dependency entries use `fyif4-sha256` public-interface hashes and `fairyc-language/10`; fixture
 manifests v1 through v4 remain historical. A component algorithm change is an intentional cache miss,
 not permission to reinterpret an older key.
 
@@ -898,13 +898,13 @@ bytes, and private symbols are not cross-release compatibility promises. Public 
 remain independently versioned.
 
 ADR 0336 does not change the current language revision because stable resolved-package analysis
-continues to reject `@abilities`. Canonical ability metadata in HIR is compiler-internal, and
-public-interface v3 rejects public non-legacy ability sets rather than omitting them from its hash.
-Stable admission requires an exact language revision and a new public-interface encoding together
-with their package, cache, lock, fixture, and release migrations.
+continues to reject `@abilities`. ADR 0341 changes the current public-interface contract to v4 and
+encodes every canonical public resource ability set instead of erasing or rejecting it. Stable
+source admission still requires an exact language revision with its package, lock, fixture, and
+release migrations.
 
 ADR 0337 also leaves `fairyc-language/10` unchanged: direct experimental analysis recognizes the
-new on-chain effects, while stable resolved-package analysis rejects them. Public-interface v3 can
+new on-chain effects, while stable resolved-package analysis rejects them. Public-interface v4 can
 encode effect strings without a shape change, but stable source admission still requires the exact
 language, manifest, SDK, lock, previous-revision, cache-vector, fixture, and migration cut.
 
@@ -1180,11 +1180,11 @@ silently inheriting it from its own schema. Changing the digest, canonical bytes
 validation rules requires a new package-identity version. Caches using another version are safe
 misses; contradictory lockfile or map records are corruption.
 
-`fairyc.module-interface-fixtures/v3` independently fixes the current public-interface descriptor
-and `fyif3-sha256-...` hash. It preserves v2 coordinate-based nominal identity and adds public
-internal and foreign callable must-use state. It excludes ordinary bodies, private implementation,
-and private must-use state while including public type shape, callable signatures, effects and
-must-use bits, foreign link contracts, module paths, and dependency nominal identities. V1 and v2
+`fairyc.module-interface-fixtures/v4` independently fixes the current public-interface descriptor
+and `fyif4-sha256-...` hash. It preserves v3 callable must-use state and adds canonical public
+resource abilities. It excludes ordinary bodies, private implementation, and private must-use
+state while including public type shape, callable signatures, effects, must-use bits, resource
+abilities, foreign link contracts, module paths, and dependency nominal identities. V1 through v3
 fixtures remain frozen historical vectors. A cache records the current algorithm explicitly and
 combines it with its own schema and compatibility vector. Changing interface inputs, canonical
 encoding, stable type spelling, digest, or prefix requires a new interface-hash version.
@@ -1202,7 +1202,7 @@ zero-based line start, including EOF after a final LF. CR is not normalized. A m
 stored spans for that file; no consumer may guess a remapped position.
 
 ADR 0185 adds the internal `fairyc.fymap-logical/v1` planning model. It requires the exact compiler
-executable identity, exact current package set, one `fyif3-sha256` public-interface hash per package,
+executable identity, exact current package set, one `fyif4-sha256` public-interface hash per package,
 all independent identity-algorithm identifiers, and explicit relation omissions. The model is
 target-independent and immutable. It is not the `.fymap` transport schema and therefore makes no
 promise by itself about encoded bytes, file naming, publication, or reader compatibility.

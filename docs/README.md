@@ -23,8 +23,8 @@
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v1.json, including historical v0 cases
 - Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
-- Public-interface hash v3 fixtures and runner: spec/fixtures/module-interface/manifest-v3.json, with historical v1 and v2 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
-- Experimental resource abilities and linear no-drop analysis: docs/language/0009-resource-abilities-v0.md, docs/adr/0336-resource-abilities-and-linear-assets.md, internal/semantic/resource_abilities.go, internal/hir/hir.go; stable resolved-package admission and public-interface v3 remain closed
+- Public-interface hash v4 fixtures and runner: spec/fixtures/module-interface/manifest-v4.json, with historical v1 through v3 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
+- Experimental resource abilities and linear no-drop analysis: docs/language/0009-resource-abilities-v0.md, docs/adr/0336-resource-abilities-and-linear-assets.md, internal/semantic/resource_abilities.go, internal/hir/hir.go; public-interface v4 transport exists while stable resolved-package admission remains closed
 - Experimental target-neutral on-chain effects: docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0337-onchain-effect-capabilities.md, internal/hir/effect.go; released `/10` vocabulary and stable resolved-package admission remain unchanged
 - Experimental typed contract-state transaction oracle: docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md, internal/contractstate/
 - Experimental bounded static generic planner: docs/adr/0339-bounded-static-generic-specialization-kernel.md, internal/genericplan/; no source syntax, HIR substitution, MIR, or backend surface is admitted
@@ -64,7 +64,7 @@
 - Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof: internal/pecoff/associative_link.go, internal/windowsarchiveprobe/, docs/adr/0235-selected-associative-comdat-unwind-proof.md
 - Exact discarded-parent associative unwind elimination proof: internal/pecoff/discarded_associative_link.go, internal/windowsarchiveprobe/, docs/adr/0236-discarded-associative-comdat-elimination-proof.md
 - Exact AMD64 ADDR64 and unwind `.pdata` ADDR32NB object-to-image proof: internal/pecoff/address_link.go, internal/windowsrelocationprobe/, docs/adr/0234-amd64-address-and-pdata-relocation-proof.md
-- Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v5.json with historical v1 through v4, internal/packagecache/, internal/packagecachefixture/
+- Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v6.json with historical v1 through v5, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
 - Bounded workspace check-session CLI and NDJSON schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
 - One-shot persistent workspace-cache CLI and JSON schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md

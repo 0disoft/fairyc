@@ -13,7 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
-const schemaVersion = "fairyc.package-cache-fixtures/v5"
+const schemaVersion = "fairyc.package-cache-fixtures/v6"
 
 // Run decodes and compares all whole-package cache-key fixtures.
 func Run(path string) (Report, error) {

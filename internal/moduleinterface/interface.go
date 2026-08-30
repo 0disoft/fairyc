@@ -17,8 +17,8 @@ import (
 
 const (
 	HashAlgorithm = "sha256"
-	HashEncoding  = "fairyc.public-interface/v3"
-	HashPrefix    = "fyif3-sha256-"
+	HashEncoding  = "fairyc.public-interface/v4"
+	HashPrefix    = "fyif4-sha256-"
 )
 
 const interfaceDomain = "fairyc.public-interface"
@@ -85,6 +85,7 @@ type Item struct {
 	LinkName   string
 	OwnerType  string
 	Effects    []string
+	Abilities  []string
 	Parameters []string
 	ResultType string
 	Fields     []Field
@@ -190,14 +191,15 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 		if !resource.Public {
 			continue
 		}
-		if !legacyResourceAbilities(resource.Abilities) {
-			return Module{}, fmt.Errorf("public resource %q uses abilities that require a newer public-interface encoding", resource.Name)
+		abilities, err := stableResourceAbilities(resource.Abilities)
+		if err != nil {
+			return Module{}, fmt.Errorf("public resource %q: %w", resource.Name, err)
 		}
 		effects, err := stableEffects(resource.DropEffects)
 		if err != nil {
 			return Module{}, fmt.Errorf("public resource %q: %w", resource.Name, err)
 		}
-		item := Item{Kind: "resource", Name: resource.Name, Effects: effects}
+		item := Item{Kind: "resource", Name: resource.Name, Effects: effects, Abilities: abilities}
 		result.Items = append(result.Items, item)
 	}
 	for _, foreign := range source.ForeignFunctions {
@@ -270,8 +272,31 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 	return result, nil
 }
 
-func legacyResourceAbilities(abilities []hir.ResourceAbility) bool {
-	return len(abilities) == 0 || len(abilities) == 1 && abilities[0] == hir.ResourceAbilityDrop
+func stableResourceAbilities(values []hir.ResourceAbility) ([]string, error) {
+	if len(values) == 0 {
+		values = []hir.ResourceAbility{hir.ResourceAbilityDrop}
+	}
+	canonical := []hir.ResourceAbility{
+		hir.ResourceAbilityDrop,
+		hir.ResourceAbilityStore,
+		hir.ResourceAbilityKey,
+	}
+	position := 0
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		for position < len(canonical) && canonical[position] != value {
+			position++
+		}
+		if position == len(canonical) {
+			return nil, fmt.Errorf("resource abilities are unknown, duplicated, or noncanonical")
+		}
+		result = append(result, string(value))
+		position++
+	}
+	if slices.Contains(values, hir.ResourceAbilityKey) && !slices.Contains(values, hir.ResourceAbilityStore) {
+		return nil, fmt.Errorf("resource ability key requires store")
+	}
+	return result, nil
 }
 
 func stableStructFields(fields []hir.StructField, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, publicTypes map[hir.Type]bool) ([]Field, error) {
@@ -395,7 +420,7 @@ func stableEffects(values []hir.Effect) ([]string, error) {
 	return result, nil
 }
 
-// Encode returns the deterministic v3 bytes hashed for cache invalidation.
+// Encode returns the deterministic v4 bytes hashed for cache invalidation.
 func Encode(value Descriptor) ([]byte, error) {
 	if err := validateDescriptor(value); err != nil {
 		return nil, err
@@ -403,7 +428,7 @@ func Encode(value Descriptor) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(interfaceDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(3)
+	encoded.WriteByte(4)
 	writeUint64(&encoded, uint64(len(value.Modules)))
 	for _, module := range value.Modules {
 		writeString(&encoded, module.Path)
@@ -467,9 +492,30 @@ func validateDescriptor(value Descriptor) error {
 			if item.Kind == "" || item.Name == "" || itemIndex > 0 && compareItem(module.Items[itemIndex-1], item) >= 0 {
 				return fmt.Errorf("module %q public items are not sorted and unique", module.Path)
 			}
+			if err := validateItemAbilities(item); err != nil {
+				return fmt.Errorf("module %q public %s %q: %w", module.Path, item.Kind, item.Name, err)
+			}
 		}
 	}
 	return nil
+}
+
+func validateItemAbilities(item Item) error {
+	if item.Kind != "resource" {
+		if len(item.Abilities) != 0 {
+			return fmt.Errorf("non-resource item carries resource abilities")
+		}
+		return nil
+	}
+	if len(item.Abilities) == 0 {
+		return fmt.Errorf("resource ability set is empty")
+	}
+	values := make([]hir.ResourceAbility, len(item.Abilities))
+	for index, value := range item.Abilities {
+		values[index] = hir.ResourceAbility(value)
+	}
+	_, err := stableResourceAbilities(values)
+	return err
 }
 
 func compareItem(left, right Item) int {
@@ -489,6 +535,7 @@ func writeItem(buffer *bytes.Buffer, item Item) {
 	writeString(buffer, item.LinkName)
 	writeString(buffer, item.OwnerType)
 	writeStrings(buffer, item.Effects)
+	writeStrings(buffer, item.Abilities)
 	writeStrings(buffer, item.Parameters)
 	writeString(buffer, item.ResultType)
 	writeUint64(buffer, uint64(len(item.Fields)))
