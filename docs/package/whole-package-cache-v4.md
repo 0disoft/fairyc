@@ -42,6 +42,7 @@ transitions. ADR 0350 independently provides a bounded capability-free operation
 verifier re-entry, ADR 0351 checks the expected hash before fresh HIR owner rebind, and ADR 0352
 pairs that payload with stable package MIR in a separate outer compilation artifact. ADR 0353 makes
 persistent records carry exactly that bundle and requires the key-selected body hash before a hit.
-The existing all-hit path still reassembles only the verified MIR members; cached state-body rebind,
-combined symbol alignment and execution, source syntax, native backend execution, and production
-persistence remain separate admission gates.
+ADR 0354 reassembles both members, requires each cached transaction to use its owning MIR function's
+fresh symbol, and exposes the verified state programs for explicit oracle execution. Source syntax,
+ordinary compiler-result integration, native backend execution, and production persistence remain
+separate admission gates.

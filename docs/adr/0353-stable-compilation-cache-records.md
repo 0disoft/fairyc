@@ -60,7 +60,7 @@ remain unchanged.
 ## Consequences
 
 Every new persistent hit now proves that the exact cache-selected state body travels with the MIR
-for the same package coordinate. Cache deletion still only causes ordinary compilation. Cached
-state-body fresh-owner rebind, cross-package symbol alignment, combined transaction reassembly,
-cached state execution, source syntax, backend lowering, runtime persistence, and targets remain
-closed.
+for the same package coordinate. Cache deletion still only causes ordinary compilation. ADR 0354
+later adds fresh-owner cached state-body rebind, cross-package symbol alignment, combined transaction
+reassembly, and explicit oracle execution. Source syntax, backend lowering, runtime persistence, and
+targets remain closed.

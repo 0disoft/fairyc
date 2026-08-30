@@ -72,4 +72,4 @@ quarantine on malformed payloads, and execution equivalence.
 
 ADR 0351 later completes the checked fresh-HIR-owner rebind, ADR 0352 adds the outer package
 artifact, and ADR 0353 admits it to persistent cache records. Combined cached state-body reassembly
-remains open.
+and explicit oracle execution arrive later in ADR 0354.

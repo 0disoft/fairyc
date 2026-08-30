@@ -69,6 +69,6 @@ artifact versions, runtime ABI, SDK, target, lockfile, Atlas, and CLI schemas re
 
 Stable transaction payloads can now enter a fresh compilation without trusting old local numbers,
 old capability tokens, current source operation bodies, or names alone. ADR 0352 later attaches
-the payload to stable package MIR through a separately versioned outer artifact. Cache records and
-workspace reassembly must still prove exact package closure, hit/miss behavior, malformed-entry
-quarantine, fresh-symbol alignment, and execution equivalence.
+the payload to stable package MIR through a separately versioned outer artifact, ADR 0353 admits
+that bundle to persistent records, and ADR 0354 later proves exact package closure, fresh MIR-symbol
+alignment, new capability authority, and cached execution equivalence.

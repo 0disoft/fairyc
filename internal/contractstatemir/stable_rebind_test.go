@@ -57,6 +57,25 @@ func TestStableStateBodyRebindsFreshOwnersCapabilitiesAndExecution(t *testing.T)
 			t.Fatalf("rebind %d reused transaction capability", index)
 		}
 	}
+	aligned, err := RebindStableStateBodyWithSymbols(body, body.Hash, fresh, 9, coordinates, map[string]hir.SymbolID{
+		"ledger::apply": 1001, "ledger::observe": 1002,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if aligned.Transactions[0].Function != 1001 || aligned.Transactions[1].Function != 1002 {
+		t.Fatalf("aligned transactions = %+v", aligned.Transactions)
+	}
+	if _, err := RebindStableStateBodyWithSymbols(body, body.Hash, fresh, 9, coordinates, map[string]hir.SymbolID{
+		"ledger::apply": 1001,
+	}); err == nil || !strings.Contains(err.Error(), "no aligned MIR symbol") {
+		t.Fatalf("missing aligned function symbol error = %v", err)
+	}
+	if _, err := RebindStableStateBodyWithSymbols(body, body.Hash, fresh, 9, coordinates, map[string]hir.SymbolID{
+		"ledger::apply": 1001, "ledger::observe": 1001,
+	}); err == nil || !strings.Contains(err.Error(), "share fresh symbol") {
+		t.Fatalf("duplicate aligned function symbol error = %v", err)
+	}
 
 	store, err := NewMemoryStore(rebound.Layout)
 	if err != nil {

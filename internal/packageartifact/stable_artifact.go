@@ -41,6 +41,21 @@ type stableArtifactEnvelope struct {
 	Artifact StableArtifact `json:"artifact"`
 }
 
+// StableFunctionBinding records the fresh process-local symbol assigned to one
+// coordinate-owned logical function during stable MIR reassembly.
+type StableFunctionBinding struct {
+	Package packagegraph.CoordinateID
+	Name    string
+	Symbol  hir.SymbolID
+}
+
+// StableReassembly contains one verified MIR program plus the exact function
+// bindings needed to align separately serialized compiler artifacts.
+type StableReassembly struct {
+	MIR       mir.Program
+	Functions []StableFunctionBinding
+}
+
 // DescribeStableArtifact projects one verified process-local package artifact into stable bodies,
 // explicit FunctionID imports, and the exact stable type context shared by those bodies.
 func DescribeStableArtifact(artifact Artifact, maxBytes uint64) (StableArtifact, error) {
@@ -220,8 +235,15 @@ func DecodeStableArtifact(encoded []byte, maxBytes uint64) (StableArtifact, erro
 // RebindStableArtifacts reconstructs one closed verified MIR program without any process-local
 // package artifact. Package-scoped contexts are conflict-checked and merged before bodies bind.
 func RebindStableArtifacts(artifacts []StableArtifact, coordinates map[hir.PackageID]packagegraph.CoordinateID, firstFunctionSymbol, firstForeignSymbol hir.SymbolID, firstLocal mir.LocalID) (mir.Program, error) {
+	reassembled, err := RebindStableArtifactsWithBindings(artifacts, coordinates, firstFunctionSymbol, firstForeignSymbol, firstLocal)
+	return reassembled.MIR, err
+}
+
+// RebindStableArtifactsWithBindings reconstructs one closed verified MIR
+// program and returns its deterministic fresh function-symbol assignments.
+func RebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates map[hir.PackageID]packagegraph.CoordinateID, firstFunctionSymbol, firstForeignSymbol hir.SymbolID, firstLocal mir.LocalID) (StableReassembly, error) {
 	if len(artifacts) == 0 {
-		return mir.Program{}, fmt.Errorf("no stable package MIR artifacts to rebind")
+		return StableReassembly{}, fmt.Errorf("no stable package MIR artifacts to rebind")
 	}
 	seenPackages := make(map[packagegraph.InstanceID]struct{}, len(artifacts))
 	seenCoordinates := make(map[packagegraph.CoordinateID]struct{}, len(artifacts))
@@ -233,20 +255,20 @@ func RebindStableArtifacts(artifacts []StableArtifact, coordinates map[hir.Packa
 	contexts := make([]ContextDescriptor, 0, len(artifacts))
 	for index, artifact := range artifacts {
 		if err := ValidateStableArtifact(artifact); err != nil {
-			return mir.Program{}, fmt.Errorf("stable artifact %d: %w", index, err)
+			return StableReassembly{}, fmt.Errorf("stable artifact %d: %w", index, err)
 		}
 		contexts = append(contexts, artifact.Context)
 		if _, duplicate := seenPackages[artifact.Package]; duplicate {
-			return mir.Program{}, fmt.Errorf("stable package MIR artifact %s is duplicated", artifact.Package)
+			return StableReassembly{}, fmt.Errorf("stable package MIR artifact %s is duplicated", artifact.Package)
 		}
 		seenPackages[artifact.Package] = struct{}{}
 		if _, duplicate := seenCoordinates[artifact.Coordinate]; duplicate {
-			return mir.Program{}, fmt.Errorf("stable package MIR coordinate %s is duplicated", artifact.Coordinate)
+			return StableReassembly{}, fmt.Errorf("stable package MIR coordinate %s is duplicated", artifact.Coordinate)
 		}
 		seenCoordinates[artifact.Coordinate] = struct{}{}
 		for _, body := range artifact.Functions {
 			if _, duplicate := owned[body.ID]; duplicate {
-				return mir.Program{}, fmt.Errorf("stable owned FunctionID %s is duplicated", body.ID)
+				return StableReassembly{}, fmt.Errorf("stable owned FunctionID %s is duplicated", body.ID)
 			}
 			owned[body.ID] = ownedBody{body: body, context: artifact.Context}
 		}
@@ -254,7 +276,7 @@ func RebindStableArtifacts(artifacts []StableArtifact, coordinates map[hir.Packa
 	for _, artifact := range artifacts {
 		for _, imported := range artifact.Imports {
 			if _, found := owned[imported]; !found {
-				return mir.Program{}, fmt.Errorf("stable import FunctionID %s is unresolved", imported)
+				return StableReassembly{}, fmt.Errorf("stable import FunctionID %s is unresolved", imported)
 			}
 		}
 	}
@@ -267,34 +289,38 @@ func RebindStableArtifacts(artifacts []StableArtifact, coordinates map[hir.Packa
 	for index, id := range ids {
 		symbol := firstFunctionSymbol + hir.SymbolID(index)
 		if symbol < firstFunctionSymbol || symbol == hir.NoSymbol {
-			return mir.Program{}, fmt.Errorf("stable function symbol namespace overflows")
+			return StableReassembly{}, fmt.Errorf("stable function symbol namespace overflows")
 		}
 		functionSymbols[id] = symbol
 	}
 	mergedContext, err := MergeContextDescriptors(contexts)
 	if err != nil {
-		return mir.Program{}, err
+		return StableReassembly{}, err
 	}
 	program, err := RebindContextDescriptor(mergedContext, coordinates, functionSymbols, firstForeignSymbol)
 	if err != nil {
-		return mir.Program{}, err
+		return StableReassembly{}, err
 	}
+	bindings := make([]StableFunctionBinding, 0, len(ids))
 	processContext := mir.Clone(program)
 	for _, id := range ids {
 		item := owned[id]
+		bindings = append(bindings, StableFunctionBinding{
+			Package: item.body.Package, Name: item.body.Function.Name, Symbol: functionSymbols[id],
+		})
 		foreignSymbols, foreignErr := foreignSymbolsForContext(processContext, item.context, coordinates)
 		if foreignErr != nil {
-			return mir.Program{}, fmt.Errorf("rebind stable function %s foreign context: %w", id, foreignErr)
+			return StableReassembly{}, fmt.Errorf("rebind stable function %s foreign context: %w", id, foreignErr)
 		}
 		function, err := rebindStableBody(item.body, item.context, coordinates, functionSymbols, foreignSymbols, firstLocal, ^uint64(0))
 		if err != nil {
-			return mir.Program{}, fmt.Errorf("rebind stable function %s: %w", id, err)
+			return StableReassembly{}, fmt.Errorf("rebind stable function %s: %w", id, err)
 		}
 		program.Functions = append(program.Functions, function)
 	}
 	slices.SortFunc(program.Functions, func(left, right mir.Function) int { return strings.Compare(left.Name, right.Name) })
 	if failures := mir.Verify(program); len(failures) != 0 {
-		return mir.Program{}, fmt.Errorf("verify rebound stable package MIR: %w", failures[0])
+		return StableReassembly{}, fmt.Errorf("verify rebound stable package MIR: %w", failures[0])
 	}
-	return program, nil
+	return StableReassembly{MIR: program, Functions: bindings}, nil
 }

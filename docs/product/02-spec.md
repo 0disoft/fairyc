@@ -154,8 +154,9 @@ verifier, and recomputes that hash. ADR 0351 additionally requires the expected 
 current coordinate/layout/function descriptors before mapping the payload to fresh package/function
 symbols and capabilities without current source operation bodies. ADR 0352 pairs the payload with
 stable package MIR v3 in a coordinate-bound outer artifact. ADR 0353 makes persistent cache records
-carry that bundle and requires the key-selected body hash before a hit. Workspace all-hit reuse still
-reassembles only the verified MIR members and does not execute cached state bodies.
+carry that bundle and requires the key-selected body hash before a hit. ADR 0354 reassembles both
+members under the MIR program's fresh coordinate-owned function symbols and returns verified cached
+state transactions for explicit compiler-private oracle execution.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -980,7 +981,9 @@ and body hash. Its decoder reconstructs layouts and operations, creates fresh pr
 re-enters the transaction-MIR verifier, and recomputes the hash. ADR 0351 binds it to an exact
 expected hash, current HIR layout, and fresh package/function symbols. ADR 0352 then pairs it with
 stable package MIR v3 in a separate outer artifact. ADR 0353 adds cache storage, expected-body
-lookup, and exact-generation quarantine; state-body rebind and combined reassembly remain closed.
+lookup, and exact-generation quarantine. ADR 0354 adds state-body rebind, combined fresh-symbol
+reassembly, and explicit cached oracle execution while source and native/runtime admission remain
+closed.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

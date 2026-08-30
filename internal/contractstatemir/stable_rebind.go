@@ -23,6 +23,13 @@ type ReboundStateBody struct {
 // HIR layout/signatures before reconstructing each transaction with fresh
 // private capability authority.
 func RebindStableStateBody(body StableStateBodyArtifact, expected StateBodyHash, input hir.Package, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (ReboundStateBody, error) {
+	return RebindStableStateBodyWithSymbols(body, expected, input, packageID, coordinates, nil)
+}
+
+// RebindStableStateBodyWithSymbols performs the checked fresh-owner rebind and,
+// when functionSymbols is nonnil, requires every transaction to use the symbol
+// assigned by the separately reassembled ordinary MIR program.
+func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected StateBodyHash, input hir.Package, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[string]hir.SymbolID) (ReboundStateBody, error) {
 	if expected == (StateBodyHash{}) {
 		return ReboundStateBody{}, fmt.Errorf("stable contract-state body rebind requires an expected body hash")
 	}
@@ -72,16 +79,24 @@ func RebindStableStateBody(body StableStateBodyArtifact, expected StateBodyHash,
 		if function.Symbol == hir.NoSymbol {
 			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function has no fresh symbol", index)
 		}
-		if previous, duplicate := boundSymbols[function.Symbol]; duplicate {
-			return ReboundStateBody{}, fmt.Errorf("stable functions %q and %q share fresh symbol %d", previous, descriptor.name, function.Symbol)
+		freshSymbol := function.Symbol
+		if functionSymbols != nil {
+			var found bool
+			freshSymbol, found = functionSymbols[descriptor.name]
+			if !found || freshSymbol == hir.NoSymbol {
+				return ReboundStateBody{}, fmt.Errorf("stable transaction %d function %q has no aligned MIR symbol", index, descriptor.name)
+			}
 		}
-		boundSymbols[function.Symbol] = descriptor.name
+		if previous, duplicate := boundSymbols[freshSymbol]; duplicate {
+			return ReboundStateBody{}, fmt.Errorf("stable functions %q and %q share fresh symbol %d", previous, descriptor.name, freshSymbol)
+		}
+		boundSymbols[freshSymbol] = descriptor.name
 		program, err := programFromStableStateTransaction(currentLayout, descriptor, transaction)
 		if err != nil {
 			return ReboundStateBody{}, fmt.Errorf("rebind stable transaction %d: %w", index, err)
 		}
 		result.Transactions = append(result.Transactions, LoweredTransaction{
-			Package: packageID, Function: function.Symbol, Program: program,
+			Package: packageID, Function: freshSymbol, Program: program,
 		})
 	}
 	return result, nil

@@ -94,8 +94,9 @@ operation bodies. The payload is not yet stored or reassembled through package c
 ADR 0352 pairs that payload with stable package MIR v3 in one exact-version outer artifact and
 requires both nested artifacts to share a package coordinate. It does not change either nested
 format. ADR 0353 stores that bundle in persistent cache `/2`, requires exact expected-body identity,
-and quarantines malformed, legacy, or contradictory generations. Combined state-body rebind,
-reassembly, and fresh-symbol alignment remain closed.
+and quarantines malformed, legacy, or contradictory generations. ADR 0354 rebinds every all-hit
+state body through the matching fresh MIR function symbol and returns executable compiler-private
+transactions without running them inside compilation.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

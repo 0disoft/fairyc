@@ -50,7 +50,8 @@ least-recently-used entries until both limits hold. `Get` promotes a hit and ret
 
 Artifact kinds are closed to `compilation`, `typed-hir`, `mir`, and `object`. ADR 0353 adds
 `compilation` for the exact-version stable package bundle without changing the generic record
-envelope. Kinds must be nonempty, sorted, and unique. Their byte encoding is intentionally
+envelope; ADR 0354 consumes both bundle members during verified all-hit reassembly. Kinds must be
+nonempty, sorted, and unique. Their byte encoding is intentionally
 unspecified outside the exact compiler build that put the record. The output public-interface hash
 is metadata for dependent invalidation, not proof that the opaque payload is compatible.
 

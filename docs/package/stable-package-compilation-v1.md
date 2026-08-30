@@ -2,9 +2,11 @@
 
 - Status: Experimental compiler-private contract
 - Decisions: `docs/adr/0352-stable-package-compilation-artifact.md`,
-  `docs/adr/0353-stable-compilation-cache-records.md`
-- Implementation: `internal/packageartifact/stable_compilation.go`,
-  `internal/packageartifact/stable_cache.go`
+  `docs/adr/0353-stable-compilation-cache-records.md`,
+  `docs/adr/0354-combined-cached-state-reassembly.md`
+- Implementation: `internal/packageartifact/stable_artifact.go`,
+  `internal/packageartifact/stable_compilation.go`, `internal/packageartifact/stable_cache.go`,
+  `internal/workspacecompiler/session.go`
 - Schema: `fairyc.stable-package-compilation/v1`
 - Version: `fairyc-stable-package-compilation/1`
 
@@ -38,9 +40,11 @@ outer artifact, shared coordinate, and exact body hash. Any record-derived contr
 only the immutable generation read; a missing caller hash does not delete a valid generation. The
 persistent compiler identity `/2` makes MIR-only `/1` records incompatible misses.
 
-## Closed gates
+## Combined all-hit reassembly
 
-Workspace all-hit reuse currently extracts only the verified MIR member for the existing MIR
-reassembly path. Cached state-body fresh-owner rebind, combined MIR/state symbol alignment and
-execution, source syntax, backend, runtime, production persistence, and target admission remain
-closed.
+ADR 0354 retains both verified members on a persistent all-hit. Stable MIR reassembly returns its
+fresh coordinate-owned logical-function bindings; every cached state transaction must bind through
+the matching MIR symbol after current layout/signature verification and fresh capability creation.
+The workspace result exposes those transactions for explicit oracle execution. Source syntax,
+ordinary compiler-result integration, backend, runtime, production persistence, and target admission
+remain closed.

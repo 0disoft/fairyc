@@ -1,13 +1,16 @@
 package workspacecompiler
 
 import (
+	"bytes"
 	"maps"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/contractstate"
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
@@ -301,6 +304,43 @@ func TestPersistentSessionReusesStableMIRAcrossIndependentSessions(t *testing.T)
 	}
 }
 
+func TestPersistentSessionReassemblesCachedStateWithMIRSymbols(t *testing.T) {
+	root := writeCacheWorkspace(t, testAnswer42)
+	workspace := loadCacheWorkspace(t, root)
+	analysis := statefulCacheAnalysis(t, workspace)
+	diskRoot := t.TempDir()
+	configuration := persistentTestConfiguration(diskRoot, "test-stateful-compiler-build")
+
+	writer, err := NewSession(configuration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = writer.Close() })
+	cold := checkPersistentAnalysis(t, writer, workspace, analysis, false)
+	if cold.Cache.Outcome != OutcomeFallback || !cold.Cache.Lowered || cold.Cache.Stored != 2 || len(cold.StateTransactions) != 1 {
+		t.Fatalf("cold stateful Check() = %+v", cold)
+	}
+	assertStateTransactionResult(t, cold, 42)
+
+	reader, err := NewSession(configuration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = reader.Close() })
+	reader.lower = func(compiler.Analysis) (compiler.Result, error) {
+		t.Fatal("persistent all-hit state reassembly invoked ordinary MIR lowering")
+		return compiler.Result{}, nil
+	}
+	warm := checkPersistentAnalysis(t, reader, workspace, analysis, true)
+	if warm.Cache.Outcome != OutcomeAllHit || warm.Cache.Lowered || warm.Cache.Hits != 2 || len(warm.StateTransactions) != 1 {
+		t.Fatalf("warm stateful Check() = %+v", warm)
+	}
+	assertStateTransactionResult(t, warm, 42)
+	if cold.StateTransactions[0].Program.Capability == warm.StateTransactions[0].Program.Capability {
+		t.Fatal("persistent reassembly reused source-lowered transaction authority")
+	}
+}
+
 func TestPersistentSessionRejectsAmbiguousConfiguration(t *testing.T) {
 	t.Parallel()
 	configuration := persistentTestConfiguration(t.TempDir(), "build")
@@ -342,6 +382,136 @@ func persistentTestConfiguration(root, compilerBuild string) Configuration {
 			},
 			CompilerBuild: compilerBuild,
 		},
+	}
+}
+
+func statefulCacheAnalysis(t *testing.T, workspace workspaceloader.Workspace) compiler.Analysis {
+	t.Helper()
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, err := compiler.AnalyzePackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var packageID hir.PackageID
+	var symbol hir.SymbolID
+	foundOwner := false
+	for moduleIndex := range analysis.Semantic.HIR.Modules {
+		module := &analysis.Semantic.HIR.Modules[moduleIndex]
+		if module.Path != "answer" {
+			continue
+		}
+		for functionIndex := range module.Functions {
+			function := &module.Functions[functionIndex]
+			if function.Name != "value" {
+				continue
+			}
+			if foundOwner {
+				t.Fatal("answer::value HIR owner is ambiguous")
+			}
+			packageID, symbol = module.Package, function.Symbol
+			foundOwner = true
+			function.Effects = hir.CanonicalEffects([]hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite})
+		}
+	}
+	if !foundOwner || symbol == hir.NoSymbol {
+		t.Fatal("answer::value HIR owner was not found")
+	}
+	encoded, err := contractstate.U64.Encode(42)
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis.Semantic.HIR.StateLayouts = []hir.StateLayout{{
+		Package: packageID, ContractUID: "test.workspace-cache.answer",
+		Fields: []hir.StateField{{Name: "value", Kind: hir.StateFieldCell, ValueTypeID: contractstate.U64.TypeID()}},
+	}}
+	analysis.Semantic.HIR.StateTransactions = []hir.StateTransaction{{
+		Package: packageID, Function: symbol, Exit: hir.StateTransactionCommit,
+		Accesses: []hir.StateAccess{
+			{Kind: hir.StateAccessCellWrite, Field: "value", Value: hir.StateValue{TypeID: contractstate.U64.TypeID(), Encoded: encoded}},
+			{Kind: hir.StateAccessCellRead, Field: "value"},
+		},
+	}}
+	return analysis
+}
+
+func checkPersistentAnalysis(t *testing.T, session *Session, workspace workspaceloader.Workspace, analysis compiler.Analysis, stripCurrentOperations bool) Result {
+	t.Helper()
+	metadata, err := workspace.SemanticPackages()
+	if err != nil {
+		t.Fatal(err)
+	}
+	identities, err := workspace.PackageIdentities()
+	if err != nil {
+		t.Fatal(err)
+	}
+	coordinates, err := workspace.PackageCoordinates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	interfaces, err := packageInterfaces(analysis.Semantic.HIR, metadata, coordinates)
+	if err != nil {
+		t.Fatal(err)
+	}
+	owners := functionOwners(analysis.Semantic.HIR)
+	bodies, err := contractstatemir.ComputeHIRStateBodyHashes(analysis.Semantic.HIR, owners, coordinates)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keys, err := session.packageKeys(metadata, interfaces, bodies, owners)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stripCurrentOperations {
+		analysis.Semantic.HIR.StateTransactions = nil
+	}
+	result, err := session.checkPersistent(
+		analysis, identities, coordinates, interfaces, bodies, owners, keys,
+		Report{Outcome: OutcomeFallback, Storage: StorageDisk, Packages: len(owners)},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return result
+}
+
+func assertStateTransactionResult(t *testing.T, result Result, value uint64) {
+	t.Helper()
+	if len(result.StateTransactions) != 1 {
+		t.Fatalf("state transactions = %+v", result.StateTransactions)
+	}
+	transaction := result.StateTransactions[0]
+	foundFunction := false
+	for _, function := range result.Compiler.MIR.Functions {
+		if strings.HasSuffix(function.Name, "::answer::value") {
+			foundFunction = true
+			if function.Symbol != transaction.Function {
+				t.Fatalf("state function symbol %d does not align with MIR symbol %d", transaction.Function, function.Symbol)
+			}
+		}
+	}
+	if !foundFunction {
+		t.Fatal("reassembled MIR has no answer::value function")
+	}
+	store, err := contractstatemir.NewMemoryStore(transaction.Program.Layout)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := contractstatemir.Execute(store, transaction.Program, contractstate.Limits{
+		MaxWrites: 8, MaxWriteBytes: 1024, MaxValueBytes: 64, MaxMapKeyBytes: 64,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := contractstate.U64.Encode(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if outcome.Exit != contractstatemir.ExitCommit || len(outcome.Reads) != 1 || !outcome.Reads[0].Found ||
+		outcome.Reads[0].Value.TypeID != contractstate.U64.TypeID() || !bytes.Equal(outcome.Reads[0].Value.Encoded, want) {
+		t.Fatalf("state execution = %+v, want committed read %d", outcome, value)
 	}
 }
 

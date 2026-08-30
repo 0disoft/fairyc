@@ -10,6 +10,7 @@
 - Stable package-compilation source: `docs/adr/0352-stable-package-compilation-artifact.md`,
   `docs/package/stable-package-compilation-v1.md`
 - Persistent compilation-cache source: `docs/adr/0353-stable-compilation-cache-records.md`
+- Combined cached reassembly source: `docs/adr/0354-combined-cached-state-reassembly.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -20,8 +21,9 @@ This submodel proves that one exact persistent-state layout and one explicit tra
 verified before execution against the process-local semantic oracle. It is intentionally separate
 from the stable `internal/mir.Program`: no Fairy source form lowers into it, and no C backend,
 target runtime, or public compatibility promise consumes it. ADR 0350 adds a standalone compiler-
-private stable body payload, ADR 0352 pairs it with stable package MIR, and ADR 0353 admits that outer
-artifact into the disposable persistent cache without changing stable MIR v3.
+private stable body payload, ADR 0352 pairs it with stable package MIR, ADR 0353 admits that outer
+artifact into the disposable persistent cache, and ADR 0354 reassembles both members under one fresh
+function-symbol graph without changing stable MIR v3.
 
 The separation is temporary but useful. It lets the compiler prove layout and transaction semantics
 before choosing source grammar or allowing a backend to invent commit and rollback behavior.
@@ -109,8 +111,9 @@ capability tokens are never serialized.
 ADR 0352 stores this payload beside stable package MIR v3 in one exact-version outer compilation
 artifact and requires both nested artifacts to share a package coordinate. Stable MIR v3 itself is
 unchanged. ADR 0353 makes persistent records carry the bundle and checks the cache-selected body hash
-before a hit. The current all-hit coordinator consumes only its MIR member; it does not rebind or
-execute cached state transactions.
+before a hit. ADR 0354 makes the all-hit coordinator rebind every cached body through the fresh
+coordinate-owned logical-function bindings returned by MIR reassembly. The resulting compiler-private
+transactions are executable through the semantic oracle; `Session.Check` does not execute them.
 
 ## Fresh-owner rebind
 
@@ -127,8 +130,8 @@ unexpected bodies fail before publication.
 ## Closed gates
 
 This slice does not add source syntax, data-dependent values, branches, loops, calls, owner-bound
-state borrows, external-call rules, combined MIR/state reassembly and fresh-symbol alignment,
-deterministic native backend execution, persistence, migration, gas, or chain integration.
+state borrows, external-call rules, ordinary compiler-result integration, deterministic native
+backend execution, persistence, migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
 v5 carries the exact layout identity. ADR 0346 verifies transaction
@@ -137,5 +140,5 @@ proofs, ADR 0348 gives the verified bodies an exact stable package hash, ADR 034
 consume that hash, and ADR 0350 adds bounded capability-free payload transport with verifier
 re-entry. ADR 0351 adds checked fresh-owner rebind, and ADR 0352 binds the payload to stable package
 MIR through a separate outer artifact. ADR 0353 adds cache publication, exact expected-body lookup,
-and record quarantine. A later compiler slice must rebind and align both cached members before
-cached compilation can consume state transactions.
+and record quarantine. ADR 0354 rebinds and aligns both cached members before the workspace compiler
+returns executable compiler-private state transactions.

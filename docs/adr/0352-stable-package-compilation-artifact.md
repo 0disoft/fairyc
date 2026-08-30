@@ -57,5 +57,5 @@ Atlas, and CLI schemas remain unchanged.
 One immutable byte sequence can now prove that package MIR and state operations share the same
 stable package owner without collapsing their semantic models. ADR 0353 later changes the
 persistent cache adapter to publish and retrieve this outer artifact with an expected body hash.
-Combined reassembly must still align cached MIR fresh symbols with rebound state transaction owners
-before cached execution can be admitted.
+ADR 0354 later aligns cached MIR fresh symbols with rebound state transaction owners and proves
+explicit cached oracle execution.

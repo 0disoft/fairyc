@@ -21,8 +21,9 @@ capability, re-enters the MIR verifier, and requires the exact ADR 0348 body has
 additionally binds the expected payload to an exact current HIR layout and fresh function symbols,
 then reconstructs new capability authority without retaining source operation bodies. ADR 0352
 pairs that payload with stable package MIR in a separate exact-version outer artifact. ADR 0353
-admits that bundle into disposable persistent cache records with exact expected-body checking;
-production storage and runtime targets still do not consume it.
+admits that bundle into disposable persistent cache records with exact expected-body checking.
+ADR 0354 reassembles cached MIR and state bodies under one fresh function-symbol graph and proves
+explicit oracle execution; production storage and runtime targets still do not consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
@@ -195,6 +196,7 @@ tokens. Public-interface v5 carries only the exact layout hash, while whole-pack
 adds the exact private body hash to the owner without widening dependency entries. The compiler
 now also proves a bounded capability-free body payload, fresh capability reconstruction, verifier
 re-entry, exact body-hash matching, checked fresh-HIR-owner rebind, and one coordinate-bound outer
-stable package-compilation artifact. It still does not prove source declaration/access rules, cache
-state-body rebind or combined transaction-body reassembly, owner-bound borrows, external-call
-exclusion, stable MIR v3 integration, or deterministic target execution.
+stable package-compilation artifact. ADR 0354 also proves complete cache hits rebind state operations
+to the matching fresh MIR function symbols and execute through this oracle. It still does not prove
+source declaration/access rules, owner-bound borrows, external-call exclusion, ordinary compiler-
+result integration, native MIR lowering, or deterministic target execution.

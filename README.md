@@ -501,8 +501,10 @@ ADR 0352 adds `fairyc-stable-package-compilation/1`, a bounded canonical outer a
 stable package MIR v3 with the exact state-body payload only when both independently validate and
 share one package coordinate. ADR 0353 advances persistent cache identity to `/2`, stores exactly
 that compilation payload, requires the key-selected body hash, and quarantines contradictory or
-legacy MIR-only generations. All-hit execution still reassembles only the verified MIR members;
-cached state-body rebind and combined symbol alignment remain the next gates.
+legacy MIR-only generations. ADR 0354 reassembles both members under one fresh coordinate-owned
+function-symbol graph and returns cached state transactions that the compiler-private oracle can
+execute after exact current-body identity selection without consulting the current operation side
+table during reassembly.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

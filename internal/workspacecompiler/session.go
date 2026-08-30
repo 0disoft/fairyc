@@ -74,10 +74,12 @@ type Report struct {
 	ReassemblyFallback bool
 }
 
-// Result contains the ordinary compiler result plus the exact process-cache decision that led to it.
+// Result contains the ordinary compiler result, verified compiler-private state
+// transactions, and the exact process-cache decision that led to them.
 type Result struct {
-	Compiler compiler.Result
-	Cache    Report
+	Compiler          compiler.Result
+	StateTransactions []contractstatemir.LoweredTransaction
+	Cache             Report
 }
 
 // Session owns exactly one bounded artifact cache: either process-local MIR or stable disk package
@@ -199,7 +201,10 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	if len(owners) == 0 {
 		compiled, lowerErr := session.lower(analysis)
 		report.Lowered = compiled.Verified
-		return Result{Compiler: compiled, Cache: report}, lowerErr
+		if lowerErr != nil || !compiled.Verified {
+			return Result{Compiler: compiled, Cache: report}, lowerErr
+		}
+		return resultWithCurrentState(analysis, compiled, report)
 	}
 	bodies, err := contractstatemir.ComputeHIRStateBodyHashes(analysis.Semantic.HIR, owners, coordinates)
 	if err != nil {
@@ -235,7 +240,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		program, reassemblyErr := packageartifact.Reassemble(artifacts)
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit
-			return Result{Compiler: compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, Cache: report}, nil
+			return resultWithCurrentState(analysis, compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, report)
 		}
 		report.ReassemblyFallback = true
 	}
@@ -273,7 +278,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		}
 		report.Stored++
 	}
-	return Result{Compiler: compiled, Cache: report}, nil
+	return resultWithCurrentState(analysis, compiled, report)
 }
 
 // Stats returns the underlying verified-cache counters for measurement and diagnostics.
@@ -293,7 +298,7 @@ func (session *Session) PersistentStats() (packageartifact.StableCacheStats, err
 }
 
 func (session *Session) checkPersistent(analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
-	artifacts := make([]packageartifact.StableArtifact, 0, len(owners))
+	compilations := make([]packageartifact.StableCompilationArtifact, 0, len(owners))
 	allHit := true
 	for _, packageID := range owners {
 		instance, found := identities[packageID]
@@ -308,7 +313,7 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		switch lookup.Status {
 		case packageartifact.LookupHit:
 			report.Hits++
-			artifacts = append(artifacts, lookup.Compilation.MIR)
+			compilations = append(compilations, lookup.Compilation)
 		case packageartifact.LookupMiss:
 			report.Misses++
 			allHit = false
@@ -320,10 +325,16 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		}
 	}
 	if allHit {
-		program, reassemblyErr := rebindPersistentArtifacts(artifacts, coordinates)
+		program, stateTransactions, reassemblyErr := rebindPersistentCompilations(
+			compilations, analysis.Semantic.HIR, coordinates, bodies, owners,
+		)
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit
-			return Result{Compiler: compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, Cache: report}, nil
+			return Result{
+				Compiler:          compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true},
+				StateTransactions: stateTransactions,
+				Cache:             report,
+			}, nil
 		}
 		report.ReassemblyFallback = true
 	}
@@ -373,23 +384,78 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		}
 		report.Stored++
 	}
-	return Result{Compiler: compiled, Cache: report}, nil
+	return resultWithCurrentState(analysis, compiled, report)
 }
 
-func rebindPersistentArtifacts(artifacts []packageartifact.StableArtifact, coordinates map[hir.PackageID]packagegraph.CoordinateID) (mir.Program, error) {
+func rebindPersistentCompilations(compilations []packageartifact.StableCompilationArtifact, input hir.Package, coordinates map[hir.PackageID]packagegraph.CoordinateID, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (mir.Program, []contractstatemir.LoweredTransaction, error) {
+	artifacts := make([]packageartifact.StableArtifact, 0, len(compilations))
+	stateByCoordinate := make(map[packagegraph.CoordinateID]contractstatemir.StableStateBodyArtifact, len(compilations))
+	for _, compilation := range compilations {
+		artifacts = append(artifacts, compilation.MIR)
+		if _, duplicate := stateByCoordinate[compilation.MIR.Coordinate]; duplicate {
+			return mir.Program{}, nil, fmt.Errorf("stable package compilation coordinate %s is duplicated", compilation.MIR.Coordinate)
+		}
+		stateByCoordinate[compilation.MIR.Coordinate] = compilation.StateBody
+	}
 	functionCount := 0
 	for _, artifact := range artifacts {
 		if len(artifact.Functions) > int(^uint(0)>>1)-functionCount {
-			return mir.Program{}, fmt.Errorf("stable package function namespace overflows")
+			return mir.Program{}, nil, fmt.Errorf("stable package function namespace overflows")
 		}
 		functionCount += len(artifact.Functions)
 	}
 	firstFunction := hir.SymbolID(1)
 	firstForeign := firstFunction + hir.SymbolID(functionCount)
 	if firstForeign < firstFunction {
-		return mir.Program{}, fmt.Errorf("stable package symbol namespace overflows")
+		return mir.Program{}, nil, fmt.Errorf("stable package symbol namespace overflows")
 	}
-	return packageartifact.RebindStableArtifacts(artifacts, coordinates, firstFunction, firstForeign, mir.LocalID(1))
+	reassembled, err := packageartifact.RebindStableArtifactsWithBindings(artifacts, coordinates, firstFunction, firstForeign, mir.LocalID(1))
+	if err != nil {
+		return mir.Program{}, nil, err
+	}
+	symbolsByCoordinate := make(map[packagegraph.CoordinateID]map[string]hir.SymbolID, len(compilations))
+	for _, binding := range reassembled.Functions {
+		symbols := symbolsByCoordinate[binding.Package]
+		if symbols == nil {
+			symbols = make(map[string]hir.SymbolID)
+			symbolsByCoordinate[binding.Package] = symbols
+		}
+		if _, duplicate := symbols[binding.Name]; duplicate {
+			return mir.Program{}, nil, fmt.Errorf("stable package %s has multiple MIR functions named %q", binding.Package, binding.Name)
+		}
+		symbols[binding.Name] = binding.Symbol
+	}
+	transactions := make([]contractstatemir.LoweredTransaction, 0)
+	for _, packageID := range owners {
+		coordinate, found := coordinates[packageID]
+		if !found || coordinate == (packagegraph.CoordinateID{}) {
+			return mir.Program{}, nil, fmt.Errorf("function-owning package %d has no stable package coordinate", packageID)
+		}
+		stateBody, found := stateByCoordinate[coordinate]
+		if !found {
+			return mir.Program{}, nil, fmt.Errorf("function-owning package %d has no cached contract-state body", packageID)
+		}
+		expected, found := bodies[packageID]
+		if !found || expected == (contractstatemir.StateBodyHash{}) {
+			return mir.Program{}, nil, fmt.Errorf("function-owning package %d has no expected contract-state body identity", packageID)
+		}
+		rebound, err := contractstatemir.RebindStableStateBodyWithSymbols(
+			stateBody, expected, input, packageID, coordinates, symbolsByCoordinate[coordinate],
+		)
+		if err != nil {
+			return mir.Program{}, nil, fmt.Errorf("rebind package %d cached contract-state body: %w", packageID, err)
+		}
+		transactions = append(transactions, rebound.Transactions...)
+	}
+	return reassembled.MIR, transactions, nil
+}
+
+func resultWithCurrentState(analysis compiler.Analysis, compiled compiler.Result, report Report) (Result, error) {
+	transactions, err := contractstatemir.LowerHIRTransactions(analysis.Semantic.HIR)
+	if err != nil {
+		return Result{}, fmt.Errorf("lower current HIR contract-state transactions: %w", err)
+	}
+	return Result{Compiler: compiled, StateTransactions: transactions, Cache: report}, nil
 }
 
 func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {
