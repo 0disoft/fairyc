@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/contractstate"
+	"github.com/0disoft/fairyc/internal/hir"
 )
 
 func TestBuildLayoutMatchesTypedKernelIdentity(t *testing.T) {
@@ -43,25 +44,71 @@ func TestVerifyRejectsLayoutOperationAndExitDrift(t *testing.T) {
 	badLayout := layout
 	badLayout.Fields = slices.Clone(layout.Fields)
 	badLayout.Fields[0].Prefix = contractstate.Key{}
-	if failures := Verify(Program{Layout: badLayout, Exit: ExitCommit}); len(failures) != 1 || failures[0].Code != "CSM1001" {
+	if failures := Verify(testProgram(badLayout, nil, ExitCommit)); len(failures) != 1 || failures[0].Code != "CSM1001" {
 		t.Fatalf("layout failures = %+v", failures)
 	}
 
-	noncanonical := Program{
-		Layout: layout,
-		Operations: []Operation{{
-			Kind: OperationCellWrite, FieldIndex: 2,
-			Value: Value{TypeID: contractstate.Bool.TypeID(), Encoded: []byte{2}},
-		}},
-		Exit: ExitCommit,
-	}
+	noncanonical := testProgram(layout, []Operation{{
+		Kind: OperationCellWrite, FieldIndex: 2,
+		Value: Value{TypeID: contractstate.Bool.TypeID(), Encoded: []byte{2}},
+	}}, ExitCommit)
 	if failures := Verify(noncanonical); len(failures) != 1 || failures[0].Code != "CSM1002" {
 		t.Fatalf("operation failures = %+v", failures)
 	}
 
-	badExit := Program{Layout: layout, Exit: ExitTrap, TrapCategory: "Host_Failure"}
+	badExit := testProgram(layout, nil, ExitTrap)
+	badExit.TrapCategory = "Host_Failure"
 	if failures := Verify(badExit); len(failures) != 1 || failures[0].Code != "CSM1003" {
 		t.Fatalf("exit failures = %+v", failures)
+	}
+}
+
+func TestVerifyRejectsCapabilityAndEffectDrift(t *testing.T) {
+	layout := testLayout(t)
+
+	missingCapability := testProgram(layout, nil, ExitCommit)
+	missingCapability.Capability = TransactionCapability{}
+	if failures := Verify(missingCapability); !hasFailureCode(failures, "CSM1004") {
+		t.Fatalf("missing capability failures = %+v", failures)
+	}
+
+	mismatched := testProgram(layout, []Operation{{Kind: OperationCellRead, FieldIndex: 0}}, ExitCommit)
+	mismatched.Operations[0].Capability = newTransactionCapability()
+	if failures := Verify(mismatched); !hasFailureCode(failures, "CSM1004") {
+		t.Fatalf("capability failures = %+v", failures)
+	}
+	missingOperationCapability := testProgram(layout, []Operation{{Kind: OperationCellRead, FieldIndex: 0}}, ExitCommit)
+	missingOperationCapability.Operations[0].Capability = TransactionCapability{}
+	if failures := Verify(missingOperationCapability); !hasFailureCode(failures, "CSM1004") {
+		t.Fatalf("missing operation capability failures = %+v", failures)
+	}
+
+	missing := testProgram(layout, []Operation{{Kind: OperationCellWrite, FieldIndex: 0, Value: encode(t, contractstate.U64, uint64(1))}}, ExitCommit)
+	missing.Effects = nil
+	if failures := Verify(missing); !hasFailureCode(failures, "CSM1005") {
+		t.Fatalf("missing effect failures = %+v", failures)
+	}
+
+	noncanonical := testProgram(layout, []Operation{{Kind: OperationCellRead, FieldIndex: 0}}, ExitCommit)
+	noncanonical.Effects = []hir.Effect{hir.EffectStorageWrite, hir.EffectStorageRead}
+	if failures := Verify(noncanonical); !hasFailureCode(failures, "CSM1005") {
+		t.Fatalf("noncanonical effect failures = %+v", failures)
+	}
+	duplicate := testProgram(layout, []Operation{{Kind: OperationCellRead, FieldIndex: 0}}, ExitCommit)
+	duplicate.Effects = []hir.Effect{hir.EffectStorageRead, hir.EffectStorageRead}
+	if failures := Verify(duplicate); !hasFailureCode(failures, "CSM1005") {
+		t.Fatalf("duplicate effect failures = %+v", failures)
+	}
+
+	hostEffect := testProgram(layout, nil, ExitCommit)
+	hostEffect.Effects = []hir.Effect{hir.EffectFilesystem}
+	if failures := Verify(hostEffect); !hasFailureCode(failures, "CSM1005") {
+		t.Fatalf("host effect failures = %+v", failures)
+	}
+	unknownEffect := testProgram(layout, nil, ExitCommit)
+	unknownEffect.Effects = []hir.Effect{"future_chain"}
+	if failures := Verify(unknownEffect); !hasFailureCode(failures, "CSM1005") {
+		t.Fatalf("unknown effect failures = %+v", failures)
 	}
 }
 
@@ -74,18 +121,14 @@ func TestExecuteCommitsReadYourWritesAndDelete(t *testing.T) {
 	account := encode(t, contractstate.Byte20, contractstate.Bytes20{19: 7})
 	ten := encode(t, contractstate.U64, uint64(10))
 	seven := encode(t, contractstate.U64, uint64(7))
-	program := Program{
-		Layout: layout,
-		Operations: []Operation{
-			{Kind: OperationCellWrite, FieldIndex: 0, Value: ten},
-			{Kind: OperationCellRead, FieldIndex: 0},
-			{Kind: OperationMapWrite, FieldIndex: 1, Key: account, Value: seven},
-			{Kind: OperationMapRead, FieldIndex: 1, Key: account},
-			{Kind: OperationCellDelete, FieldIndex: 0},
-			{Kind: OperationCellRead, FieldIndex: 0},
-		},
-		Exit: ExitCommit,
-	}
+	program := testProgram(layout, []Operation{
+		{Kind: OperationCellWrite, FieldIndex: 0, Value: ten},
+		{Kind: OperationCellRead, FieldIndex: 0},
+		{Kind: OperationMapWrite, FieldIndex: 1, Key: account, Value: seven},
+		{Kind: OperationMapRead, FieldIndex: 1, Key: account},
+		{Kind: OperationCellDelete, FieldIndex: 0},
+		{Kind: OperationCellRead, FieldIndex: 0},
+	}, ExitCommit)
 	outcome, err := Execute(store, program, testLimits())
 	if err != nil {
 		t.Fatal(err)
@@ -113,7 +156,7 @@ func TestExecuteRollsBackRejectTrapAndLimit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		outcome, err := Execute(store, Program{Layout: layout, Operations: []Operation{write}, Exit: ExitReject}, testLimits())
+		outcome, err := Execute(store, testProgram(layout, []Operation{write}, ExitReject), testLimits())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -128,9 +171,9 @@ func TestExecuteRollsBackRejectTrapAndLimit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		recovered := executeAndRecover(store, Program{
-			Layout: layout, Operations: []Operation{write}, Exit: ExitTrap, TrapCategory: "assertion-failed",
-		}, testLimits())
+		program := testProgram(layout, []Operation{write}, ExitTrap)
+		program.TrapCategory = "assertion-failed"
+		recovered := executeAndRecover(store, program, testLimits())
 		trap, ok := recovered.(Trap)
 		if !ok || trap.Category != "assertion-failed" {
 			t.Fatalf("recovered = %#v", recovered)
@@ -143,14 +186,10 @@ func TestExecuteRollsBackRejectTrapAndLimit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		program := Program{
-			Layout: layout,
-			Operations: []Operation{
-				write,
-				{Kind: OperationCellWrite, FieldIndex: 2, Value: encode(t, contractstate.Bool, true)},
-			},
-			Exit: ExitCommit,
-		}
+		program := testProgram(layout, []Operation{
+			write,
+			{Kind: OperationCellWrite, FieldIndex: 2, Value: encode(t, contractstate.Bool, true)},
+		}, ExitCommit)
 		limits := testLimits()
 		limits.MaxWrites = 1
 		if _, err := Execute(store, program, limits); !errors.Is(err, contractstate.ErrWriteLimit) {
@@ -171,6 +210,23 @@ func testLayout(t *testing.T) Layout {
 		t.Fatal(err)
 	}
 	return layout
+}
+
+func testProgram(layout Layout, operations []Operation, exit ExitKind) Program {
+	capability := newTransactionCapability()
+	operations = slices.Clone(operations)
+	var effects []hir.Effect
+	for index := range operations {
+		operations[index].Capability = capability
+		effects = append(effects, requiredStorageEffects(operations[index].Kind)...)
+	}
+	return Program{
+		Layout: layout, Capability: capability, Effects: hir.CanonicalEffects(effects), Operations: operations, Exit: exit,
+	}
+}
+
+func hasFailureCode(failures []VerificationError, code string) bool {
+	return slices.ContainsFunc(failures, func(failure VerificationError) bool { return failure.Code == code })
 }
 
 func testLimits() contractstate.Limits {

@@ -467,6 +467,11 @@ v3 additionally consumes the owning package's current interface, so generated HI
 invalidate both the owner and its dependents. Source syntax and stable execution surfaces remain
 closed.
 
+ADR 0346 gives each compiler-private state program one opaque transaction capability and requires
+every operation to use that exact identity. The verifier also derives `storage_read` and
+`storage_write` requirements before the oracle begins, while source/HIR access lowering and stable
+execution surfaces remain closed.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

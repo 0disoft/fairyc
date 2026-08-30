@@ -135,8 +135,10 @@ contract profiles. ADR 0344 adds a separate experimental compiler-private layout
 that verifies canonical cell/map operations plus explicit commit, reject, and trap exits before
 oracle execution. ADR 0345 adds source-independent package-owned HIR layout declarations,
 public-interface v5 layout hashes, and whole-package cache-key v3 current-interface invalidation.
-None reserves source syntax or adds state access expressions, stable MIR artifacts, SDK, runtime,
-backend, ABI, database, Merkle tree, or a supported chain target. Production persistence must
+ADR 0346 adds one opaque transaction capability plus verifier-derived `storage_read` and
+`storage_write` requirements to the compiler-private submodel. None reserves source syntax or adds
+HIR state access expressions, stable MIR artifacts, SDK, runtime, backend, ABI, database, Merkle
+tree, or a supported chain target. Production persistence must
 preserve the oracle's observable layout, limit, rollback, conflict, and append-only upgrade rules
 through separate evidence.
 

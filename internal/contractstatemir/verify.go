@@ -2,9 +2,11 @@ package contractstatemir
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/contractstate"
+	"github.com/0disoft/fairyc/internal/hir"
 )
 
 // VerificationError is one stable compiler-private transaction-MIR failure.
@@ -37,8 +39,16 @@ func Verify(program Program) []VerificationError {
 		return []VerificationError{{Code: "CSM1001", Entity: "layout", Detail: err.Error()}}
 	}
 	failures := make([]VerificationError, 0)
+	if program.Capability.token == nil {
+		failures = append(failures, VerificationError{Code: "CSM1004", Entity: "capability", Detail: "program requires one transaction capability"})
+	}
+	requiredEffects := make([]hir.Effect, 0, 2)
 	for index, operation := range program.Operations {
 		entity := fmt.Sprintf("operation %d", index)
+		if operation.Capability.token == nil || operation.Capability != program.Capability {
+			failures = append(failures, VerificationError{Code: "CSM1004", Entity: entity, Detail: "operation does not use the program transaction capability"})
+		}
+		requiredEffects = append(requiredEffects, requiredStorageEffects(operation.Kind)...)
 		if int(operation.FieldIndex) >= len(bound.fields) {
 			failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "field index is outside the verified layout"})
 			continue
@@ -48,10 +58,40 @@ func Verify(program Program) []VerificationError {
 			failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: detail})
 		}
 	}
+	if detail := verifyEffects(program.Effects, requiredEffects); detail != "" {
+		failures = append(failures, VerificationError{Code: "CSM1005", Entity: "effects", Detail: detail})
+	}
 	if detail := verifyExit(program.Exit, program.TrapCategory); detail != "" {
 		failures = append(failures, VerificationError{Code: "CSM1003", Entity: "exit", Detail: detail})
 	}
 	return failures
+}
+
+func requiredStorageEffects(kind OperationKind) []hir.Effect {
+	switch kind {
+	case OperationCellRead, OperationMapRead:
+		return []hir.Effect{hir.EffectStorageRead}
+	case OperationCellWrite, OperationCellDelete, OperationMapWrite, OperationMapDelete:
+		return []hir.Effect{hir.EffectStorageWrite}
+	default:
+		return nil
+	}
+}
+
+func verifyEffects(declared, required []hir.Effect) string {
+	canonical := hir.CanonicalEffects(declared)
+	if !slices.Equal(declared, canonical) {
+		return "declared effects are not sorted and unique"
+	}
+	for _, effect := range declared {
+		if !hir.IsOnchainEffect(effect) {
+			return fmt.Sprintf("declared effect %q is not an on-chain capability", effect)
+		}
+	}
+	if missing := hir.MissingEffects(declared, required); len(missing) != 0 {
+		return fmt.Sprintf("missing required effects %v", missing)
+	}
+	return ""
 }
 
 func bindLayout(layout Layout) (boundLayout, error) {

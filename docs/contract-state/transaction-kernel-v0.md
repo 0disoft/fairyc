@@ -176,7 +176,9 @@ A source-level state implementation must preserve these ownership boundaries:
 
 The current oracle plus compiler-private submodel now prove exact layout reconstruction, one managed
 transaction capability, explicit commit/reject/trap exits, and straight-line canonical cell/map
-operations. Source-independent HIR owns one layout per package, public-interface v5 carries its exact
-hash, and whole-package cache key v3 invalidates both the owner and dependents. The compiler still
-does not prove source declaration/access rules, function-boundary effects, owner-bound borrows,
-external-call exclusion, stable MIR integration, or deterministic target execution.
+operations. Every operation now names one opaque program capability, and verifier-owned
+`storage_read`/`storage_write` requirements fail before transaction begin. Source-independent HIR
+owns one layout per package, public-interface v5 carries its exact hash, and whole-package cache key
+v3 invalidates both the owner and dependents. The compiler still does not prove source
+declaration/access rules, HIR access lowering, owner-bound borrows, external-call exclusion, stable
+MIR integration, or deterministic target execution.

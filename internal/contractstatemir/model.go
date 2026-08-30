@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/contractstate"
+	"github.com/0disoft/fairyc/internal/hir"
 )
 
 // Declaration is one source-ordered compiler-known state field.
@@ -40,6 +41,23 @@ type Value struct {
 	Encoded []byte
 }
 
+type transactionCapabilityToken struct {
+	marker byte
+}
+
+// TransactionCapability is one compiler-created, non-forgeable transaction
+// identity. Copies retain the same authority instead of creating a new token.
+type TransactionCapability struct {
+	token *transactionCapabilityToken
+}
+
+// newTransactionCapability creates one fresh compiler-private transaction
+// identity for a complete Program and all of its operations. Construction stays
+// package-private so other compiler stages cannot forge verified authority.
+func newTransactionCapability() TransactionCapability {
+	return TransactionCapability{token: &transactionCapabilityToken{marker: 1}}
+}
+
 type OperationKind string
 
 const (
@@ -55,6 +73,7 @@ const (
 // to Outcome.Reads; writes and deletes enter the private transaction overlay.
 type Operation struct {
 	Kind       OperationKind
+	Capability TransactionCapability
 	FieldIndex uint32
 	Key        Value
 	Value      Value
@@ -73,6 +92,8 @@ const (
 // changed by this experimental submodel.
 type Program struct {
 	Layout       Layout
+	Capability   TransactionCapability
+	Effects      []hir.Effect
 	Operations   []Operation
 	Exit         ExitKind
 	TrapCategory string

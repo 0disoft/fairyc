@@ -63,6 +63,10 @@ carries the exact layout hash, while whole-package cache key v3 consumes the cur
 interface as well as dependency interfaces. Layout changes therefore invalidate the owner and its
 dependents before source syntax is admitted.
 
+ADR 0346 adds one opaque transaction capability per compiler-private program and requires every
+state operation to use it. The same verifier derives `storage_read` and `storage_write` requirements
+and rejects missing, noncanonical, or host-only effect declarations before transaction begin.
+
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
 
@@ -72,7 +76,7 @@ A later PR may introduce source syntax only after it also supplies:
 
 - exact grammar and recovery behavior;
 - resolver and type rules for source state declarations and access;
-- explicit `storage_read` and `storage_write` effects;
+- source-to-HIR effect inference and state access syntax;
 - MIR operations whose verifier proves layout identity and transaction ownership;
 - interpreter fixtures for success, error propagation, trap, delete, conflict, and limits;
 - at least one deterministic contract backend with byte-for-byte state transition fixtures;
