@@ -65,3 +65,6 @@ source or cached compilation can consume it, a later slice must give source-inde
 bodies an exact package-body/artifact identity and cache invalidation contract. Data-dependent values,
 branches, calls, owner-bound borrows, external-call exclusion, deterministic backend execution, and
 production persistence remain separate gates.
+
+ADR 0348 later supplies the exact package-body hash portion of this gate. Cache-key participation
+and stable payload transport remain open.

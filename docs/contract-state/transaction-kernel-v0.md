@@ -180,7 +180,10 @@ operations. Every operation names one opaque program capability, and verifier-ow
 `storage_read`/`storage_write` requirements fail before transaction begin. Source-independent HIR
 owns one layout per package and attaches transaction plans to existing function effects; lowering
 resolves field names, copies value bytes, verifies MIR, and executes through this oracle.
-Public-interface v5 carries only the exact layout hash, while whole-package cache key v3 invalidates
-the owner and dependents for layout changes. The compiler still does not prove source
-declaration/access rules, cached transaction-body identity, owner-bound borrows, external-call
+ADR 0348 additionally hashes the verified package body through stable function signatures, exact
+operation bytes and order, layout identity, and exit while excluding local symbols and capability
+tokens. Public-interface v5 carries only the exact layout hash, while whole-package cache key v3
+still invalidates only the owner and dependents for layout changes. The compiler still does not
+prove source declaration/access rules, cache-key participation or payload transport for transaction
+bodies, owner-bound borrows, external-call
 exclusion, stable MIR integration, or deterministic target execution.

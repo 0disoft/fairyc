@@ -144,6 +144,11 @@ runtime, backend, ABI, database, Merkle tree, or a supported chain target. Produ
 preserve the oracle's observable layout, limit, rollback, conflict, and append-only upgrade rules
 through separate evidence.
 
+ADR 0348 assigns each verified package transaction set an exact
+`fairyc.contract-state-package-body/v1` identity over stable package/function/type facts, layout,
+effects, operation bytes and order, and exit. It excludes build-local numbering and capability
+tokens. Package-cache key v3 does not consume the hash and stable artifacts do not carry its payload.
+
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
 generic evidence question without admitting source syntax, inference, HIR type variables, MIR,

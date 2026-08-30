@@ -40,3 +40,4 @@ The layout originates in source-independent typed HIR and is lowered through the
 transaction MIR. Process-local HIR state transactions do not enter this public interface because
 they are function-body behavior rather than a public layout promise. V5 does not admit source
 syntax, transaction-body serialization, a runtime ABI, or a target backend.
+ADR 0348 gives those bodies a separate exact package-body hash without changing this exclusion.

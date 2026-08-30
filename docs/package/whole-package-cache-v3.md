@@ -35,5 +35,7 @@ state backend or stable MIR artifact.
 
 Source-independent HIR state transaction bodies are not encoded by v3: they are neither acquired
 source bytes nor public-interface layout facts. ADR 0347 therefore keeps their lowering process-local
-and outside cached compilation. A later artifact/cache revision must key their exact body identity
-before a cached compiler path may consume them.
+and outside cached compilation. ADR 0348 now defines their exact
+`fairyc.contract-state-package-body/v1` hash, but v3 does not consume it. A later cache-key revision
+must add that hash before a cached compiler path may consume the bodies; stable artifacts must also
+transport their payload before reassembly can preserve execution.

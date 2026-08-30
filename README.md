@@ -477,6 +477,12 @@ creates one fresh capability, verifies the result, and executes the generated pr
 failure-atomic oracle. Source syntax, stable/cached body transport, and target execution remain
 closed.
 
+ADR 0348 gives those verified HIR transaction bodies an exact
+`fairyc.contract-state-package-body/v1` SHA-256 identity. Stable package coordinates, layout hash,
+function signatures, effects, exact operation bytes/order, and exits participate; build-local
+numbers, spans, and fresh capability tokens do not. Cache-key participation and payload transport
+remain closed follow-up gates.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

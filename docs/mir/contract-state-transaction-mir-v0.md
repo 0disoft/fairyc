@@ -4,6 +4,7 @@
 - Decision source: `docs/adr/0344-compiler-private-contract-state-transaction-mir.md`
 - Capability and effect source: `docs/adr/0346-contract-state-mir-capability-and-effect-verification.md`
 - HIR lowering source: `docs/adr/0347-source-independent-hir-state-access-lowering.md`
+- Body identity source: `docs/adr/0348-exact-contract-state-package-body-identity.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -85,15 +86,26 @@ Malformed or implicit exits fail verification with `CSM1003`. Runtime codec, lay
 limit errors return from `Execute` and rely on the managed `contractstate.Execute` boundary to roll
 back. The verifier runs before `Begin`, so invalid MIR cannot observe a snapshot or mutate state.
 
+## Package-body identity
+
+ADR 0348 defines `fairyc.contract-state-package-body/v1`. It first verifies the complete HIR
+transaction set, then hashes one package's stable coordinate, optional exact layout hash, stable
+function descriptors, canonical effects, exact operation sequence and bytes, and static exit.
+Build-local package/function numbers, spans, and fresh capability tokens do not participate.
+
+The hash is identity only. No stable artifact transports or rebinds these operation payloads yet,
+and package-cache key v3 does not consume it.
+
 ## Closed gates
 
 This slice does not add source syntax, data-dependent values, branches, loops, calls, owner-bound
-state borrows, external-call rules, stable MIR serialization, package-artifact/cache body identity,
+state borrows, external-call rules, stable MIR serialization, package-artifact payload transport,
 deterministic native
 backend execution, persistence, migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
 v5 plus whole-package cache key v3 carry the exact layout identity. ADR 0346 verifies transaction
-capability identity and storage effects, and ADR 0347 lowers source-independent HIR accesses into
-those proofs. A later compiler slice must give those access bodies stable artifact/cache identity
-before ordinary source or cached compilation consumes them.
+capability identity and storage effects, ADR 0347 lowers source-independent HIR accesses into those
+proofs, and ADR 0348 gives the verified bodies an exact stable package hash. A later compiler slice
+must make a new cache-key version consume that hash, then add payload artifact transport before
+ordinary source or cached compilation consumes the bodies.

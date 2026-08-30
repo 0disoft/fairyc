@@ -71,7 +71,12 @@ ADR 0347 adds source-independent HIR transaction plans owned by an existing pack
 function remains the sole effect authority; lowering resolves field names through the exact layout,
 clones encoded bytes, assigns one fresh capability, verifies the program, and proves mixed
 read/write behavior through the failure-atomic oracle. These bodies are process-local and are not
-yet package-artifact or cache inputs.
+yet package-artifact payloads or cache inputs.
+
+ADR 0348 assigns the verified body set an exact stable hash over package coordinate, layout,
+function signature and effects, operation bytes/order, and exit. Local package/function numbers,
+spans, and capability tokens are excluded. The hash exists before cache or payload admission so a
+later consumer cannot invent a weaker identity.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
@@ -83,7 +88,7 @@ A later PR may introduce source syntax only after it also supplies:
 - exact grammar and recovery behavior;
 - resolver and type rules for source state declarations and access;
 - source-to-HIR effect inference and state access syntax;
-- exact package-body/artifact identity and cache invalidation for generated state transaction plans;
+- whole-package cache-key participation and invalidation for the exact ADR 0348 body identity;
 - MIR operations whose verifier proves layout identity and transaction ownership;
 - interpreter fixtures for success, error propagation, trap, delete, conflict, and limits;
 - at least one deterministic contract backend with byte-for-byte state transition fixtures;
