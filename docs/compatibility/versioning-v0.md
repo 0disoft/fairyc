@@ -109,10 +109,11 @@ typed-HIR, MIR, and object payloads remain exact-compiler disposable state rathe
 compatibility formats. The bounded persistent storage format and one exact-version experimental
 command now exist; ordinary-command policy and default limits remain undecided.
 
-The current whole-package key encoding is `fairyc.package-cache-key/v3` with
-`fycache3-sha256-...` text. `fairyc.package-cache-fixtures/v7` supplies current vectors; every key
-includes its current `fyif5-sha256` public interface plus sorted dependency coordinate/interface
-pairs and `fairyc-language/12`. Fixture manifests v1 through v6 remain historical. A key or component
+The current whole-package key encoding is `fairyc.package-cache-key/v4` with
+`fycache4-sha256-...` text. `fairyc.package-cache-fixtures/v8` supplies current vectors; every key
+includes its current `fyif5-sha256` public interface, `fycsbody1-sha256` private body identity,
+sorted dependency coordinate/interface pairs, and `fairyc-language/12`. Fixture manifests v1
+through v7 remain historical. A key or component
 algorithm change is an intentional cache miss, not permission to reinterpret an older key.
 
 ## Target and ABI

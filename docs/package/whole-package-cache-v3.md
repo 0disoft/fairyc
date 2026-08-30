@@ -1,6 +1,6 @@
 # Whole-package cache key v3
 
-- Status: Experimental executable contract
+- Status: Historical; superseded by `whole-package-cache-v4.md`
 - Decision: `docs/adr/0345-hir-contract-state-interface-and-cache-identity.md`
 - Fixture source: `spec/fixtures/package-cache/manifest-v7.json`
 - Historical source: `docs/package/whole-package-cache-v2.md`

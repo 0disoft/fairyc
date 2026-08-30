@@ -59,9 +59,9 @@ reject, or trap exits before executing them through the oracle. It is not the st
 MIR and has no source, stable artifact, backend, or target admission.
 
 Source-independent `hir.StateLayout` declarations lower into that submodel. Public-interface v5
-carries the exact layout hash, while whole-package cache key v3 consumes the current package
-interface as well as dependency interfaces. Layout changes therefore invalidate the owner and its
-dependents before source syntax is admitted.
+carries the exact layout hash, while whole-package cache key v4 consumes the current package
+interface and body hash as well as dependency interfaces. Layout changes therefore invalidate the
+owner and its dependents, while private body changes invalidate only the owner.
 
 ADR 0346 adds one opaque transaction capability per compiler-private program and requires every
 state operation to use it. The same verifier derives `storage_read` and `storage_write` requirements
@@ -78,6 +78,9 @@ function signature and effects, operation bytes/order, and exit. Local package/f
 spans, and capability tokens are excluded. The hash exists before cache or payload admission so a
 later consumer cannot invent a weaker identity.
 
+ADR 0349 makes whole-package cache key v4 consume that hash before lookup and keeps dependency
+entries public-interface-only. Stable artifact payload transport remains closed.
+
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
 
@@ -88,7 +91,6 @@ A later PR may introduce source syntax only after it also supplies:
 - exact grammar and recovery behavior;
 - resolver and type rules for source state declarations and access;
 - source-to-HIR effect inference and state access syntax;
-- whole-package cache-key participation and invalidation for the exact ADR 0348 body identity;
 - MIR operations whose verifier proves layout identity and transaction ownership;
 - interpreter fixtures for success, error propagation, trap, delete, conflict, and limits;
 - at least one deterministic contract backend with byte-for-byte state transition fixtures;

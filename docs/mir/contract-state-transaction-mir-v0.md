@@ -93,8 +93,8 @@ transaction set, then hashes one package's stable coordinate, optional exact lay
 function descriptors, canonical effects, exact operation sequence and bytes, and static exit.
 Build-local package/function numbers, spans, and fresh capability tokens do not participate.
 
-The hash is identity only. No stable artifact transports or rebinds these operation payloads yet,
-and package-cache key v3 does not consume it.
+The hash is identity only. Package-cache key v4 consumes it for exact owning-package invalidation,
+but no stable artifact transports or rebinds these operation payloads yet.
 
 ## Closed gates
 
@@ -104,8 +104,8 @@ deterministic native
 backend execution, persistence, migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
-v5 plus whole-package cache key v3 carry the exact layout identity. ADR 0346 verifies transaction
+v5 carries the exact layout identity. ADR 0346 verifies transaction
 capability identity and storage effects, ADR 0347 lowers source-independent HIR accesses into those
-proofs, and ADR 0348 gives the verified bodies an exact stable package hash. A later compiler slice
-must make a new cache-key version consume that hash, then add payload artifact transport before
-ordinary source or cached compilation consumes the bodies.
+proofs, ADR 0348 gives the verified bodies an exact stable package hash, and ADR 0349 makes cache
+key v4 consume that hash. A later compiler slice must add payload artifact transport before ordinary
+source or cached compilation consumes the bodies.

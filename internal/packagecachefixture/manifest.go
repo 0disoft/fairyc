@@ -23,6 +23,7 @@ type inputDefinition struct {
 	Package              string                 `json:"package"`
 	Source               string                 `json:"source"`
 	CurrentInterface     string                 `json:"currentInterface"`
+	CurrentBody          string                 `json:"currentBody"`
 	Dependencies         []dependencyDefinition `json:"dependencies"`
 	Features             []string               `json:"features"`
 }
@@ -46,6 +47,7 @@ type inputOverride struct {
 	Package              *string                 `json:"package,omitempty"`
 	Source               *string                 `json:"source,omitempty"`
 	CurrentInterface     *string                 `json:"currentInterface,omitempty"`
+	CurrentBody          *string                 `json:"currentBody,omitempty"`
 	Dependencies         *[]dependencyDefinition `json:"dependencies,omitempty"`
 	Features             *[]string               `json:"features,omitempty"`
 }

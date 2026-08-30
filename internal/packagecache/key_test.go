@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -16,7 +17,7 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Compute() error = %v", err)
 	}
-	if got, want := key.String(), "fycache3-sha256-73be9cac29cbebdceed08e0b0f280da737b00a9f01557c5e7af7a035511506cb"; got != want {
+	if got, want := key.String(), "fycache4-sha256-51508c63893427d1cdc799f8d478c25102ea28d3ce93e0bd6b918d817ccef96f"; got != want {
 		t.Fatalf("key = %q, want %q", got, want)
 	}
 	parsed, err := ParseKey(key.String())
@@ -39,6 +40,12 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if err != nil || other == key {
 		t.Fatalf("current interface change = %s, %v; baseline %s", other, err, key)
 	}
+	changed = baseline
+	changed.CurrentBody[0]++
+	other, err = Compute(changed)
+	if err != nil || other == key {
+		t.Fatalf("current body change = %s, %v; baseline %s", other, err, key)
+	}
 }
 
 func TestKeyRejectsNoncanonicalSets(t *testing.T) {
@@ -54,6 +61,7 @@ func TestKeyRejectsNoncanonicalSets(t *testing.T) {
 		{name: "missing package", mutate: func(value *Inputs) { value.Package = packagegraph.InstanceID{} }, want: "package must be set"},
 		{name: "missing source", mutate: func(value *Inputs) { value.Source = packagecontent.Digest{} }, want: "source must be set"},
 		{name: "missing current interface", mutate: func(value *Inputs) { value.CurrentInterface = moduleinterface.Hash{} }, want: "currentInterface"},
+		{name: "missing current body", mutate: func(value *Inputs) { value.CurrentBody = contractstatemir.StateBodyHash{} }, want: "currentBody"},
 		{name: "missing dependency hash", mutate: func(value *Inputs) { value.Dependencies[0].Interface = moduleinterface.Hash{} }, want: "dependency 0"},
 	}
 	for _, test := range tests {
@@ -121,12 +129,22 @@ func testInputs(t *testing.T) Inputs {
 		Package:              mustInstance(t, "fypi1-sha256-04fc4400f5e875c5c22ab2d50765d721df38a12a19ef3508deb432c7f4da92f3"),
 		Source:               mustSource(t, "fysrc1-sha256-dd19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3"),
 		CurrentInterface:     mustInterface(t, "fyif5-sha256-c5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
+		CurrentBody:          mustStateBody(t, "fycsbody1-sha256-e17e8bd4062f7a371bbb888927f12918ba77c9d03f31e60367baea8fea136a07"),
 		Dependencies: []Dependency{{
 			Coordinate: mustCoordinate(t, "fypc1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41"),
 			Interface:  mustInterface(t, "fyif5-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
 		}},
 		Features: []string{"base", "tls"},
 	}
+}
+
+func mustStateBody(t *testing.T, value string) contractstatemir.StateBodyHash {
+	t.Helper()
+	parsed, err := contractstatemir.ParseStateBodyHash(value)
+	if err != nil {
+		t.Fatalf("ParseStateBodyHash(%q): %v", value, err)
+	}
+	return parsed
 }
 
 func mustCoordinate(t *testing.T, value string) packagegraph.CoordinateID {

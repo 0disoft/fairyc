@@ -55,3 +55,6 @@ Generated state transaction bodies now have a deterministic identity suitable fo
 artifact binding without confusing process authority with persistent bytes. The next slice must add
 this hash to a new whole-package cache-key version and prove body-only invalidation. Stable payload
 transport and reassembly remain required before cached state execution can be admitted.
+
+ADR 0349 later completes the cache-key portion with v4. Stable payload transport and reassembly
+remain open.

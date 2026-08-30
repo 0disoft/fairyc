@@ -483,6 +483,10 @@ function signatures, effects, exact operation bytes/order, and exits participate
 numbers, spans, and fresh capability tokens do not. Cache-key participation and payload transport
 remain closed follow-up gates.
 
+ADR 0349 advances whole-package cache keys to v4 and requires that exact body identity for every
+function-owning package before lookup. A body-only change invalidates its owner without widening
+dependency entries beyond public-interface v5. Stable transaction payload artifacts remain closed.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing
@@ -914,7 +918,7 @@ or arbitrary link-input option.
 - PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
 - Public-interface hash v5 extraction with resource abilities and package-owned state layout identity, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v5.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
-- Whole-package cache-key v3, bounded memory store, current-interface invalidation, current v7 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v7.json`, `internal/packagecachefixture/`; fixture manifests v1 through v6 remain historical
+- Whole-package cache-key v4, bounded memory store, current-interface/body invalidation, current v8 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v8.json`, `internal/packagecachefixture/`; fixture manifests v1 through v7 remain historical
 - Exact-version verified whole-program MIR artifact codec: `internal/mircodec/`
 - Strict local-exact `fairy.toml` v1 parser, fixtures, and runner: `internal/projectmanifest/`, `spec/fixtures/project-manifest/manifest-v1.json`, `internal/projectmanifestfixture/`
 - Filesystem-safe local workspace loader, fixtures, and runner: `internal/workspaceloader/`, `spec/fixtures/workspace-loader/manifest-v1.json`, `internal/workspaceloaderfixture/`

@@ -1,12 +1,14 @@
 package workspacecompiler
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/packagecache"
@@ -163,6 +165,69 @@ func TestSessionInvalidatesSourceAndFallsBackFromMixedArtifactContexts(t *testin
 		t.Fatalf("healed Check() = %+v, lower calls = %d", healed, lowerCalls)
 	}
 	assertWorkspaceResult(t, reverted, healed.Compiler, 42)
+}
+
+func TestPackageKeysConsumeOnlyTheOwningContractStateBody(t *testing.T) {
+	root := writeCacheWorkspace(t, testAnswer42)
+	workspace := loadCacheWorkspace(t, root)
+	session, err := NewSession(Configuration{
+		Target:           target.X8664WindowsMSVC,
+		Cache:            packagecache.Limits{MaxEntries: 8, MaxBytes: 32 << 20},
+		MaxArtifactBytes: 8 << 20,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	metadata, err := workspace.SemanticPackages()
+	if err != nil {
+		t.Fatal(err)
+	}
+	coordinates, err := workspace.PackageCoordinates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, err := compiler.AnalyzePackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	interfaces, err := packageInterfaces(analysis.Semantic.HIR, metadata, coordinates)
+	if err != nil {
+		t.Fatal(err)
+	}
+	owners := functionOwners(analysis.Semantic.HIR)
+	bodies, err := contractstatemir.ComputeHIRStateBodyHashes(analysis.Semantic.HIR, owners, coordinates)
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline, err := session.packageKeys(metadata, interfaces, bodies, owners)
+	if err != nil {
+		t.Fatal(err)
+	}
+	changedBodies := maps.Clone(bodies)
+	changedOwner := owners[0]
+	changed := changedBodies[changedOwner]
+	changed[0]++
+	changedBodies[changedOwner] = changed
+	changedKeys, err := session.packageKeys(metadata, interfaces, changedBodies, owners)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, owner := range owners {
+		if owner == changedOwner && changedKeys[owner] == baseline[owner] {
+			t.Fatalf("package %d body change preserved its cache key", owner)
+		}
+		if owner != changedOwner && changedKeys[owner] != baseline[owner] {
+			t.Fatalf("package %d body change invalidated unrelated owner %d", changedOwner, owner)
+		}
+	}
+	delete(changedBodies, changedOwner)
+	if _, err := session.packageKeys(metadata, interfaces, changedBodies, owners); err == nil {
+		t.Fatal("package keys accepted a missing current body identity")
+	}
 }
 
 func TestPersistentSessionReusesStableMIRAcrossIndependentSessions(t *testing.T) {

@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/mircodec"
@@ -196,7 +197,11 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		report.Lowered = compiled.Verified
 		return Result{Compiler: compiled, Cache: report}, lowerErr
 	}
-	keys, err := session.packageKeys(metadata, interfaces, owners)
+	bodies, err := contractstatemir.ComputeHIRStateBodyHashes(analysis.Semantic.HIR, owners, coordinates)
+	if err != nil {
+		return Result{}, fmt.Errorf("compute package contract-state body identities: %w", err)
+	}
+	keys, err := session.packageKeys(metadata, interfaces, bodies, owners)
 	if err != nil {
 		return Result{}, err
 	}
@@ -371,7 +376,7 @@ func rebindPersistentArtifacts(artifacts []packageartifact.StableArtifact, coord
 	return packageartifact.RebindStableArtifacts(artifacts, coordinates, firstFunction, firstForeign, mir.LocalID(1))
 }
 
-func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {
+func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {
 	byID := make(map[hir.PackageID]workspaceloader.SemanticPackage, len(metadata))
 	for _, loaded := range metadata {
 		byID[loaded.ID] = loaded
@@ -385,6 +390,10 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 		currentInterface, found := interfaces[packageID]
 		if !found {
 			return nil, fmt.Errorf("function-owning package %d has no public interface", packageID)
+		}
+		currentBody, found := bodies[packageID]
+		if !found || currentBody == (contractstatemir.StateBodyHash{}) {
+			return nil, fmt.Errorf("function-owning package %d has no contract-state body identity", packageID)
 		}
 		dependencies := make([]packagecache.Dependency, 0, len(loaded.Dependencies))
 		for _, dependencyID := range loaded.Dependencies {
@@ -408,7 +417,7 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 			TargetSchema: session.target.SchemaVersion, ABIProfile: abiProfile(session.target),
 			ToolchainFingerprint: toolchainIdentity, Backend: backendIdentity,
 			RuntimeABI: sdkstdlib.RuntimeABI, StandardLibrary: session.standardLibrary,
-			Package: loaded.Instance, Source: loaded.Source, CurrentInterface: currentInterface, Dependencies: dependencies,
+			Package: loaded.Instance, Source: loaded.Source, CurrentInterface: currentInterface, CurrentBody: currentBody, Dependencies: dependencies,
 			Features: slices.Clone(loaded.Features),
 		})
 		if err != nil {

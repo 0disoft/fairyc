@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -18,8 +19,8 @@ import (
 
 const (
 	KeyAlgorithm = "sha256"
-	KeyEncoding  = "fairyc.package-cache-key/v3"
-	KeyPrefix    = "fycache3-sha256-"
+	KeyEncoding  = "fairyc.package-cache-key/v4"
+	KeyPrefix    = "fycache4-sha256-"
 )
 
 const keyDomain = "fairyc.package-cache-key"
@@ -46,6 +47,7 @@ type Inputs struct {
 	Package              packagegraph.InstanceID
 	Source               packagecontent.Digest
 	CurrentInterface     moduleinterface.Hash
+	CurrentBody          contractstatemir.StateBodyHash
 	Dependencies         []Dependency
 	Features             []string
 }
@@ -70,7 +72,7 @@ func (key *Key) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// ParseKey accepts only the complete lowercase v2 representation.
+// ParseKey accepts only the complete lowercase v4 representation.
 func ParseKey(value string) (Key, error) {
 	var result Key
 	if !strings.HasPrefix(value, KeyPrefix) {
@@ -106,7 +108,7 @@ func Encode(inputs Inputs) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(keyDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(3)
+	encoded.WriteByte(4)
 	writeString(&encoded, packagegraph.InstanceIDEncoding)
 	writeString(&encoded, packagegraph.InstanceIDAlgorithm)
 	writeString(&encoded, packagegraph.CoordinateIDEncoding)
@@ -115,6 +117,8 @@ func Encode(inputs Inputs) ([]byte, error) {
 	writeString(&encoded, packagecontent.DigestAlgorithm)
 	writeString(&encoded, moduleinterface.HashEncoding)
 	writeString(&encoded, moduleinterface.HashAlgorithm)
+	writeString(&encoded, contractstatemir.StateBodyHashEncoding)
+	writeString(&encoded, contractstatemir.StateBodyHashAlgorithm)
 	writeString(&encoded, inputs.CompilerBuild)
 	writeString(&encoded, inputs.LanguageRevision)
 	writeString(&encoded, inputs.MIRVersion)
@@ -128,6 +132,7 @@ func Encode(inputs Inputs) ([]byte, error) {
 	encoded.Write(inputs.Package[:])
 	encoded.Write(inputs.Source[:])
 	encoded.Write(inputs.CurrentInterface[:])
+	encoded.Write(inputs.CurrentBody[:])
 	writeUint64(&encoded, uint64(len(inputs.Dependencies)))
 	for _, dependency := range inputs.Dependencies {
 		encoded.Write(dependency.Coordinate[:])
@@ -167,6 +172,9 @@ func validateInputs(inputs Inputs) error {
 	}
 	if isZero(inputs.CurrentInterface[:]) {
 		return fmt.Errorf("package cache currentInterface must be set")
+	}
+	if isZero(inputs.CurrentBody[:]) {
+		return fmt.Errorf("package cache currentBody must be set")
 	}
 	if err := validateSortedStrings("profileFlags", inputs.ProfileFlags); err != nil {
 		return err

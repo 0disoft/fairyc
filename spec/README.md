@@ -33,7 +33,7 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/package-identity/manifest-v1.json`: canonical resolved-instance bytes, full SHA-256 IDs, component boundaries, and identity validation cases.
 - `fixtures/module-interface/manifest-v5.json`: current coordinate-based digest for source-visible items plus one injected package-owned HIR state layout; historical v1 through v4 remain frozen.
 - `fixtures/package-source/manifest-v1.json`: exact canonical path/source-byte digest and invalidation cases.
-- `fixtures/package-cache/manifest-v7.json`: current v3 owning/dependency compatibility key with fyif5 and exact language `/12` inputs; historical v1 through v6 remain frozen.
+- `fixtures/package-cache/manifest-v8.json`: current v4 owning/dependency compatibility key with fyif5, fycsbody1, and exact language `/12` inputs; historical v1 through v7 remain frozen.
 - `fixtures/project-manifest/manifest-v1.json`: complete strict `fairy.toml` local-exact parser cases.
 - `fixtures/workspace-loader/manifest-v1.json`: complete local workspace trees for filesystem-safe graph construction.
 - `fixtures/coff-object/manifest-v0.json`: exact small raw AMD64 COFF symbol, relocation, and COMDAT vectors.

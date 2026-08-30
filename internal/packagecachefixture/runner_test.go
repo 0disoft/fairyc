@@ -7,11 +7,11 @@ import (
 
 func TestRunPackageCacheManifest(t *testing.T) {
 	t.Parallel()
-	report, err := Run(filepath.Join("..", "..", "spec", "fixtures", "package-cache", "manifest-v7.json"))
+	report, err := Run(filepath.Join("..", "..", "spec", "fixtures", "package-cache", "manifest-v8.json"))
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 9 || len(report.Failures) != 0 {
+	if report.CasesRun != 10 || len(report.Failures) != 0 {
 		t.Fatalf("Run() report = %+v", report)
 	}
 }
