@@ -98,5 +98,8 @@ ADR 0164 adds a mutually exclusive persistent Session mode. Its caller supplies 
 build identity and every disk/artifact bound. A stable hit additionally checks the current package
 instance and public interface; a complete hit set is rebound into fresh identities and reruns
 `mir.Verify`. Independent Sessions and separate writer/reader test processes over the same directory
-execute result `42` without a second lowering call. ADR 0166 adds one explicit experimental command
+execute result `42` without a second lowering call. ADR 0353 later changes each persistent record
+from MIR-only to one stable package-compilation bundle and adds exact expected state-body checking,
+while the current all-hit execution path continues to reassemble only the verified MIR members.
+ADR 0166 adds one explicit experimental command
 using the exact executable identity; no timing result justifies an ordinary-command default.

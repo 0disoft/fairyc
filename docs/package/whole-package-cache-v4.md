@@ -40,6 +40,8 @@ authority for safe reassembly.
 V4 does not serialize state transaction operations into stable MIR or execute cached state
 transitions. ADR 0350 independently provides a bounded capability-free operation payload and
 verifier re-entry, ADR 0351 checks the expected hash before fresh HIR owner rebind, and ADR 0352
-pairs that payload with stable package MIR in a separate outer compilation artifact. No cache
-record, cache adapter, or combined reassembly path consumes that artifact yet. Source syntax,
-native backend execution, and production persistence remain separate admission gates.
+pairs that payload with stable package MIR in a separate outer compilation artifact. ADR 0353 makes
+persistent records carry exactly that bundle and requires the key-selected body hash before a hit.
+The existing all-hit path still reassembles only the verified MIR members; cached state-body rebind,
+combined symbol alignment and execution, source syntax, native backend execution, and production
+persistence remain separate admission gates.

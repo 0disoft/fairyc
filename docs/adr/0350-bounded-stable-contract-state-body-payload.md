@@ -70,5 +70,6 @@ stable function identities into fresh HIR/MIR owners. Package-artifact and cache
 remain separate until reassembly proves exact provider matching, fresh identity allocation,
 quarantine on malformed payloads, and execution equivalence.
 
-ADR 0351 later completes the checked fresh-HIR-owner rebind. Package-artifact and cache integration
-remain open.
+ADR 0351 later completes the checked fresh-HIR-owner rebind, ADR 0352 adds the outer package
+artifact, and ADR 0353 admits it to persistent cache records. Combined cached state-body reassembly
+remains open.

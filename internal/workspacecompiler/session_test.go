@@ -11,6 +11,7 @@ import (
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/packageartifact"
 	"github.com/0disoft/fairyc/internal/packagecache"
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -310,6 +311,23 @@ func TestPersistentSessionRejectsAmbiguousConfiguration(t *testing.T) {
 	configuration = persistentTestConfiguration(t.TempDir(), "")
 	if _, err := NewSession(configuration); err == nil {
 		t.Fatal("empty persistent compiler build identity was accepted")
+	}
+}
+
+func TestPersistentSessionCompilerIdentityBindsCompilationFormats(t *testing.T) {
+	t.Parallel()
+	session, err := NewSession(persistentTestConfiguration(t.TempDir(), "test-compiler-build"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = session.Close() })
+	want := compilerStableEncoding + ";test-compiler-build;" +
+		packageartifact.StableCompilationVersion + ";" +
+		packageartifact.StableArtifactVersion + ";" +
+		contractstatemir.StableStateBodyVersion + ";" +
+		packagecache.DiskRecordVersion
+	if session.compilerBuild != want {
+		t.Fatalf("persistent compiler identity = %q, want %q", session.compilerBuild, want)
 	}
 }
 

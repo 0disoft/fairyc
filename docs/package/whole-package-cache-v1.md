@@ -48,10 +48,11 @@ hash, artifact metadata, and artifact bytes. `Put` rejects an individually overs
 changing prior state, replaces the same key atomically under the process mutex, and evicts the
 least-recently-used entries until both limits hold. `Get` promotes a hit and returns a deep copy.
 
-Artifact kinds are closed to `typed-hir`, `mir`, and `object`. They must be nonempty, sorted, and
-unique. Their byte encoding is intentionally unspecified outside the exact compiler build that put
-the record. The output public-interface hash is metadata for dependent invalidation, not proof that
-the opaque payload is compatible.
+Artifact kinds are closed to `compilation`, `typed-hir`, `mir`, and `object`. ADR 0353 adds
+`compilation` for the exact-version stable package bundle without changing the generic record
+envelope. Kinds must be nonempty, sorted, and unique. Their byte encoding is intentionally
+unspecified outside the exact compiler build that put the record. The output public-interface hash
+is metadata for dependent invalidation, not proof that the opaque payload is compatible.
 
 `MemoryStore` remains process-local. ADR 0163 separately adds a caller-bounded immutable-generation
 `DiskStore`: canonical records live under key and payload digests, concurrent identical writers

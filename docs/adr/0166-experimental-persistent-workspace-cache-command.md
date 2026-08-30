@@ -2,6 +2,7 @@
 
 - Status: Accepted experimental surface
 - Date: 2026-07-22
+- Cache-record amendment: `docs/adr/0353-stable-compilation-cache-records.md`
 - Implementation: `internal/cli/workspace_cache.go`
 - Output schema: `spec/cli/experimental-workspace-cache-check-v0.schema.json`
 - Build identity prerequisite: `docs/adr/0165-executable-digest-compiler-build-identity.md`

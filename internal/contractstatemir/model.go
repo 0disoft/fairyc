@@ -1,7 +1,7 @@
 // Package contractstatemir defines an experimental compiler-private MIR for
-// deterministic persistent-state transactions. It has no source syntax or
-// cache/runtime integration; its bounded body payload and checked fresh-owner
-// rebind form a compiler-private transport boundary.
+// deterministic persistent-state transactions. It has no source syntax,
+// cached execution, or runtime integration; its bounded body payload and
+// checked fresh-owner rebind form a compiler-private transport boundary.
 package contractstatemir
 
 import (

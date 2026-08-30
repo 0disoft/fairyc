@@ -490,17 +490,19 @@ dependency entries beyond public-interface v5.
 ADR 0350 adds an exact-version, caller-bounded canonical payload for those bodies. It excludes
 build-local identities and capability tokens, reconstructs each layout, creates fresh private
 capabilities, re-enters the verifier, and recomputes the ADR 0348 hash. Stable package-artifact
-integration, cache storage/reassembly, and cached execution remain closed.
+integration and cache storage were still closed at that boundary.
 
 ADR 0351 checks the cache-selected expected hash, current coordinate/layout, and byte-exact current
 HIR function descriptors before mapping that payload to fresh package/function symbols. Every
 transaction receives another fresh capability and re-enters verification without requiring the
-current HIR source-operation side table. Package/cache integration remains closed.
+current HIR source-operation side table. Combined cached reassembly remained closed.
 
 ADR 0352 adds `fairyc-stable-package-compilation/1`, a bounded canonical outer artifact that pairs
 stable package MIR v3 with the exact state-body payload only when both independently validate and
-share one package coordinate. Existing MIR bytes and cache records remain unchanged; cache
-publication and combined reassembly are the next gates.
+share one package coordinate. ADR 0353 advances persistent cache identity to `/2`, stores exactly
+that compilation payload, requires the key-selected body hash, and quarantines contradictory or
+legacy MIR-only generations. All-hit execution still reassembles only the verified MIR members;
+cached state-body rebind and combined symbol alignment remain the next gates.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

@@ -2,6 +2,7 @@
 
 - Status: Accepted internal integration
 - Date: 2026-07-22
+- Amended by: `docs/adr/0353-stable-compilation-cache-records.md`
 - Implementation: `internal/packageartifact/stable_cache.go`, `internal/workspacecompiler/session.go`
 - Storage prerequisite: `docs/adr/0163-bounded-immutable-disk-cache-store.md`
 
@@ -63,3 +64,6 @@ ordinary lowering.
 - ADR 0171 now gives each package a closed stable context projection and conflict-checked merge.
   Partial hits still lower normally; function-level reuse remains measurement-gated.
 - The cache is disposable derived state. Deletion or rejection can only cause ordinary compilation.
+- ADR 0353 later replaces MIR-only persistent records with coordinate-bound stable compilation
+  bundles and advances the persistent compiler identity to `/2`; this ADR's verified MIR reassembly
+  and disposable-cache policy remain authoritative.

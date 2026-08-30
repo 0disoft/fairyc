@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	ArtifactTypedHIR = "typed-hir"
-	ArtifactMIR      = "mir"
-	ArtifactObject   = "object"
+	ArtifactCompilation = "compilation"
+	ArtifactTypedHIR    = "typed-hir"
+	ArtifactMIR         = "mir"
+	ArtifactObject      = "object"
 )
 
 var ErrRecordTooLarge = errors.New("package cache record exceeds the byte limit")
@@ -195,7 +196,7 @@ func validateRecord(record Record) (uint64, error) {
 
 func validArtifactKind(kind string) bool {
 	switch kind {
-	case ArtifactTypedHIR, ArtifactMIR, ArtifactObject:
+	case ArtifactCompilation, ArtifactTypedHIR, ArtifactMIR, ArtifactObject:
 		return true
 	default:
 		return false

@@ -1,8 +1,10 @@
 # Stable package compilation artifact v1
 
 - Status: Experimental compiler-private contract
-- Decision: `docs/adr/0352-stable-package-compilation-artifact.md`
-- Implementation: `internal/packageartifact/stable_compilation.go`
+- Decisions: `docs/adr/0352-stable-package-compilation-artifact.md`,
+  `docs/adr/0353-stable-compilation-cache-records.md`
+- Implementation: `internal/packageartifact/stable_compilation.go`,
+  `internal/packageartifact/stable_cache.go`
 - Schema: `fairyc.stable-package-compilation/v1`
 - Version: `fairyc-stable-package-compilation/1`
 
@@ -28,9 +30,17 @@ authority for its own identity and semantics.
   the state payload;
 - local state package renumbering under the same coordinate preserves complete artifact bytes.
 
+## Persistent cache admission
+
+ADR 0353 publishes exactly one `compilation` payload per persistent record. Lookup requires the
+cache-selected nonzero state-body hash and verifies the record interface, package instance, complete
+outer artifact, shared coordinate, and exact body hash. Any record-derived contradiction quarantines
+only the immutable generation read; a missing caller hash does not delete a valid generation. The
+persistent compiler identity `/2` makes MIR-only `/1` records incompatible misses.
+
 ## Closed gates
 
-Stable cache records still contain MIR v3 alone. This artifact has no cache adapter publication,
-expected-body lookup, malformed-record quarantine, combined MIR/state reassembly, fresh-symbol
-alignment, workspace all-hit execution, source syntax, backend, runtime, persistence, or target
-admission. Those require later versioned slices rather than implicit use of this codec.
+Workspace all-hit reuse currently extracts only the verified MIR member for the existing MIR
+reassembly path. Cached state-body fresh-owner rebind, combined MIR/state symbol alignment and
+execution, source syntax, backend, runtime, production persistence, and target admission remain
+closed.

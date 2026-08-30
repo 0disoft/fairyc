@@ -32,15 +32,16 @@ const (
 	StorageDisk        = "disk"
 
 	compilerProcessEncoding = "fairyc.compiler-process/0:"
-	compilerStableEncoding  = "fairyc.compiler-stable-package-cache/1"
+	compilerStableEncoding  = "fairyc.compiler-stable-package-cache/2"
 	backendIdentity         = "verified-mir"
 	toolchainIdentity       = "not-applicable:verified-mir"
 )
 
 const maxCompilerBuildIdentityBytes = 512
 
-// PersistentConfiguration opts one Session into cross-process stable MIR reuse. CompilerBuild
-// must identify the exact compiler build; using a release family or moving label is unsafe.
+// PersistentConfiguration opts one Session into cross-process stable package-compilation reuse.
+// CompilerBuild must identify the exact compiler build; using a release family or moving label is
+// unsafe.
 type PersistentConfiguration struct {
 	Root          string
 	RootBoundary  *os.Root
@@ -79,7 +80,8 @@ type Result struct {
 	Cache    Report
 }
 
-// Session owns exactly one bounded artifact cache: either process-local MIR or stable disk MIR.
+// Session owns exactly one bounded artifact cache: either process-local MIR or stable disk package
+// compilation bundles.
 type Session struct {
 	cache           *packageartifact.Cache
 	stableCache     *packageartifact.StableCache
@@ -128,7 +130,9 @@ func NewSession(configuration Configuration) (*Session, error) {
 		compilerBuild = strings.Join([]string{
 			compilerStableEncoding,
 			configuration.Persistent.CompilerBuild,
+			packageartifact.StableCompilationVersion,
 			packageartifact.StableArtifactVersion,
+			contractstatemir.StableStateBodyVersion,
 			packagecache.DiskRecordVersion,
 		}, ";")
 		storage = StorageDisk
@@ -206,7 +210,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		return Result{}, err
 	}
 	if session.stableCache != nil {
-		return session.checkPersistent(analysis, identities, coordinates, interfaces, owners, keys, report)
+		return session.checkPersistent(analysis, identities, coordinates, interfaces, bodies, owners, keys, report)
 	}
 
 	artifacts := make([]packageartifact.Artifact, 0, len(owners))
@@ -288,7 +292,7 @@ func (session *Session) PersistentStats() (packageartifact.StableCacheStats, err
 	return session.stableCache.Stats()
 }
 
-func (session *Session) checkPersistent(analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, interfaces map[hir.PackageID]moduleinterface.Hash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
+func (session *Session) checkPersistent(analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
 	artifacts := make([]packageartifact.StableArtifact, 0, len(owners))
 	allHit := true
 	for _, packageID := range owners {
@@ -296,11 +300,15 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		if !found {
 			return Result{}, fmt.Errorf("function-owning package %d has no stable package identity", packageID)
 		}
-		lookup := session.stableCache.Get(keys[packageID], interfaces[packageID], instance)
+		expectedBody, found := bodies[packageID]
+		if !found || expectedBody == (contractstatemir.StateBodyHash{}) {
+			return Result{}, fmt.Errorf("function-owning package %d has no contract-state body identity", packageID)
+		}
+		lookup := session.stableCache.Get(keys[packageID], interfaces[packageID], instance, expectedBody)
 		switch lookup.Status {
 		case packageartifact.LookupHit:
 			report.Hits++
-			artifacts = append(artifacts, lookup.Artifact)
+			artifacts = append(artifacts, lookup.Compilation.MIR)
 		case packageartifact.LookupMiss:
 			report.Misses++
 			allHit = false
@@ -339,13 +347,21 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		}
 		byPackage[artifact.PackageID] = artifact
 	}
+	stateBodies, err := contractstatemir.DescribeStableHIRStateBodies(analysis.Semantic.HIR, owners, coordinates)
+	if err != nil {
+		return Result{}, fmt.Errorf("describe stable package contract-state bodies: %w", err)
+	}
 	for _, packageID := range owners {
 		artifact, found := byPackage[packageID]
 		if !found {
 			return Result{}, fmt.Errorf("lowered MIR has no artifact for function-owning package %d", packageID)
 		}
-		if err := session.stableCache.Put(keys[packageID], interfaces[packageID], artifact); err != nil {
-			if errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
+		stateBody, found := stateBodies[packageID]
+		if !found || stateBody.Hash != bodies[packageID] {
+			return Result{}, fmt.Errorf("stable contract-state body for package %d does not match the cache-key identity", packageID)
+		}
+		if err := session.stableCache.Put(keys[packageID], interfaces[packageID], artifact, stateBody); err != nil {
+			if errors.Is(err, packageartifact.ErrStableCompilationTooLarge) || errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, contractstatemir.ErrStableStateBodyTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
 				report.StoreSkipped++
 				continue
 			}
@@ -353,7 +369,7 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 				report.StoreFailed++
 				continue
 			}
-			return Result{}, fmt.Errorf("store package %d stable MIR artifact: %w", packageID, err)
+			return Result{}, fmt.Errorf("store package %d stable compilation artifact: %w", packageID, err)
 		}
 		report.Stored++
 	}

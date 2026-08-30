@@ -55,7 +55,7 @@ Atlas, and CLI schemas remain unchanged.
 ## Consequences
 
 One immutable byte sequence can now prove that package MIR and state operations share the same
-stable package owner without collapsing their semantic models. The next slice may change the
+stable package owner without collapsing their semantic models. ADR 0353 later changes the
 persistent cache adapter to publish and retrieve this outer artifact with an expected body hash.
 Combined reassembly must still align cached MIR fresh symbols with rebound state transaction owners
 before cached execution can be admitted.
