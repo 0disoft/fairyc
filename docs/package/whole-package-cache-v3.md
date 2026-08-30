@@ -32,3 +32,8 @@ Current-interface participation deliberately over-invalidates an owning package 
 public fact changes, even though the source digest ordinarily changes too. Correctness and generated
 HIR coverage take precedence over recovering that redundant hit. This decision adds no persistent
 state backend or stable MIR artifact.
+
+Source-independent HIR state transaction bodies are not encoded by v3: they are neither acquired
+source bytes nor public-interface layout facts. ADR 0347 therefore keeps their lowering process-local
+and outside cached compilation. A later artifact/cache revision must key their exact body identity
+before a cached compiler path may consume them.

@@ -15,6 +15,14 @@ type PackageLayout struct {
 	Layout  Layout
 }
 
+// LoweredTransaction binds one package-owned HIR function to a verified
+// compiler-private transaction program.
+type LoweredTransaction struct {
+	Package  hir.PackageID
+	Function hir.SymbolID
+	Program  Program
+}
+
 // LowerHIRLayoutForPackage lowers only one package-owned layout. Malformed
 // layouts owned by other packages remain the responsibility of their own
 // interface extraction.
@@ -70,6 +78,157 @@ func LowerHIRLayouts(input hir.Package) ([]PackageLayout, error) {
 		result = append(result, PackageLayout{Package: definition.Package, Layout: layout})
 	}
 	return result, nil
+}
+
+// LowerHIRTransactions lowers every source-independent HIR transaction in
+// package/function order. The owning HIR function supplies the effect set, and
+// every result passes the transaction-MIR verifier before publication.
+func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
+	layouts, err := LowerHIRLayouts(input)
+	if err != nil {
+		return nil, err
+	}
+	layoutByPackage := make(map[hir.PackageID]Layout, len(layouts))
+	for _, item := range layouts {
+		layoutByPackage[item.Package] = item.Layout
+	}
+
+	transactions := slices.Clone(input.StateTransactions)
+	slices.SortFunc(transactions, compareHIRTransactions)
+	result := make([]LoweredTransaction, 0, len(transactions))
+	for index, transaction := range transactions {
+		if transaction.Function == hir.NoSymbol {
+			return nil, fmt.Errorf("package %d state transaction has no function symbol", transaction.Package)
+		}
+		if index > 0 && transactions[index-1].Package == transaction.Package && transactions[index-1].Function == transaction.Function {
+			return nil, fmt.Errorf("package %d function %d declares multiple state transactions", transaction.Package, transaction.Function)
+		}
+		layout, found := layoutByPackage[transaction.Package]
+		if !found {
+			return nil, fmt.Errorf("package %d state transaction has no owned layout", transaction.Package)
+		}
+		function, err := findHIRFunction(input, transaction.Package, transaction.Function)
+		if err != nil {
+			return nil, err
+		}
+		program, err := lowerHIRTransaction(layout, function.Effects, transaction)
+		if err != nil {
+			return nil, fmt.Errorf("package %d function %d state transaction: %w", transaction.Package, transaction.Function, err)
+		}
+		result = append(result, LoweredTransaction{Package: transaction.Package, Function: transaction.Function, Program: program})
+	}
+	return result, nil
+}
+
+func compareHIRTransactions(left, right hir.StateTransaction) int {
+	if left.Package < right.Package {
+		return -1
+	}
+	if left.Package > right.Package {
+		return 1
+	}
+	if left.Function < right.Function {
+		return -1
+	}
+	if left.Function > right.Function {
+		return 1
+	}
+	return 0
+}
+
+func findHIRFunction(input hir.Package, packageID hir.PackageID, symbol hir.SymbolID) (hir.Function, error) {
+	var result hir.Function
+	found := false
+	for _, module := range input.Modules {
+		if module.Package != packageID {
+			continue
+		}
+		for _, function := range module.Functions {
+			if function.Symbol != symbol {
+				continue
+			}
+			if found {
+				return hir.Function{}, fmt.Errorf("package %d function symbol %d is duplicated", packageID, symbol)
+			}
+			result = function
+			found = true
+		}
+	}
+	if !found {
+		return hir.Function{}, fmt.Errorf("package %d state transaction names missing function %d", packageID, symbol)
+	}
+	return result, nil
+}
+
+func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.StateTransaction) (Program, error) {
+	fieldIndices := make(map[string]uint32, len(layout.Fields))
+	for _, field := range layout.Fields {
+		fieldIndices[field.Name] = field.Index
+	}
+	capability := newTransactionCapability()
+	operations := make([]Operation, 0, len(transaction.Accesses))
+	for index, access := range transaction.Accesses {
+		fieldIndex, found := fieldIndices[access.Field]
+		if !found {
+			return Program{}, fmt.Errorf("access %d names unknown field %q", index, access.Field)
+		}
+		kind, err := lowerStateAccessKind(access.Kind)
+		if err != nil {
+			return Program{}, fmt.Errorf("access %d: %w", index, err)
+		}
+		operations = append(operations, Operation{
+			Kind: kind, Capability: capability, FieldIndex: fieldIndex,
+			Key: lowerStateValue(access.Key), Value: lowerStateValue(access.Value),
+		})
+	}
+	exit, err := lowerStateTransactionExit(transaction.Exit)
+	if err != nil {
+		return Program{}, err
+	}
+	program := Program{
+		Layout: layout, Capability: capability, Effects: slices.Clone(effects), Operations: operations,
+		Exit: exit, TrapCategory: transaction.TrapCategory,
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		return Program{}, VerificationErrors{Failures: failures}
+	}
+	return program, nil
+}
+
+func lowerStateAccessKind(kind hir.StateAccessKind) (OperationKind, error) {
+	switch kind {
+	case hir.StateAccessCellRead:
+		return OperationCellRead, nil
+	case hir.StateAccessCellWrite:
+		return OperationCellWrite, nil
+	case hir.StateAccessCellDelete:
+		return OperationCellDelete, nil
+	case hir.StateAccessMapRead:
+		return OperationMapRead, nil
+	case hir.StateAccessMapWrite:
+		return OperationMapWrite, nil
+	case hir.StateAccessMapDelete:
+		return OperationMapDelete, nil
+	default:
+		return "", fmt.Errorf("unsupported state access kind %q", kind)
+	}
+}
+
+func lowerStateTransactionExit(exit hir.StateTransactionExit) (ExitKind, error) {
+	switch exit {
+	case hir.StateTransactionCommit:
+		return ExitCommit, nil
+	case hir.StateTransactionReject:
+		return ExitReject, nil
+	case hir.StateTransactionTrap:
+		return ExitTrap, nil
+	default:
+		return "", fmt.Errorf("unsupported state transaction exit %q", exit)
+	}
+}
+
+func lowerStateValue(value hir.StateValue) Value {
+	return Value{TypeID: value.TypeID, Encoded: slices.Clone(value.Encoded)}
 }
 
 func lowerFieldKind(kind hir.StateFieldKind) (contractstate.FieldKind, error) {

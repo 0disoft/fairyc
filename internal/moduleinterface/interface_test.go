@@ -125,6 +125,15 @@ func TestExtractIncludesExactHIRStateLayoutIdentity(t *testing.T) {
 	if hash := extractHash(t, unrelated, 1, coordinates); hash != baseHash {
 		t.Fatalf("unrelated package layout changed interface: %s != %s", hash, baseHash)
 	}
+
+	bodyOnly := clonePackage(base)
+	bodyOnly.StateTransactions = []hir.StateTransaction{{
+		Package: 1, Function: 17, Exit: hir.StateTransactionCommit,
+		Accesses: []hir.StateAccess{{Kind: hir.StateAccessCellRead, Field: "total_supply"}},
+	}}
+	if hash := extractHash(t, bodyOnly, 1, coordinates); hash != baseHash {
+		t.Fatalf("process-local state transaction changed public interface: %s != %s", hash, baseHash)
+	}
 }
 
 func TestExtractIgnoresPrivateItemsBodiesAndDeclarationOrder(t *testing.T) {

@@ -67,6 +67,12 @@ ADR 0346 adds one opaque transaction capability per compiler-private program and
 state operation to use it. The same verifier derives `storage_read` and `storage_write` requirements
 and rejects missing, noncanonical, or host-only effect declarations before transaction begin.
 
+ADR 0347 adds source-independent HIR transaction plans owned by an existing package function. The
+function remains the sole effect authority; lowering resolves field names through the exact layout,
+clones encoded bytes, assigns one fresh capability, verifies the program, and proves mixed
+read/write behavior through the failure-atomic oracle. These bodies are process-local and are not
+yet package-artifact or cache inputs.
+
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
 
@@ -77,6 +83,7 @@ A later PR may introduce source syntax only after it also supplies:
 - exact grammar and recovery behavior;
 - resolver and type rules for source state declarations and access;
 - source-to-HIR effect inference and state access syntax;
+- exact package-body/artifact identity and cache invalidation for generated state transaction plans;
 - MIR operations whose verifier proves layout identity and transaction ownership;
 - interpreter fixtures for success, error propagation, trap, delete, conflict, and limits;
 - at least one deterministic contract backend with byte-for-byte state transition fixtures;

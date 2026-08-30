@@ -469,8 +469,13 @@ closed.
 
 ADR 0346 gives each compiler-private state program one opaque transaction capability and requires
 every operation to use that exact identity. The verifier also derives `storage_read` and
-`storage_write` requirements before the oracle begins, while source/HIR access lowering and stable
-execution surfaces remain closed.
+`storage_write` requirements before the oracle begins.
+
+ADR 0347 adds source-independent HIR transaction plans owned by an existing package function. The
+function remains the sole effect authority; lowering resolves field names through its exact layout,
+creates one fresh capability, verifies the result, and executes the generated program through the
+failure-atomic oracle. Source syntax, stable/cached body transport, and target execution remain
+closed.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

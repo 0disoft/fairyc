@@ -3,6 +3,7 @@
 - Status: Experimental compiler-private contract
 - Decision source: `docs/adr/0344-compiler-private-contract-state-transaction-mir.md`
 - Capability and effect source: `docs/adr/0346-contract-state-mir-capability-and-effect-verification.md`
+- HIR lowering source: `docs/adr/0347-source-independent-hir-state-access-lowering.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -62,6 +63,14 @@ Program effects are canonical released on-chain HIR effects. Cell/map reads requ
 noncanonical sets, and host-only effects fail with `CSM1005`. Additional on-chain effects remain
 legal because this submodel does not yet represent every operation in a complete function.
 
+## HIR bridge
+
+`hir.StateTransaction` names one package and existing ordinary HIR function symbol. The function is
+the sole declared-effect authority. Each source-independent access names a layout field rather than
+a physical index; lowering resolves the exact package layout, clones encoded values, creates one
+fresh capability, attaches it to every operation, maps the static exit, and runs this verifier before
+returning a program. Results are deterministic in package/function order and remain process-local.
+
 ## Exit and execution
 
 Every program ends in exactly one explicit exit:
@@ -78,12 +87,13 @@ back. The verifier runs before `Begin`, so invalid MIR cannot observe a snapshot
 
 ## Closed gates
 
-This slice does not add source syntax, HIR state access operations, data-dependent values, branches,
-loops, calls, owner-bound state borrows, external-call rules, stable MIR serialization,
-package-artifact/cache body identity, deterministic native
+This slice does not add source syntax, data-dependent values, branches, loops, calls, owner-bound
+state borrows, external-call rules, stable MIR serialization, package-artifact/cache body identity,
+deterministic native
 backend execution, persistence, migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
 v5 plus whole-package cache key v3 carry the exact layout identity. ADR 0346 verifies transaction
-capability identity and storage effects inside this submodel. The next compiler slice must lower
-source-independent HIR state accesses into those proofs without opening source syntax first.
+capability identity and storage effects, and ADR 0347 lowers source-independent HIR accesses into
+those proofs. A later compiler slice must give those access bodies stable artifact/cache identity
+before ordinary source or cached compilation consumes them.

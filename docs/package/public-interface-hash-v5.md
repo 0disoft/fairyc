@@ -37,5 +37,6 @@ V1 through v4 hashes remain historical fixture facts and fail parsing under the 
 ## Boundary
 
 The layout originates in source-independent typed HIR and is lowered through the compiler-private
-transaction MIR. V5 does not admit source syntax, state access, stable MIR serialization, a runtime
-ABI, or a target backend.
+transaction MIR. Process-local HIR state transactions do not enter this public interface because
+they are function-body behavior rather than a public layout promise. V5 does not admit source
+syntax, transaction-body serialization, a runtime ABI, or a target backend.
