@@ -10,7 +10,7 @@ import (
 
 func TestPackageCacheSchemaRequiresClosedRoot(t *testing.T) {
 	t.Parallel()
-	path := filepath.Join("..", "..", "spec", "fixtures", "package-cache", "schema-v6.json")
+	path := filepath.Join("..", "..", "spec", "fixtures", "package-cache", "schema-v7.json")
 	body, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read schema: %v", err)

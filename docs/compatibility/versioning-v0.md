@@ -109,11 +109,11 @@ typed-HIR, MIR, and object payloads remain exact-compiler disposable state rathe
 compatibility formats. The bounded persistent storage format and one exact-version experimental
 command now exist; ordinary-command policy and default limits remain undecided.
 
-The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
-`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v6` supplies current vectors because its
-dependency entries use `fyif4-sha256` public-interface hashes and `fairyc-language/12`; fixture
-manifests v1 through v5 remain historical. A component algorithm change is an intentional cache miss,
-not permission to reinterpret an older key.
+The current whole-package key encoding is `fairyc.package-cache-key/v3` with
+`fycache3-sha256-...` text. `fairyc.package-cache-fixtures/v7` supplies current vectors; every key
+includes its current `fyif5-sha256` public interface plus sorted dependency coordinate/interface
+pairs and `fairyc-language/12`. Fixture manifests v1 through v6 remain historical. A key or component
+algorithm change is an intentional cache miss, not permission to reinterpret an older key.
 
 ## Target and ABI
 
@@ -1192,14 +1192,15 @@ silently inheriting it from its own schema. Changing the digest, canonical bytes
 validation rules requires a new package-identity version. Caches using another version are safe
 misses; contradictory lockfile or map records are corruption.
 
-`fairyc.module-interface-fixtures/v4` independently fixes the current public-interface descriptor
-and `fyif4-sha256-...` hash. It preserves v3 callable must-use state and adds canonical public
-resource abilities. It excludes ordinary bodies, private implementation, and private must-use
-state while including public type shape, callable signatures, effects, must-use bits, resource
-abilities, foreign link contracts, module paths, and dependency nominal identities. V1 through v3
-fixtures remain frozen historical vectors. A cache records the current algorithm explicitly and
-combines it with its own schema and compatibility vector. Changing interface inputs, canonical
-encoding, stable type spelling, digest, or prefix requires a new interface-hash version.
+`fairyc.module-interface-fixtures/v5` independently fixes the current public-interface descriptor
+and `fyif5-sha256-...` hash. It preserves v4 public items and resource abilities, then adds one exact
+package-owned contract-state layout UID and hash. It excludes ordinary bodies, private
+implementation, and private must-use state while including public type shape, callable signatures,
+effects, must-use bits, resource abilities, foreign link contracts, module paths, dependency nominal
+identities, and state layout identity. V1 through v4 fixtures remain frozen historical vectors. A
+cache records the current algorithm explicitly and combines it with its own schema and compatibility
+vector. Changing interface inputs, canonical encoding, stable type spelling, digest, or prefix
+requires a new interface-hash version.
 
 `fairyc.package-source-fixtures/v1` independently fixes the exact package-source graph digest as
 SHA-256 over sorted canonical relative paths and exact source bytes. Its text form is
@@ -1214,7 +1215,7 @@ zero-based line start, including EOF after a final LF. CR is not normalized. A m
 stored spans for that file; no consumer may guess a remapped position.
 
 ADR 0185 adds the internal `fairyc.fymap-logical/v1` planning model. It requires the exact compiler
-executable identity, exact current package set, one `fyif4-sha256` public-interface hash per package,
+executable identity, exact current package set, one current `fyif5-sha256` public-interface hash per package,
 all independent identity-algorithm identifiers, and explicit relation omissions. The model is
 target-independent and immutable. It is not the `.fymap` transport schema and therefore makes no
 promise by itself about encoded bytes, file naming, publication, or reader compatibility.

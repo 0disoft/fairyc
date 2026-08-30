@@ -18,8 +18,8 @@ import (
 
 const (
 	KeyAlgorithm = "sha256"
-	KeyEncoding  = "fairyc.package-cache-key/v2"
-	KeyPrefix    = "fycache2-sha256-"
+	KeyEncoding  = "fairyc.package-cache-key/v3"
+	KeyPrefix    = "fycache3-sha256-"
 )
 
 const keyDomain = "fairyc.package-cache-key"
@@ -45,6 +45,7 @@ type Inputs struct {
 	StandardLibrary      packagegraph.InstanceID
 	Package              packagegraph.InstanceID
 	Source               packagecontent.Digest
+	CurrentInterface     moduleinterface.Hash
 	Dependencies         []Dependency
 	Features             []string
 }
@@ -105,7 +106,7 @@ func Encode(inputs Inputs) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(keyDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(2)
+	encoded.WriteByte(3)
 	writeString(&encoded, packagegraph.InstanceIDEncoding)
 	writeString(&encoded, packagegraph.InstanceIDAlgorithm)
 	writeString(&encoded, packagegraph.CoordinateIDEncoding)
@@ -126,6 +127,7 @@ func Encode(inputs Inputs) ([]byte, error) {
 	encoded.Write(inputs.StandardLibrary[:])
 	encoded.Write(inputs.Package[:])
 	encoded.Write(inputs.Source[:])
+	encoded.Write(inputs.CurrentInterface[:])
 	writeUint64(&encoded, uint64(len(inputs.Dependencies)))
 	for _, dependency := range inputs.Dependencies {
 		encoded.Write(dependency.Coordinate[:])
@@ -162,6 +164,9 @@ func validateInputs(inputs Inputs) error {
 	}
 	if isZero(inputs.Source[:]) {
 		return fmt.Errorf("package cache source must be set")
+	}
+	if isZero(inputs.CurrentInterface[:]) {
+		return fmt.Errorf("package cache currentInterface must be set")
 	}
 	if err := validateSortedStrings("profileFlags", inputs.ProfileFlags); err != nil {
 		return err

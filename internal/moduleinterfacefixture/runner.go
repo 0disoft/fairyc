@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	schemaVersion = "fairyc.module-interface-fixtures/v4"
+	schemaVersion = "fairyc.module-interface-fixtures/v5"
 	maximumSource = 1 << 20
 )
 
@@ -31,7 +31,8 @@ func Run(path string) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
-	if definition.Schema == "" || definition.SchemaVersion != schemaVersion || len(definition.Contracts) == 0 || len(definition.Cases) == 0 {
+	if definition.Schema == "" || definition.SchemaVersion != schemaVersion || len(definition.Contracts) == 0 || len(definition.Cases) == 0 ||
+		definition.Identity.StateLayout.ContractUID == "" || len(definition.Identity.StateLayout.Fields) == 0 {
 		return Report{}, fmt.Errorf("invalid module interface fixture contract header")
 	}
 	coordinateID, err := packagegraph.ComputeCoordinateID(packagegraph.Coordinate{
@@ -55,7 +56,7 @@ func Run(path string) (Report, error) {
 			return Report{}, fmt.Errorf("duplicate module interface fixture %q", fixture.ID)
 		}
 		seen[fixture.ID] = struct{}{}
-		hash, failure := runCase(manifestDirectory, fixture, coordinateID)
+		hash, failure := runCase(manifestDirectory, fixture, coordinateID, definition.Identity.StateLayout)
 		if failure != nil {
 			report.Failures = append(report.Failures, *failure)
 			continue
@@ -115,7 +116,7 @@ func loadManifest(path string) (manifest, error) {
 	return definition, nil
 }
 
-func runCase(root string, fixture caseDefinition, coordinateID packagegraph.CoordinateID) (moduleinterface.Hash, *Failure) {
+func runCase(root string, fixture caseDefinition, coordinateID packagegraph.CoordinateID, layoutDefinition stateLayoutDefinition) (moduleinterface.Hash, *Failure) {
 	path, err := containedSource(root, fixture.Source)
 	if err != nil {
 		return moduleinterface.Hash{}, &Failure{CaseID: fixture.ID, Detail: err.Error()}
@@ -136,6 +137,15 @@ func runCase(root string, fixture caseDefinition, coordinateID packagegraph.Coor
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || semanticResult.FailedPhase != semantic.PhaseNone || len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
 		return moduleinterface.Hash{}, &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("semantic analysis failed: phase=%s diagnostics=%v unsupported=%v", semanticResult.FailedPhase, semanticResult.Diagnostics, semanticResult.Unsupported)}
 	}
+	stateFields := make([]hir.StateField, 0, len(layoutDefinition.Fields))
+	for _, field := range layoutDefinition.Fields {
+		stateFields = append(stateFields, hir.StateField{
+			Name: field.Name, Kind: hir.StateFieldKind(field.Kind), KeyTypeID: field.KeyTypeID, ValueTypeID: field.ValueTypeID,
+		})
+	}
+	semanticResult.HIR.StateLayouts = []hir.StateLayout{{
+		Package: hir.DefaultPackage, ContractUID: layoutDefinition.ContractUID, Fields: stateFields,
+	}}
 	descriptor, err := moduleinterface.Extract(semanticResult.HIR, hir.DefaultPackage, map[hir.PackageID]packagegraph.CoordinateID{hir.DefaultPackage: coordinateID})
 	if err != nil {
 		return moduleinterface.Hash{}, &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("extract interface: %v", err)}

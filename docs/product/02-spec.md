@@ -133,10 +133,12 @@ unchanged.
 ADR 0338 adds a process-local typed state-layout and failure-atomic transaction oracle for future
 contract profiles. ADR 0344 adds a separate experimental compiler-private layout and transaction MIR
 that verifies canonical cell/map operations plus explicit commit, reject, and trap exits before
-oracle execution. Neither decision reserves source syntax or adds HIR, stable MIR artifacts, SDK,
-runtime, backend, ABI, database, Merkle tree, or a supported chain target. Production persistence
-must preserve the oracle's observable layout, limit, rollback, conflict, and append-only upgrade
-rules through separate evidence.
+oracle execution. ADR 0345 adds source-independent package-owned HIR layout declarations,
+public-interface v5 layout hashes, and whole-package cache-key v3 current-interface invalidation.
+None reserves source syntax or adds state access expressions, stable MIR artifacts, SDK, runtime,
+backend, ABI, database, Merkle tree, or a supported chain target. Production persistence must
+preserve the oracle's observable layout, limit, rollback, conflict, and append-only upgrade rules
+through separate evidence.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -945,15 +947,16 @@ Source-linked MIR normalization assertions are versioned in `spec/fixtures/mir/m
 
 MIR verifier rejection recipes are versioned in `spec/fixtures/mir-verifier/manifest-v0.json`. They require a verified named seed, exactly one typed mutation, and exactly one expected `Vxxxx` result without creating a general serialized MIR or plugin format.
 
-Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v1.json`, which includes all eight historical v0 cases and adds deterministic package-cycle rejection. They fix package-instance equality, one source root per instance, acyclic direct dependency structure, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax. `internal/packagefixture` executes all nine cases through the reusable `internal/packagegraph` validator and resolver, converts passing graphs into build-local semantic package input, and proves isolated equal module paths complete semantic Flow. Region v1 consumes the same validated graph result. The independently versioned `spec/fixtures/package-identity/manifest-v1.json` freezes the canonical resolved-tuple byte encoding, full SHA-256 `PackageInstanceId`, text form, component boundaries, and feature-set rejection reasons without choosing any package-manager format. `PackageCoordinateId` v1 separately identifies the source-independent UID/version/feature coordinate used by public cross-package contracts. Typed HIR retains source `pub` state for every current item category. `spec/fixtures/module-interface/manifest-v4.json` compiles thirteen current source variants and freezes the coordinate-based public-interface v4 digest: private must-use, private module-constant, and private source-location state preserve it while public must-use and public resource-ability state invalidate it, alongside the existing body, representation, declaration-order, signature, field-order, foreign-link, dependency-source, and dependency-coordinate relations. V1 through v3 manifests remain frozen historical vectors. `spec/fixtures/package-source/manifest-v1.json` separately freezes the exact path-and-source-byte digest used for the current package's own implementation invalidation. Historical `spec/fixtures/package-cache/manifest-v1.json` records the first caller-bounded process-local LRU key baseline.
+Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v1.json`, which includes all eight historical v0 cases and adds deterministic package-cycle rejection. They fix package-instance equality, one source root per instance, acyclic direct dependency structure, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax. `internal/packagefixture` executes all nine cases through the reusable `internal/packagegraph` validator and resolver, converts passing graphs into build-local semantic package input, and proves isolated equal module paths complete semantic Flow. Region v1 consumes the same validated graph result. The independently versioned `spec/fixtures/package-identity/manifest-v1.json` freezes the canonical resolved-tuple byte encoding, full SHA-256 `PackageInstanceId`, text form, component boundaries, and feature-set rejection reasons without choosing any package-manager format. `PackageCoordinateId` v1 separately identifies the source-independent UID/version/feature coordinate used by public cross-package contracts. Typed HIR retains source `pub` state for every current item category and may carry one source-independent contract-state layout per package. `spec/fixtures/module-interface/manifest-v5.json` compiles thirteen current source variants and freezes the coordinate-based public-interface v5 digest: it preserves every v4 item relation and adds the exact package-owned state-layout hash. V1 through v4 manifests remain frozen historical vectors. `spec/fixtures/package-source/manifest-v1.json` separately freezes the exact path-and-source-byte digest used for the current package's own implementation invalidation. Historical `spec/fixtures/package-cache/manifest-v1.json` records the first caller-bounded process-local LRU key baseline.
 
-ADR 0174's v2 key encoding now uses current vectors in
-`spec/fixtures/package-cache/manifest-v6.json`. The current package keeps exact source identity;
-dependency pairs use source-independent coordinate plus public-interface v4, including public
-must-use and resource-ability state. Stable function,
+ADR 0345's v3 key encoding uses current vectors in
+`spec/fixtures/package-cache/manifest-v7.json`. The current package keeps exact source identity and
+its complete public-interface v5 hash; dependency pairs use source-independent coordinates plus
+public-interface v5, including public must-use, resource abilities, and contract-state layout
+identity. Stable function,
 nominal type, foreign, body, and package artifacts use the same coordinate boundary and still
 re-enter MIR verification, so a private dependency edit can reuse the caller without accepting an
-old provider body. Historical cache fixture manifests v1 and v2 remain frozen.
+old provider body. Historical cache fixture manifests v1 through v6 remain frozen.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

@@ -85,12 +85,12 @@ regenerate, or override compiler source.
 - PackageInstanceId v1 fixtures: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 encoding and fixture runner: internal/packagegraph/identity.go, internal/packageidentityfixture/
 - PackageCoordinateId v1 encoding and workspace mapping: internal/packagegraph/coordinate.go, internal/workspaceloader/semantic.go, docs/package/package-coordinate-id-v1.md
-- Public-interface hash v4 fixtures: spec/fixtures/module-interface/manifest-v4.json with historical manifest-v1.json through manifest-v3.json coverage
+- Public-interface hash v5 fixtures: spec/fixtures/module-interface/manifest-v5.json with historical manifest-v1.json through manifest-v4.json coverage
 - Public-interface extraction, hashing, and fixture runner: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and fixture runner: internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identities: internal/packagecontent/file_identity.go, docs/package/source-file-identities-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md
-- Whole-package cache-key v2 fixtures: spec/fixtures/package-cache/manifest-v6.json with historical manifest-v1.json through manifest-v5.json coverage
+- Whole-package cache-key v3 fixtures: spec/fixtures/package-cache/manifest-v7.json with historical manifest-v1.json through manifest-v6.json coverage
 - Whole-package cache key, bounded memory store, and fixture runner: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache CLI and schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md
@@ -138,6 +138,7 @@ regenerate, or override compiler source.
 - Released language-12 declaration-owned explicit resource burn and native quickstart: internal/semantic/resource_abilities.go, internal/mir/, internal/interpreter/, internal/cbackend/, examples/asset_burn_quickstart/, docs/language/0009-resource-abilities-v0.md, docs/mir/drop-elaboration-v0.md, docs/adr/0343-declaration-owned-explicit-resource-burn.md
 - Experimental typed contract-state layout and failure-atomic transaction oracle, with no source, stable MIR, runtime, backend, or production persistence admission: internal/contractstate/, docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md
 - Experimental compiler-private contract-state transaction MIR and oracle bridge, isolated from source, HIR, stable MIR artifacts, caches, and targets: internal/contractstatemir/, internal/contractstate/encoded.go, docs/mir/contract-state-transaction-mir-v0.md, docs/adr/0344-compiler-private-contract-state-transaction-mir.md
+- Source-independent HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 identity: internal/hir/state.go, internal/contractstatemir/lower.go, internal/moduleinterface/, internal/packagecache/, internal/workspacecompiler/, docs/adr/0345-hir-contract-state-interface-and-cache-identity.md
 - Experimental bounded static generic specialization planner, with source syntax, HIR substitution, MIR, and backend admission closed: internal/genericplan/, docs/adr/0339-bounded-static-generic-specialization-kernel.md, docs/adr/0223-defer-static-interfaces-until-generics.md
 - Experimental chain-neutral contract IDL, schema, and typed Go/TypeScript binding generator, isolated from Stage 0 grammar and the stable `fairyc` CLI: cmd/fairyc-contract-idl/, internal/contractabi/, spec/contract-idl/, examples/contract_idl/, docs/cli/contract-idl.md, docs/adr/0340-experimental-chain-neutral-contract-idl.md
 - Nested compact tag fields in private aggregates and native Windows proof: internal/cbackend/aggregate_types.go, internal/cbackend/tagged_types.go, spec/fixtures/c-emission/cases/pass/nested-compact-tag-aggregate-fields/, cmd/fairyc-windows-host-smoke/nested_compact_aggregate_source.go, docs/adr/0329-nested-compact-tag-aggregate-fields.md

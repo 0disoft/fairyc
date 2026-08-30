@@ -392,7 +392,8 @@ type Span struct {
 
 // Package contains typed modules in deterministic source-path order.
 type Package struct {
-	Modules []Module
+	Modules      []Module
+	StateLayouts []StateLayout
 }
 
 // Module is one typed source module.

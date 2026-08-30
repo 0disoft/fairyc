@@ -74,6 +74,7 @@
 - Released language-12 declaration-owned explicit resource-burn route: internal/semantic/resource_abilities.go, internal/mir/, internal/interpreter/, internal/cbackend/, examples/asset_burn_quickstart/, docs/language/0009-resource-abilities-v0.md, docs/mir/drop-elaboration-v0.md, docs/adr/0343-declaration-owned-explicit-resource-burn.md
 - Experimental contract-state oracle route: internal/contractstate/, docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md
 - Experimental contract-state transaction-MIR route: internal/contractstatemir/, internal/contractstate/encoded.go, docs/mir/contract-state-transaction-mir-v0.md, docs/adr/0344-compiler-private-contract-state-transaction-mir.md
+- HIR contract-state interface/cache identity route: internal/hir/state.go, internal/contractstatemir/lower.go, internal/moduleinterface/, internal/packagecache/, internal/workspacecompiler/, docs/adr/0345-hir-contract-state-interface-and-cache-identity.md
 - Experimental generic-planning route: internal/genericplan/, docs/adr/0339-bounded-static-generic-specialization-kernel.md, docs/adr/0223-defer-static-interfaces-until-generics.md
 - Experimental contract-IDL route: cmd/fairyc-contract-idl/, internal/contractabi/, spec/contract-idl/, examples/contract_idl/, docs/cli/contract-idl.md, docs/adr/0340-experimental-chain-neutral-contract-idl.md
 - Nested compact tagged aggregate-field C route: internal/cbackend/aggregate_types.go, internal/cbackend/tagged_types.go, spec/fixtures/c-emission/cases/pass/nested-compact-tag-aggregate-fields/, cmd/fairyc-windows-host-smoke/nested_compact_aggregate_source.go, docs/adr/0329-nested-compact-tag-aggregate-fields.md
@@ -85,12 +86,12 @@
 - PackageInstanceId v1 fixture route: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 runner route: internal/packageidentityfixture/
 - PackageCoordinateId v1 route: internal/packagegraph/coordinate.go, internal/workspaceloader/semantic.go, docs/package/package-coordinate-id-v1.md, docs/adr/0172-source-independent-package-coordinate.md
-- Public-interface hash v4 fixture route: spec/fixtures/module-interface/manifest-v4.json with historical manifest-v1.json through manifest-v3.json
+- Public-interface hash v5 fixture route: spec/fixtures/module-interface/manifest-v5.json with historical manifest-v1.json through manifest-v4.json
 - Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixture route: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identity route: internal/packagecontent/file_identity.go, docs/package/source-file-identities-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md
-- Whole-package cache-key v2 fixture route: spec/fixtures/package-cache/manifest-v6.json with historical manifest-v1.json through manifest-v5.json
+- Whole-package cache-key v3 fixture route: spec/fixtures/package-cache/manifest-v7.json with historical manifest-v1.json through manifest-v6.json
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity route: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache command route: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md

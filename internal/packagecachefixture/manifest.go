@@ -22,6 +22,7 @@ type inputDefinition struct {
 	StandardLibrary      string                 `json:"standardLibrary"`
 	Package              string                 `json:"package"`
 	Source               string                 `json:"source"`
+	CurrentInterface     string                 `json:"currentInterface"`
 	Dependencies         []dependencyDefinition `json:"dependencies"`
 	Features             []string               `json:"features"`
 }
@@ -44,6 +45,7 @@ type inputOverride struct {
 	StandardLibrary      *string                 `json:"standardLibrary,omitempty"`
 	Package              *string                 `json:"package,omitempty"`
 	Source               *string                 `json:"source,omitempty"`
+	CurrentInterface     *string                 `json:"currentInterface,omitempty"`
 	Dependencies         *[]dependencyDefinition `json:"dependencies,omitempty"`
 	Features             *[]string               `json:"features,omitempty"`
 }

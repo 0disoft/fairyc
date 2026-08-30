@@ -70,6 +70,6 @@ loops, calls, `storage_read` or `storage_write` effect checking, owner-bound sta
 call rules, stable MIR serialization, package/interface/cache identity, deterministic native
 backend execution, persistence, migration, gas, or chain integration.
 
-The next compiler slice must map source-independent HIR declarations and effect-checked accesses
-into this boundary (or explicitly replace it), and must include the layout hash in interface and
-cache identity before any source syntax is admitted.
+Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
+v5 plus whole-package cache key v3 carry the exact layout identity. The next compiler slice must add
+effect-checked state accesses and transaction capability flow without opening source syntax first.

@@ -11,14 +11,16 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/contractstate"
+	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
 const (
 	HashAlgorithm = "sha256"
-	HashEncoding  = "fairyc.public-interface/v4"
-	HashPrefix    = "fyif4-sha256-"
+	HashEncoding  = "fairyc.public-interface/v5"
+	HashPrefix    = "fyif5-sha256-"
 )
 
 const interfaceDomain = "fairyc.public-interface"
@@ -65,7 +67,14 @@ func ParseHash(value string) (Hash, error) {
 
 // Descriptor is the declaration-order-independent public source interface of one package.
 type Descriptor struct {
-	Modules []Module
+	StateLayouts []StateLayout
+	Modules      []Module
+}
+
+// StateLayout is one package-visible persistent-state compatibility identity.
+type StateLayout struct {
+	ContractUID string
+	Hash        contractstate.LayoutHash
 }
 
 // Module names one source-visible module and its sorted public items.
@@ -127,7 +136,17 @@ func Extract(value hir.Package, packageID hir.PackageID, coordinates map[hir.Pac
 		}
 	}
 
+	loweredLayout, hasStateLayout, err := contractstatemir.LowerHIRLayoutForPackage(value, packageID)
+	if err != nil {
+		return Descriptor{}, fmt.Errorf("lower contract state layouts: %w", err)
+	}
 	descriptor := Descriptor{}
+	if hasStateLayout {
+		descriptor.StateLayouts = append(descriptor.StateLayouts, StateLayout{
+			ContractUID: loweredLayout.ContractUID,
+			Hash:        loweredLayout.Hash,
+		})
+	}
 	seenModules := make(map[string]struct{})
 	for _, sourceModule := range value.Modules {
 		if sourceModule.Package != packageID {
@@ -420,7 +439,7 @@ func stableEffects(values []hir.Effect) ([]string, error) {
 	return result, nil
 }
 
-// Encode returns the deterministic v4 bytes hashed for cache invalidation.
+// Encode returns the deterministic v5 bytes hashed for cache invalidation.
 func Encode(value Descriptor) ([]byte, error) {
 	if err := validateDescriptor(value); err != nil {
 		return nil, err
@@ -428,7 +447,12 @@ func Encode(value Descriptor) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(interfaceDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(4)
+	encoded.WriteByte(5)
+	writeUint64(&encoded, uint64(len(value.StateLayouts)))
+	for _, layout := range value.StateLayouts {
+		writeString(&encoded, layout.ContractUID)
+		encoded.Write(layout.Hash[:])
+	}
 	writeUint64(&encoded, uint64(len(value.Modules)))
 	for _, module := range value.Modules {
 		writeString(&encoded, module.Path)
@@ -481,6 +505,20 @@ func ComputePackages(value hir.Package, packageIDs []hir.PackageID, coordinates 
 }
 
 func validateDescriptor(value Descriptor) error {
+	if len(value.StateLayouts) > 1 {
+		return fmt.Errorf("public interface has %d state layouts; at most one is allowed", len(value.StateLayouts))
+	}
+	for index, layout := range value.StateLayouts {
+		if _, err := contractstate.NewLayoutBuilder(layout.ContractUID); err != nil {
+			return fmt.Errorf("state layout %d: %w", index, err)
+		}
+		if layout.Hash == (contractstate.LayoutHash{}) {
+			return fmt.Errorf("state layout %q has an empty hash", layout.ContractUID)
+		}
+		if index > 0 && value.StateLayouts[index-1].ContractUID >= layout.ContractUID {
+			return fmt.Errorf("state layouts are not sorted and unique")
+		}
+	}
 	if len(value.Modules) == 0 {
 		return fmt.Errorf("public interface has no modules")
 	}

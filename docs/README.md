@@ -23,7 +23,7 @@
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v1.json, including historical v0 cases
 - Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
-- Public-interface hash v4 fixtures and runner: spec/fixtures/module-interface/manifest-v4.json, with historical v1 through v3 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
+- Public-interface hash v5 fixtures and runner: spec/fixtures/module-interface/manifest-v5.json, with historical v1 through v4 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
 - Released language-11 resource abilities and linear no-drop analysis: docs/language/0009-resource-abilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md, internal/semantic/resource_abilities.go, internal/hir/hir.go, internal/moduleinterface/
 - Released language-11 target-neutral on-chain effects: docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md, internal/hir/effect.go, internal/semantic/effects.go
 - Released language-12 declaration-owned explicit resource burn: docs/language/0009-resource-abilities-v0.md, docs/mir/drop-elaboration-v0.md, docs/adr/0343-declaration-owned-explicit-resource-burn.md, internal/semantic/resource_abilities.go, internal/mir/, internal/interpreter/, internal/cbackend/, examples/asset_burn_quickstart/
@@ -65,7 +65,7 @@
 - Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof: internal/pecoff/associative_link.go, internal/windowsarchiveprobe/, docs/adr/0235-selected-associative-comdat-unwind-proof.md
 - Exact discarded-parent associative unwind elimination proof: internal/pecoff/discarded_associative_link.go, internal/windowsarchiveprobe/, docs/adr/0236-discarded-associative-comdat-elimination-proof.md
 - Exact AMD64 ADDR64 and unwind `.pdata` ADDR32NB object-to-image proof: internal/pecoff/address_link.go, internal/windowsrelocationprobe/, docs/adr/0234-amd64-address-and-pdata-relocation-proof.md
-- Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v6.json with historical v1 through v5, internal/packagecache/, internal/packagecachefixture/
+- Whole-package cache-key v3 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v7.json with historical v1 through v6, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
 - Bounded workspace check-session CLI and NDJSON schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
 - One-shot persistent workspace-cache CLI and JSON schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md

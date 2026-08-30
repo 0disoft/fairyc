@@ -10,10 +10,23 @@ type manifest struct {
 }
 
 type identity struct {
-	PackageUID      string   `json:"packageUid"`
-	SourceIdentity  string   `json:"sourceIdentity"`
-	VersionIdentity string   `json:"versionIdentity"`
-	Features        []string `json:"features"`
+	PackageUID      string                `json:"packageUid"`
+	SourceIdentity  string                `json:"sourceIdentity"`
+	VersionIdentity string                `json:"versionIdentity"`
+	Features        []string              `json:"features"`
+	StateLayout     stateLayoutDefinition `json:"stateLayout"`
+}
+
+type stateLayoutDefinition struct {
+	ContractUID string                 `json:"contractUid"`
+	Fields      []stateFieldDefinition `json:"fields"`
+}
+
+type stateFieldDefinition struct {
+	Name        string `json:"name"`
+	Kind        string `json:"kind"`
+	KeyTypeID   string `json:"keyTypeId,omitempty"`
+	ValueTypeID string `json:"valueTypeId"`
 }
 
 type caseDefinition struct {

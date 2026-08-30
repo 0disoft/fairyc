@@ -382,6 +382,10 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 		if !found {
 			return nil, fmt.Errorf("function-owning package %d has no workspace metadata", packageID)
 		}
+		currentInterface, found := interfaces[packageID]
+		if !found {
+			return nil, fmt.Errorf("function-owning package %d has no public interface", packageID)
+		}
 		dependencies := make([]packagecache.Dependency, 0, len(loaded.Dependencies))
 		for _, dependencyID := range loaded.Dependencies {
 			dependency, found := byID[dependencyID]
@@ -404,7 +408,7 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 			TargetSchema: session.target.SchemaVersion, ABIProfile: abiProfile(session.target),
 			ToolchainFingerprint: toolchainIdentity, Backend: backendIdentity,
 			RuntimeABI: sdkstdlib.RuntimeABI, StandardLibrary: session.standardLibrary,
-			Package: loaded.Instance, Source: loaded.Source, Dependencies: dependencies,
+			Package: loaded.Instance, Source: loaded.Source, CurrentInterface: currentInterface, Dependencies: dependencies,
 			Features: slices.Clone(loaded.Features),
 		})
 		if err != nil {

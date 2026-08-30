@@ -56,7 +56,12 @@ store-wide optimistic conflict detection, atomic commit, and rollback on returne
 `internal/contractstatemir` now adds a separate compiler-private layout and straight-line transaction
 submodel. It verifies exact layout identity, canonical cell/map operations, and explicit commit,
 reject, or trap exits before executing them through the oracle. It is not the stable whole-program
-MIR and has no source, artifact, cache, backend, or target admission.
+MIR and has no source, stable artifact, backend, or target admission.
+
+Source-independent `hir.StateLayout` declarations lower into that submodel. Public-interface v5
+carries the exact layout hash, while whole-package cache key v3 consumes the current package
+interface as well as dependency interfaces. Layout changes therefore invalidate the owner and its
+dependents before source syntax is admitted.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
@@ -66,12 +71,12 @@ database, a Merkle tree, a consensus implementation, or a Fairy C standard-libra
 A later PR may introduce source syntax only after it also supplies:
 
 - exact grammar and recovery behavior;
-- resolver and type rules for state declarations and access;
+- resolver and type rules for source state declarations and access;
 - explicit `storage_read` and `storage_write` effects;
 - MIR operations whose verifier proves layout identity and transaction ownership;
 - interpreter fixtures for success, error propagation, trap, delete, conflict, and limits;
 - at least one deterministic contract backend with byte-for-byte state transition fixtures;
-- package/interface/cache invalidation rules for every layout change;
+- stable package artifact and cache-reassembly transport for state operations;
 - diagnostics for duplicate fields, unsupported codecs, stale layouts, illegal borrows, and
   non-atomic external interaction.
 

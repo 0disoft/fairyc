@@ -1,6 +1,6 @@
 # Whole-package cache key and stable linking v2
 
-- Status: Executable prototype contract
+- Status: Historical executable contract; superseded by whole-package cache key v3
 - Decision: `docs/adr/0174-coordinate-stable-linking-and-cache-key-v2.md`
 - Fixture source: `spec/fixtures/package-cache/manifest-v6.json`
 - Implementation: `internal/packagecache/`, `internal/packageartifact/`, `internal/workspacecompiler/`

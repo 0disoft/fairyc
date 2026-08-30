@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:module-interface-fixtures:v5",
+  "title": "Fairy C public-interface hash fixture manifest v5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "contracts", "identity", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.module-interface-fixtures/v5" },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packageUid", "sourceIdentity", "versionIdentity", "features", "stateLayout"],
+      "properties": {
+        "packageUid": { "type": "string", "minLength": 1 },
+        "sourceIdentity": { "type": "string", "minLength": 1 },
+        "versionIdentity": { "type": "string", "minLength": 1 },
+        "features": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "stateLayout": { "$ref": "#/$defs/stateLayout" }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source", "relation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+          "source": { "type": "string", "pattern": "^cases/[a-z][a-z0-9]*(?:-[a-z0-9]+)*/[A-Za-z_][A-Za-z0-9_]*\\.fy$" },
+          "compareTo": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+          "relation": { "enum": ["baseline", "same", "different"] },
+          "expectHash": { "type": "string", "pattern": "^fyif5-sha256-[0-9a-f]{64}$" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stateLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractUid", "fields"],
+      "properties": {
+        "contractUid": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$" },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/stateField" }
+        }
+      }
+    },
+    "stateField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "valueTypeId"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+        "kind": { "enum": ["cell", "map"] },
+        "keyTypeId": { "type": "string", "minLength": 1 },
+        "valueTypeId": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -16,7 +16,7 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Compute() error = %v", err)
 	}
-	if got, want := key.String(), "fycache2-sha256-b27788473412f220dd6d393bf934f88fc7149d8c3d8718f48fa342f9d185aaa6"; got != want {
+	if got, want := key.String(), "fycache3-sha256-73be9cac29cbebdceed08e0b0f280da737b00a9f01557c5e7af7a035511506cb"; got != want {
 		t.Fatalf("key = %q, want %q", got, want)
 	}
 	parsed, err := ParseKey(key.String())
@@ -33,6 +33,12 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if other == key {
 		t.Fatal("compiler build change preserved cache key")
 	}
+	changed = baseline
+	changed.CurrentInterface[0]++
+	other, err = Compute(changed)
+	if err != nil || other == key {
+		t.Fatalf("current interface change = %s, %v; baseline %s", other, err, key)
+	}
 }
 
 func TestKeyRejectsNoncanonicalSets(t *testing.T) {
@@ -47,6 +53,7 @@ func TestKeyRejectsNoncanonicalSets(t *testing.T) {
 		{name: "dependencies", mutate: func(value *Inputs) { value.Dependencies = append(value.Dependencies, value.Dependencies[0]) }, want: "dependencies"},
 		{name: "missing package", mutate: func(value *Inputs) { value.Package = packagegraph.InstanceID{} }, want: "package must be set"},
 		{name: "missing source", mutate: func(value *Inputs) { value.Source = packagecontent.Digest{} }, want: "source must be set"},
+		{name: "missing current interface", mutate: func(value *Inputs) { value.CurrentInterface = moduleinterface.Hash{} }, want: "currentInterface"},
 		{name: "missing dependency hash", mutate: func(value *Inputs) { value.Dependencies[0].Interface = moduleinterface.Hash{} }, want: "dependency 0"},
 	}
 	for _, test := range tests {
@@ -113,9 +120,10 @@ func testInputs(t *testing.T) Inputs {
 		StandardLibrary:      mustInstance(t, "fypi1-sha256-e8756812ba7956f1f997a35a522b7f1735d8679c99c48b140570f4cd690c1a91"),
 		Package:              mustInstance(t, "fypi1-sha256-04fc4400f5e875c5c22ab2d50765d721df38a12a19ef3508deb432c7f4da92f3"),
 		Source:               mustSource(t, "fysrc1-sha256-dd19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3"),
+		CurrentInterface:     mustInterface(t, "fyif5-sha256-c5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
 		Dependencies: []Dependency{{
 			Coordinate: mustCoordinate(t, "fypc1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41"),
-			Interface:  mustInterface(t, "fyif4-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
+			Interface:  mustInterface(t, "fyif5-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
 		}},
 		Features: []string{"base", "tls"},
 	}

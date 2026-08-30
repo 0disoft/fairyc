@@ -1,6 +1,6 @@
 # Public interface hash v4
 
-- Status: Executable prototype contract
+- Status: Historical executable contract; superseded by public-interface hash v5
 - Decision: `docs/adr/0341-public-interface-resource-abilities-v4.md`
 - Fixture source: `spec/fixtures/module-interface/manifest-v4.json`
 - Historical source: `docs/package/public-interface-hash-v3.md`

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/contractstate"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -30,6 +31,22 @@ func TestParseHashRejectsNoncanonicalText(t *testing.T) {
 		if _, err := ParseHash(value); err == nil {
 			t.Fatalf("ParseHash(%q) accepted", value)
 		}
+	}
+}
+
+func TestEncodeRejectsMultipleStateLayouts(t *testing.T) {
+	t.Parallel()
+	firstHash := contractstate.LayoutHash{1}
+	secondHash := contractstate.LayoutHash{2}
+	_, err := Encode(Descriptor{
+		StateLayouts: []StateLayout{
+			{ContractUID: "example.one", Hash: firstHash},
+			{ContractUID: "example.two", Hash: secondHash},
+		},
+		Modules: []Module{{Path: "api"}},
+	})
+	if err == nil || !strings.Contains(err.Error(), "at most one") {
+		t.Fatalf("multiple state layouts error = %v", err)
 	}
 }
 
@@ -59,6 +76,54 @@ fn i32 private_helper() { return 1; }
 	}
 	if changed := extractHash(t, publicSignatureChange, hir.DefaultPackage, instances); changed == baseHash {
 		t.Fatalf("public source signature did not invalidate interface: %s", changed)
+	}
+}
+
+func TestExtractIncludesExactHIRStateLayoutIdentity(t *testing.T) {
+	t.Parallel()
+	coordinates := map[hir.PackageID]packagegraph.CoordinateID{1: testCoordinateID(t, "state-owner")}
+	base := hir.Package{
+		Modules: []hir.Module{{Package: 1, Path: "token", Functions: []hir.Function{{Name: "supply", Public: true, ResultType: hir.TypeU32}}}},
+		StateLayouts: []hir.StateLayout{{
+			Package: 1, ContractUID: "example.token",
+			Fields: []hir.StateField{
+				{Name: "total_supply", Kind: hir.StateFieldCell, ValueTypeID: contractstate.U64.TypeID()},
+				{Name: "balances", Kind: hir.StateFieldMap, KeyTypeID: contractstate.Byte20.TypeID(), ValueTypeID: contractstate.U64.TypeID()},
+			},
+		}},
+	}
+	baseDescriptor, err := Extract(base, 1, coordinates)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(baseDescriptor.StateLayouts) != 1 || baseDescriptor.StateLayouts[0].ContractUID != "example.token" || baseDescriptor.StateLayouts[0].Hash == (contractstate.LayoutHash{}) {
+		t.Fatalf("state layouts = %+v", baseDescriptor.StateLayouts)
+	}
+	baseHash := extractHash(t, base, 1, coordinates)
+
+	changed := clonePackage(base)
+	changed.StateLayouts = slices.Clone(base.StateLayouts)
+	changed.StateLayouts[0].Fields = slices.Clone(base.StateLayouts[0].Fields)
+	changed.StateLayouts[0].Fields[1].ValueTypeID = contractstate.U32.TypeID()
+	if hash := extractHash(t, changed, 1, coordinates); hash == baseHash {
+		t.Fatalf("state layout change did not invalidate interface: %s", hash)
+	}
+
+	renumbered := clonePackage(base)
+	renumbered.Modules[0].Package = 7
+	renumbered.StateLayouts = slices.Clone(base.StateLayouts)
+	renumbered.StateLayouts[0].Package = 7
+	renumberedCoordinates := map[hir.PackageID]packagegraph.CoordinateID{7: coordinates[1]}
+	if hash := extractHash(t, renumbered, 7, renumberedCoordinates); hash != baseHash {
+		t.Fatalf("build-local state owner changed interface: %s != %s", hash, baseHash)
+	}
+
+	unrelated := clonePackage(base)
+	unrelated.StateLayouts = append(slices.Clone(base.StateLayouts), hir.StateLayout{
+		Package: 2, ContractUID: "bad uid", Fields: []hir.StateField{{Name: "value", Kind: "dynamic"}},
+	})
+	if hash := extractHash(t, unrelated, 1, coordinates); hash != baseHash {
+		t.Fatalf("unrelated package layout changed interface: %s != %s", hash, baseHash)
 	}
 }
 

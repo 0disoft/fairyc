@@ -13,7 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
-const schemaVersion = "fairyc.package-cache-fixtures/v6"
+const schemaVersion = "fairyc.package-cache-fixtures/v7"
 
 // Run decodes and compares all whole-package cache-key fixtures.
 func Run(path string) (Report, error) {
@@ -89,6 +89,10 @@ func parseInput(value inputDefinition) (packagecache.Inputs, error) {
 	if err != nil {
 		return packagecache.Inputs{}, fmt.Errorf("parse source: %w", err)
 	}
+	currentInterface, err := moduleinterface.ParseHash(value.CurrentInterface)
+	if err != nil {
+		return packagecache.Inputs{}, fmt.Errorf("parse currentInterface: %w", err)
+	}
 	dependencies := make([]packagecache.Dependency, 0, len(value.Dependencies))
 	for index, definition := range value.Dependencies {
 		coordinate, err := packagegraph.ParseCoordinateID(definition.Coordinate)
@@ -114,6 +118,7 @@ func parseInput(value inputDefinition) (packagecache.Inputs, error) {
 		StandardLibrary:      standardLibrary,
 		Package:              packageID,
 		Source:               source,
+		CurrentInterface:     currentInterface,
 		Dependencies:         dependencies,
 		Features:             slices.Clone(value.Features),
 	}, nil
@@ -135,6 +140,7 @@ func applyOverride(base inputDefinition, override inputOverride) inputDefinition
 	assignString(&result.StandardLibrary, override.StandardLibrary)
 	assignString(&result.Package, override.Package)
 	assignString(&result.Source, override.Source)
+	assignString(&result.CurrentInterface, override.CurrentInterface)
 	if override.ProfileFlags != nil {
 		result.ProfileFlags = slices.Clone(*override.ProfileFlags)
 	}
