@@ -490,7 +490,12 @@ dependency entries beyond public-interface v5.
 ADR 0350 adds an exact-version, caller-bounded canonical payload for those bodies. It excludes
 build-local identities and capability tokens, reconstructs each layout, creates fresh private
 capabilities, re-enters the verifier, and recomputes the ADR 0348 hash. Stable package-artifact
-rebind, cache storage/reassembly, and cached execution remain closed.
+integration, cache storage/reassembly, and cached execution remain closed.
+
+ADR 0351 checks the cache-selected expected hash, current coordinate/layout, and byte-exact current
+HIR function descriptors before mapping that payload to fresh package/function symbols. Every
+transaction receives another fresh capability and re-enters verification without requiring the
+current HIR source-operation side table. Package/cache integration remains closed.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

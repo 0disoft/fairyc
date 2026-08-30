@@ -84,8 +84,12 @@ entries public-interface-only.
 ADR 0350 adds an exact-version, caller-bounded canonical payload for the layout and transaction
 bodies. Decode parses and canonically re-encodes stable function descriptors, reconstructs layout
 and operation values, creates fresh private capabilities, re-enters the verifier, and recomputes the
-ADR 0348 hash. The payload is not yet rebound into stable package owners or stored and reassembled
-through package caches.
+ADR 0348 hash.
+
+ADR 0351 requires the cache-selected expected hash, one-to-one coordinate map, exact current HIR
+layout, and byte-identical logical function descriptors before mapping those bodies to fresh
+package/function symbols and newly verified capabilities. It does not require current HIR source
+operation bodies. The payload is not yet stored or reassembled through package caches.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

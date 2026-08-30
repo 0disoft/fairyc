@@ -58,4 +58,4 @@ transport and reassembly remain required before cached state execution can be ad
 
 ADR 0349 later completes the cache-key portion with v4. Stable payload transport and reassembly
 remain open at this decision. ADR 0350 later adds bounded capability-free payload transport;
-stable owner rebind and package/cache reassembly remain open.
+ADR 0351 later adds checked fresh-owner rebind. Package/cache reassembly remains open.

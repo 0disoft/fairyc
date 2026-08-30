@@ -18,7 +18,9 @@ experimental compiler-private transaction submodel without opening those stable 
 ADR 0350 gives that compiler-private submodel a bounded canonical body payload. Decode never imports
 authority: it reconstructs layouts and operations from data, creates a fresh opaque transaction
 capability, re-enters the MIR verifier, and requires the exact ADR 0348 body hash. Stable package
-artifacts, caches, production storage, and runtime targets still do not consume the payload.
+artifacts, caches, production storage, and runtime targets still do not consume the payload. ADR 0351
+additionally binds the expected payload to an exact current HIR layout and fresh function symbols,
+then reconstructs new capability authority without retaining source operation bodies.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
@@ -190,6 +192,6 @@ operation bytes and order, layout identity, and exit while excluding local symbo
 tokens. Public-interface v5 carries only the exact layout hash, while whole-package cache key v4
 adds the exact private body hash to the owner without widening dependency entries. The compiler
 now also proves a bounded capability-free body payload, fresh capability reconstruction, verifier
-re-entry, and exact body-hash matching. It still does not prove source declaration/access rules,
-stable owner rebind or package/cache reassembly for transaction bodies, owner-bound borrows, external-call
+re-entry, exact body-hash matching, and checked fresh-HIR-owner rebind. It still does not prove source
+declaration/access rules, package/cache reassembly for transaction bodies, owner-bound borrows, external-call
 exclusion, stable MIR integration, or deterministic target execution.

@@ -6,6 +6,7 @@
 - HIR lowering source: `docs/adr/0347-source-independent-hir-state-access-lowering.md`
 - Body identity source: `docs/adr/0348-exact-contract-state-package-body-identity.md`
 - Body payload source: `docs/adr/0350-bounded-stable-contract-state-body-payload.md`
+- Fresh-owner rebind source: `docs/adr/0351-checked-fresh-owner-contract-state-body-rebind.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -102,7 +103,19 @@ identity, re-enters this verifier, and recomputes the hash. Build-local identiti
 capability tokens are never serialized.
 
 This payload is not yet part of stable package or whole-program MIR artifacts. It has no public
-fresh-owner rebind API, cache record, reassembly coordinator, or cached execution path.
+cache record, reassembly coordinator, or cached execution path.
+
+## Fresh-owner rebind
+
+ADR 0351 requires the caller's cache-selected expected body hash, a one-to-one current coordinate
+map, an exact current HIR layout, and byte-identical current logical function descriptors. It maps
+only the payload's transaction owners to fresh package/function symbols; unrelated current functions
+do not enter the boundary. The current HIR transaction-operation side table is not required.
+
+Every rebound transaction receives another new opaque capability, attaches it to every operation,
+and re-enters verification. Repeated rebinds therefore reconstruct equal work with distinct process
+authority. Missing or shared symbols, coordinate ambiguity, layout/signature drift, and valid-but-
+unexpected bodies fail before publication.
 
 ## Closed gates
 
@@ -116,5 +129,5 @@ v5 carries the exact layout identity. ADR 0346 verifies transaction
 capability identity and storage effects, ADR 0347 lowers source-independent HIR accesses into those
 proofs, ADR 0348 gives the verified bodies an exact stable package hash, ADR 0349 makes cache key v4
 consume that hash, and ADR 0350 adds bounded capability-free payload transport with verifier
-re-entry. A later compiler slice must add stable owner rebinding and package/cache reassembly before
-ordinary source or cached compilation consumes the bodies.
+re-entry. ADR 0351 adds checked fresh-owner rebind. A later compiler slice must add package/cache
+reassembly before ordinary source or cached compilation consumes the bodies.

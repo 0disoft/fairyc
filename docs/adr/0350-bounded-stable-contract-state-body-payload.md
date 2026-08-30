@@ -69,3 +69,6 @@ an independent verifier re-entry path. The next slice may expose a checked rebin
 stable function identities into fresh HIR/MIR owners. Package-artifact and cache integration must
 remain separate until reassembly proves exact provider matching, fresh identity allocation,
 quarantine on malformed payloads, and execution equivalence.
+
+ADR 0351 later completes the checked fresh-HIR-owner rebind. Package-artifact and cache integration
+remain open.

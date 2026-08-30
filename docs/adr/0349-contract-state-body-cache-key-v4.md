@@ -55,5 +55,5 @@ ABI, SDK, target, lockfile, Atlas, and CLI output schemas remain unchanged.
 
 The compiler now has an exact body identity and an executable cache invalidation path before source
 syntax is admitted. ADR 0350 later adds stable transaction payload serialization, bounded decode,
-fresh capability reconstruction, and verifier re-entry. Stable owner rebind and cache reassembly
-evidence remain required before cached state execution can be enabled.
+fresh capability reconstruction, and verifier re-entry. ADR 0351 later adds checked fresh-owner
+rebind. Cache reassembly evidence remains required before cached state execution can be enabled.
