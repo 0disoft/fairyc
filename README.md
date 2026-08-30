@@ -456,6 +456,11 @@ discharges one declaration-owned inert no-drop resource through a distinct verif
 it is neither ordinary drop nor a generic forget primitive. `examples/asset_burn_quickstart/`
 returns native 42 under low and optimized MSVC while its unreachable cleanup body would trap.
 
+ADR 0344 adds an experimental compiler-private contract-state transaction MIR beside the stable
+whole-program MIR. It reconstructs exact layouts, verifies canonical cell/map operations and
+commit/reject/trap exits, then executes through the ADR 0338 atomic oracle. Source syntax, HIR,
+stable artifacts, caches, backends, targets, and public version identities remain unchanged.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

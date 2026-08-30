@@ -4,13 +4,16 @@
 - Product source: `docs/product/04-contract-profile-candidates.md`
 - Decision source: `docs/adr/0338-typed-persistent-state-transaction-kernel.md`
 - Implementation: `internal/contractstate`
+- Compiler-private MIR bridge: `internal/contractstatemir`,
+  `docs/mir/contract-state-transaction-mir-v0.md`
 - Compatibility identity: `fairyc-contract-state/*/v1` domains
 
 ## Boundary
 
 The kernel defines host-independent layout and transaction behavior for a future Fairy C contract
-profile. It deliberately stops before source syntax, HIR, MIR, a standard-library API, persistence,
-a chain target, consensus, gas pricing, or Merkle storage.
+profile. It deliberately stops before source syntax, HIR, stable whole-program MIR, a standard-library
+API, persistence, a chain target, consensus, gas pricing, or Merkle storage. ADR 0344 adds a separate
+experimental compiler-private transaction submodel without opening those stable surfaces.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
@@ -171,5 +174,8 @@ A source-level state implementation must preserve these ownership boundaries:
 6. external calls cannot occur while an uncommitted exclusive state borrow remains live;
 7. cache and package identities include the state layout hash.
 
-The current package proves the state engine. It does not claim those frontend and backend gates are
-implemented.
+The current oracle plus compiler-private submodel now prove exact layout reconstruction, one managed
+transaction capability, explicit commit/reject/trap exits, and straight-line canonical cell/map
+operations. They do not yet prove source/HIR ownership, function-boundary effects, owner-bound
+borrows, external-call exclusion, stable MIR integration, deterministic target execution, or
+interface/cache invalidation.

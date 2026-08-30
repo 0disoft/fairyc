@@ -53,8 +53,13 @@ contains typed `Cell[T]` and `Map[K, V]` handles, canonical SHA-256 layout and k
 append-only compatibility checks, snapshot transactions, bounded read-your-writes overlays,
 store-wide optimistic conflict detection, atomic commit, and rollback on returned errors or panics.
 
-This package is compiler implementation evidence. It is not a public Go API, a persistent database,
-a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
+`internal/contractstatemir` now adds a separate compiler-private layout and straight-line transaction
+submodel. It verifies exact layout identity, canonical cell/map operations, and explicit commit,
+reject, or trap exits before executing them through the oracle. It is not the stable whole-program
+MIR and has no source, artifact, cache, backend, or target admission.
+
+These packages are compiler implementation evidence. They are not a public Go API, a persistent
+database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
 
 ## Admission gates for source and MIR integration
 

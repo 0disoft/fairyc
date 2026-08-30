@@ -131,9 +131,12 @@ resource-bearing, and foreign-module operands fail closed with `E1109`. SDK
 unchanged.
 
 ADR 0338 adds a process-local typed state-layout and failure-atomic transaction oracle for future
-contract profiles. It reserves no source syntax and adds no HIR, MIR, SDK, runtime, backend, ABI,
-database, Merkle tree, or supported chain target. Production persistence must preserve the oracle's
-observable layout, limit, rollback, conflict, and append-only upgrade rules through separate evidence.
+contract profiles. ADR 0344 adds a separate experimental compiler-private layout and transaction MIR
+that verifies canonical cell/map operations plus explicit commit, reject, and trap exits before
+oracle execution. Neither decision reserves source syntax or adds HIR, stable MIR artifacts, SDK,
+runtime, backend, ABI, database, Merkle tree, or a supported chain target. Production persistence
+must preserve the oracle's observable layout, limit, rollback, conflict, and append-only upgrade
+rules through separate evidence.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
