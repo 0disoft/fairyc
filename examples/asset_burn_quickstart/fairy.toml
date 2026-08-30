@@ -1,0 +1,8 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "example.asset-burn-quickstart.app"
+name = "asset-burn-quickstart"
+version = "1.0.0"
+language = "fairyc-language/12"
+source = "src"

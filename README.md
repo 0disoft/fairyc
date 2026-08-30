@@ -52,8 +52,8 @@ overwrite and early-return rejection, exactly-once classification, non-Result `?
 error compatibility. The MIR runner executes all
   13 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
-  cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
-  baselines and proves all 22 isolated `V1001` through `V1701` rejection recipes, including a
+  cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 11 named
+  baselines and proves all 23 isolated `V1001` through `V1701` rejection recipes, including a
   missing internal call target rejected before artifact or backend handoff. The first MIR
   interpreter slice executes all 94 v0 cases for literal return, bounded lexical `defer`, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, classic
@@ -450,6 +450,11 @@ analysis admits canonical resource abilities and target-neutral on-chain effects
 public-interface v4 and cache fixture v6 preserving those facts. The attributes add no ambient
 chain API or runtime symbol; `examples/contract_capabilities_quickstart/` is the native result-42
 admission proof.
+
+ADR 0343 moves the SDK to `0.0.0-stage0.54` and language `fairyc-language/12`. `burn local;`
+discharges one declaration-owned inert no-drop resource through a distinct verified MIR operation;
+it is neither ordinary drop nor a generic forget primitive. `examples/asset_burn_quickstart/`
+returns native 42 under low and optimized MSVC while its unreachable cleanup body would trap.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

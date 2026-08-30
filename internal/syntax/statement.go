@@ -35,6 +35,14 @@ func (p *parser) parseBlockWithTail(allowTail bool) NodeID {
 			children = append(children, p.parseDefer())
 		case "discard":
 			children = append(children, p.parseDiscard())
+		case "burn":
+			if p.isPreviousRevision() {
+				children = append(children, p.unexpected())
+				p.synchronize(";", "}")
+				p.match(";")
+				continue
+			}
+			children = append(children, p.parseBurn())
 		case "while":
 			children = append(children, p.parseWhile())
 		case "for":
@@ -162,6 +170,14 @@ func (p *parser) parseDiscard() NodeID {
 	expression := p.parseExpression(0, true)
 	p.expectStatementTerminator()
 	return p.addNode(KindDiscard, start, []NodeID{expression}, "", "")
+}
+
+func (p *parser) parseBurn() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	expression := p.parseExpression(0, true)
+	p.expectStatementTerminator()
+	return p.addNode(KindBurn, start, []NodeID{expression}, "", "")
 }
 
 func (p *parser) parseWhile() NodeID {

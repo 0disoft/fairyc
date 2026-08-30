@@ -25,8 +25,9 @@ A seed-construction failure, baseline verifier failure, missing target, ignored 
 
 `internal/mirverifyfixture` implements this protocol for every seed and mutation named by the
 manifest. It deep-clones each verified baseline before mutation and compares the complete verifier
-result rather than searching for an expected code inside a larger cascade. The resource-return seed
-carries the verified `seed::Token` definition; removing only that definition isolates `V1001`
+result rather than searching for an expected code inside a larger cascade. The resource-return and
+resource-burn seeds carry the verified `seed::Token` definition; removing only that definition
+isolates `V1001`
 before any interpreter or backend can infer its shape. The normal-call seed resolves its own
 internal symbol; replacing only that callee with an absent symbol isolates `V1001` before artifact
 or backend handoff. The plain-region seed includes enter, place, and reset operations; removing
@@ -39,6 +40,7 @@ The checked-arithmetic seed has a complete addition check edge; removing its mar
 
 - `scalar-return`: initialized scalar return with one reachable terminated block;
 - `resource-return`: one empty-drop resource definition and obligation, initialized drop flag, flag clear before drop, and clean return;
+- `resource-burn`: one direct resource parameter, exact-type Burn, discharged obligation, and clean return;
 - `borrow-return`: one valid parameter origin and bounded loan;
 - `plain-region`: inert placement that remains within one plain region;
 - `break-region-control`: inert placement, a `break`-kind reset, and a goto to the loop exit;
@@ -52,7 +54,7 @@ The Go harness may represent these seeds however the internal MIR requires, but 
 
 ## Mutation rules
 
-Each mutation is closed and typed: remove a resource type definition, remove a terminator, introduce a use before initialization, duplicate a resource discharge, remove cleanup, move a resource projection, remove drop-flag initialization, reorder flag clear after drop, extend a loan, add a return origin, mark a region value escaping, place a `NeedsDrop` value in a plain region, remove a Region reset, corrupt a required division check, remove a checked-arithmetic marker, add an unwind successor, reinsert a source-only form, remove a tagged-operation type, or remove unsafe provenance. A mutation names `supportingEntity` when its target alone would not identify the replacement value or exact check to remove.
+Each mutation is closed and typed: remove a resource type definition, remove a terminator, introduce a use before initialization, duplicate a resource discharge, remove cleanup, move a resource projection, corrupt a Burn type, remove drop-flag initialization, reorder flag clear after drop, extend a loan, add a return origin, mark a region value escaping, place a `NeedsDrop` value in a plain region, remove a Region reset, corrupt a required division check, remove a checked-arithmetic marker, add an unwind successor, reinsert a source-only form, remove a tagged-operation type, or remove unsafe provenance. A mutation names `supportingEntity` when its target alone would not identify the replacement value or exact check to remove.
 
 Mutation application is deterministic and idempotence is not assumed. Applying the same recipe twice is a harness error rather than a second test case.
 

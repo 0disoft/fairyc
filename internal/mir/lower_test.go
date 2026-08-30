@@ -2387,6 +2387,39 @@ fn i32 main() {
 	}
 }
 
+func TestLowerBurnDischargesResourceWithoutDrop(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@abilities(store, key)
+resource Coin { i32 amount; cleanup {} }
+fn i32 main() {
+    let Coin coin = Coin { .amount = 42 };
+    burn coin;
+    return 42;
+}
+`)
+	var burns, drops int
+	for _, block := range program.Functions[0].Blocks {
+		for _, operation := range block.Operations {
+			switch operation.Kind {
+			case OperationBurn:
+				burns++
+				if operation.Type != program.ResourceTypes[0].Type || operation.DestinationLocal != NoLocal {
+					t.Errorf("burn operation = %+v", operation)
+				}
+			case OperationDrop:
+				drops++
+			}
+		}
+	}
+	if burns != 1 || drops != 0 {
+		t.Fatalf("ownership operations = burns %d, drops %d", burns, drops)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	return lowerTestSourceAtPath(t, "main.fy", text)

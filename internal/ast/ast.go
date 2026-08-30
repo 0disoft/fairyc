@@ -589,7 +589,7 @@ func lowerStatement(tree *syntax.Tree, node syntax.Node) Statement {
 		if len(node.Children) > 1 {
 			statement.Expression = lowerExpression(tree, node.Children[1])
 		}
-	case syntax.KindAssert, syntax.KindDefer, syntax.KindReturn, syntax.KindDiscard, syntax.KindExprStmt:
+	case syntax.KindAssert, syntax.KindDefer, syntax.KindReturn, syntax.KindDiscard, syntax.KindBurn, syntax.KindExprStmt:
 		if len(node.Children) > 0 {
 			statement.Expression = lowerExpression(tree, node.Children[0])
 		}

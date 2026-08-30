@@ -288,9 +288,10 @@ The verifier runs before every interpreter or backend handoff.
 | --- | --- |
 | `V1001` | Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; every executable aggregate use agrees with one valid program-level definition; internal function symbols and call signature shapes are closed and consistent; and foreign declarations mapped to one link name have compatible signatures. |
 | `V1002` | Every use is dominated by an initialized assignment on all incoming paths. |
-| `V1101` | A resource root is moved or dropped at most once. |
+| `V1101` | A resource root is moved, dropped, or burned at most once. |
 | `V1102` | A live resource on a normal exiting edge has exactly one cleanup obligation. |
 | `V1103` | No resource projection appears in a `Move` operand. |
+| `V1104` | `Burn` discharges exactly one live direct resource root with its exact declared type and no cleanup metadata. |
 | `V1201` | A drop flag is initialized before use and agrees with ownership transfer. |
 | `V1202` | `Drop` clears its active flag before invoking cleanup. |
 | `V1301` | No safe borrow outlives or conflicts with its verified origin and loan. |

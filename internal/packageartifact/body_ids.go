@@ -281,7 +281,7 @@ func rewriteFunctionGraphIDs(function *mir.Function, locals map[mir.LocalID]mir.
 
 func operationCarriesLocalSymbol(kind mir.OperationKind) bool {
 	switch kind {
-	case mir.OperationInitialize, mir.OperationMove, mir.OperationDrop,
+	case mir.OperationInitialize, mir.OperationMove, mir.OperationDrop, mir.OperationBurn,
 		mir.OperationRegionEnter, mir.OperationRegionPlace, mir.OperationRegionReset:
 		return true
 	default:

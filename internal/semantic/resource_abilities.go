@@ -236,6 +236,46 @@ func (a *analyzer) rejectDiscardedLinearResource(module *moduleScope, expression
 	}
 }
 
+// validateResourceBurn keeps explicit destruction declaration-owned and narrow. Only the module
+// that declares one direct no-drop resource may burn a bare local or parameter of that type. The
+// initial slice rejects resource-bearing fields so one burn cannot erase another ownership domain.
+func (a *analyzer) validateResourceBurn(module *moduleScope, expression *ast.Expression) bool {
+	at := diagnostic.Span{}
+	if expression != nil {
+		at = expression.Span
+	}
+	reject := func(owner *symbol, related diagnostic.Span) bool {
+		var spans []RelatedSpan
+		if owner != nil && related != (diagnostic.Span{}) {
+			spans = append(spans, RelatedSpan{Role: "resource-declaration", Span: span(owner.source, related)})
+		}
+		a.addDiagnostic("E1109", span(module.file.Path, at), spans...)
+		return false
+	}
+	if expression == nil || expression.Kind != syntax.KindPath {
+		return reject(nil, diagnostic.Span{})
+	}
+	value := a.resolved[expression]
+	if value == nil || value.kind != "local" && value.kind != "parameter" {
+		return reject(nil, diagnostic.Span{})
+	}
+	info := a.resourceTypes[value.typ]
+	if info == nil || info.symbol == nil {
+		return reject(nil, diagnostic.Span{})
+	}
+	owner := info.symbol
+	allowedDrop, abilitySpan := a.resourceAllowsImplicitDrop(owner)
+	if allowedDrop || owner.packageID != module.key.packageID || owner.module != module.file.Module.Path {
+		return reject(owner, abilitySpan)
+	}
+	for _, field := range info.orderedFields {
+		if a.isResource(field.typ) {
+			return reject(owner, owner.declaration)
+		}
+	}
+	return true
+}
+
 func resourcePlaceExpression(expression *ast.Expression) bool {
 	for expression != nil && expression.Kind == syntax.KindGroup && len(expression.Children) == 1 {
 		expression = expression.Children[0]

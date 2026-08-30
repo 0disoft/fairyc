@@ -3453,6 +3453,33 @@ fn i32 main() {
 	}
 }
 
+func TestEmitBurnSkipsResourceDropGlue(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 observe(i32 value) { return value; }
+@abilities(store, key)
+resource Coin {
+    i32 amount;
+    cleanup { let i32 observed = observe(this.amount); }
+}
+fn i32 main() {
+    let Coin coin = Coin { .amount = 42 };
+    burn coin;
+    return 42;
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Contains(unit.Features, "resource-burn") || !slices.Equal(unit.Functions, []string{"main::main"}) {
+		t.Fatalf("burn unit = functions %v, features %v", unit.Functions, unit.Features)
+	}
+	if strings.Contains(unit.Source, "main::$drop$Coin") || strings.Contains(unit.Source, "main::observe") {
+		t.Fatalf("generated C retained burn-skipped cleanup reachability:\n%s", unit.Source)
+	}
+}
+
 func TestEmitRejectsForeignDeclarationCollidingWithInternalSymbol(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 main() { return 42; }\n")

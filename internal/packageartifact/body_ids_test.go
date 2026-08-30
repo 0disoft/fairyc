@@ -79,6 +79,35 @@ func TestFunctionGraphIDsRewriteRegionEntities(t *testing.T) {
 	}
 }
 
+func TestFunctionGraphIDsRewriteBurnLocalSymbol(t *testing.T) {
+	t.Parallel()
+	function := mir.Function{
+		Name: "main::burn", Entry: 0,
+		Resources: []mir.ResourceLocal{{Symbol: 71, Type: hir.Type("main::Coin"), Parameter: true}},
+		Blocks: []mir.Block{{
+			ID: 0,
+			Operations: []mir.Operation{{
+				Kind: mir.OperationBurn, Symbol: 71, DestinationLocal: mir.NoLocal, Type: hir.Type("main::Coin"),
+			}},
+			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock, DestinationLocal: mir.NoLocal},
+		}},
+	}
+	canonical, shape, err := canonicalizeFunctionGraphIDs(function)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if canonical.Resources[0].Symbol != 0 || canonical.Blocks[0].Operations[0].Symbol != 0 {
+		t.Fatalf("canonical burn locals = resource %d, operation %d", canonical.Resources[0].Symbol, canonical.Blocks[0].Operations[0].Symbol)
+	}
+	rebound, err := rebindFunctionGraphIDs(canonical, shape, 500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rebound.Resources[0].Symbol != 500 || rebound.Blocks[0].Operations[0].Symbol != 500 {
+		t.Fatalf("rebound burn locals = resource %d, operation %d", rebound.Resources[0].Symbol, rebound.Blocks[0].Operations[0].Symbol)
+	}
+}
+
 func TestFunctionGraphIDsRejectMalformedNamespaces(t *testing.T) {
 	t.Parallel()
 	function := mir.Function{

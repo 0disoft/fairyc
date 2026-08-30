@@ -957,6 +957,16 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{trapCategory: trap}, nil
 				}
 				delete(locals, local)
+			case mir.OperationBurn:
+				local := mir.LocalID(operation.Symbol)
+				value, found := locals[local]
+				if !found {
+					return callCompletion{}, fmt.Errorf("burn in %q names missing local %d", function.Name, local)
+				}
+				if value.kind != valueResource || value.resource == nil || value.resource.definition == nil || value.resource.definition.Type != operation.Type {
+					return callCompletion{}, fmt.Errorf("burn in %q names an incompatible resource local %d", function.Name, local)
+				}
+				delete(locals, local)
 			}
 		}
 

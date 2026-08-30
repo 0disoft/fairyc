@@ -149,6 +149,8 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			a.resourceExpression(module, statement.Expression, environment, resourceMove)
 			a.checkResourceEnvironmentEffects(environment, span(module.file.Path, statement.Span), nil)
 			reachable = false
+		case statement.Kind == syntax.KindBurn:
+			a.resourceExpression(module, statement.Expression, environment, resourceMove)
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
 			a.checkResourceLoopExitEffects(environment, span(module.file.Path, statement.Span))
 			a.captureResourceLoopEdge(environment)

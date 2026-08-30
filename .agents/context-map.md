@@ -71,6 +71,7 @@
 - Released resource-ability route: internal/semantic/resource_abilities.go, internal/hir/hir.go, internal/moduleinterface/, docs/language/0009-resource-abilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md
 - Released on-chain effect route: internal/hir/effect.go, internal/semantic/effects.go, docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md
 - Stable language-11 contract capability quickstart route: examples/contract_capabilities_quickstart/, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md
+- Released language-12 declaration-owned explicit resource-burn route: internal/semantic/resource_abilities.go, internal/mir/, internal/interpreter/, internal/cbackend/, examples/asset_burn_quickstart/, docs/language/0009-resource-abilities-v0.md, docs/mir/drop-elaboration-v0.md, docs/adr/0343-declaration-owned-explicit-resource-burn.md
 - Experimental contract-state oracle route: internal/contractstate/, docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md
 - Experimental generic-planning route: internal/genericplan/, docs/adr/0339-bounded-static-generic-specialization-kernel.md, docs/adr/0223-defer-static-interfaces-until-generics.md
 - Experimental contract-IDL route: cmd/fairyc-contract-idl/, internal/contractabi/, spec/contract-idl/, examples/contract_idl/, docs/cli/contract-idl.md, docs/adr/0340-experimental-chain-neutral-contract-idl.md

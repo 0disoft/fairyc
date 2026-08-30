@@ -24,6 +24,7 @@ var mutationKinds = []string{
 	"escape-region-value",
 	"extend-loan-past-origin",
 	"insert-source-form",
+	"invalidate-burn-type",
 	"invalidate-region-reset-exit-kind",
 	"move-resource-projection",
 	"remove-arithmetic-trap-check",
@@ -198,6 +199,11 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 	case "invalidate-region-reset-exit-kind":
 		if block, index := findOperation(function, mutation.Target); block != nil {
 			block.Operations[index].ExitKind = "invalid"
+			return 1, nil
+		}
+	case "invalidate-burn-type":
+		if block, index := findOperation(function, mutation.Target); block != nil {
+			block.Operations[index].Type = hir.TypeI32
 			return 1, nil
 		}
 	case "use-before-initialize":

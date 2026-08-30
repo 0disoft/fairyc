@@ -243,6 +243,7 @@ const (
 	OperationInitialize               OperationKind = "initialize"
 	OperationMove                     OperationKind = "move"
 	OperationDrop                     OperationKind = "drop"
+	OperationBurn                     OperationKind = "burn"
 	OperationCheckedDivision          OperationKind = "checked-division"
 	OperationArithmeticCheck          OperationKind = "arithmetic-check"
 	OperationResultSwitch             OperationKind = "result-switch"

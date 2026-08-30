@@ -384,6 +384,22 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			if _, err := l.lowerExpression(statement.Expression); err != nil {
 				return false, err
 			}
+		case "burn":
+			if statement.Expression == nil || statement.Expression.Kind != "path" {
+				return false, fmt.Errorf("burn requires one direct resource path")
+			}
+			binding, found := l.bindings[statement.Expression.Symbol]
+			if !found || !l.properties.NeedsDrop(binding.typ) {
+				return false, fmt.Errorf("burn names non-resource local %d", statement.Expression.Symbol)
+			}
+			if !l.live[statement.Expression.Symbol] {
+				return false, fmt.Errorf("burn names discharged resource local %d", statement.Expression.Symbol)
+			}
+			l.appendOperation(Operation{
+				Kind: OperationBurn, Span: statement.Span, Symbol: statement.Expression.Symbol,
+				DestinationLocal: NoLocal, Type: binding.typ,
+			})
+			l.live[statement.Expression.Symbol] = false
 		case "assignment":
 			if statement.Target != nil && (statement.Target.Kind == "array-index" || statement.Target.Kind == "view-index") {
 				if err := l.lowerIndexedAssignment(statement); err != nil {

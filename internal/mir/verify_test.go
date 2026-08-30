@@ -22,6 +22,41 @@ func TestVerifyRejectsMissingInternalCallTarget(t *testing.T) {
 	}
 }
 
+func TestVerifyBurnRequiresOneLiveDirectResource(t *testing.T) {
+	t.Parallel()
+	coinType := hir.Type("main::Coin")
+	program := Program{
+		ResourceTypes: []ResourceType{{
+			Type: coinType, Fields: []ResourceField{{Name: "amount", Type: hir.TypeI32}},
+			DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
+		}},
+		Functions: []Function{{
+			Symbol: 1, Name: "main::burn_coin", Parameters: []LocalID{2}, ParameterTypes: []hir.Type{coinType},
+			ResultType: hir.TypeVoid, Entry: 0,
+			Resources: []ResourceLocal{{Symbol: 2, Type: coinType, Parameter: true, Entity: "resource:coin"}},
+			Blocks: []Block{{
+				ID: 0,
+				Operations: []Operation{{
+					Kind: OperationBurn, Entity: "burn:coin", Symbol: 2, DestinationLocal: NoLocal, Type: coinType,
+				}},
+				Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock},
+			}},
+		}},
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify(valid burn) = %+v", failures)
+	}
+	program.Functions[0].Blocks[0].Operations[0].Type = hir.TypeI32
+	failures := Verify(program)
+	found := false
+	for _, failure := range failures {
+		found = found || failure.Code == "V1104"
+	}
+	if !found {
+		t.Fatalf("Verify(malformed burn) = %+v", failures)
+	}
+}
+
 func TestVerifyMergesBranchLocalInitializationByIntersection(t *testing.T) {
 	t.Parallel()
 	program := Program{Functions: []Function{{

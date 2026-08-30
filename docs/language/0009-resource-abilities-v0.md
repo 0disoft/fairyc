@@ -1,6 +1,6 @@
 # Resource Abilities v0
 
-- Status: Released language 11 contract
+- Status: Released language 12 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0336-resource-abilities-and-linear-assets.md`
 - Diagnostic source: `docs/diagnostics/catalog-v0.md`
@@ -13,7 +13,8 @@ Resource abilities let a declaration opt into a closed set of compiler-known pro
 
 ## Availability boundary
 
-ADR 0342 admits this contract in `fairyc-language/11`. Direct analysis and resolved-package check,
+ADR 0342 admits resource abilities in `fairyc-language/11`. ADR 0343 adds the bounded explicit burn
+contract in `fairyc-language/12`. Direct analysis and resolved-package check,
 build, run, test, cache, and native emission share the same Flow rules. HIR preserves canonical
 ability metadata and public-interface v4 encodes every public effective ability set. The runtime ABI
 does not change because abilities are static ownership facts.
@@ -107,10 +108,10 @@ An implicit cleanup of a valid explicit no-drop value is `E1108`. The primary sp
 
 ## Explicit destruction boundary
 
-`discard`, an unsafe block, an empty cleanup body, and raw-pointer conversion do not grant permission to destroy a no-drop resource. A future explicit `burn` operation must discharge one ownership obligation in verified MIR and must be authorized by a declaration-owned API or contract capability. Implementing it as a generic escape hatch would recreate the exact asset-loss bug this feature prevents.
+`discard`, an unsafe block, an empty cleanup body, and raw-pointer conversion do not grant permission to destroy a no-drop resource. Language 12 admits `burn local;` only for a bare local or parameter whose direct no-drop resource is declared by the current package and module and has no resource-bearing fields. External callers transfer ownership to a public function owned by that declaring module. Droppable resources, temporaries, projections, wrappers, foreign-module resources, and resource-bearing aggregates fail with `E1109`.
 
-No explicit burn operation is admitted by this v0 slice. Until a separate decision defines its source contract, MIR operation, verifier rule, and backend behavior, a no-drop resource must be transferred or returned.
+Flow consumes the operand exactly once. Verified MIR records a distinct `Burn` operation, the interpreter removes the live value without cleanup, and C emission invokes no drop glue. This is not a generic escape hatch: all values outside the closed authorization boundary must still be transferred or returned.
 
 ## Deferred work
 
-Persistent state, account keys, storage layout, serialization, minting, burning, splitting, merging, event emission, contract entry points, gas accounting, and chain-specific ABI generation remain outside this contract. `store` and `key` are validated metadata only and create no backend promise.
+Persistent state, account keys, storage layout, serialization, minting, recursive burn authorization, splitting, merging, event emission, contract entry points, gas accounting, and chain-specific ABI generation remain outside this contract. `store` and `key` are validated metadata only and create no backend promise.

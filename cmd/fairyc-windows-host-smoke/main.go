@@ -430,6 +430,17 @@ func run(arguments []string) error {
 		return err
 	}
 	workspaceBuildExecutions += contractCapabilityBuildExecutions
+	assetBurnBuildExecutions, err := runStdlibQuickstartProof(
+		root,
+		"asset_burn_quickstart",
+		"asset-burn-quickstart",
+		"language-12 explicit asset burn",
+		42,
+	)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += assetBurnBuildExecutions
 	stdFSBuildExecutions, err := runStdlibQuickstartProofWithFixtures(
 		root,
 		"std_fs_quickstart",

@@ -441,7 +441,7 @@ func isPrefixOperator(value string) bool {
 
 func isExpressionTerminator(value string) bool {
 	switch value {
-	case "", ";", ",", ")", "]", "}", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|=", "=>", ":", "case", "..", "let", "var", "return", "discard", "while", "for", "break", "continue", "region":
+	case "", ";", ",", ")", "]", "}", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|=", "=>", ":", "case", "..", "let", "var", "return", "discard", "burn", "while", "for", "break", "continue", "region":
 		return true
 	default:
 		return false

@@ -49,6 +49,16 @@
       ]
     },
     {
+      "id": "resource-burn",
+      "baseline": "verify",
+      "entities": [
+        "local:token",
+        "operation:burn-token",
+        "resource-type:seed-token",
+        "terminator:return"
+      ]
+    },
+    {
       "id": "borrow-return",
       "baseline": "verify",
       "entities": [
@@ -182,6 +192,12 @@
       "seed": "resource-return",
       "mutation": { "kind": "move-resource-projection", "target": "place:token-field" },
       "expect": { "status": "reject", "codes": ["V1103"], "primaryEntity": "place:token-field" }
+    },
+    {
+      "id": "fail.mir-verify.v1104.invalid-burn-type",
+      "seed": "resource-burn",
+      "mutation": { "kind": "invalidate-burn-type", "target": "operation:burn-token" },
+      "expect": { "status": "reject", "codes": ["V1104"], "primaryEntity": "operation:burn-token" }
     },
     {
       "id": "fail.mir-verify.v1201.uninitialized-drop-flag",

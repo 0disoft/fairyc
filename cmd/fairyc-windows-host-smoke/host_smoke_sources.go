@@ -91,6 +91,14 @@ func loadHostSmokeSources() (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in contract capabilities workspace entry: %w", err)
 	}
+	assetBurnManifest, err := os.ReadFile(filepath.FromSlash(checkedInAssetBurnManifestPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in asset burn workspace manifest: %w", err)
+	}
+	assetBurnMain, err := os.ReadFile(filepath.FromSlash(checkedInAssetBurnMainPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in asset burn workspace entry: %w", err)
+	}
 	stdFSManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdFSManifestPath))
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in std::fs workspace manifest: %w", err)
@@ -251,6 +259,8 @@ func loadHostSmokeSources() (map[string]string, error) {
 		checkedInStdTextFromBufferMainPath:        string(stdTextFromBufferMain),
 		checkedInContractCapabilitiesManifestPath: string(contractCapabilitiesManifest),
 		checkedInContractCapabilitiesMainPath:     string(contractCapabilitiesMain),
+		checkedInAssetBurnManifestPath:            string(assetBurnManifest),
+		checkedInAssetBurnMainPath:                string(assetBurnMain),
 		checkedInStdFSManifestPath:                string(stdFSManifest),
 		checkedInStdFSMainPath:                    string(stdFSMain),
 		checkedInStdFSPathOpsPath:                 string(stdFSPathOps),

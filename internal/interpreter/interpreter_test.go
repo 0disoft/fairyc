@@ -653,6 +653,23 @@ fn i32 main() { discard run(); return 42; }
 	}
 }
 
+func TestExecuteBurnReturnsWithoutRunningDropGlue(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@abilities(store, key)
+resource Coin { i32 amount; cleanup {} }
+fn i32 main() {
+    let Coin coin = Coin { .amount = 42 };
+    burn coin;
+    return 42;
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || len(outcome.DropTrace) != 0 {
+		t.Fatalf("Execute() = %+v, %v", outcome, err)
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(contents)), source.DefaultLimits())

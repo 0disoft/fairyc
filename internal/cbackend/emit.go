@@ -1246,7 +1246,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				if err := e.inspectResourceInitialize(functionIndex, *operation); err != nil {
 					return err
 				}
-			case mir.OperationMove, mir.OperationDrop:
+			case mir.OperationMove, mir.OperationDrop, mir.OperationBurn:
 				if err := e.inspectResourceDischarge(functionIndex, *operation); err != nil {
 					return err
 				}
@@ -1576,7 +1576,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
-	case mir.OperationMove, mir.OperationDrop:
+	case mir.OperationMove, mir.OperationDrop, mir.OperationBurn:
 		if operation.Symbol == hir.NoSymbol {
 			return fmt.Errorf("%s operation in %s has no resource symbol", operation.Kind, function)
 		}
@@ -2436,6 +2436,9 @@ func (e *emitter) inspectResourceDischarge(functionIndex int, operation mir.Oper
 	}
 	if operation.Kind == mir.OperationDrop && (operation.DropFlagEntity != "" || !operation.FlagClearedFirst) {
 		return CapabilityError{Function: function.Name, Feature: "conditional resource drop"}
+	}
+	if operation.Kind == mir.OperationBurn && (operation.Type != resource.Type || operation.Destination != "" || operation.DropFlagEntity != "" || operation.FlagClearedFirst) {
+		return fmt.Errorf("resource burn in %s has invalid direct-discharge metadata", function.Name)
 	}
 	return nil
 }
@@ -3472,6 +3475,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err := e.emitDropGlue(output, functionIndex, operation); err != nil {
 			return fmt.Errorf("drop glue in %s: %w", function, err)
 		}
+	case mir.OperationBurn:
+		fmt.Fprintf(output, "    (void)fy_l_%d;\n", operation.Symbol)
+		e.features["resource-burn"] = struct{}{}
 	case mir.OperationRegionEnter:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil || operand.Kind != mir.OperandLocal {

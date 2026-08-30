@@ -122,6 +122,14 @@ analysis. No ambient chain context, storage API, event/call transport, rollback,
 backend, ABI, or target support is implied; each operation still requires an explicit capability
 and its own vertical slice.
 
+ADR 0343 advances the current language to `fairyc-language/12` and admits `burn local;` for a bare
+local or parameter whose direct inert no-drop resource is declared in the current package and
+module. Flow discharges one obligation, verified MIR preserves a distinct Burn operation, and the
+interpreter and C backend destroy no fields or drop glue. Droppable, temporary, projected, wrapped,
+resource-bearing, and foreign-module operands fail closed with `E1109`. SDK
+`0.0.0-stage0.54` carries the exact language identity; public-interface v4 and runtime ABI remain
+unchanged.
+
 ADR 0338 adds a process-local typed state-layout and failure-atomic transaction oracle for future
 contract profiles. It reserves no source syntax and adds no HIR, MIR, SDK, runtime, backend, ABI,
 database, Merkle tree, or supported chain target. Production persistence must preserve the oracle's
@@ -662,7 +670,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.53` exposes
+  The compiler-bundled SDK `0.0.0-stage0.54` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -970,7 +978,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.53` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.54` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer` and ADR 0299's fallible single-byte append,

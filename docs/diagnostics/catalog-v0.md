@@ -63,6 +63,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E1106` | Fallible `drop` or ambiguous close ownership. |
 | `E1107` | `@abilities` is empty, duplicated, malformed, names an unknown resource ability, or declares `key` without `store`. |
 | `E1108` | Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. |
+| `E1109` | Explicit `burn` is not authorized for this value, resource declaration, or module. |
 | `E2101` | Access conflicts with an active shared or mutable loan. |
 | `E2102` | Returned borrow originates from a local value. |
 | `E2103` | Returned borrow has multiple possible input origins. |

@@ -142,7 +142,7 @@ func TestDocumentationSidecarDoesNotEnterFymapV1PlanOrEncoding(t *testing.T) {
 uid = "test.atlas.documentation-sidecar"
 name = "documentation-sidecar"
 version = "1.0.0"
-language = "fairyc-language/11"
+language = "fairyc-language/12"
 source = "src"
 `
 	sourceText := "module main;\n/// Returns the answer.\nfn i32 main() { return 42; }\n"

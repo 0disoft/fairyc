@@ -32,6 +32,12 @@ func constructSeed(id string) (mir.Program, error) {
 			Type: hir.Type("seed::Token"), Entity: "resource-type:seed-token",
 			Fields: []mir.ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
 		}}
+	case "resource-burn":
+		function = resourceBurnSeed()
+		resourceTypes = []mir.ResourceType{{
+			Type: hir.Type("seed::Token"), Entity: "resource-type:seed-token",
+			Fields: []mir.ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
+		}}
 	case "borrow-return":
 		function = borrowReturnSeed()
 	case "plain-region":
@@ -54,6 +60,26 @@ func constructSeed(id string) (mir.Program, error) {
 		return mir.Program{}, fmt.Errorf("unknown seed %q", id)
 	}
 	return mir.Program{ResourceTypes: resourceTypes, Functions: []mir.Function{function}}, nil
+}
+
+func resourceBurnSeed() mir.Function {
+	return mir.Function{
+		Name:         "seed::resource-burn",
+		Entry:        0,
+		ReturnEntity: "terminator:return",
+		Entities: []string{
+			"local:token", "operation:burn-token", "resource-type:seed-token", "terminator:return",
+		},
+		Resources: []mir.ResourceLocal{{Symbol: tokenSymbol, Type: hir.Type("seed::Token"), Parameter: true, Entity: "local:token"}},
+		Blocks: []mir.Block{{
+			ID: 0,
+			Operations: []mir.Operation{{
+				Kind: mir.OperationBurn, Entity: "operation:burn-token", Symbol: tokenSymbol,
+				DestinationLocal: mir.NoLocal, Type: hir.Type("seed::Token"),
+			}},
+			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
+		}},
+	}
 }
 
 func seedArenaResourceType() mir.ResourceType {

@@ -473,6 +473,10 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindExprStmt || statement.Kind == syntax.KindDiscard:
 			expression, _ := c.checkExpression(statement.Expression, hir.TypeInvalid)
 			hirStatement.Expression = expression
+		case statement.Kind == syntax.KindBurn:
+			expression, _ := c.checkExpression(statement.Expression, hir.TypeInvalid)
+			hirStatement.Expression = expression
+			c.analyzer.validateResourceBurn(c.module, statement.Expression)
 		case statement.Kind == syntax.KindWhile:
 			expression, _ := c.checkExpression(statement.Expression, hir.TypeVoid)
 			hirStatement.Expression = expression

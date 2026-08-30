@@ -414,6 +414,17 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1202", Entity: entity, Detail: "drop does not clear its active flag first"})
 				}
 				state.live[operation.Symbol] = false
+			case OperationBurn:
+				resource, found := resources[operation.Symbol]
+				if !found || operation.Type == "" || operation.Type == hir.TypeInvalid || found && operation.Type != resource.Type ||
+					operation.ProjectionEntity != "" || operation.Destination != "" || operation.DestinationLocal != NoLocal ||
+					len(operation.Operands) != 0 || operation.DropFlagEntity != "" || operation.FlagClearedFirst {
+					failures = append(failures, VerificationError{Code: "V1104", Entity: entity, Detail: "burn does not name one direct declared resource root"})
+				}
+				if found && !state.live[operation.Symbol] {
+					failures = append(failures, VerificationError{Code: "V1101", Entity: resourceEntity(resource, entity), Detail: "resource burned after discharge"})
+				}
+				state.live[operation.Symbol] = false
 			case OperationCheckedDivision:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				categories, valid := divisionTrapCategories(operation.OwnerType)

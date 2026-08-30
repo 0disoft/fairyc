@@ -689,6 +689,29 @@ func TestParseLexicalDeferLosslessly(t *testing.T) {
 	}
 }
 
+func TestParseResourceBurnLosslessly(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn void destroy(Token token) { burn token; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	found := false
+	for _, node := range tree.Nodes {
+		found = found || node.Kind == KindBurn
+	}
+	if !found {
+		t.Fatal("Parse() produced no burn node")
+	}
+	if reconstructed, ok := tree.Reconstruct(); !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
+	}
+	previous := ParsePreviousRevision(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(previous.Diagnostics) == 0 {
+		t.Fatal("ParsePreviousRevision() accepted current-only burn")
+	}
+}
+
 func TestParseClassicForPreservesOmittedClauses(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn i32 main() { for (;;) { break; } return 42; }\n")

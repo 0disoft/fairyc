@@ -60,6 +60,7 @@ const (
 	KindDefer        Kind = "defer"
 	KindReturn       Kind = "return"
 	KindDiscard      Kind = "discard"
+	KindBurn         Kind = "burn"
 	KindWhile        Kind = "while"
 	KindFor          Kind = "for"
 	KindForInit      Kind = "for-init"

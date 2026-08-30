@@ -10,7 +10,7 @@ Drop elaboration consumes verified Flow CFG ownership states, lexical scope-exit
 
 ## Obligations
 
-Every transition to `Live` creates one cleanup obligation. A move, consuming call, successful ownership transfer, or drop removes it. `Dead` has none. A source-visible complete resource root that becomes `MaybeLive` is rejected during Flow analysis. Drop flags are reserved for compiler-owned partial construction or later explicitly specified conditional obligations, not for silently accepting a path-dependent source local.
+Every transition to `Live` creates one cleanup obligation. A move, consuming call, successful ownership transfer, authorized burn, or drop removes it. `Dead` has none. A source-visible complete resource root that becomes `MaybeLive` is rejected during Flow analysis. Drop flags are reserved for compiler-owned partial construction or later explicitly specified conditional obligations, not for silently accepting a path-dependent source local.
 
 Drop flags are not attached to every resource automatically. They are introduced only for genuinely conditional obligations.
 
@@ -29,6 +29,14 @@ field reads, interpreter cleanup, and future backends consume that definition ra
 field order or drop behavior from operations. For a nonempty definition the interpreter records the
 resource drop, enters `dropping`, invokes the linked private body, then recursively drops fields in
 reverse declaration order. A second drop during `dropping` is rejected.
+
+## Burn operation
+
+Language 12 lowers an authorized direct no-drop local or parameter to a distinct MIR `Burn`
+operation. Burn consumes one live root and clears its ownership obligation without invoking its drop
+body or recursively dropping fields. `V1104` requires a direct local operand with the exact resource
+type; `V1101` rejects a second discharge. The semantic boundary admits only declaration-owned inert
+resources, so MIR never reconstructs burn authority and backends must not lower Burn as Drop.
 
 ## Partial aggregate initialization
 

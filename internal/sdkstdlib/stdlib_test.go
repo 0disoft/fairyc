@@ -8,10 +8,10 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.53" {
+	if Version != "0.0.0-stage0.54" {
 		t.Fatalf("Version = %q", Version)
 	}
-	if LanguageRevision != "fairyc-language/11" {
+	if LanguageRevision != "fairyc-language/12" {
 		t.Fatalf("LanguageRevision = %q", LanguageRevision)
 	}
 	definition, err := Load()
