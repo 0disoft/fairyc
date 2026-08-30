@@ -2,6 +2,7 @@ package moduleinterface
 
 import (
 	"maps"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -270,6 +271,38 @@ func TestComputeRejectsAbilitiesOutsideCanonicalResourceItems(t *testing.T) {
 		if _, err := Compute(descriptor); err == nil {
 			t.Fatalf("Compute() accepted item %+v", item)
 		}
+	}
+}
+
+func TestStablePackageCarriesLanguage11CapabilitiesIntoInterface(t *testing.T) {
+	t.Parallel()
+	parsed, err := frontend.AnalyzeSyntax(source.NewFile("api.fy", []byte(`module api;
+@abilities(store, key)
+pub resource Asset { i32 value; cleanup {} }
+@effects(storage_read)
+pub fn i32 read() { return 42; }
+`)), source.DefaultLimits())
+	if err != nil || parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
+		t.Fatalf("AnalyzeSyntax() = %+v, %v", parsed, err)
+	}
+	result, err := semantic.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{{
+		Package: 1, Path: "api.fy", Module: parsed.AST,
+	}}})
+	if err != nil || result.CompletedThrough != semantic.PhaseFlow || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
+		t.Fatalf("AnalyzePackages() = %+v, %v", result, err)
+	}
+	coordinate := testCoordinateID(t, "self")
+	descriptor, err := Extract(result.HIR, 1, map[hir.PackageID]packagegraph.CoordinateID{1: coordinate})
+	if err != nil {
+		t.Fatalf("Extract() error = %v", err)
+	}
+	if len(descriptor.Modules) != 1 || len(descriptor.Modules[0].Items) != 2 {
+		t.Fatalf("descriptor = %+v", descriptor)
+	}
+	items := descriptor.Modules[0].Items
+	if items[0].Kind != "function" || !slices.Equal(items[0].Effects, []string{"storage_read"}) ||
+		items[1].Kind != "resource" || !slices.Equal(items[1].Abilities, []string{"store", "key"}) {
+		t.Fatalf("language-11 interface items = %+v", items)
 	}
 }
 

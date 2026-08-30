@@ -1,6 +1,6 @@
 (* Fairy C experimental chain-neutral contract-interface profile v0.
    This grammar is consumed only by fairyc-contract-idl. It is not part of the Stage 0 product
-   grammar and does not change fairyc-language/10. *)
+   grammar and does not change fairyc-language/11. *)
 
 source = module_decl item+ EOF ;
 

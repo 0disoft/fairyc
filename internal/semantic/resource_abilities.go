@@ -67,9 +67,6 @@ func cloneResourceAbilityInputs(files []File) []File {
 // item-attribute fallback runs. Parsed declarations remain attached to the canonical resource type
 // so Flow can reject compiler-scheduled destruction without leaking syntax details into later passes.
 func (a *analyzer) prepareResourceAbilities() {
-	if !a.experimentalLanguage {
-		return
-	}
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]

@@ -445,6 +445,12 @@ ADR 0334 moves the SDK to `0.0.0-stage0.52` and makes bounded `std::fs::seek_cur
 the existing `SetFilePointerEx` behavior. Other metadata, exact-read, Buffer-read, and path mutation
 remain target-bound.
 
+ADR 0342 moves the SDK to `0.0.0-stage0.53` and language `fairyc-language/11`. Stable workspace
+analysis admits canonical resource abilities and target-neutral on-chain effects, with
+public-interface v4 and cache fixture v6 preserving those facts. The attributes add no ambient
+chain API or runtime symbol; `examples/contract_capabilities_quickstart/` is the native result-42
+admission proof.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

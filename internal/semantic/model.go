@@ -171,7 +171,7 @@ type Unsupported struct {
 
 // Analyze resolves every file before creating type facts or HIR.
 func Analyze(files []File) Result {
-	return analyze(files, nil, true)
+	return analyze(files, nil)
 }
 
 // AnalyzePackages resolves an already-resolved multi-package input without choosing a public
@@ -181,10 +181,10 @@ func AnalyzePackages(input PackageInput) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	return analyze(input.Files, bindings, false), nil
+	return analyze(input.Files, bindings), nil
 }
 
-func analyze(files []File, bindings map[packageImportKey]hir.PackageID, experimentalLanguage bool) Result {
+func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 	ordered := cloneResourceAbilityInputs(files)
 	slices.SortFunc(ordered, func(a, b File) int {
 		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
@@ -196,7 +196,6 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID, experime
 		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
 	}
 	analyzer := newAnalyzer(ordered, bindings)
-	analyzer.experimentalLanguage = experimentalLanguage
 	analyzer.resolve()
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()

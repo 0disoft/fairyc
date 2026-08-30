@@ -1,6 +1,6 @@
 # Effects and External Capabilities v0
 
-- Status: Draft Stage 0 contract
+- Status: Released language 11 contract
 - Product source: `docs/product/02-spec.md`
 - Decision sources: `docs/adr/0116-stage-0-source-effects.md`, `docs/adr/0121-resource-drop-effects.md`, `docs/adr/0337-onchain-effect-capabilities.md`
 - Semantic fixtures: `spec/fixtures/semantic/manifest-v0.json`
@@ -17,12 +17,12 @@ checked by Resource Flow. Both survive in typed HIR. They do not by themselves g
 backend, interpreter, or standard-library implementation. Real host I/O remains unavailable until
 the corresponding safe API, typed errors, runtime transport, and target evidence exist.
 
-## Experimental availability boundary
+## Availability boundary
 
-ADR 0337 adds target-neutral on-chain effects to direct single-package experimental semantic
-analysis. `Stage0Effects()` and stable resolved-package compilation remain fixed to
-`fairyc-language/10`; workspace check, build, run, test, cache, and native emission reject the new
-spellings as unsupported until an exact language-revision cut.
+ADR 0342 admits the target-neutral on-chain effects in `fairyc-language/11`. Direct analysis and
+resolved-package check, build, run, test, cache, and native emission now share the same closed
+vocabulary. This admission transports authority facts only; an effect has no operation unless an
+explicit SDK and target contract implements one.
 
 ## Declaration syntax
 
@@ -57,7 +57,7 @@ literal argument, and an unknown name are `E7101`. Omitting the attribute declar
 There is no separate `pure` spelling. An empty resource cleanup body cannot claim effects because it
 has no user cleanup operation to authorize.
 
-## Closed Stage 0 vocabulary
+## Closed language 11 vocabulary
 
 | Effect | Authority represented |
 | --- | --- |
@@ -69,7 +69,7 @@ has no user cleanup operation to authorize.
 | `clock` | Observe wall, monotonic, or CPU time |
 | `random` | Observe an operating-system or external randomness source |
 
-The experimental vocabulary additionally recognizes:
+Language 11 additionally recognizes:
 
 | Effect | Authority represented |
 | --- | --- |

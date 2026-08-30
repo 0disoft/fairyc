@@ -113,10 +113,6 @@ func (a *analyzer) parseEffects(source string, declaration diagnostic.Span, attr
 				})
 				continue
 			}
-			if !a.experimentalLanguage && hir.IsOnchainEffect(effect) {
-				a.addUnsupported(source, argument.Span, "effect "+argument.Raw)
-				continue
-			}
 			if _, duplicate := seenEffects[effect]; duplicate {
 				validDeclaration = false
 				a.addDiagnostic("E7101", span(source, argument.Span), RelatedSpan{

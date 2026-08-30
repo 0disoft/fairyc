@@ -376,9 +376,6 @@ func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instanc
 	if len(owners) == 0 {
 		return packages, graph, instances, nil
 	}
-	if packages[0].Manifest.Package.Language != sdkstdlib.LanguageRevision {
-		return nil, packagegraph.Graph{}, nil, &LoadError{Reason: ReasonStandardLibrary, Detail: fmt.Sprintf("SDK requires %s", sdkstdlib.LanguageRevision)}
-	}
 	definition, err := sdkstdlib.Load()
 	if err != nil {
 		return nil, packagegraph.Graph{}, nil, &LoadError{Reason: ReasonStandardLibrary, Detail: err.Error()}
@@ -408,6 +405,13 @@ func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instanc
 
 func validateDependencyDeclarations(packages []Package, pathIndexes map[string]int) error {
 	rootLanguage := packages[0].Manifest.Package.Language
+	if rootLanguage != sdkstdlib.LanguageRevision {
+		return &LoadError{
+			Reason: ReasonLanguageMismatch,
+			Path:   packages[0].Path,
+			Detail: fmt.Sprintf("got %q, compiler requires %q", rootLanguage, sdkstdlib.LanguageRevision),
+		}
+	}
 	for _, loaded := range packages {
 		if loaded.Manifest.Package.UID == sdkstdlib.PackageUID {
 			return &LoadError{Reason: ReasonStandardLibrary, Path: loaded.Path, Detail: fmt.Sprintf("package UID %q is reserved by the SDK", sdkstdlib.PackageUID)}

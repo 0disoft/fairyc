@@ -8,22 +8,22 @@ import (
 func TestStage0EffectsAreCanonicalAndClosed(t *testing.T) {
 	t.Parallel()
 	want := []Effect{
+		EffectBlockContext,
 		EffectClock,
 		EffectConsole,
+		EffectEmit,
 		EffectEnvironment,
+		EffectExternalCall,
 		EffectFilesystem,
 		EffectNetwork,
 		EffectProcess,
 		EffectRandom,
+		EffectStorageRead,
+		EffectStorageWrite,
 	}
 	got := Stage0Effects()
 	if !slices.Equal(got, want) {
 		t.Fatalf("Stage0Effects() = %v, want %v", got, want)
-	}
-	for _, effect := range []Effect{EffectBlockContext, EffectEmit, EffectExternalCall, EffectStorageRead, EffectStorageWrite} {
-		if slices.Contains(got, effect) {
-			t.Fatalf("Stage0Effects() admitted experimental effect %q", effect)
-		}
 	}
 	for _, effect := range want {
 		if parsed, ok := ParseEffect(string(effect)); !ok || parsed != effect {

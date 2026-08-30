@@ -7,13 +7,14 @@
     "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
     "docs/adr/0221-explicit-source-location-intrinsic.md",
     "docs/adr/0341-public-interface-resource-abilities-v4.md",
+    "docs/adr/0342-stable-resource-abilities-and-onchain-effects.md",
     "docs/package/whole-package-cache-v2.md",
     "docs/compatibility/versioning-v0.md",
     "docs/engineering/03-performance-budget.md"
   ],
   "base": {
     "compilerBuild": "compiler:a",
-    "languageRevision": "fairyc-language/10",
+    "languageRevision": "fairyc-language/11",
     "mirVersion": "fairyc-mir/0",
     "targetSchema": "fairyc.target-spec/v0:x86_64-windows-msvc",
     "abiProfile": "microsoft-x64/v0",
@@ -31,7 +32,7 @@
     "features": ["base", "tls"]
   },
   "cases": [
-    { "id": "baseline", "override": {}, "relation": "baseline", "expectKey": "fycache2-sha256-6c6aaba7355e5a6051035be20b47b3a45f8e9e1852135ae48b271226cd6ca2ea" },
+    { "id": "baseline", "override": {}, "relation": "baseline", "expectKey": "fycache2-sha256-0e42b0daff4ecdd918f689165959e36ece1b17cf988b8c283f7717e9b44707b8" },
     { "id": "compiler-build", "override": { "compilerBuild": "compiler:b" }, "compareTo": "baseline", "relation": "different" },
     { "id": "language-revision", "override": { "languageRevision": "fairyc-language/5" }, "compareTo": "baseline", "relation": "different" },
     { "id": "source-digest", "override": { "source": "fysrc1-sha256-ed19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3" }, "compareTo": "baseline", "relation": "different" },

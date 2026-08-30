@@ -24,8 +24,8 @@
 - Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
 - Public-interface hash v4 fixtures and runner: spec/fixtures/module-interface/manifest-v4.json, with historical v1 through v3 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
-- Experimental resource abilities and linear no-drop analysis: docs/language/0009-resource-abilities-v0.md, docs/adr/0336-resource-abilities-and-linear-assets.md, internal/semantic/resource_abilities.go, internal/hir/hir.go; public-interface v4 transport exists while stable resolved-package admission remains closed
-- Experimental target-neutral on-chain effects: docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0337-onchain-effect-capabilities.md, internal/hir/effect.go; released `/10` vocabulary and stable resolved-package admission remain unchanged
+- Released language-11 resource abilities and linear no-drop analysis: docs/language/0009-resource-abilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md, internal/semantic/resource_abilities.go, internal/hir/hir.go, internal/moduleinterface/
+- Released language-11 target-neutral on-chain effects: docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md, internal/hir/effect.go, internal/semantic/effects.go
 - Experimental typed contract-state transaction oracle: docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md, internal/contractstate/
 - Experimental bounded static generic planner: docs/adr/0339-bounded-static-generic-specialization-kernel.md, internal/genericplan/; no source syntax, HIR substitution, MIR, or backend surface is admitted
 - Experimental chain-neutral contract IDL and bindings: docs/cli/contract-idl.md, docs/adr/0340-experimental-chain-neutral-contract-idl.md, spec/contract-idl/, internal/contractabi/, cmd/fairyc-contract-idl/, examples/contract_idl/

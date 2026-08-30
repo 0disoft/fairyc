@@ -110,9 +110,9 @@ compatibility formats. The bounded persistent storage format and one exact-versi
 command now exist; ordinary-command policy and default limits remain undecided.
 
 The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
-`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v5` supplies current vectors because its
-dependency entries use `fyif4-sha256` public-interface hashes and `fairyc-language/10`; fixture
-manifests v1 through v4 remain historical. A component algorithm change is an intentional cache miss,
+`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v6` supplies current vectors because its
+dependency entries use `fyif4-sha256` public-interface hashes and `fairyc-language/11`; fixture
+manifests v1 through v5 remain historical. A component algorithm change is an intentional cache miss,
 not permission to reinterpret an older key.
 
 ## Target and ABI
@@ -834,8 +834,8 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.52`, language
-`fairyc-language/10`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.53`, language
+`fairyc-language/11`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
@@ -907,6 +907,12 @@ ADR 0337 also leaves `fairyc-language/10` unchanged: direct experimental analysi
 new on-chain effects, while stable resolved-package analysis rejects them. Public-interface v4 can
 encode effect strings without a shape change, but stable source admission still requires the exact
 language, manifest, SDK, lock, previous-revision, cache-vector, fixture, and migration cut.
+
+ADR 0342 performs that coordinated cut. `fairyc-language/11` admits resource abilities and the five
+on-chain effects in resolved packages, SDK `0.0.0-stage0.53` carries the exact language identity,
+public-interface v4 transports abilities and effects, and package-cache fixture v6 pins `/11` plus
+`fyif4`. Runtime ABI, MIR version, C ABI, and target schemas remain unchanged because the admitted
+facts add no runtime representation or operation by themselves.
 
 ADR 0181 stabilizes `fairyc test [--locked]`, the root-only optional lowercase `tests/` overlay,
 `tests/`-prefixed module identity, argument-free `@test` declaration shape, canonical test ordering,

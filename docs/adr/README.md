@@ -351,6 +351,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0339-bounded-static-generic-specialization-kernel.md`: adds a bounded, coherent, deterministic compiler-internal specialization planner while keeping source generics, HIR substitution, MIR, and backend admission closed.
 - `0340-experimental-chain-neutral-contract-idl.md`: adds a bounded standalone contract-interface parser, canonical IDL v0, and typed Go/TypeScript bindings without changing Stage 0 grammar or claiming a chain codec or target.
 - `0341-public-interface-resource-abilities-v4.md`: adds canonical public resource abilities to public-interface v4 so dependency hashes cannot erase ownership policy.
+- `0342-stable-resource-abilities-and-onchain-effects.md`: releases resource abilities and target-neutral on-chain effects through stable package compilation in `fairyc-language/11` with SDK `0.0.0-stage0.53`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

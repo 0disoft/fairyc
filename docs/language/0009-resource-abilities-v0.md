@@ -1,6 +1,6 @@
 # Resource Abilities v0
 
-- Status: Draft experimental contract
+- Status: Released language 11 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0336-resource-abilities-and-linear-assets.md`
 - Diagnostic source: `docs/diagnostics/catalog-v0.md`
@@ -13,9 +13,10 @@ Resource abilities let a declaration opt into a closed set of compiler-known pro
 
 ## Availability boundary
 
-This contract currently governs direct, single-package experimental semantic analysis only. Stable manifest and resolved-package compilation under `fairyc-language/10` reports `@abilities` as unsupported, so workspace check, build, run, test, cache, and native emission do not admit it.
-
-HIR preserves canonical ability metadata, and public-interface v4 now encodes every public effective ability set. Stable release still requires the coordinated language revision; this draft changes no current SDK, runtime ABI, package identity, or backend behavior.
+ADR 0342 admits this contract in `fairyc-language/11`. Direct analysis and resolved-package check,
+build, run, test, cache, and native emission share the same Flow rules. HIR preserves canonical
+ability metadata and public-interface v4 encodes every public effective ability set. The runtime ABI
+does not change because abilities are static ownership facts.
 
 ## Declaration syntax
 

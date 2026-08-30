@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/buildmeasure"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/workspacecallcatalog"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -106,7 +107,7 @@ func writeAtlasCallScaleWorkspace(root string, definition buildmeasure.AtlasCall
 	}
 	libraryCount := definition.Packages - 1
 	var manifest strings.Builder
-	fmt.Fprintf(&manifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/9\"\nsource = \"src\"\n[workspace]\nmembers = [\n", definition.Name, definition.Name)
+	fmt.Fprintf(&manifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"%s\"\nsource = \"src\"\n[workspace]\nmembers = [\n", definition.Name, definition.Name, sdkstdlib.LanguageRevision)
 	for index := 1; index <= libraryCount; index++ {
 		fmt.Fprintf(&manifest, "  \"libs/p%03d\",\n", index)
 	}
@@ -133,7 +134,7 @@ func writeAtlasCallScaleWorkspace(root string, definition buildmeasure.AtlasCall
 	}
 	for index := 1; index <= libraryCount; index++ {
 		name := fmt.Sprintf("p%03d", index)
-		memberManifest := fmt.Sprintf("schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/9\"\nsource = \"src\"\n", definition.Name, name, name)
+		memberManifest := fmt.Sprintf("schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"%s\"\nsource = \"src\"\n", definition.Name, name, name, sdkstdlib.LanguageRevision)
 		if err := writeAtlasCallScaleFile(filepath.Join(root, "libs", name, "fairy.toml"), memberManifest); err != nil {
 			return err
 		}

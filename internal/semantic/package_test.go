@@ -1,6 +1,7 @@
 package semantic_test
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -94,25 +95,25 @@ func TestAnalyzePackagesKeepsDiagnosticPathsUnqualified(t *testing.T) {
 	}
 }
 
-func TestAnalyzePackagesKeepsResourceAbilitiesBehindLanguageCutover(t *testing.T) {
+func TestAnalyzePackagesAdmitsResourceAbilitiesInCurrentLanguage(t *testing.T) {
 	t.Parallel()
 	result, err := semantic.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
 		parsePackageFile(t, 1, "asset.fy", `module asset;
 @abilities(store, key)
-resource Coin { i32 amount; cleanup {} }
-fn void keep(Coin coin) {}`),
+pub resource Coin { i32 amount; cleanup {} }`),
 	}})
 	if err != nil {
 		t.Fatalf("AnalyzePackages() error = %v", err)
 	}
-	if result.CompletedThrough != semantic.PhaseResolve || result.FailedPhase != semantic.PhaseNone ||
-		len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 ||
-		result.Unsupported[0].Feature != "resource attribute @abilities" {
+	if result.CompletedThrough != semantic.PhaseFlow || result.FailedPhase != semantic.PhaseNone ||
+		len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 ||
+		len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Resources) != 1 ||
+		!slices.Equal(result.HIR.Modules[0].Resources[0].Abilities, []hir.ResourceAbility{hir.ResourceAbilityStore, hir.ResourceAbilityKey}) {
 		t.Fatalf("AnalyzePackages() result = %+v", result)
 	}
 }
 
-func TestAnalyzePackagesKeepsOnchainEffectsBehindLanguageCutover(t *testing.T) {
+func TestAnalyzePackagesAdmitsOnchainEffectsInCurrentLanguage(t *testing.T) {
 	t.Parallel()
 	result, err := semantic.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
 		parsePackageFile(t, 1, "contract.fy", `module contract;
@@ -122,8 +123,10 @@ fn i32 balance() { return 0; }`),
 	if err != nil {
 		t.Fatalf("AnalyzePackages() error = %v", err)
 	}
-	if result.FailedPhase != semantic.PhaseNone || len(result.Diagnostics) != 0 ||
-		len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "effect storage_read" {
+	if result.CompletedThrough != semantic.PhaseFlow || result.FailedPhase != semantic.PhaseNone ||
+		len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 ||
+		len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 1 ||
+		!slices.Equal(result.HIR.Modules[0].Functions[0].Effects, []hir.Effect{hir.EffectStorageRead}) {
 		t.Fatalf("AnalyzePackages() result = %+v", result)
 	}
 }

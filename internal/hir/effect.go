@@ -21,16 +21,6 @@ const (
 )
 
 var stage0Effects = []Effect{
-	EffectClock,
-	EffectConsole,
-	EffectEnvironment,
-	EffectFilesystem,
-	EffectNetwork,
-	EffectProcess,
-	EffectRandom,
-}
-
-var experimentalEffects = []Effect{
 	EffectBlockContext,
 	EffectClock,
 	EffectConsole,
@@ -65,9 +55,10 @@ func Stage0Effects() []Effect {
 	return slices.Clone(stage0Effects)
 }
 
-// ExperimentalEffects returns the complete experimental vocabulary in lexical order.
+// ExperimentalEffects preserves the compiler-internal helper name used before language 11.
+// Its result is now exactly the released vocabulary.
 func ExperimentalEffects() []Effect {
-	return slices.Clone(experimentalEffects)
+	return Stage0Effects()
 }
 
 // OnchainEffects returns the target-neutral on-chain authority vocabulary in lexical order.
@@ -107,11 +98,10 @@ func OnchainEffectsAreReadOnly(effects []Effect) bool {
 	return len(MutatingOnchainEffects(effects)) == 0
 }
 
-// ParseEffect returns one exact compiler-known effect. Stable package analysis separately keeps
-// experimental on-chain spellings behind the current language-revision boundary.
+// ParseEffect returns one exact compiler-known effect from the current language revision.
 func ParseEffect(value string) (Effect, bool) {
 	effect := Effect(value)
-	return effect, slices.Contains(experimentalEffects, effect)
+	return effect, slices.Contains(stage0Effects, effect)
 }
 
 // CanonicalEffects returns a sorted, duplicate-free copy of effects.

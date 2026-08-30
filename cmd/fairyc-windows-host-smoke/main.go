@@ -419,6 +419,17 @@ func run(arguments []string) error {
 		return err
 	}
 	workspaceBuildExecutions += stdTextFromBufferBuildExecutions
+	contractCapabilityBuildExecutions, err := runStdlibQuickstartProof(
+		root,
+		"contract_capabilities_quickstart",
+		"contract-capabilities-quickstart",
+		"language-11 contract capabilities",
+		42,
+	)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += contractCapabilityBuildExecutions
 	stdFSBuildExecutions, err := runStdlibQuickstartProofWithFixtures(
 		root,
 		"std_fs_quickstart",

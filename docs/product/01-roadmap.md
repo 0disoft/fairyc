@@ -492,9 +492,9 @@ example, requires no output and native result 42, and removes the image. The min
 quickstart iterates two bytes with typed `usize` ordering and checked addition, performs checked byte
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
-  smoke therefore covers two retained target builds, seventeen package-workspace builds including
-  safe allocation, byte-buffer, text, I/O, and Region quickstarts, nine package-workspace runs, two safe File builds, two safe owned-text
-  builds, two direct target executions, two exec-target executions, and sixty-three total target or
+  smoke therefore covers two retained target builds, twenty-five package-workspace builds including
+  language-11 contract capabilities, safe allocation, byte-buffer, text, I/O, and Region quickstarts, nine package-workspace runs, two safe File builds, two safe owned-text
+  builds, two direct target executions, two exec-target executions, and ninety-one total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
 replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
 separately built temporary `fairyc.exe`. Direct execution of that product additionally proves EOF,
@@ -1331,8 +1331,8 @@ non-authority to separate executable oracles and records what each still does no
 - `impact`, semantic `diff`, stable anchors, MCP, and structural edits: require `.fymap` identity and completeness evidence from real use.
 - Custom allocators, portable paths, resource-aware arenas, closures, concurrency capabilities, async, sockets, and freestanding or embedded support each require a separate ownership and target contract.
 - Production workloads: ADR 0328 records candidate-only gates for independently promoted Linux profiles, verified cancellation and structured task ownership, bounded I/O and generated declarations, and vendor-neutral operational context. It accepts no server framework, database, scheduler, trait, macro, registry, or telemetry protocol; each implementation remains a separate evidence-backed vertical slice.
-- Resource abilities: ADR 0336 supplies experimental single-package `drop`, `store`, and `key` analysis plus HIR metadata. ADR 0341 adds lossless public-interface v4 transport, but stable package compilation remains closed until the coordinated language revision cut, so this is not yet a released language capability.
-- On-chain effects: ADR 0337 supplies experimental chain-neutral authority and mutation classification while leaving the released `/10` vocabulary and stable package compilation closed pending a coordinated revision cut.
+- Resource abilities: ADR 0342 releases `drop`, `store`, and `key` analysis in language 11 after ADR 0341's lossless public-interface v4 transport. Explicit authorized destruction remains a separate MIR/backend slice.
+- On-chain effects: ADR 0342 releases the five chain-neutral authority and mutation effects in language 11. Concrete storage, event, external-call, and block-context operations remain separate SDK, MIR, backend, and target slices.
 - Contract state: ADR 0338 supplies a host-independent typed layout and failure-atomic transaction oracle only. Source syntax, MIR lowering, production persistence, Merkle proofs, reentrancy, and deployable targets remain separate admission slices.
 - Contract interfaces: ADR 0340 supplies an experimental chain-neutral IDL and typed client generator over consumer-owned transports. Ordinary Fairy source calls, codec selection, signing, reentrancy analysis, MIR lowering, and deployable targets remain closed.
 

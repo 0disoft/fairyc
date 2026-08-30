@@ -1,0 +1,8 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "example.contract-capabilities-quickstart.app"
+name = "contract-capabilities-quickstart"
+version = "1.0.0"
+language = "fairyc-language/11"
+source = "src"
