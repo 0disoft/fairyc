@@ -34,10 +34,13 @@ also rejects receiver-bound and drop-glue owners while preserving static associa
 explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while
 preserving safe resource borrows and static resource namespaces; production storage and runtime
 targets still do not consume it. ADR 0363 freezes the remaining owner HIR as a positive allowlist so
-future forms fail closed.
+future forms fail closed. ADR 0364 adds a versioned five-case transaction corpus that reaches this
+oracle through source-independent HIR and verified transaction MIR.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
+`spec/fixtures/contract-state/manifest-v0.json` owns the current executable compatibility examples;
+it is not a production storage format.
 
 ## Typed declarations
 

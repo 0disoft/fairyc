@@ -521,7 +521,9 @@ linear state side model while retaining its explicit static trap exit. ADR 0362 
 resource values and lexical regions whose drop, burn, and reset lifetimes are absent from that side
 model while preserving safe resource borrows and static resource namespaces. ADR 0363 then freezes
 the remaining pure owner HIR as a positive allowlist so future statement, expression, operator, or
-expression-effect additions fail closed.
+expression-effect additions fail closed. ADR 0364 adds a versioned five-case transaction fixture
+corpus that executes commit, reject, trap, delete, and write-limit behavior through HIR lowering,
+verified transaction MIR, and the semantic oracle without admitting source or production storage.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

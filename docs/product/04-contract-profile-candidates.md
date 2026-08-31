@@ -113,6 +113,9 @@ exit. ADR 0362 rejects owned resource values and lexical regions until their dro
 and reset lifetimes have a transaction-level representation; safe resource borrows and static
 resource namespaces remain admitted. ADR 0363 requires every residual current owner statement,
 expression, operator, and expression-local effect to appear in a positive allowlist.
+ADR 0364 adds a versioned five-case transaction corpus for commit, reject, trap, delete, and
+write-limit rollback through the current HIR/MIR/oracle path. Passing that corpus does not by itself
+admit source syntax, native execution, production persistence, or deployable contract targets.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

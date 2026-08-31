@@ -1,0 +1,55 @@
+package contractstatefixture
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestContractStateManifestV0(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state", "manifest-v0.json")
+	report, err := Run(manifestPath)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if report.CasesRun != 5 {
+		t.Fatalf("Run() cases = %d, want 5", report.CasesRun)
+	}
+	for _, failure := range report.Failures {
+		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
+	}
+}
+
+func TestContractStateManifestRejectsUnknownFields(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state", "manifest-v0.json")
+	contents, err := os.ReadFile(manifestPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	contents = []byte(strings.Replace(string(contents), `"schemaVersion":`, `"unknown": true, "schemaVersion":`, 1))
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	if err := os.WriteFile(path, contents, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Run(path); err == nil || !strings.Contains(err.Error(), "unknown field") {
+		t.Fatalf("Run() error = %v, want unknown-field rejection", err)
+	}
+}
+
+func TestContractStateManifestRejectsDuplicateIdentities(t *testing.T) {
+	t.Parallel()
+	definition := manifest{
+		Schema: fixtureSchemaVersion, SchemaVersion: fixtureSchemaVersion, Contracts: []string{"contract"},
+		Layout: layoutDefinition{ContractUID: "fixture", Fields: []fieldDefinition{
+			{Name: "value", Kind: "cell", ValueTypeID: "u64/be/v1"},
+			{Name: "value", Kind: "cell", ValueTypeID: "u64/be/v1"},
+		}},
+		Limits: limitsDefinition{MaxWrites: 1, MaxWriteBytes: 1, MaxValueBytes: 1, MaxMapKeyBytes: 1},
+	}
+	if err := validateManifest(definition); err == nil || !strings.Contains(err.Error(), "duplicated") {
+		t.Fatalf("validateManifest() error = %v, want duplicate rejection", err)
+	}
+}
