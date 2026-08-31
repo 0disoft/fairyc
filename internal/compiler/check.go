@@ -4,6 +4,7 @@ package compiler
 import (
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
@@ -12,9 +13,10 @@ import (
 type Stage string
 
 const (
-	StagePackageInput Stage = "package-input"
-	StageMIRLower     Stage = "mir-lower"
-	StageMIRVerify    Stage = "mir-verify"
+	StagePackageInput  Stage = "package-input"
+	StageMIRLower      Stage = "mir-lower"
+	StageMIRVerify     Stage = "mir-verify"
+	StageStateMIRLower Stage = "contract-state-mir-lower"
 )
 
 // Error reports an internal pipeline failure separately from ordinary source diagnostics and
@@ -46,11 +48,13 @@ func (e *Error) Unwrap() error {
 	return e.Cause
 }
 
-// Result contains the semantic result and, only after successful verification, executable MIR.
+// Result contains the semantic result and, only after every executable IR
+// boundary verifies, ordinary MIR plus compiler-private contract-state MIR.
 type Result struct {
-	Semantic semantic.Result
-	MIR      mir.Program
-	Verified bool
+	Semantic          semantic.Result
+	MIR               mir.Program
+	StateTransactions []contractstatemir.LoweredTransaction
+	Verified          bool
 }
 
 // Analysis is the completed semantic half of one compiler request. It deliberately contains no
@@ -105,7 +109,12 @@ func lowerVerified(semanticResult semantic.Result) (Result, error) {
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return result, &Error{Stage: StageMIRVerify, Verification: failures}
 	}
+	stateTransactions, err := contractstatemir.LowerHIRTransactions(semanticResult.HIR)
+	if err != nil {
+		return result, &Error{Stage: StageStateMIRLower, Cause: err}
+	}
 	result.MIR = program
+	result.StateTransactions = stateTransactions
 	result.Verified = true
 	return result, nil
 }

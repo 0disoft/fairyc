@@ -1,6 +1,7 @@
 package compiler_test
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"path/filepath"
@@ -8,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/contractstate"
+	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
@@ -112,6 +115,50 @@ func TestAnalyzePackagesSeparatesSemanticAnalysisFromVerifiedMIRLowering(t *test
 	}
 }
 
+func TestLowerAnalyzedPublishesVerifiedStateTransactionsAtomically(t *testing.T) {
+	t.Parallel()
+	analysis, encoded := statefulCompilerAnalysis(t)
+	result, err := compiler.LowerAnalyzed(analysis)
+	if err != nil {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if !result.Verified || len(result.MIR.Functions) != 1 || len(result.StateTransactions) != 1 {
+		t.Fatalf("LowerAnalyzed() result = %+v", result)
+	}
+	transaction := result.StateTransactions[0]
+	if transaction.Package != 1 || transaction.Function != result.MIR.Functions[0].Symbol {
+		t.Fatalf("state transaction owner = %d/%d, MIR symbol = %d", transaction.Package, transaction.Function, result.MIR.Functions[0].Symbol)
+	}
+	store, err := contractstatemir.NewMemoryStore(transaction.Program.Layout)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := contractstatemir.Execute(store, transaction.Program, contractstate.Limits{
+		MaxWrites: 8, MaxWriteBytes: 1024, MaxValueBytes: 64, MaxMapKeyBytes: 64,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if outcome.Exit != contractstatemir.ExitCommit || len(outcome.Reads) != 1 || !outcome.Reads[0].Found ||
+		outcome.Reads[0].Value.TypeID != contractstate.U64.TypeID() || !bytes.Equal(outcome.Reads[0].Value.Encoded, encoded) {
+		t.Fatalf("state execution = %+v, want committed read 42", outcome)
+	}
+}
+
+func TestLowerAnalyzedRejectsStateMIRBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	analysis, _ := statefulCompilerAnalysis(t)
+	analysis.Semantic.HIR.Modules[0].Functions[0].Effects = nil
+	result, err := compiler.LowerAnalyzed(analysis)
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+		t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
@@ -127,6 +174,34 @@ func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	if result.Verified || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) != 1 || len(result.MIR.Functions) != 0 {
 		t.Fatalf("LowerAnalyzed() result = %+v", result)
 	}
+}
+
+func statefulCompilerAnalysis(t *testing.T) (compiler.Analysis, []byte) {
+	t.Helper()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main() { return 42; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	function := &analysis.Semantic.HIR.Modules[0].Functions[0]
+	function.Effects = hir.CanonicalEffects([]hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite})
+	encoded, err := contractstate.U64.Encode(42)
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis.Semantic.HIR.StateLayouts = []hir.StateLayout{{
+		Package: 1, ContractUID: "test.compiler-result",
+		Fields: []hir.StateField{{Name: "value", Kind: hir.StateFieldCell, ValueTypeID: contractstate.U64.TypeID()}},
+	}}
+	analysis.Semantic.HIR.StateTransactions = []hir.StateTransaction{{
+		Package: 1, Function: function.Symbol, Exit: hir.StateTransactionCommit,
+		Accesses: []hir.StateAccess{
+			{Kind: hir.StateAccessCellWrite, Field: "value", Value: hir.StateValue{TypeID: contractstate.U64.TypeID(), Encoded: encoded}},
+			{Kind: hir.StateAccessCellRead, Field: "value"},
+		},
+	}}
+	return analysis, encoded
 }
 
 func TestCheckPackagesVerifiesIsolatedModulePaths(t *testing.T) {

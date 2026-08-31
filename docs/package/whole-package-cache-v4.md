@@ -43,6 +43,6 @@ verifier re-entry, ADR 0351 checks the expected hash before fresh HIR owner rebi
 pairs that payload with stable package MIR in a separate outer compilation artifact. ADR 0353 makes
 persistent records carry exactly that bundle and requires the key-selected body hash before a hit.
 ADR 0354 reassembles both members, requires each cached transaction to use its owning MIR function's
-fresh symbol, and exposes the verified state programs for explicit oracle execution. Source syntax,
-ordinary compiler-result integration, native backend execution, and production persistence remain
-separate admission gates.
+fresh symbol, and exposes the verified state programs for explicit oracle execution. ADR 0355
+publishes cold and cached programs through one atomic verified compiler result. Source syntax,
+native backend execution, and production persistence remain separate admission gates.

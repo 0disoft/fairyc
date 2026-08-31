@@ -504,7 +504,8 @@ that compilation payload, requires the key-selected body hash, and quarantines c
 legacy MIR-only generations. ADR 0354 reassembles both members under one fresh coordinate-owned
 function-symbol graph and returns cached state transactions that the compiler-private oracle can
 execute after exact current-body identity selection without consulting the current operation side
-table during reassembly.
+table during reassembly. ADR 0355 publishes ordinary and contract-state MIR atomically through one
+verified `compiler.Result` for cold and cached compilation paths.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

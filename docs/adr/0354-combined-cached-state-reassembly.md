@@ -64,3 +64,6 @@ A persistent all-hit now returns ordinary MIR and executable compiler-private st
 under one verified fresh function-symbol graph. Source syntax, ordinary `compiler.Result` state
 integration, data-dependent transaction control flow, native backend lowering, runtime persistence,
 migration, gas, Merkle proofs, reentrancy, chain integration, and deployable targets remain closed.
+
+ADR 0355 later moves both ordinary and cached transactions into the shared atomic
+`compiler.Result` verification boundary.

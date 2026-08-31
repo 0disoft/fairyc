@@ -317,7 +317,7 @@ func TestPersistentSessionReassemblesCachedStateWithMIRSymbols(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = writer.Close() })
 	cold := checkPersistentAnalysis(t, writer, workspace, analysis, false)
-	if cold.Cache.Outcome != OutcomeFallback || !cold.Cache.Lowered || cold.Cache.Stored != 2 || len(cold.StateTransactions) != 1 {
+	if cold.Cache.Outcome != OutcomeFallback || !cold.Cache.Lowered || cold.Cache.Stored != 2 || len(cold.Compiler.StateTransactions) != 1 {
 		t.Fatalf("cold stateful Check() = %+v", cold)
 	}
 	assertStateTransactionResult(t, cold, 42)
@@ -332,11 +332,11 @@ func TestPersistentSessionReassemblesCachedStateWithMIRSymbols(t *testing.T) {
 		return compiler.Result{}, nil
 	}
 	warm := checkPersistentAnalysis(t, reader, workspace, analysis, true)
-	if warm.Cache.Outcome != OutcomeAllHit || warm.Cache.Lowered || warm.Cache.Hits != 2 || len(warm.StateTransactions) != 1 {
+	if warm.Cache.Outcome != OutcomeAllHit || warm.Cache.Lowered || warm.Cache.Hits != 2 || len(warm.Compiler.StateTransactions) != 1 {
 		t.Fatalf("warm stateful Check() = %+v", warm)
 	}
 	assertStateTransactionResult(t, warm, 42)
-	if cold.StateTransactions[0].Program.Capability == warm.StateTransactions[0].Program.Capability {
+	if cold.Compiler.StateTransactions[0].Program.Capability == warm.Compiler.StateTransactions[0].Program.Capability {
 		t.Fatal("persistent reassembly reused source-lowered transaction authority")
 	}
 }
@@ -479,10 +479,10 @@ func checkPersistentAnalysis(t *testing.T, session *Session, workspace workspace
 
 func assertStateTransactionResult(t *testing.T, result Result, value uint64) {
 	t.Helper()
-	if len(result.StateTransactions) != 1 {
-		t.Fatalf("state transactions = %+v", result.StateTransactions)
+	if len(result.Compiler.StateTransactions) != 1 {
+		t.Fatalf("state transactions = %+v", result.Compiler.StateTransactions)
 	}
-	transaction := result.StateTransactions[0]
+	transaction := result.Compiler.StateTransactions[0]
 	foundFunction := false
 	for _, function := range result.Compiler.MIR.Functions {
 		if strings.HasSuffix(function.Name, "::answer::value") {

@@ -23,7 +23,8 @@ then reconstructs new capability authority without retaining source operation bo
 pairs that payload with stable package MIR in a separate exact-version outer artifact. ADR 0353
 admits that bundle into disposable persistent cache records with exact expected-body checking.
 ADR 0354 reassembles cached MIR and state bodies under one fresh function-symbol graph and proves
-explicit oracle execution; production storage and runtime targets still do not consume it.
+explicit oracle execution. ADR 0355 publishes ordinary and contract-state MIR atomically through one
+verified compiler result; production storage and runtime targets still do not consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
@@ -197,6 +198,7 @@ adds the exact private body hash to the owner without widening dependency entrie
 now also proves a bounded capability-free body payload, fresh capability reconstruction, verifier
 re-entry, exact body-hash matching, checked fresh-HIR-owner rebind, and one coordinate-bound outer
 stable package-compilation artifact. ADR 0354 also proves complete cache hits rebind state operations
-to the matching fresh MIR function symbols and execute through this oracle. It still does not prove
-source declaration/access rules, owner-bound borrows, external-call exclusion, ordinary compiler-
-result integration, native MIR lowering, or deterministic target execution.
+to the matching fresh MIR function symbols and execute through this oracle. ADR 0355 moves cold and
+cached transactions into the ordinary atomic verified compiler result. It still does not prove
+source declaration/access rules, owner-bound borrows, external-call exclusion, native MIR lowering,
+or deterministic target execution.

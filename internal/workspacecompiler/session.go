@@ -74,12 +74,11 @@ type Report struct {
 	ReassemblyFallback bool
 }
 
-// Result contains the ordinary compiler result, verified compiler-private state
-// transactions, and the exact process-cache decision that led to them.
+// Result contains the unified compiler result plus the exact process-cache
+// decision that produced it.
 type Result struct {
-	Compiler          compiler.Result
-	StateTransactions []contractstatemir.LoweredTransaction
-	Cache             Report
+	Compiler compiler.Result
+	Cache    Report
 }
 
 // Session owns exactly one bounded artifact cache: either process-local MIR or stable disk package
@@ -201,10 +200,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	if len(owners) == 0 {
 		compiled, lowerErr := session.lower(analysis)
 		report.Lowered = compiled.Verified
-		if lowerErr != nil || !compiled.Verified {
-			return Result{Compiler: compiled, Cache: report}, lowerErr
-		}
-		return resultWithCurrentState(analysis, compiled, report)
+		return Result{Compiler: compiled, Cache: report}, lowerErr
 	}
 	bodies, err := contractstatemir.ComputeHIRStateBodyHashes(analysis.Semantic.HIR, owners, coordinates)
 	if err != nil {
@@ -278,7 +274,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		}
 		report.Stored++
 	}
-	return resultWithCurrentState(analysis, compiled, report)
+	return Result{Compiler: compiled, Cache: report}, nil
 }
 
 // Stats returns the underlying verified-cache counters for measurement and diagnostics.
@@ -331,9 +327,11 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{
-				Compiler:          compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true},
-				StateTransactions: stateTransactions,
-				Cache:             report,
+				Compiler: compiler.Result{
+					Semantic: analysis.Semantic, MIR: program,
+					StateTransactions: stateTransactions, Verified: true,
+				},
+				Cache: report,
 			}, nil
 		}
 		report.ReassemblyFallback = true
@@ -384,7 +382,7 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		}
 		report.Stored++
 	}
-	return resultWithCurrentState(analysis, compiled, report)
+	return Result{Compiler: compiled, Cache: report}, nil
 }
 
 func rebindPersistentCompilations(compilations []packageartifact.StableCompilationArtifact, input hir.Package, coordinates map[hir.PackageID]packagegraph.CoordinateID, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (mir.Program, []contractstatemir.LoweredTransaction, error) {
@@ -455,7 +453,8 @@ func resultWithCurrentState(analysis compiler.Analysis, compiled compiler.Result
 	if err != nil {
 		return Result{}, fmt.Errorf("lower current HIR contract-state transactions: %w", err)
 	}
-	return Result{Compiler: compiled, StateTransactions: transactions, Cache: report}, nil
+	compiled.StateTransactions = transactions
+	return Result{Compiler: compiled, Cache: report}, nil
 }
 
 func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {

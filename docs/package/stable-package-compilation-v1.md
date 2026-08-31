@@ -3,7 +3,8 @@
 - Status: Experimental compiler-private contract
 - Decisions: `docs/adr/0352-stable-package-compilation-artifact.md`,
   `docs/adr/0353-stable-compilation-cache-records.md`,
-  `docs/adr/0354-combined-cached-state-reassembly.md`
+  `docs/adr/0354-combined-cached-state-reassembly.md`,
+  `docs/adr/0355-unified-verified-compiler-result.md`
 - Implementation: `internal/packageartifact/stable_artifact.go`,
   `internal/packageartifact/stable_compilation.go`, `internal/packageartifact/stable_cache.go`,
   `internal/workspacecompiler/session.go`
@@ -45,6 +46,6 @@ persistent compiler identity `/2` makes MIR-only `/1` records incompatible misse
 ADR 0354 retains both verified members on a persistent all-hit. Stable MIR reassembly returns its
 fresh coordinate-owned logical-function bindings; every cached state transaction must bind through
 the matching MIR symbol after current layout/signature verification and fresh capability creation.
-The workspace result exposes those transactions for explicit oracle execution. Source syntax,
-ordinary compiler-result integration, backend, runtime, production persistence, and target admission
-remain closed.
+ADR 0355 exposes those transactions through the same nested verified `compiler.Result` used by cold
+and process-local paths. Source syntax, backend, runtime, production persistence, and target
+admission remain closed.

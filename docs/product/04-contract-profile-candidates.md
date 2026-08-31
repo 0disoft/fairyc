@@ -96,7 +96,8 @@ requires both nested artifacts to share a package coordinate. It does not change
 format. ADR 0353 stores that bundle in persistent cache `/2`, requires exact expected-body identity,
 and quarantines malformed, legacy, or contradictory generations. ADR 0354 rebinds every all-hit
 state body through the matching fresh MIR function symbol and returns executable compiler-private
-transactions without running them inside compilation.
+transactions without running them inside compilation. ADR 0355 makes cold and cached compilation
+publish those transactions atomically through the same verified `compiler.Result`.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
