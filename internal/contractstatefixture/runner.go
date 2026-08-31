@@ -11,9 +11,11 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contractstate"
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 const (
@@ -143,14 +145,18 @@ func runCase(definition manifest, fixture caseDefinition) *Failure {
 	if err != nil {
 		return &Failure{CaseID: fixture.ID, Detail: err.Error()}
 	}
-	lowered, err := contractstatemir.LowerHIRTransactions(input)
+	published, err := publishCompilerResult(input)
 	if err != nil {
-		return &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("lower HIR transaction: %v", err)}
+		return &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("publish compiler result: %v", err)}
 	}
-	if len(lowered) != 1 {
-		return &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("lowered transactions = %d, want 1", len(lowered))}
+	if !published.Verified || len(published.MIR.Functions) != 1 || len(published.StateTransactions) != 1 {
+		return &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf(
+			"compiler result = verified %t ordinary functions %d state transactions %d, want true/1/1",
+			published.Verified, len(published.MIR.Functions), len(published.StateTransactions),
+		)}
 	}
-	store, err := contractstatemir.NewMemoryStore(lowered[0].Program.Layout)
+	program := published.StateTransactions[0].Program
+	store, err := contractstatemir.NewMemoryStore(program.Layout)
 	if err != nil {
 		return &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("construct store: %v", err)}
 	}
@@ -158,14 +164,20 @@ func runCase(definition manifest, fixture caseDefinition) *Failure {
 	if fixture.Limits != nil {
 		limits = *fixture.Limits
 	}
-	outcome, executeErr, recovered := execute(store, lowered[0].Program, contractstate.Limits{
+	outcome, executeErr, recovered := execute(store, program, contractstate.Limits{
 		MaxWrites: limits.MaxWrites, MaxWriteBytes: limits.MaxWriteBytes,
 		MaxValueBytes: limits.MaxValueBytes, MaxMapKeyBytes: limits.MaxMapKeyBytes,
 	})
-	if detail := compareResult(fixture, lowered[0].Program.Layout, store, outcome, executeErr, recovered); detail != "" {
+	if detail := compareResult(fixture, program.Layout, store, outcome, executeErr, recovered); detail != "" {
 		return &Failure{CaseID: fixture.ID, Detail: detail}
 	}
 	return nil
+}
+
+func publishCompilerResult(input hir.Package) (compiler.Result, error) {
+	return compiler.LowerAnalyzed(compiler.Analysis{Semantic: semantic.Result{
+		HIR: input, CompletedThrough: semantic.PhaseFlow,
+	}})
 }
 
 func buildHIRPackage(layout layoutDefinition, fixture caseDefinition) (hir.Package, error) {

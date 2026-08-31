@@ -1,10 +1,13 @@
 package contractstatefixture
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/compiler"
 )
 
 func TestContractStateManifestV0(t *testing.T) {
@@ -66,5 +69,27 @@ func TestContractStateManifestRejectsDuplicateIdentities(t *testing.T) {
 	}
 	if err := validateManifest(definition); err == nil || !strings.Contains(err.Error(), "duplicated") {
 		t.Fatalf("validateManifest() error = %v, want duplicate rejection", err)
+	}
+}
+
+func TestCompilerPublicationRejectsFixtureDriftAtomically(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state", "manifest-v1.json")
+	definition, err := loadManifest(manifestPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := buildHIRPackage(definition.Layout, definition.Cases[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	input.StateTransactions[0].Accesses[0].Value.Encoded = []byte{1}
+	result, err := publishCompilerResult(input)
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower {
+		t.Fatalf("publishCompilerResult() error = %v, want state MIR lower failure", err)
+	}
+	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+		t.Fatalf("failed compiler result published executable IR: %+v", result)
 	}
 }

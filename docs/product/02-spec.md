@@ -1011,6 +1011,9 @@ source-independent HIR lowering, verified contract-state MIR, and the failure-at
 manifest is an admission corpus, not a source, runtime, or persistence format.
 ADR 0365 preserves the v0 cell corpus and extends the current v1 manifest with map write/read,
 delete, exact domain-separated storage-key, and encoded-key-limit rollback evidence.
+ADR 0366 requires both fixture generations to pass through `compiler.LowerAnalyzed` and treats only
+one verified atomic ordinary/state MIR result as executable. Direct HIR fixture construction remains
+compiler test input, not a source-language contract.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

@@ -118,6 +118,8 @@ write-limit rollback through the current HIR/MIR/oracle path. Passing that corpu
 admit source syntax, native execution, production persistence, or deployable contract targets.
 ADR 0365 keeps those five cell cases historical and adds three current map cases, including an exact
 physical storage-key vector and map-key-limit rollback, without changing the admission boundary.
+ADR 0366 strengthens those cases to consume only compiler-published state transactions and proves
+state verification failure withholds ordinary MIR too; source construction and targets remain closed.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

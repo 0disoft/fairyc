@@ -44,3 +44,6 @@ rollback after the map-key limit failure.
 The versioned corpus now covers both storage shapes represented by contract-state transaction MIR.
 Future source, backend, runtime, or persistence candidates can be required to satisfy the eight-case
 v1 corpus while historical v0 remains independently executable.
+
+ADR 0366 later routes both corpora through the compiler's atomic ordinary/state MIR publication
+boundary before oracle execution.

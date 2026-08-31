@@ -42,6 +42,8 @@ host calls, or copy-on-write pages, but it must preserve the same observable tra
 `spec/fixtures/contract-state/manifest-v0.json` owns the historical executable cell examples;
 ADR 0365 preserves that baseline and makes `manifest-v1.json` the current
 cell-and-map corpus. Neither manifest is a production storage format.
+ADR 0366 executes both corpora only after the compiler atomically publishes verified ordinary and
+contract-state MIR; a state-MIR rejection leaves both executable outputs empty.
 
 ## Typed declarations
 

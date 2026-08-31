@@ -21,6 +21,7 @@
 - Resource-lifetime-free owner source: `docs/adr/0362-resource-lifetime-free-contract-state-owners.md`
 - Closed-form owner source: `docs/adr/0363-closed-form-contract-state-owner-hir.md`
 - Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v1.json` with historical v0 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`
+- Compiler-published fixture source: `docs/adr/0366-compiler-published-contract-state-fixtures.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -100,6 +101,8 @@ ADR 0364 exercises the admitted HIR bridge and this verifier through a versioned
 corpus covering commit, reject, trap, delete, and write-limit rollback.
 ADR 0365 preserves those historical vectors and adds map write/read, map delete, exact physical-key,
 and encoded-key-limit evidence in the current v1 corpus.
+ADR 0366 submits every fixture HIR package to the unified compiler coordinator and executes only the
+transaction from a verified atomic ordinary/state MIR result.
 
 ## HIR bridge
 
