@@ -67,8 +67,9 @@ type expectedRead struct {
 }
 
 type expectedEntry struct {
-	Field    string `json:"field"`
-	ValueHex string `json:"valueHex"`
+	Field         string `json:"field"`
+	StorageKeyHex string `json:"storageKeyHex,omitempty"`
+	ValueHex      string `json:"valueHex"`
 }
 
 // Failure identifies one malformed or behaviorally mismatched fixture case.

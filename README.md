@@ -524,6 +524,8 @@ the remaining pure owner HIR as a positive allowlist so future statement, expres
 expression-effect additions fail closed. ADR 0364 adds a versioned five-case transaction fixture
 corpus that executes commit, reject, trap, delete, and write-limit behavior through HIR lowering,
 verified transaction MIR, and the semantic oracle without admitting source or production storage.
+ADR 0365 preserves that v0 baseline and adds a current v1 corpus for map write/read, map delete,
+exact domain-separated storage keys, and map-key-limit rollback.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

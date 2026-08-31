@@ -39,8 +39,9 @@ oracle through source-independent HIR and verified transaction MIR.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
-`spec/fixtures/contract-state/manifest-v0.json` owns the current executable compatibility examples;
-it is not a production storage format.
+`spec/fixtures/contract-state/manifest-v0.json` owns the historical executable cell examples;
+ADR 0365 preserves that baseline and makes `manifest-v1.json` the current
+cell-and-map corpus. Neither manifest is a production storage format.
 
 ## Typed declarations
 

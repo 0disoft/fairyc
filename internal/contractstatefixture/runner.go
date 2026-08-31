@@ -16,7 +16,12 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
-const fixtureSchemaVersion = "fairyc.contract-state-fixtures/v0"
+const (
+	fixtureSchemaV0 = "fairyc.contract-state-fixtures/v0"
+	fixtureSchemaV1 = "fairyc.contract-state-fixtures/v1"
+)
+
+var fixtureSchemaVersions = []string{fixtureSchemaV0, fixtureSchemaV1}
 
 var operationKinds = []string{
 	"cell-delete",
@@ -74,7 +79,7 @@ func loadManifest(path string) (manifest, error) {
 }
 
 func validateManifest(definition manifest) error {
-	if definition.Schema == "" || definition.SchemaVersion != fixtureSchemaVersion || len(definition.Contracts) == 0 {
+	if definition.Schema == "" || !slices.Contains(fixtureSchemaVersions, definition.SchemaVersion) || len(definition.Contracts) == 0 {
 		return fmt.Errorf("invalid contract-state fixture contract header")
 	}
 	if definition.Layout.ContractUID == "" || len(definition.Layout.Fields) == 0 {
@@ -273,9 +278,26 @@ func compareResult(fixture caseDefinition, layout contractstatemir.Layout, store
 	}
 	for index, expected := range expect.Store {
 		field, found := fields[expected.Field]
-		if !found || entries[index].Key != field.Prefix || hex.EncodeToString(entries[index].Value) != expected.ValueHex {
+		expectedKey, err := expectedStorageKey(field, expected.StorageKeyHex)
+		if !found || err != nil || entries[index].Key != expectedKey || hex.EncodeToString(entries[index].Value) != expected.ValueHex {
 			return fmt.Sprintf("store entry %d = %+v, want field %q value %q", index, entries[index], expected.Field, expected.ValueHex)
 		}
 	}
 	return ""
+}
+
+func expectedStorageKey(field contractstatemir.LayoutField, encodedHex string) (contractstate.Key, error) {
+	if encodedHex == "" {
+		return field.Prefix, nil
+	}
+	encoded, err := hex.DecodeString(encodedHex)
+	if err != nil {
+		return contractstate.Key{}, fmt.Errorf("decode expected storage key: %w", err)
+	}
+	if len(encoded) != len(contractstate.Key{}) {
+		return contractstate.Key{}, fmt.Errorf("expected storage key has %d bytes, want %d", len(encoded), len(contractstate.Key{}))
+	}
+	var key contractstate.Key
+	copy(key[:], encoded)
+	return key, nil
 }

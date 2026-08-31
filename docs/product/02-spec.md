@@ -1009,6 +1009,8 @@ allowlist.
 ADR 0364 versions the first five transaction execution cases and requires them to pass through
 source-independent HIR lowering, verified contract-state MIR, and the failure-atomic oracle. The
 manifest is an admission corpus, not a source, runtime, or persistence format.
+ADR 0365 preserves the v0 cell corpus and extends the current v1 manifest with map write/read,
+delete, exact domain-separated storage-key, and encoded-key-limit rollback evidence.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

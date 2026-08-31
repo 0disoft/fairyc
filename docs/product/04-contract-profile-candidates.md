@@ -116,6 +116,8 @@ expression, operator, and expression-local effect to appear in a positive allowl
 ADR 0364 adds a versioned five-case transaction corpus for commit, reject, trap, delete, and
 write-limit rollback through the current HIR/MIR/oracle path. Passing that corpus does not by itself
 admit source syntax, native execution, production persistence, or deployable contract targets.
+ADR 0365 keeps those five cell cases historical and adds three current map cases, including an exact
+physical storage-key vector and map-key-limit rollback, without changing the admission boundary.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

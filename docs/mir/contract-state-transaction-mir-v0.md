@@ -20,7 +20,7 @@
 - Potential-trap owner source: `docs/adr/0361-potentially-trapping-owner-operations.md`
 - Resource-lifetime-free owner source: `docs/adr/0362-resource-lifetime-free-contract-state-owners.md`
 - Closed-form owner source: `docs/adr/0363-closed-form-contract-state-owner-hir.md`
-- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v0.json`, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`
+- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v1.json` with historical v0 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -98,6 +98,8 @@ ADR 0363 then admits only a positive statement, expression, and operator allowli
 future owner form or expression-local effect fails closed.
 ADR 0364 exercises the admitted HIR bridge and this verifier through a versioned five-case oracle
 corpus covering commit, reject, trap, delete, and write-limit rollback.
+ADR 0365 preserves those historical vectors and adds map write/read, map delete, exact physical-key,
+and encoded-key-limit evidence in the current v1 corpus.
 
 ## HIR bridge
 

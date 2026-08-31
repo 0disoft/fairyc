@@ -48,3 +48,5 @@ Contract-state transaction semantics now have a reusable admission artifact rath
 implementation-local tests. A future execution path can be required to consume the same manifest
 and produce the same observations without treating the experimental in-memory store as a
 production persistence design.
+
+ADR 0365 later preserves this five-case v0 baseline and adds a separately versioned v1 map corpus.

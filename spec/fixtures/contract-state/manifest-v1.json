@@ -1,0 +1,187 @@
+{
+  "$schema": "./schema-v1.json",
+  "schemaVersion": "fairyc.contract-state-fixtures/v1",
+  "deferred": [
+    "source syntax and public compiler admission",
+    "conditional and data-dependent state operations",
+    "production persistence and chain-specific accounting",
+    "concurrent transaction scheduling and conflict fixtures",
+    "native backend and runtime integration"
+  ],
+  "contracts": [
+    "docs/contract-state/transaction-kernel-v0.md",
+    "docs/mir/contract-state-transaction-mir-v0.md",
+    "docs/adr/0338-typed-persistent-state-transaction-kernel.md",
+    "docs/adr/0344-compiler-private-contract-state-transaction-mir.md",
+    "docs/adr/0364-versioned-contract-state-transaction-fixtures.md",
+    "docs/adr/0365-versioned-contract-state-map-fixtures.md"
+  ],
+  "layout": {
+    "contractUID": "fixture.counter",
+    "fields": [
+      { "name": "primary", "kind": "cell", "valueTypeID": "u64/be/v1" },
+      { "name": "secondary", "kind": "cell", "valueTypeID": "u64/be/v1" },
+      { "name": "balances", "kind": "map", "keyTypeID": "bytes20/v1", "valueTypeID": "u64/be/v1" }
+    ]
+  },
+  "limits": {
+    "maxWrites": 8,
+    "maxWriteBytes": 1024,
+    "maxValueBytes": 64,
+    "maxMapKeyBytes": 64
+  },
+  "cases": [
+    {
+      "id": "commit-read-your-write",
+      "operations": [
+        { "kind": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000001" },
+        { "kind": "cell-read", "field": "primary" }
+      ],
+      "exit": "commit",
+      "expect": {
+        "status": "commit",
+        "exit": "commit",
+        "version": 1,
+        "writes": 1,
+        "reads": [
+          { "operation": 1, "found": true, "typeID": "u64/be/v1", "valueHex": "0000000000000001" }
+        ],
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000001" }
+        ]
+      }
+    },
+    {
+      "id": "reject-rolls-back",
+      "operations": [
+        { "kind": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000002" }
+      ],
+      "exit": "reject",
+      "expect": {
+        "status": "reject",
+        "exit": "reject",
+        "version": 0,
+        "writes": 0,
+        "reads": [],
+        "store": []
+      }
+    },
+    {
+      "id": "trap-rolls-back",
+      "operations": [
+        { "kind": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000003" }
+      ],
+      "exit": "trap",
+      "trapCategory": "assertion-failed",
+      "expect": {
+        "status": "trap",
+        "trapCategory": "assertion-failed",
+        "version": 0,
+        "writes": 0,
+        "reads": [],
+        "store": []
+      }
+    },
+    {
+      "id": "delete-hides-pending-write",
+      "operations": [
+        { "kind": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000004" },
+        { "kind": "cell-delete", "field": "primary" },
+        { "kind": "cell-read", "field": "primary" }
+      ],
+      "exit": "commit",
+      "expect": {
+        "status": "commit",
+        "exit": "commit",
+        "version": 1,
+        "writes": 1,
+        "reads": [
+          { "operation": 2, "found": false, "typeID": "u64/be/v1", "valueHex": "" }
+        ],
+        "store": []
+      }
+    },
+    {
+      "id": "write-limit-rolls-back",
+      "operations": [
+        { "kind": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000005" },
+        { "kind": "cell-write", "field": "secondary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000006" }
+      ],
+      "exit": "commit",
+      "limits": {
+        "maxWrites": 1,
+        "maxWriteBytes": 1024,
+        "maxValueBytes": 64,
+        "maxMapKeyBytes": 64
+      },
+      "expect": {
+        "status": "error",
+        "errorContains": "exceeds the write-count limit",
+        "version": 0,
+        "writes": 0,
+        "reads": [],
+        "store": []
+      }
+    },
+    {
+      "id": "map-commit-read-your-write",
+      "operations": [
+        { "kind": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000007" },
+        { "kind": "map-read", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213" }
+      ],
+      "exit": "commit",
+      "expect": {
+        "status": "commit",
+        "exit": "commit",
+        "version": 1,
+        "writes": 1,
+        "reads": [
+          { "operation": 1, "found": true, "typeID": "u64/be/v1", "valueHex": "0000000000000007" }
+        ],
+        "store": [
+          { "field": "balances", "storageKeyHex": "ba63df86472560033a3ac3585e268edfe003120d2a42f28304cd3a2b07d70c71", "valueHex": "0000000000000007" }
+        ]
+      }
+    },
+    {
+      "id": "map-delete-hides-pending-write",
+      "operations": [
+        { "kind": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000008" },
+        { "kind": "map-delete", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213" },
+        { "kind": "map-read", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213" }
+      ],
+      "exit": "commit",
+      "expect": {
+        "status": "commit",
+        "exit": "commit",
+        "version": 1,
+        "writes": 1,
+        "reads": [
+          { "operation": 2, "found": false, "typeID": "u64/be/v1", "valueHex": "" }
+        ],
+        "store": []
+      }
+    },
+    {
+      "id": "map-key-limit-rolls-back",
+      "operations": [
+        { "kind": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000009" }
+      ],
+      "exit": "commit",
+      "limits": {
+        "maxWrites": 8,
+        "maxWriteBytes": 1024,
+        "maxValueBytes": 64,
+        "maxMapKeyBytes": 19
+      },
+      "expect": {
+        "status": "error",
+        "errorContains": "exceeds the encoded-key byte limit",
+        "version": 0,
+        "writes": 0,
+        "reads": [],
+        "store": []
+      }
+    }
+  ]
+}

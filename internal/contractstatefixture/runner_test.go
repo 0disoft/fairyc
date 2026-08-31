@@ -22,6 +22,21 @@ func TestContractStateManifestV0(t *testing.T) {
 	}
 }
 
+func TestContractStateManifestV1(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state", "manifest-v1.json")
+	report, err := Run(manifestPath)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if report.CasesRun != 8 {
+		t.Fatalf("Run() cases = %d, want 8", report.CasesRun)
+	}
+	for _, failure := range report.Failures {
+		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
+	}
+}
+
 func TestContractStateManifestRejectsUnknownFields(t *testing.T) {
 	t.Parallel()
 	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state", "manifest-v0.json")
@@ -42,7 +57,7 @@ func TestContractStateManifestRejectsUnknownFields(t *testing.T) {
 func TestContractStateManifestRejectsDuplicateIdentities(t *testing.T) {
 	t.Parallel()
 	definition := manifest{
-		Schema: fixtureSchemaVersion, SchemaVersion: fixtureSchemaVersion, Contracts: []string{"contract"},
+		Schema: fixtureSchemaV1, SchemaVersion: fixtureSchemaV1, Contracts: []string{"contract"},
 		Layout: layoutDefinition{ContractUID: "fixture", Fields: []fieldDefinition{
 			{Name: "value", Kind: "cell", ValueTypeID: "u64/be/v1"},
 			{Name: "value", Kind: "cell", ValueTypeID: "u64/be/v1"},
