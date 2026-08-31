@@ -66,7 +66,8 @@ the straight-line state side model without claiming transitive call-graph or ree
 unsafe code and reachable raw-pointer types without treating safe borrows as state permissions. ADR
 0360 later excludes receiver-bound methods and automatic drop glue while retaining static associated
 functions as explicit entries. ADR 0361 later excludes ordinary potentially trapping operations
-without removing the state program's explicit static trap exit.
+without removing the state program's explicit static trap exit. ADR 0362 later excludes ordinary
+owned-resource and lexical-region lifetime transitions.
 
 The compiler now has a complete process-local typed path from package/function ownership through
 verified state effects and capability flow into failure-atomic oracle execution. Before ordinary

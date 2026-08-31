@@ -40,10 +40,10 @@ owner would overstate what the state side model verifies.
 ## Validation
 
 Direct HIR mutation tests reject an unsafe declaration, unsafe body, raw-pointer local, and a raw
-pointer nested inside a struct parameter. A positive regression preserves safe-borrow and
-pointer-free resource owner types. Stable rebind rejects unsafe declaration/body drift and a fresh
-raw-pointer local. Compiler integration tests ordinarily analyze a valid unsafe C-string cast and a
-valid raw-pointer parameter, then prove state lowering classifies each at
+pointer nested inside a struct parameter. A positive regression preserves the then-current safe
+borrow and pointer-free resource owner types. Stable rebind rejects unsafe declaration/body drift
+and a fresh raw-pointer local. Compiler integration tests ordinarily analyze a valid unsafe C-string
+cast and a valid raw-pointer parameter, then prove state lowering classifies each at
 `contract-state-mir-lower` without publishing partial executable IR.
 
 ## Compatibility
@@ -58,6 +58,7 @@ Every accepted current transaction owner is call-free, straight-line, safe, and 
 raw-pointer types. Safe borrows and resources remain ordinary compiler facts rather than state-MIR
 permissions. ADR 0360 later requires an explicit free or static-associated entry and rejects
 receiver-bound methods and automatic drop glue. Source state syntax, data-dependent state values,
-owner-bound state borrows, potentially trapping ordinary operations, conditional
+owner-bound state borrows, potentially trapping ordinary operations, owned-resource and lexical
+region lifetime admission, conditional
 transaction MIR, native lowering, runtime persistence, migration, gas, Merkle proofs, events, block
 context, reentrancy, chain integration, and deployable targets remain closed.

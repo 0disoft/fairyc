@@ -187,6 +187,14 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 		{name: "owner checked compound assignment", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: "assignment", Operator: "+="}}
 		}, contains: "potentially trapping operations are not admitted"},
+		{name: "owner owned resource parameter", mutate: func(input *hir.Package) {
+			resourceType := hir.Type("ledger::Handle")
+			input.Modules[0].Resources = []hir.Resource{{Type: resourceType, DropKind: hir.ResourceDropEmpty}}
+			input.Modules[0].Functions[0].Parameters = []hir.Parameter{{Type: resourceType}}
+		}, contains: "owned resource values are not admitted"},
+		{name: "nested owner lexical region", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "region"}}}
+		}, contains: "lexical regions are not admitted"},
 		{name: "owner call", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},
@@ -228,16 +236,16 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 	}
 }
 
-func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceOwnerTypes(t *testing.T) {
+func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceNamespaces(t *testing.T) {
 	input := baseHIRTransaction()
 	resourceType := hir.Type("ledger::Handle")
-	input.Modules[0].Resources = []hir.Resource{{Type: resourceType, Fields: []hir.ResourceField{{Type: hir.TypeU32}}}}
+	input.Modules[0].Resources = []hir.Resource{{Type: resourceType, DropKind: hir.ResourceDropEmpty, Fields: []hir.ResourceField{{Type: hir.TypeU32}}}}
 	input.Modules[0].Functions[0].Parameters = []hir.Parameter{
 		{Type: hir.SharedBorrow(hir.TypeI32)},
-		{Type: resourceType},
+		{Type: hir.SharedBorrow(resourceType)},
 	}
 	input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.MutableBorrow(hir.TypeU32)}}
-	input.Modules[0].Functions[0].OwnerType = hir.Type("ledger::Counter")
+	input.Modules[0].Functions[0].OwnerType = resourceType
 	input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "&"}
 	if _, err := LowerHIRTransactions(input); err != nil {
 		t.Fatalf("safe static-associated owner types rejected: %v", err)

@@ -269,6 +269,26 @@ func TestLowerAnalyzedRejectsPotentiallyTrappingStateOwnerBeforePublishingExecut
 	}
 }
 
+func TestLowerAnalyzedRejectsOwnedResourceStateOwnerBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nresource Token { i32 value; cleanup {} }\nfn i32 main(Token token) { return 42; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-owned-resource")
+	result, err := compiler.LowerAnalyzed(analysis)
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower ||
+		!strings.Contains(err.Error(), "owned resource values are not admitted") {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+		t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{

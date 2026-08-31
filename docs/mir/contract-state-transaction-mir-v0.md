@@ -18,6 +18,7 @@
 - Safe raw-pointer-free owner source: `docs/adr/0359-safe-contract-state-owner-memory-boundary.md`
 - Explicit-entry owner source: `docs/adr/0360-explicit-entry-contract-state-owners.md`
 - Potential-trap owner source: `docs/adr/0361-potentially-trapping-owner-operations.md`
+- Resource-lifetime-free owner source: `docs/adr/0362-resource-lifetime-free-contract-state-owners.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -89,7 +90,8 @@ locals, expressions, or nominal aggregate fields. Safe borrows remain ordinary H
 state-MIR permissions. ADR 0360 rejects receiver-bound methods and automatic drop glue as current
 owners while preserving static associated functions with no receiver. ADR 0361 rejects retained
 ordinary checked arithmetic and bounds operations because their conditional trap edges are absent
-from this linear model.
+from this linear model. ADR 0362 rejects owned resource values and lexical regions because their
+drop, burn, placement, and reset lifetimes are also absent.
 
 ## HIR bridge
 
@@ -169,3 +171,5 @@ ADR 0359 rejects unsafe code and reachable raw-pointer types without banning saf
 pointer-free resources. ADR 0360 rejects receiver and drop-glue entry semantics that the side model
 does not represent, while preserving explicit static associated functions. ADR 0361 rejects
 potentially trapping ordinary operations while leaving this MIR's explicit static trap exit intact.
+ADR 0362 rejects ordinary owned-resource and lexical-region lifetime transitions while preserving
+safe resource borrows and static resource namespaces.

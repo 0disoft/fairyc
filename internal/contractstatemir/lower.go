@@ -126,6 +126,9 @@ func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
 		if err := verifyHIRStateOwnerTrapBoundary(function); err != nil {
 			return nil, fmt.Errorf("package %d function %d: %w", transaction.Package, transaction.Function, err)
 		}
+		if err := verifyHIRStateOwnerLifetimeBoundary(input, function); err != nil {
+			return nil, fmt.Errorf("package %d function %d: %w", transaction.Package, transaction.Function, err)
+		}
 		program, err := lowerHIRTransaction(layout, function.Effects, transaction)
 		if err != nil {
 			return nil, fmt.Errorf("package %d function %d state transaction: %w", transaction.Package, transaction.Function, err)

@@ -1,6 +1,7 @@
 package contractstatemir
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
@@ -39,6 +40,44 @@ func TestHIRTypeContainsRawPointerTraversesOwnerTypeGraph(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := hirTypeContainsRawPointer(input, test.typeValue, make(map[hir.Type]bool)); got != test.want {
 				t.Fatalf("hirTypeContainsRawPointer(%q) = %t, want %t", test.typeValue, got, test.want)
+			}
+		})
+	}
+}
+
+func TestHIRTypeContainsOwnedResourceTraversesValueGraph(t *testing.T) {
+	resourceType := hir.Type("ledger::Handle")
+	structType := hir.Type("ledger::ResourceStruct")
+	enumType := hir.Type("ledger::ResourceEnum")
+	cycleType := hir.Type("ledger::Cycle")
+	input := hir.Package{Modules: []hir.Module{{
+		Structs: []hir.Struct{
+			{Type: structType, Fields: []hir.StructField{{Type: resourceType}}},
+			{Type: cycleType, Fields: []hir.StructField{{Type: cycleType}}},
+		},
+		Enums:     []hir.Enum{{Type: enumType, Variants: []hir.EnumVariant{{Fields: []hir.EnumField{{Type: resourceType}}}}}},
+		Resources: []hir.Resource{{Type: resourceType, DropKind: hir.ResourceDropEmpty}},
+	}}}
+	tests := []struct {
+		name string
+		typ  hir.Type
+		want bool
+	}{
+		{name: "resource", typ: resourceType, want: true},
+		{name: "fixed array", typ: hir.FixedArray(resourceType, 2), want: true},
+		{name: "option", typ: hir.Option(resourceType), want: true},
+		{name: "result", typ: hir.Result(hir.TypeU32, resourceType), want: true},
+		{name: "struct field", typ: structType, want: true},
+		{name: "enum field", typ: enumType, want: true},
+		{name: "shared resource borrow", typ: hir.SharedBorrow(resourceType)},
+		{name: "mutable resource borrow", typ: hir.MutableBorrow(resourceType)},
+		{name: "scalar", typ: hir.TypeU32},
+		{name: "pointer-free cycle", typ: cycleType},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := hirTypeContainsOwnedResource(input, test.typ, make(map[hir.Type]bool)); got != test.want {
+				t.Fatalf("hirTypeContainsOwnedResource(%q) = %t, want %t", test.typ, got, test.want)
 			}
 		})
 	}
@@ -90,6 +129,35 @@ func TestHIRStateOwnerTrapBoundaryClassifiesClosedForms(t *testing.T) {
 			err := verifyHIRStateOwnerTrapBoundary(test.function)
 			if (err != nil) != test.wantError {
 				t.Fatalf("verifyHIRStateOwnerTrapBoundary() error = %v, wantError = %t", err, test.wantError)
+			}
+		})
+	}
+}
+
+func TestHIRStateOwnerLifetimeBoundaryClassifiesOwnedValuesAndRegions(t *testing.T) {
+	resourceType := hir.Type("ledger::Handle")
+	input := hir.Package{Modules: []hir.Module{{Resources: []hir.Resource{{Type: resourceType, DropKind: hir.ResourceDropEmpty}}}}}
+	tests := []struct {
+		name     string
+		function hir.Function
+		contains string
+	}{
+		{name: "owned parameter", function: hir.Function{Parameters: []hir.Parameter{{Type: resourceType}}}, contains: "owned resource values are not admitted"},
+		{name: "owned result", function: hir.Function{ResultType: hir.Option(resourceType)}, contains: "owned resource values are not admitted"},
+		{name: "owned local", function: hir.Function{Locals: []hir.Local{{Type: resourceType}}}, contains: "owned resource values are not admitted"},
+		{name: "nested owned expression", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "path", Type: resourceType}}}}}, contains: "owned resource values are not admitted"},
+		{name: "nested lexical region", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "region"}}}}}, contains: "lexical regions are not admitted"},
+		{name: "borrowed resource", function: hir.Function{Parameters: []hir.Parameter{{Type: hir.SharedBorrow(resourceType)}}}},
+		{name: "static resource namespace", function: hir.Function{OwnerType: resourceType}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := verifyHIRStateOwnerLifetimeBoundary(input, test.function)
+			if test.contains == "" && err != nil {
+				t.Fatalf("verifyHIRStateOwnerLifetimeBoundary() error = %v", err)
+			}
+			if test.contains != "" && (err == nil || !strings.Contains(err.Error(), test.contains)) {
+				t.Fatalf("verifyHIRStateOwnerLifetimeBoundary() error = %v, want %q", err, test.contains)
 			}
 		})
 	}

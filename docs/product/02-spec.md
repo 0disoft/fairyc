@@ -163,9 +163,11 @@ ADR 0357 requires the complete current owner HIR body to be call-free during dir
 stable rebind. ADR 0358 also rejects conditionals, loops, assertions, Result propagation, and
 short-circuit operators. ADR 0359 rejects unsafe code and recursively reachable raw-pointer types
 while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360 rejects
-receiver-bound methods and automatic drop glue while preserving static associated entries; none admits transitive calls,
-owner-bound state borrows, pointer provenance, or conditional transaction MIR. ADR 0361 also rejects
-ordinary potentially trapping operations while preserving the state model's explicit static trap exit.
+receiver-bound methods and automatic drop glue while preserving static associated entries; none
+admits transitive calls, owner-bound state borrows, pointer provenance, or conditional transaction
+MIR. ADR 0361 also rejects ordinary potentially trapping operations while preserving the state
+model's explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while
+preserving safe resource borrows and static resource namespaces.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -999,6 +1001,8 @@ data-dependent state values and conditional transaction MIR remain absent. ADR 0
 and raw-pointer owner transport while safe borrows remain ordinary HIR facts rather than state
 permissions. ADR 0360 closes receiver and drop-glue ownership while retaining explicit static
 associated functions. ADR 0361 closes checked-arithmetic and bounds trap edges in current owners.
+ADR 0362 closes owned-resource drop/burn flow and lexical region cleanup while preserving safe
+borrows and static resource namespaces.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

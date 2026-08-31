@@ -31,8 +31,9 @@ paths so current owners remain straight-line. ADR 0359 rejects unsafe scopes and
 raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360
 also rejects receiver-bound and drop-glue owners while preserving static associated entries. ADR
 0361 rejects ordinary potentially trapping operations while preserving the transaction program's
-explicit static trap exit; production
-storage and runtime targets still do not consume it.
+explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while
+preserving safe resource borrows and static resource namespaces; production storage and runtime
+targets still do not consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.

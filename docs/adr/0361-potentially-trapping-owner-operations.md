@@ -62,8 +62,9 @@ target, lockfile, or Atlas contract. No version bump is required.
 ## Consequences
 
 Accepted current owners no longer retain ordinary HIR operations that can branch to a runtime trap.
-The state program may still select its own explicit static trap exit. Source state syntax,
+The state program may still select its own explicit static trap exit. ADR 0362 later excludes owned
+resource values and lexical region cleanup. Source state syntax,
 data-dependent state values, proof-backed ordinary trap admission, receiver-bound state borrows,
-implicit resource cleanup effects, conditional transaction MIR, native lowering, runtime
+proof-backed resource lifetime admission, conditional transaction MIR, native lowering, runtime
 persistence, migration, gas, Merkle proofs, events, block context, reentrancy, chain integration,
 and deployable targets remain closed.

@@ -55,6 +55,7 @@ ordinary safe-borrow and pointer-free resource types. This does not derive state
 ordinary expressions or admit data-dependent state values. ADR 0360 later excludes receiver-bound
 methods and automatic drop glue without rejecting static associated functions. ADR 0361 later
 excludes ordinary checked arithmetic and bounds operations whose trap edges remain unrepresented.
+ADR 0362 later excludes owned resource values and lexical region cleanup.
 Source state syntax, owner-bound state borrows, conditional transaction MIR,
 native lowering, runtime persistence, migration, gas, Merkle proofs, events, block context,
 reentrancy, chain integration, and deployable targets remain closed.

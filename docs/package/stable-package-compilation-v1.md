@@ -53,6 +53,8 @@ those current-HIR boundaries. ADR 0359 additionally rejects unsafe code and recu
 raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360
 also rechecks that fresh current owners have no receiver or drop-glue execution semantics while
 preserving explicit static associated functions. ADR 0361 additionally rechecks that fresh current
-owners contain no retained checked arithmetic or bounds operation with an unrepresented trap edge. Source
-syntax, call or conditional-state admission, pointer provenance, backend,
-runtime, production persistence, and target admission remain closed.
+owners contain no retained checked arithmetic or bounds operation with an unrepresented trap edge.
+ADR 0362 rechecks that fresh owners carry neither owned resource values nor lexical regions while
+preserving safe resource borrows and static resource namespaces. Source syntax, call or
+conditional-state admission, pointer provenance, backend, runtime, production persistence, and
+target admission remain closed.

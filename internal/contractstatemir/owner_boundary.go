@@ -92,6 +92,184 @@ func hirOperatorMayTrap(operator string) bool {
 	}
 }
 
+func verifyHIRStateOwnerLifetimeBoundary(input hir.Package, function hir.Function) error {
+	if hirFunctionUsesOwnedResource(input, function) {
+		return fmt.Errorf("state transaction owner carries an owned resource value; owned resource values are not admitted")
+	}
+	if hirBlockContainsLexicalRegion(function.Body) {
+		return fmt.Errorf("state transaction owner contains a lexical region; lexical regions are not admitted")
+	}
+	return nil
+}
+
+func hirFunctionUsesOwnedResource(input hir.Package, function hir.Function) bool {
+	types := make([]hir.Type, 0, 1+len(function.Parameters)+len(function.Locals))
+	types = append(types, function.ResultType)
+	for _, parameter := range function.Parameters {
+		types = append(types, parameter.Type)
+	}
+	for _, local := range function.Locals {
+		types = append(types, local.Type)
+	}
+	for _, value := range types {
+		if hirTypeContainsOwnedResource(input, value, make(map[hir.Type]bool)) {
+			return true
+		}
+	}
+	return hirBlockUsesOwnedResource(input, function.Body)
+}
+
+func hirBlockUsesOwnedResource(input hir.Package, block hir.Block) bool {
+	for index := range block.Statements {
+		if hirStatementUsesOwnedResource(input, &block.Statements[index]) {
+			return true
+		}
+	}
+	return hirExpressionUsesOwnedResource(input, block.Tail)
+}
+
+func hirStatementUsesOwnedResource(input hir.Package, statement *hir.Statement) bool {
+	if statement == nil {
+		return false
+	}
+	if hirExpressionUsesOwnedResource(input, statement.Target) || hirExpressionUsesOwnedResource(input, statement.Expression) {
+		return true
+	}
+	if statement.For == nil {
+		return false
+	}
+	return hirStatementUsesOwnedResource(input, statement.For.Initializer) ||
+		hirExpressionUsesOwnedResource(input, statement.For.Condition) ||
+		hirStatementUsesOwnedResource(input, statement.For.Post) || hirBlockUsesOwnedResource(input, statement.For.Body)
+}
+
+func hirExpressionUsesOwnedResource(input hir.Package, expression *hir.Expression) bool {
+	if expression == nil {
+		return false
+	}
+	if hirTypeContainsOwnedResource(input, expression.Type, make(map[hir.Type]bool)) ||
+		hirTypeContainsOwnedResource(input, expression.TargetType, make(map[hir.Type]bool)) {
+		return true
+	}
+	for index := range expression.Children {
+		if hirExpressionUsesOwnedResource(input, &expression.Children[index]) {
+			return true
+		}
+	}
+	if expression.Block != nil && hirBlockUsesOwnedResource(input, *expression.Block) {
+		return true
+	}
+	for index := range expression.Arms {
+		if hirExpressionUsesOwnedResource(input, &expression.Arms[index].Expression) {
+			return true
+		}
+	}
+	return false
+}
+
+func hirTypeContainsOwnedResource(input hir.Package, value hir.Type, visiting map[hir.Type]bool) bool {
+	if value == "" || value == hir.TypeInvalid {
+		return false
+	}
+	if _, _, borrow := hir.BorrowElement(value); borrow {
+		return false
+	}
+	for _, module := range input.Modules {
+		for _, resource := range module.Resources {
+			if resource.Type == value {
+				return true
+			}
+		}
+	}
+	if visiting[value] {
+		return false
+	}
+	visiting[value] = true
+	defer delete(visiting, value)
+
+	if element, _, array := hir.FixedArrayParts(value); array {
+		return hirTypeContainsOwnedResource(input, element, visiting)
+	}
+	if element, option := hir.OptionElement(value); option {
+		return hirTypeContainsOwnedResource(input, element, visiting)
+	}
+	if success, failure, result := hir.ResultElements(value); result {
+		return hirTypeContainsOwnedResource(input, success, visiting) || hirTypeContainsOwnedResource(input, failure, visiting)
+	}
+	for _, module := range input.Modules {
+		for _, structure := range module.Structs {
+			if structure.Type != value {
+				continue
+			}
+			for _, field := range structure.Fields {
+				if hirTypeContainsOwnedResource(input, field.Type, visiting) {
+					return true
+				}
+			}
+		}
+		for _, enum := range module.Enums {
+			if enum.Type != value {
+				continue
+			}
+			for _, variant := range enum.Variants {
+				for _, field := range variant.Fields {
+					if hirTypeContainsOwnedResource(input, field.Type, visiting) {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
+func hirBlockContainsLexicalRegion(block hir.Block) bool {
+	for index := range block.Statements {
+		if hirStatementContainsLexicalRegion(&block.Statements[index]) {
+			return true
+		}
+	}
+	return hirExpressionContainsLexicalRegion(block.Tail)
+}
+
+func hirStatementContainsLexicalRegion(statement *hir.Statement) bool {
+	if statement == nil {
+		return false
+	}
+	if hirExpressionContainsLexicalRegion(statement.Target) || hirExpressionContainsLexicalRegion(statement.Expression) {
+		return true
+	}
+	if statement.For == nil {
+		return false
+	}
+	return hirStatementContainsLexicalRegion(statement.For.Initializer) ||
+		hirExpressionContainsLexicalRegion(statement.For.Condition) ||
+		hirStatementContainsLexicalRegion(statement.For.Post) || hirBlockContainsLexicalRegion(statement.For.Body)
+}
+
+func hirExpressionContainsLexicalRegion(expression *hir.Expression) bool {
+	if expression == nil {
+		return false
+	}
+	if expression.Kind == "region" {
+		return true
+	}
+	for index := range expression.Children {
+		if hirExpressionContainsLexicalRegion(&expression.Children[index]) {
+			return true
+		}
+	}
+	if expression.Block != nil && hirBlockContainsLexicalRegion(*expression.Block) {
+		return true
+	}
+	for index := range expression.Arms {
+		if hirExpressionContainsLexicalRegion(&expression.Arms[index].Expression) {
+			return true
+		}
+	}
+	return false
+}
+
 func verifyHIRStateOwnerMemoryBoundary(input hir.Package, function hir.Function) error {
 	if function.Unsafe {
 		return fmt.Errorf("state transaction owner is unsafe; unsafe owners are not admitted")

@@ -143,6 +143,11 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 		{name: "current potentially trapping owner", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "/"}
 		}, contains: "potentially trapping operations are not admitted"},
+		{name: "current owned resource local", mutateHIR: func(input *hir.Package) {
+			resourceType := hir.Type("ledger::FreshHandle")
+			input.Modules[0].Resources = append(input.Modules[0].Resources, hir.Resource{Type: resourceType, DropKind: hir.ResourceDropEmpty})
+			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: resourceType}}
+		}, contains: "owned resource values are not admitted"},
 		{name: "current owner call", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},
