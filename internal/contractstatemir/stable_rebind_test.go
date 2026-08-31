@@ -133,6 +133,13 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 		{name: "current raw-pointer owner local", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.RawPointer(hir.TypeU8, false)}}
 		}, contains: "raw-pointer types are not admitted"},
+		{name: "current receiver-bound owner", mutateHIR: func(input *hir.Package) {
+			input.Modules[0].Functions[0].OwnerType = hir.Type("ledger::Account")
+			input.Modules[0].Functions[0].Receiver = "shared"
+		}, contains: "receiver-bound owners are not admitted"},
+		{name: "current drop-glue owner", mutateHIR: func(input *hir.Package) {
+			input.Modules[0].Functions[0].DropGlueFor = hir.TypeU32
+		}, contains: "signature does not match"},
 		{name: "current owner call", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},

@@ -162,7 +162,8 @@ admits only the `storage_read` and `storage_write` effects represented by curren
 ADR 0357 requires the complete current owner HIR body to be call-free during direct lowering and
 stable rebind. ADR 0358 also rejects conditionals, loops, assertions, Result propagation, and
 short-circuit operators. ADR 0359 rejects unsafe code and recursively reachable raw-pointer types
-while preserving ordinary safe-borrow and pointer-free resource types; none admits transitive calls,
+while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360 rejects
+receiver-bound methods and automatic drop glue while preserving static associated entries; none admits transitive calls,
 owner-bound state borrows, pointer provenance, or conditional transaction MIR.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
@@ -995,7 +996,8 @@ effects. ADR 0357 closes current owner-body calls while source, call admission, 
 admission remain closed. ADR 0358 closes current owner-body dynamic control flow while
 data-dependent state values and conditional transaction MIR remain absent. ADR 0359 closes unsafe
 and raw-pointer owner transport while safe borrows remain ordinary HIR facts rather than state
-permissions.
+permissions. ADR 0360 closes receiver and drop-glue ownership while retaining explicit static
+associated functions.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

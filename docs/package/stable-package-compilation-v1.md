@@ -50,6 +50,8 @@ ADR 0355 exposes those transactions through the same nested verified `compiler.R
 and process-local paths. ADR 0357 rechecks that each fresh current transaction owner is call-free;
 ADR 0358 also rechecks that it contains no dynamic control flow. Cached operations cannot bypass
 those current-HIR boundaries. ADR 0359 additionally rejects unsafe code and recursively reachable
-raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. Source
+raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360
+also rechecks that fresh current owners have no receiver or drop-glue execution semantics while
+preserving explicit static associated functions. Source
 syntax, call or conditional-state admission, pointer provenance, backend,
 runtime, production persistence, and target admission remain closed.

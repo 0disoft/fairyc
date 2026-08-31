@@ -16,6 +16,7 @@
 - Call-free owner source: `docs/adr/0357-call-free-contract-state-owners.md`
 - Straight-line owner source: `docs/adr/0358-straight-line-contract-state-owners.md`
 - Safe raw-pointer-free owner source: `docs/adr/0359-safe-contract-state-owner-memory-boundary.md`
+- Explicit-entry owner source: `docs/adr/0360-explicit-entry-contract-state-owners.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -84,7 +85,8 @@ call-graph or reentrancy support. ADR 0358 rejects `if`, `match`, `while`, class
 control, assertions, Result propagation, and short-circuit operators in the same current-body paths.
 ADR 0359 rejects unsafe declarations/scopes and raw-pointer types reachable through signatures,
 locals, expressions, or nominal aggregate fields. Safe borrows remain ordinary HIR permissions, not
-state-MIR permissions.
+state-MIR permissions. ADR 0360 rejects receiver-bound methods and automatic drop glue as current
+owners while preserving static associated functions with no receiver.
 
 ## HIR bridge
 
@@ -161,4 +163,5 @@ the ordinary atomic verified compiler result. ADR 0356 rejects every effect not 
 current storage-operation set. ADR 0357 rejects every current owner-body call during direct HIR
 lowering and stable fresh-owner rebind. ADR 0358 rejects dynamic control flow in those same paths.
 ADR 0359 rejects unsafe code and reachable raw-pointer types without banning safe borrows or
-pointer-free resources.
+pointer-free resources. ADR 0360 rejects receiver and drop-glue entry semantics that the side model
+does not represent, while preserving explicit static associated functions.

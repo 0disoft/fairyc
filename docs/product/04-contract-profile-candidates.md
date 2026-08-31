@@ -105,7 +105,9 @@ operations, effects, state-borrow lifetime, capabilities, and reentrancy. ADR 03
 current `if`, `match`, loop, loop-control, assertion, Result-propagation, and short-circuit path until
 conditional transaction MIR has an exact representation. ADR 0359 additionally rejects unsafe
 declarations/scopes and raw-pointer types through signatures, locals, expressions, and nested
-aggregates without conflating ordinary safe borrows with state permissions.
+aggregates without conflating ordinary safe borrows with state permissions. ADR 0360 rejects
+receiver-bound methods and automatic drop glue as current owners while retaining receiver-free
+static associated functions.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

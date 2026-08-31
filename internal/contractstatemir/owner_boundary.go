@@ -6,6 +6,16 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
+func verifyHIRStateOwnerEntryBoundary(function hir.Function) error {
+	if function.Receiver != "" {
+		return fmt.Errorf("state transaction owner has receiver mode %q; receiver-bound owners are not admitted", function.Receiver)
+	}
+	if function.DropGlueFor != "" {
+		return fmt.Errorf("state transaction owner is drop glue for %q; drop-glue owners are not admitted", function.DropGlueFor)
+	}
+	return nil
+}
+
 func verifyHIRStateOwnerMemoryBoundary(input hir.Package, function hir.Function) error {
 	if function.Unsafe {
 		return fmt.Errorf("state transaction owner is unsafe; unsafe owners are not admitted")

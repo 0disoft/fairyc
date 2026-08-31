@@ -224,6 +224,31 @@ func TestLowerAnalyzedRejectsUnsafeStateOwnerBeforePublishingExecutableIR(t *tes
 	}
 }
 
+func TestLowerAnalyzedRejectsImplicitStateOwnersBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name     string
+		analysis func(*testing.T) compiler.Analysis
+		contains string
+	}{
+		{name: "receiver-bound method", analysis: statefulReceiverMethodCompilerAnalysis, contains: "receiver-bound owners are not admitted"},
+		{name: "drop glue", analysis: statefulDropGlueCompilerAnalysis, contains: "drop-glue owners are not admitted"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := compiler.LowerAnalyzed(test.analysis(t))
+			var pipelineError *compiler.Error
+			if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower ||
+				!strings.Contains(err.Error(), test.contains) {
+				t.Fatalf("LowerAnalyzed() error = %v", err)
+			}
+			if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+				t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+			}
+		})
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
@@ -300,20 +325,55 @@ func statefulRawPointerCompilerAnalysis(t *testing.T) compiler.Analysis {
 	return analysis
 }
 
+func statefulReceiverMethodCompilerAnalysis(t *testing.T) compiler.Analysis {
+	t.Helper()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nstruct Counter { i32 value; }\nfn i32 Counter::read(ref Counter this) { return 42; }\nfn i32 main() { return 42; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerFunction(t, analysis, "test.compiler-result-receiver", func(function *hir.Function) bool {
+		return function.Name == "Counter::read"
+	})
+	return analysis
+}
+
+func statefulDropGlueCompilerAnalysis(t *testing.T) compiler.Analysis {
+	t.Helper()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nresource Handle { i32 value; cleanup { let i32 marker = this.value; } }\nfn i32 main() { return 42; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerFunction(t, analysis, "test.compiler-result-drop-glue", func(function *hir.Function) bool {
+		return function.DropGlueFor != ""
+	})
+	analysis.Semantic.HIR.Modules[0].Resources[0].DropEffects = hir.CanonicalEffects([]hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite})
+	return analysis
+}
+
 func attachStatefulCompilerAnalysis(t *testing.T, analysis compiler.Analysis, contractUID string) (compiler.Analysis, []byte) {
+	return attachStatefulCompilerFunction(t, analysis, contractUID, func(function *hir.Function) bool {
+		return function.Name == "main"
+	})
+}
+
+func attachStatefulCompilerFunction(t *testing.T, analysis compiler.Analysis, contractUID string, selectFunction func(*hir.Function) bool) (compiler.Analysis, []byte) {
 	t.Helper()
 	var function *hir.Function
 	for moduleIndex := range analysis.Semantic.HIR.Modules {
 		for functionIndex := range analysis.Semantic.HIR.Modules[moduleIndex].Functions {
 			candidate := &analysis.Semantic.HIR.Modules[moduleIndex].Functions[functionIndex]
-			if candidate.Name == "main" {
+			if selectFunction(candidate) {
 				function = candidate
 				break
 			}
 		}
 	}
 	if function == nil {
-		t.Fatal("analyzed package has no main function")
+		t.Fatal("analyzed package has no selected state function")
 	}
 	function.Effects = hir.CanonicalEffects([]hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite})
 	encoded, err := contractstate.U64.Encode(42)

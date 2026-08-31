@@ -56,6 +56,8 @@ lockfile, or Atlas contract. No version bump is required.
 
 Every accepted current transaction owner is call-free, straight-line, safe, and free of reachable
 raw-pointer types. Safe borrows and resources remain ordinary compiler facts rather than state-MIR
-permissions. Source state syntax, data-dependent state values, owner-bound state borrows, conditional
+permissions. ADR 0360 later requires an explicit free or static-associated entry and rejects
+receiver-bound methods and automatic drop glue. Source state syntax, data-dependent state values,
+owner-bound state borrows, conditional
 transaction MIR, native lowering, runtime persistence, migration, gas, Merkle proofs, events, block
 context, reentrancy, chain integration, and deployable targets remain closed.

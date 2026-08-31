@@ -171,6 +171,13 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 			input.Modules[0].Structs = []hir.Struct{{Type: wrapperType, Fields: []hir.StructField{{Type: hir.RawPointer(hir.TypeU8, true)}}}}
 			input.Modules[0].Functions[0].Parameters = []hir.Parameter{{Type: wrapperType}}
 		}, contains: "raw-pointer types are not admitted"},
+		{name: "receiver-bound owner", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].OwnerType = hir.Type("ledger::Counter")
+			input.Modules[0].Functions[0].Receiver = "shared"
+		}, contains: "receiver-bound owners are not admitted"},
+		{name: "drop-glue owner", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].DropGlueFor = hir.Type("ledger::Handle")
+		}, contains: "drop-glue owners are not admitted"},
 		{name: "owner call", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},
@@ -221,8 +228,9 @@ func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceOwnerTypes(t *testing
 		{Type: resourceType},
 	}
 	input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.MutableBorrow(hir.TypeU32)}}
+	input.Modules[0].Functions[0].OwnerType = hir.Type("ledger::Counter")
 	if _, err := LowerHIRTransactions(input); err != nil {
-		t.Fatalf("safe owner types rejected: %v", err)
+		t.Fatalf("safe static-associated owner types rejected: %v", err)
 	}
 }
 

@@ -28,7 +28,8 @@ verified compiler result. ADR 0356 then admits only the represented `storage_rea
 `storage_write` effects. ADR 0357 additionally requires the current transaction owner body to be
 call-free on direct lowering and stable rebind. ADR 0358 rejects dynamic control flow in those same
 paths so current owners remain straight-line. ADR 0359 rejects unsafe scopes and reachable
-raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types; production
+raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360
+also rejects receiver-bound and drop-glue owners while preserving static associated entries; production
 storage and runtime targets still do not consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
