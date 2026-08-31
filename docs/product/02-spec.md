@@ -157,7 +157,8 @@ stable package MIR v3 in a coordinate-bound outer artifact. ADR 0353 makes persi
 carry that bundle and requires the key-selected body hash before a hit. ADR 0354 reassembles both
 members under the MIR program's fresh coordinate-owned function symbols and returns verified cached
 state transactions for explicit compiler-private oracle execution. ADR 0355 makes ordinary and
-cached compilation publish those programs through one atomic verified compiler result.
+cached compilation publish those programs through one atomic verified compiler result. ADR 0356
+admits only the `storage_read` and `storage_write` effects represented by current transaction MIR.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -984,7 +985,8 @@ expected hash, current HIR layout, and fresh package/function symbols. ADR 0352 
 stable package MIR v3 in a separate outer artifact. ADR 0353 adds cache storage, expected-body
 lookup, and exact-generation quarantine. ADR 0354 adds state-body rebind, combined fresh-symbol
 reassembly, and explicit cached oracle execution. ADR 0355 unifies cold and cached transaction
-publication in `compiler.Result` while source and native/runtime admission remain closed.
+publication in `compiler.Result`, and ADR 0356 closes accepted authority to represented storage
+effects while source, exact call-graph, and native/runtime admission remain closed.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

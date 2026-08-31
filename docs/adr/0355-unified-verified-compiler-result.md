@@ -61,3 +61,6 @@ All current compilation paths now share one atomic verified-result boundary for 
 contract-state MIR. Source declarations and access expressions, data-dependent control flow,
 owner-bound borrows, external-call exclusion, native lowering, runtime persistence, migration, gas,
 Merkle proofs, reentrancy, chain integration, and deployable targets remain closed.
+
+ADR 0356 later narrows accepted transaction authority to the storage effects represented by this
+compiler-private MIR.

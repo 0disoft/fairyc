@@ -3,6 +3,7 @@ package contractstatemir
 import (
 	"errors"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/contractstate"
@@ -109,6 +110,16 @@ func TestVerifyRejectsCapabilityAndEffectDrift(t *testing.T) {
 	unknownEffect.Effects = []hir.Effect{"future_chain"}
 	if failures := Verify(unknownEffect); !hasFailureCode(failures, "CSM1005") {
 		t.Fatalf("unknown effect failures = %+v", failures)
+	}
+	for _, effect := range []hir.Effect{hir.EffectBlockContext, hir.EffectEmit, hir.EffectExternalCall} {
+		unrepresented := testProgram(layout, nil, ExitCommit)
+		unrepresented.Effects = []hir.Effect{effect}
+		failures := Verify(unrepresented)
+		if !slices.ContainsFunc(failures, func(failure VerificationError) bool {
+			return failure.Code == "CSM1005" && strings.Contains(failure.Detail, "has no contract-state transaction MIR operation")
+		}) {
+			t.Fatalf("unrepresented effect %q failures = %+v", effect, failures)
+		}
 	}
 }
 

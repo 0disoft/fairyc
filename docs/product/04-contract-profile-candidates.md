@@ -97,7 +97,9 @@ format. ADR 0353 stores that bundle in persistent cache `/2`, requires exact exp
 and quarantines malformed, legacy, or contradictory generations. ADR 0354 rebinds every all-hit
 state body through the matching fresh MIR function symbol and returns executable compiler-private
 transactions without running them inside compilation. ADR 0355 makes cold and cached compilation
-publish those transactions atomically through the same verified `compiler.Result`.
+publish those transactions atomically through the same verified `compiler.Result`. ADR 0356
+rejects `block_context`, `emit`, and `external_call` authority until transaction MIR represents and
+verifies those operations.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

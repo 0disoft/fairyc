@@ -87,6 +87,9 @@ func verifyEffects(declared, required []hir.Effect) string {
 		if !hir.IsOnchainEffect(effect) {
 			return fmt.Sprintf("declared effect %q is not an on-chain capability", effect)
 		}
+		if effect != hir.EffectStorageRead && effect != hir.EffectStorageWrite {
+			return fmt.Sprintf("declared effect %q has no contract-state transaction MIR operation", effect)
+		}
 	}
 	if missing := hir.MissingEffects(declared, required); len(missing) != 0 {
 		return fmt.Sprintf("missing required effects %v", missing)

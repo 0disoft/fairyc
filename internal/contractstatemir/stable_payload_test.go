@@ -144,6 +144,9 @@ func TestStableStateBodyArtifactRejectsMalformedPayloads(t *testing.T) {
 			value.Transactions[0].Function = encodeStableStateFunctionDescriptor(descriptor)
 		}},
 		{name: "effect mismatch", mutate: func(value *StableStateBodyArtifact) { value.Transactions[0].Effects = []string{} }},
+		{name: "unrepresented effect", mutate: func(value *StableStateBodyArtifact) {
+			value.Transactions[0].Effects = []string{string(hir.EffectExternalCall), string(hir.EffectStorageRead), string(hir.EffectStorageWrite)}
+		}},
 		{name: "unsupported operation", mutate: func(value *StableStateBodyArtifact) { value.Transactions[0].Operations[0].Kind = "peek" }},
 		{name: "noncanonical value", mutate: func(value *StableStateBodyArtifact) {
 			value.Transactions[0].Operations[0].Value.Encoded = append(value.Transactions[0].Operations[0].Value.Encoded, 0)

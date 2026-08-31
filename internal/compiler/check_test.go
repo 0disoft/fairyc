@@ -147,15 +147,26 @@ func TestLowerAnalyzedPublishesVerifiedStateTransactionsAtomically(t *testing.T)
 
 func TestLowerAnalyzedRejectsStateMIRBeforePublishingExecutableIR(t *testing.T) {
 	t.Parallel()
-	analysis, _ := statefulCompilerAnalysis(t)
-	analysis.Semantic.HIR.Modules[0].Functions[0].Effects = nil
-	result, err := compiler.LowerAnalyzed(analysis)
-	var pipelineError *compiler.Error
-	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower {
-		t.Fatalf("LowerAnalyzed() error = %v", err)
+	tests := []struct {
+		name    string
+		effects []hir.Effect
+	}{
+		{name: "missing storage authority", effects: nil},
+		{name: "unrepresented external call authority", effects: []hir.Effect{hir.EffectExternalCall, hir.EffectStorageRead, hir.EffectStorageWrite}},
 	}
-	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
-		t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			analysis, _ := statefulCompilerAnalysis(t)
+			analysis.Semantic.HIR.Modules[0].Functions[0].Effects = test.effects
+			result, err := compiler.LowerAnalyzed(analysis)
+			var pipelineError *compiler.Error
+			if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower {
+				t.Fatalf("LowerAnalyzed() error = %v", err)
+			}
+			if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+				t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+			}
+		})
 	}
 }
 

@@ -154,6 +154,9 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 		{name: "unknown access", mutate: func(input *hir.Package) { input.StateTransactions[0].Accesses[0].Kind = "dynamic" }, contains: "unsupported state access kind"},
 		{name: "missing effect", mutate: func(input *hir.Package) { input.Modules[0].Functions[0].Effects = nil }, contains: "CSM1005"},
 		{name: "host effect", mutate: func(input *hir.Package) { input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectFilesystem} }, contains: "CSM1005"},
+		{name: "unrepresented external call effect", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectExternalCall, hir.EffectStorageRead}
+		}, contains: "has no contract-state transaction MIR operation"},
 		{name: "noncanonical effects", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectStorageWrite, hir.EffectStorageRead}
 		}, contains: "CSM1005"},

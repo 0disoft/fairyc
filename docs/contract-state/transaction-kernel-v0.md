@@ -24,7 +24,8 @@ pairs that payload with stable package MIR in a separate exact-version outer art
 admits that bundle into disposable persistent cache records with exact expected-body checking.
 ADR 0354 reassembles cached MIR and state bodies under one fresh function-symbol graph and proves
 explicit oracle execution. ADR 0355 publishes ordinary and contract-state MIR atomically through one
-verified compiler result; production storage and runtime targets still do not consume it.
+verified compiler result. ADR 0356 then admits only the represented `storage_read` and
+`storage_write` effects; production storage and runtime targets still do not consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
@@ -190,7 +191,9 @@ transaction capability, explicit commit/reject/trap exits, and straight-line can
 operations. Every operation names one opaque program capability, and verifier-owned
 `storage_read`/`storage_write` requirements fail before transaction begin. Source-independent HIR
 owns one layout per package and attaches transaction plans to existing function effects; lowering
-resolves field names, copies value bytes, verifies MIR, and executes through this oracle.
+resolves field names, copies value bytes, verifies MIR, and executes through this oracle. The
+transaction verifier rejects `block_context`, `emit`, and `external_call` until their operations and
+complete call rules exist.
 ADR 0348 additionally hashes the verified package body through stable function signatures, exact
 operation bytes and order, layout identity, and exit while excluding local symbols and capability
 tokens. Public-interface v5 carries only the exact layout hash, while whole-package cache key v4

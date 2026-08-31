@@ -49,3 +49,6 @@ The next slice can lower source-independent HIR state accesses only by allocatin
 entry transaction, attaching it to every lowered operation, and preserving declared effects. Source
 syntax, data-dependent values, calls, branches, state-borrow lifetimes, external-call exclusion,
 cached body transport, and deterministic target execution remain closed gates.
+
+ADR 0356 later supersedes Decision 4 after unified compiler-result publication: contract-state MIR
+now admits only the storage effects represented by its own operations.
