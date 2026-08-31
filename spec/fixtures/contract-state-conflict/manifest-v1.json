@@ -1,0 +1,138 @@
+{
+  "$schema": "./schema-v1.json",
+  "schemaVersion": "fairyc.contract-state-conflict-fixtures/v1",
+  "deferred": [
+    "parallel goroutine scheduling and race detection",
+    "layout upgrade while transactions are open",
+    "production database isolation mapping",
+    "distributed consensus and retry policy"
+  ],
+  "contracts": [
+    "docs/contract-state/transaction-kernel-v0.md",
+    "docs/adr/0338-typed-persistent-state-transaction-kernel.md",
+    "docs/adr/0367-versioned-contract-state-conflict-fixtures.md",
+    "docs/adr/0368-versioned-contract-state-map-conflict-fixtures.md"
+  ],
+  "layout": {
+    "contractUID": "fixture.conflict",
+    "fields": [
+      { "name": "primary", "kind": "cell", "valueTypeID": "u64/be/v1" },
+      { "name": "secondary", "kind": "cell", "valueTypeID": "u64/be/v1" },
+      { "name": "balances", "kind": "map", "keyTypeID": "bytes20/v1", "valueTypeID": "u64/be/v1" }
+    ]
+  },
+  "limits": {
+    "maxWrites": 8,
+    "maxWriteBytes": 1024,
+    "maxValueBytes": 64,
+    "maxMapKeyBytes": 64
+  },
+  "cases": [
+    {
+      "id": "stale-writer-conflict-no-partial-publication",
+      "steps": [
+        { "id": "begin-winner", "transaction": "winner", "action": "begin", "expect": { "status": "open" } },
+        { "id": "begin-stale", "transaction": "stale", "action": "begin", "expect": { "status": "open" } },
+        { "id": "winner-write", "transaction": "winner", "action": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000001", "expect": { "status": "ok" } },
+        { "id": "winner-commit", "transaction": "winner", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "stale-write", "transaction": "stale", "action": "cell-write", "field": "secondary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000002", "expect": { "status": "ok" } },
+        { "id": "stale-conflict", "transaction": "stale", "action": "commit", "expect": { "status": "conflict" } }
+      ],
+      "expect": {
+        "version": 1,
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000001" }
+        ]
+      }
+    },
+    {
+      "id": "open-reader-retains-start-snapshot",
+      "steps": [
+        { "id": "begin-reader", "transaction": "reader", "action": "begin", "expect": { "status": "open" } },
+        { "id": "begin-writer", "transaction": "writer", "action": "begin", "expect": { "status": "open" } },
+        { "id": "writer-write", "transaction": "writer", "action": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000003", "expect": { "status": "ok" } },
+        { "id": "writer-commit", "transaction": "writer", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "reader-old-snapshot", "transaction": "reader", "action": "cell-read", "field": "primary", "expect": { "status": "ok", "found": false, "valueHex": "" } },
+        { "id": "reader-rollback", "transaction": "reader", "action": "rollback", "expect": { "status": "rolled-back" } }
+      ],
+      "expect": {
+        "version": 1,
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000003" }
+        ]
+      }
+    },
+    {
+      "id": "fresh-transaction-observes-latest-version",
+      "steps": [
+        { "id": "begin-first", "transaction": "first", "action": "begin", "expect": { "status": "open" } },
+        { "id": "first-write", "transaction": "first", "action": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000004", "expect": { "status": "ok" } },
+        { "id": "first-commit", "transaction": "first", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "begin-second", "transaction": "second", "action": "begin", "expect": { "status": "open" } },
+        { "id": "second-read", "transaction": "second", "action": "cell-read", "field": "primary", "expect": { "status": "ok", "found": true, "valueHex": "0000000000000004" } },
+        { "id": "second-write", "transaction": "second", "action": "cell-write", "field": "secondary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000005", "expect": { "status": "ok" } },
+        { "id": "second-commit", "transaction": "second", "action": "commit", "expect": { "status": "commit", "version": 2, "writes": 1 } }
+      ],
+      "expect": {
+        "version": 2,
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000004" },
+          { "field": "secondary", "valueHex": "0000000000000005" }
+        ]
+      }
+    },
+    {
+      "id": "stale-map-writer-conflicts-across-distinct-keys",
+      "steps": [
+        { "id": "begin-map-winner", "transaction": "map-winner", "action": "begin", "expect": { "status": "open" } },
+        { "id": "begin-map-stale", "transaction": "map-stale", "action": "begin", "expect": { "status": "open" } },
+        { "id": "map-winner-write", "transaction": "map-winner", "action": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000006", "expect": { "status": "ok" } },
+        { "id": "map-winner-commit", "transaction": "map-winner", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "map-stale-write", "transaction": "map-stale", "action": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "1415161718191a1b1c1d1e1f2021222324252627", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000007", "expect": { "status": "ok" } },
+        { "id": "map-stale-conflict", "transaction": "map-stale", "action": "commit", "expect": { "status": "conflict" } }
+      ],
+      "expect": {
+        "version": 1,
+        "store": [
+          { "field": "balances", "storageKeyHex": "3986228c29b507b8efaa42fcf48c30496f3143ba697818f38010810a3e32b0ae", "valueHex": "0000000000000006" }
+        ]
+      }
+    },
+    {
+      "id": "open-map-reader-retains-start-snapshot",
+      "steps": [
+        { "id": "begin-map-reader", "transaction": "map-reader", "action": "begin", "expect": { "status": "open" } },
+        { "id": "begin-map-writer", "transaction": "map-writer", "action": "begin", "expect": { "status": "open" } },
+        { "id": "map-writer-write", "transaction": "map-writer", "action": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000008", "expect": { "status": "ok" } },
+        { "id": "map-writer-commit", "transaction": "map-writer", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "map-reader-old-snapshot", "transaction": "map-reader", "action": "map-read", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "expect": { "status": "ok", "found": false, "valueHex": "" } },
+        { "id": "map-reader-rollback", "transaction": "map-reader", "action": "rollback", "expect": { "status": "rolled-back" } }
+      ],
+      "expect": {
+        "version": 1,
+        "store": [
+          { "field": "balances", "storageKeyHex": "3986228c29b507b8efaa42fcf48c30496f3143ba697818f38010810a3e32b0ae", "valueHex": "0000000000000008" }
+        ]
+      }
+    },
+    {
+      "id": "fresh-transaction-observes-latest-map-version",
+      "steps": [
+        { "id": "begin-map-first", "transaction": "map-first", "action": "begin", "expect": { "status": "open" } },
+        { "id": "map-first-write", "transaction": "map-first", "action": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000009", "expect": { "status": "ok" } },
+        { "id": "map-first-commit", "transaction": "map-first", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "begin-map-second", "transaction": "map-second", "action": "begin", "expect": { "status": "open" } },
+        { "id": "map-second-read", "transaction": "map-second", "action": "map-read", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "000102030405060708090a0b0c0d0e0f10111213", "expect": { "status": "ok", "found": true, "valueHex": "0000000000000009" } },
+        { "id": "map-second-write", "transaction": "map-second", "action": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "1415161718191a1b1c1d1e1f2021222324252627", "valueTypeID": "u64/be/v1", "valueHex": "000000000000000a", "expect": { "status": "ok" } },
+        { "id": "map-second-commit", "transaction": "map-second", "action": "commit", "expect": { "status": "commit", "version": 2, "writes": 1 } }
+      ],
+      "expect": {
+        "version": 2,
+        "store": [
+          { "field": "balances", "storageKeyHex": "3986228c29b507b8efaa42fcf48c30496f3143ba697818f38010810a3e32b0ae", "valueHex": "0000000000000009" },
+          { "field": "balances", "storageKeyHex": "8736984b2a95bf8d56988dedb3dc70e5d8c66fa15a5559503ad5aa960695d89d", "valueHex": "000000000000000a" }
+        ]
+      }
+    }
+  ]
+}

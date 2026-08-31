@@ -123,6 +123,8 @@ state verification failure withholds ordinary MIR too; source construction and t
 ADR 0367 versions optimistic snapshot/conflict behavior independently: stale overlays publish no
 state, existing readers retain their start snapshot, and later transactions see the winner. It does
 not choose production isolation, scheduling, retry, or consensus policy.
+ADR 0368 freezes the current oracle's store-wide version check for distinct map keys and adds exact
+map snapshot/storage-key evidence. Key-granular concurrency would require a new semantic version.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

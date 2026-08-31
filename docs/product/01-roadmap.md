@@ -1342,6 +1342,7 @@ non-authority to separate executable oracles and records what each still does no
 - Contract-state map corpus: ADR 0365 preserves the five historical cell cases and adds three current map cases for write/read, delete, exact storage-key identity, and encoded-key-limit rollback. Source, native, concurrency, and persistence admission remain closed.
 - Contract-state fixture publication: ADR 0366 routes both fixture generations through the compiler's atomic ordinary/state MIR result and proves malformed state bytes publish neither member. It still supplies HIR directly and therefore does not admit source syntax.
 - Contract-state conflict corpus: ADR 0367 versions three deterministic overlapping cell schedules for stale-writer no-partial-publication, stable start snapshots, and fresh-version observation. Map conflicts, goroutine scheduling, retries, layout upgrades, and production isolation mapping remain closed.
+- Contract-state map conflict corpus: ADR 0368 preserves the three historical cell schedules and adds three current map schedules proving store-wide conflicts across distinct keys, map snapshot stability, fresh observation, and exact physical-key identity. Goroutine scheduling, retries, layout upgrades, and production isolation mapping remain closed.
 - Contract interfaces: ADR 0340 supplies an experimental chain-neutral IDL and typed client generator over consumer-owned transports. Ordinary Fairy source calls, codec selection, signing, reentrancy analysis, MIR lowering, and deployable targets remain closed.
 
 ## Self-hosting gate

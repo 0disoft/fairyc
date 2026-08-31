@@ -531,6 +531,8 @@ ordinary/state MIR result, and proves malformed state bytes publish neither exec
 ADR 0367 separately versions three overlapping semantic-oracle schedules for stale-writer conflict,
 stable start snapshots, and fresh-version observation. A conflict publishes no stale state and does
 not revoke already verified compiler IR.
+ADR 0368 preserves that cell baseline and adds three map schedules proving that distinct keys still
+share one optimistic store version, with exact physical-key and snapshot evidence.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

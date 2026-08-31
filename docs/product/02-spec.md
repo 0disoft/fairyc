@@ -1018,6 +1018,9 @@ ADR 0367 separately versions overlapping semantic-oracle schedules. A stale comm
 publishes none of its overlay, and leaves the winning store version unchanged; a transaction reads
 the snapshot captured at begin, while a later begin observes the latest committed version. These
 runtime facts do not erase verified compiler IR.
+ADR 0368 applies the same version boundary to maps. Overlapping transactions that write distinct map
+keys still conflict when their base store version is stale; open readers retain their captured map
+snapshot, and a fresh transaction observes the latest committed keys.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

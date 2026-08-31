@@ -47,6 +47,8 @@ contract-state MIR; a state-MIR rejection leaves both executable outputs empty.
 ADR 0367 adds a separate deterministic overlapping-transaction corpus: stale commits publish no
 overlay or version, open readers retain their start snapshot, and fresh transactions observe the
 latest version. Runtime store conflict does not revoke compiler IR.
+ADR 0368 extends that durable evidence to maps: distinct entry keys still conflict through the
+store-wide base version, while snapshot and fresh-observation rules remain unchanged.
 
 ## Typed declarations
 

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:contract-state-conflict-fixtures:v1",
+  "title": "Fairy C contract-state conflict fixture manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "deferred", "contracts", "layout", "limits", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.contract-state-conflict-fixtures/v1" },
+    "deferred": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "contracts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "layout": { "$ref": "#/$defs/layout" },
+    "limits": { "$ref": "#/$defs/limits" },
+    "cases": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/case" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+    "hex": { "type": "string", "pattern": "^(?:[0-9a-f]{2})*$" },
+    "storageKeyHex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "action": { "enum": ["begin", "cell-read", "cell-write", "commit", "map-read", "map-write", "rollback"] },
+    "status": { "enum": ["commit", "conflict", "ok", "open", "rolled-back"] },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "valueTypeID"],
+      "properties": {
+        "name": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["cell", "map"] },
+        "keyTypeID": { "type": "string", "minLength": 1 },
+        "valueTypeID": { "type": "string", "minLength": 1 }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractUID", "fields"],
+      "properties": {
+        "contractUID": { "type": "string", "minLength": 1 },
+        "fields": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/field" } }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxWrites", "maxWriteBytes", "maxValueBytes", "maxMapKeyBytes"],
+      "properties": {
+        "maxWrites": { "type": "integer", "minimum": 1 },
+        "maxWriteBytes": { "type": "integer", "minimum": 1 },
+        "maxValueBytes": { "type": "integer", "minimum": 1 },
+        "maxMapKeyBytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "stepExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "found": { "type": "boolean" },
+        "valueHex": { "$ref": "#/$defs/hex" },
+        "version": { "type": "integer", "minimum": 0 },
+        "writes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "transaction", "action", "expect"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "transaction": { "$ref": "#/$defs/id" },
+        "action": { "$ref": "#/$defs/action" },
+        "field": { "$ref": "#/$defs/id" },
+        "keyTypeID": { "type": "string", "minLength": 1 },
+        "keyHex": { "$ref": "#/$defs/hex" },
+        "valueTypeID": { "type": "string", "minLength": 1 },
+        "valueHex": { "$ref": "#/$defs/hex" },
+        "expect": { "$ref": "#/$defs/stepExpectation" }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "valueHex"],
+      "properties": {
+        "field": { "$ref": "#/$defs/id" },
+        "storageKeyHex": { "$ref": "#/$defs/storageKeyHex" },
+        "valueHex": { "$ref": "#/$defs/hex" }
+      }
+    },
+    "finalExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "store"],
+      "properties": {
+        "version": { "type": "integer", "minimum": 0 },
+        "store": { "type": "array", "items": { "$ref": "#/$defs/entry" } }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "steps", "expect"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "steps": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/step" } },
+        "expect": { "$ref": "#/$defs/finalExpectation" }
+      }
+    }
+  }
+}

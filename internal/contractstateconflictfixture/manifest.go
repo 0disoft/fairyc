@@ -18,6 +18,8 @@ type layoutDefinition struct {
 
 type fieldDefinition struct {
 	Name        string `json:"name"`
+	Kind        string `json:"kind,omitempty"`
+	KeyTypeID   string `json:"keyTypeID,omitempty"`
 	ValueTypeID string `json:"valueTypeID"`
 }
 
@@ -39,6 +41,8 @@ type stepDefinition struct {
 	Transaction string          `json:"transaction"`
 	Action      string          `json:"action"`
 	Field       string          `json:"field,omitempty"`
+	KeyTypeID   string          `json:"keyTypeID,omitempty"`
+	KeyHex      string          `json:"keyHex,omitempty"`
 	ValueTypeID string          `json:"valueTypeID,omitempty"`
 	ValueHex    string          `json:"valueHex,omitempty"`
 	Expect      stepExpectation `json:"expect"`
@@ -58,8 +62,9 @@ type finalExpectation struct {
 }
 
 type expectedEntry struct {
-	Field    string `json:"field"`
-	ValueHex string `json:"valueHex"`
+	Field         string `json:"field"`
+	StorageKeyHex string `json:"storageKeyHex,omitempty"`
+	ValueHex      string `json:"valueHex"`
 }
 
 // Failure identifies one malformed or behaviorally mismatched schedule.

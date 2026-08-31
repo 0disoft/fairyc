@@ -45,3 +45,6 @@ to exactly three schedules and keeps schema action/status vocabularies aligned w
 The semantic oracle now has durable snapshot and conflict evidence without pretending that a
 process-local schedule format is a production isolation-level or retry contract. Backend candidates
 must map these observable state outcomes separately from compiler executable-IR publication.
+
+ADR 0368 later preserves v0 and adds a v1 corpus proving the same store-wide version semantics for
+distinct map keys.

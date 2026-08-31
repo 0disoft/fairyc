@@ -22,6 +22,21 @@ func TestContractStateConflictManifestV0(t *testing.T) {
 	}
 }
 
+func TestContractStateConflictManifestV1(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state-conflict", "manifest-v1.json")
+	report, err := Run(manifestPath)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if report.CasesRun != 6 {
+		t.Fatalf("Run() cases = %d, want 6", report.CasesRun)
+	}
+	for _, failure := range report.Failures {
+		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
+	}
+}
+
 func TestContractStateConflictManifestRejectsUnknownFields(t *testing.T) {
 	t.Parallel()
 	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state-conflict", "manifest-v0.json")
