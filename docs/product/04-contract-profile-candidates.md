@@ -99,7 +99,9 @@ state body through the matching fresh MIR function symbol and returns executable
 transactions without running them inside compilation. ADR 0355 makes cold and cached compilation
 publish those transactions atomically through the same verified `compiler.Result`. ADR 0356
 rejects `block_context`, `emit`, and `external_call` authority until transaction MIR represents and
-verifies those operations.
+verifies those operations. ADR 0357 rejects every internal or foreign call in the complete current
+owner body during direct lowering and stable rebind; later call admission must prove transitive
+operations, effects, state-borrow lifetime, capabilities, and reentrancy.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

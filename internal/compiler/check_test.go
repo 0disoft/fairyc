@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -170,6 +171,20 @@ func TestLowerAnalyzedRejectsStateMIRBeforePublishingExecutableIR(t *testing.T) 
 	}
 }
 
+func TestLowerAnalyzedRejectsStateOwnerCallBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	analysis := statefulCallingCompilerAnalysis(t)
+	result, err := compiler.LowerAnalyzed(analysis)
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower ||
+		!strings.Contains(err.Error(), "contains a call; calls are not admitted") {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+		t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
@@ -213,6 +228,46 @@ func statefulCompilerAnalysis(t *testing.T) (compiler.Analysis, []byte) {
 		},
 	}}
 	return analysis, encoded
+}
+
+func statefulCallingCompilerAnalysis(t *testing.T) compiler.Analysis {
+	t.Helper()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 helper() { return 42; }\nfn i32 main() { return helper(); }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var function *hir.Function
+	for moduleIndex := range analysis.Semantic.HIR.Modules {
+		for functionIndex := range analysis.Semantic.HIR.Modules[moduleIndex].Functions {
+			candidate := &analysis.Semantic.HIR.Modules[moduleIndex].Functions[functionIndex]
+			if candidate.Name == "main" {
+				function = candidate
+				break
+			}
+		}
+	}
+	if function == nil {
+		t.Fatal("analyzed package has no main function")
+	}
+	function.Effects = hir.CanonicalEffects([]hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite})
+	encoded, err := contractstate.U64.Encode(42)
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis.Semantic.HIR.StateLayouts = []hir.StateLayout{{
+		Package: 1, ContractUID: "test.compiler-result-call",
+		Fields: []hir.StateField{{Name: "value", Kind: hir.StateFieldCell, ValueTypeID: contractstate.U64.TypeID()}},
+	}}
+	analysis.Semantic.HIR.StateTransactions = []hir.StateTransaction{{
+		Package: 1, Function: function.Symbol, Exit: hir.StateTransactionCommit,
+		Accesses: []hir.StateAccess{
+			{Kind: hir.StateAccessCellWrite, Field: "value", Value: hir.StateValue{TypeID: contractstate.U64.TypeID(), Encoded: encoded}},
+			{Kind: hir.StateAccessCellRead, Field: "value"},
+		},
+	}}
+	return analysis
 }
 
 func TestCheckPackagesVerifiesIsolatedModulePaths(t *testing.T) {

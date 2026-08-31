@@ -26,9 +26,9 @@ though the current transaction program contains only cell/map reads, writes, and
 3. Apply the same verifier on direct programs, source-independent HIR lowering, stable body
    encoding/decoding, fresh-owner rebind, persistent cache lookup, and unified compiler-result
    publication. No transport path may bypass the closed profile.
-4. Do not infer complete call-graph exclusion from this effect check. Completed semantic analysis
-   still owns call-effect propagation, and a later slice must prove the exact internal/foreign call
-   rules, state-borrow lifetime, and reentrancy boundary before source or target admission.
+4. Do not infer complete call-graph exclusion from this effect check. ADR 0357 separately requires
+   the current transaction owner body to be call-free; admitting any internal or foreign call still
+   requires transitive operation/effect, state-borrow, capability, and reentrancy evidence.
 5. Keep state-body v1, package-body hash v1, cache key v4, stable compilation v1, persistent compiler
    identity `/2`, language 12, and SDK `0.0.0-stage0.54` unchanged. Existing bytes already carry the
    exact effect set and re-enter the current verifier under an exact compiler-build identity.
@@ -50,6 +50,6 @@ Atlas contract. No version bump is required.
 ## Consequences
 
 An accepted transaction program now carries only authority justified by its represented storage
-operations. Source state syntax, data-dependent values and control flow, exact call-graph exclusion,
-owner-bound borrows, event/block-context operations, native lowering, runtime persistence, migration,
+operations. ADR 0357 later closes every current owner-body call position. Source state syntax,
+data-dependent values and control flow, call admission, owner-bound borrows, event/block-context operations, native lowering, runtime persistence, migration,
 gas, Merkle proofs, reentrancy, chain integration, and deployable targets remain closed.

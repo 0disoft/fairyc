@@ -47,5 +47,6 @@ ADR 0354 retains both verified members on a persistent all-hit. Stable MIR reass
 fresh coordinate-owned logical-function bindings; every cached state transaction must bind through
 the matching MIR symbol after current layout/signature verification and fresh capability creation.
 ADR 0355 exposes those transactions through the same nested verified `compiler.Result` used by cold
-and process-local paths. Source syntax, backend, runtime, production persistence, and target
-admission remain closed.
+and process-local paths. ADR 0357 rechecks that each fresh current transaction owner is call-free;
+cached operations cannot bypass that current-HIR boundary. Source syntax, call admission, backend,
+runtime, production persistence, and target admission remain closed.

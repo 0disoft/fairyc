@@ -13,6 +13,7 @@
 - Combined cached reassembly source: `docs/adr/0354-combined-cached-state-reassembly.md`
 - Unified compiler-result source: `docs/adr/0355-unified-verified-compiler-result.md`
 - Closed effect-profile source: `docs/adr/0356-closed-contract-state-effect-profile.md`
+- Call-free owner source: `docs/adr/0357-call-free-contract-state-owners.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -75,7 +76,9 @@ Program effects are canonical released on-chain HIR effects. Cell/map reads requ
 `storage_read`; writes and deletes require `storage_write`. Missing required effects,
 noncanonical sets, and host-only effects fail with `CSM1005`. ADR 0356 also rejects
 `block_context`, `emit`, and `external_call`: this MIR has no operation that can justify those
-authorities. Exact call-graph and reentrancy rules remain a later gate.
+authorities. ADR 0357 also rejects every call expression in the current transaction owner body,
+including nested loop, block, child, and match-arm positions. This is call exclusion, not transitive
+call-graph or reentrancy support.
 
 ## HIR bridge
 
@@ -135,8 +138,8 @@ unexpected bodies fail before publication.
 
 ## Closed gates
 
-This slice does not add source syntax, data-dependent values, branches, loops, calls, owner-bound
-state borrows, exact call-graph rules, deterministic native backend execution, persistence,
+This slice does not add source syntax, data-dependent values, branches, loops, call admission,
+owner-bound state borrows, transitive call-graph rules, deterministic native backend execution, persistence,
 migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
@@ -149,4 +152,5 @@ MIR through a separate outer artifact. ADR 0353 adds cache publication, exact ex
 and record quarantine. ADR 0354 rebinds and aligns both cached members before the workspace compiler
 returns executable compiler-private state transactions. ADR 0355 makes those transactions part of
 the ordinary atomic verified compiler result. ADR 0356 rejects every effect not represented by the
-current storage-operation set.
+current storage-operation set. ADR 0357 rejects every current owner-body call during direct HIR
+lowering and stable fresh-owner rebind.

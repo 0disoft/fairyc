@@ -157,6 +157,14 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 		{name: "unrepresented external call effect", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectExternalCall, hir.EffectStorageRead}
 		}, contains: "has no contract-state transaction MIR operation"},
+		{name: "owner call", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
+		}, contains: "contains a call; calls are not admitted"},
+		{name: "nested owner call", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{For: &hir.ForLoop{
+				Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "call"}}}},
+			}}}
+		}, contains: "contains a call; calls are not admitted"},
 		{name: "noncanonical effects", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectStorageWrite, hir.EffectStorageRead}
 		}, contains: "CSM1005"},

@@ -79,6 +79,9 @@ func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected Sta
 		if function.Symbol == hir.NoSymbol {
 			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function has no fresh symbol", index)
 		}
+		if hirBlockContainsCall(function.Body) {
+			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function %q contains a call; calls are not admitted", index, descriptor.name)
+		}
 		freshSymbol := function.Symbol
 		if functionSymbols != nil {
 			var found bool

@@ -159,6 +159,8 @@ members under the MIR program's fresh coordinate-owned function symbols and retu
 state transactions for explicit compiler-private oracle execution. ADR 0355 makes ordinary and
 cached compilation publish those programs through one atomic verified compiler result. ADR 0356
 admits only the `storage_read` and `storage_write` effects represented by current transaction MIR.
+ADR 0357 requires the complete current owner HIR body to be call-free during direct lowering and
+stable rebind; it does not admit transitive call-graph or reentrancy semantics.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -986,7 +988,8 @@ stable package MIR v3 in a separate outer artifact. ADR 0353 adds cache storage,
 lookup, and exact-generation quarantine. ADR 0354 adds state-body rebind, combined fresh-symbol
 reassembly, and explicit cached oracle execution. ADR 0355 unifies cold and cached transaction
 publication in `compiler.Result`, and ADR 0356 closes accepted authority to represented storage
-effects while source, exact call-graph, and native/runtime admission remain closed.
+effects. ADR 0357 closes current owner-body calls while source, call admission, and native/runtime
+admission remain closed.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language
