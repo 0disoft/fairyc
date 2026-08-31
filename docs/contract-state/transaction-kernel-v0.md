@@ -44,6 +44,9 @@ ADR 0365 preserves that baseline and makes `manifest-v1.json` the current
 cell-and-map corpus. Neither manifest is a production storage format.
 ADR 0366 executes both corpora only after the compiler atomically publishes verified ordinary and
 contract-state MIR; a state-MIR rejection leaves both executable outputs empty.
+ADR 0367 adds a separate deterministic overlapping-transaction corpus: stale commits publish no
+overlay or version, open readers retain their start snapshot, and fresh transactions observe the
+latest version. Runtime store conflict does not revoke compiler IR.
 
 ## Typed declarations
 

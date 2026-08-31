@@ -1014,6 +1014,10 @@ delete, exact domain-separated storage-key, and encoded-key-limit rollback evide
 ADR 0366 requires both fixture generations to pass through `compiler.LowerAnalyzed` and treats only
 one verified atomic ordinary/state MIR result as executable. Direct HIR fixture construction remains
 compiler test input, not a source-language contract.
+ADR 0367 separately versions overlapping semantic-oracle schedules. A stale commit returns conflict,
+publishes none of its overlay, and leaves the winning store version unchanged; a transaction reads
+the snapshot captured at begin, while a later begin observes the latest committed version. These
+runtime facts do not erase verified compiler IR.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

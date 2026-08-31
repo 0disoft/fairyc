@@ -120,6 +120,9 @@ ADR 0365 keeps those five cell cases historical and adds three current map cases
 physical storage-key vector and map-key-limit rollback, without changing the admission boundary.
 ADR 0366 strengthens those cases to consume only compiler-published state transactions and proves
 state verification failure withholds ordinary MIR too; source construction and targets remain closed.
+ADR 0367 versions optimistic snapshot/conflict behavior independently: stale overlays publish no
+state, existing readers retain their start snapshot, and later transactions see the winner. It does
+not choose production isolation, scheduling, retry, or consensus policy.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

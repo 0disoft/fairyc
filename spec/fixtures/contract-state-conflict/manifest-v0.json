@@ -1,0 +1,84 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.contract-state-conflict-fixtures/v0",
+  "deferred": [
+    "parallel goroutine scheduling and race detection",
+    "map-entry conflict schedules",
+    "layout upgrade while transactions are open",
+    "production database isolation mapping",
+    "distributed consensus and retry policy"
+  ],
+  "contracts": [
+    "docs/contract-state/transaction-kernel-v0.md",
+    "docs/adr/0338-typed-persistent-state-transaction-kernel.md",
+    "docs/adr/0367-versioned-contract-state-conflict-fixtures.md"
+  ],
+  "layout": {
+    "contractUID": "fixture.conflict",
+    "fields": [
+      { "name": "primary", "valueTypeID": "u64/be/v1" },
+      { "name": "secondary", "valueTypeID": "u64/be/v1" }
+    ]
+  },
+  "limits": {
+    "maxWrites": 8,
+    "maxWriteBytes": 1024,
+    "maxValueBytes": 64,
+    "maxMapKeyBytes": 64
+  },
+  "cases": [
+    {
+      "id": "stale-writer-conflict-no-partial-publication",
+      "steps": [
+        { "id": "begin-winner", "transaction": "winner", "action": "begin", "expect": { "status": "open" } },
+        { "id": "begin-stale", "transaction": "stale", "action": "begin", "expect": { "status": "open" } },
+        { "id": "winner-write", "transaction": "winner", "action": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000001", "expect": { "status": "ok" } },
+        { "id": "winner-commit", "transaction": "winner", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "stale-write", "transaction": "stale", "action": "cell-write", "field": "secondary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000002", "expect": { "status": "ok" } },
+        { "id": "stale-conflict", "transaction": "stale", "action": "commit", "expect": { "status": "conflict" } }
+      ],
+      "expect": {
+        "version": 1,
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000001" }
+        ]
+      }
+    },
+    {
+      "id": "open-reader-retains-start-snapshot",
+      "steps": [
+        { "id": "begin-reader", "transaction": "reader", "action": "begin", "expect": { "status": "open" } },
+        { "id": "begin-writer", "transaction": "writer", "action": "begin", "expect": { "status": "open" } },
+        { "id": "writer-write", "transaction": "writer", "action": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000003", "expect": { "status": "ok" } },
+        { "id": "writer-commit", "transaction": "writer", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "reader-old-snapshot", "transaction": "reader", "action": "cell-read", "field": "primary", "expect": { "status": "ok", "found": false, "valueHex": "" } },
+        { "id": "reader-rollback", "transaction": "reader", "action": "rollback", "expect": { "status": "rolled-back" } }
+      ],
+      "expect": {
+        "version": 1,
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000003" }
+        ]
+      }
+    },
+    {
+      "id": "fresh-transaction-observes-latest-version",
+      "steps": [
+        { "id": "begin-first", "transaction": "first", "action": "begin", "expect": { "status": "open" } },
+        { "id": "first-write", "transaction": "first", "action": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000004", "expect": { "status": "ok" } },
+        { "id": "first-commit", "transaction": "first", "action": "commit", "expect": { "status": "commit", "version": 1, "writes": 1 } },
+        { "id": "begin-second", "transaction": "second", "action": "begin", "expect": { "status": "open" } },
+        { "id": "second-read", "transaction": "second", "action": "cell-read", "field": "primary", "expect": { "status": "ok", "found": true, "valueHex": "0000000000000004" } },
+        { "id": "second-write", "transaction": "second", "action": "cell-write", "field": "secondary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000005", "expect": { "status": "ok" } },
+        { "id": "second-commit", "transaction": "second", "action": "commit", "expect": { "status": "commit", "version": 2, "writes": 1 } }
+      ],
+      "expect": {
+        "version": 2,
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000004" },
+          { "field": "secondary", "valueHex": "0000000000000005" }
+        ]
+      }
+    }
+  ]
+}
