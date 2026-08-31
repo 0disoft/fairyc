@@ -157,6 +157,20 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 		{name: "unrepresented external call effect", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectExternalCall, hir.EffectStorageRead}
 		}, contains: "has no contract-state transaction MIR operation"},
+		{name: "unsafe owner", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Unsafe = true
+		}, contains: "unsafe owners are not admitted"},
+		{name: "unsafe owner body", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "unsafe"}
+		}, contains: "unsafe code is not admitted"},
+		{name: "raw-pointer owner local", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.RawPointer(hir.TypeU8, false)}}
+		}, contains: "raw-pointer types are not admitted"},
+		{name: "aggregate-nested raw-pointer owner parameter", mutate: func(input *hir.Package) {
+			wrapperType := hir.Type("ledger::RawEnvelope")
+			input.Modules[0].Structs = []hir.Struct{{Type: wrapperType, Fields: []hir.StructField{{Type: hir.RawPointer(hir.TypeU8, true)}}}}
+			input.Modules[0].Functions[0].Parameters = []hir.Parameter{{Type: wrapperType}}
+		}, contains: "raw-pointer types are not admitted"},
 		{name: "owner call", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},
@@ -195,6 +209,20 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 				t.Fatalf("error = %v, want %q", err, test.contains)
 			}
 		})
+	}
+}
+
+func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceOwnerTypes(t *testing.T) {
+	input := baseHIRTransaction()
+	resourceType := hir.Type("ledger::Handle")
+	input.Modules[0].Resources = []hir.Resource{{Type: resourceType, Fields: []hir.ResourceField{{Type: hir.TypeU32}}}}
+	input.Modules[0].Functions[0].Parameters = []hir.Parameter{
+		{Type: hir.SharedBorrow(hir.TypeI32)},
+		{Type: resourceType},
+	}
+	input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.MutableBorrow(hir.TypeU32)}}
+	if _, err := LowerHIRTransactions(input); err != nil {
+		t.Fatalf("safe owner types rejected: %v", err)
 	}
 }
 

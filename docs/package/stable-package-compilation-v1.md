@@ -49,5 +49,7 @@ the matching MIR symbol after current layout/signature verification and fresh ca
 ADR 0355 exposes those transactions through the same nested verified `compiler.Result` used by cold
 and process-local paths. ADR 0357 rechecks that each fresh current transaction owner is call-free;
 ADR 0358 also rechecks that it contains no dynamic control flow. Cached operations cannot bypass
-those current-HIR boundaries. Source syntax, call or conditional-state admission, backend,
+those current-HIR boundaries. ADR 0359 additionally rejects unsafe code and recursively reachable
+raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. Source
+syntax, call or conditional-state admission, pointer provenance, backend,
 runtime, production persistence, and target admission remain closed.

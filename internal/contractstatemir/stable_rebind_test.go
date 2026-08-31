@@ -124,6 +124,15 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 		}, contains: "multiple functions"},
 		{name: "signature drift", mutateHIR: func(input *hir.Package) { input.Modules[0].Functions[0].Parameters[0].Type = hir.TypeU32 }, contains: "signature does not match"},
 		{name: "missing fresh symbol", mutateHIR: func(input *hir.Package) { input.Modules[0].Functions[0].Symbol = hir.NoSymbol }, contains: "no fresh symbol"},
+		{name: "current unsafe owner", mutateHIR: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Unsafe = true
+		}, contains: "unsafe owners are not admitted"},
+		{name: "current unsafe owner body", mutateHIR: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "unsafe"}
+		}, contains: "unsafe code is not admitted"},
+		{name: "current raw-pointer owner local", mutateHIR: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.RawPointer(hir.TypeU8, false)}}
+		}, contains: "raw-pointer types are not admitted"},
 		{name: "current owner call", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},

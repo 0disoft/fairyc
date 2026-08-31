@@ -512,7 +512,9 @@ current transaction owner body to be call-free during direct lowering and stable
 ordinary internal and foreign calls remain closed until their transitive state and reentrancy
 semantics are represented. ADR 0358 additionally rejects conditionals, loops, assertions, Result
 propagation, and short-circuit operators so every current owner remains straight-line under the
-exact compiler-private HIR boundary.
+exact compiler-private HIR boundary. ADR 0359 rejects unsafe declarations/scopes and raw-pointer
+types through signatures, locals, expressions, and nested aggregates while preserving ordinary
+safe-borrow and pointer-free resource types.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

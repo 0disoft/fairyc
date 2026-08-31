@@ -50,7 +50,9 @@ lockfile, or Atlas contract. No version bump is required.
 ## Consequences
 
 Every accepted current transaction owner is now call-free and straight-line under the exact closed
-HIR set above. This does not derive state operations from ordinary expressions or admit
-data-dependent state values. Source state syntax, owner-bound borrows, conditional transaction MIR,
+HIR set above. ADR 0359 later excludes unsafe code and reachable raw-pointer types while preserving
+ordinary safe-borrow and pointer-free resource types. This does not derive state operations from
+ordinary expressions or admit data-dependent state values. Source state syntax, owner-bound state
+borrows, conditional transaction MIR,
 native lowering, runtime persistence, migration, gas, Merkle proofs, events, block context,
 reentrancy, chain integration, and deployable targets remain closed.

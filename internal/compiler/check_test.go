@@ -199,6 +199,31 @@ func TestLowerAnalyzedRejectsStateOwnerControlFlowBeforePublishingExecutableIR(t
 	}
 }
 
+func TestLowerAnalyzedRejectsUnsafeStateOwnerBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name     string
+		analysis func(*testing.T) compiler.Analysis
+		contains string
+	}{
+		{name: "unsafe body", analysis: statefulUnsafeCompilerAnalysis, contains: "unsafe code is not admitted"},
+		{name: "raw-pointer parameter", analysis: statefulRawPointerCompilerAnalysis, contains: "raw-pointer types are not admitted"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := compiler.LowerAnalyzed(test.analysis(t))
+			var pipelineError *compiler.Error
+			if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower ||
+				!strings.Contains(err.Error(), test.contains) {
+				t.Fatalf("LowerAnalyzed() error = %v", err)
+			}
+			if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+				t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+			}
+		})
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
@@ -248,6 +273,30 @@ func statefulControlFlowCompilerAnalysis(t *testing.T) compiler.Analysis {
 		t.Fatal(err)
 	}
 	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-control-flow")
+	return analysis
+}
+
+func statefulUnsafeCompilerAnalysis(t *testing.T) compiler.Analysis {
+	t.Helper()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main() { let ptr u8 pointer = unsafe { c\"fairy\" as ptr u8 }; return 42; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-unsafe")
+	return analysis
+}
+
+func statefulRawPointerCompilerAnalysis(t *testing.T) compiler.Analysis {
+	t.Helper()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main(ptr u8 pointer) { return 42; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-raw-pointer")
 	return analysis
 }
 

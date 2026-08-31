@@ -161,7 +161,9 @@ cached compilation publish those programs through one atomic verified compiler r
 admits only the `storage_read` and `storage_write` effects represented by current transaction MIR.
 ADR 0357 requires the complete current owner HIR body to be call-free during direct lowering and
 stable rebind. ADR 0358 also rejects conditionals, loops, assertions, Result propagation, and
-short-circuit operators; neither decision admits transitive calls or conditional transaction MIR.
+short-circuit operators. ADR 0359 rejects unsafe code and recursively reachable raw-pointer types
+while preserving ordinary safe-borrow and pointer-free resource types; none admits transitive calls,
+owner-bound state borrows, pointer provenance, or conditional transaction MIR.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -991,7 +993,9 @@ reassembly, and explicit cached oracle execution. ADR 0355 unifies cold and cach
 publication in `compiler.Result`, and ADR 0356 closes accepted authority to represented storage
 effects. ADR 0357 closes current owner-body calls while source, call admission, and native/runtime
 admission remain closed. ADR 0358 closes current owner-body dynamic control flow while
-data-dependent state values and conditional transaction MIR remain absent.
+data-dependent state values and conditional transaction MIR remain absent. ADR 0359 closes unsafe
+and raw-pointer owner transport while safe borrows remain ordinary HIR facts rather than state
+permissions.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

@@ -27,8 +27,9 @@ explicit oracle execution. ADR 0355 publishes ordinary and contract-state MIR at
 verified compiler result. ADR 0356 then admits only the represented `storage_read` and
 `storage_write` effects. ADR 0357 additionally requires the current transaction owner body to be
 call-free on direct lowering and stable rebind. ADR 0358 rejects dynamic control flow in those same
-paths so current owners remain straight-line; production storage and runtime targets still do not
-consume it.
+paths so current owners remain straight-line. ADR 0359 rejects unsafe scopes and reachable
+raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types; production
+storage and runtime targets still do not consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.

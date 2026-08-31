@@ -103,7 +103,9 @@ verifies those operations. ADR 0357 rejects every internal or foreign call in th
 owner body during direct lowering and stable rebind; later call admission must prove transitive
 operations, effects, state-borrow lifetime, capabilities, and reentrancy. ADR 0358 also rejects every
 current `if`, `match`, loop, loop-control, assertion, Result-propagation, and short-circuit path until
-conditional transaction MIR has an exact representation.
+conditional transaction MIR has an exact representation. ADR 0359 additionally rejects unsafe
+declarations/scopes and raw-pointer types through signatures, locals, expressions, and nested
+aggregates without conflating ordinary safe borrows with state permissions.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
