@@ -167,7 +167,8 @@ receiver-bound methods and automatic drop glue while preserving static associate
 admits transitive calls, owner-bound state borrows, pointer provenance, or conditional transaction
 MIR. ADR 0361 also rejects ordinary potentially trapping operations while preserving the state
 model's explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while
-preserving safe resource borrows and static resource namespaces.
+preserving safe resource borrows and static resource namespaces. ADR 0363 freezes the residual pure
+owner HIR as a positive allowlist so future forms and expression-local effects fail closed.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -1003,6 +1004,8 @@ permissions. ADR 0360 closes receiver and drop-glue ownership while retaining ex
 associated functions. ADR 0361 closes checked-arithmetic and bounds trap edges in current owners.
 ADR 0362 closes owned-resource drop/burn flow and lexical region cleanup while preserving safe
 borrows and static resource namespaces.
+ADR 0363 closes the owner HIR world to an explicit positive statement, expression, and operator
+allowlist.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

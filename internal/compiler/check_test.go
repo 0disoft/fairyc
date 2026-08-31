@@ -289,6 +289,31 @@ func TestLowerAnalyzedRejectsOwnedResourceStateOwnerBeforePublishingExecutableIR
 	}
 }
 
+func TestLowerAnalyzedRejectsUnlistedStateOwnerHIRBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main() { return 42; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-closed-owner-form")
+	function := &analysis.Semantic.HIR.Modules[0].Functions[0]
+	if len(function.Body.Statements) != 1 || function.Body.Statements[0].Expression == nil {
+		t.Fatalf("main HIR body = %+v", function.Body)
+	}
+	function.Body.Statements[0].Expression.Effects = []hir.Effect{hir.EffectStorageRead}
+	result, err := compiler.LowerAnalyzed(analysis)
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower ||
+		!strings.Contains(err.Error(), "carries expression-local effects") {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+		t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{

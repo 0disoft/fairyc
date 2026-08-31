@@ -55,6 +55,8 @@ also rechecks that fresh current owners have no receiver or drop-glue execution 
 preserving explicit static associated functions. ADR 0361 additionally rechecks that fresh current
 owners contain no retained checked arithmetic or bounds operation with an unrepresented trap edge.
 ADR 0362 rechecks that fresh owners carry neither owned resource values nor lexical regions while
-preserving safe resource borrows and static resource namespaces. Source syntax, call or
+preserving safe resource borrows and static resource namespaces. ADR 0363 rejects every fresh-owner
+statement, expression, operator, or expression-local effect outside the closed positive allowlist.
+Source syntax, call or
 conditional-state admission, pointer provenance, backend, runtime, production persistence, and
 target admission remain closed.

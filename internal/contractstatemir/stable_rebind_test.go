@@ -148,6 +148,9 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 			input.Modules[0].Resources = append(input.Modules[0].Resources, hir.Resource{Type: resourceType, DropKind: hir.ResourceDropEmpty})
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: resourceType}}
 		}, contains: "owned resource values are not admitted"},
+		{name: "current future owner expression", mutateHIR: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "future-expression"}
+		}, contains: "expression kind \"future-expression\" is not admitted"},
 		{name: "current owner call", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},

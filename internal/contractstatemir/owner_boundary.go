@@ -270,6 +270,94 @@ func hirExpressionContainsLexicalRegion(expression *hir.Expression) bool {
 	return false
 }
 
+func verifyHIRStateOwnerClosedFormBoundary(function hir.Function) error {
+	if err := verifyHIRStateOwnerBlockClosedForm(function.Body); err != nil {
+		return fmt.Errorf("state transaction owner is outside the closed HIR form: %w", err)
+	}
+	return nil
+}
+
+func verifyHIRStateOwnerBlockClosedForm(block hir.Block) error {
+	for index := range block.Statements {
+		if err := verifyHIRStateOwnerStatementClosedForm(&block.Statements[index]); err != nil {
+			return err
+		}
+	}
+	return verifyHIRStateOwnerExpressionClosedForm(block.Tail)
+}
+
+func verifyHIRStateOwnerStatementClosedForm(statement *hir.Statement) error {
+	if statement == nil {
+		return nil
+	}
+	switch statement.Kind {
+	case "binding", "return", "discard", "expression-statement":
+	case "assignment":
+		operator := statement.Operator
+		if operator == "" {
+			operator = "="
+		}
+		switch operator {
+		case "=", "&=", "|=", "^=":
+		default:
+			return fmt.Errorf("assignment operator %q is not admitted", statement.Operator)
+		}
+	default:
+		return fmt.Errorf("statement kind %q is not admitted", statement.Kind)
+	}
+	if statement.For != nil {
+		return fmt.Errorf("statement kind %q carries loop state", statement.Kind)
+	}
+	if err := verifyHIRStateOwnerExpressionClosedForm(statement.Target); err != nil {
+		return err
+	}
+	return verifyHIRStateOwnerExpressionClosedForm(statement.Expression)
+}
+
+func verifyHIRStateOwnerExpressionClosedForm(expression *hir.Expression) error {
+	if expression == nil {
+		return nil
+	}
+	if len(expression.Effects) != 0 {
+		return fmt.Errorf("expression kind %q carries expression-local effects", expression.Kind)
+	}
+	switch expression.Kind {
+	case "literal", "path", "group", "record", "array", "array-view-borrow", "array-length",
+		"field-expression", "view-length", "view-empty", "scalar-cast", "result-variant",
+		"option-variant", "enum-variant", "block":
+	case "prefix":
+		switch expression.Operator {
+		case "+", "!", "~", "&", "&mut", "*":
+		default:
+			return fmt.Errorf("prefix operator %q is not admitted", expression.Operator)
+		}
+	case "binary":
+		switch expression.Operator {
+		case "==", "!=", "<", "<=", ">", ">=", "&", "|", "^":
+		default:
+			return fmt.Errorf("binary operator %q is not admitted", expression.Operator)
+		}
+	default:
+		return fmt.Errorf("expression kind %q is not admitted", expression.Kind)
+	}
+	for index := range expression.Children {
+		if err := verifyHIRStateOwnerExpressionClosedForm(&expression.Children[index]); err != nil {
+			return err
+		}
+	}
+	if expression.Block != nil {
+		if err := verifyHIRStateOwnerBlockClosedForm(*expression.Block); err != nil {
+			return err
+		}
+	}
+	for index := range expression.Arms {
+		if err := verifyHIRStateOwnerExpressionClosedForm(&expression.Arms[index].Expression); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func verifyHIRStateOwnerMemoryBoundary(input hir.Package, function hir.Function) error {
 	if function.Unsafe {
 		return fmt.Errorf("state transaction owner is unsafe; unsafe owners are not admitted")

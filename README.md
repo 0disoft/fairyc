@@ -519,7 +519,9 @@ drop glue as state owners while preserving explicit static associated functions.
 ordinary checked arithmetic and bounds operations whose conditional traps are absent from the
 linear state side model while retaining its explicit static trap exit. ADR 0362 rejects owned
 resource values and lexical regions whose drop, burn, and reset lifetimes are absent from that side
-model while preserving safe resource borrows and static resource namespaces.
+model while preserving safe resource borrows and static resource namespaces. ADR 0363 then freezes
+the remaining pure owner HIR as a positive allowlist so future statement, expression, operator, or
+expression-effect additions fail closed.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

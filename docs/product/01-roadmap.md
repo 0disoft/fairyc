@@ -1337,6 +1337,7 @@ non-authority to separate executable oracles and records what each still does no
 - Contract-state entry boundary: ADR 0360 rejects receiver-bound methods and automatic drop glue as current transaction owners while preserving explicit static associated functions. Receiver-bound state borrows and cleanup-triggered transactions remain closed.
 - Contract-state ordinary trap boundary: ADR 0361 rejects retained checked arithmetic, division, shifts, indexing, and slicing whose conditional trap edges are absent from the linear state model. The state program's explicit static trap exit remains admitted.
 - Contract-state ordinary lifetime boundary: ADR 0362 rejects owned resource values and lexical regions whose drop, burn, placement, and reset transitions are absent from the state model. Safe resource borrows and static resource namespaces remain admitted.
+- Contract-state closed owner HIR: ADR 0363 freezes the residual pure statement, expression, and operator subset as a positive allowlist. Future HIR forms and expression-local effects fail closed until separately admitted.
 - Contract interfaces: ADR 0340 supplies an experimental chain-neutral IDL and typed client generator over consumer-owned transports. Ordinary Fairy source calls, codec selection, signing, reentrancy analysis, MIR lowering, and deployable targets remain closed.
 
 ## Self-hosting gate

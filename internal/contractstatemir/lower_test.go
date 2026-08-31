@@ -195,6 +195,15 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 		{name: "nested owner lexical region", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "region"}}}
 		}, contains: "lexical regions are not admitted"},
+		{name: "future owner statement", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: "future-statement"}}
+		}, contains: "statement kind \"future-statement\" is not admitted"},
+		{name: "nested future owner expression", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "future-expression"}}}
+		}, contains: "expression kind \"future-expression\" is not admitted"},
+		{name: "owner expression-local effects", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "literal", Effects: []hir.Effect{hir.EffectStorageRead}}
+		}, contains: "carries expression-local effects"},
 		{name: "owner call", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},
@@ -246,7 +255,7 @@ func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceNamespaces(t *testing
 	}
 	input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.MutableBorrow(hir.TypeU32)}}
 	input.Modules[0].Functions[0].OwnerType = resourceType
-	input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "&"}
+	input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "&", Children: []hir.Expression{{Kind: "literal"}, {Kind: "literal"}}}
 	if _, err := LowerHIRTransactions(input); err != nil {
 		t.Fatalf("safe static-associated owner types rejected: %v", err)
 	}

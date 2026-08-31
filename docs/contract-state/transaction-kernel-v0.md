@@ -33,7 +33,8 @@ also rejects receiver-bound and drop-glue owners while preserving static associa
 0361 rejects ordinary potentially trapping operations while preserving the transaction program's
 explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while
 preserving safe resource borrows and static resource namespaces; production storage and runtime
-targets still do not consume it.
+targets still do not consume it. ADR 0363 freezes the remaining owner HIR as a positive allowlist so
+future forms fail closed.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.

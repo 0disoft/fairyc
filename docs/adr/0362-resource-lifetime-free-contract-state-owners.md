@@ -60,7 +60,8 @@ target, lockfile, or Atlas contract. No version bump is required.
 
 Accepted current owners no longer carry ordinary resource release authority or lexical region
 cleanup. Safe borrows and receiver-free static resource namespaces remain ordinary HIR facts, not
-state-MIR permissions. Source state syntax, data-dependent state values, owner-bound state borrows,
+state-MIR permissions. ADR 0363 later freezes the remaining owner HIR as a positive allowlist.
+Source state syntax, data-dependent state values, owner-bound state borrows,
 proof-backed resource-lifetime admission, conditional transaction MIR, native lowering, runtime
 persistence, migration, gas, Merkle proofs, events, block context, reentrancy, chain integration,
 and deployable targets remain closed.

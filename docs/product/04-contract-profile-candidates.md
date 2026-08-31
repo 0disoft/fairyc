@@ -111,7 +111,8 @@ static associated functions. ADR 0361 rejects ordinary checked arithmetic, divis
 indexing, and slicing until a future model can prove their trap relationship to the transaction
 exit. ADR 0362 rejects owned resource values and lexical regions until their drop, burn, placement,
 and reset lifetimes have a transaction-level representation; safe resource borrows and static
-resource namespaces remain admitted.
+resource namespaces remain admitted. ADR 0363 requires every residual current owner statement,
+expression, operator, and expression-local effect to appear in a positive allowlist.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

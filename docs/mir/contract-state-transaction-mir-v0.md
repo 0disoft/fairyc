@@ -19,6 +19,7 @@
 - Explicit-entry owner source: `docs/adr/0360-explicit-entry-contract-state-owners.md`
 - Potential-trap owner source: `docs/adr/0361-potentially-trapping-owner-operations.md`
 - Resource-lifetime-free owner source: `docs/adr/0362-resource-lifetime-free-contract-state-owners.md`
+- Closed-form owner source: `docs/adr/0363-closed-form-contract-state-owner-hir.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
 - Stable language, MIR artifact, runtime ABI, and SDK identity: unchanged
@@ -92,6 +93,8 @@ owners while preserving static associated functions with no receiver. ADR 0361 r
 ordinary checked arithmetic and bounds operations because their conditional trap edges are absent
 from this linear model. ADR 0362 rejects owned resource values and lexical regions because their
 drop, burn, placement, and reset lifetimes are also absent.
+ADR 0363 then admits only a positive statement, expression, and operator allowlist; every unknown
+future owner form or expression-local effect fails closed.
 
 ## HIR bridge
 
@@ -173,3 +176,4 @@ does not represent, while preserving explicit static associated functions. ADR 0
 potentially trapping ordinary operations while leaving this MIR's explicit static trap exit intact.
 ADR 0362 rejects ordinary owned-resource and lexical-region lifetime transitions while preserving
 safe resource borrows and static resource namespaces.
+ADR 0363 freezes the residual pure owner HIR as a recursive positive allowlist.
