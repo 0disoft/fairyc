@@ -249,6 +249,26 @@ func TestLowerAnalyzedRejectsImplicitStateOwnersBeforePublishingExecutableIR(t *
 	}
 }
 
+func TestLowerAnalyzedRejectsPotentiallyTrappingStateOwnerBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main(i32 value) { return value + 1; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-trap")
+	result, err := compiler.LowerAnalyzed(analysis)
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower ||
+		!strings.Contains(err.Error(), "potentially trapping operations are not admitted") {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+		t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{

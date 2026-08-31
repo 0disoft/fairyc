@@ -43,3 +43,62 @@ func TestHIRTypeContainsRawPointerTraversesOwnerTypeGraph(t *testing.T) {
 		})
 	}
 }
+
+func TestHIRStateOwnerTrapBoundaryClassifiesClosedForms(t *testing.T) {
+	tests := []struct {
+		name      string
+		function  hir.Function
+		wantError bool
+	}{
+		{name: "unary minus", function: trapOwnerExpression("prefix", "-"), wantError: true},
+		{name: "bitwise complement", function: trapOwnerExpression("prefix", "~")},
+		{name: "array index", function: trapOwnerExpression("array-index", "[]"), wantError: true},
+		{name: "view index", function: trapOwnerExpression("view-index", "[]"), wantError: true},
+		{name: "view slice", function: trapOwnerExpression("view-slice", ".."), wantError: true},
+		{name: "scalar cast", function: trapOwnerExpression("scalar-cast", "as")},
+	}
+	for _, operator := range []string{"+", "-", "*", "/", "%", "<<", ">>"} {
+		tests = append(tests, struct {
+			name      string
+			function  hir.Function
+			wantError bool
+		}{name: "binary " + operator, function: trapOwnerExpression("binary", operator), wantError: true})
+	}
+	for _, operator := range []string{"==", "!=", "<", "<=", ">", ">=", "&", "|", "^"} {
+		tests = append(tests, struct {
+			name      string
+			function  hir.Function
+			wantError bool
+		}{name: "safe binary " + operator, function: trapOwnerExpression("binary", operator)})
+	}
+	for _, operator := range []string{"+=", "-=", "*=", "/=", "%=", "<<=", ">>="} {
+		tests = append(tests, struct {
+			name      string
+			function  hir.Function
+			wantError bool
+		}{name: "compound " + operator, function: trapOwnerAssignment(operator), wantError: true})
+	}
+	for _, operator := range []string{"=", "&=", "|=", "^="} {
+		tests = append(tests, struct {
+			name      string
+			function  hir.Function
+			wantError bool
+		}{name: "safe assignment " + operator, function: trapOwnerAssignment(operator)})
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := verifyHIRStateOwnerTrapBoundary(test.function)
+			if (err != nil) != test.wantError {
+				t.Fatalf("verifyHIRStateOwnerTrapBoundary() error = %v, wantError = %t", err, test.wantError)
+			}
+		})
+	}
+}
+
+func trapOwnerExpression(kind, operator string) hir.Function {
+	return hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: kind, Operator: operator}}}
+}
+
+func trapOwnerAssignment(operator string) hir.Function {
+	return hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: "assignment", Operator: operator}}}}
+}

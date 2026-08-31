@@ -16,6 +16,82 @@ func verifyHIRStateOwnerEntryBoundary(function hir.Function) error {
 	return nil
 }
 
+func verifyHIRStateOwnerTrapBoundary(function hir.Function) error {
+	if hirBlockMayTrap(function.Body) {
+		return fmt.Errorf("state transaction owner contains a potentially trapping operation; potentially trapping operations are not admitted")
+	}
+	return nil
+}
+
+func hirBlockMayTrap(block hir.Block) bool {
+	for index := range block.Statements {
+		if hirStatementMayTrap(&block.Statements[index]) {
+			return true
+		}
+	}
+	return hirExpressionMayTrap(block.Tail)
+}
+
+func hirStatementMayTrap(statement *hir.Statement) bool {
+	if statement == nil {
+		return false
+	}
+	if statement.Kind == "assert" {
+		return true
+	}
+	if statement.Kind == "assignment" {
+		if operator, ok := hir.CompoundAssignmentBinary(statement.Operator); ok && hirOperatorMayTrap(operator) {
+			return true
+		}
+	}
+	if hirExpressionMayTrap(statement.Target) || hirExpressionMayTrap(statement.Expression) {
+		return true
+	}
+	if statement.For == nil {
+		return false
+	}
+	return hirStatementMayTrap(statement.For.Initializer) ||
+		hirExpressionMayTrap(statement.For.Condition) ||
+		hirStatementMayTrap(statement.For.Post) || hirBlockMayTrap(statement.For.Body)
+}
+
+func hirExpressionMayTrap(expression *hir.Expression) bool {
+	if expression == nil {
+		return false
+	}
+	switch expression.Kind {
+	case "array-index", "view-index", "view-slice":
+		return true
+	case "prefix", "binary":
+		if hirOperatorMayTrap(expression.Operator) {
+			return true
+		}
+	}
+	for index := range expression.Children {
+		if hirExpressionMayTrap(&expression.Children[index]) {
+			return true
+		}
+	}
+	if expression.Block != nil && hirBlockMayTrap(*expression.Block) {
+		return true
+	}
+	for index := range expression.Arms {
+		if hirExpressionMayTrap(&expression.Arms[index].Expression) {
+			return true
+		}
+	}
+	return false
+}
+
+func hirOperatorMayTrap(operator string) bool {
+	switch operator {
+	case "+", "-", "*", "/", "%", "<<", ">>":
+		return true
+	default:
+		return false
+	}
+}
+
 func verifyHIRStateOwnerMemoryBoundary(input hir.Package, function hir.Function) error {
 	if function.Unsafe {
 		return fmt.Errorf("state transaction owner is unsafe; unsafe owners are not admitted")

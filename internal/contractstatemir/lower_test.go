@@ -178,6 +178,15 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 		{name: "drop-glue owner", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].DropGlueFor = hir.Type("ledger::Handle")
 		}, contains: "drop-glue owners are not admitted"},
+		{name: "owner checked arithmetic", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "+"}
+		}, contains: "potentially trapping operations are not admitted"},
+		{name: "nested owner bounds access", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "view-slice"}}}
+		}, contains: "potentially trapping operations are not admitted"},
+		{name: "owner checked compound assignment", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: "assignment", Operator: "+="}}
+		}, contains: "potentially trapping operations are not admitted"},
 		{name: "owner call", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},
@@ -229,6 +238,7 @@ func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceOwnerTypes(t *testing
 	}
 	input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.MutableBorrow(hir.TypeU32)}}
 	input.Modules[0].Functions[0].OwnerType = hir.Type("ledger::Counter")
+	input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "&"}
 	if _, err := LowerHIRTransactions(input); err != nil {
 		t.Fatalf("safe static-associated owner types rejected: %v", err)
 	}

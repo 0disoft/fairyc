@@ -515,7 +515,9 @@ propagation, and short-circuit operators so every current owner remains straight
 exact compiler-private HIR boundary. ADR 0359 rejects unsafe declarations/scopes and raw-pointer
 types through signatures, locals, expressions, and nested aggregates while preserving ordinary
 safe-borrow and pointer-free resource types. ADR 0360 rejects receiver-bound methods and automatic
-drop glue as state owners while preserving explicit static associated functions.
+drop glue as state owners while preserving explicit static associated functions. ADR 0361 rejects
+ordinary checked arithmetic and bounds operations whose conditional traps are absent from the
+linear state side model while retaining its explicit static trap exit.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

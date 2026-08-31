@@ -65,7 +65,8 @@ the straight-line state side model without claiming transitive call-graph or ree
 0358 later rejects dynamic control flow in those same current-owner paths. ADR 0359 later excludes
 unsafe code and reachable raw-pointer types without treating safe borrows as state permissions. ADR
 0360 later excludes receiver-bound methods and automatic drop glue while retaining static associated
-functions as explicit entries.
+functions as explicit entries. ADR 0361 later excludes ordinary potentially trapping operations
+without removing the state program's explicit static trap exit.
 
 The compiler now has a complete process-local typed path from package/function ownership through
 verified state effects and capability flow into failure-atomic oracle execution. Before ordinary

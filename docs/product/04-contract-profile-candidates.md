@@ -107,7 +107,8 @@ conditional transaction MIR has an exact representation. ADR 0359 additionally r
 declarations/scopes and raw-pointer types through signatures, locals, expressions, and nested
 aggregates without conflating ordinary safe borrows with state permissions. ADR 0360 rejects
 receiver-bound methods and automatic drop glue as current owners while retaining receiver-free
-static associated functions.
+static associated functions. ADR 0361 rejects ordinary checked arithmetic, division, shifts,
+indexing, and slicing until a future model can prove their trap relationship to the transaction exit.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

@@ -58,6 +58,6 @@ Every accepted current transaction owner is call-free, straight-line, safe, and 
 raw-pointer types. Safe borrows and resources remain ordinary compiler facts rather than state-MIR
 permissions. ADR 0360 later requires an explicit free or static-associated entry and rejects
 receiver-bound methods and automatic drop glue. Source state syntax, data-dependent state values,
-owner-bound state borrows, conditional
+owner-bound state borrows, potentially trapping ordinary operations, conditional
 transaction MIR, native lowering, runtime persistence, migration, gas, Merkle proofs, events, block
 context, reentrancy, chain integration, and deployable targets remain closed.

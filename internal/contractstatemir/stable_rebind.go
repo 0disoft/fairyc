@@ -91,6 +91,9 @@ func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected Sta
 		if err := verifyHIRStateOwnerEntryBoundary(function); err != nil {
 			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function %q: %w", index, descriptor.name, err)
 		}
+		if err := verifyHIRStateOwnerTrapBoundary(function); err != nil {
+			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function %q: %w", index, descriptor.name, err)
+		}
 		freshSymbol := function.Symbol
 		if functionSymbols != nil {
 			var found bool

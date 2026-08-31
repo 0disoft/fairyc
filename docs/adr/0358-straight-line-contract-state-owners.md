@@ -53,7 +53,8 @@ Every accepted current transaction owner is now call-free and straight-line unde
 HIR set above. ADR 0359 later excludes unsafe code and reachable raw-pointer types while preserving
 ordinary safe-borrow and pointer-free resource types. This does not derive state operations from
 ordinary expressions or admit data-dependent state values. ADR 0360 later excludes receiver-bound
-methods and automatic drop glue without rejecting static associated functions. Source state syntax, owner-bound state
-borrows, conditional transaction MIR,
+methods and automatic drop glue without rejecting static associated functions. ADR 0361 later
+excludes ordinary checked arithmetic and bounds operations whose trap edges remain unrepresented.
+Source state syntax, owner-bound state borrows, conditional transaction MIR,
 native lowering, runtime persistence, migration, gas, Merkle proofs, events, block context,
 reentrancy, chain integration, and deployable targets remain closed.

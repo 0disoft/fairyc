@@ -57,7 +57,9 @@ target, lockfile, or Atlas contract. No version bump is required.
 
 Every accepted current transaction owner now has an explicit entry shape: a free function or static
 associated function, never a receiver-bound method or automatic cleanup function. Ordinary methods
-and drop glue remain fully available outside the state-owner side table. Source state syntax,
+and drop glue remain fully available outside the state-owner side table. ADR 0361 later excludes
+ordinary checked arithmetic and bounds operations whose conditional trap edges are not represented.
+Source state syntax,
 data-dependent state values, receiver-bound state borrows, conditional transaction MIR, native
 lowering, runtime persistence, migration, gas, Merkle proofs, events, block context, reentrancy,
 chain integration, and deployable targets remain closed.
