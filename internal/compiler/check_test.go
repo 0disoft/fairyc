@@ -185,6 +185,20 @@ func TestLowerAnalyzedRejectsStateOwnerCallBeforePublishingExecutableIR(t *testi
 	}
 }
 
+func TestLowerAnalyzedRejectsStateOwnerControlFlowBeforePublishingExecutableIR(t *testing.T) {
+	t.Parallel()
+	analysis := statefulControlFlowCompilerAnalysis(t)
+	result, err := compiler.LowerAnalyzed(analysis)
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StageStateMIRLower ||
+		!strings.Contains(err.Error(), "contains dynamic control flow; dynamic control flow is not admitted") {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if result.Verified || len(result.MIR.Functions) != 0 || len(result.StateTransactions) != 0 {
+		t.Fatalf("LowerAnalyzed() published partial executable IR = %+v", result)
+	}
+}
+
 func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
@@ -210,24 +224,7 @@ func statefulCompilerAnalysis(t *testing.T) (compiler.Analysis, []byte) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	function := &analysis.Semantic.HIR.Modules[0].Functions[0]
-	function.Effects = hir.CanonicalEffects([]hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite})
-	encoded, err := contractstate.U64.Encode(42)
-	if err != nil {
-		t.Fatal(err)
-	}
-	analysis.Semantic.HIR.StateLayouts = []hir.StateLayout{{
-		Package: 1, ContractUID: "test.compiler-result",
-		Fields: []hir.StateField{{Name: "value", Kind: hir.StateFieldCell, ValueTypeID: contractstate.U64.TypeID()}},
-	}}
-	analysis.Semantic.HIR.StateTransactions = []hir.StateTransaction{{
-		Package: 1, Function: function.Symbol, Exit: hir.StateTransactionCommit,
-		Accesses: []hir.StateAccess{
-			{Kind: hir.StateAccessCellWrite, Field: "value", Value: hir.StateValue{TypeID: contractstate.U64.TypeID(), Encoded: encoded}},
-			{Kind: hir.StateAccessCellRead, Field: "value"},
-		},
-	}}
-	return analysis, encoded
+	return attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result")
 }
 
 func statefulCallingCompilerAnalysis(t *testing.T) compiler.Analysis {
@@ -238,6 +235,24 @@ func statefulCallingCompilerAnalysis(t *testing.T) compiler.Analysis {
 	if err != nil {
 		t.Fatal(err)
 	}
+	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-call")
+	return analysis
+}
+
+func statefulControlFlowCompilerAnalysis(t *testing.T) compiler.Analysis {
+	t.Helper()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main() { return if (true) { 42 } else { 0 }; }\n"),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	analysis, _ = attachStatefulCompilerAnalysis(t, analysis, "test.compiler-result-control-flow")
+	return analysis
+}
+
+func attachStatefulCompilerAnalysis(t *testing.T, analysis compiler.Analysis, contractUID string) (compiler.Analysis, []byte) {
+	t.Helper()
 	var function *hir.Function
 	for moduleIndex := range analysis.Semantic.HIR.Modules {
 		for functionIndex := range analysis.Semantic.HIR.Modules[moduleIndex].Functions {
@@ -257,7 +272,7 @@ func statefulCallingCompilerAnalysis(t *testing.T) compiler.Analysis {
 		t.Fatal(err)
 	}
 	analysis.Semantic.HIR.StateLayouts = []hir.StateLayout{{
-		Package: 1, ContractUID: "test.compiler-result-call",
+		Package: 1, ContractUID: contractUID,
 		Fields: []hir.StateField{{Name: "value", Kind: hir.StateFieldCell, ValueTypeID: contractstate.U64.TypeID()}},
 	}}
 	analysis.Semantic.HIR.StateTransactions = []hir.StateTransaction{{
@@ -267,7 +282,7 @@ func statefulCallingCompilerAnalysis(t *testing.T) compiler.Analysis {
 			{Kind: hir.StateAccessCellRead, Field: "value"},
 		},
 	}}
-	return analysis
+	return analysis, encoded
 }
 
 func TestCheckPackagesVerifiesIsolatedModulePaths(t *testing.T) {

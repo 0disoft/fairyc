@@ -48,5 +48,6 @@ fresh coordinate-owned logical-function bindings; every cached state transaction
 the matching MIR symbol after current layout/signature verification and fresh capability creation.
 ADR 0355 exposes those transactions through the same nested verified `compiler.Result` used by cold
 and process-local paths. ADR 0357 rechecks that each fresh current transaction owner is call-free;
-cached operations cannot bypass that current-HIR boundary. Source syntax, call admission, backend,
+ADR 0358 also rechecks that it contains no dynamic control flow. Cached operations cannot bypass
+those current-HIR boundaries. Source syntax, call or conditional-state admission, backend,
 runtime, production persistence, and target admission remain closed.

@@ -26,7 +26,8 @@ ADR 0354 reassembles cached MIR and state bodies under one fresh function-symbol
 explicit oracle execution. ADR 0355 publishes ordinary and contract-state MIR atomically through one
 verified compiler result. ADR 0356 then admits only the represented `storage_read` and
 `storage_write` effects. ADR 0357 additionally requires the current transaction owner body to be
-call-free on direct lowering and stable rebind; production storage and runtime targets still do not
+call-free on direct lowering and stable rebind. ADR 0358 rejects dynamic control flow in those same
+paths so current owners remain straight-line; production storage and runtime targets still do not
 consume it.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,

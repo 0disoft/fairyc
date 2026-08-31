@@ -50,7 +50,8 @@ lockfile, or Atlas contract. No version bump is required.
 ## Consequences
 
 Every accepted current transaction owner is now exactly call-free, including nested expression and
-loop positions. This is not a transitive call-graph or reentrancy analysis. Source state syntax,
-data-dependent values and control flow, owner-bound borrows, native lowering, runtime persistence,
+loop positions. This is not a transitive call-graph or reentrancy analysis. ADR 0358 later rejects
+dynamic control flow in the same current-owner paths. Source state syntax, data-dependent values,
+conditional transaction MIR, owner-bound borrows, native lowering, runtime persistence,
 migration, gas, Merkle proofs, event/block-context operations, chain integration, and deployable
 targets remain closed.

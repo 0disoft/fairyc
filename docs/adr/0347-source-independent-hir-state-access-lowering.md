@@ -61,7 +61,8 @@ target, lockfile, Atlas, and CLI bytes remain unchanged.
 
 ADR 0357 later requires every current transaction owner body to be call-free during direct lowering
 and stable fresh-owner rebind. That boundary prevents ordinary callee execution from diverging from
-the straight-line state side model without claiming transitive call-graph or reentrancy support.
+the straight-line state side model without claiming transitive call-graph or reentrancy support. ADR
+0358 later rejects dynamic control flow in those same current-owner paths.
 
 The compiler now has a complete process-local typed path from package/function ownership through
 verified state effects and capability flow into failure-atomic oracle execution. Before ordinary

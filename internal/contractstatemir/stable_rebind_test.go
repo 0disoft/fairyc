@@ -127,6 +127,9 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 		{name: "current owner call", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
 		}, contains: "contains a call; calls are not admitted"},
+		{name: "current owner control flow", mutateHIR: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "match"}
+		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
 		{name: "shared fresh symbol", mutateHIR: func(input *hir.Package) { input.Modules[0].Functions[1].Symbol = input.Modules[0].Functions[0].Symbol }, contains: "share fresh symbol"},
 	}
 	for _, test := range tests {

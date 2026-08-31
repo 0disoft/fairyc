@@ -160,7 +160,8 @@ state transactions for explicit compiler-private oracle execution. ADR 0355 make
 cached compilation publish those programs through one atomic verified compiler result. ADR 0356
 admits only the `storage_read` and `storage_write` effects represented by current transaction MIR.
 ADR 0357 requires the complete current owner HIR body to be call-free during direct lowering and
-stable rebind; it does not admit transitive call-graph or reentrancy semantics.
+stable rebind. ADR 0358 also rejects conditionals, loops, assertions, Result propagation, and
+short-circuit operators; neither decision admits transitive calls or conditional transaction MIR.
 
 ADR 0339 supplies a bounded compiler-internal specialization planner with exact provider coherence,
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
@@ -989,7 +990,8 @@ lookup, and exact-generation quarantine. ADR 0354 adds state-body rebind, combin
 reassembly, and explicit cached oracle execution. ADR 0355 unifies cold and cached transaction
 publication in `compiler.Result`, and ADR 0356 closes accepted authority to represented storage
 effects. ADR 0357 closes current owner-body calls while source, call admission, and native/runtime
-admission remain closed.
+admission remain closed. ADR 0358 closes current owner-body dynamic control flow while
+data-dependent state values and conditional transaction MIR remain absent.
 
 ADR 0143 fixes the first human project file as strict `fairy.toml` schema
 `fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language

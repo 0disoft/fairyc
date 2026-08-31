@@ -114,6 +114,9 @@ func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
 		if hirBlockContainsCall(function.Body) {
 			return nil, fmt.Errorf("package %d function %d state transaction owner contains a call; calls are not admitted", transaction.Package, transaction.Function)
 		}
+		if hirBlockContainsDynamicControlFlow(function.Body) {
+			return nil, fmt.Errorf("package %d function %d state transaction owner contains dynamic control flow; dynamic control flow is not admitted", transaction.Package, transaction.Function)
+		}
 		program, err := lowerHIRTransaction(layout, function.Effects, transaction)
 		if err != nil {
 			return nil, fmt.Errorf("package %d function %d state transaction: %w", transaction.Package, transaction.Function, err)
@@ -204,6 +207,62 @@ func hirExpressionContainsCall(expression *hir.Expression) bool {
 	}
 	for index := range expression.Arms {
 		if hirExpressionContainsCall(&expression.Arms[index].Expression) {
+			return true
+		}
+	}
+	return false
+}
+
+func hirBlockContainsDynamicControlFlow(block hir.Block) bool {
+	for index := range block.Statements {
+		if hirStatementContainsDynamicControlFlow(&block.Statements[index]) {
+			return true
+		}
+	}
+	return hirExpressionContainsDynamicControlFlow(block.Tail)
+}
+
+func hirStatementContainsDynamicControlFlow(statement *hir.Statement) bool {
+	if statement == nil {
+		return false
+	}
+	switch statement.Kind {
+	case "assert", "while", "for", "break", "continue":
+		return true
+	}
+	if hirExpressionContainsDynamicControlFlow(statement.Target) || hirExpressionContainsDynamicControlFlow(statement.Expression) {
+		return true
+	}
+	if statement.For == nil {
+		return false
+	}
+	return hirStatementContainsDynamicControlFlow(statement.For.Initializer) ||
+		hirExpressionContainsDynamicControlFlow(statement.For.Condition) ||
+		hirStatementContainsDynamicControlFlow(statement.For.Post) || hirBlockContainsDynamicControlFlow(statement.For.Body)
+}
+
+func hirExpressionContainsDynamicControlFlow(expression *hir.Expression) bool {
+	if expression == nil {
+		return false
+	}
+	switch expression.Kind {
+	case "if", "match", "while", "propagate":
+		return true
+	case "binary":
+		if expression.Operator == "&&" || expression.Operator == "||" {
+			return true
+		}
+	}
+	for index := range expression.Children {
+		if hirExpressionContainsDynamicControlFlow(&expression.Children[index]) {
+			return true
+		}
+	}
+	if expression.Block != nil && hirBlockContainsDynamicControlFlow(*expression.Block) {
+		return true
+	}
+	for index := range expression.Arms {
+		if hirExpressionContainsDynamicControlFlow(&expression.Arms[index].Expression) {
 			return true
 		}
 	}

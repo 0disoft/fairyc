@@ -510,7 +510,9 @@ verified `compiler.Result` for cold and cached compilation paths. ADR 0356 admit
 external-call operations have their own verifier contracts. ADR 0357 recursively requires the
 current transaction owner body to be call-free during direct lowering and stable fresh-owner rebind;
 ordinary internal and foreign calls remain closed until their transitive state and reentrancy
-semantics are represented.
+semantics are represented. ADR 0358 additionally rejects conditionals, loops, assertions, Result
+propagation, and short-circuit operators so every current owner remains straight-line under the
+exact compiler-private HIR boundary.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

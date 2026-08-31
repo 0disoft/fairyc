@@ -165,6 +165,17 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 				Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "call"}}}},
 			}}}
 		}, contains: "contains a call; calls are not admitted"},
+		{name: "owner conditional", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "if"}
+		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
+		{name: "nested owner short circuit", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{
+				Kind: "binary", Operator: "&&",
+			}}}
+		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
+		{name: "owner assertion", mutate: func(input *hir.Package) {
+			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: "assert"}}
+		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
 		{name: "noncanonical effects", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectStorageWrite, hir.EffectStorageRead}
 		}, contains: "CSM1005"},

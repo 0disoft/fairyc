@@ -101,7 +101,9 @@ publish those transactions atomically through the same verified `compiler.Result
 rejects `block_context`, `emit`, and `external_call` authority until transaction MIR represents and
 verifies those operations. ADR 0357 rejects every internal or foreign call in the complete current
 owner body during direct lowering and stable rebind; later call admission must prove transitive
-operations, effects, state-borrow lifetime, capabilities, and reentrancy.
+operations, effects, state-borrow lifetime, capabilities, and reentrancy. ADR 0358 also rejects every
+current `if`, `match`, loop, loop-control, assertion, Result-propagation, and short-circuit path until
+conditional transaction MIR has an exact representation.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
