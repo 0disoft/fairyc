@@ -152,9 +152,23 @@ func AnalyzeSources(inputs []SourceInput) (Report, error) {
 		return report, errors.New("semantic analysis completed without verified MIR")
 	}
 
+	report = analyzeCompilerResult(checked, loopBudgets)
+	return report, nil
+}
+
+func analyzeCompilerResult(checked compiler.Result, loopBudgets map[string]uint64) Report {
+	report := NewReport()
+	if len(checked.StateTransactions) != 0 {
+		report.Violations = append(report.Violations, Violation{
+			Code:    "CP1017",
+			Message: "contract-state transactions are not admitted by deterministic contract profile v0",
+		})
+		report.Finalize()
+		return report
+	}
 	report = Analyze(checked.MIR, loopBudgets)
 	report.Finalize()
-	return report, nil
+	return report
 }
 
 func consumeProfileAttributes(sourcePath string, module *ast.Module) (map[string]uint64, []Violation) {
