@@ -34,6 +34,7 @@
 - Experimental bounded static generic planner: docs/adr/0339-bounded-static-generic-specialization-kernel.md, internal/genericplan/; no source syntax, HIR substitution, MIR, or backend surface is admitted
 - Experimental chain-neutral contract IDL and bindings: docs/cli/contract-idl.md, docs/adr/0340-experimental-chain-neutral-contract-idl.md, spec/contract-idl/, internal/contractabi/, cmd/fairyc-contract-idl/, examples/contract_idl/
 - Experimental deterministic contract profile and bounded meter plan: docs/contract/deterministic-contract-profile-v0.md, docs/adr/0369-experimental-deterministic-contract-profile.md, spec/cli/experimental-contract-profile-v0.schema.json, internal/contractprofile/, cmd/fairyc-contract-profile/; backend, gas, persistent storage, and target selection remain closed
+- Compiler-private fixed-width unsigned arithmetic oracle: docs/adr/0370-fixed-width-unsigned-arithmetic-oracle.md, internal/chainprimitives/; source types, MIR, backends, ABI, nominal chain values, cryptography, fixed-point values, gas, and target selection remain closed
 - Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identities: docs/package/source-file-identities-v1.md, internal/packagecontent/file_identity.go
 - Deterministic per-package Atlas logical map plan: docs/atlas/fymap-logical-plan-v1.md, internal/atlasmap/

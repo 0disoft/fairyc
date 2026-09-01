@@ -186,6 +186,12 @@ not change the language revision or public interface. Profile v0 rejects ambient
 unsafe/raw-pointer operations, target-dependent types, recursion, unmetered Regions, and the
 compiler result's contract-state transactions; persistent storage and target selection remain closed.
 
+ADR 0370 adds a compiler-private fixed-width unsigned arithmetic oracle for possible future
+deterministic workloads. It defines checked, wrapping, and saturating `u64`, `Uint128`, and `Uint256`
+reference behavior without adding source types, MIR operations, backend lowering, ABI promises, or
+target semantics. Address, signature, cryptographic, fixed-point, gas, and target choices remain
+`UNDECIDED`.
+
 ## Value categories
 
 ### Inert values
