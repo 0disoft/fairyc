@@ -180,6 +180,12 @@ canonical chain-neutral IDL v0, and typed Go/TypeScript clients over a consumer-
 It changes neither Stage 0 grammar nor the stable `fairyc` CLI and claims no source-level contract
 call, codec, signing, reentrancy proof, HIR/MIR lowering, backend, deployment, or supported target.
 
+ADR 0369 adds a standalone experimental deterministic-contract profile over the ordinary verified
+MIR pipeline. Its profile-only `@max_iter` overlay is removed before core semantic analysis and does
+not change the language revision or public interface. Profile v0 rejects ambient effects, FFI,
+unsafe/raw-pointer operations, target-dependent types, recursion, unmetered Regions, and the
+compiler result's contract-state transactions; persistent storage and target selection remain closed.
+
 ## Value categories
 
 ### Inert values

@@ -1,4 +1,4 @@
-# ADR 0335: Add a verified-MIR deterministic contract profile and bounded cost report
+# ADR 0369: Add a verified-MIR deterministic contract profile and bounded cost report
 
 - Status: Accepted experimental surface
 - Date: 2026-08-19
@@ -56,7 +56,9 @@ following:
 8. cyclic control flow without a valid `@max_iter`;
 9. direct or mutual recursion;
 10. missing internal call targets, malformed verified-MIR graph identities, orphan loop annotations,
-    or abstract-cost overflow.
+    or abstract-cost overflow;
+11. compiler-published contract-state transactions, because profile v0 has no persistent-storage
+    instruction, growth bound, or commit-cost contract.
 
 The first abstract cost model assigns deterministic integer weights to operations and terminators.
 A function's local cost is the sum across all of its MIR blocks. Each internal call site adds the
@@ -75,9 +77,9 @@ contains exact cyclic MIR edges, aggregate budgets, abstract cost ceilings, and 
 ceilings. Public JSON contains only the number of metered edges because MIR block identities are
 valid only inside one verified program instance.
 
-The first intended executable backend is a constrained WASM contract target. A constrained RISC-V
-target follows after the same programs, counters, traps, and report identities can be reproduced.
-This decision adds neither emitter and makes no target-support claim.
+The first executable backend remains `UNDECIDED`. A future target ADR must compare the selected
+runtime's validation, counter, trap, memory, ABI, and deployment evidence against this profile.
+This decision adds no emitter and makes no target-support claim.
 
 ## Evidence
 
@@ -93,7 +95,7 @@ exit classes.
 ## Consequences
 
 Fairy C gains a real backend-independent contract admission gate without turning its general
-language into a Solidity clone. WASM and RISC-V work can now target one explicit verified input
+language into a Solidity clone. A future selected target can consume one explicit verified input
 contract instead of re-deciding consensus safety inside each emitter.
 
 The current profile cannot express persistent state, events, contract calls, cryptographic host

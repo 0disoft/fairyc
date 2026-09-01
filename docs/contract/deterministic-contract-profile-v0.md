@@ -60,7 +60,7 @@ not become a Stage 0 language attribute, public interface member, or MIR field.
 
 The aggregate rule is deliberate. The analyzer computes strongly connected components and marks
 every CFG edge whose source and destination belong to the same cyclic component. The report exposes
-that count as `meteredCycleEdges`. A future WASM or RISC-V runtime increments one per-function
+that count as `meteredCycleEdges`. A future selected runtime increments one per-function
 counter on every such edge and traps before the aggregate budget is exceeded. This cannot silently
 multiply independent per-loop promises or miss irreducible control flow.
 
@@ -72,7 +72,7 @@ declaration. Later chain capabilities must enter through a separate deterministi
 explicit prices and replay semantics; reusing the current host effects is forbidden.
 
 Raw pointers, unsafe MIR operations, foreign calls, raw-pointer-bearing aggregate fields,
-target-dependent `c::*` scalars, `usize`, `@repr(C)` layout, and floating-point types are rejected. Floating point remains closed until WASM and RISC-V backends,
+target-dependent `c::*` scalars, `usize`, `@repr(C)` layout, and floating-point types are rejected. Floating point remains closed until every admitted backend,
 constant folding, traps, NaN canonicalization, and serialization share one exact contract. Region
 enter, placement, and reset operations are also rejected until a backend owns a measurable
 memory-growth ceiling. Ordinary move-only resources remain
@@ -138,6 +138,7 @@ That value must not be reused after storage is added; the profile and report sch
 | `CP1014` | target-dependent `c::*` scalar |
 | `CP1015` | target-width `usize` |
 | `CP1016` | target-dependent `@repr(C)` aggregate layout |
+| `CP1017` | compiler-published contract-state transaction not admitted by profile v0 |
 
 Violations sort by function, source range, code, and message. Reports never contain source text,
 absolute host paths, build-local symbol IDs, bytecode, toolchain paths, or secrets.
@@ -153,7 +154,6 @@ returns each function's exact cyclic MIR edges, aggregate loop budget, abstract 
 storage-growth ceiling. Block identities remain out of the public JSON because they are valid only
 for the current verified MIR instance.
 
-The first backend should emit constrained WASM because its structured validation and mature tooling
-make the initial proof surface smaller. RISC-V should follow through the same profile report and
-runtime counter contract. Neither backend may reinterpret `fairyc-abstract-step/v0` as chain gas
-without a separately versioned schedule and native execution evidence.
+The first backend remains `UNDECIDED`. Its target ADR must preserve this profile report and runtime
+counter contract, and it may not reinterpret `fairyc-abstract-step/v0` as chain gas without a
+separately versioned schedule and native execution evidence.

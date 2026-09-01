@@ -1344,6 +1344,7 @@ non-authority to separate executable oracles and records what each still does no
 - Contract-state conflict corpus: ADR 0367 versions three deterministic overlapping cell schedules for stale-writer no-partial-publication, stable start snapshots, and fresh-version observation. Map conflicts, goroutine scheduling, retries, layout upgrades, and production isolation mapping remain closed.
 - Contract-state map conflict corpus: ADR 0368 preserves the three historical cell schedules and adds three current map schedules proving store-wide conflicts across distinct keys, map snapshot stability, fresh observation, and exact physical-key identity. Goroutine scheduling, retries, layout upgrades, and production isolation mapping remain closed.
 - Contract interfaces: ADR 0340 supplies an experimental chain-neutral IDL and typed client generator over consumer-owned transports. Ordinary Fairy source calls, codec selection, signing, reentrancy analysis, MIR lowering, and deployable targets remain closed.
+- Deterministic contract profile: ADR 0369 adds an experimental source-to-verified-MIR admission report, bounded aggregate cycle-edge budgets, transitive abstract-cost ceilings, and a compiler-private meter plan. It rejects ambient effects, FFI, unsafe/raw-pointer operations, target-dependent types, recursion, unmetered Regions, and compiler-published contract-state transactions. Backend, gas schedule, persistent storage, event/call/block capabilities, and deployable target selection remain closed.
 
 ## Self-hosting gate
 

@@ -1,6 +1,11 @@
 package contractprofile
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/contractstatemir"
+)
 
 func TestAnalyzeSourcesConsumesMaxIterOverlayBeforeCoreSemantics(t *testing.T) {
 	t.Parallel()
@@ -112,5 +117,19 @@ fn i32 main() {
 	}
 	if report.SourceDiagnostics[0].Code != "E0101" || len(report.Functions) != 0 {
 		t.Fatalf("diagnostics/functions = %+v / %+v", report.SourceDiagnostics, report.Functions)
+	}
+}
+
+func TestAnalyzeCompilerResultRejectsContractStateTransactions(t *testing.T) {
+	t.Parallel()
+	report := analyzeCompilerResult(compiler.Result{
+		Verified:          true,
+		StateTransactions: []contractstatemir.LoweredTransaction{{}},
+	}, nil)
+	if report.Accepted || report.PersistentStorage || !hasViolationCode(report, "CP1017") {
+		t.Fatalf("report = %+v", report)
+	}
+	if len(report.Functions) != 0 {
+		t.Fatalf("functions = %+v", report.Functions)
 	}
 }
