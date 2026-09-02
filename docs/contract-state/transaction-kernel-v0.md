@@ -189,6 +189,11 @@ differently.
 contract UID and every existing field byte-for-byte at the same index. New fields may only be
 appended. The upgrade increments the store version, invalidating every open transaction.
 
+ADR 0371 and `fairyc.contract-state-layout-fixtures/v0` execute this rule across the publication
+boundary. An accepted append-only upgrade preserves committed bytes and field identity while an
+old-layout transaction fails with `ErrLayoutMismatch`; removal, reorder, rename, kind, key/value
+codec, and contract-namespace changes leave layout, version, and bytes untouched.
+
 The first rule intentionally rejects field removal, reorder, rename, codec changes, namespace reuse,
 and in-place migration. A later migration system needs explicit old/new codecs, bounded work,
 restart behavior, authorization, and rollback evidence instead of silently weakening this gate.

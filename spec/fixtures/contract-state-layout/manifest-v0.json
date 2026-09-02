@@ -1,0 +1,214 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.contract-state-layout-fixtures/v0",
+  "contracts": [
+    "docs/adr/0371-contract-state-layout-upgrade-fixtures.md",
+    "docs/contract-state/transaction-kernel-v0.md"
+  ],
+  "limits": {
+    "maxWrites": 16,
+    "maxWriteBytes": 4096,
+    "maxValueBytes": 64,
+    "maxMapKeyBytes": 64
+  },
+  "baseLayout": {
+    "contractUID": "example.layout",
+    "fields": [
+      {
+        "name": "supply",
+        "kind": "cell",
+        "valueTypeID": "u64/be/v1"
+      },
+      {
+        "name": "balances",
+        "kind": "map",
+        "keyTypeID": "u32/be/v1",
+        "valueTypeID": "u64/be/v1"
+      }
+    ]
+  },
+  "seed": [
+    {
+      "field": "supply",
+      "valueHex": "0000000000000007"
+    },
+    {
+      "field": "balances",
+      "keyHex": "00000001",
+      "valueHex": "000000000000000a"
+    }
+  ],
+  "pending": [
+    {
+      "field": "supply",
+      "valueHex": "0000000000000009"
+    },
+    {
+      "field": "balances",
+      "keyHex": "00000002",
+      "valueHex": "0000000000000014"
+    }
+  ],
+  "cases": [
+    {
+      "id": "append-only-publication-invalidates-open-transaction",
+      "expect": "accepted",
+      "candidate": {
+        "contractUID": "example.layout",
+        "fields": [
+          {
+            "name": "supply",
+            "kind": "cell",
+            "valueTypeID": "u64/be/v1"
+          },
+          {
+            "name": "balances",
+            "kind": "map",
+            "keyTypeID": "u32/be/v1",
+            "valueTypeID": "u64/be/v1"
+          },
+          {
+            "name": "enabled",
+            "kind": "cell",
+            "valueTypeID": "bool/v1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "field-removal-is-rejected",
+      "expect": "rejected",
+      "candidate": {
+        "contractUID": "example.layout",
+        "fields": [
+          {
+            "name": "supply",
+            "kind": "cell",
+            "valueTypeID": "u64/be/v1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "field-reorder-is-rejected",
+      "expect": "rejected",
+      "candidate": {
+        "contractUID": "example.layout",
+        "fields": [
+          {
+            "name": "balances",
+            "kind": "map",
+            "keyTypeID": "u32/be/v1",
+            "valueTypeID": "u64/be/v1"
+          },
+          {
+            "name": "supply",
+            "kind": "cell",
+            "valueTypeID": "u64/be/v1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "field-rename-is-rejected",
+      "expect": "rejected",
+      "candidate": {
+        "contractUID": "example.layout",
+        "fields": [
+          {
+            "name": "total_supply",
+            "kind": "cell",
+            "valueTypeID": "u64/be/v1"
+          },
+          {
+            "name": "balances",
+            "kind": "map",
+            "keyTypeID": "u32/be/v1",
+            "valueTypeID": "u64/be/v1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "field-kind-change-is-rejected",
+      "expect": "rejected",
+      "candidate": {
+        "contractUID": "example.layout",
+        "fields": [
+          {
+            "name": "supply",
+            "kind": "map",
+            "keyTypeID": "u32/be/v1",
+            "valueTypeID": "u64/be/v1"
+          },
+          {
+            "name": "balances",
+            "kind": "map",
+            "keyTypeID": "u32/be/v1",
+            "valueTypeID": "u64/be/v1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "map-key-codec-change-is-rejected",
+      "expect": "rejected",
+      "candidate": {
+        "contractUID": "example.layout",
+        "fields": [
+          {
+            "name": "supply",
+            "kind": "cell",
+            "valueTypeID": "u64/be/v1"
+          },
+          {
+            "name": "balances",
+            "kind": "map",
+            "keyTypeID": "bytes20/v1",
+            "valueTypeID": "u64/be/v1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "value-codec-change-is-rejected",
+      "expect": "rejected",
+      "candidate": {
+        "contractUID": "example.layout",
+        "fields": [
+          {
+            "name": "supply",
+            "kind": "cell",
+            "valueTypeID": "u32/be/v1"
+          },
+          {
+            "name": "balances",
+            "kind": "map",
+            "keyTypeID": "u32/be/v1",
+            "valueTypeID": "u64/be/v1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "contract-namespace-change-is-rejected",
+      "expect": "rejected",
+      "candidate": {
+        "contractUID": "example.layout.v2",
+        "fields": [
+          {
+            "name": "supply",
+            "kind": "cell",
+            "valueTypeID": "u64/be/v1"
+          },
+          {
+            "name": "balances",
+            "kind": "map",
+            "keyTypeID": "u32/be/v1",
+            "valueTypeID": "u64/be/v1"
+          }
+        ]
+      }
+    }
+  ]
+}

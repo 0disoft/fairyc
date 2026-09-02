@@ -128,6 +128,10 @@ map snapshot/storage-key evidence. Key-granular concurrency would require a new 
 Real-goroutine regressions now cover overlapping cell writes, same-key and distinct-key map writes,
 and readers racing a complete commit. Their channel-coordinated overlap and Linux race-detector gate
 add thread-safety evidence without selecting a production isolation or scheduling policy.
+ADR 0371 adds a separate versioned layout-publication lane. It preserves committed bytes across an
+append-only extension, invalidates an already-open old-layout transaction, and rejects every current
+breaking layout dimension without mutation. Database migration and upgrade authorization remain
+outside this oracle.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
