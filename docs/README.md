@@ -116,7 +116,7 @@
 - Human project manifest v1: docs/package/project-manifest-v1.md
 - Local workspace loader v1: docs/package/workspace-loader-v1.md
 - Generated lockfile v1: docs/package/lockfile-v1.md
-- Target and C ABI contract: docs/abi/*.md
+- Target and C ABI contract and Windows maturity ledger: docs/abi/*.md
 - Runtime and standard-library contract: docs/runtime/*.md
 - Compatibility and versioning contract: docs/compatibility/*.md
 - Planned C-shaped pre-1 source cutover: docs/adr/0136-c-shaped-source-surface.md

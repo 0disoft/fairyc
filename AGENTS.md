@@ -154,6 +154,7 @@ regenerate, or override compiler source.
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI: docs/abi/*.md, docs/adr/0214-first-hosted-native-ci-receipts.md
+- Windows target maturity evidence ledger: docs/abi/windows-target-maturity-v0.md, cmd/fairyc-windows-host-smoke/
 - Runtime and standard library: docs/runtime/*.md
 - Compatibility and versioning: docs/compatibility/*.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md
