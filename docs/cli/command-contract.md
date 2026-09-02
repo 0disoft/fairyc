@@ -6,6 +6,10 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
+`docs/cli/stable-cli-contract-v0.md` owns the cross-command configuration, exit-code, output,
+machine-report, and hosted-runtime rules for the currently implemented stable surface. The sections
+below retain each command's exact behavior and historical admission evidence.
+
 ## Stable starter project creation v4
 
 `fairyc new <package-name> --uid <package-uid>` creates one starter project as a direct child of the
