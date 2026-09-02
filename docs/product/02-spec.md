@@ -127,7 +127,7 @@ local or parameter whose direct inert no-drop resource is declared in the curren
 module. Flow discharges one obligation, verified MIR preserves a distinct Burn operation, and the
 interpreter and C backend destroy no fields or drop glue. Droppable, temporary, projected, wrapped,
 resource-bearing, and foreign-module operands fail closed with `E1109`. SDK
-`0.0.0-stage0.54` carries the exact language identity; public-interface v4 and runtime ABI remain
+`0.0.0-stage0.55` carries the exact language identity; public-interface v4 and runtime ABI remain
 unchanged.
 
 ADR 0338 adds a process-local typed state-layout and failure-atomic transaction oracle for future
@@ -717,7 +717,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.54` exposes
+  The compiler-bundled SDK `0.0.0-stage0.55` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -755,6 +755,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   pointer and runtime symbol. The checked-in safe quickstart executes that full lifecycle under
   Windows development and release builds; private layout, spare-capacity access, and generic
   element storage remain excluded.
+  ADR 0373 additionally exposes `append_i32`, `append_u32`, `append_usize`, and `append_bool` on
+  `std::bytes`. They append canonical locale-independent ASCII to a caller-owned Buffer through one
+  existing bulk append, return the new initialized length, and preserve data, length, capacity, and
+  ownership on allocation failure. Format literals, templates, reflection, varargs, floating point,
+  user-defined display, and implicit Buffer creation remain excluded.
   ADR 0247 additionally exposes move-only `std::text::String` and `CString`, explicit fallible
   construction and append, byte length and emptiness metadata, owner-bound immutable `ref str` and
   `ref CStr` views, and separate text/allocation status fields. The checked-in safe quickstart
@@ -1060,10 +1065,11 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.54` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.55` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
-ADR 0246's public safe `std::bytes::Buffer` and ADR 0299's fallible single-byte append,
+ADR 0246's public safe `std::bytes::Buffer`, ADR 0299's fallible single-byte append, and ADR 0373's
+canonical `i32`, `u32`, `usize`, and `bool` text append operations,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
 `std::text::validate_utf8`, ADR 0302's allocation-free immutable `std::text::as_bytes`, ADR 0263's
 zero-copy `std::text::from_buffer`, ADR 0264's Windows MSVC

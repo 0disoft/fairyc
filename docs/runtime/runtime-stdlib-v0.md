@@ -73,7 +73,7 @@ The initial library surface is:
 
 ```text
 std::alloc  SystemHeap, Arena, AllocError
-std::bytes  Buffer with fallible bulk and single-byte append
+std::bytes  Buffer with fallible bulk/single-byte append and canonical scalar text append
 std::text   String, CStr, CString, allocation-free UTF-8 validation and immutable text-byte views, and zero-copy Buffer-to-String conversion
 std::fs     target-neutral File open/read/write/sync/close, absolute and bounded relative/end positioning, and logical size plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, and other metadata
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
@@ -83,7 +83,7 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.54` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.55` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, positioning,
 and logical size, Windows MSVC `std::fs` extensions, console I/O, scalar output, and effect-free
 `std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through 0334.
@@ -346,7 +346,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.54` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.55` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -779,6 +779,14 @@ allocation policy, implicit growth promise, byte conversion, or `push`-style lan
 The checked-in quickstart executes the generated-Fairy success path, while low and optimized MSVC
 failure probes force growth allocation failure and require unchanged zero length/capacity plus zero
 live allocations after automatic cleanup.
+
+ADR 0373 extends the SDK to `0.0.0-stage0.55` with `std::bytes::append_i32`, `append_u32`,
+`append_usize`, and `append_bool`. Each operation appends canonical locale-independent ASCII to a
+caller-owned Buffer; integer paths use bounded stack storage and commit through one existing bulk
+append. Generated-Fairy low and optimized MSVC execution proves exact boundary bytes, forced growth
+failure with the initialized prefix and owner preserved, and zero live allocations. No formatting
+syntax, parser, C varargs path, reflection hook, runtime symbol, or user-defined display protocol is
+introduced.
 
 ADR 0305 extends it to `0.0.0-stage0.39` with
 `seek_current(ref mut File, i32)` and `seek_end(ref mut File, i32)`. The target shares one

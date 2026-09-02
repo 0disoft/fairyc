@@ -57,6 +57,30 @@ fn i32 discard_buffer(Buffer value) {
     return 0;
 }
 
+fn u8 i32_decimal_digit(i32 value) {
+    return if (value == -9 || value == 9) {
+        57
+    } else if (value == -8 || value == 8) {
+        56
+    } else if (value == -7 || value == 7) {
+        55
+    } else if (value == -6 || value == 6) {
+        54
+    } else if (value == -5 || value == 5) {
+        53
+    } else if (value == -4 || value == 4) {
+        52
+    } else if (value == -3 || value == 3) {
+        51
+    } else if (value == -2 || value == 2) {
+        50
+    } else if (value == -1 || value == 1) {
+        49
+    } else {
+        48
+    };
+}
+
 /// Creates an empty buffer without allocating.
 pub fn Buffer empty() {
     return empty_buffer();
@@ -160,6 +184,72 @@ pub fn Result<usize, BufferError> append_byte(ref mut Buffer buffer, u8 value) {
         .ok(buffer.length)
     } else {
         .err(buffer_error(status))
+    };
+}
+
+/// Appends canonical locale-independent decimal ASCII for value.
+pub fn Result<usize, BufferError> append_i32(ref mut Buffer buffer, i32 value) {
+    var u8[11] digits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var usize position = 11;
+    var i32 remaining = value;
+    while (remaining <= -10 || remaining >= 10) {
+        position -= 1;
+        digits[position] = i32_decimal_digit(remaining % 10);
+        remaining /= 10;
+    }
+    position -= 1;
+    digits[position] = i32_decimal_digit(remaining);
+    if (value < 0) {
+        position -= 1;
+        digits[position] = 45;
+    }
+    let ref u8[] encoded = ref digits;
+    return append(buffer, encoded[position..]);
+}
+
+/// Appends canonical locale-independent decimal ASCII for value.
+pub fn Result<usize, BufferError> append_u32(ref mut Buffer buffer, u32 value) {
+    var u8[10] digits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let ref u8[] alphabet = b"0123456789";
+    var usize position = 10;
+    var u32 remaining = value;
+    while (remaining >= 10) {
+        position -= 1;
+        digits[position] = alphabet[(remaining % 10) as usize];
+        remaining /= 10;
+    }
+    position -= 1;
+    digits[position] = alphabet[remaining as usize];
+    let ref u8[] encoded = ref digits;
+    return append(buffer, encoded[position..]);
+}
+
+/// Appends canonical locale-independent decimal ASCII for value.
+pub fn Result<usize, BufferError> append_usize(ref mut Buffer buffer, usize value) {
+    var u8[20] digits = [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ];
+    let ref u8[] alphabet = b"0123456789";
+    var usize position = 20;
+    var usize remaining = value;
+    while (remaining >= 10) {
+        position -= 1;
+        digits[position] = alphabet[remaining % 10];
+        remaining /= 10;
+    }
+    position -= 1;
+    digits[position] = alphabet[remaining];
+    let ref u8[] encoded = ref digits;
+    return append(buffer, encoded[position..]);
+}
+
+/// Appends exactly ASCII true or false for value.
+pub fn Result<usize, BufferError> append_bool(ref mut Buffer buffer, bool value) {
+    return if (value) {
+        append(buffer, b"true")
+    } else {
+        append(buffer, b"false")
     };
 }
 
