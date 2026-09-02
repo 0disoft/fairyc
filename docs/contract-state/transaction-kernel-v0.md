@@ -12,8 +12,10 @@
 
 The kernel defines host-independent layout and transaction behavior for a future Fairy C contract
 profile. It deliberately stops before source syntax, HIR, stable whole-program MIR, a standard-library
-API, persistence, a chain target, consensus, gas pricing, or Merkle storage. ADR 0344 adds a separate
-experimental compiler-private transaction submodel without opening those stable surfaces.
+API, persistence, a chain target, consensus, gas pricing, or production Merkle storage. ADR 0344 adds
+a separate experimental compiler-private transaction submodel without opening those stable surfaces.
+ADR 0374 adds read-only bounded commitments and inclusion/absence proofs over exact in-memory
+snapshots; it does not gain transaction, persistence, network, or consensus authority.
 
 ADR 0350 gives that compiler-private submodel a bounded canonical body payload. Decode never imports
 authority: it reconstructs layouts and operations from data, creates a fresh opaque transaction

@@ -140,9 +140,12 @@ ADR 0346 adds one opaque transaction capability plus verifier-derived `storage_r
 source-independent HIR transaction plans owned by existing package functions and lowers exact field
 names, encoded values, effects, capabilities, and static exits through that verifier into oracle
 execution. None reserves source syntax or adds stable/cached transaction-body artifacts, SDK,
-runtime, backend, ABI, database, Merkle tree, or a supported chain target. Production persistence must
+runtime, backend, ABI, database, production Merkle storage, or a supported chain target. Production persistence must
 preserve the oracle's observable layout, limit, rollback, conflict, and append-only upgrade rules
 through separate evidence.
+ADR 0374 adds a compiler-internal SHA-256 commitment over an exact in-memory layout/version snapshot,
+with bounded inclusion and sorted-boundary absence proofs. It adds no persistence, serialization,
+network proof service, consensus, chain target, or public Fairy API.
 
 ADR 0348 assigns each verified package transaction set an exact
 `fairyc.contract-state-package-body/v1` identity over stable package/function/type facts, layout,
