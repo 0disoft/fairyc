@@ -151,6 +151,12 @@ The prototype uses store-wide optimistic serialization. Disjoint concurrent writ
 That is intentional: it proves atomic semantics before a later backend introduces key-level conflict
 tracking or MVCC.
 
+`internal/contractstate/concurrency_conflict_test.go` also drives overlapping cell and map
+transactions through real goroutines. Channels establish the overlap without sleeps, the commit
+winner remains scheduler-selected, and Linux CI runs the owning package under the Go race detector.
+The tests require one complete winning overlay, one stale conflict, and only complete reader
+snapshots; they do not change the store-wide conflict rule.
+
 ## Read-only views
 
 `View` captures the same immutable snapshot but rejects every write with `ErrReadOnly`. It always

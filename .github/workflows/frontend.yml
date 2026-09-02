@@ -38,6 +38,11 @@ jobs:
         run: go vet -mod=readonly ./...
       - name: Test
         run: go test -mod=readonly -count=1 ./...
+      - name: Race-test contract-state concurrency
+        if: runner.os == 'Linux'
+        env:
+          CGO_ENABLED: "1"
+        run: go test -race -mod=readonly -count=1 ./internal/contractstate
       - name: Run Windows native target smoke
         if: runner.os == 'Windows'
         run: go run -mod=readonly ./cmd/fairyc-windows-host-smoke
