@@ -9,6 +9,7 @@
 
 - Product scope route: docs/product/02-spec.md
 - Architecture route: docs/architecture/, docs/adr/, internal/architecturecontract/
+- Self-hosting readiness route: docs/architecture/self-hosting-readiness-v0.md, docs/product/01-roadmap.md
 - Stage 0 language route: docs/language/, docs/adr/0213-classic-scalar-for-loop.md, docs/adr/0216-checked-compound-assignment.md, docs/adr/0217-bounded-lexical-defer.md, docs/adr/0219-narrow-must-use-call-contract.md, docs/adr/0220-bounded-scalar-compile-time-evaluation.md, docs/adr/0221-explicit-source-location-intrinsic.md, docs/adr/0222-retain-explicit-factory-construction.md
 - Post-Stage 0 language and production-workload capability admission route: docs/adr/0218-modern-language-concept-admission-boundary.md, docs/adr/0219-narrow-must-use-call-contract.md, docs/adr/0220-bounded-scalar-compile-time-evaluation.md, docs/adr/0221-explicit-source-location-intrinsic.md, docs/adr/0222-retain-explicit-factory-construction.md, docs/adr/0223-defer-static-interfaces-until-generics.md, docs/adr/0224-defer-unproven-surface-shorthands.md, docs/adr/0253-ada-pascal-concept-admission.md, docs/adr/0254-defer-nominal-scalars-pending-user-domain-evidence.md, docs/adr/0328-production-workload-capability-admission-gates.md, docs/product/01-roadmap.md, docs/product/02-spec.md
 - Normative grammar route: spec/grammar/stage0.ebnf
