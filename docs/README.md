@@ -127,7 +127,7 @@
 - Validation source: VALIDATION.md
 - Agent routing source: .agents/context-map.md
 - Repository hygiene source: .editorconfig, .gitattributes, .gitignore
-- CLI command contract source: docs/cli/command-contract.md
+- CLI command and cross-command stable contract sources: docs/cli/command-contract.md, docs/cli/stable-cli-contract-v0.md
 - CLI config source: docs/cli/configuration.md
 - CLI output and exit-code source: docs/cli/output-and-exit-codes.md
 - Monorepo source: docs/monorepo/README.md
