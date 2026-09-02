@@ -2,6 +2,27 @@ module main;
 
 import std::bytes as bytes;
 
+fn bool view_equals(ref u8[] left, ref u8[] right) {
+    if (left.len != right.len) {
+        return false;
+    }
+    var usize index = 0;
+    while (index < left.len) {
+        if (left[index] != right[index]) {
+            return false;
+        }
+        index += 1;
+    }
+    return true;
+}
+
+fn bool append_succeeded(Result<usize, bytes::BufferError> result) {
+    return switch (result) {
+        case .ok(_) : { true }
+        case .err(_) : { false }
+    };
+}
+
 fn i32 check_empty(bytes::Buffer buffer) {
     let ref u8[] empty = bytes::view(ref buffer)[..];
     return if (bytes::len(ref buffer) == 0 &&
@@ -59,6 +80,70 @@ fn i32 check_buffer(bytes::Buffer input) {
     };
 }
 
+fn i32 check_formatting(bytes::Buffer input) {
+    var bytes::Buffer buffer = input;
+    if (!append_succeeded(bytes::append(ref mut buffer, b"i32="))) {
+        return 6;
+    }
+    if (!append_succeeded(bytes::append_i32(ref mut buffer, 0))) {
+        return 7;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b","))) {
+        return 8;
+    }
+    if (!append_succeeded(bytes::append_i32(ref mut buffer, -2147483648))) {
+        return 9;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b","))) {
+        return 10;
+    }
+    if (!append_succeeded(bytes::append_i32(ref mut buffer, 2147483647))) {
+        return 11;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b";u32="))) {
+        return 12;
+    }
+    if (!append_succeeded(bytes::append_u32(ref mut buffer, 0))) {
+        return 13;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b","))) {
+        return 14;
+    }
+    if (!append_succeeded(bytes::append_u32(ref mut buffer, 4294967295))) {
+        return 15;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b";usize="))) {
+        return 16;
+    }
+    if (!append_succeeded(bytes::append_usize(ref mut buffer, 0))) {
+        return 17;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b","))) {
+        return 18;
+    }
+    if (!append_succeeded(bytes::append_usize(ref mut buffer, 18446744073709551615))) {
+        return 19;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b";bool="))) {
+        return 20;
+    }
+    if (!append_succeeded(bytes::append_bool(ref mut buffer, true))) {
+        return 21;
+    }
+    if (!append_succeeded(bytes::append(ref mut buffer, b","))) {
+        return 22;
+    }
+    if (!append_succeeded(bytes::append_bool(ref mut buffer, false))) {
+        return 23;
+    }
+    let ref u8[] actual = bytes::view(ref buffer);
+    return if (view_equals(actual, b"i32=0,-2147483648,2147483647;u32=0,4294967295;usize=0,18446744073709551615;bool=true,false")) {
+        0
+    } else {
+        24
+    };
+}
+
 fn i32 main() {
     let i32 empty_code = switch (bytes::with_capacity(0)) {
         case .ok(buffer) : { check_empty(buffer) }
@@ -67,9 +152,15 @@ fn i32 main() {
     return if (empty_code != 0) {
         empty_code
     } else {
-        switch (bytes::copy(b"Fairy")) {
+        let i32 buffer_code = switch (bytes::copy(b"Fairy")) {
             case .ok(buffer) : { check_buffer(buffer) }
             case .err(error) : { if (bytes::error_status(error) == 0) { 2 } else { 3 } }
+        };
+        if (buffer_code != 0) {
+            buffer_code
+        } else {
+            let bytes::Buffer formatting = bytes::empty();
+            check_formatting(formatting)
         }
     };
 }
