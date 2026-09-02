@@ -10,6 +10,7 @@
 - Stage 0 language details: docs/language/*.md
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser fixture manifest: spec/fixtures/parser/manifest-v0.json
+- Editor-internal immutable green tree and full-file formatter: internal/formatter/, docs/adr/0375-immutable-green-tree-and-first-formatter.md
 - Semantic fixture manifest: spec/fixtures/semantic/manifest-v0.json
 - Resource Flow fixture manifest: spec/fixtures/resource/manifest-v0.json
 - Region fixture manifest: spec/fixtures/region/manifest-v1.json
