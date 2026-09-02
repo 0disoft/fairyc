@@ -146,6 +146,10 @@ through separate evidence.
 ADR 0374 adds a compiler-internal SHA-256 commitment over an exact in-memory layout/version snapshot,
 with bounded inclusion and sorted-boundary absence proofs. It adds no persistence, serialization,
 network proof service, consensus, chain target, or public Fairy API.
+ADR 0376 defines a compiler-internal vendor-neutral persistence port for exact-layout snapshots,
+atomic version/layout compare-and-publish, and guarded append-only layout publication. The reference
+adapter is process-local executable evidence; no database, durable provider, native runtime path,
+migration product, replication, or deployment target is selected.
 
 ADR 0348 assigns each verified package transaction set an exact
 `fairyc.contract-state-package-body/v1` identity over stable package/function/type facts, layout,

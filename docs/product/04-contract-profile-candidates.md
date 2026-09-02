@@ -116,6 +116,10 @@ expression, operator, and expression-local effect to appear in a positive allowl
 ADR 0364 adds a versioned five-case transaction corpus for commit, reject, trap, delete, and
 write-limit rollback through the current HIR/MIR/oracle path. Passing that corpus does not by itself
 admit source syntax, native execution, production persistence, or deployable contract targets.
+
+ADR 0376 additionally fixes the minimum vendor-neutral persistence port and a deterministic
+process-local reference adapter. It proves the compare-and-publish boundary and failure mapping but
+does not admit a database/provider, durable artifact, native lowering, or production target.
 ADR 0365 keeps those five cell cases historical and adds three current map cases, including an exact
 physical storage-key vector and map-key-limit rollback, without changing the admission boundary.
 ADR 0366 strengthens those cases to consume only compiler-published state transactions and proves
