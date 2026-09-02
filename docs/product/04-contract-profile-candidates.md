@@ -132,6 +132,10 @@ ADR 0371 adds a separate versioned layout-publication lane. It preserves committ
 append-only extension, invalidates an already-open old-layout transaction, and rejects every current
 breaking layout dimension without mutation. Database migration and upgrade authorization remain
 outside this oracle.
+ADR 0372 fixes retry ownership: the kernel performs one callback evaluation and one commit attempt,
+while any bounded retry loop, fresh attempt identity, exhaustion result, cancellation, or backoff is
+caller-visible. The versioned retry lane proves fresh-snapshot recomputation after conflict and
+complete competing overlays without admitting a public helper or hidden effect replay.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
 database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.

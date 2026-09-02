@@ -1,0 +1,38 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.contract-state-retry-fixtures/v0",
+  "contracts": [
+    "docs/adr/0372-explicit-caller-visible-contract-state-retry.md",
+    "docs/contract-state/transaction-kernel-v0.md"
+  ],
+  "limits": {
+    "maxWrites": 8,
+    "maxWriteBytes": 1024,
+    "maxValueBytes": 32,
+    "maxMapKeyBytes": 32
+  },
+  "cases": [
+    {
+      "id": "success-after-one-visible-conflict",
+      "maxAttempts": 3,
+      "injectedConflicts": 1,
+      "expect": {
+        "status": "commit",
+        "attempts": 2,
+        "version": 2,
+        "value": 11
+      }
+    },
+    {
+      "id": "caller-owned-attempt-budget-exhaustion",
+      "maxAttempts": 2,
+      "injectedConflicts": 2,
+      "expect": {
+        "status": "exhausted",
+        "attempts": 2,
+        "version": 2,
+        "value": 20
+      }
+    }
+  ]
+}

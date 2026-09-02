@@ -157,6 +157,19 @@ winner remains scheduler-selected, and Linux CI runs the owning package under th
 The tests require one complete winning overlay, one stale conflict, and only complete reader
 snapshots; they do not change the store-wide conflict rule.
 
+## Retry policy
+
+`Execute` evaluates its callback once and attempts one commit. It does not retry `ErrConflict`, a
+returned rejection, panic, limit failure, layout mismatch, verifier failure, or any other failure.
+A caller that wants another attempt invokes `Execute` again, receiving a fresh transaction over the
+then-current committed layout and version. Attempt limits, exhaustion, scheduling, cancellation, and
+backoff remain caller policy.
+
+ADR 0372 and `fairyc.contract-state-retry-fixtures/v0` preserve this boundary with success after one
+explicit conflict and caller-owned exhaustion cases. Each losing attempt publishes none of its own
+overlay, and every competing commit remains complete. No stable source, SDK, runtime, persistence,
+metering, or external-effect retry helper is admitted.
+
 ## Read-only views
 
 `View` captures the same immutable snapshot but rejects every write with `ErrReadOnly`. It always
