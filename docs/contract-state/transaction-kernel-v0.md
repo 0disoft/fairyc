@@ -17,6 +17,11 @@ a separate experimental compiler-private transaction submodel without opening th
 ADR 0374 adds read-only bounded commitments and inclusion/absence proofs over exact in-memory
 snapshots; it does not gain transaction, persistence, network, or consensus authority.
 
+ADR 0376 defines the vendor-neutral persistence authority required by a future durable adapter:
+exact-layout snapshot, atomic compare-and-publish against layout hash plus store version, and guarded
+append-only layout publication. Its deterministic `ReferencePersistence` is process-local contract
+evidence, not a production database or native runtime integration.
+
 ADR 0350 gives that compiler-private submodel a bounded canonical body payload. Decode never imports
 authority: it reconstructs layouts and operations from data, creates a fresh opaque transaction
 capability, re-enters the MIR verifier, and requires the exact ADR 0348 body hash. ADR 0351
