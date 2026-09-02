@@ -138,7 +138,9 @@ caller-visible. The versioned retry lane proves fresh-snapshot recomputation aft
 complete competing overlays without admitting a public helper or hidden effect replay.
 
 These packages are compiler implementation evidence. They are not a public Go API, a persistent
-database, a Merkle tree, a consensus implementation, or a Fairy C standard-library promise.
+database, a production Merkle store, a consensus implementation, or a Fairy C standard-library
+promise. ADR 0374's read-only bounded commitment oracle authenticates exact in-memory snapshots
+without changing that boundary.
 
 ## Admission gates for source and MIR integration
 
@@ -157,6 +159,6 @@ A later PR may introduce source syntax only after it also supplies:
 ## Non-goals of the first slice
 
 The first slice does not provide chain networking, consensus, accounts, balances, gas pricing,
-Merkle proofs, event logs, contract-to-contract calls, upgrade authorization, source-level globals,
+public or network Merkle proofs, event logs, contract-to-contract calls, upgrade authorization, source-level globals,
 persistent files, reflection, dynamic serialization, hidden allocation, or a production concurrent
 store.
