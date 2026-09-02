@@ -6,6 +6,7 @@
 
 - Product scope source: docs/product/02-spec.md
 - Architecture decisions source: docs/adr/*.md
+- Self-hosting start and promotion gate: docs/architecture/self-hosting-readiness-v0.md
 - Stage 0 language details: docs/language/*.md
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser fixture manifest: spec/fixtures/parser/manifest-v0.json

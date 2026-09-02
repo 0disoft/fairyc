@@ -1353,4 +1353,4 @@ non-authority to separate executable oracles and records what each still does no
 
 ## Self-hosting gate
 
-Self-hosting starts only after modules, strings, containers, `Result`, resource moves, C FFI, package builds, source maps, and the test runner can support the compiler without freezing immature language decisions. The Go compiler remains a bootstrap and reference implementation.
+Self-hosting starts only after modules, strings, containers, `Result`, resource moves, C FFI, package builds, source maps, diagnostics, and the test runner can support the compiler without freezing immature language decisions. `docs/architecture/self-hosting-readiness-v0.md` owns the executable start and promotion matrix. The Go compiler remains the bootstrap and reference implementation until bounded differential stage1/stage2 evidence passes.
