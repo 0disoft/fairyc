@@ -120,6 +120,7 @@
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
 - Target and C ABI route: docs/abi/, docs/adr/0214-first-hosted-native-ci-receipts.md
+- Windows target maturity route: docs/abi/windows-target-maturity-v0.md, docs/product/01-roadmap.md, cmd/fairyc-windows-host-smoke/
 - Runtime and standard-library route: docs/runtime/
 - Compatibility route: docs/compatibility/
 - Diagnostics route: docs/diagnostics/catalog-v0.md
