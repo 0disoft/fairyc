@@ -447,8 +447,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   lossless syntax, and lowers to AST only after an error-free batch parse. Physical-line-leading
   consecutive `///` comments attach by exact byte span only to the selected top-level declaration
   families through typed HIR; they remain grammar trivia and carry no rendered or semantic meaning.
-  An immutable green tree and incremental reparse are deferred until formatter or IDE work requires
-  them.
+  ADR 0375 adds an editor-internal immutable green tree and a deterministic full-file formatter that
+  changes only lexer-owned whitespace after proving identical parser shape and significant tokens.
+  Incremental reparse, LSP, SCIP, semantic rename, and structural edits remain deferred until
+  measured editor work requires them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
 - Already-resolved multi-package input carries a deterministic build-local package discriminator and
   exact import-provider bindings. Semantic module identity is package plus source-visible module
