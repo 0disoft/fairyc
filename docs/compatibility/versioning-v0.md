@@ -112,8 +112,9 @@ command now exist; ordinary-command policy and default limits remain undecided.
 The current whole-package key encoding is `fairyc.package-cache-key/v4` with
 `fycache4-sha256-...` text. `fairyc.package-cache-fixtures/v8` supplies current vectors; every key
 includes its current `fyif5-sha256` public interface, `fycsbody1-sha256` private body identity,
-sorted dependency coordinate/interface pairs, and `fairyc-language/12`. Fixture manifests v1
-through v7 remain historical. A key or component
+sorted dependency coordinate/interface pairs, and an exact language revision. Fixture manifests v1
+through v8 remain historical; v8 is the last frozen language-12 vector. Language 13 uses the same
+v4 key algorithm and changes the key through that existing revision field. A key or component
 algorithm change is an intentional cache miss, not permission to reinterpret an older key.
 
 ## Target and ABI
@@ -835,8 +836,8 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.54`, language
-`fairyc-language/12`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.56`, language
+`fairyc-language/13`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
@@ -920,6 +921,12 @@ burn for direct inert no-drop resources, SDK `0.0.0-stage0.54` carries the exact
 and package-cache fixture v6 pins `/12`. Public-interface v4 and runtime ABI remain unchanged. Burn
 has a distinct verified compiler-internal MIR operation but changes no serialized MIR artifact or C
 ABI contract.
+
+ADR 0377 performs the next coordinated source cut. `fairyc-language/13` gives contextual declaration
+meaning to `state`, `cell`, and `map`, admits one explicit package-owned state declaration, and advances the compiler-bundled SDK
+identity to `0.0.0-stage0.56`. Public-interface remains v5, package cache remains v4, and runtime ABI
+remains `fairyc-runtime/0`; the existing state layout hash and cache rebind contracts consume the new
+source-derived HIR without a second encoding family.
 
 ADR 0181 stabilizes `fairyc test [--locked]`, the root-only optional lowercase `tests/` overlay,
 `tests/`-prefixed module identity, argument-free `@test` declaration shape, canonical test ordering,

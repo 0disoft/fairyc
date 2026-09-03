@@ -136,6 +136,46 @@ func TestExtractIncludesExactHIRStateLayoutIdentity(t *testing.T) {
 	}
 }
 
+func TestExtractIncludesSourceDeclaredStateLayoutIdentity(t *testing.T) {
+	t.Parallel()
+	base := analyzeSource(t, `module api;
+@contract_uid("example.token")
+state { cell u64 total_supply; map bytes20 u64 balances; }
+pub fn u32 version() { return 1; }
+`)
+	changed := analyzeSource(t, `module api;
+@contract_uid("example.token")
+state { cell u64 total_supply; map bytes20 u32 balances; }
+pub fn u32 version() { return 1; }
+`)
+	coordinates := map[hir.PackageID]packagegraph.CoordinateID{hir.DefaultPackage: testCoordinateID(t, "source-state")}
+	descriptor, err := Extract(base, hir.DefaultPackage, coordinates)
+	if err != nil {
+		t.Fatal(err)
+	}
+	builder, err := contractstate.NewLayoutBuilder("example.token")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = contractstate.DeclareEncodedCell(builder, "total_supply", contractstate.U64.TypeID()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = contractstate.DeclareEncodedMap(builder, "balances", contractstate.Byte20.TypeID(), contractstate.U64.TypeID()); err != nil {
+		t.Fatal(err)
+	}
+	wantLayout, err := builder.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(descriptor.StateLayouts) != 1 || descriptor.StateLayouts[0].Hash != wantLayout.Hash() {
+		t.Fatalf("source layout identity = %+v, want %s", descriptor.StateLayouts, wantLayout.Hash())
+	}
+	baseHash := extractHash(t, base, hir.DefaultPackage, coordinates)
+	if changedHash := extractHash(t, changed, hir.DefaultPackage, coordinates); changedHash == baseHash {
+		t.Fatalf("source state layout change did not invalidate interface: %s", changedHash)
+	}
+}
+
 func TestExtractIgnoresPrivateItemsBodiesAndDeclarationOrder(t *testing.T) {
 	t.Parallel()
 	self := testCoordinateID(t, "self")

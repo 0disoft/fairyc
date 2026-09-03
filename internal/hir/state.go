@@ -9,8 +9,8 @@ const (
 	StateFieldMap  StateFieldKind = "map"
 )
 
-// StateLayout is one source-independent package-owned persistent-state schema.
-// No Stage 0 syntax constructs this HIR yet.
+// StateLayout is one package-owned persistent-state schema. Language 13 source declarations and
+// compiler-private direct fixtures both construct this same HIR representation.
 type StateLayout struct {
 	Package     PackageID
 	ContractUID string

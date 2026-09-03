@@ -96,6 +96,9 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E6103` | C ABI v0 excludes the requested calling, layout, callback, TLS, or variadic feature. |
 | `E7101` | `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. |
 | `E7102` | A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. |
+| `E7201` | A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. |
+| `E7202` | A package state field name is declared more than once. |
+| `E7203` | A package state field uses an unsupported or malformed storage codec declaration. |
 | `E8001` | Selected runtime ABI is incompatible with generated code. |
 | `E8002` | Requested language revision is unsupported by this compiler. |
 | `E9001` | `@test` must appear exactly once without arguments on a private safe zero-argument free function returning `void` in isolated test source. |

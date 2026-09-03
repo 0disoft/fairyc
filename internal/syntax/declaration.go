@@ -82,6 +82,10 @@ func (p *parser) parseItem() NodeID {
 		if !p.isPreviousRevision() {
 			return p.parseStaticAssert(start, children)
 		}
+	case "state":
+		if !p.isPreviousRevision() {
+			return p.parseState(start, children)
+		}
 	case "struct":
 		return p.parseStruct(start, children)
 	case "resource":
@@ -103,6 +107,35 @@ func (p *parser) parseItem() NodeID {
 	p.synchronize(";", "}")
 	p.match(";")
 	return p.addNode(KindError, start, children, "item", "")
+}
+
+func (p *parser) parseState(start int, leading []NodeID) NodeID {
+	p.advance()
+	p.expect("{")
+	children := append([]NodeID(nil), leading...)
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+		fieldStart := p.currentFullIndex()
+		kind := KindStateCell
+		if p.match("cell") {
+			kind = KindStateCell
+		} else if p.match("map") {
+			kind = KindStateMap
+		} else {
+			children = append(children, p.unexpected())
+			p.synchronize(";", "}")
+			p.match(";")
+			continue
+		}
+		fieldChildren := []NodeID{p.parseType()}
+		if kind == KindStateMap {
+			fieldChildren = append(fieldChildren, p.parseType())
+		}
+		name, nameSpan := p.parseNameWithSpan()
+		p.expect(";")
+		children = append(children, p.addNamedNode(kind, fieldStart, fieldChildren, name, "", nameSpan))
+	}
+	p.expect("}")
+	return p.addNode(KindState, start, children, "", "")
 }
 
 func (p *parser) parseAttribute() NodeID {

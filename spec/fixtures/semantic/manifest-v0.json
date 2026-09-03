@@ -29,6 +29,7 @@
     "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
     "docs/adr/0221-explicit-source-location-intrinsic.md",
     "docs/adr/0222-retain-explicit-factory-construction.md",
+    "docs/adr/0377-source-package-contract-state-declarations.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -1212,6 +1213,27 @@
               { "role": "declaration", "span": { "source": "lib.fy", "startByte": 26, "endByte": 31 } }
             ]
           }
+        ]
+      }
+    },
+    {
+      "id": "pass.type.package-state",
+      "sourceRoot": "cases/pass/package-state/src",
+      "sources": ["state.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "fail.type.package-state-codec",
+      "sourceRoot": "cases/fail/package-state-codec/src",
+      "sources": ["state.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E7203", "primary": { "source": "state.fy", "startByte": 58, "endByte": 64 }, "related": [] }
         ]
       }
     }

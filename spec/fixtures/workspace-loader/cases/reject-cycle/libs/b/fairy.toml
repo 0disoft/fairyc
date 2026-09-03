@@ -4,7 +4,7 @@ schema = "fairyc.manifest/v1"
 uid = "fixture.cycle.b"
 name = "b"
 version = "1.0.0"
-language = "fairyc-language/12"
+language = "fairyc-language/13"
 source = "src"
 
 [dependencies.a]

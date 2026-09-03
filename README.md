@@ -456,6 +456,12 @@ discharges one declaration-owned inert no-drop resource through a distinct verif
 it is neither ordinary drop nor a generic forget primitive. `examples/asset_burn_quickstart/`
 returns native 42 under low and optimized MSVC while its unreachable cleanup body would trap.
 
+ADR 0377 moves the current language to `fairyc-language/13` and the compiler-bundled SDK identity to
+`0.0.0-stage0.56`. One `@contract_uid("...") state { ... }` declaration per package now lowers from
+Fairy source into the existing typed HIR layout, public-interface v5 hash, and cache-key v4 identity.
+The first fields are explicit `cell Value name;` and `map Key Value name;` declarations over a closed
+fixed codec set. Source state operations, native persistence, and deployable targets remain closed.
+
 ADR 0344 adds an experimental compiler-private contract-state transaction MIR beside the stable
 whole-program MIR. It reconstructs exact layouts, verifies canonical cell/map operations and
 commit/reject/trap exits, then executes through the ADR 0338 atomic oracle. Source syntax, HIR,

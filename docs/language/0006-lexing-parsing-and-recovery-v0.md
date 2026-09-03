@@ -74,8 +74,9 @@ if import in let module mut null ptr pub ref region resource return
 struct switch true unsafe var while
 ```
 
-Primitive type names, `this`, and the `C` in `extern C` are contextual names rather than globally
-reserved keywords. `this` gains receiver or cleanup meaning only in the corresponding
+Primitive type names, `state`, `cell`, `map`, `this`, and the `C` in `extern C` are contextual names
+rather than globally reserved keywords. The state words gain meaning only at module-item start or
+inside an already recognized state declaration. `this` gains receiver or cleanup meaning only in the corresponding
 owner-qualified function or resource cleanup block. A contextual name is interpreted specially only
 in its owning grammar position.
 

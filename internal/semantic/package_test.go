@@ -5,11 +5,71 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/contractstate"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
+
+func TestAnalyzePackagesLowersSourceStateDeclaration(t *testing.T) {
+	t.Parallel()
+	result, err := semantic.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parsePackageFile(t, 7, "state.fy", `module state;
+@contract_uid("example.token")
+state {
+    cell u64 total_supply;
+    map bytes20 u64 balances;
+    cell bool paused;
+}`),
+	}})
+	if err != nil {
+		t.Fatalf("AnalyzePackages() error = %v", err)
+	}
+	if result.CompletedThrough != semantic.PhaseFlow || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 || len(result.HIR.StateLayouts) != 1 {
+		t.Fatalf("AnalyzePackages() result = %+v", result)
+	}
+	layout := result.HIR.StateLayouts[0]
+	if layout.Package != 7 || layout.ContractUID != "example.token" || len(layout.Fields) != 3 ||
+		layout.Fields[0].Name != "total_supply" || layout.Fields[0].Kind != hir.StateFieldCell || layout.Fields[0].ValueTypeID != contractstate.U64.TypeID() ||
+		layout.Fields[1].Name != "balances" || layout.Fields[1].Kind != hir.StateFieldMap || layout.Fields[1].KeyTypeID != contractstate.Byte20.TypeID() || layout.Fields[1].ValueTypeID != contractstate.U64.TypeID() ||
+		layout.Fields[2].ValueTypeID != contractstate.Bool.TypeID() {
+		t.Fatalf("state layout = %+v", layout)
+	}
+}
+
+func TestAnalyzePackagesRejectsInvalidSourceStateDeclarations(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name  string
+		files []semantic.File
+		codes []string
+	}{
+		{name: "missing uid", files: []semantic.File{parsePackageFile(t, 1, "state.fy", "module state;\nstate { cell u64 value; }")}, codes: []string{"E7201"}},
+		{name: "invalid uid", files: []semantic.File{parsePackageFile(t, 1, "state.fy", "module state;\n@contract_uid(\"bad uid\")\nstate { cell u64 value; }")}, codes: []string{"E7201"}},
+		{name: "duplicate field", files: []semantic.File{parsePackageFile(t, 1, "state.fy", "module state;\n@contract_uid(\"example.state\")\nstate { cell u64 value; cell u32 value; }")}, codes: []string{"E7202"}},
+		{name: "unsupported codec", files: []semantic.File{parsePackageFile(t, 1, "state.fy", "module state;\n@contract_uid(\"example.state\")\nstate { cell String value; }")}, codes: []string{"E7203"}},
+		{name: "ambiguous owner", files: []semantic.File{
+			parsePackageFile(t, 1, "first.fy", "module first;\n@contract_uid(\"example.first\")\nstate { cell u32 first; }"),
+			parsePackageFile(t, 1, "second.fy", "module second;\n@contract_uid(\"example.second\")\nstate { cell u32 second; }"),
+		}, codes: []string{"E7201"}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := semantic.AnalyzePackages(semantic.PackageInput{Files: test.files})
+			if err != nil {
+				t.Fatalf("AnalyzePackages() error = %v", err)
+			}
+			var codes []string
+			for _, diagnostic := range result.Diagnostics {
+				codes = append(codes, diagnostic.Code)
+			}
+			if result.FailedPhase != semantic.PhaseType || !slices.Equal(codes, test.codes) || len(result.HIR.StateLayouts) != 0 {
+				t.Fatalf("AnalyzePackages() result = %+v, codes = %v", result, codes)
+			}
+		})
+	}
+}
 
 func TestAnalyzePackagesResolvesEqualModulePathsByPackage(t *testing.T) {
 	t.Parallel()

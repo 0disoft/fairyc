@@ -20,6 +20,7 @@ type Module struct {
 	Imports          []Import
 	Constants        []Constant
 	StaticAssertions []StaticAssertion
+	States           []StateDeclaration
 	Structs          []Struct
 	Resources        []Resource
 	Enums            []Enum
@@ -27,6 +28,31 @@ type Module struct {
 	Functions        []Function
 	Bindings         []Binding
 	Literals         []Literal
+}
+
+// StateDeclaration is the single package-owned persistent-state schema admitted by source.
+type StateDeclaration struct {
+	Public     bool
+	Span       diagnostic.Span
+	Attributes []Attribute
+	Fields     []StateFieldDeclaration
+}
+
+// StateFieldDeclaration preserves one ordered cell or map codec declaration.
+type StateFieldKind string
+
+const (
+	StateFieldCell StateFieldKind = "cell"
+	StateFieldMap  StateFieldKind = "map"
+)
+
+type StateFieldDeclaration struct {
+	Kind      StateFieldKind
+	Name      string
+	Span      diagnostic.Span
+	NameSpan  diagnostic.Span
+	KeyType   *TypeReference
+	ValueType TypeReference
 }
 
 // Constant preserves one module constant before bounded compile-time evaluation.
@@ -261,6 +287,8 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 			module.Constants = append(module.Constants, lowerConstant(tree, child))
 		case syntax.KindStaticAssert:
 			module.StaticAssertions = append(module.StaticAssertions, lowerStaticAssertion(tree, child))
+		case syntax.KindState:
+			module.States = append(module.States, lowerState(tree, child))
 		case syntax.KindStruct:
 			module.Structs = append(module.Structs, lowerStruct(tree, child))
 		case syntax.KindResource:
@@ -304,6 +332,41 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	}
 	walk(tree.Root)
 	return module, nil
+}
+
+func lowerState(tree *syntax.Tree, node syntax.Node) StateDeclaration {
+	value := StateDeclaration{
+		Public:     containsKeywordBeforeName(tree, node, "pub", "state"),
+		Span:       node.Span,
+		Attributes: lowerAttributes(tree, node),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found || child.Kind != syntax.KindStateCell && child.Kind != syntax.KindStateMap {
+			continue
+		}
+		field := StateFieldDeclaration{
+			Name:     child.Text,
+			Span:     child.Span,
+			NameSpan: child.NameSpan,
+		}
+		var types []TypeReference
+		for _, typeID := range child.Children {
+			if typeNode, ok := tree.Node(typeID); ok && typeNode.Kind == syntax.KindType {
+				types = append(types, lowerType(tree, typeNode))
+			}
+		}
+		if child.Kind == syntax.KindStateCell && len(types) == 1 {
+			field.Kind = StateFieldCell
+			field.ValueType = types[0]
+		} else if child.Kind == syntax.KindStateMap && len(types) == 2 {
+			field.Kind = StateFieldMap
+			field.KeyType = &types[0]
+			field.ValueType = types[1]
+		}
+		value.Fields = append(value.Fields, field)
+	}
+	return value
 }
 
 func lowerConstant(tree *syntax.Tree, node syntax.Node) Constant {

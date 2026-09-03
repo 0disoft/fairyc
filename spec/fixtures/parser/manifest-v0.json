@@ -359,6 +359,15 @@
           }
         ]
       }
+    },
+    {
+      "id": "pass.package-state",
+      "sourceRoot": "cases/pass/package-state/src",
+      "source": "package_state.fy",
+      "expect": {
+        "status": "pass",
+        "module": "package_state"
+      }
     }
   ]
 }

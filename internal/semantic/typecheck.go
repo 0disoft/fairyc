@@ -30,6 +30,7 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareCallableMustUse()
 	a.prepareCallableEffects()
 	a.prepareCompileTime()
+	result.HIR.StateLayouts = a.checkStateLayouts()
 	for _, module := range a.moduleOrder {
 		_, sourcePath := hir.SourcePathParts(module.file.Path)
 		hirModule := hir.Module{Package: module.key.packageID, Path: module.file.Module.Path, SourcePath: sourcePath}

@@ -509,3 +509,22 @@ func TestLowerPreservesLexicalDeferCall(t *testing.T) {
 		t.Fatalf("defer statement = %+v", statement)
 	}
 }
+
+func TestLowerPreservesPackageStateDeclaration(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n@contract_uid(\"example.token\")\nstate { cell u64 total_supply; map bytes20 u64 balances; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v, diagnostics = %+v", err, tree.Diagnostics)
+	}
+	if len(module.States) != 1 || len(module.States[0].Attributes) != 1 || len(module.States[0].Fields) != 2 {
+		t.Fatalf("states = %+v", module.States)
+	}
+	state := module.States[0]
+	if state.Attributes[0].Name != "contract_uid" || state.Attributes[0].Arguments[0].Cooked != "example.token" ||
+		state.Fields[0].Kind != StateFieldCell || state.Fields[0].ValueType.Path != "u64" ||
+		state.Fields[1].Kind != StateFieldMap || state.Fields[1].KeyType == nil || state.Fields[1].KeyType.Path != "bytes20" || state.Fields[1].ValueType.Path != "u64" {
+		t.Fatalf("state = %+v", state)
+	}
+}

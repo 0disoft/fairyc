@@ -72,6 +72,26 @@ Every import has an alias and names remain qualified through that alias. A modul
 
 `pub` grants source-module visibility only. It does not export a stable binary symbol, layout, mangling, or calling convention.
 
+## Package-owned contract state
+
+Language 13 admits one explicit persistent-state schema per package:
+
+```fy
+@contract_uid("example.token")
+state {
+    cell u64 total_supply;
+    map bytes20 u64 balances;
+}
+```
+
+`state`, `cell`, and `map` are contextual language-13 declaration words, so existing ordinary names
+remain source-compatible. The required `contract_uid` string owns the
+stable storage namespace; source order owns field indexes. The closed storage-codec vocabulary is
+`bool`, `u32`, `u64`, `bytes20`, and `bytes32`. These codec spellings are not general user-defined
+generic types or new ordinary arithmetic types. A package cannot declare more than one state block,
+and a state block cannot be `pub`. State access expressions and native persistence remain outside
+this declaration-only slice.
+
 ## Types
 
 Stage 0 type syntax includes:

@@ -712,6 +712,36 @@ func TestParseResourceBurnLosslessly(t *testing.T) {
 	}
 }
 
+func TestParsePackageStateDeclarationLosslessly(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n@contract_uid(\"example.token\")\nstate { cell u64 total_supply; map bytes20 u64 balances; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var states, cells, maps int
+	for _, node := range tree.Nodes {
+		switch node.Kind {
+		case KindState:
+			states++
+		case KindStateCell:
+			cells++
+		case KindStateMap:
+			maps++
+		}
+	}
+	if states != 1 || cells != 1 || maps != 1 {
+		t.Fatalf("state nodes = state:%d cell:%d map:%d", states, cells, maps)
+	}
+	if reconstructed, ok := tree.Reconstruct(); !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
+	}
+	previous := ParsePreviousRevision(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(previous.Diagnostics) == 0 {
+		t.Fatal("ParsePreviousRevision() accepted language-13 state declaration")
+	}
+}
+
 func TestParseClassicForPreservesOmittedClauses(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn i32 main() { for (;;) { break; } return 42; }\n")

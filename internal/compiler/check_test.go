@@ -32,6 +32,27 @@ func TestCheckProducesVerifiedMIR(t *testing.T) {
 	}
 }
 
+func TestCheckPublishesSourceStateLayoutBeforeMIR(t *testing.T) {
+	t.Parallel()
+	result, err := compiler.Check([]semantic.File{
+		parseCompilerFile(t, hir.DefaultPackage, "main.fy", `module main;
+@contract_uid("example.counter")
+state { cell u32 value; }
+fn i32 main() { return 42; }
+`),
+	})
+	if err != nil {
+		t.Fatalf("Check() error = %v", err)
+	}
+	if !result.Verified || len(result.Semantic.HIR.StateLayouts) != 1 || len(result.MIR.Functions) != 1 || len(result.StateTransactions) != 0 {
+		t.Fatalf("Check() result = %+v", result)
+	}
+	layout := result.Semantic.HIR.StateLayouts[0]
+	if layout.ContractUID != "example.counter" || len(layout.Fields) != 1 || layout.Fields[0].ValueTypeID != contractstate.U32.TypeID() {
+		t.Fatalf("source state layout = %+v", layout)
+	}
+}
+
 func TestCheckProducesVerifiedMIRForOwnedTextExample(t *testing.T) {
 	t.Parallel()
 	result, err := compiler.Check([]semantic.File{
@@ -42,6 +63,24 @@ func TestCheckProducesVerifiedMIRForOwnedTextExample(t *testing.T) {
 		t.Fatalf("Check() error = %v", err)
 	}
 	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow {
+		t.Fatalf("Check() result = %+v", result)
+	}
+}
+
+func TestCheckProducesVerifiedMIRForContractStateDeclarationExample(t *testing.T) {
+	t.Parallel()
+	path := filepath.Join("..", "..", "examples", "contract_state_declaration_quickstart", "src", "main.fy")
+	text, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile(%s) error = %v", path, err)
+	}
+	result, err := compiler.Check([]semantic.File{
+		parseCompilerFile(t, hir.DefaultPackage, "main.fy", string(text)),
+	})
+	if err != nil {
+		t.Fatalf("Check() error = %v", err)
+	}
+	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow || len(result.Semantic.HIR.StateLayouts) != 1 || len(result.StateTransactions) != 0 {
 		t.Fatalf("Check() result = %+v", result)
 	}
 }

@@ -28,6 +28,7 @@ import_decl = "import" path "as" IDENT ";" ;
 item = attribute* "pub"? item_body ;
 item_body = const_decl
           | static_assert_decl
+          | state_decl
           | struct_decl
           | resource_decl
           | enum_decl
@@ -43,6 +44,13 @@ attribute_argument = path | integer_literal | string_literal ;
 const_decl = "const" type IDENT "=" expression ";" ;
 (* static_assert is contextual at module-item start, not a globally reserved identifier. *)
 static_assert_decl = "static_assert" "(" expression ")" ";" ;
+
+(* One package owns at most one state declaration. The required contract_uid attribute and
+   codec vocabulary are semantic contracts rather than alternate type syntax. *)
+state_decl = "state" "{" state_field_decl* "}" ;
+state_field_decl = "cell" type IDENT ";"
+                 | "map" type type IDENT ";"
+                 ;
 
 struct_decl = "struct" IDENT "{" field_decl* "}" ;
 field_decl = "pub"? type IDENT ";" ;

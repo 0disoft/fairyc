@@ -12,24 +12,25 @@
 A future Fairy C contract profile may target deterministic state-machine runtimes such as WebAssembly
 or RISC-V contract engines. The profile must reuse the ordinary Fairy ownership, checked arithmetic,
 `Result`, effect, and verified-MIR rules instead of creating a separate Solidity-shaped language.
-This document records candidate requirements. It does not reserve syntax, publish a target, or change
-the Stage 0 language revision.
+This document records candidate requirements. ADR 0377 now owns the declaration-only source syntax;
+this profile still does not publish a target.
 
 ## Typed persistent state candidate
 
-The first required capability is typed persistent state with transaction-atomic mutation. An
-illustrative source form is:
+The first required capability is typed persistent state with transaction-atomic mutation. The
+accepted language-13 declaration form is:
 
 ```fy
+@contract_uid("example.token")
 state {
-    StorageCell<u64> total_supply;
-    StorageMap<Address, u64> balances;
+    cell u64 total_supply;
+    map bytes20 u64 balances;
 }
 ```
 
-The spelling above is not reserved. A later language ADR must decide whether state is a declaration,
-a generated owner module, a compiler-known package, or another form after the executable kernel has
-produced enough evidence.
+ADR 0377 selects one explicit package declaration over an implicit persistent aggregate or an
+external generated-owner schema. It lowers to the existing HIR and layout builder rather than
+creating another state model. State access syntax and executable persistence remain closed.
 
 The accepted behavior must satisfy all of the following:
 
@@ -56,9 +57,10 @@ store-wide optimistic conflict detection, atomic commit, and rollback on returne
 `internal/contractstatemir` now adds a separate compiler-private layout and straight-line transaction
 submodel. It verifies exact layout identity, canonical cell/map operations, and explicit commit,
 reject, or trap exits before executing them through the oracle. It is not the stable whole-program
-MIR and has no source, stable package-artifact, backend, or target admission.
+MIR and has no source state-access, stable package-artifact, backend, or target admission.
 
-Source-independent `hir.StateLayout` declarations lower into that submodel. Public-interface v5
+Language-13 source declarations and direct compiler fixtures lower into the same `hir.StateLayout`
+submodel. Public-interface v5
 carries the exact layout hash, while whole-package cache key v4 consumes the current package
 interface and body hash as well as dependency interfaces. Layout changes therefore invalidate the
 owner and its dependents, while private body changes invalidate only the owner.
@@ -146,12 +148,11 @@ database, a production Merkle store, a consensus implementation, or a Fairy C st
 promise. ADR 0374's read-only bounded commitment oracle authenticates exact in-memory snapshots
 without changing that boundary.
 
-## Admission gates for source and MIR integration
+## Remaining admission gates for source access and MIR integration
 
-A later PR may introduce source syntax only after it also supplies:
+A later PR may introduce source state access only after it also supplies:
 
-- exact grammar and recovery behavior;
-- resolver and type rules for source state declarations and access;
+- resolver and type rules for source state access;
 - source-to-HIR effect inference and state access syntax;
 - MIR operations whose verifier proves layout identity and transaction ownership;
 - interpreter fixtures for success, error propagation, trap, delete, conflict, and limits;

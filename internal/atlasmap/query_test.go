@@ -437,7 +437,7 @@ func localCallGraphFixture(t *testing.T) queryFixture {
 uid = "test.atlas-query"
 name = "atlas-query"
 version = "1.0.0"
-language = "fairyc-language/12"
+language = "fairyc-language/13"
 source = "src"
 `)
 	writeQueryFixture(t, filepath.Join(root, "src", "main.fy"), `module main;

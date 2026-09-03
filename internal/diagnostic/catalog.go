@@ -27,6 +27,7 @@ const (
 	categoryUnsafe        = "Unsafe and foreign boundaries"
 	categoryABI           = "Target layout and ABI"
 	categoryEffect        = "Effects and external capabilities"
+	categoryState         = "Package-owned contract state"
 	categoryCompatibility = "Compatibility and toolchain selection"
 	categoryTest          = "Test declarations and harness"
 	categoryAtlas         = "Atlas warnings or hard map-integrity errors"
@@ -100,6 +101,9 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E6103", Category: categoryABI, Meaning: "C ABI v0 excludes the requested calling, layout, callback, TLS, or variadic feature."},
 	{Code: "E7101", Category: categoryEffect, Meaning: "`@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary."},
 	{Code: "E7102", Category: categoryEffect, Meaning: "A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function."},
+	{Code: "E7201", Category: categoryState, Meaning: "A package state declaration has malformed UID authority, invalid visibility, or more than one package owner."},
+	{Code: "E7202", Category: categoryState, Meaning: "A package state field name is declared more than once."},
+	{Code: "E7203", Category: categoryState, Meaning: "A package state field uses an unsupported or malformed storage codec declaration."},
 	{Code: "E8001", Category: categoryCompatibility, Meaning: "Selected runtime ABI is incompatible with generated code."},
 	{Code: "E8002", Category: categoryCompatibility, Meaning: "Requested language revision is unsupported by this compiler."},
 	{Code: "E9001", Category: categoryTest, Meaning: "`@test` must appear exactly once without arguments on a private safe zero-argument free function returning `void` in isolated test source."},
