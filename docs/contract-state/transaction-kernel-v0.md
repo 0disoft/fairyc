@@ -49,6 +49,9 @@ acyclic SSA state blocks with typed reads, explicit joins, bool branches, and re
 ADR 0379 then admits only exact same-package `void fn()` helper edges. Helpers execute inside the
 root snapshot and overlay; return resumes the caller, while reject or trap rolls back the complete
 root attempt and only the root may commit.
+ADR 0380 adds an oracle-only owner-bound encoded borrow. Its provenance contains the exact layout,
+starting version, field, derived storage key, and key-local mutation generation. Exact-key
+replacement/delete invalidates prior and nested views; close and retry attempts cannot reuse them.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
@@ -227,10 +230,10 @@ restart behavior, authorization, and rollback evidence instead of silently weake
 
 ## Copy and alias rules
 
-The store, snapshots, overlays, codecs supplied by the package, `Dump`, and transaction reads copy
-byte slices at their boundaries. A caller cannot mutate committed state through an aliased Go slice.
-Future Fairy source integration must replace these implementation copies with verified owner-bound
-borrows where profitable without changing transaction visibility.
+The store, snapshots, overlays, codecs supplied by the package, `Dump`, and ordinary transaction
+reads copy byte slices at their boundaries. A caller cannot mutate committed state through an
+aliased Go slice. ADR 0380's encoded borrow also returns a copy when observed, but retains executable
+owner/provenance/invalidation semantics for later compiler transport without exposing host storage.
 
 ## Required future compiler mapping
 
@@ -261,6 +264,7 @@ now also proves a bounded capability-free body payload, fresh capability reconst
 re-entry, exact body-hash matching, checked fresh-HIR-owner rebind, and one coordinate-bound outer
 stable package-compilation artifact. ADR 0354 also proves complete cache hits rebind state operations
 to the matching fresh MIR function symbols and execute through this oracle. ADR 0355 moves cold and
-cached transactions into the ordinary atomic verified compiler result. It still does not prove
-source declaration/access rules, owner-bound borrows, external-call exclusion, native MIR lowering,
+cached transactions into the ordinary atomic verified compiler result. ADR 0380 proves the
+oracle-only borrow lifetime but not HIR/MIR transport. It still does not prove source
+declaration/access rules, external-call exclusion, native MIR lowering,
 or deterministic target execution.

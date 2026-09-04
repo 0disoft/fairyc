@@ -53,6 +53,15 @@ func (cell EncodedCell) Get(transaction *Transaction) ([]byte, bool, error) {
 	return transaction.readCell(cell.field)
 }
 
+// Borrow returns a transaction-owned encoded view. The view is invalidated by
+// any replacement or deletion of this cell and cannot survive transaction close.
+func (cell EncodedCell) Borrow(transaction *Transaction) (BorrowedValue, bool, error) {
+	if transaction == nil {
+		return BorrowedValue{}, false, fmt.Errorf("contract state transaction is nil")
+	}
+	return transaction.borrowCell(cell.field)
+}
+
 func (cell EncodedCell) Set(transaction *Transaction, encoded []byte) error {
 	if err := cell.validate(transaction); err != nil {
 		return err
@@ -87,6 +96,17 @@ func (mapped EncodedMap) Get(transaction *Transaction, encodedKey []byte) ([]byt
 		return nil, false, fmt.Errorf("map %q key: %w", mapped.field.Name, err)
 	}
 	return transaction.readMap(mapped.field, encodedKey)
+}
+
+// Borrow returns a transaction-owned encoded view for one exact canonical key.
+func (mapped EncodedMap) Borrow(transaction *Transaction, encodedKey []byte) (BorrowedValue, bool, error) {
+	if transaction == nil {
+		return BorrowedValue{}, false, fmt.Errorf("contract state transaction is nil")
+	}
+	if err := ValidateCanonicalEncoding(mapped.field.KeyTypeID, encodedKey); err != nil {
+		return BorrowedValue{}, false, fmt.Errorf("map %q key: %w", mapped.field.Name, err)
+	}
+	return transaction.borrowMap(mapped.field, encodedKey)
 }
 
 func (mapped EncodedMap) Set(transaction *Transaction, encodedKey, encodedValue []byte) error {

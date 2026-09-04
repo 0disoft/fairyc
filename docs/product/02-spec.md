@@ -182,8 +182,9 @@ Indirect, foreign, cross-package, argument-bearing, value-returning, and recursi
 closed. ADR 0358 also rejects conditionals, loops, assertions, Result propagation, and
 short-circuit operators. ADR 0359 rejects unsafe code and recursively reachable raw-pointer types
 while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360 rejects
-receiver-bound methods and automatic drop glue while preserving static associated entries; none
-admits owner-bound state borrows or pointer provenance. ADR 0378 separately
+receiver-bound methods and automatic drop glue while preserving static associated entries. ADR
+0380 admits only oracle-level owner-bound encoded views with exact provenance and invalidation;
+HIR/MIR/source borrow transport remains closed. ADR 0378 separately
 admits bounded acyclic conditional state blocks with typed reads, explicit joins and represented
 costs without lowering ordinary HIR conditionals. ADR 0361 also rejects ordinary potentially trapping operations while preserving the state
 model's explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while

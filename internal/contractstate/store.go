@@ -9,15 +9,16 @@ import (
 )
 
 var (
-	ErrClosed           = errors.New("contract state transaction is closed")
-	ErrConflict         = errors.New("contract state transaction conflicts with a committed change")
-	ErrLayoutMismatch   = errors.New("contract state layout does not match the store")
-	ErrReadOnly         = errors.New("contract state transaction is read-only")
-	ErrManagedLifecycle = errors.New("contract state transaction lifecycle is owned by Execute or View")
-	ErrWriteLimit       = errors.New("contract state transaction exceeds the write-count limit")
-	ErrWriteBytesLimit  = errors.New("contract state transaction exceeds the write-byte limit")
-	ErrValueTooLarge    = errors.New("contract state value exceeds the per-value byte limit")
-	ErrMapKeyTooLarge   = errors.New("contract state map key exceeds the encoded-key byte limit")
+	ErrClosed            = errors.New("contract state transaction is closed")
+	ErrBorrowInvalidated = errors.New("contract state borrow is invalidated")
+	ErrConflict          = errors.New("contract state transaction conflicts with a committed change")
+	ErrLayoutMismatch    = errors.New("contract state layout does not match the store")
+	ErrReadOnly          = errors.New("contract state transaction is read-only")
+	ErrManagedLifecycle  = errors.New("contract state transaction lifecycle is owned by Execute or View")
+	ErrWriteLimit        = errors.New("contract state transaction exceeds the write-count limit")
+	ErrWriteBytesLimit   = errors.New("contract state transaction exceeds the write-byte limit")
+	ErrValueTooLarge     = errors.New("contract state value exceeds the per-value byte limit")
+	ErrMapKeyTooLarge    = errors.New("contract state map key exceeds the encoded-key byte limit")
 )
 
 // Limits are mandatory execution policy. There are no hidden or guessed

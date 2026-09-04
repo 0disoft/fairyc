@@ -50,6 +50,8 @@ type Transaction struct {
 	state       transactionState
 	snapshot    map[Key][]byte
 	writes      map[Key]pendingWrite
+	borrowToken *borrowToken
+	borrowEpoch map[Key]uint64
 	reads       uint64
 	writeBytes  uint64
 }
@@ -79,6 +81,8 @@ func (store *MemoryStore) begin(layout Layout, limits Limits, readOnly bool) (*T
 		state:       transactionOpen,
 		snapshot:    snapshot,
 		writes:      make(map[Key]pendingWrite),
+		borrowToken: &borrowToken{marker: 1},
+		borrowEpoch: make(map[Key]uint64),
 	}, nil
 }
 
@@ -325,7 +329,12 @@ func (transaction *Transaction) writeKeyLocked(key Key, value []byte, deleted bo
 	if nextBytes > transaction.limits.MaxWriteBytes {
 		return fmt.Errorf("%w: %d bytes, limit %d", ErrWriteBytesLimit, nextBytes, transaction.limits.MaxWriteBytes)
 	}
+	epoch := transaction.borrowEpoch[key]
+	if epoch == math.MaxUint64 {
+		return fmt.Errorf("contract state borrow generation overflow")
+	}
 	transaction.writes[key] = newWrite
+	transaction.borrowEpoch[key] = epoch + 1
 	transaction.writeBytes = nextBytes
 	return nil
 }
@@ -347,5 +356,7 @@ func (transaction *Transaction) closeLocked(state transactionState) {
 	transaction.state = state
 	transaction.snapshot = nil
 	transaction.writes = nil
+	transaction.borrowToken = nil
+	transaction.borrowEpoch = nil
 	transaction.writeBytes = 0
 }
