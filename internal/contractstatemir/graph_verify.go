@@ -13,7 +13,7 @@ const (
 	canonicalStepCost  = 1
 )
 
-func verifyGraph(program Program, bound boundLayout) ([]VerificationError, []hir.Effect) {
+func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]hir.Effect, helper bool) ([]VerificationError, []hir.Effect) {
 	failures := make([]VerificationError, 0)
 	requiredEffects := make([]hir.Effect, 0, 2)
 	if len(program.Blocks) > maxGraphBlocks {
@@ -72,6 +72,17 @@ func verifyGraph(program Program, bound boundLayout) ([]VerificationError, []hir
 			if operation.Cost != canonicalStepCost {
 				failures = append(failures, VerificationError{Code: "CSM1008", Entity: entity, Detail: "operation requires explicit canonical cost 1"})
 			}
+			if operation.Kind == OperationCall {
+				effects, found := helperEffects[operation.Callee]
+				if !found {
+					failures = append(failures, VerificationError{Code: "CSM1009", Entity: entity, Detail: "call does not name a verified helper"})
+				}
+				requiredEffects = append(requiredEffects, effects...)
+				if detail := verifyCallOperation(operation); detail != "" {
+					failures = append(failures, VerificationError{Code: "CSM1009", Entity: entity, Detail: detail})
+				}
+				continue
+			}
 			requiredEffects = append(requiredEffects, requiredStorageEffects(operation.Kind)...)
 			if int(operation.FieldIndex) >= len(bound.fields) {
 				failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "field index is outside the verified layout"})
@@ -92,7 +103,7 @@ func verifyGraph(program Program, bound boundLayout) ([]VerificationError, []hir
 		if block.Terminator.Cost != canonicalStepCost {
 			failures = append(failures, VerificationError{Code: "CSM1008", Entity: termEntity, Detail: "terminator requires explicit canonical cost 1"})
 		}
-		blockEdges, termFailures := verifyGraphTerminator(block.Terminator, program.Blocks, available, index)
+		blockEdges, termFailures := verifyGraphTerminator(block.Terminator, program.Blocks, available, index, helper)
 		failures = append(failures, termFailures...)
 		for _, target := range blockEdges {
 			edges[index] = append(edges[index], target)
@@ -238,7 +249,7 @@ func verifyGraphOperation(operation Operation, field contractstate.Field, availa
 	return ""
 }
 
-func verifyGraphTerminator(term Terminator, blocks []Block, available map[ValueID]string, source int) ([]BlockID, []VerificationError) {
+func verifyGraphTerminator(term Terminator, blocks []Block, available map[ValueID]string, source int, helper bool) ([]BlockID, []VerificationError) {
 	entity := fmt.Sprintf("block %d terminator", source)
 	fail := func(detail string) ([]BlockID, []VerificationError) {
 		return nil, []VerificationError{{Code: "CSM1006", Entity: entity, Detail: detail}}
@@ -283,6 +294,9 @@ func verifyGraphTerminator(term Terminator, blocks []Block, available map[ValueI
 		}
 		return []BlockID{term.TrueTarget, term.FalseTarget}, nil
 	case TerminatorCommit, TerminatorReject:
+		if helper && term.Kind == TerminatorCommit {
+			return fail("helper cannot commit the root transaction")
+		}
 		if term.Condition != 0 || term.Target != 0 || len(term.Arguments) != 0 || term.TrueTarget != 0 || term.FalseTarget != 0 || len(term.TrueArguments) != 0 || len(term.FalseArguments) != 0 || term.TrapCategory != "" {
 			return fail("exit carries unrelated fields")
 		}
@@ -293,6 +307,14 @@ func verifyGraphTerminator(term Terminator, blocks []Block, available map[ValueI
 		}
 		if term.Condition != 0 || term.Target != 0 || len(term.Arguments) != 0 || term.TrueTarget != 0 || term.FalseTarget != 0 || len(term.TrueArguments) != 0 || len(term.FalseArguments) != 0 {
 			return fail("trap carries unrelated control fields")
+		}
+		return nil, nil
+	case TerminatorReturn:
+		if !helper {
+			return fail("root transaction cannot return")
+		}
+		if term.Condition != 0 || term.Target != 0 || len(term.Arguments) != 0 || term.TrueTarget != 0 || term.FalseTarget != 0 || len(term.TrueArguments) != 0 || len(term.FalseArguments) != 0 || term.TrapCategory != "" {
+			return fail("return carries unrelated fields")
 		}
 		return nil, nil
 	default:

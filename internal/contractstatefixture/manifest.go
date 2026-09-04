@@ -32,14 +32,15 @@ type limitsDefinition struct {
 }
 
 type caseDefinition struct {
-	ID           string            `json:"id"`
-	Operations   []operation       `json:"operations"`
-	Exit         string            `json:"exit"`
-	TrapCategory string            `json:"trapCategory,omitempty"`
-	Limits       *limitsDefinition `json:"limits,omitempty"`
-	Expect       expectation       `json:"expect"`
-	Entry        uint32            `json:"entry,omitempty"`
-	Blocks       []blockDefinition `json:"blocks,omitempty"`
+	ID           string             `json:"id"`
+	Operations   []operation        `json:"operations"`
+	Exit         string             `json:"exit"`
+	TrapCategory string             `json:"trapCategory,omitempty"`
+	Limits       *limitsDefinition  `json:"limits,omitempty"`
+	Expect       expectation        `json:"expect"`
+	Entry        uint32             `json:"entry,omitempty"`
+	Blocks       []blockDefinition  `json:"blocks,omitempty"`
+	Helpers      []helperDefinition `json:"helpers,omitempty"`
 }
 
 type operation struct {
@@ -54,6 +55,16 @@ type operation struct {
 	Result     uint32 `json:"result,omitempty"`
 	Found      uint32 `json:"found,omitempty"`
 	Cost       uint32 `json:"cost,omitempty"`
+	Callee     string `json:"callee,omitempty"`
+}
+
+type helperDefinition struct {
+	Name         string            `json:"name"`
+	Operations   []operation       `json:"operations"`
+	Exit         string            `json:"exit"`
+	TrapCategory string            `json:"trapCategory,omitempty"`
+	Entry        uint32            `json:"entry,omitempty"`
+	Blocks       []blockDefinition `json:"blocks,omitempty"`
 }
 
 type blockDefinition struct {

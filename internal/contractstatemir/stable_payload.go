@@ -17,10 +17,12 @@ import (
 )
 
 const (
-	StableStateBodySchema       = "fairyc.contract-state-package-body-artifact/v1"
-	StableStateBodyVersion      = "fairyc-contract-state-package-body-artifact/1"
-	StableStateGraphBodySchema  = "fairyc.contract-state-package-body-artifact/v2"
-	StableStateGraphBodyVersion = "fairyc-contract-state-package-body-artifact/2"
+	StableStateBodySchema        = "fairyc.contract-state-package-body-artifact/v1"
+	StableStateBodyVersion       = "fairyc-contract-state-package-body-artifact/1"
+	StableStateGraphBodySchema   = "fairyc.contract-state-package-body-artifact/v2"
+	StableStateGraphBodyVersion  = "fairyc-contract-state-package-body-artifact/2"
+	StableStateHelperBodySchema  = "fairyc.contract-state-package-body-artifact/v3"
+	StableStateHelperBodyVersion = "fairyc-contract-state-package-body-artifact/3"
 )
 
 var (
@@ -57,6 +59,17 @@ type StableStateTransaction struct {
 	TrapCategory string                 `json:"trapCategory"`
 	Entry        uint32                 `json:"entry,omitempty"`
 	Blocks       []StableStateBlock     `json:"blocks,omitempty"`
+	Helpers      []StableStateHelper    `json:"helpers,omitempty"`
+}
+
+type StableStateHelper struct {
+	Name         string                 `json:"name"`
+	Effects      []string               `json:"effects"`
+	Operations   []StableStateOperation `json:"operations"`
+	Exit         string                 `json:"exit"`
+	TrapCategory string                 `json:"trapCategory"`
+	Entry        uint32                 `json:"entry,omitempty"`
+	Blocks       []StableStateBlock     `json:"blocks,omitempty"`
 }
 
 type StableStateOperation struct {
@@ -68,6 +81,7 @@ type StableStateOperation struct {
 	ValueInput uint32           `json:"valueInput,omitempty"`
 	Result     uint32           `json:"result,omitempty"`
 	Found      uint32           `json:"found,omitempty"`
+	Callee     string           `json:"callee,omitempty"`
 	Cost       uint32           `json:"cost,omitempty"`
 }
 
@@ -204,6 +218,9 @@ func DecodeStableStateBody(encoded []byte, maxBytes uint64) (StableStateBodyArti
 
 func stableStateBodyEnvelopeIdentity(body StableStateBodyArtifact) (string, string) {
 	for _, transaction := range body.Transactions {
+		if len(transaction.Helpers) != 0 {
+			return StableStateHelperBodySchema, StableStateHelperBodyVersion
+		}
 		if len(transaction.Blocks) != 0 {
 			return StableStateGraphBodySchema, StableStateGraphBodyVersion
 		}
@@ -291,6 +308,47 @@ func stableStateTransactionArtifact(transaction stableStateTransaction) StableSt
 		}
 		result.Blocks = append(result.Blocks, stableBlock)
 	}
+	if len(transaction.program.Helpers) != 0 {
+		result.Helpers = make([]StableStateHelper, 0, len(transaction.program.Helpers))
+	}
+	for _, helper := range transaction.program.Helpers {
+		stableHelper := StableStateHelper{
+			Name: helper.Name, Effects: stableEffects(helper.Effects), Operations: stableOperations(helper.Operations),
+			Exit: string(helper.Exit), TrapCategory: helper.TrapCategory, Entry: uint32(helper.Entry), Blocks: stableBlocks(helper.Blocks),
+		}
+		result.Helpers = append(result.Helpers, stableHelper)
+	}
+	return result
+}
+
+func stableEffects(effects []hir.Effect) []string {
+	result := make([]string, 0, len(effects))
+	for _, effect := range effects {
+		result = append(result, string(effect))
+	}
+	return result
+}
+
+func stableOperations(operations []Operation) []StableStateOperation {
+	result := make([]StableStateOperation, 0, len(operations))
+	for _, operation := range operations {
+		result = append(result, stableStateOperation(operation))
+	}
+	return result
+}
+
+func stableBlocks(blocks []Block) []StableStateBlock {
+	if blocks == nil {
+		return nil
+	}
+	result := make([]StableStateBlock, 0, len(blocks))
+	for _, block := range blocks {
+		stableBlock := StableStateBlock{ID: uint32(block.ID), Parameters: make([]StableStateBlockParameter, 0, len(block.Parameters)), Operations: stableOperations(block.Operations), Terminator: stableStateTerminator(block.Terminator)}
+		for _, parameter := range block.Parameters {
+			stableBlock.Parameters = append(stableBlock.Parameters, StableStateBlockParameter{ID: uint32(parameter.ID), TypeID: parameter.TypeID})
+		}
+		result = append(result, stableBlock)
+	}
 	return result
 }
 
@@ -300,6 +358,7 @@ func stableStateOperation(operation Operation) StableStateOperation {
 		Key: stableStateValue(operation.Key), Value: stableStateValue(operation.Value),
 		KeyInput: uint32(operation.KeyInput), ValueInput: uint32(operation.ValueInput),
 		Result: uint32(operation.Result), Found: uint32(operation.Found), Cost: operation.Cost,
+		Callee: operation.Callee,
 	}
 }
 
@@ -388,9 +447,26 @@ func programFromStableStateTransaction(layout Layout, descriptor stableStateFunc
 		}
 		blocks = append(blocks, block)
 	}
+	helpers := make([]Helper, 0, len(value.Helpers))
+	for index, stableHelper := range value.Helpers {
+		if stableHelper.Operations == nil {
+			return Program{}, fmt.Errorf("stable helper %d operations must be an array", index)
+		}
+		helperEffects, err := effectsFromStable(stableHelper.Effects)
+		if err != nil {
+			return Program{}, fmt.Errorf("stable helper %d: %w", index, err)
+		}
+		helpers = append(helpers, Helper{
+			Name: stableHelper.Name, Effects: helperEffects,
+			Operations: operationsFromStable(stableHelper.Operations, capability),
+			Exit:       ExitKind(stableHelper.Exit), TrapCategory: stableHelper.TrapCategory,
+			Entry: BlockID(stableHelper.Entry), Blocks: blocksFromStable(stableHelper.Blocks, capability),
+		})
+	}
 	program := Program{
 		Layout: layout, Capability: capability, Effects: effects, Operations: operations,
 		Exit: ExitKind(value.Exit), TrapCategory: value.TrapCategory, Entry: BlockID(value.Entry), Blocks: blocks,
+		Helpers: helpers,
 	}
 	if failures := Verify(program); len(failures) != 0 {
 		return Program{}, VerificationErrors{Failures: failures}
@@ -405,7 +481,46 @@ func operationFromStable(value StableStateOperation, capability TransactionCapab
 		Value:    Value{TypeID: value.Value.TypeID, Encoded: slices.Clone(value.Value.Encoded)},
 		KeyInput: ValueID(value.KeyInput), ValueInput: ValueID(value.ValueInput),
 		Result: ValueID(value.Result), Found: ValueID(value.Found), Cost: value.Cost,
+		Callee: value.Callee,
 	}
+}
+
+func effectsFromStable(values []string) ([]hir.Effect, error) {
+	if values == nil {
+		return nil, fmt.Errorf("effects must be an array")
+	}
+	result := make([]hir.Effect, 0, len(values))
+	for _, value := range values {
+		parsed, ok := hir.ParseEffect(value)
+		if !ok {
+			return nil, fmt.Errorf("unknown effect %q", value)
+		}
+		result = append(result, parsed)
+	}
+	return result, nil
+}
+
+func operationsFromStable(values []StableStateOperation, capability TransactionCapability) []Operation {
+	result := make([]Operation, 0, len(values))
+	for _, value := range values {
+		result = append(result, operationFromStable(value, capability))
+	}
+	return result
+}
+
+func blocksFromStable(values []StableStateBlock, capability TransactionCapability) []Block {
+	if values == nil {
+		return nil
+	}
+	result := make([]Block, 0, len(values))
+	for _, stableBlock := range values {
+		block := Block{ID: BlockID(stableBlock.ID), Parameters: make([]BlockParameter, 0, len(stableBlock.Parameters)), Operations: operationsFromStable(stableBlock.Operations, capability), Terminator: terminatorFromStable(stableBlock.Terminator)}
+		for _, parameter := range stableBlock.Parameters {
+			block.Parameters = append(block.Parameters, BlockParameter{ID: ValueID(parameter.ID), TypeID: parameter.TypeID})
+		}
+		result = append(result, block)
+	}
+	return result
 }
 
 func terminatorFromStable(value StableStateTerminator) Terminator {

@@ -1,0 +1,60 @@
+{
+  "$schema": "./schema-v3.json",
+  "schemaVersion": "fairyc.contract-state-fixtures/v3",
+  "deferred": [
+    "helper parameters and return values",
+    "recursive, indirect, foreign, and cross-package helper calls",
+    "owner-bound state borrows and pointer provenance",
+    "native backend, persistence, and external calls"
+  ],
+  "contracts": [
+    "docs/mir/contract-state-transaction-mir-v0.md",
+    "docs/adr/0379-verified-contract-state-helper-calls.md"
+  ],
+  "layout": {
+    "contractUID": "fixture.helpers",
+    "fields": [
+      { "name": "value", "kind": "cell", "valueTypeID": "u64/be/v1" }
+    ]
+  },
+  "limits": { "maxWrites": 8, "maxWriteBytes": 1024, "maxValueBytes": 64, "maxMapKeyBytes": 64 },
+  "cases": [
+    {
+      "id": "transitive-helper-commit",
+      "operations": [{ "kind": "call", "callee": "writer", "cost": 1 }],
+      "exit": "commit",
+      "helpers": [
+        { "name": "pure", "operations": [], "exit": "return" },
+        {
+          "name": "writer",
+          "operations": [
+            { "kind": "call", "callee": "pure", "cost": 1 },
+            { "kind": "cell-write", "field": "value", "valueTypeID": "u64/be/v1", "valueHex": "000000000000002a" }
+          ],
+          "exit": "return"
+        }
+      ],
+      "expect": {
+        "status": "commit", "exit": "commit", "version": 1, "writes": 1, "cost": 2,
+        "reads": [], "store": [{ "field": "value", "valueHex": "000000000000002a" }]
+      }
+    },
+    {
+      "id": "helper-reject-rolls-back",
+      "operations": [
+        { "kind": "cell-write", "field": "value", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000007" },
+        { "kind": "call", "callee": "rejecter", "cost": 1 }
+      ],
+      "exit": "commit",
+      "helpers": [{ "name": "rejecter", "operations": [], "exit": "reject" }],
+      "expect": {
+        "status": "reject", "exit": "reject", "version": 0, "writes": 0, "cost": 1,
+        "reads": [], "store": []
+      }
+    }
+  ],
+  "mutations": [
+    { "id": "reject-helper-cycle", "case": "transitive-helper-commit", "kind": "helper-cycle", "errorContains": "recursion" },
+    { "id": "reject-helper-effect-drift", "case": "transitive-helper-commit", "kind": "helper-effect", "errorContains": "missing required effects" }
+  ]
+}

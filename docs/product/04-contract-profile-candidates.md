@@ -56,7 +56,8 @@ store-wide optimistic conflict detection, atomic commit, and rollback on returne
 
 `internal/contractstatemir` adds a separate compiler-private layout and transaction submodel. It
 verifies exact layout identity, canonical cell/map operations, explicit commit/reject/trap exits,
-and ADR 0378's bounded acyclic SSA blocks with typed reads, joins, bool branches, and unit costs
+ADR 0378's bounded acyclic SSA blocks with typed reads, joins, bool branches, and unit costs, and
+ADR 0379's bounded same-package no-argument void helper DAG with transitive effects and call costs
 before executing them through the oracle. It is not the stable whole-program MIR and has no source
 state-access, backend, or target admission.
 
@@ -102,9 +103,10 @@ state body through the matching fresh MIR function symbol and returns executable
 transactions without running them inside compilation. ADR 0355 makes cold and cached compilation
 publish those transactions atomically through the same verified `compiler.Result`. ADR 0356
 rejects `block_context`, `emit`, and `external_call` authority until transaction MIR represents and
-verifies those operations. ADR 0357 rejects every internal or foreign call in the complete current
-owner body during direct lowering and stable rebind; later call admission must prove transitive
-operations, effects, state-borrow lifetime, capabilities, and reentrancy. ADR 0358 also rejects every
+verifies those operations. ADR 0357 originally rejected every internal or foreign call in the complete current
+owner body during direct lowering and stable rebind. ADR 0379 now proves transitive operations,
+effects, and shared capability for one bounded static helper DAG; state-borrow lifetime and
+reentrancy remain closed. ADR 0358 also rejects every
 ordinary-owner `if`, `match`, loop, loop-control, assertion, Result-propagation, and short-circuit
 path. ADR 0378 admits conditional state-side blocks without relaxing that ordinary HIR boundary.
 ADR 0359 additionally rejects unsafe

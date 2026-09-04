@@ -513,10 +513,11 @@ execute after exact current-body identity selection without consulting the curre
 table during reassembly. ADR 0355 publishes ordinary and contract-state MIR atomically through one
 verified `compiler.Result` for cold and cached compilation paths. ADR 0356 admits only
 `storage_read` and `storage_write` in the transaction program until block-context, event, and
-external-call operations have their own verifier contracts. ADR 0357 recursively requires the
-current transaction owner body to be call-free during direct lowering and stable fresh-owner rebind;
-ordinary internal and foreign calls remain closed until their transitive state and reentrancy
-semantics are represented. ADR 0358 additionally rejects conditionals, loops, assertions, Result
+external-call operations have their own verifier contracts. ADR 0357 rejects calls without a
+transaction representation. ADR 0379 now admits only statically resolved same-package no-argument
+`void` helpers whose exact call sequence, transitive storage effects, capability, costs, bodies,
+and rollback behavior are verified. Indirect, foreign, cross-package, argument-bearing,
+value-returning, recursive, and reentrant calls remain closed. ADR 0358 additionally rejects conditionals, loops, assertions, Result
 propagation, and short-circuit operators so every current owner remains straight-line under the
 exact compiler-private HIR boundary. ADR 0359 rejects unsafe declarations/scopes and raw-pointer
 types through signatures, locals, expressions, and nested aggregates while preserving ordinary
@@ -547,7 +548,14 @@ storage effects, and unit operation/terminator costs are verified before the ora
 v2 fixtures execute cell-read branch/join and map-found branch paths through atomic compiler
 publication and reject cycle, join-type, missing-cost, and unknown-value mutations. Graph bodies use
 the v2 stable envelope and existing body-hash cache invalidation while legacy v1 payload bytes remain
-unchanged. Source state access, loops, calls, native lowering, and production persistence stay closed.
+unchanged. Source state access, loops, native lowering, and production persistence stay closed.
+
+ADR 0379 adds compiler-private bounded helper calls. A root can reach at most 32 sorted
+module-qualified `void fn()` helpers across at most 1024 total operations. Calls cost one unit and
+execute inside the root snapshot and overlay; helper return resumes, while helper reject or trap
+rolls back the complete attempt. The v3 stable body includes helper order, calls, bodies, effects,
+exits, and costs while preserving legacy v1 and graph v2 bytes. Manifest v3 executes a
+pure-to-state helper chain and rejection rollback and rejects recursion and transitive-effect drift.
 
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested

@@ -175,12 +175,15 @@ members under the MIR program's fresh coordinate-owned function symbols and retu
 state transactions for explicit compiler-private oracle execution. ADR 0355 makes ordinary and
 cached compilation publish those programs through one atomic verified compiler result. ADR 0356
 admits only the `storage_read` and `storage_write` effects represented by current transaction MIR.
-ADR 0357 requires the complete current owner HIR body to be call-free during direct lowering and
-stable rebind. ADR 0358 also rejects conditionals, loops, assertions, Result propagation, and
+ADR 0357 rejects calls without a transaction representation. ADR 0379 admits only statically
+resolved same-package no-argument void helper calls with a closed acyclic graph, exact current-HIR
+call sequence, transitive effects, stable v3 body identity, and one shared transaction overlay.
+Indirect, foreign, cross-package, argument-bearing, value-returning, and recursive calls stay
+closed. ADR 0358 also rejects conditionals, loops, assertions, Result propagation, and
 short-circuit operators. ADR 0359 rejects unsafe code and recursively reachable raw-pointer types
 while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360 rejects
 receiver-bound methods and automatic drop glue while preserving static associated entries; none
-admits transitive calls, owner-bound state borrows, or pointer provenance. ADR 0378 separately
+admits owner-bound state borrows or pointer provenance. ADR 0378 separately
 admits bounded acyclic conditional state blocks with typed reads, explicit joins and represented
 costs without lowering ordinary HIR conditionals. ADR 0361 also rejects ordinary potentially trapping operations while preserving the state
 model's explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while
@@ -1032,8 +1035,9 @@ stable package MIR v3 in a separate outer artifact. ADR 0353 adds cache storage,
 lookup, and exact-generation quarantine. ADR 0354 adds state-body rebind, combined fresh-symbol
 reassembly, and explicit cached oracle execution. ADR 0355 unifies cold and cached transaction
 publication in `compiler.Result`, and ADR 0356 closes accepted authority to represented storage
-effects. ADR 0357 closes current owner-body calls while source, call admission, and native/runtime
-admission remain closed. ADR 0358 closes current ordinary owner-body dynamic control flow. ADR 0378
+effects. ADR 0357 closes unrepresented owner-body calls. ADR 0379 admits only the bounded
+same-package no-argument void helper graph while public source state operations, general call
+admission, and native/runtime admission remain closed. ADR 0358 closes current ordinary owner-body dynamic control flow. ADR 0378
 admits compiler-private typed state values and bounded acyclic conditional blocks with v2 stable
 transport while source state access and ordinary conditional lowering remain absent. ADR 0359 closes unsafe
 and raw-pointer owner transport while safe borrows remain ordinary HIR facts rather than state

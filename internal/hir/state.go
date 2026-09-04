@@ -38,6 +38,7 @@ const (
 	StateAccessMapRead    StateAccessKind = "map-read"
 	StateAccessMapWrite   StateAccessKind = "map-write"
 	StateAccessMapDelete  StateAccessKind = "map-delete"
+	StateAccessCall       StateAccessKind = "call"
 )
 
 // StateValue carries one storage-codec identity and its canonical encoded
@@ -73,6 +74,7 @@ type StateAccess struct {
 	ValueInput  StateValueID
 	Result      StateValueID
 	FoundResult StateValueID
+	Callee      SymbolID
 	Cost        uint32
 	Span        Span
 }
@@ -85,6 +87,7 @@ const (
 	StateTerminatorCommit StateTerminatorKind = "commit"
 	StateTerminatorReject StateTerminatorKind = "reject"
 	StateTerminatorTrap   StateTerminatorKind = "trap"
+	StateTerminatorReturn StateTerminatorKind = "return"
 )
 
 // StateTerminator closes every block. Branch conditions must be bool/v1 SSA
@@ -119,6 +122,7 @@ const (
 	StateTransactionCommit StateTransactionExit = "commit"
 	StateTransactionReject StateTransactionExit = "reject"
 	StateTransactionTrap   StateTransactionExit = "trap"
+	StateTransactionReturn StateTransactionExit = "return"
 )
 
 // StateTransaction attaches either legacy straight-line accesses or one

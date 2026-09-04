@@ -21,7 +21,8 @@
 - Resource-lifetime-free owner source: `docs/adr/0362-resource-lifetime-free-contract-state-owners.md`
 - Closed-form owner source: `docs/adr/0363-closed-form-contract-state-owner-hir.md`
 - Data-dependent graph source: `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`
-- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v2.json` with historical v0/v1 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`, `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`
+- Verified helper-call source: `docs/adr/0379-verified-contract-state-helper-calls.md`
+- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v3.json` with historical v0/v1/v2 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`, `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`, `docs/adr/0379-verified-contract-state-helper-calls.md`
 - Compiler-published fixture source: `docs/adr/0366-compiler-published-contract-state-fixtures.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
@@ -101,9 +102,9 @@ Program effects are canonical released on-chain HIR effects. Cell/map reads requ
 `storage_read`; writes and deletes require `storage_write`. Missing required effects,
 noncanonical sets, and host-only effects fail with `CSM1005`. ADR 0356 also rejects
 `block_context`, `emit`, and `external_call`: this MIR has no operation that can justify those
-authorities. ADR 0357 also rejects every call expression in the current transaction owner body,
-including nested loop, block, child, and match-arm positions. This is call exclusion, not transitive
-call-graph or reentrancy support. ADR 0358 still rejects ordinary-owner `if`, `match`, `while`, classic `for`, loop
+authorities. ADR 0357 originally rejected every call expression in the transaction owner body;
+ADR 0379 now admits only the exact bounded static helper graph described below. General calls and
+reentrancy remain closed. ADR 0358 still rejects ordinary-owner `if`, `match`, `while`, classic `for`, loop
 control, assertions, Result propagation, and short-circuit operators in the same current-body paths.
 ADR 0359 rejects unsafe declarations/scopes and raw-pointer types reachable through signatures,
 locals, expressions, or nominal aggregate fields. Safe borrows remain ordinary HIR permissions, not
@@ -123,6 +124,12 @@ ADR 0366 submits every fixture HIR package to the unified compiler coordinator a
 transaction from a verified atomic ordinary/state MIR result.
 ADR 0378 adds current v2 graph fixtures for a cell-read branch with an explicit join and a map-read
 found branch, plus cycle, join-type, missing-cost, and unavailable-value mutations.
+
+ADR 0379 adds current v3 fixtures for a pure-to-state helper chain and helper rejection rollback,
+plus recursion and transitive-effect mutations. Helper calls are exact same-package `void fn()`
+edges, share the root transaction capability and overlay, cost one unit each, and are limited to an
+acyclic reachable set of 32 helpers and 1024 total root/helper operations. `CSM1009` rejects an
+unknown, unreachable, noncanonical, or recursive helper graph. Only the root may commit.
 
 ## HIR bridge
 
@@ -194,7 +201,7 @@ unexpected bodies fail before publication.
 ## Closed gates
 
 This slice does not add source state-access syntax, ordinary-HIR conditional lowering, loops,
-call admission, owner-bound state borrows, pointer provenance, transitive call-graph rules, deterministic native backend execution, persistence,
+general call admission, graph-block helper calls, owner-bound state borrows, pointer provenance, reentrancy, deterministic native backend execution, persistence,
 migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface
@@ -218,3 +225,7 @@ safe resource borrows and static resource namespaces.
 ADR 0363 freezes the residual pure owner HIR as a recursive positive allowlist. ADR 0378 separately
 admits bounded acyclic SSA state blocks with explicit joins, bool branches, represented costs, v2
 graph payload transport, and compiler-published cell/map execution while preserving legacy v1 bytes.
+ADR 0379 narrowly reopens only statically resolved same-package no-argument void calls whose
+ordinary-HIR sequence matches the state side table. Indirect, foreign, cross-package,
+argument-bearing, value-returning, recursive, receiver-bound, and resource-owning calls remain
+closed. Helper-bearing stable bodies use v3 transport while v1 and v2 remain byte-identical.

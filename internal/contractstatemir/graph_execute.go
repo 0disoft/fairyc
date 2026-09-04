@@ -7,13 +7,21 @@ import (
 	"github.com/0disoft/fairyc/internal/contractstate"
 )
 
-func executeGraph(transaction *contractstate.Transaction, bound boundLayout, program Program, outcome *Outcome) (ExitKind, error) {
+func executeGraph(transaction *contractstate.Transaction, bound boundLayout, program Program, helpers map[string]Helper, outcome *Outcome, operationIndex *int) (ExitKind, error) {
 	values := make(map[ValueID]Value)
 	current := program.Entry
-	operationIndex := 0
 	for {
 		block := program.Blocks[current]
 		for _, operation := range block.Operations {
+			if operation.Kind == OperationCall {
+				(*operationIndex)++
+				outcome.Cost += uint64(operation.Cost)
+				exit, err := executeHelper(transaction, bound, program.Capability, helpers[operation.Callee], helpers, outcome, operationIndex)
+				if err != nil || exit != ExitReturn {
+					return exit, err
+				}
+				continue
+			}
 			field := bound.fields[operation.FieldIndex]
 			key := operation.Key
 			if operation.KeyInput != 0 {
@@ -29,7 +37,7 @@ func executeGraph(transaction *contractstate.Transaction, bound boundLayout, pro
 				if err != nil {
 					return "", err
 				}
-				outcome.Reads = append(outcome.Reads, Read{Operation: operationIndex, Found: found, Value: Value{TypeID: field.descriptor.ValueTypeID, Encoded: slices.Clone(encoded)}})
+				outcome.Reads = append(outcome.Reads, Read{Operation: *operationIndex, Found: found, Value: Value{TypeID: field.descriptor.ValueTypeID, Encoded: slices.Clone(encoded)}})
 				values[operation.Result] = graphReadValue(field.descriptor.ValueTypeID, encoded, found)
 				values[operation.Found] = boolGraphValue(found)
 			case OperationCellWrite:
@@ -45,7 +53,7 @@ func executeGraph(transaction *contractstate.Transaction, bound boundLayout, pro
 				if err != nil {
 					return "", err
 				}
-				outcome.Reads = append(outcome.Reads, Read{Operation: operationIndex, Found: found, Value: Value{TypeID: field.descriptor.ValueTypeID, Encoded: slices.Clone(encoded)}})
+				outcome.Reads = append(outcome.Reads, Read{Operation: *operationIndex, Found: found, Value: Value{TypeID: field.descriptor.ValueTypeID, Encoded: slices.Clone(encoded)}})
 				values[operation.Result] = graphReadValue(field.descriptor.ValueTypeID, encoded, found)
 				values[operation.Found] = boolGraphValue(found)
 			case OperationMapWrite:
@@ -59,7 +67,7 @@ func executeGraph(transaction *contractstate.Transaction, bound boundLayout, pro
 			default:
 				return "", fmt.Errorf("verified contract state graph contains operation %q", operation.Kind)
 			}
-			operationIndex++
+			(*operationIndex)++
 			outcome.Cost += uint64(operation.Cost)
 		}
 		term := block.Terminator
@@ -86,6 +94,8 @@ func executeGraph(transaction *contractstate.Transaction, bound boundLayout, pro
 			return ExitReject, errRejected
 		case TerminatorTrap:
 			panic(Trap{Category: term.TrapCategory})
+		case TerminatorReturn:
+			return ExitReturn, nil
 		default:
 			return "", fmt.Errorf("verified contract state graph contains terminator %q", term.Kind)
 		}

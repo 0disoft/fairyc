@@ -76,6 +76,7 @@ const (
 	OperationMapRead    OperationKind = "map-read"
 	OperationMapWrite   OperationKind = "map-write"
 	OperationMapDelete  OperationKind = "map-delete"
+	OperationCall       OperationKind = "call"
 )
 
 // Operation is one storage action in either a legacy line or a graph block.
@@ -91,6 +92,7 @@ type Operation struct {
 	ValueInput ValueID
 	Result     ValueID
 	Found      ValueID
+	Callee     string
 	Cost       uint32
 }
 
@@ -102,6 +104,7 @@ const (
 	TerminatorCommit TerminatorKind = "commit"
 	TerminatorReject TerminatorKind = "reject"
 	TerminatorTrap   TerminatorKind = "trap"
+	TerminatorReturn TerminatorKind = "return"
 )
 
 type Terminator struct {
@@ -130,7 +133,21 @@ const (
 	ExitCommit ExitKind = "commit"
 	ExitReject ExitKind = "reject"
 	ExitTrap   ExitKind = "trap"
+	ExitReturn ExitKind = "return"
 )
+
+// Helper is one same-package, statically resolved, no-argument void function.
+// Names are stable module-qualified identities; bodies share the root
+// transaction capability and may call only other helpers in this slice.
+type Helper struct {
+	Name         string
+	Effects      []hir.Effect
+	Operations   []Operation
+	Exit         ExitKind
+	TrapCategory string
+	Entry        BlockID
+	Blocks       []Block
+}
 
 // Program owns one exact layout and either one legacy operation sequence or a
 // bounded acyclic graph whose paths have explicit transaction exits. General
@@ -144,6 +161,7 @@ type Program struct {
 	TrapCategory string
 	Entry        BlockID
 	Blocks       []Block
+	Helpers      []Helper
 }
 
 // BuildLayout computes the same canonical identity used by the transaction

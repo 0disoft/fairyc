@@ -318,13 +318,13 @@ func verifyHIRStateOwnerExpressionClosedForm(expression *hir.Expression) error {
 	if expression == nil {
 		return nil
 	}
-	if len(expression.Effects) != 0 {
+	if len(expression.Effects) != 0 && expression.Kind != "call" {
 		return fmt.Errorf("expression kind %q carries expression-local effects", expression.Kind)
 	}
 	switch expression.Kind {
 	case "literal", "path", "group", "record", "array", "array-view-borrow", "array-length",
 		"field-expression", "view-length", "view-empty", "scalar-cast", "result-variant",
-		"option-variant", "enum-variant", "block":
+		"option-variant", "enum-variant", "block", "call":
 	case "prefix":
 		switch expression.Operator {
 		case "+", "!", "~", "&", "&mut", "*":

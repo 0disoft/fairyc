@@ -55,6 +55,21 @@ func TestContractStateManifestV2(t *testing.T) {
 	}
 }
 
+func TestContractStateManifestV3(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state", "manifest-v3.json")
+	report, err := Run(manifestPath)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if report.CasesRun != 4 {
+		t.Fatalf("Run() cases = %d, want 4", report.CasesRun)
+	}
+	for _, failure := range report.Failures {
+		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
+	}
+}
+
 func TestContractStateManifestRejectsUnknownFields(t *testing.T) {
 	t.Parallel()
 	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "contract-state", "manifest-v0.json")
@@ -84,6 +99,19 @@ func TestContractStateManifestRejectsDuplicateIdentities(t *testing.T) {
 	}
 	if err := validateManifest(definition); err == nil || !strings.Contains(err.Error(), "duplicated") {
 		t.Fatalf("validateManifest() error = %v, want duplicate rejection", err)
+	}
+}
+
+func TestContractStateManifestKeepsHelpersVersionGated(t *testing.T) {
+	t.Parallel()
+	definition := manifest{
+		Schema: fixtureSchemaV2, SchemaVersion: fixtureSchemaV2, Contracts: []string{"contract"},
+		Layout: layoutDefinition{ContractUID: "fixture", Fields: []fieldDefinition{{Name: "value", Kind: "cell", ValueTypeID: "u64/be/v1"}}},
+		Limits: limitsDefinition{MaxWrites: 1, MaxWriteBytes: 1, MaxValueBytes: 1, MaxMapKeyBytes: 1},
+		Cases:  []caseDefinition{{ID: "legacy", Operations: []operation{{Kind: "call", Callee: "helper", Cost: 1}}, Exit: "commit", Helpers: []helperDefinition{{Name: "helper", Operations: []operation{}, Exit: "return"}}, Expect: expectation{Status: "commit"}}},
+	}
+	if err := validateManifest(definition); err == nil || !strings.Contains(err.Error(), "before fixture schema v3") {
+		t.Fatalf("validateManifest() error = %v, want helper version rejection", err)
 	}
 }
 

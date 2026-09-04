@@ -32,8 +32,9 @@ admits that bundle into disposable persistent cache records with exact expected-
 ADR 0354 reassembles cached MIR and state bodies under one fresh function-symbol graph and proves
 explicit oracle execution. ADR 0355 publishes ordinary and contract-state MIR atomically through one
 verified compiler result. ADR 0356 then admits only the represented `storage_read` and
-`storage_write` effects. ADR 0357 additionally requires the current transaction owner body to be
-call-free on direct lowering and stable rebind. ADR 0358 rejects dynamic control flow in those same
+`storage_write` effects. ADR 0357 originally required the current transaction owner body to be
+call-free on direct lowering and stable rebind; ADR 0379 now reopens only the bounded static helper
+edges described below. ADR 0358 rejects dynamic control flow in those same
 paths so current owners remain straight-line. ADR 0359 rejects unsafe scopes and reachable
 raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360
 also rejects receiver-bound and drop-glue owners while preserving static associated entries. ADR
@@ -45,12 +46,16 @@ future forms fail closed. ADR 0364 adds a versioned five-case transaction corpus
 oracle through source-independent HIR and verified transaction MIR.
 ADR 0378 leaves the ordinary owner HIR restriction intact while separately admitting bounded
 acyclic SSA state blocks with typed reads, explicit joins, bool branches, and represented costs.
+ADR 0379 then admits only exact same-package `void fn()` helper edges. Helpers execute inside the
+root snapshot and overlay; return resumes the caller, while reject or trap rolls back the complete
+root attempt and only the root may commit.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
 `spec/fixtures/contract-state/manifest-v0.json` owns the historical executable cell examples;
-ADR 0365 preserves that baseline in `manifest-v1.json`; ADR 0378 makes `manifest-v2.json` the
-current graph corpus while retaining both historical versions. No manifest is a production storage format.
+ADR 0365 preserves that baseline in `manifest-v1.json`; ADR 0378 preserves the v2 graph generation;
+ADR 0379 makes `manifest-v3.json` the current helper corpus while retaining all historical versions.
+No manifest is a production storage format.
 ADR 0366 executes both corpora only after the compiler atomically publishes verified ordinary and
 contract-state MIR; a state-MIR rejection leaves both executable outputs empty.
 ADR 0367 adds a separate deterministic overlapping-transaction corpus: stale commits publish no

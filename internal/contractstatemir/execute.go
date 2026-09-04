@@ -3,7 +3,6 @@ package contractstatemir
 import (
 	"errors"
 	"fmt"
-	"slices"
 
 	"github.com/0disoft/fairyc/internal/contractstate"
 )
@@ -60,57 +59,15 @@ func Execute(store *contractstate.MemoryStore, program Program, limits contracts
 		return Outcome{}, fmt.Errorf("bind verified contract state MIR layout: %w", err)
 	}
 	outcome := Outcome{Exit: program.Exit}
+	helpers := make(map[string]Helper, len(program.Helpers))
+	for _, helper := range program.Helpers {
+		helpers[helper.Name] = helper
+	}
+	operationIndex := 0
 	receipt, err := contractstate.Execute(store, bound.layout, limits, func(transaction *contractstate.Transaction) error {
-		if len(program.Blocks) != 0 {
-			exit, err := executeGraph(transaction, bound, program, &outcome)
-			outcome.Exit = exit
-			return err
-		}
-		for index, operation := range program.Operations {
-			field := bound.fields[operation.FieldIndex]
-			switch operation.Kind {
-			case OperationCellRead:
-				encoded, found, err := field.cell.Get(transaction)
-				if err != nil {
-					return err
-				}
-				outcome.Reads = append(outcome.Reads, Read{Operation: index, Found: found, Value: Value{TypeID: field.descriptor.ValueTypeID, Encoded: slices.Clone(encoded)}})
-			case OperationCellWrite:
-				if err := field.cell.Set(transaction, operation.Value.Encoded); err != nil {
-					return err
-				}
-			case OperationCellDelete:
-				if err := field.cell.Delete(transaction); err != nil {
-					return err
-				}
-			case OperationMapRead:
-				encoded, found, err := field.mapped.Get(transaction, operation.Key.Encoded)
-				if err != nil {
-					return err
-				}
-				outcome.Reads = append(outcome.Reads, Read{Operation: index, Found: found, Value: Value{TypeID: field.descriptor.ValueTypeID, Encoded: slices.Clone(encoded)}})
-			case OperationMapWrite:
-				if err := field.mapped.Set(transaction, operation.Key.Encoded, operation.Value.Encoded); err != nil {
-					return err
-				}
-			case OperationMapDelete:
-				if err := field.mapped.Delete(transaction, operation.Key.Encoded); err != nil {
-					return err
-				}
-			default:
-				return fmt.Errorf("verified contract state MIR contains operation %q", operation.Kind)
-			}
-		}
-		switch program.Exit {
-		case ExitCommit:
-			return nil
-		case ExitReject:
-			return errRejected
-		case ExitTrap:
-			panic(Trap{Category: program.TrapCategory})
-		default:
-			return fmt.Errorf("verified contract state MIR contains exit %q", program.Exit)
-		}
+		exit, err := executeProgramBody(transaction, bound, program, helpers, &outcome, &operationIndex)
+		outcome.Exit = exit
+		return err
 	})
 	if errors.Is(err, errRejected) {
 		return outcome, nil

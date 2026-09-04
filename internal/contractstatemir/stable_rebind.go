@@ -79,9 +79,6 @@ func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected Sta
 		if function.Symbol == hir.NoSymbol {
 			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function has no fresh symbol", index)
 		}
-		if hirBlockContainsCall(function.Body) {
-			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function %q contains a call; calls are not admitted", index, descriptor.name)
-		}
 		if hirBlockContainsDynamicControlFlow(function.Body) {
 			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function %q contains dynamic control flow; dynamic control flow is not admitted", index, descriptor.name)
 		}
@@ -115,6 +112,9 @@ func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected Sta
 		program, err := programFromStableStateTransaction(currentLayout, descriptor, transaction)
 		if err != nil {
 			return ReboundStateBody{}, fmt.Errorf("rebind stable transaction %d: %w", index, err)
+		}
+		if err := validateCurrentHelperHIR(input, packageID, function, program); err != nil {
+			return ReboundStateBody{}, fmt.Errorf("rebind stable transaction %d helpers: %w", index, err)
 		}
 		result.Transactions = append(result.Transactions, LoweredTransaction{
 			Package: packageID, Function: freshSymbol, Program: program,

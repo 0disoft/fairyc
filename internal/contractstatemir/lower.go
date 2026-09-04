@@ -95,7 +95,16 @@ func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
 
 	transactions := slices.Clone(input.StateTransactions)
 	slices.SortFunc(transactions, compareHIRTransactions)
-	result := make([]LoweredTransaction, 0, len(transactions))
+	type node struct {
+		transaction hir.StateTransaction
+		function    hir.Function
+		name        string
+		program     Program
+	}
+	names := make(map[hir.SymbolID]string, len(transactions))
+	nameOwners := make(map[string]hir.SymbolID, len(transactions))
+	functions := make(map[hir.SymbolID]hir.Function, len(transactions))
+	packages := make(map[hir.SymbolID]hir.PackageID, len(transactions))
 	for index, transaction := range transactions {
 		if transaction.Function == hir.NoSymbol {
 			return nil, fmt.Errorf("package %d state transaction has no function symbol", transaction.Package)
@@ -103,16 +112,62 @@ func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
 		if index > 0 && transactions[index-1].Package == transaction.Package && transactions[index-1].Function == transaction.Function {
 			return nil, fmt.Errorf("package %d function %d declares multiple state transactions", transaction.Package, transaction.Function)
 		}
+		module, function, err := findHIRFunctionOwner(input, transaction.Package, transaction.Function)
+		if err != nil {
+			return nil, err
+		}
+		if function.Name != "" && module.Path != "" {
+			name := module.Path + "::" + function.Name
+			if previous, duplicate := nameOwners[name]; duplicate && previous != transaction.Function {
+				return nil, fmt.Errorf("package %d stable transaction name %q has ambiguous owners %d and %d", transaction.Package, name, previous, transaction.Function)
+			}
+			names[transaction.Function] = name
+			nameOwners[name] = transaction.Function
+		}
+		if previous, duplicate := packages[transaction.Function]; duplicate && previous != transaction.Package {
+			return nil, fmt.Errorf("state transaction function symbol %d is shared by packages %d and %d", transaction.Function, previous, transaction.Package)
+		}
+		functions[transaction.Function] = function
+		packages[transaction.Function] = transaction.Package
+	}
+
+	nodes := make(map[hir.SymbolID]node, len(transactions))
+	called := make(map[hir.SymbolID]bool, len(transactions))
+	for _, transaction := range transactions {
 		layout, found := layoutByPackage[transaction.Package]
 		if !found {
 			return nil, fmt.Errorf("package %d state transaction has no owned layout", transaction.Package)
 		}
-		function, err := findHIRFunction(input, transaction.Package, transaction.Function)
+		function := functions[transaction.Function]
+		hirCalls, err := hirStaticStateCalls(function.Body)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("package %d function %d: %w", transaction.Package, transaction.Function, err)
 		}
-		if hirBlockContainsCall(function.Body) {
-			return nil, fmt.Errorf("package %d function %d state transaction owner contains a call; calls are not admitted", transaction.Package, transaction.Function)
+		stateCalls := hirStateTransactionCalls(transaction)
+		if len(transaction.Blocks) != 0 && len(stateCalls) != 0 {
+			return nil, fmt.Errorf("package %d function %d graph helper calls are not admitted", transaction.Package, transaction.Function)
+		}
+		if !slices.Equal(hirCalls, stateCalls) {
+			return nil, fmt.Errorf("package %d function %d helper calls do not match the transaction body", transaction.Package, transaction.Function)
+		}
+		for _, callee := range hirCalls {
+			calleeFunction, found := functions[callee]
+			if !found {
+				return nil, fmt.Errorf("package %d function %d calls a missing or non-transaction helper %d", transaction.Package, transaction.Function, callee)
+			}
+			if packages[callee] != transaction.Package {
+				return nil, fmt.Errorf("package %d function %d calls cross-package transaction helper %d", transaction.Package, transaction.Function, callee)
+			}
+			if len(calleeFunction.Parameters) != 0 || calleeFunction.ResultType != hir.TypeVoid {
+				return nil, fmt.Errorf("package %d helper %d must be void and have no parameters", transaction.Package, callee)
+			}
+			if names[callee] == "" {
+				return nil, fmt.Errorf("package %d helper %d has no stable module-qualified name", transaction.Package, callee)
+			}
+			called[callee] = true
+		}
+		if err := verifyHIRStateCallEffects(function.Body, functions); err != nil {
+			return nil, fmt.Errorf("package %d function %d: %w", transaction.Package, transaction.Function, err)
 		}
 		if hirBlockContainsDynamicControlFlow(function.Body) {
 			return nil, fmt.Errorf("package %d function %d state transaction owner contains dynamic control flow; dynamic control flow is not admitted", transaction.Package, transaction.Function)
@@ -132,11 +187,66 @@ func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
 		if err := verifyHIRStateOwnerClosedFormBoundary(function); err != nil {
 			return nil, fmt.Errorf("package %d function %d: %w", transaction.Package, transaction.Function, err)
 		}
-		program, err := lowerHIRTransaction(layout, function.Effects, transaction)
+		program, err := lowerHIRTransaction(layout, function.Effects, transaction, names)
 		if err != nil {
 			return nil, fmt.Errorf("package %d function %d state transaction: %w", transaction.Package, transaction.Function, err)
 		}
+		nodes[transaction.Function] = node{transaction: transaction, function: function, name: names[transaction.Function], program: program}
+	}
+
+	result := make([]LoweredTransaction, 0, len(nodes))
+	for _, transaction := range transactions {
+		if called[transaction.Function] {
+			continue
+		}
+		root := nodes[transaction.Function]
+		program := root.program
+		program.Operations = cloneStateOperations(root.program.Operations)
+		program.Blocks = cloneStateBlocks(root.program.Blocks)
+		reachable := make(map[string]bool)
+		var collect func(Program)
+		collect = func(body Program) {
+			for _, name := range bodyCalls(body.Operations, body.Blocks) {
+				if reachable[name] {
+					continue
+				}
+				reachable[name] = true
+				for _, candidate := range nodes {
+					if candidate.name == name {
+						collect(candidate.program)
+						break
+					}
+				}
+			}
+		}
+		collect(program)
+		helperNames := make([]string, 0, len(reachable))
+		for name := range reachable {
+			helperNames = append(helperNames, name)
+		}
+		slices.Sort(helperNames)
+		for _, name := range helperNames {
+			for _, candidate := range nodes {
+				if candidate.name != name {
+					continue
+				}
+				body := candidate.program
+				program.Helpers = append(program.Helpers, Helper{
+					Name: name, Effects: slices.Clone(body.Effects), Operations: cloneStateOperations(body.Operations),
+					Exit: body.Exit, TrapCategory: body.TrapCategory, Entry: body.Entry, Blocks: cloneStateBlocks(body.Blocks),
+				})
+				break
+			}
+		}
+		program.Capability = newTransactionCapability()
+		shareHelperCapability(&program)
+		if failures := Verify(program); len(failures) != 0 {
+			return nil, fmt.Errorf("package %d function %d state transaction: %w", transaction.Package, transaction.Function, VerificationErrors{Failures: failures})
+		}
 		result = append(result, LoweredTransaction{Package: transaction.Package, Function: transaction.Function, Program: program})
+	}
+	if len(nodes) != 0 && len(result) == 0 {
+		return nil, fmt.Errorf("contract-state helper call graph has no root transaction")
 	}
 	return result, nil
 }
@@ -228,6 +338,119 @@ func hirExpressionContainsCall(expression *hir.Expression) bool {
 	return false
 }
 
+func hirStaticStateCalls(block hir.Block) ([]hir.SymbolID, error) {
+	result := make([]hir.SymbolID, 0)
+	var visitExpression func(*hir.Expression) error
+	var visitBlock func(hir.Block) error
+	visitExpression = func(expression *hir.Expression) error {
+		if expression == nil {
+			return nil
+		}
+		if expression.Kind == "call" {
+			if expression.Symbol == hir.NoSymbol || expression.ForeignABI != "" || expression.Type != hir.TypeVoid || len(expression.Children) != 1 {
+				return fmt.Errorf("state transaction owner contains a call; calls are not admitted unless resolved to an internal void transaction helper with no arguments")
+			}
+			result = append(result, expression.Symbol)
+		}
+		for index := range expression.Children {
+			if expression.Kind == "call" && index == 0 {
+				continue
+			}
+			if err := visitExpression(&expression.Children[index]); err != nil {
+				return err
+			}
+		}
+		if expression.Block != nil {
+			if err := visitBlock(*expression.Block); err != nil {
+				return err
+			}
+		}
+		for index := range expression.Arms {
+			if err := visitExpression(&expression.Arms[index].Expression); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	visitBlock = func(value hir.Block) error {
+		for index := range value.Statements {
+			statement := &value.Statements[index]
+			if err := visitExpression(statement.Target); err != nil {
+				return err
+			}
+			if err := visitExpression(statement.Expression); err != nil {
+				return err
+			}
+			if statement.For != nil {
+				return fmt.Errorf("state transaction owner contains a call; calls are not admitted inside loop state")
+			}
+		}
+		return visitExpression(value.Tail)
+	}
+	return result, visitBlock(block)
+}
+
+func hirStateTransactionCalls(transaction hir.StateTransaction) []hir.SymbolID {
+	result := make([]hir.SymbolID, 0)
+	for _, access := range transaction.Accesses {
+		if access.Kind == hir.StateAccessCall {
+			result = append(result, access.Callee)
+		}
+	}
+	for _, block := range transaction.Blocks {
+		for _, access := range block.Accesses {
+			if access.Kind == hir.StateAccessCall {
+				result = append(result, access.Callee)
+			}
+		}
+	}
+	return result
+}
+
+func verifyHIRStateCallEffects(block hir.Block, functions map[hir.SymbolID]hir.Function) error {
+	var visitExpression func(*hir.Expression) error
+	var visitBlock func(hir.Block) error
+	visitExpression = func(expression *hir.Expression) error {
+		if expression == nil {
+			return nil
+		}
+		if expression.Kind == "call" {
+			callee, found := functions[expression.Symbol]
+			if !found || !slices.Equal(expression.Effects, callee.Effects) {
+				return fmt.Errorf("state helper call effects do not match the resolved callee")
+			}
+		}
+		for index := range expression.Children {
+			if err := visitExpression(&expression.Children[index]); err != nil {
+				return err
+			}
+		}
+		if expression.Block != nil {
+			if err := visitBlock(*expression.Block); err != nil {
+				return err
+			}
+		}
+		for index := range expression.Arms {
+			if err := visitExpression(&expression.Arms[index].Expression); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	visitBlock = func(value hir.Block) error {
+		for index := range value.Statements {
+			if err := visitExpression(value.Statements[index].Target); err != nil {
+				return err
+			}
+			if err := visitExpression(value.Statements[index].Expression); err != nil {
+				return err
+			}
+		}
+		return visitExpression(value.Tail)
+	}
+	return visitBlock(block)
+}
+
 func hirBlockContainsDynamicControlFlow(block hir.Block) bool {
 	for index := range block.Statements {
 		if hirStatementContainsDynamicControlFlow(&block.Statements[index]) {
@@ -284,7 +507,7 @@ func hirExpressionContainsDynamicControlFlow(expression *hir.Expression) bool {
 	return false
 }
 
-func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.StateTransaction) (Program, error) {
+func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.StateTransaction, helperNames map[hir.SymbolID]string) (Program, error) {
 	fieldIndices := make(map[string]uint32, len(layout.Fields))
 	for _, field := range layout.Fields {
 		fieldIndices[field.Name] = field.Index
@@ -299,6 +522,14 @@ func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.St
 			}
 			operations := make([]Operation, 0, len(sourceBlock.Accesses))
 			for accessIndex, access := range sourceBlock.Accesses {
+				if access.Kind == hir.StateAccessCall {
+					name, found := helperNames[access.Callee]
+					if !found {
+						return Program{}, fmt.Errorf("block %d access %d calls unknown helper %d", blockIndex, accessIndex, access.Callee)
+					}
+					operations = append(operations, Operation{Kind: OperationCall, Capability: capability, Callee: name, Cost: access.Cost})
+					continue
+				}
 				fieldIndex, found := fieldIndices[access.Field]
 				if !found {
 					return Program{}, fmt.Errorf("block %d access %d names unknown field %q", blockIndex, accessIndex, access.Field)
@@ -323,13 +554,18 @@ func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.St
 			Layout: layout, Capability: capability, Effects: slices.Clone(effects),
 			Entry: BlockID(transaction.Entry), Blocks: blocks,
 		}
-		if failures := Verify(program); len(failures) != 0 {
-			return Program{}, VerificationErrors{Failures: failures}
-		}
 		return program, nil
 	}
 	operations := make([]Operation, 0, len(transaction.Accesses))
 	for index, access := range transaction.Accesses {
+		if access.Kind == hir.StateAccessCall {
+			name, found := helperNames[access.Callee]
+			if !found {
+				return Program{}, fmt.Errorf("access %d calls unknown helper %d", index, access.Callee)
+			}
+			operations = append(operations, Operation{Kind: OperationCall, Capability: capability, Callee: name, Cost: access.Cost})
+			continue
+		}
 		fieldIndex, found := fieldIndices[access.Field]
 		if !found {
 			return Program{}, fmt.Errorf("access %d names unknown field %q", index, access.Field)
@@ -350,9 +586,6 @@ func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.St
 	program := Program{
 		Layout: layout, Capability: capability, Effects: slices.Clone(effects), Operations: operations,
 		Exit: exit, TrapCategory: transaction.TrapCategory,
-	}
-	if failures := Verify(program); len(failures) != 0 {
-		return Program{}, VerificationErrors{Failures: failures}
 	}
 	return program, nil
 }
@@ -402,6 +635,8 @@ func lowerStateTransactionExit(exit hir.StateTransactionExit) (ExitKind, error) 
 		return ExitReject, nil
 	case hir.StateTransactionTrap:
 		return ExitTrap, nil
+	case hir.StateTransactionReturn:
+		return ExitReturn, nil
 	default:
 		return "", fmt.Errorf("unsupported state transaction exit %q", exit)
 	}

@@ -10,7 +10,7 @@ import (
 
 func TestContractStateSchemaMatchesRunnerVocabulary(t *testing.T) {
 	t.Parallel()
-	for _, version := range []string{"v0", "v1", "v2"} {
+	for _, version := range []string{"v0", "v1", "v2", "v3"} {
 		version := version
 		t.Run(version, func(t *testing.T) {
 			t.Parallel()
@@ -39,7 +39,11 @@ func TestContractStateSchemaMatchesRunnerVocabulary(t *testing.T) {
 			if schema.Dialect != "https://json-schema.org/draft/2020-12/schema" || schema.ID != "urn:fairyc:contract-state-fixtures:"+version {
 				t.Fatalf("schema identity = %q, %q", schema.Dialect, schema.ID)
 			}
-			if !slices.Equal(schema.Defs.OperationKind.Enum, operationKinds) || !slices.Equal(schema.Defs.ExitKind.Enum, exitKinds) || !slices.Equal(schema.Defs.Status.Enum, resultStatuses) {
+			expectedOperations := operationKinds
+			if version == "v3" {
+				expectedOperations = helperOperationKinds
+			}
+			if !slices.Equal(schema.Defs.OperationKind.Enum, expectedOperations) || !slices.Equal(schema.Defs.ExitKind.Enum, exitKinds) || !slices.Equal(schema.Defs.Status.Enum, resultStatuses) {
 				t.Fatalf("schema vocabulary does not match runner")
 			}
 		})

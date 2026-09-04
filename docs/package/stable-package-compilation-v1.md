@@ -47,7 +47,9 @@ ADR 0354 retains both verified members on a persistent all-hit. Stable MIR reass
 fresh coordinate-owned logical-function bindings; every cached state transaction must bind through
 the matching MIR symbol after current layout/signature verification and fresh capability creation.
 ADR 0355 exposes those transactions through the same nested verified `compiler.Result` used by cold
-and process-local paths. ADR 0357 rechecks that each fresh current transaction owner is call-free;
+and process-local paths. ADR 0357 keeps unrepresented calls closed; ADR 0379 permits only a stable
+v3 payload's exact same-package no-argument void helper graph and rechecks the current root/helper
+call sequence during fresh rebind;
 ADR 0358 also rechecks that it contains no dynamic control flow. Cached operations cannot bypass
 those current-HIR boundaries. ADR 0359 additionally rejects unsafe code and recursively reachable
 raw-pointer types while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360

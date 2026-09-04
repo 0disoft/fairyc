@@ -156,6 +156,16 @@ func hashStableStateBody(coordinate packagegraph.CoordinateID, layout Layout, tr
 	for _, transaction := range transactions {
 		writeStateBodyUint64(hasher, uint64(len(transaction.function)))
 		hasher.Write(transaction.function)
+		if len(transaction.program.Helpers) != 0 {
+			writeStateBodyString(hasher, "helpers-v1")
+			writeStateBodyExecutable(hasher, transaction.program.Effects, transaction.program.Operations, transaction.program.Exit, transaction.program.TrapCategory, transaction.program.Entry, transaction.program.Blocks)
+			writeStateBodyUint64(hasher, uint64(len(transaction.program.Helpers)))
+			for _, helper := range transaction.program.Helpers {
+				writeStateBodyString(hasher, helper.Name)
+				writeStateBodyExecutable(hasher, helper.Effects, helper.Operations, helper.Exit, helper.TrapCategory, helper.Entry, helper.Blocks)
+			}
+			continue
+		}
 		writeStateBodyStrings(hasher, transaction.program.Effects)
 		if len(transaction.program.Blocks) == 0 {
 			writeStateBodyUint64(hasher, uint64(len(transaction.program.Operations)))
@@ -189,6 +199,41 @@ func hashStableStateBody(coordinate packagegraph.CoordinateID, layout Layout, tr
 	var result StateBodyHash
 	copy(result[:], hasher.Sum(nil))
 	return result
+}
+
+func writeStateBodyExecutable(writer stateBodyWriter, effects []hir.Effect, operations []Operation, exit ExitKind, trapCategory string, entry BlockID, blocks []Block) {
+	writeStateBodyStrings(writer, effects)
+	if len(blocks) == 0 {
+		writeStateBodyString(writer, "linear")
+		writeStateBodyUint64(writer, uint64(len(operations)))
+		for _, operation := range operations {
+			writeStateBodyHelperOperation(writer, operation)
+		}
+		writeStateBodyString(writer, string(exit))
+		writeStateBodyString(writer, trapCategory)
+		return
+	}
+	writeStateBodyString(writer, "graph")
+	writeStateBodyUint64(writer, uint64(entry))
+	writeStateBodyUint64(writer, uint64(len(blocks)))
+	for _, block := range blocks {
+		writeStateBodyUint64(writer, uint64(block.ID))
+		writeStateBodyUint64(writer, uint64(len(block.Parameters)))
+		for _, parameter := range block.Parameters {
+			writeStateBodyUint64(writer, uint64(parameter.ID))
+			writeStateBodyString(writer, parameter.TypeID)
+		}
+		writeStateBodyUint64(writer, uint64(len(block.Operations)))
+		for _, operation := range block.Operations {
+			writeStateBodyHelperOperation(writer, operation)
+		}
+		writeStateBodyTerminator(writer, block.Terminator)
+	}
+}
+
+func writeStateBodyHelperOperation(writer stateBodyWriter, operation Operation) {
+	writeStateBodyOperation(writer, operation)
+	writeStateBodyString(writer, operation.Callee)
 }
 
 func writeStateBodyOperation(writer stateBodyWriter, operation Operation) {
