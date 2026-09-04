@@ -17,8 +17,10 @@ import (
 )
 
 const (
-	StableStateBodySchema  = "fairyc.contract-state-package-body-artifact/v1"
-	StableStateBodyVersion = "fairyc-contract-state-package-body-artifact/1"
+	StableStateBodySchema       = "fairyc.contract-state-package-body-artifact/v1"
+	StableStateBodyVersion      = "fairyc-contract-state-package-body-artifact/1"
+	StableStateGraphBodySchema  = "fairyc.contract-state-package-body-artifact/v2"
+	StableStateGraphBodyVersion = "fairyc-contract-state-package-body-artifact/2"
 )
 
 var (
@@ -53,6 +55,8 @@ type StableStateTransaction struct {
 	Operations   []StableStateOperation `json:"operations"`
 	Exit         string                 `json:"exit"`
 	TrapCategory string                 `json:"trapCategory"`
+	Entry        uint32                 `json:"entry,omitempty"`
+	Blocks       []StableStateBlock     `json:"blocks,omitempty"`
 }
 
 type StableStateOperation struct {
@@ -60,6 +64,36 @@ type StableStateOperation struct {
 	FieldIndex uint32           `json:"fieldIndex"`
 	Key        StableStateValue `json:"key"`
 	Value      StableStateValue `json:"value"`
+	KeyInput   uint32           `json:"keyInput,omitempty"`
+	ValueInput uint32           `json:"valueInput,omitempty"`
+	Result     uint32           `json:"result,omitempty"`
+	Found      uint32           `json:"found,omitempty"`
+	Cost       uint32           `json:"cost,omitempty"`
+}
+
+type StableStateBlock struct {
+	ID         uint32                      `json:"id"`
+	Parameters []StableStateBlockParameter `json:"parameters"`
+	Operations []StableStateOperation      `json:"operations"`
+	Terminator StableStateTerminator       `json:"terminator"`
+}
+
+type StableStateBlockParameter struct {
+	ID     uint32 `json:"id"`
+	TypeID string `json:"typeId"`
+}
+
+type StableStateTerminator struct {
+	Kind           string   `json:"kind"`
+	Condition      uint32   `json:"condition"`
+	Target         uint32   `json:"target"`
+	Arguments      []uint32 `json:"arguments"`
+	TrueTarget     uint32   `json:"trueTarget"`
+	TrueArguments  []uint32 `json:"trueArguments"`
+	FalseTarget    uint32   `json:"falseTarget"`
+	FalseArguments []uint32 `json:"falseArguments"`
+	TrapCategory   string   `json:"trapCategory"`
+	Cost           uint32   `json:"cost"`
 }
 
 type StableStateValue struct {
@@ -115,7 +149,8 @@ func EncodeStableStateBody(body StableStateBodyArtifact, maxBytes uint64) ([]byt
 	if err := ValidateStableStateBody(body); err != nil {
 		return nil, err
 	}
-	encoded, err := json.Marshal(stableStateBodyEnvelope{Schema: StableStateBodySchema, Version: StableStateBodyVersion, Body: body})
+	schema, version := stableStateBodyEnvelopeIdentity(body)
+	encoded, err := json.Marshal(stableStateBodyEnvelope{Schema: schema, Version: version, Body: body})
 	if err != nil {
 		return nil, fmt.Errorf("encode stable contract-state body artifact: %w", err)
 	}
@@ -150,7 +185,8 @@ func DecodeStableStateBody(encoded []byte, maxBytes uint64) (StableStateBodyArti
 		}
 		return StableStateBodyArtifact{}, fmt.Errorf("decode stable contract-state body artifact trailing data: %w", err)
 	}
-	if envelope.Schema != StableStateBodySchema || envelope.Version != StableStateBodyVersion {
+	expectedSchema, expectedVersion := stableStateBodyEnvelopeIdentity(envelope.Body)
+	if envelope.Schema != expectedSchema || envelope.Version != expectedVersion {
 		return StableStateBodyArtifact{}, fmt.Errorf("stable contract-state body schema or version is incompatible")
 	}
 	if err := ValidateStableStateBody(envelope.Body); err != nil {
@@ -164,6 +200,15 @@ func DecodeStableStateBody(encoded []byte, maxBytes uint64) (StableStateBodyArti
 		return StableStateBodyArtifact{}, ErrStableStateBodyEncoding
 	}
 	return envelope.Body, nil
+}
+
+func stableStateBodyEnvelopeIdentity(body StableStateBodyArtifact) (string, string) {
+	for _, transaction := range body.Transactions {
+		if len(transaction.Blocks) != 0 {
+			return StableStateGraphBodySchema, StableStateGraphBodyVersion
+		}
+	}
+	return StableStateBodySchema, StableStateBodyVersion
 }
 
 // ValidateStableStateBody reconstructs the exact layout and verifier-ready
@@ -221,15 +266,56 @@ func stableStateTransactionArtifact(transaction stableStateTransaction) StableSt
 		Function: slices.Clone(transaction.function), Effects: make([]string, 0, len(transaction.program.Effects)),
 		Operations: make([]StableStateOperation, 0, len(transaction.program.Operations)),
 		Exit:       string(transaction.program.Exit), TrapCategory: transaction.program.TrapCategory,
+		Entry: uint32(transaction.program.Entry),
 	}
 	for _, effect := range transaction.program.Effects {
 		result.Effects = append(result.Effects, string(effect))
 	}
 	for _, operation := range transaction.program.Operations {
-		result.Operations = append(result.Operations, StableStateOperation{
-			Kind: string(operation.Kind), FieldIndex: operation.FieldIndex,
-			Key: stableStateValue(operation.Key), Value: stableStateValue(operation.Value),
-		})
+		result.Operations = append(result.Operations, stableStateOperation(operation))
+	}
+	if len(transaction.program.Blocks) != 0 {
+		result.Blocks = make([]StableStateBlock, 0, len(transaction.program.Blocks))
+	}
+	for _, block := range transaction.program.Blocks {
+		stableBlock := StableStateBlock{
+			ID: uint32(block.ID), Parameters: make([]StableStateBlockParameter, 0, len(block.Parameters)),
+			Operations: make([]StableStateOperation, 0, len(block.Operations)),
+			Terminator: stableStateTerminator(block.Terminator),
+		}
+		for _, parameter := range block.Parameters {
+			stableBlock.Parameters = append(stableBlock.Parameters, StableStateBlockParameter{ID: uint32(parameter.ID), TypeID: parameter.TypeID})
+		}
+		for _, operation := range block.Operations {
+			stableBlock.Operations = append(stableBlock.Operations, stableStateOperation(operation))
+		}
+		result.Blocks = append(result.Blocks, stableBlock)
+	}
+	return result
+}
+
+func stableStateOperation(operation Operation) StableStateOperation {
+	return StableStateOperation{
+		Kind: string(operation.Kind), FieldIndex: operation.FieldIndex,
+		Key: stableStateValue(operation.Key), Value: stableStateValue(operation.Value),
+		KeyInput: uint32(operation.KeyInput), ValueInput: uint32(operation.ValueInput),
+		Result: uint32(operation.Result), Found: uint32(operation.Found), Cost: operation.Cost,
+	}
+}
+
+func stableStateTerminator(value Terminator) StableStateTerminator {
+	return StableStateTerminator{
+		Kind: string(value.Kind), Condition: uint32(value.Condition), Target: uint32(value.Target),
+		Arguments: stableStateValueIDs(value.Arguments), TrueTarget: uint32(value.TrueTarget),
+		TrueArguments: stableStateValueIDs(value.TrueArguments), FalseTarget: uint32(value.FalseTarget),
+		FalseArguments: stableStateValueIDs(value.FalseArguments), TrapCategory: value.TrapCategory, Cost: value.Cost,
+	}
+}
+
+func stableStateValueIDs(values []ValueID) []uint32 {
+	result := make([]uint32, 0, len(values))
+	for _, value := range values {
+		result = append(result, uint32(value))
 	}
 	return result
 }
@@ -285,20 +371,58 @@ func programFromStableStateTransaction(layout Layout, descriptor stableStateFunc
 	capability := newTransactionCapability()
 	operations := make([]Operation, 0, len(value.Operations))
 	for _, operation := range value.Operations {
-		operations = append(operations, Operation{
-			Kind: OperationKind(operation.Kind), Capability: capability, FieldIndex: operation.FieldIndex,
-			Key:   Value{TypeID: operation.Key.TypeID, Encoded: slices.Clone(operation.Key.Encoded)},
-			Value: Value{TypeID: operation.Value.TypeID, Encoded: slices.Clone(operation.Value.Encoded)},
-		})
+		operations = append(operations, operationFromStable(operation, capability))
+	}
+	blocks := make([]Block, 0, len(value.Blocks))
+	for _, stableBlock := range value.Blocks {
+		block := Block{
+			ID: BlockID(stableBlock.ID), Parameters: make([]BlockParameter, 0, len(stableBlock.Parameters)),
+			Operations: make([]Operation, 0, len(stableBlock.Operations)),
+			Terminator: terminatorFromStable(stableBlock.Terminator),
+		}
+		for _, parameter := range stableBlock.Parameters {
+			block.Parameters = append(block.Parameters, BlockParameter{ID: ValueID(parameter.ID), TypeID: parameter.TypeID})
+		}
+		for _, operation := range stableBlock.Operations {
+			block.Operations = append(block.Operations, operationFromStable(operation, capability))
+		}
+		blocks = append(blocks, block)
 	}
 	program := Program{
 		Layout: layout, Capability: capability, Effects: effects, Operations: operations,
-		Exit: ExitKind(value.Exit), TrapCategory: value.TrapCategory,
+		Exit: ExitKind(value.Exit), TrapCategory: value.TrapCategory, Entry: BlockID(value.Entry), Blocks: blocks,
 	}
 	if failures := Verify(program); len(failures) != 0 {
 		return Program{}, VerificationErrors{Failures: failures}
 	}
 	return program, nil
+}
+
+func operationFromStable(value StableStateOperation, capability TransactionCapability) Operation {
+	return Operation{
+		Kind: OperationKind(value.Kind), Capability: capability, FieldIndex: value.FieldIndex,
+		Key:      Value{TypeID: value.Key.TypeID, Encoded: slices.Clone(value.Key.Encoded)},
+		Value:    Value{TypeID: value.Value.TypeID, Encoded: slices.Clone(value.Value.Encoded)},
+		KeyInput: ValueID(value.KeyInput), ValueInput: ValueID(value.ValueInput),
+		Result: ValueID(value.Result), Found: ValueID(value.Found), Cost: value.Cost,
+	}
+}
+
+func terminatorFromStable(value StableStateTerminator) Terminator {
+	return Terminator{
+		Kind: TerminatorKind(value.Kind), Condition: ValueID(value.Condition), Target: BlockID(value.Target),
+		Arguments: valueIDsFromStable(value.Arguments), TrueTarget: BlockID(value.TrueTarget),
+		TrueArguments: valueIDsFromStable(value.TrueArguments), FalseTarget: BlockID(value.FalseTarget),
+		FalseArguments: valueIDsFromStable(value.FalseArguments), TrapCategory: value.TrapCategory, Cost: value.Cost,
+	}
+}
+
+func valueIDsFromStable(values []uint32) []ValueID {
+	result := make([]ValueID, 0, len(values))
+	for _, value := range values {
+		result = append(result, ValueID(value))
+	}
+	return result
 }
 
 func decodeStableStateFunctionDescriptor(encoded []byte) (stableStateFunctionDescriptor, error) {

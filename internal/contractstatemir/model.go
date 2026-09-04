@@ -42,6 +42,14 @@ type Value struct {
 	Encoded []byte
 }
 
+type ValueID uint32
+type BlockID uint32
+
+type BlockParameter struct {
+	ID     ValueID
+	TypeID string
+}
+
 type transactionCapabilityToken struct {
 	marker byte
 }
@@ -70,14 +78,50 @@ const (
 	OperationMapDelete  OperationKind = "map-delete"
 )
 
-// Operation is one straight-line storage action. Reads append one observation
-// to Outcome.Reads; writes and deletes enter the private transaction overlay.
+// Operation is one storage action in either a legacy line or a graph block.
+// Reads append one observation and may define typed graph values; writes and
+// deletes enter the private transaction overlay.
 type Operation struct {
 	Kind       OperationKind
 	Capability TransactionCapability
 	FieldIndex uint32
 	Key        Value
 	Value      Value
+	KeyInput   ValueID
+	ValueInput ValueID
+	Result     ValueID
+	Found      ValueID
+	Cost       uint32
+}
+
+type TerminatorKind string
+
+const (
+	TerminatorJump   TerminatorKind = "jump"
+	TerminatorBranch TerminatorKind = "branch"
+	TerminatorCommit TerminatorKind = "commit"
+	TerminatorReject TerminatorKind = "reject"
+	TerminatorTrap   TerminatorKind = "trap"
+)
+
+type Terminator struct {
+	Kind           TerminatorKind
+	Condition      ValueID
+	Target         BlockID
+	Arguments      []ValueID
+	TrueTarget     BlockID
+	TrueArguments  []ValueID
+	FalseTarget    BlockID
+	FalseArguments []ValueID
+	TrapCategory   string
+	Cost           uint32
+}
+
+type Block struct {
+	ID         BlockID
+	Parameters []BlockParameter
+	Operations []Operation
+	Terminator Terminator
 }
 
 type ExitKind string
@@ -88,9 +132,9 @@ const (
 	ExitTrap   ExitKind = "trap"
 )
 
-// Program owns one exact layout, one bounded operation sequence, and one
-// explicit transaction exit. General Fairy MIR and source grammar are not
-// changed by this experimental submodel.
+// Program owns one exact layout and either one legacy operation sequence or a
+// bounded acyclic graph whose paths have explicit transaction exits. General
+// Fairy MIR and source grammar are not changed by this experimental submodel.
 type Program struct {
 	Layout       Layout
 	Capability   TransactionCapability
@@ -98,6 +142,8 @@ type Program struct {
 	Operations   []Operation
 	Exit         ExitKind
 	TrapCategory string
+	Entry        BlockID
+	Blocks       []Block
 }
 
 // BuildLayout computes the same canonical identity used by the transaction

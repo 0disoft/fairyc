@@ -540,6 +540,15 @@ not revoke already verified compiler IR.
 ADR 0368 preserves that cell baseline and adds three map schedules proving that distinct keys still
 share one optimistic store version, with exact physical-key and snapshot evidence.
 
+ADR 0378 adds a bounded compiler-private SSA graph for data-dependent state work. Cell and map reads
+define codec-typed values plus explicit `bool/v1` presence, branches consume bool values, and block
+parameters make every join dependency explicit. Dense reachable acyclic blocks, capability identity,
+storage effects, and unit operation/terminator costs are verified before the oracle begins. Current
+v2 fixtures execute cell-read branch/join and map-found branch paths through atomic compiler
+publication and reject cycle, join-type, missing-cost, and unknown-value mutations. Graph bodies use
+the v2 stable envelope and existing body-hash cache invalidation while legacy v1 payload bytes remain
+unchanged. Source state access, loops, calls, native lowering, and production persistence stay closed.
+
 ADR 0323 reuses that aggregate graph for acyclic inert enums nested inside user-enum payloads. The
 46th C-emission fixture and low/optimized generated-Fairy MSVC executions preserve nested
 construction, by-value transport, extraction, exhaustive switching, and result 42 without changing

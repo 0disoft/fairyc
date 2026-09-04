@@ -1,0 +1,117 @@
+{
+  "$schema": "./schema-v2.json",
+  "schemaVersion": "fairyc.contract-state-fixtures/v2",
+  "deferred": [
+    "source state access syntax and public compiler admission",
+    "owner-bound state borrows and verified helper calls",
+    "production persistence and chain-specific accounting",
+    "native backend and runtime integration"
+  ],
+  "contracts": [
+    "docs/contract-state/transaction-kernel-v0.md",
+    "docs/mir/contract-state-transaction-mir-v0.md",
+    "docs/adr/0378-data-dependent-contract-state-transaction-graphs.md"
+  ],
+  "layout": {
+    "contractUID": "fixture.counter",
+    "fields": [
+      { "name": "primary", "kind": "cell", "valueTypeID": "u64/be/v1" },
+      { "name": "secondary", "kind": "cell", "valueTypeID": "u64/be/v1" },
+      { "name": "paused", "kind": "cell", "valueTypeID": "bool/v1" },
+      { "name": "balances", "kind": "map", "keyTypeID": "bytes20/v1", "valueTypeID": "u64/be/v1" }
+    ]
+  },
+  "limits": { "maxWrites": 8, "maxWriteBytes": 1024, "maxValueBytes": 64, "maxMapKeyBytes": 64 },
+  "cases": [
+    {
+      "id": "cell-read-branch-join",
+      "entry": 0,
+      "blocks": [
+        {
+          "id": 0,
+          "parameters": [],
+          "operations": [
+            { "kind": "cell-write", "field": "primary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000007", "cost": 1 },
+            { "kind": "cell-write", "field": "paused", "valueTypeID": "bool/v1", "valueHex": "01", "cost": 1 },
+            { "kind": "cell-read", "field": "primary", "result": 1, "found": 2, "cost": 1 },
+            { "kind": "cell-read", "field": "paused", "result": 3, "found": 4, "cost": 1 }
+          ],
+          "terminator": { "kind": "branch", "condition": 3, "arguments": [], "trueTarget": 1, "trueArguments": [1], "falseTarget": 2, "falseArguments": [], "cost": 1 }
+        },
+        {
+          "id": 1, "parameters": [{ "id": 10, "typeID": "u64/be/v1" }], "operations": [],
+          "terminator": { "kind": "jump", "target": 3, "arguments": [10], "trueArguments": [], "falseArguments": [], "cost": 1 }
+        },
+        {
+          "id": 2, "parameters": [],
+          "operations": [
+            { "kind": "cell-write", "field": "secondary", "valueTypeID": "u64/be/v1", "valueHex": "0000000000000009", "cost": 1 },
+            { "kind": "cell-read", "field": "secondary", "result": 6, "found": 7, "cost": 1 }
+          ],
+          "terminator": { "kind": "jump", "target": 3, "arguments": [6], "trueArguments": [], "falseArguments": [], "cost": 1 }
+        },
+        {
+          "id": 3,
+          "parameters": [{ "id": 5, "typeID": "u64/be/v1" }],
+          "operations": [
+            { "kind": "cell-write", "field": "secondary", "valueInput": 5, "cost": 1 },
+            { "kind": "cell-read", "field": "secondary", "result": 8, "found": 9, "cost": 1 }
+          ],
+          "terminator": { "kind": "commit", "arguments": [], "trueArguments": [], "falseArguments": [], "cost": 1 }
+        }
+      ],
+      "expect": {
+        "status": "commit", "exit": "commit", "version": 1, "writes": 3, "cost": 9,
+        "reads": [
+          { "operation": 2, "found": true, "typeID": "u64/be/v1", "valueHex": "0000000000000007" },
+          { "operation": 3, "found": true, "typeID": "bool/v1", "valueHex": "01" },
+          { "operation": 5, "found": true, "typeID": "u64/be/v1", "valueHex": "0000000000000007" }
+        ],
+        "store": [
+          { "field": "primary", "valueHex": "0000000000000007" },
+          { "field": "paused", "valueHex": "01" },
+          { "field": "secondary", "valueHex": "0000000000000007" }
+        ]
+      }
+    },
+    {
+      "id": "map-read-found-branch",
+      "entry": 0,
+      "blocks": [
+        {
+          "id": 0, "parameters": [],
+          "operations": [
+            { "kind": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "0000000000000000000000000000000000000001", "valueTypeID": "u64/be/v1", "valueHex": "000000000000000b", "cost": 1 },
+            { "kind": "map-read", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "0000000000000000000000000000000000000001", "result": 1, "found": 2, "cost": 1 }
+          ],
+          "terminator": { "kind": "branch", "condition": 2, "arguments": [], "trueTarget": 1, "trueArguments": [1], "falseTarget": 2, "falseArguments": [], "cost": 1 }
+        },
+        {
+          "id": 1, "parameters": [{ "id": 3, "typeID": "u64/be/v1" }],
+          "operations": [
+            { "kind": "map-write", "field": "balances", "keyTypeID": "bytes20/v1", "keyHex": "0000000000000000000000000000000000000002", "valueInput": 3, "cost": 1 }
+          ],
+          "terminator": { "kind": "commit", "arguments": [], "trueArguments": [], "falseArguments": [], "cost": 1 }
+        },
+        {
+          "id": 2, "parameters": [], "operations": [],
+          "terminator": { "kind": "trap", "arguments": [], "trueArguments": [], "falseArguments": [], "trapCategory": "missing-map-value", "cost": 1 }
+        }
+      ],
+      "expect": {
+        "status": "commit", "exit": "commit", "version": 1, "writes": 2, "cost": 5,
+        "reads": [{ "operation": 1, "found": true, "typeID": "u64/be/v1", "valueHex": "000000000000000b" }],
+        "store": [
+          { "field": "balances", "storageKeyHex": "0d62ca8fe1a64df03a7a5a54dc3e3c5710f8c0b0c3814ce0df6987bdb28f6b11", "valueHex": "000000000000000b" },
+          { "field": "balances", "storageKeyHex": "13c3e4f316e9f5d337efdae26a83fce73e6f0778e35a349d27313737d29b4784", "valueHex": "000000000000000b" }
+        ]
+      }
+    }
+  ],
+  "mutations": [
+    { "id": "reject-cycle", "case": "cell-read-branch-join", "kind": "cycle", "errorContains": "entry block has a predecessor" },
+    { "id": "reject-join-type", "case": "cell-read-branch-join", "kind": "join-type", "errorContains": "edge argument type" },
+    { "id": "reject-missing-cost", "case": "map-read-found-branch", "kind": "missing-cost", "errorContains": "explicit canonical cost" },
+    { "id": "reject-unknown-value", "case": "cell-read-branch-join", "kind": "unknown-value", "errorContains": "available bool condition" }
+  ]
+}

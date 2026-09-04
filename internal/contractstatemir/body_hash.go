@@ -157,19 +157,70 @@ func hashStableStateBody(coordinate packagegraph.CoordinateID, layout Layout, tr
 		writeStateBodyUint64(hasher, uint64(len(transaction.function)))
 		hasher.Write(transaction.function)
 		writeStateBodyStrings(hasher, transaction.program.Effects)
-		writeStateBodyUint64(hasher, uint64(len(transaction.program.Operations)))
-		for _, operation := range transaction.program.Operations {
-			writeStateBodyString(hasher, string(operation.Kind))
-			writeStateBodyUint64(hasher, uint64(operation.FieldIndex))
-			writeStateBodyValue(hasher, operation.Key)
-			writeStateBodyValue(hasher, operation.Value)
+		if len(transaction.program.Blocks) == 0 {
+			writeStateBodyUint64(hasher, uint64(len(transaction.program.Operations)))
+			for _, operation := range transaction.program.Operations {
+				writeStateBodyString(hasher, string(operation.Kind))
+				writeStateBodyUint64(hasher, uint64(operation.FieldIndex))
+				writeStateBodyValue(hasher, operation.Key)
+				writeStateBodyValue(hasher, operation.Value)
+			}
+			writeStateBodyString(hasher, string(transaction.program.Exit))
+			writeStateBodyString(hasher, transaction.program.TrapCategory)
+		} else {
+			writeStateBodyString(hasher, "graph-v1")
+			writeStateBodyUint64(hasher, uint64(transaction.program.Entry))
+			writeStateBodyUint64(hasher, uint64(len(transaction.program.Blocks)))
+			for _, block := range transaction.program.Blocks {
+				writeStateBodyUint64(hasher, uint64(block.ID))
+				writeStateBodyUint64(hasher, uint64(len(block.Parameters)))
+				for _, parameter := range block.Parameters {
+					writeStateBodyUint64(hasher, uint64(parameter.ID))
+					writeStateBodyString(hasher, parameter.TypeID)
+				}
+				writeStateBodyUint64(hasher, uint64(len(block.Operations)))
+				for _, operation := range block.Operations {
+					writeStateBodyOperation(hasher, operation)
+				}
+				writeStateBodyTerminator(hasher, block.Terminator)
+			}
 		}
-		writeStateBodyString(hasher, string(transaction.program.Exit))
-		writeStateBodyString(hasher, transaction.program.TrapCategory)
 	}
 	var result StateBodyHash
 	copy(result[:], hasher.Sum(nil))
 	return result
+}
+
+func writeStateBodyOperation(writer stateBodyWriter, operation Operation) {
+	writeStateBodyString(writer, string(operation.Kind))
+	writeStateBodyUint64(writer, uint64(operation.FieldIndex))
+	writeStateBodyValue(writer, operation.Key)
+	writeStateBodyValue(writer, operation.Value)
+	writeStateBodyUint64(writer, uint64(operation.KeyInput))
+	writeStateBodyUint64(writer, uint64(operation.ValueInput))
+	writeStateBodyUint64(writer, uint64(operation.Result))
+	writeStateBodyUint64(writer, uint64(operation.Found))
+	writeStateBodyUint64(writer, uint64(operation.Cost))
+}
+
+func writeStateBodyValueIDs(writer stateBodyWriter, values []ValueID) {
+	writeStateBodyUint64(writer, uint64(len(values)))
+	for _, value := range values {
+		writeStateBodyUint64(writer, uint64(value))
+	}
+}
+
+func writeStateBodyTerminator(writer stateBodyWriter, value Terminator) {
+	writeStateBodyString(writer, string(value.Kind))
+	writeStateBodyUint64(writer, uint64(value.Condition))
+	writeStateBodyUint64(writer, uint64(value.Target))
+	writeStateBodyValueIDs(writer, value.Arguments)
+	writeStateBodyUint64(writer, uint64(value.TrueTarget))
+	writeStateBodyValueIDs(writer, value.TrueArguments)
+	writeStateBodyUint64(writer, uint64(value.FalseTarget))
+	writeStateBodyValueIDs(writer, value.FalseArguments)
+	writeStateBodyString(writer, value.TrapCategory)
+	writeStateBodyUint64(writer, uint64(value.Cost))
 }
 
 func describeStateBodyFunction(module hir.Module, function hir.Function, coordinates map[hir.PackageID]packagegraph.CoordinateID) ([]byte, error) {

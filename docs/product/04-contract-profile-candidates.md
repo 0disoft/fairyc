@@ -54,10 +54,11 @@ contains typed `Cell[T]` and `Map[K, V]` handles, canonical SHA-256 layout and k
 append-only compatibility checks, snapshot transactions, bounded read-your-writes overlays,
 store-wide optimistic conflict detection, atomic commit, and rollback on returned errors or panics.
 
-`internal/contractstatemir` now adds a separate compiler-private layout and straight-line transaction
-submodel. It verifies exact layout identity, canonical cell/map operations, and explicit commit,
-reject, or trap exits before executing them through the oracle. It is not the stable whole-program
-MIR and has no source state-access, stable package-artifact, backend, or target admission.
+`internal/contractstatemir` adds a separate compiler-private layout and transaction submodel. It
+verifies exact layout identity, canonical cell/map operations, explicit commit/reject/trap exits,
+and ADR 0378's bounded acyclic SSA blocks with typed reads, joins, bool branches, and unit costs
+before executing them through the oracle. It is not the stable whole-program MIR and has no source
+state-access, backend, or target admission.
 
 Language-13 source declarations and direct compiler fixtures lower into the same `hir.StateLayout`
 submodel. Public-interface v5
@@ -104,8 +105,9 @@ rejects `block_context`, `emit`, and `external_call` authority until transaction
 verifies those operations. ADR 0357 rejects every internal or foreign call in the complete current
 owner body during direct lowering and stable rebind; later call admission must prove transitive
 operations, effects, state-borrow lifetime, capabilities, and reentrancy. ADR 0358 also rejects every
-current `if`, `match`, loop, loop-control, assertion, Result-propagation, and short-circuit path until
-conditional transaction MIR has an exact representation. ADR 0359 additionally rejects unsafe
+ordinary-owner `if`, `match`, loop, loop-control, assertion, Result-propagation, and short-circuit
+path. ADR 0378 admits conditional state-side blocks without relaxing that ordinary HIR boundary.
+ADR 0359 additionally rejects unsafe
 declarations/scopes and raw-pointer types through signatures, locals, expressions, and nested
 aggregates without conflating ordinary safe borrows with state permissions. ADR 0360 rejects
 receiver-bound methods and automatic drop glue as current owners while retaining receiver-free

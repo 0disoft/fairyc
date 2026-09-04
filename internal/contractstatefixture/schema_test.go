@@ -10,7 +10,7 @@ import (
 
 func TestContractStateSchemaMatchesRunnerVocabulary(t *testing.T) {
 	t.Parallel()
-	for _, version := range []string{"v0", "v1"} {
+	for _, version := range []string{"v0", "v1", "v2"} {
 		version := version
 		t.Run(version, func(t *testing.T) {
 			t.Parallel()

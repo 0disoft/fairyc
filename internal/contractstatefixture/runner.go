@@ -21,9 +21,10 @@ import (
 const (
 	fixtureSchemaV0 = "fairyc.contract-state-fixtures/v0"
 	fixtureSchemaV1 = "fairyc.contract-state-fixtures/v1"
+	fixtureSchemaV2 = "fairyc.contract-state-fixtures/v2"
 )
 
-var fixtureSchemaVersions = []string{fixtureSchemaV0, fixtureSchemaV1}
+var fixtureSchemaVersions = []string{fixtureSchemaV0, fixtureSchemaV1, fixtureSchemaV2}
 
 var operationKinds = []string{
 	"cell-delete",
@@ -50,9 +51,14 @@ func Run(manifestPath string) (Report, error) {
 	if err := validateManifest(definition); err != nil {
 		return Report{}, err
 	}
-	report := Report{CasesRun: len(definition.Cases)}
+	report := Report{CasesRun: len(definition.Cases) + len(definition.Mutations)}
 	for _, fixture := range definition.Cases {
 		if failure := runCase(definition, fixture); failure != nil {
+			report.Failures = append(report.Failures, *failure)
+		}
+	}
+	for _, mutation := range definition.Mutations {
+		if failure := runMutation(definition, mutation); failure != nil {
 			report.Failures = append(report.Failures, *failure)
 		}
 	}
@@ -107,6 +113,7 @@ func validateManifest(definition manifest) error {
 		fields[field.Name] = field
 	}
 	seen := make(map[string]struct{}, len(definition.Cases))
+	cases := make(map[string]caseDefinition, len(definition.Cases))
 	for _, fixture := range definition.Cases {
 		if fixture.ID == "" {
 			return fmt.Errorf("contract-state fixture case has an empty id")
@@ -115,7 +122,9 @@ func validateManifest(definition manifest) error {
 			return fmt.Errorf("contract-state fixture case %q is duplicated", fixture.ID)
 		}
 		seen[fixture.ID] = struct{}{}
-		if !slices.Contains(exitKinds, fixture.Exit) || !slices.Contains(resultStatuses, fixture.Expect.Status) {
+		cases[fixture.ID] = fixture
+		validExit := len(fixture.Blocks) == 0 && slices.Contains(exitKinds, fixture.Exit) || len(fixture.Blocks) != 0 && fixture.Exit == ""
+		if !validExit || !slices.Contains(resultStatuses, fixture.Expect.Status) {
 			return fmt.Errorf("contract-state fixture case %q has an unsupported exit or status", fixture.ID)
 		}
 		if fixture.Limits != nil {
@@ -123,12 +132,66 @@ func validateManifest(definition manifest) error {
 				return fmt.Errorf("contract-state fixture case %q limits: %w", fixture.ID, err)
 			}
 		}
-		for _, operation := range fixture.Operations {
+		operations := fixture.Operations
+		for _, block := range fixture.Blocks {
+			operations = append(operations, block.Operations...)
+		}
+		for _, operation := range operations {
 			field, found := fields[operation.Field]
 			if !found || !slices.Contains(operationKinds, operation.Kind) || !strings.HasPrefix(operation.Kind, field.Kind+"-") {
 				return fmt.Errorf("contract-state fixture case %q has an invalid operation on %q", fixture.ID, operation.Field)
 			}
 		}
+	}
+	for _, mutation := range definition.Mutations {
+		if mutation.ID == "" || mutation.Case == "" || mutation.Kind == "" || mutation.ErrorContains == "" {
+			return fmt.Errorf("contract-state mutation fixture has an empty identity")
+		}
+		if _, duplicate := seen[mutation.ID]; duplicate {
+			return fmt.Errorf("contract-state fixture identity %q is duplicated", mutation.ID)
+		}
+		seen[mutation.ID] = struct{}{}
+		if _, found := cases[mutation.Case]; !found {
+			return fmt.Errorf("contract-state mutation %q names unknown case %q", mutation.ID, mutation.Case)
+		}
+		if !slices.Contains([]string{"cycle", "join-type", "missing-cost", "unknown-value"}, mutation.Kind) {
+			return fmt.Errorf("contract-state mutation %q has unsupported kind %q", mutation.ID, mutation.Kind)
+		}
+	}
+	return nil
+}
+
+func runMutation(definition manifest, mutation mutationDefinition) *Failure {
+	var fixture caseDefinition
+	for _, candidate := range definition.Cases {
+		if candidate.ID == mutation.Case {
+			fixture = candidate
+			break
+		}
+	}
+	input, err := buildHIRPackage(definition.Layout, fixture)
+	if err != nil {
+		return &Failure{CaseID: mutation.ID, Detail: err.Error()}
+	}
+	transaction := &input.StateTransactions[0]
+	switch mutation.Kind {
+	case "cycle":
+		transaction.Blocks[len(transaction.Blocks)-1].Terminator = hir.StateTerminator{Kind: hir.StateTerminatorJump, Target: transaction.Entry, Arguments: []hir.StateValueID{}, Cost: 1}
+	case "join-type":
+		for index := range transaction.Blocks {
+			if len(transaction.Blocks[index].Parameters) != 0 {
+				transaction.Blocks[index].Parameters[0].TypeID = contractstate.Bool.TypeID()
+				break
+			}
+		}
+	case "missing-cost":
+		transaction.Blocks[0].Accesses[0].Cost = 0
+	case "unknown-value":
+		transaction.Blocks[0].Terminator.Condition = 999
+	}
+	_, err = publishCompilerResult(input)
+	if err == nil || !strings.Contains(err.Error(), mutation.ErrorContains) {
+		return &Failure{CaseID: mutation.ID, Detail: fmt.Sprintf("compiler error = %v, want containing %q", err, mutation.ErrorContains)}
 	}
 	return nil
 }
@@ -210,14 +273,50 @@ func buildHIRPackage(layout layoutDefinition, fixture caseDefinition) (hir.Packa
 		if operation.ValueType != "" && operation.ValueType != field.ValueTypeID {
 			return hir.Package{}, fmt.Errorf("operation %d value type %q does not match field %q", index, operation.ValueType, field.ValueTypeID)
 		}
-		accesses = append(accesses, hir.StateAccess{
-			Kind: hir.StateAccessKind(operation.Kind), Field: operation.Field, Key: key, Value: value,
-		})
+		accesses = append(accesses, hirStateAccess(operation, key, value))
 		if strings.HasSuffix(operation.Kind, "read") {
 			effects = append(effects, hir.EffectStorageRead)
 		} else {
 			effects = append(effects, hir.EffectStorageWrite)
 		}
+	}
+	blocks := make([]hir.StateBlock, 0, len(fixture.Blocks))
+	for _, block := range fixture.Blocks {
+		lowered := hir.StateBlock{ID: hir.StateBlockID(block.ID), Parameters: make([]hir.StateBlockParameter, 0, len(block.Parameters)), Accesses: make([]hir.StateAccess, 0, len(block.Operations))}
+		for _, parameter := range block.Parameters {
+			lowered.Parameters = append(lowered.Parameters, hir.StateBlockParameter{ID: hir.StateValueID(parameter.ID), TypeID: parameter.TypeID})
+		}
+		for index, operation := range block.Operations {
+			field := fieldByName[operation.Field]
+			key, err := decodeValue(operation.KeyType, operation.KeyHex)
+			if err != nil {
+				return hir.Package{}, fmt.Errorf("block %d operation %d key: %w", block.ID, index, err)
+			}
+			value, err := decodeValue(operation.ValueType, operation.ValueHex)
+			if err != nil {
+				return hir.Package{}, fmt.Errorf("block %d operation %d value: %w", block.ID, index, err)
+			}
+			if operation.KeyType != "" && operation.KeyType != field.KeyTypeID {
+				return hir.Package{}, fmt.Errorf("block %d operation %d key type mismatch", block.ID, index)
+			}
+			if operation.ValueType != "" && operation.ValueType != field.ValueTypeID {
+				return hir.Package{}, fmt.Errorf("block %d operation %d value type mismatch", block.ID, index)
+			}
+			lowered.Accesses = append(lowered.Accesses, hirStateAccess(operation, key, value))
+			if strings.HasSuffix(operation.Kind, "read") {
+				effects = append(effects, hir.EffectStorageRead)
+			} else {
+				effects = append(effects, hir.EffectStorageWrite)
+			}
+		}
+		lowered.Terminator = hir.StateTerminator{
+			Kind: hir.StateTerminatorKind(block.Terminator.Kind), Condition: hir.StateValueID(block.Terminator.Condition),
+			Target: hir.StateBlockID(block.Terminator.Target), Arguments: hirValueIDs(block.Terminator.Arguments),
+			TrueTarget: hir.StateBlockID(block.Terminator.TrueTarget), TrueArguments: hirValueIDs(block.Terminator.TrueArguments),
+			FalseTarget: hir.StateBlockID(block.Terminator.FalseTarget), FalseArguments: hirValueIDs(block.Terminator.FalseArguments),
+			TrapCategory: block.Terminator.TrapCategory, Cost: block.Terminator.Cost,
+		}
+		blocks = append(blocks, lowered)
 	}
 	return hir.Package{
 		Modules: []hir.Module{{Package: packageID, Functions: []hir.Function{{
@@ -227,8 +326,25 @@ func buildHIRPackage(layout layoutDefinition, fixture caseDefinition) (hir.Packa
 		StateTransactions: []hir.StateTransaction{{
 			Package: packageID, Function: functionID, Accesses: accesses,
 			Exit: hir.StateTransactionExit(fixture.Exit), TrapCategory: fixture.TrapCategory,
+			Entry: hir.StateBlockID(fixture.Entry), Blocks: blocks,
 		}},
 	}, nil
+}
+
+func hirStateAccess(operation operation, key, value hir.StateValue) hir.StateAccess {
+	return hir.StateAccess{
+		Kind: hir.StateAccessKind(operation.Kind), Field: operation.Field, Key: key, Value: value,
+		KeyInput: hir.StateValueID(operation.KeyInput), ValueInput: hir.StateValueID(operation.ValueInput),
+		Result: hir.StateValueID(operation.Result), FoundResult: hir.StateValueID(operation.Found), Cost: operation.Cost,
+	}
+}
+
+func hirValueIDs(values []uint32) []hir.StateValueID {
+	result := make([]hir.StateValueID, 0, len(values))
+	for _, value := range values {
+		result = append(result, hir.StateValueID(value))
+	}
+	return result
 }
 
 func decodeValue(typeID, encodedHex string) (hir.StateValue, error) {
@@ -270,6 +386,9 @@ func compareResult(fixture caseDefinition, layout contractstatemir.Layout, store
 	}
 	if store.Version() != expect.Version || outcome.Receipt.Version != expect.Version || outcome.Receipt.Writes != expect.Writes {
 		return fmt.Sprintf("receipt/store = %+v version %d, want version %d writes %d", outcome.Receipt, store.Version(), expect.Version, expect.Writes)
+	}
+	if outcome.Cost != expect.Cost {
+		return fmt.Sprintf("execution cost = %d, want %d", outcome.Cost, expect.Cost)
 	}
 	if len(outcome.Reads) != len(expect.Reads) {
 		return fmt.Sprintf("reads = %d, want %d", len(outcome.Reads), len(expect.Reads))

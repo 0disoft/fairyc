@@ -180,8 +180,9 @@ stable rebind. ADR 0358 also rejects conditionals, loops, assertions, Result pro
 short-circuit operators. ADR 0359 rejects unsafe code and recursively reachable raw-pointer types
 while preserving ordinary safe-borrow and pointer-free resource types. ADR 0360 rejects
 receiver-bound methods and automatic drop glue while preserving static associated entries; none
-admits transitive calls, owner-bound state borrows, pointer provenance, or conditional transaction
-MIR. ADR 0361 also rejects ordinary potentially trapping operations while preserving the state
+admits transitive calls, owner-bound state borrows, or pointer provenance. ADR 0378 separately
+admits bounded acyclic conditional state blocks with typed reads, explicit joins and represented
+costs without lowering ordinary HIR conditionals. ADR 0361 also rejects ordinary potentially trapping operations while preserving the state
 model's explicit static trap exit. ADR 0362 rejects owned resource values and lexical regions while
 preserving safe resource borrows and static resource namespaces. ADR 0363 freezes the residual pure
 owner HIR as a positive allowlist so future forms and expression-local effects fail closed.
@@ -1032,8 +1033,9 @@ lookup, and exact-generation quarantine. ADR 0354 adds state-body rebind, combin
 reassembly, and explicit cached oracle execution. ADR 0355 unifies cold and cached transaction
 publication in `compiler.Result`, and ADR 0356 closes accepted authority to represented storage
 effects. ADR 0357 closes current owner-body calls while source, call admission, and native/runtime
-admission remain closed. ADR 0358 closes current owner-body dynamic control flow while
-data-dependent state values and conditional transaction MIR remain absent. ADR 0359 closes unsafe
+admission remain closed. ADR 0358 closes current ordinary owner-body dynamic control flow. ADR 0378
+admits compiler-private typed state values and bounded acyclic conditional blocks with v2 stable
+transport while source state access and ordinary conditional lowering remain absent. ADR 0359 closes unsafe
 and raw-pointer owner transport while safe borrows remain ordinary HIR facts rather than state
 permissions. ADR 0360 closes receiver and drop-glue ownership while retaining explicit static
 associated functions. ADR 0361 closes checked-arithmetic and bounds trap edges in current owners.

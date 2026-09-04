@@ -32,6 +32,7 @@ type Outcome struct {
 	Exit    ExitKind
 	Receipt contractstate.CommitReceipt
 	Reads   []Read
+	Cost    uint64
 }
 
 // NewMemoryStore constructs the semantic oracle only after verifying the
@@ -60,6 +61,11 @@ func Execute(store *contractstate.MemoryStore, program Program, limits contracts
 	}
 	outcome := Outcome{Exit: program.Exit}
 	receipt, err := contractstate.Execute(store, bound.layout, limits, func(transaction *contractstate.Transaction) error {
+		if len(program.Blocks) != 0 {
+			exit, err := executeGraph(transaction, bound, program, &outcome)
+			outcome.Exit = exit
+			return err
+		}
 		for index, operation := range program.Operations {
 			field := bound.fields[operation.FieldIndex]
 			switch operation.Kind {

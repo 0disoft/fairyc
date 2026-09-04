@@ -20,7 +20,8 @@
 - Potential-trap owner source: `docs/adr/0361-potentially-trapping-owner-operations.md`
 - Resource-lifetime-free owner source: `docs/adr/0362-resource-lifetime-free-contract-state-owners.md`
 - Closed-form owner source: `docs/adr/0363-closed-form-contract-state-owner-hir.md`
-- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v1.json` with historical v0 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`
+- Data-dependent graph source: `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`
+- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v2.json` with historical v0/v1 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`, `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`
 - Compiler-published fixture source: `docs/adr/0366-compiler-published-contract-state-fixtures.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
@@ -28,7 +29,7 @@
 
 ## Boundary
 
-This submodel proves that one exact persistent-state layout and one explicit transaction exit can be
+This submodel proves that one exact persistent-state layout and every reachable explicit transaction exit can be
 verified before execution against the process-local semantic oracle. It is intentionally separate
 from the stable `internal/mir.Program`: no Fairy source form lowers into it, and no C backend,
 target runtime, or public compatibility promise consumes it. ADR 0350 adds a standalone compiler-
@@ -60,9 +61,9 @@ Only the seven compiler-known canonical codecs are admitted:
 Implementation-defined `FuncCodec` identities remain valid for direct oracle experiments but cannot
 enter compiler-private MIR until their canonical byte contract has an owning compiler rule.
 
-## Operations
+## Operations and values
 
-The first submodel is straight-line and deliberately small:
+The storage operation set remains deliberately small:
 
 - `cell-read`, `cell-write`, `cell-delete`;
 - `map-read`, `map-write`, `map-delete`.
@@ -70,8 +71,24 @@ The first submodel is straight-line and deliberately small:
 Every operation names a field by exact layout index. Map keys and written values carry an explicit
 codec identity plus canonical bytes. The verifier rejects kind mismatches, missing or extra
 operands, type mismatches, noncanonical bytes, and unknown operations with `CSM1002` before a state
-snapshot is captured. Reads produce ordered test observations; they are not a public contract return
-ABI.
+snapshot is captured. In graph bodies, reads also define one codec-typed SSA value and one
+`bool/v1` found value. Missing reads retain an absent observation and supply only the codec's
+canonical zero to the typed SSA result; programs inspect `found` when absence matters. A write or
+map key may consume an available same-typed SSA value. Reads produce ordered test observations;
+they are not a public contract return ABI.
+
+## Bounded control graph
+
+ADR 0378 admits a graph body only when it is separate from the legacy linear body. It contains at
+most 64 dense source-ordered blocks and 1024 operations, has one in-range predecessor-free entry,
+and makes every block reachable. Backedges and all other cycles fail with `CSM1006`.
+
+Values are local SSA identities. A use must follow its definition in the same block; cross-block
+values travel only as explicit edge arguments into same-typed block parameters. This makes
+dominance and joins local to the state verifier instead of borrowing assumptions from ordinary MIR.
+`branch` consumes one available `bool/v1`; `jump`, `commit`, `reject`, and `trap` are the only other
+terminators. Invalid definitions, uses, and joins fail with `CSM1007`. Every operation and
+terminator carries the exact canonical cost `1`; absent or unknown costs fail with `CSM1008`.
 
 ## Capability and effects
 
@@ -86,7 +103,7 @@ noncanonical sets, and host-only effects fail with `CSM1005`. ADR 0356 also reje
 `block_context`, `emit`, and `external_call`: this MIR has no operation that can justify those
 authorities. ADR 0357 also rejects every call expression in the current transaction owner body,
 including nested loop, block, child, and match-arm positions. This is call exclusion, not transitive
-call-graph or reentrancy support. ADR 0358 rejects `if`, `match`, `while`, classic `for`, loop
+call-graph or reentrancy support. ADR 0358 still rejects ordinary-owner `if`, `match`, `while`, classic `for`, loop
 control, assertions, Result propagation, and short-circuit operators in the same current-body paths.
 ADR 0359 rejects unsafe declarations/scopes and raw-pointer types reachable through signatures,
 locals, expressions, or nominal aggregate fields. Safe borrows remain ordinary HIR permissions, not
@@ -96,13 +113,16 @@ ordinary checked arithmetic and bounds operations because their conditional trap
 from this linear model. ADR 0362 rejects owned resource values and lexical regions because their
 drop, burn, placement, and reset lifetimes are also absent.
 ADR 0363 then admits only a positive statement, expression, and operator allowlist; every unknown
-future owner form or expression-local effect fails closed.
+future owner form or expression-local effect fails closed. ADR 0378 does not relax that ordinary
+HIR boundary: compiler-created `hir.StateBlock` values lower through the separate state side table.
 ADR 0364 exercises the admitted HIR bridge and this verifier through a versioned five-case oracle
 corpus covering commit, reject, trap, delete, and write-limit rollback.
 ADR 0365 preserves those historical vectors and adds map write/read, map delete, exact physical-key,
 and encoded-key-limit evidence in the current v1 corpus.
 ADR 0366 submits every fixture HIR package to the unified compiler coordinator and executes only the
 transaction from a verified atomic ordinary/state MIR result.
+ADR 0378 adds current v2 graph fixtures for a cell-read branch with an explicit join and a map-read
+found branch, plus cycle, join-type, missing-cost, and unavailable-value mutations.
 
 ## HIR bridge
 
@@ -110,11 +130,14 @@ transaction from a verified atomic ordinary/state MIR result.
 the sole declared-effect authority. Each source-independent access names a layout field rather than
 a physical index; lowering resolves the exact package layout, clones encoded values, creates one
 fresh capability, attaches it to every operation, maps the static exit, and runs this verifier before
-returning a program. Results are deterministic in package/function order and remain process-local.
+returning a program. A graph transaction additionally lowers dense blocks, explicit parameters and
+edge arguments, typed read results, dynamic operands, and terminators before the same verifier and
+compiler publication boundary. Results are deterministic in package/function order and remain
+process-local.
 
 ## Exit and execution
 
-Every program ends in exactly one explicit exit:
+Every executed path ends in exactly one explicit exit:
 
 | Exit | Oracle behavior |
 | --- | --- |
@@ -125,19 +148,26 @@ Every program ends in exactly one explicit exit:
 Malformed or implicit exits fail verification with `CSM1003`. Runtime codec, layout, conflict, and
 limit errors return from `Execute` and rely on the managed `contractstate.Execute` boundary to roll
 back. The verifier runs before `Begin`, so invalid MIR cannot observe a snapshot or mutate state.
+Graph execution reads and writes through that same transaction, preserving snapshot reads,
+read-your-write behavior, atomic overlay publication, and reject/trap/error rollback. `Outcome.Cost`
+is the exact sum of executed operation and terminator costs.
 
 ## Package-body identity
 
 ADR 0348 defines `fairyc.contract-state-package-body/v1`. It first verifies the complete HIR
 transaction set, then hashes one package's stable coordinate, optional exact layout hash, stable
-function descriptors, canonical effects, exact operation sequence and bytes, and static exit.
+function descriptors, canonical effects, and either the exact legacy operation/exit sequence or the
+exact graph blocks, values, edges, operands, costs, and terminators.
 Build-local package/function numbers, spans, and fresh capability tokens do not participate.
 
 Package-cache key v4 consumes the hash for exact owning-package invalidation. ADR 0350 now transports
 the same stable facts through an exact-version, caller-bounded canonical payload. Decode rebuilds
 the layout, parses and re-encodes each stable function descriptor, creates fresh private capability
 identity, re-enters this verifier, and recomputes the hash. Build-local identities, spans, and
-capability tokens are never serialized.
+capability tokens are never serialized. Legacy bodies retain their byte-identical v1 envelope and
+hash. Graph bodies use `fairyc.contract-state-package-body-artifact/v2`, reconstruct fresh
+capabilities, re-enter graph verification, and participate in the already-required body hash, so
+cache key v4 invalidates its owner after any graph change.
 
 ADR 0352 stores this payload beside stable package MIR v3 in one exact-version outer compilation
 artifact and requires both nested artifacts to share a package coordinate. Stable MIR v3 itself is
@@ -155,14 +185,15 @@ map, an exact current HIR layout, and byte-identical current logical function de
 only the payload's transaction owners to fresh package/function symbols; unrelated current functions
 do not enter the boundary. The current HIR transaction-operation side table is not required.
 
-Every rebound transaction receives another new opaque capability, attaches it to every operation,
+Every rebound transaction receives another new opaque capability, attaches it to every operation
+in every block,
 and re-enters verification. Repeated rebinds therefore reconstruct equal work with distinct process
 authority. Missing or shared symbols, coordinate ambiguity, layout/signature drift, and valid-but-
 unexpected bodies fail before publication.
 
 ## Closed gates
 
-This slice does not add source syntax, data-dependent state values, conditional transaction MIR,
+This slice does not add source state-access syntax, ordinary-HIR conditional lowering, loops,
 call admission, owner-bound state borrows, pointer provenance, transitive call-graph rules, deterministic native backend execution, persistence,
 migration, gas, or chain integration.
 
@@ -184,4 +215,6 @@ does not represent, while preserving explicit static associated functions. ADR 0
 potentially trapping ordinary operations while leaving this MIR's explicit static trap exit intact.
 ADR 0362 rejects ordinary owned-resource and lexical-region lifetime transitions while preserving
 safe resource borrows and static resource namespaces.
-ADR 0363 freezes the residual pure owner HIR as a recursive positive allowlist.
+ADR 0363 freezes the residual pure owner HIR as a recursive positive allowlist. ADR 0378 separately
+admits bounded acyclic SSA state blocks with explicit joins, bool branches, represented costs, v2
+graph payload transport, and compiler-published cell/map execution while preserving legacy v1 bytes.

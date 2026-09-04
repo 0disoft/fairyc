@@ -43,26 +43,41 @@ func Verify(program Program) []VerificationError {
 		failures = append(failures, VerificationError{Code: "CSM1004", Entity: "capability", Detail: "program requires one transaction capability"})
 	}
 	requiredEffects := make([]hir.Effect, 0, 2)
-	for index, operation := range program.Operations {
-		entity := fmt.Sprintf("operation %d", index)
-		if operation.Capability.token == nil || operation.Capability != program.Capability {
-			failures = append(failures, VerificationError{Code: "CSM1004", Entity: entity, Detail: "operation does not use the program transaction capability"})
+	if len(program.Blocks) != 0 {
+		if len(program.Operations) != 0 || program.Exit != "" || program.TrapCategory != "" {
+			failures = append(failures, VerificationError{Code: "CSM1006", Entity: "program", Detail: "graph and legacy linear bodies cannot be mixed"})
 		}
-		requiredEffects = append(requiredEffects, requiredStorageEffects(operation.Kind)...)
-		if int(operation.FieldIndex) >= len(bound.fields) {
-			failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "field index is outside the verified layout"})
-			continue
+		graphFailures, graphEffects := verifyGraph(program, bound)
+		failures = append(failures, graphFailures...)
+		requiredEffects = append(requiredEffects, graphEffects...)
+	} else {
+		if program.Entry != 0 {
+			failures = append(failures, VerificationError{Code: "CSM1006", Entity: "entry", Detail: "linear program cannot declare a graph entry"})
 		}
-		field := bound.fields[operation.FieldIndex].descriptor
-		if detail := verifyOperation(operation, field); detail != "" {
-			failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: detail})
+		for index, operation := range program.Operations {
+			entity := fmt.Sprintf("operation %d", index)
+			if operation.KeyInput != 0 || operation.ValueInput != 0 || operation.Result != 0 || operation.Found != 0 || operation.Cost != 0 {
+				failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "legacy operation carries graph-only value or cost fields"})
+			}
+			if operation.Capability.token == nil || operation.Capability != program.Capability {
+				failures = append(failures, VerificationError{Code: "CSM1004", Entity: entity, Detail: "operation does not use the program transaction capability"})
+			}
+			requiredEffects = append(requiredEffects, requiredStorageEffects(operation.Kind)...)
+			if int(operation.FieldIndex) >= len(bound.fields) {
+				failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "field index is outside the verified layout"})
+				continue
+			}
+			field := bound.fields[operation.FieldIndex].descriptor
+			if detail := verifyOperation(operation, field); detail != "" {
+				failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: detail})
+			}
+		}
+		if detail := verifyExit(program.Exit, program.TrapCategory); detail != "" {
+			failures = append(failures, VerificationError{Code: "CSM1003", Entity: "exit", Detail: detail})
 		}
 	}
 	if detail := verifyEffects(program.Effects, requiredEffects); detail != "" {
 		failures = append(failures, VerificationError{Code: "CSM1005", Entity: "effects", Detail: detail})
-	}
-	if detail := verifyExit(program.Exit, program.TrapCategory); detail != "" {
-		failures = append(failures, VerificationError{Code: "CSM1003", Entity: "exit", Detail: detail})
 	}
 	return failures
 }

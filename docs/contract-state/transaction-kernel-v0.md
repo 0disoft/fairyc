@@ -43,12 +43,14 @@ preserving safe resource borrows and static resource namespaces; production stor
 targets still do not consume it. ADR 0363 freezes the remaining owner HIR as a positive allowlist so
 future forms fail closed. ADR 0364 adds a versioned five-case transaction corpus that reaches this
 oracle through source-independent HIR and verified transaction MIR.
+ADR 0378 leaves the ordinary owner HIR restriction intact while separately admitting bounded
+acyclic SSA state blocks with typed reads, explicit joins, bool branches, and represented costs.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
 `spec/fixtures/contract-state/manifest-v0.json` owns the historical executable cell examples;
-ADR 0365 preserves that baseline and makes `manifest-v1.json` the current
-cell-and-map corpus. Neither manifest is a production storage format.
+ADR 0365 preserves that baseline in `manifest-v1.json`; ADR 0378 makes `manifest-v2.json` the
+current graph corpus while retaining both historical versions. No manifest is a production storage format.
 ADR 0366 executes both corpora only after the compiler atomically publishes verified ordinary and
 contract-state MIR; a state-MIR rejection leaves both executable outputs empty.
 ADR 0367 adds a separate deterministic overlapping-transaction corpus: stale commits publish no
@@ -238,8 +240,9 @@ A source-level state implementation must preserve these ownership boundaries:
 7. cache and package identities include the state layout hash.
 
 The current oracle plus compiler-private submodel now prove exact layout reconstruction, one managed
-transaction capability, explicit commit/reject/trap exits, and straight-line canonical cell/map
-operations. Every operation names one opaque program capability, and verifier-owned
+transaction capability, explicit commit/reject/trap exits, legacy straight-line operations, and
+bounded acyclic cell/map graphs whose typed values cross blocks only through explicit join
+parameters. Every operation names one opaque program capability, and verifier-owned
 `storage_read`/`storage_write` requirements fail before transaction begin. Source-independent HIR
 owns one layout per package and attaches transaction plans to existing function effects; lowering
 resolves field names, copies value bytes, verifies MIR, and executes through this oracle. The

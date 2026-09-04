@@ -47,14 +47,68 @@ type StateValue struct {
 	Encoded []byte
 }
 
+// StateValueID is one transaction-local SSA value identity. Zero means that
+// an access uses its canonical literal operand instead of a prior value.
+type StateValueID uint32
+
+// StateBlockID is one transaction-local basic-block identity. IDs are dense
+// and source ordered so stable transport never depends on map iteration.
+type StateBlockID uint32
+
+// StateBlockParameter is an explicit join value. Every predecessor must pass
+// one same-typed argument for each parameter.
+type StateBlockParameter struct {
+	ID     StateValueID
+	TypeID string
+}
+
 // StateAccess names a package-owned field rather than a physical field index.
 // Lowering resolves the name through the exact StateLayout owned by Package.
 type StateAccess struct {
-	Kind  StateAccessKind
-	Field string
-	Key   StateValue
-	Value StateValue
-	Span  Span
+	Kind        StateAccessKind
+	Field       string
+	Key         StateValue
+	Value       StateValue
+	KeyInput    StateValueID
+	ValueInput  StateValueID
+	Result      StateValueID
+	FoundResult StateValueID
+	Cost        uint32
+	Span        Span
+}
+
+type StateTerminatorKind string
+
+const (
+	StateTerminatorJump   StateTerminatorKind = "jump"
+	StateTerminatorBranch StateTerminatorKind = "branch"
+	StateTerminatorCommit StateTerminatorKind = "commit"
+	StateTerminatorReject StateTerminatorKind = "reject"
+	StateTerminatorTrap   StateTerminatorKind = "trap"
+)
+
+// StateTerminator closes every block. Branch conditions must be bool/v1 SSA
+// values; jumps and branch edges pass explicit arguments to join parameters.
+type StateTerminator struct {
+	Kind           StateTerminatorKind
+	Condition      StateValueID
+	Target         StateBlockID
+	Arguments      []StateValueID
+	TrueTarget     StateBlockID
+	TrueArguments  []StateValueID
+	FalseTarget    StateBlockID
+	FalseArguments []StateValueID
+	TrapCategory   string
+	Cost           uint32
+}
+
+// StateBlock is one acyclic transaction block. Accesses execute in order and
+// may define typed SSA values consumed later in the block or passed on edges.
+type StateBlock struct {
+	ID         StateBlockID
+	Parameters []StateBlockParameter
+	Accesses   []StateAccess
+	Terminator StateTerminator
 }
 
 // StateTransactionExit is one statically selected transaction outcome. Branch
@@ -67,14 +121,16 @@ const (
 	StateTransactionTrap   StateTransactionExit = "trap"
 )
 
-// StateTransaction attaches straight-line state accesses to one existing HIR
-// function. The function owns the declared effects; this side table supplies no
-// second effect authority and is not part of a stable artifact.
+// StateTransaction attaches either legacy straight-line accesses or one
+// bounded acyclic state graph to an existing HIR function. The function owns
+// the declared effects; this side table supplies no second effect authority.
 type StateTransaction struct {
 	Package      PackageID
 	Function     SymbolID
 	Accesses     []StateAccess
 	Exit         StateTransactionExit
 	TrapCategory string
+	Entry        StateBlockID
+	Blocks       []StateBlock
 	Span         Span
 }

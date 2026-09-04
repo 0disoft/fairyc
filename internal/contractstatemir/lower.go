@@ -290,6 +290,44 @@ func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.St
 		fieldIndices[field.Name] = field.Index
 	}
 	capability := newTransactionCapability()
+	if len(transaction.Blocks) != 0 {
+		blocks := make([]Block, 0, len(transaction.Blocks))
+		for blockIndex, sourceBlock := range transaction.Blocks {
+			parameters := make([]BlockParameter, 0, len(sourceBlock.Parameters))
+			for _, parameter := range sourceBlock.Parameters {
+				parameters = append(parameters, BlockParameter{ID: ValueID(parameter.ID), TypeID: parameter.TypeID})
+			}
+			operations := make([]Operation, 0, len(sourceBlock.Accesses))
+			for accessIndex, access := range sourceBlock.Accesses {
+				fieldIndex, found := fieldIndices[access.Field]
+				if !found {
+					return Program{}, fmt.Errorf("block %d access %d names unknown field %q", blockIndex, accessIndex, access.Field)
+				}
+				kind, err := lowerStateAccessKind(access.Kind)
+				if err != nil {
+					return Program{}, fmt.Errorf("block %d access %d: %w", blockIndex, accessIndex, err)
+				}
+				operations = append(operations, Operation{
+					Kind: kind, Capability: capability, FieldIndex: fieldIndex,
+					Key: lowerStateValue(access.Key), Value: lowerStateValue(access.Value),
+					KeyInput: ValueID(access.KeyInput), ValueInput: ValueID(access.ValueInput),
+					Result: ValueID(access.Result), Found: ValueID(access.FoundResult), Cost: access.Cost,
+				})
+			}
+			blocks = append(blocks, Block{
+				ID: BlockID(sourceBlock.ID), Parameters: parameters, Operations: operations,
+				Terminator: lowerStateTerminator(sourceBlock.Terminator),
+			})
+		}
+		program := Program{
+			Layout: layout, Capability: capability, Effects: slices.Clone(effects),
+			Entry: BlockID(transaction.Entry), Blocks: blocks,
+		}
+		if failures := Verify(program); len(failures) != 0 {
+			return Program{}, VerificationErrors{Failures: failures}
+		}
+		return program, nil
+	}
 	operations := make([]Operation, 0, len(transaction.Accesses))
 	for index, access := range transaction.Accesses {
 		fieldIndex, found := fieldIndices[access.Field]
@@ -317,6 +355,24 @@ func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.St
 		return Program{}, VerificationErrors{Failures: failures}
 	}
 	return program, nil
+}
+
+func lowerStateTerminator(value hir.StateTerminator) Terminator {
+	return Terminator{
+		Kind: TerminatorKind(value.Kind), Condition: ValueID(value.Condition),
+		Target: BlockID(value.Target), Arguments: lowerStateValueIDs(value.Arguments),
+		TrueTarget: BlockID(value.TrueTarget), TrueArguments: lowerStateValueIDs(value.TrueArguments),
+		FalseTarget: BlockID(value.FalseTarget), FalseArguments: lowerStateValueIDs(value.FalseArguments),
+		TrapCategory: value.TrapCategory, Cost: value.Cost,
+	}
+}
+
+func lowerStateValueIDs(values []hir.StateValueID) []ValueID {
+	result := make([]ValueID, 0, len(values))
+	for _, value := range values {
+		result = append(result, ValueID(value))
+	}
+	return result
 }
 
 func lowerStateAccessKind(kind hir.StateAccessKind) (OperationKind, error) {
