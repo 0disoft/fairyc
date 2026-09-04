@@ -105,9 +105,18 @@ var stage0WindowsFileMetadataProbe string
 //go:embed stage0_windows_process_args.c
 var stage0WindowsProcessArgs string
 
+//go:embed stage0_contract_state.c
+var stage0ContractState string
+
 // SystemHeapSource returns the provisional x86_64-linux-gnu SystemHeap implementation.
 func SystemHeapSource() (string, error) {
 	return canonicalSource("SystemHeap", stage0SystemHeap)
+}
+
+// ContractStateRuntimeSource returns the compiler-private target-neutral transaction runtime.
+// It is validation transport, not a stable runtime ABI or standard-library surface.
+func ContractStateRuntimeSource() (string, error) {
+	return canonicalSource("contract-state runtime", stage0ContractState)
 }
 
 // SystemHeapProbeSource returns the closed native conformance probe for SystemHeap.

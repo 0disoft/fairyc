@@ -1052,6 +1052,12 @@ allowlist.
 ADR 0381 adds block-confined read-only state-borrow operations, stable v4 payload/hash/rebind, and
 two positive plus three mutation fixtures without opening source, pointer, native, or persistence
 surfaces.
+ADR 0382 opens only a compiler-private Windows MSVC handoff for one straight-line field-zero
+`cell<u64>` transaction. `Prepare` binds verified MIR to its exact package-body hash; emission also
+carries the exact layout hash into a bounded stack-only snapshot/overlay runtime. Commit, reject,
+and trap execute natively at low and optimized profiles with rollback and zero-resource evidence.
+This does not admit source operations, maps, multiple fields, graphs, helpers, borrows, durable
+persistence, Linux, a public ABI, or a deployable contract target.
 ADR 0364 versions the first five transaction execution cases and requires them to pass through
 source-independent HIR lowering, verified contract-state MIR, and the failure-atomic oracle. The
 manifest is an admission corpus, not a source, runtime, or persistence format.

@@ -855,6 +855,18 @@ across the two implemented targets. The remaining path, metadata, seek, exact-re
 stay specific to `x86_64-windows-msvc`; none of the slice is a portable Unicode path, retained-
 pointer contract, or public resource-layout contract.
 
+## Compiler-private contract-state runtime
+
+ADR 0382 adds a stack-only target-neutral C implementation for the first native verified-state
+handoff. It owns a single bounded 64-byte cell snapshot and overlay, exact layout/body identity
+checks, read/write/delete, commit, and rollback. Low and optimized Windows MSVC probes cover commit,
+reject, trap, read-your-write, malformed store and hash rejection, and zero live resources.
+
+These `fycs_native_*_v0` names and record layouts are compiler-private. They are not part of
+`fairyc-runtime/0`, the SDK, stable C ABI, production persistence, or target support. Maps,
+multi-field stores, graphs, helpers, borrows, durable adapters, concurrency, and Linux emission stay
+closed.
+
 ## Stage 0 product linkage
 
 The constrained C unit records sorted unique external names used by actual calls. Product builds

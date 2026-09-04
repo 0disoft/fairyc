@@ -7,6 +7,7 @@
 - Body identity source: `docs/adr/0348-exact-contract-state-package-body-identity.md`
 - Body payload source: `docs/adr/0350-bounded-stable-contract-state-body-payload.md`
 - Fresh-owner rebind source: `docs/adr/0351-checked-fresh-owner-contract-state-body-rebind.md`
+- First native handoff source: `docs/adr/0382-private-single-cell-contract-state-native-handoff.md`
 - Stable package-compilation source: `docs/adr/0352-stable-package-compilation-artifact.md`,
   `docs/package/stable-package-compilation-v1.md`
 - Persistent compilation-cache source: `docs/adr/0353-stable-compilation-cache-records.md`
@@ -189,6 +190,11 @@ body hash include borrow inputs/results and view bounds, then fresh-owner rebind
 capability before verifier entry. Existing v1 linear, v2 graph, and v3 helper payload bytes and
 pre-borrow body hashes remain unchanged.
 
+ADR 0382 adds a private `Prepare` handoff for one straight-line field-zero `cell<u64>` transaction.
+It binds verifier-admitted MIR to the computed package-body hash before target selection, then the
+Windows MSVC emitter carries both that hash and the exact layout hash into the native begin check.
+The handoff has no public constructors, and the emitter re-verifies its program defensively.
+
 ADR 0352 stores this payload beside stable package MIR v3 in one exact-version outer compilation
 artifact and requires both nested artifacts to share a package coordinate. Stable MIR v3 itself is
 unchanged. ADR 0353 makes persistent records carry the bundle and checks the cache-selected body hash
@@ -213,7 +219,8 @@ unexpected bodies fail before publication.
 
 ## Closed gates
 
-This slice does not add source state-access syntax, ordinary-HIR conditional lowering, loops,
+Except for ADR 0382's private straight-line single-cell Windows handoff, this slice does not add
+source state-access syntax, ordinary-HIR conditional lowering, loops,
 general call admission, graph-block helper calls, cross-block/helper borrow transfer, mutable or raw-pointer state views, reentrancy, deterministic native backend execution, persistence,
 migration, gas, or chain integration.
 
