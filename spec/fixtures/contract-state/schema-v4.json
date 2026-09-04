@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:contract-state-fixtures:v4",
+  "title": "Fairy C contract-state borrow fixture manifest v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "deferred", "contracts", "layout", "limits", "cases", "mutations"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.contract-state-fixtures/v4" },
+    "deferred": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "contracts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "layout": { "$ref": "#/$defs/layout" },
+    "limits": { "$ref": "#/$defs/limits" },
+    "cases": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/case" } },
+    "mutations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/mutation" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+    "hex": { "type": "string", "pattern": "^(?:[0-9a-f]{2})*$" },
+    "operationKind": { "enum": ["cell-delete", "cell-read", "cell-write", "map-delete", "map-read", "map-write", "cell-borrow", "map-borrow", "borrow-view", "borrow-copy"] },
+    "exitKind": { "enum": ["commit", "reject", "trap"] },
+    "status": { "enum": ["commit", "error", "reject", "trap"] },
+    "field": {
+      "type": "object", "additionalProperties": false, "required": ["name", "kind", "valueTypeID"],
+      "properties": { "name": { "$ref": "#/$defs/id" }, "kind": { "enum": ["cell", "map"] }, "keyTypeID": { "type": "string", "minLength": 1 }, "valueTypeID": { "type": "string", "minLength": 1 } }
+    },
+    "layout": {
+      "type": "object", "additionalProperties": false, "required": ["contractUID", "fields"],
+      "properties": { "contractUID": { "type": "string", "minLength": 1 }, "fields": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/field" } } }
+    },
+    "limits": {
+      "type": "object", "additionalProperties": false, "required": ["maxWrites", "maxWriteBytes", "maxValueBytes", "maxMapKeyBytes"],
+      "properties": { "maxWrites": { "type": "integer", "minimum": 1 }, "maxWriteBytes": { "type": "integer", "minimum": 1 }, "maxValueBytes": { "type": "integer", "minimum": 1 }, "maxMapKeyBytes": { "type": "integer", "minimum": 1 } }
+    },
+    "operation": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "cost"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/operationKind" }, "field": { "$ref": "#/$defs/id" },
+        "keyTypeID": { "type": "string", "minLength": 1 }, "keyHex": { "$ref": "#/$defs/hex" },
+        "valueTypeID": { "type": "string", "minLength": 1 }, "valueHex": { "$ref": "#/$defs/hex" },
+        "keyInput": { "type": "integer", "minimum": 1 }, "valueInput": { "type": "integer", "minimum": 1 },
+        "result": { "type": "integer", "minimum": 1 }, "found": { "type": "integer", "minimum": 1 },
+        "borrowInput": { "type": "integer", "minimum": 1 }, "borrowResult": { "type": "integer", "minimum": 1 },
+        "viewOffset": { "type": "integer", "minimum": 0 }, "viewLength": { "type": "integer", "minimum": 1 },
+        "cost": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "block": {
+      "type": "object", "additionalProperties": false, "required": ["id", "parameters", "operations", "terminator"],
+      "properties": {
+        "id": { "type": "integer", "minimum": 0 },
+        "parameters": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "typeID"], "properties": { "id": { "type": "integer", "minimum": 1 }, "typeID": { "type": "string", "minLength": 1 } } } },
+        "operations": { "type": "array", "items": { "$ref": "#/$defs/operation" } },
+        "terminator": { "$ref": "#/$defs/terminator" }
+      }
+    },
+    "terminator": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "arguments", "trueArguments", "falseArguments", "cost"],
+      "properties": {
+        "kind": { "enum": ["commit", "reject", "trap", "jump", "branch"] }, "condition": { "type": "integer", "minimum": 1 },
+        "target": { "type": "integer", "minimum": 0 }, "arguments": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+        "trueTarget": { "type": "integer", "minimum": 0 }, "trueArguments": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+        "falseTarget": { "type": "integer", "minimum": 0 }, "falseArguments": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+        "trapCategory": { "type": "string", "minLength": 1 }, "cost": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "read": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "found", "typeID", "valueHex"],
+      "properties": { "operation": { "type": "integer", "minimum": 0 }, "found": { "type": "boolean" }, "typeID": { "type": "string", "minLength": 1 }, "valueHex": { "$ref": "#/$defs/hex" } }
+    },
+    "entry": {
+      "type": "object", "additionalProperties": false, "required": ["field", "valueHex"],
+      "properties": { "field": { "$ref": "#/$defs/id" }, "storageKeyHex": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "valueHex": { "$ref": "#/$defs/hex" } }
+    },
+    "expectation": {
+      "type": "object", "additionalProperties": false, "required": ["status", "exit", "version", "writes", "cost", "reads", "store"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" }, "exit": { "$ref": "#/$defs/exitKind" },
+        "trapCategory": { "type": "string", "minLength": 1 }, "errorContains": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 0 }, "writes": { "type": "integer", "minimum": 0 }, "cost": { "type": "integer", "minimum": 0 },
+        "reads": { "type": "array", "items": { "$ref": "#/$defs/read" } }, "store": { "type": "array", "items": { "$ref": "#/$defs/entry" } }
+      }
+    },
+    "case": {
+      "type": "object", "additionalProperties": false, "required": ["id", "operations", "blocks", "expect"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "operations": { "type": "array", "maxItems": 0 }, "blocks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/block" } }, "limits": { "$ref": "#/$defs/limits" }, "expect": { "$ref": "#/$defs/expectation" } }
+    },
+    "mutation": {
+      "type": "object", "additionalProperties": false, "required": ["id", "case", "kind", "errorContains"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "case": { "$ref": "#/$defs/id" }, "kind": { "enum": ["borrow-invalidate", "borrow-dynamic-alias", "borrow-escape"] }, "errorContains": { "type": "string", "minLength": 1 } }
+    }
+  }
+}

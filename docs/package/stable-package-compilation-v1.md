@@ -20,6 +20,10 @@ One artifact contains exactly:
 - one contract-state package-body artifact v1 with the same coordinate, exact layout and body hash,
   stable function descriptors, canonical operations and values, and explicit exits.
 
+The outer schema remains v1 while the nested state body selects its compatible v1 linear, v2 graph,
+v3 helper, or v4 borrow envelope. ADR 0381 makes borrow identities and view bounds stable inputs
+without changing stable package MIR v3 or prior nested bytes.
+
 The outer artifact does not rewrite either nested representation. Each nested validator remains the
 authority for its own identity and semantics.
 
@@ -59,6 +63,7 @@ owners contain no retained checked arithmetic or bounds operation with an unrepr
 ADR 0362 rechecks that fresh owners carry neither owned resource values nor lexical regions while
 preserving safe resource borrows and static resource namespaces. ADR 0363 rejects every fresh-owner
 statement, expression, operator, or expression-local effect outside the closed positive allowlist.
-Source syntax, call or
-conditional-state admission, pointer provenance, backend, runtime, production persistence, and
+ADR 0381 additionally rechecks v4 block-confined state-borrow provenance and view bounds before
+cached execution. Source syntax, general call or
+conditional-state admission, raw-pointer exposure, backend, runtime, production persistence, and
 target admission remain closed.

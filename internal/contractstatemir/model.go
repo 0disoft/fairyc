@@ -43,6 +43,7 @@ type Value struct {
 }
 
 type ValueID uint32
+type BorrowID uint32
 type BlockID uint32
 
 type BlockParameter struct {
@@ -76,6 +77,10 @@ const (
 	OperationMapRead    OperationKind = "map-read"
 	OperationMapWrite   OperationKind = "map-write"
 	OperationMapDelete  OperationKind = "map-delete"
+	OperationCellBorrow OperationKind = "cell-borrow"
+	OperationMapBorrow  OperationKind = "map-borrow"
+	OperationBorrowView OperationKind = "borrow-view"
+	OperationBorrowCopy OperationKind = "borrow-copy"
 	OperationCall       OperationKind = "call"
 )
 
@@ -83,17 +88,21 @@ const (
 // Reads append one observation and may define typed graph values; writes and
 // deletes enter the private transaction overlay.
 type Operation struct {
-	Kind       OperationKind
-	Capability TransactionCapability
-	FieldIndex uint32
-	Key        Value
-	Value      Value
-	KeyInput   ValueID
-	ValueInput ValueID
-	Result     ValueID
-	Found      ValueID
-	Callee     string
-	Cost       uint32
+	Kind         OperationKind
+	Capability   TransactionCapability
+	FieldIndex   uint32
+	Key          Value
+	Value        Value
+	KeyInput     ValueID
+	ValueInput   ValueID
+	Result       ValueID
+	Found        ValueID
+	BorrowInput  BorrowID
+	BorrowResult BorrowID
+	ViewOffset   uint32
+	ViewLength   uint32
+	Callee       string
+	Cost         uint32
 }
 
 type TerminatorKind string

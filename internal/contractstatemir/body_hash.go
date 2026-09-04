@@ -156,6 +156,16 @@ func hashStableStateBody(coordinate packagegraph.CoordinateID, layout Layout, tr
 	for _, transaction := range transactions {
 		writeStateBodyUint64(hasher, uint64(len(transaction.function)))
 		hasher.Write(transaction.function)
+		if programHasBorrows(transaction.program) {
+			writeStateBodyString(hasher, "borrows-v1")
+			writeStateBodyBorrowExecutable(hasher, transaction.program.Effects, transaction.program.Operations, transaction.program.Exit, transaction.program.TrapCategory, transaction.program.Entry, transaction.program.Blocks)
+			writeStateBodyUint64(hasher, uint64(len(transaction.program.Helpers)))
+			for _, helper := range transaction.program.Helpers {
+				writeStateBodyString(hasher, helper.Name)
+				writeStateBodyBorrowExecutable(hasher, helper.Effects, helper.Operations, helper.Exit, helper.TrapCategory, helper.Entry, helper.Blocks)
+			}
+			continue
+		}
 		if len(transaction.program.Helpers) != 0 {
 			writeStateBodyString(hasher, "helpers-v1")
 			writeStateBodyExecutable(hasher, transaction.program.Effects, transaction.program.Operations, transaction.program.Exit, transaction.program.TrapCategory, transaction.program.Entry, transaction.program.Blocks)
@@ -199,6 +209,74 @@ func hashStableStateBody(coordinate packagegraph.CoordinateID, layout Layout, tr
 	var result StateBodyHash
 	copy(result[:], hasher.Sum(nil))
 	return result
+}
+
+func programHasBorrows(program Program) bool {
+	if operationsHaveBorrows(program.Operations) || blocksHaveBorrows(program.Blocks) {
+		return true
+	}
+	for _, helper := range program.Helpers {
+		if operationsHaveBorrows(helper.Operations) || blocksHaveBorrows(helper.Blocks) {
+			return true
+		}
+	}
+	return false
+}
+
+func blocksHaveBorrows(blocks []Block) bool {
+	for _, block := range blocks {
+		if operationsHaveBorrows(block.Operations) {
+			return true
+		}
+	}
+	return false
+}
+
+func operationsHaveBorrows(operations []Operation) bool {
+	for _, operation := range operations {
+		if isBorrowOperation(operation.Kind) || operation.BorrowInput != 0 || operation.BorrowResult != 0 || operation.ViewOffset != 0 || operation.ViewLength != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func writeStateBodyBorrowExecutable(writer stateBodyWriter, effects []hir.Effect, operations []Operation, exit ExitKind, trapCategory string, entry BlockID, blocks []Block) {
+	writeStateBodyStrings(writer, effects)
+	if len(blocks) == 0 {
+		writeStateBodyString(writer, "linear")
+		writeStateBodyUint64(writer, uint64(len(operations)))
+		for _, operation := range operations {
+			writeStateBodyBorrowOperation(writer, operation)
+		}
+		writeStateBodyString(writer, string(exit))
+		writeStateBodyString(writer, trapCategory)
+		return
+	}
+	writeStateBodyString(writer, "graph")
+	writeStateBodyUint64(writer, uint64(entry))
+	writeStateBodyUint64(writer, uint64(len(blocks)))
+	for _, block := range blocks {
+		writeStateBodyUint64(writer, uint64(block.ID))
+		writeStateBodyUint64(writer, uint64(len(block.Parameters)))
+		for _, parameter := range block.Parameters {
+			writeStateBodyUint64(writer, uint64(parameter.ID))
+			writeStateBodyString(writer, parameter.TypeID)
+		}
+		writeStateBodyUint64(writer, uint64(len(block.Operations)))
+		for _, operation := range block.Operations {
+			writeStateBodyBorrowOperation(writer, operation)
+		}
+		writeStateBodyTerminator(writer, block.Terminator)
+	}
+}
+
+func writeStateBodyBorrowOperation(writer stateBodyWriter, operation Operation) {
+	writeStateBodyHelperOperation(writer, operation)
+	writeStateBodyUint64(writer, uint64(operation.BorrowInput))
+	writeStateBodyUint64(writer, uint64(operation.BorrowResult))
+	writeStateBodyUint64(writer, uint64(operation.ViewOffset))
+	writeStateBodyUint64(writer, uint64(operation.ViewLength))
 }
 
 func writeStateBodyExecutable(writer stateBodyWriter, effects []hir.Effect, operations []Operation, exit ExitKind, trapCategory string, entry BlockID, blocks []Block) {

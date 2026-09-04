@@ -63,7 +63,7 @@ func verifyProgramBody(program Program, bound boundLayout, helperEffects map[str
 		}
 		for index, operation := range program.Operations {
 			entity := fmt.Sprintf("operation %d", index)
-			if operation.KeyInput != 0 || operation.ValueInput != 0 || operation.Result != 0 || operation.Found != 0 || operation.Kind != OperationCall && operation.Cost != 0 {
+			if operation.KeyInput != 0 || operation.ValueInput != 0 || operation.Result != 0 || operation.Found != 0 || operation.BorrowInput != 0 || operation.BorrowResult != 0 || operation.ViewOffset != 0 || operation.ViewLength != 0 || operation.Kind != OperationCall && operation.Cost != 0 {
 				failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "legacy operation carries graph-only value or cost fields"})
 			}
 			if operation.Capability.token == nil || operation.Capability != program.Capability {
@@ -109,7 +109,7 @@ func verifyCallOperation(operation Operation) string {
 	if operation.Callee == "" {
 		return "call requires one stable helper name"
 	}
-	if operation.FieldIndex != 0 || operation.Key.TypeID != "" || operation.Key.Encoded != nil || operation.Value.TypeID != "" || operation.Value.Encoded != nil || operation.KeyInput != 0 || operation.ValueInput != 0 || operation.Result != 0 || operation.Found != 0 {
+	if operation.FieldIndex != 0 || operation.Key.TypeID != "" || operation.Key.Encoded != nil || operation.Value.TypeID != "" || operation.Value.Encoded != nil || operation.KeyInput != 0 || operation.ValueInput != 0 || operation.Result != 0 || operation.Found != 0 || operation.BorrowInput != 0 || operation.BorrowResult != 0 || operation.ViewOffset != 0 || operation.ViewLength != 0 {
 		return "call carries storage or value fields"
 	}
 	return ""
@@ -117,7 +117,7 @@ func verifyCallOperation(operation Operation) string {
 
 func requiredStorageEffects(kind OperationKind) []hir.Effect {
 	switch kind {
-	case OperationCellRead, OperationMapRead:
+	case OperationCellRead, OperationMapRead, OperationCellBorrow, OperationMapBorrow:
 		return []hir.Effect{hir.EffectStorageRead}
 	case OperationCellWrite, OperationCellDelete, OperationMapWrite, OperationMapDelete:
 		return []hir.Effect{hir.EffectStorageWrite}

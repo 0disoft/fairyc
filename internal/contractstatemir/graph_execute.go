@@ -9,6 +9,7 @@ import (
 
 func executeGraph(transaction *contractstate.Transaction, bound boundLayout, program Program, helpers map[string]Helper, outcome *Outcome, operationIndex *int) (ExitKind, error) {
 	values := make(map[ValueID]Value)
+	borrows := make(map[BorrowID]contractstate.BorrowedValue)
 	current := program.Entry
 	for {
 		block := program.Blocks[current]
@@ -19,6 +20,15 @@ func executeGraph(transaction *contractstate.Transaction, bound boundLayout, pro
 				exit, err := executeHelper(transaction, bound, program.Capability, helpers[operation.Callee], helpers, outcome, operationIndex)
 				if err != nil || exit != ExitReturn {
 					return exit, err
+				}
+				continue
+			}
+			if isBorrowOperation(operation.Kind) {
+				err := executeGraphBorrow(transaction, bound, operation, values, borrows, outcome, *operationIndex)
+				(*operationIndex)++
+				outcome.Cost += uint64(operation.Cost)
+				if err != nil {
+					return "", err
 				}
 				continue
 			}

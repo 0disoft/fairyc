@@ -10,7 +10,7 @@ import (
 
 func TestContractStateSchemaMatchesRunnerVocabulary(t *testing.T) {
 	t.Parallel()
-	for _, version := range []string{"v0", "v1", "v2", "v3"} {
+	for _, version := range []string{"v0", "v1", "v2", "v3", "v4"} {
 		version := version
 		t.Run(version, func(t *testing.T) {
 			t.Parallel()
@@ -42,6 +42,8 @@ func TestContractStateSchemaMatchesRunnerVocabulary(t *testing.T) {
 			expectedOperations := operationKinds
 			if version == "v3" {
 				expectedOperations = helperOperationKinds
+			} else if version == "v4" {
+				expectedOperations = borrowOperationKinds
 			}
 			if !slices.Equal(schema.Defs.OperationKind.Enum, expectedOperations) || !slices.Equal(schema.Defs.ExitKind.Enum, exitKinds) || !slices.Equal(schema.Defs.Status.Enum, resultStatuses) {
 				t.Fatalf("schema vocabulary does not match runner")

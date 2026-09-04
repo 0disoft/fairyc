@@ -44,18 +44,22 @@ type caseDefinition struct {
 }
 
 type operation struct {
-	Kind       string `json:"kind"`
-	Field      string `json:"field"`
-	KeyType    string `json:"keyTypeID,omitempty"`
-	KeyHex     string `json:"keyHex,omitempty"`
-	ValueType  string `json:"valueTypeID,omitempty"`
-	ValueHex   string `json:"valueHex,omitempty"`
-	KeyInput   uint32 `json:"keyInput,omitempty"`
-	ValueInput uint32 `json:"valueInput,omitempty"`
-	Result     uint32 `json:"result,omitempty"`
-	Found      uint32 `json:"found,omitempty"`
-	Cost       uint32 `json:"cost,omitempty"`
-	Callee     string `json:"callee,omitempty"`
+	Kind         string `json:"kind"`
+	Field        string `json:"field,omitempty"`
+	KeyType      string `json:"keyTypeID,omitempty"`
+	KeyHex       string `json:"keyHex,omitempty"`
+	ValueType    string `json:"valueTypeID,omitempty"`
+	ValueHex     string `json:"valueHex,omitempty"`
+	KeyInput     uint32 `json:"keyInput,omitempty"`
+	ValueInput   uint32 `json:"valueInput,omitempty"`
+	Result       uint32 `json:"result,omitempty"`
+	Found        uint32 `json:"found,omitempty"`
+	BorrowInput  uint32 `json:"borrowInput,omitempty"`
+	BorrowResult uint32 `json:"borrowResult,omitempty"`
+	ViewOffset   uint32 `json:"viewOffset,omitempty"`
+	ViewLength   uint32 `json:"viewLength,omitempty"`
+	Cost         uint32 `json:"cost,omitempty"`
+	Callee       string `json:"callee,omitempty"`
 }
 
 type helperDefinition struct {

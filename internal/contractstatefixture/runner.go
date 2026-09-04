@@ -23,9 +23,10 @@ const (
 	fixtureSchemaV1 = "fairyc.contract-state-fixtures/v1"
 	fixtureSchemaV2 = "fairyc.contract-state-fixtures/v2"
 	fixtureSchemaV3 = "fairyc.contract-state-fixtures/v3"
+	fixtureSchemaV4 = "fairyc.contract-state-fixtures/v4"
 )
 
-var fixtureSchemaVersions = []string{fixtureSchemaV0, fixtureSchemaV1, fixtureSchemaV2, fixtureSchemaV3}
+var fixtureSchemaVersions = []string{fixtureSchemaV0, fixtureSchemaV1, fixtureSchemaV2, fixtureSchemaV3, fixtureSchemaV4}
 
 var operationKinds = []string{
 	"cell-delete",
@@ -37,6 +38,10 @@ var operationKinds = []string{
 }
 
 var helperOperationKinds = append(slices.Clone(operationKinds), "call")
+
+var borrowOperationKinds = append(slices.Clone(operationKinds),
+	"cell-borrow", "map-borrow", "borrow-view", "borrow-copy",
+)
 
 var exitKinds = []string{"commit", "reject", "trap"}
 var resultStatuses = []string{"commit", "error", "reject", "trap"}
@@ -178,9 +183,15 @@ func validateManifest(definition manifest) error {
 			vocabulary := operationKinds
 			if definition.SchemaVersion == fixtureSchemaV3 {
 				vocabulary = helperOperationKinds
+			} else if definition.SchemaVersion == fixtureSchemaV4 {
+				vocabulary = borrowOperationKinds
 			}
-			if !found || !slices.Contains(vocabulary, operation.Kind) || !strings.HasPrefix(operation.Kind, field.Kind+"-") {
+			fieldlessBorrow := operation.Kind == "borrow-view" || operation.Kind == "borrow-copy"
+			if !slices.Contains(vocabulary, operation.Kind) || fieldlessBorrow && operation.Field != "" || !fieldlessBorrow && (!found || !strings.HasPrefix(operation.Kind, field.Kind+"-")) {
 				return fmt.Errorf("contract-state fixture case %q has an invalid operation on %q", fixture.ID, operation.Field)
+			}
+			if definition.SchemaVersion != fixtureSchemaV4 && (operation.BorrowInput != 0 || operation.BorrowResult != 0 || operation.ViewOffset != 0 || operation.ViewLength != 0) {
+				return fmt.Errorf("contract-state fixture case %q uses borrows before fixture schema v4", fixture.ID)
 			}
 		}
 	}
@@ -198,6 +209,8 @@ func validateManifest(definition manifest) error {
 		mutationKinds := []string{"cycle", "join-type", "missing-cost", "unknown-value"}
 		if definition.SchemaVersion == fixtureSchemaV3 {
 			mutationKinds = []string{"helper-cycle", "helper-effect"}
+		} else if definition.SchemaVersion == fixtureSchemaV4 {
+			mutationKinds = []string{"borrow-invalidate", "borrow-dynamic-alias", "borrow-escape"}
 		}
 		if !slices.Contains(mutationKinds, mutation.Kind) {
 			return fmt.Errorf("contract-state mutation %q has unsupported kind %q", mutation.ID, mutation.Kind)
@@ -239,6 +252,16 @@ func runMutation(definition manifest, mutation mutationDefinition) *Failure {
 		input.Modules[0].Functions[1].Body.Statements = append([]hir.Statement{{Kind: "expression-statement", Expression: helperCallExpression(helper.Function, input.Modules[0].Functions[1].Effects)}}, input.Modules[0].Functions[1].Body.Statements...)
 	case "helper-effect":
 		input.Modules[0].Functions[0].Effects = nil
+	case "borrow-invalidate":
+		block := &transaction.Blocks[0]
+		write := hir.StateAccess{Kind: hir.StateAccessCellWrite, Field: "source", Value: hir.StateValue{TypeID: contractstate.Bytes.TypeID(), Encoded: []byte("next")}, Cost: 1}
+		block.Accesses = append(block.Accesses[:3], append([]hir.StateAccess{write}, block.Accesses[3:]...)...)
+	case "borrow-dynamic-alias":
+		transaction.Blocks[0].Accesses[4].Key = hir.StateValue{}
+		transaction.Blocks[0].Accesses[4].KeyInput = 1
+	case "borrow-escape":
+		transaction.Blocks[0].Terminator = hir.StateTerminator{Kind: hir.StateTerminatorJump, Target: 1, Arguments: []hir.StateValueID{8}, Cost: 1}
+		transaction.Blocks = append(transaction.Blocks, hir.StateBlock{ID: 1, Parameters: []hir.StateBlockParameter{{ID: 9, TypeID: contractstate.Bytes.TypeID()}}, Terminator: hir.StateTerminator{Kind: hir.StateTerminatorCommit, Cost: 1}})
 	}
 	_, err = publishCompilerResult(input)
 	if err == nil || !strings.Contains(err.Error(), mutation.ErrorContains) {
@@ -458,8 +481,9 @@ func fixtureBodyEffects(operations []operation, blocks []blockDefinition, helper
 					effects = append(effects, fixtureBodyEffects(helper.Operations, helper.Blocks, helpers, active)...)
 					delete(active, operation.Callee)
 				}
-			case "cell-read", "map-read":
+			case "cell-read", "map-read", "cell-borrow", "map-borrow":
 				effects = append(effects, hir.EffectStorageRead)
+			case "borrow-view", "borrow-copy":
 			default:
 				effects = append(effects, hir.EffectStorageWrite)
 			}
@@ -476,7 +500,9 @@ func hirStateAccess(operation operation, key, value hir.StateValue) hir.StateAcc
 	return hir.StateAccess{
 		Kind: hir.StateAccessKind(operation.Kind), Field: operation.Field, Key: key, Value: value,
 		KeyInput: hir.StateValueID(operation.KeyInput), ValueInput: hir.StateValueID(operation.ValueInput),
-		Result: hir.StateValueID(operation.Result), FoundResult: hir.StateValueID(operation.Found), Cost: operation.Cost,
+		Result: hir.StateValueID(operation.Result), FoundResult: hir.StateValueID(operation.Found),
+		BorrowInput: hir.StateBorrowID(operation.BorrowInput), BorrowResult: hir.StateBorrowID(operation.BorrowResult),
+		ViewOffset: operation.ViewOffset, ViewLength: operation.ViewLength, Cost: operation.Cost,
 	}
 }
 

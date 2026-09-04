@@ -23,8 +23,10 @@ func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]
 		return []VerificationError{{Code: "CSM1006", Entity: "entry", Detail: "entry block is outside the graph"}}, nil
 	}
 	valueTypes := make(map[ValueID]string)
+	borrowTypes := make(map[BorrowID]string)
 	operationCount := 0
 	for index, block := range program.Blocks {
+		localBorrowTypes := make(map[BorrowID]string)
 		entity := fmt.Sprintf("block %d", index)
 		if block.ID != BlockID(index) {
 			failures = append(failures, VerificationError{Code: "CSM1006", Entity: entity, Detail: "block IDs must be dense and source ordered"})
@@ -40,8 +42,19 @@ func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]
 		operationCount += len(block.Operations)
 		for opIndex, operation := range block.Operations {
 			opEntity := fmt.Sprintf("block %d operation %d", index, opIndex)
+			if operation.BorrowResult != 0 {
+				typeID := graphBorrowResultType(operation, bound, localBorrowTypes)
+				if detail := defineGraphBorrow(borrowTypes, operation.BorrowResult, typeID); detail != "" {
+					failures = append(failures, VerificationError{Code: "CSM1010", Entity: opEntity, Detail: detail})
+				} else {
+					localBorrowTypes[operation.BorrowResult] = typeID
+				}
+			}
 			if operation.Result != 0 {
 				typeID := graphOperationResultType(operation, bound)
+				if operation.Kind == OperationBorrowCopy {
+					typeID = localBorrowTypes[operation.BorrowInput]
+				}
 				if detail := defineGraphValue(valueTypes, operation.Result, typeID); detail != "" {
 					failures = append(failures, VerificationError{Code: "CSM1007", Entity: opEntity, Detail: detail})
 				}
@@ -61,6 +74,7 @@ func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]
 	indegree := make([]int, len(program.Blocks))
 	for index, block := range program.Blocks {
 		available := make(map[ValueID]string)
+		borrows := make(map[BorrowID]graphBorrow)
 		for _, parameter := range block.Parameters {
 			available[parameter.ID] = parameter.TypeID
 		}
@@ -83,6 +97,33 @@ func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]
 				}
 				continue
 			}
+			if isBorrowOperation(operation.Kind) {
+				if helper {
+					failures = append(failures, VerificationError{Code: "CSM1010", Entity: entity, Detail: "helper body cannot own a state borrow"})
+					continue
+				}
+				requiredEffects = append(requiredEffects, requiredStorageEffects(operation.Kind)...)
+				var field contractstate.Field
+				if operation.Kind == OperationCellBorrow || operation.Kind == OperationMapBorrow {
+					if int(operation.FieldIndex) >= len(bound.fields) {
+						failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "field index is outside the verified layout"})
+						continue
+					}
+					field = bound.fields[operation.FieldIndex].descriptor
+				}
+				if detail := verifyGraphBorrowOperation(operation, field, available, borrows); detail != "" {
+					failures = append(failures, VerificationError{Code: "CSM1010", Entity: entity, Detail: detail})
+					continue
+				}
+				applyGraphBorrowOperation(operation, field, borrows)
+				if operation.Kind == OperationBorrowCopy {
+					available[operation.Result] = borrows[operation.BorrowInput].typeID
+				}
+				if operation.Found != 0 {
+					available[operation.Found] = contractstate.Bool.TypeID()
+				}
+				continue
+			}
 			requiredEffects = append(requiredEffects, requiredStorageEffects(operation.Kind)...)
 			if int(operation.FieldIndex) >= len(bound.fields) {
 				failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: "field index is outside the verified layout"})
@@ -92,6 +133,9 @@ func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]
 			if detail := verifyGraphOperation(operation, field, available); detail != "" {
 				failures = append(failures, VerificationError{Code: "CSM1002", Entity: entity, Detail: detail})
 			}
+			if detail := invalidateGraphBorrows(operation, field, available, borrows); detail != "" {
+				failures = append(failures, VerificationError{Code: "CSM1010", Entity: entity, Detail: detail})
+			}
 			if operation.Result != 0 {
 				available[operation.Result] = field.ValueTypeID
 			}
@@ -100,6 +144,9 @@ func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]
 			}
 		}
 		termEntity := fmt.Sprintf("block %d terminator", index)
+		if detail := verifyGraphBorrowEscape(block.Terminator, available, borrows); detail != "" {
+			failures = append(failures, VerificationError{Code: "CSM1010", Entity: termEntity, Detail: detail})
+		}
 		if block.Terminator.Cost != canonicalStepCost {
 			failures = append(failures, VerificationError{Code: "CSM1008", Entity: termEntity, Detail: "terminator requires explicit canonical cost 1"})
 		}
@@ -171,6 +218,9 @@ func graphOperationResultType(operation Operation, bound boundLayout) string {
 }
 
 func verifyGraphOperation(operation Operation, field contractstate.Field, available map[ValueID]string) string {
+	if operation.BorrowInput != 0 || operation.BorrowResult != 0 || operation.ViewOffset != 0 || operation.ViewLength != 0 {
+		return "storage operation carries borrow-only fields"
+	}
 	isRead := operation.Kind == OperationCellRead || operation.Kind == OperationMapRead
 	if isRead != (operation.Result != 0 && operation.Found != 0) {
 		return "reads must define both value and found results; non-reads define neither"

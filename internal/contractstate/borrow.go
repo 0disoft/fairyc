@@ -14,6 +14,7 @@ type BorrowOrigin struct {
 	SnapshotVersion uint64
 	FieldIndex      uint32
 	StorageKey      Key
+	TypeID          string
 	Generation      uint64
 }
 
@@ -104,7 +105,7 @@ func (transaction *Transaction) borrowKeyLocked(field Field, key Key) (BorrowedV
 	}
 	origin := BorrowOrigin{
 		LayoutHash: transaction.layout.hash, SnapshotVersion: transaction.baseVersion,
-		FieldIndex: field.Index, StorageKey: key, Generation: transaction.borrowEpoch[key],
+		FieldIndex: field.Index, StorageKey: key, TypeID: field.ValueTypeID, Generation: transaction.borrowEpoch[key],
 	}
 	return BorrowedValue{
 		transaction: transaction, token: transaction.borrowToken, origin: origin,

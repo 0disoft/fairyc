@@ -1,0 +1,85 @@
+{
+  "$schema": "./schema-v4.json",
+  "schemaVersion": "fairyc.contract-state-fixtures/v4",
+  "deferred": [
+    "source state-access syntax and ordinary-HIR conditional lowering",
+    "borrow transfer across blocks, helpers, calls, or transactions",
+    "mutable and raw-pointer state views",
+    "native backend, production persistence, and external calls"
+  ],
+  "contracts": [
+    "docs/mir/contract-state-transaction-mir-v0.md",
+    "docs/adr/0381-verified-contract-state-borrow-transport.md"
+  ],
+  "layout": {
+    "contractUID": "fixture.borrows",
+    "fields": [
+      { "name": "source", "kind": "cell", "valueTypeID": "bytes/v1" },
+      { "name": "dynamickey", "kind": "cell", "valueTypeID": "bytes/v1" },
+      { "name": "values", "kind": "map", "keyTypeID": "bytes/v1", "valueTypeID": "bytes/v1" },
+      { "name": "target", "kind": "cell", "valueTypeID": "bytes/v1" }
+    ]
+  },
+  "limits": { "maxWrites": 8, "maxWriteBytes": 1024, "maxValueBytes": 64, "maxMapKeyBytes": 64 },
+  "cases": [
+    {
+      "id": "nested-cell-borrow-view",
+      "operations": [],
+      "blocks": [{
+        "id": 0,
+        "parameters": [],
+        "operations": [
+          { "kind": "cell-write", "field": "source", "valueTypeID": "bytes/v1", "valueHex": "616263646566", "cost": 1 },
+          { "kind": "cell-borrow", "field": "source", "borrowResult": 7, "found": 1, "cost": 1 },
+          { "kind": "borrow-view", "borrowInput": 7, "borrowResult": 8, "viewOffset": 1, "viewLength": 3, "cost": 1 },
+          { "kind": "borrow-copy", "borrowInput": 8, "result": 2, "cost": 1 },
+          { "kind": "cell-write", "field": "target", "valueInput": 2, "cost": 1 }
+        ],
+        "terminator": { "kind": "commit", "arguments": [], "trueArguments": [], "falseArguments": [], "cost": 1 }
+      }],
+      "expect": {
+        "status": "commit", "exit": "commit", "version": 1, "writes": 2, "cost": 6,
+        "reads": [{ "operation": 1, "found": true, "typeID": "bytes/v1", "valueHex": "616263646566" }],
+        "store": [
+          { "field": "source", "valueHex": "616263646566" },
+          { "field": "target", "valueHex": "626364" }
+        ]
+      }
+    },
+    {
+      "id": "map-borrow-unrelated-key",
+      "operations": [],
+      "blocks": [{
+        "id": 0,
+        "parameters": [],
+        "operations": [
+          { "kind": "cell-write", "field": "dynamickey", "valueTypeID": "bytes/v1", "valueHex": "61", "cost": 1 },
+          { "kind": "cell-read", "field": "dynamickey", "result": 1, "found": 2, "cost": 1 },
+          { "kind": "map-write", "field": "values", "keyTypeID": "bytes/v1", "keyHex": "61", "valueTypeID": "bytes/v1", "valueHex": "616c706861", "cost": 1 },
+          { "kind": "map-borrow", "field": "values", "keyTypeID": "bytes/v1", "keyHex": "61", "borrowResult": 7, "found": 3, "cost": 1 },
+          { "kind": "map-delete", "field": "values", "keyTypeID": "bytes/v1", "keyHex": "62", "cost": 1 },
+          { "kind": "borrow-copy", "borrowInput": 7, "result": 4, "cost": 1 },
+          { "kind": "cell-write", "field": "target", "valueInput": 4, "cost": 1 },
+          { "kind": "map-delete", "field": "values", "keyTypeID": "bytes/v1", "keyHex": "61", "cost": 1 }
+        ],
+        "terminator": { "kind": "commit", "arguments": [], "trueArguments": [], "falseArguments": [], "cost": 1 }
+      }],
+      "expect": {
+        "status": "commit", "exit": "commit", "version": 1, "writes": 4, "cost": 9,
+        "reads": [
+          { "operation": 1, "found": true, "typeID": "bytes/v1", "valueHex": "61" },
+          { "operation": 3, "found": true, "typeID": "bytes/v1", "valueHex": "616c706861" }
+        ],
+        "store": [
+          { "field": "target", "valueHex": "616c706861" },
+          { "field": "dynamickey", "valueHex": "61" }
+        ]
+      }
+    }
+  ],
+  "mutations": [
+    { "id": "reject-exact-borrow-invalidation", "case": "nested-cell-borrow-view", "kind": "borrow-invalidate", "errorContains": "non-invalidated borrow" },
+    { "id": "reject-dynamic-map-alias", "case": "map-borrow-unrelated-key", "kind": "borrow-dynamic-alias", "errorContains": "ambiguous alias" },
+    { "id": "reject-borrow-block-escape", "case": "nested-cell-borrow-view", "kind": "borrow-escape", "errorContains": "cannot cross a block edge" }
+  ]
+}

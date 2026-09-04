@@ -30,9 +30,9 @@ cell/map ownership.
 ## Consequences
 
 The semantic oracle can now execute and test exact owner-bound lifetime and invalidation rules
-without exposing raw storage. This decision does not yet admit borrow operations in HIR,
-contract-state MIR, stable body identity, payload codecs, fresh-owner rebind, source syntax, native
-lowering, or persistence. Those transport surfaces require a separate verified vertical slice.
+without exposing raw storage. At this decision point, HIR/MIR and stable transport remained closed;
+ADR 0381 subsequently admits that separate verified compiler slice. Source syntax, native lowering,
+and production persistence remain closed.
 
 ## Evidence
 

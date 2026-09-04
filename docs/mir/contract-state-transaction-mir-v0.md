@@ -22,7 +22,8 @@
 - Closed-form owner source: `docs/adr/0363-closed-form-contract-state-owner-hir.md`
 - Data-dependent graph source: `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`
 - Verified helper-call source: `docs/adr/0379-verified-contract-state-helper-calls.md`
-- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v3.json` with historical v0/v1/v2 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`, `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`, `docs/adr/0379-verified-contract-state-helper-calls.md`
+- State-borrow transport source: `docs/adr/0381-verified-contract-state-borrow-transport.md`
+- Versioned execution fixtures: `spec/fixtures/contract-state/manifest-v4.json` with historical v0/v1/v2/v3 coverage, `docs/adr/0364-versioned-contract-state-transaction-fixtures.md`, `docs/adr/0365-versioned-contract-state-map-fixtures.md`, `docs/adr/0378-data-dependent-contract-state-transaction-graphs.md`, `docs/adr/0379-verified-contract-state-helper-calls.md`, `docs/adr/0381-verified-contract-state-borrow-transport.md`
 - Compiler-published fixture source: `docs/adr/0366-compiler-published-contract-state-fixtures.md`
 - State oracle: `internal/contractstate`
 - Implementation: `internal/contractstatemir`, `internal/compiler/check.go`
@@ -68,6 +69,13 @@ The storage operation set remains deliberately small:
 
 - `cell-read`, `cell-write`, `cell-delete`;
 - `map-read`, `map-write`, `map-delete`.
+
+ADR 0381 adds graph-root-only `cell-borrow`, `map-borrow`, `borrow-view`, and `borrow-copy`.
+Borrow identities are transaction-unique but block-confined. They never enter ordinary SSA edges,
+parameters, helpers, or linear bodies. Origins retain the exact field, literal map key, value codec,
+snapshot, and mutation generation. Exact-address mutation invalidates a live handle; a dynamic
+same-map mutation fails closed when non-aliasing cannot be proved. Only `borrow-copy` creates an
+ordinary typed SSA value, using copied bytes rather than a pointer or mutable alias.
 
 Every operation names a field by exact layout index. Map keys and written values carry an explicit
 codec identity plus canonical bytes. The verifier rejects kind mismatches, missing or extra
@@ -176,6 +184,11 @@ hash. Graph bodies use `fairyc.contract-state-package-body-artifact/v2`, reconst
 capabilities, re-enter graph verification, and participate in the already-required body hash, so
 cache key v4 invalidates its owner after any graph change.
 
+Borrow graph bodies use `fairyc.contract-state-package-body-artifact/v4`. Their canonical bytes and
+body hash include borrow inputs/results and view bounds, then fresh-owner rebind recreates private
+capability before verifier entry. Existing v1 linear, v2 graph, and v3 helper payload bytes and
+pre-borrow body hashes remain unchanged.
+
 ADR 0352 stores this payload beside stable package MIR v3 in one exact-version outer compilation
 artifact and requires both nested artifacts to share a package coordinate. Stable MIR v3 itself is
 unchanged. ADR 0353 makes persistent records carry the bundle and checks the cache-selected body hash
@@ -201,7 +214,7 @@ unexpected bodies fail before publication.
 ## Closed gates
 
 This slice does not add source state-access syntax, ordinary-HIR conditional lowering, loops,
-general call admission, graph-block helper calls, owner-bound state borrows, pointer provenance, reentrancy, deterministic native backend execution, persistence,
+general call admission, graph-block helper calls, cross-block/helper borrow transfer, mutable or raw-pointer state views, reentrancy, deterministic native backend execution, persistence,
 migration, gas, or chain integration.
 
 Source-independent HIR declarations now map into this boundary under ADR 0345, and public-interface

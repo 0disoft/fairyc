@@ -52,12 +52,16 @@ root attempt and only the root may commit.
 ADR 0380 adds an oracle-only owner-bound encoded borrow. Its provenance contains the exact layout,
 starting version, field, derived storage key, and key-local mutation generation. Exact-key
 replacement/delete invalidates prior and nested views; close and retry attempts cannot reuse them.
+ADR 0381 transports that authority through graph-only HIR/state MIR, stable v4 package bodies,
+fresh-owner rebind, and compiler-published fixtures. Handles remain block-confined and read-only;
+dynamic same-map mutation fails closed while a borrow is live.
 
 `MemoryStore` is an executable semantic oracle. A production backend may use a database, state tree,
 host calls, or copy-on-write pages, but it must preserve the same observable transaction rules.
 `spec/fixtures/contract-state/manifest-v0.json` owns the historical executable cell examples;
 ADR 0365 preserves that baseline in `manifest-v1.json`; ADR 0378 preserves the v2 graph generation;
-ADR 0379 makes `manifest-v3.json` the current helper corpus while retaining all historical versions.
+ADR 0379 preserves the v3 helper corpus; ADR 0381 makes `manifest-v4.json` current while retaining
+all historical versions.
 No manifest is a production storage format.
 ADR 0366 executes both corpora only after the compiler atomically publishes verified ordinary and
 contract-state MIR; a state-MIR rejection leaves both executable outputs empty.

@@ -23,6 +23,8 @@ const (
 	StableStateGraphBodyVersion  = "fairyc-contract-state-package-body-artifact/2"
 	StableStateHelperBodySchema  = "fairyc.contract-state-package-body-artifact/v3"
 	StableStateHelperBodyVersion = "fairyc-contract-state-package-body-artifact/3"
+	StableStateBorrowBodySchema  = "fairyc.contract-state-package-body-artifact/v4"
+	StableStateBorrowBodyVersion = "fairyc-contract-state-package-body-artifact/4"
 )
 
 var (
@@ -73,16 +75,20 @@ type StableStateHelper struct {
 }
 
 type StableStateOperation struct {
-	Kind       string           `json:"kind"`
-	FieldIndex uint32           `json:"fieldIndex"`
-	Key        StableStateValue `json:"key"`
-	Value      StableStateValue `json:"value"`
-	KeyInput   uint32           `json:"keyInput,omitempty"`
-	ValueInput uint32           `json:"valueInput,omitempty"`
-	Result     uint32           `json:"result,omitempty"`
-	Found      uint32           `json:"found,omitempty"`
-	Callee     string           `json:"callee,omitempty"`
-	Cost       uint32           `json:"cost,omitempty"`
+	Kind         string           `json:"kind"`
+	FieldIndex   uint32           `json:"fieldIndex"`
+	Key          StableStateValue `json:"key"`
+	Value        StableStateValue `json:"value"`
+	KeyInput     uint32           `json:"keyInput,omitempty"`
+	ValueInput   uint32           `json:"valueInput,omitempty"`
+	Result       uint32           `json:"result,omitempty"`
+	Found        uint32           `json:"found,omitempty"`
+	BorrowInput  uint32           `json:"borrowInput,omitempty"`
+	BorrowResult uint32           `json:"borrowResult,omitempty"`
+	ViewOffset   uint32           `json:"viewOffset,omitempty"`
+	ViewLength   uint32           `json:"viewLength,omitempty"`
+	Callee       string           `json:"callee,omitempty"`
+	Cost         uint32           `json:"cost,omitempty"`
 }
 
 type StableStateBlock struct {
@@ -218,6 +224,9 @@ func DecodeStableStateBody(encoded []byte, maxBytes uint64) (StableStateBodyArti
 
 func stableStateBodyEnvelopeIdentity(body StableStateBodyArtifact) (string, string) {
 	for _, transaction := range body.Transactions {
+		if stableTransactionHasBorrows(transaction) {
+			return StableStateBorrowBodySchema, StableStateBorrowBodyVersion
+		}
 		if len(transaction.Helpers) != 0 {
 			return StableStateHelperBodySchema, StableStateHelperBodyVersion
 		}
@@ -358,6 +367,8 @@ func stableStateOperation(operation Operation) StableStateOperation {
 		Key: stableStateValue(operation.Key), Value: stableStateValue(operation.Value),
 		KeyInput: uint32(operation.KeyInput), ValueInput: uint32(operation.ValueInput),
 		Result: uint32(operation.Result), Found: uint32(operation.Found), Cost: operation.Cost,
+		BorrowInput: uint32(operation.BorrowInput), BorrowResult: uint32(operation.BorrowResult),
+		ViewOffset: operation.ViewOffset, ViewLength: operation.ViewLength,
 		Callee: operation.Callee,
 	}
 }
@@ -481,8 +492,41 @@ func operationFromStable(value StableStateOperation, capability TransactionCapab
 		Value:    Value{TypeID: value.Value.TypeID, Encoded: slices.Clone(value.Value.Encoded)},
 		KeyInput: ValueID(value.KeyInput), ValueInput: ValueID(value.ValueInput),
 		Result: ValueID(value.Result), Found: ValueID(value.Found), Cost: value.Cost,
+		BorrowInput: BorrowID(value.BorrowInput), BorrowResult: BorrowID(value.BorrowResult),
+		ViewOffset: value.ViewOffset, ViewLength: value.ViewLength,
 		Callee: value.Callee,
 	}
+}
+
+func stableTransactionHasBorrows(transaction StableStateTransaction) bool {
+	if stableOperationsHaveBorrows(transaction.Operations) || stableBlocksHaveBorrows(transaction.Blocks) {
+		return true
+	}
+	for _, helper := range transaction.Helpers {
+		if stableOperationsHaveBorrows(helper.Operations) || stableBlocksHaveBorrows(helper.Blocks) {
+			return true
+		}
+	}
+	return false
+}
+
+func stableBlocksHaveBorrows(blocks []StableStateBlock) bool {
+	for _, block := range blocks {
+		if stableOperationsHaveBorrows(block.Operations) {
+			return true
+		}
+	}
+	return false
+}
+
+func stableOperationsHaveBorrows(operations []StableStateOperation) bool {
+	for _, operation := range operations {
+		if operation.BorrowInput != 0 || operation.BorrowResult != 0 || operation.ViewOffset != 0 || operation.ViewLength != 0 ||
+			operation.Kind == string(OperationCellBorrow) || operation.Kind == string(OperationMapBorrow) || operation.Kind == string(OperationBorrowView) || operation.Kind == string(OperationBorrowCopy) {
+			return true
+		}
+	}
+	return false
 }
 
 func effectsFromStable(values []string) ([]hir.Effect, error) {

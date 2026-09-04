@@ -38,6 +38,10 @@ const (
 	StateAccessMapRead    StateAccessKind = "map-read"
 	StateAccessMapWrite   StateAccessKind = "map-write"
 	StateAccessMapDelete  StateAccessKind = "map-delete"
+	StateAccessCellBorrow StateAccessKind = "cell-borrow"
+	StateAccessMapBorrow  StateAccessKind = "map-borrow"
+	StateAccessBorrowView StateAccessKind = "borrow-view"
+	StateAccessBorrowCopy StateAccessKind = "borrow-copy"
 	StateAccessCall       StateAccessKind = "call"
 )
 
@@ -51,6 +55,10 @@ type StateValue struct {
 // StateValueID is one transaction-local SSA value identity. Zero means that
 // an access uses its canonical literal operand instead of a prior value.
 type StateValueID uint32
+
+// StateBorrowID is one transaction-unique owner-bound state view. Borrow identities
+// cannot enter ordinary value edges or block parameters, and cannot cross blocks.
+type StateBorrowID uint32
 
 // StateBlockID is one transaction-local basic-block identity. IDs are dense
 // and source ordered so stable transport never depends on map iteration.
@@ -66,17 +74,21 @@ type StateBlockParameter struct {
 // StateAccess names a package-owned field rather than a physical field index.
 // Lowering resolves the name through the exact StateLayout owned by Package.
 type StateAccess struct {
-	Kind        StateAccessKind
-	Field       string
-	Key         StateValue
-	Value       StateValue
-	KeyInput    StateValueID
-	ValueInput  StateValueID
-	Result      StateValueID
-	FoundResult StateValueID
-	Callee      SymbolID
-	Cost        uint32
-	Span        Span
+	Kind         StateAccessKind
+	Field        string
+	Key          StateValue
+	Value        StateValue
+	KeyInput     StateValueID
+	ValueInput   StateValueID
+	Result       StateValueID
+	FoundResult  StateValueID
+	BorrowInput  StateBorrowID
+	BorrowResult StateBorrowID
+	ViewOffset   uint32
+	ViewLength   uint32
+	Callee       SymbolID
+	Cost         uint32
+	Span         Span
 }
 
 type StateTerminatorKind string

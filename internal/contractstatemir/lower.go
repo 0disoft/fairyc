@@ -530,19 +530,29 @@ func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.St
 					operations = append(operations, Operation{Kind: OperationCall, Capability: capability, Callee: name, Cost: access.Cost})
 					continue
 				}
-				fieldIndex, found := fieldIndices[access.Field]
-				if !found {
-					return Program{}, fmt.Errorf("block %d access %d names unknown field %q", blockIndex, accessIndex, access.Field)
-				}
 				kind, err := lowerStateAccessKind(access.Kind)
 				if err != nil {
 					return Program{}, fmt.Errorf("block %d access %d: %w", blockIndex, accessIndex, err)
+				}
+				if kind == OperationBorrowView || kind == OperationBorrowCopy {
+					operations = append(operations, Operation{
+						Kind: kind, Capability: capability, Result: ValueID(access.Result),
+						BorrowInput: BorrowID(access.BorrowInput), BorrowResult: BorrowID(access.BorrowResult),
+						ViewOffset: access.ViewOffset, ViewLength: access.ViewLength, Cost: access.Cost,
+					})
+					continue
+				}
+				fieldIndex, found := fieldIndices[access.Field]
+				if !found {
+					return Program{}, fmt.Errorf("block %d access %d names unknown field %q", blockIndex, accessIndex, access.Field)
 				}
 				operations = append(operations, Operation{
 					Kind: kind, Capability: capability, FieldIndex: fieldIndex,
 					Key: lowerStateValue(access.Key), Value: lowerStateValue(access.Value),
 					KeyInput: ValueID(access.KeyInput), ValueInput: ValueID(access.ValueInput),
 					Result: ValueID(access.Result), Found: ValueID(access.FoundResult), Cost: access.Cost,
+					BorrowInput: BorrowID(access.BorrowInput), BorrowResult: BorrowID(access.BorrowResult),
+					ViewOffset: access.ViewOffset, ViewLength: access.ViewLength,
 				})
 			}
 			blocks = append(blocks, Block{
@@ -558,6 +568,9 @@ func lowerHIRTransaction(layout Layout, effects []hir.Effect, transaction hir.St
 	}
 	operations := make([]Operation, 0, len(transaction.Accesses))
 	for index, access := range transaction.Accesses {
+		if access.Kind == hir.StateAccessCellBorrow || access.Kind == hir.StateAccessMapBorrow || access.Kind == hir.StateAccessBorrowView || access.Kind == hir.StateAccessBorrowCopy {
+			return Program{}, fmt.Errorf("access %d owner-bound borrow requires a graph body", index)
+		}
 		if access.Kind == hir.StateAccessCall {
 			name, found := helperNames[access.Callee]
 			if !found {
@@ -622,6 +635,14 @@ func lowerStateAccessKind(kind hir.StateAccessKind) (OperationKind, error) {
 		return OperationMapWrite, nil
 	case hir.StateAccessMapDelete:
 		return OperationMapDelete, nil
+	case hir.StateAccessCellBorrow:
+		return OperationCellBorrow, nil
+	case hir.StateAccessMapBorrow:
+		return OperationMapBorrow, nil
+	case hir.StateAccessBorrowView:
+		return OperationBorrowView, nil
+	case hir.StateAccessBorrowCopy:
+		return OperationBorrowCopy, nil
 	default:
 		return "", fmt.Errorf("unsupported state access kind %q", kind)
 	}
