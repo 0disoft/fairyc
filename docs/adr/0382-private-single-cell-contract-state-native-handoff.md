@@ -33,6 +33,15 @@ native evidence.
    The single-u64 entry additionally rejects every present value whose length is not eight bytes.
    Native regressions start with an existing value, repeat writes and deletes across all three
    exits, compare all retained value and trap-category bytes, and check absent reads after delete.
+7. `PrepareCompiled` admits a published compiler result only after checking semantic completion,
+   ordinary MIR verification and exact fresh-lowering agreement, the complete state transaction
+   publication and its owners, and capability coherence. Fresh capability tokens are excluded only
+   from the fact comparison. The returned handoff owns freshly lowered storage rather than aliases
+   into the caller's mutable result. The native regression corpus passes through this boundary.
+
+The current result check deliberately requires fresh-lowering structural equality. Supporting
+optimized or cache-reassembled ordinary MIR requires a separate identity-preserving admission path;
+this check is not a general equivalence proof and does not claim source state-operation support.
 
 ## Consequences
 

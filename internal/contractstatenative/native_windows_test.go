@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -30,7 +32,11 @@ func TestVerifiedCellTransactionsRunLowAndOptimizedMSVC(t *testing.T) {
 			if deleting {
 				input.StateTransactions[0].Accesses[0] = hir.StateAccess{Kind: hir.StateAccessCellDelete, Field: "value"}
 			}
-			handoff, err := Prepare(input, 1, 1, coordinate)
+			compiled, err := compiler.LowerAnalyzed(compiler.Analysis{Semantic: semantic.Result{HIR: input, CompletedThrough: semantic.PhaseFlow}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			handoff, err := PrepareCompiled(compiled, 1, 1, coordinate)
 			if err != nil {
 				t.Fatal(err)
 			}
