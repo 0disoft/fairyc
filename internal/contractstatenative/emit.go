@@ -30,7 +30,7 @@ type Artifact struct {
 // Prepare creates one exact compiler-to-native handoff from source-independent HIR, its stable
 // package coordinate, and one transaction owner. Verification and body hashing share this boundary.
 func Prepare(input hir.Package, packageID hir.PackageID, function hir.SymbolID, coordinate packagegraph.CoordinateID) (Handoff, error) {
-	if packageID == 0 || function == 0 || coordinate == (packagegraph.CoordinateID{}) {
+	if packageID < 0 || function < 0 || coordinate == (packagegraph.CoordinateID{}) {
 		return Handoff{}, fmt.Errorf("contract-state native handoff identity is incomplete")
 	}
 	lowered, err := contractstatemir.LowerHIRTransactions(input)

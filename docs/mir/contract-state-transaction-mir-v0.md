@@ -8,6 +8,7 @@
 - Body payload source: `docs/adr/0350-bounded-stable-contract-state-body-payload.md`
 - Fresh-owner rebind source: `docs/adr/0351-checked-fresh-owner-contract-state-body-rebind.md`
 - First native handoff source: `docs/adr/0382-private-single-cell-contract-state-native-handoff.md`
+- Experimental source admission: `docs/adr/0383-experimental-source-state-native-transactions.md`
 - Stable package-compilation source: `docs/adr/0352-stable-package-compilation-artifact.md`,
   `docs/package/stable-package-compilation-v1.md`
 - Persistent compilation-cache source: `docs/adr/0353-stable-compilation-cache-records.md`
@@ -219,7 +220,8 @@ unexpected bodies fail before publication.
 
 ## Closed gates
 
-Except for ADR 0382's private straight-line single-cell Windows handoff, this slice does not add
+Except for ADR 0382's private straight-line single-cell Windows handoff and ADR 0383's explicitly
+selected experimental single-cell source adapter, this slice does not add
 source state-access syntax, ordinary-HIR conditional lowering, loops,
 general call admission, graph-block helper calls, cross-block/helper borrow transfer, mutable or raw-pointer state views, reentrancy, deterministic native backend execution, persistence,
 migration, gas, or chain integration.
