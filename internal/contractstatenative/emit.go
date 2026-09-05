@@ -143,6 +143,9 @@ uint8_t fycs_native_last_read_found_v0 = 0u;
 
 int32_t fycs_native_entry_v0(fycs_native_store_v0 *store) {
     fycs_native_transaction_v0 transaction;
+    if (store == NULL || (store->present != 0u && store->length != 8u)) {
+        return -10;
+    }
     if (fycs_native_begin_v0(store, fycs_native_layout_hash_v0, fycs_native_body_hash_v0, &transaction) != 0) {
         return -10;
     }

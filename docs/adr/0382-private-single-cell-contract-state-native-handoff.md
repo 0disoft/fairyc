@@ -30,6 +30,9 @@ native evidence.
 6. Execute commit, reject, and trap programs under low and optimized x64 MSVC. The native probes
    require read-your-write value `42`, commit-only publication, reject/trap rollback, exact trap
    category, hash/canonical-store rejection, no stdout or stderr, and zero live runtime resources.
+   The single-u64 entry additionally rejects every present value whose length is not eight bytes.
+   Native regressions start with an existing value, repeat writes and deletes across all three
+   exits, compare all retained value and trap-category bytes, and check absent reads after delete.
 
 ## Consequences
 
