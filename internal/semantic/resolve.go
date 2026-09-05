@@ -482,6 +482,9 @@ func (a *analyzer) resolveImports() {
 }
 
 func (a *analyzer) resolveFunction(module *moduleScope, function *ast.Function) {
+	if len(function.TypeParameters) != 0 {
+		a.addUnsupported(module.file.Path, function.Span, "generic-function-specialization")
+	}
 	parameters := &lexicalScope{names: make(map[string]*symbol)}
 	for index := range function.Parameters {
 		parameter := &function.Parameters[index]

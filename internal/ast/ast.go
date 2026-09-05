@@ -158,6 +158,7 @@ type Import struct {
 
 // Function records a source function before name resolution and typing.
 type Function struct {
+	TypeParameters    []string
 	Name              string
 	Owner             string
 	Public            bool
@@ -242,13 +243,14 @@ type Literal struct {
 
 // Expression is a structural AST expression used before name resolution and typing.
 type Expression struct {
-	Kind     syntax.Kind
-	Span     diagnostic.Span
-	Text     string
-	Cooked   string
-	Type     *TypeReference
-	Children []*Expression
-	Block    *Block
+	TypeArguments []TypeReference
+	Kind          syntax.Kind
+	Span          diagnostic.Span
+	Text          string
+	Cooked        string
+	Type          *TypeReference
+	Children      []*Expression
+	Block         *Block
 }
 
 // Lower rejects diagnostic CSTs and converts source concepts without semantic analysis.
@@ -566,6 +568,12 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 		case syntax.KindOwner:
 			value.Owner = child.Text
 			value.OwnerSpan = child.NameSpan
+		case syntax.KindTypeParameters:
+			for _, parameterID := range child.Children {
+				if parameter, found := tree.Node(parameterID); found {
+					value.TypeParameters = append(value.TypeParameters, parameter.Text)
+				}
+			}
 		case syntax.KindParameter:
 			value.Parameters = append(value.Parameters, lowerParameter(tree, child))
 		case syntax.KindType:
@@ -741,6 +749,12 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 		return expression
 	}
 	for _, child := range node.Children {
+		if node.Kind == syntax.KindSpecialize {
+			if typeNode, found := tree.Node(child); found && typeNode.Kind == syntax.KindType {
+				expression.TypeArguments = append(expression.TypeArguments, lowerType(tree, typeNode))
+				continue
+			}
+		}
 		if node.Kind == syntax.KindCast {
 			if typeNode, found := tree.Node(child); found && typeNode.Kind == syntax.KindType {
 				target := lowerType(tree, typeNode)

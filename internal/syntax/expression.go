@@ -45,6 +45,20 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 			return left
 		}
 		switch p.currentText() {
+		case "<":
+			if 140 >= minBindingPower && p.explicitTypeCallAhead(left) {
+				p.advance()
+				children := []NodeID{left}
+				for !p.at(">") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+					children = append(children, p.parseType())
+					if !p.match(",") {
+						break
+					}
+				}
+				p.expectTypeClose()
+				left = p.addNode(KindSpecialize, start, children, "", "")
+				continue
+			}
 		case "(":
 			if 140 < minBindingPower {
 				return left

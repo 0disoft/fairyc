@@ -63,13 +63,15 @@ enum_variant = IDENT enum_payload? ";" ;
 enum_payload = "{" enum_field_decl* "}" ;
 enum_field_decl = type IDENT ";" ;
 
-fairy_function_decl = "unsafe"? "fn" type function_name
+fairy_function_decl = "unsafe"? "fn" type function_name type_parameters?
                       "(" ordinary_parameter_list? ")" function_body
                       ;
 
 (* One optional owner qualifier distinguishes a type-owned function from a
    module-local function. Receiver and owner agreement is semantic. *)
 function_name = IDENT ("::" IDENT)? ;
+(* Generic syntax is retained for specialization; semantic admission remains gated. *)
+type_parameters = "<" IDENT ("," IDENT)* ","? ">" ;
 
 foreign_function_decl = "unsafe" "extern" CONTEXT_C "fn" type IDENT
                         "(" foreign_parameter_list? ")" ";"
@@ -177,7 +179,10 @@ prefix_expression = prefix_operator prefix_expression | postfix_expression ;
 prefix_operator = "-" | "+" | "!" | "~" | "ref" | "ref" "mut" | "*" ;
 
 postfix_expression = primary_expression postfix_suffix* ;
-postfix_suffix = call_suffix | index_suffix | field_suffix | "?" ;
+postfix_suffix = call_suffix | explicit_type_call_suffix | index_suffix | field_suffix | "?" ;
+(* An angle list is recognized only after a path and when followed by a call.
+   Lookahead is bounded to 256 significant tokens; ordinary comparisons remain unchanged. *)
+explicit_type_call_suffix = "<" type ("," type)* ","? ">" call_suffix ;
 call_suffix = "(" argument_list? ")" ;
 argument_list = expression ("," expression)* ","? ;
 index_suffix = "[" (expression ".." expression? | ".." expression? | expression) "]" ;

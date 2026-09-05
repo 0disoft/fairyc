@@ -316,6 +316,7 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 	var resultType NodeID
 	var parameters []NodeID
 	owner := NoNode
+	typeParameters := NoNode
 	legacyHeader := p.acceptsPreviousRevision() && p.atKind(lexer.Identifier) && p.peekText(1) == "("
 	if legacyHeader {
 		name, nameSpan = p.parseNameWithSpan()
@@ -331,10 +332,31 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 		} else {
 			name, nameSpan = firstName, firstSpan
 		}
+		if p.at("<") {
+			parameterStart := p.currentFullIndex()
+			p.advance()
+			var names []NodeID
+			if p.at(">") {
+				p.parseName()
+			}
+			for !p.at(">") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+				start := p.currentFullIndex()
+				parameter, nameSpan := p.parseNameWithSpan()
+				names = append(names, p.addNamedNode(KindPath, start, nil, parameter, "", nameSpan))
+				if !p.match(",") {
+					break
+				}
+			}
+			p.expectTypeClose()
+			typeParameters = p.addNode(KindTypeParameters, parameterStart, names, "", "")
+		}
 		parameters = p.parseParameters(method, true)
 	}
 	body := p.parseBlockWithTail(legacyHeader)
 	children := append([]NodeID(nil), leading...)
+	if typeParameters != NoNode {
+		children = append(children, typeParameters)
+	}
 	if owner != NoNode {
 		children = append(children, owner)
 	}
