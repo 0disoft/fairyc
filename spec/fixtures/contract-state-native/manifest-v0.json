@@ -1,0 +1,8 @@
+{
+  "schema": "fairyc.contract-state-native-fixtures/v0",
+  "cases": [
+    {"id": "commit", "source": "examples/contract_state_native/transaction.fy", "exit": "commit", "status": 0},
+    {"id": "reject", "source": "spec/fixtures/contract-state-native/reject/transaction.fy", "exit": "reject", "status": 1},
+    {"id": "trap", "source": "spec/fixtures/contract-state-native/trap/transaction.fy", "exit": "trap", "status": 2}
+  ]
+}

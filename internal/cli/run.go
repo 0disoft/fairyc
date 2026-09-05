@@ -266,6 +266,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runHostBuild(args[1:], sourceRoot, stdout, stderr)
 	case "run-host":
 		return runHost(args[1:], sourceRoot, stdout, stderr)
+	case "run-state":
+		return runState(args[1:], sourceRoot, stdout, stderr)
 	default:
 		return invocationError(stderr, fmt.Sprintf("unknown experimental command %q", command))
 	}

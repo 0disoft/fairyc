@@ -27,8 +27,12 @@ exact retained bytes, repeated execution, rejected malformed storage, and exact 
 ## Boundaries
 
 This is an experimental source admission and does not change the released language revision or
-stable CLI. No standard-library module named `storage` is added. It is not yet a normal workspace
-build/run command, and the example's executable host adapter remains test-owned. Source reads
+stable CLI. No standard-library module named `storage` is added. `fairyc experimental run-state
+FILE.fy --profile low|optimized` executes the source with a command-owned empty in-memory host
+store and reports the native exit kind, trap category when present, and final cell bytes. Successful
+command execution returns zero independently of the transaction exit kind. Paths use the existing
+bounded source-root loader; other flags, profiles, and hosts fail closed. It is not a normal workspace
+build/run command. Source reads
 produce transaction observations, not ordinary expression values. Graphs, maps, helpers, dynamic
 values, public ABI, persistence providers, and other native targets remain separate work.
 
@@ -39,3 +43,6 @@ values, public ABI, persistence providers, and other native targets remain separ
 - `internal/contractstatenative/source_test.go`
 - `internal/contractstatenative/native_windows_test.go`
 - `examples/contract_state_native/transaction.fy`
+- `spec/fixtures/contract-state-native/manifest-v0.json`: three versioned source-to-C fixtures
+  for commit, reject, and trap, executed by `internal/contractstatenative/fixture_test.go`.
+- `internal/cli/state_run_test.go`: command-level low/optimized MSVC execution and exact receipts.
