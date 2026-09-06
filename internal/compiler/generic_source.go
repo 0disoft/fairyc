@@ -1,10 +1,12 @@
 package compiler
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
+	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
@@ -14,6 +16,25 @@ import (
 // the ordinary type, ownership, effect, lowering, and MIR verification pipeline.
 func CheckGenericFunctions(file semantic.File, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
 	owner := genericplan.PackageID(fmt.Sprintf("package_%d", file.Package))
+	return checkGenericFunctions(file, owner, limits)
+}
+
+// CheckGenericFunctionsForPackage binds the private module-local admission path
+// to a resolved package coordinate, independent of disposable semantic numbering.
+// The caller must supply the coordinate belonging to file.Package. A coordinate
+// is a namespace, not evidence for cache reuse; definition digests still govern
+// specialization identity. This does not admit public or imported templates.
+func CheckGenericFunctionsForPackage(file semantic.File, coordinate packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
+	if coordinate == (packagegraph.CoordinateID{}) {
+		return Result{}, genericplan.Plan{}, fmt.Errorf("generic source requires a nonzero package coordinate")
+	}
+	// Encode all digest bytes in the planner's canonical identifier alphabet.
+	// Keep a distinct versioned namespace rather than weakening path validation.
+	owner := genericplan.PackageID("package_coordinate_v1_" + hex.EncodeToString(coordinate[:]))
+	return checkGenericFunctions(file, owner, limits)
+}
+
+func checkGenericFunctions(file semantic.File, owner genericplan.PackageID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
 	module, plan, err := genericsource.Expand(file.Module, owner, limits)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err

@@ -26,7 +26,7 @@ func TestGenericSourceRunsLowAndOptimizedMSVC(t *testing.T) {
 		}
 		t.Run(fixture.ID, func(t *testing.T) {
 			file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", genericFixtureSource(t, fixture.Source))
-			result, _, err := compiler.CheckGenericFunctions(file, genericplan.DefaultPlanLimits())
+			result, _, err := compiler.CheckGenericFunctionsForPackage(file, genericCoordinate(t), genericplan.DefaultPlanLimits())
 			if err != nil || !result.Verified {
 				t.Fatalf("compile: %v %+v", err, result.Semantic)
 			}
