@@ -470,7 +470,7 @@ func lowerProgramSourcesInternal(arguments []string, sourceRoot string, stderr i
 	if syntaxFailed {
 		return loweredProgram{}, ExitSourceDiagnostics
 	}
-	checked, pipelineErr := compiler.Check(semanticFiles)
+	checked, pipelineErr := compiler.CheckExplicitFiles(semanticFiles)
 	semanticResult := checked.Semantic
 	if len(semanticResult.Diagnostics) > 0 {
 		if err := writeSemanticDiagnostics(stderr, sources, semanticResult.Diagnostics); err != nil {
@@ -580,7 +580,11 @@ func runCheckSemantics(arguments []string, sourceRoot string, stdout, stderr io.
 	if syntaxFailed {
 		return ExitSourceDiagnostics
 	}
-	result := semantic.Analyze(semanticFiles)
+	analysis, err := compiler.AnalyzeExplicitFiles(semanticFiles)
+	if err != nil {
+		return internalError(stderr)
+	}
+	result := analysis.Semantic
 	if len(result.Diagnostics) > 0 {
 		if err := writeSemanticDiagnostics(stderr, sources, result.Diagnostics); err != nil {
 			return ExitInternalFailure

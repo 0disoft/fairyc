@@ -43,6 +43,13 @@ invocation or identity rejection, 4 for internal/output failure, and 7 for paren
 permission, filesystem, or rollback failure. Output failure occurs after creation and cannot undo
 the project. No absolute parent path or raw operating-system error is part of stable output.
 
+## Experimental explicit-file generics
+
+Experimental explicit-file check/semantic-check, interpreter, C-emission, and native lowering also
+accept language /14 scalar generic functions across explicitly supplied modules (ADR 0385). Their
+source closure remains manifest-free: no implicit source discovery, SDK injection, package cache,
+or package-coordinate claim is introduced. This does not enable generic source symbols in Atlas.
+
 ## Stable diagnostic explanation v1
 
 `fairyc explain <diagnostic-code>` is a stable, source-independent lookup over

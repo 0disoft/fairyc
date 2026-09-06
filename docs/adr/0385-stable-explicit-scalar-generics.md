@@ -37,8 +37,8 @@ toolchain, stream, lock, and program-exit rules. No new CLI flags are introduced
 Stable commands do not read or write compilation caches. The existing private generic memory/disk
 lane retains separate identities and current-source reanalysis. Experimental cache and session
 commands now select that lane through `SourceSession` when the current workspace contains generic
-declarations; ordinary workspaces retain their previous cache family. Atlas and direct-file entry
-points are not promoted by this decision. Generic interface
+declarations; ordinary workspaces retain their previous cache family. Atlas source-symbol support
+is not promoted by this decision. Generic interface
 and cache records are not public ABI or portable distribution formats. Generic nominal types and
 static interface source syntax are still separate work; this slice does not claim their completion.
 
@@ -52,6 +52,24 @@ Disk formats remain separate: ordinary records use the existing directory and ge
 `generic-v0`. Entry/byte bounds and reported retention counters apply to the active format namespace,
 not their combined on-disk footprint; switching formats does not delete historical cache data.
 Generic contract-state compilation still falls back to verified uncached lowering.
+
+## Explicit-file experimental commands
+
+`check-semantics`, verified `check`, interpreter `run`, C emission, and the native commands sharing
+the explicit-file lowering path now use AnalyzeExplicitFiles/CheckExplicitFiles. A source set is
+one build-local default package; public generic helpers may be imported from another explicitly
+supplied module. No package coordinate is synthesized. The owner `explicit_files_v0` is only an
+internal specialization namespace, not a manifest identity or a cache compatibility promise.
+
+Original file/module identity maps source-owned generic failures to existing diagnostics. Absent
+imports and duplicate modules retain ordinary resolve diagnostics. Source files remain immutable,
+and the existing file-count, aggregate-byte, path, entry, target and native-execution bounds remain
+unchanged. This path discovers no implicit files, loads no manifest or SDK, and publishes no public
+interface or cached artifacts. Ordinary files without generic declarations retain their previous
+analysis. Direct-file acceptance does not imply Atlas can describe original generic declarations.
+
+CLI tests execute a two-module generic helper chain as 42 in the interpreter and low/optimized
+MSVC, cover typed-HIR/MIR checks and C emission, and verify source diagnostics without partial output.
 
 ## Evidence
 

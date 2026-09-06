@@ -13,6 +13,16 @@ import (
 // genericSourceDiagnostic publishes only source-owned, uniquely mapped failures.
 // Unknown adapter/invariant failures remain errors; message prose is not parsed.
 func genericSourceDiagnostic(err error, input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID) (semantic.Diagnostic, bool) {
+	owners := map[hir.PackageID]genericplan.PackageID{}
+	for id, coordinate := range coordinates {
+		if coordinate != (packagegraph.CoordinateID{}) {
+			owners[id] = genericPackageOwner(coordinate)
+		}
+	}
+	return genericSourceDiagnosticOwned(err, input, owners)
+}
+
+func genericSourceDiagnosticOwned(err error, input semantic.PackageInput, owners map[hir.PackageID]genericplan.PackageID) (semantic.Diagnostic, bool) {
 	var located *genericsource.SourceError
 	if !errors.As(err, &located) || located == nil {
 		return semantic.Diagnostic{}, false
@@ -43,8 +53,8 @@ func genericSourceDiagnostic(err error, input semantic.PackageInput, coordinates
 	var primary hir.Span
 	matched := false
 	for _, file := range input.Files {
-		coordinate, exists := coordinates[file.Package]
-		if !exists || coordinate == (packagegraph.CoordinateID{}) || genericPackageOwner(coordinate) != located.Owner || file.Module == nil || file.Module.Path != located.Module {
+		owner, exists := owners[file.Package]
+		if !exists || owner != located.Owner || file.Module == nil || file.Module.Path != located.Module {
 			continue
 		}
 		if matched || file.Path == "" || !located.Span.Valid(file.Module.SourceSize) {
