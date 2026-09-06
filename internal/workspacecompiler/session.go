@@ -458,11 +458,27 @@ func resultWithCurrentState(analysis compiler.Analysis, compiled compiler.Result
 }
 
 func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {
+	inputs, err := session.packageInputs(metadata, interfaces, bodies, owners)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[hir.PackageID]packagecache.Key, len(owners))
+	for _, packageID := range owners {
+		key, err := packagecache.Compute(inputs[packageID])
+		if err != nil {
+			return nil, fmt.Errorf("compute cache key for package %d: %w", packageID, err)
+		}
+		result[packageID] = key
+	}
+	return result, nil
+}
+
+func (session *Session) packageInputs(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Inputs, error) {
 	byID := make(map[hir.PackageID]workspaceloader.SemanticPackage, len(metadata))
 	for _, loaded := range metadata {
 		byID[loaded.ID] = loaded
 	}
-	result := make(map[hir.PackageID]packagecache.Key, len(owners))
+	result := make(map[hir.PackageID]packagecache.Inputs, len(owners))
 	for _, packageID := range owners {
 		loaded, found := byID[packageID]
 		if !found {
@@ -492,7 +508,7 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 		if err != nil {
 			return nil, err
 		}
-		key, err := packagecache.Compute(packagecache.Inputs{
+		result[packageID] = packagecache.Inputs{
 			CompilerBuild:    session.compilerBuild,
 			LanguageRevision: sdkstdlib.LanguageRevision, MIRVersion: mircodec.MIRVersion,
 			TargetSchema: session.target.SchemaVersion, ABIProfile: abiProfile(session.target),
@@ -500,11 +516,7 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 			RuntimeABI: sdkstdlib.RuntimeABI, StandardLibrary: session.standardLibrary,
 			Package: loaded.Instance, Source: loaded.Source, CurrentInterface: currentInterface, CurrentBody: currentBody, Dependencies: dependencies,
 			Features: slices.Clone(loaded.Features),
-		})
-		if err != nil {
-			return nil, fmt.Errorf("compute cache key for package %d: %w", packageID, err)
 		}
-		result[packageID] = key
 	}
 	return result, nil
 }

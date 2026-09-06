@@ -140,8 +140,26 @@ and low/optimized Windows MSVC profiles. Mutation isolation, LRU eviction, missi
 MIR, foreign/corrupt payloads and replacement-safe quarantine have direct regression coverage.
 
 This cache transports ordinary package MIR only. A hit is not whole-compilation reuse: the caller
-must still reassemble and verify against current compilation inputs. Workspace-session activation,
-contract-state compilation bundles, persistent storage and stable CLI integration remain unadmitted.
+must still reassemble and verify against current compilation inputs. Contract-state compilation
+bundles, persistent storage and stable CLI integration remain unadmitted.
+
+## Compiler-private generic workspace session
+
+`workspacecompiler.GenericSession` explicitly connects current workspace analysis to this bounded
+memory cache. Every check performs generic expansion and semantic analysis before constructing keys.
+Only complete verified hits with exact current package IDs, instances and coordinate maps may skip
+MIR lowering, and the collected artifacts must pass whole-program reassembly. Misses, mapping
+changes and failed reassembly fall back to lowering and verified storage. Oversize records are not
+stored; invalid current source never publishes a cache hit.
+
+Persistent configuration is rejected. Contract-state transactions take the uncached compiler path
+because ordinary MIR artifacts do not carry their complete compilation bundle. The ordinary session
+and stable CLI retain their existing source admission and cache behavior.
+
+Tests count lowering calls across cold and warm checks, invalidate both packages when a consumer
+requests another specialization, reject invalid source after warm reuse, and exercise bounded-store
+fallback. Warm workspace MIR executes as 42 through the interpreter and low/optimized MSVC profiles.
+This internal activation does not change language, SDK, runtime ABI or stable CLI versions.
 
 ## Evidence
 
