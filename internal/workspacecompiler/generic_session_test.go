@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packagecache"
 	"github.com/0disoft/fairyc/internal/target"
+	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
 const genericAnswer = "module answer; pub fn T value<T>(T input) { return input; }"
@@ -63,13 +64,6 @@ func TestGenericSessionSkipsLoweringOnlyOnCurrentCompleteHits(t *testing.T) {
 }
 
 func TestGenericSessionWarmResultRunsMSVC(t *testing.T) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		t.Skip("native proof requires Windows amd64")
-	}
-	toolchain, err := cdriver.ResolveWindowsHostMSVC()
-	if err != nil {
-		t.Fatal(err)
-	}
 	session, root := genericWorkspaceSession(t, 32<<20)
 	workspace := loadCacheWorkspace(t, root)
 	if _, err := session.Check(workspace); err != nil {
@@ -78,6 +72,18 @@ func TestGenericSessionWarmResultRunsMSVC(t *testing.T) {
 	result, err := session.Check(workspace)
 	if err != nil || !result.Compiler.Verified || result.Cache.Outcome != OutcomeAllHit || result.Cache.Lowered {
 		t.Fatalf("warm: %+v %v", result.Cache, err)
+	}
+	assertGenericWorkspaceNative(t, workspace, result)
+}
+
+func assertGenericWorkspaceNative(t *testing.T, workspace workspaceloader.Workspace, result Result) {
+	t.Helper()
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("native proof requires Windows amd64")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
 	}
 	rootPackage, err := workspace.RootPackageID()
 	if err != nil {
@@ -120,6 +126,6 @@ func TestGenericSessionOversizeAndInvalidSourceDoNotPublishHits(t *testing.T) {
 		t.Fatalf("invalid: %+v %v", invalid.Cache, err)
 	}
 	if _, err := NewGenericSession(Configuration{Persistent: &PersistentConfiguration{}}, genericplan.DefaultPlanLimits()); err == nil {
-		t.Fatal("persistent configuration silently admitted")
+		t.Fatal("empty persistent configuration silently admitted")
 	}
 }

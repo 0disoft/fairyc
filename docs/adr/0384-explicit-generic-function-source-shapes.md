@@ -145,14 +145,15 @@ bundles and stable CLI integration remain unadmitted. Persistent MIR transport i
 
 ## Compiler-private generic workspace session
 
-`workspacecompiler.GenericSession` explicitly connects current workspace analysis to this bounded
-memory cache. Every check performs generic expansion and semantic analysis before constructing keys.
-Only complete verified hits with exact current package IDs, instances and coordinate maps may skip
+`workspacecompiler.GenericSession` explicitly connects current workspace analysis to one bounded
+memory or disk cache. Every check performs generic expansion and semantic analysis before constructing
+keys. Memory hits require exact current package IDs, instances and coordinate maps; disk hits require
+stable instance/coordinate ownership and fresh ID rebinding. Only complete verified hits may skip
 MIR lowering, and the collected artifacts must pass whole-program reassembly. Misses, mapping
 changes and failed reassembly fall back to lowering and verified storage. Oversize records are not
 stored; invalid current source never publishes a cache hit.
 
-Persistent configuration is rejected. Contract-state transactions take the uncached compiler path
+Memory and persistent cache policies cannot be combined. Contract-state transactions take the uncached compiler path
 because ordinary MIR artifacts do not carry their complete compilation bundle. The ordinary session
 and stable CLI retain their existing source admission and cache behavior.
 
@@ -180,9 +181,20 @@ consumer reads only stable artifacts, rebinds different package/function/local I
 and executes the result as 42 through the interpreter and low/optimized Windows MSVC transport.
 The fixture's fixed storage keys isolate this transport proof from existing source-invalidation tests.
 
-This disk adapter is not yet selected by `GenericSession`, exposes no CLI or default storage path,
-and does not carry contract-state compilation bundles. Persistent workspace reuse must supply an
-exact compiler build identity and current generic key inputs before skipping lowering.
+`GenericSession` selects this adapter only through explicit persistent configuration, including an
+optional opened filesystem root and mandatory disk/artifact limits. CompilerBuild must have the
+canonical nonzero executable SHA-256 identity format; the caller is responsible for supplying the
+current executable's identity. The session binds it together with the generic storage family and
+exact stable MIR/disk record versions, rather than its process-local codec identity.
+
+Workspace tests fill the disk cache from current generic source and create a fresh process using
+the same actual executable digest. Its lowering hook fails if called; complete verified hits execute
+as 42 in the interpreter and MSVC low/optimized profiles. New specialization requests and a changed
+compiler digest miss, invalid current source cannot hit, and tiny artifact bounds skip storage while
+returning the verified uncached result. Disk publication failures likewise return the compiler result
+with StoreFailed counts; they never claim a stored artifact.
+
+No CLI or default storage path is exposed, and contract-state compilation bundles remain uncached.
 
 ## Evidence
 

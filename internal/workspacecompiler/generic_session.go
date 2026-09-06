@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"strings"
 
+	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/genericplan"
@@ -17,19 +19,19 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-// GenericSession is an explicit compiler-private, memory-only workspace lane.
+// GenericSession is an explicit compiler-private workspace lane with exactly
+// one bounded memory or persistent MIR cache.
 // The ordinary Session and stable CLI do not implicitly enable generic source.
 type GenericSession struct {
-	cache  *packageartifact.GenericCache
-	keys   Session
-	limits genericplan.PlanLimits
-	lower  func(compiler.Analysis) (compiler.Result, error)
+	cache       *packageartifact.GenericCache
+	stableCache *packageartifact.GenericStableCache
+	storage     string
+	keys        Session
+	limits      genericplan.PlanLimits
+	lower       func(compiler.Analysis) (compiler.Result, error)
 }
 
 func NewGenericSession(configuration Configuration, limits genericplan.PlanLimits) (*GenericSession, error) {
-	if configuration.Persistent != nil {
-		return nil, fmt.Errorf("generic workspace sessions do not support persistent storage")
-	}
 	if limits.MaxSpecializations <= 0 || limits.MaxSpecializationsPerDeclaration <= 0 || limits.MaxExpansionDepth <= 0 {
 		return nil, fmt.Errorf("generic workspace planning limits must be positive")
 	}
@@ -40,19 +42,48 @@ func NewGenericSession(configuration Configuration, limits genericplan.PlanLimit
 	if err := target.Validate(spec); err != nil {
 		return nil, err
 	}
-	cache, err := packageartifact.NewGenericCache(configuration.Cache, configuration.MaxArtifactBytes)
-	if err != nil {
-		return nil, err
-	}
 	stdlib, err := standardLibraryInstance()
 	if err != nil {
 		return nil, err
 	}
-	return &GenericSession{cache: cache, keys: Session{target: spec, standardLibrary: stdlib, compilerBuild: compilerProcessEncoding + cache.Identity() + ":generic-v0"}, limits: limits, lower: compiler.LowerAnalyzed}, nil
+	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzed, storage: StorageMemory}
+	if configuration.Persistent == nil {
+		session.cache, err = packageartifact.NewGenericCache(configuration.Cache, configuration.MaxArtifactBytes)
+		if err != nil {
+			return nil, err
+		}
+		session.keys.compilerBuild = compilerProcessEncoding + session.cache.Identity() + ":generic-v0"
+	} else {
+		if configuration.Cache != (packagecache.Limits{}) {
+			return nil, fmt.Errorf("generic workspace cannot combine memory and persistent cache policies")
+		}
+		persistent := configuration.Persistent
+		if _, err := buildidentity.Parse(persistent.CompilerBuild); err != nil {
+			return nil, fmt.Errorf("generic persistent cache requires an exact compiler executable identity: %w", err)
+		}
+		if persistent.RootBoundary == nil {
+			session.stableCache, err = packageartifact.NewGenericStableCache(persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
+		} else {
+			session.stableCache, err = packageartifact.NewGenericStableCacheInRoot(persistent.RootBoundary, persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
+		}
+		if err != nil {
+			return nil, err
+		}
+		session.keys.compilerBuild = strings.Join([]string{"fairyc.compiler-generic-stable-cache/0", persistent.CompilerBuild, packageartifact.StableArtifactVersion, packagecache.DiskRecordVersion}, ";")
+		session.storage = StorageDisk
+	}
+	return session, nil
+}
+
+func (session *GenericSession) Close() error {
+	if session == nil || session.stableCache == nil {
+		return nil
+	}
+	return session.stableCache.Close()
 }
 
 func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Result, error) {
-	if session == nil || session.cache == nil || session.lower == nil {
+	if session == nil || session.cache == nil && session.stableCache == nil || session.lower == nil {
 		return Result{}, fmt.Errorf("generic workspace session is not initialized")
 	}
 	input, err := workspace.SemanticInput()
@@ -77,10 +108,10 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	}
 	if !semanticReady(analysis.Analysis.Semantic) || len(analysis.Analysis.Semantic.HIR.StateTransactions) != 0 {
 		compiled, err := session.lower(analysis.Analysis)
-		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: StorageMemory, Lowered: compiled.Verified}}, err
+		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: session.storage, Lowered: compiled.Verified}}, err
 	}
 	owners := functionOwners(analysis.Analysis.Semantic.HIR)
-	report := Report{Outcome: OutcomeFallback, Storage: StorageMemory, Packages: len(owners)}
+	report := Report{Outcome: OutcomeFallback, Storage: session.storage, Packages: len(owners)}
 	if len(owners) == 0 {
 		compiled, err := session.lower(analysis.Analysis)
 		report.Lowered = compiled.Verified
@@ -109,6 +140,9 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 			return Result{}, err
 		}
 		keys[id] = key
+	}
+	if session.stableCache != nil {
+		return session.checkGenericPersistent(analysis, identities, coordinates, owners, keys, report)
 	}
 	var artifacts []packageartifact.Artifact
 	allHit := true
@@ -171,8 +205,15 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 }
 
 func (session *GenericSession) Stats() packageartifact.CacheStats {
-	if session == nil {
+	if session == nil || session.cache == nil {
 		return packageartifact.CacheStats{}
 	}
 	return session.cache.Stats()
+}
+
+func (session *GenericSession) PersistentStats() (packageartifact.StableCacheStats, error) {
+	if session == nil || session.stableCache == nil {
+		return packageartifact.StableCacheStats{}, fmt.Errorf("generic workspace session does not use persistent storage")
+	}
+	return session.stableCache.Stats()
 }
