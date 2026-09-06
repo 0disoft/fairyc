@@ -141,7 +141,7 @@ MIR, foreign/corrupt payloads and replacement-safe quarantine have direct regres
 
 This cache transports ordinary package MIR only. A hit is not whole-compilation reuse: the caller
 must still reassemble and verify against current compilation inputs. Contract-state compilation
-bundles, persistent storage and stable CLI integration remain unadmitted.
+bundles and stable CLI integration remain unadmitted. Persistent MIR transport is described below.
 
 ## Compiler-private generic workspace session
 
@@ -160,6 +160,29 @@ Tests count lowering calls across cold and warm checks, invalidate both packages
 requests another specialization, reject invalid source after warm reuse, and exercise bounded-store
 fallback. Warm workspace MIR executes as 42 through the interpreter and low/optimized MSVC profiles.
 This internal activation does not change language, SDK, runtime ABI or stable CLI versions.
+
+## Exact-version generic disk MIR transport
+
+`packageartifact.GenericStableCache` projects verified package MIR to the existing stable MIR codec
+and stores it beneath a separate `generic-v0` directory. The opened-root disk store continues to own
+immutable durable publication, bounded reads, retention and generation-conditional quarantine.
+Entry/byte limits apply to this separate store, not jointly to ordinary and generic caches.
+
+The adapter uses domain-separated storage addresses derived from generic keys and interfaces; these
+addresses are not v4 compiler compatibility identities. Its canonical `fairyc.generic-stable-mir-cache/v0`
+envelope also retains the original complete generic key and interface plus exact-version stable MIR.
+Read admission checks both identities, canonical encoding, byte bounds, stable MIR validity, package
+instance and coordinate. A mismatch quarantines only the observed generation. Oversize writes do
+not disturb a prior valid generation. General v4 cache APIs still do not accept generic key types.
+
+A three-package generic import-chain test closes the writer and starts a fresh test process. The
+consumer reads only stable artifacts, rebinds different package/function/local IDs without lowering,
+and executes the result as 42 through the interpreter and low/optimized Windows MSVC transport.
+The fixture's fixed storage keys isolate this transport proof from existing source-invalidation tests.
+
+This disk adapter is not yet selected by `GenericSession`, exposes no CLI or default storage path,
+and does not carry contract-state compilation bundles. Persistent workspace reuse must supply an
+exact compiler build identity and current generic key inputs before skipping lowering.
 
 ## Evidence
 
