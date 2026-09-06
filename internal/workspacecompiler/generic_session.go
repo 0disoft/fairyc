@@ -19,9 +19,8 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-// GenericSession is an explicit compiler-private workspace lane with exactly
-// one bounded memory or persistent MIR cache.
-// The ordinary Session and stable CLI do not implicitly enable generic source.
+// GenericSession owns exactly one bounded memory or persistent generic MIR cache.
+// SourceSession selects this family when the loaded workspace contains generics.
 type GenericSession struct {
 	cache       *packageartifact.GenericCache
 	stableCache *packageartifact.GenericStableCache

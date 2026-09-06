@@ -35,10 +35,23 @@ toolchain, stream, lock, and program-exit rules. No new CLI flags are introduced
 ## Cache and experimental boundaries
 
 Stable commands do not read or write compilation caches. The existing private generic memory/disk
-lane retains separate identities and current-source reanalysis. Experimental ordinary cache,
-session, Atlas, and direct-file entry points are not promoted by this decision. Generic interface
+lane retains separate identities and current-source reanalysis. Experimental cache and session
+commands now select that lane through `SourceSession` when the current workspace contains generic
+declarations; ordinary workspaces retain their previous cache family. Atlas and direct-file entry
+points are not promoted by this decision. Generic interface
 and cache records are not public ABI or portable distribution formats. Generic nominal types and
 static interface source syntax are still separate work; this slice does not claim their completion.
+
+SourceSession holds one active session, closes it before a source-family transition, and discards
+the old memory LRU. Counters restart for the new family. Every request still reloads current source;
+invalid source cannot become a verified hit. Restoring valid source can reuse the same family's
+retained compatible artifacts. Configuration is copied, while an opened filesystem root remains
+borrowed from the command's enclosing lifetime. Check and Close are sequential operations.
+
+Disk formats remain separate: ordinary records use the existing directory and generic records use
+`generic-v0`. Entry/byte bounds and reported retention counters apply to the active format namespace,
+not their combined on-disk footprint; switching formats does not delete historical cache data.
+Generic contract-state compilation still falls back to verified uncached lowering.
 
 ## Evidence
 

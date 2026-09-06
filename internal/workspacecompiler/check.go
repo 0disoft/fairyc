@@ -3,6 +3,7 @@ package workspacecompiler
 import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
+	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -15,13 +16,7 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	hasGeneric := false
-	for _, file := range input.Files {
-		for _, function := range file.Module.Functions {
-			hasGeneric = hasGeneric || len(function.TypeParameters) != 0
-		}
-	}
-	if !hasGeneric {
+	if !hasGenericDeclarations(input) {
 		// Preserve ordinary diagnostics and avoid generic preparation for workspaces
 		// that do not contain a generic declaration.
 		return compiler.CheckPackages(input)
@@ -32,4 +27,15 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	}
 	result, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
 	return result, err
+}
+
+func hasGenericDeclarations(input semantic.PackageInput) bool {
+	for _, file := range input.Files {
+		for _, function := range file.Module.Functions {
+			if len(function.TypeParameters) != 0 {
+				return true
+			}
+		}
+	}
+	return false
 }

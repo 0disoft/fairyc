@@ -93,7 +93,7 @@ func runWorkspaceCacheCheck(arguments []string, sourceRoot string, stdout, stder
 		return packageFailure(stderr, fmt.Errorf("open workspace filesystem boundary: %w", err))
 	}
 	defer workspaceRoot.Close()
-	session, err := workspacecompiler.NewSession(workspacecompiler.Configuration{
+	session, err := workspacecompiler.NewSourceSession(workspacecompiler.Configuration{
 		Target:           options.target,
 		MaxArtifactBytes: options.maxArtifactBytes,
 		Persistent: &workspacecompiler.PersistentConfiguration{

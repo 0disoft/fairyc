@@ -56,6 +56,11 @@ paths, artifacts, or toolchain paths. Diagnostics remain on stderr with existing
 
 ## Evidence
 
+Language /14 workspaces containing generic declarations now use the separate generic-v0 cache
+family through SourceSession (ADR 0385). The CLI flags and JSON schema remain unchanged. Retention
+bounds and counters refer to the selected format namespace, not all historical format directories.
+Ordinary workspaces continue to use the existing stable compilation store.
+
 CLI tests require cold two-package fallback and a warm second invocation with two hits and no
 lowering. They corrupt one immutable generation and require one surviving hit, one miss, ordinary
 lowering, rejection accounting, and refreshed artifacts. Parser tests cover missing, duplicate,

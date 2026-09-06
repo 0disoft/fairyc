@@ -90,7 +90,7 @@ func runWorkspaceCheckSession(arguments []string, sourceRoot string, stdin io.Re
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	session, err := workspacecompiler.NewSession(workspacecompiler.Configuration{
+	session, err := workspacecompiler.NewSourceSession(workspacecompiler.Configuration{
 		Target: options.target,
 		Cache: packagecache.Limits{
 			MaxEntries: options.cacheEntries,
@@ -102,6 +102,7 @@ func runWorkspaceCheckSession(arguments []string, sourceRoot string, stdin io.Re
 		return invocationError(stderr, fmt.Sprintf("invalid workspace session cache policy: %v", err))
 	}
 
+	defer session.Close()
 	reader := bufio.NewReaderSize(stdin, maxWorkspaceSessionRequestBytes+2)
 	lastExitCode := ExitSuccess
 	requests := 0
@@ -303,7 +304,7 @@ func decodeWorkspaceSessionRequest(line []byte, expectedSequence int) (workspace
 	return request, nil
 }
 
-func executeWorkspaceSessionCheck(session *workspacecompiler.Session, sequence int, sourceRoot string, locked bool, stderr io.Writer) (workspaceSessionResponse, int) {
+func executeWorkspaceSessionCheck(session *workspacecompiler.SourceSession, sequence int, sourceRoot string, locked bool, stderr io.Writer) (workspaceSessionResponse, int) {
 	response := workspaceSessionResponse{
 		SchemaVersion: workspaceSessionSchema,
 		Kind:          workspaceSessionResponseKind,
@@ -367,7 +368,7 @@ func executeWorkspaceSessionCheck(session *workspacecompiler.Session, sequence i
 	return response, ExitSuccess
 }
 
-func workspaceSessionCacheResponse(report workspacecompiler.Report, session *workspacecompiler.Session) workspaceSessionCacheReport {
+func workspaceSessionCacheResponse(report workspacecompiler.Report, session *workspacecompiler.SourceSession) workspaceSessionCacheReport {
 	stats := session.Stats()
 	return workspaceSessionCacheReport{
 		Outcome: report.Outcome, Packages: report.Packages,
