@@ -1,0 +1,12 @@
+{
+  "schema": "fairyc.generic-source-fixtures/v0",
+  "admission": "compiler-private-local-scalars",
+  "cases": [
+    {"id":"transitive", "source":"pass/transitive/main.fy", "outcome":"return", "value":42, "specializations":3},
+    {"id":"two-parameters", "source":"pass/two-parameters/main.fy", "outcome":"return", "value":42, "specializations":1},
+    {"id":"arity", "source":"fail/arity/main.fy", "outcome":"planner", "code":"G2002"},
+    {"id":"recursion", "source":"fail/recursion/main.fy", "outcome":"planner", "code":"G2005"},
+    {"id":"duplicate-parameter", "source":"fail/duplicate-parameter/main.fy", "outcome":"planner", "code":"G1004"},
+    {"id":"return-type", "source":"fail/return-type/main.fy", "outcome":"semantic", "code":"E1009", "phase":"type", "primary_text":"false", "expected_type_text":"T"}
+  ]
+}

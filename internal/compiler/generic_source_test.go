@@ -11,17 +11,8 @@ import (
 	"github.com/0disoft/fairyc/internal/interpreter"
 )
 
-const genericProgram = `module main;
-fn T identity<T>(T value) { return value; }
-fn T forward<T>(T value) { let T local = identity<T>(value); return local; }
-fn i32 main() {
-    if (identity<bool>(true)) { return forward<i32>(identity<i32>(42)); }
-    return 0;
-}
-`
-
 func TestGenericSourcePlansSubstitutesAndExecutes(t *testing.T) {
-	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", genericProgram)
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", genericProgram(t))
 	before, _ := json.Marshal(file.Module)
 	result, plan, err := compiler.CheckGenericFunctions(file, genericplan.DefaultPlanLimits())
 	if err != nil || !result.Verified {
@@ -89,7 +80,7 @@ func TestGenericSourceRejectsUnadmittedShapes(t *testing.T) {
 }
 
 func TestGenericSourceUsesPlannerBudgets(t *testing.T) {
-	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", genericProgram)
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", genericProgram(t))
 	for _, limits := range []genericplan.PlanLimits{
 		{MaxSpecializations: 1, MaxSpecializationsPerDeclaration: 5, MaxExpansionDepth: 5},
 		{MaxSpecializations: 5, MaxSpecializationsPerDeclaration: 1, MaxExpansionDepth: 5},
@@ -111,8 +102,8 @@ func TestGenericSourceBodyChangeInvalidatesDependentIdentity(t *testing.T) {
 		}
 		return plan
 	}
-	before := compile(genericProgram)
-	after := compile(strings.Replace(genericProgram, "return value;", "let T copy = value; return copy;", 1))
+	before := compile(genericProgram(t))
+	after := compile(strings.Replace(genericProgram(t), "return value;", "let T copy = value; return copy;", 1))
 	for i := range before.Specializations {
 		if before.Specializations[i].ID == after.Specializations[i].ID {
 			t.Fatal("template change did not invalidate transitive specialization")

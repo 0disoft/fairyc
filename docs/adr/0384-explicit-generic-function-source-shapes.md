@@ -51,11 +51,18 @@ cannot be supplied by source. Template removal must not hide module declaration 
 The ordinary compiler entry points still reject generic source. This private preparation changes
 no released language, SDK, runtime ABI, or CLI contract. Stable admission still requires versioned
 compile fixtures, diagnostic integration, public-interface/cache invalidation evidence and a
-language-version decision. It does not complete issues 26 or 27.
+language-version decision. The private fixture coverage below does not complete issues 26 or 27.
 
 The compiler tests execute the same source through the MIR interpreter and low/optimized Windows
 MSVC C transport, expecting 42. They also cover repeated instantiations, transitive calls, input AST
 preservation, package-owner separation, template-body invalidation, negative admission and budgets.
+
+`spec/fixtures/generic-source/manifest-v0.json` versions the private compile-pass/fail corpus
+separately from stable language fixtures. Pass cases execute in the interpreter and both MSVC
+profiles. Planner failures assert exact kernel codes, while the semantic failure asserts the
+diagnostic code, failed phase, primary source text, and related expected-type location in the
+original template. All cases must parse successfully, so an unrelated parser failure cannot satisfy
+a compile-fail expectation. The ordinary compiler must still reject every case.
 
 ## Evidence
 
@@ -64,4 +71,6 @@ preservation, package-owner separation, template-body invalidation, negative adm
 - `internal/compiler/generic_syntax_test.go`
 - `internal/compiler/generic_source_test.go`
 - `internal/compiler/generic_native_test.go`
+- `internal/compiler/generic_fixture_test.go`
+- `spec/fixtures/generic-source/manifest-v0.json`
 - `spec/grammar/stage0.ebnf`
