@@ -4,6 +4,7 @@
   "cases": [
     {"id":"transitive", "source":"pass/transitive/main.fy", "outcome":"return", "value":42, "specializations":3},
     {"id":"two-parameters", "source":"pass/two-parameters/main.fy", "outcome":"return", "value":42, "specializations":1},
+    {"id":"repeated-helper", "source":"pass/repeated-helper/main.fy", "outcome":"return", "value":42, "specializations":2},
     {"id":"arity", "source":"fail/arity/main.fy", "outcome":"planner", "code":"G2002"},
     {"id":"recursion", "source":"fail/recursion/main.fy", "outcome":"planner", "code":"G2005"},
     {"id":"duplicate-parameter", "source":"fail/duplicate-parameter/main.fy", "outcome":"planner", "code":"G1004"},

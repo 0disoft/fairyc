@@ -136,7 +136,12 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 				}
 			}
 			if len(fn.TypeParameters) != 0 {
-				declaration.Dependencies = append(declaration.Dependencies, dependency)
+				// Calls remain in the AST; the planner needs each static edge only once.
+				if !slices.ContainsFunc(declaration.Dependencies, func(existing genericplan.Dependency) bool {
+					return existing.Declaration == dependency.Declaration && slices.Equal(existing.Arguments, dependency.Arguments)
+				}) {
+					declaration.Dependencies = append(declaration.Dependencies, dependency)
+				}
 			} else {
 				requests = append(requests, request)
 				if x.requests == nil {
