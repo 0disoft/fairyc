@@ -101,11 +101,13 @@ func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
 				limits.MaxSpecializations = 1
 			}
 			result, _, err := compiler.CheckGenericPackages(input, coordinates, limits)
-			if err == nil || result.Verified {
-				t.Fatalf("invalid package boundary admitted: %+v", result.Semantic)
-			}
-			if name == "global-budget" && genericplan.ErrorCode(err) != genericplan.CodePlanningBudgetExceeded {
-				t.Fatalf("wrong budget failure: %v", err)
+			code := map[string]string{"private": "E0103", "implicit": "E4502", "alias-collision": "E4501", "cycle": "E4503", "global-budget": "E4503"}[name]
+			if code != "" {
+				if err != nil || result.Verified || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != code {
+					t.Fatalf("expected source diagnostic %s: %v %+v", code, err, result.Semantic)
+				}
+			} else if err == nil || result.Verified || len(result.Semantic.Diagnostics) != 0 {
+				t.Fatalf("invalid package plumbing was not an error: %v %+v", err, result.Semantic)
 			}
 		})
 	}

@@ -212,8 +212,19 @@ errors, not source diagnostics. Unlocated catalog/invariant failures are not gue
 location. Tests check exact source text, package ownership, input-order independence and preserved
 kernel categories.
 
-This adds provenance only. Mapping these source failures to public diagnostic codes and ordinary
-compiler results remains required before stable CLI admission.
+`AnalyzeGenericPackages` and `CheckGenericPackages` now map a uniquely located source rejection to
+an ordinary failed resolve-phase result. E4501 covers declaration/binding preparation, E4502 explicit
+scalar type arguments and arity, and E4503 source-owned catalog/expansion limits and specialization
+cycles. Unknown generic paths and private uses reuse E0101 and E0103. The shared diagnostic catalog
+and CLI explanation/summary lookup own their text; raw kernel prose is not exposed as a diagnostic.
+
+No HIR, MIR, plan, interface hash or cache key is published on these failures. Unmapped owners,
+ambiguous source matches, invalid spans, unknown error kinds and invalid caller configuration remain
+errors. The lower-level standalone source adapter retains raw causes and G-codes for kernel tooling.
+Tests verify exact original-byte spans with Unicode trivia and CRLF, no executable/compiler-fact
+publication, and diagnostic delivery from a previously warm generic workspace session.
+
+Stable CLI source admission and language-version promotion remain separate gates.
 
 ## Evidence
 

@@ -56,6 +56,12 @@ func TestGenericSessionSkipsLoweringOnlyOnCurrentCompleteHits(t *testing.T) {
 	if err != nil || warmChanged.Cache.Outcome != OutcomeAllHit || calls != 2 {
 		t.Fatalf("changed warm: %+v %v", warmChanged.Cache, err)
 	}
+	writeFile(t, filepath.Join(root, "src", "main.fy"), "module main; import answer as answer; fn i32 main() { return answer::value<Unknown>(42); }")
+	rejected, err := session.Check(loadCacheWorkspace(t, root))
+	if err != nil || rejected.Compiler.Verified || rejected.Cache.Outcome != OutcomeNotEligible || rejected.Cache.Hits != 0 || len(rejected.Compiler.Semantic.Diagnostics) != 1 || rejected.Compiler.Semantic.Diagnostics[0].Code != "E4502" {
+		t.Fatalf("generic source rejection was not a diagnostic: %+v %v", rejected, err)
+	}
+	writeFile(t, filepath.Join(root, "src", "main.fy"), genericMain)
 	writeFile(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), "module answer; pub fn T value<T>(T input) { return false; }")
 	invalid, err := session.Check(loadCacheWorkspace(t, root))
 	if err != nil || invalid.Compiler.Verified || invalid.Cache.Outcome != OutcomeNotEligible || invalid.Cache.Hits != 0 {

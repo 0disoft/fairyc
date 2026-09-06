@@ -24,6 +24,7 @@ const (
 	categoryResult        = "Option, Result, and propagation"
 	categoryUse           = "Return-value use obligations"
 	categoryCompileTime   = "Bounded compile-time evaluation"
+	categoryGeneric       = "Explicit generic source preparation"
 	categoryUnsafe        = "Unsafe and foreign boundaries"
 	categoryABI           = "Target layout and ABI"
 	categoryEffect        = "Effects and external capabilities"
@@ -90,6 +91,9 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E4305", Category: categoryCompileTime, Meaning: "A module-level `static_assert` evaluates to false."},
 	{Code: "E4401", Category: categoryResolution, Meaning: "The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form."},
 	{Code: "E4402", Category: categorySyntax, Meaning: "A `source_location()` call has no valid canonical source path or exact retained line geometry."},
+	{Code: "E4501", Category: categoryGeneric, Meaning: "Generic source preparation rejects a malformed, colliding, shadowing, or reserved declaration or binding."},
+	{Code: "E4502", Category: categoryGeneric, Meaning: "A generic call requires supported explicit scalar type arguments with the declared arity."},
+	{Code: "E4503", Category: categoryGeneric, Meaning: "A generic declaration or concrete request exceeds a catalog or expansion limit, or triggers a specialization cycle."},
 	{Code: "E5101", Category: categoryUnsafe, Meaning: "Raw-pointer or unchecked operation appears outside an unsafe boundary."},
 	{Code: "E5102", Category: categoryUnsafe, Meaning: "Raw foreign signature contains a safe reference."},
 	{Code: "E5103", Category: categoryUnsafe, Meaning: "Foreign unwind, exception, or `longjmp` may cross a Fairy C frame."},

@@ -2,6 +2,7 @@ package compiler_test
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 func TestGenericErrorsRetainOriginalSourceAndKernelCategory(t *testing.T) {
@@ -39,10 +41,10 @@ func TestGenericErrorsRetainOriginalSourceAndKernelCategory(t *testing.T) {
 }
 
 func TestGenericPackagePlanningFailureKeepsRootOriginAcrossReordering(t *testing.T) {
-	input, coordinates := genericPackageInput(t)
+	input, _ := genericPackageInput(t)
 	limits := genericplan.DefaultPlanLimits()
 	limits.MaxExpansionDepth = 1
-	_, _, err := compiler.CheckGenericPackages(input, coordinates, limits)
+	err := genericPackageSourceError(input, limits)
 	var original *genericsource.SourceError
 	var request *genericplan.RequestError
 	if !errors.As(err, &original) || !errors.As(err, &request) || genericplan.ErrorCode(err) != genericplan.CodePlanningBudgetExceeded {
@@ -57,13 +59,13 @@ func TestGenericPackagePlanningFailureKeepsRootOriginAcrossReordering(t *testing
 	}
 	slices.Reverse(input.Files)
 	slices.Reverse(input.Imports)
-	_, _, err = compiler.CheckGenericPackages(input, coordinates, limits)
+	err = genericPackageSourceError(input, limits)
 	var reordered *genericsource.SourceError
 	if !errors.As(err, &reordered) || original.Owner != reordered.Owner || original.Module != reordered.Module || original.Span != reordered.Span {
 		t.Fatalf("reordered origin differs: %v", err)
 	}
 	// Invalid caller budgets are not source mistakes and must remain unlocated.
-	_, _, err = compiler.CheckGenericPackages(input, coordinates, genericplan.PlanLimits{})
+	err = genericPackageSourceError(input, genericplan.PlanLimits{})
 	var invalid *genericsource.SourceError
 	if err == nil || errors.As(err, &invalid) {
 		t.Fatalf("invalid configuration mislabeled as source: %v", err)
@@ -71,11 +73,31 @@ func TestGenericPackagePlanningFailureKeepsRootOriginAcrossReordering(t *testing
 }
 
 func TestGenericPrivateAccessOriginBelongsToConsumer(t *testing.T) {
-	input, coordinates := genericPackageInput(t)
+	input, _ := genericPackageInput(t)
 	input.Files[1].Module.Functions[0].Public = false
-	_, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	err := genericPackageSourceError(input, genericplan.DefaultPlanLimits())
 	var source *genericsource.SourceError
 	if !errors.As(err, &source) || source.Module != "main" || source.Kind != genericsource.FailurePrivate {
 		t.Fatalf("private use origin: %v", err)
 	}
+}
+
+// The raw source adapter retains planner causes; the package compiler maps
+// those causes to diagnostics and is covered separately.
+func genericPackageSourceError(input semantic.PackageInput, limits genericplan.PlanLimits) error {
+	modules := make([]genericsource.PackageModule, len(input.Files))
+	owner := func(id hir.PackageID) genericplan.PackageID {
+		return genericplan.PackageID(fmt.Sprintf("test_package_%d", id))
+	}
+	for i, file := range input.Files {
+		imports := map[string]genericplan.PackageID{}
+		for _, imported := range input.Imports {
+			if imported.FromPackage == file.Package {
+				imports[imported.ImportPath] = owner(imported.ToPackage)
+			}
+		}
+		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owner(file.Package), Imports: imports}
+	}
+	_, err := genericsource.PreparePackages(modules, limits)
+	return err
 }

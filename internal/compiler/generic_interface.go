@@ -24,6 +24,9 @@ type GenericAnalysis struct {
 func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (GenericAnalysis, error) {
 	prepared, expansion, err := prepareGenericPackages(input, coordinates, limits)
 	if err != nil {
+		if rejection, sourceOwned := genericSourceDiagnostic(err, input, coordinates); sourceOwned {
+			return GenericAnalysis{Analysis: Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: []semantic.Diagnostic{rejection}}}}, nil
+		}
 		return GenericAnalysis{}, err
 	}
 	analysis, err := AnalyzePackages(prepared)

@@ -13,8 +13,9 @@ import (
 
 // CheckGenericPackages is a compiler-private admission path for explicit scalar
 // generic functions across a resolved package graph. Coordinates must come from
-// the same workspace as input. Stable CLI, interfaces and cache admission remain
-// separate: template definitions are not yet published by the typed interface.
+// the same workspace as input. Source-owned expansion failures become ordinary
+// diagnostics; invalid package plumbing remains an error. Stable CLI admission
+// remains separate from the compiler-private generic interface and cache paths.
 func CheckGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
 	analysis, err := AnalyzeGenericPackages(input, coordinates, limits)
 	if err != nil {
