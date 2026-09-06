@@ -196,6 +196,25 @@ with StoreFailed counts; they never claim a stored artifact.
 
 No CLI or default storage path is exposed, and contract-state compilation bundles remain uncached.
 
+## Source rejection provenance before diagnostic admission
+
+The private source adapter now wraps declaration, binding and expression rejections in a structured
+`genericsource.SourceError` containing the original package owner, module and byte span. It retains
+the cause through Unwrap, so existing planner G-codes remain available without matching prose.
+Call-site type-argument arity is checked against the resolved template before catalog construction;
+the kernel still validates its independent arity contract.
+
+`genericplan.RequestError` retains a detached root request when planning fails. Source expansion maps
+that request back to the earliest matching source use in canonical owner/module order. A transitive
+cycle or budget failure therefore identifies its triggering concrete call without inventing a span
+from a generated name. Invalid caller configuration and package-provider plumbing remain ordinary
+errors, not source diagnostics. Unlocated catalog/invariant failures are not guessed into a source
+location. Tests check exact source text, package ownership, input-order independence and preserved
+kernel categories.
+
+This adds provenance only. Mapping these source failures to public diagnostic codes and ordinary
+compiler results remains required before stable CLI admission.
+
 ## Evidence
 
 - `internal/syntax/generic.go`

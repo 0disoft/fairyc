@@ -73,7 +73,7 @@ func (c *Catalog) Plan(requests []Request, limits PlanLimits) (Plan, error) {
 	for _, request := range roots {
 		id, err := value.expand(request, 1)
 		if err != nil {
-			return Plan{}, err
+			return Plan{}, &RequestError{Request: Request{Declaration: request.Declaration, Arguments: slices.Clone(request.Arguments)}, Cause: err}
 		}
 		rootIDs = append(rootIDs, id)
 	}

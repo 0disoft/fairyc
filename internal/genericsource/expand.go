@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/syntax"
 )
@@ -38,6 +39,7 @@ type expander struct {
 	names       map[string]bool
 	imports     map[string]*expander
 	allowPublic bool
+	requests    map[string]diagnostic.Span
 }
 
 func (x *expander) id(name string) genericplan.DeclarationID {
@@ -74,18 +76,18 @@ func (x *expander) collect() error {
 	}
 	for _, fn := range x.module.Functions {
 		if x.names[fn.Name] || strings.HasPrefix(fn.Name, generatedPrefix) {
-			return fmt.Errorf("duplicate or reserved function %q", fn.Name)
+			return x.at(fn.NameSpan, FailureDeclaration, fmt.Errorf("duplicate or reserved function %q", fn.Name))
 		}
 		x.names[fn.Name] = true
 		if len(fn.TypeParameters) == 0 {
 			continue
 		}
 		if (fn.Public && !x.allowPublic) || fn.Owner != "" || fn.Name == "source_location" {
-			return fmt.Errorf("generic function %q requires private module-local ownership", fn.Name)
+			return x.at(fn.NameSpan, FailureDeclaration, fmt.Errorf("generic function %q requires private module-local ownership", fn.Name))
 		}
 		for _, parameter := range fn.TypeParameters {
 			if slices.Contains(scalarTypes, parameter) || slices.Contains([]string{"void", "never", "str", "Region", "Option", "Result"}, parameter) {
-				return fmt.Errorf("type parameter %q shadows a builtin", parameter)
+				return x.at(fn.Span, FailureDeclaration, fmt.Errorf("type parameter %q shadows a builtin", parameter))
 			}
 		}
 		x.templates[fn.Name] = fn
@@ -100,7 +102,10 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 		for _, parameter := range fn.TypeParameters {
 			declaration.Parameters = append(declaration.Parameters, genericplan.TypeParameter{Name: parameter})
 		}
-		t := transform{binding: x.checkBinding, expression: func(e *ast.Expression) error {
+		t := transform{binding: func(name string, span diagnostic.Span) error {
+			return x.at(span, FailureDeclaration, x.checkBinding(name))
+		}, expression: func(e *ast.Expression) (err error) {
+			defer func() { err = x.at(e.Span, FailureRequest, err) }()
 			if err := x.checkExpression(e); err != nil {
 				return err
 			}
@@ -110,6 +115,9 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 			target, err := x.target(e)
 			if err != nil {
 				return err
+			}
+			if len(e.TypeArguments) != len(target.module.templates[target.name].TypeParameters) {
+				return &genericplan.Error{Code: genericplan.CodeTypeArgumentArity, Message: "generic type argument count does not match the declaration"}
 			}
 			dependency := genericplan.Dependency{Declaration: target.id()}
 			request := genericplan.Request{Declaration: target.id()}
@@ -131,6 +139,13 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 				declaration.Dependencies = append(declaration.Dependencies, dependency)
 			} else {
 				requests = append(requests, request)
+				if x.requests == nil {
+					x.requests = map[string]diagnostic.Span{}
+				}
+				key := requestKey(request.Declaration, request.Arguments)
+				if previous, found := x.requests[key]; !found || e.Span.StartByte < previous.StartByte {
+					x.requests[key] = e.Span
+				}
 			}
 			return nil
 		}}
@@ -158,7 +173,7 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 				declaration.Definition = genericplan.DigestText("source-package-function-v0", string(body)+"\n"+string(encoded))
 			}
 			if err := b.AddDeclaration(declaration); err != nil {
-				return nil, err
+				return nil, x.at(fn.Span, FailureDeclaration, err)
 			}
 		}
 	}
@@ -231,10 +246,10 @@ func (x *expander) target(e *ast.Expression) (callTarget, error) {
 	}
 	target, found := x.lookup(e.Children[0].Text)
 	if !found {
-		return callTarget{}, fmt.Errorf("unknown generic function %q", e.Children[0].Text)
+		return callTarget{}, x.at(e.Span, FailureUnknown, fmt.Errorf("unknown generic function %q", e.Children[0].Text))
 	}
 	if target.module != x && !target.module.templates[target.name].Public {
-		return callTarget{}, fmt.Errorf("generic function %q is private", e.Children[0].Text)
+		return callTarget{}, x.at(e.Span, FailurePrivate, fmt.Errorf("generic function %q is private", e.Children[0].Text))
 	}
 	return target, nil
 }

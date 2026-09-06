@@ -30,6 +30,17 @@ type Error struct {
 	Message string
 }
 
+// RequestError retains the root request responsible for a planning failure.
+// It carries no source coordinates; source adapters own that mapping. The
+// original kernel category remains available through ErrorCode and errors.As.
+type RequestError struct {
+	Request Request
+	Cause   error
+}
+
+func (e *RequestError) Error() string { return e.Cause.Error() }
+func (e *RequestError) Unwrap() error { return e.Cause }
+
 func (e *Error) Error() string {
 	if e == nil {
 		return ""

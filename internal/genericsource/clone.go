@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/ast"
+	"github.com/0disoft/fairyc/internal/diagnostic"
 )
 
 // transform owns newly allocated syntax. Source locations keep pointing at the
@@ -12,7 +13,7 @@ import (
 type transform struct {
 	bindings   map[string]ast.TypeReference
 	expression func(*ast.Expression) error
-	binding    func(string) error
+	binding    func(string, diagnostic.Span) error
 }
 
 func (t transform) typ(v ast.TypeReference) ast.TypeReference {
@@ -59,7 +60,7 @@ func (t transform) function(v ast.Function) (ast.Function, error) {
 	v.Parameters = slices.Clone(v.Parameters)
 	for i := range v.Parameters {
 		if t.binding != nil {
-			if err := t.binding(v.Parameters[i].Name); err != nil {
+			if err := t.binding(v.Parameters[i].Name, v.Parameters[i].Span); err != nil {
 				return ast.Function{}, err
 			}
 		}
@@ -92,7 +93,7 @@ func (t transform) statement(v *ast.Statement) error {
 	if v.Binding != nil {
 		binding := *v.Binding
 		if t.binding != nil {
-			if err := t.binding(binding.Name); err != nil {
+			if err := t.binding(binding.Name, binding.Span); err != nil {
 				return err
 			}
 		}

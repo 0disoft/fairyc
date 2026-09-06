@@ -99,7 +99,7 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...
 	}
 	for _, module := range modules {
 		if err := module.collect(); err != nil {
-			return nil, genericplan.Plan{}, err
+			return nil, genericplan.Plan{}, module.at(module.module.Span, FailureDeclaration, err)
 		}
 	}
 	var requests []genericplan.Request
@@ -121,7 +121,7 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...
 	}
 	plan, err := catalog.Plan(requests, limits)
 	if err != nil {
-		return nil, genericplan.Plan{}, err
+		return nil, genericplan.Plan{}, locatePlanningFailure(modules, err)
 	}
 	names := map[string]string{}
 	for _, specialization := range plan.Specializations {
