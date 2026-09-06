@@ -73,6 +73,22 @@ MSVC, cover typed-HIR/MIR checks and C emission, and verify source diagnostics w
 
 ## Evidence
 
+Resolved-package and explicit-file analysis now retain an immutable `GenericProvenance` sidecar:
+all original generic declarations, including unused private declarations, have exact current
+package/module/file spans and ordered parameter names. Each emitted specialization references its
+original declaration ID, generated function name and concrete parameter bindings. The mapping is
+constructed from the declaration catalog rather than reverse-parsing generated names.
+
+Successful lowering publishes this sidecar; failed analysis/lowering does not. Generic memory and
+disk hits attach the current analysis sidecar after verified reassembly, never artifact-supplied
+provenance. Getters detach nested parameter/binding slices. This is ephemeral source provenance,
+not a serialized cache format, public SymbolId, signature encoding, or proof that an unused template
+body has passed semantic analysis. The older private module-only test adapter is not an Atlas input.
+Atlas snapshot and original generic SymbolId integration still remain required.
+
+Tests cover unused declarations, exact name spans, emitted-function joins, getter mutation
+isolation, source rejection, memory cold/warm reuse and fresh-process persistent hits.
+
 `internal/cli/workspace_generic_test.go` checks ordinary/locked stable check and semantic test,
 source diagnostic classification, and Windows low/release build, run, and native test. The shared
 workspace and compiler fixtures retain interpreter, original AST, ownership, cache invalidation,

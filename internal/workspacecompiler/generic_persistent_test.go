@@ -128,6 +128,7 @@ func TestGenericPersistentSessionChild(t *testing.T) {
 		t.Fatalf("warm: %+v %v", result.Cache, err)
 	}
 	assertWorkspaceResult(t, workspace, result.Compiler, 42)
+	assertGenericProvenance(t, workspace, result.Compiler)
 	if runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
 		assertGenericWorkspaceNative(t, workspace, result)
 	}

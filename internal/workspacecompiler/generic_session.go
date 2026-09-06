@@ -170,7 +170,7 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		program, err := packageartifact.Reassemble(artifacts)
 		if err == nil {
 			report.Outcome = OutcomeAllHit
-			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true}, Cache: report}, nil
+			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil
 		}
 		report.ReassemblyFallback = true
 	}

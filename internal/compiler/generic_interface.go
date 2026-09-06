@@ -77,5 +77,13 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 	result.Interfaces = interfaces
 	result.OrdinaryInterfaces = ordinary
 	result.Specializations = specializations
+	owners := map[hir.PackageID]genericplan.PackageID{}
+	for id, coordinate := range coordinates {
+		owners[id] = genericPackageOwner(coordinate)
+	}
+	result.Analysis.GenericProvenance, err = genericProvenance(input, owners, expansion)
+	if err != nil {
+		return GenericAnalysis{}, err
+	}
 	return result, nil
 }

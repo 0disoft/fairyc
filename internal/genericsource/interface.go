@@ -26,6 +26,8 @@ type PackageExpansion struct {
 	Plan            genericplan.Plan
 	Templates       []PublicTemplate
 	GeneratedNames  []string
+	Declarations    []DeclarationOrigin
+	Origins         []SpecializationOrigin
 	Specializations map[genericplan.PackageID][]genericplan.SpecializationID
 }
 

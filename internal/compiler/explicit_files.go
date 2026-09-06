@@ -33,7 +33,7 @@ func AnalyzeExplicitFiles(files []semantic.File) (Analysis, error) {
 	for i, file := range files {
 		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owner, Imports: bindings}
 	}
-	expanded, _, err := genericsource.ExpandPackages(modules, genericplan.DefaultPlanLimits())
+	expansion, err := genericsource.PreparePackages(modules, genericplan.DefaultPlanLimits())
 	if err != nil {
 		if rejection, located := genericSourceDiagnosticOwned(err, semantic.PackageInput{Files: files}, map[hir.PackageID]genericplan.PackageID{hir.DefaultPackage: owner}); located {
 			return Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: []semantic.Diagnostic{rejection}}}, nil
@@ -48,9 +48,14 @@ func AnalyzeExplicitFiles(files []semantic.File) (Analysis, error) {
 	}
 	prepared := slices.Clone(files)
 	for i := range prepared {
-		prepared[i].Module = expanded[i]
+		prepared[i].Module = expansion.Modules[i]
 	}
-	return Analysis{Semantic: semantic.Analyze(prepared)}, nil
+	analysis := Analysis{Semantic: semantic.Analyze(prepared)}
+	checked := analysis.Semantic
+	if checked.CompletedThrough == semantic.PhaseFlow && checked.FailedPhase == semantic.PhaseNone && len(checked.Diagnostics) == 0 && len(checked.Unsupported) == 0 {
+		analysis.GenericProvenance, err = genericProvenance(semantic.PackageInput{Files: files}, map[hir.PackageID]genericplan.PackageID{hir.DefaultPackage: owner}, expansion)
+	}
+	return analysis, err
 }
 
 func CheckExplicitFiles(files []semantic.File) (Result, error) {

@@ -42,7 +42,7 @@ func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericA
 		program, err := packageartifact.RebindStableArtifacts(artifacts, coordinates, 1, hir.SymbolID(functionCount)+1, 1)
 		if err == nil {
 			report.Outcome = OutcomeAllHit
-			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true}, Cache: report}, nil
+			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil
 		}
 		report.ReassemblyFallback = true
 	}

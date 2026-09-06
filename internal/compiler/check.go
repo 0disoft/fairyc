@@ -51,6 +51,7 @@ func (e *Error) Unwrap() error {
 // Result contains the semantic result and, only after every executable IR
 // boundary verifies, ordinary MIR plus compiler-private contract-state MIR.
 type Result struct {
+	GenericProvenance GenericProvenance `json:"-"`
 	Semantic          semantic.Result
 	MIR               mir.Program
 	StateTransactions []contractstatemir.LoweredTransaction
@@ -61,7 +62,8 @@ type Result struct {
 // executable MIR, so process-local cache coordinators can inspect typed package interfaces before
 // deciding whether ordinary MIR lowering is necessary.
 type Analysis struct {
-	Semantic semantic.Result
+	GenericProvenance GenericProvenance `json:"-"`
+	Semantic          semantic.Result
 }
 
 // Check analyzes one explicit single-package source closure and verifies its lowered MIR when
@@ -93,7 +95,11 @@ func AnalyzePackages(input semantic.PackageInput) (Analysis, error) {
 // LowerAnalyzed lowers one semantic result and publishes MIR only after the ordinary closed-world
 // verifier accepts it. Cache coordinators must call this exact boundary on every fallback path.
 func LowerAnalyzed(analysis Analysis) (Result, error) {
-	return lowerVerified(analysis.Semantic)
+	result, err := lowerVerified(analysis.Semantic)
+	if err == nil && result.Verified {
+		result.GenericProvenance = analysis.GenericProvenance
+	}
+	return result, err
 }
 
 func lowerVerified(semanticResult semantic.Result) (Result, error) {

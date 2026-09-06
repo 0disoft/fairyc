@@ -70,6 +70,10 @@ func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (Pac
 		return PackageExpansion{}, err
 	}
 	result := PackageExpansion{Modules: expanded, Plan: plan, Templates: templates, Specializations: map[genericplan.PackageID][]genericplan.SpecializationID{}}
+	result.Declarations, result.Origins, err = sourceOrigins(ordered, plan)
+	if err != nil {
+		return PackageExpansion{}, err
+	}
 	for _, module := range ordered {
 		result.Specializations[module.owner] = nil
 	}

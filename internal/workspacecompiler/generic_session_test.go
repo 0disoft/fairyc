@@ -45,6 +45,8 @@ func TestGenericSessionSkipsLoweringOnlyOnCurrentCompleteHits(t *testing.T) {
 		t.Fatalf("warm: %+v %v", warm.Cache, err)
 	}
 	assertWorkspaceResult(t, workspace, warm.Compiler, 42)
+	assertGenericProvenance(t, workspace, cold.Compiler)
+	assertGenericProvenance(t, workspace, warm.Compiler)
 	writeFile(t, filepath.Join(root, "src", "main.fy"), "module main; import answer as answer; fn i32 main() { let bool extra = answer::value<bool>(true); return answer::value<i32>(42); }")
 	workspace = loadCacheWorkspace(t, root)
 	changed, err := session.Check(workspace)
@@ -115,6 +117,33 @@ func assertGenericWorkspaceNative(t *testing.T, workspace workspaceloader.Worksp
 			}
 		})
 	}
+}
+
+func assertGenericProvenance(t *testing.T, workspace workspaceloader.Workspace, result compiler.Result) {
+	t.Helper()
+	declarations := result.GenericProvenance.Declarations()
+	origins := result.GenericProvenance.Specializations()
+	if len(declarations) != 1 || len(origins) != 1 || declarations[0].Name != "value" || origins[0].Declaration != declarations[0].ID {
+		t.Fatalf("current generic provenance: %+v %+v", declarations, origins)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	matched := false
+	for _, file := range input.Files {
+		matched = matched || file.Package == declarations[0].Package && file.Path == declarations[0].Span.Source && file.Module.Path == declarations[0].Module
+	}
+	if !matched {
+		t.Fatal("provenance lost current source ownership")
+	}
+	name := hir.QualifiedModulePath(declarations[0].Package, declarations[0].Module) + "::" + origins[0].GeneratedName
+	for _, function := range result.MIR.Functions {
+		if function.Name == name {
+			return
+		}
+	}
+	t.Fatal("provenance does not identify a current MIR function")
 }
 
 func TestGenericSessionOversizeAndInvalidSourceDoNotPublishHits(t *testing.T) {
