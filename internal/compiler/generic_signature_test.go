@@ -17,6 +17,7 @@ func TestGenericSignatureDetachesEveryTypeEdge(t *testing.T) {
 	shape := ast.TypeReference{Kind: ast.TypeKindForeignFunction, ABI: "C", Element: &leaf, Result: &leaf,
 		Arguments: []ast.TypeReference{leaf}, Parameters: []ast.TypeReference{leaf}, Length: &ast.TypeLength{Text: "2"}}
 	original := GenericSignature{Unsafe: true, Arguments: []ast.Parameter{{Name: "value", Type: shape}}, Result: shape}
+	original.Attributes = []ast.Attribute{{Name: "effects", Arguments: []ast.AttributeArgument{{Raw: "console"}}}}
 	want := cloneGenericSignature(original)
 	copy := cloneGenericSignature(original)
 	if !reflect.DeepEqual(copy, original) {
@@ -32,6 +33,7 @@ func TestGenericSignatureDetachesEveryTypeEdge(t *testing.T) {
 	mutate(&copy.Arguments[0].Type)
 	mutate(&copy.Result)
 	copy.Arguments[0].Name = "changed"
+	copy.Attributes[0].Arguments[0].Raw = "changed"
 	if !reflect.DeepEqual(original, want) {
 		t.Fatal("signature cloning leaked a mutable edge")
 	}

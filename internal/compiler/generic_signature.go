@@ -9,14 +9,19 @@ import (
 // GenericSignature retains written types before specialization erases binder references.
 // These are source-declared syntax, not resolved semantic types or proof that an unused
 // template body is valid. Consumers must resolve names in the original package/module.
-// No body or attribute expression is retained, and getters detach every mutable type node.
+// No body is retained, and getters detach every mutable type and attribute node.
 type GenericSignature struct {
-	Arguments []ast.Parameter
-	Result    ast.TypeReference
-	Unsafe    bool
+	Attributes []ast.Attribute
+	Arguments  []ast.Parameter
+	Result     ast.TypeReference
+	Unsafe     bool
 }
 
 func cloneGenericSignature(value GenericSignature) GenericSignature {
+	value.Attributes = slices.Clone(value.Attributes)
+	for i := range value.Attributes {
+		value.Attributes[i].Arguments = slices.Clone(value.Attributes[i].Arguments)
+	}
 	value.Arguments = slices.Clone(value.Arguments)
 	for i := range value.Arguments {
 		value.Arguments[i].Type = cloneGenericType(value.Arguments[i].Type)

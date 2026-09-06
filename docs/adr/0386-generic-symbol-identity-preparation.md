@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted detached declaration/identity boundary; source and map integration pending
+- Status: Accepted detached declaration/identity and structural source-header bridge; full snapshot and map integration pending
 - Date: 2026-09-06
 
 ## Decision
@@ -21,6 +21,21 @@ Only ordinary module functions are admitted at this boundary. Invalid/duplicate 
 noncanonical indices, generic foreign functions, methods, and aggregate declarations fail closed.
 This is an identity boundary, not independent proof that a caller-supplied declaration is a valid
 source program. The source bridge must validate original headers against current compiler facts.
+
+## Structural source-header bridge
+
+The compiler's immutable GenericProvenance now retains original written parameter/result types
+and attributes before expansion, checks original declaration header identity, and detaches all
+mutable syntax nodes. GenericDeclarations converts that source-declared signature to positional
+snapshot types without using observed concrete specializations. It includes unused declarations,
+declared effects, scalar/builtin types, binder references, borrows, pointers, positive literal
+fixed arrays, byte slices, Option, Result, and grouping. Source spelling is not reparsed as a type.
+
+This adapter does not claim that unused bodies have been checked. Nominal name resolution,
+non-literal array lengths, unsupported shapes, and malformed effects are explicit errors rather
+than invented compiler facts. It returns detached declarations, not a full executable snapshot;
+source-to-specialization joins, completeness, and workspace integration are still pending.
+No stable language, SDK, runtime ABI, CLI, or map version changes in this preparation.
 
 ## Transport boundary
 

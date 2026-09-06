@@ -85,7 +85,7 @@ func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]gen
 			Span:       hir.Span{Package: file.Package, Source: file.Path, StartByte: declaration.Span.StartByte, EndByte: declaration.Span.EndByte},
 			NameSpan:   hir.Span{Package: file.Package, Source: file.Path, StartByte: declaration.NameSpan.StartByte, EndByte: declaration.NameSpan.EndByte},
 			Parameters: slices.Clone(declaration.Parameters),
-			Signature:  cloneGenericSignature(GenericSignature{Arguments: original.Parameters, Result: original.ResultType, Unsafe: original.Unsafe})})
+			Signature:  cloneGenericSignature(GenericSignature{Attributes: original.Attributes, Arguments: original.Parameters, Result: original.ResultType, Unsafe: original.Unsafe})})
 	}
 	result.origins = slices.Clone(expansion.Origins)
 	for i := range result.origins {
