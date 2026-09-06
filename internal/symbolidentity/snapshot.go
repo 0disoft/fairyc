@@ -50,6 +50,9 @@ func FromDeclarations(declarations []semanticsnapshot.Declaration, instanceUIDs,
 	result := make([]Symbol, 0, len(declarations))
 	ids := make([]ID, 0, len(declarations))
 	for _, declaration := range declarations {
+		if err := validateGenericDeclaration(declaration); err != nil {
+			return nil, err
+		}
 		packageUID, found := instanceUIDs[declaration.Key.PackageInstance]
 		if !found {
 			return nil, fmt.Errorf("declaration %+v has no package UID", declaration.Key)
@@ -60,7 +63,7 @@ func FromDeclarations(declarations []semanticsnapshot.Declaration, instanceUIDs,
 		}
 		identity, err := Compute(Descriptor{
 			PackageUID: packageUID, Module: declaration.Key.Module, Kind: string(declaration.Key.Kind),
-			DeclarationPath: declaration.Key.Name, GenericArity: 0, Signature: signature,
+			DeclarationPath: declaration.Key.Name, GenericArity: uint64(len(declaration.TypeParameters)), Signature: signature,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("declaration %+v identity: %w", declaration.Key, err)

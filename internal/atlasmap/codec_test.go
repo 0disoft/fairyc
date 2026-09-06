@@ -153,6 +153,7 @@ func TestEncodeRejectsContradictoryLogicalRecords(t *testing.T) {
 		match  string
 	}{
 		{name: "count", mutate: func(value *Partition) { value.data.header.Counts.Files++ }, match: "counts"},
+		{name: "generic declaration", mutate: func(value *Partition) { value.data.declarations[0].TypeParameters = []string{"T"} }, match: "cannot preserve a generic declaration"},
 		{name: "algorithm", mutate: func(value *Partition) { value.data.header.SymbolAlgorithm = "other" }, match: "algorithm"},
 		{name: "package reference", mutate: func(value *Partition) {
 			for index := range value.data.header.PackageReferences {

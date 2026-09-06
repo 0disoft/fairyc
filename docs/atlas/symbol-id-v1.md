@@ -27,7 +27,7 @@ The canonical tuple contains, in order:
 2. module path;
 3. declaration kind;
 4. canonical declaration path;
-5. generic arity, fixed to zero for the current non-generic language; and
+5. generic arity (zero for ordinary declarations); and
 6. the complete `fairyc.symbol-signature/v1` byte sequence.
 
 Each variable component is tagged and encoded as an unsigned 64-bit big-endian byte length followed
@@ -74,6 +74,18 @@ fixed-array, `Option`, and `Result` types retain kind, mutability, length, and o
 Nominal types replace the snapshot's `PackageCoordinateId` lookup key with the referenced package
 UID plus logical type path. Exact package-instance and version compatibility remains a map/header
 and graph-edge concern, so upgrading a package version alone does not renumber every declaration.
+
+The detached declaration adapter now admits ordinary module generic functions. Ordered
+`TypeParameters` supplies arity and display names; those names do not enter the signature. A
+`parameter` TypeRef stores its zero-based binder position as a canonical decimal Name, with no
+coordinate, mutability, length, or arguments. Its index must be below the declaration's arity.
+Nested references use the same rule. Duplicate or invalid parameter names, generic foreign
+functions, and generic methods/aggregates are rejected.
+
+This activates the existing arity tuple field and extends the previously unadmitted type domain;
+existing non-generic signature and identity bytes are unchanged. It does not reinterpret an old
+type encoding. The source-header-to-snapshot bridge remains separate, and .fymap v1 rejects
+generic declarations rather than dropping their parameters. See ADR 0386.
 
 ## Digest and text forms
 

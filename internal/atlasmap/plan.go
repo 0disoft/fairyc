@@ -241,6 +241,9 @@ func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, er
 		symbolsByDeclaration[value.Declaration] = symbol
 	}
 	for _, declaration := range snapshot.Declarations() {
+		if len(declaration.TypeParameters) != 0 {
+			return nil, fmt.Errorf("Atlas map v1 cannot preserve a generic declaration")
+		}
 		builder, found := builders[declaration.Key.PackageInstance]
 		if !found {
 			return nil, fmt.Errorf("declaration %+v references an unknown package", declaration.Key)

@@ -322,6 +322,9 @@ func validateTransportHeader(header Header) (map[string]string, map[string]strin
 }
 
 func validateDeclaration(value semanticsnapshot.Declaration, instance string, files, modules map[string]struct{}) error {
+	if len(value.TypeParameters) != 0 {
+		return fmt.Errorf("Atlas map v1 cannot preserve a generic declaration")
+	}
 	if err := validateLocalKey(value.Key, instance, modules); err != nil {
 		return err
 	}

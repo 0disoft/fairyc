@@ -19,6 +19,12 @@ not import this package or an Atlas package.
 
 ## Identity removal
 
+The detached Declaration model now has ordered TypeParameters and a binder-index TypeParameter
+reference for generic signature preparation (ADR 0386). Accessors clone the parameter list.
+These optional in-memory facts do not change existing snapshot output or admit generic source
+through Build yet. Connecting current compiler provenance and original source headers remains
+required; the v1 map planner/codec explicitly reject nonempty TypeParameters.
+
 HIR `PackageID`, `SymbolID`, private `$pN` qualification, MIR block/local IDs, entity strings, and
 absolute host paths are build-local and never appear in a snapshot. Construction replaces them
 with existing independently versioned identities:

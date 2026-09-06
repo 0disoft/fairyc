@@ -51,6 +51,9 @@ const (
 	TypeFixedArray TypeKind = "fixed-array"
 	TypeOption     TypeKind = "option"
 	TypeResult     TypeKind = "result"
+	// TypeParameter uses Name as a canonical zero-based decimal binder index.
+	// Display names belong to Declaration.TypeParameters, not type identity.
+	TypeParameter TypeKind = "parameter"
 )
 
 type DeclarationKind string
@@ -181,24 +184,25 @@ type Variant struct {
 // Declaration contains source-declared facts only. Compiler-created drop glue is represented by
 // its owning resource facts and is deliberately absent from this declaration set.
 type Declaration struct {
-	Key         DeclarationKey
-	Span        Span
-	Provenance  Provenance
-	Public      bool
-	Unsafe      bool
-	Foreign     bool
-	ABI         string
-	LinkName    string
-	Type        TypeRef
-	Owner       *TypeRef
-	Receiver    string
-	Parameters  []Parameter
-	Effects     []string
-	Fields      []Field
-	Variants    []Variant
-	ReprC       bool
-	DropKind    string
-	DropEffects []string
+	TypeParameters []string `json:"-"`
+	Key            DeclarationKey
+	Span           Span
+	Provenance     Provenance
+	Public         bool
+	Unsafe         bool
+	Foreign        bool
+	ABI            string
+	LinkName       string
+	Type           TypeRef
+	Owner          *TypeRef
+	Receiver       string
+	Parameters     []Parameter
+	Effects        []string
+	Fields         []Field
+	Variants       []Variant
+	ReprC          bool
+	DropKind       string
+	DropEffects    []string
 }
 
 // DeclarationDocumentation is an ephemeral compiler-fact sidecar. It binds one declaration's
@@ -318,6 +322,7 @@ func (snapshot Snapshot) Completeness() []Completeness {
 
 func cloneDeclaration(value Declaration) Declaration {
 	result := value
+	result.TypeParameters = slices.Clone(value.TypeParameters)
 	result.Type = cloneType(value.Type)
 	if value.Owner != nil {
 		owner := cloneType(*value.Owner)
