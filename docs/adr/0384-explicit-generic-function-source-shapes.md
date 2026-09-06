@@ -107,6 +107,24 @@ This private encoding retains the existing exact AST-based definition digests an
 invalidate on source-span changes. It does not serialize template source or claim stable ABI,
 whitespace-insensitive compatibility, cache admission, or a released interface-version change.
 
+## Internal specialization-aware cache key
+
+`GenericAnalysis` also retains the ordinary source-interface projection and sorted concrete
+specialization IDs for each defining package. Ownership comes from the validated declaration
+catalog, not from parsing generated function names. Packages with no emitted instantiations receive
+an empty set; semantic rejection publishes none of these cache inputs.
+
+`packagecache.ComputeGeneric` composes the complete v4 environment/source/ordinary-interface tuple,
+the current generic source interface, every direct dependency's generic interface, and the exact
+package-local emitted specialization set. Generic dependency coordinates must match the ordinary
+dependency list exactly. Missing hashes, malformed specialization IDs, duplicates and noncanonical
+order are rejected. This closes the key-level case where a consumer adds `bool` alongside `i32`
+without changing the producer source or its public generic interface.
+
+The key has a distinct `GenericKey` type and `fycacheg0-sha256-` spelling. Current v4 stores and
+artifact records do not accept it. This commit supplies cache identity only; bounded storage,
+verified artifact reuse, persistent transport and stable CLI promotion remain separate gates.
+
 ## Evidence
 
 - `internal/syntax/generic.go`

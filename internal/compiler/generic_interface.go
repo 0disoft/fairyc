@@ -14,9 +14,11 @@ import (
 // typed HIR. Interfaces are absent on semantic rejection and have no authority
 // to admit current stable cache records or unverified executable artifacts.
 type GenericAnalysis struct {
-	Analysis   Analysis
-	Plan       genericplan.Plan
-	Interfaces map[hir.PackageID]moduleinterface.GenericHash
+	Analysis           Analysis
+	Plan               genericplan.Plan
+	Interfaces         map[hir.PackageID]moduleinterface.GenericHash
+	OrdinaryInterfaces map[hir.PackageID]moduleinterface.Hash
+	Specializations    map[hir.PackageID][]genericplan.SpecializationID
 }
 
 func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (GenericAnalysis, error) {
@@ -38,6 +40,8 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 		generated[name] = true
 	}
 	interfaces := map[hir.PackageID]moduleinterface.GenericHash{}
+	ordinary := map[hir.PackageID]moduleinterface.Hash{}
+	specializations := map[hir.PackageID][]genericplan.SpecializationID{}
 	for _, file := range input.Files {
 		if _, done := interfaces[file.Package]; done {
 			continue
@@ -61,7 +65,14 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 			return GenericAnalysis{}, err
 		}
 		interfaces[file.Package] = hash
+		ordinary[file.Package], err = moduleinterface.Compute(descriptor)
+		if err != nil {
+			return GenericAnalysis{}, err
+		}
+		specializations[file.Package] = slices.Clone(expansion.Specializations[owner])
 	}
 	result.Interfaces = interfaces
+	result.OrdinaryInterfaces = ordinary
+	result.Specializations = specializations
 	return result, nil
 }

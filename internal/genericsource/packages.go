@@ -2,6 +2,7 @@ package genericsource
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
@@ -58,7 +59,9 @@ func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (Pac
 		}
 	}
 	var templates []PublicTemplate
+	var declarations *genericplan.Catalog
 	expanded, plan, err := expandAll(ordered, limits, func(catalog *genericplan.Catalog) error {
+		declarations = catalog
 		var err error
 		templates, err = publicTemplates(ordered, catalog)
 		return err
@@ -66,9 +69,20 @@ func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (Pac
 	if err != nil {
 		return PackageExpansion{}, err
 	}
-	result := PackageExpansion{Modules: expanded, Plan: plan, Templates: templates}
+	result := PackageExpansion{Modules: expanded, Plan: plan, Templates: templates, Specializations: map[genericplan.PackageID][]genericplan.SpecializationID{}}
+	for _, module := range ordered {
+		result.Specializations[module.owner] = nil
+	}
 	for _, specialization := range plan.Specializations {
 		result.GeneratedNames = append(result.GeneratedNames, generatedPrefix+string(specialization.ID))
+		declaration, exists := declarations.Declaration(specialization.Declaration)
+		if !exists {
+			return PackageExpansion{}, fmt.Errorf("missing specialization owner")
+		}
+		result.Specializations[declaration.Owner] = append(result.Specializations[declaration.Owner], specialization.ID)
+	}
+	for _, ids := range result.Specializations {
+		slices.Sort(ids)
 	}
 	return result, nil
 }
