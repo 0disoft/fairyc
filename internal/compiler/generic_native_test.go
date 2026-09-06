@@ -30,25 +30,38 @@ func TestGenericSourceRunsLowAndOptimizedMSVC(t *testing.T) {
 			if err != nil || !result.Verified {
 				t.Fatalf("compile: %v %+v", err, result.Semantic)
 			}
-			unit, err := cbackend.Emit(result.MIR, "main::main", cbackend.Stage0WindowsMSVCProfile())
+			runGenericNative(t, toolchain, result, "main::main", fixture.Value)
+		})
+	}
+	t.Run("package-import-chain", func(t *testing.T) {
+		input, coordinates := genericPackageInput(t)
+		result, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+		if err != nil || !result.Verified {
+			t.Fatalf("compile: %v %+v", err, result.Semantic)
+		}
+		runGenericNative(t, toolchain, result, hir.QualifiedModulePath(1, "main")+"::main", 42)
+	})
+}
+
+func runGenericNative(t *testing.T, toolchain cdriver.WindowsHostToolchain, result compiler.Result, entry string, expected int32) {
+	t.Helper()
+	unit, err := cbackend.Emit(result.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	scalarRuntime, err := cruntime.ScalarSource(192)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source, scalarRuntime)
 			if err != nil {
 				t.Fatal(err)
 			}
-			scalarRuntime, err := cruntime.ScalarSource(192)
-			if err != nil {
-				t.Fatal(err)
-			}
-			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-				t.Run(profile.Name, func(t *testing.T) {
-					artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source, scalarRuntime)
-					if err != nil {
-						t.Fatal(err)
-					}
-					outcome, err := cdriver.ExecuteWindowsHost(artifact)
-					if err != nil || outcome.ExitCode != fixture.Value || outcome.Stdout != "" || outcome.Stderr != "" {
-						t.Fatalf("execute: %+v %v", outcome, err)
-					}
-				})
+			outcome, err := cdriver.ExecuteWindowsHost(artifact)
+			if err != nil || outcome.ExitCode != expected || outcome.Stdout != "" || outcome.Stderr != "" {
+				t.Fatalf("execute: %+v %v", outcome, err)
 			}
 		})
 	}

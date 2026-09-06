@@ -1,6 +1,6 @@
 # ADR 0384: Retain explicit generic function source shapes
 
-- Status: Accepted frontend preparation and compiler-private local specialization
+- Status: Accepted frontend preparation and compiler-private scalar specialization
 - Date: 2026-09-05
 
 ## Decision
@@ -42,9 +42,9 @@ verification pipeline. No runtime dispatch or type-variable MIR representation i
 
 The planner retains its catalog, arity, cycle, depth, per-declaration and total-expansion limits.
 Source declarations carry complete AST digests; dependent specialization IDs change transitively.
-Build-local package ownership participates in identity. These identities are deliberately not
-stable package/cache identities: public generic declarations, qualified calls, nominal type
-arguments, source abilities, inference, and workspace/interface transport remain unadmitted.
+The original entry point uses build-local package ownership. The package-bound paths described
+below add coordinate ownership without claiming cache compatibility. Nominal type arguments,
+source abilities, inference, and stable workspace/interface transport remain unadmitted.
 Bindings cannot shadow generic functions in this initial private path, and reserved generated names
 cannot be supplied by source. Template removal must not hide module declaration collisions.
 
@@ -63,6 +63,30 @@ profiles. Planner failures assert exact kernel codes, while the semantic failure
 diagnostic code, failed phase, primary source text, and related expected-type location in the
 original template. All cases must parse successfully, so an unrelated parser failure cannot satisfy
 a compile-fail expectation. The ordinary compiler must still reject every case.
+
+## Compiler-private resolved package execution
+
+`CheckGenericFunctionsForPackage` binds a module to an exact nonzero `PackageCoordinateId`.
+`CheckGenericPackages` extends this to an already-resolved `semantic.PackageInput` and its matching
+coordinate map. Neither function discovers packages or accepts a coordinate as cache evidence.
+Missing coordinates and duplicate coordinates assigned to different semantic packages are rejected.
+The full coordinate digest is encoded in a versioned planner-safe namespace; disposable package
+numbers and file/import ordering do not affect specialization identity.
+
+`genericsource.ExpandPackages` collects all modules before planning, resolves alias-qualified calls
+through exact source-path/provider bindings, and allows public scalar generic functions across
+module boundaries. Private templates cannot be imported, including from another module in the same
+package. Generated functions remain in their defining modules with the original visibility,
+imports and source spans. One catalog and plan enforce global expansion limits and detect
+cross-package cycles. Exact provider selection and reachable template changes invalidate transitive
+specializations. Source ASTs and the caller's package input remain unchanged.
+
+Tests cover a three-package transitive call returning 42 in the interpreter and low/optimized
+Windows MSVC execution, equal module paths with distinct exact providers, renumbering/reordering,
+private access, missing/conflicting providers, alias collisions, cycles and global budgets.
+This is still an internal source execution path, not stable CLI or workspace-cache admission.
+Typed public interfaces do not yet retain exported templates, and package-cache/artifact versioning,
+stable diagnostics and language-version promotion remain required before issues 26 and 27 close.
 
 ## Evidence
 

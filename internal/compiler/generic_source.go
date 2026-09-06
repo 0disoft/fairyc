@@ -30,8 +30,12 @@ func CheckGenericFunctionsForPackage(file semantic.File, coordinate packagegraph
 	}
 	// Encode all digest bytes in the planner's canonical identifier alphabet.
 	// Keep a distinct versioned namespace rather than weakening path validation.
-	owner := genericplan.PackageID("package_coordinate_v1_" + hex.EncodeToString(coordinate[:]))
+	owner := genericPackageOwner(coordinate)
 	return checkGenericFunctions(file, owner, limits)
+}
+
+func genericPackageOwner(coordinate packagegraph.CoordinateID) genericplan.PackageID {
+	return genericplan.PackageID("package_coordinate_v1_" + hex.EncodeToString(coordinate[:]))
 }
 
 func checkGenericFunctions(file semantic.File, owner genericplan.PackageID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {

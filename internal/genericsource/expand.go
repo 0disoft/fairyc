@@ -24,34 +24,27 @@ func Expand(module *ast.Module, owner genericplan.PackageID, limits genericplan.
 		return nil, genericplan.Plan{}, fmt.Errorf("generic source module is nil")
 	}
 	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}}
-	result, plan, err := x.expand(limits)
+	modules, plan, err := expandAll([]*expander{&x}, limits)
 	if err != nil {
 		return nil, genericplan.Plan{}, err
 	}
-	return result, plan, nil
+	return modules[0], plan, nil
 }
 
 type expander struct {
-	module    *ast.Module
-	owner     genericplan.PackageID
-	templates map[string]ast.Function
-	names     map[string]bool
+	module      *ast.Module
+	owner       genericplan.PackageID
+	templates   map[string]ast.Function
+	names       map[string]bool
+	imports     map[string]*expander
+	allowPublic bool
 }
 
 func (x *expander) id(name string) genericplan.DeclarationID {
 	return genericplan.DeclarationID(string(x.owner) + "::" + x.module.Path + "::" + name)
 }
 
-func (x *expander) expand(limits genericplan.PlanLimits) (*ast.Module, genericplan.Plan, error) {
-	b, err := genericplan.NewBuilder(genericplan.DefaultCatalogLimits())
-	if err != nil {
-		return nil, genericplan.Plan{}, err
-	}
-	for _, name := range scalarTypes {
-		if err := b.AddType(genericplan.TypeDescriptor{ID: genericplan.TypeID(name), Owner: "builtin", Abilities: []genericplan.Ability{genericplan.AbilityScalar}, Definition: genericplan.DigestText("source-scalar-v0", name)}); err != nil {
-			return nil, genericplan.Plan{}, err
-		}
-	}
+func (x *expander) collect() error {
 	// Template removal must not hide an original module-namespace collision.
 	for _, v := range x.module.Constants {
 		x.names[v.Name] = true
@@ -68,29 +61,39 @@ func (x *expander) expand(limits genericplan.PlanLimits) (*ast.Module, genericpl
 	for _, v := range x.module.ForeignFunctions {
 		x.names[v.Name] = true
 	}
+	for _, imported := range x.module.Imports {
+		if x.names[imported.Alias] {
+			return fmt.Errorf("duplicate import alias %q", imported.Alias)
+		}
+		x.names[imported.Alias] = true
+	}
 	for name := range x.names {
 		if strings.HasPrefix(name, generatedPrefix) {
-			return nil, genericplan.Plan{}, fmt.Errorf("reserved module name %q", name)
+			return fmt.Errorf("reserved module name %q", name)
 		}
 	}
 	for _, fn := range x.module.Functions {
 		if x.names[fn.Name] || strings.HasPrefix(fn.Name, generatedPrefix) {
-			return nil, genericplan.Plan{}, fmt.Errorf("duplicate or reserved function %q", fn.Name)
+			return fmt.Errorf("duplicate or reserved function %q", fn.Name)
 		}
 		x.names[fn.Name] = true
 		if len(fn.TypeParameters) == 0 {
 			continue
 		}
-		if fn.Public || fn.Owner != "" || fn.Name == "source_location" {
-			return nil, genericplan.Plan{}, fmt.Errorf("generic function %q requires private module-local ownership", fn.Name)
+		if (fn.Public && !x.allowPublic) || fn.Owner != "" || fn.Name == "source_location" {
+			return fmt.Errorf("generic function %q requires private module-local ownership", fn.Name)
 		}
 		for _, parameter := range fn.TypeParameters {
 			if slices.Contains(scalarTypes, parameter) || slices.Contains([]string{"void", "never", "str", "Region", "Option", "Result"}, parameter) {
-				return nil, genericplan.Plan{}, fmt.Errorf("type parameter %q shadows a builtin", parameter)
+				return fmt.Errorf("type parameter %q shadows a builtin", parameter)
 			}
 		}
 		x.templates[fn.Name] = fn
 	}
+	return nil
+}
+
+func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error) {
 	var requests []genericplan.Request
 	for _, fn := range x.module.Functions {
 		declaration := genericplan.Declaration{ID: x.id(fn.Name), Owner: x.owner}
@@ -104,12 +107,12 @@ func (x *expander) expand(limits genericplan.PlanLimits) (*ast.Module, genericpl
 			if e.Kind != syntax.KindSpecialize {
 				return nil
 			}
-			name, err := x.target(e)
+			target, err := x.target(e)
 			if err != nil {
 				return err
 			}
-			dependency := genericplan.Dependency{Declaration: x.id(name)}
-			request := genericplan.Request{Declaration: x.id(name)}
+			dependency := genericplan.Dependency{Declaration: target.id()}
+			request := genericplan.Request{Declaration: target.id()}
 			for _, argument := range e.TypeArguments {
 				if argument.Kind != ast.TypeKindNamed || len(argument.Arguments) != 0 {
 					return fmt.Errorf("generic argument must be a scalar or direct type parameter")
@@ -132,35 +135,37 @@ func (x *expander) expand(limits genericplan.PlanLimits) (*ast.Module, genericpl
 			return nil
 		}}
 		if _, err := t.function(fn); err != nil {
-			return nil, genericplan.Plan{}, fmt.Errorf("generic source %s: %w", fn.Name, err)
+			return nil, fmt.Errorf("generic source %s: %w", fn.Name, err)
 		}
 		if len(fn.TypeParameters) != 0 {
 			body, err := json.Marshal(fn)
 			if err != nil {
-				return nil, genericplan.Plan{}, err
+				return nil, err
 			}
 			declaration.Definition = genericplan.DigestText("source-function-ast-v0", string(body))
+			if x.allowPublic {
+				// Ordinary calls also depend on exact import binding, even when
+				// they do not create an edge in the generic dependency graph.
+				var imports []string
+				for alias, target := range x.imports {
+					imports = append(imports, alias+"="+string(target.owner)+"::"+target.module.Path)
+				}
+				slices.Sort(imports)
+				encoded, err := json.Marshal(imports)
+				if err != nil {
+					return nil, err
+				}
+				declaration.Definition = genericplan.DigestText("source-package-function-v0", string(body)+"\n"+string(encoded))
+			}
 			if err := b.AddDeclaration(declaration); err != nil {
-				return nil, genericplan.Plan{}, err
+				return nil, err
 			}
 		}
 	}
-	catalog, err := b.Build()
-	if err != nil {
-		return nil, genericplan.Plan{}, err
-	}
-	plan, err := catalog.Plan(requests, limits)
-	if err != nil {
-		return nil, genericplan.Plan{}, err
-	}
-	names := map[string]string{}
-	for _, specialization := range plan.Specializations {
-		arguments := make([]genericplan.TypeID, len(specialization.Bindings))
-		for i, binding := range specialization.Bindings {
-			arguments[i] = binding.Type
-		}
-		names[requestKey(specialization.Declaration, arguments)] = generatedPrefix + string(specialization.ID)
-	}
+	return requests, nil
+}
+
+func (x *expander) emit(plan genericplan.Plan, names map[string]string) (*ast.Module, error) {
 	result := *x.module
 	result.Functions = nil
 	for _, fn := range x.module.Functions {
@@ -169,36 +174,69 @@ func (x *expander) expand(limits genericplan.PlanLimits) (*ast.Module, genericpl
 		}
 		concrete, err := x.instantiate(fn, nil, names)
 		if err != nil {
-			return nil, genericplan.Plan{}, err
+			return nil, err
 		}
 		result.Functions = append(result.Functions, concrete)
 	}
 	for _, specialization := range plan.Specializations {
-		name := strings.TrimPrefix(string(specialization.Declaration), string(x.id("")))
+		prefix := string(x.id(""))
+		if !strings.HasPrefix(string(specialization.Declaration), prefix) {
+			continue
+		}
+		name := strings.TrimPrefix(string(specialization.Declaration), prefix)
+		if _, belongs := x.templates[name]; !belongs {
+			continue
+		}
 		bindings := map[string]ast.TypeReference{}
 		for _, binding := range specialization.Bindings {
 			bindings[binding.Parameter] = ast.NamedTypeReference(string(binding.Type), x.templates[name].Span)
 		}
 		concrete, err := x.instantiate(x.templates[name], bindings, names)
 		if err != nil {
-			return nil, genericplan.Plan{}, err
+			return nil, err
 		}
 		concrete.Name = generatedPrefix + string(specialization.ID)
 		concrete.TypeParameters = nil
 		result.Functions = append(result.Functions, concrete)
 	}
-	return &result, plan, nil
+	return &result, nil
 }
 
-func (x *expander) target(e *ast.Expression) (string, error) {
+type callTarget struct {
+	module *expander
+	name   string
+	prefix string
+}
+
+func (t callTarget) id() genericplan.DeclarationID { return t.module.id(t.name) }
+
+func (x *expander) lookup(path string) (callTarget, bool) {
+	parts := strings.Split(path, "::")
+	owner, name, prefix := x, parts[0], ""
+	if len(parts) == 2 {
+		owner, name, prefix = x.imports[parts[0]], parts[1], parts[0]+"::"
+	} else if len(parts) != 1 {
+		return callTarget{}, false
+	}
+	if owner == nil {
+		return callTarget{}, false
+	}
+	_, found := owner.templates[name]
+	return callTarget{module: owner, name: name, prefix: prefix}, found
+}
+
+func (x *expander) target(e *ast.Expression) (callTarget, error) {
 	if len(e.Children) != 1 || e.Children[0].Kind != syntax.KindPath {
-		return "", fmt.Errorf("generic call requires a direct function path")
+		return callTarget{}, fmt.Errorf("generic call requires a direct function path")
 	}
-	name := e.Children[0].Text
-	if _, ok := x.templates[name]; !ok {
-		return "", fmt.Errorf("unknown local generic function %q", e.Children[0].Text)
+	target, found := x.lookup(e.Children[0].Text)
+	if !found {
+		return callTarget{}, fmt.Errorf("unknown generic function %q", e.Children[0].Text)
 	}
-	return name, nil
+	if target.module != x && !target.module.templates[target.name].Public {
+		return callTarget{}, fmt.Errorf("generic function %q is private", e.Children[0].Text)
+	}
+	return target, nil
 }
 
 func (x *expander) checkBinding(name string) error {
@@ -213,8 +251,10 @@ func (x *expander) checkExpression(e *ast.Expression) error {
 		return fmt.Errorf("source cannot reference generated generic names")
 	}
 	if e.Kind == syntax.KindCall && len(e.Children) != 0 && e.Children[0].Kind == syntax.KindPath {
-		name := strings.TrimPrefix(e.Children[0].Text, x.module.Path+"::")
-		if _, generic := x.templates[name]; generic {
+		name := e.Children[0].Text
+		_, importedGeneric := x.lookup(name)
+		_, localGeneric := x.templates[strings.TrimPrefix(name, x.module.Path+"::")]
+		if importedGeneric || (!x.allowPublic && localGeneric) {
 			return fmt.Errorf("generic function %q requires explicit type arguments", name)
 		}
 	}
@@ -234,7 +274,7 @@ func (x *expander) instantiate(fn ast.Function, bindings map[string]ast.TypeRefe
 		if e.Kind != syntax.KindSpecialize {
 			return nil
 		}
-		name, err := x.target(e)
+		target, err := x.target(e)
 		if err != nil {
 			return err
 		}
@@ -242,11 +282,11 @@ func (x *expander) instantiate(fn ast.Function, bindings map[string]ast.TypeRefe
 		for i, argument := range e.TypeArguments {
 			arguments[i] = genericplan.TypeID(argument.Path)
 		}
-		generated, ok := names[requestKey(x.id(name), arguments)]
+		generated, ok := names[requestKey(target.id(), arguments)]
 		if !ok {
 			return fmt.Errorf("specialization missing from verified plan")
 		}
-		*e = ast.Expression{Kind: syntax.KindPath, Span: e.Span, Text: generated}
+		*e = ast.Expression{Kind: syntax.KindPath, Span: e.Span, Text: target.prefix + generated}
 		return nil
 	}}
 	return t.function(fn)
