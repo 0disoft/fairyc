@@ -7,9 +7,9 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/lockfile"
 	"github.com/0disoft/fairyc/internal/semantic"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -43,7 +43,7 @@ func checkWorkspace(sourceRoot string, locked, stable bool, successLabel string,
 	if err != nil {
 		return packageFailure(stderr, err)
 	}
-	result, err := compiler.CheckPackages(input)
+	result, err := workspacecompiler.Check(workspace)
 	if err != nil {
 		return internalError(stderr)
 	}

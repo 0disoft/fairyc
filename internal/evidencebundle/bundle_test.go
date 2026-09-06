@@ -213,7 +213,7 @@ func newEvidenceFixture(t *testing.T) evidenceFixture {
 uid = "test.evidence"
 name = "evidence"
 version = "1.0.0"
-language = "fairyc-language/13"
+language = "fairyc-language/14"
 source = "src"
 `)
 	writeEvidenceFile(t, filepath.Join(root, "src", "main.fy"), `module main;

@@ -12,6 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -317,11 +318,7 @@ func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCo
 		}
 		return loweredWorkspace{}, packageFailure(stderr, err)
 	}
-	input, err := workspace.SemanticInput()
-	if err != nil {
-		return loweredWorkspace{}, packageFailure(stderr, err)
-	}
-	checked, pipelineErr := compiler.CheckPackages(input)
+	checked, pipelineErr := workspacecompiler.Check(workspace)
 	if len(checked.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
 			return loweredWorkspace{}, ExitInternalFailure

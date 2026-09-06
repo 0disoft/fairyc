@@ -20,6 +20,7 @@ import (
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packagecontent"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -186,11 +187,7 @@ func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdou
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	input, err := workspace.SemanticInput()
-	if err != nil {
-		return packageFailure(stderr, err)
-	}
-	checked, pipelineErr := compiler.CheckPackages(input)
+	checked, pipelineErr := workspacecompiler.Check(workspace)
 	if len(checked.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
 			return ExitInternalFailure

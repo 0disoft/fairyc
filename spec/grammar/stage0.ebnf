@@ -70,7 +70,7 @@ fairy_function_decl = "unsafe"? "fn" type function_name type_parameters?
 (* One optional owner qualifier distinguishes a type-owned function from a
    module-local function. Receiver and owner agreement is semantic. *)
 function_name = IDENT ("::" IDENT)? ;
-(* Generic syntax is retained for specialization; semantic admission remains gated. *)
+(* Language /14 admits explicit scalar function specialization in resolved workspaces. *)
 type_parameters = "<" IDENT ("," IDENT)* ","? ">" ;
 
 foreign_function_decl = "unsafe" "extern" CONTEXT_C "fn" type IDENT

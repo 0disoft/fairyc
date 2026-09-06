@@ -836,8 +836,8 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.56`, language
-`fairyc-language/13`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.57`, language
+`fairyc-language/14`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
@@ -921,6 +921,13 @@ burn for direct inert no-drop resources, SDK `0.0.0-stage0.54` carries the exact
 and package-cache fixture v6 pins `/12`. Public-interface v4 and runtime ABI remain unchanged. Burn
 has a distinct verified compiler-internal MIR operation but changes no serialized MIR artifact or C
 ABI contract.
+
+ADR 0385 advances current workspace source admission to `fairyc-language/14` and SDK
+`0.0.0-stage0.57` for explicit builtin-scalar generic functions. Stable check/build/run/test share
+coordinate-bound expansion before ordinary verification. Runtime ABI stays `fairyc-runtime/0`;
+the separate private generic interface/cache families do not become public formats. Existing
+manifest pins and locks must be refreshed. Nominal type arguments and static interfaces remain
+unadmitted.
 
 ADR 0377 performs the next coordinated source cut. `fairyc-language/13` gives contextual declaration
 meaning to `state`, `cell`, and `map`, admits one explicit package-owned state declaration, and advances the compiler-bundled SDK

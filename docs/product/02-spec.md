@@ -130,7 +130,7 @@ resource-bearing, and foreign-module operands fail closed with `E1109`. SDK
 `0.0.0-stage0.55` carries the exact language identity; public-interface v4 and runtime ABI remain
 unchanged.
 
-ADR 0377 advances the current language to `fairyc-language/13` and admits one explicit package-owned
+ADR 0377 introduced language `fairyc-language/13` and admits one explicit package-owned
 `@contract_uid("...") state { ... }` declaration. Ordered `cell Value name;` and
 `map Key Value name;` fields lower through the existing HIR layout and contract-state builder with
 the closed `bool`, `u32`, `u64`, `bytes20`, and `bytes32` codec vocabulary. Public-interface v5 and
@@ -741,7 +741,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.56` exposes
+  The compiler-bundled SDK `0.0.0-stage0.57` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -1100,7 +1100,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.56` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.57` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`, ADR 0299's fallible single-byte append, and ADR 0373's

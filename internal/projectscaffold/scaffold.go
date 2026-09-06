@@ -15,7 +15,7 @@ import (
 
 const (
 	DefaultVersion  = "0.1.0"
-	DefaultLanguage = "fairyc-language/13"
+	DefaultLanguage = "fairyc-language/14"
 )
 
 // FailureReason is a stable internal category for one rejected or incomplete scaffold attempt.

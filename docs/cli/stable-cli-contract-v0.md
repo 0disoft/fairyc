@@ -62,6 +62,10 @@ Experimental Linux C/native commands do not promote Linux to the stable native-c
 
 ## Compatibility rule
 
+Language /14 admits explicit scalar generic functions in stable workspace check/build/run/test
+through one coordinate-bound compiler entry point. ADR 0385 owns the accepted types and remaining
+generic restrictions. This changes source admission, not flags, output schemas, or exit taxonomy.
+
 Changing a stable command's accepted flags, configuration discovery, success bytes, JSON schema selection, compiler exit classification, stdin ownership, or pre-launch/post-launch status boundary requires a deliberate contract revision with golden tests.
 
 Adding or removing experimental commands does not by itself revise this stable contract, but help text remains the exact inventory and must change atomically with parser behavior.

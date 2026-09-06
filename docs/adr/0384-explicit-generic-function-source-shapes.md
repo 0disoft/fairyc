@@ -3,6 +3,10 @@
 - Status: Accepted frontend preparation and compiler-private scalar specialization
 - Date: 2026-09-05
 
+Stable workspace source admission is now owned by ADR 0385. The preparation and private-cache
+boundaries below describe this ADR's incremental implementation history, not a current rejection
+of stable scalar generic functions.
+
 ## Decision
 
 Use C-shaped function declarations with explicit ordered type parameters:
