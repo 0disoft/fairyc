@@ -45,6 +45,12 @@ than invented compiler facts. It returns detached declarations, not a full execu
 source-to-specialization joins, completeness, and workspace integration are still pending.
 No stable language, SDK, runtime ABI, CLI, or map version changes in this preparation.
 
+Borrow facts now retain a non-serialized build-local function discriminator. The executable
+summary join uses both that identity and the original span, so two specializations sharing one
+source borrow do not collide or receive each other's facts. Legacy caller-built facts without
+the discriminator are accepted only when their span has exactly one owner. This is a prerequisite
+for full snapshot integration, not publication of generated functions as original declarations.
+
 ## Transport boundary
 
 .fymap v1 has no generic parameter fields. Its planner and encoder therefore reject generic

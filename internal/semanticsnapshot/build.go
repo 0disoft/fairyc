@@ -866,12 +866,23 @@ func buildFunctionSummaries(
 			return nil, 0, 0, err
 		}
 		owner := -1
-		for key, index := range indexes {
-			if containsSpan(bounds[key], span) {
-				if owner != -1 {
-					return nil, 0, 0, fmt.Errorf("borrow at %+v belongs to multiple functions", span)
+		if fact.Function != hir.NoSymbol {
+			key, known := symbols[fact.Function]
+			index, summarized := indexes[key]
+			if !known || !summarized || !containsSpan(bounds[key], span) {
+				return nil, 0, 0, fmt.Errorf("borrow at %+v has no matching function identity", span)
+			}
+			owner = index
+		} else {
+			// Older caller-built facts may omit the discriminator. Source position
+			// is sufficient only if exactly one function owns it.
+			for key, index := range indexes {
+				if containsSpan(bounds[key], span) {
+					if owner != -1 {
+						return nil, 0, 0, fmt.Errorf("borrow at %+v belongs to multiple functions", span)
+					}
+					owner = index
 				}
-				owner = index
 			}
 		}
 		if owner == -1 {

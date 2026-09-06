@@ -120,11 +120,14 @@ type EffectFact struct {
 
 // BorrowFact records the hidden origin and local lifetime of one safe borrow.
 type BorrowFact struct {
-	Borrow  hir.Span
-	Kind    string
-	Origin  string
-	LastUse *hir.Span
-	Escapes bool
+	// Function disambiguates specializations sharing original source coordinates.
+	// It is build-local and never belongs to a serialized semantic contract.
+	Function hir.SymbolID `json:"-"`
+	Borrow   hir.Span
+	Kind     string
+	Origin   string
+	LastUse  *hir.Span
+	Escapes  bool
 }
 
 // RegionOriginFact records one compiler-known allocation and its hidden lexical origin.

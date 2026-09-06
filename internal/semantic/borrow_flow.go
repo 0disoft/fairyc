@@ -214,6 +214,7 @@ func (a *analyzer) borrowFlowFunction(module *moduleScope, function *ast.Functio
 	environment := flow.parameterEnvironment()
 	flow.evaluateBlock(function.Body, environment, true)
 	for index := range flow.loans {
+		flow.loans[index].fact.Function = a.functions[function].id
 		a.borrows = append(a.borrows, flow.loans[index].fact)
 	}
 }
