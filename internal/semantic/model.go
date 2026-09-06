@@ -50,6 +50,7 @@ type packageImportKey struct {
 
 // Result contains observable semantic facts and build-local typed HIR.
 type Result struct {
+	NominalTypes     []NominalTypeFact `json:"-"`
 	HIR              hir.Package
 	CompletedThrough Phase
 	FailedPhase      Phase
@@ -231,6 +232,7 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 		}
 	} else if len(result.Unsupported) == 0 {
 		result.CompletedThrough = PhaseFlow
+		result.NominalTypes = analyzer.visibleNominalTypes()
 	} else if analyzer.flowStarted {
 		result.CompletedThrough = PhaseType
 	} else {

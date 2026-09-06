@@ -14,13 +14,34 @@ import (
 
 // GenericDeclarations detaches original generic headers, independently of observed
 // specializations. It publishes source-declared signatures only: unused bodies,
-// inferred effects, executable summaries, and nominal name resolution are not proven
-// here. Nominal names require a future compiler-owned resolution bridge and are
-// rejected rather than guessed from one concrete specialization.
+// inferred effects and executable summaries are not proven here. Nominal names
+// use compiler-published visible scope facts, never a guessed specialization.
 func GenericDeclarations(provenance compiler.GenericProvenance, packages []PackageInput) ([]Declaration, error) {
 	metadata, _, _, err := normalizePackages(packages)
 	if err != nil {
 		return nil, err
+	}
+	type scopeKey struct {
+		packageID hir.PackageID
+		module    string
+	}
+	nominals := map[scopeKey]map[string]TypeRef{}
+	for _, fact := range provenance.NominalTypes() {
+		key := scopeKey{fact.Package, fact.Module}
+		if _, ok := metadata[fact.Package]; !ok {
+			return nil, fmt.Errorf("generic nominal scope has no package metadata")
+		}
+		resolved, err := normalizeType(fact.CanonicalType, metadata)
+		if err != nil || resolved.Kind != TypeNominal {
+			return nil, fmt.Errorf("generic nominal scope has no canonical nominal type")
+		}
+		if nominals[key] == nil {
+			nominals[key] = map[string]TypeRef{}
+		}
+		if _, duplicate := nominals[key][fact.Name]; duplicate {
+			return nil, fmt.Errorf("generic nominal scope repeats a written name")
+		}
+		nominals[key][fact.Name] = resolved
 	}
 	var declarations []Declaration
 	seen := map[DeclarationKey]bool{}
@@ -61,12 +82,13 @@ func GenericDeclarations(provenance compiler.GenericProvenance, packages []Packa
 		if err != nil {
 			return nil, fmt.Errorf("generic %s effects: %w", original.Name, err)
 		}
-		declaration.Type, err = genericType(original.Signature.Result, binders, 0)
+		visible := nominals[scopeKey{original.Package, original.Module}]
+		declaration.Type, err = genericType(original.Signature.Result, binders, visible, 0)
 		if err != nil {
 			return nil, fmt.Errorf("generic %s result: %w", original.Name, err)
 		}
 		for _, argument := range original.Signature.Arguments {
-			typeRef, err := genericType(argument.Type, binders, 0)
+			typeRef, err := genericType(argument.Type, binders, visible, 0)
 			if err != nil {
 				return nil, fmt.Errorf("generic %s argument %s: %w", original.Name, argument.Name, err)
 			}
@@ -112,11 +134,11 @@ func genericEffects(attributes []ast.Attribute) ([]string, error) {
 
 // This conversion describes written structure, not generic-body type checking.
 // Text is diagnostic spelling only; all type decisions use structural AST fields.
-func genericType(value ast.TypeReference, binders map[string]int, depth int) (TypeRef, error) {
+func genericType(value ast.TypeReference, binders map[string]int, nominals map[string]TypeRef, depth int) (TypeRef, error) {
 	if depth > 64 {
 		return TypeRef{}, fmt.Errorf("generic signature type nesting exceeds the snapshot bound")
 	}
-	child := func(value ast.TypeReference) (TypeRef, error) { return genericType(value, binders, depth+1) }
+	child := func(value ast.TypeReference) (TypeRef, error) { return genericType(value, binders, nominals, depth+1) }
 	switch value.Kind {
 	case ast.TypeKindGrouped, ast.TypeKindReference, ast.TypeKindRawPointer, ast.TypeKindArray, ast.TypeKindSlice:
 		if value.Element == nil {
@@ -163,6 +185,9 @@ func genericType(value ast.TypeReference, binders map[string]int, depth int) (Ty
 		}
 		if len(value.Arguments) == 0 && builtinType(hir.Type(value.Path)) {
 			return TypeRef{Kind: TypeBuiltin, Name: value.Path}, nil
+		}
+		if resolved, ok := nominals[value.Path]; ok && len(value.Arguments) == 0 {
+			return cloneType(resolved), nil
 		}
 		if value.Path == "Option" && len(value.Arguments) == 1 || value.Path == "Result" && len(value.Arguments) == 2 {
 			kind := TypeOption

@@ -29,9 +29,17 @@ and attributes before expansion, checks original declaration header identity, an
 mutable syntax nodes. GenericDeclarations converts that source-declared signature to positional
 snapshot types without using observed concrete specializations. It includes unused declarations,
 declared effects, scalar/builtin types, binder references, borrows, pointers, positive literal
-fixed arrays, byte slices, Option, Result, and grouping. Source spelling is not reparsed as a type.
+fixed arrays, byte slices, Option, Result, grouping, and compiler-resolved nominal types. Source
+spelling is not reparsed as a type.
 
-This adapter does not claim that unused bodies have been checked. Nominal name resolution,
+Successful semantic analysis publishes deterministic visible nominal scope facts, including local
+types and public imported types selected by the existing exact package-import resolver. They are
+omitted from JSON and rejected analyses. Compiler provenance clones these facts; the Atlas adapter
+replaces their build-local type qualification with PackageCoordinateId. Alias spelling and package
+renumbering do not affect identity; a different provider package UID does. Private imported names
+are unavailable, and no nominal lookup is inferred from source strings or concrete specializations.
+
+This adapter does not claim that unused bodies have been checked. Unresolved nominal names,
 non-literal array lengths, unsupported shapes, and malformed effects are explicit errors rather
 than invented compiler facts. It returns detached declarations, not a full executable snapshot;
 source-to-specialization joins, completeness, and workspace integration are still pending.

@@ -21,9 +21,12 @@ not import this package or an Atlas package.
 
 The detached Declaration model now has ordered TypeParameters and a binder-index TypeParameter
 reference for generic signature preparation (ADR 0386). Accessors clone the parameter list.
-These optional in-memory facts do not change existing snapshot output or admit generic source
-through Build yet. Connecting current compiler provenance and original source headers remains
-required; the v1 map planner/codec explicitly reject nonempty TypeParameters.
+GenericDeclarations converts compiler-retained original headers and visible nominal scope facts
+to detached declarations. Binder names become positions; nominal types become package-coordinate
+references. Declared effects are preserved, while unused-body validity is not claimed. These
+optional in-memory facts do not change existing snapshot output or admit generic source through
+Build yet: specialization joins and completeness remain pending. The v1 map planner/codec
+explicitly reject nonempty TypeParameters. See ADR 0386 for the exact source-header boundary.
 
 HIR `PackageID`, `SymbolID`, private `$pN` qualification, MIR block/local IDs, entity strings, and
 absolute host paths are build-local and never appear in a snapshot. Construction replaces them

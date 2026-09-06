@@ -63,11 +63,11 @@ func TestGenericProvenanceRejectsMismatchedOriginalHeaders(t *testing.T) {
 		t.Run(change.name, func(t *testing.T) {
 			module := &ast.Module{Path: "main", SourceSize: 20, Functions: []ast.Function{fn}}
 			input := semantic.PackageInput{Files: []semantic.File{{Package: hir.DefaultPackage, Path: "main.fy", Module: module}}}
-			if _, err := genericProvenance(input, owners, expansion); err != nil {
+			if _, err := genericProvenance(input, owners, expansion, nil); err != nil {
 				t.Fatalf("baseline: %v", err)
 			}
 			change.apply(module)
-			if _, err := genericProvenance(input, owners, expansion); err == nil {
+			if _, err := genericProvenance(input, owners, expansion, nil); err == nil {
 				t.Fatal("mismatched original header was accepted")
 			}
 		})

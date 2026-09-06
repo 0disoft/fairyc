@@ -29,6 +29,11 @@ type GenericDeclaration struct {
 type GenericProvenance struct {
 	declarations []GenericDeclaration
 	origins      []genericsource.SpecializationOrigin
+	nominalTypes []semantic.NominalTypeFact
+}
+
+func (value GenericProvenance) NominalTypes() []semantic.NominalTypeFact {
+	return slices.Clone(value.nominalTypes)
 }
 
 func (value GenericProvenance) Declarations() []GenericDeclaration {
@@ -48,8 +53,8 @@ func (value GenericProvenance) Specializations() []genericsource.SpecializationO
 	return result
 }
 
-func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]genericplan.PackageID, expansion genericsource.PackageExpansion) (GenericProvenance, error) {
-	result := GenericProvenance{}
+func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]genericplan.PackageID, expansion genericsource.PackageExpansion, nominalTypes []semantic.NominalTypeFact) (GenericProvenance, error) {
+	result := GenericProvenance{nominalTypes: slices.Clone(nominalTypes)}
 	for _, declaration := range expansion.Declarations {
 		var file *semantic.File
 		for i := range input.Files {
