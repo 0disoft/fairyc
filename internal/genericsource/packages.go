@@ -20,6 +20,13 @@ type PackageModule struct {
 // retain its visibility and imports. Callers must verify the resulting modules
 // through ordinary package-aware semantics; this is not an interface or cache.
 func ExpandPackages(inputs []PackageModule, limits genericplan.PlanLimits) ([]*ast.Module, genericplan.Plan, error) {
+	result, err := PreparePackages(inputs, limits)
+	return result.Modules, result.Plan, err
+}
+
+// PreparePackages also retains public template identities before specialization
+// erases their declarations. No template summary is returned on expansion failure.
+func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
 	type moduleKey struct {
 		owner genericplan.PackageID
 		path  string
@@ -28,11 +35,11 @@ func ExpandPackages(inputs []PackageModule, limits genericplan.PlanLimits) ([]*a
 	ordered := make([]*expander, len(inputs))
 	for i, input := range inputs {
 		if input.Module == nil {
-			return nil, genericplan.Plan{}, fmt.Errorf("generic source module is nil")
+			return PackageExpansion{}, fmt.Errorf("generic source module is nil")
 		}
 		key := moduleKey{input.Owner, input.Module.Path}
 		if _, exists := modules[key]; exists {
-			return nil, genericplan.Plan{}, fmt.Errorf("duplicate generic module %q", input.Module.Path)
+			return PackageExpansion{}, fmt.Errorf("duplicate generic module %q", input.Module.Path)
 		}
 		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true}
 		modules[key], ordered[i] = x, x
@@ -41,19 +48,32 @@ func ExpandPackages(inputs []PackageModule, limits genericplan.PlanLimits) ([]*a
 		for _, imported := range input.Module.Imports {
 			owner, bound := input.Imports[imported.Path]
 			if !bound {
-				return nil, genericplan.Plan{}, fmt.Errorf("unbound generic module import %q", imported.Path)
+				return PackageExpansion{}, fmt.Errorf("unbound generic module import %q", imported.Path)
 			}
 			target := modules[moduleKey{owner, imported.Path}]
 			if target == nil {
-				return nil, genericplan.Plan{}, fmt.Errorf("missing generic module provider %q", imported.Path)
+				return PackageExpansion{}, fmt.Errorf("missing generic module provider %q", imported.Path)
 			}
 			ordered[i].imports[imported.Alias] = target
 		}
 	}
-	return expandAll(ordered, limits)
+	var templates []PublicTemplate
+	expanded, plan, err := expandAll(ordered, limits, func(catalog *genericplan.Catalog) error {
+		var err error
+		templates, err = publicTemplates(ordered, catalog)
+		return err
+	})
+	if err != nil {
+		return PackageExpansion{}, err
+	}
+	result := PackageExpansion{Modules: expanded, Plan: plan, Templates: templates}
+	for _, specialization := range plan.Specializations {
+		result.GeneratedNames = append(result.GeneratedNames, generatedPrefix+string(specialization.ID))
+	}
+	return result, nil
 }
 
-func expandAll(modules []*expander, limits genericplan.PlanLimits) ([]*ast.Module, genericplan.Plan, error) {
+func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...func(*genericplan.Catalog) error) ([]*ast.Module, genericplan.Plan, error) {
 	builder, err := genericplan.NewBuilder(genericplan.DefaultCatalogLimits())
 	if err != nil {
 		return nil, genericplan.Plan{}, err
@@ -79,6 +99,11 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits) ([]*ast.Modul
 	catalog, err := builder.Build()
 	if err != nil {
 		return nil, genericplan.Plan{}, err
+	}
+	for _, observe := range observers {
+		if err := observe(catalog); err != nil {
+			return nil, genericplan.Plan{}, err
+		}
 	}
 	plan, err := catalog.Plan(requests, limits)
 	if err != nil {

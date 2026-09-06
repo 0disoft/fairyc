@@ -16,15 +16,24 @@ import (
 // the same workspace as input. Stable CLI, interfaces and cache admission remain
 // separate: template definitions are not yet published by the typed interface.
 func CheckGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
+	analysis, err := AnalyzeGenericPackages(input, coordinates, limits)
+	if err != nil {
+		return Result{}, genericplan.Plan{}, err
+	}
+	result, err := LowerAnalyzed(analysis.Analysis)
+	return result, analysis.Plan, err
+}
+
+func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (semantic.PackageInput, genericsource.PackageExpansion, error) {
 	owners := map[hir.PackageID]genericplan.PackageID{}
 	seen := map[packagegraph.CoordinateID]hir.PackageID{}
 	for _, file := range input.Files {
 		coordinate, exists := coordinates[file.Package]
 		if !exists || coordinate == (packagegraph.CoordinateID{}) {
-			return Result{}, genericplan.Plan{}, fmt.Errorf("missing generic package coordinate for %d", file.Package)
+			return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("missing generic package coordinate for %d", file.Package)
 		}
 		if previous, duplicate := seen[coordinate]; duplicate && previous != file.Package {
-			return Result{}, genericplan.Plan{}, fmt.Errorf("ambiguous generic package coordinate")
+			return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("ambiguous generic package coordinate")
 		}
 		seen[coordinate] = file.Package
 		owners[file.Package] = genericPackageOwner(coordinate)
@@ -34,14 +43,14 @@ func CheckGenericPackages(input semantic.PackageInput, coordinates map[hir.Packa
 		_, fromExists := owners[imported.FromPackage]
 		to, toExists := owners[imported.ToPackage]
 		if !fromExists || !toExists {
-			return Result{}, genericplan.Plan{}, fmt.Errorf("generic import references missing package")
+			return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("generic import references missing package")
 		}
 		if bindings[imported.FromPackage] == nil {
 			bindings[imported.FromPackage] = map[string]genericplan.PackageID{}
 		}
 		bound := bindings[imported.FromPackage]
 		if previous, exists := bound[imported.ImportPath]; exists && previous != to {
-			return Result{}, genericplan.Plan{}, fmt.Errorf("conflicting generic import provider")
+			return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("conflicting generic import provider")
 		}
 		bound[imported.ImportPath] = to
 	}
@@ -49,14 +58,13 @@ func CheckGenericPackages(input semantic.PackageInput, coordinates map[hir.Packa
 	for i, file := range input.Files {
 		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package]}
 	}
-	expanded, plan, err := genericsource.ExpandPackages(modules, limits)
+	expansion, err := genericsource.PreparePackages(modules, limits)
 	if err != nil {
-		return Result{}, genericplan.Plan{}, err
+		return semantic.PackageInput{}, genericsource.PackageExpansion{}, err
 	}
 	input.Files = slices.Clone(input.Files)
 	for i := range input.Files {
-		input.Files[i].Module = expanded[i]
+		input.Files[i].Module = expansion.Modules[i]
 	}
-	result, err := CheckPackages(input)
-	return result, plan, err
+	return input, expansion, nil
 }

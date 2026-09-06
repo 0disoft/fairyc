@@ -85,8 +85,27 @@ Tests cover a three-package transitive call returning 42 in the interpreter and 
 Windows MSVC execution, equal module paths with distinct exact providers, renumbering/reordering,
 private access, missing/conflicting providers, alias collisions, cycles and global budgets.
 This is still an internal source execution path, not stable CLI or workspace-cache admission.
-Typed public interfaces do not yet retain exported templates, and package-cache/artifact versioning,
-stable diagnostics and language-version promotion remain required before issues 26 and 27 close.
+The internal source-interface path below retains exported templates separately from typed HIR.
+Package-cache/artifact versioning, stable diagnostics and language-version promotion remain
+required before issues 26 and 27 close.
+
+## Internal generic source-interface identity
+
+`AnalyzeGenericPackages` preserves a source-interface hash for every successfully analyzed package
+before MIR lowering. `genericsource.PreparePackages` retains each public template's canonical
+reachable generic declaration closure, including private helpers and uninstantiated dependencies.
+Closure traversal is finite even for unused recursive definitions; actual requests still face the
+planner's cycle and expansion gates. Unreachable private template changes do not enter the closure.
+
+`moduleinterface.ComputeGeneric` combines the ordinary v5 descriptor with these sorted template
+closures under `fairyc.generic-public-interface/v0`. Generated concrete specializations are removed
+from the ordinary descriptor, so current type-argument requests do not alter the source interface.
+The resulting `GenericHash` uses `fygif0-sha256-` and is deliberately incompatible with current v5
+interface hashes and cache records. Failed semantic analysis publishes no interface hashes.
+
+This private encoding retains the existing exact AST-based definition digests and may therefore
+invalidate on source-span changes. It does not serialize template source or claim stable ABI,
+whitespace-insensitive compatibility, cache admission, or a released interface-version change.
 
 ## Evidence
 
