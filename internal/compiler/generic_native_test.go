@@ -34,11 +34,7 @@ func TestGenericSourceRunsLowAndOptimizedMSVC(t *testing.T) {
 		})
 	}
 	t.Run("package-import-chain", func(t *testing.T) {
-		input, coordinates := genericPackageInput(t)
-		result, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
-		if err != nil || !result.Verified {
-			t.Fatalf("compile: %v %+v", err, result.Semantic)
-		}
+		result := genericCachedPackageResult(t)
 		runGenericNative(t, toolchain, result, hir.QualifiedModulePath(1, "main")+"::main", 42)
 	})
 }

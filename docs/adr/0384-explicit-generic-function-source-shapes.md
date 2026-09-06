@@ -122,8 +122,26 @@ order are rejected. This closes the key-level case where a consumer adds `bool` 
 without changing the producer source or its public generic interface.
 
 The key has a distinct `GenericKey` type and `fycacheg0-sha256-` spelling. Current v4 stores and
-artifact records do not accept it. This commit supplies cache identity only; bounded storage,
-verified artifact reuse, persistent transport and stable CLI promotion remain separate gates.
+artifact records do not accept it. Persistent transport and stable CLI promotion remain separate
+gates; the isolated in-memory MIR lane is described below.
+
+## Bounded process-local generic artifact cache
+
+`packageartifact.GenericCache` keeps generic keys and interfaces in a separate typed LRU with
+mandatory entry, logical-byte and artifact-byte limits. Logical bytes count the serialized MIR
+payload and its two full digests, not allocator/container overhead. The existing process codec
+verifies artifacts before insertion and after decoding, and rejects foreign-process payloads.
+Interface contradictions and malformed payloads are quarantined; quarantine compares the retained
+record generation so an intervening replacement survives. Oversize writes preserve prior entries.
+
+Tests store all three packages of the generic import chain under computed generic keys, load every
+artifact through verified hits, reassemble the whole MIR program, and execute it in the interpreter
+and low/optimized Windows MSVC profiles. Mutation isolation, LRU eviction, missing bounds, invalid
+MIR, foreign/corrupt payloads and replacement-safe quarantine have direct regression coverage.
+
+This cache transports ordinary package MIR only. A hit is not whole-compilation reuse: the caller
+must still reassemble and verify against current compilation inputs. Workspace-session activation,
+contract-state compilation bundles, persistent storage and stable CLI integration remain unadmitted.
 
 ## Evidence
 
