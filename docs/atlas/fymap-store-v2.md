@@ -1,6 +1,6 @@
 # Generic-aware `.fymap` store v2
 
-- Status: Implemented internal opt-in store; query and CLI integration pending
+- Status: Implemented internal opt-in store; package-local v2 queries available, CLI integration pending
 - Layout: `fymap-v2/<PackageInstanceId>/<checksum-hex>.fymap`
 - Constructors: `NewMapStoreV2`, `NewMapStoreV2InRoot`
 - Transport: `docs/atlas/fymap-transport-v2.md`
@@ -47,6 +47,7 @@ and repair, independent version quotas, cross-version rejection, and per-map byt
 v1 store tests continue to exercise the shared path. Directory-link tests are conditional on host
 link support; runtime and filesystem durability limitations remain those of the shared store.
 
-No command automatically creates this store. V2 package queries, cross-package specialization
-joins, and CLI activation are not enabled by the constructors. No network, watcher, background
+No command automatically creates this store. V2 package queries require NewQueryIndexV2 as described
+in `docs/atlas/fymap-query-v2.md`; cross-package specialization joins and CLI activation remain
+pending. No network, watcher, background
 cleanup, default path, or default retention policy is added.

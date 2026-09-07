@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, compiler snapshot, v2 logical map, codec, and store; query integration pending
+- Status: Accepted source identity, compiler snapshot, v2 map/codec/store and local queries; workspace join/CLI integration pending
 - Date: 2026-09-06
 
 ## Decision
@@ -100,7 +100,8 @@ The legacy planner and workspace entry point retain v1 behavior. V2 plans cannot
 encoder, including a plan with only unused generic declarations. The v1 encoder also checks for
 specialization payloads independently of header counts. Logical planning does not itself publish
 maps. The separately opt-in v2 store now consumes the codec and current-source expectations;
-queries and CLI consumption still require their subsequent consumer integration.
+package-local queries use the separate v2 constructor; workspace joins and CLI consumption still
+require their subsequent consumer integration.
 
 ## Transport boundary
 
@@ -117,7 +118,7 @@ Generic source declarations, positional arguments, concrete summaries, and speci
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
 Checksums detect corruption, not authorship or compiler provenance authenticity. Cross-package
-implementation joins and queries still need their
+implementation joins and downstream command consumers still need their
 consumer-specific integration before v2 becomes an Atlas CLI path.
 
 NewMapStoreV2 and NewMapStoreV2InRoot publish and load maps under the separate `fymap-v2` directory.
@@ -125,6 +126,15 @@ The existing root-relative publication, retention, cleanup, and current-source c
 with version-specific codec and checksum inputs selected when the store is opened. Version-root
 links are rejected and the opened directory identity must match the inspected directory. No store
 auto-migrates or searches another version's directory. See `docs/atlas/fymap-store-v2.md`.
+
+NewQueryIndexV2 now admits exact-current v2 maps to package-local overview, catalog, show, and around
+queries. Original generic nodes retain their signature but no universal Function facts; separate
+specialization records carry concrete type arguments and observed relation counts. Relations retain
+source and target implementation IDs, and context retains generic source-interface identity and
+template-body unavailability. Existing byte/record/relation/depth budgets cover the added metadata.
+Traversal remains a declaration neighborhood, not proof of a concrete execution path across
+specializations. V1 queries and workspace joins do not silently admit v2 maps.
+See `docs/atlas/fymap-query-v2.md`.
 
 ## Evidence
 

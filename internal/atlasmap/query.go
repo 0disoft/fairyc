@@ -156,12 +156,14 @@ type QueryFunctionFacts struct {
 }
 
 type QueryNode struct {
-	Symbol      Symbol                       `json:"symbol"`
-	Declaration semanticsnapshot.Declaration `json:"declaration"`
-	Function    *QueryFunctionFacts          `json:"function,omitempty"`
+	Specializations []QuerySpecializationFacts   `json:"specializations,omitempty"`
+	Symbol          Symbol                       `json:"symbol"`
+	Declaration     semanticsnapshot.Declaration `json:"declaration"`
+	Function        *QueryFunctionFacts          `json:"function,omitempty"`
 }
 
 type QueryTarget struct {
+	Specialization  string                           `json:"specialization,omitempty"`
 	Symbol          string                           `json:"symbol,omitempty"`
 	PackageInstance string                           `json:"package_instance"`
 	Module          string                           `json:"module"`
@@ -170,30 +172,32 @@ type QueryTarget struct {
 }
 
 type QueryRelation struct {
-	Source     string                      `json:"source"`
-	Kind       RelationKind                `json:"kind"`
-	Target     *QueryTarget                `json:"target,omitempty"`
-	Span       *semanticsnapshot.Span      `json:"span,omitempty"`
-	Certainty  semanticsnapshot.Certainty  `json:"certainty,omitempty"`
-	Provenance semanticsnapshot.Provenance `json:"provenance"`
-	Detail     string                      `json:"detail,omitempty"`
-	ABI        string                      `json:"abi,omitempty"`
-	LinkName   string                      `json:"link_name,omitempty"`
-	Escapes    bool                        `json:"escapes,omitempty"`
+	SourceSpecialization string                      `json:"source_specialization,omitempty"`
+	Source               string                      `json:"source"`
+	Kind                 RelationKind                `json:"kind"`
+	Target               *QueryTarget                `json:"target,omitempty"`
+	Span                 *semanticsnapshot.Span      `json:"span,omitempty"`
+	Certainty            semanticsnapshot.Certainty  `json:"certainty,omitempty"`
+	Provenance           semanticsnapshot.Provenance `json:"provenance"`
+	Detail               string                      `json:"detail,omitempty"`
+	ABI                  string                      `json:"abi,omitempty"`
+	LinkName             string                      `json:"link_name,omitempty"`
+	Escapes              bool                        `json:"escapes,omitempty"`
 }
 
 type QueryContext struct {
-	LogicalSchema     string                          `json:"logical_schema"`
-	CompilerBuild     string                          `json:"compiler_build"`
-	Language          string                          `json:"language"`
-	PackageUID        string                          `json:"package_uid"`
-	PackageInstance   string                          `json:"package_instance"`
-	PackageCoordinate string                          `json:"package_coordinate"`
-	PackageSource     string                          `json:"package_source"`
-	InterfaceHash     string                          `json:"interface_hash"`
-	Generation        string                          `json:"generation"`
-	MapOmissions      []string                        `json:"map_omissions"`
-	Completeness      []semanticsnapshot.Completeness `json:"completeness"`
+	GenericInterfaceHash string                          `json:"generic_interface_hash,omitempty"`
+	LogicalSchema        string                          `json:"logical_schema"`
+	CompilerBuild        string                          `json:"compiler_build"`
+	Language             string                          `json:"language"`
+	PackageUID           string                          `json:"package_uid"`
+	PackageInstance      string                          `json:"package_instance"`
+	PackageCoordinate    string                          `json:"package_coordinate"`
+	PackageSource        string                          `json:"package_source"`
+	InterfaceHash        string                          `json:"interface_hash"`
+	Generation           string                          `json:"generation"`
+	MapOmissions         []string                        `json:"map_omissions"`
+	Completeness         []semanticsnapshot.Completeness `json:"completeness"`
 }
 
 type PackageOverview struct {
@@ -250,6 +254,7 @@ type indexedQueryNode struct {
 	symbol             Symbol
 	declaration        semanticsnapshot.Declaration
 	functionProvenance *semanticsnapshot.Provenance
+	specializations    []QuerySpecializationFacts
 }
 
 // QueryIndex is an immutable package-local index over one semantically validated, exact-current
@@ -287,7 +292,11 @@ func AllDeclarationKinds() []semanticsnapshot.DeclarationKind {
 }
 
 func NewQueryIndex(partition Partition, expectation LoadExpectation) (*QueryIndex, error) {
-	if err := validateTransportPartition(partition); err != nil {
+	return newQueryIndex(partition, expectation, LogicalSchema)
+}
+
+func newQueryIndex(partition Partition, expectation LoadExpectation, schema string) (*QueryIndex, error) {
+	if err := validatePartitionVersion(partition, schema); err != nil {
 		return nil, fmt.Errorf("build Atlas query index: %w", err)
 	}
 	if err := validateLoadExpectation(expectation); err != nil {
@@ -330,6 +339,8 @@ func NewQueryIndex(partition Partition, expectation LoadExpectation) (*QueryInde
 		index.byKey[symbol.Declaration] = position
 	}
 	index.relations = index.buildRelations(functions)
+	index.addSpecializations(partition.Specializations())
+	slices.SortFunc(index.relations, compareQueryRelation)
 	if len(index.relations) != index.header.Counts.Relations {
 		return nil, fmt.Errorf("build Atlas query index: relation expansion count differs from map header")
 	}
@@ -595,69 +606,10 @@ func (index *QueryIndex) ResolveAttributionSubject(symbolID string) (Attribution
 	return AttributionSubject{Context: index.contextFor(nil), Subject: subject, File: file}, nil
 }
 
-func (index *QueryIndex) buildRelations(functions []semanticsnapshot.FunctionSummary) []QueryRelation {
-	result := make([]QueryRelation, 0, index.header.Counts.Relations)
-	for _, function := range functions {
-		sourcePosition := index.byKey[function.Function]
-		source := index.nodes[sourcePosition].symbol.Visible
-		for _, call := range function.Calls {
-			kind := RelationCalls
-			if call.TargetKind == semanticsnapshot.CallTargetExternal {
-				kind = RelationCallsForeign
-			}
-			target := &QueryTarget{
-				PackageInstance: call.Target.PackageInstance, Module: call.Target.Module,
-				Kind: call.Target.Kind, Name: call.Target.Name,
-			}
-			if targetPosition, found := index.byKey[call.Target]; found {
-				target.Symbol = index.nodes[targetPosition].symbol.Visible
-			}
-			span := call.Span
-			result = append(result, QueryRelation{
-				Source: source, Kind: kind, Target: target, Span: &span, Certainty: call.Certainty,
-				Provenance: function.Provenance, ABI: call.ABI, LinkName: call.LinkName,
-			})
-		}
-		for _, category := range function.TrapCategories {
-			result = append(result, QueryRelation{Source: source, Kind: RelationMayTrap, Provenance: function.Provenance, Detail: category})
-		}
-		result = appendSpanRelations(result, source, RelationUsesUnsafe, function.Provenance, function.UnsafeSites)
-		result = appendSpanRelations(result, source, RelationMoves, function.Provenance, function.MoveSites)
-		result = appendSpanRelations(result, source, RelationDrops, function.Provenance, function.DropSites)
-		result = appendSpanRelations(result, source, RelationAllocates, function.Provenance, function.AllocationSites)
-		result = appendSpanRelations(result, source, RelationReturnsError, function.Provenance, function.ReturnErrorSites)
-		for _, borrow := range function.Borrows {
-			kind := RelationBorrowsShared
-			if borrow.Kind == "mutable" {
-				kind = RelationBorrowsMutable
-			}
-			span := borrow.Span
-			result = append(result, QueryRelation{
-				Source: source, Kind: kind, Span: &span, Provenance: function.Provenance, Escapes: borrow.Escapes,
-			})
-		}
-	}
-	slices.SortFunc(result, compareQueryRelation)
-	return result
-}
-
-func appendSpanRelations(
-	result []QueryRelation,
-	source string,
-	kind RelationKind,
-	provenance semanticsnapshot.Provenance,
-	spans []semanticsnapshot.Span,
-) []QueryRelation {
-	for _, value := range spans {
-		span := value
-		result = append(result, QueryRelation{Source: source, Kind: kind, Span: &span, Provenance: provenance})
-	}
-	return result
-}
-
 func (index *QueryIndex) node(position int) QueryNode {
 	value := index.nodes[position]
 	result := QueryNode{Symbol: value.symbol, Declaration: cloneDeclarations([]semanticsnapshot.Declaration{value.declaration})[0]}
+	result.Specializations = cloneQuerySpecializations(value.specializations)
 	if value.functionProvenance != nil {
 		counts := make(map[RelationKind]int)
 		for _, relationIndex := range index.outgoing[value.symbol.Visible] {
@@ -761,11 +713,16 @@ func (index *QueryIndex) catalogEntry(position int) SymbolCatalogEntry {
 
 func (index *QueryIndex) contextFor(relations []RelationKind) QueryContext {
 	wanted := make(map[string]struct{})
+	if index.header.LogicalSchema == LogicalSchemaV2 {
+		wanted["generic-specializations"] = struct{}{}
+		wanted["generic-template-bodies"] = struct{}{}
+	}
 	for _, relation := range relations {
 		wanted[completenessRelation(relation)] = struct{}{}
 	}
 	context := QueryContext{
-		LogicalSchema: index.header.LogicalSchema, CompilerBuild: index.header.CompilerBuild,
+		GenericInterfaceHash: index.header.GenericInterfaceHash,
+		LogicalSchema:        index.header.LogicalSchema, CompilerBuild: index.header.CompilerBuild,
 		Language: index.header.Language, PackageUID: index.header.PackageUID,
 		PackageInstance: index.header.PackageInstance, PackageCoordinate: index.header.PackageCoordinate,
 		PackageSource: index.header.PackageSource, InterfaceHash: index.header.InterfaceHash,
@@ -1054,6 +1011,9 @@ func compareQueryRelation(left, right QueryRelation) int {
 	if value := cmp.Compare(left.Source, right.Source); value != 0 {
 		return value
 	}
+	if value := cmp.Compare(left.SourceSpecialization, right.SourceSpecialization); value != 0 {
+		return value
+	}
 	if value := cmp.Compare(left.Kind, right.Kind); value != 0 {
 		return value
 	}
@@ -1119,5 +1079,8 @@ func compareOptionalTarget(left, right *QueryTarget) int {
 	if value := cmp.Compare(left.Name, right.Name); value != 0 {
 		return value
 	}
-	return cmp.Compare(left.Symbol, right.Symbol)
+	if value := cmp.Compare(left.Symbol, right.Symbol); value != 0 {
+		return value
+	}
+	return cmp.Compare(left.Specialization, right.Specialization)
 }
