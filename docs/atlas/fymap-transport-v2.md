@@ -1,6 +1,6 @@
 # Generic-aware `.fymap` transport v2
 
-- Status: Implemented opt-in internal codec; storage and query integration pending
+- Status: Implemented opt-in internal codec and store; query integration pending
 - Logical model: `fairyc.fymap-logical/v2`
 - Transport: `fairyc.fymap/v2`
 - Encoding: `fairyc.fymap-json/v2`
@@ -81,7 +81,7 @@ unknown fields, trailing data, and cross-version rejection. Resealed mutations t
 uniqueness, ownership, summary identity, IDs, calls, concrete types, counts, parameter binding, and
 template completeness independently from checksum integrity.
 
-This codec does not publish maps, authorize source reads, or enable v2 queries. Storage keys,
-cross-package implementation joins, and downstream CLI consumers remain separate integration
-requirements. Current-source expectations now include generic source-interface compatibility, but
-the map store has not yet been connected to that v2 path.
+This codec does not itself publish maps, authorize source reads, or enable v2 queries. Its explicit
+store consumer is documented in `docs/atlas/fymap-store-v2.md`, including current-source and generic
+interface validation. Cross-package implementation joins and downstream CLI consumers remain
+separate integration requirements.

@@ -17,6 +17,7 @@ import (
 )
 
 const mapStoreLayoutDirectory = "fymap-v1"
+const mapStoreLayoutDirectoryV2 = "fymap-v2"
 const maxReadableMapBytes = uint64(1<<63 - 2)
 
 // MapStoreLimits are mandatory caller policy for retained immutable map generations.
@@ -41,6 +42,7 @@ type MapStore struct {
 	root     *os.Root
 	rootName string
 	limits   MapStoreLimits
+	v2       bool
 	mu       sync.Mutex
 	hits     uint64
 	misses   uint64
@@ -60,6 +62,15 @@ type mapPublishHooks struct {
 }
 
 func NewMapStore(root string, limits MapStoreLimits) (*MapStore, error) {
+	return newMapStore(root, limits, false)
+}
+
+// NewMapStoreV2 opens an opt-in generic-aware store in a separate version directory.
+func NewMapStoreV2(root string, limits MapStoreLimits) (*MapStore, error) {
+	return newMapStore(root, limits, true)
+}
+
+func newMapStore(root string, limits MapStoreLimits, v2 bool) (*MapStore, error) {
 	if root == "" {
 		return nil, fmt.Errorf(".fymap store root must be nonempty")
 	}
@@ -78,11 +89,20 @@ func NewMapStore(root string, limits MapStoreLimits) (*MapStore, error) {
 		return nil, fmt.Errorf("open .fymap store root: %w", err)
 	}
 	defer boundary.Close()
-	return NewMapStoreInRoot(boundary, ".", limits)
+	return newMapStoreInRoot(boundary, ".", limits, v2)
 }
 
 // NewMapStoreInRoot binds all later map I/O beneath boundary and a canonical relative root.
 func NewMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits) (*MapStore, error) {
+	return newMapStoreInRoot(boundary, root, limits, false)
+}
+
+// NewMapStoreV2InRoot keeps v2 publication and cleanup below the opened boundary.
+func NewMapStoreV2InRoot(boundary *os.Root, root string, limits MapStoreLimits) (*MapStore, error) {
+	return newMapStoreInRoot(boundary, root, limits, true)
+}
+
+func newMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits, v2 bool) (*MapStore, error) {
 	if boundary == nil {
 		return nil, fmt.Errorf(".fymap filesystem boundary must be initialized")
 	}
@@ -92,15 +112,28 @@ func NewMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits) (*
 	if err := validateMapStoreLimits(limits); err != nil {
 		return nil, err
 	}
-	versionRoot := filepath.Join(root, mapStoreLayoutDirectory)
+	layout := mapStoreLayoutDirectory
+	if v2 {
+		layout = mapStoreLayoutDirectoryV2
+	}
+	versionRoot := filepath.Join(root, layout)
 	if err := boundary.MkdirAll(versionRoot, 0o700); err != nil {
 		return nil, fmt.Errorf("create .fymap version root: %w", err)
+	}
+	before, err := boundary.Lstat(versionRoot)
+	if err != nil || !before.IsDir() || before.Mode()&os.ModeSymlink != 0 {
+		return nil, fmt.Errorf(".fymap version root must be a real directory")
 	}
 	opened, err := boundary.OpenRoot(versionRoot)
 	if err != nil {
 		return nil, fmt.Errorf("open .fymap version root: %w", err)
 	}
-	return &MapStore{root: opened, rootName: opened.Name(), limits: limits}, nil
+	after, err := opened.Stat(".")
+	if err != nil || !os.SameFile(before, after) {
+		_ = opened.Close()
+		return nil, fmt.Errorf(".fymap version root changed while opening")
+	}
+	return &MapStore{root: opened, rootName: opened.Name(), limits: limits, v2: v2}, nil
 }
 
 func validateMapStoreLimits(limits MapStoreLimits) error {
@@ -139,11 +172,12 @@ func (store *MapStore) publish(partition Partition, hooks mapPublishHooks) (Chec
 	if store == nil || store.root == nil {
 		return Checksum{}, fmt.Errorf(".fymap store is not initialized")
 	}
-	encoded, err := Encode(partition, store.limits.MaxMapBytes)
+	schema, encoding, logical := store.transportVersion()
+	encoded, err := encodeVersion(partition, store.limits.MaxMapBytes, schema, encoding, logical)
 	if err != nil {
 		return Checksum{}, err
 	}
-	checksum, err := computeTransportChecksum(documentFromPartition(partition))
+	checksum, err := computeVersionChecksum(documentFromPartition(partition), schema, encoding)
 	if err != nil {
 		return Checksum{}, err
 	}
@@ -298,11 +332,12 @@ func (store *MapStore) readGeneration(path, name, expectedInstance string) (Part
 	if uint64(len(encoded)) > store.limits.MaxMapBytes {
 		return Partition{}, ErrMapTooLarge
 	}
-	partition, err := Decode(encoded, store.limits.MaxMapBytes)
+	schema, encoding, logical := store.transportVersion()
+	partition, err := decodeVersion(encoded, store.limits.MaxMapBytes, schema, encoding, logical)
 	if err != nil {
 		return Partition{}, err
 	}
-	checksum, err := computeTransportChecksum(documentFromPartition(partition))
+	checksum, err := computeVersionChecksum(documentFromPartition(partition), schema, encoding)
 	if err != nil {
 		return Partition{}, err
 	}

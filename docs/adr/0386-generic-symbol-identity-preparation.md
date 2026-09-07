@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, compiler snapshot, v2 logical map, and v2 codec; storage/query integration pending
+- Status: Accepted source identity, compiler snapshot, v2 logical map, codec, and store; query integration pending
 - Date: 2026-09-06
 
 ## Decision
@@ -98,8 +98,9 @@ all executable facts. Ordinary package partitions differ only in their explicit 
 
 The legacy planner and workspace entry point retain v1 behavior. V2 plans cannot enter the v1
 encoder, including a plan with only unused generic declarations. The v1 encoder also checks for
-specialization payloads independently of header counts. This step does not enable storage, queries,
-or CLI consumption of v2; those require the subsequent consumer integration.
+specialization payloads independently of header counts. Logical planning does not itself publish
+maps. The separately opt-in v2 store now consumes the codec and current-source expectations;
+queries and CLI consumption still require their subsequent consumer integration.
 
 ## Transport boundary
 
@@ -116,8 +117,14 @@ Generic source declarations, positional arguments, concrete summaries, and speci
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
 Checksums detect corruption, not authorship or compiler provenance authenticity. Cross-package
-implementation joins, storage, and queries still need their
+implementation joins and queries still need their
 consumer-specific integration before v2 becomes an Atlas CLI path.
+
+NewMapStoreV2 and NewMapStoreV2InRoot publish and load maps under the separate `fymap-v2` directory.
+The existing root-relative publication, retention, cleanup, and current-source checks are shared,
+with version-specific codec and checksum inputs selected when the store is opened. Version-root
+links are rejected and the opened directory identity must match the inspected directory. No store
+auto-migrates or searches another version's directory. See `docs/atlas/fymap-store-v2.md`.
 
 ## Evidence
 
