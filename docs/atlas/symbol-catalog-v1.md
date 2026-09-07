@@ -6,6 +6,10 @@
 - Implementation: `internal/symbolcatalog/`
 - CLI: `fairyc experimental atlas-symbols list`
 
+This is the default output and the explicit `--catalog-version 1` path. Its encoder accepts only
+v1 maps. The opt-in generic-aware `--catalog-version 2` path is specified in
+`docs/atlas/symbol-catalog-v2.md`.
+
 ## Envelope
 
 `fairyc.symbol-catalog/v1` is one compact UTF-8 JSON value with encoding

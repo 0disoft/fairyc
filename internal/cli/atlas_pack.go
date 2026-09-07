@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/contextpack"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -91,7 +92,11 @@ func prepareAtlasQuery(
 	locked bool,
 	stderr io.Writer,
 ) (preparedAtlasQuery, int) {
-	prepared, code := prepareAtlasWorkspace(sourceRoot, locked, stderr)
+	return prepareAtlasQueryVersion(sourceRoot, packageUID, locked, stderr, false)
+}
+
+func prepareAtlasQueryVersion(sourceRoot, packageUID string, locked bool, stderr io.Writer, generic bool) (preparedAtlasQuery, int) {
+	prepared, code := prepareAtlasWorkspaceVersion(sourceRoot, locked, stderr, generic)
 	if code != ExitSuccess {
 		return preparedAtlasQuery{}, code
 	}
@@ -103,7 +108,11 @@ func prepareAtlasQuery(
 	if !found {
 		return preparedAtlasQuery{}, internalError(stderr)
 	}
-	index, err := atlasmap.NewQueryIndex(selected, expectation)
+	query := atlasmap.NewQueryIndex
+	if generic {
+		query = atlasmap.NewQueryIndexV2
+	}
+	index, err := query(selected, expectation)
 	if err != nil {
 		return preparedAtlasQuery{}, internalError(stderr)
 	}
@@ -115,6 +124,10 @@ func prepareAtlasWorkspace(
 	locked bool,
 	stderr io.Writer,
 ) (preparedAtlasWorkspace, int) {
+	return prepareAtlasWorkspaceVersion(sourceRoot, locked, stderr, false)
+}
+
+func prepareAtlasWorkspaceVersion(sourceRoot string, locked bool, stderr io.Writer, generic bool) (preparedAtlasWorkspace, int) {
 	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
 		return preparedAtlasWorkspace{}, packageFailure(stderr, err)
@@ -123,7 +136,12 @@ func prepareAtlasWorkspace(
 	if err != nil {
 		return preparedAtlasWorkspace{}, packageFailure(stderr, err)
 	}
-	result, err := compiler.CheckPackages(input)
+	var result compiler.Result
+	if generic {
+		result, err = workspacecompiler.Check(workspace)
+	} else {
+		result, err = compiler.CheckPackages(input)
+	}
 	if err != nil {
 		return preparedAtlasWorkspace{}, internalError(stderr)
 	}
@@ -146,11 +164,15 @@ func prepareAtlasWorkspace(
 	if err != nil {
 		return preparedAtlasWorkspace{}, internalError(stderr)
 	}
-	snapshot, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
+	prepare, current := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations
+	if generic {
+		prepare, current = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2
+	}
+	snapshot, partitions, err := prepare(workspace, result, compilerBuild)
 	if err != nil {
 		return preparedAtlasWorkspace{}, internalError(stderr)
 	}
-	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, result, compilerBuild)
+	expectations, err := current(workspace, result, compilerBuild)
 	if err != nil {
 		return preparedAtlasWorkspace{}, internalError(stderr)
 	}

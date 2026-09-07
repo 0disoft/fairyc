@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, compiler snapshot, v2 map/codec/store and local queries; workspace join/CLI integration pending
+- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol discovery CLI; other output/CLI integration pending
 - Date: 2026-09-06
 
 ## Decision
@@ -100,8 +100,8 @@ The legacy planner and workspace entry point retain v1 behavior. V2 plans cannot
 encoder, including a plan with only unused generic declarations. The v1 encoder also checks for
 specialization payloads independently of header counts. Logical planning does not itself publish
 maps. The separately opt-in v2 store now consumes the codec and current-source expectations;
-package-local queries and workspace joins use separate v2 constructors; CLI consumption still
-requires subsequent consumer integration.
+package-local queries and workspace joins use separate v2 constructors. Symbol discovery has an
+explicit v2 CLI path; other CLI consumption still requires subsequent consumer integration.
 
 ## Transport boundary
 
@@ -110,7 +110,8 @@ declarations explicitly. Silently serializing them as arity zero would erase inf
 rederived IDs contradict the original identity. The snapshot now preserves generic declarations,
 specializations, and completeness together, as does the opt-in v2 logical plan.
 The v1 encoder also rejects specialization calls rather than omitting their implementation target.
-The Atlas CLI is not enabled by this preparation, and language/SDK/runtime versions do not change.
+Only the explicitly versioned symbol discovery CLI consumes v2 maps so far; language/SDK/runtime
+versions do not change.
 
 EncodeV2 and DecodeV2 now implement the separate `fairyc.fymap/v2` transport described in
 `docs/atlas/fymap-transport-v2.md`. The original Encode/Decode remain exact-v1 entry points.
@@ -118,7 +119,7 @@ Generic source declarations, positional arguments, concrete summaries, and speci
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
 Checksums detect corruption, not authorship or compiler provenance authenticity. Downstream command
-consumers still need their integration before v2 becomes an Atlas CLI path.
+consumers other than symbol discovery still need their v2 CLI integration.
 
 NewMapStoreV2 and NewMapStoreV2InRoot publish and load maps under the separate `fymap-v2` directory.
 The existing root-relative publication, retention, cleanup, and current-source checks are shared,
@@ -145,11 +146,19 @@ V1 construction remains unchanged. See `docs/atlas/workspace-call-join-v0.md`.
 The internal workspace-call catalog EncodeV1 now preserves implementation endpoints in the separate
 catalog v1 JSON/checksum contract. Canonical ordering includes both implementation IDs; exact record
 deduplication does not collapse calls sharing a template source span. The v0 encoder rejects v2
-indexes instead of erasing generic facts. Existing v0 CLI output remains unchanged; generic CLI
-compilation and the other output consumers still require integration. See
+indexes instead of erasing generic facts. Existing v0 call CLI output remains unchanged; its
+versioned generic CLI connection and the other output consumers still require integration. See
 `docs/atlas/workspace-call-catalog-v1.md`.
 
 ## Evidence
+
+Symbol catalog EncodeV2 and `experimental atlas-symbols list --catalog-version 2` now expose
+original generic declaration identities through the v2 map/query pipeline. Multiple concrete
+implementations do not duplicate catalog records; unused templates remain discoverable. The
+default and explicit catalog version 1 retain the existing ordinary compilation/output path.
+V2 uses the shared generic-aware uncached workspace compiler, with the same exact lock, source
+diagnostic, currentness, selection, and output limits. The symbol output has its own v2 checksum
+domain/version inputs and rejects mixed map versions. See `docs/atlas/symbol-catalog-v2.md`.
 
 Generic identity tests cover alpha-renaming, unused arity, changed binder positions, nested
 references, malformed/out-of-range indices, and inadmissible declaration kinds. Existing ordinary

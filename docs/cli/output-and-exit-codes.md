@@ -245,6 +245,12 @@ selection-byte, or final-output budgets are invocation failure `2`. Zero exact-n
 successful complete output. Workspace/lock failures are `7`, source diagnostics
 are `3`, and compiler invariants or output failures are `4`. No partial catalog is intentionally
 written on pre-output failure; an external writer may retain a prefix when its own write fails.
+`experimental atlas-symbols list --catalog-version 2` instead writes one canonical
+`fairyc.symbol-catalog-json/v2` page with original generic declaration identities and v2 currentness
+context. Explicit `--catalog-version 1` is byte-identical to the default. Invalid or duplicate
+versions use code `2`; source diagnostic, workspace/lock, budget, and output failures retain the
+existing command policy. No partial output is intentionally emitted on failure.
+
 `experimental atlas-calls list` writes exactly one canonical
 `fairyc.workspace-call-catalog-json/v0` value with no trailing newline. It requires an exact package
 UID, canonical visible/full SymbolId, outgoing/incoming/both direction, and explicit positive

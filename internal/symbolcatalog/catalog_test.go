@@ -14,6 +14,7 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
@@ -90,6 +91,10 @@ func TestEncodeIsCanonicalChecksummedBoundedAndTextFree(t *testing.T) {
 }
 
 func catalogFixture(t *testing.T) (string, *atlasmap.QueryIndex) {
+	return catalogFixtureVersion(t, false)
+}
+
+func catalogFixtureVersion(t *testing.T, generic bool) (string, *atlasmap.QueryIndex) {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -108,6 +113,9 @@ fn i32 leaf() { return 40; }
 fn i32 middle() { return leaf() + 1; }
 fn i32 main() { return middle() + 1; }
 `)
+	if generic {
+		writeCatalogFile(t, filepath.Join(root, "src", "main.fy"), "module main; fn T id<T>(T x) { return x; } fn T unused<T>(T x) { return x; } fn i32 main() { assert(id<i32>(42) == 42); assert(id<u32>(7) == 7); return 0; }")
+	}
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
 		t.Fatal(err)
@@ -116,7 +124,16 @@ fn i32 main() { return middle() + 1; }
 	if err != nil {
 		t.Fatal(err)
 	}
-	checked, err := compiler.CheckPackages(input)
+	var checked compiler.Result
+	if generic {
+		coordinates, coordinateErr := workspace.PackageCoordinates()
+		if coordinateErr != nil {
+			t.Fatal(coordinateErr)
+		}
+		checked, _, err = compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	} else {
+		checked, err = compiler.CheckPackages(input)
+	}
 	if err != nil || !checked.Verified {
 		t.Fatalf("CheckPackages() = %t, %v", checked.Verified, err)
 	}
@@ -124,16 +141,20 @@ fn i32 main() { return middle() + 1; }
 	for position := range compilerBuild {
 		compilerBuild[position] = byte(0x70 + position)
 	}
-	_, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
+	prepare, current, query := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations, atlasmap.NewQueryIndex
+	if generic {
+		prepare, current, query = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2, atlasmap.NewQueryIndexV2
+	}
+	_, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil || len(partitions) != 1 {
 		t.Fatalf("PrepareWorkspace() = %d, %v", len(partitions), err)
 	}
-	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, checked, compilerBuild)
+	expectations, err := current(workspace, checked, compilerBuild)
 	if err != nil {
 		t.Fatal(err)
 	}
 	partition := partitions[0]
-	index, err := atlasmap.NewQueryIndex(partition, expectations[partition.Header().PackageInstance])
+	index, err := query(partition, expectations[partition.Header().PackageInstance])
 	if err != nil {
 		t.Fatal(err)
 	}

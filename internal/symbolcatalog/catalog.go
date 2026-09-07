@@ -64,12 +64,23 @@ func Encode(
 	request atlasmap.SymbolCatalogRequest,
 	maxBytes uint64,
 ) ([]byte, error) {
+	return encode(index, request, maxBytes, false)
+}
+
+func encode(index *atlasmap.QueryIndex, request atlasmap.SymbolCatalogRequest, maxBytes uint64, generic bool) ([]byte, error) {
 	if maxBytes == 0 {
 		return nil, fmt.Errorf("symbol catalog byte limit must be positive")
 	}
 	result, err := index.CatalogSymbols(request)
 	if err != nil {
 		return nil, err
+	}
+	schema := atlasmap.LogicalSchema
+	if generic {
+		schema = atlasmap.LogicalSchemaV2
+	}
+	if result.Context.LogicalSchema != schema {
+		return nil, fmt.Errorf("symbol catalog requires %s maps", schema)
 	}
 	if result.Context.MapOmissions == nil {
 		result.Context.MapOmissions = make([]string, 0)
@@ -83,13 +94,17 @@ func Encode(
 	if result.Omissions == nil {
 		result.Omissions = make([]atlasmap.QueryOmission, 0)
 	}
-	checksum, err := computeChecksum(result)
+	version, encoding, algorithm, prefix, checksumVersion := CatalogVersion, CatalogEncoding, ChecksumAlgorithm, ChecksumPrefix, byte(0)
+	if generic {
+		version, encoding, algorithm, prefix, checksumVersion = CatalogVersionV2, CatalogEncodingV2, ChecksumAlgorithmV2, ChecksumPrefixV2, 1
+	}
+	checksum, err := computeChecksum(result, version, encoding, checksumVersion)
 	if err != nil {
 		return nil, err
 	}
 	encoded, err := json.Marshal(envelope{
-		CatalogVersion: CatalogVersion, Encoding: CatalogEncoding,
-		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: checksum.String(), Catalog: result,
+		CatalogVersion: version, Encoding: encoding,
+		ChecksumAlgorithm: algorithm, Checksum: prefix + hex.EncodeToString(checksum[:]), Catalog: result,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("encode symbol catalog: %w", err)
@@ -100,24 +115,20 @@ func Encode(
 	return encoded, nil
 }
 
-func computeChecksum(result atlasmap.SymbolCatalogResult) (Checksum, error) {
+func computeChecksum(result atlasmap.SymbolCatalogResult, version, encoding string, checksumVersion byte) (Checksum, error) {
 	payload, err := json.Marshal(result)
 	if err != nil {
 		return Checksum{}, fmt.Errorf("encode symbol catalog checksum payload: %w", err)
 	}
 	digest := sha256.New()
-	writeChecksumHeader(digest)
-	writeChecksumBytes(digest, []byte(CatalogVersion))
-	writeChecksumBytes(digest, []byte(CatalogEncoding))
+	_, _ = digest.Write([]byte(checksumDomain))
+	_, _ = digest.Write([]byte{0, checksumVersion})
+	writeChecksumBytes(digest, []byte(version))
+	writeChecksumBytes(digest, []byte(encoding))
 	writeChecksumBytes(digest, payload)
 	var resultChecksum Checksum
 	copy(resultChecksum[:], digest.Sum(nil))
 	return resultChecksum, nil
-}
-
-func writeChecksumHeader(destination hash.Hash) {
-	_, _ = destination.Write([]byte(checksumDomain))
-	_, _ = destination.Write([]byte{0, 0})
 }
 
 func writeChecksumBytes(destination hash.Hash, value []byte) {

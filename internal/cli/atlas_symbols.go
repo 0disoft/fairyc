@@ -23,6 +23,7 @@ type atlasSymbolsOptions struct {
 	maxSelectionBytes uint64
 	maxOutputBytes    uint64
 	locked            bool
+	catalogV2         bool
 }
 
 func runAtlasSymbols(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -36,11 +37,15 @@ func runAtlasSymbols(arguments []string, sourceRoot string, stdout, stderr io.Wr
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	index, code := prepareAtlasQueryIndex(sourceRoot, options.packageUID, options.locked, stderr)
+	prepared, code := prepareAtlasQueryVersion(sourceRoot, options.packageUID, options.locked, stderr, options.catalogV2)
 	if code != ExitSuccess {
 		return code
 	}
-	encoded, err := symbolcatalog.Encode(index, atlasmap.SymbolCatalogRequest{
+	encode := symbolcatalog.Encode
+	if options.catalogV2 {
+		encode = symbolcatalog.EncodeV2
+	}
+	encoded, err := encode(prepared.index, atlasmap.SymbolCatalogRequest{
 		Module: options.module, Name: options.name, Kinds: options.kinds, After: options.after,
 		Budget: atlasmap.SymbolCatalogBudget{
 			MaxSymbols: options.maxSymbols, MaxSelectionBytes: options.maxSelectionBytes,
@@ -69,7 +74,7 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 			continue
 		}
 		switch flag {
-		case "--package-uid", "--module", "--name", "--kind", "--after", "--max-symbols", "--max-selection-bytes", "--max-output-bytes":
+		case "--catalog-version", "--package-uid", "--module", "--name", "--kind", "--after", "--max-symbols", "--max-selection-bytes", "--max-output-bytes":
 		default:
 			return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" does not accept flag %q", flag)
 		}
@@ -82,6 +87,11 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 		seen[flag] = true
 		value := arguments[position+1]
 		switch flag {
+		case "--catalog-version":
+			if value != "1" && value != "2" {
+				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --catalog-version as 1 or 2")
+			}
+			options.catalogV2 = value == "2"
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-symbols list", value); err != nil {
 				return atlasSymbolsOptions{}, err
