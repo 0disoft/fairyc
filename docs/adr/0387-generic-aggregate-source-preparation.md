@@ -100,3 +100,20 @@ calls, bad arity, shadowing, and a budget that omits the helper. Resolved-packag
 cleanup specialization remains closed until its package/interface/cache evidence
 is integrated. All dependency cycles remain rejected, including cycles formed by
 a helper signature that refers back to the resource being specialized.
+
+## Kind-aware source provenance
+
+The private module path now retains the same current-source provenance boundary
+as package function specialization. Original declarations explicitly identify
+function, struct, or resource kind. Aggregate signatures retain ordered written
+fields and cleanup presence, not function arguments or a synthetic return type.
+Unused templates and their documentation locations remain source declarations,
+not claims that their bodies have been checked. Type edges and field slices are
+detached from both source ASTs and getter results. Failed compilation publishes
+no partial sidecar.
+
+Each specialization joins its original declaration ID to the appropriate concrete
+MIR function, struct or resource. No generated-name parsing supplies the kind.
+The function-only Atlas adapter explicitly rejects aggregate provenance until its
+aggregate declaration/signature support is implemented. This is not package
+aggregate admission, an Atlas promotion, or a serialized interface/cache revision.

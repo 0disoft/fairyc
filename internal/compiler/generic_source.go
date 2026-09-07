@@ -6,6 +6,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
@@ -40,26 +41,20 @@ func genericPackageOwner(coordinate packagegraph.CoordinateID) genericplan.Packa
 }
 
 func checkGenericFunctions(file semantic.File, owner genericplan.PackageID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	hasTemplates := false
-	if file.Module != nil {
-		for _, function := range file.Module.Functions {
-			hasTemplates = hasTemplates || len(function.TypeParameters) != 0
-		}
-		for _, structure := range file.Module.Structs {
-			hasTemplates = hasTemplates || len(structure.TypeParameters) != 0
-		}
-		for _, resource := range file.Module.Resources {
-			hasTemplates = hasTemplates || len(resource.TypeParameters) != 0
-		}
-	}
-	module, plan, err := genericsource.Expand(file.Module, owner, limits)
+	original := file
+	expansion, err := genericsource.PrepareModule(file.Module, owner, limits)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
-	file.Module = module
+	file.Module = expansion.Modules[0]
 	result, err := Check([]semantic.File{file})
 	if result.Verified {
-		result.Semantic.RequiresGenericProvenance = hasTemplates
+		result.GenericProvenance, err = genericProvenance(semantic.PackageInput{Files: []semantic.File{original}},
+			map[hir.PackageID]genericplan.PackageID{file.Package: owner}, expansion, result.Semantic.NominalTypes)
+		if err != nil {
+			return Result{}, genericplan.Plan{}, err
+		}
+		result.Semantic.RequiresGenericProvenance = len(expansion.Declarations) != 0
 	}
-	return result, plan, err
+	return result, expansion.Plan, err
 }

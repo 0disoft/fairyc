@@ -6,11 +6,26 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
+
+func TestGenericAggregateProvenanceIsNotPublishedAsAFunction(t *testing.T) {
+	text := "module main; struct Cell<T> { T value; } fn i32 main() { let Cell<i32> cell = Cell<i32> { .value = 42 }; return cell.value; }"
+	file := semantic.File{Package: hir.DefaultPackage, Path: "main.fy", Module: analyzeSyntax(t, "main.fy", text)}
+	result, _, err := compiler.CheckGenericFunctions(file, genericplan.DefaultPlanLimits())
+	if err != nil || !result.Verified {
+		t.Fatalf("private compile: %v %+v", err, result.Semantic)
+	}
+	input := packageInput(t, hir.DefaultPackage, "example.aggregate.snapshot", "aggregate", "1.0.0", "main.fy", text, "root")
+	declarations, err := semanticsnapshot.GenericDeclarations(result.GenericProvenance, []semanticsnapshot.PackageInput{input})
+	if err == nil || !strings.Contains(err.Error(), "requires separate snapshot support") || len(declarations) != 0 {
+		t.Fatalf("aggregate masqueraded as function: %+v %v", declarations, err)
+	}
+}
 
 func genericSourceDeclarations(t *testing.T, text string) ([]semanticsnapshot.Declaration, semanticsnapshot.PackageInput, error) {
 	t.Helper()

@@ -11,6 +11,8 @@ import (
 // template body is valid. Consumers must resolve names in the original package/module.
 // No body is retained, and getters detach every mutable type and attribute node.
 type GenericSignature struct {
+	Fields     []ast.FieldDeclaration
+	HasCleanup bool
 	Attributes []ast.Attribute
 	Arguments  []ast.Parameter
 	Result     ast.TypeReference
@@ -18,6 +20,10 @@ type GenericSignature struct {
 }
 
 func cloneGenericSignature(value GenericSignature) GenericSignature {
+	value.Fields = slices.Clone(value.Fields)
+	for i := range value.Fields {
+		value.Fields[i].Type = cloneGenericType(value.Fields[i].Type)
+	}
 	value.Attributes = slices.Clone(value.Attributes)
 	for i := range value.Attributes {
 		value.Attributes[i].Arguments = slices.Clone(value.Attributes[i].Arguments)

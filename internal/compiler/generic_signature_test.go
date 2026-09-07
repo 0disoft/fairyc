@@ -16,7 +16,8 @@ func TestGenericSignatureDetachesEveryTypeEdge(t *testing.T) {
 	leaf := ast.TypeReference{Kind: ast.TypeKindNamed, Path: "T"}
 	shape := ast.TypeReference{Kind: ast.TypeKindForeignFunction, ABI: "C", Element: &leaf, Result: &leaf,
 		Arguments: []ast.TypeReference{leaf}, Parameters: []ast.TypeReference{leaf}, Length: &ast.TypeLength{Text: "2"}}
-	original := GenericSignature{Unsafe: true, Arguments: []ast.Parameter{{Name: "value", Type: shape}}, Result: shape}
+	original := GenericSignature{Unsafe: true, Arguments: []ast.Parameter{{Name: "value", Type: shape}}, Result: shape,
+		Fields: []ast.FieldDeclaration{{Name: "payload", Type: shape}}, HasCleanup: true}
 	original.Attributes = []ast.Attribute{{Name: "effects", Arguments: []ast.AttributeArgument{{Raw: "console"}}}}
 	want := cloneGenericSignature(original)
 	copy := cloneGenericSignature(original)
@@ -32,6 +33,8 @@ func TestGenericSignatureDetachesEveryTypeEdge(t *testing.T) {
 	}
 	mutate(&copy.Arguments[0].Type)
 	mutate(&copy.Result)
+	mutate(&copy.Fields[0].Type)
+	copy.Fields[0].Name = "changed"
 	copy.Arguments[0].Name = "changed"
 	copy.Attributes[0].Arguments[0].Raw = "changed"
 	if !reflect.DeepEqual(original, want) {
@@ -45,7 +48,7 @@ func TestGenericProvenanceRejectsMismatchedOriginalHeaders(t *testing.T) {
 	fn := ast.Function{Name: "id", Span: span, NameSpan: nameSpan, TypeParameters: []string{"T"}}
 	owner := genericplan.PackageID("owner")
 	expansion := genericsource.PackageExpansion{Declarations: []genericsource.DeclarationOrigin{{
-		ID: "owner::main::id", Owner: owner, Module: "main", Name: "id", Span: span, NameSpan: nameSpan, Parameters: []string{"T"},
+		Kind: genericsource.OriginFunction, ID: "owner::main::id", Owner: owner, Module: "main", Name: "id", Span: span, NameSpan: nameSpan, Parameters: []string{"T"},
 	}}}
 	owners := map[hir.PackageID]genericplan.PackageID{hir.DefaultPackage: owner}
 	for _, change := range []struct {

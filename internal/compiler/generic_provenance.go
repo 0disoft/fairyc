@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -12,6 +11,7 @@ import (
 )
 
 type GenericDeclaration struct {
+	Kind              string
 	ID                genericplan.DeclarationID
 	Package           hir.PackageID
 	Module            string
@@ -71,33 +71,21 @@ func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]gen
 		if file == nil || file.Path == "" || !declaration.Span.Valid(file.Module.SourceSize) || !declaration.NameSpan.Valid(file.Module.SourceSize) {
 			return GenericProvenance{}, fmt.Errorf("generic declaration has no exact source")
 		}
-		var original *ast.Function
-		for i := range file.Module.Functions {
-			candidate := &file.Module.Functions[i]
-			if candidate.Name != declaration.Name {
-				continue
-			}
-			if original != nil || candidate.Owner != "" || candidate.Span != declaration.Span ||
-				candidate.NameSpan != declaration.NameSpan || candidate.Public != declaration.Public ||
-				!slices.Equal(candidate.TypeParameters, declaration.Parameters) {
-				return GenericProvenance{}, fmt.Errorf("generic declaration does not match its original header")
-			}
-			original = candidate
-		}
-		if original == nil {
-			return GenericProvenance{}, fmt.Errorf("generic declaration has no original header")
+		original, err := originalGenericHeader(file.Module, declaration)
+		if err != nil {
+			return GenericProvenance{}, err
 		}
 		var documentation hir.Span
-		if original.DocumentationSpan.EndByte > original.DocumentationSpan.StartByte {
-			documentation = hir.Span{Package: file.Package, Source: file.Path, StartByte: original.DocumentationSpan.StartByte, EndByte: original.DocumentationSpan.EndByte}
+		if original.documentation.EndByte > original.documentation.StartByte {
+			documentation = hir.Span{Package: file.Package, Source: file.Path, StartByte: original.documentation.StartByte, EndByte: original.documentation.EndByte}
 		}
-		result.declarations = append(result.declarations, GenericDeclaration{ID: declaration.ID,
+		result.declarations = append(result.declarations, GenericDeclaration{Kind: declaration.Kind, ID: declaration.ID,
 			Package: file.Package, Module: declaration.Module, Name: declaration.Name, Public: declaration.Public,
 			Span:              hir.Span{Package: file.Package, Source: file.Path, StartByte: declaration.Span.StartByte, EndByte: declaration.Span.EndByte},
 			NameSpan:          hir.Span{Package: file.Package, Source: file.Path, StartByte: declaration.NameSpan.StartByte, EndByte: declaration.NameSpan.EndByte},
 			Parameters:        slices.Clone(declaration.Parameters),
 			DocumentationSpan: documentation,
-			Signature:         cloneGenericSignature(GenericSignature{Attributes: original.Attributes, Arguments: original.Parameters, Result: original.ResultType, Unsafe: original.Unsafe})})
+			Signature:         cloneGenericSignature(original.signature)})
 	}
 	result.origins = slices.Clone(expansion.Origins)
 	for i := range result.origins {

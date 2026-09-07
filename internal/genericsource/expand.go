@@ -21,15 +21,36 @@ var scalarTypes = []string{"bool", "i8", "i16", "i32", "i64", "isize", "u8", "u1
 // must run ordinary semantic analysis and MIR verification on the returned AST.
 // The explicit owner is part of every planned declaration identity.
 func Expand(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (*ast.Module, genericplan.Plan, error) {
+	prepared, err := PrepareModule(module, owner, limits)
+	if err != nil {
+		return nil, genericplan.Plan{}, err
+	}
+	return prepared.Modules[0], prepared.Plan, nil
+}
+
+// PrepareModule retains detached declaration and specialization provenance for
+// the private module-local path, without claiming a public package interface.
+func PrepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (PackageExpansion, error) {
 	if module == nil {
-		return nil, genericplan.Plan{}, fmt.Errorf("generic source module is nil")
+		return PackageExpansion{}, fmt.Errorf("generic source module is nil")
 	}
 	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}}
 	modules, plan, err := expandAll([]*expander{&x}, limits)
 	if err != nil {
-		return nil, genericplan.Plan{}, err
+		return PackageExpansion{}, err
 	}
-	return modules[0], plan, nil
+	declarations, origins, err := sourceOrigins([]*expander{&x}, plan)
+	if err != nil {
+		return PackageExpansion{}, err
+	}
+	result := PackageExpansion{Modules: modules, Plan: plan, Declarations: declarations, Origins: origins,
+		Specializations: map[genericplan.PackageID][]genericplan.SpecializationID{owner: nil}}
+	for _, origin := range origins {
+		result.GeneratedNames = append(result.GeneratedNames, origin.GeneratedName)
+		result.Specializations[owner] = append(result.Specializations[owner], origin.Specialization)
+	}
+	slices.Sort(result.Specializations[owner])
+	return result, nil
 }
 
 type expander struct {

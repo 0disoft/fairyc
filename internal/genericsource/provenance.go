@@ -9,9 +9,16 @@ import (
 	"github.com/0disoft/fairyc/internal/genericplan"
 )
 
+const (
+	OriginFunction = "function"
+	OriginStruct   = "struct"
+	OriginResource = "resource"
+)
+
 // DeclarationOrigin is source-declared provenance, not proof that an unused
 // template body has been type checked. It contains no source text.
 type DeclarationOrigin struct {
+	Kind       string
 	ID         genericplan.DeclarationID
 	Owner      genericplan.PackageID
 	Module     string
@@ -36,9 +43,24 @@ func sourceOrigins(modules []*expander, plan genericplan.Plan) ([]DeclarationOri
 		for name, function := range module.templates {
 			id := module.id(name)
 			known[id] = true
-			declarations = append(declarations, DeclarationOrigin{ID: id, Owner: module.owner,
+			declarations = append(declarations, DeclarationOrigin{Kind: OriginFunction, ID: id, Owner: module.owner,
 				Module: module.module.Path, Name: name, Span: function.Span, NameSpan: function.NameSpan,
 				Parameters: slices.Clone(function.TypeParameters), Public: function.Public})
+		}
+		for name, aggregate := range module.aggregates {
+			shape := aggregate.shape()
+			id := module.id(name)
+			if known[id] {
+				return nil, nil, fmt.Errorf("generic declaration identity has multiple kinds")
+			}
+			known[id] = true
+			kind := OriginStruct
+			if aggregate.resource != nil {
+				kind = OriginResource
+			}
+			declarations = append(declarations, DeclarationOrigin{Kind: kind, ID: id, Owner: module.owner,
+				Module: module.module.Path, Name: name, Span: shape.Span, NameSpan: shape.NameSpan,
+				Parameters: slices.Clone(shape.TypeParameters), Public: shape.Public})
 		}
 	}
 	slices.SortFunc(declarations, func(a, b DeclarationOrigin) int { return cmp.Compare(a.ID, b.ID) })

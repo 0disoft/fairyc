@@ -17,6 +17,11 @@ import (
 // inferred effects and executable summaries are not proven here. Nominal names
 // use compiler-published visible scope facts, never a guessed specialization.
 func GenericDeclarations(provenance compiler.GenericProvenance, packages []PackageInput) ([]Declaration, error) {
+	for _, declaration := range provenance.Declarations() {
+		if declaration.Kind != string(DeclarationFunction) {
+			return nil, fmt.Errorf("generic declaration kind %q requires separate snapshot support", declaration.Kind)
+		}
+	}
 	metadata, _, _, err := normalizePackages(packages)
 	if err != nil {
 		return nil, err
