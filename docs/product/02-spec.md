@@ -95,16 +95,16 @@ version. ADR 0221 implements exact zero-argument `source_location()` as a static
 byte-coordinate string under `E4401`/`E4402`. It explicitly excludes hidden default arguments,
 callee propagation, runtime stack inspection, absolute paths, and new MIR or ABI surface. ADR 0222
 retains ordinary named functions returning `T` or `Result<T, E>` as the complete construction model
-after auditing the SDK/example factory and rollback patterns. ADR 0223 records that the current
-29-file SDK/example corpus has no cross-type generic-algorithm duplication and that the grammar has
-no user-generic declaration model. Static interfaces therefore remain absent until implemented
-bounded user generics and measured duplication satisfy that ADR's reopening gate. Class inheritance,
+after auditing the SDK/example factory and rollback patterns. ADR 0223 recorded that its then-current
+29-file SDK/example corpus had no cross-type generic-algorithm duplication and no user-generic
+declaration model. ADR 0385 subsequently implements bounded scalar generic functions; static
+interfaces still require measured duplication and the other evidence in ADR 0223. Class inheritance,
 exceptions, implicit conversions, overload sets, unrestricted template metaprogramming, runtime
 reflection, garbage-collected object roots, and language-owned async or virtual-thread scheduling
 remain non-goals. The current modern-concept admission queue is closed. ADR 0224 also keeps range
 iteration, checked narrowing, and expression bodies outside `/6` until their exact evidence gates
-reopen. ADR 0221 owns the current implemented `/6` cutover; later candidate statements do
-not change the current language or Stage 0 grammar.
+reopen. ADR 0221 owns the historical `/6` cutover; ADR 0385 owns current language `/14`.
+Candidate statements alone do not change the language or Stage 0 grammar.
 
 ADR 0328 records production-workload admission gates for Linux target promotion, cancellation and
 structured task ownership, bounded data interchange and generated declarations, and vendor-neutral
@@ -196,6 +196,17 @@ ADR 0339 supplies a bounded compiler-internal specialization planner with exact 
 deterministic transitive identities, cycle rejection, and explicit expansion limits. It reopens the
 generic evidence question without admitting source syntax, inference, HIR type variables, MIR,
 runtime dispatch, reflection, ABI, or backend emission.
+
+ADRs 0384/0385 subsequently connect explicit generic function declarations and calls to concrete
+HIR, verified MIR, stable workspace commands, and native C emission in language 14. The executable
+builtin argument set is `bool`, `u8`, `i32`, `u32`, and `usize`; syntax/planner recognition of other
+scalar names is not executable type admission. Package-stable specialization identities, separate
+generic interface/cache artifacts and current-source reanalysis preserve package ownership and
+invalidate changed template bodies and requested type sets. ADR 0386 adds original generic source
+SymbolIds, snapshots, and versioned Atlas consumers without universal facts for unused bodies.
+`docs/architecture/generic-growth-calibration-v0.md` records bounded synthetic growth measurements,
+not representative performance or broader generic admission. Generic aggregates, resource-element
+containers, inference, static interfaces and runtime polymorphism remain separate capabilities.
 
 ADR 0340 adds a standalone bounded parser for a separate experimental contract-interface profile,
 canonical chain-neutral IDL v0, and typed Go/TypeScript clients over a consumer-supplied transport.
@@ -403,7 +414,7 @@ Compiler intrinsics, the thin runtime, and standard-library APIs are separate bo
 
 Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `Region`. Allocation is fallible, zero-size behavior is normalized by Fairy C, and no hidden default allocator or user allocator protocol exists.
 
-`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `u8[]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `ref u8[]` construction and private generated-C transport. Safe borrowed `ref u8[]` and `ref str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `ref u8[]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `ref u8[]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. Mutable fixed scalar-array places support checked exact-type element assignment. A direct contextual `ref mut` borrow of a mutable fixed `u8[N]` place may produce `ref mut u8[]` for an exact internal parameter. It preserves the exclusive origin, exposes canonical `.len`, supports checked `u8` reads and stores, and may derive `ptr mut u8` only inside unsafe code. Indexed assignment checks the receiver and `usize` index before evaluating its right-hand side, so an invalid place traps without value-side effects. Mutable integer locals and admitted indexed scalar places support statement-only checked `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=` with one place evaluation and no promotions. It does not add assignment expressions, increment operators, mutable slicing, resizing, temporary borrowing, retained foreign pointers, or public ABI. Language revision `/9` additionally permits those positive bounded copy-scalar fixed arrays as direct `Option` and `Result` payloads with the same value-copy, indexing, return, switch, and compatible Result-propagation meaning; it does not make an array growable, resource-bearing, nested, public ABI, or foreign ABI data. The public File core accepts `ref CStr`, preserves partial I/O, syncs explicitly, and uses a consuming non-retried close contract on Linux and Windows. Private pointer-width storage selects a descriptor-plus-one Linux adapter or the existing Windows HANDLE adapter without exposing either value. Same-handle position observation, absolute and bounded relative/end seek, and logical size observation are target-neutral; exact reads, Buffer reads, path mutation, and other metadata remain Windows-only. Portable Unicode path semantics, race-resistant containment, embedded support, and resource-aware arenas remain deferred.
+`Buffer` is the only growable owned collection. `Vec<T>` remains deferred until generic aggregate layout, initialized-prefix ownership, and move/drop failure evidence are implemented; scalar generic functions alone do not provide a generic container. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `u8[]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `ref u8[]` construction and private generated-C transport. Safe borrowed `ref u8[]` and `ref str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `ref u8[]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `ref u8[]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. Mutable fixed scalar-array places support checked exact-type element assignment. A direct contextual `ref mut` borrow of a mutable fixed `u8[N]` place may produce `ref mut u8[]` for an exact internal parameter. It preserves the exclusive origin, exposes canonical `.len`, supports checked `u8` reads and stores, and may derive `ptr mut u8` only inside unsafe code. Indexed assignment checks the receiver and `usize` index before evaluating its right-hand side, so an invalid place traps without value-side effects. Mutable integer locals and admitted indexed scalar places support statement-only checked `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=` with one place evaluation and no promotions. It does not add assignment expressions, increment operators, mutable slicing, resizing, temporary borrowing, retained foreign pointers, or public ABI. Language revision `/9` additionally permits those positive bounded copy-scalar fixed arrays as direct `Option` and `Result` payloads with the same value-copy, indexing, return, switch, and compatible Result-propagation meaning; it does not make an array growable, resource-bearing, nested, public ABI, or foreign ABI data. The public File core accepts `ref CStr`, preserves partial I/O, syncs explicitly, and uses a consuming non-retried close contract on Linux and Windows. Private pointer-width storage selects a descriptor-plus-one Linux adapter or the existing Windows HANDLE adapter without exposing either value. Same-handle position observation, absolute and bounded relative/end seek, and logical size observation are target-neutral; exact reads, Buffer reads, path mutation, and other metadata remain Windows-only. Portable Unicode path semantics, race-resistant containment, embedded support, and resource-aware arenas remain deferred.
 
 An independent example-level owned-text wrapper exposes move-only Fairy `String` and `CString`
 resources, source `Result` errors, scalar length access, owner-bound `ref str` and `ref CStr` views, and
@@ -1430,7 +1441,8 @@ workspace bytes without reopening a path.
 
 The first snapshot consumer now derives provisional `SymbolId` values with the independently
 versioned `fairyc.symbol-id/v1-sha256-128+256` algorithm. Package UID, module, declaration kind and
-path, zero generic arity, and a canonical structured signature form the hash input. Package
+path, generic arity (zero for ordinary declarations), and a canonical structured signature with
+positional type-parameter references form the hash input. Package
 instances, versions, source positions, bodies, build-local numbers, compiler identity, target, and
 language revision do not. Nominal signature types use package UID and logical path; exact instance
 compatibility now lives in the map header. ADR 0225 joins exact resolved calls separately, while

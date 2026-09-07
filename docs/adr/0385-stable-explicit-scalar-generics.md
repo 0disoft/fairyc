@@ -21,7 +21,9 @@ verification. Cross-module calls use explicit import aliases, public template vi
 package ownership. Tests use the loaded test overlay. Repeated calls remain executable calls even
 when their static specialization dependency is deduplicated.
 
-Type arguments must be explicit builtin scalars or directly forwarded type parameters. In generic
+Executable type arguments must be explicit `bool`, `u8`, `i32`, `u32`, or `usize`, or directly
+forwarded type parameters bound to that set. The planner's larger scalar vocabulary does not
+admit additional ordinary typed-HIR types or C scalar arguments. In generic
 workspaces, generated names beginning `_fy_generic_` are reserved. Inference, nominal/composite type arguments, generic
 methods, user-defined capabilities/interfaces, dynamic dispatch, recursive specialization and
 unbounded expansion remain rejected. Planner defaults bound depth and total/per-declaration

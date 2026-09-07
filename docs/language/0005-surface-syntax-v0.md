@@ -5,6 +5,7 @@
 - Original boundary decision: `docs/adr/0005-stage-0-surface-and-module-boundary.md`
 - Current surface decision: `docs/adr/0136-c-shaped-source-surface.md`
 - Classic loop decision: `docs/adr/0213-classic-scalar-for-loop.md`
+- Explicit scalar generic decision: `docs/adr/0385-stable-explicit-scalar-generics.md`
 - Grammar decision: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
 - Normative grammar: `spec/grammar/stage0.ebnf`
 
@@ -21,6 +22,9 @@
   multiple declarators, and `typedef`-dependent parsing do not exist.
 - Functions use `fn Result name(Parameters)`. Every result type is explicit; `void` explicitly marks
   the absence of a returned value.
+- Language 14 additionally permits ordinary generic functions as `fn T identity<T>(T value)` and
+  explicit calls as `identity<i32>(42)`. Specialization precedes ordinary typed HIR/MIR; see the
+  bounded generic function contract below.
 - Source-level locals have initializers. `let` prevents reassignment; `var` permits reassignment and mutable borrowing.
 - A written local is `let Type name = value;` or `var Type name = value;`. The inferred forms are
   exactly `let name = value;` and `var name = value;`; `auto` is not a source declaration marker.
@@ -112,9 +116,28 @@ unsafe extern C fn T(...)
 ```
 
 `str` and `CStr` are unsized compiler-known view types and appear as `ref str` and `ref CStr`.
-User-defined generic declarations are excluded even though built-in `Option`, `Result`, slices, and
-arrays accept type arguments. `T[]` is unsized and cannot appear by value; safe views use `ref T[]`
+User-defined generic aggregate declarations remain excluded. Ordinary generic functions use the
+bounded contract below; built-in `Option`, `Result`, slices, and arrays retain their existing type
+argument rules. `T[]` is unsized and cannot appear by value; safe views use `ref T[]`
 or `ref mut T[]`.
+
+Bounded generic functions follow this contract:
+
+ADRs 0384/0385 admit explicit ordered type parameters on ordinary module functions, including
+public functions reached through exact package imports. The executable ordinary builtin-scalar
+argument set is `bool`, `u8`, `i32`, `u32`, and `usize`; a generic call may also forward one of its
+own type parameters. Syntax recognition of the larger scalar vocabulary above does not admit
+additional typed-HIR types. In particular, planner recognition alone cannot make `i8`, `i16`,
+`i64`, `u16`, `u64`, `isize`, `f32`, or `f64` executable. C scalars and nominal/composite generic
+arguments are not admitted by the source expansion contract.
+
+Every reached instantiation is substituted to concrete types before ordinary semantic/Flow and MIR
+verification. Identical requests are deduplicated by exact defining-package identity; repeated
+source calls still execute. Inference, generic methods, generic resource/struct/enum declarations,
+static interfaces, recursive specialization and unbounded expansion remain excluded. Unused source
+templates are retained for identity and documentation but are not proof of executable body checking.
+The stable workspace and explicit-file CLI entry points perform specialization; raw semantic-only
+entry points reject generic syntax instead of silently erasing it.
 
 A safe borrow whose referent type is `str` or `u8[]` exposes the read-only property `.len` with
 result type `usize`. The property reports the view's byte count, including embedded NUL bytes and
@@ -421,4 +444,4 @@ A recovered syntax tree is retained for diagnostics only. It cannot silently leg
 
 ## Explicit exclusions
 
-Function overloading, default and named arguments, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user generics, dynamic dispatch, closures, async, rich patterns, type-wide must-use contracts, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.
+Function overloading, default and named arguments, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, generic aggregates/methods and inferred instantiation, dynamic dispatch, closures, async, rich patterns, type-wide must-use contracts, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.
