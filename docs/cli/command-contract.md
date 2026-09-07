@@ -225,8 +225,11 @@ target implementation IDs alongside original declaration SymbolIds. The selector
 declaration ID, obtainable from `atlas-symbols list --catalog-version 2`; it does not select a
 runtime path. Missing, duplicate, or noncanonical version arguments fail before workspace loading.
 
-`experimental atlas-text source` and `documentation` share the exact workspace/compiler/currentness
-preparation but emit the separate attributed-text artifact, never a Context Pack. Package UID,
+`experimental atlas-text source` and `documentation` use generic-aware compilation and exact-current
+v2 query preparation but emit the unchanged attributed-text v0 artifact, never a Context Pack.
+Their subjects remain original source declarations, including unused generic templates, not
+concrete implementations; repeated specialization does not duplicate text. Ordinary output remains
+byte-identical and all text remains non-authoritative. Package UID,
 canonical visible or full SymbolId, exact origin `workspace-authored`, maximum fragment count,
 per-fragment bytes, aggregate text bytes, and final output bytes are mandatory; only `--locked` is
 optional. There are no inferred defaults, name search, SDK-text admission, or redundant kind flag:

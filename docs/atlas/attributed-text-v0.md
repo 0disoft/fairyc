@@ -91,7 +91,7 @@ authentication.
 
 ## Exact-current admission
 
-Text extraction starts only after the ordinary workspace has passed manifest, graph, bounded file,
+Text extraction starts only after the loaded workspace has passed manifest, graph, bounded file,
 syntax, semantic, Flow, verified-MIR, snapshot, partition, and exact-current query-index admission.
 It consumes the already validated immutable source closure that produced the package identity. It
 does not reopen a path after compilation or accept caller-supplied bytes beside compiler facts.
@@ -100,6 +100,19 @@ Before slicing, the extractor recomputes the package source digest plus selected
 line-map identities from those retained bytes and matches every value against the exact query
 context. A mismatch rejects the entire text request as stale or internally inconsistent. It never
 returns a best-effort line, a same-length replacement, or text from a different package instance.
+
+The source and documentation CLIs now use generic-aware compilation and exact-current v2 query
+preparation. The logical/JSON text v0 format, record/document checksums, fixed `untrusted-text`
+authority, custody labels, exact slice selection, and error/omission policy do not change. Ordinary
+source produces byte-identical v0 documents through v1 and v2 maps. No new output field or version
+flag is needed: these records identify original source spans, not executable specialization facts.
+
+Original generic declarations, including unused templates, are eligible. Multiple concrete
+implementations still select one original source span and at most one frontend-attached
+documentation span. Compiler-generated names/bodies are not source subjects. Retrieval of an unused
+body is not a claim that its executable semantics were checked. Generic source and documentation
+remain untrusted text; hostile prose is preserved as inert data, never interpreted as instructions.
+Missing documentation remains an explicit `kind-unavailable` omission, not a synthesized summary.
 
 The requested span must be in range and begin and end on UTF-8 scalar boundaries. The emitted bytes
 are the exact slice: no newline conversion, Unicode normalization, trimming, indentation rewriting,

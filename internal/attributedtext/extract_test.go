@@ -15,6 +15,7 @@ import (
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -218,13 +219,21 @@ func loadAttributedTextFixture(t *testing.T, sourceBytes []byte) attributedTextF
 }
 
 func loadAttributedTextFixtureForSymbol(t *testing.T, sourceBytes []byte, name string) attributedTextFixture {
+	return loadAttributedTextFixtureVersion(t, sourceBytes, name, false)
+}
+
+func loadAttributedTextFixtureVersion(t *testing.T, sourceBytes []byte, name string, generic bool) attributedTextFixture {
 	t.Helper()
-	prepared := prepareAttributedTextWorkspace(t, sourceBytes)
+	prepared := prepareAttributedTextWorkspaceVersion(t, sourceBytes, generic)
 	for _, partition := range prepared.partitions {
 		if partition.Header().PackageUID != "test.attributed-text" {
 			continue
 		}
-		index, err := atlasmap.NewQueryIndex(partition, prepared.expectations[partition.Header().PackageInstance])
+		query := atlasmap.NewQueryIndex
+		if generic {
+			query = atlasmap.NewQueryIndexV2
+		}
+		index, err := query(partition, prepared.expectations[partition.Header().PackageInstance])
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -242,6 +251,10 @@ func loadAttributedTextFixtureForSymbol(t *testing.T, sourceBytes []byte, name s
 }
 
 func prepareAttributedTextWorkspace(t *testing.T, sourceBytes []byte) preparedAttributedTextWorkspace {
+	return prepareAttributedTextWorkspaceVersion(t, sourceBytes, false)
+}
+
+func prepareAttributedTextWorkspaceVersion(t *testing.T, sourceBytes []byte, generic bool) preparedAttributedTextWorkspace {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -267,16 +280,25 @@ source = "src"
 	if err != nil {
 		t.Fatal(err)
 	}
-	checked, err := compiler.CheckPackages(input)
+	var checked compiler.Result
+	if generic {
+		checked, err = workspacecompiler.Check(workspace)
+	} else {
+		checked, err = compiler.CheckPackages(input)
+	}
 	if err != nil || !checked.Verified {
 		t.Fatalf("CheckPackages() = verified %t error %v", checked.Verified, err)
 	}
 	compilerBuild := attributedTextCompilerBuild()
-	snapshot, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
+	prepare, current := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations
+	if generic {
+		prepare, current = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2
+	}
+	snapshot, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil || len(partitions) == 0 {
 		t.Fatalf("PrepareWorkspace() = %d, %v", len(partitions), err)
 	}
-	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, checked, compilerBuild)
+	expectations, err := current(workspace, checked, compilerBuild)
 	if err != nil {
 		t.Fatal(err)
 	}

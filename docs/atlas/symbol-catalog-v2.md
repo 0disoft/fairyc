@@ -45,5 +45,6 @@ byte changes, not authenticity. No input decoder or persisted catalog format is 
 
 Pass an original declaration ID to `atlas-calls list --catalog-version 1` for generic-aware
 workspace call queries, or `atlas-pack show|around --pack-version 2` for bounded compiler-fact
-neighborhoods. Attributed-text and Evidence Bundle CLI commands remain on their existing map path;
-their generic consumption requires separate contract work.
+neighborhoods. The existing `atlas-text source|documentation` commands accept these original IDs
+through generic-aware preparation while retaining attributed-text v0 output. Generic Evidence
+Bundle composition still requires separate integration.

@@ -250,6 +250,11 @@ selection-byte, or final-output budgets are invocation failure `2`. Zero exact-n
 successful complete output. Workspace/lock failures are `7`, source diagnostics
 are `3`, and compiler invariants or output failures are `4`. No partial catalog is intentionally
 written on pre-output failure; an external writer may retain a prefix when its own write fails.
+`experimental atlas-text source|documentation` now accepts original generic declaration IDs without
+changing attributed-text v0 output or exit/omission policies. An unused template can supply exact
+untrusted source bytes; that output does not assert executable-body checking. Repeated
+specialization does not duplicate a source/documentation record.
+
 `experimental atlas-symbols list --catalog-version 2` instead writes one canonical
 `fairyc.symbol-catalog-json/v2` page with original generic declaration identities and v2 currentness
 context. Explicit `--catalog-version 1` is byte-identical to the default. Invalid or duplicate

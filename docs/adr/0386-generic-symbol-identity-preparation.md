@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol/call/pack CLIs; attributed consumers pending
+- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol/call/pack/text CLIs; generic Evidence Bundle pending
 - Date: 2026-09-06
 
 ## Decision
@@ -155,6 +155,14 @@ still require integration. See
 `docs/atlas/workspace-call-catalog-v1.md`.
 
 ## Evidence
+
+The existing `atlas-text source|documentation` commands now prepare generic-aware exact-current v2
+queries. Their output remains attributed-text v0: exact original declaration spans already carry
+all required identity and custody fields, without executable generic facts. Source and attached
+documentation remain one record per original declaration, including unused templates, and fixed
+`untrusted-text` authority. Tests cover ordinary v1/v2 byte equivalence, exact retained generic
+bytes, snapshot/source mismatch, control and size omissions, both SymbolId forms, and CLI output.
+No new text schema or flag is introduced. Generic Evidence Bundle composition remains separate.
 
 Context Pack v2 encoders and `atlas-pack overview|show|around --pack-version 2` retain generic
 source-interface identity, original declaration signatures, separate implementation observations,

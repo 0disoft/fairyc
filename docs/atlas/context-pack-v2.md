@@ -54,7 +54,8 @@ compact JSON with no newline; empty arrays and inactive `null` fact variants ret
 Documentation, source excerpts, and warnings remain empty arrays. Generic source bodies, comments,
 host paths, model text, instructions, and permissions do not enter the pack. The `--pack-version`
 flag is scoped to `atlas-pack`; the shared relation parser does not enable it on unversioned
-Evidence Bundle commands. Attributed-text and Evidence Bundle integration remain separate work.
+Evidence Bundle commands. The separate source/documentation CLI now handles original generic
+declarations as unchanged attributed-text v0; generic Evidence Bundle integration remains separate.
 Lock refresh/no-write behavior, source and workspace errors, bounded selection, and output-writer
 failure handling retain existing CLI policies. No map store, compiler cache, or pack file is
 published automatically.
