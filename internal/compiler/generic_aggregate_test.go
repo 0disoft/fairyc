@@ -110,6 +110,12 @@ func TestGenericAggregateExpansionRejectsInvalidOwnershipAndShapes(t *testing.T)
 }
 
 func TestGenericAggregateCleanupRunsExactlyOnceMSVC(t *testing.T) {
+	t.Run("ordinary-helper", func(t *testing.T) { runGenericAggregateNative(t, genericAggregateProgram) })
+	t.Run("generic-helper", func(t *testing.T) { runGenericAggregateNative(t, genericCleanupProgram()) })
+}
+
+func runGenericAggregateNative(t *testing.T, source string) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("native proof requires Windows amd64")
 	}
@@ -117,7 +123,7 @@ func TestGenericAggregateCleanupRunsExactlyOnceMSVC(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := strings.Replace(genericAggregateProgram, "fn i32 observe(i32 value) { return value; }", `
+	text := strings.Replace(source, "fn i32 observe(i32 value) { return value; }", `
 @link_name("fairyc_fixture_generic_mark") unsafe extern C fn i32 mark_raw(i32 value);
 @link_name("fairyc_fixture_generic_check") unsafe extern C fn i32 check_raw();
 fn i32 observe(i32 value) { return unsafe { mark_raw(value) }; }`, 1)

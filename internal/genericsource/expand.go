@@ -114,50 +114,7 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 			if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
 				return x.registerAggregateRecord(e, fn.TypeParameters, &declaration, &requests)
 			}
-			if e.Kind != syntax.KindSpecialize {
-				return nil
-			}
-			target, err := x.target(e)
-			if err != nil {
-				return err
-			}
-			if len(e.TypeArguments) != len(target.module.templates[target.name].TypeParameters) {
-				return &genericplan.Error{Code: genericplan.CodeTypeArgumentArity, Message: "generic type argument count does not match the declaration"}
-			}
-			dependency := genericplan.Dependency{Declaration: target.id()}
-			request := genericplan.Request{Declaration: target.id()}
-			for _, argument := range e.TypeArguments {
-				if argument.Kind != ast.TypeKindNamed || len(argument.Arguments) != 0 {
-					return fmt.Errorf("generic argument must be a scalar or direct type parameter")
-				}
-				if slices.Contains(fn.TypeParameters, argument.Path) {
-					dependency.Arguments = append(dependency.Arguments, genericplan.ParameterType(argument.Path))
-				} else {
-					if !slices.Contains(scalarTypes, argument.Path) {
-						return fmt.Errorf("unsupported concrete generic type %q", argument.Path)
-					}
-					dependency.Arguments = append(dependency.Arguments, genericplan.ConcreteType(genericplan.TypeID(argument.Path)))
-					request.Arguments = append(request.Arguments, genericplan.TypeID(argument.Path))
-				}
-			}
-			if len(fn.TypeParameters) != 0 {
-				// Calls remain in the AST; the planner needs each static edge only once.
-				if !slices.ContainsFunc(declaration.Dependencies, func(existing genericplan.Dependency) bool {
-					return existing.Declaration == dependency.Declaration && slices.Equal(existing.Arguments, dependency.Arguments)
-				}) {
-					declaration.Dependencies = append(declaration.Dependencies, dependency)
-				}
-			} else {
-				requests = append(requests, request)
-				if x.requests == nil {
-					x.requests = map[string]diagnostic.Span{}
-				}
-				key := requestKey(request.Declaration, request.Arguments)
-				if previous, found := x.requests[key]; !found || e.Span.StartByte < previous.StartByte {
-					x.requests[key] = e.Span
-				}
-			}
-			return nil
+			return x.registerFunctionCall(e, fn.TypeParameters, &declaration, &requests)
 		}}
 		t.typeReference = func(ref *ast.TypeReference) {
 			if typeError == nil {
@@ -312,26 +269,7 @@ func requestKey(declaration genericplan.DeclarationID, arguments []genericplan.T
 func (x *expander) instantiate(fn ast.Function, bindings map[string]ast.TypeReference, names map[string]string) (ast.Function, error) {
 	var typeError error
 	t := transform{bindings: bindings, expression: func(e *ast.Expression) error {
-		if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
-			return x.rewriteAggregateRecord(e, names)
-		}
-		if e.Kind != syntax.KindSpecialize {
-			return nil
-		}
-		target, err := x.target(e)
-		if err != nil {
-			return err
-		}
-		arguments := make([]genericplan.TypeID, len(e.TypeArguments))
-		for i, argument := range e.TypeArguments {
-			arguments[i] = genericplan.TypeID(argument.Path)
-		}
-		generated, ok := names[requestKey(target.id(), arguments)]
-		if !ok {
-			return fmt.Errorf("specialization missing from verified plan")
-		}
-		*e = ast.Expression{Kind: syntax.KindPath, Span: e.Span, Text: target.prefix + generated}
-		return nil
+		return x.rewriteSpecialization(e, names)
 	}}
 	t.typeReference = func(ref *ast.TypeReference) {
 		if typeError == nil {

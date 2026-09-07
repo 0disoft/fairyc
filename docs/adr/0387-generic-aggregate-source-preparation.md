@@ -65,8 +65,8 @@ and verification. A resource remains move-only; specialization does not change
 its cleanup protocol. Recursive dependencies, bad arity, duplicate parameters,
 unsupported arguments, implicit type arguments and generated-name access fail
 closed. The resolved-package path rejects aggregate templates pending its identity,
-interface, cache and Atlas integration. Generic calls inside cleanup, generic
-methods and nominal/composite type arguments remain outside this private slice.
+interface, cache and Atlas integration. Generic methods and nominal/composite
+type arguments remain outside this private slice.
 
 This work also extends ADR 0119's private C resource transport to fields whose
 inert struct layout has already passed the aggregate resolver. Struct definitions
@@ -83,3 +83,20 @@ counter after return and move through a consuming function. Low and optimized
 MSVC must both observe exactly one cleanup before returning 42. No allocation,
 vector growth, allocation-failure ownership or resource-element container support
 is claimed by this test.
+
+## Generic cleanup helpers
+
+Private module-local cleanup blocks may call generic helpers with explicit scalar
+arguments or their aggregate's directly forwarded type parameters. Calls use the
+same registration and rewriting routines as ordinary function bodies. They create
+real planner dependencies, count toward the combined expansion budget, and retain
+original source spans. A helper change invalidates the resource and its factories.
+Local bindings may not shadow generic helper or aggregate names.
+
+The private native/interpreter fixture also calls `finish<T>` on a copied payload
+from cleanup after return, move and consumption. It requires one cleanup and one
+observed marker, preserves the original AST, and rejects unknown/unbound/recursive
+calls, bad arity, shadowing, and a budget that omits the helper. Resolved-package
+cleanup specialization remains closed until its package/interface/cache evidence
+is integrated. All dependency cycles remain rejected, including cycles formed by
+a helper signature that refers back to the resource being specialized.

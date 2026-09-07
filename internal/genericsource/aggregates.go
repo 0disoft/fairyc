@@ -161,17 +161,20 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 			if typeError == nil {
 				typeError = x.registerAggregateType(*ref, shape.TypeParameters, &declaration, &requests)
 			}
-		}, expression: func(e *ast.Expression) error {
+		}, binding: func(name string, at diagnostic.Span) error {
+			return x.at(at, FailureDeclaration, x.checkBinding(name))
+		}, expression: func(e *ast.Expression) (err error) {
+			defer func() { err = x.at(e.Span, FailureRequest, err) }()
 			if err := x.checkExpression(e); err != nil {
 				return err
 			}
-			if e.Kind == syntax.KindSpecialize {
-				return fmt.Errorf("generic calls in aggregate cleanup are not admitted")
+			if e.Kind == syntax.KindSpecialize && x.allowPublic {
+				return fmt.Errorf("generic cleanup calls require the private module-local admission path")
 			}
 			if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
 				return x.registerAggregateRecord(e, shape.TypeParameters, &declaration, &requests)
 			}
-			return nil
+			return x.registerFunctionCall(e, shape.TypeParameters, &declaration, &requests)
 		}}
 		for _, field := range shape.Fields {
 			t.typ(field.Type)
@@ -248,10 +251,7 @@ func (x *expander) emitAggregates(result *ast.Module, plan genericplan.Plan, nam
 				typeError = x.rewriteAggregateType(ref, names)
 			}
 		}, expression: func(e *ast.Expression) error {
-			if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
-				return x.rewriteAggregateRecord(e, names)
-			}
-			return nil
+			return x.rewriteSpecialization(e, names)
 		}}
 		fields := slices.Clone(shape.Fields)
 		for i := range fields {
