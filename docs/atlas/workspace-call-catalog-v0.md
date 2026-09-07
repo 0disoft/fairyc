@@ -12,7 +12,7 @@
 
 ## Identity
 
-The only emitted representation is one compact canonical JSON value with no trailing newline:
+The v0 encoder emits one compact canonical JSON value with no trailing newline:
 
 ```text
 catalog version:    fairyc.workspace-call-catalog/v0
@@ -22,6 +22,9 @@ checksum prefix:    fywcall0-sha256-
 ```
 
 This is an output-only pre-release format. No decoder or cross-version input is admitted.
+`Encode` requires v1 maps and rejects a v2 workspace index rather than dropping generic endpoint
+identity. The separate internal `EncodeV1` contract is documented in
+`docs/atlas/workspace-call-catalog-v1.md`; the existing CLI remains on v0.
 
 ## Canonical envelope
 

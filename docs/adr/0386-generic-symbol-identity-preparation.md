@@ -142,6 +142,13 @@ a generic target without an implementation is rejected. Incoming/outgoing select
 declaration-based and returns separate concrete call records, not an execution-path traversal.
 V1 construction remains unchanged. See `docs/atlas/workspace-call-join-v0.md`.
 
+The internal workspace-call catalog EncodeV1 now preserves implementation endpoints in the separate
+catalog v1 JSON/checksum contract. Canonical ordering includes both implementation IDs; exact record
+deduplication does not collapse calls sharing a template source span. The v0 encoder rejects v2
+indexes instead of erasing generic facts. Existing v0 CLI output remains unchanged; generic CLI
+compilation and the other output consumers still require integration. See
+`docs/atlas/workspace-call-catalog-v1.md`.
+
 ## Evidence
 
 Generic identity tests cover alpha-renaming, unused arity, changed binder positions, nested

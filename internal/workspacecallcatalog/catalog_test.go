@@ -14,6 +14,7 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -29,7 +30,7 @@ func TestEncodeIsCanonicalChecksummedBoundedAndTextFree(t *testing.T) {
 		t.Fatalf("repeated workspace call catalog differs: %v", err)
 	}
 	if !json.Valid(first) || bytes.HasSuffix(first, []byte("\n")) || bytes.Contains(first, []byte(root)) ||
-		bytes.Contains(first, []byte("answer::value")) {
+		bytes.Contains(first, []byte("answer::value")) || bytes.Contains(first, []byte(`"specialization"`)) {
 		t.Fatalf("workspace call catalog leaked invalid, path, source, or newline data: %s", first)
 	}
 	var decoded envelope
@@ -85,6 +86,10 @@ func TestEncodeIsCanonicalChecksummedBoundedAndTextFree(t *testing.T) {
 }
 
 func workspaceCallCatalogFixture(t *testing.T) (string, *atlasmap.WorkspaceCallIndex, atlasmap.WorkspaceSymbol, atlasmap.WorkspaceSymbol, string) {
+	return workspaceCallCatalogFixtureVersion(t, false)
+}
+
+func workspaceCallCatalogFixtureVersion(t *testing.T, generic bool) (string, *atlasmap.WorkspaceCallIndex, atlasmap.WorkspaceSymbol, atlasmap.WorkspaceSymbol, string) {
 	t.Helper()
 	root := t.TempDir()
 	writeCatalogFixture(t, filepath.Join(root, "fairy.toml"), `schema = "fairyc.manifest/v1"
@@ -111,6 +116,10 @@ language = "fairyc-language/14"
 source = "src"
 `)
 	writeCatalogFixture(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), "module answer;\npub fn i32 value() { return 42; }\n")
+	if generic {
+		writeCatalogFixture(t, filepath.Join(root, "src", "main.fy"), "module main; import answer as answer; fn T pass<T>(T value) { return answer::value<T>(value); } fn i32 main() { assert(pass<i32>(42) == 42); assert(pass<u32>(7) == 7); return 0; }")
+		writeCatalogFixture(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), "module answer; pub fn T value<T>(T x) { return x; }")
+	}
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
 		t.Fatal(err)
@@ -119,7 +128,16 @@ source = "src"
 	if err != nil {
 		t.Fatal(err)
 	}
-	checked, err := compiler.CheckPackages(input)
+	var checked compiler.Result
+	if generic {
+		coordinates, coordinateErr := workspace.PackageCoordinates()
+		if coordinateErr != nil {
+			t.Fatal(coordinateErr)
+		}
+		checked, _, err = compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	} else {
+		checked, err = compiler.CheckPackages(input)
+	}
 	if err != nil || !checked.Verified {
 		t.Fatalf("CheckPackages() = %t, %v", checked.Verified, err)
 	}
@@ -127,19 +145,35 @@ source = "src"
 	for position := range compilerBuild {
 		compilerBuild[position] = byte(0x40 + position)
 	}
-	_, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
+	prepare, current, join := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations, atlasmap.NewWorkspaceCallIndex
+	if generic {
+		prepare, current, join = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2, atlasmap.NewWorkspaceCallIndexV2
+	}
+	_, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, checked, compilerBuild)
+	expectations, err := current(workspace, checked, compilerBuild)
 	if err != nil {
 		t.Fatal(err)
 	}
-	index, err := atlasmap.NewWorkspaceCallIndex(partitions, expectations, atlasmap.WorkspaceCallBudget{MaxPackages: 4, MaxCalls: 8})
+	index, err := join(partitions, expectations, atlasmap.WorkspaceCallBudget{MaxPackages: 4, MaxCalls: 8})
 	if err != nil {
 		t.Fatal(err)
 	}
 	calls := index.Calls()
+	if generic {
+		cross := make([]atlasmap.JoinedCall, 0)
+		for _, call := range calls {
+			if call.Source.PackageInstance != call.Target.PackageInstance {
+				cross = append(cross, call)
+			}
+		}
+		if len(cross) != 2 {
+			t.Fatalf("generic cross calls: %+v", cross)
+		}
+		calls = cross[:1]
+	}
 	if len(calls) != 1 {
 		t.Fatalf("joined calls = %+v", calls)
 	}

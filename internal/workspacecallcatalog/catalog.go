@@ -54,6 +54,7 @@ func ParseChecksum(value string) (Checksum, error) {
 type Symbol struct {
 	PackageInstance string `json:"package_instance"`
 	Symbol          string `json:"symbol"`
+	Specialization  string `json:"specialization,omitempty"`
 }
 
 type Span struct {
@@ -109,6 +110,10 @@ func Encode(
 	direction atlasmap.QueryDirection,
 	maxBytes uint64,
 ) ([]byte, error) {
+	return encode(index, packageInstance, symbolID, direction, maxBytes, false)
+}
+
+func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string, direction atlasmap.QueryDirection, maxBytes uint64, generic bool) ([]byte, error) {
 	if index == nil {
 		return nil, fmt.Errorf("Atlas workspace call index is not initialized")
 	}
@@ -125,6 +130,13 @@ func Encode(
 	context, err := index.PackageContext(packageInstance)
 	if err != nil {
 		return nil, err
+	}
+	schema := atlasmap.LogicalSchema
+	if generic {
+		schema = atlasmap.LogicalSchemaV2
+	}
+	if context.LogicalSchema != schema {
+		return nil, fmt.Errorf("workspace call catalog requires %s maps", schema)
 	}
 	calls, err := selectCalls(index, packageInstance, symbolID, direction)
 	if err != nil {
@@ -152,13 +164,17 @@ func Encode(
 	if catalog.Calls == nil {
 		catalog.Calls = make([]Call, 0)
 	}
-	checksum, err := computeChecksum(catalog)
+	version, encoding, algorithm, prefix, checksumVersion := CatalogVersion, CatalogEncoding, ChecksumAlgorithm, ChecksumPrefix, byte(0)
+	if generic {
+		version, encoding, algorithm, prefix, checksumVersion = CatalogVersionV1, CatalogEncodingV1, ChecksumAlgorithmV1, ChecksumPrefixV1, 1
+	}
+	checksum, err := computeVersionedChecksum(catalog, version, encoding, checksumVersion)
 	if err != nil {
 		return nil, err
 	}
 	encoded, err := json.Marshal(envelope{
-		CatalogVersion: CatalogVersion, Encoding: CatalogEncoding,
-		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: checksum.String(), Catalog: catalog,
+		CatalogVersion: version, Encoding: encoding,
+		ChecksumAlgorithm: algorithm, Checksum: prefix + hex.EncodeToString(checksum[:]), Catalog: catalog,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("encode workspace call catalog: %w", err)
@@ -194,8 +210,8 @@ func selectCalls(
 	result := make([]Call, 0, len(joined))
 	for _, call := range joined {
 		result = append(result, Call{
-			Source: Symbol{PackageInstance: call.Source.PackageInstance, Symbol: call.Source.Symbol},
-			Target: Symbol{PackageInstance: call.Target.PackageInstance, Symbol: call.Target.Symbol},
+			Source: Symbol{PackageInstance: call.Source.PackageInstance, Symbol: call.Source.Symbol, Specialization: call.SourceSpecialization},
+			Target: Symbol{PackageInstance: call.Target.PackageInstance, Symbol: call.Target.Symbol, Specialization: call.TargetSpecialization},
 			Span: Span{
 				PackageInstance: call.Span.PackageInstance, Source: call.Span.Source,
 				StartByte: call.Span.StartByte, EndByte: call.Span.EndByte,
@@ -210,8 +226,10 @@ func compareJoinedCall(left, right atlasmap.JoinedCall) int {
 	for _, value := range []int{
 		cmp.Compare(left.Source.PackageInstance, right.Source.PackageInstance),
 		cmp.Compare(left.Source.Symbol, right.Source.Symbol),
+		cmp.Compare(left.SourceSpecialization, right.SourceSpecialization),
 		cmp.Compare(left.Target.PackageInstance, right.Target.PackageInstance),
 		cmp.Compare(left.Target.Symbol, right.Target.Symbol),
+		cmp.Compare(left.TargetSpecialization, right.TargetSpecialization),
 		cmp.Compare(left.Span.PackageInstance, right.Span.PackageInstance),
 		cmp.Compare(left.Span.Source, right.Span.Source),
 		cmp.Compare(left.Span.StartByte, right.Span.StartByte),
@@ -224,24 +242,20 @@ func compareJoinedCall(left, right atlasmap.JoinedCall) int {
 	return 0
 }
 
-func computeChecksum(catalog Catalog) (Checksum, error) {
+func computeVersionedChecksum(catalog Catalog, version, encoding string, checksumVersion byte) (Checksum, error) {
 	payload, err := json.Marshal(catalog)
 	if err != nil {
 		return Checksum{}, fmt.Errorf("encode workspace call catalog checksum payload: %w", err)
 	}
 	digest := sha256.New()
-	writeChecksumHeader(digest)
-	writeChecksumBytes(digest, []byte(CatalogVersion))
-	writeChecksumBytes(digest, []byte(CatalogEncoding))
+	_, _ = digest.Write([]byte(checksumDomain))
+	_, _ = digest.Write([]byte{0, checksumVersion})
+	writeChecksumBytes(digest, []byte(version))
+	writeChecksumBytes(digest, []byte(encoding))
 	writeChecksumBytes(digest, payload)
 	var result Checksum
 	copy(result[:], digest.Sum(nil))
 	return result, nil
-}
-
-func writeChecksumHeader(destination hash.Hash) {
-	_, _ = destination.Write([]byte(checksumDomain))
-	_, _ = destination.Write([]byte{0, 0})
 }
 
 func writeChecksumBytes(destination hash.Hash, value []byte) {

@@ -69,8 +69,9 @@ implementation must exist under the exact resolved target declaration; a generic
 implementation ID rejects the join. Both fields are empty for ordinary calls. Declaration selectors
 aggregate the call records of their implementations without dropping implementation IDs or merging
 different records. This is not concrete execution-path traversal. Returned IDs are current-build
-compiler identities, not stable source anchors. No output catalog or CLI consumes this v2 entry point
-yet; the existing v0 output/CLI remains on v1 construction.
+compiler identities, not stable source anchors. The separate internal call catalog v1 encoder now
+consumes this v2 entry point; the existing v0 output/CLI remains on v1 construction. See
+`docs/atlas/workspace-call-catalog-v1.md`.
 
 ### Declaration selectors
 
