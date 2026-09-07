@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -19,11 +20,16 @@ import (
 const maxTransportTypeDepth = 64
 
 func validateTransportPartition(partition Partition) error {
-	if len(partition.data.specializations) != 0 {
+	return validatePartitionVersion(partition, LogicalSchema)
+}
+
+func validatePartitionVersion(partition Partition, schema string) error {
+	generic := schema == LogicalSchemaV2
+	if !generic && len(partition.data.specializations) != 0 {
 		return fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
 	}
 	header := partition.Header()
-	instanceUIDs, coordinateUIDs, err := validateTransportHeader(header)
+	instanceUIDs, coordinateUIDs, err := validateTransportHeader(header, schema)
 	if err != nil {
 		return err
 	}
@@ -33,9 +39,13 @@ func validateTransportPartition(partition Partition) error {
 	declarations := partition.Declarations()
 	functions := partition.Functions()
 	completeness := partition.Completeness()
+	relations := countRelations(functions)
+	for _, item := range partition.data.specializations {
+		relations += relationCount(item.Function)
+	}
 	if header.Counts != (RecordCounts{
 		Files: len(files), Modules: len(modules), Symbols: len(symbols), Functions: len(functions),
-		Relations: countRelations(functions), Completeness: len(completeness),
+		Relations: relations, Completeness: len(completeness), Specializations: len(partition.data.specializations),
 	}) {
 		return fmt.Errorf("header record counts do not match payload")
 	}
@@ -105,7 +115,7 @@ func validateTransportPartition(partition Partition) error {
 		if index > 0 && compareDeclarationKey(declarations[index-1].Key, declaration.Key) >= 0 {
 			return fmt.Errorf("declarations are not canonical")
 		}
-		if err := validateDeclaration(declaration, header.PackageInstance, filePaths, modulePaths); err != nil {
+		if err := validateDeclaration(declaration, header.PackageInstance, filePaths, modulePaths, generic); err != nil {
 			return err
 		}
 		declarationSet[declaration.Key] = struct{}{}
@@ -168,16 +178,27 @@ func validateTransportPartition(partition Partition) error {
 		if _, found := declarationSet[function.Function]; !found {
 			return fmt.Errorf("function summary %+v has no declaration", function.Function)
 		}
-		if err := validateFunction(function, header.PackageInstance, filePaths, declarationSet, instanceUIDs); err != nil {
+		if err := validateFunction(function, header.PackageInstance, filePaths, declarationSet, instanceUIDs, generic); err != nil {
 			return err
 		}
 		functionSet[function.Function] = struct{}{}
 	}
 	for _, declaration := range declarations {
 		if declaration.Key.Kind == semanticsnapshot.DeclarationFunction {
+			if len(declaration.TypeParameters) != 0 {
+				if _, found := functionSet[declaration.Key]; found {
+					return fmt.Errorf("generic declaration has an ordinary executable summary")
+				}
+				continue
+			}
 			if _, found := functionSet[declaration.Key]; !found {
 				return fmt.Errorf("source function %+v has no summary", declaration.Key)
 			}
+		}
+	}
+	if generic {
+		if err := validateGenericPartition(partition, filePaths, declarationSet, instanceUIDs); err != nil {
+			return err
 		}
 	}
 
@@ -191,8 +212,8 @@ func validateTransportPartition(partition Partition) error {
 	return nil
 }
 
-func validateTransportHeader(header Header) (map[string]string, map[string]string, error) {
-	if header.LogicalSchema != LogicalSchema || header.SnapshotModel != semanticsnapshot.ModelVersion {
+func validateTransportHeader(header Header, schema string) (map[string]string, map[string]string, error) {
+	if header.LogicalSchema != schema || header.SnapshotModel != semanticsnapshot.ModelVersion {
 		return nil, nil, fmt.Errorf("logical schema or snapshot model is incompatible")
 	}
 	if header.CompilerBuildAlgorithm != buildidentity.Encoding {
@@ -324,8 +345,8 @@ func validateTransportHeader(header Header) (map[string]string, map[string]strin
 	return instanceUIDs, coordinateUIDs, nil
 }
 
-func validateDeclaration(value semanticsnapshot.Declaration, instance string, files, modules map[string]struct{}) error {
-	if len(value.TypeParameters) != 0 {
+func validateDeclaration(value semanticsnapshot.Declaration, instance string, files, modules map[string]struct{}, generic bool) error {
+	if !generic && len(value.TypeParameters) != 0 {
 		return fmt.Errorf("Atlas map v1 cannot preserve a generic declaration")
 	}
 	if err := validateLocalKey(value.Key, instance, modules); err != nil {
@@ -337,7 +358,7 @@ func validateDeclaration(value semanticsnapshot.Declaration, instance string, fi
 	if err := validateSpan(value.Span, instance, files); err != nil {
 		return fmt.Errorf("declaration %+v: %w", value.Key, err)
 	}
-	if err := validateTypeRef(value.Type, 0); err != nil {
+	if err := validateBoundTypeRef(value.Type, 0, len(value.TypeParameters)); err != nil {
 		return fmt.Errorf("declaration %+v type: %w", value.Key, err)
 	}
 	if value.Owner != nil {
@@ -355,7 +376,7 @@ func validateDeclaration(value semanticsnapshot.Declaration, instance string, fi
 		if !source.ValidIdentifier(parameter.Name) {
 			return fmt.Errorf("declaration %+v has invalid parameter %q", value.Key, parameter.Name)
 		}
-		if err := validateTypeRef(parameter.Type, 0); err != nil {
+		if err := validateBoundTypeRef(parameter.Type, 0, len(value.TypeParameters)); err != nil {
 			return err
 		}
 		if err := validateSpan(parameter.Span, instance, files); err != nil {
@@ -410,6 +431,7 @@ func validateFunction(
 	files map[string]struct{},
 	declarations map[semanticsnapshot.DeclarationKey]struct{},
 	packageInstances map[string]string,
+	generic bool,
 ) error {
 	if value.Provenance != semanticsnapshot.ProvenanceCompilerObserved {
 		return fmt.Errorf("function %+v has invalid provenance %q", value.Function, value.Provenance)
@@ -418,7 +440,7 @@ func validateFunction(
 		return err
 	}
 	for index, call := range value.Calls {
-		if call.Specialization != "" {
+		if !generic && call.Specialization != "" {
 			return fmt.Errorf("Atlas map v1 cannot preserve a specialization call")
 		}
 		if index > 0 && compareCall(value.Calls[index-1], call) >= 0 {
@@ -483,6 +505,10 @@ func validateFunction(
 }
 
 func validateTypeRef(value semanticsnapshot.TypeRef, depth int) error {
+	return validateBoundTypeRef(value, depth, 0)
+}
+
+func validateBoundTypeRef(value semanticsnapshot.TypeRef, depth, arity int) error {
 	if depth >= maxTransportTypeDepth {
 		return fmt.Errorf("type nesting exceeds %d", maxTransportTypeDepth)
 	}
@@ -493,6 +519,11 @@ func validateTypeRef(value semanticsnapshot.TypeRef, depth int) error {
 		return fmt.Errorf("type kind %q cannot carry a length", value.Kind)
 	}
 	switch value.Kind {
+	case semanticsnapshot.TypeParameter:
+		index, err := strconv.Atoi(value.Name)
+		if err != nil || index < 0 || index >= arity || strconv.Itoa(index) != value.Name || value.PackageCoordinate != "" || len(value.Arguments) != 0 {
+			return fmt.Errorf("invalid or unbound type parameter")
+		}
 	case semanticsnapshot.TypeBuiltin:
 		if !validTransportText(value.Name) || value.PackageCoordinate != "" || len(value.Arguments) != 0 {
 			return fmt.Errorf("invalid builtin type")
@@ -516,7 +547,7 @@ func validateTypeRef(value semanticsnapshot.TypeRef, depth int) error {
 		return fmt.Errorf("unknown type kind %q", value.Kind)
 	}
 	for _, argument := range value.Arguments {
-		if err := validateTypeRef(argument, depth+1); err != nil {
+		if err := validateBoundTypeRef(argument, depth+1, arity); err != nil {
 			return err
 		}
 	}
@@ -652,7 +683,10 @@ func compareCall(left, right semanticsnapshot.Call) int {
 	if value := compareSpan(left.Span, right.Span); value != 0 {
 		return value
 	}
-	return compareDeclarationKey(left.Target, right.Target)
+	if value := compareDeclarationKey(left.Target, right.Target); value != 0 {
+		return value
+	}
+	return cmp.Compare(left.Specialization, right.Specialization)
 }
 
 func compareBorrow(left, right semanticsnapshot.Borrow) int {

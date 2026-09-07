@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, compiler snapshot, and v2 logical map integration; v2 transport pending
+- Status: Accepted source identity, compiler snapshot, v2 logical map, and v2 codec; storage/query integration pending
 - Date: 2026-09-06
 
 ## Decision
@@ -85,17 +85,25 @@ all executable facts. Ordinary package partitions differ only in their explicit 
 The legacy planner and workspace entry point retain v1 behavior. V2 plans cannot enter the v1
 encoder, including a plan with only unused generic declarations. The v1 encoder also checks for
 specialization payloads independently of header counts. This step does not enable storage, queries,
-or CLI consumption of v2; those require the subsequent versioned transport and consumer integration.
+or CLI consumption of v2; those require the subsequent consumer integration.
 
 ## Transport boundary
 
 .fymap v1 has no generic parameter fields. Its planner and encoder therefore reject generic
 declarations explicitly. Silently serializing them as arity zero would erase information and make
 rederived IDs contradict the original identity. The snapshot now preserves generic declarations,
-specializations, and completeness together, as does the opt-in v2 logical plan; a versioned
-transport change is still required.
+specializations, and completeness together, as does the opt-in v2 logical plan.
 The v1 encoder also rejects specialization calls rather than omitting their implementation target.
 The Atlas CLI is not enabled by this preparation, and language/SDK/runtime versions do not change.
+
+EncodeV2 and DecodeV2 now implement the separate `fairyc.fymap/v2` transport described in
+`docs/atlas/fymap-transport-v2.md`. The original Encode/Decode remain exact-v1 entry points.
+Generic source declarations, positional arguments, concrete summaries, and specialization calls
+round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
+checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
+Checksums detect corruption, not authorship or compiler provenance authenticity. Cross-package
+implementation joins, generic source-interface compatibility, storage, and queries still need their
+consumer-specific integration before v2 becomes an Atlas CLI path.
 
 ## Evidence
 

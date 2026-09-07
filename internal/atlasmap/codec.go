@@ -17,6 +17,8 @@ import (
 const (
 	TransportSchema     = "fairyc.fymap/v1"
 	TransportEncoding   = "fairyc.fymap-json/v1"
+	TransportSchemaV2   = "fairyc.fymap/v2"
+	TransportEncodingV2 = "fairyc.fymap-json/v2"
 	ChecksumAlgorithm   = "fairyc.fymap-checksum/v1-sha256"
 	ChecksumPrefix      = "fymap1-sha256-"
 	checksumInputDomain = "fairyc.fymap-checksum"
@@ -56,19 +58,28 @@ func ParseChecksum(value string) (Checksum, error) {
 // Encode validates one logical package partition and returns deterministic, checksummed exact-v1
 // JSON bytes. The caller must choose a positive maximum; the transport has no guessed global cap.
 func Encode(partition Partition, maxBytes uint64) ([]byte, error) {
+	return encodeVersion(partition, maxBytes, TransportSchema, TransportEncoding, LogicalSchema)
+}
+
+// EncodeV2 preserves generic declarations and concrete summaries in canonical v2 bytes.
+func EncodeV2(partition Partition, maxBytes uint64) ([]byte, error) {
+	return encodeVersion(partition, maxBytes, TransportSchemaV2, TransportEncodingV2, LogicalSchemaV2)
+}
+
+func encodeVersion(partition Partition, maxBytes uint64, schema, encoding, logical string) ([]byte, error) {
 	if maxBytes == 0 {
 		return nil, fmt.Errorf(".fymap byte limit must be positive")
 	}
-	if err := validateTransportPartition(partition); err != nil {
+	if err := validatePartitionVersion(partition, logical); err != nil {
 		return nil, fmt.Errorf("validate .fymap partition: %w", err)
 	}
 	document := documentFromPartition(partition)
-	checksum, err := computeTransportChecksum(document)
+	checksum, err := computeVersionChecksum(document, schema, encoding)
 	if err != nil {
 		return nil, err
 	}
 	encoded, err := json.Marshal(transportEnvelope{
-		Schema: TransportSchema, Encoding: TransportEncoding,
+		Schema: schema, Encoding: encoding,
 		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: checksum.String(), Map: document,
 	})
 	if err != nil {
@@ -83,6 +94,15 @@ func Encode(partition Partition, maxBytes uint64) ([]byte, error) {
 // Decode enforces the caller's byte limit, exact transport versions, strict fields, checksum,
 // semantic record invariants, and byte-for-byte canonical encoding before returning immutable data.
 func Decode(encoded []byte, maxBytes uint64) (Partition, error) {
+	return decodeVersion(encoded, maxBytes, TransportSchema, TransportEncoding, LogicalSchema)
+}
+
+// DecodeV2 validates generic-aware records without admitting them to legacy queries.
+func DecodeV2(encoded []byte, maxBytes uint64) (Partition, error) {
+	return decodeVersion(encoded, maxBytes, TransportSchemaV2, TransportEncodingV2, LogicalSchemaV2)
+}
+
+func decodeVersion(encoded []byte, maxBytes uint64, schema, encoding, logical string) (Partition, error) {
 	if maxBytes == 0 {
 		return Partition{}, fmt.Errorf(".fymap byte limit must be positive")
 	}
@@ -106,11 +126,11 @@ func Decode(encoded []byte, maxBytes uint64) (Partition, error) {
 		}
 		return Partition{}, fmt.Errorf("decode .fymap trailing data: %w", err)
 	}
-	if envelope.Schema != TransportSchema {
-		return Partition{}, fmt.Errorf(".fymap schema %q is incompatible with %q", envelope.Schema, TransportSchema)
+	if envelope.Schema != schema {
+		return Partition{}, fmt.Errorf(".fymap schema %q is incompatible with %q", envelope.Schema, schema)
 	}
-	if envelope.Encoding != TransportEncoding {
-		return Partition{}, fmt.Errorf(".fymap encoding %q is incompatible with %q", envelope.Encoding, TransportEncoding)
+	if envelope.Encoding != encoding {
+		return Partition{}, fmt.Errorf(".fymap encoding %q is incompatible with %q", envelope.Encoding, encoding)
 	}
 	if envelope.ChecksumAlgorithm != ChecksumAlgorithm {
 		return Partition{}, fmt.Errorf(".fymap checksum algorithm %q is incompatible with %q", envelope.ChecksumAlgorithm, ChecksumAlgorithm)
@@ -119,7 +139,7 @@ func Decode(encoded []byte, maxBytes uint64) (Partition, error) {
 	if err != nil {
 		return Partition{}, err
 	}
-	computedChecksum, err := computeTransportChecksum(envelope.Map)
+	computedChecksum, err := computeVersionChecksum(envelope.Map, schema, encoding)
 	if err != nil {
 		return Partition{}, err
 	}
@@ -130,10 +150,10 @@ func Decode(encoded []byte, maxBytes uint64) (Partition, error) {
 	if err != nil {
 		return Partition{}, fmt.Errorf("decode .fymap records: %w", err)
 	}
-	if err := validateTransportPartition(partition); err != nil {
+	if err := validatePartitionVersion(partition, logical); err != nil {
 		return Partition{}, fmt.Errorf("validate decoded .fymap: %w", err)
 	}
-	canonical, err := Encode(partition, maxBytes)
+	canonical, err := encodeVersion(partition, maxBytes, schema, encoding, logical)
 	if err != nil {
 		return Partition{}, err
 	}
@@ -144,14 +164,18 @@ func Decode(encoded []byte, maxBytes uint64) (Partition, error) {
 }
 
 func computeTransportChecksum(document transportDocument) (Checksum, error) {
+	return computeVersionChecksum(document, TransportSchema, TransportEncoding)
+}
+
+func computeVersionChecksum(document transportDocument, schema, encoding string) (Checksum, error) {
 	payload, err := json.Marshal(document)
 	if err != nil {
 		return Checksum{}, fmt.Errorf("encode .fymap checksum payload: %w", err)
 	}
 	digest := sha256.New()
 	writeChecksumHeader(digest)
-	writeChecksumBytes(digest, []byte(TransportSchema))
-	writeChecksumBytes(digest, []byte(TransportEncoding))
+	writeChecksumBytes(digest, []byte(schema))
+	writeChecksumBytes(digest, []byte(encoding))
 	writeChecksumBytes(digest, payload)
 	var result Checksum
 	copy(result[:], digest.Sum(nil))

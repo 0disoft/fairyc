@@ -16,22 +16,24 @@ type transportEnvelope struct {
 }
 
 type transportDocument struct {
-	Header       transportHeader            `json:"header"`
-	Files        []transportFile            `json:"files"`
-	Modules      []transportModule          `json:"modules"`
-	Symbols      []transportSymbol          `json:"symbols"`
-	Declarations []transportDeclaration     `json:"declarations"`
-	Functions    []transportFunctionSummary `json:"functions"`
-	Completeness []transportCompleteness    `json:"completeness"`
+	Specializations []transportSpecialization  `json:"specializations,omitempty"`
+	Header          transportHeader            `json:"header"`
+	Files           []transportFile            `json:"files"`
+	Modules         []transportModule          `json:"modules"`
+	Symbols         []transportSymbol          `json:"symbols"`
+	Declarations    []transportDeclaration     `json:"declarations"`
+	Functions       []transportFunctionSummary `json:"functions"`
+	Completeness    []transportCompleteness    `json:"completeness"`
 }
 
 type transportCounts struct {
-	Files        uint64 `json:"files"`
-	Modules      uint64 `json:"modules"`
-	Symbols      uint64 `json:"symbols"`
-	Functions    uint64 `json:"functions"`
-	Relations    uint64 `json:"relations"`
-	Completeness uint64 `json:"completeness"`
+	Specializations uint64 `json:"specializations,omitempty"`
+	Files           uint64 `json:"files"`
+	Modules         uint64 `json:"modules"`
+	Symbols         uint64 `json:"symbols"`
+	Functions       uint64 `json:"functions"`
+	Relations       uint64 `json:"relations"`
+	Completeness    uint64 `json:"completeness"`
 }
 
 type transportHeader struct {
@@ -127,24 +129,25 @@ type transportVariant struct {
 }
 
 type transportDeclaration struct {
-	Key         transportDeclarationKey `json:"key"`
-	Span        transportSpan           `json:"span"`
-	Provenance  string                  `json:"provenance"`
-	Public      bool                    `json:"public"`
-	Unsafe      bool                    `json:"unsafe"`
-	Foreign     bool                    `json:"foreign"`
-	ABI         string                  `json:"abi"`
-	LinkName    string                  `json:"link_name"`
-	Type        transportTypeRef        `json:"type"`
-	Owner       *transportTypeRef       `json:"owner"`
-	Receiver    string                  `json:"receiver"`
-	Parameters  []transportParameter    `json:"parameters"`
-	Effects     []string                `json:"effects"`
-	Fields      []transportField        `json:"fields"`
-	Variants    []transportVariant      `json:"variants"`
-	ReprC       bool                    `json:"repr_c"`
-	DropKind    string                  `json:"drop_kind"`
-	DropEffects []string                `json:"drop_effects"`
+	TypeParameters []string                `json:"type_parameters,omitempty"`
+	Key            transportDeclarationKey `json:"key"`
+	Span           transportSpan           `json:"span"`
+	Provenance     string                  `json:"provenance"`
+	Public         bool                    `json:"public"`
+	Unsafe         bool                    `json:"unsafe"`
+	Foreign        bool                    `json:"foreign"`
+	ABI            string                  `json:"abi"`
+	LinkName       string                  `json:"link_name"`
+	Type           transportTypeRef        `json:"type"`
+	Owner          *transportTypeRef       `json:"owner"`
+	Receiver       string                  `json:"receiver"`
+	Parameters     []transportParameter    `json:"parameters"`
+	Effects        []string                `json:"effects"`
+	Fields         []transportField        `json:"fields"`
+	Variants       []transportVariant      `json:"variants"`
+	ReprC          bool                    `json:"repr_c"`
+	DropKind       string                  `json:"drop_kind"`
+	DropEffects    []string                `json:"drop_effects"`
 }
 
 type transportSymbol struct {
@@ -154,12 +157,13 @@ type transportSymbol struct {
 }
 
 type transportCall struct {
-	Span       transportSpan           `json:"span"`
-	TargetKind string                  `json:"target_kind"`
-	Target     transportDeclarationKey `json:"target"`
-	Certainty  string                  `json:"certainty"`
-	ABI        string                  `json:"abi"`
-	LinkName   string                  `json:"link_name"`
+	Specialization string                  `json:"specialization,omitempty"`
+	Span           transportSpan           `json:"span"`
+	TargetKind     string                  `json:"target_kind"`
+	Target         transportDeclarationKey `json:"target"`
+	Certainty      string                  `json:"certainty"`
+	ABI            string                  `json:"abi"`
+	LinkName       string                  `json:"link_name"`
 }
 
 type transportBorrow struct {
@@ -209,7 +213,8 @@ func documentFromPartition(partition Partition) transportDocument {
 			PackageReferences: referencesToTransport(header.PackageReferences),
 			GenerationStatus:  header.GenerationStatus, Omissions: nonNilStrings(header.Omissions),
 			Counts: transportCounts{
-				Files: uint64(header.Counts.Files), Modules: uint64(header.Counts.Modules), Symbols: uint64(header.Counts.Symbols),
+				Specializations: uint64(header.Counts.Specializations),
+				Files:           uint64(header.Counts.Files), Modules: uint64(header.Counts.Modules), Symbols: uint64(header.Counts.Symbols),
 				Functions: uint64(header.Counts.Functions), Relations: uint64(header.Counts.Relations),
 				Completeness: uint64(header.Counts.Completeness),
 			},
@@ -232,6 +237,9 @@ func documentFromPartition(partition Partition) transportDocument {
 	}
 	for _, value := range partition.Functions() {
 		result.Functions = append(result.Functions, functionToTransport(value))
+	}
+	for _, value := range partition.Specializations() {
+		result.Specializations = append(result.Specializations, specializationToTransport(value))
 	}
 	for _, value := range partition.Completeness() {
 		result.Completeness = append(result.Completeness, transportCompleteness{
@@ -264,7 +272,8 @@ func fieldToTransport(value semanticsnapshot.Field) transportField {
 
 func declarationToTransport(value semanticsnapshot.Declaration) transportDeclaration {
 	result := transportDeclaration{
-		Key: keyToTransport(value.Key), Span: spanToTransport(value.Span), Provenance: string(value.Provenance),
+		TypeParameters: append([]string(nil), value.TypeParameters...),
+		Key:            keyToTransport(value.Key), Span: spanToTransport(value.Span), Provenance: string(value.Provenance),
 		Public: value.Public, Unsafe: value.Unsafe, Foreign: value.Foreign, ABI: value.ABI, LinkName: value.LinkName,
 		Type: typeToTransport(value.Type), Receiver: value.Receiver, Effects: nonNilStrings(value.Effects),
 		Parameters: make([]transportParameter, 0, len(value.Parameters)), Fields: make([]transportField, 0, len(value.Fields)),
@@ -300,7 +309,7 @@ func functionToTransport(value semanticsnapshot.FunctionSummary) transportFuncti
 		ReturnErrorSites: spansToTransport(value.ReturnErrorSites), Borrows: make([]transportBorrow, 0, len(value.Borrows)),
 	}
 	for _, call := range value.Calls {
-		result.Calls = append(result.Calls, transportCall{Span: spanToTransport(call.Span), TargetKind: string(call.TargetKind), Target: keyToTransport(call.Target), Certainty: string(call.Certainty), ABI: call.ABI, LinkName: call.LinkName})
+		result.Calls = append(result.Calls, transportCall{Specialization: call.Specialization, Span: spanToTransport(call.Span), TargetKind: string(call.TargetKind), Target: keyToTransport(call.Target), Certainty: string(call.Certainty), ABI: call.ABI, LinkName: call.LinkName})
 	}
 	for _, borrow := range value.Borrows {
 		result.Borrows = append(result.Borrows, transportBorrow{Span: spanToTransport(borrow.Span), Kind: borrow.Kind, Escapes: borrow.Escapes})
@@ -375,6 +384,13 @@ func partitionFromDocument(value transportDocument) (Partition, error) {
 		}
 		data.completeness = append(data.completeness, semanticsnapshot.Completeness{Relation: item.Relation, Status: semanticsnapshot.CompletenessStatus(item.Status), Resolved: resolved, External: external, Unknown: unknown, Reasons: append([]string(nil), item.Reasons...)})
 	}
+	for _, item := range value.Specializations {
+		decoded, err := specializationFromTransport(item)
+		if err != nil {
+			return Partition{}, err
+		}
+		data.specializations = append(data.specializations, decoded)
+	}
 	return Partition{data: data}, nil
 }
 
@@ -385,6 +401,7 @@ func countsFromTransport(value transportCounts) (RecordCounts, error) {
 	}{
 		{"files", value.Files}, {"modules", value.Modules}, {"symbols", value.Symbols},
 		{"functions", value.Functions}, {"relations", value.Relations}, {"completeness", value.Completeness},
+		{"specializations", value.Specializations},
 	}
 	converted := make([]int, len(fields))
 	for index, field := range fields {
@@ -394,7 +411,7 @@ func countsFromTransport(value transportCounts) (RecordCounts, error) {
 		}
 		converted[index] = item
 	}
-	return RecordCounts{Files: converted[0], Modules: converted[1], Symbols: converted[2], Functions: converted[3], Relations: converted[4], Completeness: converted[5]}, nil
+	return RecordCounts{Files: converted[0], Modules: converted[1], Symbols: converted[2], Functions: converted[3], Relations: converted[4], Completeness: converted[5], Specializations: converted[6]}, nil
 }
 
 func declarationFromTransport(value transportDeclaration) (semanticsnapshot.Declaration, error) {
@@ -403,7 +420,8 @@ func declarationFromTransport(value transportDeclaration) (semanticsnapshot.Decl
 		return semanticsnapshot.Declaration{}, err
 	}
 	result := semanticsnapshot.Declaration{
-		Key: keyFromTransport(value.Key), Span: span, Provenance: semanticsnapshot.Provenance(value.Provenance),
+		TypeParameters: append([]string(nil), value.TypeParameters...),
+		Key:            keyFromTransport(value.Key), Span: span, Provenance: semanticsnapshot.Provenance(value.Provenance),
 		Public: value.Public, Unsafe: value.Unsafe, Foreign: value.Foreign, ABI: value.ABI, LinkName: value.LinkName,
 		Type: typeFromTransport(value.Type), Receiver: value.Receiver, Effects: append([]string(nil), value.Effects...),
 		ReprC: value.ReprC, DropKind: value.DropKind, DropEffects: append([]string(nil), value.DropEffects...),
@@ -459,7 +477,7 @@ func functionFromTransport(value transportFunctionSummary) (semanticsnapshot.Fun
 		if err != nil {
 			return semanticsnapshot.FunctionSummary{}, err
 		}
-		result.Calls = append(result.Calls, semanticsnapshot.Call{Span: span, TargetKind: semanticsnapshot.CallTargetKind(call.TargetKind), Target: keyFromTransport(call.Target), Certainty: semanticsnapshot.Certainty(call.Certainty), ABI: call.ABI, LinkName: call.LinkName})
+		result.Calls = append(result.Calls, semanticsnapshot.Call{Specialization: call.Specialization, Span: span, TargetKind: semanticsnapshot.CallTargetKind(call.TargetKind), Target: keyFromTransport(call.Target), Certainty: semanticsnapshot.Certainty(call.Certainty), ABI: call.ABI, LinkName: call.LinkName})
 	}
 	var err error
 	if result.UnsafeSites, err = spansFromTransport(value.UnsafeSites); err != nil {
