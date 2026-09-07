@@ -39,6 +39,15 @@ func CurrentWorkspaceExpectations(
 	result compiler.Result,
 	compilerBuild buildidentity.Identity,
 ) (map[string]LoadExpectation, error) {
+	return currentWorkspaceExpectations(workspace, result, compilerBuild, LogicalSchema)
+}
+
+// CurrentWorkspaceExpectationsV2 binds current bytes to original generic source interfaces.
+func CurrentWorkspaceExpectationsV2(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity) (map[string]LoadExpectation, error) {
+	return currentWorkspaceExpectations(workspace, result, compilerBuild, LogicalSchemaV2)
+}
+
+func currentWorkspaceExpectations(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity, schema string) (map[string]LoadExpectation, error) {
 	if !result.Verified || compilerBuild == (buildidentity.Identity{}) {
 		return nil, fmt.Errorf("map load expectations require verified MIR and exact compiler identity")
 	}
@@ -58,7 +67,7 @@ func CurrentWorkspaceExpectations(
 	for _, packageValue := range metadata {
 		packageIDs = append(packageIDs, packageValue.ID)
 	}
-	interfaces, err := moduleinterface.ComputePackages(result.Semantic.HIR, packageIDs, coordinates)
+	interfaces, generic, err := workspaceInterfaceFacts(result, packageIDs, coordinates, schema)
 	if err != nil {
 		return nil, err
 	}
@@ -75,6 +84,7 @@ func CurrentWorkspaceExpectations(
 		}
 		expectations[instance] = LoadExpectation{
 			CompilerBuild: compilerBuild, PublicInterface: interfaceHash, Current: currentPackage,
+			GenericInterface: generic[packageValue.ID],
 		}
 	}
 	if len(expectations) != len(current) {
@@ -100,9 +110,10 @@ type CurrentPackage struct {
 
 // LoadExpectation combines current source with non-source compatibility selected by the caller.
 type LoadExpectation struct {
-	CompilerBuild   buildidentity.Identity
-	PublicInterface moduleinterface.Hash
-	Current         CurrentPackage
+	CompilerBuild    buildidentity.Identity
+	PublicInterface  moduleinterface.Hash
+	GenericInterface moduleinterface.GenericHash
+	Current          CurrentPackage
 }
 
 // CurrentWorkspacePackages recomputes exact file identities from already validated retained bytes
@@ -276,6 +287,13 @@ func compatibilityError(partition Partition, expectation LoadExpectation) error 
 	}
 	header := partition.Header()
 	if header.CompilerBuild != expectation.CompilerBuild.String() || header.InterfaceHash != expectation.PublicInterface.String() {
+		return ErrIncompatibleMap
+	}
+	if expectation.GenericInterface == (moduleinterface.GenericHash{}) {
+		if header.GenericInterfaceHash != "" {
+			return ErrIncompatibleMap
+		}
+	} else if header.GenericInterfaceHash != expectation.GenericInterface.String() || header.GenericInterfaceAlgorithm != moduleinterface.GenericHashEncoding {
 		return ErrIncompatibleMap
 	}
 	return nil

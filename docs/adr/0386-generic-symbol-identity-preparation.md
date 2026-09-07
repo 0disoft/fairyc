@@ -76,8 +76,12 @@ exported template closures included. PackageInterfaces returns detached records 
 order. LowerAnalyzed and CheckGenericPackages preserve them only on verified results. Mutating the
 public GenericAnalysis maps, the input coordinate map, or an accessor result cannot change retained
 facts. Rejected analysis and coordinate-free explicit-file analysis publish no package interface
-records. These facts remain non-serialized and do not authorize stable cache reuse; the v2 map
-header and current-source consumer still need to bind them explicitly.
+records. These compiler facts remain non-serialized and do not authorize stable cache reuse.
+The v2 workspace adapter now binds the complete retained set to current semantic package IDs and
+coordinates, rejects missing or contradictory facts, and records ordinary and generic interface
+identities separately. CurrentWorkspaceExpectationsV2 uses the same original-source facts rather
+than recomputing an interface from generated specializations. Compatibility checks require both
+identities to match; callers omitting the generic expectation cannot accept a generic map.
 
 BuildPlanV2 and PrepareWorkspaceV2 opt into `fairyc.fymap-logical/v2`. Each original declaration
 and its existing SymbolId appears once. Each concrete specialization is assigned to its original
@@ -112,7 +116,7 @@ Generic source declarations, positional arguments, concrete summaries, and speci
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
 Checksums detect corruption, not authorship or compiler provenance authenticity. Cross-package
-implementation joins, generic source-interface compatibility, storage, and queries still need their
+implementation joins, storage, and queries still need their
 consumer-specific integration before v2 becomes an Atlas CLI path.
 
 ## Evidence

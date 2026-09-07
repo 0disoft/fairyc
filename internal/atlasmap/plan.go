@@ -27,8 +27,9 @@ const (
 
 // Input supplies compatibility facts intentionally absent from SemanticSnapshot.
 type Input struct {
-	CompilerBuild buildidentity.Identity
-	Interfaces    map[string]moduleinterface.Hash
+	CompilerBuild     buildidentity.Identity
+	Interfaces        map[string]moduleinterface.Hash
+	GenericInterfaces map[string]moduleinterface.GenericHash
 }
 
 type RecordCounts struct {
@@ -71,6 +72,8 @@ type Header struct {
 	SymbolAlgorithm            string
 	InterfaceAlgorithm         string
 	InterfaceHash              string
+	GenericInterfaceAlgorithm  string
+	GenericInterfaceHash       string
 	Features                   []string
 	Dependencies               []string
 	PackageReferences          []PackageReference
@@ -173,6 +176,16 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 	if len(input.Interfaces) != len(packages) {
 		return nil, fmt.Errorf("Atlas map plan requires one public-interface hash per package")
 	}
+	hasGeneric := len(snapshot.Specializations()) != 0
+	for _, declaration := range snapshot.Declarations() {
+		hasGeneric = hasGeneric || len(declaration.TypeParameters) != 0
+	}
+	if schema == LogicalSchema && len(input.GenericInterfaces) != 0 {
+		return nil, fmt.Errorf("Atlas map v1 cannot preserve generic interface identities")
+	}
+	if schema == LogicalSchemaV2 && (hasGeneric || len(input.GenericInterfaces) != 0) && len(input.GenericInterfaces) != len(packages) {
+		return nil, fmt.Errorf("Atlas map plan requires one generic source interface per package")
+	}
 
 	builders := make(map[string]*partitionBuilder, len(packages))
 	for _, packageValue := range packages {
@@ -181,6 +194,9 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 		}
 		if _, duplicate := builders[packageValue.Instance]; duplicate {
 			return nil, fmt.Errorf("Atlas map plan repeats package instance %q", packageValue.Instance)
+		}
+		if len(input.GenericInterfaces) != 0 && input.GenericInterfaces[packageValue.Instance] == (moduleinterface.GenericHash{}) {
+			return nil, fmt.Errorf("package %q has no exact generic source interface", packageValue.Instance)
 		}
 		interfaceHash, found := input.Interfaces[packageValue.Instance]
 		if !found || interfaceHash == ([32]byte{}) {
@@ -300,6 +316,10 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 	result := make([]Partition, 0, len(packages))
 	for _, packageValue := range packages {
 		builder := builders[packageValue.Instance]
+		if len(input.GenericInterfaces) != 0 {
+			builder.data.header.GenericInterfaceAlgorithm = moduleinterface.GenericHashEncoding
+			builder.data.header.GenericInterfaceHash = input.GenericInterfaces[packageValue.Instance].String()
+		}
 		builder.data.completeness = cloneCompleteness(completeness)
 		builder.data.header.GenerationStatus = generationStatus
 		builder.data.header.Omissions = slices.Clone(omissions)

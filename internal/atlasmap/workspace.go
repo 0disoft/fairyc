@@ -41,7 +41,7 @@ func prepareWorkspace(workspace workspaceloader.Workspace, result compiler.Resul
 	for _, packageValue := range metadata {
 		packageIDs = append(packageIDs, packageValue.ID)
 	}
-	interfacesByID, err := moduleinterface.ComputePackages(result.Semantic.HIR, packageIDs, coordinates)
+	interfacesByID, genericByID, err := workspaceInterfaceFacts(result, packageIDs, coordinates, schema)
 	if err != nil {
 		return semanticsnapshot.Snapshot{}, nil, err
 	}
@@ -53,6 +53,7 @@ func prepareWorkspace(workspace workspaceloader.Workspace, result compiler.Resul
 	}
 	packageInputs := make([]semanticsnapshot.PackageInput, 0, len(metadata))
 	interfaceHashes := make(map[string]moduleinterface.Hash, len(metadata))
+	genericHashes := make(map[string]moduleinterface.GenericHash, len(genericByID))
 	for _, packageValue := range metadata {
 		interfaceHash, found := interfacesByID[packageValue.ID]
 		if !found {
@@ -67,6 +68,9 @@ func prepareWorkspace(workspace workspaceloader.Workspace, result compiler.Resul
 			Files: slices.Clone(filesByPackage[packageValue.ID]),
 		})
 		interfaceHashes[packageValue.Instance.String()] = interfaceHash
+		if hash, found := genericByID[packageValue.ID]; found {
+			genericHashes[packageValue.Instance.String()] = hash
+		}
 		delete(filesByPackage, packageValue.ID)
 	}
 	if len(filesByPackage) != 0 {
@@ -76,7 +80,7 @@ func prepareWorkspace(workspace workspaceloader.Workspace, result compiler.Resul
 	if err != nil {
 		return semanticsnapshot.Snapshot{}, nil, err
 	}
-	partitions, err := buildPlan(snapshot, Input{CompilerBuild: compilerBuild, Interfaces: interfaceHashes}, schema)
+	partitions, err := buildPlan(snapshot, Input{CompilerBuild: compilerBuild, Interfaces: interfaceHashes, GenericInterfaces: genericHashes}, schema)
 	if err != nil {
 		return semanticsnapshot.Snapshot{}, nil, err
 	}

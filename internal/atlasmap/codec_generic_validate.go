@@ -88,6 +88,9 @@ func validateGenericPartition(partition Partition, files map[string]struct{}, ke
 		}
 	}
 	if templates > 0 {
+		if partition.data.header.GenericInterfaceHash == "" {
+			return fmt.Errorf("generic declarations require a source interface identity")
+		}
 		ledger := map[string]semanticsnapshot.Completeness{}
 		for _, entry := range partition.data.completeness {
 			ledger[entry.Relation] = entry

@@ -133,7 +133,7 @@ language = "fairyc-language/14"
 source = "src"
 `
 	source := `module main;
-fn T id<T>(T value) { let ref T view = ref value; return *view; }
+pub fn T id<T>(T value) { let ref T view = ref value; return *view; }
 fn T pass<T>(T value) { return id<T>(value); }
 fn T unused<T>(T value) { return value; }
 `

@@ -15,7 +15,7 @@ import (
 // interchangeable with the released v5 Hash or current package cache records.
 type GenericHash [sha256.Size]byte
 
-func (hash GenericHash) String() string { return "fygif0-sha256-" + hex.EncodeToString(hash[:]) }
+func (hash GenericHash) String() string { return GenericHashPrefix + hex.EncodeToString(hash[:]) }
 
 type GenericTemplate struct {
 	Module  string
@@ -43,7 +43,7 @@ func ComputeGeneric(ordinary Descriptor, templates []GenericTemplate) (GenericHa
 		return cmp.Compare(a.Name, b.Name)
 	})
 	var encoded bytes.Buffer
-	writeString(&encoded, "fairyc.generic-public-interface/v0")
+	writeString(&encoded, GenericHashEncoding)
 	writeString(&encoded, HashEncoding)
 	encoded.Write(base[:])
 	writeUint64(&encoded, uint64(len(templates)))

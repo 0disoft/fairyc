@@ -31,12 +31,26 @@ The common record shapes retain their v1 fields and add these optional nonempty 
 - Calls carry `specialization` when they target a concrete generic implementation.
 - Header counts carry `specializations` when nonzero. Relation counts include both ordinary
   function summaries and specialization summaries; function counts exclude specializations.
+- Headers carry `generic_interface_algorithm` and `generic_interface_hash` together when source
+  generic interface facts are present. The algorithm is `fairyc.generic-public-interface/v0` and
+  the canonical digest prefix is `fygif0-sha256-`. The ordinary interface field excludes generated
+  specializations; the additional hash includes exported template closures, even when unused.
 
 Empty additions are omitted, preserving existing v1 canonical bytes. Decoding explicitly empty or
 null additions still requires canonical reencoding and does not create another accepted spelling.
 Source text, documentation text, and documentation attachment records remain outside this transport.
 
 ## Validation
+
+Generic-aware workspace planning requires one nonzero generic source-interface identity for every
+package in the analyzed snapshot, bound to its exact semantic package and stable coordinate.
+The original compiler-provenance records, not generated HIR exports, supply these identities.
+Missing, extra, zero, or coordinate-mismatched source facts reject planning. Headers with generic
+declarations cannot omit the generic interface pair, and v1 rejects these additional identities.
+CurrentWorkspaceExpectationsV2 derives the matching source-and-interface expectation set. Reader
+compatibility compares both ordinary and generic hashes, without treating an absent expectation
+as a wildcard. An unused exported template-body edit changes the generic hash without changing
+the ordinary interface hash.
 
 The v1 header, file, module, span, declaration, symbol, ordinary-summary, and completeness checks
 remain applicable. Source SymbolIds are rederived using original generic arity and positional types,
@@ -68,5 +82,6 @@ uniqueness, ownership, summary identity, IDs, calls, concrete types, counts, par
 template completeness independently from checksum integrity.
 
 This codec does not publish maps, authorize source reads, or enable v2 queries. Storage keys,
-current-source expectations, generic source-interface hashes, cross-package implementation joins,
-and downstream CLI consumers remain separate integration requirements.
+cross-package implementation joins, and downstream CLI consumers remain separate integration
+requirements. Current-source expectations now include generic source-interface compatibility, but
+the map store has not yet been connected to that v2 path.

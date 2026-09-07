@@ -58,6 +58,8 @@ type transportHeader struct {
 	SymbolAlgorithm            string                      `json:"symbol_algorithm"`
 	InterfaceAlgorithm         string                      `json:"interface_algorithm"`
 	InterfaceHash              string                      `json:"interface_hash"`
+	GenericInterfaceAlgorithm  string                      `json:"generic_interface_algorithm,omitempty"`
+	GenericInterfaceHash       string                      `json:"generic_interface_hash,omitempty"`
 	Features                   []string                    `json:"features"`
 	Dependencies               []string                    `json:"dependencies"`
 	PackageReferences          []transportPackageReference `json:"package_references"`
@@ -209,6 +211,7 @@ func documentFromPartition(partition Partition) transportDocument {
 			PackageSourceAlgorithm:     header.PackageSourceAlgorithm, SourceFileAlgorithm: header.SourceFileAlgorithm,
 			LineMapAlgorithm: header.LineMapAlgorithm, SymbolAlgorithm: header.SymbolAlgorithm,
 			InterfaceAlgorithm: header.InterfaceAlgorithm, InterfaceHash: header.InterfaceHash,
+			GenericInterfaceAlgorithm: header.GenericInterfaceAlgorithm, GenericInterfaceHash: header.GenericInterfaceHash,
 			Features: nonNilStrings(header.Features), Dependencies: nonNilStrings(header.Dependencies),
 			PackageReferences: referencesToTransport(header.PackageReferences),
 			GenerationStatus:  header.GenerationStatus, Omissions: nonNilStrings(header.Omissions),
@@ -342,6 +345,7 @@ func partitionFromDocument(value transportDocument) (Partition, error) {
 		PackageSourceAlgorithm:     value.Header.PackageSourceAlgorithm, SourceFileAlgorithm: value.Header.SourceFileAlgorithm,
 		LineMapAlgorithm: value.Header.LineMapAlgorithm, SymbolAlgorithm: value.Header.SymbolAlgorithm,
 		InterfaceAlgorithm: value.Header.InterfaceAlgorithm, InterfaceHash: value.Header.InterfaceHash,
+		GenericInterfaceAlgorithm: value.Header.GenericInterfaceAlgorithm, GenericInterfaceHash: value.Header.GenericInterfaceHash,
 		Features: append([]string(nil), value.Header.Features...), Dependencies: append([]string(nil), value.Header.Dependencies...),
 		PackageReferences: referencesFromTransport(value.Header.PackageReferences),
 		GenerationStatus:  value.Header.GenerationStatus, Omissions: append([]string(nil), value.Header.Omissions...), Counts: counts,

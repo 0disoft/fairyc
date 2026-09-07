@@ -213,6 +213,15 @@ func validatePartitionVersion(partition Partition, schema string) error {
 }
 
 func validateTransportHeader(header Header, schema string) (map[string]string, map[string]string, error) {
+	if header.GenericInterfaceAlgorithm != "" || header.GenericInterfaceHash != "" {
+		if schema != LogicalSchemaV2 || header.GenericInterfaceAlgorithm != moduleinterface.GenericHashEncoding {
+			return nil, nil, fmt.Errorf("generic interface algorithm is incompatible")
+		}
+		hash, err := moduleinterface.ParseGenericHash(header.GenericInterfaceHash)
+		if err != nil || hash == (moduleinterface.GenericHash{}) {
+			return nil, nil, fmt.Errorf("generic interface hash is invalid or zero")
+		}
+	}
 	if header.LogicalSchema != schema || header.SnapshotModel != semanticsnapshot.ModelVersion {
 		return nil, nil, fmt.Errorf("logical schema or snapshot model is incompatible")
 	}
