@@ -1054,6 +1054,11 @@ func (r *runtime) dropValue(value runtimeValue, binding hir.Span, depth int) (st
 	switch value.kind {
 	case valueI32, valueU8, valueU32, valueUSize, valueNull:
 		return "", nil
+	case valueStruct:
+		if !inertDropValue(value, 0) {
+			return "", capabilityError("struct field is not an inert copy value")
+		}
+		return "", nil
 	case valueResult, valueOption:
 		if value.tagged == nil {
 			return "", fmt.Errorf("tagged value has no state")

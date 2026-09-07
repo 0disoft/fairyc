@@ -255,7 +255,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if err != nil {
 		return Unit{}, err
 	}
-	resourceTypes, resourceByType, err := prepareResourceTypes(program.ResourceTypes, layoutEngine)
+	resourceTypes, resourceByType, err := prepareResourceTypes(program.ResourceTypes, layoutEngine, structTypes, structByType)
 	if err != nil {
 		return Unit{}, err
 	}
@@ -680,7 +680,7 @@ func filterForeignFunctions(foreignFunctions []mir.ForeignFunction, bySymbol map
 	return filtered, filteredBySymbol, nil
 }
 
-func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine) ([]resourceCType, map[hir.Type]int, error) {
+func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine, structures []structCType, structByType map[hir.Type]int) ([]resourceCType, map[hir.Type]int, error) {
 	ordered := slices.Clone(definitions)
 	slices.SortFunc(ordered, func(left, right mir.ResourceType) int {
 		return strings.Compare(string(left.Type), string(right.Type))
@@ -697,8 +697,13 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine)
 		fields := make([]layout.Field, 0, len(definition.Fields))
 		fieldIndex := make(map[string]int, len(definition.Fields))
 		allI32 := true
+		nestedCopy := false
 		for index, field := range definition.Fields {
 			fieldType, ok := resourceFieldLayoutType(field.Type)
+			if structure, found := structByType[field.Type]; !ok && found {
+				fieldType, ok = structures[structure].layoutType, true
+				nestedCopy = true
+			}
 			if !ok {
 				return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
 			}
@@ -724,6 +729,9 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine)
 		feature := "flat-copy-resource"
 		if allI32 {
 			feature = "flat-i32-resource"
+		}
+		if nestedCopy {
+			feature = "nested-copy-resource"
 		}
 		result = append(result, resourceCType{
 			definition: definition, layout: computed, layoutType: aggregateType,

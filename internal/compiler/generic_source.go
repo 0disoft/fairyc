@@ -11,8 +11,9 @@ import (
 )
 
 // CheckGenericFunctions is the compiler-private source-to-MIR admission path for
-// module-local scalar generic functions. It deliberately does not participate in
-// stable workspace interfaces or package caches. Every generated function passes
+// module-local scalar generic functions and scalar-parameter aggregate templates.
+// It deliberately does not participate in stable workspace interfaces or package
+// caches. Every generated function and aggregate passes
 // the ordinary type, ownership, effect, lowering, and MIR verification pipeline.
 func CheckGenericFunctions(file semantic.File, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
 	owner := genericplan.PackageID(fmt.Sprintf("package_%d", file.Package))
@@ -43,6 +44,12 @@ func checkGenericFunctions(file semantic.File, owner genericplan.PackageID, limi
 	if file.Module != nil {
 		for _, function := range file.Module.Functions {
 			hasTemplates = hasTemplates || len(function.TypeParameters) != 0
+		}
+		for _, structure := range file.Module.Structs {
+			hasTemplates = hasTemplates || len(structure.TypeParameters) != 0
+		}
+		for _, resource := range file.Module.Resources {
+			hasTemplates = hasTemplates || len(resource.TypeParameters) != 0
 		}
 	}
 	module, plan, err := genericsource.Expand(file.Module, owner, limits)

@@ -36,6 +36,7 @@ type expander struct {
 	module      *ast.Module
 	owner       genericplan.PackageID
 	templates   map[string]ast.Function
+	aggregates  map[string]aggregateTemplate
 	names       map[string]bool
 	imports     map[string]*expander
 	allowPublic bool
@@ -92,7 +93,7 @@ func (x *expander) collect() error {
 		}
 		x.templates[fn.Name] = fn
 	}
-	return nil
+	return x.collectAggregateTemplates()
 }
 
 func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error) {
@@ -102,12 +103,16 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 		for _, parameter := range fn.TypeParameters {
 			declaration.Parameters = append(declaration.Parameters, genericplan.TypeParameter{Name: parameter})
 		}
+		var typeError error
 		t := transform{binding: func(name string, span diagnostic.Span) error {
 			return x.at(span, FailureDeclaration, x.checkBinding(name))
 		}, expression: func(e *ast.Expression) (err error) {
 			defer func() { err = x.at(e.Span, FailureRequest, err) }()
 			if err := x.checkExpression(e); err != nil {
 				return err
+			}
+			if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
+				return x.registerAggregateRecord(e, fn.TypeParameters, &declaration, &requests)
 			}
 			if e.Kind != syntax.KindSpecialize {
 				return nil
@@ -154,8 +159,16 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 			}
 			return nil
 		}}
+		t.typeReference = func(ref *ast.TypeReference) {
+			if typeError == nil {
+				typeError = x.registerAggregateType(*ref, fn.TypeParameters, &declaration, &requests)
+			}
+		}
 		if _, err := t.function(fn); err != nil {
 			return nil, fmt.Errorf("generic source %s: %w", fn.Name, err)
+		}
+		if typeError != nil {
+			return nil, typeError
 		}
 		if len(fn.TypeParameters) != 0 {
 			body, err := json.Marshal(fn)
@@ -182,7 +195,8 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 			}
 		}
 	}
-	return requests, nil
+	aggregateRequests, err := x.declareAggregates(b)
+	return append(requests, aggregateRequests...), err
 }
 
 func (x *expander) emit(plan genericplan.Plan, names map[string]string) (*ast.Module, error) {
@@ -218,6 +232,9 @@ func (x *expander) emit(plan genericplan.Plan, names map[string]string) (*ast.Mo
 		concrete.Name = generatedPrefix + string(specialization.ID)
 		concrete.TypeParameters = nil
 		result.Functions = append(result.Functions, concrete)
+	}
+	if err := x.emitAggregates(&result, plan, names); err != nil {
+		return nil, err
 	}
 	return &result, nil
 }
@@ -260,6 +277,9 @@ func (x *expander) target(e *ast.Expression) (callTarget, error) {
 }
 
 func (x *expander) checkBinding(name string) error {
+	if _, generic := x.aggregates[name]; generic {
+		return fmt.Errorf("binding %q shadows a generic aggregate", name)
+	}
 	if _, generic := x.templates[name]; generic || strings.HasPrefix(name, generatedPrefix) {
 		return fmt.Errorf("binding %q shadows a generic function or reserved name", name)
 	}
@@ -290,7 +310,11 @@ func requestKey(declaration genericplan.DeclarationID, arguments []genericplan.T
 }
 
 func (x *expander) instantiate(fn ast.Function, bindings map[string]ast.TypeReference, names map[string]string) (ast.Function, error) {
+	var typeError error
 	t := transform{bindings: bindings, expression: func(e *ast.Expression) error {
+		if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
+			return x.rewriteAggregateRecord(e, names)
+		}
 		if e.Kind != syntax.KindSpecialize {
 			return nil
 		}
@@ -309,5 +333,14 @@ func (x *expander) instantiate(fn ast.Function, bindings map[string]ast.TypeRefe
 		*e = ast.Expression{Kind: syntax.KindPath, Span: e.Span, Text: target.prefix + generated}
 		return nil
 	}}
-	return t.function(fn)
+	t.typeReference = func(ref *ast.TypeReference) {
+		if typeError == nil {
+			typeError = x.rewriteAggregateType(ref, names)
+		}
+	}
+	result, err := t.function(fn)
+	if err == nil {
+		err = typeError
+	}
+	return result, err
 }

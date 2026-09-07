@@ -54,6 +54,7 @@
         "flat-i32-resource",
         "inert-enum",
         "inert-struct",
+        "nested-copy-resource",
         "non-empty-resource-drop",
         "resource-option",
         "resource-result",

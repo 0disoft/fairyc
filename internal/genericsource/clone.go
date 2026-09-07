@@ -11,9 +11,10 @@ import (
 // transform owns newly allocated syntax. Source locations keep pointing at the
 // template; no source text is reparsed and no caller-owned AST is rewritten.
 type transform struct {
-	bindings   map[string]ast.TypeReference
-	expression func(*ast.Expression) error
-	binding    func(string, diagnostic.Span) error
+	bindings      map[string]ast.TypeReference
+	expression    func(*ast.Expression) error
+	binding       func(string, diagnostic.Span) error
+	typeReference func(*ast.TypeReference)
 }
 
 func (t transform) typ(v ast.TypeReference) ast.TypeReference {
@@ -28,6 +29,9 @@ func (t transform) typ(v ast.TypeReference) ast.TypeReference {
 	if v.Length != nil {
 		length := *v.Length
 		v.Length = &length
+	}
+	if t.typeReference != nil {
+		t.typeReference(&v)
 	}
 	return v
 }

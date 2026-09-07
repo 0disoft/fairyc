@@ -1651,13 +1651,21 @@ fn i32 main() {
 	}
 }
 
-func TestEmitRejectsNestedStructResourceField(t *testing.T) {
+func TestEmitNestedInertStructResourceField(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nstruct Marker { u32 value; }\nresource Holder { Marker marker; cleanup {} }\nfn i32 main() { return 0; }\n")
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "field \"marker\" of type \"main::Marker\"") || capability.Function != "" {
-		t.Fatalf("Emit() error = %v", err)
+	program := lowerSource(t, "module main;\nstruct Marker { i32 value; }\nresource Holder { Marker marker; cleanup {} }\nfn i32 main() { let Holder value = Holder { .marker = Marker { .value = 42 } }; return value.marker.value; }\n")
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || len(outcome.DropTrace) != 1 {
+		t.Fatalf("interpret nested resource: %+v %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil || !slices.Contains(unit.Features, "nested-copy-resource") {
+		t.Fatalf("Emit() features=%v error=%v", unit.Features, err)
+	}
+	for _, required := range []string{"fy_struct_0 f_0;", "sizeof(fy_resource_0) == UINT64_C(4)", "_Alignof(fy_resource_0) == UINT64_C(4)", "offsetof(fy_resource_0, f_0) == UINT64_C(0)"} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("missing nested layout assertion %q", required)
+		}
 	}
 }
 
