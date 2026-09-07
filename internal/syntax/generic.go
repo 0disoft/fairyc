@@ -24,9 +24,9 @@ func (p *parser) parseTypeParameters() NodeID {
 	return p.addNode(KindTypeParameters, start, names, "", "")
 }
 
-// A closed angle list followed immediately by a call is the explicit type-argument form.
-// Chained comparisons are already rejected by the ordinary expression grammar.
-func (p *parser) explicitTypeCallAhead(left NodeID) bool {
+// Only a closed angle list with the requested continuation is specialization.
+// The caller separately decides whether records are legal in this expression context.
+func (p *parser) explicitTypeArgumentsAhead(left NodeID, continuation string) bool {
 	node, found := p.tree.Node(left)
 	if !found || node.Kind != KindPath {
 		return false
@@ -44,8 +44,21 @@ func (p *parser) explicitTypeCallAhead(left NodeID) bool {
 			return false
 		}
 		if depth <= 0 {
-			return depth == 0 && offset > 1 && p.peekText(offset+1) == "("
+			return depth == 0 && offset > 1 && p.peekText(offset+1) == continuation
 		}
 	}
 	return false
+}
+
+func (p *parser) parseTypeArguments() []NodeID {
+	p.expect("<")
+	var arguments []NodeID
+	for !p.at(">") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+		arguments = append(arguments, p.parseType())
+		if !p.match(",") {
+			break
+		}
+	}
+	p.expectTypeClose()
+	return arguments
 }

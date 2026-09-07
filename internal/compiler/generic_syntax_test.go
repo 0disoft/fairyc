@@ -16,6 +16,8 @@ func TestGenericSyntaxCannotBypassSpecialization(t *testing.T) {
 		"module main; resource Value<T> { i32 value; } fn i32 main() { return 0; }",
 		"module main; pub struct Value<T> { i32 value; } fn i32 main() { return 0; }",
 		"module main; pub resource Value<T> { i32 value; cleanup {} } fn i32 main() { return 0; }",
+		"module main; struct Value { i32 value; } fn i32 main() { let Value v = Value<i32> { .value = 42 }; return v.value; }",
+		"module main; resource Value { i32 value; } fn i32 main() { let Value v = Value<i32> { .value = 42 }; return v.value; }",
 	} {
 		file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
 		result, err := compiler.Check([]semantic.File{file})

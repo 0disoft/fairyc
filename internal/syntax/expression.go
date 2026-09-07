@@ -46,16 +46,8 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 		}
 		switch p.currentText() {
 		case "<":
-			if 140 >= minBindingPower && p.explicitTypeCallAhead(left) {
-				p.advance()
-				children := []NodeID{left}
-				for !p.at(">") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
-					children = append(children, p.parseType())
-					if !p.match(",") {
-						break
-					}
-				}
-				p.expectTypeClose()
+			if 140 >= minBindingPower && p.explicitTypeArgumentsAhead(left, "(") {
+				children := append([]NodeID{left}, p.parseTypeArguments()...)
 				left = p.addNode(KindSpecialize, start, children, "", "")
 				continue
 			}
@@ -234,8 +226,12 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 	}
 	if token.Kind == lexer.Identifier {
 		pathID, value, _ := p.pathNode()
+		var typeArguments []NodeID
+		if allowRecord && p.at("<") && p.explicitTypeArgumentsAhead(pathID, "{") {
+			typeArguments = p.parseTypeArguments()
+		}
 		if allowRecord && p.match("{") {
-			children := []NodeID{pathID}
+			children := append([]NodeID{pathID}, typeArguments...)
 			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				fieldStart := p.currentFullIndex()
 				if p.match(".") {

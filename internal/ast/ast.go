@@ -753,7 +753,7 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 		return expression
 	}
 	for _, child := range node.Children {
-		if node.Kind == syntax.KindSpecialize {
+		if node.Kind == syntax.KindSpecialize || node.Kind == syntax.KindRecord {
 			if typeNode, found := tree.Node(child); found && typeNode.Kind == syntax.KindType {
 				expression.TypeArguments = append(expression.TypeArguments, lowerType(tree, typeNode))
 				continue

@@ -212,7 +212,9 @@ grouped_expression = "(" expression ")" ;
 array_expression = "[" array_contents? "]" ;
 array_contents = expression (";" const_expression | ("," expression)* ","?) ;
 
-record_expression = path "{" record_field_list? "}" ;
+(* Type arguments on records are retained but require aggregate specialization
+   before semantic admission, like the generic aggregate declarations above. *)
+record_expression = path type_arguments? "{" record_field_list? "}" ;
 record_field_list = record_field ("," record_field)* ","? ;
 record_field = "." IDENT "=" expression ;
 

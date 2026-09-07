@@ -967,6 +967,10 @@ func (c *typeChecker) checkWhile(expression *ast.Expression, result *hir.Express
 }
 
 func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
+	if len(expression.TypeArguments) != 0 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "generic-aggregate-specialization")
+		return hir.TypeInvalid
+	}
 	if len(expression.Children) == 0 {
 		return hir.TypeInvalid
 	}

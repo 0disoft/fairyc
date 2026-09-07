@@ -76,3 +76,49 @@ func TestMalformedAggregateTypeParametersAreRejected(t *testing.T) {
 		})
 	}
 }
+
+func TestGenericRecordRetainsTypesSeparatelyFromFields(t *testing.T) {
+	text := `module main;
+fn i32 main() {
+    let remote::Holder<Result<i32, u8>> nested = remote::Holder<Result<i32, u8>> { .value = identity<i32>(42) };
+    let Pair<i32, bool> pair = Pair<i32, bool,> { .first = 42, .second = true, };
+    let Plain plain = Plain { .value = 7 };
+    return 0;
+}
+fn bool less(i32 a, i32 b) { return a < b; }
+fn bool greater(i32 a, i32 b) { return a > b; }
+`
+	tree := syntax.Parse(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())
+	module, err := Lower(tree)
+	if err != nil || len(tree.Diagnostics) != 0 {
+		t.Fatalf("lower: %v diagnostics=%+v", err, tree.Diagnostics)
+	}
+	nested := module.Functions[0].Body.Statements[0].Binding.Expression
+	if nested.Kind != syntax.KindRecord || len(nested.Children) != 2 || nested.Children[0].Text != "remote::Holder" || nested.Children[1].Text != "value" {
+		t.Fatalf("record value children changed: %+v", nested)
+	}
+	if len(nested.TypeArguments) != 1 || nested.TypeArguments[0].Path != "Result" || len(nested.TypeArguments[0].Arguments) != 2 || nested.TypeArguments[0].Arguments[0].Path != "i32" || nested.TypeArguments[0].Arguments[1].Path != "u8" {
+		t.Fatalf("nested type arguments lost: %+v", nested.TypeArguments)
+	}
+	argument := nested.TypeArguments[0]
+	if text[argument.Span.StartByte:argument.Span.EndByte] != "Result<i32, u8>" {
+		t.Fatal("type argument source span changed")
+	}
+	call := nested.Children[1].Children[0]
+	if call.Kind != syntax.KindCall || call.Children[0].Kind != syntax.KindSpecialize || call.Children[0].TypeArguments[0].Path != "i32" {
+		t.Fatal("generic call inside record changed")
+	}
+	pair := module.Functions[0].Body.Statements[1].Binding.Expression
+	if len(pair.TypeArguments) != 2 || pair.TypeArguments[0].Path != "i32" || pair.TypeArguments[1].Path != "bool" || len(pair.Children) != 3 {
+		t.Fatalf("ordered record arguments or fields lost: %+v", pair)
+	}
+	plain := module.Functions[0].Body.Statements[2].Binding.Expression
+	if plain.Kind != syntax.KindRecord || plain.TypeArguments != nil || len(plain.Children) != 2 {
+		t.Fatal("ordinary record changed")
+	}
+	for _, fn := range module.Functions[1:] {
+		if fn.Body.Statements[0].Expression.Kind != syntax.KindBinary {
+			t.Fatalf("comparison changed: %s", fn.Name)
+		}
+	}
+}

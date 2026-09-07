@@ -24,8 +24,8 @@ Otherwise a phantom parameter could be silently erased and an ordinary type
 published before specialization. Public declarations follow the same gate.
 
 This is the first dependency of issue 44, not a `Vec<T>` implementation or a
-language/SDK promotion. Language 14 and the runtime ABI are unchanged. Generic
-aggregate construction expressions, concrete type expansion, layout ownership,
+language/SDK promotion. Language 14 and the runtime ABI are unchanged. Concrete
+type expansion, layout ownership,
 package identities, cache/interface and Atlas integration, native cleanup proof,
 and container operations remain to be implemented before stable admission.
 
@@ -36,3 +36,17 @@ and cleanup, preserve ordinary declarations, and reject malformed parameter list
 Compiler tests reject unused private/public struct and resource templates even
 when all fields are concrete. Native tests cannot establish generic aggregate
 execution yet because this preparation deliberately produces no verified MIR.
+
+## Construction syntax preparation
+
+`Holder<i32> { .value = 42 }` retains its type arguments directly on the record
+AST, separately from the constructor path and value-field children. Qualified
+paths, nested structural types, and trailing commas use the existing type parser.
+The 256-token lookahead recognizes either a call or a record continuation; record
+recognition still requires a context that allows record expressions. It does not
+reinterpret ordinary comparisons or argument-free records.
+
+An unexpanded typed construction is rejected even if its constructor names an
+ordinary non-generic aggregate. This prevents type arguments from being ignored
+while an otherwise valid record is published as verified MIR. This source-shape
+preparation does not change the execution or version boundary above.
