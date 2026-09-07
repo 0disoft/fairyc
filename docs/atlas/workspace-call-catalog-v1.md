@@ -1,9 +1,10 @@
 # Workspace call catalog v1
 
-- Status: Implemented internal output-only contract; no CLI entry point yet
+- Status: Implemented experimental output-only contract and explicit CLI entry point
 - Decision: `docs/adr/0386-generic-symbol-identity-preparation.md`
 - Join prerequisite: `docs/atlas/workspace-call-join-v0.md`
 - Implementation: `internal/workspacecallcatalog/catalog_generic.go`
+- CLI: `fairyc experimental atlas-calls list --catalog-version 1`
 
 `EncodeV1` emits one compact canonical JSON value without a trailing newline from an exact-current
 v2 workspace call index. The legacy `Encode` accepts only v1 maps and retains catalog v0 bytes.
@@ -52,8 +53,21 @@ its unsigned 64-bit big-endian byte length. `ParseChecksumV1` accepts only the v
 64 lowercase hexadecimal digits; `ChecksumV1.String` retains that prefix. V0 parsing rejects v1
 checksums. The checksum detects byte changes, not authenticity or trusted compiler provenance.
 
+## CLI selection
+
+`atlas-calls list` defaults to catalog v0; explicit `--catalog-version 0` is identical. Selecting
+`--catalog-version 1` uses the shared generic-aware uncached workspace compiler and exact-current
+v2 map preparation, then the bounded v2 join and this encoder. Only canonical values `0` and `1`
+are accepted, at most once. The existing package/symbol/direction/budget flags remain required.
+`--locked` retains its exact no-write lock behavior; otherwise lock refresh may precede a later
+selection or budget failure. No map, catalog, compiler cache, or artifact file is written.
+
+Discover an original function's SymbolId using `atlas-symbols list --catalog-version 2` with the
+desired exact package/module/name filters and explicit limits. Pass its visible or full ID to
+`atlas-calls list --catalog-version 1 --symbol <id>` with the same workspace and all required call
+limits. The two catalog versions belong to different output families, not competing map versions.
+
 ## Not enabled
 
-The existing experimental `atlas-calls` CLI still uses v0. This internal encoder does not enable
-generic CLI compilation, package catalog v2, Context Pack, Evidence Bundle, persisted reverse-call
-discovery, implementation selectors, or transitive execution traversal.
+Context Pack, Evidence Bundle, attributed text, persisted reverse-call discovery, implementation
+selectors, and transitive execution traversal are not enabled by this command.

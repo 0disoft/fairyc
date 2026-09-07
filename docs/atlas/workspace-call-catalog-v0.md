@@ -24,7 +24,8 @@ checksum prefix:    fywcall0-sha256-
 This is an output-only pre-release format. No decoder or cross-version input is admitted.
 `Encode` requires v1 maps and rejects a v2 workspace index rather than dropping generic endpoint
 identity. The separate internal `EncodeV1` contract is documented in
-`docs/atlas/workspace-call-catalog-v1.md`; the existing CLI remains on v0.
+`docs/atlas/workspace-call-catalog-v1.md`; the CLI defaults to v0 and accepts explicit
+`--catalog-version 1` for generic-aware output.
 
 ## Canonical envelope
 

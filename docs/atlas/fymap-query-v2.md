@@ -1,6 +1,6 @@
 # Generic-aware package-local queries v2
 
-- Status: Implemented internal opt-in query API; workspace join and CLI integration pending
+- Status: Implemented opt-in query API with separate workspace join and symbol/call CLI consumers
 - Entry point: `NewQueryIndexV2`
 - Store: `docs/atlas/fymap-store-v2.md`
 - Shared query policy: `docs/atlas/fymap-query-v1.md`
@@ -50,6 +50,7 @@ and helper-call facts for two scalar bindings, exact original-symbol catalog cou
 accessors, relation and byte budgets, declaration-neighborhood traversal, incompatible-interface
 rejection, and the legacy v1 admission boundary. Existing v1 query tests remain active.
 
-Context Pack output, cross-package specialization validation, and CLI activation require their own
-consumer updates. The existing v1 workspace-call join still rejects v2 rather than discarding its
-implementation identities.
+Context Pack output still requires its own consumer update. Cross-package specialization validation
+is available through the separate v2 workspace join, and explicit symbol catalog v2/call catalog v1
+CLI paths now consume v2 maps. The existing v1 workspace-call join still rejects v2 rather than
+discarding its implementation identities. Package-local show/around remain unjoined.

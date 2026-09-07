@@ -260,6 +260,10 @@ manifest, workspace, graph, and lock failures use `7`; internal join contradicti
 failures use `4`. A valid zero-call selection is successful complete output. No partial catalog is
 intentionally written before output begins; an external writer may retain a prefix when its own
 write fails.
+Selecting `--catalog-version 1` emits `fairyc.workspace-call-catalog-json/v1` with concrete generic
+endpoints from v2 maps; explicit version `0` is identical to the default. The same exit codes,
+atomic pre-output failures, exact lock behavior, and external-writer prefix limitation apply.
+Unused generic declarations are valid zero-call subjects, not fabricated implementation records.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.

@@ -19,6 +19,7 @@ type atlasCallsOptions struct {
 	maxCalls       int
 	maxOutputBytes uint64
 	locked         bool
+	catalogV1      bool
 }
 
 func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -32,7 +33,7 @@ func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasWorkspace(sourceRoot, options.locked, stderr)
+	prepared, code := prepareAtlasWorkspaceVersion(sourceRoot, options.locked, stderr, options.catalogV1)
 	if code != ExitSuccess {
 		return code
 	}
@@ -40,7 +41,12 @@ func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	if !found {
 		return invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", options.packageUID))
 	}
-	index, err := atlasmap.NewWorkspaceCallIndex(
+	join := atlasmap.NewWorkspaceCallIndex
+	encode := workspacecallcatalog.Encode
+	if options.catalogV1 {
+		join, encode = atlasmap.NewWorkspaceCallIndexV2, workspacecallcatalog.EncodeV1
+	}
+	index, err := join(
 		prepared.partitions,
 		prepared.expectations,
 		atlasmap.WorkspaceCallBudget{MaxPackages: options.maxPackages, MaxCalls: options.maxCalls},
@@ -51,7 +57,7 @@ func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		}
 		return internalError(stderr)
 	}
-	encoded, err := workspacecallcatalog.Encode(
+	encoded, err := encode(
 		index, selected.Header().PackageInstance, options.symbol, options.direction, options.maxOutputBytes,
 	)
 	if err != nil {
@@ -80,7 +86,7 @@ func parseAtlasCallsOptions(arguments []string) (atlasCallsOptions, error) {
 			continue
 		}
 		switch flag {
-		case "--package-uid", "--symbol", "--direction", "--max-packages", "--max-calls", "--max-output-bytes":
+		case "--catalog-version", "--package-uid", "--symbol", "--direction", "--max-packages", "--max-calls", "--max-output-bytes":
 		default:
 			return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" does not accept flag %q", flag)
 		}
@@ -93,6 +99,11 @@ func parseAtlasCallsOptions(arguments []string) (atlasCallsOptions, error) {
 		seen[flag] = true
 		value := arguments[position+1]
 		switch flag {
+		case "--catalog-version":
+			if value != "0" && value != "1" {
+				return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires --catalog-version as 0 or 1")
+			}
+			options.catalogV1 = value == "1"
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-calls list", value); err != nil {
 				return atlasCallsOptions{}, err

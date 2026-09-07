@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol discovery CLI; other output/CLI integration pending
+- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol/call CLIs; Context Pack and attributed consumers pending
 - Date: 2026-09-06
 
 ## Decision
@@ -101,7 +101,8 @@ encoder, including a plan with only unused generic declarations. The v1 encoder 
 specialization payloads independently of header counts. Logical planning does not itself publish
 maps. The separately opt-in v2 store now consumes the codec and current-source expectations;
 package-local queries and workspace joins use separate v2 constructors. Symbol discovery has an
-explicit v2 CLI path; other CLI consumption still requires subsequent consumer integration.
+explicit v2 CLI path, and call catalog v1 has an explicit generic-aware CLI path. Other CLI
+consumption still requires subsequent consumer integration.
 
 ## Transport boundary
 
@@ -110,7 +111,7 @@ declarations explicitly. Silently serializing them as arity zero would erase inf
 rederived IDs contradict the original identity. The snapshot now preserves generic declarations,
 specializations, and completeness together, as does the opt-in v2 logical plan.
 The v1 encoder also rejects specialization calls rather than omitting their implementation target.
-Only the explicitly versioned symbol discovery CLI consumes v2 maps so far; language/SDK/runtime
+The explicitly versioned symbol discovery and call catalog CLIs consume v2 maps; language/SDK/runtime
 versions do not change.
 
 EncodeV2 and DecodeV2 now implement the separate `fairyc.fymap/v2` transport described in
@@ -119,7 +120,7 @@ Generic source declarations, positional arguments, concrete summaries, and speci
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
 Checksums detect corruption, not authorship or compiler provenance authenticity. Downstream command
-consumers other than symbol discovery still need their v2 CLI integration.
+consumers other than symbol discovery and call catalogs still need their v2 CLI integration.
 
 NewMapStoreV2 and NewMapStoreV2InRoot publish and load maps under the separate `fymap-v2` directory.
 The existing root-relative publication, retention, cleanup, and current-source checks are shared,
@@ -146,8 +147,10 @@ V1 construction remains unchanged. See `docs/atlas/workspace-call-join-v0.md`.
 The internal workspace-call catalog EncodeV1 now preserves implementation endpoints in the separate
 catalog v1 JSON/checksum contract. Canonical ordering includes both implementation IDs; exact record
 deduplication does not collapse calls sharing a template source span. The v0 encoder rejects v2
-indexes instead of erasing generic facts. Existing v0 call CLI output remains unchanged; its
-versioned generic CLI connection and the other output consumers still require integration. See
+indexes instead of erasing generic facts. Existing v0 call CLI output remains unchanged. Explicit
+`atlas-calls list --catalog-version 1` connects the generic-aware workspace, v2 join, and v1 output;
+its exact declaration selectors are discoverable through symbol catalog v2. Other output consumers
+still require integration. See
 `docs/atlas/workspace-call-catalog-v1.md`.
 
 ## Evidence

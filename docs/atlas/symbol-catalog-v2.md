@@ -43,6 +43,6 @@ byte changes, not authenticity. No input decoder or persisted catalog format is 
 
 ## Remaining integration
 
-The generic-aware call catalog encoder exists separately, but its CLI connection is not enabled by
-this symbol discovery command. Context Pack, attributed-text, and Evidence Bundle CLI commands
+Pass an original declaration ID to `atlas-calls list --catalog-version 1` for generic-aware
+workspace call queries. Context Pack, attributed-text, and Evidence Bundle CLI commands
 remain on their existing map path. Their generic consumption requires separate contract work.
