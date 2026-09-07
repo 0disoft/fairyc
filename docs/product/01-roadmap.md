@@ -68,12 +68,12 @@ contains four public fallible resource factories whose names expose copy, conver
 open policy; constructor syntax would not remove their explicit rollback work or improve ownership
 evidence. Ordinary named `T`/`Result<T, E>` factories remain the complete construction model.
 
-ADR 0223 closes the remaining static-interface candidate. The same 29-file corpus contains 82
-function declarations but no algorithm duplicated across different production types, and the
-language has no user-generic declaration or instantiation model for an interface to constrain.
-Static interfaces may return to the queue only after implemented bounded user generics and the
-cross-type duplication, build-cost, code-size, resolution, ownership, and backend evidence required
-by that ADR exist.
+ADR 0223 deferred the static-interface candidate on its then-current 29-file corpus of 82 function
+declarations: it found no algorithm duplicated across different production types, and user generics
+were not yet implemented. ADR 0385 now supplies bounded explicit builtin-scalar generic functions
+in language 14 through stable workspace check/build/run/test. This satisfies only the generic-source
+prerequisite. Static interfaces still require the cross-type duplication, build-cost, code-size,
+resolution, ownership, and backend evidence required by ADR 0223; no interface syntax is admitted.
 
 ADR 0253 reopens the post-Stage 0 queue without accepting syntax. Nominal scalar types are the first
 candidate because they can prevent accidental interchange of IDs, counts, offsets, and other values
@@ -1308,12 +1308,19 @@ require compiler and MIR imports to fail, closing the previously prose-only depe
 - Preserve the implemented contained immutable store and current-source rejection boundary.
 - Preserve the implemented bounded exact-current package-local query boundary.
 - Preserve the implemented canonical compiler-fact-only Context Pack boundary.
-- Preserve the output-only single-symbol Evidence Bundle v0 composition boundary; keep child authority and byte limits explicit and add no decoder or Context Pack text population.
+- Preserve the output-only single-symbol Evidence Bundle v0 and opt-in generic-aware v1 composition boundaries; keep child authority and byte limits explicit and add no decoder or Context Pack text population.
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Preserve the raw fresh-process, fixed-shape scaling, retained-heap batch, and non-star correctness controls; require representative real package/call distributions and a declared reference environment before selecting defaults, budgets, or traversal.
-- Preserve the implemented exact module/name/kind SymbolId Catalog v1 output as the discovery path for experimental `show` and `around`; keep fuzzy ranking and guessed uniqueness out.
+- Preserve the implemented exact module/name/kind SymbolId Catalog v1 and opt-in generic-aware v2 discovery paths for experimental `show` and `around`; keep fuzzy ranking and guessed uniqueness out.
 - Preserve the implemented attributed-text v0 model, exact retained source/documentation gates, canonical output-only JSON, explicit experimental source/documentation/evidence commands, and exact `///` frontend attachment sidecar; keep additional origins, multi-record composition, decoding, and rendering behind separate decisions.
+
+ADR 0386 extends the same boundaries to original generic declarations: immutable source provenance,
+positional signature identity, snapshot integration, v2 maps/store/query, exact workspace-call joins, symbol
+catalog v2, call catalog v1, Context Pack v2, and Evidence Bundle v1. Version flags opt into the new
+fact outputs; direct source/documentation commands retain attributed-text v0. Original declarations
+appear once, while concrete specializations retain separate executable facts and unused template
+bodies remain explicitly unchecked. This does not admit a stable Atlas CLI or wider graph analysis.
 
 Exit gate: satisfied for the current Stage 0 scope. `docs/atlas/phase4-exit-evidence.md` maps the
 one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text
@@ -1328,7 +1335,7 @@ non-authority to separate executable oracles and records what each still does no
 - `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, inspected cross-object `REL32` through `REL32_5`, all three weak-external search modes including NOLIBRARY suppression and LIBRARY archive extraction, `ADDR64`, complete three-field unwind `.pdata` `ADDR32NB`, one profile-specific unwind-handler tail, function-targeted CodeView `SECTION`/`SECREL`, final PE/PDB identity, and one system-DbgHelp function/line canary, one exact archive extraction and pick-any COMDAT final-selection proof, selected-parent retention and discarded-parent elimination proofs for direct associative unwind, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, remaining relocation formulas, weak chains/cycles and COMDAT/default-library interactions, chained unwind tails, non-unwind and broader archive/COMDAT policies, complete version-2/handler-payload/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, full CodeView/PDB semantics, and broader debugger/symbolicator fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
-- Generics and `Vec<T>`: ADR 0339 now provides a bounded compiler-internal specialization planner, but source admission still requires semantic-to-concrete-HIR substitution, diagnostics, MIR/backend evidence, and representative compile-time/code-size measurements. `Vec<T>` additionally requires active-payload and ownership fixtures.
+- Generics and `Vec<T>`: ADRs 0384/0385 implement bounded explicit builtin-scalar generic functions, source-to-concrete-HIR expansion, diagnostics, verified MIR, and stable workspace/native command paths in language 14. ADR 0386 adds original generic Atlas identities and versioned consumers. Nominal/composite arguments, generic aggregate types, inference, recursive specialization, and static interfaces remain unadmitted. Representative compile-time/code-size evidence is still required for broader admission; `Vec<T>` additionally requires active-payload and ownership fixtures.
 - Immutable green tree and formatter: ADR 0375 adds detached trivia-sensitive green identity and a fail-closed full-file whitespace formatter with parse-equivalence and idempotence evidence. Incremental reparse, LSP, SCIP, semantic rename, and structural edits remain gated on measured editor needs.
 - `impact`, semantic `diff`, stable anchors, MCP, and structural edits: require `.fymap` identity and completeness evidence from real use.
 - Custom allocators, portable paths, resource-aware arenas, closures, concurrency capabilities, async, sockets, and freestanding or embedded support each require a separate ownership and target contract.

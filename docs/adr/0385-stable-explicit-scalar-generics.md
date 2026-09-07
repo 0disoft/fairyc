@@ -84,7 +84,9 @@ disk hits attach the current analysis sidecar after verified reassembly, never a
 provenance. Getters detach nested parameter/binding slices. This is ephemeral source provenance,
 not a serialized cache format, public SymbolId, signature encoding, or proof that an unused template
 body has passed semantic analysis. The older private module-only test adapter is not an Atlas input.
-Atlas snapshot and original generic SymbolId integration still remain required.
+ADR 0386 subsequently implements the Atlas snapshot and original generic SymbolId integration,
+with separately versioned map/query and CLI consumers. It preserves this source-provenance boundary
+and does not treat an unused template body as checked executable facts.
 
 Tests cover unused declarations, exact name spans, emitted-function joins, getter mutation
 isolation, source rejection, memory cold/warm reuse and fresh-process persistent hits.
