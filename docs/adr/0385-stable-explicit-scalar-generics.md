@@ -97,3 +97,10 @@ isolation, source rejection, memory cold/warm reuse and fresh-process persistent
 source diagnostic classification, and Windows low/release build, run, and native test. The shared
 workspace and compiler fixtures retain interpreter, original AST, ownership, cache invalidation,
 and low/optimized MSVC evidence.
+
+`TestGenericMultipleCallersShareOnlyExactProviderSpecializations` adds a five-package diamond:
+two callers share one specialization at total budget 1, while byte-identical source in a distinct
+provider requires a second package-owned implementation. It checks exact MIR/provenance ownership,
+source immutability, package renumbering/order stability, independent provider budget rejection,
+interpreter results, and both native profiles. This is compiler-boundary evidence, not linker-level
+generic sharing or resource-element ownership admission.
