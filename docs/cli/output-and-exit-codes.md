@@ -237,6 +237,11 @@ families. Malformed visible/full SymbolIds, unsupported directions or relations,
 unknown exact symbols, and insufficient record/relation/depth/selection/output budgets use code `2`.
 `around` accepts canonical depth zero through 64; `show` rejects a depth option. Both emit no partial
 pack before output begins and preserve the same external-writer prefix caveat.
+Explicit `--pack-version 2` on `experimental atlas-pack overview|show|around` emits
+`fairyc.context-pack-json/v2`, preserving generic compatibility and concrete facts. Default and
+explicit version `1` are identical. Invalid or duplicate versions use code `2`; existing source,
+workspace/lock, budget, and output-writer failure codes and atomic-output limits remain unchanged.
+
 `experimental atlas-symbols list` writes exactly one canonical
 `fairyc.symbol-catalog-json/v1` value with no trailing newline. Invalid or duplicate kinds,
 malformed or duplicate exact names, malformed full-ID cursors, cursors outside the complete

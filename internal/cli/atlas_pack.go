@@ -28,6 +28,7 @@ type atlasPackOverviewOptions struct {
 	maxSelectionBytes uint64
 	maxOutputBytes    uint64
 	locked            bool
+	packV2            bool
 }
 
 func runAtlasPack(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -49,11 +50,15 @@ func runAtlasPackOverview(arguments []string, sourceRoot string, stdout, stderr 
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	index, code := prepareAtlasQueryIndex(sourceRoot, options.packageUID, options.locked, stderr)
+	prepared, code := prepareAtlasQueryVersion(sourceRoot, options.packageUID, options.locked, stderr, options.packV2)
 	if code != ExitSuccess {
 		return code
 	}
-	encoded, err := contextpack.EncodeOverview(index, atlasmap.QueryBudget{
+	encode := contextpack.EncodeOverview
+	if options.packV2 {
+		encode = contextpack.EncodeOverviewV2
+	}
+	encoded, err := encode(prepared.index, atlasmap.QueryBudget{
 		MaxRecords: options.maxRecords, MaxRelations: 0, MaxDepth: 0,
 		MaxSelectionBytes: options.maxSelectionBytes,
 	}, options.maxOutputBytes)
@@ -204,7 +209,7 @@ func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions
 			continue
 		}
 		switch flag {
-		case "--package-uid", "--max-records", "--max-selection-bytes", "--max-output-bytes":
+		case "--pack-version", "--package-uid", "--max-records", "--max-selection-bytes", "--max-output-bytes":
 		default:
 			return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" does not accept flag %q", flag)
 		}
@@ -217,6 +222,11 @@ func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions
 		seen[flag] = true
 		value := arguments[index+1]
 		switch flag {
+		case "--pack-version":
+			if value != "1" && value != "2" {
+				return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" requires --pack-version as 1 or 2")
+			}
+			options.packV2 = value == "2"
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-pack overview", value); err != nil {
 				return atlasPackOverviewOptions{}, err

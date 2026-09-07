@@ -50,7 +50,13 @@ and helper-call facts for two scalar bindings, exact original-symbol catalog cou
 accessors, relation and byte budgets, declaration-neighborhood traversal, incompatible-interface
 rejection, and the legacy v1 admission boundary. Existing v1 query tests remain active.
 
-Context Pack output still requires its own consumer update. Cross-package specialization validation
+Query nodes expose generic binder names in `type_parameters`, independently cloned from the
+in-memory declaration. Snapshot declaration JSON continues to omit its internal binder-name field
+for v1 compatibility; this explicit query field preserves those names in v2 output and counts them
+in selection-byte budgets. Ordinary nodes omit the field.
+
+Context Pack v2 now consumes this query API through explicit `atlas-pack --pack-version 2` output.
+Cross-package specialization validation
 is available through the separate v2 workspace join, and explicit symbol catalog v2/call catalog v1
 CLI paths now consume v2 maps. The existing v1 workspace-call join still rejects v2 rather than
 discarding its implementation identities. Package-local show/around remain unjoined.

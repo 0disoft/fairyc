@@ -8,6 +8,9 @@
 - Decision: `docs/adr/0189-canonical-compiler-fact-context-pack-v1.md`
 - Query source: `docs/atlas/fymap-query-v1.md`
 
+This remains the default and explicit `--pack-version 1` output. Its encoders accept only v1 maps.
+The generic-aware opt-in `--pack-version 2` contract is in `docs/atlas/context-pack-v2.md`.
+
 ## Purpose and boundary
 
 A Context Pack is deterministic bounded data for a human, IDE, CI job, or LLM-facing tool. It is

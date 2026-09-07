@@ -25,6 +25,7 @@ type atlasPackRelationOptions struct {
 	maxSelectionBytes uint64
 	maxOutputBytes    uint64
 	locked            bool
+	packV2            bool
 }
 
 func runAtlasPackRelations(query string, arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -32,7 +33,7 @@ func runAtlasPackRelations(query string, arguments []string, sourceRoot string, 
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	index, code := prepareAtlasQueryIndex(sourceRoot, options.packageUID, options.locked, stderr)
+	prepared, code := prepareAtlasQueryVersion(sourceRoot, options.packageUID, options.locked, stderr, options.packV2)
 	if code != ExitSuccess {
 		return code
 	}
@@ -44,10 +45,14 @@ func runAtlasPackRelations(query string, arguments []string, sourceRoot string, 
 		},
 	}
 	var encoded []byte
+	show, around := contextpack.EncodeShow, contextpack.EncodeAround
+	if options.packV2 {
+		show, around = contextpack.EncodeShowV2, contextpack.EncodeAroundV2
+	}
 	if query == "show" {
-		encoded, err = contextpack.EncodeShow(index, options.symbol, request, options.maxOutputBytes)
+		encoded, err = show(prepared.index, options.symbol, request, options.maxOutputBytes)
 	} else {
-		encoded, err = contextpack.EncodeAround(index, options.symbol, request, options.maxOutputBytes)
+		encoded, err = around(prepared.index, options.symbol, request, options.maxOutputBytes)
 	}
 	if err != nil {
 		if errors.Is(err, atlasmap.ErrSymbolNotFound) || errors.Is(err, atlasmap.ErrQueryBudgetTooSmall) ||
@@ -81,7 +86,8 @@ func parseAtlasRelationOptions(command, query string, arguments []string) (atlas
 		}
 		allowed := flag == "--package-uid" || flag == "--symbol" || flag == "--direction" ||
 			flag == "--relation" || flag == "--max-records" || flag == "--max-relations" ||
-			flag == "--max-selection-bytes" || flag == "--max-output-bytes" || query == "around" && flag == "--max-depth"
+			flag == "--max-selection-bytes" || flag == "--max-output-bytes" || query == "around" && flag == "--max-depth" ||
+			flag == "--pack-version" && (command == "atlas-pack show" || command == "atlas-pack around")
 		if !allowed {
 			return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
 		}
@@ -94,6 +100,11 @@ func parseAtlasRelationOptions(command, query string, arguments []string) (atlas
 		seen[flag] = true
 		value := arguments[position+1]
 		switch flag {
+		case "--pack-version":
+			if value != "1" && value != "2" {
+				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q requires --pack-version as 1 or 2", command)
+			}
+			options.packV2 = value == "2"
 		case "--package-uid":
 			if err := validateAtlasPackageUID(command, value); err != nil {
 				return atlasPackRelationOptions{}, err

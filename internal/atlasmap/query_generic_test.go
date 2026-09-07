@@ -52,7 +52,7 @@ func TestQueryV2ReadsStoredGenericDeclarationsAndImplementations(t *testing.T) {
 		if used {
 			want = 2
 		}
-		if shown.Subject.Function != nil || len(shown.Subject.Specializations) != want || len(shown.Relations) != want || len(shown.Subject.Declaration.TypeParameters) != 1 {
+		if shown.Subject.Function != nil || len(shown.Subject.Specializations) != want || len(shown.Relations) != want || len(shown.Subject.Declaration.TypeParameters) != 1 || !reflect.DeepEqual(shown.Subject.TypeParameters, shown.Subject.Declaration.TypeParameters) {
 			t.Fatalf("template and implementation facts collapsed: %+v", shown.Subject)
 		}
 		if shown.Context.GenericInterfaceHash != partition.Header().GenericInterfaceHash {
@@ -98,6 +98,7 @@ func TestQueryV2ReadsStoredGenericDeclarationsAndImplementations(t *testing.T) {
 				t.Fatal(err)
 			}
 			shown.Subject.Specializations[0].TypeArguments[0].Name = "changed"
+			shown.Subject.TypeParameters[0] = "changed"
 			shown.Subject.Specializations[0].Function.Relations[0].Count = -1
 			again, err := index.Show(ids["id"], request)
 			if err != nil || !reflect.DeepEqual(original, again) {

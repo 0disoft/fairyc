@@ -62,6 +62,10 @@ func ParseChecksum(value string) (Checksum, error) {
 
 // EncodeOverview runs one bounded exact-current overview query and returns one canonical pack.
 func EncodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, maxBytes uint64) ([]byte, error) {
+	return encodeOverview(index, budget, maxBytes, false)
+}
+
+func encodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, maxBytes uint64, generic bool) ([]byte, error) {
 	if err := validateMaxBytes(maxBytes); err != nil {
 		return nil, err
 	}
@@ -74,7 +78,8 @@ func EncodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, max
 		packageIdentity{UID: header.PackageUID, Instance: header.PackageInstance, Coordinate: header.PackageCoordinate, Source: header.PackageSource},
 		compatibility{
 			CompilerBuild: header.CompilerBuild, Language: header.Language, InterfaceHash: header.InterfaceHash,
-			Generation: header.GenerationStatus, MapOmissions: nonNil(header.Omissions),
+			GenericInterfaceHash: header.GenericInterfaceHash,
+			Generation:           header.GenerationStatus, MapOmissions: nonNil(header.Omissions),
 		},
 		header.LogicalSchema,
 		queryDescriptor{Kind: QueryOverview, Subject: header.PackageInstance, Relations: make([]atlasmap.RelationKind, 0)},
@@ -84,7 +89,7 @@ func EncodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, max
 		result.Omissions,
 	)
 	document.Facts.Overview = &overviewFacts{Package: result.Package, Modules: nonNil(result.Modules)}
-	return encode(document, maxBytes)
+	return encode(document, maxBytes, generic)
 }
 
 // EncodeShow runs one bounded exact-current symbol query and returns one canonical pack.
@@ -94,6 +99,10 @@ func EncodeShow(
 	request atlasmap.RelationRequest,
 	maxBytes uint64,
 ) ([]byte, error) {
+	return encodeShow(index, symbolID, request, maxBytes, false)
+}
+
+func encodeShow(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64, generic bool) ([]byte, error) {
 	if err := validateMaxBytes(maxBytes); err != nil {
 		return nil, err
 	}
@@ -113,7 +122,7 @@ func EncodeShow(
 	)
 	document.Facts.Show = &showFacts{Subject: result.Subject}
 	document.Relations = nonNil(result.Relations)
-	return encode(document, maxBytes)
+	return encode(document, maxBytes, generic)
 }
 
 // EncodeAround runs one bounded exact-current neighborhood query and returns one canonical pack.
@@ -123,6 +132,10 @@ func EncodeAround(
 	request atlasmap.RelationRequest,
 	maxBytes uint64,
 ) ([]byte, error) {
+	return encodeAround(index, symbolID, request, maxBytes, false)
+}
+
+func encodeAround(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64, generic bool) ([]byte, error) {
 	if err := validateMaxBytes(maxBytes); err != nil {
 		return nil, err
 	}
@@ -142,7 +155,7 @@ func EncodeAround(
 	)
 	document.Facts.Around = &aroundFacts{Nodes: nonNil(result.Nodes)}
 	document.Relations = nonNil(result.Relations)
-	return encode(document, maxBytes)
+	return encode(document, maxBytes, generic)
 }
 
 type packEnvelope struct {
@@ -177,11 +190,12 @@ type packageIdentity struct {
 }
 
 type compatibility struct {
-	CompilerBuild string   `json:"compiler_build"`
-	Language      string   `json:"language"`
-	InterfaceHash string   `json:"interface_hash"`
-	Generation    string   `json:"generation"`
-	MapOmissions  []string `json:"map_omissions"`
+	CompilerBuild        string   `json:"compiler_build"`
+	Language             string   `json:"language"`
+	InterfaceHash        string   `json:"interface_hash"`
+	GenericInterfaceHash string   `json:"generic_interface_hash,omitempty"`
+	Generation           string   `json:"generation"`
+	MapOmissions         []string `json:"map_omissions"`
 }
 
 type queryDescriptor struct {
@@ -228,7 +242,8 @@ func documentFromContext(
 		},
 		compatibility{
 			CompilerBuild: context.CompilerBuild, Language: context.Language, InterfaceHash: context.InterfaceHash,
-			Generation: context.Generation, MapOmissions: nonNil(context.MapOmissions),
+			GenericInterfaceHash: context.GenericInterfaceHash,
+			Generation:           context.Generation, MapOmissions: nonNil(context.MapOmissions),
 		},
 		context.LogicalSchema,
 		query,
@@ -258,14 +273,23 @@ func baseDocument(
 	}
 }
 
-func encode(document packDocument, maxBytes uint64) ([]byte, error) {
-	checksum, err := computeChecksum(document)
+func encode(document packDocument, maxBytes uint64, generic bool) ([]byte, error) {
+	schema := atlasmap.LogicalSchema
+	version, encoding, algorithm, prefix, checksumVersion := PackVersion, PackEncoding, ChecksumAlgorithm, ChecksumPrefix, byte(1)
+	if generic {
+		schema = atlasmap.LogicalSchemaV2
+		version, encoding, algorithm, prefix, checksumVersion = PackVersionV2, PackEncodingV2, ChecksumAlgorithmV2, ChecksumPrefixV2, 2
+	}
+	if document.MapVersion != schema {
+		return nil, fmt.Errorf("Atlas Context Pack requires %s maps", schema)
+	}
+	checksum, err := computeChecksum(document, version, encoding, checksumVersion)
 	if err != nil {
 		return nil, err
 	}
 	encoded, err := json.Marshal(packEnvelope{
-		PackVersion: PackVersion, Encoding: PackEncoding,
-		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: checksum.String(), Pack: document,
+		PackVersion: version, Encoding: encoding,
+		ChecksumAlgorithm: algorithm, Checksum: prefix + hex.EncodeToString(checksum[:]), Pack: document,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("encode Atlas Context Pack: %w", err)
@@ -283,24 +307,20 @@ func validateMaxBytes(maxBytes uint64) error {
 	return nil
 }
 
-func computeChecksum(document packDocument) (Checksum, error) {
+func computeChecksum(document packDocument, version, encoding string, checksumVersion byte) (Checksum, error) {
 	payload, err := json.Marshal(document)
 	if err != nil {
 		return Checksum{}, fmt.Errorf("encode Context Pack checksum payload: %w", err)
 	}
 	digest := sha256.New()
-	writeChecksumHeader(digest)
-	writeChecksumBytes(digest, []byte(PackVersion))
-	writeChecksumBytes(digest, []byte(PackEncoding))
+	_, _ = digest.Write([]byte(checksumDomain))
+	_, _ = digest.Write([]byte{0, checksumVersion})
+	writeChecksumBytes(digest, []byte(version))
+	writeChecksumBytes(digest, []byte(encoding))
 	writeChecksumBytes(digest, payload)
 	var result Checksum
 	copy(result[:], digest.Sum(nil))
 	return result, nil
-}
-
-func writeChecksumHeader(destination hash.Hash) {
-	_, _ = destination.Write([]byte(checksumDomain))
-	_, _ = destination.Write([]byte{0, 1})
 }
 
 func writeChecksumBytes(destination hash.Hash, value []byte) {

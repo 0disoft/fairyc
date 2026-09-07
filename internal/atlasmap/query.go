@@ -156,6 +156,7 @@ type QueryFunctionFacts struct {
 }
 
 type QueryNode struct {
+	TypeParameters  []string                     `json:"type_parameters,omitempty"`
 	Specializations []QuerySpecializationFacts   `json:"specializations,omitempty"`
 	Symbol          Symbol                       `json:"symbol"`
 	Declaration     semanticsnapshot.Declaration `json:"declaration"`
@@ -609,6 +610,7 @@ func (index *QueryIndex) ResolveAttributionSubject(symbolID string) (Attribution
 func (index *QueryIndex) node(position int) QueryNode {
 	value := index.nodes[position]
 	result := QueryNode{Symbol: value.symbol, Declaration: cloneDeclarations([]semanticsnapshot.Declaration{value.declaration})[0]}
+	result.TypeParameters = slices.Clone(value.declaration.TypeParameters)
 	result.Specializations = cloneQuerySpecializations(value.specializations)
 	if value.functionProvenance != nil {
 		counts := make(map[RelationKind]int)

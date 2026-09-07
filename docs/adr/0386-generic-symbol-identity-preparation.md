@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol/call CLIs; Context Pack and attributed consumers pending
+- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol/call/pack CLIs; attributed consumers pending
 - Date: 2026-09-06
 
 ## Decision
@@ -43,7 +43,8 @@ This adapter does not claim that unused bodies have been checked. Unresolved nom
 non-literal array lengths, unsupported shapes, and malformed effects are explicit errors rather
 than invented compiler facts. GenericDeclarations returns detached declarations; BuildCompiler
 adds checked source-to-specialization joins and executable completeness as described below.
-No stable language, SDK, runtime ABI, CLI, or map version changes in this preparation.
+This identity adapter does not change stable language, SDK, runtime ABI, or stable CLI contracts.
+Opt-in map, output, and experimental CLI versions are described below.
 
 Borrow facts now retain a non-serialized build-local function discriminator. The executable
 summary join uses both that identity and the original span, so two specializations sharing one
@@ -101,7 +102,7 @@ encoder, including a plan with only unused generic declarations. The v1 encoder 
 specialization payloads independently of header counts. Logical planning does not itself publish
 maps. The separately opt-in v2 store now consumes the codec and current-source expectations;
 package-local queries and workspace joins use separate v2 constructors. Symbol discovery has an
-explicit v2 CLI path, and call catalog v1 has an explicit generic-aware CLI path. Other CLI
+explicit v2 CLI path, as do Context Pack v2 and call catalog v1 through their own version flags. Other CLI
 consumption still requires subsequent consumer integration.
 
 ## Transport boundary
@@ -111,7 +112,7 @@ declarations explicitly. Silently serializing them as arity zero would erase inf
 rederived IDs contradict the original identity. The snapshot now preserves generic declarations,
 specializations, and completeness together, as does the opt-in v2 logical plan.
 The v1 encoder also rejects specialization calls rather than omitting their implementation target.
-The explicitly versioned symbol discovery and call catalog CLIs consume v2 maps; language/SDK/runtime
+The explicitly versioned symbol discovery, Context Pack, and call catalog CLIs consume v2 maps; language/SDK/runtime
 versions do not change.
 
 EncodeV2 and DecodeV2 now implement the separate `fairyc.fymap/v2` transport described in
@@ -120,7 +121,7 @@ Generic source declarations, positional arguments, concrete summaries, and speci
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
 Checksums detect corruption, not authorship or compiler provenance authenticity. Downstream command
-consumers other than symbol discovery and call catalogs still need their v2 CLI integration.
+consumers other than symbol discovery, Context Packs, and call catalogs still need their v2 CLI integration.
 
 NewMapStoreV2 and NewMapStoreV2InRoot publish and load maps under the separate `fymap-v2` directory.
 The existing root-relative publication, retention, cleanup, and current-source checks are shared,
@@ -154,6 +155,12 @@ still require integration. See
 `docs/atlas/workspace-call-catalog-v1.md`.
 
 ## Evidence
+
+Context Pack v2 encoders and `atlas-pack overview|show|around --pack-version 2` retain generic
+source-interface identity, original declaration signatures, separate implementation observations,
+concrete relation endpoints, and template uncertainty. V1 encoders reject v2 indexes. Default CLI
+output stays v1, and the pack-version flag does not activate the shared Evidence Bundle parser.
+Source/documentation arrays stay empty. See `docs/atlas/context-pack-v2.md`.
 
 Symbol catalog EncodeV2 and `experimental atlas-symbols list --catalog-version 2` now expose
 original generic declaration identities through the v2 map/query pipeline. Multiple concrete
