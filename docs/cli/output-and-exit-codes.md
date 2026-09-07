@@ -250,6 +250,11 @@ selection-byte, or final-output budgets are invocation failure `2`. Zero exact-n
 successful complete output. Workspace/lock failures are `7`, source diagnostics
 are `3`, and compiler invariants or output failures are `4`. No partial catalog is intentionally
 written on pre-output failure; an external writer may retain a prefix when its own write fails.
+`experimental atlas-evidence show --bundle-version 1` emits Evidence Bundle v1 with Context Pack v2
+and unchanged text v0 children. Default and explicit version `0` retain v0 output. Version errors
+are invocation errors before workspace loading; component/final overflow and writer errors retain
+the existing codes and atomic pre-output behavior.
+
 `experimental atlas-text source|documentation` now accepts original generic declaration IDs without
 changing attributed-text v0 output or exit/omission policies. An unused template can supply exact
 untrusted source bytes; that output does not assert executable-body checking. Repeated

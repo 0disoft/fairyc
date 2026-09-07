@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol/call/pack/text CLIs; generic Evidence Bundle pending
+- Status: Accepted source identity, v2 snapshot/map/store/query/join and symbol/call/pack/text/evidence CLIs
 - Date: 2026-09-06
 
 ## Decision
@@ -102,8 +102,8 @@ encoder, including a plan with only unused generic declarations. The v1 encoder 
 specialization payloads independently of header counts. Logical planning does not itself publish
 maps. The separately opt-in v2 store now consumes the codec and current-source expectations;
 package-local queries and workspace joins use separate v2 constructors. Symbol discovery has an
-explicit v2 CLI path, as do Context Pack v2 and call catalog v1 through their own version flags. Other CLI
-consumption still requires subsequent consumer integration.
+explicit v2 CLI path, as do Context Pack v2, call catalog v1, and Evidence Bundle v1 through their
+own version flags. Source/documentation commands retain their text v0 output.
 
 ## Transport boundary
 
@@ -120,8 +120,8 @@ EncodeV2 and DecodeV2 now implement the separate `fairyc.fymap/v2` transport des
 Generic source declarations, positional arguments, concrete summaries, and specialization calls
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
-Checksums detect corruption, not authorship or compiler provenance authenticity. Downstream command
-consumers other than symbol discovery, Context Packs, and call catalogs still need their v2 CLI integration.
+Checksums detect corruption, not authorship or compiler provenance authenticity. Source/documentation
+and Evidence Bundle consumers now use the same exact-current v2 preparation with independent outputs.
 
 NewMapStoreV2 and NewMapStoreV2InRoot publish and load maps under the separate `fymap-v2` directory.
 The existing root-relative publication, retention, cleanup, and current-source checks are shared,
@@ -150,8 +150,7 @@ catalog v1 JSON/checksum contract. Canonical ordering includes both implementati
 deduplication does not collapse calls sharing a template source span. The v0 encoder rejects v2
 indexes instead of erasing generic facts. Existing v0 call CLI output remains unchanged. Explicit
 `atlas-calls list --catalog-version 1` connects the generic-aware workspace, v2 join, and v1 output;
-its exact declaration selectors are discoverable through symbol catalog v2. Other output consumers
-still require integration. See
+its exact declaration selectors are discoverable through symbol catalog v2. See
 `docs/atlas/workspace-call-catalog-v1.md`.
 
 ## Evidence
@@ -162,7 +161,9 @@ all required identity and custody fields, without executable generic facts. Sour
 documentation remain one record per original declaration, including unused templates, and fixed
 `untrusted-text` authority. Tests cover ordinary v1/v2 byte equivalence, exact retained generic
 bytes, snapshot/source mismatch, control and size omissions, both SymbolId forms, and CLI output.
-No new text schema or flag is introduced. Generic Evidence Bundle composition remains separate.
+No new text schema or flag is introduced. Evidence Bundle v1 now composes these unchanged text
+children with Context Pack v2 through explicit `--bundle-version 1`; v0 remains the default.
+See `docs/atlas/evidence-bundle-v1.md`.
 
 Context Pack v2 encoders and `atlas-pack overview|show|around --pack-version 2` retain generic
 source-interface identity, original declaration signatures, separate implementation observations,

@@ -1,5 +1,8 @@
 # Atlas Evidence Bundle v0
 
+Generic-aware composition is separately available as [Evidence Bundle v1](evidence-bundle-v1.md).
+Default output and explicit `--bundle-version 0` retain this v0 contract.
+
 - Status: Implemented output-only single-symbol composer with experimental CLI exposure; no decoder
 - Bundle version: `fairyc.atlas-evidence/v0`
 - Encoding: `fairyc.atlas-evidence-json/v0`

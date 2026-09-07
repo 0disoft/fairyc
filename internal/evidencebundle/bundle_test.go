@@ -17,6 +17,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contextpack"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -204,6 +205,11 @@ type evidenceFixture struct {
 
 func newEvidenceFixture(t *testing.T) evidenceFixture {
 	t.Helper()
+	return newEvidenceFixtureVersion(t, false)
+}
+
+func newEvidenceFixtureVersion(t *testing.T, generic bool) evidenceFixture {
+	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
 		t.Fatal(err)
@@ -216,11 +222,15 @@ version = "1.0.0"
 language = "fairyc-language/14"
 source = "src"
 `)
-	writeEvidenceFile(t, filepath.Join(root, "src", "main.fy"), `module main;
-/// `+evidencePromptLikeText+`
+	source := `module main;
+/// ` + evidencePromptLikeText + `
 fn i32 main() { return helper(); }
 fn i32 helper() { return 42; }
-`)
+`
+	if generic {
+		source = "module main;\n/// " + evidencePromptLikeText + "\nfn T id<T>(T value) { return value; }\nfn T helper<T>(T value) { return value; }\nfn i32 main() { assert(id<i32>(42) == 42); assert(id<u32>(7) == 7); return 0; }\n"
+	}
+	writeEvidenceFile(t, filepath.Join(root, "src", "main.fy"), source)
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
 		t.Fatal(err)
@@ -230,6 +240,9 @@ fn i32 helper() { return 42; }
 		t.Fatal(err)
 	}
 	checked, err := compiler.CheckPackages(input)
+	if generic {
+		checked, err = workspacecompiler.Check(workspace)
+	}
 	if err != nil || !checked.Verified {
 		t.Fatalf("CheckPackages() = %t, %v", checked.Verified, err)
 	}
@@ -237,16 +250,20 @@ fn i32 helper() { return 42; }
 	for index := range compilerBuild {
 		compilerBuild[index] = byte(0x80 + index)
 	}
-	snapshot, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
+	prepare, current, query := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations, atlasmap.NewQueryIndex
+	if generic {
+		prepare, current, query = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2, atlasmap.NewQueryIndexV2
+	}
+	snapshot, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil || len(partitions) != 1 {
 		t.Fatalf("PrepareWorkspace() = %d, %v", len(partitions), err)
 	}
-	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, checked, compilerBuild)
+	expectations, err := current(workspace, checked, compilerBuild)
 	if err != nil {
 		t.Fatal(err)
 	}
 	partition := partitions[0]
-	index, err := atlasmap.NewQueryIndex(partition, expectations[partition.Header().PackageInstance])
+	index, err := query(partition, expectations[partition.Header().PackageInstance])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -260,9 +277,13 @@ fn i32 helper() { return 42; }
 		}
 		return result.Symbols[0].Symbol
 	}
+	name := "main"
+	if generic {
+		name = "id"
+	}
 	return evidenceFixture{
 		root: root, workspace: workspace, index: index, snapshot: snapshot,
-		main: find("main"), helper: find("helper"),
+		main: find(name), helper: find("helper"),
 	}
 }
 

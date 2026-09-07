@@ -36,7 +36,7 @@ const (
 var ErrBundleTooLarge = errors.New("Atlas Evidence Bundle exceeds the caller byte limit")
 
 // Limits independently bound the three nested documents and the final composite. FactsBytes
-// applies to Context Pack v1; TextDocumentBytes applies separately to each attributed-text document.
+// applies to the selected Context Pack; TextDocumentBytes applies separately to each text document.
 type Limits struct {
 	FactsBytes        uint64 `json:"facts_bytes"`
 	TextDocumentBytes uint64 `json:"text_document_bytes"`
@@ -79,6 +79,19 @@ func EncodeShow(
 	textBudget attributedtext.Budget,
 	limits Limits,
 ) ([]byte, error) {
+	return encodeShow(workspace, index, snapshot, symbolID, request, textBudget, limits, false)
+}
+
+func encodeShow(
+	workspace workspaceloader.Workspace,
+	index *atlasmap.QueryIndex,
+	snapshot semanticsnapshot.Snapshot,
+	symbolID string,
+	request atlasmap.RelationRequest,
+	textBudget attributedtext.Budget,
+	limits Limits,
+	generic bool,
+) ([]byte, error) {
 	if limits.FactsBytes == 0 || limits.TextDocumentBytes == 0 || limits.BundleBytes == 0 {
 		return nil, fmt.Errorf("Atlas Evidence Bundle requires positive component and final byte limits")
 	}
@@ -86,7 +99,11 @@ func EncodeShow(
 	if err != nil {
 		return nil, err
 	}
-	facts, err := contextpack.EncodeShow(index, symbolID, request, limits.FactsBytes)
+	encodeFacts := contextpack.EncodeShow
+	if generic {
+		encodeFacts = contextpack.EncodeShowV2
+	}
+	facts, err := encodeFacts(index, symbolID, request, limits.FactsBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -127,13 +144,17 @@ func EncodeShow(
 		},
 		Limits: limits,
 	}
-	checksum, err := computeChecksum(document)
+	version, encoding, algorithm, prefix := BundleVersion, BundleEncoding, ChecksumAlgorithm, ChecksumPrefix
+	if generic {
+		version, encoding, algorithm, prefix = BundleVersionV1, BundleEncodingV1, ChecksumAlgorithmV1, ChecksumPrefixV1
+	}
+	checksum, err := computeChecksumVersion(document, generic)
 	if err != nil {
 		return nil, err
 	}
 	encoded, err := json.Marshal(bundleEnvelope{
-		BundleVersion: BundleVersion, Encoding: BundleEncoding,
-		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: checksum.String(), Bundle: document,
+		BundleVersion: version, Encoding: encoding,
+		ChecksumAlgorithm: algorithm, Checksum: prefix + hex.EncodeToString(checksum[:]), Bundle: document,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("encode Atlas Evidence Bundle: %w", err)
@@ -180,14 +201,25 @@ type componentDocuments struct {
 }
 
 func computeChecksum(document bundleDocument) (Checksum, error) {
+	return computeChecksumVersion(document, false)
+}
+
+func computeChecksumVersion(document bundleDocument, generic bool) (Checksum, error) {
 	payload, err := json.Marshal(document)
 	if err != nil {
 		return Checksum{}, fmt.Errorf("encode Atlas Evidence Bundle checksum payload: %w", err)
 	}
 	digest := sha256.New()
-	writeChecksumHeader(digest)
-	writeChecksumBytes(digest, []byte(BundleVersion))
-	writeChecksumBytes(digest, []byte(BundleEncoding))
+	version, encoding := BundleVersion, BundleEncoding
+	if generic {
+		_, _ = digest.Write([]byte(checksumDomain))
+		_, _ = digest.Write([]byte{0, 1})
+		version, encoding = BundleVersionV1, BundleEncodingV1
+	} else {
+		writeChecksumHeader(digest)
+	}
+	writeChecksumBytes(digest, []byte(version))
+	writeChecksumBytes(digest, []byte(encoding))
 	writeChecksumBytes(digest, payload)
 	var result Checksum
 	copy(result[:], digest.Sum(nil))

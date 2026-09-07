@@ -13,6 +13,7 @@ import (
 )
 
 type atlasEvidenceOptions struct {
+	generic              bool
 	relation             atlasPackRelationOptions
 	maxFragmentBytes     uint64
 	maxTextBytes         uint64
@@ -31,8 +32,8 @@ func runAtlasEvidence(arguments []string, sourceRoot string, stdout, stderr io.W
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasQuery(
-		sourceRoot, options.relation.packageUID, options.relation.locked, stderr,
+	prepared, code := prepareAtlasQueryVersion(
+		sourceRoot, options.relation.packageUID, options.relation.locked, stderr, options.generic,
 	)
 	if code != ExitSuccess {
 		return code
@@ -44,7 +45,11 @@ func runAtlasEvidence(arguments []string, sourceRoot string, stdout, stderr io.W
 			MaxDepth: 0, MaxSelectionBytes: options.relation.maxSelectionBytes,
 		},
 	}
-	encoded, err := evidencebundle.EncodeShow(
+	encode := evidencebundle.EncodeShow
+	if options.generic {
+		encode = evidencebundle.EncodeShowV1
+	}
+	encoded, err := encode(
 		prepared.workspace, prepared.index, prepared.snapshot, options.relation.symbol,
 		request,
 		attributedtext.Budget{
@@ -77,7 +82,7 @@ func parseAtlasEvidenceOptions(arguments []string) (atlasEvidenceOptions, error)
 	relationArguments := make([]string, 0, len(arguments))
 	for position := 0; position < len(arguments); {
 		flag := arguments[position]
-		if !isAtlasEvidenceLimit(flag) {
+		if !isAtlasEvidenceLimit(flag) && flag != "--bundle-version" {
 			relationArguments = append(relationArguments, flag)
 			position++
 			continue
@@ -89,6 +94,15 @@ func parseAtlasEvidenceOptions(arguments []string) (atlasEvidenceOptions, error)
 			return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
 		}
 		seen[flag] = true
+		if flag == "--bundle-version" {
+			version := arguments[position+1]
+			if version != "0" && version != "1" {
+				return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires --bundle-version as 0 or 1", command)
+			}
+			result.generic = version == "1"
+			position += 2
+			continue
+		}
 		value, err := parseAtlasPositiveLimit(command, flag, arguments[position+1], maxAtlasPackBytes)
 		if err != nil {
 			return atlasEvidenceOptions{}, err
