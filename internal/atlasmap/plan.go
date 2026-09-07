@@ -19,6 +19,7 @@ import (
 
 const (
 	LogicalSchema          = "fairyc.fymap-logical/v1"
+	LogicalSchemaV2        = "fairyc.fymap-logical/v2"
 	TargetScopeIndependent = "target-independent"
 	GenerationExact        = "exact"
 	GenerationPartial      = "partial"
@@ -31,12 +32,13 @@ type Input struct {
 }
 
 type RecordCounts struct {
-	Files        int
-	Modules      int
-	Symbols      int
-	Functions    int
-	Relations    int
-	Completeness int
+	Files           int
+	Modules         int
+	Symbols         int
+	Functions       int
+	Specializations int
+	Relations       int
+	Completeness    int
 }
 
 // PackageReference supplies the stable namespace mapping required to rederive declaration IDs.
@@ -85,13 +87,14 @@ type Symbol struct {
 }
 
 type partitionData struct {
-	header       Header
-	files        []semanticsnapshot.File
-	modules      []semanticsnapshot.Module
-	symbols      []Symbol
-	declarations []semanticsnapshot.Declaration
-	functions    []semanticsnapshot.FunctionSummary
-	completeness []semanticsnapshot.Completeness
+	header          Header
+	files           []semanticsnapshot.File
+	modules         []semanticsnapshot.Module
+	symbols         []Symbol
+	declarations    []semanticsnapshot.Declaration
+	functions       []semanticsnapshot.FunctionSummary
+	specializations []semanticsnapshot.SpecializationSummary
+	completeness    []semanticsnapshot.Completeness
 }
 
 // Partition is an immutable assignment plan for one future whole-package map.
@@ -144,7 +147,17 @@ type partitionBuilder struct {
 // BuildPlan validates every compatibility input and assigns every snapshot record to exactly one
 // whole-package logical partition. It performs no filesystem, source, executable, target, or map I/O.
 func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, error) {
-	if len(snapshot.Specializations()) != 0 {
+	return buildPlan(snapshot, input, LogicalSchema)
+}
+
+// BuildPlanV2 retains original generic declarations and separate concrete summaries.
+// It is a logical planning boundary; the v1 codec cannot encode these partitions.
+func BuildPlanV2(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, error) {
+	return buildPlan(snapshot, input, LogicalSchemaV2)
+}
+
+func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) ([]Partition, error) {
+	if schema == LogicalSchema && len(snapshot.Specializations()) != 0 {
 		return nil, fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
 	}
 	if snapshot.Version() != semanticsnapshot.ModelVersion {
@@ -174,7 +187,7 @@ func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, er
 			return nil, fmt.Errorf("package %q has no exact public-interface hash", packageValue.Instance)
 		}
 		builders[packageValue.Instance] = &partitionBuilder{packageValue: packageValue, data: partitionData{header: Header{
-			LogicalSchema: LogicalSchema, SnapshotModel: snapshot.Version(), CompilerBuild: input.CompilerBuild.String(),
+			LogicalSchema: schema, SnapshotModel: snapshot.Version(), CompilerBuild: input.CompilerBuild.String(),
 			CompilerBuildAlgorithm: buildidentity.Encoding,
 			Language:               packageValue.Language, PackageUID: packageValue.UID, PackageInstance: packageValue.Instance,
 			PackageCoordinate: packageValue.Coordinate, PackageSource: packageValue.Source,
@@ -244,7 +257,7 @@ func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, er
 		symbolsByDeclaration[value.Declaration] = symbol
 	}
 	for _, declaration := range snapshot.Declarations() {
-		if len(declaration.TypeParameters) != 0 {
+		if schema == LogicalSchema && len(declaration.TypeParameters) != 0 {
 			return nil, fmt.Errorf("Atlas map v1 cannot preserve a generic declaration")
 		}
 		builder, found := builders[declaration.Key.PackageInstance]
@@ -270,6 +283,14 @@ func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, er
 		builder.data.functions = append(builder.data.functions, function)
 		builder.data.header.Counts.Relations += relationCount(function)
 	}
+	for _, specialization := range snapshot.Specializations() {
+		builder, found := builders[specialization.Declaration.PackageInstance]
+		if !found {
+			return nil, fmt.Errorf("specialization %q references an unknown package", specialization.ID)
+		}
+		builder.data.specializations = append(builder.data.specializations, specialization)
+		builder.data.header.Counts.Relations += relationCount(specialization.Function)
+	}
 
 	completeness := snapshot.Completeness()
 	generationStatus, omissions, err := generationCompleteness(completeness)
@@ -286,6 +307,7 @@ func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, er
 		builder.data.header.Counts.Modules = len(builder.data.modules)
 		builder.data.header.Counts.Symbols = len(builder.data.symbols)
 		builder.data.header.Counts.Functions = len(builder.data.functions)
+		builder.data.header.Counts.Specializations = len(builder.data.specializations)
 		builder.data.header.Counts.Completeness = len(completeness)
 		if builder.data.header.Counts.Files == 0 || builder.data.header.Counts.Modules == 0 {
 			return nil, fmt.Errorf("package %q has no file or module partition", packageValue.Instance)
@@ -367,6 +389,7 @@ func cloneCompleteness(values []semanticsnapshot.Completeness) []semanticsnapsho
 func cloneDeclarations(values []semanticsnapshot.Declaration) []semanticsnapshot.Declaration {
 	result := slices.Clone(values)
 	for index := range result {
+		result[index].TypeParameters = slices.Clone(result[index].TypeParameters)
 		result[index].Type = cloneTypeRef(result[index].Type)
 		if result[index].Owner != nil {
 			owner := cloneTypeRef(*result[index].Owner)

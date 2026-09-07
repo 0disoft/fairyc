@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted source identity and compiler snapshot integration; versioned map integration pending
+- Status: Accepted source identity, compiler snapshot, and v2 logical map integration; v2 transport pending
 - Date: 2026-09-06
 
 ## Decision
@@ -67,12 +67,33 @@ BuildCompiler; ordinary snapshots and their existing SymbolIds remain unchanged.
 The concrete specialization set has exact completeness. Original template bodies remain explicitly
 unavailable as universal executable facts, whether or not a particular specialization was checked.
 
+## V2 logical package plan
+
+BuildPlanV2 and PrepareWorkspaceV2 opt into `fairyc.fymap-logical/v2`. Each original declaration
+and its existing SymbolId appears once. Each concrete specialization is assigned to its original
+declaration's package, retains ordered type arguments and a separate executable summary, and is
+counted separately from ordinary functions. Relation counts include both kinds of executable
+summary. Calls retain their declaration and exact specialization target; generic body unavailability
+and concrete specialization completeness remain separate ledger entries. Accessors detach type
+parameter names, nested type arguments, calls, and all summary slices.
+
+Specialization IDs are exact compiler-provenance join keys, not source SymbolIds or a new promise of
+cross-build stability. The original source SymbolId remains the stable declaration join. No source
+or documentation text is added to maps. The compiler build and package identity header still scopes
+all executable facts. Ordinary package partitions differ only in their explicit v2 logical schema.
+
+The legacy planner and workspace entry point retain v1 behavior. V2 plans cannot enter the v1
+encoder, including a plan with only unused generic declarations. The v1 encoder also checks for
+specialization payloads independently of header counts. This step does not enable storage, queries,
+or CLI consumption of v2; those require the subsequent versioned transport and consumer integration.
+
 ## Transport boundary
 
 .fymap v1 has no generic parameter fields. Its planner and encoder therefore reject generic
 declarations explicitly. Silently serializing them as arity zero would erase information and make
 rederived IDs contradict the original identity. The snapshot now preserves generic declarations,
-specializations, and completeness together; a versioned transport change is still required.
+specializations, and completeness together, as does the opt-in v2 logical plan; a versioned
+transport change is still required.
 The v1 encoder also rejects specialization calls rather than omitting their implementation target.
 The Atlas CLI is not enabled by this preparation, and language/SDK/runtime versions do not change.
 

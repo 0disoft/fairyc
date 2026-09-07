@@ -16,6 +16,15 @@ import (
 // from one already-loaded workspace and its exact compiler result. Compiler executable discovery is
 // deliberately caller-owned so this function performs no filesystem or process access.
 func PrepareWorkspace(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity) (semanticsnapshot.Snapshot, []Partition, error) {
+	return prepareWorkspace(workspace, result, compilerBuild, LogicalSchema)
+}
+
+// PrepareWorkspaceV2 prepares generic-aware logical partitions without publishing them.
+func PrepareWorkspaceV2(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity) (semanticsnapshot.Snapshot, []Partition, error) {
+	return prepareWorkspace(workspace, result, compilerBuild, LogicalSchemaV2)
+}
+
+func prepareWorkspace(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity, schema string) (semanticsnapshot.Snapshot, []Partition, error) {
 	metadata, err := workspace.SemanticPackages()
 	if err != nil {
 		return semanticsnapshot.Snapshot{}, nil, err
@@ -67,7 +76,7 @@ func PrepareWorkspace(workspace workspaceloader.Workspace, result compiler.Resul
 	if err != nil {
 		return semanticsnapshot.Snapshot{}, nil, err
 	}
-	partitions, err := BuildPlan(snapshot, Input{CompilerBuild: compilerBuild, Interfaces: interfaceHashes})
+	partitions, err := buildPlan(snapshot, Input{CompilerBuild: compilerBuild, Interfaces: interfaceHashes}, schema)
 	if err != nil {
 		return semanticsnapshot.Snapshot{}, nil, err
 	}

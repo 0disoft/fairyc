@@ -19,6 +19,9 @@ import (
 const maxTransportTypeDepth = 64
 
 func validateTransportPartition(partition Partition) error {
+	if len(partition.data.specializations) != 0 {
+		return fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
+	}
 	header := partition.Header()
 	instanceUIDs, coordinateUIDs, err := validateTransportHeader(header)
 	if err != nil {
