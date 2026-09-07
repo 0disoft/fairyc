@@ -95,6 +95,7 @@ type EnumVariant struct {
 
 // Struct is one inert named aggregate without compiler-owned cleanup.
 type Struct struct {
+	TypeParameters    []string
 	Name              string
 	Public            bool
 	Span              diagnostic.Span
@@ -120,6 +121,7 @@ type AttributeArgument struct {
 
 // Resource is one move-only named aggregate with compiler-owned cleanup.
 type Resource struct {
+	TypeParameters    []string
 	Name              string
 	Public            bool
 	Span              diagnostic.Span
@@ -438,6 +440,7 @@ func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {
 
 func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {
 	value := Struct{
+		TypeParameters:    lowerTypeParameters(tree, node),
 		Name:              node.Text,
 		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
 		Span:              node.Span,
@@ -484,6 +487,7 @@ func decodedAttributeArgument(argument syntax.Node) string {
 
 func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 	value := Resource{
+		TypeParameters:    lowerTypeParameters(tree, node),
 		Name:              node.Text,
 		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
 		Span:              node.Span,

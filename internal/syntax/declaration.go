@@ -193,8 +193,12 @@ func (p *parser) parseStaticAssert(start int, leading []NodeID) NodeID {
 func (p *parser) parseStruct(start int, leading []NodeID) NodeID {
 	p.advance()
 	name, nameSpan := p.parseNameWithSpan()
+	typeParameters := p.parseTypeParameters()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
+	if typeParameters != NoNode {
+		children = append(children, typeParameters)
+	}
 	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		children = append(children, p.parseField())
 	}
@@ -205,8 +209,12 @@ func (p *parser) parseStruct(start int, leading []NodeID) NodeID {
 func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 	p.advance()
 	name, nameSpan := p.parseNameWithSpan()
+	typeParameters := p.parseTypeParameters()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
+	if typeParameters != NoNode {
+		children = append(children, typeParameters)
+	}
 	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		if p.at("cleanup") {
 			children = append(children, p.parseCleanup(nil))
@@ -332,24 +340,7 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 		} else {
 			name, nameSpan = firstName, firstSpan
 		}
-		if p.at("<") {
-			parameterStart := p.currentFullIndex()
-			p.advance()
-			var names []NodeID
-			if p.at(">") {
-				p.parseName()
-			}
-			for !p.at(">") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
-				start := p.currentFullIndex()
-				parameter, nameSpan := p.parseNameWithSpan()
-				names = append(names, p.addNamedNode(KindPath, start, nil, parameter, "", nameSpan))
-				if !p.match(",") {
-					break
-				}
-			}
-			p.expectTypeClose()
-			typeParameters = p.addNode(KindTypeParameters, parameterStart, names, "", "")
-		}
+		typeParameters = p.parseTypeParameters()
 		parameters = p.parseParameters(method, true)
 	}
 	body := p.parseBlockWithTail(legacyHeader)

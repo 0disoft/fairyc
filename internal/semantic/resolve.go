@@ -302,6 +302,9 @@ func (a *analyzer) declareStructs() {
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Structs {
 			structure := &module.file.Module.Structs[index]
+			if len(structure.TypeParameters) != 0 {
+				a.addUnsupported(module.file.Path, structure.Span, "generic-aggregate-specialization")
+			}
 			if previous := module.item(structure.Name); previous != nil {
 				a.addDiagnostic("E0102", span(module.file.Path, structure.NameSpan), RelatedSpan{Role: "previous-declaration", Span: span(previous.source, previous.declaration)})
 				continue
@@ -327,6 +330,9 @@ func (a *analyzer) declareResources() {
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
+			if len(resource.TypeParameters) != 0 {
+				a.addUnsupported(module.file.Path, resource.Span, "generic-aggregate-specialization")
+			}
 			if previous := module.item(resource.Name); previous != nil {
 				a.addDiagnostic("E0102", span(module.file.Path, resource.NameSpan), RelatedSpan{
 					Role: "previous-declaration",

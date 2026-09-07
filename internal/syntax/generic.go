@@ -1,5 +1,29 @@
 package syntax
 
+import "github.com/0disoft/fairyc/internal/lexer"
+
+func (p *parser) parseTypeParameters() NodeID {
+	if !p.at("<") {
+		return NoNode
+	}
+	start := p.currentFullIndex()
+	p.advance()
+	var names []NodeID
+	if p.at(">") {
+		p.parseName()
+	}
+	for !p.at(">") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+		parameterStart := p.currentFullIndex()
+		name, span := p.parseNameWithSpan()
+		names = append(names, p.addNamedNode(KindPath, parameterStart, nil, name, "", span))
+		if !p.match(",") {
+			break
+		}
+	}
+	p.expectTypeClose()
+	return p.addNode(KindTypeParameters, start, names, "", "")
+}
+
 // A closed angle list followed immediately by a call is the explicit type-argument form.
 // Chained comparisons are already rejected by the ordinary expression grammar.
 func (p *parser) explicitTypeCallAhead(left NodeID) bool {

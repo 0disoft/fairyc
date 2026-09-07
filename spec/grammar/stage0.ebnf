@@ -52,10 +52,12 @@ state_field_decl = "cell" type IDENT ";"
                  | "map" type type IDENT ";"
                  ;
 
-struct_decl = "struct" IDENT "{" field_decl* "}" ;
+(* Generic aggregate declarations are retained for specialization preparation,
+   but ordinary semantic analysis rejects them until aggregate admission. *)
+struct_decl = "struct" IDENT type_parameters? "{" field_decl* "}" ;
 field_decl = "pub"? type IDENT ";" ;
 
-resource_decl = "resource" IDENT "{" field_decl* cleanup_decl? "}" ;
+resource_decl = "resource" IDENT type_parameters? "{" field_decl* cleanup_decl? "}" ;
 cleanup_decl = attribute* "cleanup" statement_block ;
 
 enum_decl = "enum" IDENT "{" enum_variant* "}" ;

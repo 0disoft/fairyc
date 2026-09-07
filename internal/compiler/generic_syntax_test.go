@@ -12,6 +12,10 @@ func TestGenericSyntaxCannotBypassSpecialization(t *testing.T) {
 	for _, text := range []string{
 		"module main; fn i32 value<T>() { return 42; } fn i32 main() { return 0; }",
 		"module main; fn i32 value() { return 42; } fn i32 main() { return value<i32>(); }",
+		"module main; struct Value<T> { i32 value; } fn i32 main() { return 0; }",
+		"module main; resource Value<T> { i32 value; } fn i32 main() { return 0; }",
+		"module main; pub struct Value<T> { i32 value; } fn i32 main() { return 0; }",
+		"module main; pub resource Value<T> { i32 value; cleanup {} } fn i32 main() { return 0; }",
 	} {
 		file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
 		result, err := compiler.Check([]semantic.File{file})
