@@ -8,6 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
@@ -90,5 +91,50 @@ func TestGenericInterfaceAbsentOnSemanticFailure(t *testing.T) {
 	result, err := compiler.AnalyzeGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
 	if err != nil || len(result.Analysis.Semantic.Diagnostics) == 0 || result.Interfaces != nil {
 		t.Fatalf("rejected source published interfaces: %+v %v", result, err)
+	}
+	if len(result.Analysis.GenericProvenance.PackageInterfaces()) != 0 {
+		t.Fatal("rejected analysis retained package interfaces")
+	}
+}
+
+func TestGenericPackageInterfacesSurviveVerifiedLoweringWithoutAliasing(t *testing.T) {
+	input, coordinates := genericPackageInput(t)
+	analysis, err := compiler.AnalyzeGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	if err != nil {
+		t.Fatal(err)
+	}
+	interfaces := analysis.Analysis.GenericProvenance.PackageInterfaces()
+	if len(interfaces) != 3 {
+		t.Fatalf("retained interface count: %d", len(interfaces))
+	}
+	for i, item := range interfaces {
+		if i > 0 && interfaces[i-1].Package >= item.Package {
+			t.Fatal("interface order is not canonical")
+		}
+		if item.Coordinate != coordinates[item.Package] || item.Generic != analysis.Interfaces[item.Package] || item.Ordinary != analysis.OrdinaryInterfaces[item.Package] {
+			t.Fatal("retained interface contradicts its source analysis")
+		}
+	}
+	first := interfaces[0]
+	interfaces[0] = compiler.GenericPackageInterface{}
+	analysis.Interfaces[first.Package] = moduleinterface.GenericHash{}
+	analysis.OrdinaryInterfaces[first.Package] = moduleinterface.Hash{}
+	coordinates[first.Package] = packagegraph.CoordinateID{}
+	result, err := compiler.LowerAnalyzed(analysis.Analysis)
+	if err != nil || !result.Verified {
+		t.Fatalf("lowering: %v", err)
+	}
+	retained := result.GenericProvenance.PackageInterfaces()
+	if len(retained) != 3 || retained[0] != first {
+		t.Fatal("public maps or accessor alias compiler provenance")
+	}
+	retained[0] = compiler.GenericPackageInterface{}
+	if result.GenericProvenance.PackageInterfaces()[0] != first {
+		t.Fatal("result accessor aliases retained interface")
+	}
+	input, coordinates = genericPackageInput(t)
+	checked, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	if err != nil || !checked.Verified || !reflect.DeepEqual(checked.GenericProvenance.PackageInterfaces(), result.GenericProvenance.PackageInterfaces()) {
+		t.Fatalf("checked result lost source interfaces: %v", err)
 	}
 }

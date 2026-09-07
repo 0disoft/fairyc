@@ -69,6 +69,16 @@ unavailable as universal executable facts, whether or not a particular specializ
 
 ## V2 logical package plan
 
+Package-aware generic analysis now retains immutable package interface facts in GenericProvenance.
+Each record binds its semantic package ID and stable package coordinate to both the ordinary
+interface hash with generated specializations excluded and the generic source-interface hash with
+exported template closures included. PackageInterfaces returns detached records in semantic package
+order. LowerAnalyzed and CheckGenericPackages preserve them only on verified results. Mutating the
+public GenericAnalysis maps, the input coordinate map, or an accessor result cannot change retained
+facts. Rejected analysis and coordinate-free explicit-file analysis publish no package interface
+records. These facts remain non-serialized and do not authorize stable cache reuse; the v2 map
+header and current-source consumer still need to bind them explicitly.
+
 BuildPlanV2 and PrepareWorkspaceV2 opt into `fairyc.fymap-logical/v2`. Each original declaration
 and its existing SymbolId appears once. Each concrete specialization is assigned to its original
 declaration's package, retains ordered type arguments and a separate executable summary, and is

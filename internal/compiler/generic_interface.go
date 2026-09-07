@@ -86,5 +86,6 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 	if err != nil {
 		return GenericAnalysis{}, err
 	}
+	result.Analysis.GenericProvenance.interfaces = retainGenericPackageInterfaces(ordinary, interfaces, coordinates)
 	return result, nil
 }

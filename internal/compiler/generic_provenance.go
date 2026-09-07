@@ -31,6 +31,7 @@ type GenericProvenance struct {
 	declarations []GenericDeclaration
 	origins      []genericsource.SpecializationOrigin
 	nominalTypes []semantic.NominalTypeFact
+	interfaces   []GenericPackageInterface
 }
 
 func (value GenericProvenance) NominalTypes() []semantic.NominalTypeFact {
