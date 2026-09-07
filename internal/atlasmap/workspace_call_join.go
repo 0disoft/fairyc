@@ -40,11 +40,13 @@ type WorkspaceSymbol struct {
 // JoinedCall is one compiler-resolved call whose source and target both have exact-current maps.
 // It is a detached compiler-fact record, not an impact or safe-change claim.
 type JoinedCall struct {
-	Source     WorkspaceSymbol
-	Target     WorkspaceSymbol
-	Span       semanticsnapshot.Span
-	Certainty  semanticsnapshot.Certainty
-	Provenance semanticsnapshot.Provenance
+	SourceSpecialization string
+	TargetSpecialization string
+	Source               WorkspaceSymbol
+	Target               WorkspaceSymbol
+	Span                 semanticsnapshot.Span
+	Certainty            semanticsnapshot.Certainty
+	Provenance           semanticsnapshot.Provenance
 }
 
 // WorkspaceCallIndex is an immutable, bounded reverse-call ledger over a caller-supplied complete
@@ -75,6 +77,15 @@ func NewWorkspaceCallIndex(
 	expectations map[string]LoadExpectation,
 	budget WorkspaceCallBudget,
 ) (*WorkspaceCallIndex, error) {
+	return newWorkspaceCallIndex(partitions, expectations, budget, LogicalSchema)
+}
+
+// NewWorkspaceCallIndexV2 preserves concrete implementation endpoints while joining v2 maps.
+func NewWorkspaceCallIndexV2(partitions []Partition, expectations map[string]LoadExpectation, budget WorkspaceCallBudget) (*WorkspaceCallIndex, error) {
+	return newWorkspaceCallIndex(partitions, expectations, budget, LogicalSchemaV2)
+}
+
+func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadExpectation, budget WorkspaceCallBudget, schema string) (*WorkspaceCallIndex, error) {
 	if budget.MaxPackages <= 0 || budget.MaxCalls < 0 {
 		return nil, fmt.Errorf("Atlas workspace call join budget is invalid")
 	}
@@ -104,7 +115,7 @@ func NewWorkspaceCallIndex(
 		if !found {
 			return nil, fmt.Errorf("%w: package %q has no load expectation", ErrWorkspaceJoinIncomplete, header.PackageInstance)
 		}
-		packageIndex, err := NewQueryIndex(partition, expectation)
+		packageIndex, err := newQueryIndex(partition, expectation, schema)
 		if err != nil {
 			return nil, fmt.Errorf("build Atlas workspace call join package %q: %w", header.PackageInstance, err)
 		}
@@ -159,6 +170,20 @@ func NewWorkspaceCallIndex(
 				return nil, fmt.Errorf("%w: call target %q %s::%s has no exact declaration", ErrWorkspaceJoinIncomplete, relation.Target.PackageInstance, relation.Target.Module, relation.Target.Name)
 			}
 			targetNode := targetIndex.nodes[targetPosition]
+			if relation.Target.Specialization != "" {
+				found := false
+				for _, implementation := range targetNode.specializations {
+					if implementation.ID == relation.Target.Specialization {
+						found = true
+						break
+					}
+				}
+				if !found {
+					return nil, fmt.Errorf("%w: call target implementation is absent from its exact declaration", ErrWorkspaceJoinIncomplete)
+				}
+			} else if len(targetNode.declaration.TypeParameters) != 0 {
+				return nil, fmt.Errorf("%w: generic call target has no concrete implementation", ErrWorkspaceJoinIncomplete)
+			}
 			if relation.Target.Symbol != "" && relation.Target.Symbol != targetNode.symbol.Visible {
 				return nil, fmt.Errorf("%w: package-local and workspace target symbols disagree", ErrWorkspaceJoinIncomplete)
 			}
@@ -173,9 +198,11 @@ func NewWorkspaceCallIndex(
 				return nil, fmt.Errorf("%w: calls exceed %d", ErrWorkspaceJoinBudget, budget.MaxCalls)
 			}
 			call := JoinedCall{
-				Source: WorkspaceSymbol{PackageInstance: header.PackageInstance, Symbol: packageIndex.nodes[sourcePosition].symbol.Visible},
-				Target: WorkspaceSymbol{PackageInstance: relation.Target.PackageInstance, Symbol: targetNode.symbol.Visible},
-				Span:   *relation.Span, Certainty: relation.Certainty, Provenance: relation.Provenance,
+				SourceSpecialization: relation.SourceSpecialization,
+				TargetSpecialization: relation.Target.Specialization,
+				Source:               WorkspaceSymbol{PackageInstance: header.PackageInstance, Symbol: packageIndex.nodes[sourcePosition].symbol.Visible},
+				Target:               WorkspaceSymbol{PackageInstance: relation.Target.PackageInstance, Symbol: targetNode.symbol.Visible},
+				Span:                 *relation.Span, Certainty: relation.Certainty, Provenance: relation.Provenance,
 			}
 			callPosition := len(index.calls)
 			index.calls = append(index.calls, call)

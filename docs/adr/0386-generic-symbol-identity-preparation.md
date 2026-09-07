@@ -100,8 +100,8 @@ The legacy planner and workspace entry point retain v1 behavior. V2 plans cannot
 encoder, including a plan with only unused generic declarations. The v1 encoder also checks for
 specialization payloads independently of header counts. Logical planning does not itself publish
 maps. The separately opt-in v2 store now consumes the codec and current-source expectations;
-package-local queries use the separate v2 constructor; workspace joins and CLI consumption still
-require their subsequent consumer integration.
+package-local queries and workspace joins use separate v2 constructors; CLI consumption still
+requires subsequent consumer integration.
 
 ## Transport boundary
 
@@ -117,9 +117,8 @@ EncodeV2 and DecodeV2 now implement the separate `fairyc.fymap/v2` transport des
 Generic source declarations, positional arguments, concrete summaries, and specialization calls
 round-trip with canonical bytes and checksums. Structural validation rederives source SymbolIds,
 checks local implementation joins and scalar bindings, and preserves explicit template uncertainty.
-Checksums detect corruption, not authorship or compiler provenance authenticity. Cross-package
-implementation joins and downstream command consumers still need their
-consumer-specific integration before v2 becomes an Atlas CLI path.
+Checksums detect corruption, not authorship or compiler provenance authenticity. Downstream command
+consumers still need their integration before v2 becomes an Atlas CLI path.
 
 NewMapStoreV2 and NewMapStoreV2InRoot publish and load maps under the separate `fymap-v2` directory.
 The existing root-relative publication, retention, cleanup, and current-source checks are shared,
@@ -135,6 +134,13 @@ template-body unavailability. Existing byte/record/relation/depth budgets cover 
 Traversal remains a declaration neighborhood, not proof of a concrete execution path across
 specializations. V1 queries and workspace joins do not silently admit v2 maps.
 See `docs/atlas/fymap-query-v2.md`.
+
+NewWorkspaceCallIndexV2 joins exact-current v2 partitions through the existing bounded direct-call
+ledger. Joined calls preserve both implementation IDs alongside original declaration SymbolIds.
+The target implementation must belong to the exact target declaration, including across packages;
+a generic target without an implementation is rejected. Incoming/outgoing selection remains
+declaration-based and returns separate concrete call records, not an execution-path traversal.
+V1 construction remains unchanged. See `docs/atlas/workspace-call-join-v0.md`.
 
 ## Evidence
 

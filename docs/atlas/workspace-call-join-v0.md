@@ -57,6 +57,23 @@ source paths belong to one package instance.
 
 ## Query surface
 
+### Opt-in generic-aware construction
+
+`NewWorkspaceCallIndexV2` uses `NewQueryIndexV2` admission for every partition. It accepts only v2
+maps and independently supplied v2 current-source expectations. Direct-dependency closure, public
+cross-package targets, currentness, and package/call budgets remain mandatory. The v1 constructor
+does not admit v2 maps.
+
+Each `JoinedCall` retains `SourceSpecialization` and `TargetSpecialization` when present. The target
+implementation must exist under the exact resolved target declaration; a generic target with no
+implementation ID rejects the join. Both fields are empty for ordinary calls. Declaration selectors
+aggregate the call records of their implementations without dropping implementation IDs or merging
+different records. This is not concrete execution-path traversal. Returned IDs are current-build
+compiler identities, not stable source anchors. No output catalog or CLI consumes this v2 entry point
+yet; the existing v0 output/CLI remains on v1 construction.
+
+### Declaration selectors
+
 - `Calls` returns every resolved call in deterministic package and relation order.
 - `OutgoingCalls` selects calls made by one exact package-qualified visible or full SymbolId.
 - `IncomingCalls` selects calls targeting one exact package-qualified visible or full SymbolId.
