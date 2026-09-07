@@ -63,7 +63,7 @@ func PrepareWorkspace(workspace workspaceloader.Workspace, result compiler.Resul
 	if len(filesByPackage) != 0 {
 		return semanticsnapshot.Snapshot{}, nil, fmt.Errorf("source file metadata references an unknown semantic package")
 	}
-	snapshot, err := semanticsnapshot.Build(result.Semantic, result.MIR, packageInputs)
+	snapshot, err := semanticsnapshot.BuildCompiler(result, packageInputs)
 	if err != nil {
 		return semanticsnapshot.Snapshot{}, nil, err
 	}

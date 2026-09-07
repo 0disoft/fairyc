@@ -24,9 +24,10 @@ reference for generic signature preparation (ADR 0386). Accessors clone the para
 GenericDeclarations converts compiler-retained original headers and visible nominal scope facts
 to detached declarations. Binder names become positions; nominal types become package-coordinate
 references. Declared effects are preserved, while unused-body validity is not claimed. These
-optional in-memory facts do not change existing snapshot output or admit generic source through
-Build yet: specialization joins and completeness remain pending. The v1 map planner/codec
-explicitly reject nonempty TypeParameters. See ADR 0386 for the exact source-header boundary.
+in-memory facts enter BuildCompiler together with current compiler provenance. The raw Build
+entry rejects results marked as requiring generic provenance, including unused templates; it
+does not infer that requirement from function-name spelling. The v1 map planner/codec explicitly
+reject generic declarations, specialization records, and specialization calls. See ADR 0386.
 
 HIR `PackageID`, `SymbolID`, private `$pN` qualification, MIR block/local IDs, entity strings, and
 absolute host paths are build-local and never appear in a snapshot. Construction replaces them
@@ -61,6 +62,15 @@ semantic compile-time facts and are deliberately absent from Semantic Snapshot v
 and `.fymap` v1; no consumer may reinterpret them as locals or functions. Adding a constant
 declaration kind requires a separate versioned Atlas transport decision. Compiler-created cleanup
 functions remain private; their source resource owns the corresponding declared facts.
+
+BuildCompiler keeps each original generic function in the declaration set exactly once. Concrete
+implementations live in a separate immutable Specializations collection: each record contains the
+compiler's exact specialization ID, original declaration key, positional concrete type arguments,
+and verified FunctionSummary. FunctionSummary.Function points to the original declaration, while
+the containing record scopes its executable facts to that one specialization. Ordinary Functions
+does not duplicate these summaries. Calls to generic implementations carry both the original
+declaration target and exact specialization ID. Generated implementation names are not source names.
+Source documentation attaches once to the original declaration, not once per implementation.
 
 Verified function summaries currently retain:
 
@@ -98,6 +108,11 @@ Completeness is relation-specific. Local direct calls, effects, traps, unsafe si
 Region placement, Result propagation, and borrow facts are exact for the implemented Stage 0 MIR.
 The presence of a foreign C call makes only `calls` partial and records `external-ffi`; its local
 declaration and call site remain known, while behavior beyond the ABI boundary is opaque.
+
+For generic source, generic-specializations is exact for the checked concrete implementation set.
+generic-template-bodies remains unavailable for every original template: checking a specialization
+does not prove the body valid for every possible type argument. Executable relation counts include
+the concrete summaries, not a union presented as a universal generic-body summary.
 
 `reads`, `writes`, and `test-calls` are explicitly unavailable in v0. The builder does not guess
 them or convert their absence into a complete graph. `test-calls` requires a later compiler-owned

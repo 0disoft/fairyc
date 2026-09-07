@@ -415,6 +415,9 @@ func validateFunction(
 		return err
 	}
 	for index, call := range value.Calls {
+		if call.Specialization != "" {
+			return fmt.Errorf("Atlas map v1 cannot preserve a specialization call")
+		}
 		if index > 0 && compareCall(value.Calls[index-1], call) >= 0 {
 			return fmt.Errorf("function %+v calls are not canonical", value.Function)
 		}

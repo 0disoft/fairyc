@@ -144,6 +144,9 @@ type partitionBuilder struct {
 // BuildPlan validates every compatibility input and assigns every snapshot record to exactly one
 // whole-package logical partition. It performs no filesystem, source, executable, target, or map I/O.
 func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, error) {
+	if len(snapshot.Specializations()) != 0 {
+		return nil, fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
+	}
 	if snapshot.Version() != semanticsnapshot.ModelVersion {
 		return nil, fmt.Errorf("Atlas map plan requires snapshot model %q", semanticsnapshot.ModelVersion)
 	}

@@ -39,6 +39,7 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 		return result, nil
 	}
 	generated := map[string]bool{}
+	result.Analysis.Semantic.RequiresGenericProvenance = len(expansion.Declarations) != 0
 	for _, name := range expansion.GeneratedNames {
 		generated[name] = true
 	}

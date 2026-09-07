@@ -50,20 +50,23 @@ type packageImportKey struct {
 
 // Result contains observable semantic facts and build-local typed HIR.
 type Result struct {
-	NominalTypes     []NominalTypeFact `json:"-"`
-	HIR              hir.Package
-	CompletedThrough Phase
-	FailedPhase      Phase
-	Diagnostics      []Diagnostic
-	Resolutions      []Resolution
-	Types            []TypeFact
-	Borrows          []BorrowFact
-	RegionOrigins    []RegionOriginFact
-	ResultHandling   []ResultHandlingFact
-	Effects          []EffectFact
-	ResourceStates   []ResourceStateFact
-	Constants        []ConstantFact
-	Unsupported      []Unsupported
+	// Set by the compiler coordinator when source templates were expanded or
+	// removed. Consumers cannot recover those declarations from ordinary HIR.
+	RequiresGenericProvenance bool              `json:"-"`
+	NominalTypes              []NominalTypeFact `json:"-"`
+	HIR                       hir.Package
+	CompletedThrough          Phase
+	FailedPhase               Phase
+	Diagnostics               []Diagnostic
+	Resolutions               []Resolution
+	Types                     []TypeFact
+	Borrows                   []BorrowFact
+	RegionOrigins             []RegionOriginFact
+	ResultHandling            []ResultHandlingFact
+	Effects                   []EffectFact
+	ResourceStates            []ResourceStateFact
+	Constants                 []ConstantFact
+	Unsupported               []Unsupported
 }
 
 // ConstantFact retains one private module constant without adding an executable HIR declaration.

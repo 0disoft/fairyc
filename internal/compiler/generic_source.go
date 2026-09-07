@@ -39,11 +39,20 @@ func genericPackageOwner(coordinate packagegraph.CoordinateID) genericplan.Packa
 }
 
 func checkGenericFunctions(file semantic.File, owner genericplan.PackageID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
+	hasTemplates := false
+	if file.Module != nil {
+		for _, function := range file.Module.Functions {
+			hasTemplates = hasTemplates || len(function.TypeParameters) != 0
+		}
+	}
 	module, plan, err := genericsource.Expand(file.Module, owner, limits)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
 	file.Module = module
 	result, err := Check([]semantic.File{file})
+	if result.Verified {
+		result.Semantic.RequiresGenericProvenance = hasTemplates
+	}
 	return result, plan, err
 }

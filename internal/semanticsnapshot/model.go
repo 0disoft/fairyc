@@ -215,12 +215,13 @@ type DeclarationDocumentation struct {
 }
 
 type Call struct {
-	Span       Span
-	TargetKind CallTargetKind
-	Target     DeclarationKey
-	Certainty  Certainty
-	ABI        string
-	LinkName   string
+	Specialization string `json:"-"`
+	Span           Span
+	TargetKind     CallTargetKind
+	Target         DeclarationKey
+	Certainty      Certainty
+	ABI            string
+	LinkName       string
 }
 
 type Borrow struct {
@@ -243,6 +244,15 @@ type FunctionSummary struct {
 	Borrows          []Borrow
 }
 
+// SpecializationSummary describes one verified concrete implementation of an
+// original generic declaration, not a new source declaration or a universal body.
+type SpecializationSummary struct {
+	ID            string
+	Declaration   DeclarationKey
+	TypeArguments []TypeRef
+	Function      FunctionSummary
+}
+
 // Completeness is relation-specific so a foreign call cannot silently degrade unrelated local
 // ownership or trap facts.
 type Completeness struct {
@@ -255,13 +265,14 @@ type Completeness struct {
 }
 
 type snapshotData struct {
-	packages      []Package
-	files         []File
-	modules       []Module
-	declarations  []Declaration
-	documentation []DeclarationDocumentation
-	functions     []FunctionSummary
-	completeness  []Completeness
+	packages        []Package
+	files           []File
+	modules         []Module
+	declarations    []Declaration
+	documentation   []DeclarationDocumentation
+	functions       []FunctionSummary
+	specializations []SpecializationSummary
+	completeness    []Completeness
 }
 
 // Snapshot is immutable by construction. Accessors return deep detached copies.
@@ -308,6 +319,18 @@ func (snapshot Snapshot) Functions() []FunctionSummary {
 	result := make([]FunctionSummary, len(snapshot.data.functions))
 	for index, function := range snapshot.data.functions {
 		result[index] = cloneFunctionSummary(function)
+	}
+	return result
+}
+
+func (snapshot Snapshot) Specializations() []SpecializationSummary {
+	result := slices.Clone(snapshot.data.specializations)
+	for i := range result {
+		result[i].TypeArguments = slices.Clone(result[i].TypeArguments)
+		for j := range result[i].TypeArguments {
+			result[i].TypeArguments[j] = cloneType(result[i].TypeArguments[j])
+		}
+		result[i].Function = cloneFunctionSummary(result[i].Function)
 	}
 	return result
 }

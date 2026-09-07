@@ -17,14 +17,27 @@ import (
 // Build validates and detaches compiler facts from one completed semantic result and its verified
 // MIR. It performs no filesystem, network, cache, backend, toolchain, or source-text access.
 func Build(semanticResult semantic.Result, program mir.Program, packages []PackageInput) (Snapshot, error) {
+	if semanticResult.RequiresGenericProvenance {
+		return Snapshot{}, fmt.Errorf("generic source requires the compiler provenance snapshot path")
+	}
+	if err := validateSnapshotInput(semanticResult, program); err != nil {
+		return Snapshot{}, err
+	}
+	return buildOrdinarySnapshot(semanticResult, program, packages)
+}
+
+func validateSnapshotInput(semanticResult semantic.Result, program mir.Program) error {
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || semanticResult.FailedPhase != semantic.PhaseNone ||
 		len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
-		return Snapshot{}, fmt.Errorf("semantic snapshot requires a successful complete Flow result")
+		return fmt.Errorf("semantic snapshot requires a successful complete Flow result")
 	}
 	if failures := mir.Verify(program); len(failures) != 0 {
-		return Snapshot{}, fmt.Errorf("semantic snapshot requires verified MIR: %s", failures[0])
+		return fmt.Errorf("semantic snapshot requires verified MIR: %s", failures[0])
 	}
+	return nil
+}
 
+func buildOrdinarySnapshot(semanticResult semantic.Result, program mir.Program, packages []PackageInput) (Snapshot, error) {
 	metadata, stablePackages, files, err := normalizePackages(packages)
 	if err != nil {
 		return Snapshot{}, err
@@ -997,7 +1010,10 @@ func compareCall(left, right Call) int {
 	if value := compareSpan(left.Span, right.Span); value != 0 {
 		return value
 	}
-	return compareDeclarationKey(left.Target, right.Target)
+	if value := compareDeclarationKey(left.Target, right.Target); value != 0 {
+		return value
+	}
+	return cmp.Compare(left.Specialization, right.Specialization)
 }
 
 func compareBorrow(left, right Borrow) int {

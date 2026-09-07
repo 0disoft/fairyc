@@ -53,6 +53,7 @@ func AnalyzeExplicitFiles(files []semantic.File) (Analysis, error) {
 	analysis := Analysis{Semantic: semantic.Analyze(prepared)}
 	checked := analysis.Semantic
 	if checked.CompletedThrough == semantic.PhaseFlow && checked.FailedPhase == semantic.PhaseNone && len(checked.Diagnostics) == 0 && len(checked.Unsupported) == 0 {
+		analysis.Semantic.RequiresGenericProvenance = len(expansion.Declarations) != 0
 		analysis.GenericProvenance, err = genericProvenance(semantic.PackageInput{Files: files}, map[hir.PackageID]genericplan.PackageID{hir.DefaultPackage: owner}, expansion, checked.NominalTypes)
 	}
 	return analysis, err

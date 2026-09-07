@@ -1,6 +1,6 @@
 # ADR 0386: Generic declaration identity preparation
 
-- Status: Accepted detached declaration/identity and structural source-header bridge; full snapshot and map integration pending
+- Status: Accepted source identity and compiler snapshot integration; versioned map integration pending
 - Date: 2026-09-06
 
 ## Decision
@@ -41,22 +41,39 @@ are unavailable, and no nominal lookup is inferred from source strings or concre
 
 This adapter does not claim that unused bodies have been checked. Unresolved nominal names,
 non-literal array lengths, unsupported shapes, and malformed effects are explicit errors rather
-than invented compiler facts. It returns detached declarations, not a full executable snapshot;
-source-to-specialization joins, completeness, and workspace integration are still pending.
+than invented compiler facts. GenericDeclarations returns detached declarations; BuildCompiler
+adds checked source-to-specialization joins and executable completeness as described below.
 No stable language, SDK, runtime ABI, CLI, or map version changes in this preparation.
 
 Borrow facts now retain a non-serialized build-local function discriminator. The executable
 summary join uses both that identity and the original span, so two specializations sharing one
 source borrow do not collide or receive each other's facts. Legacy caller-built facts without
-the discriminator are accepted only when their span has exactly one owner. This is a prerequisite
-for full snapshot integration, not publication of generated functions as original declarations.
+the discriminator are accepted only when their span has exactly one owner.
+
+## Compiler snapshot integration
+
+BuildCompiler checks the original signature against every typed implementation after substituting
+its exact positional bindings. It rejects missing provenance, orphan implementations, source-span
+or signature contradictions, and missing executable summaries. Original declarations and their
+documentation appear once; implementations retain separate summaries and concrete type arguments.
+Calls retain the original declaration plus the exact specialization ID, including generic helper
+calls. Accessors detach both type arguments and all summary slices.
+
+The compiler marks semantic results requiring generic provenance without adding a serialized
+field. The raw Build entry rejects that marker, even when all templates are unused. Ordinary
+functions are not classified by a generated-looking name prefix. The workspace adapter now uses
+BuildCompiler; ordinary snapshots and their existing SymbolIds remain unchanged.
+
+The concrete specialization set has exact completeness. Original template bodies remain explicitly
+unavailable as universal executable facts, whether or not a particular specialization was checked.
 
 ## Transport boundary
 
 .fymap v1 has no generic parameter fields. Its planner and encoder therefore reject generic
 declarations explicitly. Silently serializing them as arity zero would erase information and make
-rederived IDs contradict the original identity. A subsequent source snapshot and versioned
-transport change must preserve generic declarations, specializations, and completeness together.
+rederived IDs contradict the original identity. The snapshot now preserves generic declarations,
+specializations, and completeness together; a versioned transport change is still required.
+The v1 encoder also rejects specialization calls rather than omitting their implementation target.
 The Atlas CLI is not enabled by this preparation, and language/SDK/runtime versions do not change.
 
 ## Evidence

@@ -93,7 +93,7 @@ func GenericDeclarations(provenance compiler.GenericProvenance, packages []Packa
 				return nil, fmt.Errorf("generic %s argument %s: %w", original.Name, argument.Name, err)
 			}
 			span := original.Span
-			span.StartByte, span.EndByte = argument.Span.StartByte, argument.Span.EndByte
+			span.StartByte, span.EndByte = argument.NameSpan.StartByte, argument.NameSpan.EndByte
 			if span.StartByte < original.Span.StartByte || span.EndByte > original.Span.EndByte {
 				return nil, fmt.Errorf("generic argument span escapes its declaration")
 			}

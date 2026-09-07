@@ -265,6 +265,22 @@ func TestChecksumInputVector(t *testing.T) {
 	}
 }
 
+func TestEncodeRejectsSpecializationCallInsteadOfDroppingIt(t *testing.T) {
+	for _, partition := range testWorkspacePartitions(t) {
+		for i := range partition.data.functions {
+			if len(partition.data.functions[i].Calls) == 0 {
+				continue
+			}
+			partition.data.functions[i].Calls[0].Specialization = "g0_test"
+			if _, err := Encode(partition, testMapLimit); err == nil || !strings.Contains(err.Error(), "cannot preserve a specialization call") {
+				t.Fatalf("specialization call encode: %v", err)
+			}
+			return
+		}
+	}
+	t.Fatal("workspace has no call fixture")
+}
+
 func testWorkspacePartitions(t *testing.T) []Partition {
 	t.Helper()
 	workspace, result := loadQuickstart(t)
