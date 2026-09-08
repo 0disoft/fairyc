@@ -47,6 +47,11 @@ func CurrentWorkspaceExpectationsV2(workspace workspaceloader.Workspace, result 
 	return currentWorkspaceExpectations(workspace, result, compilerBuild, LogicalSchemaV2)
 }
 
+// CurrentWorkspaceExpectationsV3 binds aggregate maps to current source and interfaces.
+func CurrentWorkspaceExpectationsV3(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity) (map[string]LoadExpectation, error) {
+	return currentWorkspaceExpectations(workspace, result, compilerBuild, LogicalSchemaV3)
+}
+
 func currentWorkspaceExpectations(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity, schema string) (map[string]LoadExpectation, error) {
 	if !result.Verified || compilerBuild == (buildidentity.Identity{}) {
 		return nil, fmt.Errorf("map load expectations require verified MIR and exact compiler identity")

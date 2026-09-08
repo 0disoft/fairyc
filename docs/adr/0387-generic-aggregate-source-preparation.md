@@ -218,5 +218,7 @@ aggregate specializations. No stable language, SDK or ABI promotion is made.
 The v3 logical planner and codec preserve aggregate declarations, concrete fields
 and separately owned cleanup summaries. The exact contract and mutation evidence
 are in `docs/atlas/fymap-transport-v3.md`. Existing v1/v2 bytes and explicit entry
-points remain isolated. Store, current-source query, workspace-join and CLI
-integration must adopt v3 before stable aggregate admission.
+points remain isolated. The opt-in v3 store and current-source expectations are
+implemented as documented in `docs/atlas/fymap-store-v3.md`; they preserve the
+existing opened-root I/O and version-local retention boundary. Query, workspace
+join and CLI integration must adopt v3 before stable aggregate admission.

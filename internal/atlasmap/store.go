@@ -18,6 +18,7 @@ import (
 
 const mapStoreLayoutDirectory = "fymap-v1"
 const mapStoreLayoutDirectoryV2 = "fymap-v2"
+const mapStoreLayoutDirectoryV3 = "fymap-v3"
 const maxReadableMapBytes = uint64(1<<63 - 2)
 
 // MapStoreLimits are mandatory caller policy for retained immutable map generations.
@@ -42,7 +43,7 @@ type MapStore struct {
 	root     *os.Root
 	rootName string
 	limits   MapStoreLimits
-	v2       bool
+	version  mapStoreVersion
 	mu       sync.Mutex
 	hits     uint64
 	misses   uint64
@@ -62,15 +63,18 @@ type mapPublishHooks struct {
 }
 
 func NewMapStore(root string, limits MapStoreLimits) (*MapStore, error) {
-	return newMapStore(root, limits, false)
+	return newMapStore(root, limits, mapStoreV1)
 }
 
 // NewMapStoreV2 opens an opt-in generic-aware store in a separate version directory.
 func NewMapStoreV2(root string, limits MapStoreLimits) (*MapStore, error) {
-	return newMapStore(root, limits, true)
+	return newMapStore(root, limits, mapStoreV2)
 }
 
-func newMapStore(root string, limits MapStoreLimits, v2 bool) (*MapStore, error) {
+func newMapStore(root string, limits MapStoreLimits, version mapStoreVersion) (*MapStore, error) {
+	if _, err := version.layoutDirectory(); err != nil {
+		return nil, err
+	}
 	if root == "" {
 		return nil, fmt.Errorf(".fymap store root must be nonempty")
 	}
@@ -89,20 +93,20 @@ func newMapStore(root string, limits MapStoreLimits, v2 bool) (*MapStore, error)
 		return nil, fmt.Errorf("open .fymap store root: %w", err)
 	}
 	defer boundary.Close()
-	return newMapStoreInRoot(boundary, ".", limits, v2)
+	return newMapStoreInRoot(boundary, ".", limits, version)
 }
 
 // NewMapStoreInRoot binds all later map I/O beneath boundary and a canonical relative root.
 func NewMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits) (*MapStore, error) {
-	return newMapStoreInRoot(boundary, root, limits, false)
+	return newMapStoreInRoot(boundary, root, limits, mapStoreV1)
 }
 
 // NewMapStoreV2InRoot keeps v2 publication and cleanup below the opened boundary.
 func NewMapStoreV2InRoot(boundary *os.Root, root string, limits MapStoreLimits) (*MapStore, error) {
-	return newMapStoreInRoot(boundary, root, limits, true)
+	return newMapStoreInRoot(boundary, root, limits, mapStoreV2)
 }
 
-func newMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits, v2 bool) (*MapStore, error) {
+func newMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits, version mapStoreVersion) (*MapStore, error) {
 	if boundary == nil {
 		return nil, fmt.Errorf(".fymap filesystem boundary must be initialized")
 	}
@@ -112,9 +116,9 @@ func newMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits, v2
 	if err := validateMapStoreLimits(limits); err != nil {
 		return nil, err
 	}
-	layout := mapStoreLayoutDirectory
-	if v2 {
-		layout = mapStoreLayoutDirectoryV2
+	layout, err := version.layoutDirectory()
+	if err != nil {
+		return nil, err
 	}
 	versionRoot := filepath.Join(root, layout)
 	if err := boundary.MkdirAll(versionRoot, 0o700); err != nil {
@@ -133,7 +137,7 @@ func newMapStoreInRoot(boundary *os.Root, root string, limits MapStoreLimits, v2
 		_ = opened.Close()
 		return nil, fmt.Errorf(".fymap version root changed while opening")
 	}
-	return &MapStore{root: opened, rootName: opened.Name(), limits: limits, v2: v2}, nil
+	return &MapStore{root: opened, rootName: opened.Name(), limits: limits, version: version}, nil
 }
 
 func validateMapStoreLimits(limits MapStoreLimits) error {
