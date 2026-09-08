@@ -558,9 +558,33 @@ ordinary codec defaults remain unchanged. Both encode and decode verify the
 package artifact. The shared bounded LRU retains copy isolation, eviction and
 interface-mismatch quarantine behavior. Tests include two verified vector-package
 cache hits followed by reassembly and low/optimized native execution, as well as
-cross-codec/process rejection and size/canonicality limits. Fixture keys are not
-production source keys: current-source key construction and hit/fallback
-coordination remain required, together with persistent cache and SDK admission.
+cross-codec/process rejection and size/canonicality limits. Fixture keys in this
+codec lane are not production source keys. The explicit workspace coordinator
+below supplies current-source identity and hit/fallback coordination; persistent
+cache and SDK admission remain separate.
+
+### Current-source process cache coordination
+
+`workspacecompiler.NewStorageTransferSession` explicitly selects the private
+transfer analyzer, process codec, fallback lowering, artifact extraction and
+reassembly. It reuses the generic source/interface/dependency/specialization key
+construction with an isolated transfer compatibility identity and the configured
+target. Every call analyzes current source and rebuilds provenance before lookup.
+Only complete verified hits with exact current package identities and coordinates
+may skip lowering; missing, rejected or incompatible artifacts fall back to the
+whole current compilation. Invalid current source never looks up retained code.
+
+The existing two-package vector ownership fixture now also loads real manifests
+and source digests, stores two cold artifacts and executes two warm hits under
+low/optimized MSVC. Provider template-body and client nominal-cleanup edits both
+invalidate the two package keys. Updated warm execution retains the original
+OOM, typed-transfer, exactly-once cleanup and zero-live-allocation counters.
+One-entry retention exercises mixed hit/miss fallback, and a lowering sentinel
+separately proves warm checks skip lowering while source changes invoke it.
+
+This constructor rejects persistent configuration before opening storage. Stable
+`SourceSession` selection still rejects generic aggregate source; no stable CLI,
+SDK, language or runtime ABI promotion is made by this private coordinator.
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,

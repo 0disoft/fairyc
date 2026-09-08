@@ -28,9 +28,17 @@ type GenericSession struct {
 	keys        Session
 	limits      genericplan.PlanLimits
 	lower       func(compiler.Analysis) (compiler.Result, error)
+	transfers   bool
 }
 
 func NewGenericSession(configuration Configuration, limits genericplan.PlanLimits) (*GenericSession, error) {
+	return newGenericSession(configuration, limits, false)
+}
+
+func newGenericSession(configuration Configuration, limits genericplan.PlanLimits, transfers bool) (*GenericSession, error) {
+	if transfers && configuration.Persistent != nil {
+		return nil, fmt.Errorf("storage transfer sessions do not admit persistent caches")
+	}
 	if limits.MaxSpecializations <= 0 || limits.MaxSpecializationsPerDeclaration <= 0 || limits.MaxExpansionDepth <= 0 {
 		return nil, fmt.Errorf("generic workspace planning limits must be positive")
 	}
@@ -45,13 +53,21 @@ func NewGenericSession(configuration Configuration, limits genericplan.PlanLimit
 	if err != nil {
 		return nil, err
 	}
-	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzed, storage: StorageMemory}
+	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzed, storage: StorageMemory, transfers: transfers}
 	if configuration.Persistent == nil {
-		session.cache, err = packageartifact.NewGenericCache(configuration.Cache, configuration.MaxArtifactBytes)
+		createCache := packageartifact.NewGenericCache
+		if transfers {
+			createCache = packageartifact.NewStorageTransferCache
+			session.lower = compiler.LowerAnalyzedStorageTransfers
+		}
+		session.cache, err = createCache(configuration.Cache, configuration.MaxArtifactBytes)
 		if err != nil {
 			return nil, err
 		}
 		session.keys.compilerBuild = compilerProcessEncoding + session.cache.Identity() + ":generic-v0"
+		if transfers {
+			session.keys.compilerBuild += ":storage-transfer-v0"
+		}
 	} else {
 		if configuration.Cache != (packagecache.Limits{}) {
 			return nil, fmt.Errorf("generic workspace cannot combine memory and persistent cache policies")
@@ -101,7 +117,11 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	if err != nil {
 		return Result{}, err
 	}
-	analysis, err := compiler.AnalyzeGenericPackages(input, coordinates, session.limits)
+	analyze := compiler.AnalyzeGenericPackages
+	if session.transfers {
+		analyze = compiler.AnalyzeStorageTransferPackages
+	}
+	analysis, err := analyze(input, coordinates, session.limits)
 	if err != nil {
 		return Result{}, err
 	}
@@ -167,7 +187,11 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		}
 	}
 	if allHit {
-		program, err := packageartifact.Reassemble(artifacts)
+		reassemble := packageartifact.Reassemble
+		if session.transfers {
+			reassemble = packageartifact.ReassembleStorageTransfers
+		}
+		program, err := reassemble(artifacts)
 		if err == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil
@@ -182,7 +206,11 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities, coordinates)
+	extract := packageartifact.ExtractAll
+	if session.transfers {
+		extract = packageartifact.ExtractAllStorageTransfers
+	}
+	extracted, err := extract(compiled.MIR, identities, coordinates)
 	if err != nil {
 		return Result{}, err
 	}

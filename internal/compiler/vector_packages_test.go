@@ -22,6 +22,19 @@ func vectorPackageInput(t *testing.T, replacements ...[2]string) (semantic.Packa
 
 func vectorPackageInputEdited(t *testing.T, editProvider func(string) string, replacements ...[2]string) (semantic.PackageInput, map[hir.PackageID]packagegraph.CoordinateID) {
 	t.Helper()
+	client, provider := vectorPackageSources(t, editProvider, replacements...)
+	input := semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", client),
+		parseCompilerFile(t, 2, "storage.fy", provider),
+	}, Imports: []semantic.PackageImport{{FromPackage: 1, ImportPath: "storage", ToPackage: 2}}}
+	first := genericCoordinate(t)
+	second := first
+	second[0] ^= 1
+	return input, map[hir.PackageID]packagegraph.CoordinateID{1: first, 2: second}
+}
+
+func vectorPackageSources(t *testing.T, editProvider func(string) string, replacements ...[2]string) (string, string) {
+	t.Helper()
 	between := func(start, end string) string {
 		_, tail, ok := strings.Cut(vectorResourceProgram, start)
 		if !ok {
@@ -56,14 +69,7 @@ func vectorPackageInputEdited(t *testing.T, editProvider func(string) string, re
 		}
 		client = changed
 	}
-	input := semantic.PackageInput{Files: []semantic.File{
-		parseCompilerFile(t, 1, "main.fy", client),
-		parseCompilerFile(t, 2, "storage.fy", provider),
-	}, Imports: []semantic.PackageImport{{FromPackage: 1, ImportPath: "storage", ToPackage: 2}}}
-	first := genericCoordinate(t)
-	second := first
-	second[0] ^= 1
-	return input, map[hir.PackageID]packagegraph.CoordinateID{1: first, 2: second}
+	return client, provider
 }
 
 func TestPrivateVectorPackageOwnership(t *testing.T) {

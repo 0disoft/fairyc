@@ -69,11 +69,19 @@ func CheckStorageTransferPackages(input semantic.PackageInput, coordinates map[h
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
-	result, err := lowerWithVerifier(analysis.Analysis.Semantic, mir.VerifyStorageTransfers)
-	if err == nil && result.Verified {
-		result.GenericProvenance = analysis.Analysis.GenericProvenance
-	}
+	result, err := LowerAnalyzedStorageTransfers(analysis.Analysis)
 	return result, analysis.Plan, err
+}
+
+// LowerAnalyzedStorageTransfers is the private cache fallback boundary. It keeps
+// ordinary lowering closed to transfers and publishes provenance only with MIR
+// accepted by the transfer verifier.
+func LowerAnalyzedStorageTransfers(analysis Analysis) (Result, error) {
+	result, err := lowerWithVerifier(analysis.Semantic, mir.VerifyStorageTransfers)
+	if err == nil && result.Verified {
+		result.GenericProvenance = analysis.GenericProvenance
+	}
+	return result, err
 }
 
 // AnalyzeStorageTransferPackages publishes private closed-graph source identities
