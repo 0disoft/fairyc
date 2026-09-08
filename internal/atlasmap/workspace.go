@@ -24,6 +24,11 @@ func PrepareWorkspaceV2(workspace workspaceloader.Workspace, result compiler.Res
 	return prepareWorkspace(workspace, result, compilerBuild, LogicalSchemaV2)
 }
 
+// PrepareWorkspaceV3 retains aggregate specializations and their cleanup bodies.
+func PrepareWorkspaceV3(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity) (semanticsnapshot.Snapshot, []Partition, error) {
+	return prepareWorkspace(workspace, result, compilerBuild, LogicalSchemaV3)
+}
+
 func prepareWorkspace(workspace workspaceloader.Workspace, result compiler.Result, compilerBuild buildidentity.Identity, schema string) (semanticsnapshot.Snapshot, []Partition, error) {
 	metadata, err := workspace.SemanticPackages()
 	if err != nil {

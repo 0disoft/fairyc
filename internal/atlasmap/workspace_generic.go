@@ -11,7 +11,7 @@ import (
 
 func workspaceInterfaceFacts(result compiler.Result, packages []hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, schema string) (map[hir.PackageID]moduleinterface.Hash, map[hir.PackageID]moduleinterface.GenericHash, error) {
 	facts := result.GenericProvenance.PackageInterfaces()
-	if schema != LogicalSchemaV2 || !result.Semantic.RequiresGenericProvenance && len(facts) == 0 {
+	if schema == LogicalSchema || !result.Semantic.RequiresGenericProvenance && len(facts) == 0 {
 		ordinary, err := moduleinterface.ComputePackages(result.Semantic.HIR, packages, coordinates)
 		return ordinary, nil, err
 	}

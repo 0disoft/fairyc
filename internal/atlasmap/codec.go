@@ -19,6 +19,8 @@ const (
 	TransportEncoding   = "fairyc.fymap-json/v1"
 	TransportSchemaV2   = "fairyc.fymap/v2"
 	TransportEncodingV2 = "fairyc.fymap-json/v2"
+	TransportSchemaV3   = "fairyc.fymap/v3"
+	TransportEncodingV3 = "fairyc.fymap-json/v3"
 	ChecksumAlgorithm   = "fairyc.fymap-checksum/v1-sha256"
 	ChecksumPrefix      = "fymap1-sha256-"
 	checksumInputDomain = "fairyc.fymap-checksum"
@@ -66,6 +68,11 @@ func EncodeV2(partition Partition, maxBytes uint64) ([]byte, error) {
 	return encodeVersion(partition, maxBytes, TransportSchemaV2, TransportEncodingV2, LogicalSchemaV2)
 }
 
+// EncodeV3 includes concrete aggregate and cleanup facts without changing v1/v2.
+func EncodeV3(partition Partition, maxBytes uint64) ([]byte, error) {
+	return encodeVersion(partition, maxBytes, TransportSchemaV3, TransportEncodingV3, LogicalSchemaV3)
+}
+
 func encodeVersion(partition Partition, maxBytes uint64, schema, encoding, logical string) ([]byte, error) {
 	if maxBytes == 0 {
 		return nil, fmt.Errorf(".fymap byte limit must be positive")
@@ -100,6 +107,11 @@ func Decode(encoded []byte, maxBytes uint64) (Partition, error) {
 // DecodeV2 validates generic-aware records without admitting them to legacy queries.
 func DecodeV2(encoded []byte, maxBytes uint64) (Partition, error) {
 	return decodeVersion(encoded, maxBytes, TransportSchemaV2, TransportEncodingV2, LogicalSchemaV2)
+}
+
+// DecodeV3 validates exact aggregate-aware bytes; older decoders reject them.
+func DecodeV3(encoded []byte, maxBytes uint64) (Partition, error) {
+	return decodeVersion(encoded, maxBytes, TransportSchemaV3, TransportEncodingV3, LogicalSchemaV3)
 }
 
 func decodeVersion(encoded []byte, maxBytes uint64, schema, encoding, logical string) (Partition, error) {

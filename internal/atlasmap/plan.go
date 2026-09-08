@@ -20,6 +20,7 @@ import (
 const (
 	LogicalSchema          = "fairyc.fymap-logical/v1"
 	LogicalSchemaV2        = "fairyc.fymap-logical/v2"
+	LogicalSchemaV3        = "fairyc.fymap-logical/v3"
 	TargetScopeIndependent = "target-independent"
 	GenerationExact        = "exact"
 	GenerationPartial      = "partial"
@@ -159,9 +160,14 @@ func BuildPlanV2(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, 
 	return buildPlan(snapshot, input, LogicalSchemaV2)
 }
 
+// BuildPlanV3 also preserves generic aggregate fields and resource cleanup summaries.
+func BuildPlanV3(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, error) {
+	return buildPlan(snapshot, input, LogicalSchemaV3)
+}
+
 func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) ([]Partition, error) {
 	for _, declaration := range snapshot.Declarations() {
-		if len(declaration.TypeParameters) != 0 && declaration.Key.Kind != semanticsnapshot.DeclarationFunction {
+		if schema != LogicalSchemaV3 && len(declaration.TypeParameters) != 0 && declaration.Key.Kind != semanticsnapshot.DeclarationFunction {
 			return nil, fmt.Errorf("Atlas map requires aggregate specialization transport support")
 		}
 	}
@@ -188,7 +194,7 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 	if schema == LogicalSchema && len(input.GenericInterfaces) != 0 {
 		return nil, fmt.Errorf("Atlas map v1 cannot preserve generic interface identities")
 	}
-	if schema == LogicalSchemaV2 && (hasGeneric || len(input.GenericInterfaces) != 0) && len(input.GenericInterfaces) != len(packages) {
+	if schema != LogicalSchema && (hasGeneric || len(input.GenericInterfaces) != 0) && len(input.GenericInterfaces) != len(packages) {
 		return nil, fmt.Errorf("Atlas map plan requires one generic source interface per package")
 	}
 
@@ -311,6 +317,9 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 		}
 		builder.data.specializations = append(builder.data.specializations, specialization)
 		builder.data.header.Counts.Relations += relationCount(specialization.Function)
+		if specialization.Cleanup != nil {
+			builder.data.header.Counts.Relations += relationCount(*specialization.Cleanup)
+		}
 	}
 
 	completeness := snapshot.Completeness()

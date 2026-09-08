@@ -38,7 +38,7 @@ func validateGenericPartition(partition Partition, files map[string]struct{}, ke
 			return fmt.Errorf("specialization IDs are invalid, duplicated, or noncanonical")
 		}
 		declaration, exists := declarations[item.Declaration]
-		if !exists || item.Declaration.PackageInstance != instance || len(declaration.TypeParameters) == 0 || item.Function.Function != item.Declaration {
+		if !exists || item.Declaration.PackageInstance != instance || len(declaration.TypeParameters) == 0 {
 			return fmt.Errorf("specialization has no matching local generic declaration")
 		}
 		if len(item.TypeArguments) != len(declaration.TypeParameters) {
@@ -64,11 +64,23 @@ func validateGenericPartition(partition Partition, files map[string]struct{}, ke
 			return fmt.Errorf("specialization repeats a declaration and argument binding")
 		}
 		bindings[binding] = true
-		if err := validateFunction(item.Function, instance, files, keys, instances, true); err != nil {
-			return err
+		if item.Declaration.Kind == semanticsnapshot.DeclarationFunction {
+			if item.Function.Function != item.Declaration || item.Aggregate != nil || item.Cleanup != nil {
+				return fmt.Errorf("function specialization has incompatible summary kind")
+			}
+			if err := validateFunction(item.Function, instance, files, keys, instances, true); err != nil {
+				return err
+			}
+			all = append(all, item.Function)
+		} else {
+			if err := validateAggregateSpecialization(item, declaration, instance, files, keys, instances); err != nil {
+				return err
+			}
+			if item.Cleanup != nil {
+				all = append(all, *item.Cleanup)
+			}
 		}
 		implementations[item.ID] = item
-		all = append(all, item.Function)
 	}
 	for _, function := range all {
 		for _, call := range function.Calls {

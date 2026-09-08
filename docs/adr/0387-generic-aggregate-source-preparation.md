@@ -210,6 +210,13 @@ summary view without modifying executable MIR.
 
 Tests cover two resource specializations, nested fields, cleanup helper calls and
 borrows, documentation attachment, detached getters, inconsistent concrete fields,
-and ordinary cleanup ownership. `.fymap` planning still explicitly rejects
-aggregate specializations until its transport can preserve these facts. No stable
-language, SDK, ABI, or map-format promotion is made in this snapshot step.
+and ordinary cleanup ownership. The v1/v2 planners still explicitly reject
+aggregate specializations. No stable language, SDK or ABI promotion is made.
+
+## Opt-in aggregate map codec
+
+The v3 logical planner and codec preserve aggregate declarations, concrete fields
+and separately owned cleanup summaries. The exact contract and mutation evidence
+are in `docs/atlas/fymap-transport-v3.md`. Existing v1/v2 bytes and explicit entry
+points remain isolated. Store, current-source query, workspace-join and CLI
+integration must adopt v3 before stable aggregate admission.

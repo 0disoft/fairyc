@@ -16,6 +16,14 @@ func (partition Partition) Specializations() []semanticsnapshot.SpecializationSu
 			result[i].TypeArguments[j] = cloneTypeRef(result[i].TypeArguments[j])
 		}
 		result[i].Function = cloneFunctionSummaries([]semanticsnapshot.FunctionSummary{result[i].Function})[0]
+		if result[i].Aggregate != nil {
+			value := cloneDeclarations([]semanticsnapshot.Declaration{*result[i].Aggregate})[0]
+			result[i].Aggregate = &value
+		}
+		if result[i].Cleanup != nil {
+			value := cloneFunctionSummaries([]semanticsnapshot.FunctionSummary{*result[i].Cleanup})[0]
+			result[i].Cleanup = &value
+		}
 	}
 	return result
 }

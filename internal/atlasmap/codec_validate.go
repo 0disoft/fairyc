@@ -24,7 +24,7 @@ func validateTransportPartition(partition Partition) error {
 }
 
 func validatePartitionVersion(partition Partition, schema string) error {
-	generic := schema == LogicalSchemaV2
+	generic := schema == LogicalSchemaV2 || schema == LogicalSchemaV3
 	if !generic && len(partition.data.specializations) != 0 {
 		return fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
 	}
@@ -42,6 +42,12 @@ func validatePartitionVersion(partition Partition, schema string) error {
 	relations := countRelations(functions)
 	for _, item := range partition.data.specializations {
 		relations += relationCount(item.Function)
+		if item.Cleanup != nil {
+			relations += relationCount(*item.Cleanup)
+		}
+		if schema != LogicalSchemaV3 && (item.Aggregate != nil || item.Cleanup != nil) {
+			return fmt.Errorf("aggregate specialization requires map v3")
+		}
 	}
 	if header.Counts != (RecordCounts{
 		Files: len(files), Modules: len(modules), Symbols: len(symbols), Functions: len(functions),
@@ -115,7 +121,10 @@ func validatePartitionVersion(partition Partition, schema string) error {
 		if index > 0 && compareDeclarationKey(declarations[index-1].Key, declaration.Key) >= 0 {
 			return fmt.Errorf("declarations are not canonical")
 		}
-		if err := validateDeclaration(declaration, header.PackageInstance, filePaths, modulePaths, generic); err != nil {
+		if schema != LogicalSchemaV3 && len(declaration.TypeParameters) > 0 && declaration.Key.Kind != semanticsnapshot.DeclarationFunction {
+			return fmt.Errorf("generic aggregate declaration requires map v3")
+		}
+		if err := validateDeclaration(declaration, header.PackageInstance, filePaths, modulePaths, generic, schema == LogicalSchemaV3); err != nil {
 			return err
 		}
 		declarationSet[declaration.Key] = struct{}{}
@@ -214,7 +223,7 @@ func validatePartitionVersion(partition Partition, schema string) error {
 
 func validateTransportHeader(header Header, schema string) (map[string]string, map[string]string, error) {
 	if header.GenericInterfaceAlgorithm != "" || header.GenericInterfaceHash != "" {
-		if schema != LogicalSchemaV2 || header.GenericInterfaceAlgorithm != moduleinterface.GenericHashEncoding {
+		if (schema != LogicalSchemaV2 && schema != LogicalSchemaV3) || header.GenericInterfaceAlgorithm != moduleinterface.GenericHashEncoding {
 			return nil, nil, fmt.Errorf("generic interface algorithm is incompatible")
 		}
 		hash, err := moduleinterface.ParseGenericHash(header.GenericInterfaceHash)
@@ -354,7 +363,7 @@ func validateTransportHeader(header Header, schema string) (map[string]string, m
 	return instanceUIDs, coordinateUIDs, nil
 }
 
-func validateDeclaration(value semanticsnapshot.Declaration, instance string, files, modules map[string]struct{}, generic bool) error {
+func validateDeclaration(value semanticsnapshot.Declaration, instance string, files, modules map[string]struct{}, generic, aggregates bool) error {
 	if !generic && len(value.TypeParameters) != 0 {
 		return fmt.Errorf("Atlas map v1 cannot preserve a generic declaration")
 	}
@@ -367,11 +376,11 @@ func validateDeclaration(value semanticsnapshot.Declaration, instance string, fi
 	if err := validateSpan(value.Span, instance, files); err != nil {
 		return fmt.Errorf("declaration %+v: %w", value.Key, err)
 	}
-	if err := validateBoundTypeRef(value.Type, 0, len(value.TypeParameters)); err != nil {
+	if err := validateVersionTypeRef(value.Type, 0, len(value.TypeParameters), aggregates); err != nil {
 		return fmt.Errorf("declaration %+v type: %w", value.Key, err)
 	}
 	if value.Owner != nil {
-		if err := validateTypeRef(*value.Owner, 0); err != nil {
+		if err := validateVersionTypeRef(*value.Owner, 0, 0, aggregates); err != nil {
 			return fmt.Errorf("declaration %+v owner: %w", value.Key, err)
 		}
 	}
@@ -385,14 +394,18 @@ func validateDeclaration(value semanticsnapshot.Declaration, instance string, fi
 		if !source.ValidIdentifier(parameter.Name) {
 			return fmt.Errorf("declaration %+v has invalid parameter %q", value.Key, parameter.Name)
 		}
-		if err := validateBoundTypeRef(parameter.Type, 0, len(value.TypeParameters)); err != nil {
+		if err := validateVersionTypeRef(parameter.Type, 0, len(value.TypeParameters), aggregates); err != nil {
 			return err
 		}
 		if err := validateSpan(parameter.Span, instance, files); err != nil {
 			return err
 		}
 	}
-	if err := validateFields(value.Fields, instance, files); err != nil {
+	fieldArity := 0
+	if aggregates {
+		fieldArity = len(value.TypeParameters)
+	}
+	if err := validateFields(value.Fields, instance, files, fieldArity, aggregates); err != nil {
 		return err
 	}
 	variantNames := make(map[string]struct{}, len(value.Variants))
@@ -407,14 +420,14 @@ func validateDeclaration(value semanticsnapshot.Declaration, instance string, fi
 		if err := validateSpan(variant.Span, instance, files); err != nil {
 			return err
 		}
-		if err := validateFields(variant.Fields, instance, files); err != nil {
+		if err := validateFields(variant.Fields, instance, files, fieldArity, aggregates); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func validateFields(values []semanticsnapshot.Field, instance string, files map[string]struct{}) error {
+func validateFields(values []semanticsnapshot.Field, instance string, files map[string]struct{}, arity int, aggregates bool) error {
 	names := make(map[string]struct{}, len(values))
 	for _, field := range values {
 		if !source.ValidIdentifier(field.Name) {
@@ -424,7 +437,7 @@ func validateFields(values []semanticsnapshot.Field, instance string, files map[
 			return fmt.Errorf("duplicate field name %q", field.Name)
 		}
 		names[field.Name] = struct{}{}
-		if err := validateTypeRef(field.Type, 0); err != nil {
+		if err := validateVersionTypeRef(field.Type, 0, arity, aggregates); err != nil {
 			return err
 		}
 		if err := validateSpan(field.Span, instance, files); err != nil {
@@ -518,6 +531,10 @@ func validateTypeRef(value semanticsnapshot.TypeRef, depth int) error {
 }
 
 func validateBoundTypeRef(value semanticsnapshot.TypeRef, depth, arity int) error {
+	return validateVersionTypeRef(value, depth, arity, false)
+}
+
+func validateVersionTypeRef(value semanticsnapshot.TypeRef, depth, arity int, aggregates bool) error {
 	if depth >= maxTransportTypeDepth {
 		return fmt.Errorf("type nesting exceeds %d", maxTransportTypeDepth)
 	}
@@ -538,7 +555,7 @@ func validateBoundTypeRef(value semanticsnapshot.TypeRef, depth, arity int) erro
 			return fmt.Errorf("invalid builtin type")
 		}
 	case semanticsnapshot.TypeNominal:
-		if !validQualifiedPath(value.Name) || len(value.Arguments) != 0 {
+		if !validQualifiedPath(value.Name) || (!aggregates && len(value.Arguments) != 0) {
 			return fmt.Errorf("invalid nominal type %q", value.Name)
 		}
 		if _, err := packagegraph.ParseCoordinateID(value.PackageCoordinate); err != nil {
@@ -556,7 +573,7 @@ func validateBoundTypeRef(value semanticsnapshot.TypeRef, depth, arity int) erro
 		return fmt.Errorf("unknown type kind %q", value.Kind)
 	}
 	for _, argument := range value.Arguments {
-		if err := validateBoundTypeRef(argument, depth+1, arity); err != nil {
+		if err := validateVersionTypeRef(argument, depth+1, arity, aggregates); err != nil {
 			return err
 		}
 	}
