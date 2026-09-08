@@ -108,6 +108,20 @@ execute through the restricted path under both MSVC profiles; the same consumer
 cannot directly use a storage-take intrinsic. Source tests cover all five private
 intrinsic spellings, exact owner selection and detached input preservation.
 
-This selection API is not source authentication. The workspace integration must
-prove the selected package is the exact embedded SDK before exposing stable
-selection; stable loader, SourceSession and CLI behavior remain unchanged here.
+This selection API is not source authentication. The candidate workspace now
+supplies that missing check: `VectorCandidateStorageOwners` requires explicit
+candidate loading, exact SDK kind/identity/runtime/digest/module catalog, and the
+complete ordered source paths, bytes and parsed ASTs from the embedded bundle.
+It rejects test overlays inside the SDK and SDK claims on other package paths.
+Only the verified catalog's resolved SDK owners receive storage authority.
+
+`NewVectorCandidateSession` applies this check before analysis/cache lookup and
+uses the owner-restricted compiler path. Its compiler-build key has a separate
+SDK-owned discriminator from the unrestricted private test session. Real memory
+and reopened disk hits still execute Buffer reads and cleanup under both MSVC
+profiles. Consumer intrinsics, mutated SDK ASTs and invalid current source leave
+cache statistics unchanged. Loader mutation tests cover bytes, AST, source paths,
+order/count, test flags, digest, labels, runtime and module catalog.
+
+Stable loader, SourceSession and CLI selection remain unchanged; this is the
+verified candidate integration prerequisite, not installed SDK promotion.

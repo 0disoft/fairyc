@@ -29,6 +29,7 @@ type GenericSession struct {
 	limits      genericplan.PlanLimits
 	lower       func(compiler.Analysis) (compiler.Result, error)
 	transfers   bool
+	sdkStorage  bool
 }
 
 func NewGenericSession(configuration Configuration, limits genericplan.PlanLimits) (*GenericSession, error) {
@@ -132,7 +133,20 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	if session.transfers {
 		analyze = compiler.AnalyzeStorageTransferPackages
 	}
-	analysis, err := analyze(input, coordinates, session.limits)
+	var analysis compiler.GenericAnalysis
+	if session.sdkStorage {
+		owners, authorityErr := workspace.VectorCandidateStorageOwners()
+		if authorityErr != nil {
+			return Result{}, authorityErr
+		}
+		if len(owners) == 0 {
+			analysis, err = compiler.AnalyzeGenericPackages(input, coordinates, session.limits)
+		} else {
+			analysis, err = compiler.AnalyzeOwnedStorageTransferPackages(input, coordinates, session.limits, owners)
+		}
+	} else {
+		analysis, err = analyze(input, coordinates, session.limits)
+	}
 	if err != nil {
 		return Result{}, err
 	}

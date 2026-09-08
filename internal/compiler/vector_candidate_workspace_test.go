@@ -51,7 +51,7 @@ source = "src"
 			if persistent {
 				configuration = vectorPersistentConfiguration(t, t.TempDir())
 			}
-			session, err := workspacecompiler.NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits())
+			session, err := workspacecompiler.NewVectorCandidateSession(configuration, genericplan.DefaultPlanLimits())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -62,7 +62,7 @@ source = "src"
 			}
 			if persistent {
 				session.Close()
-				session, err = workspacecompiler.NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits())
+				session, err = workspacecompiler.NewVectorCandidateSession(configuration, genericplan.DefaultPlanLimits())
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -127,6 +127,22 @@ source = "src"
 			invalid, err = session.Check(load())
 			if invalid.Compiler.Verified || invalid.Cache.Hits != 0 || invalid.Cache.Stored != 0 || !reflect.DeepEqual(before, stats()) {
 				t.Fatalf("borrow conflict reached candidate cache: %v %+v", err, invalid.Cache)
+			}
+			writeVectorCacheFile(t, root, "src/main.fy", strings.Replace(changed, "return 40 + 1;", "return unsafe { storage_take<i32>(null) };", 1))
+			invalid, err = session.Check(load())
+			if invalid.Compiler.Verified || invalid.Cache.Hits != 0 || invalid.Cache.Stored != 0 || !reflect.DeepEqual(before, stats()) {
+				t.Fatalf("consumer intrinsic reached candidate cache: %v %+v", err, invalid.Cache)
+			}
+			writeVectorCacheFile(t, root, "src/main.fy", changed)
+			forged := load()
+			for i := range forged.Packages {
+				if forged.Packages[i].Path == sdkstdlib.PackagePath {
+					forged.Packages[i].Sources[0].Module.Path = "forged"
+				}
+			}
+			invalid, err = session.Check(forged)
+			if err == nil || invalid.Compiler.Verified || !reflect.DeepEqual(before, stats()) {
+				t.Fatalf("forged SDK reached candidate cache: %v %+v", err, invalid.Cache)
 			}
 		})
 	}

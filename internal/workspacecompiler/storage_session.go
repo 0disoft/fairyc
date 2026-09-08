@@ -24,6 +24,19 @@ func NewStorageTransferSession(configuration Configuration, limits genericplan.P
 	return &StorageTransferSession{generic: session}, nil
 }
 
+// NewVectorCandidateSession selects private operations only for the exact
+// embedded SDK source verified by the candidate workspace loader. It does not
+// change ordinary SourceSession selection or expose the unrestricted test lane.
+func NewVectorCandidateSession(configuration Configuration, limits genericplan.PlanLimits) (*StorageTransferSession, error) {
+	session, err := NewStorageTransferSession(configuration, limits)
+	if err != nil {
+		return nil, err
+	}
+	session.generic.sdkStorage = true
+	session.generic.keys.compilerBuild += ":sdk-owned-storage-v0"
+	return session, nil
+}
+
 func (session *StorageTransferSession) Check(workspace workspaceloader.Workspace) (Result, error) {
 	if session == nil || session.generic == nil {
 		return Result{}, fmt.Errorf("storage transfer session is not initialized")
