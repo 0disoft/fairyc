@@ -62,10 +62,10 @@ func ParseChecksum(value string) (Checksum, error) {
 
 // EncodeOverview runs one bounded exact-current overview query and returns one canonical pack.
 func EncodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, maxBytes uint64) ([]byte, error) {
-	return encodeOverview(index, budget, maxBytes, false)
+	return encodeOverview(index, budget, maxBytes, 1)
 }
 
-func encodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, maxBytes uint64, generic bool) ([]byte, error) {
+func encodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, maxBytes uint64, version byte) ([]byte, error) {
 	if err := validateMaxBytes(maxBytes); err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func encodeOverview(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, max
 		result.Omissions,
 	)
 	document.Facts.Overview = &overviewFacts{Package: result.Package, Modules: nonNil(result.Modules)}
-	return encode(document, maxBytes, generic)
+	return encode(document, maxBytes, version)
 }
 
 // EncodeShow runs one bounded exact-current symbol query and returns one canonical pack.
@@ -99,10 +99,10 @@ func EncodeShow(
 	request atlasmap.RelationRequest,
 	maxBytes uint64,
 ) ([]byte, error) {
-	return encodeShow(index, symbolID, request, maxBytes, false)
+	return encodeShow(index, symbolID, request, maxBytes, 1)
 }
 
-func encodeShow(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64, generic bool) ([]byte, error) {
+func encodeShow(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64, version byte) ([]byte, error) {
 	if err := validateMaxBytes(maxBytes); err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func encodeShow(index *atlasmap.QueryIndex, symbolID string, request atlasmap.Re
 	)
 	document.Facts.Show = &showFacts{Subject: result.Subject}
 	document.Relations = nonNil(result.Relations)
-	return encode(document, maxBytes, generic)
+	return encode(document, maxBytes, version)
 }
 
 // EncodeAround runs one bounded exact-current neighborhood query and returns one canonical pack.
@@ -132,10 +132,10 @@ func EncodeAround(
 	request atlasmap.RelationRequest,
 	maxBytes uint64,
 ) ([]byte, error) {
-	return encodeAround(index, symbolID, request, maxBytes, false)
+	return encodeAround(index, symbolID, request, maxBytes, 1)
 }
 
-func encodeAround(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64, generic bool) ([]byte, error) {
+func encodeAround(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64, version byte) ([]byte, error) {
 	if err := validateMaxBytes(maxBytes); err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func encodeAround(index *atlasmap.QueryIndex, symbolID string, request atlasmap.
 	)
 	document.Facts.Around = &aroundFacts{Nodes: nonNil(result.Nodes)}
 	document.Relations = nonNil(result.Relations)
-	return encode(document, maxBytes, generic)
+	return encode(document, maxBytes, version)
 }
 
 type packEnvelope struct {
@@ -273,12 +273,19 @@ func baseDocument(
 	}
 }
 
-func encode(document packDocument, maxBytes uint64, generic bool) ([]byte, error) {
+func encode(document packDocument, maxBytes uint64, packVersion byte) ([]byte, error) {
 	schema := atlasmap.LogicalSchema
 	version, encoding, algorithm, prefix, checksumVersion := PackVersion, PackEncoding, ChecksumAlgorithm, ChecksumPrefix, byte(1)
-	if generic {
+	switch packVersion {
+	case 1:
+	case 2:
 		schema = atlasmap.LogicalSchemaV2
 		version, encoding, algorithm, prefix, checksumVersion = PackVersionV2, PackEncodingV2, ChecksumAlgorithmV2, ChecksumPrefixV2, 2
+	case 3:
+		schema = atlasmap.LogicalSchemaV3
+		version, encoding, algorithm, prefix, checksumVersion = PackVersionV3, PackEncodingV3, ChecksumAlgorithmV3, ChecksumPrefixV3, 3
+	default:
+		return nil, fmt.Errorf("unsupported Context Pack version %d", packVersion)
 	}
 	if document.MapVersion != schema {
 		return nil, fmt.Errorf("Atlas Context Pack requires %s maps", schema)

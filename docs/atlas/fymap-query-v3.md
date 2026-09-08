@@ -49,4 +49,5 @@ Function-only v2 output does not gain aggregate, cleanup or source-body fields.
 `NewWorkspaceCallIndexV3` consumes these relations with cleanup ownership intact;
 see `docs/atlas/workspace-call-join-v0.md`. Call catalog v2 preserves the joined
 cleanup marker. Experimental symbol catalog 3 and call catalog 2 commands now
-explicitly adopt v3. Context Pack and other CLI consumers remain separate work.
+explicitly adopt v3, as does Context Pack with `--pack-version 3`. Attributed-text
+and Evidence Bundle consumers remain separate work.

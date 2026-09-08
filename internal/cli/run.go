@@ -45,9 +45,9 @@ Usage:
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc experimental check <primary.fy> [--source <file.fy>]...
   fairyc experimental check-workspace [--locked]
-  fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2>] [--locked]
-  fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2>] [--locked]
-  fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2>] [--locked]
+  fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]
+  fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]
+  fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]
   fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--name <identifier>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--catalog-version <1|2|3>] [--locked]
   fairyc experimental atlas-calls list --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --max-packages <count> --max-calls <count> --max-output-bytes <bytes> [--catalog-version <0|1|2>] [--locked]
   fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]

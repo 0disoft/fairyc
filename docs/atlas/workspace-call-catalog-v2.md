@@ -56,7 +56,8 @@ bytes; they do not authenticate the compiler or grant authority.
 Tests cover two cleanup specializations calling a generic dependency, incoming,
 outgoing, both and empty selections, exact final byte limits, version rejection,
 independently computed checksums, body mutation, and legacy field omission.
-Context Pack and Evidence Bundle adoption remain separate work.
+Package-local Context Pack v3 is available separately; it does not consume this
+workspace call ledger. Aggregate-aware Evidence Bundle adoption remains pending.
 
 ## CLI selection
 

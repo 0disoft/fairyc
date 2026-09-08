@@ -30,15 +30,15 @@ func ParseChecksumV2(value string) (ChecksumV2, error) {
 
 // EncodeOverviewV2 preserves generic-aware package counts and compatibility in a v2 pack.
 func EncodeOverviewV2(index *atlasmap.QueryIndex, budget atlasmap.QueryBudget, maxBytes uint64) ([]byte, error) {
-	return encodeOverview(index, budget, maxBytes, true)
+	return encodeOverview(index, budget, maxBytes, 2)
 }
 
 // EncodeShowV2 keeps source declarations separate from concrete implementation observations.
 func EncodeShowV2(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64) ([]byte, error) {
-	return encodeShow(index, symbolID, request, maxBytes, true)
+	return encodeShow(index, symbolID, request, maxBytes, 2)
 }
 
 // EncodeAroundV2 describes a declaration neighborhood, not a concrete execution path.
 func EncodeAroundV2(index *atlasmap.QueryIndex, symbolID string, request atlasmap.RelationRequest, maxBytes uint64) ([]byte, error) {
-	return encodeAround(index, symbolID, request, maxBytes, true)
+	return encodeAround(index, symbolID, request, maxBytes, 2)
 }

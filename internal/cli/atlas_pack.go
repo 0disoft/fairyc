@@ -29,7 +29,7 @@ type atlasPackOverviewOptions struct {
 	maxSelectionBytes uint64
 	maxOutputBytes    uint64
 	locked            bool
-	packV2            bool
+	packVersion       string
 }
 
 func runAtlasPack(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -51,13 +51,15 @@ func runAtlasPackOverview(arguments []string, sourceRoot string, stdout, stderr 
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasQueryVersion(sourceRoot, options.packageUID, options.locked, stderr, options.packV2)
+	prepared, code := prepareAtlasQuerySchema(sourceRoot, options.packageUID, options.locked, stderr, atlasPackSchema(options.packVersion))
 	if code != ExitSuccess {
 		return code
 	}
 	encode := contextpack.EncodeOverview
-	if options.packV2 {
+	if options.packVersion == "2" {
 		encode = contextpack.EncodeOverviewV2
+	} else if options.packVersion == "3" {
+		encode = contextpack.EncodeOverviewV3
 	}
 	encoded, err := encode(prepared.index, atlasmap.QueryBudget{
 		MaxRecords: options.maxRecords, MaxRelations: 0, MaxDepth: 0,
@@ -253,10 +255,10 @@ func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions
 		value := arguments[index+1]
 		switch flag {
 		case "--pack-version":
-			if value != "1" && value != "2" {
-				return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" requires --pack-version as 1 or 2")
+			if value != "1" && value != "2" && value != "3" {
+				return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" requires --pack-version as 1, 2 or 3")
 			}
-			options.packV2 = value == "2"
+			options.packVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-pack overview", value); err != nil {
 				return atlasPackOverviewOptions{}, err

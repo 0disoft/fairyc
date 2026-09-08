@@ -238,5 +238,7 @@ now connect discovery to cleanup-call queries using the same loaded workspace.
 Legacy/default commands and stable workspace checks retain their prior admission.
 CLI tests cover discovered IDs, both directions, unused templates, lock-byte
 preservation, atomic selection/budget/source failures and output-writer failure.
-Context Pack, attributed-text and Evidence Bundle adoption remain separate from
-stable aggregate admission.
+Context Pack v3 and `atlas-pack --pack-version 3` now preserve concrete aggregate
+fields and separately owned cleanup calls/borrows through overview/show/around;
+see `docs/atlas/context-pack-v3.md`. Attributed-text and Evidence Bundle adoption
+remain separate from stable aggregate admission.

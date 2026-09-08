@@ -170,6 +170,10 @@ func loadContextPackFixture(t *testing.T) contextPackFixture {
 }
 
 func loadContextPackFixtureVersion(t *testing.T, generic bool) contextPackFixture {
+	return loadContextPackFixtureMode(t, generic, false)
+}
+
+func loadContextPackFixtureMode(t *testing.T, generic, aggregate bool) contextPackFixture {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -201,6 +205,9 @@ fn i32 main() {
 	if generic {
 		writeContextPackFixture(t, filepath.Join(root, "src", "main.fy"), "module main; fn T leaf<T>(T x) { let ref T view = ref x; return *view; } fn T middle<T>(T x) { return leaf<T>(x); } fn T unused<T>(T x) { return x; } fn i32 main() { assert(middle<i32>(42) == 42); assert(middle<u32>(7) == 7); return 0; }")
 	}
+	if aggregate {
+		writeContextPackFixture(t, filepath.Join(root, "src", "main.fy"), "module main; struct Cell<T> { T value; } resource Token<T> { Cell<T> payload; cleanup { let T copy = this.payload.value; let ref T view = ref copy; let T observed = leaf<T>(*view); } } fn T leaf<T>(T x) { return x; } fn Token<T> make<T>(T value) { return Token<T> { .payload = Cell<T> { .value = value } }; } fn i32 main() { let Token<i32> a = make<i32>(42); let Token<u32> b = make<u32>(7); return a.payload.value; }")
+	}
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
 		t.Fatal(err)
@@ -227,6 +234,9 @@ fn i32 main() {
 	if generic {
 		prepare, current, query = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2, atlasmap.NewQueryIndexV2
 	}
+	if aggregate {
+		prepare, current, query = atlasmap.PrepareWorkspaceV3, atlasmap.CurrentWorkspaceExpectationsV3, atlasmap.NewQueryIndexV3
+	}
 	_, partitions, err := prepare(workspace, result, compilerBuild)
 	if err != nil || len(partitions) != 1 {
 		t.Fatalf("PrepareWorkspace() = %d, %v", len(partitions), err)
@@ -243,7 +253,7 @@ fn i32 main() {
 	symbols := make(map[semanticsnapshot.DeclarationKey]string)
 	for _, symbol := range partition.Symbols() {
 		symbols[symbol.Declaration] = symbol.Visible
-		if generic && symbol.Declaration.Name == "middle" {
+		if aggregate && symbol.Declaration.Name == "Token" || generic && !aggregate && symbol.Declaration.Name == "middle" {
 			return contextPackFixture{root: root, index: index, symbol: symbol.Visible}
 		}
 	}

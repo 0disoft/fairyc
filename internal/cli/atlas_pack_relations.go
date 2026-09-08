@@ -25,7 +25,7 @@ type atlasPackRelationOptions struct {
 	maxSelectionBytes uint64
 	maxOutputBytes    uint64
 	locked            bool
-	packV2            bool
+	packVersion       string
 }
 
 func runAtlasPackRelations(query string, arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -33,7 +33,7 @@ func runAtlasPackRelations(query string, arguments []string, sourceRoot string, 
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasQueryVersion(sourceRoot, options.packageUID, options.locked, stderr, options.packV2)
+	prepared, code := prepareAtlasQuerySchema(sourceRoot, options.packageUID, options.locked, stderr, atlasPackSchema(options.packVersion))
 	if code != ExitSuccess {
 		return code
 	}
@@ -46,8 +46,10 @@ func runAtlasPackRelations(query string, arguments []string, sourceRoot string, 
 	}
 	var encoded []byte
 	show, around := contextpack.EncodeShow, contextpack.EncodeAround
-	if options.packV2 {
+	if options.packVersion == "2" {
 		show, around = contextpack.EncodeShowV2, contextpack.EncodeAroundV2
+	} else if options.packVersion == "3" {
+		show, around = contextpack.EncodeShowV3, contextpack.EncodeAroundV3
 	}
 	if query == "show" {
 		encoded, err = show(prepared.index, options.symbol, request, options.maxOutputBytes)
@@ -101,10 +103,10 @@ func parseAtlasRelationOptions(command, query string, arguments []string) (atlas
 		value := arguments[position+1]
 		switch flag {
 		case "--pack-version":
-			if value != "1" && value != "2" {
-				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q requires --pack-version as 1 or 2", command)
+			if value != "1" && value != "2" && value != "3" {
+				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q requires --pack-version as 1, 2 or 3", command)
 			}
-			options.packV2 = value == "2"
+			options.packVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID(command, value); err != nil {
 				return atlasPackRelationOptions{}, err
@@ -185,4 +187,15 @@ func validateAtlasSymbol(value string) error {
 		}
 	}
 	return fmt.Errorf("experimental Atlas relation query requires --symbol as a canonical visible or full SymbolId")
+}
+
+func atlasPackSchema(version string) string {
+	switch version {
+	case "2":
+		return atlasmap.LogicalSchemaV2
+	case "3":
+		return atlasmap.LogicalSchemaV3
+	default:
+		return atlasmap.LogicalSchema
+	}
 }
