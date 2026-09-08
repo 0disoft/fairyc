@@ -298,3 +298,7 @@ and reruns the existing five-scalar cleanup counter cases through it.
 This is experimental explicit-file admission, not stable manifest-language
 admission. No new CLI option, SDK source, runtime ABI, cache format or language
 revision is introduced.
+
+ADR 0388 adds a separate compiler-private element-sized storage prerequisite for
+`Vec<T>`, with generated-Fairy move/drop and native failure-atomic reserve evidence.
+It does not promote aggregate source or provide typed container operations.
