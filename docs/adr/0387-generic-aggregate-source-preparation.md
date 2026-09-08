@@ -249,3 +249,21 @@ currentness, untrusted authority and documentation attachment are covered in
 retaining independent limits and authority labels; see
 `docs/atlas/evidence-bundle-v2.md`. Stable aggregate admission remains a separate
 language/SDK promotion step.
+
+## Scalar-domain promotion evidence
+
+`TestGenericAggregateScalarDomainMovesAndDrops` covers the proposed builtin scalar
+domain `bool`, `u8`, `i32`, `u32` and `usize`, including wide unsigned and negative
+values. Each program specializes an inert nested `Cell<T>`, a move-only
+`Token<T>`, its factory, consumer and cleanup helper. Package-aware verified MIR
+and interpreter execution preserve the payload, return 42 and observe one drop
+and one cleanup marker. Reusing the moved original is rejected for every type.
+
+The same source is checked through the private explicit-file route and emitted
+for Windows amd64 MSVC low/optimized execution. An independent C-side counter
+requires exactly one cleanup marker before the result is checked. The compiler
+frontend and MIR are shared between interpreter and C emission, so this is not an
+independent compiler comparison. It establishes this scalar move/drop interaction,
+not allocation failure, vector growth, resource-element containers, representative
+compile-time/code-size bounds or non-Windows execution. Stable gates and version
+files remain unchanged by this evidence-only step.
