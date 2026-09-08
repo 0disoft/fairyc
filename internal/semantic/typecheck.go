@@ -632,6 +632,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkStorageLayout(expression, result)
 	case ast.PrivateStorageTake:
 		actual = c.checkStorageTake(expression, result)
+	case ast.PrivateStoragePut:
+		actual = c.checkStoragePut(expression, result)
 	case syntax.KindLiteral:
 		var supported bool
 		actual, supported = literalType(expression.Text, expected)

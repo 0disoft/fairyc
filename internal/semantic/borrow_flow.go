@@ -916,6 +916,10 @@ func (f *borrowFlowAnalyzer) checkCallOwnerMoves(statement *ast.Statement, expre
 	if f.summarizing || f.probing() || statement == nil || expression == nil {
 		return
 	}
+	if expression.Kind == ast.PrivateStoragePut && len(expression.Children) == 2 {
+		value := expression.Children[1]
+		f.checkOwnerMove(statement, movedResourceOwner(f.analyzer, value), value, environment)
+	}
 	if expression.Kind == syntax.KindCall && len(expression.Children) > 0 {
 		callee := f.analyzer.callableForCall(expression)
 		for index, argument := range f.analyzer.callArguments(expression) {

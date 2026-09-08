@@ -8,3 +8,6 @@ const PrivateStorageLayout syntax.Kind = "private-storage-layout"
 
 // PrivateStorageTake carries one unsafe raw-storage ownership transfer.
 const PrivateStorageTake syntax.Kind = "private-storage-take"
+
+// PrivateStoragePut consumes one value into caller-owned raw storage.
+const PrivateStoragePut syntax.Kind = "private-storage-put"

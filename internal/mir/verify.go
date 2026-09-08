@@ -41,7 +41,7 @@ func VerifyStorageQueries(program Program) []VerificationError {
 	return verify(program, true, false)
 }
 
-// VerifyStorageTransfers additionally admits unsafe representation-to-value moves.
+// VerifyStorageTransfers additionally admits unsafe value/storage ownership moves.
 // Ordinary, query-only, interpreter and artifact entry points remain closed.
 func VerifyStorageTransfers(program Program) []VerificationError {
 	return verify(program, true, true)
@@ -77,8 +77,14 @@ func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []
 			for operationIndex, operation := range block.Operations {
 				if operation.Kind == OperationStorageTake {
 					if !allowStorageTransfers || !validStorageTakeShape(operation) || !storageQueryType(operation.Type, properties) ||
-						!validStorageTakeProvenance(&program.Functions[index], operation) {
+						!validStorageTransferProvenance(&program.Functions[index], operation) {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage take is unadmitted or malformed"})
+					}
+				}
+				if operation.Kind == OperationStoragePut {
+					if !allowStorageTransfers || !validStoragePutShape(operation) || !storageQueryType(operation.OwnerType, properties) ||
+						!validStorageTransferProvenance(&program.Functions[index], operation) {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage put is unadmitted or malformed"})
 					}
 				}
 				if operation.Kind != OperationStorageLayout {
@@ -526,6 +532,11 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationStorageTake:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationStoragePut:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if len(operation.Operands) == 2 && operation.Operands[1].Kind == OperandLocal {
+					state.live[hir.SymbolID(operation.Operands[1].Local)] = false
+				}
 			case OperationArrayIndexCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validArrayIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {

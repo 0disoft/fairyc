@@ -23,8 +23,8 @@ func validStorageTakeShape(op Operation) bool {
 		!op.MovePayload && !op.FlagClearedFirst && op.SourceForm == "" && op.ExitKind == ""
 }
 
-func validStorageTakeProvenance(function *Function, op Operation) bool {
-	if op.Entity != sourceEntity("storage-take", op.Span) || op.UnsafeScope.Source == "" ||
+func validStorageTransferProvenance(function *Function, op Operation) bool {
+	if op.Entity != sourceEntity(string(op.Kind), op.Span) || op.UnsafeScope.Source == "" ||
 		!sameSpanSource(op.UnsafeScope, op.Span) || op.UnsafeScope.StartByte > op.Span.StartByte ||
 		op.UnsafeScope.EndByte < op.Span.EndByte {
 		return false

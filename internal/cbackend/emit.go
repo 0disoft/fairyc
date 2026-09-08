@@ -1388,6 +1388,12 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				}
 				allowedUnsafeEntities[operation.Entity] = struct{}{}
 				e.features["private-storage-take"] = struct{}{}
+			case mir.OperationStoragePut:
+				if err := e.inspectStoragePut(functionIndex, *operation); err != nil {
+					return err
+				}
+				allowedUnsafeEntities[operation.Entity] = struct{}{}
+				e.features["private-storage-put"] = struct{}{}
 			case mir.OperationArrayLength:
 				if err := e.inspectArrayLength(functionIndex, *operation); err != nil {
 					return err
@@ -2862,7 +2868,8 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("#include <sys/types.h>\n")
 	}
 	_, usesStorageTake := e.features["private-storage-take"]
-	if e.needsBitcast || usesStorageTake {
+	_, usesStoragePut := e.features["private-storage-put"]
+	if e.needsBitcast || usesStorageTake || usesStoragePut {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
@@ -3391,6 +3398,8 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		fmt.Fprintf(output, "    fy_l_%d = ((uintptr_t)UINT64_C(%d));\n", operation.DestinationLocal, value)
 	case mir.OperationStorageTake:
 		return e.writeStorageTake(output, operation)
+	case mir.OperationStoragePut:
+		return e.writeStoragePut(output, operation)
 	case mir.OperationArrayLength:
 		if _, err := oneOperand(operation.Operands); err != nil {
 			return fmt.Errorf("fixed-array length in %s: %w", function, err)

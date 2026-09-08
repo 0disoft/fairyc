@@ -17,7 +17,7 @@ func CheckStorageGenericFunctions(file semantic.File, coordinate packagegraph.Co
 	return checkStorageGenericFunctions(file, coordinate, limits, false)
 }
 
-// CheckStorageTransferFunctions explicitly admits unsafe source storage takes.
+// CheckStorageTransferFunctions explicitly admits unsafe source storage transfers.
 // Its output requires the matching private verifier and C emission entry point.
 func CheckStorageTransferFunctions(file semantic.File, coordinate packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
 	return checkStorageGenericFunctions(file, coordinate, limits, true)

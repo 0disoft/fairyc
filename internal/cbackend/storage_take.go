@@ -8,7 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-// EmitStorageTransfers explicitly enables the private unsafe storage-take lane.
+// EmitStorageTransfers explicitly enables private unsafe typed storage transfers.
 // It is not used by stable source, CLI or artifact consumers.
 func EmitStorageTransfers(program mir.Program, entry string, profile Profile) (Unit, error) {
 	return emit(program, entry, profile, true)

@@ -372,6 +372,37 @@ donor rejection. This does not yet generalize the concrete Items cleanup or remo
 push's owner-supplied empty state; consuming writes and package/SDK integration
 remain required.
 
+### Private consuming source write
+
+The same explicit transfer lane now admits `storage_put<T>(pointer, value)`.
+It requires an exact mutable void pointer, an admitted concrete value type and
+unsafe context. Resource Flow consumes the value operand; borrow analysis checks
+that no live loan crosses that move. Scalars remain copy values at source level.
+Lowering evaluates and materializes the destination before the value, transfers
+any named resource obligation, and emits a void `storage-put` operation. MIR
+verification consumes its materialized value operand so it cannot be reused.
+The backend checks actual pointer/value local types and supported nonzero layout,
+then uses `memcpy` to write the value without invoking its destructor.
+
+The caller must own sufficient uninitialized, disjoint writable storage and
+representation-relocation permission, and establish exactly one initialized
+element obligation after the write. The primitive does not allocate, check raw
+addresses, destroy an overwritten owner or return a recoverable failure. It
+must follow successful capacity preparation, not consume a donor before an
+allocation attempt. Standard/query-only source and MIR, ordinary C emission,
+interpreter and artifact consumers remain closed.
+
+The generated-Fairy source fixture moves a real allocated Item through a generic
+writer into a C-owned slot. Its original donor and writer parameter do not run
+cleanup; the receiving slot consumes and releases the allocation exactly once,
+with no null-placeholder construction or live allocation afterward. Both MSVC
+profiles return 42. Source tests reject wrong types/arity/reserved names, donor
+reuse, missing unsafe (`E5101`) and a live loan crossing the move (`E2105`). MIR
+mutation tests reject malformed writes and post-write temporary reuse; backend
+tests separately reject pointer/value type substitution. AST preservation and
+default-consumer rejection are also checked. This establishes the consuming-write
+primitive, not its reserve/write/prefix-commit integration in the vector fixture.
+
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,

@@ -270,6 +270,11 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 		}
 	case syntax.KindCall:
 		a.resourceCall(module, expression, environment)
+	case ast.PrivateStoragePut:
+		if len(expression.Children) == 2 {
+			a.resourceExpression(module, expression.Children[0], environment, resourceRead)
+			a.resourceExpression(module, expression.Children[1], environment, resourceMove)
+		}
 	case syntax.KindRecord:
 		a.resourceRecord(module, expression, environment)
 	case syntax.KindFieldExpr:
