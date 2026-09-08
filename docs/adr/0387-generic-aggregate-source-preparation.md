@@ -149,9 +149,26 @@ the resource and factory closure, and preserve interface hashes when package
 numbers or input ordering change. Verified lowering retains kind-aware original
 declarations and specialization provenance.
 
-`GenericSession` lowers aggregate inputs afresh without reading or writing MIR
-cache entries. Repeated private-session checks execute in the interpreter and
-low/optimized MSVC; they are not cache-hit evidence. Stable `Check` and
-`SourceSession` keep aggregate declarations on the ordinary unsupported-source
-path. Cache reuse, Atlas integration, and stable language/SDK promotion remain
-pending, so this internal interface step does not change language 14.
+## Compiler-private aggregate cache reuse
+
+`GenericSession` reuses the existing generic key and verified aggregate artifact
+transports for memory and persistent storage. Current-source analysis and
+kind-aware provenance are still rebuilt before cache lookup; templates are not
+recovered from serialized MIR. Source interfaces and owner specialization sets
+participate in keys, and all-hit results still require whole-program reassembly.
+No cache encoding or stable artifact format is changed by this admission.
+
+The cache fixture owns a nested `Cell<T>` struct, a `Box<T>` resource, its factory
+and a private generic cleanup helper. Memory and disk cold checks store two
+package artifacts. Warm checks hit both with no additional lowering, join all
+four current origins to the right MIR kinds, and return 42 in the interpreter
+and low/optimized MSVC. A separate process reads the persistent artifacts with
+lowering disabled and repeats those provenance and execution checks. This is
+cache-reuse evidence, not a measurement of exact cleanup counts.
+
+Adding a bool specialization or changing the cleanup helper invalidates both
+package artifacts. Invalid current source publishes no hits, stores, or partial
+provenance even when prior valid artifacts remain available. Stable `Check` and
+`SourceSession` still reject aggregate declarations through ordinary unsupported
+source analysis. Atlas integration and stable language/SDK promotion remain
+pending; language 14 is unchanged.

@@ -10,7 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
-func TestGenericAggregateCompilerFallbackAndStableAdmission(t *testing.T) {
+func TestGenericAggregateCompilerCacheAndStableAdmission(t *testing.T) {
 	session, root := genericWorkspaceSession(t, 32<<20)
 	defer session.Close()
 	writeFile(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), `module answer;
@@ -19,9 +19,9 @@ pub fn Box<T> make<T>(T value) { return Box<T> { .value = value }; }`)
 	writeFile(t, filepath.Join(root, "src", "main.fy"), `module main; import answer as a;
 fn i32 main() { let a::Box<i32> value = a::make<i32>(42); return value.value; }`)
 	workspace := loadCacheWorkspace(t, root)
-	for range 2 {
+	for i := range 2 {
 		result, err := session.Check(workspace)
-		if err != nil || !result.Compiler.Verified || result.Cache.Outcome != OutcomeNotEligible || !result.Cache.Lowered || result.Cache.Hits != 0 || result.Cache.Stored != 0 {
+		if err != nil || !result.Compiler.Verified || (i == 0 && (!result.Cache.Lowered || result.Cache.Stored != 2)) || (i == 1 && (result.Cache.Outcome != OutcomeAllHit || result.Cache.Lowered || result.Cache.Hits != 2)) {
 			t.Fatalf("aggregate cache admission: %v %+v", err, result.Cache)
 		}
 		assertWorkspaceResult(t, workspace, result.Compiler, 42)

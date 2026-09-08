@@ -105,7 +105,7 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	if err != nil {
 		return Result{}, err
 	}
-	if hasGenericAggregates(input) || !semanticReady(analysis.Analysis.Semantic) || len(analysis.Analysis.Semantic.HIR.StateTransactions) != 0 {
+	if !semanticReady(analysis.Analysis.Semantic) || len(analysis.Analysis.Semantic.HIR.StateTransactions) != 0 {
 		compiled, err := session.lower(analysis.Analysis)
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: session.storage, Lowered: compiled.Verified}}, err
 	}
