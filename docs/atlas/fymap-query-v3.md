@@ -1,6 +1,6 @@
 # Aggregate-aware package-local queries v3
 
-- Status: Implemented opt-in query API; workspace joins and CLI integration pending
+- Status: Implemented opt-in query API and workspace join; CLI integration pending
 - Entry point: `NewQueryIndexV3`
 - Store: `docs/atlas/fymap-store-v3.md`
 - Shared query policy: `docs/atlas/fymap-query-v1.md`
@@ -46,5 +46,6 @@ around, exact subject byte bounds, relation omissions, detached results and
 incompatible interfaces. Existing v1/v2 query and downstream tests remain active.
 Function-only v2 output does not gain aggregate, cleanup or source-body fields.
 
-Workspace call joins, Context Pack and CLI consumers must explicitly adopt v3;
-this package-local API does not silently activate them.
+`NewWorkspaceCallIndexV3` consumes these relations with cleanup ownership intact;
+see `docs/atlas/workspace-call-join-v0.md`. Context Pack, call catalog and CLI
+consumers must explicitly adopt v3; this package-local API does not activate them.

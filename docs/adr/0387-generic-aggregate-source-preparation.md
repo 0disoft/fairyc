@@ -223,4 +223,9 @@ implemented as documented in `docs/atlas/fymap-store-v3.md`; they preserve the
 existing opened-root I/O and version-local retention boundary. Package-local v3
 queries now expose concrete aggregate fields and separately attributed cleanup
 relations under the existing selection budgets; see `docs/atlas/fymap-query-v3.md`.
-Workspace joins and CLI must adopt v3 before stable aggregate admission.
+The opt-in v3 workspace join now preserves original resource ownership and exact
+source/target specialization IDs for cleanup calls across direct dependencies.
+Codec-roundtripped two-package tests cover both selector directions, deterministic
+ordering, detached output, call budgets, stale source and missing concrete targets.
+It does not model implicit drop scheduling. Call catalog and CLI consumers must
+adopt v3 before stable aggregate admission.

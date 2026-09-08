@@ -40,6 +40,7 @@ type WorkspaceSymbol struct {
 // JoinedCall is one compiler-resolved call whose source and target both have exact-current maps.
 // It is a detached compiler-fact record, not an impact or safe-change claim.
 type JoinedCall struct {
+	SourceBody           string
 	SourceSpecialization string
 	TargetSpecialization string
 	Source               WorkspaceSymbol
@@ -83,6 +84,11 @@ func NewWorkspaceCallIndex(
 // NewWorkspaceCallIndexV2 preserves concrete implementation endpoints while joining v2 maps.
 func NewWorkspaceCallIndexV2(partitions []Partition, expectations map[string]LoadExpectation, budget WorkspaceCallBudget) (*WorkspaceCallIndex, error) {
 	return newWorkspaceCallIndex(partitions, expectations, budget, LogicalSchemaV2)
+}
+
+// NewWorkspaceCallIndexV3 preserves aggregate cleanup ownership while joining v3 maps.
+func NewWorkspaceCallIndexV3(partitions []Partition, expectations map[string]LoadExpectation, budget WorkspaceCallBudget) (*WorkspaceCallIndex, error) {
+	return newWorkspaceCallIndex(partitions, expectations, budget, LogicalSchemaV3)
 }
 
 func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadExpectation, budget WorkspaceCallBudget, schema string) (*WorkspaceCallIndex, error) {
@@ -198,6 +204,7 @@ func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadE
 				return nil, fmt.Errorf("%w: calls exceed %d", ErrWorkspaceJoinBudget, budget.MaxCalls)
 			}
 			call := JoinedCall{
+				SourceBody:           relation.SourceBody,
 				SourceSpecialization: relation.SourceSpecialization,
 				TargetSpecialization: relation.Target.Specialization,
 				Source:               WorkspaceSymbol{PackageInstance: header.PackageInstance, Symbol: packageIndex.nodes[sourcePosition].symbol.Visible},

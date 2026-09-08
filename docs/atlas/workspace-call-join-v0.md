@@ -74,6 +74,24 @@ consumes this v2 entry point, as does `atlas-calls list --catalog-version 1`; th
 output/CLI remains on v1 construction. See
 `docs/atlas/workspace-call-catalog-v1.md`.
 
+### Aggregate-aware v3 maps
+
+`NewWorkspaceCallIndexV3` explicitly admits v3 maps and their independently derived
+current-source expectations. It keeps the same dependency closure, public-target,
+concrete-target, package and call budget checks. The older constructors reject v3.
+
+Calls originating in a concrete resource cleanup retain `SourceBody = "cleanup"`,
+the original resource SymbolId and `SourceSpecialization`. Their targets retain
+the original function SymbolId and `TargetSpecialization`, including across direct
+package dependencies. Ordinary function calls keep an empty `SourceBody`. Incoming
+and outgoing selectors return detached records without merging distinct cleanup
+implementations that share source spans. Package context still marks universal
+template-body facts unavailable. This ledger describes observed explicit calls;
+it does not add edges for implicit drop scheduling or prove cleanup execution counts.
+
+The v3 join is an internal opt-in API. Call catalog encoders and CLI consumers still
+require explicit adoption before they can expose cleanup-owned calls.
+
 ### Declaration selectors
 
 - `Calls` returns every resolved call in deterministic package and relation order.
