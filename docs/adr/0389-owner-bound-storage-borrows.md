@@ -1,6 +1,6 @@
 # ADR 0389: Owner-bound storage borrows
 
-- Status: Accepted source and private MIR prerequisite; native admission pending
+- Status: Accepted private source, MIR and Windows native prerequisite
 - Date: 2026-09-09
 - Depends on: ADR 0388
 
@@ -56,8 +56,16 @@ independent MIR alias analysis or prove raw-address validity from operand types.
 Mutation tests cover missing or dead owners, mutable results/owners, invalid
 element/address types, result aliasing, unsafe identity and ownership flags.
 
-No native execution claim is made for storage borrows. Backend operand-type
-checking, transport and real native evidence are required before the SDK exposes
-an element-access function. Mutable access,
+The private C backend checks the actual owner/address operand types against the
+retained MIR types and rejects swapped operands. It requires a supported nonzero
+element layout and emits a shared pointer assignment, not a value copy or move.
+Generated Fairy programs read scalar and resource elements through a returned
+borrow and a relay function under both low and optimized Windows MSVC profiles.
+The independent C probe checks a value of 41, one owner cleanup and zero borrowed
+element cleanups; the process must exit 42 without output. The source rejection
+and MIR mutation tests remain active. This proves the private Windows transport,
+not a general guarantee about arbitrary unsafe addresses or another target.
+
+SDK element-access functions, mutable access,
 artifact/cache transport, stable CLI and installed SDK admission remain separate.
 No stable grammar, SDK source/version, runtime ABI or cache format is promoted.
