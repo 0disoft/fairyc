@@ -281,9 +281,17 @@ remain admitted. The package aggregate fixture now uses an owner-defined
 consuming accessor instead of reading a private field from its client.
 
 A borrowed accessor for a package-specialized resource exposed an interpreter
-unary-borrow type compatibility failure during this work. The field-access fixture
-does not claim to resolve that separate interpreter boundary; it uses a consuming
-accessor and retains its value and cleanup execution checks.
+unary-borrow type compatibility failure. Runtime resource, struct and enum
+constructors retained the definition but omitted the value's semantic type tag.
+They now retain that exact type; borrow formation still requires an exact owner
+type and result-borrow match. Shared/mutable borrow checks retain the original
+state object and leave the owner's type unchanged, and reject a same-named type
+from another package.
+
+The package aggregate fixture again uses the borrowed accessor, with interpreter
+value 42 and one cleanup plus low/optimized native execution. This fixes nominal
+runtime type retention; it does not admit target-dependent layout queries to the
+interpreter or create a general mutable-place runtime model.
 
 ### Still required
 

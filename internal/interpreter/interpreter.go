@@ -446,7 +446,7 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 		}
 		state.fields[fieldName] = values[index]
 	}
-	return runtimeValue{kind: valueEnum, enum: state}, nil
+	return runtimeValue{kind: valueEnum, typ: definition.Type, enum: state}, nil
 }
 
 func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
@@ -464,7 +464,7 @@ func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtime
 		}
 		state.fields[field.Name] = values[index]
 	}
-	return runtimeValue{kind: valueResource, resource: state}, nil
+	return runtimeValue{kind: valueResource, typ: definition.Type, resource: state}, nil
 }
 
 func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValue, error) {
@@ -481,7 +481,7 @@ func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValu
 		}
 		state.fields[field.Name] = values[index]
 	}
-	return runtimeValue{kind: valueStruct, structure: state}, nil
+	return runtimeValue{kind: valueStruct, typ: definition.Type, structure: state}, nil
 }
 
 func (v runtimeValue) asI32() (int32, error) {

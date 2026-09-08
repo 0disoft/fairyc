@@ -24,11 +24,11 @@ func aggregatePackageSources(t *testing.T) []genericsource.PackageModule {
 	t.Helper()
 	return []genericsource.PackageModule{
 		{Module: parseCompilerFile(t, 1, "main.fy", `module main; import box as b;
-fn i32 main() { let b::Box<i32> value = b::make<i32>(42); return b::read<i32>(value); }`).Module, Owner: "app", Imports: map[string]genericplan.PackageID{"box": "library"}},
+fn i32 main() { let b::Box<i32> value = b::make<i32>(42); return b::read<i32>(ref value); }`).Module, Owner: "app", Imports: map[string]genericplan.PackageID{"box": "library"}},
 		{Module: parseCompilerFile(t, 2, "box.fy", `module box; import helper as h;
 pub resource Box<T> { T value; cleanup { let i32 observed = h::finish<i32>(1); } }
 pub fn Box<T> make<T>(T value) { return Box<T> { .value = value }; }
-pub fn T read<T>(Box<T> value) { return value.value; }
+pub fn T read<T>(ref Box<T> value) { return value.value; }
 pub struct Unused<T> { T item; }`).Module, Owner: "library", Imports: map[string]genericplan.PackageID{"helper": "helper_a"}},
 		{Module: parseCompilerFile(t, 3, "helper.fy", `module helper; pub fn T finish<T>(T value) { return value; }`).Module, Owner: "helper_a"},
 	}
@@ -59,7 +59,7 @@ func TestGenericAggregatePackageSourceExpansion(t *testing.T) {
 		t.Fatalf("expanded package semantics: %v %+v", err, result.Semantic)
 	}
 	outcome, err := interpreter.Execute(result.MIR, hir.QualifiedModulePath(1, "main")+"::main")
-	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || len(outcome.DropTrace) != 1 {
 		t.Fatalf("execute: %+v %v", outcome, err)
 	}
 	if runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
