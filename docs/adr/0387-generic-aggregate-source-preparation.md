@@ -230,5 +230,7 @@ ordering, detached output, call budgets, stale source and missing concrete targe
 It does not model implicit drop scheduling. The opt-in call catalog v2 encoder
 now preserves this cleanup source kind and both concrete endpoints with a separate
 checksum domain version and atomic byte bound; see
-`docs/atlas/workspace-call-catalog-v2.md`. CLI consumers must adopt v3 before stable
-aggregate admission.
+`docs/atlas/workspace-call-catalog-v2.md`. Symbol catalog v3 also lists original
+used/unused aggregate declarations once with exact kind filters, pagination and
+separate checksum identity (`docs/atlas/symbol-catalog-v3.md`). CLI consumers must
+adopt v3 before stable aggregate admission.

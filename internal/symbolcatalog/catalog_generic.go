@@ -33,5 +33,5 @@ func ParseChecksumV2(value string) (ChecksumV2, error) {
 // EncodeV2 catalogs original declaration identities from a generic-aware v2 map.
 // Specializations do not become source declarations or additional catalog entries.
 func EncodeV2(index *atlasmap.QueryIndex, request atlasmap.SymbolCatalogRequest, maxBytes uint64) ([]byte, error) {
-	return encode(index, request, maxBytes, true)
+	return encode(index, request, maxBytes, 2)
 }

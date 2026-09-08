@@ -95,6 +95,10 @@ func catalogFixture(t *testing.T) (string, *atlasmap.QueryIndex) {
 }
 
 func catalogFixtureVersion(t *testing.T, generic bool) (string, *atlasmap.QueryIndex) {
+	return catalogFixtureMode(t, generic, false)
+}
+
+func catalogFixtureMode(t *testing.T, generic, aggregate bool) (string, *atlasmap.QueryIndex) {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -115,6 +119,15 @@ fn i32 main() { return middle() + 1; }
 `)
 	if generic {
 		writeCatalogFile(t, filepath.Join(root, "src", "main.fy"), "module main; fn T id<T>(T x) { return x; } fn T unused<T>(T x) { return x; } fn i32 main() { assert(id<i32>(42) == 42); assert(id<u32>(7) == 7); return 0; }")
+	}
+	if aggregate {
+		writeCatalogFile(t, filepath.Join(root, "src", "main.fy"), `module main;
+struct Cell<T> { T value; }
+resource Token<T> { Cell<T> payload; cleanup {} }
+struct Unused<T> { T value; }
+resource UnusedToken<T> { T value; cleanup {} }
+fn Token<T> make<T>(T value) { return Token<T> { .payload = Cell<T> { .value = value } }; }
+fn i32 main() { let Token<i32> a = make<i32>(42); let Token<u32> b = make<u32>(7); return a.payload.value; }`)
 	}
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
@@ -144,6 +157,9 @@ fn i32 main() { return middle() + 1; }
 	prepare, current, query := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations, atlasmap.NewQueryIndex
 	if generic {
 		prepare, current, query = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2, atlasmap.NewQueryIndexV2
+	}
+	if aggregate {
+		prepare, current, query = atlasmap.PrepareWorkspaceV3, atlasmap.CurrentWorkspaceExpectationsV3, atlasmap.NewQueryIndexV3
 	}
 	_, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil || len(partitions) != 1 {

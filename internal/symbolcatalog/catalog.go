@@ -64,10 +64,10 @@ func Encode(
 	request atlasmap.SymbolCatalogRequest,
 	maxBytes uint64,
 ) ([]byte, error) {
-	return encode(index, request, maxBytes, false)
+	return encode(index, request, maxBytes, 1)
 }
 
-func encode(index *atlasmap.QueryIndex, request atlasmap.SymbolCatalogRequest, maxBytes uint64, generic bool) ([]byte, error) {
+func encode(index *atlasmap.QueryIndex, request atlasmap.SymbolCatalogRequest, maxBytes uint64, catalogVersion byte) ([]byte, error) {
 	if maxBytes == 0 {
 		return nil, fmt.Errorf("symbol catalog byte limit must be positive")
 	}
@@ -76,8 +76,14 @@ func encode(index *atlasmap.QueryIndex, request atlasmap.SymbolCatalogRequest, m
 		return nil, err
 	}
 	schema := atlasmap.LogicalSchema
-	if generic {
+	switch catalogVersion {
+	case 1:
+	case 2:
 		schema = atlasmap.LogicalSchemaV2
+	case 3:
+		schema = atlasmap.LogicalSchemaV3
+	default:
+		return nil, fmt.Errorf("unsupported symbol catalog version %d", catalogVersion)
 	}
 	if result.Context.LogicalSchema != schema {
 		return nil, fmt.Errorf("symbol catalog requires %s maps", schema)
@@ -95,8 +101,10 @@ func encode(index *atlasmap.QueryIndex, request atlasmap.SymbolCatalogRequest, m
 		result.Omissions = make([]atlasmap.QueryOmission, 0)
 	}
 	version, encoding, algorithm, prefix, checksumVersion := CatalogVersion, CatalogEncoding, ChecksumAlgorithm, ChecksumPrefix, byte(0)
-	if generic {
+	if catalogVersion == 2 {
 		version, encoding, algorithm, prefix, checksumVersion = CatalogVersionV2, CatalogEncodingV2, ChecksumAlgorithmV2, ChecksumPrefixV2, 1
+	} else if catalogVersion == 3 {
+		version, encoding, algorithm, prefix, checksumVersion = CatalogVersionV3, CatalogEncodingV3, ChecksumAlgorithmV3, ChecksumPrefixV3, 2
 	}
 	checksum, err := computeChecksum(result, version, encoding, checksumVersion)
 	if err != nil {
