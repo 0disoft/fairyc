@@ -87,7 +87,7 @@ func (e *emitter) storageQueryValue(operation mir.Operation) (uint64, error) {
 }
 
 func emissionTarget(profile Profile) (target.Spec, error) {
-	if profile != Stage0Profile() && profile != Stage0WindowsMSVCProfile() && profile != Stage0DropTraceProfile() {
+	if profile != Stage0Profile() && profile != Stage0WindowsMSVCProfile() && profile != Stage0DropTraceProfile() && profile != Stage0WindowsMSVCDropTraceProfile() {
 		return target.Spec{}, fmt.Errorf("unsupported C emission profile target=%q dialect=%q instrumentation=%q", profile.Target, profile.Dialect, profile.Instrumentation)
 	}
 	spec, found := target.Lookup(profile.Target)

@@ -78,8 +78,13 @@ func compareDropSiteKey(left, right dropSiteKey) int {
 }
 
 func (e *emitter) dropLeafTypes(value hir.Type) []hir.Type {
-	if _, direct := e.resourceByType[value]; direct {
-		return []hir.Type{value}
+	if index, direct := e.resourceByType[value]; direct {
+		result := []hir.Type{value}
+		fields := e.resourceTypes[index].definition.Fields
+		for index := len(fields) - 1; index >= 0; index-- {
+			result = append(result, e.dropLeafTypes(fields[index].Type)...)
+		}
+		return result
 	}
 	tagged, found := e.taggedType(value)
 	if !found {
@@ -87,8 +92,8 @@ func (e *emitter) dropLeafTypes(value hir.Type) []hir.Type {
 	}
 	result := make([]hir.Type, 0, len(tagged.payloads))
 	for _, payload := range tagged.payloads {
-		if _, direct := e.resourceByType[payload]; direct && !slices.Contains(result, payload) {
-			result = append(result, payload)
+		if _, direct := e.resourceByType[payload]; direct {
+			result = append(result, e.dropLeafTypes(payload)...)
 		}
 	}
 	return result

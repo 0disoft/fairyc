@@ -15,7 +15,7 @@ func (e *emitter) emitDropGlue(output *strings.Builder, functionIndex int, opera
 	}
 	expression := fmt.Sprintf("fy_l_%d", operation.Symbol)
 	if _, direct := e.resourceByType[resource.Type]; direct {
-		return e.emitDirectDropGlue(output, resource.Type, expression, "")
+		return e.emitDirectDropGlue(output, resource.Type, expression, "", operation.Span)
 	}
 	tagged, found := e.taggedType(resource.Type)
 	if !found {
@@ -27,37 +27,60 @@ func (e *emitter) emitDropGlue(output *strings.Builder, functionIndex int, opera
 			return fmt.Errorf("drop glue Option %q has %d payloads", resource.Type, len(tagged.payloads))
 		}
 		condition := expression + ".tag == FY_OPTION_SOME"
-		return e.emitDirectDropGlue(output, tagged.payloads[0], expression+".p_0", condition)
+		return e.emitDirectDropGlue(output, tagged.payloads[0], expression+".p_0", condition, operation.Span)
 	case taggedResult:
 		if len(tagged.payloads) != 2 {
 			return fmt.Errorf("drop glue Result %q has %d payloads", resource.Type, len(tagged.payloads))
 		}
-		if err := e.emitDirectDropGlue(output, tagged.payloads[0], expression+".p_0", expression+".tag == FY_RESULT_OK"); err != nil {
+		if err := e.emitDirectDropGlue(output, tagged.payloads[0], expression+".p_0", expression+".tag == FY_RESULT_OK", operation.Span); err != nil {
 			return err
 		}
-		return e.emitDirectDropGlue(output, tagged.payloads[1], expression+".p_1", expression+".tag == FY_RESULT_ERR")
+		return e.emitDirectDropGlue(output, tagged.payloads[1], expression+".p_1", expression+".tag == FY_RESULT_ERR", operation.Span)
 	default:
 		return fmt.Errorf("drop glue has unsupported tagged kind %q", tagged.kind)
 	}
 }
 
-func (e *emitter) emitDirectDropGlue(output *strings.Builder, resourceType hir.Type, expression, condition string) error {
+func (e *emitter) emitDirectDropGlue(output *strings.Builder, resourceType hir.Type, expression, condition string, span hir.Span) error {
 	resourceIndex, found := e.resourceByType[resourceType]
 	if !found {
 		return nil
 	}
 	definition := e.resourceTypes[resourceIndex].definition
-	if definition.DropKind == hir.ResourceDropEmpty {
+	if condition != "" && e.resourceHasNestedFields(resourceType) {
+		fmt.Fprintf(output, "    if (%s) {\n", condition)
+		if err := e.emitDirectDropGlue(output, resourceType, expression, "", span); err != nil {
+			return err
+		}
+		output.WriteString("    }\n")
 		return nil
 	}
-	functionIndex, found := e.bySymbol[definition.DropSymbol]
-	if !found {
-		return fmt.Errorf("resource %q names missing drop symbol %d", resourceType, definition.DropSymbol)
+	if definition.DropKind != hir.ResourceDropEmpty {
+		functionIndex, found := e.bySymbol[definition.DropSymbol]
+		if !found {
+			return fmt.Errorf("resource %q names missing drop symbol %d", resourceType, definition.DropSymbol)
+		}
+		if e.resourceHasNestedFields(resourceType) {
+			fmt.Fprintf(output, "    %s = fy_fn_%d(%s);\n", expression, functionIndex, expression)
+		} else if condition == "" {
+			fmt.Fprintf(output, "    fy_fn_%d(%s);\n", functionIndex, expression)
+		} else {
+			fmt.Fprintf(output, "    if (%s) { fy_fn_%d(%s); }\n", condition, functionIndex, expression)
+		}
 	}
-	if condition == "" {
-		fmt.Fprintf(output, "    fy_fn_%d(%s);\n", functionIndex, expression)
-		return nil
+	for index := len(definition.Fields) - 1; index >= 0; index-- {
+		field := definition.Fields[index]
+		if _, nested := e.resourceByType[field.Type]; !nested {
+			continue
+		}
+		if e.instrumentation == InstrumentationDropTraceV0 {
+			if err := e.emitDropTraceCall(output, field.Type, span, ""); err != nil {
+				return err
+			}
+		}
+		if err := e.emitDirectDropGlue(output, field.Type, fmt.Sprintf("(%s).f_%d", expression, index), "", span); err != nil {
+			return err
+		}
 	}
-	fmt.Fprintf(output, "    if (%s) { fy_fn_%d(%s); }\n", condition, functionIndex, expression)
 	return nil
 }

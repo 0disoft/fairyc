@@ -46,6 +46,7 @@ and optimized MSVC. These two configurations share a compiler lineage.
 
 Grammar and the existing hidden-origin/coarse-root rules do not change. Language
 14, SDK stage0.58 and runtime ABI 0 remain unchanged; this is not a new public MIR
-transport or a portable-layout promise. Nested resource C layout/cleanup, the
-complete owned-cooked-token workload and self-hosting admission remain separate
-unfinished work. The token probe must not be weakened to remove its Buffer field.
+transport or a portable-layout promise. ADR 0392 subsequently supplies nested
+resource C layout/cleanup and the owned-cooked-token storage probe without removing
+its Buffer field. The complete lexer workload and self-hosting admission remain
+unfinished.

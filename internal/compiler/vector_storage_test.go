@@ -42,7 +42,8 @@ func runVectorStorageNative(t *testing.T, program, probe string, queries bool) {
 		result, err = compiler.CheckExplicitFiles([]semantic.File{file})
 	}
 	if err != nil || !result.Verified {
-		t.Fatalf("compile: %v %+v", err, result.Semantic)
+		t.Fatalf("compile: %v phase=%s diagnostics=%+v unsupported=%+v", err,
+			result.Semantic.FailedPhase, result.Semantic.Diagnostics, result.Semantic.Unsupported)
 	}
 	runVectorStorageMIRNative(t, result.MIR, "main::main", probe)
 }

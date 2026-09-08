@@ -50,6 +50,13 @@ func Stage0DropTraceProfile() Profile {
 	}
 }
 
+// Stage0WindowsMSVCDropTraceProfile observes compiler-owned drops in the closed
+// Windows conformance lane. Production profiles remain uninstrumented.
+func Stage0WindowsMSVCDropTraceProfile() Profile {
+	return Profile{Target: target.X8664WindowsMSVC, Dialect: DialectC11,
+		Instrumentation: InstrumentationDropTraceV0}
+}
+
 // DropSite identifies one source-linked resource leaf that an instrumented drop may observe.
 type DropSite struct {
 	ID           uint32
@@ -617,26 +624,28 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 // Option/Result discharge. Empty drops and non-resource discharges return no
 // symbols.
 func dischargeDropSymbols(resourceType hir.Type, resourceTypes map[hir.Type]mir.ResourceType) []hir.SymbolID {
-	if definition, found := resourceTypes[resourceType]; found {
-		return []hir.SymbolID{definition.DropSymbol}
-	}
-	if element, option := hir.OptionElement(resourceType); option {
-		if definition, found := resourceTypes[element]; found {
-			return []hir.SymbolID{definition.DropSymbol}
+	var symbols []hir.SymbolID
+	seen := map[hir.Type]bool{}
+	var visit func(hir.Type)
+	visit = func(value hir.Type) {
+		if seen[value] {
+			return
 		}
-		return nil
-	}
-	if success, failure, result := hir.ResultElements(resourceType); result {
-		var symbols []hir.SymbolID
-		if definition, found := resourceTypes[success]; found {
+		seen[value] = true
+		if definition, found := resourceTypes[value]; found {
 			symbols = append(symbols, definition.DropSymbol)
+			for _, field := range definition.Fields {
+				visit(field.Type)
+			}
+		} else if element, option := hir.OptionElement(value); option {
+			visit(element)
+		} else if success, failure, result := hir.ResultElements(value); result {
+			visit(success)
+			visit(failure)
 		}
-		if definition, found := resourceTypes[failure]; found {
-			symbols = append(symbols, definition.DropSymbol)
-		}
-		return symbols
 	}
-	return nil
+	visit(resourceType)
+	return symbols
 }
 
 // filterFunctions keeps only visited indices in the original name-sorted order,
@@ -684,10 +693,10 @@ func filterForeignFunctions(foreignFunctions []mir.ForeignFunction, bySymbol map
 }
 
 func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine, structures []structCType, structByType map[hir.Type]int) ([]resourceCType, map[hir.Type]int, error) {
-	ordered := slices.Clone(definitions)
-	slices.SortFunc(ordered, func(left, right mir.ResourceType) int {
-		return strings.Compare(string(left.Type), string(right.Type))
-	})
+	ordered, err := orderResourceDefinitions(definitions)
+	if err != nil {
+		return nil, nil, err
+	}
 	result := make([]resourceCType, 0, len(ordered))
 	byType := make(map[hir.Type]int, len(ordered))
 	for _, definition := range ordered {
@@ -701,11 +710,16 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 		fieldIndex := make(map[string]int, len(definition.Fields))
 		allI32 := true
 		nestedCopy := false
+		nestedResource := false
 		for index, field := range definition.Fields {
 			fieldType, ok := resourceFieldLayoutType(field.Type)
 			if structure, found := structByType[field.Type]; !ok && found {
 				fieldType, ok = structures[structure].layoutType, true
 				nestedCopy = true
+			}
+			if resource, found := byType[field.Type]; !ok && found {
+				fieldType, ok = result[resource].layoutType, true
+				nestedResource = true
 			}
 			if !ok {
 				return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
@@ -735,6 +749,9 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 		}
 		if nestedCopy {
 			feature = "nested-copy-resource"
+		}
+		if nestedResource {
+			feature = "nested-resource"
 		}
 		result = append(result, resourceCType{
 			definition: definition, layout: computed, layoutType: aggregateType,
@@ -3024,7 +3041,7 @@ func (e *emitter) structCFieldName(structIndex, fieldIndex int) string {
 
 func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) error {
 	function := &e.functions[functionIndex]
-	resultType, err := e.cFunctionResultType(function.ResultType)
+	resultType, err := e.emittedFunctionResultType(function)
 	if err != nil {
 		return fmt.Errorf("prototype for %s: %w", function.Name, err)
 	}
@@ -3068,7 +3085,7 @@ func (e *emitter) emitForeignMacroGuard(output *strings.Builder, functionIndex i
 
 func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error {
 	function := &e.functions[functionIndex]
-	resultType, err := e.cFunctionResultType(function.ResultType)
+	resultType, err := e.emittedFunctionResultType(function)
 	if err != nil {
 		return fmt.Errorf("function %s: %w", function.Name, err)
 	}
@@ -3791,6 +3808,10 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 	case mir.TerminatorSwitch:
 		return e.emitSwitch(output, functionIndex, terminator)
 	case mir.TerminatorReturn:
+		if e.resourceHasNestedFields(function.DropGlueFor) {
+			fmt.Fprintf(output, "    return fy_l_%d;\n", function.Parameters[0])
+			return nil
+		}
 		if function.ResultType == hir.TypeVoid {
 			output.WriteString("    return;\n")
 			return nil

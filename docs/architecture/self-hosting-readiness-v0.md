@@ -36,6 +36,13 @@ demonstrated port workload; do not make every possible container feature a new
 self-hosting prerequisite. A workflow's test command or local native success alone
 does not establish the required same-commit CI result.
 
+ADR 0392 adds a maintained token-storage prerequisite probe with kind/trivia tags,
+source-byte bounds and an owned cooked Buffer inside each vector element. Ordinary
+Windows CLI execution and separate injected-failure/allocation-accounting tests
+cover that representation. This is not a lexer port or evidence for tokenization,
+source reconstruction, diagnostics, full corpus coverage or hosted CI completion;
+the start row therefore remains blocked pending that assessment.
+
 The first Fairy-written compiler component is the lossless lexer/token stream producer, not the parser, type checker, MIR verifier, optimizer, backend, package resolver, or runtime.
 
 The lexer is selected because its observable contract is bounded and can be compared byte-for-byte and token-for-token against the Go reference without introducing a second semantic authority. The initial port must consume the same source bytes and language revision and emit a canonical token record containing token kind, exact source range, cooked literal data where applicable, and diagnostics.

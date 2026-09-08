@@ -171,13 +171,19 @@ reset rejection is an internal-invariant trap; ordinary placement failure remain
 current Region C subset admits canonical scalar, supported inert-struct, and scalar fixed-array
 placement.
 
-The emitter rejects empty, nested-struct/array/C-scalar/Region/nested-resource or partially
+ADR 0392 additionally admits acyclic directly nested resource fields, with dependency-first
+target layouts, owner cleanup followed by reverse field cleanup, and retention of nested drop
+symbols. A nested owner's private C cleanup returns its post-cleanup receiver so field destruction
+observes body mutations. Production output remains uninstrumented; the closed Windows drop-trace
+profile compares source-linked cleanup events with the interpreter.
+
+The emitter rejects empty, array/C-scalar/Region or partially
 initialized resources, and nonempty drops without verifier-matched glue;
 unsupported or recursive nested built-in tags, unsupported built-in tag fields, raw-pointer/C-scalar tagged payloads,
 recursive or resource-bearing user enums, and other tagged payload
-combinations; returning a safe borrow through the C function boundary;
+combinations; returning a safe borrow through a foreign C function boundary;
 safe-borrow operations other than exact verified local borrowing and dereference, array-view construction, owner-bound text
-raw-parts construction, view metadata, borrowed resource field reads, immutable
+raw-parts construction, view metadata, borrowed resource field reads, shared field-address projections, immutable
 byte indexing, and immutable byte slicing; unsafe operations outside the admitted raw-address,
 owner-bound text construction, and scalar foreign-call forms; complete runtime and
 standard-library lowering; malformed
@@ -229,8 +235,9 @@ semantics, and it is emitted only in functions containing checked division or re
   `@repr(C)` records. It emits dependencies before their users plus `_Static_assert` checks for
   `sizeof`, `_Alignof`, and every `offsetof`; public C records preserve their declared tag and field
   names. Any emitted struct, enum, resource, or generic tagged record owns the required
-  `<stddef.h>` include directly rather than depending on another feature. General nested resources
-  and the remaining contracted `@repr(C)` field families fail closed.
+  `<stddef.h>` include directly rather than depending on another feature. Acyclic directly nested
+  resource fields use the same dependency-first layout checks under ADR 0392; unsupported tagged,
+  array or borrowed resource fields and remaining contracted `@repr(C)` field families fail closed.
 - Verbatim `@repr(C)` tags and fields plus external C symbols pass namespace-specific guards before
   emission. File-scope names reject every leading underscore; members reject `__*` and `_[A-Z]*`
   while retaining `_lowercase`. Header macros, the backend `FY_` macro prefix, generated scalar
