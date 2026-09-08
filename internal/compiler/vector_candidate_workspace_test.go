@@ -7,6 +7,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -29,6 +30,9 @@ language = "fairyc-language/14"
 source = "src"
 `)
 			client := vectorCandidateProgram()
+			client = strings.Replace(client, "    let bytes::Buffer last =", `    let ref bytes::Buffer first = v::at<bytes::Buffer>(ref storage, 0);
+    assert(valid(first));
+    let bytes::Buffer last =`, 1)
 			writeVectorCacheFile(t, root, "src/main.fy", client)
 			load := func() workspaceloader.Workspace {
 				t.Helper()
@@ -56,9 +60,30 @@ source = "src"
 			if err != nil || !cold.Compiler.Verified || !cold.Cache.Lowered || cold.Cache.Stored != 2 {
 				t.Fatalf("cold candidate: %v %+v %+v", err, cold.Cache, cold.Compiler.Semantic.Diagnostics)
 			}
+			if persistent {
+				session.Close()
+				session, err = workspacecompiler.NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits())
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer session.Close()
+			}
 			warm, err := session.Check(load())
 			if err != nil || !warm.Compiler.Verified || warm.Cache.Outcome != workspacecompiler.OutcomeAllHit || warm.Cache.Hits != 2 || warm.Cache.Lowered {
 				t.Fatalf("warm candidate: %v %+v", err, warm.Cache)
+			}
+			borrowCount := 0
+			for _, function := range warm.Compiler.MIR.Functions {
+				for _, block := range function.Blocks {
+					for _, operation := range block.Operations {
+						if operation.Kind == mir.OperationStorageBorrow {
+							borrowCount++
+						}
+					}
+				}
+			}
+			if borrowCount != 1 {
+				t.Fatalf("cached element borrow missing: %d", borrowCount)
 			}
 			rootID, err := workspace.RootPackageID()
 			if err != nil {
@@ -96,6 +121,12 @@ source = "src"
 			invalid, err := session.Check(load())
 			if invalid.Compiler.Verified || invalid.Cache.Hits != 0 || invalid.Cache.Stored != 0 || !reflect.DeepEqual(before, stats()) {
 				t.Fatalf("invalid source reached candidate cache: %v %+v", err, invalid.Cache)
+			}
+			conflict := strings.Replace(changed, "assert(valid(first));", "let usize removed = v::clear<bytes::Buffer>(ref mut storage); assert(valid(first));", 1)
+			writeVectorCacheFile(t, root, "src/main.fy", conflict)
+			invalid, err = session.Check(load())
+			if invalid.Compiler.Verified || invalid.Cache.Hits != 0 || invalid.Cache.Stored != 0 || !reflect.DeepEqual(before, stats()) {
+				t.Fatalf("borrow conflict reached candidate cache: %v %+v", err, invalid.Cache)
 			}
 		})
 	}

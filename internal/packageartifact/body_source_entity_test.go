@@ -7,7 +7,7 @@ import (
 )
 
 func TestByteViewSourceEntitiesRebindAcrossPackages(t *testing.T) {
-	for _, kind := range []string{"byte-slice-from-raw-parts", "mut-byte-slice-from-raw-parts"} {
+	for _, kind := range []string{"byte-slice-from-raw-parts", "mut-byte-slice-from-raw-parts", "storage-borrow"} {
 		t.Run(kind, func(t *testing.T) {
 			original := kind + ":" + hir.QualifiedSourcePath(17, "std/bytes.fy") + ":10:42"
 			stable, err := stabilizeSourceEntity(original, 17)

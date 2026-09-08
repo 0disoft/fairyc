@@ -81,6 +81,14 @@ grouped moves are included. Independent resource tests reject live-loan moves an
 accept moves after last use. Candidate tests reject clear/reserve/pop with E2101
 and direct vector moves with E2105 while an element reference remains live.
 
-Optional or mutable element access,
-artifact/cache transport, stable CLI and installed SDK admission remain separate.
+Private package artifacts now stabilize and rebind the storage-borrow source
+identity alongside its unsafe scope and operand types. A resource-borrow artifact
+round trip with different package/function numbering executes under low/optimized
+MSVC; ordinary writing and schema-substituted ordinary reading remain rejected.
+Manifest-loaded candidate programs containing `at` obtain both package hits from
+memory and from a reopened disk-cache session, retain the borrow operation, and
+execute under both profiles. Invalid source and active-view mutation are rejected
+before cache reads/writes change cache statistics.
+
+Optional or mutable element access, stable CLI and installed SDK admission remain separate.
 No stable grammar, SDK source/version, runtime ABI or cache format is promoted.
