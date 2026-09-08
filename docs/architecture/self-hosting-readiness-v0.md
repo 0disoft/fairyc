@@ -14,7 +14,7 @@ The start gate is closed while any `start` row is `blocked`. A row becomes `read
 | --- | --- | --- | --- | --- |
 | Modules and imports | start | ready | Package/module parsing, workspace resolution, public interfaces, locks, and package build/run/test contracts under `docs/package/`, `docs/cli/`, `internal/package*`, and compiler frontend fixtures | none |
 | Owned strings and byte text | start | ready | `std::text`, `std::bytes::Buffer`, generated Buffer/String transfer fixtures, runtime contracts under `docs/runtime/runtime-stdlib-v0.md` | none |
-| Containers required by a compiler port | start | blocked | Fixed arrays, byte views, Buffer, Option, and Result exist, but the roadmap deliberately has no general move-only typed sequence | #44 after #26 and #27 |
+| Containers required by a compiler port | start | blocked | Fixed arrays, byte views, Buffer, Option, and Result plus the Windows SDK-owned move-only `std::vec::Vec<T>` in ADR 0390; initialized-prefix ownership and allocation-failure evidence in ADR 0388, immutable element borrows in ADR 0389 | Reconcile #44 after #26/#27 with the released SDK subset; demonstrate that the lossless lexer's actual token-storage requirements fit the admitted element/layout and access rules, with maintained source fixtures exercised by ordinary CI on the same commit |
 | `Result` and explicit propagation | start | ready | Language Result contract, Result Flow, MIR verification, interpreter and native fixture coverage | none |
 | Resource moves and cleanup | start | ready | Resource Flow, move-only resources, explicit abilities/burn boundaries, MIR cleanup verification, interpreter traces, and native resource fixtures | none |
 | C FFI bootstrap boundary | start | ready | `unsafe extern C fn`, target-aware scalar/pointer/aggregate ABI work, constrained-C backend and bidirectional native fixture lanes | none for bootstrap use; #47 remains a broader public tagged-aggregate ABI gate |
@@ -25,6 +25,16 @@ The start gate is closed while any `start` row is `blocked`. A row becomes `read
 | Reproducible two-stage bootstrap evidence | promotion | blocked | The Go compiler is the only authoritative stage-0 implementation; no Fairy compiler stage has been admitted | the first bounded candidate must produce matching stage1/stage2 artifacts and differential results |
 
 ## First component after the gate opens
+
+The public vector release removes the absence of a typed sequence as a blocker; it
+does not by itself prove that the compiler port's container requirements are met.
+Assess the lossless lexer first, using the shipped `examples/std_vec_quickstart`
+and `TestWindowsVectorStableCLI` as integration evidence, not as a compiler-workload
+substitute. Mutable element access, iteration APIs, nested vectors and non-Windows
+vector execution are not part of ADR 0390. Add only capabilities required by the
+demonstrated port workload; do not make every possible container feature a new
+self-hosting prerequisite. A workflow's test command or local native success alone
+does not establish the required same-commit CI result.
 
 The first Fairy-written compiler component is the lossless lexer/token stream producer, not the parser, type checker, MIR verifier, optimizer, backend, package resolver, or runtime.
 
