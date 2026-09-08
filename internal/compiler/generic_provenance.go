@@ -28,10 +28,11 @@ type GenericDeclaration struct {
 // analysis, never loaded from an artifact cache, and asserts no semantic facts
 // about uninstantiated template bodies.
 type GenericProvenance struct {
-	declarations []GenericDeclaration
-	origins      []genericsource.SpecializationOrigin
-	nominalTypes []semantic.NominalTypeFact
-	interfaces   []GenericPackageInterface
+	declarations  []GenericDeclaration
+	origins       []genericsource.SpecializationOrigin
+	nominalTypes  []semantic.NominalTypeFact
+	interfaces    []GenericPackageInterface
+	templateTypes []GenericTemplateType
 }
 
 func (value GenericProvenance) NominalTypes() []semantic.NominalTypeFact {
@@ -91,5 +92,6 @@ func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]gen
 	for i := range result.origins {
 		result.origins[i].Bindings = slices.Clone(result.origins[i].Bindings)
 	}
+	result.templateTypes = genericTemplateTypes(input, result.declarations)
 	return result, nil
 }

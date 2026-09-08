@@ -114,9 +114,10 @@ no partial sidecar.
 
 Each specialization joins its original declaration ID to the appropriate concrete
 MIR function, struct or resource. No generated-name parsing supplies the kind.
-The function-only Atlas adapter explicitly rejects aggregate provenance until its
-aggregate declaration/signature support is implemented. This is not package
-aggregate admission, an Atlas promotion, or a serialized interface/cache revision.
+The initial function-only Atlas adapter rejected aggregate provenance. The header
+adapter described below now handles original aggregate declarations, while full
+snapshot implementation joins remain closed. This is not an Atlas promotion or
+a serialized interface/cache revision.
 
 ## Resolved-package source expansion
 
@@ -172,3 +173,24 @@ provenance even when prior valid artifacts remain available. Stable `Check` and
 `SourceSession` still reject aggregate declarations through ordinary unsupported
 source analysis. Atlas integration and stable language/SDK promotion remain
 pending; language 14 is unchanged.
+
+## Original aggregate headers for Atlas
+
+Compiler provenance now retains detached written-name bindings from each source
+scope to visible original aggregate templates. Local declarations and exact
+public import providers are included; private imported names are not. These facts
+identify templates and arity, not generated nominal types or checked unused bodies.
+
+`GenericDeclarations` uses those facts to represent struct/resource headers with
+their original kind, ordered field names/types/spans and a coordinate-bound self
+type. Nominal template applications retain recursively converted type arguments.
+Binders use canonical positions rather than display names. Cleanup presence is
+the `source-declared` marker, not a claim about empty/non-empty inferred drop glue
+or effects. Aggregate attributes still require separate adaptation and fail closed.
+
+The existing SymbolId encoder can encode these generic aggregate headers without
+changing ordinary identities or its format. Tests preserve IDs across binder and
+alias renaming and package renumbering, distinguish actual provider UIDs, and
+check detached getters and header results. Full `BuildCompiler` snapshots reject
+aggregate implementation joins explicitly until concrete type/call/cleanup joins
+are added; no `.fymap` aggregate transport or stable admission is promoted here.

@@ -10,8 +10,21 @@ import (
 
 func validateGenericDeclaration(declaration semanticsnapshot.Declaration) error {
 	arity := uint64(len(declaration.TypeParameters))
-	if arity != 0 && (declaration.Key.Kind != semanticsnapshot.DeclarationFunction || declaration.Foreign || declaration.Owner != nil) {
-		return fmt.Errorf("generic identity requires an ordinary module function")
+	if arity != 0 {
+		kind := declaration.Key.Kind
+		if (kind != semanticsnapshot.DeclarationFunction && kind != semanticsnapshot.DeclarationStruct && kind != semanticsnapshot.DeclarationResource) || declaration.Foreign || declaration.Owner != nil {
+			return fmt.Errorf("generic identity requires a module function or aggregate")
+		}
+		if kind != semanticsnapshot.DeclarationFunction {
+			if len(declaration.Parameters) != 0 || declaration.Type.Kind != semanticsnapshot.TypeNominal || declaration.Type.Name != declaration.Key.Module+"::"+declaration.Key.Name || uint64(len(declaration.Type.Arguments)) != arity || declaration.Type.PackageCoordinate == "" {
+				return fmt.Errorf("generic aggregate identity has an invalid self type")
+			}
+			for i, argument := range declaration.Type.Arguments {
+				if argument.Kind != semanticsnapshot.TypeParameter || argument.Name != strconv.Itoa(i) {
+					return fmt.Errorf("generic aggregate self type has invalid binders")
+				}
+			}
+		}
 	}
 	seen := map[string]bool{}
 	for _, name := range declaration.TypeParameters {

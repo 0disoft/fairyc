@@ -16,6 +16,11 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 		return Snapshot{}, fmt.Errorf("compiler snapshot requires a verified result")
 	}
 	originals := result.GenericProvenance.Declarations()
+	for _, original := range originals {
+		if original.Kind != string(DeclarationFunction) {
+			return Snapshot{}, fmt.Errorf("aggregate implementation joins require separate snapshot support")
+		}
+	}
 	if len(originals) == 0 {
 		if len(result.GenericProvenance.Specializations()) != 0 {
 			return Snapshot{}, fmt.Errorf("specializations have no original declarations")

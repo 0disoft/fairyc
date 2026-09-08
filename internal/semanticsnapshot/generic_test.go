@@ -22,8 +22,11 @@ func TestGenericAggregateProvenanceIsNotPublishedAsAFunction(t *testing.T) {
 	}
 	input := packageInput(t, hir.DefaultPackage, "example.aggregate.snapshot", "aggregate", "1.0.0", "main.fy", text, "root")
 	declarations, err := semanticsnapshot.GenericDeclarations(result.GenericProvenance, []semanticsnapshot.PackageInput{input})
-	if err == nil || !strings.Contains(err.Error(), "requires separate snapshot support") || len(declarations) != 0 {
+	if err != nil || len(declarations) != 1 || declarations[0].Key.Kind != semanticsnapshot.DeclarationStruct || len(declarations[0].Fields) != 1 || declarations[0].Fields[0].Type.Kind != semanticsnapshot.TypeParameter {
 		t.Fatalf("aggregate masqueraded as function: %+v %v", declarations, err)
+	}
+	if _, err := semanticsnapshot.BuildCompiler(result, []semanticsnapshot.PackageInput{input}); err == nil {
+		t.Fatal("aggregate implementation joins admitted prematurely")
 	}
 }
 

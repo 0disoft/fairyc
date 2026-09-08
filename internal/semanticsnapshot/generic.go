@@ -8,6 +8,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/source"
 )
@@ -17,10 +18,13 @@ import (
 // inferred effects and executable summaries are not proven here. Nominal names
 // use compiler-published visible scope facts, never a guessed specialization.
 func GenericDeclarations(provenance compiler.GenericProvenance, packages []PackageInput) ([]Declaration, error) {
-	for _, declaration := range provenance.Declarations() {
-		if declaration.Kind != string(DeclarationFunction) {
-			return nil, fmt.Errorf("generic declaration kind %q requires separate snapshot support", declaration.Kind)
+	originals := provenance.Declarations()
+	byID := map[genericplan.DeclarationID]compiler.GenericDeclaration{}
+	for _, original := range originals {
+		if original.Kind != string(DeclarationFunction) && original.Kind != string(DeclarationStruct) && original.Kind != string(DeclarationResource) {
+			return nil, fmt.Errorf("unsupported generic declaration kind %q", original.Kind)
 		}
+		byID[original.ID] = original
 	}
 	metadata, _, _, err := normalizePackages(packages)
 	if err != nil {
@@ -48,9 +52,29 @@ func GenericDeclarations(provenance compiler.GenericProvenance, packages []Packa
 		}
 		nominals[key][fact.Name] = resolved
 	}
+	for _, fact := range provenance.TemplateTypes() {
+		target, found := byID[fact.Declaration]
+		info, owned := metadata[target.Package]
+		if !found || !owned || target.Kind == string(DeclarationFunction) || len(target.Parameters) == 0 {
+			return nil, fmt.Errorf("generic template type has no aggregate declaration")
+		}
+		if _, found := metadata[fact.Package]; !found {
+			return nil, fmt.Errorf("generic template scope has no package metadata")
+		}
+		key := scopeKey{fact.Package, fact.Module}
+		if nominals[key] == nil {
+			nominals[key] = map[string]TypeRef{}
+		}
+		if _, duplicate := nominals[key][fact.Name]; duplicate {
+			return nil, fmt.Errorf("generic template scope repeats a written name")
+		}
+		// Argument slots retain declaration arity; genericType fills them using
+		// the referring declaration's binders, never the target's display names.
+		nominals[key][fact.Name] = TypeRef{Kind: TypeNominal, Name: target.Module + "::" + target.Name, PackageCoordinate: info.input.Coordinate.String(), Arguments: make([]TypeRef, len(target.Parameters))}
+	}
 	var declarations []Declaration
 	seen := map[DeclarationKey]bool{}
-	for _, original := range provenance.Declarations() {
+	for _, original := range originals {
 		info, ok := metadata[original.Package]
 		if !ok || original.Span.Package != original.Package {
 			return nil, fmt.Errorf("generic declaration has no matching package metadata")
@@ -62,7 +86,7 @@ func GenericDeclarations(provenance compiler.GenericProvenance, packages []Packa
 		if err := validateModule(module.Path, module.SourcePath); err != nil {
 			return nil, err
 		}
-		declaration, err := declarationBase(module, DeclarationFunction, original.Name, original.Span, metadata)
+		declaration, err := declarationBase(module, DeclarationKind(original.Kind), original.Name, original.Span, metadata)
 		if err != nil {
 			return nil, err
 		}
@@ -82,12 +106,42 @@ func GenericDeclarations(provenance compiler.GenericProvenance, packages []Packa
 		}
 		declaration.TypeParameters = slices.Clone(original.Parameters)
 		declaration.Public = original.Public
+		visible := nominals[scopeKey{original.Package, original.Module}]
+		if declaration.Key.Kind != DeclarationFunction {
+			if len(original.Signature.Attributes) != 0 {
+				return nil, fmt.Errorf("generic aggregate attributes require separate snapshot support")
+			}
+			declaration.Type = TypeRef{Kind: TypeNominal, Name: original.Module + "::" + original.Name, PackageCoordinate: info.input.Coordinate.String()}
+			for i := range original.Parameters {
+				declaration.Type.Arguments = append(declaration.Type.Arguments, TypeRef{Kind: TypeParameter, Name: strconv.Itoa(i)})
+			}
+			for _, field := range original.Signature.Fields {
+				typ, err := genericType(field.Type, binders, visible, 0)
+				if err != nil {
+					return nil, fmt.Errorf("generic %s field %s: %w", original.Name, field.Name, err)
+				}
+				span := original.Span
+				span.StartByte, span.EndByte = field.NameSpan.StartByte, field.NameSpan.EndByte
+				if span.StartByte < original.Span.StartByte || span.EndByte > original.Span.EndByte {
+					return nil, fmt.Errorf("generic field span escapes its declaration")
+				}
+				stableSpan, err := normalizeSpan(span, metadata)
+				if err != nil {
+					return nil, err
+				}
+				declaration.Fields = append(declaration.Fields, Field{Name: field.Name, Type: typ, Span: stableSpan})
+			}
+			if original.Signature.HasCleanup {
+				declaration.DropKind = "source-declared"
+			}
+			declarations = append(declarations, declaration)
+			continue
+		}
 		declaration.Unsafe = original.Signature.Unsafe
 		declaration.Effects, err = genericEffects(original.Signature.Attributes)
 		if err != nil {
 			return nil, fmt.Errorf("generic %s effects: %w", original.Name, err)
 		}
-		visible := nominals[scopeKey{original.Package, original.Module}]
 		declaration.Type, err = genericType(original.Signature.Result, binders, visible, 0)
 		if err != nil {
 			return nil, fmt.Errorf("generic %s result: %w", original.Name, err)
@@ -191,8 +245,16 @@ func genericType(value ast.TypeReference, binders map[string]int, nominals map[s
 		if len(value.Arguments) == 0 && builtinType(hir.Type(value.Path)) {
 			return TypeRef{Kind: TypeBuiltin, Name: value.Path}, nil
 		}
-		if resolved, ok := nominals[value.Path]; ok && len(value.Arguments) == 0 {
-			return cloneType(resolved), nil
+		if resolved, ok := nominals[value.Path]; ok && len(value.Arguments) == len(resolved.Arguments) {
+			result := cloneType(resolved)
+			for i, argument := range value.Arguments {
+				converted, err := child(argument)
+				if err != nil {
+					return TypeRef{}, err
+				}
+				result.Arguments[i] = converted
+			}
+			return result, nil
 		}
 		if value.Path == "Option" && len(value.Arguments) == 1 || value.Path == "Result" && len(value.Arguments) == 2 {
 			kind := TypeOption
