@@ -11,3 +11,6 @@ const PrivateStorageTake syntax.Kind = "private-storage-take"
 
 // PrivateStoragePut consumes one value into caller-owned raw storage.
 const PrivateStoragePut syntax.Kind = "private-storage-put"
+
+// PrivateStorageBorrow ties a raw element address to a shared owner's lifetime.
+const PrivateStorageBorrow syntax.Kind = "private-storage-borrow"

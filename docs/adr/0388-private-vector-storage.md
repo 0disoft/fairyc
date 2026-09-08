@@ -708,6 +708,8 @@ Direct tests cover fresh package numbers and wrong-owner/build-local rejection;
 the candidate's disk-hit native execution covers the full SDK body closure.
 There is no stable CLI option, manifest opt-in or installed SDK promotion here.
 
+Owner-bound element borrowing continues in [ADR 0389](0389-owner-bound-storage-borrows.md).
+
 These are private candidate and transport contracts, not stable `Vec<T>` admission. Installed SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow

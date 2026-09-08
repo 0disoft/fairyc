@@ -89,14 +89,16 @@ type borrowReturnTarget struct {
 }
 
 type borrowFlowAnalyzer struct {
-	analyzer   *analyzer
-	module     *moduleScope
-	function   *ast.Function
-	loans      []borrowLoanRecord
-	liveAfter  map[*ast.Statement]borrowLiveMap
-	loanByKey  map[borrowLoanKey]int
-	loops      []borrowLoopFrame
-	probeDepth int
+	analyzer            *analyzer
+	module              *moduleScope
+	function            *ast.Function
+	loans               []borrowLoanRecord
+	liveAfter           map[*ast.Statement]borrowLiveMap
+	liveAfterExpression map[*ast.Expression]borrowLiveMap
+	callBorrows         []borrowValueState
+	loanByKey           map[borrowLoanKey]int
+	loops               []borrowLoopFrame
+	probeDepth          int
 
 	summarizing   bool
 	returnSeen    bool
@@ -207,8 +209,9 @@ func (a *analyzer) borrowFlowFunction(module *moduleScope, function *ast.Functio
 	}
 	flow := &borrowFlowAnalyzer{
 		analyzer: a, module: module, function: function,
-		liveAfter: make(map[*ast.Statement]borrowLiveMap),
-		loanByKey: make(map[borrowLoanKey]int),
+		liveAfter:           make(map[*ast.Statement]borrowLiveMap),
+		liveAfterExpression: make(map[*ast.Expression]borrowLiveMap),
+		loanByKey:           make(map[borrowLoanKey]int),
 	}
 	flow.liveBlock(function.Body, make(borrowLiveMap), borrowLiveContext{})
 	environment := flow.parameterEnvironment()
@@ -367,6 +370,21 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return borrowValueState{}, true
 	}
 	switch expression.Kind {
+	case ast.PrivateStorageBorrow:
+		if len(expression.Children) != 2 {
+			return borrowValueState{known: false}, true
+		}
+		owner, reachable := f.evaluateExpression(expression.Children[0], environment)
+		if !reachable {
+			return borrowValueState{}, false
+		}
+		base := len(f.callBorrows)
+		f.callBorrows = append(f.callBorrows, owner)
+		defer func() { f.callBorrows = f.callBorrows[:base] }()
+		if _, reachable := f.evaluateExpression(expression.Children[1], environment); !reachable {
+			return borrowValueState{}, false
+		}
+		return cloneBorrowValue(owner), true
 	case syntax.KindLiteral:
 		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
 			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}
@@ -394,6 +412,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return cloneBorrowValue(state), true
 	case syntax.KindPrefix:
 		if isBorrowExpression(expression) {
+			f.checkBorrowCreation(expression, environment)
 			owner := f.analyzer.resolved[expression.Children[0]]
 			if owner == nil {
 				return borrowValueState{known: false}, true
@@ -438,6 +457,8 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 	case syntax.KindPropagate:
 		return f.evaluatePropagate(expression, environment)
 	case syntax.KindCall:
+		base := len(f.callBorrows)
+		defer func() { f.callBorrows = f.callBorrows[:base] }()
 		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
 			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}
 			return borrowValueState{
@@ -456,6 +477,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 					return borrowValueState{}, false
 				}
 				argumentValues = append(argumentValues, value)
+				f.callBorrows = append(f.callBorrows, value)
 			}
 			return cloneBorrowValue(argumentValues[0]), true
 		}
@@ -484,6 +506,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		if !reachable {
 			return borrowValueState{}, false
 		}
+		f.callBorrows = append(f.callBorrows, calleeValue)
 		arguments := expression.Children[1:]
 		argumentValues := make([]borrowValueState, 0, len(arguments))
 		for _, argument := range arguments {
@@ -492,6 +515,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 				return borrowValueState{}, false
 			}
 			argumentValues = append(argumentValues, value)
+			f.callBorrows = append(f.callBorrows, value)
 		}
 		if f.analyzer.methodCalls[expression] != nil {
 			callee := expression.Children[0]
@@ -1362,6 +1386,9 @@ func indexedArrayOwner(analyzer *analyzer, target *ast.Expression) *symbol {
 func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {
 	if expression == nil {
 		return cloneBorrowLive(liveOut)
+	}
+	if f.liveAfterExpression != nil && isBorrowExpression(expression) {
+		f.liveAfterExpression[expression] = cloneBorrowLive(liveOut)
 	}
 	switch expression.Kind {
 	case syntax.KindPath:
