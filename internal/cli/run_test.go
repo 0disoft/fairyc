@@ -421,7 +421,7 @@ func TestExperimentalEmitCEmitsExplicitModuleClosure(t *testing.T) {
 	}
 }
 
-func TestExperimentalEmitCRejectsUnsupportedBackendSubset(t *testing.T) {
+func TestExperimentalEmitCEmitsInertStructResourceFields(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
@@ -435,7 +435,8 @@ resource Holder {
 fn i32 main() { return 0; }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental C-emission subset") || !strings.Contains(stderr, "field \"marker\" of type \"main::Marker\"") {
+	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "fy_struct_0 f_0;") ||
+		!strings.Contains(stdout, "_Static_assert(sizeof(fy_resource_0) == UINT64_C(4)") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }
