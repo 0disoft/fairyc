@@ -1,6 +1,6 @@
 # ADR 0389: Owner-bound storage borrows
 
-- Status: Accepted source-analysis prerequisite; executable admission pending
+- Status: Accepted source and private MIR prerequisite; native admission pending
 - Date: 2026-09-09
 - Depends on: ADR 0388
 
@@ -46,9 +46,18 @@ Independent ordinary byte-array tests cover temporary argument conflicts and
 last-use release. Semantic regression and existing low/optimized MSVC vector and
 cache tests pass.
 
-The new operation deliberately cannot produce verified executable MIR yet. No
-native execution claim is made for storage borrows. The next unit must supply
-MIR shape/provenance/ownership verification, backend transport and real native
-evidence before the SDK exposes an element-access function. Mutable access,
+Private lowering now preserves the shared owner and opaque address as separate
+operands, freezes the owner before address evaluation, and retains exact result,
+owner and address types plus unsafe source identity. The transfer verifier admits
+this operation only with its closed shape, live operands and matching unsafe
+provenance; ordinary and query-only verification reject it. Source-derived loan
+and return-origin checks remain part of compiler publication. This does not add
+independent MIR alias analysis or prove raw-address validity from operand types.
+Mutation tests cover missing or dead owners, mutable results/owners, invalid
+element/address types, result aliasing, unsafe identity and ownership flags.
+
+No native execution claim is made for storage borrows. Backend operand-type
+checking, transport and real native evidence are required before the SDK exposes
+an element-access function. Mutable access,
 artifact/cache transport, stable CLI and installed SDK admission remain separate.
 No stable grammar, SDK source/version, runtime ABI or cache format is promoted.

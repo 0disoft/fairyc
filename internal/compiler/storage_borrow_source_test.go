@@ -8,6 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
@@ -55,11 +56,58 @@ func checkStorageBorrowOrigin(t *testing.T, text string) {
 	if !strings.Contains(string(encoded), "storage-borrow") {
 		t.Fatal("typed storage borrow missing")
 	}
-	// Source preparation alone cannot publish an executable before the matching
-	// MIR operation, verifier and backend have been implemented.
 	compiled, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
-	if err == nil && compiled.Verified {
-		t.Fatal("source-only borrow gained executable admission")
+	if err != nil || !compiled.Verified {
+		t.Fatalf("storage borrow MIR: %v", err)
+	}
+	program, err := mir.Lower(result.HIR)
+	if err != nil || len(mir.VerifyStorageTransfers(program)) != 0 {
+		t.Fatalf("storage borrow lowering: %v", err)
+	}
+	if len(mir.Verify(program)) == 0 || len(mir.VerifyStorageQueries(program)) == 0 {
+		t.Fatal("storage borrow escaped private admission")
+	}
+}
+
+func TestPrivateVectorStorageBorrowSourceMIRMutations(t *testing.T) {
+	for name, mutate := range map[string]func(*mir.Operation){
+		"owner omitted":        func(op *mir.Operation) { op.Operands = op.Operands[1:] },
+		"mutable result":       func(op *mir.Operation) { op.Type = hir.MutableBorrow(hir.TypeI32) },
+		"unknown element":      func(op *mir.Operation) { op.Type = hir.SharedBorrow("main::Missing") },
+		"mutable owner":        func(op *mir.Operation) { op.OwnerType = hir.MutableBorrow("main::Owner") },
+		"raw owner":            func(op *mir.Operation) { op.OwnerType = hir.RawPointer(hir.TypeVoid, false) },
+		"typed address":        func(op *mir.Operation) { op.IndexType = hir.RawPointer(hir.TypeI32, false) },
+		"unknown owner local":  func(op *mir.Operation) { op.Operands[0].Local = 900000 },
+		"result aliases owner": func(op *mir.Operation) { op.DestinationLocal = op.Operands[0].Local },
+		"unsafe scope":         func(op *mir.Operation) { op.UnsafeScope = hir.Span{} },
+		"source identity":      func(op *mir.Operation) { op.Entity = "forged" },
+		"ownership transfer":   func(op *mir.Operation) { op.MovePayload = true },
+	} {
+		t.Run(name, func(t *testing.T) {
+			analysis, err := analyzeStorageBorrow(t, storageBorrowSource)
+			if err != nil {
+				t.Fatal(err)
+			}
+			program, err := mir.Lower(analysis.Analysis.Semantic.HIR)
+			if err != nil {
+				t.Fatal(err)
+			}
+			changed := 0
+			for fi := range program.Functions {
+				for bi := range program.Functions[fi].Blocks {
+					for oi := range program.Functions[fi].Blocks[bi].Operations {
+						op := &program.Functions[fi].Blocks[bi].Operations[oi]
+						if op.Kind == mir.OperationStorageBorrow {
+							mutate(op)
+							changed++
+						}
+					}
+				}
+			}
+			if changed != 1 || len(mir.VerifyStorageTransfers(program)) == 0 {
+				t.Fatalf("mutation not rejected: %d operations", changed)
+			}
+		})
 	}
 }
 
