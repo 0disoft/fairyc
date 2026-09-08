@@ -315,13 +315,17 @@ This is not a minimal interface digest or a reusable package-cache contract.
 `TestPrivateNominalGenericOwnershipAndIdentity` checks `pass<Point>`,
 `pass<Token>` and `Box<Point>` with verified MIR and interpreter execution,
 original AST preservation, repeat identity and owner/body invalidation. Native
-low/optimized MSVC evidence covers the two function specializations, payload 41
-and exactly one cleanup marker before return 42. It deliberately excludes
-`Box<Point>`: the existing C backend requires repr(C) for this nested struct
-shape while generated generic names are not public repr(C) identifiers.
+low/optimized MSVC evidence covers both function specializations and `Box<Point>`,
+payload 41 and exactly one cleanup marker before return 42. Both private and
+`repr(C)` Point definitions execute inside the private generic Box. The backend
+now permits acyclic nested inert structs in private structs, using its existing
+recursive layout and topological emission. The separate three-level private
+struct regression checks padding, offsets, definition order, interpreter values
+and cycle rejection. Public `repr(C)` parents still reject private nested types;
+generated generic names do not become public C identifiers.
 
 Unknown arguments, imports, nominal-name shadowing and reuse after move are
 rejected without publishing provenance. Cross-module nominal arguments,
-resource-element aggregates, nested nominal C transport, typed layout queries,
+resource-element aggregates, typed layout queries,
 stable admission and public `Vec<T>` remain separate work. SDK, language and
 runtime ABI versions are unchanged.

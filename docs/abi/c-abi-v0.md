@@ -47,6 +47,12 @@ public `fy_std_*` record tags remain admitted; neither prefix is opened generall
 
 Stage 0 does not stabilize Fairy function mangling, ordinary Fairy calling conventions, `Option` or `Result` layout, resource layout, slice layout, drop symbols, or dynamic-library exports. Calls within one compilation are compiler-private.
 
+Private inert structs may contain acyclic nested inert structs, including
+`@repr(C)` structs, using target-computed size, alignment and offset assertions
+and dependency-ordered C definitions. This does not make the containing private
+type a C ABI type. A `@repr(C)` parent still requires every nested struct to have
+`@repr(C)`; resource fields remain excluded from this inert-struct path.
+
 The external ABI consists only of:
 
 ```text

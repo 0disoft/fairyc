@@ -172,7 +172,7 @@ func (r *aggregateLayoutResolver) resolveStruct(definition mir.StructType) (layo
 func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool) (layout.Type, error) {
 	value = canonicalCValueType(value)
 	if nested, found := r.structures[value]; found {
-		if !reprC || !nested.ReprC {
+		if reprC && !nested.ReprC {
 			return layout.Type{}, fmt.Errorf("nested struct type %q is not repr(C)", value)
 		}
 		return r.resolve(value)

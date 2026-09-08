@@ -77,15 +77,12 @@ func TestPrivateNominalGenericOwnershipAndIdentity(t *testing.T) {
 		t.Fatal("legacy scalar lane admitted nominal arguments")
 	}
 	t.Run("native", func(t *testing.T) {
-		// Private generic aggregates have generated names, not public repr(C)
-		// identities. Exercise nominal function arguments natively without
-		// claiming unsupported nested nominal aggregate C transport.
-		text := strings.Replace(nominalGenericProgram, "    let Box<Point> box = Box<Point> { .value = point };\n", "", 1)
-		text = strings.Replace(text, "box.value.value", "point.value", 1)
-		runGenericAggregateNativeWithCompiler(t, text, func(file semantic.File) (compiler.Result, error) {
-			result, _, err := compiler.CheckNominalGenericFunctions(file, coordinate, limits)
-			return result, err
-		})
+		for _, text := range []string{nominalGenericProgram, strings.Replace(nominalGenericProgram, "@repr(C) struct Point", "struct Point", 1)} {
+			runGenericAggregateNativeWithCompiler(t, text, func(file semantic.File) (compiler.Result, error) {
+				result, _, err := compiler.CheckNominalGenericFunctions(file, coordinate, limits)
+				return result, err
+			})
+		}
 	})
 }
 
