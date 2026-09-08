@@ -641,6 +641,23 @@ root escape rejection; a separate sentinel proves disk hits skip lowering.
 This remains an explicit compiler-private cache lane. Stable workspace selection,
 installed SDK container source and public `Vec<T>` admission remain separate work.
 
+### Existing SDK resource integration
+
+The private package fixture now includes all six unmodified embedded SDK modules
+and specializes the candidate container with the SDK-owned `std::bytes::Buffer`.
+No SDK module is filtered out, copied into the provider, or given a new owner.
+The original source graph remains unchanged after compilation. The native helper
+links the emitted stable SDK symbol closure alongside private vector storage,
+sharing one instrumented heap implementation rather than duplicating it.
+
+Low/optimized MSVC execute empty pop, nine allocated Buffer elements, two forced
+growth failures with ownership-returning retry, explicit pop, container move and
+automatic cleanup. Every popped slot retains the exact five-byte payload; all
+nine elements and the vector allocation are released. Separate source rejections
+cover SDK-private field access, moved-donor reuse and a surviving Buffer view
+across donor transfer. This proves an existing SDK resource works through the
+private candidate, not installed container source or stable `Vec<T>` admission.
+
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow

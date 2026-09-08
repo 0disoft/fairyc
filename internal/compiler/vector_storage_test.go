@@ -2,6 +2,7 @@ package compiler_test
 
 import (
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
@@ -75,6 +76,21 @@ func runVectorStorageMIRNativeLane(t *testing.T, program mir.Program, entry, pro
 	if err != nil {
 		t.Fatal(err)
 	}
+	symbols := []string{"fy_std_system_heap_allocate_v0"}
+	for _, symbol := range unit.ForeignSymbols {
+		if strings.HasPrefix(symbol, "fy_std_") {
+			symbols = append(symbols, symbol)
+		}
+	}
+	sdk, err := cstdlib.WindowsMSVCSourceForSymbols(symbols)
+	if err != nil {
+		t.Fatal(err)
+	}
+	heap, err := cstdlib.WindowsMSVCSourceForSymbols(symbols[:1])
+	if err != nil || !strings.HasPrefix(storage, heap) {
+		t.Fatalf("private storage heap boundary: %v", err)
+	}
+	storage = sdk + strings.TrimPrefix(storage, heap)
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
 			artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source, scalar+vectorStorageAllocator+storage+vectorStorageProbe+probe)
