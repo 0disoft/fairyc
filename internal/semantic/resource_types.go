@@ -312,6 +312,8 @@ func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReferenc
 
 func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.TypeReference, allowFixedArray bool) (hir.Type, bool) {
 	switch reference.Kind {
+	case ast.TypeKindBoundNominal:
+		return a.canonicalBoundNominal(reference)
 	case ast.TypeKindArray:
 		if !allowFixedArray || reference.Element == nil || reference.Length == nil {
 			return hir.TypeInvalid, false

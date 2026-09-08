@@ -329,3 +329,32 @@ rejected without publishing provenance. Cross-module nominal arguments,
 resource-element aggregates, typed layout queries,
 stable admission and public `Vec<T>` remain separate work. SDK, language and
 runtime ABI versions are unchanged.
+
+## Exact private nominal type bindings
+
+The AST now has a compiler-private `bound-nominal` type-reference kind. Its path
+is an opaque key into an explicit binding table, not source spelling or an
+implicit module lookup. `semantic.AnalyzeBoundNominalPackages` validates each
+key against a concrete struct/resource declaration in the exact input closure,
+rejecting duplicate keys and absent targets. Ordinary semantic entry points
+have no such table and reject these references. Malformed reference shapes
+remain unsupported rather than acquiring an alternative interpretation.
+
+The compiler-side caller must establish source argument accessibility before
+supplying bindings. A binding names the original package, module and declaration;
+it grants no field access, resource-construction, copy, destruction or import
+rights. Semantic field checks continue to use that original owner. References
+to same-named types in two packages resolve to distinct HIR types without adding
+reverse imports or transferring nominal definitions into the generic provider.
+
+Semantic tests cover resource and inert-struct owner identity, original AST
+preservation, missing/duplicate/malformed authority, ordinary-entry rejection,
+and private-field denial. A compiler integration test supplies the private marker
+after parsing a provider signature, transfers a client-owned resource through
+that provider and back, then obtains result 42 and one interpreter cleanup.
+Low/optimized Windows MSVC also execute that same lowered program.
+
+This is the AST-to-semantic binding prerequisite, not automatic source generic
+argument expansion. Wiring the package generic planner and expander to produce
+these keys, validate source visibility and preserve full definition/import
+identity is still required. No stable source, cache, SDK or ABI admission changes.

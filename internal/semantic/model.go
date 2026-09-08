@@ -192,6 +192,10 @@ func AnalyzePackages(input PackageInput) (Result, error) {
 }
 
 func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
+	return analyzeBoundNominals(files, bindings, nil)
+}
+
+func analyzeBoundNominals(files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding) Result {
 	ordered := cloneResourceAbilityInputs(files)
 	slices.SortFunc(ordered, func(a, b File) int {
 		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
@@ -203,6 +207,7 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
 	}
 	analyzer := newAnalyzer(ordered, bindings)
+	analyzer.nominalBindings = nominals
 	analyzer.resolve()
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()
