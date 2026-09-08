@@ -228,3 +228,41 @@ void *fy_private_vector_pop_slot_v0(void *storage, size_t element_size) {
     memcpy(storage, &value, sizeof value);
     return slot;
 }
+
+/* Prepare one uninitialized tail slot without changing length. slot_output
+ * points to a live pointer-sized output disjoint from the descriptor/backing
+ * allocation. On failure both descriptor and output are unchanged. */
+uint32_t fy_private_vector_prepare_push_v0(void *storage, size_t element_size, void *slot_output) {
+    if (storage == NULL || slot_output == NULL) return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    if (value.length == SIZE_MAX / value.element_size) return FY_STD_ALLOC_SIZE_OVERFLOW_V0;
+    uint32_t status = fy_private_vector_reserve_v0(storage, value.length + 1);
+    if (status != FY_STD_ALLOC_OK_V0) return status;
+    memcpy(&value, storage, sizeof value);
+    void *slot = (unsigned char *)value.block.data + value.length * value.element_size;
+    memcpy(slot_output, &slot, sizeof slot);
+    return FY_STD_ALLOC_OK_V0;
+}
+
+/* The caller must have written exactly one valid owned element into the prepared
+ * slot, with no intervening descriptor mutation, alias access or callback. A
+ * matching address is not proof of initialization/ownership. This publishes the
+ * initialized-prefix obligation; it neither writes nor destroys the payload. */
+uint32_t fy_private_vector_commit_push_v0(void *storage, void *slot, size_t element_size) {
+    if (storage == NULL || slot == NULL) return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size ||
+        value.length == value.block.size / value.element_size) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    void *expected = (unsigned char *)value.block.data + value.length * value.element_size;
+    if (slot != expected) return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    value.length++;
+    memcpy(storage, &value, sizeof value);
+    return FY_STD_ALLOC_OK_V0;
+}

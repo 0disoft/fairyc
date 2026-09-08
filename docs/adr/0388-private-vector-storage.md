@@ -149,7 +149,7 @@ permission, empty-state validity, disjoint spans and exclusive ownership. An
 arbitrary type without a valid owner-supplied empty state is not covered. The byte
 core is shared with copy operations, but their ownership contracts remain distinct.
 
-`TestPrivateVectorResourceOwnership` executes a concrete owner-module `Item` and
+The original `TestPrivateVectorResourceOwnership` executed a concrete owner-module `Item` and
 `Items` implementation under both MSVC profiles. Each Item owns a real native
 allocation. A consuming push returns `Result<u32, Item>`: failed first allocation
 and failed eight-to-nine growth return the original Item, whose exact identity is
@@ -161,10 +161,11 @@ order, no live Item allocation, one vector cleanup and no live vector allocation
 `TestPrivateVectorResourceDonorCannotBeReused` rejects a source borrow after the
 consuming push path. Scalar and poison-prefix regressions run in the same lane.
 
-The fixture uses a concrete pointer-sized Item with a valid empty constructor and
+That version used a concrete pointer-sized Item with a valid empty constructor and
 compiler-queried Windows C storage layout. It does not instantiate a generic type with a nominal
 resource argument or establish cleanup for every possible resource representation.
-No source ownership rule, `burn` authority, public SDK symbol or runtime ABI changes.
+The later consuming-write integration removes that empty-constructor dependency.
+No `burn` authority, public SDK symbol or runtime ABI changes.
 
 ### Compiler-private C storage layout acquisition
 
@@ -360,17 +361,17 @@ Success transfers the tail's pending element obligation, not a safe borrow: the
 caller must immediately materialize the typed value before mutating/releasing
 storage or exiting. The helper does not allocate, copy, clear or destroy elements.
 
-The resource integration fixture now uses one source `take_slot<Item>` generic
+The first source-take integration used one source `take_slot<Item>` generic
 specialization in both explicit pop and its cleanup loop, with no injected HIR
 or empty Item construction on these paths. It retains first-allocation and growth
 OOM ownership-return/retry and exact 9-through-1 destruction evidence under both
 MSVC profiles. Native counters require nine slot transfers and eleven empty Item
 constructions, all from the eleven push attempts; no vector-pop placeholder is
-constructed. Empty/wrong-size pops preserve descriptor bytes. Source tests cover
+constructed in that version. Empty/wrong-size pops preserve descriptor bytes. Source tests cover
 AST preservation, query-only rejection, unsafe/type/arity/name guards and moved
-donor rejection. This does not yet generalize the concrete Items cleanup or remove
-push's owner-supplied empty state; consuming writes and package/SDK integration
-remain required.
+donor rejection. The consuming-write integration below removes push's remaining
+empty-state dependency; generic Items cleanup and package/SDK integration remain
+required.
 
 ### Private consuming source write
 
@@ -400,8 +401,37 @@ profiles return 42. Source tests reject wrong types/arity/reserved names, donor
 reuse, missing unsafe (`E5101`) and a live loan crossing the move (`E2105`). MIR
 mutation tests reject malformed writes and post-write temporary reuse; backend
 tests separately reject pointer/value type substitution. AST preservation and
-default-consumer rejection are also checked. This establishes the consuming-write
-primitive, not its reserve/write/prefix-commit integration in the vector fixture.
+default-consumer rejection are also checked. The following section records this
+primitive's reserve/write/prefix-commit integration in the vector fixture.
+
+### Vector push without an empty element representation
+
+`fy_private_vector_prepare_push_v0` validates size/count and reserves one tail
+slot before publishing its address into a disjoint pointer-sized output. It does
+not change the initialized count. Invalid input, overflow or OOM preserves both
+descriptor and output. After successful preparation the caller consumes the value
+with `storage_put<T>`, then calls `fy_private_vector_commit_push_v0` with that
+exact tail address and element size. Commit checks available capacity/address,
+increments length and leaves payload and allocation metadata alone. Invalid or
+duplicate commit leaves the descriptor unchanged.
+
+This is an unsafe sequential protocol, not a persistent reservation token or a
+transaction across callbacks. No storage mutation, escaping slot, alias access or
+callback may intervene; the caller proves the write initialized one owned element
+before commit. A matching pointer alone cannot prove initialization. No failing
+allocation occurs after the donor is consumed. A prepared but unwritten slot is
+outside the initialized prefix; ordinary release rules still apply to the prefix.
+
+The Item vector fixture now has no empty Item constructor, reset representation
+or null-tolerant destructor. Its source push returns the original Item on failed
+prepare and consumes it only on success. The native probe verifies nine successful
+prepares, two OOM failures with exact descriptor/output preservation, nine typed
+writes checked before commit, nine commits and nine tail transfers. Wrong-size,
+null and duplicate commit controls preserve descriptor bytes. Explicit pop plus
+scope cleanup releases Items 9 through 1 exactly once, with one vector release
+and no live element/vector allocation under low/optimized MSVC. Source donor-reuse
+and the scalar/poison-prefix regressions remain in the same lane. Container cleanup
+is still concrete Items code; generic/package/SDK admission is not established.
 
 ### Still required
 

@@ -14,7 +14,7 @@ func TestPrivateVectorResourceOwnership(t *testing.T) {
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", vectorResourceProgram)
 	before, _ := json.Marshal(file.Module)
 	result, plan, err := compiler.CheckStorageTransferFunctions(file, genericCoordinate(t), genericplan.DefaultPlanLimits())
-	if err != nil || !result.Verified || len(plan.Specializations) != 1 {
+	if err != nil || !result.Verified || len(plan.Specializations) != 2 {
 		t.Fatalf("source transfer: %v %+v", err, result.Semantic)
 	}
 	after, _ := json.Marshal(file.Module)
@@ -82,9 +82,9 @@ const vectorResourceProgram = `module main;
 @link_name("fairyc_fixture_resource_new") unsafe extern C fn ptr mut void new_raw(i32 id);
 @link_name("fairyc_fixture_resource_drop") unsafe extern C fn u32 drop_raw(ptr mut void handle);
 @link_name("fairyc_fixture_resource_id") unsafe extern C fn i32 id_raw(ptr mut void handle);
-@link_name("fairyc_fixture_resource_push") unsafe extern C fn u32 push_raw(ptr mut void storage, ptr mut void value, ptr void empty, usize size);
+@link_name("fairyc_fixture_resource_prepare") unsafe extern C fn u32 prepare_raw(ptr mut void storage, usize size, ptr mut void output);
+@link_name("fairyc_fixture_resource_commit") unsafe extern C fn u32 commit_raw(ptr mut void storage, ptr mut void slot, usize size);
 @link_name("fairyc_fixture_resource_pop_slot") unsafe extern C fn ptr mut void pop_slot_raw(ptr mut void storage, usize size);
-@link_name("fairyc_fixture_resource_empty_item") unsafe extern C fn i32 empty_item_called();
 @link_name("fairyc_fixture_resource_fail") unsafe extern C fn i32 fail_next();
 @link_name("fairyc_fixture_resource_finished") unsafe extern C fn i32 finished();
 @link_name("fairyc_fixture_resource_empty") unsafe extern C fn i32 empty_valid(ptr void storage);
@@ -103,8 +103,8 @@ resource Items {
         let u32 released = unsafe { release(ref mut this as ptr mut void) };
     }
 }
-fn Item empty_item() { assert(unsafe { empty_item_called() } == 1); return Item { .handle = null }; }
 fn T take_slot<T>(ptr mut void slot) { return unsafe { storage_take<T>(slot) }; }
+fn i32 write_slot<T>(ptr mut void slot, T value) { return unsafe { storage_put<T>(slot, value); 1 }; }
 fn Item make(i32 id) {
     let ptr mut void handle = unsafe { new_raw(id) };
     assert(handle != null);
@@ -118,13 +118,14 @@ fn Items empty_items() {
     return storage;
 }
 fn Result<u32, Item> push(ref mut Items storage, Item value) {
-    var Item owned = value;
-    let Item vacant = empty_item();
-    let u32 status = unsafe { push_raw(storage as ptr mut void, ref mut owned as ptr mut void, ref vacant as ptr void, storage.element_size) };
+    var ptr mut void slot = null;
+    let u32 status = unsafe { prepare_raw(storage as ptr mut void, storage.element_size, ref mut slot as ptr mut void) };
     return if (status == 0) {
-        let i32 discarded = discard_item(owned);
+        assert(slot != null);
+        assert(write_slot<Item>(slot, value) == 1);
+        assert(unsafe { commit_raw(storage as ptr mut void, slot, storage.element_size) } == 0);
         .ok(status)
-    } else { .err(owned) };
+    } else { .err(value) };
 }
 fn i32 push_ok(ref mut Items storage, Item value) {
     return switch (push(storage, value)) {
@@ -180,9 +181,8 @@ static void *resource_handles[9] = {NULL};
 static size_t resource_live = 0;
 static size_t resource_drops = 0;
 static int resource_bad = 0;
-static size_t resource_empty_constructs = 0;
 static size_t resource_slots = 0;
-int32_t fairyc_fixture_resource_empty_item(void) { resource_empty_constructs++; return 1; }
+static size_t resource_prepares = 0, resource_prepare_failures = 0, resource_commits = 0;
 void *fairyc_fixture_resource_new(int32_t id) {
     if (id < 1 || id > 9 || resource_handles[id - 1] != NULL) { resource_bad = 1; return NULL; }
     int32_t *handle = malloc(sizeof *handle);
@@ -190,7 +190,7 @@ void *fairyc_fixture_resource_new(int32_t id) {
     return handle;
 }
 uint32_t fairyc_fixture_resource_drop(void *handle) {
-    if (handle == NULL) return 0;
+    if (handle == NULL) { resource_bad = 1; return 4; }
     for (size_t i = 0; i < 9; i++) {
         if (resource_handles[i] == handle) {
             if (resource_drops >= 9 || i + 1 != 9 - resource_drops) resource_bad = 1;
@@ -211,8 +211,50 @@ int32_t fairyc_fixture_resource_id(void *handle) {
     resource_bad = 1;
     return 0;
 }
-uint32_t fairyc_fixture_resource_push(void *storage, void *value, const void *empty, size_t size) {
-    return fy_private_vector_push_take_v0(storage, value, empty, size);
+uint32_t fairyc_fixture_resource_prepare(void *storage, size_t size, void *output) {
+    struct fy_private_vector_storage_v0 before, after;
+    void *prior, *slot;
+    size_t live = vector_live;
+    memcpy(&before, storage, sizeof before);
+    memcpy(&prior, output, sizeof prior);
+    if (fy_private_vector_prepare_push_v0(NULL, size, output) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
+        fy_private_vector_prepare_push_v0(storage, size, NULL) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
+        fy_private_vector_prepare_push_v0(storage, size + 1, output) != FY_STD_ALLOC_INVALID_ARGUMENT_V0) resource_bad = 1;
+    memcpy(&after, storage, sizeof after);
+    memcpy(&slot, output, sizeof slot);
+    if (memcmp(&before, &after, sizeof before) != 0 || slot != prior || vector_live != live) resource_bad = 1;
+    uint32_t status = fy_private_vector_prepare_push_v0(storage, size, output);
+    memcpy(&after, storage, sizeof after);
+    memcpy(&slot, output, sizeof slot);
+    if (status != 0) {
+        if (memcmp(&before, &after, sizeof before) != 0 || slot != prior || vector_live != live) resource_bad = 1;
+        resource_prepare_failures++;
+    } else {
+        if (after.length != before.length || after.element_size != size || after.element_alignment != before.element_alignment ||
+            slot != (unsigned char *)after.block.data + after.length * size) resource_bad = 1;
+        resource_prepares++;
+    }
+    return status;
+}
+uint32_t fairyc_fixture_resource_commit(void *storage, void *slot, size_t size) {
+    struct fy_private_vector_storage_v0 before, after;
+    memcpy(&before, storage, sizeof before);
+    if (fy_private_vector_commit_push_v0(storage, NULL, size) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
+        fy_private_vector_commit_push_v0(storage, slot, size + 1) != FY_STD_ALLOC_INVALID_ARGUMENT_V0) resource_bad = 1;
+    memcpy(&after, storage, sizeof after);
+    if (memcmp(&before, &after, sizeof before) != 0) resource_bad = 1;
+    void *handle;
+    memcpy(&handle, slot, sizeof handle);
+    if (fairyc_fixture_resource_id(handle) != (int32_t)(before.length + 1) || resource_drops != 0) resource_bad = 1;
+    uint32_t status = fy_private_vector_commit_push_v0(storage, slot, size);
+    memcpy(&after, storage, sizeof after);
+    before.length++;
+    if (status != 0 || memcmp(&before, &after, sizeof before) != 0) resource_bad = 1;
+    if (fy_private_vector_commit_push_v0(storage, slot, size) != FY_STD_ALLOC_INVALID_ARGUMENT_V0) resource_bad = 1;
+    memcpy(&after, storage, sizeof after);
+    if (memcmp(&before, &after, sizeof before) != 0) resource_bad = 1;
+    resource_commits++;
+    return status;
 }
 void *fairyc_fixture_resource_pop_slot(void *storage, size_t size) {
     struct fy_private_vector_storage_v0 before, after;
@@ -230,6 +272,6 @@ void *fairyc_fixture_resource_pop_slot(void *storage, size_t size) {
 int32_t fairyc_fixture_resource_fail(void) { vector_fail = 1; return 1; }
 int32_t fairyc_fixture_resource_finished(void) {
     return fairyc_fixture_vector_finished() == 1 && resource_live == 0 && resource_drops == 9 &&
-        resource_slots == 9 && resource_empty_constructs == 11 && !resource_bad ? 1 : 0;
+        resource_slots == 9 && resource_prepares == 9 && resource_prepare_failures == 2 && resource_commits == 9 && !resource_bad ? 1 : 0;
 }
 `
