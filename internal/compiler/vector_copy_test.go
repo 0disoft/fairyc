@@ -42,9 +42,13 @@ const vectorCopyProgram = `module main;
 @link_name("fairyc_fixture_vector_fail_next") unsafe extern C fn i32 fail_next();
 @link_name("fairyc_fixture_vector_wrong_size") unsafe extern C fn i32 wrong_size(ptr mut void storage);
 @link_name("fairyc_fixture_vector_empty") unsafe extern C fn i32 empty_valid(ptr void storage);
+@link_name("fairyc_fixture_vector_clear") unsafe extern C fn u32 clear_raw(ptr mut void storage, usize size);
 resource Storage<T> {
     ptr mut void data; usize bytes; usize alignment; usize length; usize element_size; usize element_alignment;
-    cleanup { let u32 status = unsafe { release(ref mut this as ptr mut void) }; }
+    cleanup {
+        let u32 cleared = unsafe { clear_raw(ref mut this as ptr mut void, this.element_size) };
+        let u32 status = unsafe { release(ref mut this as ptr mut void) };
+    }
 }
 fn Storage<T> empty<T>() {
     var Storage<T> storage = Storage<T> { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
@@ -60,9 +64,13 @@ fn u32 read<T>(ref Storage<T> storage, usize index, ref mut T output) {
 fn u32 pop<T>(ref mut Storage<T> storage, ref mut T output) {
     return unsafe { pop_raw(storage as ptr mut void, output as ptr mut void, storage.element_size) };
 }
+fn u32 clear<T>(ref mut Storage<T> storage) {
+    return unsafe { clear_raw(storage as ptr mut void, storage.element_size) };
+}
 fn i32 exercise() {
     var Storage<SCALAR> storage = empty<SCALAR>();
     assert(unsafe { empty_valid(ref storage as ptr void) } == 1);
+    assert(clear<SCALAR>(ref mut storage) == 0 && storage.length == 0 && storage.bytes == 0);
     let SCALAR item = VALUE;
     let SCALAR other = OTHER;
     var SCALAR output = other;
@@ -82,6 +90,16 @@ fn i32 exercise() {
     assert(read<SCALAR>(ref storage, 8, ref mut output) == 4 && output == item);
     for (var usize i = 0; i < 8; i += 1) { assert(pop<SCALAR>(ref mut storage, ref mut output) == 0 && output == item); }
     assert(pop<SCALAR>(ref mut storage, ref mut output) == 4 && output == item && storage.length == 0);
+    assert(push<SCALAR>(ref mut storage, item) == 0);
+    assert(push<SCALAR>(ref mut storage, other) == 0);
+    let usize retained_bytes = storage.bytes;
+    assert(clear<SCALAR>(ref mut storage) == 0 && storage.length == 0 && storage.bytes == retained_bytes);
+    assert(clear<SCALAR>(ref mut storage) == 0 && storage.bytes == retained_bytes);
+    assert(read<SCALAR>(ref storage, 0, ref mut output) == 4 && output == item);
+    assert(pop<SCALAR>(ref mut storage, ref mut output) == 4 && output == item);
+    assert(push<SCALAR>(ref mut storage, other) == 0);
+    assert(read<SCALAR>(ref storage, 0, ref mut output) == 0 && output == other);
+    assert(storage.length == 1);
     let Storage<SCALAR> moved = storage;
     return 41;
 }
@@ -89,6 +107,16 @@ fn i32 main() { return exercise() + unsafe { finished() }; }
 `
 
 const vectorCopyProbe = `
+uint32_t fairyc_fixture_vector_clear(void *storage, size_t size) {
+    struct fy_private_vector_storage_v0 before, after;
+    memcpy(&before, storage, sizeof before);
+    size_t live = vector_live;
+    uint32_t status = fy_private_vector_clear_copy_v0(storage, size);
+    memcpy(&after, storage, sizeof after);
+    before.length = 0;
+    if (status != 0 || memcmp(&before, &after, sizeof before) != 0 || vector_live != live) return 99;
+    return status;
+}
 int32_t fairyc_fixture_vector_empty(const void *storage) {
     struct fy_private_vector_storage_v0 value;
     memcpy(&value, storage, sizeof value);
@@ -114,6 +142,8 @@ int32_t fairyc_fixture_vector_wrong_size(void *storage) {
     uint64_t output = UINT64_C(123456789);
     size_t wrong = value.element_size == sizeof output ? 1 : value.element_size + 1;
     if (fy_private_vector_push_copy_v0(storage, &output, wrong) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
+        fy_private_vector_clear_copy_v0(storage, wrong) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
+        fy_private_vector_clear_copy_v0(NULL, value.element_size) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
         fy_private_vector_read_copy_v0(storage, 0, &output, wrong) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
         fy_private_vector_pop_copy_v0(storage, &output, wrong) != FY_STD_ALLOC_INVALID_ARGUMENT_V0 ||
         output != UINT64_C(123456789) || memcmp(before, storage, sizeof before) != 0 || vector_live != 1) return 0;

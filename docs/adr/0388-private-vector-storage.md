@@ -113,6 +113,25 @@ allocations after draining and moving the resource. A mismatched scalar argument
 is rejected before emission. The original poison-prefix reserve fixture remains
 in the same configured lane. Foreign heap calls have no interpreter oracle here.
 
+### Copy-element clear and nonempty cleanup
+
+`fy_private_vector_clear_copy_v0` validates the descriptor and exact element size,
+then resets only the initialized count. Allocation, capacity and layout metadata
+are retained. It does not erase bytes, invoke destructors, allocate or free. Null,
+invalid descriptor and wrong-size requests fail without changing the descriptor.
+The unsafe caller must prove that discarded elements have no destruction
+obligations and no element borrow survives; matching byte size is not that proof.
+This operation must not discard resource elements.
+
+The five scalar programs now clear empty and populated storage, clear repeatedly,
+reject reads/pops of removed elements with unchanged outputs, and reuse retained
+capacity. Their cleanup clears before calling the unchanged empty-only release.
+Each leaves one live copy element before moving the vector and exiting scope;
+low/optimized MSVC requires one successful release and zero live allocations.
+The C probe checks unchanged allocation metadata and live count across clear,
+and wrong-size/null rejection. Resource cleanup remains the explicit pop/drop
+loop and keeps its independent nine-element destruction-order oracle.
+
 ### Owner-supplied empty-state resource transfer
 
 `fy_private_vector_push_take_v0` adds a distinct ownership-transfer protocol over

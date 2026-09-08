@@ -141,6 +141,23 @@ uint32_t fy_private_vector_push_copy_v0(void *storage, const void *element, size
     return fy_private_vector_push_bytes_v0(storage, element, element_size);
 }
 
+/* Only elements without destruction obligations may be discarded this way.
+ * The caller proves that property and exclusive access; byte size is not a type
+ * capability check. Capacity is retained and old payload bytes are not erased. */
+uint32_t fy_private_vector_clear_copy_v0(void *storage, size_t element_size) {
+    if (storage == NULL) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    value.length = 0;
+    memcpy(storage, &value, sizeof value);
+    return FY_STD_ALLOC_OK_V0;
+}
+
 /* The declaring owner supplies a valid non-owning empty representation, in a
  * separate live span disjoint from every other argument/allocation. Success
  * transfers ownership into the prefix and resets the donor before returning.
