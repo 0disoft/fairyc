@@ -666,7 +666,7 @@ func (l *functionLowerer) lowerAssert(expression *hir.Expression, statementSpan 
 	return nil
 }
 
-func (l *functionLowerer) lowerNestedBlock(block hir.Block) (Operand, bool, error) {
+func (l *functionLowerer) lowerNestedBlock(block hir.Block, ownsCleanup bool) (Operand, bool, error) {
 	previousScope := l.currentScope
 	l.currentScope = block.Span
 	defer func() { l.currentScope = previousScope }()
@@ -676,11 +676,24 @@ func (l *functionLowerer) lowerNestedBlock(block hir.Block) (Operand, bool, erro
 	}
 	if block.Tail == nil {
 		l.emitDeferredCallsForScope(block.Span)
+		if ownsCleanup {
+			l.finishValueBlockCleanup(block.Span)
+		}
 		return Operand{}, false, nil
 	}
 	value, err := l.lowerExpression(block.Tail)
 	if err == nil && !l.blockTerminated(l.current) {
+		if ownsCleanup && l.hasValueBlockCleanup(block.Span) {
+			if path := l.liveResourcePath(block.Tail); path != nil {
+				value = l.materializeMove(path, value, "block-result", true)
+			} else {
+				value = l.freezeScalarOperand(value, block.Tail.Span)
+			}
+		}
 		l.emitDeferredCallsForScope(block.Span)
+		if ownsCleanup {
+			l.finishValueBlockCleanup(block.Span)
+		}
 	}
 	return value, l.blockTerminated(l.current), err
 }
@@ -854,7 +867,7 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		if expression.Block == nil {
 			return Operand{}, fmt.Errorf("block expression has no block")
 		}
-		value, _, err := l.lowerNestedBlock(*expression.Block)
+		value, _, err := l.lowerNestedBlock(*expression.Block, true)
 		return value, err
 	case "region":
 		return l.lowerRegion(expression)
@@ -1273,7 +1286,7 @@ func (l *functionLowerer) lowerRegion(expression *hir.Expression) (Operand, erro
 		DestinationLocal: NoLocal, Operands: []Operand{arenaOwner},
 		OwnerType: arena.Children[0].Type, Type: arena.Type, Operator: "&mut",
 	})
-	_, terminated, err := l.lowerNestedBlock(*expression.Block)
+	_, terminated, err := l.lowerNestedBlock(*expression.Block, false)
 	if err != nil {
 		return Operand{}, err
 	}
@@ -2044,7 +2057,7 @@ func (l *functionLowerer) lowerFor(loop *hir.ForLoop) error {
 		header: headerBlock, continueTarget: postBlock, exit: exitBlock, body: loop.Body.Span,
 		regionDepth: len(l.regionStack), headerLive: cloneLive(headerLive),
 	})
-	_, bodyTerminated, err := l.lowerNestedBlock(loop.Body)
+	_, bodyTerminated, err := l.lowerNestedBlock(loop.Body, false)
 	l.loopStack = l.loopStack[:len(l.loopStack)-1]
 	if err != nil {
 		return err

@@ -33,8 +33,8 @@ func vectorPackageInput(t *testing.T, replacements ...[2]string) (semantic.Packa
 	provider := "module storage;\n" + externs +
 		between("resource Items<T>", "fn Item make") +
 		between("fn Items<T> empty_items", "fn i32 push_ok") +
-		between("fn T pop<T>", "fn i32 exercise")
-	for _, declaration := range []string{"resource Items<T>", "fn Items<T> empty_items", "fn Result<u32, T> push", "fn T pop<T>"} {
+		between("fn Option<T> pop<T>", "fn i32 exercise")
+	for _, declaration := range []string{"resource Items<T>", "fn Items<T> empty_items", "fn Result<u32, T> push", "fn Option<T> pop<T>"} {
 		provider = strings.Replace(provider, declaration, "pub "+declaration, 1)
 	}
 	provider += "pub fn usize length<T>(ref Items<T> storage) { return storage.length; }\n"
@@ -127,13 +127,17 @@ fn i32 recover_and_retry(ref mut v::Items<Item> storage, Item value, i32 expecte
 fn i32 exercise() {
     var v::Items<Item> storage = v::empty_items<Item>();
     assert(v::length<Item>(ref storage) == 0);
+    assert(switch (v::pop<Item>(ref mut storage)) { case .some(_) : { false } case .none : { true } });
     assert(unsafe { fail_next() } == 1);
     assert(recover_and_retry(ref mut storage, make(1), 1) == 1);
     for (var i32 id = 2; id < 9; id += 1) { assert(push_ok(ref mut storage, make(id)) == 1); }
     assert(v::length<Item>(ref storage) == 8);
     assert(unsafe { fail_next() } == 1);
     assert(recover_and_retry(ref mut storage, make(9), 9) == 1);
-    let Item last = v::pop<Item>(ref mut storage);
+    let Item last = switch (v::pop<Item>(ref mut storage)) {
+        case .some(value) : { value }
+        case .none : { assert(false); make(9) }
+    };
     assert(item_id(ref last) == 9);
     let i32 discarded = discard_item(last);
     let v::Items<Item> moved = storage;

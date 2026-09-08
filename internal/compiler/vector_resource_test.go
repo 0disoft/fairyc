@@ -39,6 +39,23 @@ func TestPrivateVectorResourceDonorCannotBeReused(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorOptionDiscardOwnership(t *testing.T) {
+	start := strings.Index(vectorResourceProgram, "    let Item last = switch")
+	end := strings.Index(vectorResourceProgram, "    let Items<Item> moved")
+	if start < 0 || end <= start {
+		t.Fatal("option consumer fixture boundary missing")
+	}
+	text := vectorResourceProgram[:start] +
+		"    assert({ let Option<Item> ignored = pop<Item>(ref mut storage); true });\n" +
+		vectorResourceProgram[end:]
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
+	result, _, err := compiler.CheckStorageTransferFunctions(file, genericCoordinate(t), genericplan.DefaultPlanLimits())
+	if err != nil || !result.Verified {
+		t.Fatalf("discarded option source: %v %+v", err, result.Semantic)
+	}
+	runVectorStorageMIRNativeLane(t, result.MIR, "main::main", vectorResourceProbe, true)
+}
+
 func TestPrivateVectorStorageTakeSourceRejections(t *testing.T) {
 	for name, replacement := range map[string][2]string{
 		"unsafe missing":     {"return unsafe { storage_take<T>(slot) };", "return storage_take<T>(slot);"},
@@ -142,14 +159,17 @@ fn i32 recover_and_retry(ref mut Items<Item> storage, Item value, i32 expected) 
         }
     };
 }
-fn T pop<T>(ref mut Items<T> storage) {
-    let ptr mut void slot = unsafe { pop_slot_raw(storage as ptr mut void, storage.element_size) };
-    assert(slot != null);
-    return take_slot<T>(slot);
+fn Option<T> pop<T>(ref mut Items<T> storage) {
+    return if (storage.length == 0) { .none } else {
+        let ptr mut void slot = unsafe { pop_slot_raw(storage as ptr mut void, storage.element_size) };
+        assert(slot != null);
+        .some(take_slot<T>(slot))
+    };
 }
 fn i32 exercise() {
     var Items<Item> storage = empty_items<Item>();
     assert(unsafe { empty_valid(ref storage as ptr void) } == 1);
+    assert(switch (pop<Item>(ref mut storage)) { case .some(_) : { false } case .none : { true } });
     assert(unsafe { pop_slot_raw(ref mut storage as ptr mut void, storage.element_size) } == null);
     assert(unsafe { fail_next() } == 1);
     assert(recover_and_retry(ref mut storage, make(1), 1) == 1);
@@ -159,7 +179,10 @@ fn i32 exercise() {
     assert(recover_and_retry(ref mut storage, make(9), 9) == 1);
     assert(storage.length == 9);
     assert(unsafe { pop_slot_raw(ref mut storage as ptr mut void, storage.element_size + 1) } == null && storage.length == 9);
-    let Item last = pop<Item>(ref mut storage);
+    let Item last = switch (pop<Item>(ref mut storage)) {
+        case .some(value) : { value }
+        case .none : { assert(false); make(9) }
+    };
     assert(item_id(ref last) == 9);
     let i32 discarded = discard_item(last);
     let Items<Item> moved = storage;
@@ -169,6 +192,7 @@ fn i32 main() { return exercise() + unsafe { finished() }; }
 `
 
 const vectorResourceProbe = `
+#include <stdio.h>
 int32_t fairyc_fixture_resource_empty(const void *storage) {
     struct fy_private_vector_storage_v0 value;
     memcpy(&value, storage, sizeof value);
@@ -271,6 +295,10 @@ void *fairyc_fixture_resource_pop_slot(void *storage, size_t size) {
 }
 int32_t fairyc_fixture_resource_fail(void) { vector_fail = 1; return 1; }
 int32_t fairyc_fixture_resource_finished(void) {
+    if (resource_live != 0 || resource_drops != 9 || resource_bad) {
+        fprintf(stderr, "resource live=%zu drops=%zu bad=%d slots=%zu prepares=%zu failures=%zu commits=%zu\n",
+            resource_live, resource_drops, resource_bad, resource_slots, resource_prepares, resource_prepare_failures, resource_commits);
+    }
     return fairyc_fixture_vector_finished() == 1 && resource_live == 0 && resource_drops == 9 &&
         resource_slots == 9 && resource_prepares == 9 && resource_prepare_failures == 2 && resource_commits == 9 && !resource_bad ? 1 : 0;
 }

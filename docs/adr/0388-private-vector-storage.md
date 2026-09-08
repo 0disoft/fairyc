@@ -473,6 +473,24 @@ renumbering local package IDs leaves the specialization plan unchanged.
 This is a closed resolved-graph compiler entry point, not stable package-cache
 identity, installed SDK source, or public `Vec<T>` admission.
 
+### Empty-safe pop and discarded result ownership
+
+The private generic `pop<T>` now returns `Option<T>`. Zero initialized length
+returns `.none` without calling the raw tail helper. Nonempty storage returns
+`.some` with the former tail's sole ownership obligation. Module-local and package
+clients match the result explicitly; the scalar fixture also drains the container
+and verifies repeated empty observation after the final element.
+
+Discarding a returned `Option<Item>` in a nested block exposed a general MIR
+fallthrough-cleanup omission: destruction was delayed until function exit. Value
+blocks now materialize their outgoing result before dropping live block-local
+resources, preserving moved results and scalar values read from a resource.
+Region and loop callers retain their existing cleanup/reset accounting. The
+native discarded-Option fixture preserves exact 9-through-1 destruction; a direct
+interpreter regression separately checks scalar-tail capture, resource-tail move
+and the observable `ABDC` cleanup order. This conforms to the existing lexical
+cleanup contract and does not add a new language or SDK surface.
+
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,

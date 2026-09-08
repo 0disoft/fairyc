@@ -34,13 +34,21 @@ fn i32 scalar_push(ref mut Items<i32> storage, i32 value) {
 fn i32 exercise() {
     var Items<i32> storage = empty_items<i32>();
     assert(storage.element_size == 4 && storage.element_alignment == 4);
+    assert(switch (pop<i32>(ref mut storage)) { case .some(_) : { false } case .none : { true } });
     assert(unsafe { fail_next() } == 1);
     assert(scalar_push(ref mut storage, 1) == 0 && storage.length == 0);
     for (var i32 value = 1; value < 9; value += 1) { assert(scalar_push(ref mut storage, value) == 1); }
     assert(unsafe { fail_next() } == 1);
     assert(scalar_push(ref mut storage, 9) == 0 && storage.length == 8);
     assert(scalar_push(ref mut storage, 9) == 1);
-    assert(pop<i32>(ref mut storage) == 9 && storage.length == 8);
+    for (var i32 expected = 9; expected > 0; expected -= 1) {
+        assert(switch (pop<i32>(ref mut storage)) {
+            case .some(value) : { value == expected }
+            case .none : { false }
+        });
+    }
+    assert(storage.length == 0);
+    assert(switch (pop<i32>(ref mut storage)) { case .some(_) : { false } case .none : { true } });
     let Items<i32> moved = storage;
     return 41;
 }
