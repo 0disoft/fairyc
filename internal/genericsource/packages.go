@@ -105,6 +105,9 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...
 		if err := module.collect(); err != nil {
 			return nil, genericplan.Plan{}, module.at(module.module.Span, FailureDeclaration, err)
 		}
+		if err := module.collectNominalTypes(builder); err != nil {
+			return nil, genericplan.Plan{}, module.at(module.module.Span, FailureDeclaration, err)
+		}
 	}
 	var requests []genericplan.Request
 	for _, module := range modules {

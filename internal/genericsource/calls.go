@@ -30,11 +30,12 @@ func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, 
 		if slices.Contains(parameters, argument.Path) {
 			dependency.Arguments = append(dependency.Arguments, genericplan.ParameterType(argument.Path))
 		} else {
-			if !slices.Contains(scalarTypes, argument.Path) {
+			typeID, found := x.concreteType(argument.Path)
+			if !found {
 				return fmt.Errorf("unsupported concrete generic type %q", argument.Path)
 			}
-			dependency.Arguments = append(dependency.Arguments, genericplan.ConcreteType(genericplan.TypeID(argument.Path)))
-			request.Arguments = append(request.Arguments, genericplan.TypeID(argument.Path))
+			dependency.Arguments = append(dependency.Arguments, genericplan.ConcreteType(typeID))
+			request.Arguments = append(request.Arguments, typeID)
 		}
 	}
 	if len(parameters) != 0 {
@@ -69,7 +70,11 @@ func (x *expander) rewriteSpecialization(e *ast.Expression, names map[string]str
 	}
 	arguments := make([]genericplan.TypeID, len(e.TypeArguments))
 	for i, argument := range e.TypeArguments {
-		arguments[i] = genericplan.TypeID(argument.Path)
+		var found bool
+		arguments[i], found = x.concreteType(argument.Path)
+		if !found {
+			return fmt.Errorf("unregistered concrete generic type %q", argument.Path)
+		}
 	}
 	generated, ok := names[requestKey(target.id(), arguments)]
 	if !ok {

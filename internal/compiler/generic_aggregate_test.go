@@ -116,6 +116,12 @@ func TestGenericAggregateCleanupRunsExactlyOnceMSVC(t *testing.T) {
 }
 
 func runGenericAggregateNative(t *testing.T, source string) {
+	runGenericAggregateNativeWithCompiler(t, source, func(file semantic.File) (compiler.Result, error) {
+		return compiler.CheckExplicitFiles([]semantic.File{file})
+	})
+}
+
+func runGenericAggregateNativeWithCompiler(t *testing.T, source string, check func(semantic.File) (compiler.Result, error)) {
 	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("native proof requires Windows amd64")
@@ -130,7 +136,7 @@ func runGenericAggregateNative(t *testing.T, source string) {
 fn i32 observe(i32 value) { return unsafe { mark_raw(value) }; }`, 1)
 	text = strings.Replace(text, "fn i32 check_drop() { return 1; }", "fn i32 check_drop() { return unsafe { check_raw() }; }", 1)
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
-	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
+	result, err := check(file)
 	if err != nil || !result.Verified {
 		t.Fatalf("native compile: %v %+v", err, result.Semantic)
 	}

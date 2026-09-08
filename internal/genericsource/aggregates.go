@@ -106,11 +106,12 @@ func (x *expander) registerAggregateType(ref ast.TypeReference, parameters []str
 		if slices.Contains(parameters, argument.Path) {
 			dependency.Arguments = append(dependency.Arguments, genericplan.ParameterType(argument.Path))
 		} else {
-			if !slices.Contains(scalarTypes, argument.Path) {
+			typeID, found := x.concreteType(argument.Path)
+			if !found {
 				return x.at(argument.Span, FailureRequest, fmt.Errorf("unsupported aggregate argument %q", argument.Path))
 			}
-			dependency.Arguments = append(dependency.Arguments, genericplan.ConcreteType(genericplan.TypeID(argument.Path)))
-			request.Arguments = append(request.Arguments, genericplan.TypeID(argument.Path))
+			dependency.Arguments = append(dependency.Arguments, genericplan.ConcreteType(typeID))
+			request.Arguments = append(request.Arguments, typeID)
 		}
 	}
 	if len(parameters) != 0 {
@@ -233,7 +234,11 @@ func (x *expander) rewriteAggregateType(ref *ast.TypeReference, names map[string
 	}
 	var arguments []genericplan.TypeID
 	for _, argument := range ref.Arguments {
-		arguments = append(arguments, genericplan.TypeID(argument.Path))
+		typeID, found := x.concreteType(argument.Path)
+		if !found {
+			return fmt.Errorf("unregistered aggregate argument %q", argument.Path)
+		}
+		arguments = append(arguments, typeID)
 	}
 	name, found := names[requestKey(target.id(), arguments)]
 	if !found {
@@ -313,7 +318,7 @@ func (x *expander) emitAggregates(result *ast.Module, plan genericplan.Plan, nam
 		}
 		bindings := map[string]ast.TypeReference{}
 		for _, binding := range specialization.Bindings {
-			bindings[binding.Parameter] = ast.NamedTypeReference(string(binding.Type), aggregate.shape().Span)
+			bindings[binding.Parameter] = x.boundType(binding.Type, aggregate.shape().Span)
 		}
 		if err := emit(aggregate, generatedPrefix+string(specialization.ID), bindings); err != nil {
 			return err

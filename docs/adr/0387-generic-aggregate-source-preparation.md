@@ -302,3 +302,26 @@ revision is introduced.
 ADR 0388 adds a separate compiler-private element-sized storage prerequisite for
 `Vec<T>`, with generated-Fairy move/drop and native failure-atomic reserve evidence.
 It does not promote aggregate source or provide typed container operations.
+
+## Private module-local nominal arguments
+
+`CheckNominalGenericFunctions` accepts ordinary local struct/resource arguments
+through a separate import-free, coordinate-bound entry point. Scalar-only stable,
+explicit-file and package entry points are unchanged. Nominal type IDs include
+the package coordinate, module and declaration name; their definition digest
+conservatively includes the entire module AST, including cleanup/helper bodies.
+This is not a minimal interface digest or a reusable package-cache contract.
+
+`TestPrivateNominalGenericOwnershipAndIdentity` checks `pass<Point>`,
+`pass<Token>` and `Box<Point>` with verified MIR and interpreter execution,
+original AST preservation, repeat identity and owner/body invalidation. Native
+low/optimized MSVC evidence covers the two function specializations, payload 41
+and exactly one cleanup marker before return 42. It deliberately excludes
+`Box<Point>`: the existing C backend requires repr(C) for this nested struct
+shape while generated generic names are not public repr(C) identifiers.
+
+Unknown arguments, imports, nominal-name shadowing and reuse after move are
+rejected without publishing provenance. Cross-module nominal arguments,
+resource-element aggregates, nested nominal C transport, typed layout queries,
+stable admission and public `Vec<T>` remain separate work. SDK, language and
+runtime ABI versions are unchanged.

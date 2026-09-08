@@ -31,10 +31,23 @@ func Expand(module *ast.Module, owner genericplan.PackageID, limits genericplan.
 // PrepareModule retains detached declaration and specialization provenance for
 // the private module-local path, without claiming a public package interface.
 func PrepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (PackageExpansion, error) {
+	return prepareModule(module, owner, limits, false)
+}
+
+// PrepareNominalModule is an opt-in private lane for local ordinary nominal
+// arguments. It publishes no package interface and accepts no module imports.
+func PrepareNominalModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (PackageExpansion, error) {
+	if module != nil && len(module.Imports) != 0 {
+		return PackageExpansion{}, fmt.Errorf("private nominal generic source requires one import-free module")
+	}
+	return prepareModule(module, owner, limits, true)
+}
+
+func prepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits, nominal bool) (PackageExpansion, error) {
 	if module == nil {
 		return PackageExpansion{}, fmt.Errorf("generic source module is nil")
 	}
-	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}}
+	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}, allowNominal: nominal}
 	modules, plan, err := expandAll([]*expander{&x}, limits)
 	if err != nil {
 		return PackageExpansion{}, err
@@ -54,14 +67,17 @@ func PrepareModule(module *ast.Module, owner genericplan.PackageID, limits gener
 }
 
 type expander struct {
-	module      *ast.Module
-	owner       genericplan.PackageID
-	templates   map[string]ast.Function
-	aggregates  map[string]aggregateTemplate
-	names       map[string]bool
-	imports     map[string]*expander
-	allowPublic bool
-	requests    map[string]diagnostic.Span
+	module       *ast.Module
+	owner        genericplan.PackageID
+	templates    map[string]ast.Function
+	aggregates   map[string]aggregateTemplate
+	names        map[string]bool
+	imports      map[string]*expander
+	allowPublic  bool
+	requests     map[string]diagnostic.Span
+	allowNominal bool
+	nominalTypes map[string]genericplan.TypeID
+	nominalNames map[genericplan.TypeID]string
 }
 
 func (x *expander) id(name string) genericplan.DeclarationID {
@@ -201,7 +217,7 @@ func (x *expander) emit(plan genericplan.Plan, names map[string]string) (*ast.Mo
 		}
 		bindings := map[string]ast.TypeReference{}
 		for _, binding := range specialization.Bindings {
-			bindings[binding.Parameter] = ast.NamedTypeReference(string(binding.Type), x.templates[name].Span)
+			bindings[binding.Parameter] = x.boundType(binding.Type, x.templates[name].Span)
 		}
 		concrete, err := x.instantiate(x.templates[name], bindings, names)
 		if err != nil {
