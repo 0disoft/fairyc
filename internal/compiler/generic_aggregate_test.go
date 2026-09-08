@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 const genericAggregateProgram = `module main;
@@ -129,7 +130,7 @@ func runGenericAggregateNative(t *testing.T, source string) {
 fn i32 observe(i32 value) { return unsafe { mark_raw(value) }; }`, 1)
 	text = strings.Replace(text, "fn i32 check_drop() { return 1; }", "fn i32 check_drop() { return unsafe { check_raw() }; }", 1)
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
-	result, _, err := compiler.CheckGenericFunctions(file, genericplan.DefaultPlanLimits())
+	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
 	if err != nil || !result.Verified {
 		t.Fatalf("native compile: %v %+v", err, result.Semantic)
 	}

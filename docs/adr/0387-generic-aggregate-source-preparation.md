@@ -274,3 +274,27 @@ specialization sets against explicitly expanded declarations, with interpreter
 drop counts and 24 low/optimized native executions. It closes the missing manual
 aggregate comparator, not representative container growth or allocation-failure
 evidence, and does not itself promote the stable language boundary.
+
+## Closed explicit-file admission
+
+`AnalyzeExplicitFiles` now detects generic structs and resources as well as
+functions. A closed source set containing only aggregate templates therefore
+uses the existing coordinate-free `explicit_files_v0` specialization namespace;
+it no longer needs an unrelated generic function to activate preparation.
+Unused aggregate templates retain source provenance without claiming executable
+instances. Ordinary source without any generic declaration retains ordinary
+analysis. Stable workspace `Check` and `SourceSession` gates are unchanged.
+
+`TestExplicitFilesSpecializeAggregatesWithoutGenericFunctions` covers struct-only,
+resource-only and unused-template sources, original AST preservation, exact
+declaration/instance provenance, interpreter values and drop counts, and
+low/optimized MSVC. Unknown arguments, wrong arity and resource use-after-move
+are rejected without publishing provenance. The shared native aggregate helper
+now calls `CheckExplicitFiles` directly; earlier versions called the module-private
+`CheckGenericFunctions` route despite the scalar-domain section describing an
+explicit-file path. This change aligns that evidence with the named entry point
+and reruns the existing five-scalar cleanup counter cases through it.
+
+This is experimental explicit-file admission, not stable manifest-language
+admission. No new CLI option, SDK source, runtime ABI, cache format or language
+revision is introduced.

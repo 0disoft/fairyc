@@ -25,6 +25,12 @@ func AnalyzeExplicitFiles(files []semantic.File) (Analysis, error) {
 		for _, function := range file.Module.Functions {
 			hasGeneric = hasGeneric || len(function.TypeParameters) != 0
 		}
+		for _, structure := range file.Module.Structs {
+			hasGeneric = hasGeneric || len(structure.TypeParameters) != 0
+		}
+		for _, resource := range file.Module.Resources {
+			hasGeneric = hasGeneric || len(resource.TypeParameters) != 0
+		}
 	}
 	if !hasGeneric {
 		return Analysis{Semantic: semantic.Analyze(files)}, nil
