@@ -431,7 +431,25 @@ null and duplicate commit controls preserve descriptor bytes. Explicit pop plus
 scope cleanup releases Items 9 through 1 exactly once, with one vector release
 and no live element/vector allocation under low/optimized MSVC. Source donor-reuse
 and the scalar/poison-prefix regressions remain in the same lane. Container cleanup
-is still concrete Items code; generic/package/SDK admission is not established.
+was concrete Items code at that integration step. The generic fixture below
+removes this limitation; package/SDK admission is not established.
+
+### Generic container ownership fixture
+
+The source fixture now declares `Items<T>` with typed cleanup, `empty_items<T>`,
+`push<T>`, and `pop<T>`. Construction uses `storage_size<T>` and
+`storage_alignment<T>`; cleanup takes each initialized tail as `T` before
+releasing empty backing storage. Push returns the unchanged `T` on preparation
+failure and consumes it only after successful allocation. No empty element
+representation is required.
+
+The same declarations execute with both owning `Item` and copy `i32` arguments.
+Both low/optimized MSVC lanes verify nine writes and reverse-order tail transfers,
+two OOM failures, one backing-storage release, and zero live allocations. The
+resource lane additionally checks nine exact resource destructions and source
+donor-reuse rejection. The scalar lane observes written/popped values independently
+in C and checks the compiler-selected four-byte layout. This is import-free private
+source preparation, not stable generic package or public SDK admission.
 
 ### Still required
 

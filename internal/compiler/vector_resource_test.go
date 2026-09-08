@@ -14,7 +14,7 @@ func TestPrivateVectorResourceOwnership(t *testing.T) {
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", vectorResourceProgram)
 	before, _ := json.Marshal(file.Module)
 	result, plan, err := compiler.CheckStorageTransferFunctions(file, genericCoordinate(t), genericplan.DefaultPlanLimits())
-	if err != nil || !result.Verified || len(plan.Specializations) != 2 {
+	if err != nil || !result.Verified || len(plan.Specializations) != 6 {
 		t.Fatalf("source transfer: %v %+v", err, result.Semantic)
 	}
 	after, _ := json.Marshal(file.Module)
@@ -92,13 +92,13 @@ resource Item {
     ptr mut void handle;
     cleanup { let u32 status = unsafe { drop_raw(this.handle) }; }
 }
-resource Items {
+resource Items<T> {
     ptr mut void data; usize bytes; usize alignment; usize length; usize element_size; usize element_alignment;
     cleanup {
         while (this.length > 0) {
             let ptr mut void slot = unsafe { pop_slot_raw(ref mut this as ptr mut void, this.element_size) };
             assert(slot != null);
-            let Item value = take_slot<Item>(slot);
+            let T value = take_slot<T>(slot);
         }
         let u32 released = unsafe { release(ref mut this as ptr mut void) };
     }
@@ -112,29 +112,29 @@ fn Item make(i32 id) {
 }
 fn i32 item_id(ref Item value) { return unsafe { id_raw(value.handle) }; }
 fn i32 discard_item(Item value) { return 0; }
-fn Items empty_items() {
-    var Items storage = Items { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
-    assert(unsafe { initialize(ref mut storage as ptr mut void, storage_size<Item>(), storage_alignment<Item>()) } == 0);
+fn Items<T> empty_items<T>() {
+    var Items<T> storage = Items<T> { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
+    assert(unsafe { initialize(ref mut storage as ptr mut void, storage_size<T>(), storage_alignment<T>()) } == 0);
     return storage;
 }
-fn Result<u32, Item> push(ref mut Items storage, Item value) {
+fn Result<u32, T> push<T>(ref mut Items<T> storage, T value) {
     var ptr mut void slot = null;
     let u32 status = unsafe { prepare_raw(storage as ptr mut void, storage.element_size, ref mut slot as ptr mut void) };
     return if (status == 0) {
         assert(slot != null);
-        assert(write_slot<Item>(slot, value) == 1);
+        assert(write_slot<T>(slot, value) == 1);
         assert(unsafe { commit_raw(storage as ptr mut void, slot, storage.element_size) } == 0);
         .ok(status)
     } else { .err(value) };
 }
-fn i32 push_ok(ref mut Items storage, Item value) {
-    return switch (push(storage, value)) {
+fn i32 push_ok(ref mut Items<Item> storage, Item value) {
+    return switch (push<Item>(storage, value)) {
         case .ok(_) : { 1 }
         case .err(_) : { 0 }
     };
 }
-fn i32 recover_and_retry(ref mut Items storage, Item value, i32 expected) {
-    return switch (push(storage, value)) {
+fn i32 recover_and_retry(ref mut Items<Item> storage, Item value, i32 expected) {
+    return switch (push<Item>(storage, value)) {
         case .ok(_) : { 0 }
         case .err(returned) : {
             assert(item_id(ref returned) == expected);
@@ -142,13 +142,13 @@ fn i32 recover_and_retry(ref mut Items storage, Item value, i32 expected) {
         }
     };
 }
-fn Item pop(ref mut Items storage) {
+fn T pop<T>(ref mut Items<T> storage) {
     let ptr mut void slot = unsafe { pop_slot_raw(storage as ptr mut void, storage.element_size) };
     assert(slot != null);
-    return take_slot<Item>(slot);
+    return take_slot<T>(slot);
 }
 fn i32 exercise() {
-    var Items storage = empty_items();
+    var Items<Item> storage = empty_items<Item>();
     assert(unsafe { empty_valid(ref storage as ptr void) } == 1);
     assert(unsafe { pop_slot_raw(ref mut storage as ptr mut void, storage.element_size) } == null);
     assert(unsafe { fail_next() } == 1);
@@ -159,10 +159,10 @@ fn i32 exercise() {
     assert(recover_and_retry(ref mut storage, make(9), 9) == 1);
     assert(storage.length == 9);
     assert(unsafe { pop_slot_raw(ref mut storage as ptr mut void, storage.element_size + 1) } == null && storage.length == 9);
-    let Item last = pop(ref mut storage);
+    let Item last = pop<Item>(ref mut storage);
     assert(item_id(ref last) == 9);
     let i32 discarded = discard_item(last);
-    let Items moved = storage;
+    let Items<Item> moved = storage;
     return 41;
 }
 fn i32 main() { return exercise() + unsafe { finished() }; }
