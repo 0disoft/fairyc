@@ -35,7 +35,7 @@ func TestExperimentalAtlasEvidenceV1GenericAndLegacy(t *testing.T) {
 	if code := Run(append([]string{"experimental", "atlas-evidence"}, args...), root, failingWriter{}, &errorText); code != ExitInternalFailure || !strings.Contains(errorText.String(), "write output failed") {
 		t.Fatal("writer error swallowed")
 	}
-	for _, version := range [][]string{{"--bundle-version"}, {"--bundle-version", "01"}, {"--bundle-version", "2"}, {"--bundle-version", "1", "--bundle-version", "0"}, {"--pack-version", "2"}} {
+	for _, version := range [][]string{{"--bundle-version"}, {"--bundle-version", "01"}, {"--bundle-version", "3"}, {"--bundle-version", "1", "--bundle-version", "0"}, {"--pack-version", "2"}} {
 		bad := append(atlasEvidenceArguments("example.session.app", symbol.Visible), version...)
 		code, out, _ := runForTest(append([]string{"experimental", "atlas-evidence"}, bad...), t.TempDir())
 		if code != ExitInvalidInvocation || out != "" {

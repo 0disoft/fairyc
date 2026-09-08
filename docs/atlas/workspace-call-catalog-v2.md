@@ -57,7 +57,8 @@ Tests cover two cleanup specializations calling a generic dependency, incoming,
 outgoing, both and empty selections, exact final byte limits, version rejection,
 independently computed checksums, body mutation, and legacy field omission.
 Package-local Context Pack v3 is available separately; it does not consume this
-workspace call ledger. Aggregate-aware Evidence Bundle adoption remains pending.
+workspace call ledger. Evidence Bundle v2 composes package-local facts with
+attributed source/documentation, not this workspace call ledger.
 
 ## CLI selection
 

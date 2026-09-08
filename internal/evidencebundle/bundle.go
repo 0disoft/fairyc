@@ -79,7 +79,7 @@ func EncodeShow(
 	textBudget attributedtext.Budget,
 	limits Limits,
 ) ([]byte, error) {
-	return encodeShow(workspace, index, snapshot, symbolID, request, textBudget, limits, false)
+	return encodeShow(workspace, index, snapshot, symbolID, request, textBudget, limits, 0)
 }
 
 func encodeShow(
@@ -90,7 +90,7 @@ func encodeShow(
 	request atlasmap.RelationRequest,
 	textBudget attributedtext.Budget,
 	limits Limits,
-	generic bool,
+	bundleVersion byte,
 ) ([]byte, error) {
 	if limits.FactsBytes == 0 || limits.TextDocumentBytes == 0 || limits.BundleBytes == 0 {
 		return nil, fmt.Errorf("Atlas Evidence Bundle requires positive component and final byte limits")
@@ -100,8 +100,14 @@ func encodeShow(
 		return nil, err
 	}
 	encodeFacts := contextpack.EncodeShow
-	if generic {
+	switch bundleVersion {
+	case 0:
+	case 1:
 		encodeFacts = contextpack.EncodeShowV2
+	case 2:
+		encodeFacts = contextpack.EncodeShowV3
+	default:
+		return nil, fmt.Errorf("unsupported Atlas Evidence Bundle version %d", bundleVersion)
 	}
 	facts, err := encodeFacts(index, symbolID, request, limits.FactsBytes)
 	if err != nil {
@@ -145,10 +151,12 @@ func encodeShow(
 		Limits: limits,
 	}
 	version, encoding, algorithm, prefix := BundleVersion, BundleEncoding, ChecksumAlgorithm, ChecksumPrefix
-	if generic {
+	if bundleVersion == 1 {
 		version, encoding, algorithm, prefix = BundleVersionV1, BundleEncodingV1, ChecksumAlgorithmV1, ChecksumPrefixV1
+	} else if bundleVersion == 2 {
+		version, encoding, algorithm, prefix = BundleVersionV2, BundleEncodingV2, ChecksumAlgorithmV2, ChecksumPrefixV2
 	}
-	checksum, err := computeChecksumVersion(document, generic)
+	checksum, err := computeChecksumVersion(document, bundleVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -201,20 +209,26 @@ type componentDocuments struct {
 }
 
 func computeChecksum(document bundleDocument) (Checksum, error) {
-	return computeChecksumVersion(document, false)
+	return computeChecksumVersion(document, 0)
 }
 
-func computeChecksumVersion(document bundleDocument, generic bool) (Checksum, error) {
+func computeChecksumVersion(document bundleDocument, bundleVersion byte) (Checksum, error) {
 	payload, err := json.Marshal(document)
 	if err != nil {
 		return Checksum{}, fmt.Errorf("encode Atlas Evidence Bundle checksum payload: %w", err)
 	}
 	digest := sha256.New()
 	version, encoding := BundleVersion, BundleEncoding
-	if generic {
+	if bundleVersion != 0 {
 		_, _ = digest.Write([]byte(checksumDomain))
-		_, _ = digest.Write([]byte{0, 1})
-		version, encoding = BundleVersionV1, BundleEncodingV1
+		_, _ = digest.Write([]byte{0, bundleVersion})
+		if bundleVersion == 1 {
+			version, encoding = BundleVersionV1, BundleEncodingV1
+		} else if bundleVersion == 2 {
+			version, encoding = BundleVersionV2, BundleEncodingV2
+		} else {
+			return Checksum{}, fmt.Errorf("unsupported Atlas Evidence Bundle checksum version %d", bundleVersion)
+		}
 	} else {
 		writeChecksumHeader(digest)
 	}

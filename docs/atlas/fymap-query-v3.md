@@ -50,4 +50,4 @@ Function-only v2 output does not gain aggregate, cleanup or source-body fields.
 see `docs/atlas/workspace-call-join-v0.md`. Call catalog v2 preserves the joined
 cleanup marker. Experimental symbol catalog 3 and call catalog 2 commands now
 explicitly adopt v3, as does Context Pack with `--pack-version 3`. Attributed-text
-now uses v3 without changing text v0; Evidence Bundle integration remains pending.
+now uses v3 without changing text v0; Evidence Bundle v2 composes both surfaces.

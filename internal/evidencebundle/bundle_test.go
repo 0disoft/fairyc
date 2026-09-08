@@ -16,6 +16,7 @@ import (
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contextpack"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -209,6 +210,10 @@ func newEvidenceFixture(t *testing.T) evidenceFixture {
 }
 
 func newEvidenceFixtureVersion(t *testing.T, generic bool) evidenceFixture {
+	return newEvidenceFixtureMode(t, generic, false)
+}
+
+func newEvidenceFixtureMode(t *testing.T, generic, aggregate bool) evidenceFixture {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -230,6 +235,9 @@ fn i32 helper() { return 42; }
 	if generic {
 		source = "module main;\n/// " + evidencePromptLikeText + "\nfn T id<T>(T value) { return value; }\nfn T helper<T>(T value) { return value; }\nfn i32 main() { assert(id<i32>(42) == 42); assert(id<u32>(7) == 7); return 0; }\n"
 	}
+	if aggregate {
+		source = "module main;\n/// " + evidencePromptLikeText + "\nresource Token<T> { T value; cleanup { let T observed = helper<T>(this.value); } }\nfn T helper<T>(T value) { return value; }\nfn Token<T> make<T>(T value) { return Token<T> { .value = value }; }\nfn i32 main() { let Token<i32> a = make<i32>(42); let Token<u32> b = make<u32>(7); return a.value; }\n"
+	}
 	writeEvidenceFile(t, filepath.Join(root, "src", "main.fy"), source)
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
@@ -240,7 +248,13 @@ fn i32 helper() { return 42; }
 		t.Fatal(err)
 	}
 	checked, err := compiler.CheckPackages(input)
-	if generic {
+	if aggregate {
+		coordinates, coordinateErr := workspace.PackageCoordinates()
+		if coordinateErr != nil {
+			t.Fatal(coordinateErr)
+		}
+		checked, _, err = compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	} else if generic {
 		checked, err = workspacecompiler.Check(workspace)
 	}
 	if err != nil || !checked.Verified {
@@ -253,6 +267,9 @@ fn i32 helper() { return 42; }
 	prepare, current, query := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations, atlasmap.NewQueryIndex
 	if generic {
 		prepare, current, query = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2, atlasmap.NewQueryIndexV2
+	}
+	if aggregate {
+		prepare, current, query = atlasmap.PrepareWorkspaceV3, atlasmap.CurrentWorkspaceExpectationsV3, atlasmap.NewQueryIndexV3
 	}
 	snapshot, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil || len(partitions) != 1 {
@@ -269,7 +286,7 @@ fn i32 helper() { return 42; }
 	}
 	find := func(name string) atlasmap.Symbol {
 		result, catalogErr := index.CatalogSymbols(atlasmap.SymbolCatalogRequest{
-			Name: name, Kinds: []semanticsnapshot.DeclarationKind{semanticsnapshot.DeclarationFunction},
+			Name: name, Kinds: atlasmap.AllDeclarationKinds(),
 			Budget: atlasmap.SymbolCatalogBudget{MaxSymbols: 4, MaxSelectionBytes: 1 << 20},
 		})
 		if catalogErr != nil || len(result.Symbols) != 1 {
@@ -280,6 +297,9 @@ fn i32 helper() { return 42; }
 	name := "main"
 	if generic {
 		name = "id"
+	}
+	if aggregate {
+		name = "Token"
 	}
 	return evidenceFixture{
 		root: root, workspace: workspace, index: index, snapshot: snapshot,

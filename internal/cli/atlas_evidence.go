@@ -13,7 +13,7 @@ import (
 )
 
 type atlasEvidenceOptions struct {
-	generic              bool
+	bundleVersion        string
 	relation             atlasPackRelationOptions
 	maxFragmentBytes     uint64
 	maxTextBytes         uint64
@@ -32,8 +32,15 @@ func runAtlasEvidence(arguments []string, sourceRoot string, stdout, stderr io.W
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasQueryVersion(
-		sourceRoot, options.relation.packageUID, options.relation.locked, stderr, options.generic,
+	schema := atlasmap.LogicalSchema
+	if options.bundleVersion == "1" {
+		schema = atlasmap.LogicalSchemaV2
+	}
+	if options.bundleVersion == "2" {
+		schema = atlasmap.LogicalSchemaV3
+	}
+	prepared, code := prepareAtlasQuerySchema(
+		sourceRoot, options.relation.packageUID, options.relation.locked, stderr, schema,
 	)
 	if code != ExitSuccess {
 		return code
@@ -46,8 +53,10 @@ func runAtlasEvidence(arguments []string, sourceRoot string, stdout, stderr io.W
 		},
 	}
 	encode := evidencebundle.EncodeShow
-	if options.generic {
+	if options.bundleVersion == "1" {
 		encode = evidencebundle.EncodeShowV1
+	} else if options.bundleVersion == "2" {
+		encode = evidencebundle.EncodeShowV2
 	}
 	encoded, err := encode(
 		prepared.workspace, prepared.index, prepared.snapshot, options.relation.symbol,
@@ -96,10 +105,10 @@ func parseAtlasEvidenceOptions(arguments []string) (atlasEvidenceOptions, error)
 		seen[flag] = true
 		if flag == "--bundle-version" {
 			version := arguments[position+1]
-			if version != "0" && version != "1" {
-				return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires --bundle-version as 0 or 1", command)
+			if version != "0" && version != "1" && version != "2" {
+				return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires --bundle-version as 0, 1 or 2", command)
 			}
-			result.generic = version == "1"
+			result.bundleVersion = version
 			position += 2
 			continue
 		}

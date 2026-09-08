@@ -244,5 +244,8 @@ see `docs/atlas/context-pack-v3.md`. Attributed-text source/documentation comman
 now use v3 query preparation while retaining byte-identical text v0 for ordinary
 and function-generic inputs. Original used/unused aggregate spans, retained-byte
 currentness, untrusted authority and documentation attachment are covered in
-`docs/atlas/attributed-text-v0.md`. Evidence Bundle adoption remains separate from
-stable aggregate admission.
+`docs/atlas/attributed-text-v0.md`. Evidence Bundle v2 and `atlas-evidence show
+--bundle-version 2` now compose the v3 facts and two unchanged text v0 documents,
+retaining independent limits and authority labels; see
+`docs/atlas/evidence-bundle-v2.md`. Stable aggregate admission remains a separate
+language/SDK promotion step.

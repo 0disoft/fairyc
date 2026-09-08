@@ -43,5 +43,5 @@ func EncodeShowV1(
 	textBudget attributedtext.Budget,
 	limits Limits,
 ) ([]byte, error) {
-	return encodeShow(workspace, index, snapshot, symbolID, request, textBudget, limits, true)
+	return encodeShow(workspace, index, snapshot, symbolID, request, textBudget, limits, 1)
 }
