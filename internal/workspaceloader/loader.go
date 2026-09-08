@@ -91,11 +91,12 @@ type Package struct {
 
 // Workspace is the validated catalog and root-reachable, feature-distinct resolved graph.
 type Workspace struct {
-	Root       string
-	Packages   []Package
-	Instances  []Instance
-	Graph      packagegraph.Graph
-	Resolution packagegraph.Result
+	Root            string
+	Packages        []Package
+	Instances       []Instance
+	Graph           packagegraph.Graph
+	Resolution      packagegraph.Result
+	vectorCandidate bool
 }
 
 // Instance maps one internal graph node to its canonical local package path and feature set.
@@ -123,6 +124,10 @@ type limits struct {
 // Load reads only the named root manifest, its explicit members, and their explicit source roots.
 // It performs no parent search, recursive manifest discovery, network access, or lockfile writes.
 func Load(root string) (Workspace, error) {
+	return loadWorkspace(root, false)
+}
+
+func loadWorkspace(root string, vectorCandidate bool) (Workspace, error) {
 	workspaceRoot, err := resolveRoot(root)
 	if err != nil {
 		return Workspace{}, err
@@ -180,7 +185,7 @@ func Load(root string) (Workspace, error) {
 		return Workspace{}, err
 	}
 	graph, instances := buildGraph(packages, pathIndexes)
-	packages, graph, instances, err = injectStandardLibrary(packages, graph, instances)
+	packages, graph, instances, err = injectStandardLibrary(packages, graph, instances, vectorCandidate)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -191,7 +196,7 @@ func Load(root string) (Workspace, error) {
 	if rejection != nil {
 		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: fmt.Sprintf("%s: %v", rejection.Reason, rejection.Subjects)}
 	}
-	return Workspace{Root: workspaceRoot, Packages: packages, Instances: instances, Graph: graph, Resolution: resolution}, nil
+	return Workspace{Root: workspaceRoot, Packages: packages, Instances: instances, Graph: graph, Resolution: resolution, vectorCandidate: vectorCandidate}, nil
 }
 
 func resolveRoot(root string) (string, error) {
@@ -358,7 +363,7 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 	return Package{Path: packagePath, Directory: directory, SourceRoot: sourceRoot, Manifest: manifest, Sources: sources, Modules: modules, Digest: digest, SourceKind: SourceKindLocal}, nil
 }
 
-func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instances []Instance) ([]Package, packagegraph.Graph, []Instance, error) {
+func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instances []Instance, vectorCandidate bool) ([]Package, packagegraph.Graph, []Instance, error) {
 	owners := make([]string, 0)
 	for _, node := range graph.Nodes {
 		needsStandardLibrary := false
@@ -376,7 +381,11 @@ func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instanc
 	if len(owners) == 0 {
 		return packages, graph, instances, nil
 	}
-	definition, err := sdkstdlib.Load()
+	loadSDK, sdkIdentity := sdkstdlib.Load, sdkstdlib.SDKIdentity
+	if vectorCandidate {
+		loadSDK, sdkIdentity = sdkstdlib.LoadVectorCandidate, sdkstdlib.VectorCandidateIdentity
+	}
+	definition, err := loadSDK()
 	if err != nil {
 		return nil, packagegraph.Graph{}, nil, &LoadError{Reason: ReasonStandardLibrary, Detail: err.Error()}
 	}
@@ -388,7 +397,7 @@ func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instanc
 	packages = append(packages, Package{
 		Path: sdkstdlib.PackagePath, Manifest: manifest, Sources: sources,
 		Modules: slices.Clone(definition.Modules), Digest: definition.Digest,
-		SourceKind: SourceKindSDK, SDKIdentity: sdkstdlib.SDKIdentity, RuntimeABI: sdkstdlib.RuntimeABI,
+		SourceKind: SourceKindSDK, SDKIdentity: sdkIdentity, RuntimeABI: sdkstdlib.RuntimeABI,
 	})
 	const standardLibraryNode = "sdk:stdlib[]"
 	graph.Nodes = append(graph.Nodes, packagegraph.Node{

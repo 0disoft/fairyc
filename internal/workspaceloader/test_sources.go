@@ -120,7 +120,7 @@ func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error
 		return Workspace{}, err
 	}
 	graph, instances := buildGraph(packages, pathIndexes)
-	packages, graph, instances, err = injectStandardLibrary(packages, graph, instances)
+	packages, graph, instances, err = injectStandardLibrary(packages, graph, instances, workspace.vectorCandidate)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -132,7 +132,7 @@ func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error
 		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: fmt.Sprintf("%s: %v", rejection.Reason, rejection.Subjects)}
 	}
 	return Workspace{
-		Root: workspace.Root, Packages: packages, Instances: instances, Graph: graph, Resolution: resolution,
+		Root: workspace.Root, Packages: packages, Instances: instances, Graph: graph, Resolution: resolution, vectorCandidate: workspace.vectorCandidate,
 	}, nil
 }
 

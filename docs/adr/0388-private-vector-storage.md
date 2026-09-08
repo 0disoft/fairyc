@@ -687,6 +687,27 @@ tests prove that the installed bundle is unaffected and candidate loads are
 deterministic and detached. Stable workspace selection, installed source, element
 access/borrow invalidation and public admission remain later steps.
 
+### Manifest-loaded candidate workspace
+
+`workspaceloader.LoadVectorCandidate` now applies the normal exact local manifest,
+path, namespace and source checks while selecting the candidate SDK explicitly.
+The SDK package and graph retain the candidate source identity. The ephemeral
+selection survives root/package test overlays, including when only tests import
+the SDK. Ordinary `Load` and ordinary test overlays do not admit `std::vec`.
+
+The candidate runs through `StorageTransferSession` with real root/SDK instance
+and coordinate identities. Memory and disk tests require two cold stores, two
+warm hits without lowering, native ownership execution under low/optimized MSVC,
+source-change invalidation, and rejection of invalid current source before cache
+activity. Ordinary `SourceSession` still refuses the candidate workspace.
+
+Full SDK disk projection exposed missing source-entity mapping for shared and
+mutable byte-view raw-parts construction. Both kinds now retain package-neutral
+source paths and rebind to the new owner through the existing checked mapping.
+Direct tests cover fresh package numbers and wrong-owner/build-local rejection;
+the candidate's disk-hit native execution covers the full SDK body closure.
+There is no stable CLI option, manifest opt-in or installed SDK promotion here.
+
 These are private candidate and transport contracts, not stable `Vec<T>` admission. Installed SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow

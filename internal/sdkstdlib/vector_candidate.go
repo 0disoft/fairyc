@@ -14,6 +14,8 @@ import (
 //go:embed candidates/std/vec.fy
 var vectorCandidate []byte
 
+const VectorCandidateIdentity = "fairyc-sdk-vector-candidate/0"
+
 // LoadVectorCandidate adds the SDK-owned container candidate to the complete
 // stable bundle. Only the explicit private storage-transfer compiler lane may
 // consume it; Load and the installed SDK identity remain unchanged.
@@ -42,6 +44,6 @@ func LoadVectorCandidate() (Definition, error) {
 	if err != nil {
 		return Definition{}, err
 	}
-	definition.SourceIdentity = SourceIdentity("fairyc-sdk-vector-candidate/0", RuntimeABI, definition.Digest)
+	definition.SourceIdentity = SourceIdentity(VectorCandidateIdentity, RuntimeABI, definition.Digest)
 	return definition, nil
 }
