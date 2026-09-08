@@ -1,6 +1,6 @@
 # Aggregate-aware `.fymap` store v3
 
-- Status: Implemented internal opt-in store; query and CLI integration pending
+- Status: Implemented internal opt-in store and local queries; CLI integration pending
 - Layout: `fymap-v3/<PackageInstanceId>/<checksum-hex>.fymap`
 - Constructors: `NewMapStoreV3`, `NewMapStoreV3InRoot`
 - Transport: `docs/atlas/fymap-transport-v3.md`
@@ -47,6 +47,7 @@ legacy bytes, copied-version rejection, per-map limits and parent traversal.
 Directory-alias checks are conditional on host symlink support.
 
 No CLI automatically opens the store, and no default root or quota is introduced.
-V3 queries, workspace joins and CLI consumers still require explicit integration.
+V3 local queries use `NewQueryIndexV3` as documented in
+`docs/atlas/fymap-query-v3.md`. Workspace joins and CLI still require integration.
 Cross-platform execution and power-loss guarantees are not established by these
 host tests.

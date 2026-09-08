@@ -1,6 +1,6 @@
 # Aggregate-aware `.fymap` transport v3
 
-- Status: Implemented opt-in logical planner, codec and store; query integration pending
+- Status: Implemented opt-in planner, codec, store and local queries; workspace/CLI integration pending
 - Logical model: `fairyc.fymap-logical/v3`
 - Transport: `fairyc.fymap/v3`
 - Encoding: `fairyc.fymap-json/v3`
@@ -50,5 +50,6 @@ corruption, unknown fields and resealed contradictions.
 
 This codec does not publish maps, read source files or create query indexes. Its
 explicit store consumer and current-source reader are documented in
-`docs/atlas/fymap-store-v3.md`. Queries, workspace joins and CLI remain separate
-consumers to integrate with v3. Stable aggregate source admission is not promoted.
+`docs/atlas/fymap-store-v3.md`. Local queries are documented in
+`docs/atlas/fymap-query-v3.md`. Workspace joins and CLI remain separate consumers
+to integrate with v3. Stable aggregate source admission is not promoted.

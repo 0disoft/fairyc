@@ -174,6 +174,7 @@ type QueryTarget struct {
 
 type QueryRelation struct {
 	SourceSpecialization string                      `json:"source_specialization,omitempty"`
+	SourceBody           string                      `json:"source_body,omitempty"`
 	Source               string                      `json:"source"`
 	Kind                 RelationKind                `json:"kind"`
 	Target               *QueryTarget                `json:"target,omitempty"`
@@ -715,7 +716,7 @@ func (index *QueryIndex) catalogEntry(position int) SymbolCatalogEntry {
 
 func (index *QueryIndex) contextFor(relations []RelationKind) QueryContext {
 	wanted := make(map[string]struct{})
-	if index.header.LogicalSchema == LogicalSchemaV2 {
+	if index.header.LogicalSchema == LogicalSchemaV2 || index.header.LogicalSchema == LogicalSchemaV3 {
 		wanted["generic-specializations"] = struct{}{}
 		wanted["generic-template-bodies"] = struct{}{}
 	}
@@ -1014,6 +1015,9 @@ func compareQueryRelation(left, right QueryRelation) int {
 		return value
 	}
 	if value := cmp.Compare(left.SourceSpecialization, right.SourceSpecialization); value != 0 {
+		return value
+	}
+	if value := cmp.Compare(left.SourceBody, right.SourceBody); value != 0 {
 		return value
 	}
 	if value := cmp.Compare(left.Kind, right.Kind); value != 0 {

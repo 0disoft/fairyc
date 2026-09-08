@@ -220,5 +220,7 @@ and separately owned cleanup summaries. The exact contract and mutation evidence
 are in `docs/atlas/fymap-transport-v3.md`. Existing v1/v2 bytes and explicit entry
 points remain isolated. The opt-in v3 store and current-source expectations are
 implemented as documented in `docs/atlas/fymap-store-v3.md`; they preserve the
-existing opened-root I/O and version-local retention boundary. Query, workspace
-join and CLI integration must adopt v3 before stable aggregate admission.
+existing opened-root I/O and version-local retention boundary. Package-local v3
+queries now expose concrete aggregate fields and separately attributed cleanup
+relations under the existing selection budgets; see `docs/atlas/fymap-query-v3.md`.
+Workspace joins and CLI must adopt v3 before stable aggregate admission.
