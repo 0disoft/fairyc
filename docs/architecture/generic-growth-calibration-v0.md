@@ -63,3 +63,49 @@ Optimized PE files were 107,520 bytes at every shape, illustrating linker/runtim
 than zero generic growth. Some raw emission intervals were 0 ns: interpret zero as below the observed
 clock resolution, never zero work. These samples do not establish latency bounds or justify a
 performance regression threshold.
+
+## Aggregate/manual comparison, 2026-09-08
+
+`TestGenericAggregateGrowthComparisonMSVC` in
+`internal/compiler/generic_aggregate_growth_test.go` adds the configured
+`fairyc_aggregate_growth_measure` lane. It compares a generic nested `Cell<T>` /
+move-only `Token<T>` factory-and-consumer chain with explicitly named concrete
+declarations generated from the same small workload template. It selects 1, 3 or
+5 types from `bool`, `u8`, `i32`, `u32`, `usize`, creates and consumes each twice,
+checks payload equality, and returns 42. Each type contributes exactly four
+specializations: struct, resource, factory and consumer. Both paths independently
+pass ordinary semantic/Flow/MIR verification and interpreter execution, including
+exactly two drops per type. Both MSVC profiles must execute as 42 without output.
+
+Two repetitions reverse both shape and generic/manual order; profiles remain
+low then optimized. There are 12 compiler observations and 24 native executions.
+Parsing, source generation, package-coordinate construction and toolchain discovery
+are outside the check interval. Generic checking includes specialization; manual
+checking does not. C emission and native build/inspection have separate intervals.
+Each compiler interval appears on both profile rows and must not be counted twice.
+There are no warmups, artifact caches, parallel samples or timing thresholds;
+ambient OS/toolchain caches and other host activity are uncontrolled. This is a
+module-local compiler comparison, not full workspace/CLI latency.
+
+The output-only `fairyc.aggregate-growth-comparison/v0` receipt carries source
+digests, executable identity, tool versions, planner limits, exact counts, source/C/PE
+byte sizes and raw timings. The successful local run used test executable identity
+`fairyc.compiler-executable-sha256/v1:676f3a3d26d5ee791b1d419b9d527cda68c9cb0c6a24f0c991d98305612007d8`.
+The observed sizes were identical across both repetitions:
+
+| Types | Generic/manual source bytes | Generic/manual C bytes | Low PE bytes, both | Optimized PE bytes, both |
+| --- | --- | --- | --- | --- |
+| 1 | 424 / 395 | 3023 / 3027 | 108544 | 107520 |
+| 3 | 600 / 1078 | 8331 / 8331 | 109056 | 107520 |
+| 5 | 788 / 1770 | 13700 / 13702 | 110080 | 107520 |
+
+This demonstrates source deduplication for this bounded aggregate pattern without
+material whole-file size inflation relative to manual expansion. It does not
+establish a latency bound, asymptotic complexity, or a performance regression gate.
+The two source forms share the workload template and compiler frontend/backend;
+they are not independent compiler lineages. Empty cleanup and constant payloads
+permit aggressive optimization. PE size includes runtime/linker overhead and is
+not per-specialization instruction size. Native exactly-once observable cleanup
+is covered separately by ADR 0387's scalar-domain counter fixture, not by the empty
+cleanup used here. Representative application workloads, vector growth, allocation
+failure and resource-element containers remain separate admission evidence.

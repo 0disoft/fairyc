@@ -267,3 +267,10 @@ independent compiler comparison. It establishes this scalar move/drop interactio
 not allocation failure, vector growth, resource-element containers, representative
 compile-time/code-size bounds or non-Windows execution. Stable gates and version
 files remain unchanged by this evidence-only step.
+
+The aggregate/manual comparison in
+`docs/architecture/generic-growth-calibration-v0.md` now measures 1/3/5 scalar
+specialization sets against explicitly expanded declarations, with interpreter
+drop counts and 24 low/optimized native executions. It closes the missing manual
+aggregate comparator, not representative container growth or allocation-failure
+evidence, and does not itself promote the stable language boundary.
