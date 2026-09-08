@@ -232,5 +232,11 @@ now preserves this cleanup source kind and both concrete endpoints with a separa
 checksum domain version and atomic byte bound; see
 `docs/atlas/workspace-call-catalog-v2.md`. Symbol catalog v3 also lists original
 used/unused aggregate declarations once with exact kind filters, pagination and
-separate checksum identity (`docs/atlas/symbol-catalog-v3.md`). CLI consumers must
-adopt v3 before stable aggregate admission.
+separate checksum identity (`docs/atlas/symbol-catalog-v3.md`). Experimental
+`atlas-symbols list --catalog-version 3` and `atlas-calls list --catalog-version 2`
+now connect discovery to cleanup-call queries using the same loaded workspace.
+Legacy/default commands and stable workspace checks retain their prior admission.
+CLI tests cover discovered IDs, both directions, unused templates, lock-byte
+preservation, atomic selection/budget/source failures and output-writer failure.
+Context Pack, attributed-text and Evidence Bundle adoption remain separate from
+stable aggregate admission.

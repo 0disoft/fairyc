@@ -104,7 +104,7 @@ func TestExperimentalAtlasCallsCatalogVersionAndFailurePolicy(t *testing.T) {
 	if code != ExitSuccess || stderr != "" || explicit != legacy {
 		t.Fatal("explicit v0 differs from default")
 	}
-	for _, suffix := range [][]string{{"--catalog-version"}, {"--catalog-version", "2"}, {"--catalog-version", "01"}, {"--catalog-version", "1", "--catalog-version", "1"}} {
+	for _, suffix := range [][]string{{"--catalog-version"}, {"--catalog-version", "3"}, {"--catalog-version", "01"}, {"--catalog-version", "1", "--catalog-version", "1"}} {
 		code, output, stderr := runForTest(append(args, suffix...), root)
 		if code != ExitInvalidInvocation || output != "" || stderr == "" {
 			t.Fatal("invalid version accepted")

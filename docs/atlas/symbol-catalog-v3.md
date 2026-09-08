@@ -1,8 +1,9 @@
 # Atlas Symbol Catalog v3
 
-- Status: Implemented opt-in encoder; CLI integration pending
+- Status: Implemented opt-in encoder and experimental CLI
 - Decision: `docs/adr/0387-generic-aggregate-source-preparation.md`
 - Implementation: `internal/symbolcatalog/catalog_aggregate.go`
+- CLI: `fairyc experimental atlas-symbols list --catalog-version 3`
 
 `EncodeV3` accepts only an exact-current v3 map query. Legacy `Encode` and
 `EncodeV2` retain their exact map admission, catalog v1/v2 bytes and checksums.
@@ -39,5 +40,18 @@ Tests cover exact kind/name selection of four used/unused aggregate templates,
 single-entry pagination without specialization duplicates, empty output, exact
 final byte limits, independent checksum calculation and version rejection.
 The returned original resource ID can select cleanup calls in call catalog v2
-(`docs/atlas/workspace-call-catalog-v2.md`). CLI adoption remains separate work;
-stable language, SDK and runtime ABI versions are unchanged.
+(`docs/atlas/workspace-call-catalog-v2.md`).
+
+## CLI selection
+
+`atlas-symbols list --catalog-version 3` explicitly selects aggregate-aware,
+uncached compilation and v3 map/query preparation from the same loaded workspace.
+Find a resource with `--kind resource --name Token` and the required package and
+budget flags, then pass its visible or full ID to call catalog version 2. Structs
+and unused templates are discoverable with their original kinds as well.
+
+Default catalog 1 and explicit 1/2 retain their prior source-admission policy.
+Only canonical 1, 2 and 3 values are accepted once. `--locked` remains no-write;
+without it, lock refresh may occur before later source or selection errors.
+This explicit experimental path does not promote aggregate syntax in stable
+workspace commands. No artifact cache or map/catalog file is written.

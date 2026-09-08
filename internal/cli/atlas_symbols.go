@@ -23,7 +23,7 @@ type atlasSymbolsOptions struct {
 	maxSelectionBytes uint64
 	maxOutputBytes    uint64
 	locked            bool
-	catalogV2         bool
+	catalogVersion    string
 }
 
 func runAtlasSymbols(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -37,13 +37,22 @@ func runAtlasSymbols(arguments []string, sourceRoot string, stdout, stderr io.Wr
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasQueryVersion(sourceRoot, options.packageUID, options.locked, stderr, options.catalogV2)
+	schema := atlasmap.LogicalSchema
+	if options.catalogVersion == "2" {
+		schema = atlasmap.LogicalSchemaV2
+	}
+	if options.catalogVersion == "3" {
+		schema = atlasmap.LogicalSchemaV3
+	}
+	prepared, code := prepareAtlasQuerySchema(sourceRoot, options.packageUID, options.locked, stderr, schema)
 	if code != ExitSuccess {
 		return code
 	}
 	encode := symbolcatalog.Encode
-	if options.catalogV2 {
+	if options.catalogVersion == "2" {
 		encode = symbolcatalog.EncodeV2
+	} else if options.catalogVersion == "3" {
+		encode = symbolcatalog.EncodeV3
 	}
 	encoded, err := encode(prepared.index, atlasmap.SymbolCatalogRequest{
 		Module: options.module, Name: options.name, Kinds: options.kinds, After: options.after,
@@ -88,10 +97,10 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 		value := arguments[position+1]
 		switch flag {
 		case "--catalog-version":
-			if value != "1" && value != "2" {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --catalog-version as 1 or 2")
+			if value != "1" && value != "2" && value != "3" {
+				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --catalog-version as 1, 2 or 3")
 			}
-			options.catalogV2 = value == "2"
+			options.catalogVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-symbols list", value); err != nil {
 				return atlasSymbolsOptions{}, err

@@ -90,8 +90,8 @@ template-body facts unavailable. This ledger describes observed explicit calls;
 it does not add edges for implicit drop scheduling or prove cleanup execution counts.
 
 The v3 join is an internal opt-in API. Call catalog v2 preserves cleanup-owned
-calls as documented in `docs/atlas/workspace-call-catalog-v2.md`; CLI consumers
-still require explicit adoption.
+calls as documented in `docs/atlas/workspace-call-catalog-v2.md`, exposed through
+`atlas-calls list --catalog-version 2` without changing the default command.
 
 ### Declaration selectors
 

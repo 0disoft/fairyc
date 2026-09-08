@@ -11,6 +11,7 @@ import (
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contextpack"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
@@ -101,7 +102,15 @@ func prepareAtlasQuery(
 }
 
 func prepareAtlasQueryVersion(sourceRoot, packageUID string, locked bool, stderr io.Writer, generic bool) (preparedAtlasQuery, int) {
-	prepared, code := prepareAtlasWorkspaceVersion(sourceRoot, locked, stderr, generic)
+	schema := atlasmap.LogicalSchema
+	if generic {
+		schema = atlasmap.LogicalSchemaV2
+	}
+	return prepareAtlasQuerySchema(sourceRoot, packageUID, locked, stderr, schema)
+}
+
+func prepareAtlasQuerySchema(sourceRoot, packageUID string, locked bool, stderr io.Writer, schema string) (preparedAtlasQuery, int) {
+	prepared, code := prepareAtlasWorkspaceSchema(sourceRoot, locked, stderr, schema)
 	if code != ExitSuccess {
 		return preparedAtlasQuery{}, code
 	}
@@ -114,8 +123,10 @@ func prepareAtlasQueryVersion(sourceRoot, packageUID string, locked bool, stderr
 		return preparedAtlasQuery{}, internalError(stderr)
 	}
 	query := atlasmap.NewQueryIndex
-	if generic {
+	if schema == atlasmap.LogicalSchemaV2 {
 		query = atlasmap.NewQueryIndexV2
+	} else if schema == atlasmap.LogicalSchemaV3 {
+		query = atlasmap.NewQueryIndexV3
 	}
 	index, err := query(selected, expectation)
 	if err != nil {
@@ -133,6 +144,17 @@ func prepareAtlasWorkspace(
 }
 
 func prepareAtlasWorkspaceVersion(sourceRoot string, locked bool, stderr io.Writer, generic bool) (preparedAtlasWorkspace, int) {
+	schema := atlasmap.LogicalSchema
+	if generic {
+		schema = atlasmap.LogicalSchemaV2
+	}
+	return prepareAtlasWorkspaceSchema(sourceRoot, locked, stderr, schema)
+}
+
+func prepareAtlasWorkspaceSchema(sourceRoot string, locked bool, stderr io.Writer, schema string) (preparedAtlasWorkspace, int) {
+	if schema != atlasmap.LogicalSchema && schema != atlasmap.LogicalSchemaV2 && schema != atlasmap.LogicalSchemaV3 {
+		return preparedAtlasWorkspace{}, internalError(stderr)
+	}
 	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
 		return preparedAtlasWorkspace{}, packageFailure(stderr, err)
@@ -142,7 +164,13 @@ func prepareAtlasWorkspaceVersion(sourceRoot string, locked bool, stderr io.Writ
 		return preparedAtlasWorkspace{}, packageFailure(stderr, err)
 	}
 	var result compiler.Result
-	if generic {
+	if schema == atlasmap.LogicalSchemaV3 {
+		coordinates, coordinateErr := workspace.PackageCoordinates()
+		if coordinateErr != nil {
+			return preparedAtlasWorkspace{}, internalError(stderr)
+		}
+		result, _, err = compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	} else if schema == atlasmap.LogicalSchemaV2 {
 		result, err = workspacecompiler.Check(workspace)
 	} else {
 		result, err = compiler.CheckPackages(input)
@@ -170,8 +198,10 @@ func prepareAtlasWorkspaceVersion(sourceRoot string, locked bool, stderr io.Writ
 		return preparedAtlasWorkspace{}, internalError(stderr)
 	}
 	prepare, current := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations
-	if generic {
+	if schema == atlasmap.LogicalSchemaV2 {
 		prepare, current = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2
+	} else if schema == atlasmap.LogicalSchemaV3 {
+		prepare, current = atlasmap.PrepareWorkspaceV3, atlasmap.CurrentWorkspaceExpectationsV3
 	}
 	snapshot, partitions, err := prepare(workspace, result, compilerBuild)
 	if err != nil {

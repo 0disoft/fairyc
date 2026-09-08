@@ -19,7 +19,7 @@ type atlasCallsOptions struct {
 	maxCalls       int
 	maxOutputBytes uint64
 	locked         bool
-	catalogV1      bool
+	catalogVersion string
 }
 
 func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -33,7 +33,14 @@ func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasWorkspaceVersion(sourceRoot, options.locked, stderr, options.catalogV1)
+	schema := atlasmap.LogicalSchema
+	if options.catalogVersion == "1" {
+		schema = atlasmap.LogicalSchemaV2
+	}
+	if options.catalogVersion == "2" {
+		schema = atlasmap.LogicalSchemaV3
+	}
+	prepared, code := prepareAtlasWorkspaceSchema(sourceRoot, options.locked, stderr, schema)
 	if code != ExitSuccess {
 		return code
 	}
@@ -43,8 +50,10 @@ func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	}
 	join := atlasmap.NewWorkspaceCallIndex
 	encode := workspacecallcatalog.Encode
-	if options.catalogV1 {
+	if options.catalogVersion == "1" {
 		join, encode = atlasmap.NewWorkspaceCallIndexV2, workspacecallcatalog.EncodeV1
+	} else if options.catalogVersion == "2" {
+		join, encode = atlasmap.NewWorkspaceCallIndexV3, workspacecallcatalog.EncodeV2
 	}
 	index, err := join(
 		prepared.partitions,
@@ -100,10 +109,10 @@ func parseAtlasCallsOptions(arguments []string) (atlasCallsOptions, error) {
 		value := arguments[position+1]
 		switch flag {
 		case "--catalog-version":
-			if value != "0" && value != "1" {
-				return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires --catalog-version as 0 or 1")
+			if value != "0" && value != "1" && value != "2" {
+				return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires --catalog-version as 0, 1 or 2")
 			}
-			options.catalogV1 = value == "1"
+			options.catalogVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-calls list", value); err != nil {
 				return atlasCallsOptions{}, err

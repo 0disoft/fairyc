@@ -1,9 +1,10 @@
 # Workspace call catalog v2
 
-- Status: Implemented opt-in output-only encoder; CLI integration pending
+- Status: Implemented opt-in output-only encoder and experimental CLI
 - Decision: `docs/adr/0387-generic-aggregate-source-preparation.md`
 - Join: `NewWorkspaceCallIndexV3`, `docs/atlas/workspace-call-join-v0.md`
 - Implementation: `internal/workspacecallcatalog/catalog_aggregate.go`
+- CLI: `fairyc experimental atlas-calls list --catalog-version 2`
 
 `EncodeV2` accepts only an exact-current v3 workspace call index. Legacy `Encode`
 and `EncodeV1` retain their exact-version admission and v0/v1 JSON bytes. There
@@ -55,5 +56,26 @@ bytes; they do not authenticate the compiler or grant authority.
 Tests cover two cleanup specializations calling a generic dependency, incoming,
 outgoing, both and empty selections, exact final byte limits, version rejection,
 independently computed checksums, body mutation, and legacy field omission.
-CLI, Context Pack and Evidence Bundle adoption remain separate work. Stable
-language, SDK and runtime ABI versions are unchanged by this internal encoder.
+Context Pack and Evidence Bundle adoption remain separate work.
+
+## CLI selection
+
+First discover the original resource SymbolId with
+`atlas-symbols list --catalog-version 3 --kind resource --name Token` and the
+required package/selection/output limits. Supply that ID to
+`atlas-calls list --catalog-version 2` with the required package, symbol,
+direction, package/call and output limits. Both commands use the same current
+workspace and aggregate-aware uncached compiler. Incoming selection on a helper
+function reports cleanup callers with their original resource IDs.
+
+Only canonical catalog values 0, 1 and 2 are accepted once. Default 0 and explicit
+0/1 keep their existing source-admission and output policies. `--locked` retains
+its exact no-write behavior; otherwise lock refresh can precede later failures.
+Source failures return diagnostics with no catalog, invalid selectors/budgets
+return invocation errors with no partial bytes, and output writer failure remains
+an internal failure. No map, catalog or compiler artifact cache is written.
+
+This experimental selection does not promote aggregate syntax in stable commands;
+language, SDK and runtime ABI revisions remain unchanged. CLI tests discover IDs
+before querying cross-package cleanup calls, compare incoming/outgoing/both,
+preserve lock bytes, check unused aggregates and enforce atomic failures.
