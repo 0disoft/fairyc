@@ -62,3 +62,43 @@ func TestVectorCandidateAuthorityMatchesBytesAndAST(t *testing.T) {
 		t.Fatal("client label gained SDK authority")
 	}
 }
+
+func TestStandardVectorAuthorityUsesExactBundle(t *testing.T) {
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{"src/main.fy": "module main; import std::vec as vec;"})
+	for _, mutation := range []string{"none", "identity", "AST"} {
+		workspace, err := Load(root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i := range workspace.Packages {
+			pkg := &workspace.Packages[i]
+			if pkg.Path != sdkstdlib.PackagePath {
+				continue
+			}
+			if mutation == "identity" {
+				pkg.SDKIdentity = sdkstdlib.VectorCandidateIdentity
+			}
+			if mutation == "AST" {
+				pkg.Sources[0].Module.Path = "forged"
+			}
+		}
+		owners, err := workspace.SDKStorageOwners()
+		if mutation == "none" {
+			if err != nil || len(owners) != 1 {
+				t.Fatalf("standard vector authority: %v %v", owners, err)
+			}
+		} else if err == nil {
+			t.Fatalf("forged %s accepted", mutation)
+		}
+	}
+	writeWorkspaceLoaderFile(t, root, "src/main.fy", "module main; import std::io as io;")
+	core, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	owners, err := core.SDKStorageOwners()
+	if err != nil || len(owners) != 0 {
+		t.Fatalf("core SDK selected vector authority: %v %v", owners, err)
+	}
+}

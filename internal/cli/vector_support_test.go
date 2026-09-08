@@ -3,6 +3,8 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -11,6 +13,106 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
+
+func TestWindowsVectorStableCLI(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "test.cli.stable-vector"
+name = "client"
+version = "1.0.0"
+language = "fairyc-language/14"
+source = "src"
+`)
+	writeTestSource(t, root, "src/main.fy", nativeVectorClient)
+	code, stdout, stderr := runForTest([]string{"check"}, root)
+	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "check ok:") {
+		t.Fatalf("check: %d %s %s", code, stdout, stderr)
+	}
+	for _, release := range []bool{false, true} {
+		for _, command := range []string{"build", "run"} {
+			args := []string{command, "--locked"}
+			if release {
+				args = append(args, "--release")
+			}
+			code, stdout, stderr := runForTest(args, root)
+			if stderr != "" {
+				t.Fatalf("%s: %s", command, stderr)
+			}
+			if command == "run" {
+				if code != 41 || stdout != "41" {
+					t.Fatalf("run: %d %q", code, stdout)
+				}
+			} else {
+				artifact, err := os.ReadFile(filepath.Join(root, "build", "client.exe"))
+				if code != ExitSuccess || !strings.Contains(stdout, "built: build/client.exe") || err != nil || len(artifact) == 0 {
+					t.Fatalf("build: %d %s %v", code, stdout, err)
+				}
+			}
+		}
+	}
+	testSource := strings.NewReplacer("module main;", "module tests::vector;", "@effects(console)", "@test\n@effects(console)", "fn i32 main()", "fn void works()", "    return 41;", "").Replace(nativeVectorClient)
+	writeTestSource(t, root, "tests/vector.fy", testSource)
+	code, _, stderr = runForTest([]string{"test", "--locked"}, root)
+	if code != ExitInvalidInvocation || !strings.Contains(stderr, "require --native") {
+		t.Fatalf("interpreter boundary: %d %s", code, stderr)
+	}
+	for _, release := range []bool{false, true} {
+		args := []string{"test", "--native", "--locked", "--json", "--capture-output"}
+		if release {
+			args = append(args, "--release")
+		}
+		code, stdout, stderr = runForTest(args, root)
+		var report stableTestExecutionReport
+		if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(stdout), &report) != nil || report.Count != 1 || report.Passed != 1 || report.Tests[0].StdoutBase64 == nil || *report.Tests[0].StdoutBase64 != "NDE=" {
+			t.Fatalf("native test: %d %s %s", code, stdout, stderr)
+		}
+	}
+	writeTestSource(t, root, "src/main.fy", nativeVectorClient+"\nstruct Local<T> { T value; }")
+	code, _, stderr = runForTest([]string{"check"}, root)
+	if code != ExitSourceDiagnostics || !strings.Contains(stderr, "E4501") {
+		t.Fatalf("source admission: %d %s", code, stderr)
+	}
+}
+
+func TestWindowsVectorQuickstart(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	root := t.TempDir()
+	for _, file := range []string{"fairy.toml", "src/main.fy", "tests/vector.fy"} {
+		contents, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_vec_quickstart", filepath.FromSlash(file)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writeTestSource(t, root, file, string(contents))
+	}
+	code, stdout, stderr := runForTest([]string{"check"}, root)
+	if code != ExitSuccess || stderr != "" {
+		t.Fatalf("quickstart check: %d %s %s", code, stdout, stderr)
+	}
+	for _, release := range []bool{false, true} {
+		args := []string{"run", "--locked"}
+		if release {
+			args = append(args, "--release")
+		}
+		code, stdout, stderr = runForTest(args, root)
+		if code != ExitSuccess || stdout != "42" || stderr != "" {
+			t.Fatalf("quickstart run: %d %s %s", code, stdout, stderr)
+		}
+		args = []string{"test", "--native", "--locked"}
+		if release {
+			args = append(args, "--release")
+		}
+		code, stdout, stderr = runForTest(args, root)
+		if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "1 passed; 0 failed") {
+			t.Fatalf("quickstart test: %d %s %s", code, stdout, stderr)
+		}
+	}
+}
 
 func TestWindowsVectorCandidateNativeTests(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {

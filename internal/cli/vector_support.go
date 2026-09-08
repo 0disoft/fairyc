@@ -10,15 +10,14 @@ import (
 )
 
 func workspaceSDKStorage(workspace workspaceloader.Workspace) (bool, error) {
-	if !workspace.UsesVectorCandidate() {
-		return false, nil
-	}
-	owners, err := workspace.VectorCandidateStorageOwners()
+	owners, err := workspace.SDKStorageOwners()
 	if err != nil {
 		return false, err
 	}
-	if err := validateVectorRuntimeOwners(workspace); err != nil {
-		return false, err
+	if len(owners) != 0 {
+		if err := validateVectorRuntimeOwners(workspace); err != nil {
+			return false, err
+		}
 	}
 	return len(owners) != 0, nil
 }

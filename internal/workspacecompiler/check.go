@@ -16,22 +16,20 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	if workspace.UsesVectorCandidate() {
-		owners, err := workspace.VectorCandidateStorageOwners()
+	owners, err := workspace.SDKStorageOwners()
+	if err != nil {
+		return compiler.Result{}, err
+	}
+	if len(owners) != 0 {
+		coordinates, err := workspace.PackageCoordinates()
 		if err != nil {
 			return compiler.Result{}, err
 		}
-		if len(owners) != 0 {
-			coordinates, err := workspace.PackageCoordinates()
-			if err != nil {
-				return compiler.Result{}, err
-			}
-			analysis, err := compiler.AnalyzeSDKStoragePackages(input, coordinates, genericplan.DefaultPlanLimits(), owners)
-			if err != nil {
-				return compiler.Result{}, err
-			}
-			return compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+		analysis, err := compiler.AnalyzeSDKStoragePackages(input, coordinates, genericplan.DefaultPlanLimits(), owners)
+		if err != nil {
+			return compiler.Result{}, err
 		}
+		return compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
 	}
 	if hasGenericAggregates(input) || !hasGenericDeclarations(input) {
 		// Preserve ordinary analysis and the unsupported-aggregate boundary;

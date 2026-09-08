@@ -354,6 +354,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0342-stable-resource-abilities-and-onchain-effects.md`: releases resource abilities and target-neutral on-chain effects through stable package compilation in `fairyc-language/11` with SDK `0.0.0-stage0.53`.
 - `0343-declaration-owned-explicit-resource-burn.md`: releases declaration-owned explicit burn for direct inert no-drop resources through a distinct verified MIR operation in `fairyc-language/12` with SDK `0.0.0-stage0.54`.
 
+- `0390-public-windows-sdk-vector.md`: admits the on-demand SDK-owned Vec<T> through stable Windows workspace compilation and native tests, preserving scalar-only consumer templates and exact source authority.
+
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
 ## Review Blockers

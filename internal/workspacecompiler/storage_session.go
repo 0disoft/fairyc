@@ -8,8 +8,9 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-// StorageTransferSession is an explicit compiler-private memory or exact-build
-// persistent lane. Stable SourceSession selection remains unchanged.
+// StorageTransferSession owns compiler-private memory or exact-build persistent
+// artifacts. The raw constructor is explicit; SourceSession selects its SDK-only
+// constructor for authenticated vector bundles.
 // Every check analyzes current source before looking up source/interface/target/
 // specialization-bound keys; only a complete verified reassembly skips lowering.
 type StorageTransferSession struct {
@@ -24,10 +25,9 @@ func NewStorageTransferSession(configuration Configuration, limits genericplan.P
 	return &StorageTransferSession{generic: session}, nil
 }
 
-// NewVectorCandidateSession selects private operations only for the exact
-// embedded SDK source verified by the candidate workspace loader. It does not
-// change ordinary SourceSession selection or expose the unrestricted test lane.
-func NewVectorCandidateSession(configuration Configuration, limits genericplan.PlanLimits) (*StorageTransferSession, error) {
+// NewSDKStorageSession selects private operations only for the exact embedded
+// core-plus-vector SDK bundle. It never exposes the unrestricted test lane.
+func NewSDKStorageSession(configuration Configuration, limits genericplan.PlanLimits) (*StorageTransferSession, error) {
 	session, err := NewStorageTransferSession(configuration, limits)
 	if err != nil {
 		return nil, err

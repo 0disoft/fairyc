@@ -115,7 +115,7 @@ complete ordered source paths, bytes and parsed ASTs from the embedded bundle.
 It rejects test overlays inside the SDK and SDK claims on other package paths.
 Only the verified catalog's resolved SDK owners receive storage authority.
 
-`NewVectorCandidateSession` applies this check before analysis/cache lookup and
+`NewSDKStorageSession` applies this check before analysis/cache lookup and
 uses the owner-restricted compiler path. Its compiler-build key has a separate
 SDK-owned discriminator from the unrestricted private test session. Real memory
 and reopened disk hits still execute Buffer reads and cleanup under both MSVC
@@ -147,9 +147,9 @@ the existing report writer. Both MSVC profiles preserve an assertion-failing
 vector test followed by a passing Buffer-borrow test, captured console bytes and
 source locations in the JSON report. Existing native runner isolation tests pass.
 
-Default loader/SDK selection remains unchanged, so the stable CLI cannot yet
-select the candidate from user source. Installed SDK promotion remains separate.
-No stable language, SDK version or runtime ABI changes.
+At this native-dispatch prerequisite stage, default loader/SDK selection remained
+unchanged and installed SDK promotion was separate. ADR 0390 now supersedes that
+exposure boundary while retaining the source/borrow guarantees established here.
 
 Before default SDK admission, the workspace integration uses a distinct
 `AnalyzeSDKStoragePackages` path. Only authenticated SDK owners may declare

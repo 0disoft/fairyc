@@ -48,14 +48,11 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 	if err != nil {
 		return Result{}, err
 	}
-	sdkStorage := false
-	if workspace.UsesVectorCandidate() {
-		owners, authorityErr := workspace.VectorCandidateStorageOwners()
-		if authorityErr != nil {
-			return Result{}, authorityErr
-		}
-		sdkStorage = len(owners) != 0
+	owners, authorityErr := workspace.SDKStorageOwners()
+	if authorityErr != nil {
+		return Result{}, authorityErr
 	}
+	sdkStorage := len(owners) != 0
 	if hasGenericAggregates(input) && !sdkStorage {
 		compiled, err := compiler.CheckPackages(input)
 		storage := StorageMemory
@@ -74,7 +71,7 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 			}
 		}
 		if sdkStorage {
-			session.active, err = NewVectorCandidateSession(session.configuration, genericplan.DefaultPlanLimits())
+			session.active, err = NewSDKStorageSession(session.configuration, genericplan.DefaultPlanLimits())
 		} else if generic {
 			session.active, err = NewGenericSession(session.configuration, genericplan.DefaultPlanLimits())
 		} else {

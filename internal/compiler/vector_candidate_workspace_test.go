@@ -35,7 +35,7 @@ source = "src"
 			writeVectorCacheFile(t, root, "src/main.fy", client)
 			load := func() workspaceloader.Workspace {
 				t.Helper()
-				workspace, err := workspaceloader.LoadVectorCandidate(root)
+				workspace, err := workspaceloader.Load(root)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -43,7 +43,7 @@ source = "src"
 			}
 			workspace := load()
 			sdk, exists := workspace.Package(sdkstdlib.PackagePath)
-			if !exists || sdk.SDKIdentity != sdkstdlib.VectorCandidateIdentity || len(workspace.Graph.Nodes) != 2 {
+			if !exists || sdk.SDKIdentity != sdkstdlib.SDKIdentity || len(workspace.Graph.Nodes) != 2 {
 				t.Fatal("candidate graph is not the root and exact SDK")
 			}
 			configuration := vectorCacheConfiguration(8)
@@ -93,8 +93,8 @@ source = "src"
 			if err != nil || !uncached.Verified {
 				t.Fatalf("uncached candidate selection: %v", err)
 			}
-			if _, err := workspaceloader.Load(root); err == nil {
-				t.Fatal("default loader unexpectedly selected candidate SDK")
+			if workspace.UsesVectorCandidate() {
+				t.Fatal("default loader selected the private candidate identity")
 			}
 			changed := strings.Replace(client, "return 41;", "return 40 + 1;", 1)
 			writeVectorCacheFile(t, root, "src/main.fy", changed)
@@ -188,7 +188,7 @@ fn i32 main() {
 	load := func(text string) workspaceloader.Workspace {
 		t.Helper()
 		writeVectorCacheFile(t, root, "src/main.fy", text)
-		workspace, err := workspaceloader.LoadVectorCandidate(root)
+		workspace, err := workspaceloader.Load(root)
 		if err != nil {
 			t.Fatal(err)
 		}

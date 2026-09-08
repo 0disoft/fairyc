@@ -109,7 +109,13 @@ func AnalyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinate
 // AnalyzeSDKStoragePackages preserves scalar-only consumer templates while
 // admitting the exact authenticated SDK's generic container implementations.
 func AnalyzeSDKStoragePackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID) (GenericAnalysis, error) {
-	return analyzeOwnedStorageTransferPackages(input, coordinates, limits, storageOwners, true)
+	analysis, err := analyzeOwnedStorageTransferPackages(input, coordinates, limits, storageOwners, true)
+	if err != nil {
+		if rejection, sourceOwned := genericSourceDiagnostic(err, input, coordinates); sourceOwned {
+			return GenericAnalysis{Analysis: Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: []semantic.Diagnostic{rejection}}}}, nil
+		}
+	}
+	return analysis, err
 }
 
 func analyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID, sdkTemplates bool) (GenericAnalysis, error) {

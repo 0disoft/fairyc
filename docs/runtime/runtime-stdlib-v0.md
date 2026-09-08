@@ -78,12 +78,13 @@ std::text   String, CStr, CString, allocation-free UTF-8 validation and immutabl
 std::fs     target-neutral File open/read/write/sync/close, absolute and bounded relative/end positioning, and logical size plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, and other metadata
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::process effect-free argument count and exact UTF-8 argument copy
+std::vec    on-demand Windows move-only Vec<T> with fallible growth and immutable element borrows
 std::c      C scalar types and raw wrapper helpers
 ```
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.57` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.58` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, positioning,
 and logical size, Windows MSVC `std::fs` extensions, console I/O, scalar output, and effect-free
 `std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through 0334.
@@ -132,7 +133,7 @@ path deterministically forces host OOM.
 
 `Buffer` is a resource owning initialized bytes from `SystemHeap`. It starts with length zero, exposes only `[0, len)`, and may grow only through fallible methods.
 
-The minimum operations are construction with capacity, copy from a byte slice, length and capacity inspection, immutable and mutable initialized-byte views, reserve, append, zero-initialized resize, truncate, and clear. Safe code cannot access spare capacity or raw parts. `Vec<T>` is deferred until user generics and element-drop behavior exist.
+The minimum operations are construction with capacity, copy from a byte slice, length and capacity inspection, immutable and mutable initialized-byte views, reserve, append, zero-initialized resize, truncate, and clear. Safe code cannot access spare capacity or raw parts. ADR 0390 additionally admits the SDK-owned Windows `Vec<T>` described below.
 
 The provisional C Buffer slice implements the storage operations behind that surface. Its invariant
 is `len <= capacity`; reserve copies only initialized bytes and publishes replacement storage only
@@ -346,7 +347,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.57` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.58` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -897,9 +898,32 @@ This is not a generic POSIX contract. POSIX.1-2024 and Linux differ for interrup
 
 Composite resources may contain resources for infallible reverse-order drop. Stage 0 does not define a general fallible close protocol that extracts several owned fields or accumulates multiple close errors. Such APIs keep their leaves separate or remain target- and module-specific until a no-partial-move design is proven.
 
+## `Vec<T>` on Windows
+
+SDK `0.0.0-stage0.58` selects the core-plus-vector bundle when source imports
+`std::vec`; other SDK imports keep the six-module core. The bundle's exact digest
+and SDK version participate in lock and cache identity. The stable workspace CLI
+checks, builds and runs it; tests require `--native` on Windows AMD64 MSVC.
+
+`empty<T>` creates an allocation-free move-only vector. `len<T>`, `is_empty<T>`
+and `capacity<T>` inspect it. `reserve<T>(ref mut Vec<T>, usize)` returns
+`Result<usize, u32>` with an element capacity or the existing allocation status.
+`push<T>(ref mut Vec<T>, T)` returns `Result<usize, T>`: failure preserves the
+vector and returns the original element. `pop<T>` returns `Option<T>` and moves
+the last element out. `clear<T>` destroys the initialized prefix in reverse order,
+returns its old length and keeps capacity. Cleanup destroys remaining elements
+and frees the allocation. Neither operation destroys uninitialized spare capacity.
+
+`at<T>(ref Vec<T>, usize)` returns an immutable owner-bound `ref T`; an invalid
+index traps with `assertion-failed`. Mutation and movement are rejected while an
+element reference remains live. Supported element types are explicit builtin
+scalars or directly named non-generic structs/resources with an admitted nonzero
+native layout. This does not admit user generic aggregate declarations or nominal
+arguments to user generic functions. See ADR 0390 and `examples/std_vec_quickstart`.
+
 ## Explicit exclusions
 
-Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, `Vec<T>`, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.
+Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.
 
 ## External references
 

@@ -1,6 +1,6 @@
 module std::vec;
 
-/// Candidate only: owns a contiguous initialized prefix of moved elements.
+/// Owns a contiguous initialized prefix of moved elements.
 pub resource Vec<T> {
     ptr mut void data;
     usize bytes;

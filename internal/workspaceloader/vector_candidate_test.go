@@ -47,11 +47,18 @@ func TestLoadVectorCandidateIdentityAndOverlay(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if _, err := WithRootTests(ordinary); err == nil {
-					t.Fatal("ordinary test overlay admitted candidate")
-				}
-			} else if err == nil {
-				t.Fatal("ordinary loader admitted candidate")
+				ordinary, err = WithRootTests(ordinary)
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			stableSDK, found := ordinary.Package(sdkstdlib.PackagePath)
+			if !found || ordinary.UsesVectorCandidate() || stableSDK.SDKIdentity != sdkstdlib.SDKIdentity || stableSDK.Digest != sdk.Digest {
+				t.Fatal("default vector bundle identity is incorrect")
+			}
+			owners, err := ordinary.SDKStorageOwners()
+			if err != nil || len(owners) != 1 {
+				t.Fatalf("stable SDK storage authority: %v %v", owners, err)
 			}
 		})
 	}

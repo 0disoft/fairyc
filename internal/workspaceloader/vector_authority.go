@@ -16,7 +16,30 @@ func (workspace Workspace) VectorCandidateStorageOwners() ([]hir.PackageID, erro
 	if !workspace.vectorCandidate {
 		return nil, fmt.Errorf("vector candidate source selection is not active")
 	}
-	definition, err := sdkstdlib.LoadVectorCandidate()
+	return workspace.SDKStorageOwners()
+}
+
+// SDKStorageOwners authenticates the selected core-plus-vector source bundle.
+// Module presence requests verification; it never grants authority by itself.
+func (workspace Workspace) SDKStorageOwners() ([]hir.PackageID, error) {
+	load, identity := sdkstdlib.LoadVector, sdkstdlib.SDKIdentity
+	if workspace.vectorCandidate {
+		load, identity = sdkstdlib.LoadVectorCandidate, sdkstdlib.VectorCandidateIdentity
+	} else {
+		present := false
+		for _, pkg := range workspace.Packages {
+			if pkg.Path != sdkstdlib.PackagePath {
+				continue
+			}
+			for _, module := range pkg.Modules {
+				present = present || module.Path == "std::vec"
+			}
+		}
+		if !present {
+			return nil, nil
+		}
+	}
+	definition, err := load()
 	if err != nil {
 		return nil, err
 	}
@@ -29,15 +52,15 @@ func (workspace Workspace) VectorCandidateStorageOwners() ([]hir.PackageID, erro
 			continue
 		}
 		count++
-		if count != 1 || loaded.SourceKind != SourceKindSDK || loaded.SDKIdentity != sdkstdlib.VectorCandidateIdentity ||
+		if count != 1 || loaded.SourceKind != SourceKindSDK || loaded.SDKIdentity != identity ||
 			loaded.RuntimeABI != sdkstdlib.RuntimeABI || loaded.Digest != definition.Digest ||
 			len(loaded.Sources) != len(definition.Sources) || !reflect.DeepEqual(loaded.Modules, definition.Modules) {
-			return nil, fmt.Errorf("vector candidate SDK catalog does not match embedded source")
+			return nil, fmt.Errorf("vector SDK catalog does not match embedded source")
 		}
 		for i, expected := range definition.Sources {
 			actual := loaded.Sources[i]
 			if actual.Test || actual.Path != expected.Path || !bytes.Equal(actual.Bytes, expected.Bytes) || !reflect.DeepEqual(actual.Module, expected.Module) {
-				return nil, fmt.Errorf("vector candidate SDK source or AST differs from embedded source")
+				return nil, fmt.Errorf("vector SDK source or AST differs from embedded source")
 			}
 		}
 	}

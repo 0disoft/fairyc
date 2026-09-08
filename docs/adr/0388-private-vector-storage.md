@@ -6,6 +6,9 @@
 
 ## Decision
 
+The private prerequisite evidence below is retained. ADR 0390 subsequently admits
+the SDK-owned Windows Vec surface without publishing the private C transport ABI.
+
 Add a private, sequential storage transport for the element-sized allocation
 required by issue 44. `internal/cstdlib/stage0_vector_storage.c` reuses the
 SystemHeap allocator, not Buffer's byte-length contract. The descriptor is an
@@ -660,7 +663,7 @@ private candidate, not installed container source or stable `Vec<T>` admission.
 
 ### SDK-owned vector candidate
 
-`sdkstdlib.LoadVectorCandidate` adds `candidates/std/vec.fy` to the complete
+`sdkstdlib.LoadVectorCandidate` adds `sources/optional/std/vec.fy` to the complete
 stable SDK bundle under a distinct candidate source identity. The candidate is
 not installed by `Load`; stable source bytes, version, language revision and
 runtime ABI are unchanged. Each load returns fresh source and AST objects.

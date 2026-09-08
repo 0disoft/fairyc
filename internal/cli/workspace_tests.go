@@ -231,6 +231,9 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 	}
 
 	var outcomes []workspaceTestOutcome
+	if sdkStorage && !options.native {
+		return invocationError(stderr, "workspace tests using std::vec require --native on Windows AMD64")
+	}
 	if options.native {
 		profile := cdriver.LowProfile
 		if options.release {

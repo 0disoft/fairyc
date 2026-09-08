@@ -365,10 +365,12 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 
 func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instances []Instance, vectorCandidate bool) ([]Package, packagegraph.Graph, []Instance, error) {
 	owners := make([]string, 0)
+	needsVector := false
 	for _, node := range graph.Nodes {
 		needsStandardLibrary := false
 		for _, module := range node.Modules {
 			for _, imported := range module.Imports {
+				needsVector = needsVector || imported == "std::vec"
 				if imported == "std" || strings.HasPrefix(imported, "std::") {
 					needsStandardLibrary = true
 				}
@@ -384,6 +386,8 @@ func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instanc
 	loadSDK, sdkIdentity := sdkstdlib.Load, sdkstdlib.SDKIdentity
 	if vectorCandidate {
 		loadSDK, sdkIdentity = sdkstdlib.LoadVectorCandidate, sdkstdlib.VectorCandidateIdentity
+	} else if needsVector {
+		loadSDK = sdkstdlib.LoadVector
 	}
 	definition, err := loadSDK()
 	if err != nil {

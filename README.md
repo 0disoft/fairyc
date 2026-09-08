@@ -466,7 +466,14 @@ ADR 0385 advances the current language to `fairyc-language/14` and SDK `0.0.0-st
 Stable workspace `check`, `build`, `run`, and `test` accept explicit scalar generic functions such
 as `fn T identity<T>(T value) { return value; }` and `identity<i32>(42)`, including public functions
 across imports. Type inference, nominal generic arguments, and user-defined static interfaces
-remain unsupported. Update existing manifest language pins and refresh their locks.
+remain unsupported for user-defined templates. Update existing manifest language pins and refresh their locks.
+
+ADR 0390 adds the on-demand `std::vec::Vec<T>` module in SDK `0.0.0-stage0.58`,
+without changing language `/14` or runtime `/0`. Stable Windows check/build/run
+and native tests support scalar and resource elements, fallible push/reserve,
+pop/clear and immutable owner-bound access. User generic aggregates, mutable
+element access, iteration and nested vectors remain unadmitted. See
+[`std_vec_quickstart`](examples/std_vec_quickstart/README.md).
 
 ADR 0344 adds an experimental compiler-private contract-state transaction MIR beside the stable
 whole-program MIR. It reconstructs exact layouts, verifies canonical cell/map operations and

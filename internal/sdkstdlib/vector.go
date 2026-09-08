@@ -11,24 +11,33 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-//go:embed candidates/std/vec.fy
-var vectorCandidate []byte
+//go:embed sources/optional/std/vec.fy
+var vectorSource []byte
 
 const VectorCandidateIdentity = "fairyc-sdk-vector-candidate/0"
 
-// LoadVectorCandidate adds the SDK-owned container candidate to the complete
-// stable bundle. Only the explicit private storage-transfer compiler lane may
-// consume it; Load and the installed SDK identity remain unchanged.
+// LoadVectorCandidate retains an explicit, separately identified test lane.
 func LoadVectorCandidate() (Definition, error) {
+	definition, err := LoadVector()
+	if err != nil {
+		return Definition{}, err
+	}
+	definition.SourceIdentity = SourceIdentity(VectorCandidateIdentity, RuntimeABI, definition.Digest)
+	return definition, nil
+}
+
+// LoadVector adds the on-demand std::vec module to the core SDK. The loader
+// selects this exact bundle only when a resolved source imports std::vec.
+func LoadVector() (Definition, error) {
 	definition, err := Load()
 	if err != nil {
 		return Definition{}, err
 	}
 	const path = "std/vec.fy"
-	contents := slices.Clone(vectorCandidate)
+	contents := slices.Clone(vectorSource)
 	analysis, err := frontend.AnalyzeSyntax(source.NewFile(path, contents), source.DefaultLimits())
 	if err != nil || analysis.AST == nil || len(analysis.Tree.Diagnostics) != 0 || analysis.AST.Path != "std::vec" {
-		return Definition{}, fmt.Errorf("embedded vector candidate is invalid")
+		return Definition{}, fmt.Errorf("embedded vector module is invalid")
 	}
 	imports := make([]string, len(analysis.AST.Imports))
 	for i, imported := range analysis.AST.Imports {
@@ -44,6 +53,6 @@ func LoadVectorCandidate() (Definition, error) {
 	if err != nil {
 		return Definition{}, err
 	}
-	definition.SourceIdentity = SourceIdentity(VectorCandidateIdentity, RuntimeABI, definition.Digest)
+	definition.SourceIdentity = SourceIdentity(SDKIdentity, RuntimeABI, definition.Digest)
 	return definition, nil
 }

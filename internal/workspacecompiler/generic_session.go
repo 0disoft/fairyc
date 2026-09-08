@@ -135,7 +135,7 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	}
 	var analysis compiler.GenericAnalysis
 	if session.sdkStorage {
-		owners, authorityErr := workspace.VectorCandidateStorageOwners()
+		owners, authorityErr := workspace.SDKStorageOwners()
 		if authorityErr != nil {
 			return Result{}, authorityErr
 		}
