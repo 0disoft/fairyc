@@ -551,6 +551,17 @@ package codec, cache key or hit/fallback coordinator.
 
 ### Still required
 
+The private process cache now has explicit `NewStorageTransferProcessCodec` and
+`NewStorageTransferCache` constructors. Transfer envelopes use
+`fairyc.package-mir-storage-process/v0` and a distinct process-identity prefix;
+ordinary codec defaults remain unchanged. Both encode and decode verify the
+package artifact. The shared bounded LRU retains copy isolation, eviction and
+interface-mismatch quarantine behavior. Tests include two verified vector-package
+cache hits followed by reassembly and low/optimized native execution, as well as
+cross-codec/process rejection and size/canonicality limits. Fixture keys are not
+production source keys: current-source key construction and hit/fallback
+coordination remain required, together with persistent cache and SDK admission.
+
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow

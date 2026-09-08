@@ -10,6 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packageartifact"
+	"github.com/0disoft/fairyc/internal/packagecache"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
@@ -24,6 +25,32 @@ func TestPrivateVectorPackageArtifactReassembly(t *testing.T) {
 	artifacts, err := packageartifact.ExtractAllStorageTransfers(result.MIR, identities, coordinates)
 	if err != nil || len(artifacts) != 2 {
 		t.Fatalf("extract transfers: %v", err)
+	}
+	cache, err := packageartifact.NewStorageTransferCache(packagecache.Limits{MaxEntries: 2, MaxBytes: 16 << 20}, 8<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	interfaces := result.GenericProvenance.PackageInterfaces()
+	for i, artifact := range artifacts {
+		key := packagecache.GenericKey{byte(artifact.PackageID)} // Closed fixture keys, not production source keys.
+		hash := interfaces[i].Generic
+		if interfaces[i].Package != artifact.PackageID {
+			t.Fatal("fixture interface order mismatch")
+		}
+		if cache.Get(key, hash).Status != packageartifact.LookupMiss {
+			t.Fatal("cold transfer cache did not miss")
+		}
+		if err := cache.Put(key, hash, artifact); err != nil {
+			t.Fatal(err)
+		}
+		loaded := cache.Get(key, hash)
+		if loaded.Status != packageartifact.LookupHit {
+			t.Fatal(loaded.Reason)
+		}
+		artifacts[i] = loaded.Artifact
+	}
+	if cache.Stats().VerifiedHits != 2 {
+		t.Fatal("missing verified transfer cache hit")
 	}
 	before, _ := json.Marshal(artifacts)
 	for _, artifact := range artifacts {

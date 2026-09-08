@@ -29,10 +29,18 @@ type GenericCache struct {
 }
 
 func NewGenericCache(limits packagecache.Limits, maxArtifactBytes uint64) (*GenericCache, error) {
+	return newGenericCache(limits, maxArtifactBytes, false)
+}
+
+func newGenericCache(limits packagecache.Limits, maxArtifactBytes uint64, transfers bool) (*GenericCache, error) {
 	if limits.MaxEntries <= 0 || limits.MaxBytes == 0 {
 		return nil, fmt.Errorf("generic cache requires positive entry and byte limits")
 	}
-	codec, err := NewProcessCodec(maxArtifactBytes)
+	createCodec := NewProcessCodec
+	if transfers {
+		createCodec = NewStorageTransferProcessCodec
+	}
+	codec, err := createCodec(maxArtifactBytes)
 	if err != nil {
 		return nil, err
 	}

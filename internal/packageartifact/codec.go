@@ -26,8 +26,9 @@ var (
 // ProcessCodec encodes package artifacts only for one compiler process. Its random identity is
 // embedded in every payload, so copied bytes fail closed in another process or codec instance.
 type ProcessCodec struct {
-	identity [32]byte
-	maxBytes uint64
+	identity         [32]byte
+	maxBytes         uint64
+	storageTransfers bool
 }
 
 type processEnvelope struct {
@@ -65,7 +66,11 @@ func (codec *ProcessCodec) Identity() string {
 	if codec == nil {
 		return ""
 	}
-	return processIdentityPrefix + hex.EncodeToString(codec.identity[:])
+	prefix := processIdentityPrefix
+	if codec.storageTransfers {
+		prefix = storageProcessIdentityPrefix
+	}
+	return prefix + hex.EncodeToString(codec.identity[:])
 }
 
 // Encode verifies and canonically encodes one artifact under this codec's mandatory byte limit.
@@ -73,11 +78,12 @@ func (codec *ProcessCodec) Encode(artifact Artifact) ([]byte, error) {
 	if codec == nil || codec.maxBytes == 0 || codec.identity == ([32]byte{}) {
 		return nil, fmt.Errorf("process-local package artifact codec is not initialized")
 	}
-	if err := Verify(artifact); err != nil {
+	schema, version, verify := codec.contract()
+	if err := verify(artifact); err != nil {
 		return nil, fmt.Errorf("verify process-local package artifact before encoding: %w", err)
 	}
 	encoded, err := json.Marshal(processEnvelope{
-		Schema: ProcessCodecSchema, Version: ProcessCodecVersion, Process: codec.Identity(), Artifact: artifact,
+		Schema: schema, Version: version, Process: codec.Identity(), Artifact: artifact,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("encode process-local package artifact: %w", err)
@@ -113,16 +119,17 @@ func (codec *ProcessCodec) Decode(encoded []byte) (Artifact, error) {
 		}
 		return Artifact{}, fmt.Errorf("decode process-local package artifact trailing data: %w", err)
 	}
-	if envelope.Schema != ProcessCodecSchema {
-		return Artifact{}, fmt.Errorf("process-local package artifact schema %q is incompatible with %q", envelope.Schema, ProcessCodecSchema)
+	schema, version, verify := codec.contract()
+	if envelope.Schema != schema {
+		return Artifact{}, fmt.Errorf("process-local package artifact schema %q is incompatible with %q", envelope.Schema, schema)
 	}
-	if envelope.Version != ProcessCodecVersion {
-		return Artifact{}, fmt.Errorf("process-local package artifact version %q is incompatible with %q", envelope.Version, ProcessCodecVersion)
+	if envelope.Version != version {
+		return Artifact{}, fmt.Errorf("process-local package artifact version %q is incompatible with %q", envelope.Version, version)
 	}
 	if envelope.Process != codec.Identity() {
 		return Artifact{}, ErrProcessArtifactForeign
 	}
-	if err := Verify(envelope.Artifact); err != nil {
+	if err := verify(envelope.Artifact); err != nil {
 		return Artifact{}, fmt.Errorf("verify decoded process-local package artifact: %w", err)
 	}
 	canonical, err := codec.Encode(envelope.Artifact)
