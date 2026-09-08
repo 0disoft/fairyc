@@ -768,6 +768,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerArrayBorrowView(expression)
 	case "array-length":
 		return l.lowerArrayLength(expression)
+	case "storage-layout":
+		return l.lowerStorageLayout(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
 	case "view-length":

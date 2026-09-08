@@ -88,6 +88,7 @@ func (e CapabilityError) Error() string {
 
 type emitter struct {
 	targetID           target.ID
+	layoutEngine       *layout.Engine
 	functions          []mir.Function
 	bySymbol           map[hir.SymbolID]int
 	foreignFunctions   []mir.ForeignFunction
@@ -221,7 +222,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if err != nil {
 		return Unit{}, err
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if failures := mir.VerifyStorageQueries(program); len(failures) != 0 {
 		return Unit{}, fmt.Errorf("C emission requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
 	}
 	if err := validateCScalarTransports(); err != nil {
@@ -307,6 +308,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	value := &emitter{
 		targetID:           profile.Target,
+		layoutEngine:       layoutEngine,
 		functions:          functions,
 		bySymbol:           make(map[hir.SymbolID]int, len(functions)),
 		foreignFunctions:   foreignFunctions,
@@ -781,7 +783,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+					mir.OperationStorageLayout, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 					mir.OperationRegionPlace:
 					inferred = operation.Type
 				}
@@ -1367,6 +1369,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				} else {
 					e.features["array-byte-view-borrow"] = struct{}{}
 				}
+			case mir.OperationStorageLayout:
+				if _, err := e.storageQueryValue(*operation); err != nil {
+					return err
+				}
+				e.features["private-storage-layout"] = struct{}{}
 			case mir.OperationArrayLength:
 				if err := e.inspectArrayLength(functionIndex, *operation); err != nil {
 					return err
@@ -1570,7 +1577,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
-		mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+		mir.OperationStorageLayout, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 		mir.OperationRegionPlace:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
@@ -3361,6 +3368,12 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			viewType = "fy_mut_byte_slice"
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = fy_l_%d.data, .length = ((uintptr_t)UINT64_C(%d)) };\n", operation.DestinationLocal, viewType, receiver.Local, length)
+	case mir.OperationStorageLayout:
+		value, err := e.storageQueryValue(operation)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(output, "    fy_l_%d = ((uintptr_t)UINT64_C(%d));\n", operation.DestinationLocal, value)
 	case mir.OperationArrayLength:
 		if _, err := oneOperand(operation.Operands); err != nil {
 			return fmt.Errorf("fixed-array length in %s: %w", function, err)
@@ -4122,7 +4135,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-		mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
+		mir.OperationStorageLayout, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

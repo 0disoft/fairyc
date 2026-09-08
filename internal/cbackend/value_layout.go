@@ -29,7 +29,7 @@ func StorageLayout(program mir.Program, value hir.Type, profile Profile) (ValueS
 	if err != nil {
 		return ValueStorageLayout{}, err
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if failures := mir.VerifyStorageQueries(program); len(failures) != 0 {
 		return ValueStorageLayout{}, fmt.Errorf("C storage layout requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
 	}
 	engine, err := layout.New(spec)
@@ -44,8 +44,15 @@ func StorageLayout(program mir.Program, value hir.Type, profile Profile) (ValueS
 	if err != nil {
 		return ValueStorageLayout{}, err
 	}
+	return preparedStorageLayout(value, profile.Target, engine, structures, structByType, enumerations, enumByType, resources, resourceByType)
+}
+
+func preparedStorageLayout(value hir.Type, targetID target.ID, engine *layout.Engine,
+	structures []structCType, structByType map[hir.Type]int, enumerations []enumCType, enumByType map[hir.Type]int,
+	resources []resourceCType, resourceByType map[hir.Type]int) (ValueStorageLayout, error) {
 	canonical := canonicalCValueType(value)
 	var computed layout.Result
+	var err error
 	switch canonical {
 	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		computed, err = engine.Of(layout.Type{Kind: layout.KindLanguageScalar, Name: string(canonical)})
@@ -63,8 +70,20 @@ func StorageLayout(program mir.Program, value hir.Type, profile Profile) (ValueS
 	if err != nil {
 		return ValueStorageLayout{}, err
 	}
-	return ValueStorageLayout{Target: profile.Target, Type: value, Representation: canonical,
+	return ValueStorageLayout{Target: targetID, Type: value, Representation: canonical,
 		SizeBytes: computed.SizeBytes, AlignmentBytes: computed.AlignmentBytes}, nil
+}
+
+func (e *emitter) storageQueryValue(operation mir.Operation) (uint64, error) {
+	computed, err := preparedStorageLayout(operation.OwnerType, e.targetID, e.layoutEngine,
+		e.structTypes, e.structByType, e.enumTypes, e.enumByType, e.resourceTypes, e.resourceByType)
+	if err != nil {
+		return 0, err
+	}
+	if operation.Field == "size" {
+		return computed.SizeBytes, nil
+	}
+	return computed.AlignmentBytes, nil
 }
 
 func emissionTarget(profile Profile) (target.Spec, error) {

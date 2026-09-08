@@ -175,6 +175,32 @@ No public foreign symbols, source grammar, stable entry points or SDK versions
 change. Source-level type-layout acquisition and a safe container constructor
 are still required.
 
+### Symbolic private storage-query lowering
+
+Typed HIR can now carry an internal `storage-layout` expression with a resolved
+target type and `size` or `alignment` selector. MIR retains that type in
+`OwnerType`; it does not evaluate a value, borrow storage, allocate, consume an
+owner or choose a numeric layout during lowering. The result is `usize`.
+
+`mir.VerifyStorageQueries` admits this one additional operation after checking
+its complete shape and known type, including occurrences in unreachable blocks.
+Ordinary `mir.Verify` rejects it in every block. The default interpreter and MIR
+artifact encode/decode therefore stay closed, without a new cache schema or an
+implicit host-target choice. C emission explicitly uses the private verifier and
+the same prepared storage layouts as `StorageLayout`, emitting a constant only
+after selecting a supported target profile. It records `private-storage-layout`
+in the unit's internal feature ledger.
+
+`TestPrivateStorageQueryHIRAndConsumerBoundaries` inserts six queries into typed
+HIR for bool, a padded struct and a resource, then checks symbolic MIR and default
+consumer rejection. Mutation cases reject wrong result/destination/type/selector,
+unexpected operands, ownership flags and traps. An unreachable-block control
+separates private admission from normal dataflow reachability. Low/optimized MSVC
+executes the six lowered queries and returns 42; generated aggregate assertions
+check the corresponding C layouts. This is direct HIR-to-native evidence, not
+parsing or semantic admission of a source-level intrinsic. The private generic
+source connection is the next required step.
+
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Source-level typed element layout

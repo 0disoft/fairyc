@@ -32,6 +32,16 @@ type verificationState struct {
 
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
+	return verify(program, false)
+}
+
+// VerifyStorageQueries permits only the additional compiler-private symbolic
+// storage query. Standard interpreter and artifact verification remain closed.
+func VerifyStorageQueries(program Program) []VerificationError {
+	return verify(program, true)
+}
+
+func verify(program Program, allowStorageQueries bool) []VerificationError {
 	structTypes, failures := verifyStructTypes(program.StructTypes)
 	enumTypes, enumFailures := verifyEnumTypes(program.EnumTypes)
 	failures = append(failures, enumFailures...)
@@ -55,7 +65,18 @@ func Verify(program Program) []VerificationError {
 	functions, functionFailures := verifyFunctionDefinitions(program.Functions, foreignFunctions)
 	failures = append(failures, functionFailures...)
 	failures = append(failures, verifyDropGlueLinks(program.ResourceTypes, program.Functions, functions)...)
+	properties := newTypeProperties(program.ResourceTypes, program.StructTypes, program.EnumTypes)
 	for index := range program.Functions {
+		for _, block := range program.Functions[index].Blocks {
+			for operationIndex, operation := range block.Operations {
+				if operation.Kind != OperationStorageLayout {
+					continue
+				}
+				if !allowStorageQueries || !validStorageQueryShape(operation) || !storageQueryType(operation.OwnerType, properties) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage query is unadmitted or malformed"})
+				}
+			}
+		}
 		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions)...)
 	}
 	slices.SortFunc(failures, func(left, right VerificationError) int {
@@ -487,6 +508,8 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if !validArrayLengthShape(operation) {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array length shape is invalid"})
 				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationStorageLayout:
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationArrayIndexCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
