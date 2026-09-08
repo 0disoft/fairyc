@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
@@ -51,7 +50,7 @@ source = "src"
 			if persistent {
 				configuration = vectorPersistentConfiguration(t, t.TempDir())
 			}
-			session, err := workspacecompiler.NewVectorCandidateSession(configuration, genericplan.DefaultPlanLimits())
+			session, err := workspacecompiler.NewSourceSession(configuration)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -62,7 +61,7 @@ source = "src"
 			}
 			if persistent {
 				session.Close()
-				session, err = workspacecompiler.NewVectorCandidateSession(configuration, genericplan.DefaultPlanLimits())
+				session, err = workspacecompiler.NewSourceSession(configuration)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -90,14 +89,12 @@ source = "src"
 				t.Fatal(err)
 			}
 			runVectorStorageMIRNativeLane(t, warm.Compiler.MIR, hir.QualifiedModulePath(rootID, "main")+"::main", vectorCandidateProbe, true)
-			ordinary, err := workspacecompiler.NewSourceSession(vectorCacheConfiguration(8))
-			if err != nil {
-				t.Fatal(err)
+			uncached, err := workspacecompiler.Check(workspace)
+			if err != nil || !uncached.Verified {
+				t.Fatalf("uncached candidate selection: %v", err)
 			}
-			defer ordinary.Close()
-			denied, err := ordinary.Check(workspace)
-			if err == nil && denied.Compiler.Verified {
-				t.Fatal("ordinary workspace session admitted private SDK")
+			if _, err := workspaceloader.Load(root); err == nil {
+				t.Fatal("default loader unexpectedly selected candidate SDK")
 			}
 			changed := strings.Replace(client, "return 41;", "return 40 + 1;", 1)
 			writeVectorCacheFile(t, root, "src/main.fy", changed)
@@ -143,6 +140,26 @@ source = "src"
 			invalid, err = session.Check(forged)
 			if err == nil || invalid.Compiler.Verified || !reflect.DeepEqual(before, stats()) {
 				t.Fatalf("forged SDK reached candidate cache: %v %+v", err, invalid.Cache)
+			}
+			writeVectorCacheFile(t, root, "src/main.fy", "module main; fn i32 main() { return 42; }")
+			ordinary, err := workspaceloader.Load(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			switched, err := session.Check(ordinary)
+			if err != nil || !switched.Compiler.Verified || !switched.Cache.Lowered {
+				t.Fatalf("candidate to ordinary transition: %v %+v", err, switched.Cache)
+			}
+			writeVectorCacheFile(t, root, "src/main.fy", changed)
+			returned, err := session.Check(load())
+			if err != nil || !returned.Compiler.Verified {
+				t.Fatalf("ordinary to candidate transition: %v %+v", err, returned.Cache)
+			}
+			if persistent && (returned.Cache.Hits != 2 || returned.Cache.Lowered) {
+				t.Fatalf("disk candidate lost exact entries: %+v", returned.Cache)
+			}
+			if !persistent && (!returned.Cache.Lowered || returned.Cache.Stored != 2) {
+				t.Fatalf("memory candidate retained a second LRU: %+v", returned.Cache)
 			}
 		})
 	}

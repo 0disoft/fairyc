@@ -7,3 +7,9 @@ package workspaceloader
 func LoadVectorCandidate(root string) (Workspace, error) {
 	return loadWorkspace(root, true)
 }
+
+// UsesVectorCandidate reports loader selection, not source authority. Consumers
+// must verify VectorCandidateStorageOwners before admitting private operations.
+func (workspace Workspace) UsesVectorCandidate() bool {
+	return workspace.vectorCandidate
+}

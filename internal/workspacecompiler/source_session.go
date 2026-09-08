@@ -24,6 +24,7 @@ type SourceSession struct {
 	configuration Configuration
 	active        sourceCacheSession
 	generic       bool
+	sdkStorage    bool
 	closed        bool
 }
 
@@ -47,7 +48,15 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 	if err != nil {
 		return Result{}, err
 	}
-	if hasGenericAggregates(input) {
+	sdkStorage := false
+	if workspace.UsesVectorCandidate() {
+		owners, authorityErr := workspace.VectorCandidateStorageOwners()
+		if authorityErr != nil {
+			return Result{}, authorityErr
+		}
+		sdkStorage = len(owners) != 0
+	}
+	if hasGenericAggregates(input) && !sdkStorage {
 		compiled, err := compiler.CheckPackages(input)
 		storage := StorageMemory
 		if session.configuration.Persistent != nil {
@@ -55,8 +64,8 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 		}
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: storage}}, err
 	}
-	generic := hasGenericDeclarations(input)
-	if session.active == nil || session.generic != generic {
+	generic := hasGenericDeclarations(input) || sdkStorage
+	if session.active == nil || session.generic != generic || session.sdkStorage != sdkStorage {
 		if session.active != nil {
 			old := session.active
 			session.active = nil
@@ -64,7 +73,9 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 				return Result{}, err
 			}
 		}
-		if generic {
+		if sdkStorage {
+			session.active, err = NewVectorCandidateSession(session.configuration, genericplan.DefaultPlanLimits())
+		} else if generic {
 			session.active, err = NewGenericSession(session.configuration, genericplan.DefaultPlanLimits())
 		} else {
 			session.active, err = NewSession(session.configuration)
@@ -74,6 +85,7 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 			return Result{}, err
 		}
 		session.generic = generic
+		session.sdkStorage = sdkStorage
 	}
 	return session.active.Check(workspace)
 }

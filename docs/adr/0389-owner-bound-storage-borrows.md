@@ -123,5 +123,13 @@ profiles. Consumer intrinsics, mutated SDK ASTs and invalid current source leave
 cache statistics unchanged. Loader mutation tests cover bytes, AST, source paths,
 order/count, test flags, digest, labels, runtime and module catalog.
 
-Stable loader, SourceSession and CLI selection remain unchanged; this is the
-verified candidate integration prerequisite, not installed SDK promotion.
+The shared uncached `workspacecompiler.Check` and bounded `SourceSession` now
+recognize an explicitly candidate-loaded workspace. They verify its source
+authority before selecting owned storage analysis; default-loaded workspaces
+retain the previous ordinary/generic admission rules. SourceSession keeps one
+active cache family across candidate/ordinary transitions. Tests require memory
+entries to be discarded on a family change, exact disk entries to survive a
+round trip, and forged SDK input not to alter the active cache.
+
+Default loader/SDK selection and CLI native dispatch remain unchanged. The
+shared check/cache integration is not yet installed SDK promotion.
