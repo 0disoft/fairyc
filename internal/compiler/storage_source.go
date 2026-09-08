@@ -52,17 +52,24 @@ func checkStorageGenericFunctions(file semantic.File, coordinate packagegraph.Co
 // CheckStorageGenericPackages enables private scalar storage queries across a
 // resolved graph. It does not publish a stable interface or artifact-cache key.
 func CheckStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	return checkStorageGenericPackages(input, coordinates, limits, false)
+	return checkStorageGenericPackages(input, coordinates, limits, false, false)
 }
 
 // CheckNominalStoragePackages admits source-visible nominal arguments through
 // exact private bindings, without adding imports or publishing a stable cache key.
 func CheckNominalStoragePackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	return checkStorageGenericPackages(input, coordinates, limits, true)
+	return checkStorageGenericPackages(input, coordinates, limits, true, false)
 }
 
-func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal bool) (Result, genericplan.Plan, error) {
-	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, true, nominal)
+// CheckStorageTransferPackages is the private closed-graph ownership-transfer
+// lane. Its verified MIR requires the matching private C emitter; it does not
+// admit storage transfers to stable workspace or artifact consumers.
+func CheckStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
+	return checkStorageGenericPackages(input, coordinates, limits, true, true)
+}
+
+func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool) (Result, genericplan.Plan, error) {
+	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, true, nominal, transfers)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
@@ -87,7 +94,11 @@ func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hi
 	if err != nil {
 		return Result{}, genericplan.Plan{}, &Error{Stage: StagePackageInput, Cause: err}
 	}
-	result, err := lowerWithVerifier(analysis, mir.VerifyStorageQueries)
+	verify := mir.VerifyStorageQueries
+	if transfers {
+		verify = mir.VerifyStorageTransfers
+	}
+	result, err := lowerWithVerifier(analysis, verify)
 	if err == nil && result.Verified {
 		owners := make(map[hir.PackageID]genericplan.PackageID, len(coordinates))
 		for id, coordinate := range coordinates {

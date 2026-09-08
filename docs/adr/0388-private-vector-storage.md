@@ -448,8 +448,30 @@ Both low/optimized MSVC lanes verify nine writes and reverse-order tail transfer
 two OOM failures, one backing-storage release, and zero live allocations. The
 resource lane additionally checks nine exact resource destructions and source
 donor-reuse rejection. The scalar lane observes written/popped values independently
-in C and checks the compiler-selected four-byte layout. This is import-free private
-source preparation, not stable generic package or public SDK admission.
+in C and checks the compiler-selected four-byte layout. This first fixture uses
+import-free private source preparation, not stable generic package or public SDK admission.
+
+### Private resolved-package ownership transfer
+
+`CheckStorageTransferPackages` now combines exact nominal package bindings with
+the transfer-enabled expander and MIR verifier. Existing ordinary and query-only
+package entry points still reject the transfer operations; stable workspace,
+artifact and SDK consumers are unchanged.
+
+The container declarations above also execute in a separate `storage` package,
+with public construction, push, pop and length functions and private descriptor
+fields and raw helpers. The client owns `Item` and creates it through its own
+factory. The container does not import the client or invent a client import;
+exact private nominal bindings preserve that argument's owner through expansion,
+verification, C emission and cleanup. Low/optimized MSVC execution retains both
+OOM recoveries, nine typed writes and tail transfers, exact reverse-order element
+destruction, one vector release and zero live allocations. Tests reject private
+field/helper access, moved-container and popped-donor reuse and wrong element
+arguments. Input ASTs remain unchanged, and reversing package input order while
+renumbering local package IDs leaves the specialization plan unchanged.
+
+This is a closed resolved-graph compiler entry point, not stable package-cache
+identity, installed SDK source, or public `Vec<T>` admission.
 
 ### Still required
 
