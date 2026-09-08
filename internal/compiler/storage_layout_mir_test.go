@@ -173,10 +173,14 @@ func TestPrivateStorageQueryGateIncludesUnreachableBlocks(t *testing.T) {
 }
 
 func TestPrivateStorageQueryMSVC(t *testing.T) {
+	checkStorageQueryNative(t, storageQueryMIR(t))
+}
+
+func checkStorageQueryNative(t *testing.T, program mir.Program) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("native storage-query proof requires Windows amd64")
 	}
-	program := storageQueryMIR(t)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
 	if err != nil || !slices.Contains(unit.Features, "private-storage-layout") {
 		t.Fatalf("emit: %v", err)

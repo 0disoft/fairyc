@@ -201,10 +201,34 @@ check the corresponding C layouts. This is direct HIR-to-native evidence, not
 parsing or semantic admission of a source-level intrinsic. The private generic
 source connection is the next required step.
 
+### Private generic source layout queries
+
+`compiler.CheckStorageGenericFunctions` connects the import-free private nominal
+generic lane to `storage_size<T>()` and `storage_alignment<T>()`. These are
+private source operations, not stable language builtins. Existing parser syntax
+is reused; ordinary generic, package, cache and CLI entry points do not enable
+them. The two names are reserved only within this opt-in lane.
+
+Expansion substitutes a direct scalar or module-local nominal type into a
+detached private AST marker. Semantic analysis resolves the type and produces the
+symbolic HIR query; the private MIR verifier admits it without choosing a target.
+No value is constructed, evaluated, borrowed, copied or consumed. C emission is
+still the first numeric layout selection. Uninvoked specializations fail parsing;
+value arguments, wrong arity, unknown or unsupported types and shadowing fail
+before verified MIR publication.
+
+`TestPrivateStorageQuerySource` parses generic size/alignment helpers and calls
+them for bool, a padded struct and an unconstructed resource. Six symbolic queries
+retain source locations, the original AST is unchanged, and ordinary compiler,
+nominal-generic, interpreter and artifact paths reject the private operations.
+The complete source program returns 42 under low/optimized Windows MSVC.
+These tests reuse the existing native query harness, not injected HIR or numeric
+test adapters. SDK, public language and runtime ABI versions are unchanged.
+
 ### Still required
 
-This is private storage and transfer evidence, not `Vec<T>`. Source-level typed element layout
-acquisition, package-level nominal/resource argument admission, safe public operations,
+This is private storage and transfer evidence, not `Vec<T>`. Safe typed container construction
+using these queries, package-level nominal/resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow
 invalidation, package/SDK integration and stable admission
 remain separate work. The i32 fixture supplies its known four-byte layout and

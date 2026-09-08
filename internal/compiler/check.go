@@ -103,6 +103,10 @@ func LowerAnalyzed(analysis Analysis) (Result, error) {
 }
 
 func lowerVerified(semanticResult semantic.Result) (Result, error) {
+	return lowerWithVerifier(semanticResult, mir.Verify)
+}
+
+func lowerWithVerifier(semanticResult semantic.Result, verify func(mir.Program) []mir.VerificationError) (Result, error) {
 	result := Result{Semantic: semanticResult}
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || semanticResult.FailedPhase != semantic.PhaseNone ||
 		len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
@@ -112,7 +116,7 @@ func lowerVerified(semanticResult semantic.Result) (Result, error) {
 	if err != nil {
 		return result, &Error{Stage: StageMIRLower, Cause: err}
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if failures := verify(program); len(failures) != 0 {
 		return result, &Error{Stage: StageMIRVerify, Verification: failures}
 	}
 	stateTransactions, err := contractstatemir.LowerHIRTransactions(semanticResult.HIR)

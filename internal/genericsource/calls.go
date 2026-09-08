@@ -14,6 +14,16 @@ func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, 
 	if e.Kind != syntax.KindSpecialize {
 		return nil
 	}
+	if x.allowStorage && len(e.Children) == 1 && storageSelector(e.Children[0].Text) != "" {
+		if len(e.TypeArguments) != 1 || e.TypeArguments[0].Kind != ast.TypeKindNamed || len(e.TypeArguments[0].Arguments) != 0 {
+			return fmt.Errorf("private storage query requires one direct type argument")
+		}
+		name := e.TypeArguments[0].Path
+		if _, found := x.concreteType(name); !found && !slices.Contains(parameters, name) {
+			return fmt.Errorf("unknown storage query type %q", name)
+		}
+		return nil
+	}
 	target, err := x.target(e)
 	if err != nil {
 		return err
@@ -58,6 +68,11 @@ func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, 
 }
 
 func (x *expander) rewriteSpecialization(e *ast.Expression, names map[string]string) error {
+	if x.allowStorage {
+		if handled, err := x.rewriteStorageQuery(e); handled || err != nil {
+			return err
+		}
+	}
 	if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
 		return x.rewriteAggregateRecord(e, names)
 	}

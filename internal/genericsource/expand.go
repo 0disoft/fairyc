@@ -31,7 +31,7 @@ func Expand(module *ast.Module, owner genericplan.PackageID, limits genericplan.
 // PrepareModule retains detached declaration and specialization provenance for
 // the private module-local path, without claiming a public package interface.
 func PrepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return prepareModule(module, owner, limits, false)
+	return prepareModule(module, owner, limits, false, false)
 }
 
 // PrepareNominalModule is an opt-in private lane for local ordinary nominal
@@ -40,14 +40,14 @@ func PrepareNominalModule(module *ast.Module, owner genericplan.PackageID, limit
 	if module != nil && len(module.Imports) != 0 {
 		return PackageExpansion{}, fmt.Errorf("private nominal generic source requires one import-free module")
 	}
-	return prepareModule(module, owner, limits, true)
+	return prepareModule(module, owner, limits, true, false)
 }
 
-func prepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits, nominal bool) (PackageExpansion, error) {
+func prepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits, nominal, storage bool) (PackageExpansion, error) {
 	if module == nil {
 		return PackageExpansion{}, fmt.Errorf("generic source module is nil")
 	}
-	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}, allowNominal: nominal}
+	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}, allowNominal: nominal, allowStorage: storage}
 	modules, plan, err := expandAll([]*expander{&x}, limits)
 	if err != nil {
 		return PackageExpansion{}, err
@@ -76,6 +76,7 @@ type expander struct {
 	allowPublic  bool
 	requests     map[string]diagnostic.Span
 	allowNominal bool
+	allowStorage bool
 	nominalTypes map[string]genericplan.TypeID
 	nominalNames map[genericplan.TypeID]string
 }
@@ -108,11 +109,17 @@ func (x *expander) collect() error {
 		x.names[imported.Alias] = true
 	}
 	for name := range x.names {
+		if x.allowStorage && storageSelector(name) != "" {
+			return fmt.Errorf("reserved private storage query name %q", name)
+		}
 		if strings.HasPrefix(name, generatedPrefix) {
 			return fmt.Errorf("reserved module name %q", name)
 		}
 	}
 	for _, fn := range x.module.Functions {
+		if x.allowStorage && storageSelector(fn.Name) != "" {
+			return fmt.Errorf("reserved private storage query name %q", fn.Name)
+		}
 		if x.names[fn.Name] || strings.HasPrefix(fn.Name, generatedPrefix) {
 			return x.at(fn.NameSpan, FailureDeclaration, fmt.Errorf("duplicate or reserved function %q", fn.Name))
 		}
@@ -271,6 +278,9 @@ func (x *expander) target(e *ast.Expression) (callTarget, error) {
 }
 
 func (x *expander) checkBinding(name string) error {
+	if x.allowStorage && storageSelector(name) != "" {
+		return fmt.Errorf("binding shadows private storage query %q", name)
+	}
 	if _, generic := x.aggregates[name]; generic {
 		return fmt.Errorf("binding %q shadows a generic aggregate", name)
 	}
