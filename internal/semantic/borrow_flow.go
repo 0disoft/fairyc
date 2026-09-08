@@ -415,8 +415,14 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return cloneBorrowValue(state), true
 	case syntax.KindPrefix:
 		if isBorrowExpression(expression) {
+			root := borrowPlaceRoot(expression.Children[0])
+			if root != expression.Children[0] {
+				if _, _, borrowed := hir.BorrowElement(f.analyzer.expressionTypes[root]); borrowed {
+					return f.evaluateExpression(root, environment)
+				}
+			}
 			f.checkBorrowCreation(expression, environment)
-			owner := f.analyzer.resolved[expression.Children[0]]
+			owner := f.analyzer.resolved[root]
 			if owner == nil {
 				return borrowValueState{known: false}, true
 			}

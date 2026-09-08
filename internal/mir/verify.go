@@ -796,8 +796,16 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource construction fields do not match the definition"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
-			case OperationFieldRead:
+			case OperationFieldRead, OperationFieldBorrow:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				fieldType := operation.Type
+				if operation.Kind == OperationFieldBorrow {
+					element, _, _ := hir.BorrowElement(operation.Type)
+					if !validFieldBorrowShape(operation) {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field borrow requires a borrowed owner and shared result"})
+					}
+					fieldType = element
+				}
 				aggregateType := fieldAggregateType(operation.OwnerType)
 				resourceDefinition := resourceTypes[aggregateType]
 				structDefinition := structTypes[aggregateType]
@@ -809,13 +817,13 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 				if resourceDefinition != nil {
 					field, found := resourceField(resourceDefinition.Fields, operation.Field)
-					if !found || field.Type != operation.Type {
+					if !found || field.Type != fieldType {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read does not match the resource definition"})
 					}
 				}
 				if structDefinition != nil {
 					field, found := structField(structDefinition.Fields, operation.Field)
-					if !found || field.Type != operation.Type {
+					if !found || field.Type != fieldType {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read does not match the struct definition"})
 					}
 				}

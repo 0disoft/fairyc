@@ -1191,6 +1191,13 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return childType
 	case "&":
+		if child != nil {
+			if field, ok := sharedFieldBorrow(*child); ok {
+				*result = field
+				result.Span = span(c.module.file.Path, expression.Span)
+				return field.Type
+			}
+		}
 		if c.analyzer.resolved[expression.Children[0]] == nil {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "borrow of a non-place expression")
 			return hir.TypeInvalid

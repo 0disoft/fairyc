@@ -36,6 +36,14 @@ Stage 0 loans are local and end after the last proven use in the current functio
 
 Place overlap is deliberately coarse. Borrows of different fields of the same root are treated as borrowing the whole root. Field-disjoint borrowing and two-phase borrows are deferred until real APIs justify their diagnostics and analysis cost.
 
+ADR 0391 implements shared field-address projection from local/by-value places and
+existing shared aggregate references, including nested fields. A local root keeps
+its local origin; projection through a shared reference retains that reference's
+origin and loans. Resource field privacy is unchanged, and no intermediate field
+value is copied or moved. Owned call-result temporaries, mutable field borrows and
+projection through mutable aggregate references remain outside this executable
+slice.
+
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
 `ref mut T`. The original borrow becomes usable again after the call's last use. Returning, storing,
 or assigning the borrow to a longer-lived destination is not a call-bounded reborrow and must

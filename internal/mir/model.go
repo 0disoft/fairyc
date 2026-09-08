@@ -276,6 +276,7 @@ const (
 	OperationStructConstruct          OperationKind = "struct-construct"
 	OperationResourceConstruct        OperationKind = "resource-construct"
 	OperationFieldRead                OperationKind = "field-read"
+	OperationFieldBorrow              OperationKind = "field-borrow"
 	OperationViewLength               OperationKind = "view-length"
 	OperationViewEmpty                OperationKind = "view-empty"
 	OperationViewIndexCheck           OperationKind = "view-index-check"

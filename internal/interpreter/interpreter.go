@@ -887,7 +887,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("resource construction in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = constructed
-			case mir.OperationFieldRead:
+			case mir.OperationFieldRead, mir.OperationFieldBorrow:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
@@ -901,6 +901,9 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
+				}
+				if operation.Kind == mir.OperationFieldBorrow {
+					value.typ = operation.Type
 				}
 				locals[operation.DestinationLocal] = value
 			case mir.OperationRegionEnter:

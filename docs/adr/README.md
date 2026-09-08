@@ -355,6 +355,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0343-declaration-owned-explicit-resource-burn.md`: releases declaration-owned explicit burn for direct inert no-drop resources through a distinct verified MIR operation in `fairyc-language/12` with SDK `0.0.0-stage0.54`.
 
 - `0390-public-windows-sdk-vector.md`: admits the on-demand SDK-owned Vec<T> through stable Windows workspace compilation and native tests, preserving scalar-only consumer templates and exact source authority.
+- `0391-shared-field-borrow-projections.md`: implements shared field addresses with retained coarse-root loans, source privacy, MIR shape checks, interpreter and native execution; mutable reborrows and nested resource storage remain separate.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
