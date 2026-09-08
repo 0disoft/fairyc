@@ -133,6 +133,10 @@ func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdou
 		}
 		return packageFailure(stderr, err)
 	}
+	return runLoadedStableTest(workspace, lockState, options, sourceRoot, stdin, stdout, stderr)
+}
+
+func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, options stableTestOptions, sourceRoot string, stdin io.Reader, stdout, stderr io.Writer) int {
 	packagePaths, err := selectWorkspaceTestPackagePaths(workspace, options)
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -212,6 +216,10 @@ func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdou
 	if !checked.Verified {
 		return internalError(stderr)
 	}
+	sdkStorage, err := workspaceSDKStorage(workspace)
+	if err != nil {
+		return workspaceSubsetCapabilityError(workspaceCompilePolicy{stableDiagnostics: true}, stderr, "native test SDK", err)
+	}
 	if options.stdin && len(tests) != 1 {
 		return invocationError(stderr, `command "test" requires exactly one selected test when --stdin is supplied`)
 	}
@@ -240,7 +248,7 @@ func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdou
 			nativeInput.replay = contents
 			nativeInput.replayEach = true
 		}
-		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, stderr)
+		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, sdkStorage, stderr)
 	} else {
 		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, stderr)
 	}

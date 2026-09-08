@@ -17,7 +17,7 @@ import (
 func TestNativeWorkspaceTestProgramAddsVerifiedI32Harness(t *testing.T) {
 	t.Parallel()
 	program := nativeTestFixtureProgram()
-	native, entry, err := nativeWorkspaceTestProgram(program, "tests::native::passes")
+	native, entry, err := nativeWorkspaceTestProgram(program, "tests::native::passes", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.OptimizedProfile, nativeWorkspaceTestInput{}, programArguments, time.Minute, false, &stderr, compile, execute,
+		program, tests, cdriver.OptimizedProfile, nativeWorkspaceTestInput{}, programArguments, time.Minute, false, false, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || compiled != 2 || len(outcomes) != 2 ||
 		outcomes[0].display != tests[0].display || outcomes[0].trapCategory != "assertion-failed" ||
@@ -114,6 +114,7 @@ func TestNativeWorkspaceTestForwardsCallerInputToSelectedProcess(t *testing.T) {
 		programArguments,
 		time.Minute,
 		false,
+		false,
 		&stderr,
 		compile,
 		execute,
@@ -146,7 +147,7 @@ func TestNativeWorkspaceTestsReplayFixtureInputFromByteZero(t *testing.T) {
 	outcomes, code := runNativeWorkspaceTestsWith(
 		program, tests, cdriver.LowProfile,
 		nativeWorkspaceTestInput{replay: []byte("fixture\x00bytes"), replayEach: true},
-		nil, time.Minute, false, &stderr, compile, execute,
+		nil, time.Minute, false, false, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 2 || executions != 2 {
 		t.Fatalf("replayed native outcomes=%+v executions=%d code=%d stderr=%q", outcomes, executions, code, stderr.String())
@@ -182,7 +183,7 @@ func TestNativeWorkspaceTestsCaptureExactProgramStreamsApartFromTrapControl(t *t
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.LowProfile, nativeWorkspaceTestInput{}, nil, time.Minute, true, &stderr, compile, execute,
+		program, tests, cdriver.LowProfile, nativeWorkspaceTestInput{}, nil, time.Minute, true, false, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 2 ||
 		outcomes[0].trapCategory != "assertion-failed" || outcomes[0].stdout != string([]byte{0, 0xff}) ||
@@ -216,6 +217,7 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 				nativeWorkspaceTestInput{},
 				nil,
 				time.Minute,
+				false,
 				false,
 				&stderr,
 				compile,

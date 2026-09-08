@@ -9,6 +9,20 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
+func workspaceSDKStorage(workspace workspaceloader.Workspace) (bool, error) {
+	if !workspace.UsesVectorCandidate() {
+		return false, nil
+	}
+	owners, err := workspace.VectorCandidateStorageOwners()
+	if err != nil {
+		return false, err
+	}
+	if err := validateVectorRuntimeOwners(workspace); err != nil {
+		return false, err
+	}
+	return len(owners) != 0, nil
+}
+
 func validateVectorRuntimeOwners(workspace workspaceloader.Workspace) error {
 	for _, pkg := range workspace.Packages {
 		if pkg.Path == sdkstdlib.PackagePath {

@@ -139,6 +139,14 @@ Focused CLI tests load the candidate bundle and execute Buffer element access,
 console output and out-of-range assertion traps under low/optimized MSVC. Ordinary
 support composition is unchanged and unknown private vector symbols are rejected.
 
+Native test dispatch now shares this exact SDK authority check. The selected
+test harness uses storage-transfer MIR verification and the same storage-aware
+Windows emitter; ordinary native tests retain ordinary verification. Candidate
+test overlays execute through discovery, analysis, isolated native processes and
+the existing report writer. Both MSVC profiles preserve an assertion-failing
+vector test followed by a passing Buffer-borrow test, captured console bytes and
+source locations in the JSON report. Existing native runner isolation tests pass.
+
 Default loader/SDK selection remains unchanged, so the stable CLI cannot yet
-select the candidate from user source. Native test dispatch and installed SDK
-promotion remain separate. No stable language, SDK version or runtime ABI changes.
+select the candidate from user source. Installed SDK promotion remains separate.
+No stable language, SDK version or runtime ABI changes.

@@ -48,8 +48,15 @@ func runNativeWorkspaceTests(
 	programArguments []string,
 	timeout time.Duration,
 	captureOutput bool,
+	sdkStorage bool,
 	stderr io.Writer,
 ) ([]workspaceTestOutcome, int) {
+	compile := compileNativeWorkspaceTest
+	if sdkStorage {
+		compile = func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+			return compileWindowsProgramPolicy(program, entry, target.X8664WindowsMSVC, profile, true, true, stderr)
+		}
+	}
 	return runNativeWorkspaceTestsWith(
 		program,
 		tests,
@@ -58,8 +65,9 @@ func runNativeWorkspaceTests(
 		programArguments,
 		timeout,
 		captureOutput,
+		sdkStorage,
 		stderr,
-		compileNativeWorkspaceTest,
+		compile,
 		executeNativeWorkspaceTest,
 	)
 }
@@ -72,13 +80,14 @@ func runNativeWorkspaceTestsWith(
 	programArguments []string,
 	timeout time.Duration,
 	captureOutput bool,
+	sdkStorage bool,
 	stderr io.Writer,
 	compile nativeWorkspaceTestCompiler,
 	execute nativeWorkspaceTestExecutor,
 ) ([]workspaceTestOutcome, int) {
 	outcomes := make([]workspaceTestOutcome, 0, len(tests))
 	for _, test := range tests {
-		testProgram, entry, err := nativeWorkspaceTestProgram(program, test.entry)
+		testProgram, entry, err := nativeWorkspaceTestProgram(program, test.entry, sdkStorage)
 		if err != nil {
 			return nil, internalError(stderr)
 		}
@@ -136,7 +145,7 @@ func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact, stdin io.R
 	return cdriver.ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(artifact, stdin, programArguments, timeout)
 }
 
-func nativeWorkspaceTestProgram(input mir.Program, testEntry string) (mir.Program, string, error) {
+func nativeWorkspaceTestProgram(input mir.Program, testEntry string, sdkStorage bool) (mir.Program, string, error) {
 	test, found := programEntry(input, testEntry)
 	if !found || len(test.Parameters) != 0 || test.ResultType != hir.TypeVoid {
 		return mir.Program{}, "", fmt.Errorf("native test entry %q must have type fn() -> void", testEntry)
@@ -198,7 +207,11 @@ func nativeWorkspaceTestProgram(input mir.Program, testEntry string) (mir.Progra
 			},
 		},
 	})
-	if failures := mir.Verify(result); len(failures) != 0 {
+	verify := mir.Verify
+	if sdkStorage {
+		verify = mir.VerifyStorageTransfers
+	}
+	if failures := verify(result); len(failures) != 0 {
 		return mir.Program{}, "", fmt.Errorf("native test harness failed MIR verification: %v", failures[0])
 	}
 	return result, nativeWorkspaceTestEntry, nil

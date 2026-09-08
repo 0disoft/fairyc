@@ -350,16 +350,9 @@ func lowerLoadedWorkspaceExecutable(workspace workspaceloader.Workspace, lockSta
 	if !checked.Verified {
 		return loweredWorkspace{}, internalError(stderr)
 	}
-	sdkStorage := false
-	if workspace.UsesVectorCandidate() {
-		owners, err := workspace.VectorCandidateStorageOwners()
-		if err != nil {
-			return loweredWorkspace{}, internalError(stderr)
-		}
-		sdkStorage = len(owners) != 0
-		if err := validateVectorRuntimeOwners(workspace); err != nil {
-			return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, err)
-		}
+	sdkStorage, err := workspaceSDKStorage(workspace)
+	if err != nil {
+		return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, err)
 	}
 	entryName, err := workspaceEntryName(workspace)
 	if err != nil {

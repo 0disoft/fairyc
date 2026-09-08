@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"encoding/json"
 	"runtime"
 	"strings"
 	"testing"
@@ -10,6 +11,57 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
+
+func TestWindowsVectorCandidateNativeTests(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "test.cli.vector-tests"
+name = "client"
+version = "1.0.0"
+language = "fairyc-language/14"
+source = "src"
+`)
+	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main() { return 0; }")
+	client := strings.NewReplacer("module main;", "module tests::vector;", "@effects(console)", "@test\n@effects(console)", "fn i32 main()", "fn void b_passes()", "    return 41;", "").Replace(nativeVectorClient)
+	client += `
+@test
+fn void a_traps() {
+    var v::Vec<bytes::Buffer> items = v::empty<bytes::Buffer>();
+    assert(bytes::len(v::at<bytes::Buffer>(ref items, 0)) == 0);
+}
+`
+	writeTestSource(t, root, "tests/vector.fy", client)
+	for _, release := range []bool{false, true} {
+		workspace, err := workspaceloader.LoadVectorCandidate(root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var stdout, stderr bytes.Buffer
+		options := stableTestOptions{native: true, release: release, json: true, locations: true, captureOutput: true, timeoutSeconds: 10}
+		code := runLoadedStableTest(workspace, "verified", options, root, strings.NewReader(""), &stdout, &stderr)
+		if code != ExitProgramTrap || stderr.Len() != 0 {
+			t.Fatalf("native tests: %d %s %s", code, &stdout, &stderr)
+		}
+		var report stableTestExecutionReport
+		if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		if report.Count != 2 || report.Passed != 1 || report.Failed != 1 || report.Engine != "native" || report.Lock != "verified" {
+			t.Fatalf("report: %+v", report)
+		}
+		failed, passed := report.Tests[0], report.Tests[1]
+		if failed.TrapCategory == nil || *failed.TrapCategory != "assertion-failed" || failed.Outcome != "failed" || passed.Outcome != "passed" || passed.StdoutBase64 == nil || *passed.StdoutBase64 != "NDE=" {
+			t.Fatalf("outcomes: %+v", report.Tests)
+		}
+		if passed.Source == nil || passed.Source.Path != "tests/vector.fy" || failed.StdoutBase64 == nil || *failed.StdoutBase64 != "" {
+			t.Fatalf("source/streams: %+v", report.Tests)
+		}
+	}
+}
 
 const nativeVectorClient = `module main;
 import std::vec as v;
