@@ -55,7 +55,11 @@ type FunctionSignature struct {
 
 // ExtractAll slices every function-owning package from one closed, verified whole program.
 func ExtractAll(program mir.Program, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID) ([]Artifact, error) {
-	if failures := mir.Verify(program); len(failures) != 0 {
+	return extractAll(program, identities, coordinates, mir.Verify)
+}
+
+func extractAll(program mir.Program, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, verifyMIR func(mir.Program) []mir.VerificationError) ([]Artifact, error) {
+	if failures := verifyMIR(program); len(failures) != 0 {
 		return nil, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
 	}
 	packages := make(map[hir.PackageID]struct{})
@@ -69,7 +73,7 @@ func ExtractAll(program mir.Program, identities map[hir.PackageID]packagegraph.I
 	slices.Sort(packageIDs)
 	artifacts := make([]Artifact, 0, len(packageIDs))
 	for _, packageID := range packageIDs {
-		artifact, err := extractVerified(program, packageID, identities, coordinates)
+		artifact, err := extractVerified(program, packageID, identities, coordinates, verifyMIR)
 		if err != nil {
 			return nil, err
 		}
@@ -84,10 +88,10 @@ func Extract(program mir.Program, packageID hir.PackageID, identities map[hir.Pa
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Artifact{}, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
 	}
-	return extractVerified(program, packageID, identities, coordinates)
+	return extractVerified(program, packageID, identities, coordinates, mir.Verify)
 }
 
-func extractVerified(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (Artifact, error) {
+func extractVerified(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, verifyMIR func(mir.Program) []mir.VerificationError) (Artifact, error) {
 	packageIdentity, found := identities[packageID]
 	if !found {
 		return Artifact{}, fmt.Errorf("package %d has no PackageInstanceId", packageID)
@@ -178,7 +182,7 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 		return Artifact{}, fmt.Errorf("describe package %d type context: %w", packageID, err)
 	}
 	artifact.StableContext = stableContext
-	if err := Verify(artifact); err != nil {
+	if err := verifyArtifact(artifact, verifyMIR); err != nil {
 		return Artifact{}, fmt.Errorf("verify extracted package %d: %w", packageID, err)
 	}
 	return artifact, nil
@@ -187,6 +191,10 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 // Verify checks stable identities, ownership, explicit bindings, and the full MIR verifier by
 // materializing unreachable body stubs for imports. Import stubs can never escape this function.
 func Verify(artifact Artifact) error {
+	return verifyArtifact(artifact, mir.Verify)
+}
+
+func verifyArtifact(artifact Artifact, verifyMIR func(mir.Program) []mir.VerificationError) error {
 	if artifact.Package == (packagegraph.InstanceID{}) {
 		return fmt.Errorf("package artifact has an empty PackageInstanceId")
 	}
@@ -241,7 +249,7 @@ func Verify(artifact Artifact) error {
 	if !reflect.DeepEqual(artifact.StableContext, expectedContext) {
 		return fmt.Errorf("package artifact stable type context does not match its process-local context")
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if failures := verifyMIR(program); len(failures) != 0 {
 		return fmt.Errorf("verify package MIR closure: %w", failures[0])
 	}
 	return nil
@@ -251,11 +259,15 @@ func Verify(artifact Artifact) error {
 // fresh collision-free internal function-symbol space, rewrites calls and drop links, and reruns
 // the ordinary closed-world MIR verifier.
 func Reassemble(artifacts []Artifact) (mir.Program, error) {
+	return reassemble(artifacts, mir.Verify)
+}
+
+func reassemble(artifacts []Artifact, verifyMIR func(mir.Program) []mir.VerificationError) (mir.Program, error) {
 	if len(artifacts) == 0 {
 		return mir.Program{}, fmt.Errorf("no package artifacts to reassemble")
 	}
 	for index := range artifacts {
-		if err := Verify(artifacts[index]); err != nil {
+		if err := verifyArtifact(artifacts[index], verifyMIR); err != nil {
 			return mir.Program{}, fmt.Errorf("artifact %d: %w", index, err)
 		}
 	}
@@ -374,7 +386,7 @@ func Reassemble(artifacts []Artifact) (mir.Program, error) {
 		}
 		return 0
 	})
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if failures := verifyMIR(program); len(failures) != 0 {
 		return mir.Program{}, fmt.Errorf("verify reassembled whole program: %w", failures[0])
 	}
 	return program, nil

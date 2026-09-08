@@ -531,6 +531,24 @@ without publishing a decoded program. This envelope carries executable MIR only;
 it does not authenticate a current source closure, carry generic provenance,
 bind a target or admit persistent package-cache reuse.
 
+### Private package artifact extraction and reassembly
+
+`packageartifact.ExtractAllStorageTransfers`, `VerifyStorageTransfers` and
+`ReassembleStorageTransfers` reuse the existing package identity, coordinate,
+owned-function, explicit-import and stable-context checks with the private MIR
+transfer verifier. Ordinary artifact entry points retain their original verifier.
+Reassembly requires the complete exact process-local package closure, allocates
+fresh internal function symbols, rewrites calls and resource drop links, and
+verifies the combined program before returning it. Import body stubs remain
+internal to artifact verification.
+
+The vector fixture splits into two independently checked package artifacts and
+executes the reassembled program under low/optimized MSVC with the existing
+ownership counters. Missing/duplicate packages and inconsistent owner metadata
+are rejected, package input order does not change reassembly, and caller-owned
+artifacts are not mutated. These entry points do not yet select a transfer-aware
+package codec, cache key or hit/fallback coordinator.
+
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
