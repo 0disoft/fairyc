@@ -33,7 +33,7 @@ func NewVectorCandidateSession(configuration Configuration, limits genericplan.P
 		return nil, err
 	}
 	session.generic.sdkStorage = true
-	session.generic.keys.compilerBuild += ":sdk-owned-storage-v0"
+	session.generic.keys.compilerBuild += ":sdk-owned-storage-v1"
 	return session, nil
 }
 

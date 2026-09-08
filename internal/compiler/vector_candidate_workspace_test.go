@@ -164,3 +164,75 @@ source = "src"
 		})
 	}
 }
+
+func TestPrivateVectorSDKWorkspaceSourceAdmission(t *testing.T) {
+	root := t.TempDir()
+	writeVectorCacheFile(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "test.sdk.source-admission"
+name = "client"
+version = "1.0.0"
+language = "fairyc-language/14"
+source = "src"
+`)
+	const client = `module main;
+import std::vec as vec;
+import std::bytes as bytes;
+fn T identity<T>(T value) { return value; }
+fn i32 main() {
+    var vec::Vec<bytes::Buffer> items = vec::empty<bytes::Buffer>();
+    assert(vec::len<bytes::Buffer>(ref items) == 0);
+    return identity<i32>(41);
+}
+`
+	load := func(text string) workspaceloader.Workspace {
+		t.Helper()
+		writeVectorCacheFile(t, root, "src/main.fy", text)
+		workspace, err := workspaceloader.LoadVectorCandidate(root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return workspace
+	}
+	for _, persistent := range []bool{false, true} {
+		configuration := vectorCacheConfiguration(8)
+		if persistent {
+			configuration = vectorPersistentConfiguration(t, t.TempDir())
+		}
+		session, err := workspacecompiler.NewSourceSession(configuration)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer session.Close()
+		baseline, err := session.Check(load(client))
+		if err != nil || !baseline.Compiler.Verified {
+			t.Fatalf("scalar consumer and SDK nominal template: %v %+v", err, baseline.Compiler.Semantic)
+		}
+		stats := func() any {
+			if !persistent {
+				return session.Stats()
+			}
+			value, err := session.PersistentStats()
+			if err != nil {
+				t.Fatal(err)
+			}
+			return value
+		}
+		before := stats()
+		for _, extra := range []string{
+			"struct Local<T> { T value; }",
+			"resource Local<T> { T value; cleanup {} }",
+			"fn i32 use_nominal() { let bytes::Buffer value = identity<bytes::Buffer>(bytes::empty()); return 0; }",
+		} {
+			workspace := load(client + extra)
+			checked, err := workspacecompiler.Check(workspace)
+			if err == nil && checked.Verified {
+				t.Fatalf("uncached consumer permission widened: %s", extra)
+			}
+			cached, err := session.Check(workspace)
+			if cached.Compiler.Verified || cached.Cache.Hits != 0 || cached.Cache.Stored != 0 || !reflect.DeepEqual(before, stats()) {
+				t.Fatalf("denied consumer touched cache: %s %v %+v", extra, err, cached.Cache)
+			}
+		}
+	}
+}

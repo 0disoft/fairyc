@@ -142,7 +142,7 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		if len(owners) == 0 {
 			analysis, err = compiler.AnalyzeGenericPackages(input, coordinates, session.limits)
 		} else {
-			analysis, err = compiler.AnalyzeOwnedStorageTransferPackages(input, coordinates, session.limits, owners)
+			analysis, err = compiler.AnalyzeSDKStoragePackages(input, coordinates, session.limits, owners)
 		}
 	} else {
 		analysis, err = analyze(input, coordinates, session.limits)

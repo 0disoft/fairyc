@@ -50,7 +50,7 @@ func PrepareStorageTransferPackages(inputs []PackageModule, limits genericplan.P
 }
 
 func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal, transfers bool) (PackageExpansion, error) {
-	return preparePackagesOwned(inputs, limits, storage, nominal, transfers, nil)
+	return preparePackagesOwned(inputs, limits, storage, nominal, transfers, nil, false)
 }
 
 // PrepareOwnedStorageTransferPackages restricts private storage operations to
@@ -58,6 +58,16 @@ func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, stor
 // source authority; module names and import aliases never grant permission.
 // Ordinary generic/nominal use and calls to the provider remain available.
 func PrepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID) (PackageExpansion, error) {
+	return prepareOwnedStorageTransferPackages(inputs, limits, owners, false)
+}
+
+// PrepareSDKStoragePackages admits aggregate and nominal-argument templates only
+// in authenticated SDK owners. Consumer templates retain scalar-only arguments.
+func PrepareSDKStoragePackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID) (PackageExpansion, error) {
+	return prepareOwnedStorageTransferPackages(inputs, limits, owners, true)
+}
+
+func prepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID, sdkTemplates bool) (PackageExpansion, error) {
 	if len(owners) == 0 {
 		return PackageExpansion{}, fmt.Errorf("storage operation owners must be explicit")
 	}
@@ -78,10 +88,10 @@ func PrepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericp
 		}
 		allowed[owner] = true
 	}
-	return preparePackagesOwned(inputs, limits, true, true, true, allowed)
+	return preparePackagesOwned(inputs, limits, true, true, true, allowed, sdkTemplates)
 }
 
-func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners map[genericplan.PackageID]bool) (PackageExpansion, error) {
+func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners map[genericplan.PackageID]bool, sdkTemplates bool) (PackageExpansion, error) {
 	type moduleKey struct {
 		owner genericplan.PackageID
 		path  string
@@ -98,6 +108,7 @@ func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits,
 		}
 		allowStorage := storageOwners == nil || storageOwners[input.Owner]
 		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: storage && allowStorage, allowNominal: nominal, packageNominal: nominal, allowStorageTransfers: transfers && allowStorage}
+		x.scalarTemplatesOnly = sdkTemplates && !allowStorage
 		modules[key], ordered[i] = x, x
 	}
 	for i, input := range inputs {

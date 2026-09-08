@@ -60,6 +60,9 @@ func (x *expander) collectAggregateTemplates() error {
 		if len(shape.TypeParameters) == 0 {
 			continue
 		}
+		if x.scalarTemplatesOnly {
+			return x.at(shape.NameSpan, FailureDeclaration, fmt.Errorf("generic aggregate declarations are not admitted outside the embedded SDK"))
+		}
 		if slices.Contains(scalarTypes, shape.Name) || slices.Contains([]string{"void", "never", "str", "Region", "Option", "Result", "source_location"}, shape.Name) {
 			return x.at(shape.NameSpan, FailureDeclaration, fmt.Errorf("aggregate name %q shadows a builtin", shape.Name))
 		}

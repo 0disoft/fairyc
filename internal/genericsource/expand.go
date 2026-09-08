@@ -78,6 +78,7 @@ type expander struct {
 	allowNominal          bool
 	allowStorage          bool
 	allowStorageTransfers bool
+	scalarTemplatesOnly   bool
 	packageNominal        bool
 	nominalContext        string
 	boundNominals         map[genericplan.TypeID]NominalBinding
@@ -150,7 +151,11 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 	for _, fn := range x.module.Functions {
 		declaration := genericplan.Declaration{ID: x.id(fn.Name), Owner: x.owner}
 		for _, parameter := range fn.TypeParameters {
-			declaration.Parameters = append(declaration.Parameters, genericplan.TypeParameter{Name: parameter})
+			value := genericplan.TypeParameter{Name: parameter}
+			if x.scalarTemplatesOnly {
+				value.Abilities = []genericplan.Ability{genericplan.AbilityScalar}
+			}
+			declaration.Parameters = append(declaration.Parameters, value)
 		}
 		var typeError error
 		t := transform{binding: func(name string, span diagnostic.Span) error {

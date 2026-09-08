@@ -30,10 +30,10 @@ func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 }
 
 func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal, transfers bool) (semantic.PackageInput, genericsource.PackageExpansion, error) {
-	return prepareGenericPackageGraphOwned(input, coordinates, limits, storage, nominal, transfers, nil)
+	return prepareGenericPackageGraphOwned(input, coordinates, limits, storage, nominal, transfers, nil, false)
 }
 
-func prepareGenericPackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners []hir.PackageID) (semantic.PackageInput, genericsource.PackageExpansion, error) {
+func prepareGenericPackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners []hir.PackageID, sdkTemplates bool) (semantic.PackageInput, genericsource.PackageExpansion, error) {
 	owners := map[hir.PackageID]genericplan.PackageID{}
 	seen := map[packagegraph.CoordinateID]hir.PackageID{}
 	for _, file := range input.Files {
@@ -89,7 +89,11 @@ func prepareGenericPackageGraphOwned(input semantic.PackageInput, coordinates ma
 				return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("storage operation owner is absent from package input")
 			}
 		}
-		expansion, err = genericsource.PrepareOwnedStorageTransferPackages(modules, limits, selected)
+		prepareOwned := genericsource.PrepareOwnedStorageTransferPackages
+		if sdkTemplates {
+			prepareOwned = genericsource.PrepareSDKStoragePackages
+		}
+		expansion, err = prepareOwned(modules, limits, selected)
 	} else {
 		expansion, err = prepare(modules, limits)
 	}

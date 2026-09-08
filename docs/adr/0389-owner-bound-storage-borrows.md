@@ -150,3 +150,13 @@ source locations in the JSON report. Existing native runner isolation tests pass
 Default loader/SDK selection remains unchanged, so the stable CLI cannot yet
 select the candidate from user source. Installed SDK promotion remains separate.
 No stable language, SDK version or runtime ABI changes.
+
+Before default SDK admission, the workspace integration uses a distinct
+`AnalyzeSDKStoragePackages` path. Only authenticated SDK owners may declare
+generic aggregates or instantiate templates with nominal arguments. Consumer
+generic functions retain builtin-scalar constraints, including transitive calls;
+ordinary nominal values may still be passed to SDK Vec operations. The broader
+owner-restricted private compiler API remains unchanged for experimental evidence.
+The SDK-owned cache discriminator advances to v1. Memory/disk admission tests
+reject consumer aggregate declarations and nominal function instances before
+cache statistics change; scalar consumer functions plus Vec<Buffer> still pass.

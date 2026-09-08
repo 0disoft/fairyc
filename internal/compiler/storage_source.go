@@ -96,25 +96,35 @@ func AnalyzeStorageTransferPackages(input semantic.PackageInput, coordinates map
 }
 
 func analyzeStoragePackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool) (semantic.Result, genericsource.PackageExpansion, error) {
-	return analyzeStoragePackageGraphOwned(input, coordinates, limits, nominal, transfers, nil)
+	return analyzeStoragePackageGraphOwned(input, coordinates, limits, nominal, transfers, nil, false)
 }
 
 // AnalyzeOwnedStorageTransferPackages is the owner-restricted integration lane.
 // The caller must authenticate the selected source packages; this function does
 // not derive authority from a module name, SDK label, or import spelling.
 func AnalyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID) (GenericAnalysis, error) {
+	return analyzeOwnedStorageTransferPackages(input, coordinates, limits, storageOwners, false)
+}
+
+// AnalyzeSDKStoragePackages preserves scalar-only consumer templates while
+// admitting the exact authenticated SDK's generic container implementations.
+func AnalyzeSDKStoragePackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID) (GenericAnalysis, error) {
+	return analyzeOwnedStorageTransferPackages(input, coordinates, limits, storageOwners, true)
+}
+
+func analyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID, sdkTemplates bool) (GenericAnalysis, error) {
 	if len(storageOwners) == 0 {
 		return GenericAnalysis{}, fmt.Errorf("storage operation owners must be explicit")
 	}
-	analysis, expansion, err := analyzeStoragePackageGraphOwned(input, coordinates, limits, true, true, storageOwners)
+	analysis, expansion, err := analyzeStoragePackageGraphOwned(input, coordinates, limits, true, true, storageOwners, sdkTemplates)
 	if err != nil {
 		return GenericAnalysis{}, err
 	}
 	return publishGenericAnalysis(input, coordinates, expansion, Analysis{Semantic: analysis})
 }
 
-func analyzeStoragePackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool, storageOwners []hir.PackageID) (semantic.Result, genericsource.PackageExpansion, error) {
-	prepared, expansion, err := prepareGenericPackageGraphOwned(input, coordinates, limits, true, nominal, transfers, storageOwners)
+func analyzeStoragePackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool, storageOwners []hir.PackageID, sdkTemplates bool) (semantic.Result, genericsource.PackageExpansion, error) {
+	prepared, expansion, err := prepareGenericPackageGraphOwned(input, coordinates, limits, true, nominal, transfers, storageOwners, sdkTemplates)
 	if err != nil {
 		return semantic.Result{}, genericsource.PackageExpansion{}, err
 	}

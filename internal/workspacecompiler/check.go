@@ -26,7 +26,7 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 			if err != nil {
 				return compiler.Result{}, err
 			}
-			analysis, err := compiler.AnalyzeOwnedStorageTransferPackages(input, coordinates, genericplan.DefaultPlanLimits(), owners)
+			analysis, err := compiler.AnalyzeSDKStoragePackages(input, coordinates, genericplan.DefaultPlanLimits(), owners)
 			if err != nil {
 				return compiler.Result{}, err
 			}
