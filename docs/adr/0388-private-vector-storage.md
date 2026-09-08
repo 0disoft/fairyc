@@ -514,6 +514,23 @@ interpreter regression separately checks scalar-tail capture, resource-tail move
 and the observable `ABDC` cleanup order. This conforms to the existing lexical
 cleanup contract and does not add a new language or SDK surface.
 
+### Exact private transfer MIR envelope
+
+`mircodec.EncodeStorageTransfers` and `DecodeStorageTransfers` use the distinct
+`fairyc.mir-storage-transfer-artifact/v0` schema with the existing exact MIR
+version. They reuse the ordinary codec's positive byte budget, unknown-field and
+trailing-data rejection and canonical-byte check, but verify with
+`VerifyStorageTransfers` both before encoding and after decoding. Ordinary
+encode/decode remain on their original schema and verifier.
+
+The package-vector round trip preserves the exact MIR, deterministically
+re-encodes it, and executes the decoded program under low/optimized MSVC with the
+existing ownership/OOM counters. Tests reject ordinary-reader access, schema
+substitution, over-budget and noncanonical bytes, and malformed storage writes
+without publishing a decoded program. This envelope carries executable MIR only;
+it does not authenticate a current source closure, carry generic provenance,
+bind a target or admit persistent package-cache reuse.
+
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,

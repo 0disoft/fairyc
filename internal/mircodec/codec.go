@@ -30,13 +30,17 @@ type envelope struct {
 // Encode verifies program and returns its deterministic exact-version JSON bytes. The caller must
 // supply a positive byte limit; Stage 0 deliberately has no guessed universal artifact budget.
 func Encode(program mir.Program, maxBytes uint64) ([]byte, error) {
+	return encode(program, maxBytes, Schema, mir.Verify)
+}
+
+func encode(program mir.Program, maxBytes uint64, schema string, verify func(mir.Program) []mir.VerificationError) ([]byte, error) {
 	if maxBytes == 0 {
 		return nil, fmt.Errorf("MIR artifact byte limit must be positive")
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if failures := verify(program); len(failures) != 0 {
 		return nil, fmt.Errorf("verify MIR before encoding: %w", failures[0])
 	}
-	encoded, err := json.Marshal(envelope{Schema: Schema, MIRVersion: MIRVersion, Program: program})
+	encoded, err := json.Marshal(envelope{Schema: schema, MIRVersion: MIRVersion, Program: program})
 	if err != nil {
 		return nil, fmt.Errorf("encode MIR artifact: %w", err)
 	}
@@ -49,6 +53,10 @@ func Encode(program mir.Program, maxBytes uint64) ([]byte, error) {
 // Decode accepts only one canonical exact-version envelope, enforces the caller's byte limit, and
 // reruns the MIR verifier before returning executable compiler state.
 func Decode(encoded []byte, maxBytes uint64) (mir.Program, error) {
+	return decode(encoded, maxBytes, Schema, mir.Verify)
+}
+
+func decode(encoded []byte, maxBytes uint64, schema string, verify func(mir.Program) []mir.VerificationError) (mir.Program, error) {
 	if maxBytes == 0 {
 		return mir.Program{}, fmt.Errorf("MIR artifact byte limit must be positive")
 	}
@@ -72,16 +80,16 @@ func Decode(encoded []byte, maxBytes uint64) (mir.Program, error) {
 		}
 		return mir.Program{}, fmt.Errorf("decode MIR artifact trailing data: %w", err)
 	}
-	if artifact.Schema != Schema {
-		return mir.Program{}, fmt.Errorf("MIR artifact schema %q is incompatible with %q", artifact.Schema, Schema)
+	if artifact.Schema != schema {
+		return mir.Program{}, fmt.Errorf("MIR artifact schema %q is incompatible with %q", artifact.Schema, schema)
 	}
 	if artifact.MIRVersion != MIRVersion {
 		return mir.Program{}, fmt.Errorf("MIR artifact version %q is incompatible with %q", artifact.MIRVersion, MIRVersion)
 	}
-	if failures := mir.Verify(artifact.Program); len(failures) != 0 {
+	if failures := verify(artifact.Program); len(failures) != 0 {
 		return mir.Program{}, fmt.Errorf("verify decoded MIR artifact: %w", failures[0])
 	}
-	canonical, err := Encode(artifact.Program, maxBytes)
+	canonical, err := encode(artifact.Program, maxBytes, schema, verify)
 	if err != nil {
 		return mir.Program{}, err
 	}
