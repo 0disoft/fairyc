@@ -1,5 +1,6 @@
 /* Compiler-private storage transport. The caller owns element lifetimes and
- * supplies a live, exclusively borrowed descriptor of this exact layout.
+ * supplies a live descriptor of this exact layout; mutation requires exclusive
+ * access and read-only slot access requires a retained shared owner.
  * A descriptor may move, but must never be copied into a second live owner. */
 struct fy_private_vector_storage_v0 {
     struct fy_std_system_heap_block_v0 block;
@@ -171,6 +172,18 @@ uint32_t fy_private_vector_push_take_v0(void *storage, void *element, const void
         memcpy(element, empty, element_size);
     }
     return status;
+}
+
+/* Borrow an initialized slot without changing the descriptor or element.
+ * The caller must retain the owner and exclude mutation for the borrow lifetime. */
+const void *fy_private_vector_element_slot_v0(const void *storage, size_t index, size_t element_size) {
+    if (storage == NULL) return NULL;
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size || index >= value.length) {
+        return NULL;
+    }
+    return (const unsigned char *)value.block.data + index * value.element_size;
 }
 
 uint32_t fy_private_vector_read_copy_v0(const void *storage, size_t index, void *output, size_t element_size) {

@@ -16,6 +16,7 @@ func TestPrivateVectorRuntimeSymbolBoundary(t *testing.T) {
 		{"prepare_push", "u32", "ptr mut void storage, usize size, ptr mut void output", "null, 0, null"},
 		{"commit_push", "u32", "ptr mut void storage, ptr mut void slot, usize size", "null, null, 0"},
 		{"pop_slot", "ptr mut void", "ptr mut void storage, usize size", "null, 0"},
+		{"element_slot", "ptr void", "ptr void storage, usize index, usize size", "null, 0, 0"},
 	} {
 		t.Run(entry.name, func(t *testing.T) {
 			text := fmt.Sprintf(`module main;
@@ -37,6 +38,9 @@ fn i32 main() { let %s result = unsafe { operation(%s) }; return 42; }`, entry.n
 				t.Fatal("incorrect result ABI admitted")
 			}
 			wrong = strings.ReplaceAll(text, "ptr mut void storage", "ptr void storage")
+			if wrong == text {
+				wrong = strings.ReplaceAll(text, "ptr void storage", "ptr mut void storage")
+			}
 			if _, err := cbackend.EmitStorageTransfers(lowerSource(t, wrong), "main::main", cbackend.Stage0WindowsMSVCProfile()); err == nil {
 				t.Fatal("incorrect parameter ABI admitted")
 			}

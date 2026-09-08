@@ -42,3 +42,31 @@ fn void reverse(ref mut u8[] left, ref u8[] right) {}
 fn void exclusive(ref mut u8[] left, ref mut u8[] right) {}
 fn void shared(ref u8[] left, ref u8[] right) {}
 `
+
+func TestAnalyzeDirectOwnerMoveBorrowLifetime(t *testing.T) {
+	for name, move := range map[string]string{
+		"binding":         "let Owner next = owner;",
+		"grouped binding": "let Owner next = (owner);",
+		"assignment":      "var Owner next = Owner {}; next = owner;",
+	} {
+		for _, live := range []bool{false, true} {
+			t.Run(name+map[bool]string{false: "/after-last-use", true: "/live"}[live], func(t *testing.T) {
+				body := "observe(view); " + move
+				if live {
+					body = move + " observe(view);"
+				}
+				result := analyzeText(t, map[string]string{"main.fy": `module main;
+resource Owner { cleanup {} }
+fn void observe(ref Owner value) {}
+fn i32 main() { let Owner owner = Owner {}; let ref Owner view = ref owner; ` + body + ` return 0; }`})
+				if !live {
+					assertCleanTypeResult(t, result)
+					return
+				}
+				if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2105" || len(result.Unsupported) != 0 {
+					t.Fatalf("direct move with live borrow: %+v %+v", result.Diagnostics, result.Unsupported)
+				}
+			})
+		}
+	}
+}

@@ -53,6 +53,11 @@ func runVectorStorageMIRNative(t *testing.T, program mir.Program, entry, probe s
 
 func runVectorStorageMIRNativeLane(t *testing.T, program mir.Program, entry, probe string, transfers bool) {
 	t.Helper()
+	runVectorStorageMIRNativeExit(t, program, entry, probe, transfers, 42)
+}
+
+func runVectorStorageMIRNativeExit(t *testing.T, program mir.Program, entry, probe string, transfers bool, expectedExit int32) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private vector storage proof requires Windows amd64")
 	}
@@ -98,7 +103,7 @@ func runVectorStorageMIRNativeLane(t *testing.T, program mir.Program, entry, pro
 				t.Fatal(err)
 			}
 			outcome, err := cdriver.ExecuteWindowsHost(artifact)
-			if err != nil || outcome.ExitCode != 42 || outcome.Stdout != "" || outcome.Stderr != "" {
+			if err != nil || outcome.ExitCode != expectedExit || outcome.Stdout != "" || outcome.Stderr != "" {
 				t.Fatalf("native: %+v %v", outcome, err)
 			}
 		})

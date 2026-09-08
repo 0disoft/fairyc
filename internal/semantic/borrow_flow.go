@@ -277,6 +277,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		return true
 	}
 	if statement.Binding != nil {
+		f.checkDirectOwnerMove(statement, statement.Binding.Expression, environment)
 		f.checkCallOwnerMoves(statement, statement.Binding.Expression, environment)
 		value, reachable := f.evaluateExpression(statement.Binding.Expression, environment)
 		binding := f.analyzer.bindingSymbols[statement.Binding]
@@ -298,11 +299,13 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 
 	switch statement.Kind {
 	case syntax.KindReturn:
+		f.checkDirectOwnerMove(statement, statement.Expression, environment)
 		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		value, _ := f.evaluateExpression(statement.Expression, environment)
 		f.checkReturn(statement.Expression, value)
 		return false
 	case syntax.KindAssignment:
+		f.checkDirectOwnerMove(statement, statement.Expression, environment)
 		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		if indexedAssignmentTarget(statement.Target) {
 			if _, reachable := f.evaluateExpression(statement.Target, environment); !reachable {
@@ -968,6 +971,13 @@ func (f *borrowFlowAnalyzer) checkCallOwnerMoves(statement *ast.Statement, expre
 	for _, child := range expression.Children {
 		f.checkCallOwnerMoves(statement, child, environment)
 	}
+}
+
+func (f *borrowFlowAnalyzer) checkDirectOwnerMove(statement *ast.Statement, expression *ast.Expression, environment borrowEnvironment) {
+	if f.summarizing || f.probing() {
+		return
+	}
+	f.checkOwnerMove(statement, movedResourceOwner(f.analyzer, expression), expression, environment)
 }
 
 func movedResourceOwner(analyzer *analyzer, expression *ast.Expression) *symbol {

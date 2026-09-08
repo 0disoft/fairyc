@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -15,13 +16,23 @@ func vectorCandidateProgram() string {
 }
 
 func TestPrivateVectorSDKCandidateOwnership(t *testing.T) {
-	for _, name := range []string{"cleanup", "clear", "reserve"} {
+	for _, name := range []string{"cleanup", "clear", "reserve", "borrow"} {
 		t.Run(name, func(t *testing.T) {
 			text := vectorCandidateProgram()
 			text = strings.Replace(text, "assert(v::len<bytes::Buffer>(ref storage) == 0);", `assert(v::is_empty<bytes::Buffer>(ref storage));
     assert(v::capacity<bytes::Buffer>(ref storage) == 0);
     assert(switch (v::reserve<bytes::Buffer>(ref mut storage, 0)) { case .ok(count) : { count == 0 } case .err(_) : { false } });`, 1)
 			probe := vectorCandidateProbe
+			if name == "borrow" {
+				text = strings.Replace(text, "    let bytes::Buffer last =", `    let usize capacity_before = v::capacity<bytes::Buffer>(ref storage);
+    let ref bytes::Buffer first = v::at<bytes::Buffer>(ref storage, 0);
+    let ref bytes::Buffer ninth = v::at<bytes::Buffer>(ref storage, 8);
+    assert(valid(first));
+    assert(valid(ninth));
+    assert(v::len<bytes::Buffer>(ref storage) == 9);
+    assert(v::capacity<bytes::Buffer>(ref storage) == capacity_before);
+    let bytes::Buffer last =`, 1)
+			}
 			if name == "reserve" {
 				text = strings.Replace(text, "    let bytes::Buffer last =", `    let usize before = v::capacity<bytes::Buffer>(ref storage);
     assert(unsafe { fail_next() } == 1);
@@ -56,6 +67,38 @@ func TestPrivateVectorSDKCandidateOwnership(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorSDKCandidateBorrowBounds(t *testing.T) {
+	code, ok := cbackend.TrapCode("assertion-failed")
+	if !ok {
+		t.Fatal("assertion trap code missing")
+	}
+	for name, setup := range map[string]string{
+		"empty":    "var v::Vec<bytes::Buffer> storage = v::empty<bytes::Buffer>();",
+		"past-end": "var v::Vec<bytes::Buffer> storage = v::empty<bytes::Buffer>(); assert(retry(ref mut storage, make()));",
+	} {
+		t.Run(name, func(t *testing.T) {
+			text := vectorCandidateProgram()
+			start := strings.Index(text, "fn i32 exercise()")
+			if start < 0 {
+				t.Fatal("missing exercise")
+			}
+			text = text[:start] + `@link_name("fairyc_fixture_borrow_bad_index") unsafe extern C fn usize bad_index();
+fn i32 exercise() { ` + setup + " let ref bytes::Buffer missing = v::at<bytes::Buffer>(ref storage, unsafe { bad_index() }); assert(valid(missing)); return 41; } fn i32 main() { return exercise(); }"
+			input, coordinates := vectorSDKInputWithCandidate(t, text, true)
+			result, _, err := compiler.CheckStorageTransferPackages(input, coordinates, genericplan.DefaultPlanLimits())
+			if err != nil || !result.Verified {
+				t.Fatalf("bounds fixture: %v %+v", err, result.Semantic.Diagnostics)
+			}
+			index := "0"
+			if name == "past-end" {
+				index = "1"
+			}
+			probe := vectorCandidateProbe + "\nsize_t fairyc_fixture_borrow_bad_index(void) { return " + index + "; }\n"
+			runVectorStorageMIRNativeExit(t, result.MIR, hir.QualifiedModulePath(1, "main")+"::main", probe, true, int32(192+code))
+		})
+	}
+}
+
 func TestPrivateVectorSDKCandidateEncapsulation(t *testing.T) {
 	for name, replacement := range map[string][2]string{
 		"private container field": {"assert(valid(ref last));", "assert(storage.length == 8);"},
@@ -72,6 +115,45 @@ func TestPrivateVectorSDKCandidateEncapsulation(t *testing.T) {
 			result, _, err := compiler.CheckStorageTransferPackages(input, coordinates, genericplan.DefaultPlanLimits())
 			if err == nil && result.Verified {
 				t.Fatal("candidate encapsulation violation admitted")
+			}
+		})
+	}
+}
+
+func TestPrivateVectorSDKCandidateBorrowInvalidation(t *testing.T) {
+	for name, mutation := range map[string]string{
+		"clear":   "let usize removed = v::clear<bytes::Buffer>(ref mut storage);",
+		"reserve": "let Result<usize, u32> grown = v::reserve<bytes::Buffer>(ref mut storage, 17);",
+		"pop":     "let Option<bytes::Buffer> removed = v::pop<bytes::Buffer>(ref mut storage);",
+		"move":    "var v::Vec<bytes::Buffer> moved_early = storage;",
+	} {
+		t.Run(name, func(t *testing.T) {
+			text := strings.Replace(vectorCandidateProgram(), "    let bytes::Buffer last =",
+				"    let ref bytes::Buffer borrowed = v::at<bytes::Buffer>(ref storage, 0);\n    "+mutation+"\n    assert(valid(borrowed));\n    let bytes::Buffer last =", 1)
+			if name == "move" {
+				before, after, found := strings.Cut(text, "assert(valid(borrowed));")
+				if !found {
+					t.Fatal("missing borrowed use")
+				}
+				text = before + "assert(valid(borrowed));" + strings.ReplaceAll(after, "storage", "moved_early")
+			}
+			input, coordinates := vectorSDKInputWithCandidate(t, text, true)
+			result, _, err := compiler.CheckStorageTransferPackages(input, coordinates, genericplan.DefaultPlanLimits())
+			if err == nil && result.Verified {
+				t.Fatal("vector invalidation with live element borrow admitted")
+			}
+			found := false
+			want := "E2101"
+			if name == "move" {
+				want = "E2105"
+			}
+			for _, diagnostic := range result.Semantic.Diagnostics {
+				if diagnostic.Code == want {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("missing borrow-conflict diagnostic: %v %+v", err, result.Semantic.Diagnostics)
 			}
 		})
 	}

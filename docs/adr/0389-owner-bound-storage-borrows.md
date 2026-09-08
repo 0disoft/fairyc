@@ -66,6 +66,21 @@ element cleanups; the process must exit 42 without output. The source rejection
 and MIR mutation tests remain active. This proves the private Windows transport,
 not a general guarantee about arbitrary unsafe addresses or another target.
 
-SDK element-access functions, mutable access,
+The explicit vector candidate now exposes `at<T>(ref Vec<T>, usize) -> ref T`.
+It checks the initialized-prefix bound before calling a closed read-only slot
+transport, checks the returned address, and binds the reference to the vector.
+The raw helper validates descriptor shape, element size and index without changing
+length, capacity or payload. Candidate Buffer tests borrow first/last initialized
+elements, preserve ownership and allocation counts, and then pop after last use.
+Empty and past-end accesses trap under low/optimized MSVC using runtime-provided
+indices. Stable SDK loading remains byte-identical.
+
+The integration exposed a missing direct resource-move loan check. Binding and
+assignment RHS moves now use the same E2105 owner-loan rule as consuming calls;
+grouped moves are included. Independent resource tests reject live-loan moves and
+accept moves after last use. Candidate tests reject clear/reserve/pop with E2101
+and direct vector moves with E2105 while an element reference remains live.
+
+Optional or mutable element access,
 artifact/cache transport, stable CLI and installed SDK admission remain separate.
 No stable grammar, SDK source/version, runtime ABI or cache format is promoted.

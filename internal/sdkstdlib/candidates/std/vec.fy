@@ -32,6 +32,8 @@ unsafe extern C fn u32 prepare_raw(ptr mut void storage, usize size, ptr mut voi
 unsafe extern C fn u32 commit_raw(ptr mut void storage, ptr mut void slot, usize size);
 @link_name("fy_private_vector_pop_slot_v0")
 unsafe extern C fn ptr mut void pop_slot_raw(ptr mut void storage, usize size);
+@link_name("fy_private_vector_element_slot_v0")
+unsafe extern C fn ptr void element_slot_raw(ptr void storage, usize index, usize size);
 
 fn T take_slot<T>(ptr mut void slot) { return unsafe { storage_take<T>(slot) }; }
 fn i32 write_slot<T>(ptr mut void slot, T value) { return unsafe { storage_put<T>(slot, value); 1 }; }
@@ -45,6 +47,15 @@ pub fn Vec<T> empty<T>() {
 
 /// Returns the number of initialized elements.
 pub fn usize len<T>(ref Vec<T> value) { return value.length; }
+
+/// Borrows an initialized element without moving it. An out-of-range index traps.
+/// The vector cannot be mutated or moved while the returned reference is live.
+pub fn ref T at<T>(ref Vec<T> value, usize index) {
+    assert(index < value.length);
+    let ptr void slot = unsafe { element_slot_raw(value as ptr void, index, value.element_size) };
+    assert(slot != null);
+    return unsafe { storage_borrow<T>(value, slot) };
+}
 
 /// Returns how many elements fit without growing the allocation.
 pub fn usize capacity<T>(ref Vec<T> value) { return value.bytes / value.element_size; }
