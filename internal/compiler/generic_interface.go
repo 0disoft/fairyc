@@ -55,7 +55,7 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 			return GenericAnalysis{}, err
 		}
 		for i := range descriptor.Modules {
-			descriptor.Modules[i].Items = slices.DeleteFunc(descriptor.Modules[i].Items, func(item moduleinterface.Item) bool { return item.Kind == "function" && generated[item.Name] })
+			descriptor.Modules[i].Items = slices.DeleteFunc(descriptor.Modules[i].Items, func(item moduleinterface.Item) bool { return generated[item.Name] })
 		}
 		var templates []moduleinterface.GenericTemplate
 		owner := genericPackageOwner(coordinates[file.Package])

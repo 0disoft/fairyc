@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -13,7 +12,7 @@ import (
 )
 
 // CheckGenericPackages is a compiler-private admission path for explicit scalar
-// generic functions across a resolved package graph. Coordinates must come from
+// generic functions and aggregates across a resolved package graph. Coordinates come from
 // the same workspace as input. Source-owned expansion failures become ordinary
 // diagnostics; invalid package plumbing remains an error. Stable CLI admission
 // remains separate from the compiler-private generic interface and cache paths.
@@ -61,18 +60,6 @@ func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 		if file.Module == nil {
 			return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("generic source module is nil")
 		}
-		// Source expansion can now resolve aggregate imports, but package
-		// interfaces and cache artifacts still require their own admission.
-		for _, declaration := range file.Module.Structs {
-			if len(declaration.TypeParameters) != 0 {
-				return semantic.PackageInput{}, genericsource.PackageExpansion{}, packageAggregatePending(file.Module.Path, owners[file.Package], declaration.Span)
-			}
-		}
-		for _, declaration := range file.Module.Resources {
-			if len(declaration.TypeParameters) != 0 {
-				return semantic.PackageInput{}, genericsource.PackageExpansion{}, packageAggregatePending(file.Module.Path, owners[file.Package], declaration.Span)
-			}
-		}
 		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package]}
 	}
 	expansion, err := genericsource.PreparePackages(modules, limits)
@@ -84,8 +71,4 @@ func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 		input.Files[i].Module = expansion.Modules[i]
 	}
 	return input, expansion, nil
-}
-
-func packageAggregatePending(module string, owner genericplan.PackageID, span diagnostic.Span) error {
-	return &genericsource.SourceError{Owner: owner, Module: module, Span: span, Kind: genericsource.FailureDeclaration, Cause: fmt.Errorf("generic aggregate package interfaces are not admitted")}
 }

@@ -2,7 +2,9 @@ package compiler_test
 
 import (
 	"encoding/json"
+	"reflect"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 
@@ -14,6 +16,7 @@ import (
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
@@ -111,12 +114,59 @@ func TestGenericAggregatePackageSourceExpansion(t *testing.T) {
 	}
 }
 
-func TestGenericAggregatePackageInterfaceRemainsClosed(t *testing.T) {
-	input, coordinates := genericPackageInput(t)
-	input.Files[1] = parseCompilerFile(t, 2, "util.fy", `module util; pub resource Box<T> { T value; cleanup {} }`)
-	analysis, err := compiler.AnalyzeGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
-	if err != nil || len(analysis.Analysis.Semantic.Diagnostics) == 0 || len(analysis.Interfaces) != 0 || len(analysis.Specializations) != 0 {
-		t.Fatalf("aggregate interface admitted: %v %+v", err, analysis)
+func TestGenericAggregatePackageInterfacesIgnoreInstantiationDemand(t *testing.T) {
+	sources := aggregatePackageSources(t)
+	input := semantic.PackageInput{Imports: []semantic.PackageImport{{FromPackage: 1, ImportPath: "box", ToPackage: 2}, {FromPackage: 2, ImportPath: "helper", ToPackage: 3}}}
+	coordinates := map[hir.PackageID]packagegraph.CoordinateID{}
+	for i, source := range sources {
+		id := hir.PackageID(i + 1)
+		file := parseCompilerFile(t, id, source.Module.Path+".fy", "module "+source.Module.Path+";")
+		file.Module = source.Module
+		input.Files = append(input.Files, file)
+		coordinate, err := packagegraph.ComputeCoordinateID(packagegraph.Coordinate{PackageUID: source.Module.Path, VersionIdentity: "1"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		coordinates[id] = coordinate
+	}
+	used, err := compiler.AnalyzeGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	if err != nil || len(used.Interfaces) != 3 || len(used.Plan.Specializations) != 3 {
+		t.Fatalf("used: %v %+v", err, used)
+	}
+	result, err := compiler.LowerAnalyzed(used.Analysis)
+	if err != nil || !result.Verified || len(result.GenericProvenance.Declarations()) != 4 || len(result.GenericProvenance.Specializations()) != 3 {
+		t.Fatalf("lower: %v %+v", err, result)
+	}
+	input.Files[0] = parseCompilerFile(t, 1, "main.fy", `module main; import box as b; fn i32 main() { return 0; }`)
+	unused, err := compiler.AnalyzeGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	if err != nil || len(unused.Plan.Specializations) != 0 || !reflect.DeepEqual(used.Interfaces, unused.Interfaces) || !reflect.DeepEqual(used.OrdinaryInterfaces, unused.OrdinaryInterfaces) {
+		t.Fatalf("demand leaked into interface: %v", err)
+	}
+	input.Files[2] = parseCompilerFile(t, 3, "helper.fy", `module helper; pub fn T finish<T>(T value) { let T copy = value; return copy; }`)
+	changed, err := compiler.AnalyzeGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	if err != nil || changed.Interfaces[2] == unused.Interfaces[2] || changed.Interfaces[3] == unused.Interfaces[3] || changed.Interfaces[1] != unused.Interfaces[1] {
+		t.Fatalf("cleanup closure propagation: %v", err)
+	}
+	renumbered := map[hir.PackageID]packagegraph.CoordinateID{}
+	for id, coordinate := range coordinates {
+		renumbered[id+10] = coordinate
+	}
+	for i := range input.Files {
+		input.Files[i].Package += 10
+	}
+	for i := range input.Imports {
+		input.Imports[i].FromPackage += 10
+		input.Imports[i].ToPackage += 10
+	}
+	slices.Reverse(input.Files)
+	reordered, err := compiler.AnalyzeGenericPackages(input, renumbered, genericplan.DefaultPlanLimits())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, hash := range changed.Interfaces {
+		if reordered.Interfaces[id+10] != hash {
+			t.Fatal("package numbering changed aggregate interface")
+		}
 	}
 }
 

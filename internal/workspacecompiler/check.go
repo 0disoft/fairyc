@@ -16,9 +16,9 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	if !hasGenericDeclarations(input) {
-		// Preserve ordinary diagnostics and avoid generic preparation for workspaces
-		// that do not contain a generic declaration.
+	if hasGenericAggregates(input) || !hasGenericDeclarations(input) {
+		// Preserve ordinary analysis and the unsupported-aggregate boundary;
+		// compiler-private aggregate admission is not a stable language promotion.
 		return compiler.CheckPackages(input)
 	}
 	coordinates, err := workspace.PackageCoordinates()
@@ -27,6 +27,24 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	}
 	result, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
 	return result, err
+}
+
+// Stable source admission stays separate from compiler-private aggregate
+// interfaces until cache and Atlas transport have their own promotion evidence.
+func hasGenericAggregates(input semantic.PackageInput) bool {
+	for _, file := range input.Files {
+		for _, declaration := range file.Module.Structs {
+			if len(declaration.TypeParameters) != 0 {
+				return true
+			}
+		}
+		for _, declaration := range file.Module.Resources {
+			if len(declaration.TypeParameters) != 0 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func hasGenericDeclarations(input semantic.PackageInput) bool {

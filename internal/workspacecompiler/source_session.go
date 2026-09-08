@@ -3,6 +3,7 @@ package workspacecompiler
 import (
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/packageartifact"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -45,6 +46,14 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 	input, err := workspace.SemanticInput()
 	if err != nil {
 		return Result{}, err
+	}
+	if hasGenericAggregates(input) {
+		compiled, err := compiler.CheckPackages(input)
+		storage := StorageMemory
+		if session.configuration.Persistent != nil {
+			storage = StorageDisk
+		}
+		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: storage}}, err
 	}
 	generic := hasGenericDeclarations(input)
 	if session.active == nil || session.generic != generic {

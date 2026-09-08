@@ -135,7 +135,23 @@ optimized MSVC execution return 42. This checks executable package transport, no
 an exact cleanup count or allocation-failure behavior. Private access, wrong arity,
 missing aliases and generated-name requests publish no partial expansion.
 
-The compiler's `AnalyzeGenericPackages` entry point still rejects aggregate
-templates before publishing interface hashes or cache specializations. Its gate
-now belongs to compiler package admission rather than the source expander.
-Interface/cache/Atlas integration and stable language/SDK promotion remain pending.
+## Compiler-private package interfaces
+
+`AnalyzeGenericPackages` and `CheckGenericPackages` now admit the resolved
+aggregate source graph. Interface extraction removes generated functions, structs
+and resources rather than treating a specialization as a source export. Original
+template closures remain the interface facts, including unused public templates
+and cleanup dependencies. Concrete public signatures still use the ordinary
+typed visibility and coordinate checks before generated items are removed.
+
+Tests compare used and unused template interfaces, propagate helper edits through
+the resource and factory closure, and preserve interface hashes when package
+numbers or input ordering change. Verified lowering retains kind-aware original
+declarations and specialization provenance.
+
+`GenericSession` lowers aggregate inputs afresh without reading or writing MIR
+cache entries. Repeated private-session checks execute in the interpreter and
+low/optimized MSVC; they are not cache-hit evidence. Stable `Check` and
+`SourceSession` keep aggregate declarations on the ordinary unsupported-source
+path. Cache reuse, Atlas integration, and stable language/SDK promotion remain
+pending, so this internal interface step does not change language 14.
