@@ -16,11 +16,6 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 		return Snapshot{}, fmt.Errorf("compiler snapshot requires a verified result")
 	}
 	originals := result.GenericProvenance.Declarations()
-	for _, original := range originals {
-		if original.Kind != string(DeclarationFunction) {
-			return Snapshot{}, fmt.Errorf("aggregate implementation joins require separate snapshot support")
-		}
-	}
 	if len(originals) == 0 {
 		if len(result.GenericProvenance.Specializations()) != 0 {
 			return Snapshot{}, fmt.Errorf("specializations have no original declarations")
@@ -52,14 +47,18 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 	if err != nil {
 		return Snapshot{}, err
 	}
-	functions, resolved, external, err := buildFunctionSummaries(result.MIR, result.Semantic.Borrows, metadata, symbols, foreign, private, bounds)
+	cleanup, ordinaryBorrows, cleanupResolved, cleanupExternal, err := buildGenericCleanupSummaries(result, implementations, metadata, symbols, foreign, private)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	functions, resolved, external, err := buildFunctionSummaries(result.MIR, ordinaryBorrows, metadata, symbols, foreign, private, bounds)
 	if err != nil {
 		return Snapshot{}, err
 	}
 	var ordinary []FunctionSummary
 	var specializations []SpecializationSummary
 	seen := map[DeclarationKey]bool{}
-	for _, function := range functions {
+	remapCalls := func(function *FunctionSummary) {
 		for i := range function.Calls {
 			if target, ok := implementations[function.Calls[i].Target]; ok {
 				function.Calls[i].Target = target.Declaration
@@ -67,6 +66,20 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 			}
 		}
 		slices.SortFunc(function.Calls, compareCall)
+	}
+	for key, implementation := range implementations {
+		if implementation.Aggregate == nil {
+			continue
+		}
+		seen[key] = true
+		if summary, found := cleanup[key]; found {
+			remapCalls(&summary)
+			implementation.Cleanup = &summary
+		}
+		specializations = append(specializations, implementation)
+	}
+	for _, function := range functions {
+		remapCalls(&function)
 		if implementation, ok := implementations[function.Function]; ok {
 			seen[function.Function] = true
 			function.Function = implementation.Declaration
@@ -90,6 +103,14 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 			_, generated := implementations[symbols[function.Symbol]]
 			return generated
 		})
+		module.Structs = slices.DeleteFunc(slices.Clone(module.Structs), func(value hir.Struct) bool {
+			_, found := implementations[DeclarationKey{PackageInstance: metadata[module.Package].instance, Module: module.Path, Kind: DeclarationStruct, Name: value.Name}]
+			return found
+		})
+		module.Resources = slices.DeleteFunc(slices.Clone(module.Resources), func(value hir.Resource) bool {
+			_, found := implementations[DeclarationKey{PackageInstance: metadata[module.Package].instance, Module: module.Path, Kind: DeclarationResource, Name: value.Name}]
+			return found
+		})
 	}
 	documentation, err := buildDocumentationSpans(docHIR, metadata, declarations)
 	if err != nil {
@@ -109,12 +130,12 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 			return Snapshot{}, fmt.Errorf("generic documentation has no exact preceding source span")
 		}
 		documentation = append(documentation, DeclarationDocumentation{
-			Declaration:     DeclarationKey{PackageInstance: declarationSpan.PackageInstance, Module: original.Module, Kind: DeclarationFunction, Name: original.Name},
+			Declaration:     DeclarationKey{PackageInstance: declarationSpan.PackageInstance, Module: original.Module, Kind: DeclarationKind(original.Kind), Name: original.Name},
 			DeclarationSpan: declarationSpan, Documentation: docSpan,
 		})
 	}
 	slices.SortFunc(documentation, func(a, b DeclarationDocumentation) int { return compareDeclarationKey(a.Declaration, b.Declaration) })
-	completeness := buildCompleteness(resolved, external)
+	completeness := buildCompleteness(resolved+cleanupResolved, external+cleanupExternal)
 	completeness = append(completeness,
 		Completeness{Relation: "generic-specializations", Status: CompletenessExact, Resolved: len(specializations)},
 		Completeness{Relation: "generic-template-bodies", Status: CompletenessUnavailable, Unknown: len(generic), Reasons: []string{"bodies-checked-only-after-specialization"}},

@@ -191,6 +191,25 @@ or effects. Aggregate attributes still require separate adaptation and fail clos
 The existing SymbolId encoder can encode these generic aggregate headers without
 changing ordinary identities or its format. Tests preserve IDs across binder and
 alias renaming and package renumbering, distinguish actual provider UIDs, and
-check detached getters and header results. Full `BuildCompiler` snapshots reject
-aggregate implementation joins explicitly until concrete type/call/cleanup joins
-are added; no `.fymap` aggregate transport or stable admission is promoted here.
+check detached getters and header results.
+
+## Aggregate implementations in Atlas snapshots
+
+`BuildCompiler` joins concrete struct/resource types and fields to original
+templates, substituting concrete arguments without exposing generated type names.
+Aggregate specialization summaries retain inferred drop kind separately from
+source-declared cleanup presence. Resource cleanup bodies have separate execution
+summaries keyed by the original resource; calls identify the exact helper
+specialization. Borrow analysis also runs for cleanup bodies and retains their
+private function identity, even when specializations share source spans.
+
+Ordinary function summaries continue to exclude private drop bodies and their
+borrow facts. A private borrow must match its actual cleanup body's span; it is
+not attributed to a neighboring source function. Generic cleanup uses a separate
+summary view without modifying executable MIR.
+
+Tests cover two resource specializations, nested fields, cleanup helper calls and
+borrows, documentation attachment, detached getters, inconsistent concrete fields,
+and ordinary cleanup ownership. `.fymap` planning still explicitly rejects
+aggregate specializations until its transport can preserve these facts. No stable
+language, SDK, ABI, or map-format promotion is made in this snapshot step.

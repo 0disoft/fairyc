@@ -749,6 +749,7 @@ func buildFunctionSummaries(
 ) ([]FunctionSummary, int, int, error) {
 	result := make([]FunctionSummary, 0, len(program.Functions))
 	indexes := make(map[DeclarationKey]int)
+	privateBounds := make(map[hir.SymbolID]Span)
 	resolvedCalls := 0
 	externalCalls := 0
 	for _, function := range program.Functions {
@@ -756,6 +757,11 @@ func buildFunctionSummaries(
 			if _, known := privateSymbols[function.Symbol]; !known {
 				return nil, 0, 0, fmt.Errorf("MIR drop function %q has no HIR private-symbol owner", function.Name)
 			}
+			bound, err := normalizeSpan(function.Span, metadata)
+			if err != nil {
+				return nil, 0, 0, err
+			}
+			privateBounds[function.Symbol] = bound
 			continue
 		}
 		key, found := symbols[function.Symbol]
@@ -880,6 +886,14 @@ func buildFunctionSummaries(
 		}
 		owner := -1
 		if fact.Function != hir.NoSymbol {
+			if bound, private := privateBounds[fact.Function]; private {
+				if !containsSpan(bound, span) {
+					return nil, 0, 0, fmt.Errorf("private cleanup borrow has no matching function span")
+				}
+				// Private drop bodies are excluded from ordinary function summaries.
+				// Generic cleanup summaries use a separate, explicitly owned view.
+				continue
+			}
 			key, known := symbols[fact.Function]
 			index, summarized := indexes[key]
 			if !known || !summarized || !containsSpan(bounds[key], span) {

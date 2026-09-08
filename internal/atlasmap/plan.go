@@ -160,6 +160,11 @@ func BuildPlanV2(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, 
 }
 
 func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) ([]Partition, error) {
+	for _, declaration := range snapshot.Declarations() {
+		if len(declaration.TypeParameters) != 0 && declaration.Key.Kind != semanticsnapshot.DeclarationFunction {
+			return nil, fmt.Errorf("Atlas map requires aggregate specialization transport support")
+		}
+	}
 	if schema == LogicalSchema && len(snapshot.Specializations()) != 0 {
 		return nil, fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
 	}

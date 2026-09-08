@@ -18,7 +18,7 @@ func joinGenericImplementations(provenance compiler.GenericProvenance, originals
 		byKey[declaration.Key] = declaration
 	}
 	for _, origin := range provenance.Declarations() {
-		key := DeclarationKey{PackageInstance: metadata[origin.Package].instance, Module: origin.Module, Kind: DeclarationFunction, Name: origin.Name}
+		key := DeclarationKey{PackageInstance: metadata[origin.Package].instance, Module: origin.Module, Kind: DeclarationKind(origin.Kind), Name: origin.Name}
 		declaration, ok := byKey[key]
 		if !ok {
 			return nil, nil, fmt.Errorf("generic origin has no source declaration")
@@ -33,6 +33,7 @@ func joinGenericImplementations(provenance compiler.GenericProvenance, originals
 		concreteByKey[declaration.Key] = declaration
 	}
 	implementations := map[DeclarationKey]SpecializationSummary{}
+	typeNames := map[string]TypeRef{}
 	ids := map[string]bool{}
 	for _, origin := range provenance.Specializations() {
 		original, ok := byID[origin.Declaration]
@@ -62,8 +63,28 @@ func joinGenericImplementations(provenance compiler.GenericProvenance, originals
 			}
 			arguments[index], bound[index] = argument, true
 		}
+		if original.Key.Kind != DeclarationFunction {
+			typ, err := substituteGenericType(original.Type, arguments)
+			if err != nil || actual.Type.Kind != TypeNominal {
+				return nil, nil, fmt.Errorf("aggregate specialization has no nominal type")
+			}
+			typeNames[genericNominalKey(actual.Type)] = typ
+		}
+		implementations[key] = SpecializationSummary{ID: string(origin.Specialization), Declaration: original.Key, TypeArguments: arguments}
+	}
+	for i := range concrete {
+		value, err := remapGenericDeclaration(concrete[i], typeNames)
+		if err != nil {
+			return nil, nil, err
+		}
+		concreteByKey[value.Key] = value
+	}
+	for key, implementation := range implementations {
+		original := byKey[implementation.Declaration]
+		actual := concreteByKey[key]
+		arguments := implementation.TypeArguments
 		expected, err := substituteGenericType(original.Type, arguments)
-		if err != nil || !sameSnapshotType(expected, actual.Type) || len(original.Parameters) != len(actual.Parameters) {
+		if err != nil || !sameSnapshotType(expected, actual.Type) || len(original.Parameters) != len(actual.Parameters) || len(original.Fields) != len(actual.Fields) {
 			return nil, nil, fmt.Errorf("specialization result or parameter arity contradicts its source signature")
 		}
 		for i, parameter := range original.Parameters {
@@ -72,7 +93,18 @@ func joinGenericImplementations(provenance compiler.GenericProvenance, originals
 				return nil, nil, fmt.Errorf("specialization parameter contradicts its source signature")
 			}
 		}
-		implementations[key] = SpecializationSummary{ID: string(origin.Specialization), Declaration: original.Key, TypeArguments: arguments}
+		for i, field := range original.Fields {
+			expected, err := substituteGenericType(field.Type, arguments)
+			if err != nil || !sameSnapshotType(expected, actual.Fields[i].Type) || field.Name != actual.Fields[i].Name || !containsSpan(actual.Fields[i].Span, field.Span) {
+				return nil, nil, fmt.Errorf("aggregate field contradicts its source signature")
+			}
+		}
+		if original.Key.Kind != DeclarationFunction {
+			actual.Key = original.Key
+			actual.Provenance = ProvenanceCompilerObserved
+			implementation.Aggregate = &actual
+			implementations[key] = implementation
+		}
 	}
 	declarations := slices.Clone(originals)
 	for _, declaration := range concrete {
@@ -85,7 +117,7 @@ func joinGenericImplementations(provenance compiler.GenericProvenance, originals
 		if _, collision := byKey[declaration.Key]; collision {
 			return nil, nil, fmt.Errorf("original generic declaration collides with a typed source declaration")
 		}
-		declarations = append(declarations, declaration)
+		declarations = append(declarations, concreteByKey[declaration.Key])
 	}
 	slices.SortFunc(declarations, func(a, b Declaration) int { return compareDeclarationKey(a.Key, b.Key) })
 	return declarations, implementations, nil

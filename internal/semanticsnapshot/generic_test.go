@@ -25,8 +25,8 @@ func TestGenericAggregateProvenanceIsNotPublishedAsAFunction(t *testing.T) {
 	if err != nil || len(declarations) != 1 || declarations[0].Key.Kind != semanticsnapshot.DeclarationStruct || len(declarations[0].Fields) != 1 || declarations[0].Fields[0].Type.Kind != semanticsnapshot.TypeParameter {
 		t.Fatalf("aggregate masqueraded as function: %+v %v", declarations, err)
 	}
-	if _, err := semanticsnapshot.BuildCompiler(result, []semanticsnapshot.PackageInput{input}); err == nil {
-		t.Fatal("aggregate implementation joins admitted prematurely")
+	if snapshot, err := semanticsnapshot.BuildCompiler(result, []semanticsnapshot.PackageInput{input}); err != nil || len(snapshot.Specializations()) != 1 || snapshot.Specializations()[0].Aggregate == nil {
+		t.Fatalf("aggregate implementation join: %v", err)
 	}
 }
 

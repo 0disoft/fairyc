@@ -230,7 +230,8 @@ type Borrow struct {
 	Escapes bool
 }
 
-// FunctionSummary contains verified executable facts for one source-declared function.
+// FunctionSummary contains verified facts for a source function or source-owned
+// cleanup body. Cleanup summaries use the resource key and stay out of Functions().
 type FunctionSummary struct {
 	Function         DeclarationKey
 	Provenance       Provenance
@@ -251,6 +252,9 @@ type SpecializationSummary struct {
 	Declaration   DeclarationKey
 	TypeArguments []TypeRef
 	Function      FunctionSummary
+	// Aggregate and Cleanup are in-memory facts pending an aggregate map format.
+	Aggregate *Declaration     `json:"-"`
+	Cleanup   *FunctionSummary `json:"-"`
 }
 
 // Completeness is relation-specific so a foreign call cannot silently degrade unrelated local
@@ -331,6 +335,14 @@ func (snapshot Snapshot) Specializations() []SpecializationSummary {
 			result[i].TypeArguments[j] = cloneType(result[i].TypeArguments[j])
 		}
 		result[i].Function = cloneFunctionSummary(result[i].Function)
+		if result[i].Aggregate != nil {
+			value := cloneDeclaration(*result[i].Aggregate)
+			result[i].Aggregate = &value
+		}
+		if result[i].Cleanup != nil {
+			value := cloneFunctionSummary(*result[i].Cleanup)
+			result[i].Cleanup = &value
+		}
 	}
 	return result
 }
