@@ -339,8 +339,38 @@ into an Item whose destructor rejects null and duplicate handles. Both MSVC
 profiles return 42 after the value crosses a consuming function, with one slot
 export, one destruction and no live allocation. Boundary/mutation tests reject
 missing provenance, malformed unreachable operations and scalar pointer operands.
-This proves the HIR-to-native transfer prerequisite, not generic source expansion
-or vector pop integration; consuming writes into raw storage also remain work.
+This proves the HIR-to-native transfer prerequisite. The following section records
+its later generic source and vector-pop integration.
+
+### Private source take and vector-slot pop
+
+`compiler.CheckStorageTransferFunctions` and
+`genericsource.PrepareStorageTransferModule` enable `storage_take<T>(pointer)` in
+an import-free private source module. The ordinary/query-only entry points do not
+enable this name. Expansion substitutes the concrete generic type into a detached
+AST marker; semantic analysis requires one mutable void pointer, an admitted
+concrete type and an explicit unsafe context (`E5101` when absent). Source type
+identity and unsafe provenance survive lowering into the preceding MIR operation.
+The parser and stable language/SDK contracts are unchanged.
+
+`fy_private_vector_pop_slot_v0` checks descriptor, exact element size and nonempty
+prefix before decrementing length and returning the former tail address. Null,
+invalid size/descriptor and empty-prefix requests return null without mutation.
+Success transfers the tail's pending element obligation, not a safe borrow: the
+caller must immediately materialize the typed value before mutating/releasing
+storage or exiting. The helper does not allocate, copy, clear or destroy elements.
+
+The resource integration fixture now uses one source `take_slot<Item>` generic
+specialization in both explicit pop and its cleanup loop, with no injected HIR
+or empty Item construction on these paths. It retains first-allocation and growth
+OOM ownership-return/retry and exact 9-through-1 destruction evidence under both
+MSVC profiles. Native counters require nine slot transfers and eleven empty Item
+constructions, all from the eleven push attempts; no vector-pop placeholder is
+constructed. Empty/wrong-size pops preserve descriptor bytes. Source tests cover
+AST preservation, query-only rejection, unsafe/type/arity/name guards and moved
+donor rejection. This does not yet generalize the concrete Items cleanup or remove
+push's owner-supplied empty state; consuming writes and package/SDK integration
+remain required.
 
 ### Still required
 

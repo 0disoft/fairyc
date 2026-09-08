@@ -14,10 +14,24 @@ func PrepareStorageModule(module *ast.Module, owner genericplan.PackageID, limit
 	if module == nil || len(module.Imports) != 0 {
 		return PackageExpansion{}, fmt.Errorf("private storage queries require an import-free module")
 	}
-	return prepareModule(module, owner, limits, true, true)
+	return prepareModule(module, owner, limits, true, true, false)
 }
 
-func storageSelector(name string) string {
+// PrepareStorageTransferModule also enables unsafe source ownership takes.
+func PrepareStorageTransferModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (PackageExpansion, error) {
+	if module == nil || len(module.Imports) != 0 {
+		return PackageExpansion{}, fmt.Errorf("private storage transfers require an import-free module")
+	}
+	return prepareModule(module, owner, limits, true, true, true)
+}
+
+func (x *expander) storageSelector(name string) string {
+	if x.allowStorageTransfers && name == "storage_take" {
+		return "take"
+	}
+	if !x.allowStorage {
+		return ""
+	}
 	switch name {
 	case "storage_size":
 		return "size"
@@ -31,7 +45,7 @@ const storageType syntax.Kind = "private-storage-type"
 
 func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
 	if e.Kind == syntax.KindSpecialize && len(e.Children) == 1 {
-		selector := storageSelector(e.Children[0].Text)
+		selector := x.storageSelector(e.Children[0].Text)
 		if selector != "" {
 			if len(e.TypeArguments) != 1 {
 				return true, fmt.Errorf("private storage query requires one type argument")
@@ -42,10 +56,17 @@ func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
 		}
 	}
 	if e.Kind == syntax.KindCall && len(e.Children) != 0 && e.Children[0].Kind == storageType {
+		callee := e.Children[0]
+		if callee.Text == "take" {
+			if len(e.Children) != 2 {
+				return true, fmt.Errorf("private storage take requires one pointer argument")
+			}
+			*e = ast.Expression{Kind: ast.PrivateStorageTake, Span: e.Span, Text: "take", Type: callee.Type, Children: e.Children[1:]}
+			return true, nil
+		}
 		if len(e.Children) != 1 {
 			return true, fmt.Errorf("private storage query takes no value arguments")
 		}
-		callee := e.Children[0]
 		*e = ast.Expression{Kind: ast.PrivateStorageLayout, Span: e.Span, Text: callee.Text, Type: callee.Type}
 		return true, nil
 	}

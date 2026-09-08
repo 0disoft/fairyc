@@ -630,6 +630,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	switch expression.Kind {
 	case ast.PrivateStorageLayout:
 		actual = c.checkStorageLayout(expression, result)
+	case ast.PrivateStorageTake:
+		actual = c.checkStorageTake(expression, result)
 	case syntax.KindLiteral:
 		var supported bool
 		actual, supported = literalType(expression.Text, expected)

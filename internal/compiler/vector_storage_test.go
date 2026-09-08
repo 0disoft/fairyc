@@ -47,6 +47,10 @@ func runVectorStorageNative(t *testing.T, program, probe string, queries bool) {
 }
 
 func runVectorStorageMIRNative(t *testing.T, program mir.Program, entry, probe string) {
+	runVectorStorageMIRNativeLane(t, program, entry, probe, false)
+}
+
+func runVectorStorageMIRNativeLane(t *testing.T, program mir.Program, entry, probe string, transfers bool) {
 	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private vector storage proof requires Windows amd64")
@@ -55,7 +59,11 @@ func runVectorStorageMIRNative(t *testing.T, program mir.Program, entry, probe s
 	if err != nil {
 		t.Fatal(err)
 	}
-	unit, err := cbackend.Emit(program, entry, cbackend.Stage0WindowsMSVCProfile())
+	emit := cbackend.Emit
+	if transfers {
+		emit = cbackend.EmitStorageTransfers
+	}
+	unit, err := emit(program, entry, cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
 		t.Fatal(err)
 	}

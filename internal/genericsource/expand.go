@@ -31,7 +31,7 @@ func Expand(module *ast.Module, owner genericplan.PackageID, limits genericplan.
 // PrepareModule retains detached declaration and specialization provenance for
 // the private module-local path, without claiming a public package interface.
 func PrepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return prepareModule(module, owner, limits, false, false)
+	return prepareModule(module, owner, limits, false, false, false)
 }
 
 // PrepareNominalModule is an opt-in private lane for local ordinary nominal
@@ -40,14 +40,14 @@ func PrepareNominalModule(module *ast.Module, owner genericplan.PackageID, limit
 	if module != nil && len(module.Imports) != 0 {
 		return PackageExpansion{}, fmt.Errorf("private nominal generic source requires one import-free module")
 	}
-	return prepareModule(module, owner, limits, true, false)
+	return prepareModule(module, owner, limits, true, false, false)
 }
 
-func prepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits, nominal, storage bool) (PackageExpansion, error) {
+func prepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits, nominal, storage, transfers bool) (PackageExpansion, error) {
 	if module == nil {
 		return PackageExpansion{}, fmt.Errorf("generic source module is nil")
 	}
-	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}, allowNominal: nominal, allowStorage: storage}
+	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}, allowNominal: nominal, allowStorage: storage, allowStorageTransfers: transfers}
 	modules, plan, err := expandAll([]*expander{&x}, limits)
 	if err != nil {
 		return PackageExpansion{}, err
@@ -67,22 +67,23 @@ func prepareModule(module *ast.Module, owner genericplan.PackageID, limits gener
 }
 
 type expander struct {
-	module         *ast.Module
-	owner          genericplan.PackageID
-	templates      map[string]ast.Function
-	aggregates     map[string]aggregateTemplate
-	names          map[string]bool
-	imports        map[string]*expander
-	allowPublic    bool
-	requests       map[string]diagnostic.Span
-	allowNominal   bool
-	allowStorage   bool
-	packageNominal bool
-	nominalContext string
-	boundNominals  map[genericplan.TypeID]NominalBinding
-	nominalPublic  map[string]bool
-	nominalTypes   map[string]genericplan.TypeID
-	nominalNames   map[genericplan.TypeID]string
+	module                *ast.Module
+	owner                 genericplan.PackageID
+	templates             map[string]ast.Function
+	aggregates            map[string]aggregateTemplate
+	names                 map[string]bool
+	imports               map[string]*expander
+	allowPublic           bool
+	requests              map[string]diagnostic.Span
+	allowNominal          bool
+	allowStorage          bool
+	allowStorageTransfers bool
+	packageNominal        bool
+	nominalContext        string
+	boundNominals         map[genericplan.TypeID]NominalBinding
+	nominalPublic         map[string]bool
+	nominalTypes          map[string]genericplan.TypeID
+	nominalNames          map[genericplan.TypeID]string
 }
 
 func (x *expander) id(name string) genericplan.DeclarationID {
@@ -113,7 +114,7 @@ func (x *expander) collect() error {
 		x.names[imported.Alias] = true
 	}
 	for name := range x.names {
-		if x.allowStorage && storageSelector(name) != "" {
+		if x.storageSelector(name) != "" {
 			return fmt.Errorf("reserved private storage query name %q", name)
 		}
 		if strings.HasPrefix(name, generatedPrefix) {
@@ -121,7 +122,7 @@ func (x *expander) collect() error {
 		}
 	}
 	for _, fn := range x.module.Functions {
-		if x.allowStorage && storageSelector(fn.Name) != "" {
+		if x.storageSelector(fn.Name) != "" {
 			return fmt.Errorf("reserved private storage query name %q", fn.Name)
 		}
 		if x.names[fn.Name] || strings.HasPrefix(fn.Name, generatedPrefix) {
@@ -282,7 +283,7 @@ func (x *expander) target(e *ast.Expression) (callTarget, error) {
 }
 
 func (x *expander) checkBinding(name string) error {
-	if x.allowStorage && storageSelector(name) != "" {
+	if x.storageSelector(name) != "" {
 		return fmt.Errorf("binding shadows private storage query %q", name)
 	}
 	if _, generic := x.aggregates[name]; generic {

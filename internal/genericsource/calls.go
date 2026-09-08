@@ -14,7 +14,7 @@ func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, 
 	if e.Kind != syntax.KindSpecialize {
 		return nil
 	}
-	if x.allowStorage && len(e.Children) == 1 && storageSelector(e.Children[0].Text) != "" {
+	if len(e.Children) == 1 && x.storageSelector(e.Children[0].Text) != "" {
 		if len(e.TypeArguments) != 1 || e.TypeArguments[0].Kind != ast.TypeKindNamed || len(e.TypeArguments[0].Arguments) != 0 {
 			return fmt.Errorf("private storage query requires one direct type argument")
 		}
@@ -68,7 +68,7 @@ func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, 
 }
 
 func (x *expander) rewriteSpecialization(e *ast.Expression, names map[string]string) error {
-	if x.allowStorage {
+	if x.allowStorage || x.allowStorageTransfers {
 		if handled, err := x.rewriteStorageQuery(e); handled || err != nil {
 			return err
 		}

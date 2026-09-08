@@ -211,3 +211,20 @@ uint32_t fy_private_vector_pop_copy_v0(void *storage, void *output, size_t eleme
 uint32_t fy_private_vector_pop_take_v0(void *storage, void *output, size_t element_size) {
     return fy_private_vector_pop_bytes_v0(storage, output, element_size);
 }
+
+/* Retire the last initialized slot and hand its sole element obligation to the
+ * unsafe caller. The caller must immediately take the typed value before any
+ * storage mutation/release; the returned address is not an element borrow.
+ * NULL means invalid input or empty prefix, with no descriptor change. */
+void *fy_private_vector_pop_slot_v0(void *storage, size_t element_size) {
+    if (storage == NULL) return NULL;
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size || value.length == 0) {
+        return NULL;
+    }
+    value.length--;
+    void *slot = (unsigned char *)value.block.data + value.length * value.element_size;
+    memcpy(storage, &value, sizeof value);
+    return slot;
+}
