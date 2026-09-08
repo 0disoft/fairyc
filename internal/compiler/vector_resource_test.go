@@ -5,21 +5,20 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
-	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 func TestPrivateVectorResourceOwnership(t *testing.T) {
-	runPrivateVectorStorageNativeWithLayout(t, vectorResourceProgram, vectorResourceProbe, hir.Type("main::Item"), "void *")
+	runPrivateVectorStorageNativeWithQueries(t, vectorResourceProgram, vectorResourceProbe)
 }
 
 func TestPrivateVectorResourceDonorCannotBeReused(t *testing.T) {
 	text := strings.Replace(vectorResourceProgram,
 		"assert(recover_and_retry(ref mut storage, make(1), 1) == 1);",
 		"let Item first = make(1); assert(recover_and_retry(ref mut storage, first, 1) == 1); assert(item_id(ref first) == 1);", 1)
-	text = strings.NewReplacer("element_size()", "8", "element_alignment()", "8").Replace(text)
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
-	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
+	result, _, err := compiler.CheckStorageGenericFunctions(file, genericCoordinate(t), genericplan.DefaultPlanLimits())
 	if err == nil && result.Verified {
 		t.Fatal("transferred resource donor remained usable")
 	}
@@ -35,6 +34,7 @@ const vectorResourceProgram = `module main;
 @link_name("fairyc_fixture_resource_pop") unsafe extern C fn u32 pop_raw(ptr mut void storage, ptr mut void output, usize size);
 @link_name("fairyc_fixture_resource_fail") unsafe extern C fn i32 fail_next();
 @link_name("fairyc_fixture_resource_finished") unsafe extern C fn i32 finished();
+@link_name("fairyc_fixture_resource_empty") unsafe extern C fn i32 empty_valid(ptr void storage);
 resource Item {
     ptr mut void handle;
     cleanup { let u32 status = unsafe { drop_raw(this.handle) }; }
@@ -59,7 +59,9 @@ fn Item make(i32 id) {
 fn i32 item_id(ref Item value) { return unsafe { id_raw(value.handle) }; }
 fn i32 discard_item(Item value) { return 0; }
 fn Items empty_items() {
-    return Items { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
+    var Items storage = Items { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
+    assert(unsafe { initialize(ref mut storage as ptr mut void, storage_size<Item>(), storage_alignment<Item>()) } == 0);
+    return storage;
 }
 fn Result<u32, Item> push(ref mut Items storage, Item value) {
     var Item owned = value;
@@ -92,7 +94,7 @@ fn Item pop(ref mut Items storage) {
 }
 fn i32 exercise() {
     var Items storage = empty_items();
-    assert(unsafe { initialize(ref mut storage as ptr mut void, element_size(), element_alignment()) } == 0);
+    assert(unsafe { empty_valid(ref storage as ptr void) } == 1);
     assert(unsafe { fail_next() } == 1);
     assert(recover_and_retry(ref mut storage, make(1), 1) == 1);
     for (var i32 id = 2; id < 9; id += 1) { assert(push_ok(ref mut storage, make(id)) == 1); }
@@ -110,6 +112,13 @@ fn i32 main() { return exercise() + unsafe { finished() }; }
 `
 
 const vectorResourceProbe = `
+int32_t fairyc_fixture_resource_empty(const void *storage) {
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    return vector_live == 0 && value.block.data == NULL && value.block.size == 0 &&
+        value.block.alignment == 0 && value.length == 0 &&
+        value.element_size == sizeof(void *) && value.element_alignment == _Alignof(void *);
+}
 _Static_assert(sizeof(void *) == 8 && _Alignof(void *) == 8, "fixture Item layout");
 static void *resource_handles[9] = {NULL};
 static size_t resource_live = 0;

@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
-	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 func TestPrivateVectorCopyScalars(t *testing.T) {
@@ -16,16 +16,17 @@ func TestPrivateVectorCopyScalars(t *testing.T) {
 	} {
 		t.Run(item.scalar, func(t *testing.T) {
 			source := strings.NewReplacer("SCALAR", item.scalar, "VALUE", item.value, "OTHER", item.other).Replace(vectorCopyProgram)
-			runPrivateVectorStorageNativeWithLayout(t, source, vectorCopyProbe, hir.Type(item.scalar), item.nativeType)
+			probe := strings.ReplaceAll(vectorCopyProbe, "ELEMENT_NATIVE", item.nativeType)
+			runPrivateVectorStorageNativeWithQueries(t, source, probe)
 		})
 	}
 }
 
 func TestPrivateVectorCopyRejectsWrongScalar(t *testing.T) {
-	text := strings.NewReplacer("SCALAR", "i32", "VALUE", "42", "OTHER", "0", "element_size()", "4", "element_alignment()", "4").Replace(vectorCopyProgram)
+	text := strings.NewReplacer("SCALAR", "i32", "VALUE", "42", "OTHER", "0").Replace(vectorCopyProgram)
 	text = strings.Replace(text, "push<i32>(ref mut storage, item)", "push<i32>(ref mut storage, false)", 1)
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
-	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
+	result, _, err := compiler.CheckStorageGenericFunctions(file, genericCoordinate(t), genericplan.DefaultPlanLimits())
 	if err == nil && result.Verified {
 		t.Fatal("wrong scalar accepted by typed push")
 	}
@@ -40,12 +41,15 @@ const vectorCopyProgram = `module main;
 @link_name("fairyc_fixture_vector_pop") unsafe extern C fn u32 pop_raw(ptr mut void storage, ptr mut void output, usize size);
 @link_name("fairyc_fixture_vector_fail_next") unsafe extern C fn i32 fail_next();
 @link_name("fairyc_fixture_vector_wrong_size") unsafe extern C fn i32 wrong_size(ptr mut void storage);
+@link_name("fairyc_fixture_vector_empty") unsafe extern C fn i32 empty_valid(ptr void storage);
 resource Storage<T> {
     ptr mut void data; usize bytes; usize alignment; usize length; usize element_size; usize element_alignment;
     cleanup { let u32 status = unsafe { release(ref mut this as ptr mut void) }; }
 }
 fn Storage<T> empty<T>() {
-    return Storage<T> { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
+    var Storage<T> storage = Storage<T> { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
+    assert(unsafe { initialize(ref mut storage as ptr mut void, storage_size<T>(), storage_alignment<T>()) } == 0);
+    return storage;
 }
 fn u32 push<T>(ref mut Storage<T> storage, T value) {
     return unsafe { push_raw(storage as ptr mut void, ref value as ptr void, storage.element_size) };
@@ -58,7 +62,7 @@ fn u32 pop<T>(ref mut Storage<T> storage, ref mut T output) {
 }
 fn i32 exercise() {
     var Storage<SCALAR> storage = empty<SCALAR>();
-    assert(unsafe { initialize(ref mut storage as ptr mut void, element_size(), element_alignment()) } == 0);
+    assert(unsafe { empty_valid(ref storage as ptr void) } == 1);
     let SCALAR item = VALUE;
     let SCALAR other = OTHER;
     var SCALAR output = other;
@@ -85,6 +89,13 @@ fn i32 main() { return exercise() + unsafe { finished() }; }
 `
 
 const vectorCopyProbe = `
+int32_t fairyc_fixture_vector_empty(const void *storage) {
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    return vector_live == 0 && value.block.data == NULL && value.block.size == 0 &&
+        value.block.alignment == 0 && value.length == 0 &&
+        value.element_size == sizeof(ELEMENT_NATIVE) && value.element_alignment == _Alignof(ELEMENT_NATIVE);
+}
 uint32_t fairyc_fixture_vector_push(void *storage, const void *value, size_t size) {
     return fy_private_vector_push_copy_v0(storage, value, size);
 }

@@ -172,8 +172,8 @@ struct, resource and enum layouts for both target profiles, preserved query
 identity and zero-result rejection. The original i32 poison-prefix fixture
 retains its explicit four-byte constants as an independent fixed-layout oracle.
 No public foreign symbols, source grammar, stable entry points or SDK versions
-change. Source-level type-layout acquisition and a safe container constructor
-are still required.
+change. The later sections record source-level acquisition and constructor
+integration; a public SDK container is not admitted.
 
 ### Symbolic private storage-query lowering
 
@@ -198,8 +198,8 @@ unexpected operands, ownership flags and traps. An unreachable-block control
 separates private admission from normal dataflow reachability. Low/optimized MSVC
 executes the six lowered queries and returns 42; generated aggregate assertions
 check the corresponding C layouts. This is direct HIR-to-native evidence, not
-parsing or semantic admission of a source-level intrinsic. The private generic
-source connection is the next required step.
+parsing or semantic admission of a source-level intrinsic. The following section
+records the subsequently implemented private generic source connection.
 
 ### Private generic source layout queries
 
@@ -225,10 +225,33 @@ The complete source program returns 42 under low/optimized Windows MSVC.
 These tests reuse the existing native query harness, not injected HIR or numeric
 test adapters. SDK, public language and runtime ABI versions are unchanged.
 
+### Type-driven construction and lifecycle integration
+
+The five scalar copy programs now initialize inside `empty<T>()`, using the
+source queries directly, then return the initialized resource by ownership move.
+The Item-owning program does the same inside `empty_items()` with the nominal
+Item type. Neither constructor receives a size/alignment argument or calls a
+test-only C layout provider. The previously described numeric adapter setup has
+been removed from these two integration paths.
+
+Native C probes independently compare the returned descriptor with `sizeof` and
+`_Alignof` of each element's C representation. They also require null data, zero
+allocated bytes, zero allocation alignment, zero length and no live allocation
+immediately after construction. They read through `memcpy`, not an incompatible
+struct cast. Existing full scalar push/read/pop, initial/growth OOM preservation,
+resource failure-return/retry, move and exact cleanup oracles run afterward under
+low/optimized MSVC. Wrong scalar arguments and reuse of a moved Item donor are
+checked through the same private source admission lane as their positive controls.
+
+This closes type-driven initialization in the native integration programs, not
+public SDK construction. The scalar generic helpers still require a copyable
+element contract, and Item cleanup remains specific to that known empty-state
+resource. Private descriptor fields are not an encapsulated public API.
+
 ### Still required
 
-This is private storage and transfer evidence, not `Vec<T>`. Safe typed container construction
-using these queries, package-level nominal/resource argument admission, safe public operations,
+This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
+package-level nominal/resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow
 invalidation, package/SDK integration and stable admission
 remain separate work. The i32 fixture supplies its known four-byte layout and
