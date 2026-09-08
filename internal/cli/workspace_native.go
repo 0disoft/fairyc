@@ -39,6 +39,7 @@ type loweredWorkspace struct {
 	entryName       string
 	lockState       string
 	rootPackageName string
+	sdkStorage      bool
 }
 
 type workspaceCompilePolicy struct {
@@ -299,7 +300,7 @@ func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, 
 	if code != ExitSuccess {
 		return compiledWorkspace{}, code
 	}
-	artifact, code := compileWindowsProgramWithRunReceipt(lowered.program, lowered.entryName, options.targetID, options.profile, policy.runTrapReceipt, stderr)
+	artifact, code := compileWindowsProgramPolicy(lowered.program, lowered.entryName, options.targetID, options.profile, policy.runTrapReceipt, lowered.sdkStorage, stderr)
 	if code != ExitSuccess {
 		return compiledWorkspace{}, code
 	}
@@ -318,6 +319,10 @@ func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCo
 		}
 		return loweredWorkspace{}, packageFailure(stderr, err)
 	}
+	return lowerLoadedWorkspaceExecutable(workspace, lockState, policy, subset, stderr)
+}
+
+func lowerLoadedWorkspaceExecutable(workspace workspaceloader.Workspace, lockState string, policy workspaceCompilePolicy, subset string, stderr io.Writer) (loweredWorkspace, int) {
 	checked, pipelineErr := workspacecompiler.Check(workspace)
 	if len(checked.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
@@ -345,6 +350,17 @@ func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCo
 	if !checked.Verified {
 		return loweredWorkspace{}, internalError(stderr)
 	}
+	sdkStorage := false
+	if workspace.UsesVectorCandidate() {
+		owners, err := workspace.VectorCandidateStorageOwners()
+		if err != nil {
+			return loweredWorkspace{}, internalError(stderr)
+		}
+		sdkStorage = len(owners) != 0
+		if err := validateVectorRuntimeOwners(workspace); err != nil {
+			return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, err)
+		}
+	}
 	entryName, err := workspaceEntryName(workspace)
 	if err != nil {
 		return loweredWorkspace{}, packageFailure(stderr, err)
@@ -360,6 +376,7 @@ func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCo
 	return loweredWorkspace{
 		program: checked.MIR, entryName: entryName, lockState: lockState,
 		rootPackageName: rootPackage.Manifest.Package.Name,
+		sdkStorage:      sdkStorage,
 	}, ExitSuccess
 }
 

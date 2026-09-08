@@ -131,5 +131,14 @@ active cache family across candidate/ordinary transitions. Tests require memory
 entries to be discarded on a family change, exact disk entries to survive a
 round trip, and forged SDK input not to alter the active cache.
 
-Default loader/SDK selection and CLI native dispatch remain unchanged. The
-shared check/cache integration is not yet installed SDK promotion.
+The Windows workspace build path now carries the verified SDK storage selection
+into the storage-aware emitter. Its support composition includes one system heap,
+the closed vector runtime and the existing product/run trap transport. Consumer
+declarations of private vector runtime symbols are rejected before native build.
+Focused CLI tests load the candidate bundle and execute Buffer element access,
+console output and out-of-range assertion traps under low/optimized MSVC. Ordinary
+support composition is unchanged and unknown private vector symbols are rejected.
+
+Default loader/SDK selection remains unchanged, so the stable CLI cannot yet
+select the candidate from user source. Native test dispatch and installed SDK
+promotion remain separate. No stable language, SDK version or runtime ABI changes.

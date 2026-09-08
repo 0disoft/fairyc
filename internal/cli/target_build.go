@@ -63,10 +63,18 @@ func compileWindowsProgram(program mir.Program, entryName string, targetID targe
 }
 
 func compileWindowsProgramWithRunReceipt(program mir.Program, entryName string, targetID target.ID, profile cdriver.Profile, runReceipt bool, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+	return compileWindowsProgramPolicy(program, entryName, targetID, profile, runReceipt, false, stderr)
+}
+
+func compileWindowsProgramPolicy(program mir.Program, entryName string, targetID target.ID, profile cdriver.Profile, runReceipt, sdkStorage bool, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
 	if targetID != target.X8664WindowsMSVC {
 		return cdriver.WindowsHostArtifact{}, invocationError(stderr, fmt.Sprintf("Windows target compilation requires %s", target.X8664WindowsMSVC))
 	}
-	unit, err := cbackend.Emit(program, entryName, cbackend.Stage0WindowsMSVCProfile())
+	emit := cbackend.Emit
+	if sdkStorage {
+		emit = cbackend.EmitStorageTransfers
+	}
+	unit, err := emit(program, entryName, cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {
@@ -78,7 +86,9 @@ func compileWindowsProgramWithRunReceipt(program mir.Program, entryName string, 
 		return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows target build", err)
 	}
 	var supportSource string
-	if runReceipt {
+	if sdkStorage {
+		supportSource, err = windowsVectorSupportSource(unit.ForeignSymbols, runReceipt)
+	} else if runReceipt {
 		supportSource, err = windowsTargetRunSupportSource(unit.ForeignSymbols)
 	} else {
 		supportSource, err = windowsTargetSupportSource(unit.ForeignSymbols)
