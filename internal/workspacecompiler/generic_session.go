@@ -36,9 +36,6 @@ func NewGenericSession(configuration Configuration, limits genericplan.PlanLimit
 }
 
 func newGenericSession(configuration Configuration, limits genericplan.PlanLimits, transfers bool) (*GenericSession, error) {
-	if transfers && configuration.Persistent != nil {
-		return nil, fmt.Errorf("storage transfer sessions do not admit persistent caches")
-	}
 	if limits.MaxSpecializations <= 0 || limits.MaxSpecializationsPerDeclaration <= 0 || limits.MaxExpansionDepth <= 0 {
 		return nil, fmt.Errorf("generic workspace planning limits must be positive")
 	}
@@ -54,11 +51,13 @@ func newGenericSession(configuration Configuration, limits genericplan.PlanLimit
 		return nil, err
 	}
 	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzed, storage: StorageMemory, transfers: transfers}
+	if transfers {
+		session.lower = compiler.LowerAnalyzedStorageTransfers
+	}
 	if configuration.Persistent == nil {
 		createCache := packageartifact.NewGenericCache
 		if transfers {
 			createCache = packageartifact.NewStorageTransferCache
-			session.lower = compiler.LowerAnalyzedStorageTransfers
 		}
 		session.cache, err = createCache(configuration.Cache, configuration.MaxArtifactBytes)
 		if err != nil {
@@ -77,14 +76,26 @@ func newGenericSession(configuration Configuration, limits genericplan.PlanLimit
 			return nil, fmt.Errorf("generic persistent cache requires an exact compiler executable identity: %w", err)
 		}
 		if persistent.RootBoundary == nil {
-			session.stableCache, err = packageartifact.NewGenericStableCache(persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
+			createCache := packageartifact.NewGenericStableCache
+			if transfers {
+				createCache = packageartifact.NewStorageTransferStableCache
+			}
+			session.stableCache, err = createCache(persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
 		} else {
-			session.stableCache, err = packageartifact.NewGenericStableCacheInRoot(persistent.RootBoundary, persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
+			createCache := packageartifact.NewGenericStableCacheInRoot
+			if transfers {
+				createCache = packageartifact.NewStorageTransferStableCacheInRoot
+			}
+			session.stableCache, err = createCache(persistent.RootBoundary, persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
 		}
 		if err != nil {
 			return nil, err
 		}
-		session.keys.compilerBuild = strings.Join([]string{"fairyc.compiler-generic-stable-cache/0", persistent.CompilerBuild, packageartifact.StableArtifactVersion, packagecache.DiskRecordVersion}, ";")
+		family, version := "fairyc.compiler-generic-stable-cache/0", packageartifact.StableArtifactVersion
+		if transfers {
+			family, version = "fairyc.compiler-storage-stable-cache/0", packageartifact.StorageStableArtifactVersion
+		}
+		session.keys.compilerBuild = strings.Join([]string{family, persistent.CompilerBuild, version, packagecache.DiskRecordVersion}, ";")
 		session.storage = StorageDisk
 	}
 	return session, nil

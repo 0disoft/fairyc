@@ -13,18 +13,27 @@ import (
 )
 
 func TestStorageTransferSessionSkipsOnlyWarmLowering(t *testing.T) {
-	_, root := genericWorkspaceSession(t, 32<<20)
-	configuration := genericPersistentConfiguration(t, t.TempDir())
-	// The private constructor rejects disk policy before opening any root.
-	if _, err := NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits()); err == nil {
-		t.Fatal("private transfer session admitted a persistent cache")
-	}
-	configuration = Configuration{Target: target.X8664WindowsMSVC, Cache: packagecache.Limits{MaxEntries: 8, MaxBytes: 32 << 20}, MaxArtifactBytes: 8 << 20}
+	configuration := Configuration{Target: target.X8664WindowsMSVC, Cache: packagecache.Limits{MaxEntries: 8, MaxBytes: 32 << 20}, MaxArtifactBytes: 8 << 20}
+	t.Run("memory", func(t *testing.T) { testStorageTransferSessionLowering(t, configuration) })
+	t.Run("disk", func(t *testing.T) {
+		testStorageTransferSessionLowering(t, genericPersistentConfiguration(t, t.TempDir()))
+	})
+}
+
+func testStorageTransferSessionLowering(t *testing.T, configuration Configuration) {
+	t.Helper()
+	root := writeCacheWorkspace(t, genericAnswer)
+	writeFile(t, filepath.Join(root, "src", "main.fy"), genericMain)
 	session, err := NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(session.generic.keys.compilerBuild, ":storage-transfer-v0") {
+	defer session.Close()
+	domain := ":storage-transfer-v0"
+	if configuration.Persistent != nil {
+		domain = "fairyc.compiler-storage-stable-cache/0;"
+	}
+	if !strings.Contains(session.generic.keys.compilerBuild, domain) {
 		t.Fatal("private session lost its key compatibility domain")
 	}
 	workspace := loadCacheWorkspace(t, root)
@@ -40,5 +49,18 @@ func TestStorageTransferSessionSkipsOnlyWarmLowering(t *testing.T) {
 	writeFile(t, filepath.Join(root, "src", "main.fy"), strings.Replace(genericMain, "42", "43", 1))
 	if _, err := session.Check(loadCacheWorkspace(t, root)); !errors.Is(err, sentinel) {
 		t.Fatalf("source change failed to invoke fallback lowering: %v", err)
+	}
+}
+
+func TestStorageTransferSessionPersistentRequiresExactPolicy(t *testing.T) {
+	configuration := genericPersistentConfiguration(t, t.TempDir())
+	configuration.Cache = packagecache.Limits{MaxEntries: 1, MaxBytes: 1}
+	if _, err := NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits()); err == nil {
+		t.Fatal("transfer session accepted mixed cache policies")
+	}
+	configuration.Cache = packagecache.Limits{}
+	configuration.Persistent.CompilerBuild = "latest"
+	if _, err := NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits()); err == nil {
+		t.Fatal("transfer session accepted a moving compiler identity")
 	}
 }

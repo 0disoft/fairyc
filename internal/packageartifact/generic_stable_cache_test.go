@@ -11,10 +11,24 @@ import (
 )
 
 func TestGenericStableCacheIsolationAndQuarantine(t *testing.T) {
+	testStableCacheIsolationAndQuarantine(t, false)
+}
+
+func TestStorageTransferStableCacheIsolationAndQuarantine(t *testing.T) {
+	testStableCacheIsolationAndQuarantine(t, true)
+}
+
+func testStableCacheIsolationAndQuarantine(t *testing.T, transfers bool) {
+	t.Helper()
 	artifact, _, _ := cacheFixture(t)
 	root := t.TempDir()
 	limits := packagecache.DiskLimits{MaxEntries: 4, MaxBytes: 16 << 20, MaxRecordBytes: 8 << 20, TempMaxAge: time.Minute}
-	cache, err := NewGenericStableCache(root, limits, 8<<20)
+	createCache := NewGenericStableCache
+	otherCache := NewStorageTransferStableCache
+	if transfers {
+		createCache, otherCache = otherCache, createCache
+	}
+	cache, err := createCache(root, limits, 8<<20)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,8 +49,20 @@ func TestGenericStableCacheIsolationAndQuarantine(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer ordinary.Close()
-	if _, found := ordinary.Get(genericDiskAddress(key)); found {
+	address := stableDiskAddress(cache.schema(), key)
+	if _, found := ordinary.Get(address); found {
 		t.Fatal("generic record leaked into ordinary directory")
+	}
+	other, err := otherCache(root, limits, 8<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer other.Close()
+	if other.Get(key, hash, artifact.Package, artifact.PackageCoordinate).Status != LookupMiss {
+		t.Fatal("stable cache format namespaces overlap")
+	}
+	if address == stableDiskAddress(other.schema(), key) || stableDiskInterface(cache.schema(), hash) == stableDiskInterface(other.schema(), hash) {
+		t.Fatal("stable cache storage domains overlap")
 	}
 	cache.maxArtifactBytes = 1
 	if err := cache.Put(key, hash, artifact); !errors.Is(err, ErrContextArtifactTooLarge) {
@@ -46,9 +72,20 @@ func TestGenericStableCacheIsolationAndQuarantine(t *testing.T) {
 	if get().Status != LookupHit {
 		t.Fatal("oversize write removed prior generation")
 	}
-	record, found := cache.store.Get(genericDiskAddress(key))
+	record, found := cache.store.Get(address)
 	if !found {
 		t.Fatal("missing original generation")
+	}
+	// Even a record copied to the other directory and relabeled at the outer
+	// DiskStore layer cannot cross the inner cache/artifact schema boundary.
+	foreignRecord := record
+	foreignRecord.Key = stableDiskAddress(other.schema(), key)
+	foreignRecord.PublicInterface = stableDiskInterface(other.schema(), hash)
+	if err := other.store.Put(foreignRecord); err != nil {
+		t.Fatal(err)
+	}
+	if other.Get(key, hash, artifact.Package, artifact.PackageCoordinate).Status != LookupRejected || get().Status != LookupHit {
+		t.Fatal("cross-format rejection damaged the original namespace")
 	}
 	cache.maxArtifactBytes = uint64(len(record.Artifacts[0].Data) - 1)
 	if err := cache.Put(key, hash, artifact); !errors.Is(err, ErrStableArtifactTooLarge) {
@@ -70,7 +107,7 @@ func TestGenericStableCacheIsolationAndQuarantine(t *testing.T) {
 		if err := cache.Put(key, hash, artifact); err != nil {
 			t.Fatal(err)
 		}
-		record, found := cache.store.Get(genericDiskAddress(key))
+		record, found := cache.store.Get(address)
 		if !found {
 			t.Fatal("missing stored record")
 		}
@@ -86,9 +123,9 @@ func TestGenericStableCacheIsolationAndQuarantine(t *testing.T) {
 	if err := cache.Put(key, hash, artifact); err != nil {
 		t.Fatal(err)
 	}
-	other := artifact.PackageCoordinate
-	other[0] ^= 1
-	if cache.Get(key, hash, artifact.Package, other).Status != LookupRejected || get().Status != LookupMiss {
+	otherCoordinate := artifact.PackageCoordinate
+	otherCoordinate[0] ^= 1
+	if cache.Get(key, hash, artifact.Package, otherCoordinate).Status != LookupRejected || get().Status != LookupMiss {
 		t.Fatal("foreign coordinate accepted")
 	}
 	stats, err := cache.Stats()
@@ -98,14 +135,27 @@ func TestGenericStableCacheIsolationAndQuarantine(t *testing.T) {
 }
 
 func TestGenericStableCacheRequiresBoundsAndOpenedContainment(t *testing.T) {
+	testStableCacheBoundsAndContainment(t, false)
+}
+
+func TestStorageTransferStableCacheRequiresBoundsAndOpenedContainment(t *testing.T) {
+	testStableCacheBoundsAndContainment(t, true)
+}
+
+func testStableCacheBoundsAndContainment(t *testing.T, transfers bool) {
+	t.Helper()
+	createCache, createBoundCache := NewGenericStableCache, NewGenericStableCacheInRoot
+	if transfers {
+		createCache, createBoundCache = NewStorageTransferStableCache, NewStorageTransferStableCacheInRoot
+	}
 	limits := packagecache.DiskLimits{MaxEntries: 2, MaxBytes: 16 << 20, MaxRecordBytes: 8 << 20, TempMaxAge: time.Minute}
-	if _, err := NewGenericStableCache("", limits, 8<<20); err == nil {
+	if _, err := createCache("", limits, 8<<20); err == nil {
 		t.Fatal("empty root accepted")
 	}
-	if _, err := NewGenericStableCache(t.TempDir(), limits, 0); err == nil {
+	if _, err := createCache(t.TempDir(), limits, 0); err == nil {
 		t.Fatal("missing bound accepted")
 	}
-	if _, err := NewGenericStableCacheInRoot(nil, ".", limits, 8<<20); err == nil {
+	if _, err := createBoundCache(nil, ".", limits, 8<<20); err == nil {
 		t.Fatal("nil boundary accepted")
 	}
 	boundary, err := os.OpenRoot(t.TempDir())
@@ -113,10 +163,10 @@ func TestGenericStableCacheRequiresBoundsAndOpenedContainment(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer boundary.Close()
-	if _, err := NewGenericStableCacheInRoot(boundary, "../escape", limits, 8<<20); err == nil {
+	if _, err := createBoundCache(boundary, "../escape", limits, 8<<20); err == nil {
 		t.Fatal("boundary escape accepted")
 	}
-	cache, err := NewGenericStableCacheInRoot(boundary, "cache", limits, 8<<20)
+	cache, err := createBoundCache(boundary, "cache", limits, 8<<20)
 	if err != nil {
 		t.Fatal(err)
 	}

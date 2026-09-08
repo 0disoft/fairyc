@@ -19,9 +19,24 @@ import (
 // package identities and source digests from real manifests instead of fixture
 // keys. This is the source-to-cache-to-execution lane missing from codec tests.
 func TestPrivateVectorWorkspaceCacheCurrentSource(t *testing.T) {
+	for _, persistent := range []bool{false, true} {
+		name := "memory"
+		if persistent {
+			name = "disk"
+		}
+		t.Run(name, func(t *testing.T) { testVectorWorkspaceCacheCurrentSource(t, persistent) })
+	}
+}
+
+func testVectorWorkspaceCacheCurrentSource(t *testing.T, persistent bool) {
+	t.Helper()
 	client, provider := vectorPackageSources(t, nil)
 	root := writeVectorCacheWorkspace(t, client, provider)
-	session, err := workspacecompiler.NewStorageTransferSession(vectorCacheConfiguration(8), genericplan.DefaultPlanLimits())
+	configuration := vectorCacheConfiguration(8)
+	if persistent {
+		configuration = vectorPersistentConfiguration(t, t.TempDir())
+	}
+	session, err := workspacecompiler.NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,6 +47,18 @@ func TestPrivateVectorWorkspaceCacheCurrentSource(t *testing.T) {
 			t.Fatal(err)
 		}
 		return workspace
+	}
+	defer session.Close()
+	stats := func() any {
+		t.Helper()
+		if !persistent {
+			return session.Stats()
+		}
+		result, err := session.PersistentStats()
+		if err != nil {
+			t.Fatal(err)
+		}
+		return result
 	}
 	workspace := load()
 	cold, err := session.Check(workspace)
@@ -50,7 +77,9 @@ func TestPrivateVectorWorkspaceCacheCurrentSource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	runVectorStorageMIRNativeLane(t, warm.Compiler.MIR, hir.QualifiedModulePath(rootID, "main")+"::main", vectorResourceProbe, true)
+	t.Run("warm-native", func(t *testing.T) {
+		runVectorStorageMIRNativeLane(t, warm.Compiler.MIR, hir.QualifiedModulePath(rootID, "main")+"::main", vectorResourceProbe, true)
+	})
 
 	// Ordinary stable selection does not acquire the private session capability.
 	ordinary, err := workspacecompiler.NewSourceSession(vectorCacheConfiguration(8))
@@ -89,18 +118,31 @@ func TestPrivateVectorWorkspaceCacheCurrentSource(t *testing.T) {
 	if err != nil || updatedWarm.Cache.Outcome != workspacecompiler.OutcomeAllHit || updatedWarm.Cache.Lowered {
 		t.Fatalf("updated warm: %v %+v", err, updatedWarm.Cache)
 	}
-	runVectorStorageMIRNativeLane(t, updatedWarm.Compiler.MIR, hir.QualifiedModulePath(rootID, "main")+"::main", vectorResourceProbe, true)
+	t.Run("updated-native", func(t *testing.T) {
+		runVectorStorageMIRNativeLane(t, updatedWarm.Compiler.MIR, hir.QualifiedModulePath(rootID, "main")+"::main", vectorResourceProbe, true)
+	})
 
 	// Current invalid source must be rejected before looking up retained code.
-	before := session.Stats()
+	before := stats()
 	writeVectorCacheFile(t, root, "storage/src/storage.fy", strings.Replace(changedProvider, "return observed;", "return false;", 1))
 	invalid, err := session.Check(load())
-	if invalid.Compiler.Verified || invalid.Cache.Hits != 0 || invalid.Cache.Stored != 0 || !reflect.DeepEqual(before, session.Stats()) {
+	if invalid.Compiler.Verified || invalid.Cache.Hits != 0 || invalid.Cache.Stored != 0 || !reflect.DeepEqual(before, stats()) {
 		t.Fatalf("invalid source touched cache: %v %+v", err, invalid.Cache)
 	}
 }
 
 func TestPrivateVectorWorkspaceCachePartialHits(t *testing.T) {
+	for _, persistent := range []bool{false, true} {
+		name := "memory"
+		if persistent {
+			name = "disk"
+		}
+		t.Run(name, func(t *testing.T) { testVectorWorkspaceCachePartialHits(t, persistent) })
+	}
+}
+
+func testVectorWorkspaceCachePartialHits(t *testing.T, persistent bool) {
+	t.Helper()
 	client, provider := vectorPackageSources(t, nil)
 	root := writeVectorCacheWorkspace(t, client, provider)
 	workspace, err := workspaceloader.Load(root)
@@ -108,10 +150,16 @@ func TestPrivateVectorWorkspaceCachePartialHits(t *testing.T) {
 		t.Fatal(err)
 	}
 	// One retained package cannot authorize publishing half of a program.
-	session, err := workspacecompiler.NewStorageTransferSession(vectorCacheConfiguration(1), genericplan.DefaultPlanLimits())
+	configuration := vectorCacheConfiguration(1)
+	if persistent {
+		configuration = vectorPersistentConfiguration(t, t.TempDir())
+		configuration.Persistent.Limits.MaxEntries = 1
+	}
+	session, err := workspacecompiler.NewStorageTransferSession(configuration, genericplan.DefaultPlanLimits())
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer session.Close()
 	if _, err := session.Check(workspace); err != nil {
 		t.Fatal(err)
 	}

@@ -39,7 +39,11 @@ func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericA
 			}
 			functionCount += uint64(len(artifact.Functions))
 		}
-		program, err := packageartifact.RebindStableArtifacts(artifacts, coordinates, 1, hir.SymbolID(functionCount)+1, 1)
+		rebind := packageartifact.RebindStableArtifacts
+		if session.transfers {
+			rebind = packageartifact.RebindStorageTransferStableArtifacts
+		}
+		program, err := rebind(artifacts, coordinates, 1, hir.SymbolID(functionCount)+1, 1)
 		if err == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil
@@ -54,7 +58,11 @@ func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericA
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities, coordinates)
+	extract := packageartifact.ExtractAll
+	if session.transfers {
+		extract = packageartifact.ExtractAllStorageTransfers
+	}
+	extracted, err := extract(compiled.MIR, identities, coordinates)
 	if err != nil {
 		return Result{}, err
 	}

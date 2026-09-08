@@ -30,33 +30,39 @@ type GenericStableLookup struct {
 }
 
 // GenericStableCache stores exact-version stable MIR, not process-codec bytes.
-// Its generic-v0 directory and domain-separated storage addresses isolate it
-// from ordinary compilation records. Hits still require current reassembly.
+// Default constructors select generic-v0; transfer constructors select a separate
+// namespace. Domain-separated addresses isolate both from ordinary compilation
+// records. Hits still require current reassembly.
 type GenericStableCache struct {
 	store                  *packagecache.DiskStore
 	maxArtifactBytes       uint64
 	mu                     sync.Mutex
 	hits, misses, rejected uint64
+	storageTransfers       bool
 }
 
 func NewGenericStableCache(root string, limits packagecache.DiskLimits, maxArtifactBytes uint64) (*GenericStableCache, error) {
-	return newGenericStableCache(nil, root, limits, maxArtifactBytes)
+	return newGenericStableCache(nil, root, limits, maxArtifactBytes, false)
 }
 
 func NewGenericStableCacheInRoot(boundary *os.Root, root string, limits packagecache.DiskLimits, maxArtifactBytes uint64) (*GenericStableCache, error) {
 	if boundary == nil {
 		return nil, fmt.Errorf("generic stable cache filesystem boundary must be initialized")
 	}
-	return newGenericStableCache(boundary, root, limits, maxArtifactBytes)
+	return newGenericStableCache(boundary, root, limits, maxArtifactBytes, false)
 }
 
-func newGenericStableCache(boundary *os.Root, root string, limits packagecache.DiskLimits, maxArtifactBytes uint64) (*GenericStableCache, error) {
+func newGenericStableCache(boundary *os.Root, root string, limits packagecache.DiskLimits, maxArtifactBytes uint64, transfers bool) (*GenericStableCache, error) {
 	if root == "" || maxArtifactBytes == 0 || maxArtifactBytes > limits.MaxRecordBytes {
 		return nil, fmt.Errorf("generic stable cache requires a root and positive artifact bound within the record bound")
 	}
 	var store *packagecache.DiskStore
 	var err error
-	root = filepath.Join(root, "generic-v0")
+	directory := "generic-v0"
+	if transfers {
+		directory = "storage-transfer-v0"
+	}
+	root = filepath.Join(root, directory)
 	if boundary == nil {
 		store, err = packagecache.NewDiskStore(root, limits)
 	} else {
@@ -65,7 +71,7 @@ func newGenericStableCache(boundary *os.Root, root string, limits packagecache.D
 	if err != nil {
 		return nil, err
 	}
-	return &GenericStableCache{store: store, maxArtifactBytes: maxArtifactBytes}, nil
+	return &GenericStableCache{store: store, maxArtifactBytes: maxArtifactBytes, storageTransfers: transfers}, nil
 }
 
 func (cache *GenericStableCache) Close() error {
@@ -76,12 +82,12 @@ func (cache *GenericStableCache) Close() error {
 }
 
 // These are storage addresses only, never v4 compiler compatibility identities.
-func genericDiskAddress(key packagecache.GenericKey) packagecache.Key {
-	return sha256.Sum256([]byte(genericStableSchema + ":address:" + key.String()))
+func stableDiskAddress(schema string, key packagecache.GenericKey) packagecache.Key {
+	return sha256.Sum256([]byte(schema + ":address:" + key.String()))
 }
 
-func genericDiskInterface(hash moduleinterface.GenericHash) moduleinterface.Hash {
-	return sha256.Sum256([]byte(genericStableSchema + ":interface:" + hash.String()))
+func stableDiskInterface(schema string, hash moduleinterface.GenericHash) moduleinterface.Hash {
+	return sha256.Sum256([]byte(schema + ":interface:" + hash.String()))
 }
 
 func (cache *GenericStableCache) Put(key packagecache.GenericKey, hash moduleinterface.GenericHash, artifact Artifact) error {
@@ -91,15 +97,16 @@ func (cache *GenericStableCache) Put(key packagecache.GenericKey, hash moduleint
 	if key == (packagecache.GenericKey{}) || hash == (moduleinterface.GenericHash{}) {
 		return fmt.Errorf("generic stable cache key and interface must be set")
 	}
-	stable, err := DescribeStableArtifact(artifact, cache.maxArtifactBytes)
+	stable, err := describeStableArtifact(artifact, cache.maxArtifactBytes, cache.storageTransfers)
 	if err != nil {
 		return err
 	}
-	payload, err := EncodeStableArtifact(stable, cache.maxArtifactBytes)
+	payload, err := encodeStableArtifact(stable, cache.maxArtifactBytes, cache.storageTransfers)
 	if err != nil {
 		return err
 	}
-	encoded, err := json.Marshal(genericStableEnvelope{genericStableSchema, key.String(), hash.String(), payload})
+	schema := cache.schema()
+	encoded, err := json.Marshal(genericStableEnvelope{schema, key.String(), hash.String(), payload})
 	if err != nil {
 		return err
 	}
@@ -107,7 +114,7 @@ func (cache *GenericStableCache) Put(key packagecache.GenericKey, hash moduleint
 		return ErrStableArtifactTooLarge
 	}
 	if err := cache.store.Put(packagecache.Record{
-		Key: genericDiskAddress(key), PublicInterface: genericDiskInterface(hash),
+		Key: stableDiskAddress(schema, key), PublicInterface: stableDiskInterface(schema, hash),
 		Artifacts: []packagecache.Artifact{{Kind: packagecache.ArtifactMIR, Data: encoded}},
 	}); err != nil {
 		return fmt.Errorf("%w: %w", ErrStableCacheStore, err)
@@ -122,7 +129,8 @@ func (cache *GenericStableCache) Get(key packagecache.GenericKey, hash moduleint
 	if key == (packagecache.GenericKey{}) || hash == (moduleinterface.GenericHash{}) || expectedPackage == (packagegraph.InstanceID{}) || expectedCoordinate == (packagegraph.CoordinateID{}) {
 		return cache.genericResult(GenericStableLookup{Status: LookupRejected, Reason: "generic stable cache expectations must be set"})
 	}
-	record, found := cache.store.Get(genericDiskAddress(key))
+	schema := cache.schema()
+	record, found := cache.store.Get(stableDiskAddress(schema, key))
 	if !found {
 		return cache.genericResult(GenericStableLookup{Status: LookupMiss})
 	}
@@ -130,7 +138,7 @@ func (cache *GenericStableCache) Get(key packagecache.GenericKey, hash moduleint
 		cache.store.DeleteIfMatch(record)
 		return cache.genericResult(GenericStableLookup{Status: LookupRejected, Reason: reason})
 	}
-	if record.PublicInterface != genericDiskInterface(hash) || len(record.Artifacts) != 1 || record.Artifacts[0].Kind != packagecache.ArtifactMIR {
+	if record.PublicInterface != stableDiskInterface(schema, hash) || len(record.Artifacts) != 1 || record.Artifacts[0].Kind != packagecache.ArtifactMIR {
 		return reject("generic stable cache record identity or payload kind differs")
 	}
 	encoded := record.Artifacts[0].Data
@@ -145,10 +153,10 @@ func (cache *GenericStableCache) Get(key packagecache.GenericKey, hash moduleint
 	if err != nil || !bytes.Equal(canonical, encoded) {
 		return reject("generic stable cache envelope is not canonical")
 	}
-	if envelope.Schema != genericStableSchema || envelope.Key != key.String() || envelope.Interface != hash.String() {
+	if envelope.Schema != schema || envelope.Key != key.String() || envelope.Interface != hash.String() {
 		return reject("generic stable cache envelope identity differs")
 	}
-	artifact, err := DecodeStableArtifact(envelope.MIR, cache.maxArtifactBytes)
+	artifact, err := decodeStableArtifact(envelope.MIR, cache.maxArtifactBytes, cache.storageTransfers)
 	if err != nil {
 		return reject(err.Error())
 	}

@@ -582,9 +582,10 @@ OOM, typed-transfer, exactly-once cleanup and zero-live-allocation counters.
 One-entry retention exercises mixed hit/miss fallback, and a lowering sentinel
 separately proves warm checks skip lowering while source changes invoke it.
 
-This constructor rejects persistent configuration before opening storage. Stable
-`SourceSession` selection still rejects generic aggregate source; no stable CLI,
-SDK, language or runtime ABI promotion is made by this private coordinator.
+The initial constructor admitted memory only. The explicit persistent option
+described below retains the same source-analysis gate. Stable `SourceSession`
+selection still rejects generic aggregate source; no stable CLI, SDK, language or
+runtime ABI promotion is made by this private coordinator.
 
 ### Private coordinate-stable transfer artifacts
 
@@ -607,8 +608,38 @@ The vector fixture changes all process-local namespaces, reverses package order,
 re-extracts byte-identical stable artifacts, and executes the rebound code under
 low/optimized MSVC with its existing ownership/OOM counters. It rejects incomplete
 closures, schema substitution, unknown/trailing/noncanonical bytes, byte-limit
-violations and damaged unsafe scope. Persistent storage and fresh-process disk
-cache coordination are not yet admitted by this transport step.
+violations and damaged unsafe scope. This transport step alone does not select
+persistent storage or establish current-source disk-cache compatibility.
+
+### Exact-build persistent transfer cache
+
+`NewStorageTransferStableCache` and its opened-root variant persist the private
+stable artifacts in a `storage-transfer-v0` directory using the separate
+`fairyc.storage-transfer-stable-cache/v0` envelope and storage-address domains.
+They retain the existing positive byte/entry limits, opened-root containment,
+immutable publication, retention and generation-matched quarantine checks.
+Ordinary and transfer caches cannot read each other's records, including records
+copied into the other directory and relabeled at the outer storage layer.
+
+`StorageTransferSession` now accepts explicit persistent configuration, requires
+an exact compiler executable digest and rejects mixed memory/disk policy. Its
+compatibility key includes the private stable-artifact version, source and generic
+interfaces, nominal specialization closure, dependencies and target. Every hit
+still follows current source analysis; complete hits rebind into fresh namespaces
+and pass the transfer verifier. Missing, rejected or partial entries recompile the
+current program. `Close` releases the opened cache root; `PersistentStats` reports
+the selected namespace, not an aggregate of unrelated cache directories.
+
+The vector fixture exercises memory and disk cold/warm checks, provider-body and
+client nominal-cleanup invalidation, invalid-source suppression, partial retention
+fallback and updated warm native execution. A separate process reads two disk
+hits with no lowering or stores and executes the ownership/OOM program under
+low/optimized MSVC. Changing the compiler digest produces two misses. The shared
+cache tests cover both schema families, invalid records, byte bounds and opened-
+root escape rejection; a separate sentinel proves disk hits skip lowering.
+
+This remains an explicit compiler-private cache lane. Stable workspace selection,
+installed SDK container source and public `Vec<T>` admission remain separate work.
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,
