@@ -218,11 +218,19 @@ func targetCScalar(spec target.Spec, name string) (target.Scalar, bool) {
 
 // Emit verifies MIR, rejects unsupported semantic families, and emits one deterministic C unit.
 func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
+	return emit(program, entry, profile, false)
+}
+
+func emit(program mir.Program, entry string, profile Profile, storageTransfers bool) (Unit, error) {
 	targetSpec, err := emissionTarget(profile)
 	if err != nil {
 		return Unit{}, err
 	}
-	if failures := mir.VerifyStorageQueries(program); len(failures) != 0 {
+	verify := mir.VerifyStorageQueries
+	if storageTransfers {
+		verify = mir.VerifyStorageTransfers
+	}
+	if failures := verify(program); len(failures) != 0 {
 		return Unit{}, fmt.Errorf("C emission requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
 	}
 	if err := validateCScalarTransports(); err != nil {
@@ -783,7 +791,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-					mir.OperationStorageLayout, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+					mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 					mir.OperationRegionPlace:
 					inferred = operation.Type
 				}
@@ -1374,6 +1382,12 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["private-storage-layout"] = struct{}{}
+			case mir.OperationStorageTake:
+				if err := e.inspectStorageTake(functionIndex, *operation); err != nil {
+					return err
+				}
+				allowedUnsafeEntities[operation.Entity] = struct{}{}
+				e.features["private-storage-take"] = struct{}{}
 			case mir.OperationArrayLength:
 				if err := e.inspectArrayLength(functionIndex, *operation); err != nil {
 					return err
@@ -1577,7 +1591,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
-		mir.OperationStorageLayout, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 		mir.OperationRegionPlace:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
@@ -2847,7 +2861,8 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if usesCSSizeT {
 		output.WriteString("#include <sys/types.h>\n")
 	}
-	if e.needsBitcast {
+	_, usesStorageTake := e.features["private-storage-take"]
+	if e.needsBitcast || usesStorageTake {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
@@ -3374,6 +3389,8 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return err
 		}
 		fmt.Fprintf(output, "    fy_l_%d = ((uintptr_t)UINT64_C(%d));\n", operation.DestinationLocal, value)
+	case mir.OperationStorageTake:
+		return e.writeStorageTake(output, operation)
 	case mir.OperationArrayLength:
 		if _, err := oneOperand(operation.Operands); err != nil {
 			return fmt.Errorf("fixed-array length in %s: %w", function, err)
@@ -4135,7 +4152,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-		mir.OperationStorageLayout, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
+		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

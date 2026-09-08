@@ -32,16 +32,22 @@ type verificationState struct {
 
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
-	return verify(program, false)
+	return verify(program, false, false)
 }
 
 // VerifyStorageQueries permits only the additional compiler-private symbolic
 // storage query. Standard interpreter and artifact verification remain closed.
 func VerifyStorageQueries(program Program) []VerificationError {
-	return verify(program, true)
+	return verify(program, true, false)
 }
 
-func verify(program Program, allowStorageQueries bool) []VerificationError {
+// VerifyStorageTransfers additionally admits unsafe representation-to-value moves.
+// Ordinary, query-only, interpreter and artifact entry points remain closed.
+func VerifyStorageTransfers(program Program) []VerificationError {
+	return verify(program, true, true)
+}
+
+func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []VerificationError {
 	structTypes, failures := verifyStructTypes(program.StructTypes)
 	enumTypes, enumFailures := verifyEnumTypes(program.EnumTypes)
 	failures = append(failures, enumFailures...)
@@ -69,6 +75,12 @@ func verify(program Program, allowStorageQueries bool) []VerificationError {
 	for index := range program.Functions {
 		for _, block := range program.Functions[index].Blocks {
 			for operationIndex, operation := range block.Operations {
+				if operation.Kind == OperationStorageTake {
+					if !allowStorageTransfers || !validStorageTakeShape(operation) || !storageQueryType(operation.Type, properties) ||
+						!validStorageTakeProvenance(&program.Functions[index], operation) {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage take is unadmitted or malformed"})
+					}
+				}
 				if operation.Kind != OperationStorageLayout {
 					continue
 				}
@@ -510,6 +522,9 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStorageLayout:
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationStorageTake:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationArrayIndexCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)

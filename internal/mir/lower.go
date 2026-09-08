@@ -770,6 +770,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerArrayLength(expression)
 	case "storage-layout":
 		return l.lowerStorageLayout(expression)
+	case "storage-take":
+		return l.lowerStorageTake(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
 	case "view-length":

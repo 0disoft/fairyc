@@ -312,6 +312,36 @@ value 42 and one cleanup plus low/optimized native execution. This fixes nominal
 runtime type retention; it does not admit target-dependent layout queries to the
 interpreter or create a general mutable-place runtime model.
 
+### Private representation-to-value ownership transfer
+
+Typed HIR and MIR now have a private `storage-take` operation. It reads exactly
+one backend representation through a materialized mutable void pointer and
+produces a typed value without constructing a placeholder or empty value.
+For resource results the ordinary binding, return, move and cleanup machinery
+owns the resulting obligation. The source storage is neither cleared nor freed.
+The unsafe caller must exclusively own one initialized, representation-relocatable
+element, provide enough live disjoint storage, and retire the old element lifetime
+without reading or dropping it again. An unsafe span or byte size does not prove
+these obligations; there is no runtime pointer validation or safe arbitrary read.
+
+`mir.VerifyStorageTransfers` admits this operation separately from ordinary and
+layout-query-only verification, checks its shape and exact unsafe provenance in
+every block, and checks live operands on reachable paths. The explicit
+`cbackend.EmitStorageTransfers` additionally checks the actual pointer local type
+and supported nonzero element representation. It emits `memcpy` into a typed
+temporary, avoiding incompatible C lvalue access. Ordinary C emission,
+interpreter and MIR artifact encode/decode stay closed. No new cache or stable
+source operation is admitted.
+
+`TestPrivateVectorStorageTakeMSVC` replaces one explicitly unsafe fixture HIR
+expression with the private operation. A C-owned slot transfers one real allocation
+into an Item whose destructor rejects null and duplicate handles. Both MSVC
+profiles return 42 after the value crosses a consuming function, with one slot
+export, one destruction and no live allocation. Boundary/mutation tests reject
+missing provenance, malformed unreachable operations and scalar pointer operands.
+This proves the HIR-to-native transfer prerequisite, not generic source expansion
+or vector pop integration; consuming writes into raw storage also remain work.
+
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
