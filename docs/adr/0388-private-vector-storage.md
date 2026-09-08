@@ -296,7 +296,7 @@ interpreter or create a general mutable-place runtime model.
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
-package-level nominal/resource argument admission, safe public operations,
+stable package/SDK nominal-resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow
 invalidation, package/SDK integration and stable admission
 remain separate work. The i32 fixture supplies its known four-byte layout and

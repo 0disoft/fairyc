@@ -67,18 +67,22 @@ func prepareModule(module *ast.Module, owner genericplan.PackageID, limits gener
 }
 
 type expander struct {
-	module       *ast.Module
-	owner        genericplan.PackageID
-	templates    map[string]ast.Function
-	aggregates   map[string]aggregateTemplate
-	names        map[string]bool
-	imports      map[string]*expander
-	allowPublic  bool
-	requests     map[string]diagnostic.Span
-	allowNominal bool
-	allowStorage bool
-	nominalTypes map[string]genericplan.TypeID
-	nominalNames map[genericplan.TypeID]string
+	module         *ast.Module
+	owner          genericplan.PackageID
+	templates      map[string]ast.Function
+	aggregates     map[string]aggregateTemplate
+	names          map[string]bool
+	imports        map[string]*expander
+	allowPublic    bool
+	requests       map[string]diagnostic.Span
+	allowNominal   bool
+	allowStorage   bool
+	packageNominal bool
+	nominalContext string
+	boundNominals  map[genericplan.TypeID]NominalBinding
+	nominalPublic  map[string]bool
+	nominalTypes   map[string]genericplan.TypeID
+	nominalNames   map[genericplan.TypeID]string
 }
 
 func (x *expander) id(name string) genericplan.DeclarationID {

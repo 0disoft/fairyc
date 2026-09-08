@@ -234,7 +234,7 @@ func (x *expander) rewriteAggregateType(ref *ast.TypeReference, names map[string
 	}
 	var arguments []genericplan.TypeID
 	for _, argument := range ref.Arguments {
-		typeID, found := x.concreteType(argument.Path)
+		typeID, found := x.concreteReference(argument)
 		if !found {
 			return fmt.Errorf("unregistered aggregate argument %q", argument.Path)
 		}

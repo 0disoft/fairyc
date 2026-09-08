@@ -22,6 +22,7 @@ type PublicTemplate struct {
 // PackageExpansion owns detached metadata for one completed expansion. Template
 // hashes do not contain source text and generated names are not source exports.
 type PackageExpansion struct {
+	NominalBindings []NominalBinding
 	Modules         []*ast.Module
 	Plan            genericplan.Plan
 	Templates       []PublicTemplate

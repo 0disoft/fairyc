@@ -3,6 +3,7 @@ package genericsource
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
@@ -28,16 +29,21 @@ func ExpandPackages(inputs []PackageModule, limits genericplan.PlanLimits) ([]*a
 // PreparePackages also retains public template identities before specialization
 // erases their declarations. No template summary is returned on expansion failure.
 func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return preparePackages(inputs, limits, false)
+	return preparePackages(inputs, limits, false, false)
 }
 
 // PrepareStoragePackages enables symbolic queries across an exact resolved graph.
 // Arguments remain scalar; nominal arguments need cross-owner type binding.
 func PrepareStoragePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return preparePackages(inputs, limits, true)
+	return preparePackages(inputs, limits, true, false)
 }
 
-func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, storage bool) (PackageExpansion, error) {
+// PrepareNominalStoragePackages is a private, closed-graph nominal and layout lane.
+func PrepareNominalStoragePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
+	return preparePackages(inputs, limits, true, true)
+}
+
+func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal bool) (PackageExpansion, error) {
 	type moduleKey struct {
 		owner genericplan.PackageID
 		path  string
@@ -52,7 +58,7 @@ func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, stor
 		if _, exists := modules[key]; exists {
 			return PackageExpansion{}, fmt.Errorf("duplicate generic module %q", input.Module.Path)
 		}
-		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: storage}
+		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: storage, allowNominal: nominal, packageNominal: nominal}
 		modules[key], ordered[i] = x, x
 	}
 	for i, input := range inputs {
@@ -69,6 +75,11 @@ func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, stor
 		}
 	}
 	var templates []PublicTemplate
+	if nominal {
+		if err := bindNominalContext(ordered); err != nil {
+			return PackageExpansion{}, err
+		}
+	}
 	var declarations *genericplan.Catalog
 	expanded, plan, err := expandAll(ordered, limits, func(catalog *genericplan.Catalog) error {
 		declarations = catalog
@@ -80,6 +91,12 @@ func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, stor
 		return PackageExpansion{}, err
 	}
 	result := PackageExpansion{Modules: expanded, Plan: plan, Templates: templates, Specializations: map[genericplan.PackageID][]genericplan.SpecializationID{}}
+	if nominal && len(ordered) != 0 {
+		for _, binding := range ordered[0].boundNominals {
+			result.NominalBindings = append(result.NominalBindings, binding)
+		}
+		slices.SortFunc(result.NominalBindings, func(a, b NominalBinding) int { return strings.Compare(string(a.ID), string(b.ID)) })
+	}
 	result.Declarations, result.Origins, err = sourceOrigins(ordered, plan)
 	if err != nil {
 		return PackageExpansion{}, err
@@ -120,6 +137,7 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...
 		}
 	}
 	var requests []genericplan.Request
+	bindNominalRegistry(modules)
 	for _, module := range modules {
 		roots, err := module.declare(builder)
 		if err != nil {

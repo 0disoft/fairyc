@@ -354,7 +354,44 @@ after parsing a provider signature, transfers a client-owned resource through
 that provider and back, then obtains result 42 and one interpreter cleanup.
 Low/optimized Windows MSVC also execute that same lowered program.
 
-This is the AST-to-semantic binding prerequisite, not automatic source generic
-argument expansion. Wiring the package generic planner and expander to produce
-these keys, validate source visibility and preserve full definition/import
-identity is still required. No stable source, cache, SDK or ABI admission changes.
+This binding prerequisite is distinct from automatic source generic argument
+expansion. The following section records that source connection. No stable
+source, cache, SDK or ABI admission changes.
+
+## Private closed-graph nominal source expansion
+
+`compiler.CheckNominalStoragePackages` and
+`genericsource.PrepareNominalStoragePackages` add a separate private entry point
+for concrete struct/resource arguments across resolved packages. Existing scalar
+and stable entry points retain their previous admission rules.
+
+The source requester may name its own private nominal types or public nominal
+types through an exact import alias. A private imported type is not an available
+generic argument. Expansion records original declaration ownership, substitutes
+opaque bound references into generated signatures and nested aggregate arguments,
+and supplies the exact semantic binding table. It does not add reverse imports,
+copy type declarations into the generic provider, or grant resource field access.
+Bound references forwarded to another generic function remain bound identities;
+source spelling cannot manufacture them.
+
+Nominal IDs retain owner coordinate, module and declaration name. Their private
+definition digest conservatively includes the complete sorted source graph and
+exact alias-to-provider bindings. Consequently a definition/helper or provider
+change invalidates affected nominal specializations, while local package-ID
+renumbering and file order do not. This deliberately broad closed-request digest
+is not a minimal public interface or persistent cache identity contract.
+
+Source tests distinguish local and imported same-named Point structs, pass both
+through generic functions, forward a bound argument through a generic helper,
+construct a private generic Box<Point>, and move a client-private Token through
+the provider and back. Interpreter execution returns 42 with one cleanup marker;
+low/optimized Windows MSVC checks the same result and exact cleanup counter.
+Separate source queries for all three types execute natively while the targetless
+interpreter continues to reject layout queries. AST preservation, plan identity,
+provider/definition invalidation, private-type denial, wrong-type rejection,
+donor-reuse rejection and E0103 provider-field denial are covered.
+
+This does not publish `Vec<T>` or a generic resource-element lifecycle. Public SDK
+integration, element copy/relocation/drop contracts and borrow invalidation remain
+required. Explicit-file, stable CLI, Atlas and ordinary package-cache entry points
+do not call this private lane. SDK, language revision and runtime ABI are unchanged.

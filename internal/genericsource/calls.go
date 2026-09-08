@@ -86,7 +86,7 @@ func (x *expander) rewriteSpecialization(e *ast.Expression, names map[string]str
 	arguments := make([]genericplan.TypeID, len(e.TypeArguments))
 	for i, argument := range e.TypeArguments {
 		var found bool
-		arguments[i], found = x.concreteType(argument.Path)
+		arguments[i], found = x.concreteReference(argument)
 		if !found {
 			return fmt.Errorf("unregistered concrete generic type %q", argument.Path)
 		}

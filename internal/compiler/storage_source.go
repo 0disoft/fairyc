@@ -38,11 +38,38 @@ func CheckStorageGenericFunctions(file semantic.File, coordinate packagegraph.Co
 // CheckStorageGenericPackages enables private scalar storage queries across a
 // resolved graph. It does not publish a stable interface or artifact-cache key.
 func CheckStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, true)
+	return checkStorageGenericPackages(input, coordinates, limits, false)
+}
+
+// CheckNominalStoragePackages admits source-visible nominal arguments through
+// exact private bindings, without adding imports or publishing a stable cache key.
+func CheckNominalStoragePackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
+	return checkStorageGenericPackages(input, coordinates, limits, true)
+}
+
+func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal bool) (Result, genericplan.Plan, error) {
+	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, true, nominal)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
-	analysis, err := semantic.AnalyzePackages(prepared)
+	var analysis semantic.Result
+	if nominal {
+		byOwner := map[genericplan.PackageID]hir.PackageID{}
+		for _, file := range input.Files {
+			byOwner[genericPackageOwner(coordinates[file.Package])] = file.Package
+		}
+		bindings := make([]semantic.NominalTypeBinding, 0, len(expansion.NominalBindings))
+		for _, binding := range expansion.NominalBindings {
+			id, found := byOwner[binding.Owner]
+			if !found {
+				return Result{}, genericplan.Plan{}, fmt.Errorf("nominal binding owner is absent")
+			}
+			bindings = append(bindings, semantic.NominalTypeBinding{Key: string(binding.ID), Package: id, Module: binding.Module, Name: binding.Name})
+		}
+		analysis, err = semantic.AnalyzeBoundNominalPackages(prepared, bindings)
+	} else {
+		analysis, err = semantic.AnalyzePackages(prepared)
+	}
 	if err != nil {
 		return Result{}, genericplan.Plan{}, &Error{Stage: StagePackageInput, Cause: err}
 	}

@@ -26,10 +26,10 @@ func CheckGenericPackages(input semantic.PackageInput, coordinates map[hir.Packa
 }
 
 func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (semantic.PackageInput, genericsource.PackageExpansion, error) {
-	return prepareGenericPackageGraph(input, coordinates, limits, false)
+	return prepareGenericPackageGraph(input, coordinates, limits, false, false)
 }
 
-func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage bool) (semantic.PackageInput, genericsource.PackageExpansion, error) {
+func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal bool) (semantic.PackageInput, genericsource.PackageExpansion, error) {
 	owners := map[hir.PackageID]genericplan.PackageID{}
 	seen := map[packagegraph.CoordinateID]hir.PackageID{}
 	for _, file := range input.Files {
@@ -67,7 +67,9 @@ func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir
 		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package]}
 	}
 	prepare := genericsource.PreparePackages
-	if storage {
+	if nominal {
+		prepare = genericsource.PrepareNominalStoragePackages
+	} else if storage {
 		prepare = genericsource.PrepareStoragePackages
 	}
 	expansion, err := prepare(modules, limits)
