@@ -101,18 +101,25 @@ line-map identities from those retained bytes and matches every value against th
 context. A mismatch rejects the entire text request as stale or internally inconsistent. It never
 returns a best-effort line, a same-length replacement, or text from a different package instance.
 
-The source and documentation CLIs now use generic-aware compilation and exact-current v2 query
+The source and documentation CLIs now use aggregate-aware compilation and exact-current v3 query
 preparation. The logical/JSON text v0 format, record/document checksums, fixed `untrusted-text`
 authority, custody labels, exact slice selection, and error/omission policy do not change. Ordinary
-source produces byte-identical v0 documents through v1 and v2 maps. No new output field or version
+and function-generic source produce byte-identical v0 documents through v2 and v3 maps; ordinary
+v1/v2 identity remains covered. No new output field or version
 flag is needed: these records identify original source spans, not executable specialization facts.
 
-Original generic declarations, including unused templates, are eligible. Multiple concrete
+Original generic declarations, including used/unused structs and resources, are eligible. Multiple concrete
 implementations still select one original source span and at most one frontend-attached
 documentation span. Compiler-generated names/bodies are not source subjects. Retrieval of an unused
 body is not a claim that its executable semantics were checked. Generic source and documentation
 remain untrusted text; hostile prose is preserved as inert data, never interpreted as instructions.
 Missing documentation remains an explicit `kind-unavailable` omission, not a synthesized summary.
+
+Aggregate tests preserve BOM/CRLF and non-ASCII spans, inert instruction-like documentation,
+retained-source extraction after disk edits, stale retained-byte rejection, wrong snapshot
+rejection, control omissions and absent documentation. CLI discovery uses symbol catalog 3;
+source/documentation commands need no new version flag because text v0 remains unchanged.
+This experimental text admission does not promote aggregate syntax in stable workspace commands.
 
 The requested span must be in range and begin and end on UTF-8 scalar boundaries. The emitted bytes
 are the exact slice: no newline conversion, Unicode normalization, trimming, indentation rewriting,

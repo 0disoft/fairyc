@@ -34,7 +34,7 @@ func runAtlasText(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	prepared, code := prepareAtlasQueryVersion(sourceRoot, options.packageUID, options.locked, stderr, true)
+	prepared, code := prepareAtlasQuerySchema(sourceRoot, options.packageUID, options.locked, stderr, atlasmap.LogicalSchemaV3)
 	if code != ExitSuccess {
 		return code
 	}

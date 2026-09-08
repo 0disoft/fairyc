@@ -12,6 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
@@ -223,15 +224,25 @@ func loadAttributedTextFixtureForSymbol(t *testing.T, sourceBytes []byte, name s
 }
 
 func loadAttributedTextFixtureVersion(t *testing.T, sourceBytes []byte, name string, generic bool) attributedTextFixture {
+	version := byte(1)
+	if generic {
+		version = 2
+	}
+	return loadAttributedTextFixtureSchema(t, sourceBytes, name, version)
+}
+
+func loadAttributedTextFixtureSchema(t *testing.T, sourceBytes []byte, name string, version byte) attributedTextFixture {
 	t.Helper()
-	prepared := prepareAttributedTextWorkspaceVersion(t, sourceBytes, generic)
+	prepared := prepareAttributedTextWorkspaceSchema(t, sourceBytes, version)
 	for _, partition := range prepared.partitions {
 		if partition.Header().PackageUID != "test.attributed-text" {
 			continue
 		}
 		query := atlasmap.NewQueryIndex
-		if generic {
+		if version == 2 {
 			query = atlasmap.NewQueryIndexV2
+		} else if version == 3 {
+			query = atlasmap.NewQueryIndexV3
 		}
 		index, err := query(partition, prepared.expectations[partition.Header().PackageInstance])
 		if err != nil {
@@ -255,6 +266,14 @@ func prepareAttributedTextWorkspace(t *testing.T, sourceBytes []byte) preparedAt
 }
 
 func prepareAttributedTextWorkspaceVersion(t *testing.T, sourceBytes []byte, generic bool) preparedAttributedTextWorkspace {
+	version := byte(1)
+	if generic {
+		version = 2
+	}
+	return prepareAttributedTextWorkspaceSchema(t, sourceBytes, version)
+}
+
+func prepareAttributedTextWorkspaceSchema(t *testing.T, sourceBytes []byte, version byte) preparedAttributedTextWorkspace {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -281,7 +300,13 @@ source = "src"
 		t.Fatal(err)
 	}
 	var checked compiler.Result
-	if generic {
+	if version == 3 {
+		coordinates, coordinateErr := workspace.PackageCoordinates()
+		if coordinateErr != nil {
+			t.Fatal(coordinateErr)
+		}
+		checked, _, err = compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	} else if version == 2 {
 		checked, err = workspacecompiler.Check(workspace)
 	} else {
 		checked, err = compiler.CheckPackages(input)
@@ -291,8 +316,10 @@ source = "src"
 	}
 	compilerBuild := attributedTextCompilerBuild()
 	prepare, current := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations
-	if generic {
+	if version == 2 {
 		prepare, current = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2
+	} else if version == 3 {
+		prepare, current = atlasmap.PrepareWorkspaceV3, atlasmap.CurrentWorkspaceExpectationsV3
 	}
 	snapshot, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil || len(partitions) == 0 {

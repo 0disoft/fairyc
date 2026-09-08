@@ -240,5 +240,9 @@ CLI tests cover discovered IDs, both directions, unused templates, lock-byte
 preservation, atomic selection/budget/source failures and output-writer failure.
 Context Pack v3 and `atlas-pack --pack-version 3` now preserve concrete aggregate
 fields and separately owned cleanup calls/borrows through overview/show/around;
-see `docs/atlas/context-pack-v3.md`. Attributed-text and Evidence Bundle adoption
-remain separate from stable aggregate admission.
+see `docs/atlas/context-pack-v3.md`. Attributed-text source/documentation commands
+now use v3 query preparation while retaining byte-identical text v0 for ordinary
+and function-generic inputs. Original used/unused aggregate spans, retained-byte
+currentness, untrusted authority and documentation attachment are covered in
+`docs/atlas/attributed-text-v0.md`. Evidence Bundle adoption remains separate from
+stable aggregate admission.

@@ -51,4 +51,5 @@ Tests cover nested concrete fields, two cleanup specializations, call and borrow
 ownership, overview/show/around, independently calculated checksums, legacy
 rejection and atomic byte limits. CLI tests use discovered resource IDs and
 verify locked output, invalid versions, limits and legacy aggregate rejection.
-Evidence Bundle and attributed text still need aggregate-aware integration.
+Attributed-text commands separately expose original aggregate source/documentation
+without populating this pack's text channels. Evidence Bundle integration remains pending.
