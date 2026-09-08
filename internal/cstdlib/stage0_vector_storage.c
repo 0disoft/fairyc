@@ -108,3 +108,58 @@ uint32_t fy_private_vector_release_empty_v0(void *storage) {
     memcpy(storage, &value, sizeof value);
     return FY_STD_ALLOC_OK_V0;
 }
+
+/* Copy-element operations require trivially copyable/relocatable values.
+ * Element/output spans must be live, at least element_size bytes, and disjoint
+ * from both the descriptor and its backing allocation. No element borrow may
+ * survive a mutating call. These are unsafe caller obligations, not pointer checks. */
+uint32_t fy_private_vector_push_copy_v0(void *storage, const void *element, size_t element_size) {
+    if (storage == NULL || element == NULL) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    if (value.length == SIZE_MAX / value.element_size) {
+        return FY_STD_ALLOC_SIZE_OVERFLOW_V0;
+    }
+    uint32_t status = fy_private_vector_reserve_v0(storage, value.length + 1);
+    if (status != FY_STD_ALLOC_OK_V0) {
+        return status;
+    }
+    memcpy(&value, storage, sizeof value);
+    memcpy((unsigned char *)value.block.data + value.length * value.element_size, element, element_size);
+    value.length++;
+    memcpy(storage, &value, sizeof value);
+    return FY_STD_ALLOC_OK_V0;
+}
+
+uint32_t fy_private_vector_read_copy_v0(const void *storage, size_t index, void *output, size_t element_size) {
+    if (storage == NULL || output == NULL) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size || index >= value.length) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    memcpy(output, (const unsigned char *)value.block.data + index * value.element_size, element_size);
+    return FY_STD_ALLOC_OK_V0;
+}
+
+uint32_t fy_private_vector_pop_copy_v0(void *storage, void *output, size_t element_size) {
+    if (storage == NULL || output == NULL) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size || value.length == 0) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    memcpy(output, (const unsigned char *)value.block.data + (value.length - 1) * value.element_size, element_size);
+    value.length--;
+    memcpy(storage, &value, sizeof value);
+    return FY_STD_ALLOC_OK_V0;
+}

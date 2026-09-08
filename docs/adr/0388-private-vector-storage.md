@@ -82,8 +82,42 @@ execution or independent compiler lineage is claimed.
 
 ## Remaining container work
 
-This is storage, not `Vec<T>`. Typed element layout acquisition, safe push/get/pop,
-initialized-prefix transitions, resource-element cleanup, ownership-returning
+### Implemented copy-element transitions
+
+`fy_private_vector_push_copy_v0`, `fy_private_vector_read_copy_v0` and
+`fy_private_vector_pop_copy_v0` now own the copy-element initialized-prefix
+transitions. Each checks the supplied element byte size against the descriptor.
+Push checks count overflow and reserves before copying the complete input and
+incrementing length. OOM leaves both input and descriptor unchanged. Read accepts
+only an index below length. Pop copies the last initialized element into the
+output before decrementing length. Bad size, out-of-range read and empty pop
+return invalid-argument status without changing descriptor or output. Physical
+bytes beyond the new prefix are not zeroed but cannot be read by these APIs.
+
+These raw operations require copyable, representation-relocatable elements. Input
+and output spans must be live and disjoint from the descriptor and backing
+allocation, with enough bytes for the matching element size. They cannot copy
+resource ownership or keep an element borrow alive across mutation. The caller
+still establishes the correspondence between a Fairy type and descriptor layout.
+
+`TestPrivateVectorCopyScalars` supplies private Fairy `push<T>`, `read<T>` and
+`pop<T>` wrappers using scalar inputs and borrowed outputs. Separate Windows
+amd64 sources exercise `bool`, `u8`, `i32`, `u32` and `usize`, including nonzero,
+negative and wide unsigned payloads. Each uses its known target size/alignment;
+this is not a public type-layout intrinsic or a safe arbitrary-type constructor.
+Low and optimized native runs cover first-allocation OOM, eight-to-nine-element
+growth OOM and retry, exact values, LIFO pop, wrong-size rejection, unchanged
+outputs, rejection of a just-popped index, and one cleanup with zero live
+allocations after draining and moving the resource. A mismatched scalar argument
+is rejected before emission. The original poison-prefix reserve fixture remains
+in the same configured lane. Foreign heap calls have no interpreter oracle here.
+
+### Still required
+
+This is storage, not `Vec<T>`. Typed element layout acquisition, safe public operations,
+resource-element initialized-prefix transitions and cleanup, ownership-returning
 failure APIs, borrow invalidation, package/SDK integration and stable admission
 remain separate work. The i32 fixture supplies its known four-byte layout and
 seeds/discards one copy scalar in C; it is not a generic typed element API.
+The newer copy-element fixtures use the actual push/read/pop transport instead of
+C seeding, but neither fixture promotes a safe public container or resource elements.

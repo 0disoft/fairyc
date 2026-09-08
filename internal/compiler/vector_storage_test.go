@@ -14,6 +14,11 @@ import (
 )
 
 func TestPrivateVectorStorageGeneratedNative(t *testing.T) {
+	runPrivateVectorStorageNative(t, vectorStorageProgram, "")
+}
+
+func runPrivateVectorStorageNative(t *testing.T, program, probe string) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private vector storage proof requires Windows amd64")
 	}
@@ -21,7 +26,7 @@ func TestPrivateVectorStorageGeneratedNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", vectorStorageProgram)
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", program)
 	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
 	if err != nil || !result.Verified {
 		t.Fatalf("compile: %v %+v", err, result.Semantic)
@@ -40,7 +45,7 @@ func TestPrivateVectorStorageGeneratedNative(t *testing.T) {
 	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
-			artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source, scalar+vectorStorageAllocator+storage+vectorStorageProbe)
+			artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source, scalar+vectorStorageAllocator+storage+vectorStorageProbe+probe)
 			if err != nil {
 				t.Fatal(err)
 			}
