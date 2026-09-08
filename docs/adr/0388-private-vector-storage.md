@@ -658,7 +658,36 @@ cover SDK-private field access, moved-donor reuse and a surviving Buffer view
 across donor transfer. This proves an existing SDK resource works through the
 private candidate, not installed container source or stable `Vec<T>` admission.
 
-This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
+### SDK-owned vector candidate
+
+`sdkstdlib.LoadVectorCandidate` adds `candidates/std/vec.fy` to the complete
+stable SDK bundle under a distinct candidate source identity. The candidate is
+not installed by `Load`; stable source bytes, version, language revision and
+runtime ABI are unchanged. Each load returns fresh source and AST objects.
+
+The candidate owns `std::vec::Vec<T>` and its empty construction, length,
+capacity, empty predicate, reserve, push, pop and clear operations. Fields and
+raw helpers are private. Push returns the new length or the original element
+on failure; pop transfers one owned element, and clear destroys the initialized
+prefix in reverse order while retaining capacity. These are candidate contracts,
+not a stable public API promise or borrowed element-view admission.
+
+The transfer-only Windows C emitter admits exactly the six required private
+runtime symbols with exact result and parameter types. Ordinary output, other
+targets, unknown private symbols and incorrect signatures remain rejected.
+This avoids replacing runtime calls with test-only symbol aliases.
+
+The full candidate bundle is compiled with a separate client using SDK Buffer
+elements. Low/optimized MSVC cover automatic cleanup, explicit clear with
+retained capacity, zero reserve, failed and successful growth reserve, two
+ownership-returning push retries and container moves. Instrumented allocation
+counts require every Buffer and storage allocation to be freed. Source checks
+reject private field/helper access and non-owner Vec construction. SDK identity
+tests prove that the installed bundle is unaffected and candidate loads are
+deterministic and detached. Stable workspace selection, installed source, element
+access/borrow invalidation and public admission remain later steps.
+
+These are private candidate and transport contracts, not stable `Vec<T>` admission. Installed SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow
 invalidation, package/SDK integration and stable admission

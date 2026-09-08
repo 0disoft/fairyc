@@ -14,10 +14,21 @@ import (
 )
 
 func vectorSDKInput(t *testing.T, client string) (semantic.PackageInput, map[hir.PackageID]packagegraph.CoordinateID) {
+	return vectorSDKInputWithCandidate(t, client, false)
+}
+
+func vectorSDKInputWithCandidate(t *testing.T, client string, candidate bool) (semantic.PackageInput, map[hir.PackageID]packagegraph.CoordinateID) {
 	t.Helper()
 	input, coordinates := vectorPackageInput(t)
 	input.Files[0] = parseCompilerFile(t, 1, "main.fy", client)
-	definition, err := sdkstdlib.Load()
+	load := sdkstdlib.Load
+	if candidate {
+		load = sdkstdlib.LoadVectorCandidate
+		input.Files = input.Files[:1]
+		input.Imports[0] = semantic.PackageImport{FromPackage: 1, ImportPath: "std::vec", ToPackage: 3}
+		delete(coordinates, 2)
+	}
+	definition, err := load()
 	if err != nil {
 		t.Fatal(err)
 	}

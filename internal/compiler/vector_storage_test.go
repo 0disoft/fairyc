@@ -140,16 +140,17 @@ const vectorStorageAllocator = `
 #include <stdlib.h>
 #include <string.h>
 static size_t vector_live = 0;
+static size_t vector_allocations = 0, vector_frees = 0, vector_failures = 0;
 static int vector_fail = 0;
 static int vector_drop_calls = 0;
 static uint32_t vector_drop_status = 99;
 static void *vector_malloc(size_t size) {
-    if (vector_fail) { vector_fail = 0; return NULL; }
+    if (vector_fail) { vector_fail = 0; vector_failures++; return NULL; }
     void *data = malloc(size);
-    if (data != NULL) { vector_live++; memset(data, 0xa5, size); }
+    if (data != NULL) { vector_live++; vector_allocations++; memset(data, 0xa5, size); }
     return data;
 }
-static void vector_free(void *data) { if (data != NULL) { vector_live--; free(data); } }
+static void vector_free(void *data) { if (data != NULL) { vector_live--; vector_frees++; free(data); } }
 #define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) vector_malloc(size)
 #define FY_STD_SYSTEM_HEAP_FREE_V0(data) vector_free(data)
 `

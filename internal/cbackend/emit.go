@@ -107,6 +107,7 @@ type emitter struct {
 	resourceLocals     []map[hir.SymbolID]mir.ResourceLocal
 	features           map[string]struct{}
 	usedForeignSymbols map[string]struct{}
+	storageTransfers   bool
 	trapCategories     map[string]struct{}
 	dynamicTrapTargets map[int]map[mir.BlockID]struct{}
 	localTypes         []map[mir.LocalID]hir.Type
@@ -335,6 +336,7 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 		resourceLocals:     make([]map[hir.SymbolID]mir.ResourceLocal, len(functions)),
 		features:           make(map[string]struct{}),
 		usedForeignSymbols: make(map[string]struct{}),
+		storageTransfers:   storageTransfers,
 		trapCategories:     make(map[string]struct{}),
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
@@ -841,7 +843,8 @@ func (e *emitter) inspectForeignFunctions() error {
 		if function.ABI != "C" {
 			return CapabilityError{Function: function.Name, Feature: "foreign ABI " + strconv.Quote(function.ABI)}
 		}
-		if !validExternalCIdentifier(function.LinkName, e.targetID) {
+		if !validExternalCIdentifier(function.LinkName, e.targetID) &&
+			!(e.storageTransfers && validVectorRuntimeFunction(function, e.targetID)) {
 			return CapabilityError{Function: function.Name, Feature: "external C symbol " + strconv.Quote(function.LinkName)}
 		}
 		if _, err := e.foreignCType(function.ResultType, true); err != nil {
