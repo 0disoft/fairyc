@@ -473,6 +473,29 @@ renumbering local package IDs leaves the specialization plan unchanged.
 This is a closed resolved-graph compiler entry point, not stable package-cache
 identity, installed SDK source, or public `Vec<T>` admission.
 
+### Transfer analysis source identities
+
+`AnalyzeStorageTransferPackages` publishes ordinary source interfaces, generic
+template-closure interfaces and per-package specialization IDs through the same
+post-Flow publication helper as existing scalar generic analysis. Exact bound
+nominal analysis still owns admission. Failed semantic analysis publishes no
+interface maps or interface provenance. `CheckStorageTransferPackages` carries
+those source facts into its result only after the transfer MIR verifier succeeds.
+
+Interface provenance retains the exact semantic package and coordinate, with
+detached getters. Package input reordering and local-ID renumbering preserve
+interface hashes and specialization plans. A provider template-body change
+invalidates its generic interface; a client nominal-definition change invalidates
+the conservative specialization plan. These are distinct identities: the template
+interface alone is not a cache key for instantiated nominal code. This step does
+not admit storage-transfer MIR to ordinary artifact codecs, stable caches, Atlas
+consumers or workspace entry points.
+
+The existing scalar-argument aggregate cache fixtures now read resource payloads
+through a provider-owned generic getter, rather than invalid cross-package private
+field access. Their cold/warm, persistent-process, invalidation, provenance and
+stable-entry rejection assertions remain active.
+
 ### Empty-safe pop and discarded result ownership
 
 The private generic `pop<T>` now returns `Option<T>`. Zero initialized length

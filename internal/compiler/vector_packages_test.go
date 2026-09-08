@@ -17,6 +17,11 @@ import (
 
 func vectorPackageInput(t *testing.T, replacements ...[2]string) (semantic.PackageInput, map[hir.PackageID]packagegraph.CoordinateID) {
 	t.Helper()
+	return vectorPackageInputEdited(t, nil, replacements...)
+}
+
+func vectorPackageInputEdited(t *testing.T, editProvider func(string) string, replacements ...[2]string) (semantic.PackageInput, map[hir.PackageID]packagegraph.CoordinateID) {
+	t.Helper()
 	between := func(start, end string) string {
 		_, tail, ok := strings.Cut(vectorResourceProgram, start)
 		if !ok {
@@ -38,6 +43,9 @@ func vectorPackageInput(t *testing.T, replacements ...[2]string) (semantic.Packa
 		provider = strings.Replace(provider, declaration, "pub "+declaration, 1)
 	}
 	provider += "pub fn usize length<T>(ref Items<T> storage) { return storage.length; }\n"
+	if editProvider != nil {
+		provider = editProvider(provider)
+	}
 	client := "module main;\nimport storage as v;\n" + externs +
 		between("resource Item {", "resource Items<T>") +
 		between("fn Item make", "fn Items<T> empty_items") + vectorPackageEntry

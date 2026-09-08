@@ -21,16 +21,17 @@ const aggregateCacheLibrary = `module answer;
 pub struct Cell<T> { T value; }
 pub resource Box<T> { Cell<T> cell; cleanup { let T observed = finish<T>(this.cell.value); } }
 fn T finish<T>(T value) { return value; }
-pub fn Box<T> make<T>(T value) { return Box<T> { .cell = Cell<T> { .value = value } }; }`
+pub fn Box<T> make<T>(T value) { return Box<T> { .cell = Cell<T> { .value = value } }; }
+pub fn T read<T>(ref Box<T> value) { return value.cell.value; }`
 
 const aggregateCacheMain = `module main; import answer as a;
-fn i32 main() { let a::Box<i32> value = a::make<i32>(42); return value.cell.value; }`
+fn i32 main() { let a::Box<i32> value = a::make<i32>(42); return a::read<i32>(ref value); }`
 
 func assertAggregateCacheOrigins(t *testing.T, result compiler.Result) {
 	t.Helper()
 	declarations := result.GenericProvenance.Declarations()
 	origins := result.GenericProvenance.Specializations()
-	if len(declarations) != 4 || len(origins) != 4 {
+	if len(declarations) != 5 || len(origins) != 5 {
 		t.Fatalf("aggregate provenance: %d/%d", len(declarations), len(origins))
 	}
 	byID := map[genericplan.DeclarationID]compiler.GenericDeclaration{}

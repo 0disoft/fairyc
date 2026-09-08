@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/genericplan"
+	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -33,6 +34,12 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 	if err != nil {
 		return GenericAnalysis{}, err
 	}
+	return publishGenericAnalysis(input, coordinates, expansion, analysis)
+}
+
+// Publish source interface identities only after the owning semantic lane has
+// completed Flow. This helper grants no executable artifact admission.
+func publishGenericAnalysis(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, expansion genericsource.PackageExpansion, analysis Analysis) (GenericAnalysis, error) {
 	result := GenericAnalysis{Analysis: analysis, Plan: expansion.Plan}
 	checked := analysis.Semantic
 	if checked.CompletedThrough != semantic.PhaseFlow || checked.FailedPhase != semantic.PhaseNone || len(checked.Diagnostics) != 0 || len(checked.Unsupported) != 0 {
@@ -82,6 +89,7 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 	for id, coordinate := range coordinates {
 		owners[id] = genericPackageOwner(coordinate)
 	}
+	var err error
 	result.Analysis.GenericProvenance, err = genericProvenance(input, owners, expansion, checked.NominalTypes)
 	if err != nil {
 		return GenericAnalysis{}, err

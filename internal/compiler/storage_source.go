@@ -65,13 +65,32 @@ func CheckNominalStoragePackages(input semantic.PackageInput, coordinates map[hi
 // lane. Its verified MIR requires the matching private C emitter; it does not
 // admit storage transfers to stable workspace or artifact consumers.
 func CheckStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	return checkStorageGenericPackages(input, coordinates, limits, true, true)
-}
-
-func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool) (Result, genericplan.Plan, error) {
-	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, true, nominal, transfers)
+	analysis, err := AnalyzeStorageTransferPackages(input, coordinates, limits)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
+	}
+	result, err := lowerWithVerifier(analysis.Analysis.Semantic, mir.VerifyStorageTransfers)
+	if err == nil && result.Verified {
+		result.GenericProvenance = analysis.Analysis.GenericProvenance
+	}
+	return result, analysis.Plan, err
+}
+
+// AnalyzeStorageTransferPackages publishes private closed-graph source identities
+// after bound nominal Flow analysis, without publishing executable MIR or cache
+// admission. Nominal specialization definitions retain their conservative closure.
+func AnalyzeStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (GenericAnalysis, error) {
+	analysis, expansion, err := analyzeStoragePackageGraph(input, coordinates, limits, true, true)
+	if err != nil {
+		return GenericAnalysis{}, err
+	}
+	return publishGenericAnalysis(input, coordinates, expansion, Analysis{Semantic: analysis})
+}
+
+func analyzeStoragePackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool) (semantic.Result, genericsource.PackageExpansion, error) {
+	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, true, nominal, transfers)
+	if err != nil {
+		return semantic.Result{}, genericsource.PackageExpansion{}, err
 	}
 	var analysis semantic.Result
 	if nominal {
@@ -83,7 +102,7 @@ func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hi
 		for _, binding := range expansion.NominalBindings {
 			id, found := byOwner[binding.Owner]
 			if !found {
-				return Result{}, genericplan.Plan{}, fmt.Errorf("nominal binding owner is absent")
+				return semantic.Result{}, genericsource.PackageExpansion{}, fmt.Errorf("nominal binding owner is absent")
 			}
 			bindings = append(bindings, semantic.NominalTypeBinding{Key: string(binding.ID), Package: id, Module: binding.Module, Name: binding.Name})
 		}
@@ -92,7 +111,15 @@ func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hi
 		analysis, err = semantic.AnalyzePackages(prepared)
 	}
 	if err != nil {
-		return Result{}, genericplan.Plan{}, &Error{Stage: StagePackageInput, Cause: err}
+		return semantic.Result{}, genericsource.PackageExpansion{}, &Error{Stage: StagePackageInput, Cause: err}
+	}
+	return analysis, expansion, nil
+}
+
+func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool) (Result, genericplan.Plan, error) {
+	analysis, expansion, err := analyzeStoragePackageGraph(input, coordinates, limits, nominal, transfers)
+	if err != nil {
+		return Result{}, genericplan.Plan{}, err
 	}
 	verify := mir.VerifyStorageQueries
 	if transfers {

@@ -15,14 +15,15 @@ func TestGenericAggregateCompilerCacheAndStableAdmission(t *testing.T) {
 	defer session.Close()
 	writeFile(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), `module answer;
 pub resource Box<T> { T value; cleanup {} }
-pub fn Box<T> make<T>(T value) { return Box<T> { .value = value }; }`)
+pub fn Box<T> make<T>(T value) { return Box<T> { .value = value }; }
+pub fn T read<T>(ref Box<T> value) { return value.value; }`)
 	writeFile(t, filepath.Join(root, "src", "main.fy"), `module main; import answer as a;
-fn i32 main() { let a::Box<i32> value = a::make<i32>(42); return value.value; }`)
+fn i32 main() { let a::Box<i32> value = a::make<i32>(42); return a::read<i32>(ref value); }`)
 	workspace := loadCacheWorkspace(t, root)
 	for i := range 2 {
 		result, err := session.Check(workspace)
 		if err != nil || !result.Compiler.Verified || (i == 0 && (!result.Cache.Lowered || result.Cache.Stored != 2)) || (i == 1 && (result.Cache.Outcome != OutcomeAllHit || result.Cache.Lowered || result.Cache.Hits != 2)) {
-			t.Fatalf("aggregate cache admission: %v %+v", err, result.Cache)
+			t.Fatalf("aggregate cache admission: %v %+v diagnostics=%+v unsupported=%+v", err, result.Cache, result.Compiler.Semantic.Diagnostics, result.Compiler.Semantic.Unsupported)
 		}
 		assertWorkspaceResult(t, workspace, result.Compiler, 42)
 		assertGenericWorkspaceNative(t, workspace, result)
