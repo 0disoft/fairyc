@@ -10,13 +10,14 @@ import (
 )
 
 func TestPrivateVectorResourceOwnership(t *testing.T) {
-	runPrivateVectorStorageNative(t, vectorResourceProgram, vectorResourceProbe)
+	runPrivateVectorStorageNativeWithLayout(t, vectorResourceProgram, vectorResourceProbe, hir.Type("main::Item"), "void *")
 }
 
 func TestPrivateVectorResourceDonorCannotBeReused(t *testing.T) {
 	text := strings.Replace(vectorResourceProgram,
 		"assert(recover_and_retry(ref mut storage, make(1), 1) == 1);",
 		"let Item first = make(1); assert(recover_and_retry(ref mut storage, first, 1) == 1); assert(item_id(ref first) == 1);", 1)
+	text = strings.NewReplacer("element_size()", "8", "element_alignment()", "8").Replace(text)
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
 	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
 	if err == nil && result.Verified {
@@ -43,7 +44,7 @@ resource Items {
     cleanup {
         while (this.length > 0) {
             var Item value = empty_item();
-            let u32 status = unsafe { pop_raw(ref mut this as ptr mut void, ref mut value as ptr mut void, 8) };
+            let u32 status = unsafe { pop_raw(ref mut this as ptr mut void, ref mut value as ptr mut void, this.element_size) };
             if (status != 0) { break; }
         }
         let u32 released = unsafe { release(ref mut this as ptr mut void) };
@@ -63,7 +64,7 @@ fn Items empty_items() {
 fn Result<u32, Item> push(ref mut Items storage, Item value) {
     var Item owned = value;
     let Item vacant = empty_item();
-    let u32 status = unsafe { push_raw(storage as ptr mut void, ref mut owned as ptr mut void, ref vacant as ptr void, 8) };
+    let u32 status = unsafe { push_raw(storage as ptr mut void, ref mut owned as ptr mut void, ref vacant as ptr void, storage.element_size) };
     return if (status == 0) {
         let i32 discarded = discard_item(owned);
         .ok(status)
@@ -86,12 +87,12 @@ fn i32 recover_and_retry(ref mut Items storage, Item value, i32 expected) {
 }
 fn Item pop(ref mut Items storage) {
     var Item output = empty_item();
-    assert(unsafe { pop_raw(storage as ptr mut void, ref mut output as ptr mut void, 8) } == 0);
+    assert(unsafe { pop_raw(storage as ptr mut void, ref mut output as ptr mut void, storage.element_size) } == 0);
     return output;
 }
 fn i32 exercise() {
     var Items storage = empty_items();
-    assert(unsafe { initialize(ref mut storage as ptr mut void, 8, 8) } == 0);
+    assert(unsafe { initialize(ref mut storage as ptr mut void, element_size(), element_alignment()) } == 0);
     assert(unsafe { fail_next() } == 1);
     assert(recover_and_retry(ref mut storage, make(1), 1) == 1);
     for (var i32 id = 2; id < 9; id += 1) { assert(push_ok(ref mut storage, make(id)) == 1); }

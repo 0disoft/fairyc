@@ -10,19 +10,19 @@ import (
 )
 
 func TestPrivateVectorCopyScalars(t *testing.T) {
-	for _, item := range []struct{ scalar, size, value, other string }{
-		{"bool", "1", "true", "false"}, {"u8", "1", "255", "0"},
-		{"i32", "4", "-2147483647", "42"}, {"u32", "4", "4294967295", "0"}, {"usize", "8", "65537", "0"},
+	for _, item := range []struct{ scalar, nativeType, value, other string }{
+		{"bool", "int32_t", "true", "false"}, {"u8", "uint8_t", "255", "0"},
+		{"i32", "int32_t", "-2147483647", "42"}, {"u32", "uint32_t", "4294967295", "0"}, {"usize", "uintptr_t", "65537", "0"},
 	} {
 		t.Run(item.scalar, func(t *testing.T) {
-			source := strings.NewReplacer("SCALAR", item.scalar, "SIZE", item.size, "VALUE", item.value, "OTHER", item.other).Replace(vectorCopyProgram)
-			runPrivateVectorStorageNative(t, source, vectorCopyProbe)
+			source := strings.NewReplacer("SCALAR", item.scalar, "VALUE", item.value, "OTHER", item.other).Replace(vectorCopyProgram)
+			runPrivateVectorStorageNativeWithLayout(t, source, vectorCopyProbe, hir.Type(item.scalar), item.nativeType)
 		})
 	}
 }
 
 func TestPrivateVectorCopyRejectsWrongScalar(t *testing.T) {
-	text := strings.NewReplacer("SCALAR", "i32", "SIZE", "4", "VALUE", "42", "OTHER", "0").Replace(vectorCopyProgram)
+	text := strings.NewReplacer("SCALAR", "i32", "VALUE", "42", "OTHER", "0", "element_size()", "4", "element_alignment()", "4").Replace(vectorCopyProgram)
 	text = strings.Replace(text, "push<i32>(ref mut storage, item)", "push<i32>(ref mut storage, false)", 1)
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
 	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
@@ -58,7 +58,7 @@ fn u32 pop<T>(ref mut Storage<T> storage, ref mut T output) {
 }
 fn i32 exercise() {
     var Storage<SCALAR> storage = empty<SCALAR>();
-    assert(unsafe { initialize(ref mut storage as ptr mut void, SIZE, SIZE) } == 0);
+    assert(unsafe { initialize(ref mut storage as ptr mut void, element_size(), element_alignment()) } == 0);
     let SCALAR item = VALUE;
     let SCALAR other = OTHER;
     var SCALAR output = other;

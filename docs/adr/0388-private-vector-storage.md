@@ -103,8 +103,9 @@ still establishes the correspondence between a Fairy type and descriptor layout.
 `TestPrivateVectorCopyScalars` supplies private Fairy `push<T>`, `read<T>` and
 `pop<T>` wrappers using scalar inputs and borrowed outputs. Separate Windows
 amd64 sources exercise `bool`, `u8`, `i32`, `u32` and `usize`, including nonzero,
-negative and wide unsigned payloads. Each uses its known target size/alignment;
-this is not a public type-layout intrinsic or a safe arbitrary-type constructor.
+negative and wide unsigned payloads. Each now uses the compiler's C storage
+layout query described below; this is not a public type-layout intrinsic or a
+safe arbitrary-type constructor.
 Low and optimized native runs cover first-allocation OOM, eight-to-nine-element
 growth OOM and retry, exact values, LIFO pop, wrong-size rejection, unchanged
 outputs, rejection of a just-popped index, and one cleanup with zero live
@@ -142,14 +143,42 @@ order, no live Item allocation, one vector cleanup and no live vector allocation
 consuming push path. Scalar and poison-prefix regressions run in the same lane.
 
 The fixture uses a concrete pointer-sized Item with a valid empty constructor and
-known Windows layout. It does not instantiate a generic type with a nominal
+compiler-queried Windows C storage layout. It does not instantiate a generic type with a nominal
 resource argument or establish cleanup for every possible resource representation.
 No source ownership rule, `burn` authority, public SDK symbol or runtime ABI changes.
 
+### Compiler-private C storage layout acquisition
+
+`cbackend.StorageLayout` validates the target profile and MIR, then reuses the
+emitter's aggregate/resource layout preparation and canonical scalar mapping.
+It returns the requested type, target, representation type, byte size and alignment.
+The current query covers the five emitted Fairy scalars and admitted inert
+structs/enums/resources. It rejects unsupported types, pointer/borrow requests,
+tagged values, arrays, unverified MIR and unknown profiles. Its result conveys
+no copyability, relocation, empty-state or destruction permission.
+
+This is the backend representation, not a source-language `sizeof` promise.
+In particular, this backend stores `bool` as `int32_t`, with size/alignment 4/4
+on both current profiles. The original bool vector test incorrectly supplied
+1/1; its 0/1 values did not reveal the partial-representation copy. The test now
+initializes storage from the queried representation and statically compares the
+computed constants against native `sizeof` and `_Alignof`. Scalar and Item
+fixtures obtain their initialization sizes through test-only C adapters; Item
+push/pop/cleanup reuse the initialized descriptor's element size.
+
+The five scalar copy/OOM cases and Item move/failure/cleanup case execute with
+these values in low/optimized MSVC. Backend tests separately check padded
+struct, resource and enum layouts for both target profiles, preserved query
+identity and zero-result rejection. The original i32 poison-prefix fixture
+retains its explicit four-byte constants as an independent fixed-layout oracle.
+No public foreign symbols, source grammar, stable entry points or SDK versions
+change. Source-level type-layout acquisition and a safe container constructor
+are still required.
+
 ### Still required
 
-This is private storage and transfer evidence, not `Vec<T>`. Typed element layout
-acquisition, generic nominal/resource argument admission, safe public operations,
+This is private storage and transfer evidence, not `Vec<T>`. Source-level typed element layout
+acquisition, package-level nominal/resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow
 invalidation, package/SDK integration and stable admission
 remain separate work. The i32 fixture supplies its known four-byte layout and

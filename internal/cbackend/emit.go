@@ -217,24 +217,15 @@ func targetCScalar(spec target.Spec, name string) (target.Scalar, bool) {
 
 // Emit verifies MIR, rejects unsupported semantic families, and emits one deterministic C unit.
 func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
-	if profile != Stage0Profile() && profile != Stage0WindowsMSVCProfile() && profile != Stage0DropTraceProfile() {
-		return Unit{}, fmt.Errorf(
-			"unsupported C emission profile target=%q dialect=%q instrumentation=%q",
-			profile.Target, profile.Dialect, profile.Instrumentation,
-		)
+	targetSpec, err := emissionTarget(profile)
+	if err != nil {
+		return Unit{}, err
 	}
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Unit{}, fmt.Errorf("C emission requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
 	}
 	if err := validateCScalarTransports(); err != nil {
 		return Unit{}, err
-	}
-	targetSpec, found := target.Lookup(profile.Target)
-	if !found {
-		return Unit{}, fmt.Errorf("C emission target %q is missing", profile.Target)
-	}
-	if err := target.Validate(targetSpec); err != nil {
-		return Unit{}, fmt.Errorf("C emission target %q is invalid: %w", profile.Target, err)
 	}
 	cScalars := make(map[hir.Type]target.Scalar, len(cScalarTransports))
 	for _, transport := range cScalarTransports {

@@ -1,7 +1,9 @@
 package compiler_test
 
 import (
+	"fmt"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
@@ -18,6 +20,10 @@ func TestPrivateVectorStorageGeneratedNative(t *testing.T) {
 }
 
 func runPrivateVectorStorageNative(t *testing.T, program, probe string) {
+	runPrivateVectorStorageNativeWithLayout(t, program, probe, "", "")
+}
+
+func runPrivateVectorStorageNativeWithLayout(t *testing.T, program, probe string, element hir.Type, nativeType string) {
 	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private vector storage proof requires Windows amd64")
@@ -25,6 +31,11 @@ func runPrivateVectorStorageNative(t *testing.T, program, probe string) {
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if element != "" {
+		program = strings.Replace(program, "module main;", `module main;
+@link_name("fairyc_fixture_element_size") unsafe extern C fn usize element_size();
+@link_name("fairyc_fixture_element_alignment") unsafe extern C fn usize element_alignment();`, 1)
 	}
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", program)
 	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
@@ -34,6 +45,18 @@ func runPrivateVectorStorageNative(t *testing.T, program, probe string) {
 	unit, err := cbackend.Emit(result.MIR, "main::main", cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
 		t.Fatal(err)
+	}
+	if element != "" {
+		computed, err := cbackend.StorageLayout(result.MIR, element, cbackend.Stage0WindowsMSVCProfile())
+		if err != nil {
+			t.Fatal(err)
+		}
+		probe += fmt.Sprintf(`
+_Static_assert(sizeof(%s) == UINT64_C(%d), "compiler element storage size");
+_Static_assert(_Alignof(%s) == UINT64_C(%d), "compiler element storage alignment");
+uintptr_t fairyc_fixture_element_size(void) { return UINT64_C(%d); }
+uintptr_t fairyc_fixture_element_alignment(void) { return UINT64_C(%d); }
+`, nativeType, computed.SizeBytes, nativeType, computed.AlignmentBytes, computed.SizeBytes, computed.AlignmentBytes)
 	}
 	scalar, err := cruntime.ScalarSource(192)
 	if err != nil {
