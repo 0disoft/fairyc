@@ -92,3 +92,22 @@ before cache reads/writes change cache statistics.
 
 Optional or mutable element access, stable CLI and installed SDK admission remain separate.
 No stable grammar, SDK source/version, runtime ABI or cache format is promoted.
+
+## SDK-only operation admission prerequisite
+
+The private integration layer now accepts an explicit set of package owners for
+storage layout, take, put and borrow operations. It rejects empty, duplicated or
+absent owners and enables these intrinsics only in their defining expanders.
+Consumer generic calls still instantiate the selected provider's implementation;
+module names and import aliases confer no privilege. The prior unrestricted
+private test lane remains separate and unchanged.
+
+`AnalyzeOwnedStorageTransferPackages` binds those selections through the current
+package-coordinate map. Full SDK Buffer vector construction, reads and cleanup
+execute through the restricted path under both MSVC profiles; the same consumer
+cannot directly use a storage-take intrinsic. Source tests cover all five private
+intrinsic spellings, exact owner selection and detached input preservation.
+
+This selection API is not source authentication. The workspace integration must
+prove the selected package is the exact embedded SDK before exposing stable
+selection; stable loader, SourceSession and CLI behavior remain unchanged here.

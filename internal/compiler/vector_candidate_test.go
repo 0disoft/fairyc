@@ -67,6 +67,26 @@ func TestPrivateVectorSDKCandidateOwnership(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorSDKCandidateOwnedStorage(t *testing.T) {
+	client := strings.Replace(vectorCandidateProgram(), "    let bytes::Buffer last =", "    assert(valid(v::at<bytes::Buffer>(ref storage, 0)));\n    let bytes::Buffer last =", 1)
+	input, coordinates := vectorSDKInputWithCandidate(t, client, true)
+	analysis, err := compiler.AnalyzeOwnedStorageTransferPackages(input, coordinates, genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+	if err != nil || !result.Verified {
+		t.Fatalf("owner-restricted SDK: %v %+v", err, result.Semantic.Diagnostics)
+	}
+	runVectorStorageMIRNativeLane(t, result.MIR, hir.QualifiedModulePath(1, "main")+"::main", vectorCandidateProbe, true)
+	client = strings.Replace(client, "return 41;", "return unsafe { storage_take<i32>(null) };", 1)
+	input, coordinates = vectorSDKInputWithCandidate(t, client, true)
+	analysis, err = compiler.AnalyzeOwnedStorageTransferPackages(input, coordinates, genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+	if err == nil && len(analysis.Analysis.Semantic.Diagnostics) == 0 && len(analysis.Analysis.Semantic.Unsupported) == 0 {
+		t.Fatal("SDK consumer gained private storage authority")
+	}
+}
+
 func TestPrivateVectorSDKCandidateBorrowBounds(t *testing.T) {
 	code, ok := cbackend.TrapCode("assertion-failed")
 	if !ok {

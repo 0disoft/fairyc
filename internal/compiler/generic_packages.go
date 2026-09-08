@@ -30,6 +30,10 @@ func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 }
 
 func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal, transfers bool) (semantic.PackageInput, genericsource.PackageExpansion, error) {
+	return prepareGenericPackageGraphOwned(input, coordinates, limits, storage, nominal, transfers, nil)
+}
+
+func prepareGenericPackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners []hir.PackageID) (semantic.PackageInput, genericsource.PackageExpansion, error) {
 	owners := map[hir.PackageID]genericplan.PackageID{}
 	seen := map[packagegraph.CoordinateID]hir.PackageID{}
 	for _, file := range input.Files {
@@ -74,7 +78,21 @@ func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir
 	} else if storage {
 		prepare = genericsource.PrepareStoragePackages
 	}
-	expansion, err := prepare(modules, limits)
+	var expansion genericsource.PackageExpansion
+	var err error
+	if storageOwners != nil {
+		selected := make([]genericplan.PackageID, len(storageOwners))
+		for i, owner := range storageOwners {
+			var exists bool
+			selected[i], exists = owners[owner]
+			if !exists {
+				return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("storage operation owner is absent from package input")
+			}
+		}
+		expansion, err = genericsource.PrepareOwnedStorageTransferPackages(modules, limits, selected)
+	} else {
+		expansion, err = prepare(modules, limits)
+	}
 	if err != nil {
 		return semantic.PackageInput{}, genericsource.PackageExpansion{}, err
 	}

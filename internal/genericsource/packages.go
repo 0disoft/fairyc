@@ -50,6 +50,38 @@ func PrepareStorageTransferPackages(inputs []PackageModule, limits genericplan.P
 }
 
 func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal, transfers bool) (PackageExpansion, error) {
+	return preparePackagesOwned(inputs, limits, storage, nominal, transfers, nil)
+}
+
+// PrepareOwnedStorageTransferPackages restricts private storage operations to
+// explicitly selected package owners. The caller must establish those owners'
+// source authority; module names and import aliases never grant permission.
+// Ordinary generic/nominal use and calls to the provider remain available.
+func PrepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID) (PackageExpansion, error) {
+	if len(owners) == 0 {
+		return PackageExpansion{}, fmt.Errorf("storage operation owners must be explicit")
+	}
+	allowed := make(map[genericplan.PackageID]bool, len(owners))
+	for _, owner := range owners {
+		if owner == "" || allowed[owner] {
+			return PackageExpansion{}, fmt.Errorf("storage operation owner is empty or duplicated")
+		}
+		found := false
+		for _, input := range inputs {
+			if input.Owner == owner {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return PackageExpansion{}, fmt.Errorf("storage operation owner is absent from source graph")
+		}
+		allowed[owner] = true
+	}
+	return preparePackagesOwned(inputs, limits, true, true, true, allowed)
+}
+
+func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners map[genericplan.PackageID]bool) (PackageExpansion, error) {
 	type moduleKey struct {
 		owner genericplan.PackageID
 		path  string
@@ -64,7 +96,8 @@ func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, stor
 		if _, exists := modules[key]; exists {
 			return PackageExpansion{}, fmt.Errorf("duplicate generic module %q", input.Module.Path)
 		}
-		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: storage, allowNominal: nominal, packageNominal: nominal, allowStorageTransfers: transfers}
+		allowStorage := storageOwners == nil || storageOwners[input.Owner]
+		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: storage && allowStorage, allowNominal: nominal, packageNominal: nominal, allowStorageTransfers: transfers && allowStorage}
 		modules[key], ordered[i] = x, x
 	}
 	for i, input := range inputs {
