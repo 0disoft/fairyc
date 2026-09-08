@@ -109,11 +109,11 @@ uint32_t fy_private_vector_release_empty_v0(void *storage) {
     return FY_STD_ALLOC_OK_V0;
 }
 
-/* Copy-element operations require trivially copyable/relocatable values.
+/* Byte transport requires representation-relocatable values.
  * Element/output spans must be live, at least element_size bytes, and disjoint
  * from both the descriptor and its backing allocation. No element borrow may
  * survive a mutating call. These are unsafe caller obligations, not pointer checks. */
-uint32_t fy_private_vector_push_copy_v0(void *storage, const void *element, size_t element_size) {
+static uint32_t fy_private_vector_push_bytes_v0(void *storage, const void *element, size_t element_size) {
     if (storage == NULL || element == NULL) {
         return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
     }
@@ -136,6 +136,26 @@ uint32_t fy_private_vector_push_copy_v0(void *storage, const void *element, size
     return FY_STD_ALLOC_OK_V0;
 }
 
+/* Copy wrappers may only duplicate copyable values, never resource ownership. */
+uint32_t fy_private_vector_push_copy_v0(void *storage, const void *element, size_t element_size) {
+    return fy_private_vector_push_bytes_v0(storage, element, element_size);
+}
+
+/* The declaring owner supplies a valid non-owning empty representation, in a
+ * separate live span disjoint from every other argument/allocation. Success
+ * transfers ownership into the prefix and resets the donor before returning.
+ * Failure neither consumes nor changes the donor. */
+uint32_t fy_private_vector_push_take_v0(void *storage, void *element, const void *empty, size_t element_size) {
+    if (empty == NULL) {
+        return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
+    }
+    uint32_t status = fy_private_vector_push_bytes_v0(storage, element, element_size);
+    if (status == FY_STD_ALLOC_OK_V0) {
+        memcpy(element, empty, element_size);
+    }
+    return status;
+}
+
 uint32_t fy_private_vector_read_copy_v0(const void *storage, size_t index, void *output, size_t element_size) {
     if (storage == NULL || output == NULL) {
         return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
@@ -149,7 +169,7 @@ uint32_t fy_private_vector_read_copy_v0(const void *storage, size_t index, void 
     return FY_STD_ALLOC_OK_V0;
 }
 
-uint32_t fy_private_vector_pop_copy_v0(void *storage, void *output, size_t element_size) {
+static uint32_t fy_private_vector_pop_bytes_v0(void *storage, void *output, size_t element_size) {
     if (storage == NULL || output == NULL) {
         return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
     }
@@ -162,4 +182,15 @@ uint32_t fy_private_vector_pop_copy_v0(void *storage, void *output, size_t eleme
     value.length--;
     memcpy(storage, &value, sizeof value);
     return FY_STD_ALLOC_OK_V0;
+}
+
+uint32_t fy_private_vector_pop_copy_v0(void *storage, void *output, size_t element_size) {
+    return fy_private_vector_pop_bytes_v0(storage, output, element_size);
+}
+
+/* Output must be a valid non-owning empty value of the exact element type.
+ * Success transfers the tail obligation to output; no read-copy resource API
+ * is supplied. Removed tail bytes are outside the initialized prefix. */
+uint32_t fy_private_vector_pop_take_v0(void *storage, void *output, size_t element_size) {
+    return fy_private_vector_pop_bytes_v0(storage, output, element_size);
 }

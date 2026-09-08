@@ -112,11 +112,46 @@ allocations after draining and moving the resource. A mismatched scalar argument
 is rejected before emission. The original poison-prefix reserve fixture remains
 in the same configured lane. Foreign heap calls have no interpreter oracle here.
 
+### Owner-supplied empty-state resource transfer
+
+`fy_private_vector_push_take_v0` adds a distinct ownership-transfer protocol over
+the same checked byte-growth core. The declaring owner supplies a valid,
+non-owning empty representation in a separate live span. On success the input is
+copied into the new initialized slot and reset to that empty representation before
+the call returns. On failure the donor and prefix remain unchanged.
+`fy_private_vector_pop_take_v0` transfers the tail into an already empty output
+and removes that slot from the initialized prefix. Neither operation invokes an
+element destructor or admits resource use through the copy/read-copy APIs.
+
+This is the existing Buffer/String owner-reset pattern, not permission to `burn`
+droppable values. The raw caller proves exact representation size, relocation
+permission, empty-state validity, disjoint spans and exclusive ownership. An
+arbitrary type without a valid owner-supplied empty state is not covered. The byte
+core is shared with copy operations, but their ownership contracts remain distinct.
+
+`TestPrivateVectorResourceOwnership` executes a concrete owner-module `Item` and
+`Items` implementation under both MSVC profiles. Each Item owns a real native
+allocation. A consuming push returns `Result<u32, Item>`: failed first allocation
+and failed eight-to-nine growth return the original Item, whose exact identity is
+checked before retry. Successful donors become empty and can follow ordinary
+cleanup. Explicit pop returns Item 9; after moving the vector, its Fairy cleanup
+loop pops and drops Items 8 through 1 before releasing storage. The independent
+C registry rejects duplicate/unknown releases and requires nine releases in that
+order, no live Item allocation, one vector cleanup and no live vector allocation.
+`TestPrivateVectorResourceDonorCannotBeReused` rejects a source borrow after the
+consuming push path. Scalar and poison-prefix regressions run in the same lane.
+
+The fixture uses a concrete pointer-sized Item with a valid empty constructor and
+known Windows layout. It does not instantiate a generic type with a nominal
+resource argument or establish cleanup for every possible resource representation.
+No source ownership rule, `burn` authority, public SDK symbol or runtime ABI changes.
+
 ### Still required
 
-This is storage, not `Vec<T>`. Typed element layout acquisition, safe public operations,
-resource-element initialized-prefix transitions and cleanup, ownership-returning
-failure APIs, borrow invalidation, package/SDK integration and stable admission
+This is private storage and transfer evidence, not `Vec<T>`. Typed element layout
+acquisition, generic nominal/resource argument admission, safe public operations,
+general resource-element cleanup, public ownership-returning failure APIs, borrow
+invalidation, package/SDK integration and stable admission
 remain separate work. The i32 fixture supplies its known four-byte layout and
 seeds/discards one copy scalar in C; it is not a generic typed element API.
 The newer copy-element fixtures use the actual push/read/pop transport instead of
