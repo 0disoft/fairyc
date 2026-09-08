@@ -44,6 +44,16 @@ func publicTemplates(modules []*expander, catalog *genericplan.Catalog) ([]Publi
 			}
 			result = append(result, PublicTemplate{Owner: module.owner, Module: module.module.Path, Name: name, Closure: digest})
 		}
+		for name, aggregate := range module.aggregates {
+			if !aggregate.shape().Public {
+				continue
+			}
+			digest, err := templateClosure(catalog, module.id(name))
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, PublicTemplate{Owner: module.owner, Module: module.module.Path, Name: name, Closure: digest})
+		}
 	}
 	slices.SortFunc(result, func(a, b PublicTemplate) int {
 		if order := cmp.Compare(a.Owner, b.Owner); order != 0 {

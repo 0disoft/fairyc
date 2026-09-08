@@ -117,3 +117,25 @@ MIR function, struct or resource. No generated-name parsing supplies the kind.
 The function-only Atlas adapter explicitly rejects aggregate provenance until its
 aggregate declaration/signature support is implemented. This is not package
 aggregate admission, an Atlas promotion, or a serialized interface/cache revision.
+
+## Resolved-package source expansion
+
+`genericsource.PreparePackages` resolves aggregate references through exact import
+aliases and package owners. Cross-module access requires a public template;
+generated declarations stay in the defining module and rewritten references keep
+the caller's alias. Functions, aggregate fields, constructors and cleanup helper
+calls share the same dependency graph. Public aggregate closures include unused
+templates and exact import bindings, so rebinding a cleanup dependency invalidates
+both the resource and its factory. Source ASTs remain unchanged on expansion.
+
+The three-package fixture returns a resource from its owning module's factory,
+uses it in the consumer and runs a generic cleanup helper from another package.
+Ordinary package semantics, MIR verification, interpreter execution, and low and
+optimized MSVC execution return 42. This checks executable package transport, not
+an exact cleanup count or allocation-failure behavior. Private access, wrong arity,
+missing aliases and generated-name requests publish no partial expansion.
+
+The compiler's `AnalyzeGenericPackages` entry point still rejects aggregate
+templates before publishing interface hashes or cache specializations. Its gate
+now belongs to compiler package admission rather than the source expander.
+Interface/cache/Atlas integration and stable language/SDK promotion remain pending.

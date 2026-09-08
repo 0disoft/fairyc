@@ -63,7 +63,7 @@ func (x *expander) collectAggregateTemplates() error {
 		if slices.Contains(scalarTypes, shape.Name) || slices.Contains([]string{"void", "never", "str", "Region", "Option", "Result", "source_location"}, shape.Name) {
 			return x.at(shape.NameSpan, FailureDeclaration, fmt.Errorf("aggregate name %q shadows a builtin", shape.Name))
 		}
-		if x.allowPublic || shape.Public {
+		if !x.allowPublic && shape.Public {
 			return x.at(shape.Span, FailureDeclaration, fmt.Errorf("generic aggregates require the private module-local admission path"))
 		}
 		if counts[shape.Name] != 1 {
@@ -83,17 +83,21 @@ func (x *expander) registerAggregateType(ref ast.TypeReference, parameters []str
 	if ref.Kind != ast.TypeKindNamed {
 		return nil
 	}
-	if len(x.aggregates) != 0 && strings.Contains(ref.Path, generatedPrefix) {
+	if strings.Contains(ref.Path, generatedPrefix) {
 		return x.at(ref.Span, FailureRequest, fmt.Errorf("source cannot name generated aggregate types"))
 	}
-	aggregate, found := x.aggregates[ref.Path]
+	target, found, err := x.aggregateTarget(ref)
+	if err != nil {
+		return err
+	}
 	if !found {
 		return nil
 	}
+	aggregate := target.module.aggregates[target.name]
 	if len(ref.Arguments) != len(aggregate.shape().TypeParameters) {
 		return x.at(ref.Span, FailureRequest, &genericplan.Error{Code: genericplan.CodeTypeArgumentArity, Message: "aggregate type argument count does not match the declaration"})
 	}
-	dependency := genericplan.Dependency{Declaration: x.id(ref.Path)}
+	dependency := genericplan.Dependency{Declaration: target.id()}
 	request := genericplan.Request{Declaration: dependency.Declaration}
 	for _, argument := range ref.Arguments {
 		if argument.Kind != ast.TypeKindNamed || len(argument.Arguments) != 0 {
@@ -142,8 +146,10 @@ func (x *expander) registerAggregateRecord(e *ast.Expression, parameters []strin
 	if err != nil {
 		return err
 	}
-	if _, found := x.aggregates[ref.Path]; !found {
-		return fmt.Errorf("unknown module-local generic aggregate %q", ref.Path)
+	if _, found, err := x.aggregateTarget(ref); err != nil {
+		return err
+	} else if !found {
+		return fmt.Errorf("unknown generic aggregate %q", ref.Path)
 	}
 	return x.registerAggregateType(ref, parameters, declaration, requests)
 }
@@ -167,9 +173,6 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 			defer func() { err = x.at(e.Span, FailureRequest, err) }()
 			if err := x.checkExpression(e); err != nil {
 				return err
-			}
-			if e.Kind == syntax.KindSpecialize && x.allowPublic {
-				return fmt.Errorf("generic cleanup calls require the private module-local admission path")
 			}
 			if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
 				return x.registerAggregateRecord(e, shape.TypeParameters, &declaration, &requests)
@@ -198,6 +201,18 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 			return nil, err
 		}
 		declaration.Definition = genericplan.DigestText("source-aggregate-ast-v0", string(encoded))
+		if x.allowPublic {
+			var imports []string
+			for alias, target := range x.imports {
+				imports = append(imports, alias+"="+string(target.owner)+"::"+target.module.Path)
+			}
+			slices.Sort(imports)
+			bindings, err := json.Marshal(imports)
+			if err != nil {
+				return nil, err
+			}
+			declaration.Definition = genericplan.DigestText("source-package-aggregate-v0", string(encoded)+"\n"+string(bindings))
+		}
 		if err := builder.AddDeclaration(declaration); err != nil {
 			return nil, x.at(shape.Span, FailureDeclaration, err)
 		}
@@ -209,18 +224,22 @@ func (x *expander) rewriteAggregateType(ref *ast.TypeReference, names map[string
 	if ref.Kind != ast.TypeKindNamed {
 		return nil
 	}
-	if _, found := x.aggregates[ref.Path]; !found {
+	target, found, err := x.aggregateTarget(*ref)
+	if err != nil {
+		return err
+	}
+	if !found {
 		return nil
 	}
 	var arguments []genericplan.TypeID
 	for _, argument := range ref.Arguments {
 		arguments = append(arguments, genericplan.TypeID(argument.Path))
 	}
-	name, found := names[requestKey(x.id(ref.Path), arguments)]
+	name, found := names[requestKey(target.id(), arguments)]
 	if !found {
 		return fmt.Errorf("aggregate specialization missing from verified plan")
 	}
-	*ref = ast.NamedTypeReference(name, ref.Span)
+	*ref = ast.NamedTypeReference(target.prefix+name, ref.Span)
 	return nil
 }
 
@@ -229,7 +248,9 @@ func (x *expander) rewriteAggregateRecord(e *ast.Expression, names map[string]st
 	if err != nil {
 		return err
 	}
-	if _, found := x.aggregates[ref.Path]; !found {
+	if _, found, err := x.aggregateTarget(ref); err != nil {
+		return err
+	} else if !found {
 		return fmt.Errorf("unknown generic aggregate construction")
 	}
 	if err := x.rewriteAggregateType(&ref, names); err != nil {

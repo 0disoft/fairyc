@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -57,6 +58,21 @@ func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 	}
 	modules := make([]genericsource.PackageModule, len(input.Files))
 	for i, file := range input.Files {
+		if file.Module == nil {
+			return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("generic source module is nil")
+		}
+		// Source expansion can now resolve aggregate imports, but package
+		// interfaces and cache artifacts still require their own admission.
+		for _, declaration := range file.Module.Structs {
+			if len(declaration.TypeParameters) != 0 {
+				return semantic.PackageInput{}, genericsource.PackageExpansion{}, packageAggregatePending(file.Module.Path, owners[file.Package], declaration.Span)
+			}
+		}
+		for _, declaration := range file.Module.Resources {
+			if len(declaration.TypeParameters) != 0 {
+				return semantic.PackageInput{}, genericsource.PackageExpansion{}, packageAggregatePending(file.Module.Path, owners[file.Package], declaration.Span)
+			}
+		}
 		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package]}
 	}
 	expansion, err := genericsource.PreparePackages(modules, limits)
@@ -68,4 +84,8 @@ func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 		input.Files[i].Module = expansion.Modules[i]
 	}
 	return input, expansion, nil
+}
+
+func packageAggregatePending(module string, owner genericplan.PackageID, span diagnostic.Span) error {
+	return &genericsource.SourceError{Owner: owner, Module: module, Span: span, Kind: genericsource.FailureDeclaration, Cause: fmt.Errorf("generic aggregate package interfaces are not admitted")}
 }
