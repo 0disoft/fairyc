@@ -89,8 +89,9 @@ implementations that share source spans. Package context still marks universal
 template-body facts unavailable. This ledger describes observed explicit calls;
 it does not add edges for implicit drop scheduling or prove cleanup execution counts.
 
-The v3 join is an internal opt-in API. Call catalog encoders and CLI consumers still
-require explicit adoption before they can expose cleanup-owned calls.
+The v3 join is an internal opt-in API. Call catalog v2 preserves cleanup-owned
+calls as documented in `docs/atlas/workspace-call-catalog-v2.md`; CLI consumers
+still require explicit adoption.
 
 ### Declaration selectors
 

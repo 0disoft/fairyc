@@ -65,6 +65,7 @@ type Span struct {
 }
 
 type Call struct {
+	SourceBody string                      `json:"source_body,omitempty"`
 	Source     Symbol                      `json:"source"`
 	Target     Symbol                      `json:"target"`
 	Span       Span                        `json:"span"`
@@ -110,10 +111,10 @@ func Encode(
 	direction atlasmap.QueryDirection,
 	maxBytes uint64,
 ) ([]byte, error) {
-	return encode(index, packageInstance, symbolID, direction, maxBytes, false)
+	return encode(index, packageInstance, symbolID, direction, maxBytes, 0)
 }
 
-func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string, direction atlasmap.QueryDirection, maxBytes uint64, generic bool) ([]byte, error) {
+func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string, direction atlasmap.QueryDirection, maxBytes uint64, catalogVersion byte) ([]byte, error) {
 	if index == nil {
 		return nil, fmt.Errorf("Atlas workspace call index is not initialized")
 	}
@@ -132,8 +133,14 @@ func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string
 		return nil, err
 	}
 	schema := atlasmap.LogicalSchema
-	if generic {
+	switch catalogVersion {
+	case 0:
+	case 1:
 		schema = atlasmap.LogicalSchemaV2
+	case 2:
+		schema = atlasmap.LogicalSchemaV3
+	default:
+		return nil, fmt.Errorf("unsupported workspace call catalog version %d", catalogVersion)
 	}
 	if context.LogicalSchema != schema {
 		return nil, fmt.Errorf("workspace call catalog requires %s maps", schema)
@@ -165,8 +172,10 @@ func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string
 		catalog.Calls = make([]Call, 0)
 	}
 	version, encoding, algorithm, prefix, checksumVersion := CatalogVersion, CatalogEncoding, ChecksumAlgorithm, ChecksumPrefix, byte(0)
-	if generic {
+	if catalogVersion == 1 {
 		version, encoding, algorithm, prefix, checksumVersion = CatalogVersionV1, CatalogEncodingV1, ChecksumAlgorithmV1, ChecksumPrefixV1, 1
+	} else if catalogVersion == 2 {
+		version, encoding, algorithm, prefix, checksumVersion = CatalogVersionV2, CatalogEncodingV2, ChecksumAlgorithmV2, ChecksumPrefixV2, 2
 	}
 	checksum, err := computeVersionedChecksum(catalog, version, encoding, checksumVersion)
 	if err != nil {
@@ -210,8 +219,9 @@ func selectCalls(
 	result := make([]Call, 0, len(joined))
 	for _, call := range joined {
 		result = append(result, Call{
-			Source: Symbol{PackageInstance: call.Source.PackageInstance, Symbol: call.Source.Symbol, Specialization: call.SourceSpecialization},
-			Target: Symbol{PackageInstance: call.Target.PackageInstance, Symbol: call.Target.Symbol, Specialization: call.TargetSpecialization},
+			SourceBody: call.SourceBody,
+			Source:     Symbol{PackageInstance: call.Source.PackageInstance, Symbol: call.Source.Symbol, Specialization: call.SourceSpecialization},
+			Target:     Symbol{PackageInstance: call.Target.PackageInstance, Symbol: call.Target.Symbol, Specialization: call.TargetSpecialization},
 			Span: Span{
 				PackageInstance: call.Span.PackageInstance, Source: call.Span.Source,
 				StartByte: call.Span.StartByte, EndByte: call.Span.EndByte,
@@ -226,6 +236,7 @@ func compareJoinedCall(left, right atlasmap.JoinedCall) int {
 	for _, value := range []int{
 		cmp.Compare(left.Source.PackageInstance, right.Source.PackageInstance),
 		cmp.Compare(left.Source.Symbol, right.Source.Symbol),
+		cmp.Compare(left.SourceBody, right.SourceBody),
 		cmp.Compare(left.SourceSpecialization, right.SourceSpecialization),
 		cmp.Compare(left.Target.PackageInstance, right.Target.PackageInstance),
 		cmp.Compare(left.Target.Symbol, right.Target.Symbol),

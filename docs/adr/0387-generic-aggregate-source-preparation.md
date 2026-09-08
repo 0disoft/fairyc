@@ -227,5 +227,8 @@ The opt-in v3 workspace join now preserves original resource ownership and exact
 source/target specialization IDs for cleanup calls across direct dependencies.
 Codec-roundtripped two-package tests cover both selector directions, deterministic
 ordering, detached output, call budgets, stale source and missing concrete targets.
-It does not model implicit drop scheduling. Call catalog and CLI consumers must
-adopt v3 before stable aggregate admission.
+It does not model implicit drop scheduling. The opt-in call catalog v2 encoder
+now preserves this cleanup source kind and both concrete endpoints with a separate
+checksum domain version and atomic byte bound; see
+`docs/atlas/workspace-call-catalog-v2.md`. CLI consumers must adopt v3 before stable
+aggregate admission.

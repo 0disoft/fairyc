@@ -47,5 +47,6 @@ incompatible interfaces. Existing v1/v2 query and downstream tests remain active
 Function-only v2 output does not gain aggregate, cleanup or source-body fields.
 
 `NewWorkspaceCallIndexV3` consumes these relations with cleanup ownership intact;
-see `docs/atlas/workspace-call-join-v0.md`. Context Pack, call catalog and CLI
-consumers must explicitly adopt v3; this package-local API does not activate them.
+see `docs/atlas/workspace-call-join-v0.md`. Call catalog v2 preserves the joined
+cleanup marker. Context Pack and CLI consumers must explicitly adopt v3; this
+package-local API does not activate them.

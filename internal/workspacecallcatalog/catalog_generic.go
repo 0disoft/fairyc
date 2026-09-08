@@ -33,5 +33,5 @@ func ParseChecksumV1(value string) (ChecksumV1, error) {
 // EncodeV1 emits concrete implementation endpoints from an exact-current v2 workspace join.
 // Selection remains declaration-based; neither the format nor its IDs are execution authority.
 func EncodeV1(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string, direction atlasmap.QueryDirection, maxBytes uint64) ([]byte, error) {
-	return encode(index, packageInstance, symbolID, direction, maxBytes, true)
+	return encode(index, packageInstance, symbolID, direction, maxBytes, 1)
 }

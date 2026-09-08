@@ -90,6 +90,10 @@ func workspaceCallCatalogFixture(t *testing.T) (string, *atlasmap.WorkspaceCallI
 }
 
 func workspaceCallCatalogFixtureVersion(t *testing.T, generic bool) (string, *atlasmap.WorkspaceCallIndex, atlasmap.WorkspaceSymbol, atlasmap.WorkspaceSymbol, string) {
+	return workspaceCallCatalogFixtureMode(t, generic, false)
+}
+
+func workspaceCallCatalogFixtureMode(t *testing.T, generic, aggregate bool) (string, *atlasmap.WorkspaceCallIndex, atlasmap.WorkspaceSymbol, atlasmap.WorkspaceSymbol, string) {
 	t.Helper()
 	root := t.TempDir()
 	writeCatalogFixture(t, filepath.Join(root, "fairy.toml"), `schema = "fairyc.manifest/v1"
@@ -120,6 +124,9 @@ source = "src"
 		writeCatalogFixture(t, filepath.Join(root, "src", "main.fy"), "module main; import answer as answer; fn T pass<T>(T value) { return answer::value<T>(value); } fn i32 main() { assert(pass<i32>(42) == 42); assert(pass<u32>(7) == 7); return 0; }")
 		writeCatalogFixture(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), "module answer; pub fn T value<T>(T x) { return x; }")
 	}
+	if aggregate {
+		writeCatalogFixture(t, filepath.Join(root, "src", "main.fy"), "module main; import answer as answer; resource Token<T> { T value; cleanup { let T observed = answer::value<T>(this.value); } } fn Token<T> make<T>(T value) { return Token<T> { .value = value }; } fn i32 main() { let Token<i32> a = make<i32>(42); let Token<u32> b = make<u32>(7); return a.value; }")
+	}
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
 		t.Fatal(err)
@@ -148,6 +155,9 @@ source = "src"
 	prepare, current, join := atlasmap.PrepareWorkspace, atlasmap.CurrentWorkspaceExpectations, atlasmap.NewWorkspaceCallIndex
 	if generic {
 		prepare, current, join = atlasmap.PrepareWorkspaceV2, atlasmap.CurrentWorkspaceExpectationsV2, atlasmap.NewWorkspaceCallIndexV2
+	}
+	if aggregate {
+		prepare, current, join = atlasmap.PrepareWorkspaceV3, atlasmap.CurrentWorkspaceExpectationsV3, atlasmap.NewWorkspaceCallIndexV3
 	}
 	_, partitions, err := prepare(workspace, checked, compilerBuild)
 	if err != nil {
