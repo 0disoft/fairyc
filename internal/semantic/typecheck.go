@@ -1127,6 +1127,13 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	}
 	fields := map[string]resourceField(nil)
 	if info, found := c.analyzer.resourceType(receiverType); found {
+		owner := info.symbol
+		if owner.packageID != c.module.key.packageID || owner.module != c.module.file.Module.Path {
+			c.analyzer.addDiagnostic("E0103", span(c.module.file.Path, expression.Span), RelatedSpan{
+				Role: "declaration", Span: span(owner.source, owner.declaration),
+			})
+			return hir.TypeInvalid
+		}
 		fields = info.fields
 	} else if info, found := c.analyzer.structType(receiverType); found {
 		fields = info.fields

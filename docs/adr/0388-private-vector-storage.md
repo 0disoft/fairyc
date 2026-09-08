@@ -248,6 +248,43 @@ public SDK construction. The scalar generic helpers still require a copyable
 element contract, and Item cleanup remains specific to that known empty-state
 resource. Private descriptor fields are not an encapsulated public API.
 
+### Private scalar package construction boundary
+
+`compiler.CheckStorageGenericPackages` carries the same symbolic operations
+through an already-resolved package graph, with exact coordinate/import bindings
+and ordinary package visibility analysis. This path is separate from ordinary
+generic packages, stable interfaces, cached compilation and CLI admission.
+It admits scalar generic arguments only; module-local nominal admission does not
+establish cross-package nominal binding.
+
+The storage package integration fixture exports a generic resource and typed
+factory/reserve/capacity functions while keeping descriptor fields and raw C
+helpers private. An importing client constructs `Storage<bool>`, reserves nine
+elements, observes capacity sixteen, moves the owner and leaves scope. Both MSVC
+profiles return 42 after the runtime probe observes one release and no live
+allocation. The client supplies no descriptor fields, raw pointer or layout
+number. No element insertion or arbitrary element destruction is claimed here.
+
+Negative clients cannot read a descriptor field, call its private raw release,
+reuse the moved donor, or pass `Storage<bool>` to `reserve<i32>`. The positive
+graph preserves its input AST and specialization plan under file reversal and
+local package-ID renumbering; ordinary generic admission still rejects the
+queries. This is compiler-private module encapsulation evidence, not SDK
+publication or admission of a general `Vec<T>` element contract.
+
+This integration exposed a missing resource-field owner check in semantic
+analysis. The existing language-14 surface contract already makes such fields
+private outside their defining module. Field projection now applies the same
+package/module ownership check as resource record construction, with `E0103`
+and the owner declaration span. Owner-local reads and public inert struct fields
+remain admitted. The package aggregate fixture now uses an owner-defined
+consuming accessor instead of reading a private field from its client.
+
+A borrowed accessor for a package-specialized resource exposed an interpreter
+unary-borrow type compatibility failure during this work. The field-access fixture
+does not claim to resolve that separate interpreter boundary; it uses a consuming
+accessor and retains its value and cleanup execution checks.
+
 ### Still required
 
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,

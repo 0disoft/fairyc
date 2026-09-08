@@ -11,6 +11,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
@@ -31,12 +32,9 @@ func runVectorStorageNative(t *testing.T, program, probe string, queries bool) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private vector storage proof requires Windows amd64")
 	}
-	toolchain, err := cdriver.ResolveWindowsHostMSVC()
-	if err != nil {
-		t.Fatal(err)
-	}
 	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", program)
 	var result compiler.Result
+	var err error
 	if queries {
 		result, _, err = compiler.CheckStorageGenericFunctions(file, genericCoordinate(t), genericplan.DefaultPlanLimits())
 	} else {
@@ -45,7 +43,19 @@ func runVectorStorageNative(t *testing.T, program, probe string, queries bool) {
 	if err != nil || !result.Verified {
 		t.Fatalf("compile: %v %+v", err, result.Semantic)
 	}
-	unit, err := cbackend.Emit(result.MIR, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	runVectorStorageMIRNative(t, result.MIR, "main::main", probe)
+}
+
+func runVectorStorageMIRNative(t *testing.T, program mir.Program, entry, probe string) {
+	t.Helper()
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("private vector storage proof requires Windows amd64")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	unit, err := cbackend.Emit(program, entry, cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
 		t.Fatal(err)
 	}

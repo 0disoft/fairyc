@@ -28,6 +28,16 @@ func ExpandPackages(inputs []PackageModule, limits genericplan.PlanLimits) ([]*a
 // PreparePackages also retains public template identities before specialization
 // erases their declarations. No template summary is returned on expansion failure.
 func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
+	return preparePackages(inputs, limits, false)
+}
+
+// PrepareStoragePackages enables symbolic queries across an exact resolved graph.
+// Arguments remain scalar; nominal arguments need cross-owner type binding.
+func PrepareStoragePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
+	return preparePackages(inputs, limits, true)
+}
+
+func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, storage bool) (PackageExpansion, error) {
 	type moduleKey struct {
 		owner genericplan.PackageID
 		path  string
@@ -42,7 +52,7 @@ func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (Pac
 		if _, exists := modules[key]; exists {
 			return PackageExpansion{}, fmt.Errorf("duplicate generic module %q", input.Module.Path)
 		}
-		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true}
+		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: storage}
 		modules[key], ordered[i] = x, x
 	}
 	for i, input := range inputs {

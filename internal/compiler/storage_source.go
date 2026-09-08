@@ -34,3 +34,29 @@ func CheckStorageGenericFunctions(file semantic.File, coordinate packagegraph.Co
 	}
 	return result, expansion.Plan, err
 }
+
+// CheckStorageGenericPackages enables private scalar storage queries across a
+// resolved graph. It does not publish a stable interface or artifact-cache key.
+func CheckStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
+	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, true)
+	if err != nil {
+		return Result{}, genericplan.Plan{}, err
+	}
+	analysis, err := semantic.AnalyzePackages(prepared)
+	if err != nil {
+		return Result{}, genericplan.Plan{}, &Error{Stage: StagePackageInput, Cause: err}
+	}
+	result, err := lowerWithVerifier(analysis, mir.VerifyStorageQueries)
+	if err == nil && result.Verified {
+		owners := make(map[hir.PackageID]genericplan.PackageID, len(coordinates))
+		for id, coordinate := range coordinates {
+			owners[id] = genericPackageOwner(coordinate)
+		}
+		result.GenericProvenance, err = genericProvenance(input, owners, expansion, result.Semantic.NominalTypes)
+		if err != nil {
+			return Result{}, genericplan.Plan{}, err
+		}
+		result.Semantic.RequiresGenericProvenance = len(expansion.Declarations) != 0
+	}
+	return result, expansion.Plan, err
+}

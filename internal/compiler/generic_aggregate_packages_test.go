@@ -24,10 +24,11 @@ func aggregatePackageSources(t *testing.T) []genericsource.PackageModule {
 	t.Helper()
 	return []genericsource.PackageModule{
 		{Module: parseCompilerFile(t, 1, "main.fy", `module main; import box as b;
-fn i32 main() { let b::Box<i32> value = b::make<i32>(42); return value.value; }`).Module, Owner: "app", Imports: map[string]genericplan.PackageID{"box": "library"}},
+fn i32 main() { let b::Box<i32> value = b::make<i32>(42); return b::read<i32>(value); }`).Module, Owner: "app", Imports: map[string]genericplan.PackageID{"box": "library"}},
 		{Module: parseCompilerFile(t, 2, "box.fy", `module box; import helper as h;
 pub resource Box<T> { T value; cleanup { let i32 observed = h::finish<i32>(1); } }
 pub fn Box<T> make<T>(T value) { return Box<T> { .value = value }; }
+pub fn T read<T>(Box<T> value) { return value.value; }
 pub struct Unused<T> { T item; }`).Module, Owner: "library", Imports: map[string]genericplan.PackageID{"helper": "helper_a"}},
 		{Module: parseCompilerFile(t, 3, "helper.fy", `module helper; pub fn T finish<T>(T value) { return value; }`).Module, Owner: "helper_a"},
 	}
@@ -37,7 +38,7 @@ func TestGenericAggregatePackageSourceExpansion(t *testing.T) {
 	input := aggregatePackageSources(t)
 	before, _ := json.Marshal(input)
 	expanded, err := genericsource.PreparePackages(input, genericplan.DefaultPlanLimits())
-	if err != nil || len(expanded.Plan.Specializations) != 3 || len(expanded.Templates) != 4 {
+	if err != nil || len(expanded.Plan.Specializations) != 4 || len(expanded.Templates) != 5 {
 		t.Fatalf("expand: %v %+v", err, expanded)
 	}
 	after, _ := json.Marshal(input)
@@ -130,11 +131,11 @@ func TestGenericAggregatePackageInterfacesIgnoreInstantiationDemand(t *testing.T
 		coordinates[id] = coordinate
 	}
 	used, err := compiler.AnalyzeGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
-	if err != nil || len(used.Interfaces) != 3 || len(used.Plan.Specializations) != 3 {
+	if err != nil || len(used.Interfaces) != 3 || len(used.Plan.Specializations) != 4 {
 		t.Fatalf("used: %v %+v", err, used)
 	}
 	result, err := compiler.LowerAnalyzed(used.Analysis)
-	if err != nil || !result.Verified || len(result.GenericProvenance.Declarations()) != 4 || len(result.GenericProvenance.Specializations()) != 3 {
+	if err != nil || !result.Verified || len(result.GenericProvenance.Declarations()) != 5 || len(result.GenericProvenance.Specializations()) != 4 {
 		t.Fatalf("lower: %v %+v", err, result)
 	}
 	input.Files[0] = parseCompilerFile(t, 1, "main.fy", `module main; import box as b; fn i32 main() { return 0; }`)
