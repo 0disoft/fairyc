@@ -816,7 +816,7 @@ func mapFunctionEntities(function *mir.Function, transform func(string) (string,
 
 var sourceEntityKinds = []string{
 	"byte-slice-data-address", "call", "cstr-data-address", "cstr-from-raw-parts", "foreign",
-	"raw-address", "raw-borrow-pointer", "span", "str-data-address", "str-from-raw-parts", "unsafe-scope",
+	"raw-address", "raw-borrow-pointer", "span", "storage-put", "storage-take", "str-data-address", "str-from-raw-parts", "unsafe-scope",
 }
 
 func stabilizeSourceEntity(value string, owner hir.PackageID) (string, error) {

@@ -586,6 +586,30 @@ This constructor rejects persistent configuration before opening storage. Stable
 `SourceSession` selection still rejects generic aggregate source; no stable CLI,
 SDK, language or runtime ABI promotion is made by this private coordinator.
 
+### Private coordinate-stable transfer artifacts
+
+`DescribeStorageTransferStableArtifact`, `EncodeStorageTransferStableArtifact`
+and `DecodeStorageTransferStableArtifact` use the separate
+`fairyc.stable-package-storage-mir/v0` envelope. They preserve the existing exact
+package ownership, projected type context, canonical body graph and explicit
+import checks. Ordinary package encoders, decoders and rebind entry points still
+reject storage operations, including a private payload relabeled with ordinary
+schema and version strings.
+
+`RebindStorageTransferStableArtifacts` maps the complete package closure into
+fresh package, function, foreign-symbol and local namespaces, then runs the
+transfer MIR verifier before publishing executable code. Source entities for
+`storage-take` and `storage-put` now follow the same package-neutral source-path
+transport as calls and unsafe scopes. Structural decoding alone is not execution
+authorization; damaged ownership provenance is rejected during final rebind.
+
+The vector fixture changes all process-local namespaces, reverses package order,
+re-extracts byte-identical stable artifacts, and executes the rebound code under
+low/optimized MSVC with its existing ownership/OOM counters. It rejects incomplete
+closures, schema substitution, unknown/trailing/noncanonical bytes, byte-limit
+violations and damaged unsafe scope. Persistent storage and fresh-process disk
+cache coordination are not yet admitted by this transport step.
+
 This is private storage and transfer evidence, not `Vec<T>`. Encapsulated SDK container construction,
 stable package/SDK nominal-resource argument admission, safe public operations,
 general resource-element cleanup, public ownership-returning failure APIs, borrow

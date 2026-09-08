@@ -59,7 +59,15 @@ type StableReassembly struct {
 // DescribeStableArtifact projects one verified process-local package artifact into stable bodies,
 // explicit FunctionID imports, and the exact stable type context shared by those bodies.
 func DescribeStableArtifact(artifact Artifact, maxBytes uint64) (StableArtifact, error) {
-	if err := Verify(artifact); err != nil {
+	return describeStableArtifact(artifact, maxBytes, false)
+}
+
+func describeStableArtifact(artifact Artifact, maxBytes uint64, transfers bool) (StableArtifact, error) {
+	verify := Verify
+	if transfers {
+		verify = VerifyStorageTransfers
+	}
+	if err := verify(artifact); err != nil {
 		return StableArtifact{}, fmt.Errorf("verify process-local artifact before stable projection: %w", err)
 	}
 	context, foreign, err := projectArtifactContext(artifact)
@@ -78,7 +86,7 @@ func DescribeStableArtifact(artifact Artifact, maxBytes uint64) (StableArtifact,
 	if err != nil {
 		return StableArtifact{}, err
 	}
-	if err := ValidateStableArtifact(result); err != nil {
+	if err := validateStableArtifact(result, transfers); err != nil {
 		return StableArtifact{}, err
 	}
 	return result, nil
@@ -87,6 +95,10 @@ func DescribeStableArtifact(artifact Artifact, maxBytes uint64) (StableArtifact,
 // ValidateStableArtifact checks package ownership, context identity, sorted bindings, and exact
 // resolution of every internal call and resource-drop reference without process-local symbols.
 func ValidateStableArtifact(artifact StableArtifact) error {
+	return validateStableArtifact(artifact, false)
+}
+
+func validateStableArtifact(artifact StableArtifact, transfers bool) error {
 	if artifact.Package == (packagegraph.InstanceID{}) {
 		return fmt.Errorf("stable package MIR artifact has an empty PackageInstanceId")
 	}
@@ -110,6 +122,15 @@ func ValidateStableArtifact(artifact StableArtifact) error {
 		}
 		if err := ValidateStableBody(body); err != nil {
 			return fmt.Errorf("stable function %s: %w", body.ID, err)
+		}
+		if !transfers {
+			for _, block := range body.Function.Blocks {
+				for _, operation := range block.Operations {
+					if operation.Kind == mir.OperationStorageLayout || operation.Kind == mir.OperationStorageTake || operation.Kind == mir.OperationStoragePut {
+						return fmt.Errorf("ordinary stable package MIR does not admit private storage operations")
+					}
+				}
+			}
 		}
 		owned[body.ID] = struct{}{}
 	}
@@ -175,13 +196,18 @@ func ValidateStableArtifact(artifact StableArtifact) error {
 
 // EncodeStableArtifact returns canonical exact-version JSON under a mandatory caller limit.
 func EncodeStableArtifact(artifact StableArtifact, maxBytes uint64) ([]byte, error) {
+	return encodeStableArtifact(artifact, maxBytes, false)
+}
+
+func encodeStableArtifact(artifact StableArtifact, maxBytes uint64, transfers bool) ([]byte, error) {
 	if maxBytes == 0 {
 		return nil, fmt.Errorf("stable package MIR artifact byte limit must be positive")
 	}
-	if err := ValidateStableArtifact(artifact); err != nil {
+	if err := validateStableArtifact(artifact, transfers); err != nil {
 		return nil, err
 	}
-	encoded, err := json.Marshal(stableArtifactEnvelope{Schema: StableArtifactSchema, Version: StableArtifactVersion, Artifact: artifact})
+	schema, version := stableArtifactContract(transfers)
+	encoded, err := json.Marshal(stableArtifactEnvelope{Schema: schema, Version: version, Artifact: artifact})
 	if err != nil {
 		return nil, fmt.Errorf("encode stable package MIR artifact: %w", err)
 	}
@@ -194,6 +220,10 @@ func EncodeStableArtifact(artifact StableArtifact, maxBytes uint64) ([]byte, err
 // DecodeStableArtifact enforces canonical JSON, exact schema/version, strict fields, caller bounds,
 // and full stable package validation before returning reusable compiler state.
 func DecodeStableArtifact(encoded []byte, maxBytes uint64) (StableArtifact, error) {
+	return decodeStableArtifact(encoded, maxBytes, false)
+}
+
+func decodeStableArtifact(encoded []byte, maxBytes uint64, transfers bool) (StableArtifact, error) {
 	if maxBytes == 0 {
 		return StableArtifact{}, fmt.Errorf("stable package MIR artifact byte limit must be positive")
 	}
@@ -216,13 +246,14 @@ func DecodeStableArtifact(encoded []byte, maxBytes uint64) (StableArtifact, erro
 		}
 		return StableArtifact{}, fmt.Errorf("decode stable package MIR artifact trailing data: %w", err)
 	}
-	if envelope.Schema != StableArtifactSchema || envelope.Version != StableArtifactVersion {
+	schema, version := stableArtifactContract(transfers)
+	if envelope.Schema != schema || envelope.Version != version {
 		return StableArtifact{}, fmt.Errorf("stable package MIR artifact schema or version is incompatible")
 	}
-	if err := ValidateStableArtifact(envelope.Artifact); err != nil {
+	if err := validateStableArtifact(envelope.Artifact, transfers); err != nil {
 		return StableArtifact{}, fmt.Errorf("verify decoded stable package MIR artifact: %w", err)
 	}
-	canonical, err := EncodeStableArtifact(envelope.Artifact, maxBytes)
+	canonical, err := encodeStableArtifact(envelope.Artifact, maxBytes, transfers)
 	if err != nil {
 		return StableArtifact{}, err
 	}
@@ -242,6 +273,10 @@ func RebindStableArtifacts(artifacts []StableArtifact, coordinates map[hir.Packa
 // RebindStableArtifactsWithBindings reconstructs one closed verified MIR
 // program and returns its deterministic fresh function-symbol assignments.
 func RebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates map[hir.PackageID]packagegraph.CoordinateID, firstFunctionSymbol, firstForeignSymbol hir.SymbolID, firstLocal mir.LocalID) (StableReassembly, error) {
+	return rebindStableArtifactsWithBindings(artifacts, coordinates, firstFunctionSymbol, firstForeignSymbol, firstLocal, false)
+}
+
+func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates map[hir.PackageID]packagegraph.CoordinateID, firstFunctionSymbol, firstForeignSymbol hir.SymbolID, firstLocal mir.LocalID, transfers bool) (StableReassembly, error) {
 	if len(artifacts) == 0 {
 		return StableReassembly{}, fmt.Errorf("no stable package MIR artifacts to rebind")
 	}
@@ -254,7 +289,7 @@ func RebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 	owned := make(map[FunctionID]ownedBody)
 	contexts := make([]ContextDescriptor, 0, len(artifacts))
 	for index, artifact := range artifacts {
-		if err := ValidateStableArtifact(artifact); err != nil {
+		if err := validateStableArtifact(artifact, transfers); err != nil {
 			return StableReassembly{}, fmt.Errorf("stable artifact %d: %w", index, err)
 		}
 		contexts = append(contexts, artifact.Context)
@@ -319,7 +354,11 @@ func RebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 		program.Functions = append(program.Functions, function)
 	}
 	slices.SortFunc(program.Functions, func(left, right mir.Function) int { return strings.Compare(left.Name, right.Name) })
-	if failures := mir.Verify(program); len(failures) != 0 {
+	verify := mir.Verify
+	if transfers {
+		verify = mir.VerifyStorageTransfers
+	}
+	if failures := verify(program); len(failures) != 0 {
 		return StableReassembly{}, fmt.Errorf("verify rebound stable package MIR: %w", failures[0])
 	}
 	return StableReassembly{MIR: program, Functions: bindings}, nil
