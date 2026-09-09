@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"io/fs"
 	"os"
@@ -47,18 +48,31 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 	var names []string
 	var ends []int
 	var inputEnds []int
-	appendCase := func(name string, input []byte, previous bool) {
-		if len(input) > 4096 || len(names) >= 2048 {
+	appendObservation := func(name string, input []byte, previous bool, limits source.Limits, custom bool) {
+		if len(input) > 4096 || len(names) >= 10240 {
 			t.Fatalf("candidate corpus bound exceeded by %s", name)
 		}
 		mode := byte(0)
 		if previous {
 			mode = 1
 		}
+		if custom {
+			mode += 2
+		}
 		stdin.Write([]byte{mode, byte(len(input)), byte(len(input) >> 8)})
+		if custom {
+			for _, limit := range []int{limits.MaxBytes, limits.MaxTokens, limits.MaxDiagnostics, limits.MaxWorkUnits} {
+				if limit < 0 || uint64(limit) > 0xffffffff {
+					t.Fatalf("unrepresentable corpus budget: %d", limit)
+				}
+				var encoded [4]byte
+				binary.LittleEndian.PutUint32(encoded[:], uint32(limit))
+				stdin.Write(encoded[:])
+			}
+		}
 		stdin.Write(input)
 		file := source.NewFile("input.fy", input)
-		budget := source.NewBudget(source.DefaultLimits(), len(input))
+		budget := source.NewBudget(limits, len(input))
 		var result lexer.Result
 		if previous {
 			result = lexer.LexPreviousRevision(file, budget)
@@ -66,7 +80,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 			result = lexer.Lex(file, budget)
 		}
 		for _, d := range result.Diagnostics {
-			if d.Code == "E0010" {
+			if d.Code == "E0010" && !custom {
 				t.Fatalf("reference budget exhaustion in %s", name)
 			}
 		}
@@ -89,6 +103,23 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 		names = append(names, name)
 		ends = append(ends, expected.Len())
 		inputEnds = append(inputEnds, stdin.Len())
+	}
+	appendCase := func(name string, input []byte, previous bool) {
+		appendObservation(name, input, previous, source.DefaultLimits(), false)
+		for _, profile := range []string{"bytes-half", "one-token", "no-diagnostics", "work-half"} {
+			limits := source.DefaultLimits()
+			switch profile {
+			case "bytes-half":
+				limits.MaxBytes = len(input) / 2
+			case "one-token":
+				limits.MaxTokens = 1
+			case "no-diagnostics":
+				limits.MaxDiagnostics = 0
+			case "work-half":
+				limits.MaxWorkUnits = len(input) / 2
+			}
+			appendObservation(name+"/"+profile, input, previous, limits, true)
+		}
 	}
 	for _, path := range paths {
 		input, err := os.ReadFile(path)
@@ -132,7 +163,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 		begin, inputStart, outputStart := 0, 0, 0
 		for begin < len(names) {
 			end := begin
-			for end < len(names) && ends[end]-outputStart <= 60000 {
+			for end < len(names) && end-begin < 2048 && ends[end]-outputStart <= 60000 {
 				end++
 			}
 			if end == begin {
@@ -165,10 +196,18 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 			}
 			begin, inputStart, outputStart = end, inputEnd, outputEnd
 		}
-		for _, bad := range []struct {
+		badFrames := []struct {
 			input []byte
 			exit  int32
-		}{{[]byte{2}, 8}, {[]byte{0}, 8}, {[]byte{0, 1, 0}, 8}, {[]byte{0, 1, 16}, 4}} {
+		}{{[]byte{4}, 8}, {[]byte{2}, 8}, {[]byte{0}, 8}, {[]byte{0, 1, 0}, 8}, {[]byte{0, 1, 16}, 4}, {[]byte{2, 1, 16}, 4}}
+		for length := 0; length <= 16; length++ {
+			// Include every truncated budget-header length and a complete header without its body.
+			badFrames = append(badFrames, struct {
+				input []byte
+				exit  int32
+			}{append([]byte{3, 1, 0}, make([]byte, length)...), 8})
+		}
+		for _, bad := range badFrames {
 			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewReader(bad.input))
 			if err != nil || outcome.ExitCode != bad.exit || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
 				t.Fatalf("malformed frame %x: outcome=%+v err=%v", bad.input, outcome, err)
