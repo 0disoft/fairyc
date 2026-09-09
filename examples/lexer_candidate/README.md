@@ -58,10 +58,13 @@ Numeric recognition also charges source advancement and complete pre-trimming
 decimal expansion before materializing output. Exact expansion boundaries,
 cumulative numbers, signed 64-bit exponent endpoints and out-of-range exponents
 are compared against Go. Independent expansion/storage caps remain in force.
-String work charging is pending. Encountering a string with a work limit below
-the reference default (16777216) returns status 2 without a partial stream.
-Existing default-budget corpus execution remains available; complete work-unit
-parity and compiler-component promotion remain unfinished.
+String recognition carries the same work meter through prefixed openers, raw
+UTF-8, escapes, malformed-escape recovery and closing quotes. A multi-byte charge
+either advances in full or leaves the cursor unchanged, matching the reference.
+Native work-boundary tests also combine token and diagnostic limits and mixed
+numeric/string input. All recognition paths now participate in work charging;
+independent candidate storage caps and the separate compiler-component promotion
+gate remain in force.
 Status 2 remains reserved for unsupported extensions;
 it must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate

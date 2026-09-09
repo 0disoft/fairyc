@@ -172,11 +172,11 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             unclosed_comment = depth != 0;
             kind = 2; trivia = 4;
         } else if (current == 34 || matches(input, position, b"b\"") || matches(input, position, b"c\"")) {
-            if (max_work < 16777216) { return 2; }
             kind = if (current == 34) { 7 } else if (current == 98) { 8 } else { 9 };
             let usize opener = if (current == 34) { 1 } else { 2 };
             var bytes::Buffer cooked = bytes::empty();
-            let strings::Step step = strings::scan(input, start, kind, opener, ref mut cooked, errors, diagnostic_count, max_diagnostics);
+            let strings::Step step = strings::scan(input, start, kind, opener, ref mut cooked, errors, diagnostic_count, max_diagnostics, work);
+            work = step.work;
             if (step.status == 5) {
                 if (!append(tokens, 0, 0, start, step.end)) { return 3; }
                 return exhausted(input, step.end, tokens, errors);
