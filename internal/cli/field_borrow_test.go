@@ -55,7 +55,7 @@ language = "fairyc-language/14"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", `module main;
-struct State { i32 count; }
+struct State { u32 count; }
 fn void edit(ref mut State state) { state.count = 1; }
 fn i32 main() { var State state = State { .count = 0 }; edit(ref mut state); assert(state.count == 1); return 0; }
 `)

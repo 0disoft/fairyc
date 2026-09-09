@@ -340,6 +340,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 }
 
 func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
+	storeTypes := fieldStoreLocalTypes(function, functions, foreignFunctions)
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: "V1001", Entity: function.Name, Detail: "entry block is missing"}}
 	}
@@ -796,6 +797,26 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource construction fields do not match the definition"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationFieldStore:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				valid := ValidFieldStoreShape(operation)
+				if valid {
+					valid = fieldStoreOperandType(operation.Operands[0], storeTypes) == operation.OwnerType &&
+						fieldStoreOperandType(operation.Operands[1], storeTypes) == operation.Type
+				}
+				aggregate := fieldAggregateType(operation.OwnerType)
+				if definition := structTypes[aggregate]; definition != nil {
+					field, found := structField(definition.Fields, operation.Field)
+					valid = valid && found && field.Type == operation.Type
+				} else if definition := resourceTypes[aggregate]; definition != nil {
+					field, found := resourceField(definition.Fields, operation.Field)
+					valid = valid && found && field.Type == operation.Type
+				} else {
+					valid = false
+				}
+				if !valid {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "scalar field store does not match its writable owner and declared field"})
+				}
 			case OperationFieldRead, OperationFieldBorrow:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				fieldType := operation.Type

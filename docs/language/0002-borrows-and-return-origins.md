@@ -44,11 +44,16 @@ value is copied or moved. Owned call-result temporaries, mutable field borrows a
 projection through mutable aggregate references remain outside this executable
 slice.
 
-Field assignment is not yet executable. Pure semantic analysis retains typed
-assignments for receiver and ownership checks. MIR lowering rejects owned-place
-and mutable-reference field assignment with a source-located unsupported result;
-the compiler coordinator reports it without publishing executable MIR.
-This does not restrict the admitted shared field reads and borrows above.
+ADR 0394 admits plain assignment to a direct `i32`, `usize`, or `bool` field of
+a mutable local struct/resource or an existing `ref mut` aggregate receiver.
+The right-hand side evaluates once and must have the exact field type. Resource
+privacy, moved-owner checks and whole-root loan conflicts remain enforced.
+Copying an inert aggregate retains value semantics, including when that value is
+stored inside another aggregate; assigning through a borrow changes its referent.
+Nested field paths, compound field assignment, `u8`/`u32` fields and whole
+resource-field replacement remain source-located unsupported lowering results,
+without publishing executable MIR. Shared field reads and borrows retain the
+separate projection boundary above; field stores do not admit mutable field borrows.
 
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
 `ref mut T`. The original borrow becomes usable again after the call's last use. Returning, storing,

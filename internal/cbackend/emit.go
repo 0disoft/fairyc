@@ -1335,6 +1335,10 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				if err := e.inspectResourceOperation(functionIndex, *operation); err != nil {
 					return err
 				}
+			case mir.OperationFieldStore:
+				if err := e.inspectFieldStore(functionIndex, *operation); err != nil {
+					return err
+				}
 			case mir.OperationFieldBorrow:
 				if err := e.inspectFieldBorrow(functionIndex, *operation); err != nil {
 					return err
@@ -3325,6 +3329,8 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			fmt.Fprintf(output, ".f_%d = %s", fieldIndex, value)
 		}
 		output.WriteString(" };\n")
+	case mir.OperationFieldStore:
+		return e.writeFieldStore(output, operation)
 	case mir.OperationFieldBorrow:
 		return e.writeFieldBorrow(output, operation)
 	case mir.OperationFieldRead:

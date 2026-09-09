@@ -402,7 +402,10 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			l.live[statement.Expression.Symbol] = false
 		case "assignment":
 			if statement.Target != nil && statement.Target.Kind == "field-expression" {
-				return false, &Unsupported{Feature: "field assignment without executable field storage", Span: statement.Target.Span}
+				if err := l.lowerFieldStore(statement); err != nil {
+					return false, err
+				}
+				continue
 			}
 			if statement.Target != nil && (statement.Target.Kind == "array-index" || statement.Target.Kind == "view-index") {
 				if err := l.lowerIndexedAssignment(statement); err != nil {

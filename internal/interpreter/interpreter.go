@@ -383,7 +383,7 @@ func resultValue(variant string, payload runtimeValue) (runtimeValue, error) {
 	if variant != "ok" && variant != "err" {
 		return runtimeValue{}, fmt.Errorf("invalid Result variant %q", variant)
 	}
-	copy := payload
+	copy := payload.cloneForValueCopy()
 	return runtimeValue{kind: valueResult, tagged: &taggedState{variant: variant, payload: &copy}}, nil
 }
 
@@ -393,7 +393,7 @@ func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
 		if payload == nil {
 			return runtimeValue{}, fmt.Errorf("Option::Some has no payload")
 		}
-		copy := *payload
+		copy := payload.cloneForValueCopy()
 		return runtimeValue{kind: valueOption, tagged: &taggedState{variant: variant, payload: &copy}}, nil
 	case "none":
 		if payload != nil {
@@ -431,7 +431,7 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 		if _, duplicate := state.fields[fieldName]; duplicate {
 			return runtimeValue{}, fmt.Errorf("enum %q variant %q repeats field %q", definition.Type, variantName, fieldName)
 		}
-		state.fields[fieldName] = values[index]
+		state.fields[fieldName] = values[index].cloneForValueCopy()
 	}
 	return runtimeValue{kind: valueEnum, typ: definition.Type, enum: state}, nil
 }
@@ -449,7 +449,7 @@ func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtime
 		if _, duplicate := state.fields[field.Name]; duplicate {
 			return runtimeValue{}, fmt.Errorf("resource %q has duplicate field %q", definition.Type, field.Name)
 		}
-		state.fields[field.Name] = values[index]
+		state.fields[field.Name] = values[index].cloneForValueCopy()
 	}
 	return runtimeValue{kind: valueResource, typ: definition.Type, resource: state}, nil
 }
@@ -466,7 +466,7 @@ func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValu
 		if _, duplicate := state.fields[field.Name]; duplicate {
 			return runtimeValue{}, fmt.Errorf("struct %q has duplicate field %q", definition.Type, field.Name)
 		}
-		state.fields[field.Name] = values[index]
+		state.fields[field.Name] = values[index].cloneForValueCopy()
 	}
 	return runtimeValue{kind: valueStruct, typ: definition.Type, structure: state}, nil
 }
@@ -874,6 +874,10 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("resource construction in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = constructed
+			case mir.OperationFieldStore:
+				if err := storeScalarField(locals, operation); err != nil {
+					return callCompletion{}, fmt.Errorf("field store in %q: %w", function.Name, err)
+				}
 			case mir.OperationFieldRead, mir.OperationFieldBorrow:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -1248,7 +1252,7 @@ func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation)
 		return unsignedRuntimeValue(operation.OwnerType, limit^value.u64), "", nil
 	}
 	if operation.Operator == "!" {
-		if operation.OwnerType != hir.TypeBool || operation.Type != hir.TypeBool {
+		if operation.OwnerType != hir.TypeBool || operation.Type != hir.TypeBool || value.typ != hir.TypeBool {
 			return runtimeValue{}, "", capabilityError("logical not has incompatible operand or result type")
 		}
 	} else if operation.OwnerType != hir.TypeI32 || operation.Type != hir.TypeI32 {
@@ -1259,6 +1263,9 @@ func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation)
 		return runtimeValue{}, "", err
 	}
 	result, trap, err := unary(operation.Operator, i32)
+	if operation.Operator == "!" && err == nil && trap == "" {
+		return boolRuntimeValue(result != 0), "", nil
+	}
 	return i32Value(result), trap, err
 }
 

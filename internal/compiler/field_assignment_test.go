@@ -11,9 +11,9 @@ import (
 
 func TestFieldBorrowAssignmentRejectsOnlyExecutableLowering(t *testing.T) {
 	const text = `module main;
-struct Counter { i32 value; }
-fn void Counter::set(ref mut Counter this, i32 value) { this.value = value; }
-fn i32 main() { var Counter counter = Counter { .value = 0 }; counter.set(42); return counter.value; }`
+struct Counter { u32 value; }
+fn void Counter::set(ref mut Counter this, u32 value) { this.value = value; }
+fn i32 main() { var Counter counter = Counter { .value = 0 }; counter.set(42); return 0; }`
 	files := []semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)}
 	analysis := semantic.Analyze(files)
 	if analysis.CompletedThrough != semantic.PhaseFlow || len(analysis.Diagnostics) != 0 || len(analysis.Unsupported) != 0 {
