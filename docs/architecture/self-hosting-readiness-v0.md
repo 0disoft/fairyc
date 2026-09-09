@@ -14,7 +14,7 @@ The start gate is closed while any `start` row is `blocked`. A row becomes `read
 | --- | --- | --- | --- | --- |
 | Modules and imports | start | ready | Package/module parsing, workspace resolution, public interfaces, locks, and package build/run/test contracts under `docs/package/`, `docs/cli/`, `internal/package*`, and compiler frontend fixtures | none |
 | Owned strings and byte text | start | ready | `std::text`, `std::bytes::Buffer`, generated Buffer/String transfer fixtures, runtime contracts under `docs/runtime/runtime-stdlib-v0.md` | none |
-| Containers required by a compiler port | start | blocked | Fixed arrays, byte views, Buffer, Option, and Result plus the Windows SDK-owned move-only `std::vec::Vec<T>` in ADR 0390; initialized-prefix ownership and allocation-failure evidence in ADR 0388, immutable element borrows in ADR 0389 | Reconcile #44 after #26/#27 with the released SDK subset; demonstrate that the lossless lexer's actual token-storage requirements fit the admitted element/layout and access rules, with maintained source fixtures exercised by ordinary CI on the same commit |
+| Containers required by a compiler port | start | ready | Windows SDK-owned move-only `std::vec::Vec<T>` in ADRs 0388–0392; token/diagnostic storage and issue #44 reconciliation below; ordinary CI run 34325894239 at `a76b09dea75f7b953048a71c1d0481469d64ba24` | none for the bounded Windows AMD64 MSVC lexer candidate; broader container and target admission remain separate |
 | `Result` and explicit propagation | start | ready | Language Result contract, Result Flow, MIR verification, interpreter and native fixture coverage | none |
 | Resource moves and cleanup | start | ready | Resource Flow, move-only resources, explicit abilities/burn boundaries, MIR cleanup verification, interpreter traces, and native resource fixtures | none |
 | C FFI bootstrap boundary | start | ready | `unsafe extern C fn`, target-aware scalar/pointer/aggregate ABI work, constrained-C backend and bidirectional native fixture lanes | none for bootstrap use; #47 remains a broader public tagged-aggregate ABI gate |
@@ -41,7 +41,8 @@ source-byte bounds and an owned cooked Buffer inside each vector element. Ordina
 Windows CLI execution and separate injected-failure/allocation-accounting tests
 cover that representation. The subsequent record-transport assessment below adds
 source reconstruction and diagnostic storage evidence without implementing a lexer
-or claiming hosted CI completion. The start row remains blocked.
+or implementing token recognition. The same-commit hosted evidence below now closes
+the container start row for the bounded Windows candidate.
 
 ### Current lexer storage assessment
 
@@ -78,11 +79,32 @@ The current scanner's append/read pattern supplies no requirement for mutable
 element access, iterator syntax or nested vectors; add those only if an actual
 port operation demonstrates the need.
 
-The ordinary Windows `go test ./...` lane includes this test, but workflow wiring
-and local passes do not constitute a hosted result. Before changing the container
-row to `ready`, reconcile issue #44's acceptance scope with this Windows subset
-and record successful ordinary CI for the exact `main` commit containing the
-prerequisite fixtures. Full tokenizer corpus comparison remains the acceptance
+### Same-commit start evidence and issue #44 reconciliation
+
+[Frontend run 34325894239](https://github.com/0disoft/fairyc/actions/runs/34325894239)
+completed successfully for `main` commit
+`a76b09dea75f7b953048a71c1d0481469d64ba24` on 2026-09-09. Its ordinary Windows
+lane runs the complete Go suite without cached results and the Windows native
+smoke. The Linux frontend, race checks and downstream C differential, sanitizer,
+layout, ABI and product-build job also passed. This is evidence for that exact
+commit, not a promise that later revisions cannot regress.
+
+Issue #44's acceptance items map to the released Windows subset as follows:
+
+| Acceptance item | Repository evidence |
+| --- | --- |
+| Bounded source, HIR, MIR and backend admission | ADRs 0384/0385 and 0388–0390; ordinary stable CLI vector execution in `internal/cli/vector_support_test.go` |
+| Move-only layout and allocator ownership | SDK `internal/sdkstdlib/sources/optional/std/vec.fy`; private storage layout and SystemHeap ownership in ADR 0388 |
+| Inert and admitted resource elements | `internal/compiler/vector_generic_test.go`, `vector_resource_test.go`, `vector_sdk_test.go` and `nested_resource_test.go` |
+| Reserve/grow, push/pop, truncate/clear and borrowed access | SDK operations above; `internal/cli/vector_truncate_test.go`, `vector_support_test.go` and the nested-resource ownership probe |
+| Initialized prefix and allocation-failure atomicity | `TestPrivateVectorNestedResourceTokenOwnership` forces initial/growth failures, checks intact returned donors, pop ownership, retained capacity, reverse cleanup and zero live allocations |
+| Low and optimized generated-Fairy execution | Native compiler ownership probes and stable CLI token/diagnostic record roundtrips, both exercised by the successful Windows lane |
+
+This reconciliation does not admit arbitrary user generic aggregates, mutable
+views, iteration, nested vectors or non-Windows vector execution. The lexer
+storage workload needs none of those features. Issue tracking state alone does
+not control the gate: these maintained sources and same-commit CI establish its
+bounded start evidence. Full tokenizer corpus comparison remains the acceptance
 condition for the subsequent Fairy component, not a claim made by these probes.
 
 The first Fairy-written compiler component is the lossless lexer/token stream producer, not the parser, type checker, MIR verifier, optimizer, backend, package resolver, or runtime.
