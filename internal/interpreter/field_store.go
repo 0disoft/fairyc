@@ -24,7 +24,9 @@ func storeScalarField(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 	}
 	validValue := op.Type == hir.TypeI32 && value.kind == valueI32 && value.typ != hir.TypeBool ||
 		op.Type == hir.TypeBool && value.kind == valueI32 && value.typ == hir.TypeBool && (value.i32 == 0 || value.i32 == 1) ||
-		op.Type == hir.TypeUSize && value.kind == valueUSize
+		op.Type == hir.TypeUSize && value.kind == valueUSize ||
+		op.Type == hir.TypeU8 && value.kind == valueU8 && value.typ == hir.TypeU8 && value.u64 <= 255 ||
+		op.Type == hir.TypeU32 && value.kind == valueU32 && value.typ == hir.TypeU32 && value.u64 <= 4294967295
 	if !validValue {
 		return fmt.Errorf("field store scalar type mismatch")
 	}

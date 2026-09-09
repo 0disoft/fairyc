@@ -3,7 +3,7 @@ package mir
 import "github.com/0disoft/fairyc/internal/hir"
 
 func fieldStoreScalar(typ hir.Type) bool {
-	return typ == hir.TypeI32 || typ == hir.TypeUSize || typ == hir.TypeBool
+	return typ == hir.TypeI32 || typ == hir.TypeU8 || typ == hir.TypeU32 || typ == hir.TypeUSize || typ == hir.TypeBool
 }
 
 func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {

@@ -12,7 +12,7 @@ remain independent once that state can change.
 
 ## Decision
 
-Execute plain `=` assignments to direct `i32`, `usize`, and `bool` fields of
+Execute plain `=` assignments to direct `i32`, `u8`, `u32`, `usize`, and `bool` fields of
 mutable local structs/resources and existing `ref mut` aggregate receivers.
 The receiver is a direct path (optionally grouped); evaluate the right-hand side
 once, require its exact field type, and retain resource visibility and moved-owner
@@ -31,8 +31,8 @@ negation retains its boolean runtime type when used as a stored or asserted valu
 
 ## Boundaries
 
-Nested field paths, compound field assignments, `u8`/`u32` stores and whole
-resource-field replacement remain unsupported. This does not introduce mutable
+Nested field paths, compound field assignments and whole aggregate-field
+replacement remain unsupported. This does not introduce mutable
 field-address projection, field-disjoint borrowing, temporary owners, public
 aggregate ABI or new source syntax.
 
@@ -47,3 +47,8 @@ inside a resource, last-use loan release, conflicting root loans, malformed MIR,
 artifact round trips and the unsupported boundaries. Windows stable CLI tests
 exercise both default and release native profiles. These tests establish behavior,
 not performance or non-Windows native execution evidence.
+
+The unsigned extension covers zero and maximum `u8`/`u32` values, local and
+mutable-reference receivers, owned resource fields and detached copies. Out-of-range
+source literals, mismatched unsigned types and malformed MIR immediates remain
+rejected rather than truncated or promoted.

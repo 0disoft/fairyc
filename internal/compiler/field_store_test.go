@@ -41,8 +41,9 @@ func TestFieldStoreAdmissionBoundaries(t *testing.T) {
 		"resource replacement": `resource R { i32 x; cleanup {} } resource H { R r; cleanup {} } fn void edit() { var H h = H { .r = R { .x = 0 } }; h.r = R { .x = 1 }; }`,
 		"nested path":          `struct S { i32 x; } struct H { S s; } fn void edit() { var H h = H { .s = S { .x = 0 } }; h.s.x = 1; }`,
 		"compound":             `struct S { i32 x; } fn void edit(ref mut S s) { s.x += 1; }`,
-		"u8":                   `struct S { u8 x; } fn void edit(ref mut S s) { s.x = 1; }`,
-		"u32":                  `struct S { u32 x; } fn void edit(ref mut S s) { s.x = 1; }`,
+		"u8 overflow":          `struct S { u8 x; } fn void edit(ref mut S s) { s.x = 256; }`,
+		"u32 overflow":         `struct S { u32 x; } fn void edit(ref mut S s) { s.x = 4294967296; }`,
+		"unsigned mismatch":    `struct S { u8 x; } fn void edit(ref mut S s, u32 value) { s.x = value; }`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main; "+source)})
@@ -50,5 +51,40 @@ func TestFieldStoreAdmissionBoundaries(t *testing.T) {
 				t.Fatalf("invalid field store: %+v %v", result, err)
 			}
 		})
+	}
+}
+
+func TestUnsignedFieldStoreArtifactRoundTrip(t *testing.T) {
+	const source = `module main;
+struct S { u8 byte; u32 word; }
+resource R { u8 byte; u32 word; cleanup {} }
+fn void fill(ref mut S s) { s.byte = 255; s.word = 4294967295; }
+fn i32 main() {
+    var S original = S { .byte = 0, .word = 0 };
+    var S copy = original; fill(ref mut copy);
+    assert(copy.byte == 255 && copy.word == 4294967295);
+    assert(original.byte == 0 && original.word == 0);
+    var R owned = R { .byte = 0, .word = 0 };
+    owned.byte = copy.byte; owned.word = copy.word;
+    assert(owned.byte == 255 && owned.word == 4294967295);
+    copy.byte = 0; copy.word = 0;
+    assert(owned.byte == 255 && owned.word == 4294967295);
+    return 42;
+}`
+	result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", source)})
+	if err != nil || !result.Verified {
+		t.Fatalf("compile: %+v %v", result, err)
+	}
+	encoded, err := mircodec.Encode(result.MIR, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := mircodec.Decode(encoded, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := interpreter.Execute(decoded, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("unsigned round trip: %+v %v", outcome, err)
 	}
 }

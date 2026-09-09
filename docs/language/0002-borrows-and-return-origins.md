@@ -44,14 +44,14 @@ value is copied or moved. Owned call-result temporaries, mutable field borrows a
 projection through mutable aggregate references remain outside this executable
 slice.
 
-ADR 0394 admits plain assignment to a direct `i32`, `usize`, or `bool` field of
+ADR 0394 admits plain assignment to a direct `i32`, `u8`, `u32`, `usize`, or `bool` field of
 a mutable local struct/resource or an existing `ref mut` aggregate receiver.
 The right-hand side evaluates once and must have the exact field type. Resource
 privacy, moved-owner checks and whole-root loan conflicts remain enforced.
 Copying an inert aggregate retains value semantics, including when that value is
 stored inside another aggregate; assigning through a borrow changes its referent.
-Nested field paths, compound field assignment, `u8`/`u32` fields and whole
-resource-field replacement remain source-located unsupported lowering results,
+Nested field paths, compound field assignment and whole aggregate-field
+replacement remain source-located unsupported lowering results,
 without publishing executable MIR. Shared field reads and borrows retain the
 separate projection boundary above; field stores do not admit mutable field borrows.
 

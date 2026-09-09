@@ -38,4 +38,27 @@ func TestVerifyFieldStore(t *testing.T) {
 			}
 		})
 	}
+	for _, scalar := range []struct {
+		typ  hir.Type
+		kind OperandKind
+		max  uint64
+	}{
+		{hir.TypeU8, OperandU8, 255}, {hir.TypeU32, OperandU32, 4294967295},
+	} {
+		t.Run(string(scalar.typ), func(t *testing.T) {
+			store := op
+			store.Type = scalar.typ
+			store.Operands = []Operand{op.Operands[0], {Kind: scalar.kind, U64: scalar.max}}
+			program.StructTypes[0].Fields[0].Type = scalar.typ
+			program.Functions[0].Blocks[0].Operations[0] = store
+			if failures := Verify(program); len(failures) != 0 {
+				t.Fatalf("unsigned store: %+v", failures)
+			}
+			store.Operands[1].U64++
+			program.Functions[0].Blocks[0].Operations[0] = store
+			if failures := Verify(program); len(failures) == 0 {
+				t.Fatal("out-of-range store accepted")
+			}
+		})
+	}
 }

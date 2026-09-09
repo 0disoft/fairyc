@@ -23,6 +23,9 @@ source = "src"
 struct State { i32 count; usize size; bool ready; }
 resource Owner { i32 count; cleanup {} }
 resource Holder { State state; cleanup {} }
+struct Unsigned { u8 byte; u32 word; }
+resource OwnedUnsigned { u8 byte; u32 word; cleanup {} }
+fn void fill(ref mut Unsigned value) { value.byte = 255; value.word = 4294967295; }
 fn void State::set(ref mut State this) { this.count = 42; this.size = 9; this.ready = true; }
 fn i32 main() {
     var State original = State { .count = 1, .size = 2, .ready = false };
@@ -38,6 +41,15 @@ fn i32 main() {
     var Owner owner = Owner { .count = 0 };
     owner.count = copy.count;
     assert(owner.count == 42);
+    var Unsigned original_unsigned = Unsigned { .byte = 0, .word = 0 };
+    var Unsigned copied_unsigned = original_unsigned;
+    fill(ref mut copied_unsigned);
+    assert(copied_unsigned.byte == 255 && copied_unsigned.word == 4294967295);
+    assert(original_unsigned.byte == 0 && original_unsigned.word == 0);
+    var OwnedUnsigned owned_unsigned = OwnedUnsigned { .byte = 0, .word = 0 };
+    owned_unsigned.byte = copied_unsigned.byte; owned_unsigned.word = copied_unsigned.word;
+    copied_unsigned.byte = 0; copied_unsigned.word = 0;
+    assert(owned_unsigned.byte == 255 && owned_unsigned.word == 4294967295);
     return 0;
 }`)
 	for _, args := range [][]string{{"check"}, {"run"}, {"run", "--release", "--locked"}} {
