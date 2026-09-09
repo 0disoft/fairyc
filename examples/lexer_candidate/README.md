@@ -47,7 +47,11 @@ code, numeric and string recognition, including escapes, invalid UTF-8, raw NUL,
 newline and final literal validation. Tests compare both the failure position and
 the retained diagnostics, including zero allowance and the default 256/257 boundary.
 Independent storage guards still apply if callers request more than 256 ordinary
-diagnostics. Work-unit parity and compiler-component promotion remain unfinished.
+diagnostics. `src/budget.fy` supplies the work meter as an immutable value returned
+by each charge. Native tests compare charge sequences against the Go budget and
+check exact-limit acceptance, sticky exhaustion and arithmetic at the maximum `usize` value.
+The meter is not yet connected to recognition: work-unit parity and
+compiler-component promotion remain unfinished.
 Status 2 remains reserved for unsupported extensions;
 it must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate

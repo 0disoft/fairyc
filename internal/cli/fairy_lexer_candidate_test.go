@@ -51,7 +51,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	}
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy"} {
+	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
 		data, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {
 			t.Fatal(err)
@@ -59,7 +59,38 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		writeTestSource(t, root, name, string(data))
 	}
 	var program, expected strings.Builder
-	program.WriteString("module main;\nimport scanner as scanner;\nimport diagnostics as diagnostics;\nimport std::vec as v;\nimport std::bytes as bytes;\n@effects(console)\nfn i32 main() {\n")
+	program.WriteString("module main;\nimport scanner as scanner;\nimport diagnostics as diagnostics;\nimport budget as budget;\nimport std::vec as v;\nimport std::bytes as bytes;\nfn void budget_checks() {\n")
+	for _, limit := range []int{0, 1, 3, 16} {
+		for _, charges := range [][]int{{0, 1, 0}, {1, 1, 1, 1}, {3, 0, 1}, {16, 1}, {17, 0}} {
+			oracle := source.NewBudget(source.Limits{MaxBytes: 0, MaxWorkUnits: limit}, 0)
+			fmt.Fprintf(&program, "{ var budget::Work work = budget::create(%d);\n", limit)
+			used := 0
+			for _, charge := range charges {
+				accepted := oracle.ChargeWork(charge)
+				if accepted {
+					used += charge
+				}
+				fmt.Fprintf(&program, "work = budget::charge(work, %d); assert(work.exhausted == %t); assert(work.used == %d); assert(work.limit == %d);\n", charge, !accepted, used, limit)
+			}
+			program.WriteString("}\n")
+		}
+	}
+	// Exact usize maximum exercises overflow avoidance without allocating input.
+	program.WriteString(`{
+    let usize maximum = 18446744073709551615;
+    var budget::Work work = budget::create(maximum);
+    work = budget::charge(work, maximum);
+    assert(!work.exhausted && work.used == maximum);
+    work = budget::charge(work, 1);
+    assert(work.exhausted && work.used == maximum);
+    work = budget::charge(work, 0);
+    assert(work.exhausted && work.used == maximum);
+    let budget::Work invalid = budget::Work { .used = 2, .limit = 1, .exhausted = false };
+    work = budget::charge(invalid, 0);
+    assert(work.exhausted && work.used == 2);
+}
+`)
+	program.WriteString("}\n@effects(console)\nfn i32 main() { budget_checks();\n")
 	writeInput := func(input string, index, status int) {
 		name := fmt.Sprintf("input%d", index)
 		fmt.Fprintf(&program, "{ let bytes::Buffer %s = switch (bytes::copy(b\"", name)
