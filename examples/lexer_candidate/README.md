@@ -6,9 +6,12 @@ compiler for Windows AMD64 MSVC. It is not a compiler replacement or stable CLI.
 
 Current recognition: leading UTF-8 BOM, ASCII identifiers and exact current
 keywords, longest-match punctuation, horizontal whitespace/LF/CRLF, line and
-documentation comments, nested closed block comments, arbitrary-width 2/10/16-base
+documentation comments, nested block comments, arbitrary-width 2/10/16-base
 integers, decimal fractions and exponents. `src/numbers.fy` follows the reference
 numeric recovery envelope and emits `E0004` for malformed numeric tokens.
+Invalid code bytes, non-ASCII code points, lone CR and unterminated block comments
+retain lossless tokens with `E0001`. `src/utf8.fy` rejects overlong encodings,
+surrogates, out-of-range scalars and truncated sequences without skipping bytes.
 Token observations are
 `kind trivia startByte endByte cookedLength` numeric fields followed by each cooked
 byte as a decimal number, separated by spaces. `true`, `false` and `null` retain
@@ -16,17 +19,21 @@ their cooked spelling; numbers retain their canonical decimal bytes. EOF appears
 These numbers are private test observations tied to `internal/lexer/token.go`.
 After tokens, a diagnostic count precedes each diagnostic's length-prefixed code,
 repair and token bytes followed by its half-open start/end span. The current
-diagnostic subset is `E0004` with repair `none` and empty token text.
+diagnostic subset is `E0001`/`E0004`, including the block-comment `exit` repair and
+`*/` token. The separate diagnostic store uses stable source/code/repair/token
+ordering and preserves duplicate records; its renderer also supports the forthcoming
+string codes without admitting string recognition yet.
 
 Input is bounded to 4096 bytes, each materialized decimal expansion to 16384 bytes
 and cumulative retained numeric cooked data to 65536 bytes. Status 0 means a
 complete supported token/diagnostic stream (not syntactically valid code);
 2 means unsupported input, 3 allocation failure, and 4 candidate-limit exhaustion.
 Scanning finishes before output starts, so scan failure produces no partial stream.
+At most 256 diagnostics are published. A 257th insertion triggers status 4 and is
+dropped with the failed scan's owner; it is never sorted or printed.
 Output failures still use the existing assertion/trap boundary.
 
-Strings, non-numeric malformed-input diagnostics, lone CR, invalid code bytes,
-reference-budget parity and the complete differential corpus remain unfinished.
+Strings, reference-budget parity and the complete differential corpus remain unfinished.
 Unsupported input must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate
 are in `docs/architecture/self-hosting-readiness-v0.md`.

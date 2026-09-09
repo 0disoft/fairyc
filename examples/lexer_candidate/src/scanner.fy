@@ -3,20 +3,22 @@ import std::vec as v;
 import std::io as io;
 import std::bytes as bytes;
 import numbers as numbers;
+import diagnostics as diagnostics;
+import utf8 as utf8;
 
 // Private numeric observations mirror internal/lexer/token.go, not a stable ABI.
 resource Token {
     u32 kind; u32 trivia; usize start; usize end;
-    bytes::Buffer cooked; bool invalid_number;
+    bytes::Buffer cooked;
     cleanup { }
 }
 
 fn bool append(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end) {
-    return append_cooked(tokens, kind, trivia, start, end, bytes::empty(), false);
+    return append_cooked(tokens, kind, trivia, start, end, bytes::empty());
 }
 
-fn bool append_cooked(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end, bytes::Buffer cooked, bool invalid_number) {
-    let Token value = Token { .kind = kind, .trivia = trivia, .start = start, .end = end, .cooked = cooked, .invalid_number = invalid_number };
+fn bool append_cooked(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end, bytes::Buffer cooked) {
+    let Token value = Token { .kind = kind, .trivia = trivia, .start = start, .end = end, .cooked = cooked };
     return switch (v::push<Token>(tokens, value)) {
         case .ok(_) : { true }
         case .err(_) : { false }
@@ -69,7 +71,7 @@ fn usize symbol_width(ref u8[] input, usize start) {
 
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
-fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens) {
+fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors) {
     if (input.len > 4096) { return 4; }
     var usize position = 0;
     var usize cooked_bytes = 0;
@@ -88,7 +90,13 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens) {
                 else if (matches(input, position, b"\r\n")) { position += 2; }
                 else { break; }
             }
-            if (position == start) { return 2; }
+            if (position == start) {
+                position += 1;
+                if (!append(tokens, 0, 0, start, position)) { return 3; }
+                let i32 status = diagnostics::add(errors, 1, start, position, false, b"");
+                if (status != 0) { return status; }
+                continue;
+            }
             kind = 2; trivia = 2;
         } else if (matches(input, position, b"//")) {
             trivia = if (matches(input, position, b"///")) { 5 } else { 3 };
@@ -103,7 +111,10 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens) {
                 else if (matches(input, position, b"*/")) { depth -= 1; position += 2; }
                 else { position += 1; }
             }
-            if (depth != 0) { return 2; }
+            if (depth != 0) {
+                let i32 status = diagnostics::add(errors, 1, start, position, true, b"*/");
+                if (status != 0) { return status; }
+            }
             kind = 2; trivia = 4;
         } else if (letter(current)) {
             if (matches(input, position, b"b\"") || matches(input, position, b"c\"")) { return 2; }
@@ -120,13 +131,21 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens) {
             let usize cooked_limit = 65536;
             if (length > cooked_limit - cooked_bytes) { return 4; }
             cooked_bytes += length;
-            if (!append_cooked(tokens, kind, 0, start, position, cooked, status == 1)) { return 3; }
+            if (!append_cooked(tokens, kind, 0, start, position, cooked)) { return 3; }
+            if (status == 1) {
+                let i32 added = diagnostics::add(errors, 4, start, position, false, b"");
+                if (added != 0) { return added; }
+            }
             continue;
         } else {
             let usize width = symbol_width(input, position);
-            if (width == 0) { return 2; }
-            position += width;
-            kind = 10;
+            if (width == 0) {
+                if (current == 34) { return 2; }
+                let usize decoded = utf8::width(input, position);
+                position += if (decoded == 0) { 1 } else { decoded };
+                let i32 status = diagnostics::add(errors, 1, start, position, false, b"");
+                if (status != 0) { return status; }
+            } else { position += width; kind = 10; }
         }
         assert(position > start && position <= input.len);
         if (!append(tokens, kind, trivia, start, position)) { return 3; }
@@ -144,11 +163,11 @@ fn void number(usize value) {
 @effects(console)
 pub fn i32 report(ref u8[] input) {
     var v::Vec<Token> tokens = v::empty<Token>();
-    let i32 status = scan(input, ref mut tokens);
+    var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
+    let i32 status = scan(input, ref mut tokens, ref mut errors);
     if (status != 0) { return status; }
     var usize index = 0;
     var usize position = 0;
-    var usize diagnostics = 0;
     while (index < v::len<Token>(ref tokens)) {
         let ref Token token = v::at<Token>(ref tokens, index);
         assert(token.start == position && token.end >= token.start && token.end <= input.len);
@@ -164,26 +183,10 @@ pub fn i32 report(ref u8[] input) {
         }
         var usize n = 0;
         while (n < numeric.len) { number(numeric[n] as usize); n += 1; }
-        if (token.invalid_number) { diagnostics += 1; }
         position = token.end;
         index += 1;
     }
     assert(position == input.len);
-    number(diagnostics);
-    index = 0;
-    while (index < v::len<Token>(ref tokens)) {
-        let ref Token token = v::at<Token>(ref tokens, index);
-        if (token.invalid_number) {
-            text(b"E0004"); text(b"none"); text(b""); number(token.start); number(token.end);
-        }
-        index += 1;
-    }
+    diagnostics::report(ref errors);
     return 0;
-}
-
-@effects(console)
-fn void text(ref u8[] value) {
-    number(value.len);
-    var usize i = 0;
-    while (i < value.len) { number(value[i] as usize); i += 1; }
 }
