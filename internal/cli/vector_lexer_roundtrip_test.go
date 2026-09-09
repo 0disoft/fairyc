@@ -20,7 +20,7 @@ func TestWindowsVectorLexerRoundTrip(t *testing.T) {
 	inputs := []string{
 		"",
 		"\xef\xbb\xbf/// docs\r\nmodule main; /* trivia */ fn i32 main() { let ref str s = \"a\\n한\"; return 42; }\n",
-		"\xff \"unterminated\n /* unclosed",
+		strings.Repeat("\xff ", 17) + "\"unterminated\n /* unclosed",
 	}
 	var program, expected strings.Builder
 	program.WriteString(vectorLexerRoundTripHelpers)
@@ -31,8 +31,8 @@ func TestWindowsVectorLexerRoundTrip(t *testing.T) {
 		if !ok || !bytes.Equal(rebuilt, []byte(input)) {
 			t.Fatalf("oracle reconstruction %d", i)
 		}
-		if i == 2 && len(result.Diagnostics) == 0 {
-			t.Fatal("malformed corpus must exercise diagnostic-producing tokens")
+		if i == 2 && len(result.Diagnostics) < 17 {
+			t.Fatal("malformed corpus must grow the diagnostic vector beyond its initial capacity")
 		}
 		fmt.Fprintf(&program, "@effects(console)\nfn void case%d() {\nvar bytes::Buffer source = bytes::empty();\n", i)
 		appendVectorRoundTripBytes(&program, "source", []byte(input))
@@ -46,8 +46,23 @@ func TestWindowsVectorLexerRoundTrip(t *testing.T) {
 				fmt.Fprintf(&expected, "%d ", b)
 			}
 		}
-		program.WriteString("report(ref tokens, bytes::view(ref source));\n}\n")
+		program.WriteString("report(ref tokens, bytes::view(ref source));\nvar v::Vec<Diagnostic> diagnostics = v::empty<Diagnostic>();\n")
 		expected.WriteString(input)
+		fmt.Fprintf(&expected, "%d ", len(result.Diagnostics))
+		for j, diagnostic := range result.Diagnostics {
+			for field, value := range []string{diagnostic.Code, string(diagnostic.Repair), diagnostic.Token} {
+				name := fmt.Sprintf("diagnostic%dfield%d", j, field)
+				fmt.Fprintf(&program, "var bytes::Buffer %s = bytes::empty();\n", name)
+				appendVectorRoundTripBytes(&program, name, []byte(value))
+				fmt.Fprintf(&expected, "%d ", len(value))
+				for _, b := range []byte(value) {
+					fmt.Fprintf(&expected, "%d ", b)
+				}
+			}
+			fmt.Fprintf(&expected, "%d %d ", diagnostic.Span.StartByte, diagnostic.Span.EndByte)
+			fmt.Fprintf(&program, "push_diagnostic(ref mut diagnostics, make_diagnostic(diagnostic%dfield0, diagnostic%dfield1, diagnostic%dfield2, %d, %d));\n", j, j, j, diagnostic.Span.StartByte, diagnostic.Span.EndByte)
+		}
+		program.WriteString("report_diagnostics(ref diagnostics);\n}\n")
 	}
 	program.WriteString("@effects(console)\nfn i32 main() { case0(); case1(); case2(); return 0; }\n")
 	root := t.TempDir()
@@ -82,6 +97,35 @@ const vectorLexerRoundTripHelpers = `module main;
 import std::vec as v;
 import std::bytes as bytes;
 import std::io as io;
+resource Diagnostic {
+    bytes::Buffer code; bytes::Buffer repair; bytes::Buffer token;
+    usize start; usize end;
+    cleanup { }
+}
+fn Diagnostic make_diagnostic(bytes::Buffer code, bytes::Buffer repair, bytes::Buffer token, usize start, usize end) {
+    return Diagnostic { .code = code, .repair = repair, .token = token, .start = start, .end = end };
+}
+fn void push_diagnostic(ref mut v::Vec<Diagnostic> diagnostics, Diagnostic value) {
+    assert(switch (v::push<Diagnostic>(diagnostics, value)) { case .ok(_) : { true } case .err(_) : { false } });
+}
+@effects(console)
+fn void report_bytes(ref bytes::Buffer value) {
+    let ref u8[] data = bytes::view(value);
+    number(data.len);
+    var usize index = 0;
+    while (index < data.len) { number(data[index] as usize); index += 1; }
+}
+@effects(console)
+fn void report_diagnostics(ref v::Vec<Diagnostic> diagnostics) {
+    number(v::len<Diagnostic>(diagnostics));
+    var usize index = 0;
+    while (index < v::len<Diagnostic>(diagnostics)) {
+        let ref Diagnostic value = v::at<Diagnostic>(diagnostics, index);
+        report_bytes(ref value.code); report_bytes(ref value.repair); report_bytes(ref value.token);
+        number(value.start); number(value.end);
+        index += 1;
+    }
+}
 resource Token {
     u32 kind; u32 trivia; usize start; usize end; bytes::Buffer cooked;
     cleanup { }
