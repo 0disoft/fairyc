@@ -24,10 +24,13 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		"<<<==== >>>= ->=> .... / /= //tail\n///docs\r\n",
 		"/*outer /*nested*/ tail*/fn /*\xff\x00*/ main() {}",
 		strings.Repeat("a", 4096),
+		"0 000 0123 0xFf 0b101010 1_000 0xA_B 0b1_0 184467440737095516160 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+		"1.25 1e3 1e-3 001.200 0e3 0e-3 1__0.0 1e_2 1_e+2 1..2 1.foo .5 1. 1e+0",
+		"0x 0b 0xG 0b2 1_ 1__0 1abc 1e 1e+ 1e-foo 1.2foo 0XFF 0B10 0x_1 ; tail",
 	}
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/scanner.fy"} {
+	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy"} {
 		data, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {
 			t.Fatal(err)
@@ -48,20 +51,33 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	for i, input := range inputs {
 		writeInput(input, i, 0)
 		result := lexer.Lex(source.NewFile("input.fy", []byte(input)), source.NewBudget(source.DefaultLimits(), len(input)))
-		if len(result.Diagnostics) != 0 {
-			t.Fatalf("invalid supported oracle input %d: %+v", i, result.Diagnostics)
-		}
 		for _, token := range result.Tokens {
 			fmt.Fprintf(&expected, "%d %d %d %d %d ", token.Kind, token.Trivia, token.Span.StartByte, token.Span.EndByte, len(token.Cooked))
 			for _, b := range []byte(token.Cooked) {
 				fmt.Fprintf(&expected, "%d ", b)
 			}
 		}
+		fmt.Fprintf(&expected, "%d ", len(result.Diagnostics))
+		for _, d := range result.Diagnostics {
+			if d.Code != "E0004" {
+				t.Fatalf("unexpected oracle diagnostic: %+v", d)
+			}
+			for _, value := range []string{d.Code, string(d.Repair), d.Token} {
+				fmt.Fprintf(&expected, "%d ", len(value))
+				for _, b := range []byte(value) {
+					fmt.Fprintf(&expected, "%d ", b)
+				}
+			}
+			fmt.Fprintf(&expected, "%d %d ", d.Span.StartByte, d.Span.EndByte)
+		}
 	}
-	for i, input := range []string{"123", "x 1", "\"text\"", "b\"bytes\"", "c\"string\"", "\r", " \r", "\v", "\f", "\x00", "\xff", "한", "/*open", "a\xef\xbb\xbf"} {
+	for i, input := range []string{"\"text\"", "b\"bytes\"", "c\"string\"", "\r", " \r", "\v", "\f", "\x00", "\xff", "한", "/*open", "a\xef\xbb\xbf"} {
 		writeInput(input, len(inputs)+i, 2)
 	}
 	writeInput(strings.Repeat("a", 4097), 100, 4)
+	writeInput("1e20000", 101, 4)
+	writeInput("1e-20000", 102, 4)
+	writeInput(strings.Repeat("1e10000 ", 7), 103, 4)
 	program.WriteString("return 0; }\n")
 	writeTestSource(t, root, "src/main.fy", program.String())
 	for _, release := range []bool{false, true} {

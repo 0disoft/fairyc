@@ -1,15 +1,22 @@
 module scanner;
 import std::vec as v;
 import std::io as io;
+import std::bytes as bytes;
+import numbers as numbers;
 
 // Private numeric observations mirror internal/lexer/token.go, not a stable ABI.
 resource Token {
     u32 kind; u32 trivia; usize start; usize end;
+    bytes::Buffer cooked; bool invalid_number;
     cleanup { }
 }
 
 fn bool append(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end) {
-    let Token value = Token { .kind = kind, .trivia = trivia, .start = start, .end = end };
+    return append_cooked(tokens, kind, trivia, start, end, bytes::empty(), false);
+}
+
+fn bool append_cooked(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end, bytes::Buffer cooked, bool invalid_number) {
+    let Token value = Token { .kind = kind, .trivia = trivia, .start = start, .end = end, .cooked = cooked, .invalid_number = invalid_number };
     return switch (v::push<Token>(tokens, value)) {
         case .ok(_) : { true }
         case .err(_) : { false }
@@ -65,6 +72,7 @@ fn usize symbol_width(ref u8[] input, usize start) {
 fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens) {
     if (input.len > 4096) { return 4; }
     var usize position = 0;
+    var usize cooked_bytes = 0;
     if (matches(input, 0, b"\xEF\xBB\xBF")) {
         if (!append(tokens, 2, 1, 0, 3)) { return 3; }
         position = 3;
@@ -102,6 +110,18 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens) {
             position += 1;
             while (position < input.len && (letter(input[position]) || digit(input[position]))) { position += 1; }
             kind = if (keyword(input, start, position)) { 4 } else { 3 };
+        } else if (digit(current)) {
+            var bytes::Buffer cooked = bytes::empty();
+            let numbers::Scan result = numbers::scan(input, start, ref mut cooked);
+            position = result.end; kind = result.kind;
+            let i32 status = result.status;
+            if (status == 3 || status == 4) { return status; }
+            let usize length = bytes::len(ref cooked);
+            let usize cooked_limit = 65536;
+            if (length > cooked_limit - cooked_bytes) { return 4; }
+            cooked_bytes += length;
+            if (!append_cooked(tokens, kind, 0, start, position, cooked, status == 1)) { return 3; }
+            continue;
         } else {
             let usize width = symbol_width(input, position);
             if (width == 0) { return 2; }
@@ -128,6 +148,7 @@ pub fn i32 report(ref u8[] input) {
     if (status != 0) { return status; }
     var usize index = 0;
     var usize position = 0;
+    var usize diagnostics = 0;
     while (index < v::len<Token>(ref tokens)) {
         let ref Token token = v::at<Token>(ref tokens, index);
         assert(token.start == position && token.end >= token.start && token.end <= input.len);
@@ -135,14 +156,34 @@ pub fn i32 report(ref u8[] input) {
         number(token.start); number(token.end);
         let usize width = token.end - token.start;
         let bool cooked = token.kind == 4 && ((width == 4 && (matches(input, token.start, b"true") || matches(input, token.start, b"null"))) || (width == 5 && matches(input, token.start, b"false")));
-        number(if (cooked) { width } else { 0 });
+        let ref u8[] numeric = bytes::view(ref token.cooked);
+        number(if (cooked) { width } else { numeric.len });
         if (cooked) {
             var usize byte_index = token.start;
             while (byte_index < token.end) { number(input[byte_index] as usize); byte_index += 1; }
         }
+        var usize n = 0;
+        while (n < numeric.len) { number(numeric[n] as usize); n += 1; }
+        if (token.invalid_number) { diagnostics += 1; }
         position = token.end;
         index += 1;
     }
     assert(position == input.len);
+    number(diagnostics);
+    index = 0;
+    while (index < v::len<Token>(ref tokens)) {
+        let ref Token token = v::at<Token>(ref tokens, index);
+        if (token.invalid_number) {
+            text(b"E0004"); text(b"none"); text(b""); number(token.start); number(token.end);
+        }
+        index += 1;
+    }
     return 0;
+}
+
+@effects(console)
+fn void text(ref u8[] value) {
+    number(value.len);
+    var usize i = 0;
+    while (i < value.len) { number(value[i] as usize); i += 1; }
 }
