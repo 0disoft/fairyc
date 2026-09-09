@@ -39,9 +39,51 @@ does not establish the required same-commit CI result.
 ADR 0392 adds a maintained token-storage prerequisite probe with kind/trivia tags,
 source-byte bounds and an owned cooked Buffer inside each vector element. Ordinary
 Windows CLI execution and separate injected-failure/allocation-accounting tests
-cover that representation. This is not a lexer port or evidence for tokenization,
-source reconstruction, diagnostics, full corpus coverage or hosted CI completion;
-the start row therefore remains blocked pending that assessment.
+cover that representation. The subsequent record-transport assessment below adds
+source reconstruction and diagnostic storage evidence without implementing a lexer
+or claiming hosted CI completion. The start row remains blocked.
+
+### Current lexer storage assessment
+
+The Go scanner in `internal/lexer/lexer.go` appends completed `Token` and
+`diagnostic.Diagnostic` values. It does not update previously appended elements.
+`internal/lexer/token.go` reads their ranges to recover source spelling and
+reconstruct the original bytes. `internal/lexer/documentation.go` also reads
+adjacent tokens without modifying the sequence. This access pattern maps to the
+released vector subset as follows:
+
+| Reference requirement | Admitted representation and operation | Maintained evidence |
+| --- | --- | --- |
+| Immutable original bytes, including malformed UTF-8 | Owned Buffer with shared byte view | Native record roundtrip compares exact reconstructed output bytes |
+| Token kind, trivia kind and byte range | Scalar fields in a directly named resource; `usize` for nonnegative byte offsets | Token field output compared with Go-produced records |
+| Canonical `Token.Cooked` string | Owned Buffer field, retaining the reference string bytes without decoding or reinterpretation | Cooked length and every byte compared after vector growth |
+| Ordered diagnostic code, repair, token text and range | Directly named resource with three owned Buffers and scalar offsets | Diagnostic field output compared after growing beyond the initial vector capacity |
+| Append completed values, read by index, then destroy | Fallible push, owner-bound shared `at`, reverse cleanup | Public CLI roundtrip plus ADRs 0388–0392 ownership, failure and cleanup probes |
+
+`TestWindowsVectorLexerRoundTrip` in
+`internal/cli/vector_lexer_roundtrip_test.go` obtains records from the Go lexer,
+generates Fairy source that owns them in separate token and diagnostic vectors,
+then compares exact native output under low and optimized Windows MSVC. Its
+bounded cases cover empty input, BOM, CRLF, documentation/block trivia, a Unicode
+escaped literal, invalid UTF-8, and unterminated string/comment diagnostics.
+The source reconstruction and diagnostic comparison run through ordinary `run`;
+the optimized run uses the resulting lockfile through `--locked`.
+
+This is evidence for container representation and access, not a differential
+tokenizer: the Fairy program receives precomputed records. It does not establish
+recognition, recovery, budget-exhaustion behavior, full corpus coverage, diagnostic
+sorting, source discovery or stage1/stage2 reproducibility. Allocation-failure
+evidence remains in the independent ownership probes, not the record comparison.
+The current scanner's append/read pattern supplies no requirement for mutable
+element access, iterator syntax or nested vectors; add those only if an actual
+port operation demonstrates the need.
+
+The ordinary Windows `go test ./...` lane includes this test, but workflow wiring
+and local passes do not constitute a hosted result. Before changing the container
+row to `ready`, reconcile issue #44's acceptance scope with this Windows subset
+and record successful ordinary CI for the exact `main` commit containing the
+prerequisite fixtures. Full tokenizer corpus comparison remains the acceptance
+condition for the subsequent Fairy component, not a claim made by these probes.
 
 The first Fairy-written compiler component is the lossless lexer/token stream producer, not the parser, type checker, MIR verifier, optimizer, backend, package resolver, or runtime.
 
