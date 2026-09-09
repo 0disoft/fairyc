@@ -2,6 +2,7 @@
 package compiler
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/contractstatemir"
@@ -114,6 +115,11 @@ func lowerWithVerifier(semanticResult semantic.Result, verify func(mir.Program) 
 	}
 	program, err := mir.Lower(semanticResult.HIR)
 	if err != nil {
+		var unsupported *mir.Unsupported
+		if errors.As(err, &unsupported) {
+			result.Semantic.Unsupported = []semantic.Unsupported{{Feature: unsupported.Feature, Span: unsupported.Span}}
+			return result, nil
+		}
 		return result, &Error{Stage: StageMIRLower, Cause: err}
 	}
 	if failures := verify(program); len(failures) != 0 {

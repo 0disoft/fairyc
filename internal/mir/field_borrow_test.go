@@ -1,7 +1,7 @@
 package mir
 
 import (
-	"strings"
+	"errors"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
@@ -15,7 +15,8 @@ func TestLowerFieldBorrowAssignmentFailsClosed(t *testing.T) {
 			Expression: &hir.Expression{Kind: "integer", Type: hir.TypeI32, Value: "1"},
 		}}},
 	}}}}})
-	if err == nil || !strings.Contains(err.Error(), "field assignment requires executable field storage") {
+	var unsupported *Unsupported
+	if !errors.As(err, &unsupported) || unsupported.Feature != "field assignment without executable field storage" {
 		t.Fatalf("field assignment must not disappear during lowering: %v", err)
 	}
 }

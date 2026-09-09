@@ -2,7 +2,7 @@ package semantic_test
 
 import "testing"
 
-func TestAnalyzeFieldBorrowAssignmentDoesNotSilentlyDrop(t *testing.T) {
+func TestAnalyzeFieldBorrowAssignmentPreservesTypedForm(t *testing.T) {
 	for name, body := range map[string]string{
 		"local":             "fn i32 main() { var State state = State { .count = 0 }; state.count = 1; return state.count; }",
 		"mutable reference": "fn void edit(ref mut State state) { state.count = 1; }",
@@ -10,8 +10,23 @@ func TestAnalyzeFieldBorrowAssignmentDoesNotSilentlyDrop(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			result := analyzeText(t, map[string]string{"main.fy": "module main; struct State { i32 count; } " + body})
-			if len(result.Unsupported) == 0 {
-				t.Fatal("field assignment accepted without executable storage")
+			if name == "compound" {
+				if len(result.Unsupported) == 0 {
+					t.Fatal("compound field assignment admitted")
+				}
+				return
+			}
+			assertCleanTypeResult(t, result)
+			found := false
+			for _, function := range result.HIR.Modules[0].Functions {
+				for _, statement := range function.Body.Statements {
+					if statement.Kind == "assignment" && statement.Target != nil && statement.Target.Kind == "field-expression" {
+						found = true
+					}
+				}
+			}
+			if !found {
+				t.Fatal("typed field assignment disappeared")
 			}
 		})
 	}

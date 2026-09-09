@@ -44,9 +44,10 @@ value is copied or moved. Owned call-result temporaries, mutable field borrows a
 projection through mutable aggregate references remain outside this executable
 slice.
 
-Field assignment is not yet executable: both owned-place and mutable-reference
-field assignment are rejected as unsupported before MIR generation. The MIR
-lowerer independently rejects field assignment instead of silently dropping it.
+Field assignment is not yet executable. Pure semantic analysis retains typed
+assignments for receiver and ownership checks. MIR lowering rejects owned-place
+and mutable-reference field assignment with a source-located unsupported result;
+the compiler coordinator reports it without publishing executable MIR.
 This does not restrict the admitted shared field reads and borrows above.
 
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
