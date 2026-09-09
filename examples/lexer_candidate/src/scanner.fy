@@ -14,6 +14,24 @@ resource Token {
     cleanup { }
 }
 
+fn bool emit(ref mut v::Vec<Token> tokens, bool admitted, u32 kind, u32 trivia, usize start, usize end) {
+    if (!admitted) { return append(tokens, 0, 0, start, end); }
+    return append(tokens, kind, trivia, start, end);
+}
+
+fn bool emit_cooked(ref mut v::Vec<Token> tokens, bool admitted, u32 kind, usize start, usize end, bytes::Buffer cooked) {
+    if (!admitted) { return append(tokens, 0, 0, start, end); }
+    return append_cooked(tokens, kind, 0, start, end, cooked);
+}
+
+fn i32 exhausted(ref u8[] input, usize position, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors) {
+    let i32 status = diagnostics::add(errors, 10, position, position, false, b"");
+    if (status != 0) { return status; }
+    if (position < input.len && !append(tokens, 0, 0, position, input.len)) { return 3; }
+    if (!append(tokens, 1, 0, input.len, input.len)) { return 3; }
+    return 0;
+}
+
 fn bool append(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end) {
     return append_cooked(tokens, kind, trivia, start, end, bytes::empty());
 }
@@ -73,19 +91,27 @@ fn usize symbol_width(ref u8[] input, usize start) {
 
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
-fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors, bool previous) {
+fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens) {
     if (input.len > 4096) { return 4; }
+    if (input.len > max_bytes) { return exhausted(input, 0, tokens, errors); }
+    var usize token_count = 0;
+    var bool token_exhausted = false;
     var usize position = 0;
     var usize cooked_bytes = 0;
     if (matches(input, 0, b"\xEF\xBB\xBF")) {
-        if (!append(tokens, 2, 1, 0, 3)) { return 3; }
+        token_exhausted = max_tokens == 0;
+        if (!emit(tokens, !token_exhausted, 2, 1, 0, 3)) { return 3; }
+        if (!token_exhausted) { token_count += 1; }
         position = 3;
     }
-    while (position < input.len) {
+    while (position < input.len && !token_exhausted) {
+        token_exhausted = token_count >= max_tokens;
+        if (!token_exhausted) { token_count += 1; }
         let usize start = position;
         let u8 current = input[position];
         var u32 kind = 0;
         var u32 trivia = 0;
+        var bool unclosed_comment = false;
         if (space(current) || current == 13) {
             while (position < input.len) {
                 if (space(input[position])) { position += 1; }
@@ -94,7 +120,8 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             }
             if (position == start) {
                 position += 1;
-                if (!append(tokens, 0, 0, start, position)) { return 3; }
+                if (!emit(tokens, !token_exhausted, 0, 0, start, position)) { return 3; }
+                if (token_exhausted) { break; }
                 let i32 status = diagnostics::add(errors, 1, start, position, false, b"");
                 if (status != 0) { return status; }
                 continue;
@@ -113,10 +140,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
                 else if (matches(input, position, b"*/")) { depth -= 1; position += 2; }
                 else { position += 1; }
             }
-            if (depth != 0) {
-                let i32 status = diagnostics::add(errors, 1, start, position, true, b"*/");
-                if (status != 0) { return status; }
-            }
+            unclosed_comment = depth != 0;
             kind = 2; trivia = 4;
         } else if (current == 34 || matches(input, position, b"b\"") || matches(input, position, b"c\"")) {
             kind = if (current == 34) { 7 } else if (current == 98) { 8 } else { 9 };
@@ -129,7 +153,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             let usize cooked_limit = 65536;
             if (length > cooked_limit - cooked_bytes) { return 4; }
             cooked_bytes += length;
-            if (!append_cooked(tokens, kind, 0, start, position, cooked)) { return 3; }
+            if (!emit_cooked(tokens, !token_exhausted, kind, start, position, cooked)) { return 3; }
             continue;
         } else if (letter(current)) {
             position += 1;
@@ -145,8 +169,8 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             let usize cooked_limit = 65536;
             if (length > cooked_limit - cooked_bytes) { return 4; }
             cooked_bytes += length;
-            if (!append_cooked(tokens, kind, 0, start, position, cooked)) { return 3; }
-            if (status == 1) {
+            if (!emit_cooked(tokens, !token_exhausted, kind, start, position, cooked)) { return 3; }
+            if (status == 1 && !token_exhausted) {
                 let i32 added = diagnostics::add(errors, 4, start, position, false, b"");
                 if (added != 0) { return added; }
             }
@@ -156,13 +180,21 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             if (width == 0) {
                 let usize decoded = utf8::width(input, position);
                 position += if (decoded == 0) { 1 } else { decoded };
+                if (!emit(tokens, !token_exhausted, 0, 0, start, position)) { return 3; }
+                if (token_exhausted) { break; }
                 let i32 status = diagnostics::add(errors, 1, start, position, false, b"");
                 if (status != 0) { return status; }
+                continue;
             } else { position += width; kind = 10; }
         }
         assert(position > start && position <= input.len);
-        if (!append(tokens, kind, trivia, start, position)) { return 3; }
+        if (!emit(tokens, !token_exhausted, kind, trivia, start, position)) { return 3; }
+        if (unclosed_comment && !token_exhausted) {
+            let i32 status = diagnostics::add(errors, 1, start, position, true, b"*/");
+            if (status != 0) { return status; }
+        }
     }
+    if (token_exhausted) { return exhausted(input, position, tokens, errors); }
     if (!append(tokens, 1, 0, position, position)) { return 3; }
     return 0;
 }
@@ -180,9 +212,14 @@ pub fn i32 report(ref u8[] input) {
 
 @effects(console)
 pub fn i32 report_mode(ref u8[] input, bool previous) {
+    return report_limits(input, previous, 4096, 1048576);
+}
+
+@effects(console)
+pub fn i32 report_limits(ref u8[] input, bool previous, usize max_bytes, usize max_tokens) {
     var v::Vec<Token> tokens = v::empty<Token>();
     var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
-    let i32 status = scan(input, ref mut tokens, ref mut errors, previous);
+    let i32 status = scan(input, ref mut tokens, ref mut errors, previous, max_bytes, max_tokens);
     if (status != 0) { return status; }
     var usize index = 0;
     var usize position = 0;

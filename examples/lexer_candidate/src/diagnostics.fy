@@ -74,6 +74,7 @@ pub fn void report(ref v::Vec<Entry> entries) {
         if (entry.code == 1) { text(b"E0001"); }
         else if (entry.code == 4) { text(b"E0004"); }
         else if (entry.code == 5) { text(b"E0005"); }
+        else if (entry.code == 10) { text(b"E0010"); }
         else { assert(entry.code == 6); text(b"E0006"); }
         if (entry.exit_repair) { text(b"exit"); } else { text(b"none"); }
         text(bytes::view(ref entry.token)); number(entry.start); number(entry.end);

@@ -35,7 +35,13 @@ At most 256 diagnostics are published. A 257th insertion triggers status 4 and i
 dropped with the failed scan's owner; it is never sorted or printed.
 Output failures still use the existing assertion/trap boundary.
 
-Reference-budget parity and compiler-component promotion remain unfinished.
+`scanner::report_limits` accepts caller-selected source-byte and token limits
+within the candidate's independent storage guards. Exhaustion emits `E0010` once,
+retains the denied token and remaining bytes as invalid records, and always emits
+an uncharged EOF. Byte limits are checked before recognition; token limits count
+trivia and the leading BOM. Native tests compare zero, exact and exceeded limits
+with the Go reference, including malformed-token diagnostic ordering.
+Work-unit and diagnostic-budget parity and compiler-component promotion remain unfinished.
 Status 2 remains reserved for unsupported extensions;
 it must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate

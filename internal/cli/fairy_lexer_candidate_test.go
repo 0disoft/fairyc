@@ -96,6 +96,43 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	writeInput("1e-20000", 102, 4)
 	writeInput(strings.Repeat("1e10000 ", 7), 103, 4)
 	writeInput(strings.Repeat("\x00", 257), 104, 4)
+	// Caller-selected byte/token budgets preserve the reference exhaustion stream.
+	budgetNames := map[int]string{}
+	for _, input := range []string{"", "abc", "a b", "\xef\xbb\xbfabc", "\r x", " \r x", "/*open", "\x00x", "1abc x", `"\q" x`, "true false"} {
+		for _, limit := range []int{0, 1, 2, len(input)} {
+			for _, bytesLimited := range []bool{false, true} {
+				budgetNames[expected.Len()] = fmt.Sprintf("input=%q limit=%d bytes=%v", input, limit, bytesLimited)
+				limits := source.DefaultLimits()
+				if bytesLimited {
+					limits.MaxBytes = limit
+				} else {
+					limits.MaxTokens = limit
+				}
+				program.WriteString("assert(scanner::report_limits(b\"")
+				for _, b := range []byte(input) {
+					fmt.Fprintf(&program, "\\x%02X", b)
+				}
+				fmt.Fprintf(&program, "\", false, %d, %d) == 0);\n", limits.MaxBytes, limits.MaxTokens)
+				result := lexer.Lex(source.NewFile("input.fy", []byte(input)), source.NewBudget(limits, len(input)))
+				for _, token := range result.Tokens {
+					fmt.Fprintf(&expected, "%d %d %d %d %d ", token.Kind, token.Trivia, token.Span.StartByte, token.Span.EndByte, len(token.Cooked))
+					for _, b := range []byte(token.Cooked) {
+						fmt.Fprintf(&expected, "%d ", b)
+					}
+				}
+				fmt.Fprintf(&expected, "%d ", len(result.Diagnostics))
+				for _, d := range result.Diagnostics {
+					for _, value := range []string{d.Code, string(d.Repair), d.Token} {
+						fmt.Fprintf(&expected, "%d ", len(value))
+						for _, b := range []byte(value) {
+							fmt.Fprintf(&expected, "%d ", b)
+						}
+					}
+					fmt.Fprintf(&expected, "%d %d ", d.Span.StartByte, d.Span.EndByte)
+				}
+			}
+		}
+	}
 	// Exercise every sort key independently of the naturally ordered scanner.
 	records := []diagnostic.Diagnostic{
 		{Code: "E0006", Span: diagnostic.Span{StartByte: 9, EndByte: 10}, Repair: diagnostic.RepairNone},
@@ -139,6 +176,13 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 			for i < len(stdout) && i < len(want) && stdout[i] == want[i] {
 				i++
 			}
+			nearest := -1
+			for offset := range budgetNames {
+				if offset <= i && offset > nearest {
+					nearest = offset
+				}
+			}
+			t.Logf("budget case: %s offset=%d", budgetNames[nearest], nearest)
 			t.Fatalf("candidate release=%v mismatch at byte %d; lengths got=%d want=%d; got=%q want=%q", release, i, len(stdout), len(want), stdout[i:min(i+200, len(stdout))], want[i:min(i+200, len(want))])
 		}
 	}
