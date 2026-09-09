@@ -326,19 +326,6 @@ type runtimeValue struct {
 	view      *byteViewState
 }
 
-func (v runtimeValue) cloneForValueCopy() runtimeValue {
-	copy := v
-	if v.kind != valueArray || v.array == nil {
-		return copy
-	}
-	elements := make([]runtimeValue, len(v.array.elements))
-	for index, element := range v.array.elements {
-		elements[index] = element.cloneForValueCopy()
-	}
-	copy.array = &arrayState{elements: elements}
-	return copy
-}
-
 func staticByteView(data string, typ hir.Type) runtimeValue {
 	return runtimeValue{kind: valueView, typ: typ, view: &byteViewState{staticData: data, length: uint64(len(data))}}
 }
