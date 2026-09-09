@@ -357,6 +357,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0390-public-windows-sdk-vector.md`: admits the on-demand SDK-owned Vec<T> through stable Windows workspace compilation and native tests, preserving scalar-only consumer templates and exact source authority.
 - `0391-shared-field-borrow-projections.md`: implements shared field addresses with retained coarse-root loans, source privacy, MIR shape checks, interpreter and native execution; mutable reborrows and nested resource storage remain separate.
 - `0392-nested-resource-c-storage-and-cleanup.md`: adds acyclic resource-field layout and reverse cleanup, post-cleanup receiver propagation, native trace comparison and token Buffer ownership evidence.
+- `0393-public-vector-truncation.md`: adds capacity-preserving reverse tail destruction through SDK vector truncation.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

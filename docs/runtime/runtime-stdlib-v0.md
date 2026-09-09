@@ -84,7 +84,7 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.58` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.59` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, positioning,
 and logical size, Windows MSVC `std::fs` extensions, console I/O, scalar output, and effect-free
 `std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through 0334.
@@ -347,7 +347,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.58` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.59` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -900,7 +900,7 @@ Composite resources may contain resources for infallible reverse-order drop. Sta
 
 ## `Vec<T>` on Windows
 
-SDK `0.0.0-stage0.58` selects the core-plus-vector bundle when source imports
+SDK `0.0.0-stage0.59` selects the core-plus-vector bundle when source imports
 `std::vec`; other SDK imports keep the six-module core. The bundle's exact digest
 and SDK version participate in lock and cache identity. The stable workspace CLI
 checks, builds and runs it; tests require `--native` on Windows AMD64 MSVC.
@@ -910,7 +910,11 @@ and `capacity<T>` inspect it. `reserve<T>(ref mut Vec<T>, usize)` returns
 `Result<usize, u32>` with an element capacity or the existing allocation status.
 `push<T>(ref mut Vec<T>, T)` returns `Result<usize, T>`: failure preserves the
 vector and returns the original element. `pop<T>` returns `Option<T>` and moves
-the last element out. `clear<T>` destroys the initialized prefix in reverse order,
+the last element out. `truncate<T>(ref mut Vec<T>, usize new_length)` destroys
+only the tail in reverse order, returns the removed count, and retains capacity.
+A requested length at or above the current length is a no-op returning zero;
+it never grows or initializes elements. `clear<T>` delegates to truncation at zero
+and destroys the initialized prefix in reverse order,
 returns its old length and keeps capacity. Cleanup destroys remaining elements
 and frees the allocation. Neither operation destroys uninitialized spare capacity.
 
@@ -919,7 +923,7 @@ index traps with `assertion-failed`. Mutation and movement are rejected while an
 element reference remains live. Supported element types are explicit builtin
 scalars or directly named non-generic structs/resources with an admitted nonzero
 native layout. This does not admit user generic aggregate declarations or nominal
-arguments to user generic functions. See ADR 0390 and `examples/std_vec_quickstart`.
+arguments to user generic functions. See ADRs 0390/0393 and `examples/std_vec_quickstart`.
 
 ## Explicit exclusions
 

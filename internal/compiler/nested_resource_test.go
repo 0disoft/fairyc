@@ -105,7 +105,16 @@ fn i32 exercise() {
         case .none : { assert(false); make(-1) }
     };
     assert(valid(ref popped, 8));
-    assert(v::clear<Token>(ref mut tokens) == 8);
+    let usize capacity = v::capacity<Token>(ref tokens);
+    assert(v::truncate<Token>(ref mut tokens, 100) == 0);
+    assert(v::truncate<Token>(ref mut tokens, 8) == 0);
+    assert(v::truncate<Token>(ref mut tokens, 4) == 4);
+    assert(v::len<Token>(ref tokens) == 4);
+    assert(v::capacity<Token>(ref tokens) == capacity);
+    assert(valid(v::at<Token>(ref tokens, 3), 3));
+    assert(v::truncate<Token>(ref mut tokens, 4) == 0);
+    assert(v::clear<Token>(ref mut tokens) == 4);
+    assert(v::truncate<Token>(ref mut tokens, 0) == 0);
     assert(push(ref mut tokens, make(9)));
     return 41;
 }

@@ -1,6 +1,6 @@
 # Scalar vector quickstart
 
-Requires the SDK bundled with Fairy C `0.0.0-stage0.58` and Windows AMD64 MSVC.
+Requires the SDK bundled with Fairy C `0.0.0-stage0.59` and Windows AMD64 MSVC.
 From this directory:
 
 ```text
@@ -11,7 +11,8 @@ fairyc test --native --locked
 
 The program prints `42` without a newline and exits successfully. It constructs
 an empty vector, handles both push results, borrows an element, pops the last
-element, and clears the remaining initialized prefix. Dropping the vector frees
+element, and truncates the remaining initialized prefix to zero. Clearing the
+already empty vector returns zero. Dropping the vector frees
 its retained allocation. Add `--release` to run or native test for optimization.
 
 `push<T>` returns the original element in `.err` if allocation fails. This small

@@ -473,7 +473,8 @@ without changing language `/14` or runtime `/0`. Stable Windows check/build/run
 and native tests support scalar and resource elements, fallible push/reserve,
 pop/clear and immutable owner-bound access. User generic aggregates, mutable
 element access, iteration and nested vectors remain unadmitted. See
-[`std_vec_quickstart`](examples/std_vec_quickstart/README.md).
+[`std_vec_quickstart`](examples/std_vec_quickstart/README.md). ADR 0393 adds
+capacity-preserving `truncate<T>` in SDK `0.0.0-stage0.59`; refresh existing SDK locks.
 
 ADR 0344 adds an experimental compiler-private contract-state transaction MIR beside the stable
 whole-program MIR. It reconstructs exact layouts, verifies canonical cell/map operations and

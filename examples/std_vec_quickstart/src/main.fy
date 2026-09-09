@@ -18,7 +18,8 @@ pub fn i32 total() {
         case .some(value) : { value }
         case .none : { 0 }
     };
-    assert(vec::clear<i32>(ref mut values) == 1);
+    assert(vec::truncate<i32>(ref mut values, 0) == 1);
+    assert(vec::clear<i32>(ref mut values) == 0);
     assert(vec::is_empty<i32>(ref values));
     return first + last;
 }

@@ -91,13 +91,19 @@ pub fn Option<T> pop<T>(ref mut Vec<T> value) {
     };
 }
 
-/// Destroys all elements in reverse order while retaining capacity.
-pub fn usize clear<T>(ref mut Vec<T> value) {
+/// Destroys the tail in reverse order and returns the number of removed elements.
+/// Retains capacity. A length at or above the current length changes nothing.
+pub fn usize truncate<T>(ref mut Vec<T> value, usize new_length) {
     let usize count = value.length;
-    while (value.length > 0) {
+    while (value.length > new_length) {
         let ptr mut void slot = unsafe { pop_slot_raw(value as ptr mut void, value.element_size) };
         assert(slot != null);
         let T element = take_slot<T>(slot);
     }
-    return count;
+    return count - value.length;
+}
+
+/// Destroys all elements in reverse order while retaining capacity.
+pub fn usize clear<T>(ref mut Vec<T> value) {
+    return truncate<T>(value, 0);
 }
