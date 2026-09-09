@@ -5,6 +5,7 @@ import std::bytes as bytes;
 import numbers as numbers;
 import diagnostics as diagnostics;
 import utf8 as utf8;
+import strings as strings;
 
 // Private numeric observations mirror internal/lexer/token.go, not a stable ABI.
 resource Token {
@@ -116,8 +117,20 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
                 if (status != 0) { return status; }
             }
             kind = 2; trivia = 4;
+        } else if (current == 34 || matches(input, position, b"b\"") || matches(input, position, b"c\"")) {
+            kind = if (current == 34) { 7 } else if (current == 98) { 8 } else { 9 };
+            let usize opener = if (current == 34) { 1 } else { 2 };
+            var bytes::Buffer cooked = bytes::empty();
+            let strings::Step step = strings::scan(input, start, kind, opener, ref mut cooked, errors);
+            if (step.status != 0) { return step.status; }
+            position = step.end;
+            let usize length = bytes::len(ref cooked);
+            let usize cooked_limit = 65536;
+            if (length > cooked_limit - cooked_bytes) { return 4; }
+            cooked_bytes += length;
+            if (!append_cooked(tokens, kind, 0, start, position, cooked)) { return 3; }
+            continue;
         } else if (letter(current)) {
-            if (matches(input, position, b"b\"") || matches(input, position, b"c\"")) { return 2; }
             position += 1;
             while (position < input.len && (letter(input[position]) || digit(input[position]))) { position += 1; }
             kind = if (keyword(input, start, position)) { 4 } else { 3 };
@@ -140,7 +153,6 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
         } else {
             let usize width = symbol_width(input, position);
             if (width == 0) {
-                if (current == 34) { return 2; }
                 let usize decoded = utf8::width(input, position);
                 position += if (decoded == 0) { 1 } else { decoded };
                 let i32 status = diagnostics::add(errors, 1, start, position, false, b"");

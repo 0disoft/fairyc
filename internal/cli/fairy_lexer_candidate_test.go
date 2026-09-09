@@ -33,10 +33,24 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		"\xc2\xa0 \xe0\xa0\x80 \xed\x9f\xbf \xf0\x90\x80\x80 \xf4\x8f\xbf\xbf",
 		"\xc0\xaf \xed\xa0\x80 \xf4\x90\x80\x80 \xe2\x82 a\xef\xbb\xbf \x80",
 		strings.Repeat("\x00", 256),
+		`"" b"" c"" "hello 한 😀" b"bytes" c"cstring"`,
+		`"\\\"\n\r\t\0\x41" "\u{0}\u{7f}\u{80}\u{7ff}\u{800}\u{ffff}\u{10000}\u{10ffff}"`,
+		`b"\xff\x00" c"\0\x00" "\xc2\xa0" "\xff" "\u{d800}\u{110000}"`,
+		`"\q\x\x1Z\u\u{}\u{1234567}" b"\u{41}" c"\u{41}"`,
+		"\"unterminated\nnext\r\n\"again\rend",
+		"\"nul\x00bad\xff\" b\"\x00\xff\" c\"\x00\xff\"",
+		"\"unfinished\\",
+		"\"\\u{bad\nmissing\" tail",
+		"\"escaped\\\nline\"",
+	}
+	for _, seed := range []string{`"a\x41\u{1f600}한"`, `c"\0"`, `b"\x00"`} {
+		for end := 0; end <= len(seed); end++ {
+			inputs = append(inputs, seed[:end])
+		}
 	}
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy"} {
+	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy"} {
 		data, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {
 			t.Fatal(err)
@@ -65,7 +79,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		}
 		fmt.Fprintf(&expected, "%d ", len(result.Diagnostics))
 		for _, d := range result.Diagnostics {
-			if d.Code != "E0004" && d.Code != "E0001" {
+			if d.Code != "E0004" && d.Code != "E0001" && d.Code != "E0005" && d.Code != "E0006" {
 				t.Fatalf("unexpected oracle diagnostic: %+v", d)
 			}
 			for _, value := range []string{d.Code, string(d.Repair), d.Token} {
@@ -76,9 +90,6 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 			}
 			fmt.Fprintf(&expected, "%d %d ", d.Span.StartByte, d.Span.EndByte)
 		}
-	}
-	for i, input := range []string{"\"text\"", "b\"bytes\"", "c\"string\""} {
-		writeInput(input, len(inputs)+i, 2)
 	}
 	writeInput(strings.Repeat("a", 4097), 100, 4)
 	writeInput("1e20000", 101, 4)
