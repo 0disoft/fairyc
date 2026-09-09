@@ -54,10 +54,14 @@ check exact-limit acceptance, sticky exhaustion and arithmetic at the maximum `u
 identifiers, punctuation and non-ASCII code bytes. Native comparisons vary work
 limits at every source-byte boundary together with token limits, including the
 reference's one-byte progress guard when a multi-byte step cannot start.
-Numeric and string work charging is pending. Encountering either literal with a
-work limit below the reference default (16777216) returns status 2 without a
-partial stream. Existing default-budget corpus execution remains available;
-complete work-unit parity and compiler-component promotion remain unfinished.
+Numeric recognition also charges source advancement and complete pre-trimming
+decimal expansion before materializing output. Exact expansion boundaries,
+cumulative numbers, signed 64-bit exponent endpoints and out-of-range exponents
+are compared against Go. Independent expansion/storage caps remain in force.
+String work charging is pending. Encountering a string with a work limit below
+the reference default (16777216) returns status 2 without a partial stream.
+Existing default-budget corpus execution remains available; complete work-unit
+parity and compiler-component promotion remain unfinished.
 Status 2 remains reserved for unsupported extensions;
 it must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate
