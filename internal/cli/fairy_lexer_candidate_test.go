@@ -123,7 +123,16 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 			fmt.Fprintf(&expected, "%d %d ", d.Span.StartByte, d.Span.EndByte)
 		}
 	}
-	writeInput(strings.Repeat("a", 4097), 100, 4)
+	program.WriteString(`{
+    var bytes::Buffer oversized = bytes::empty();
+    var usize index = 0;
+    while (index < 16385) {
+        assert(switch (bytes::append_byte(ref mut oversized, 97)) { case .ok(_) : { true } case .err(_) : { false } });
+        index += 1;
+    }
+    assert(scanner::report(bytes::view(ref oversized)) == 4);
+}
+`)
 	writeInput("1e20000", 101, 4)
 	writeInput("1e-20000", 102, 4)
 	writeInput(strings.Repeat("1e10000 ", 7), 103, 4)

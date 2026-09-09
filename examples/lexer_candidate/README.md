@@ -26,7 +26,7 @@ diagnostic subset is `E0001`/`E0004`/`E0005`/`E0006`/`E0010`, including comment 
 `exit` repairs and expected closing tokens. The separate diagnostic store uses
 stable source/code/repair/token ordering and preserves duplicate records.
 
-Input is bounded to 4096 bytes, each materialized decimal expansion to 16384 bytes
+Input is bounded to 16384 bytes, each materialized decimal expansion to 16384 bytes
 and cumulative retained cooked data to 65536 bytes. Status 0 means a
 complete supported token/diagnostic stream (not syntactically valid code);
 2 means unsupported input, 3 allocation failure, and 4 candidate-limit exhaustion.
@@ -81,8 +81,11 @@ filtering by pass/fail status. It compares current and immediately previous lexe
 revision modes and deterministic NUL insertion, first-byte deletion and invalid-byte
 replacement. Every source/mode/mutation case runs with five budget settings:
 defaults, half the source-byte allowance, one token, no diagnostics, and half the
-source length in work units. The current corpus has 303 source files and 7580
-framed observations, all matching Go under low and optimized Windows MSVC.
+source length in work units. The current corpus has 303 fixture source files plus
+the real `std_bytes_quickstart` and `std_io_scalar_quickstart` main sources, both
+larger than the former 4096-byte limit. Identifier lengths around 4096 and 16384,
+a 6000-byte string, and closed/unterminated 12000-byte comments add large-input
+boundaries. All 7670 framed observations match Go under low and optimized Windows MSVC.
 Comparison retains exact `E0010` positions, invalid ranges, preceding diagnostics
 and EOF for exhausted runs. Newly added oversized fixtures
 fail the lane rather than silently disappearing. Embedded Go-only seeds and
@@ -94,11 +97,14 @@ modes 2/3 add four unsigned 32-bit little-endian limits in byte, token, diagnost
 work order. Odd modes use the previous revision. Exact source bytes follow the
 header. EOF is valid only between frames. Invalid mode, truncated framing or more
 than 2048 frames exits 8; oversized source exits 4. The harness checks invalid
-mode, every truncated extended-header length, missing body and oversized length
+mode, every truncated extended-header length, missing body and a 16385-byte length
 at both profiles.
 
 The harness compiles once per profile through the ordinary workspace compiler,
 then reuses that artifact for output-bounded batches of at most 2048 frames. Each batch stays below 60KB
 of expected output and retains the existing native driver's 64KB output limit and
-trap classification. This is exact record comparison, not a token hash or a subset
-chosen to fit the output cap. Hosted CI for this new lane is still pending.
+trap classification. Fixture coverage remains complete; the two project sources
+are a bounded workload sample, not all project files. A single observation that
+exceeds the output cap fails explicitly, so 16KB source admission does not promise
+that every such source fits this private reporting transport. This is exact record
+comparison, not a token hash. Hosted CI for the large-input expansion is pending.

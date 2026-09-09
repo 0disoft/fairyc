@@ -43,13 +43,22 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 	if len(paths) == 0 {
 		t.Fatal("empty source fixture corpus")
 	}
+	fixtureCount := len(paths)
+	for _, name := range []string{"std_bytes_quickstart", "std_io_scalar_quickstart"} {
+		path := filepath.Join("..", "..", "examples", name, "src", "main.fy")
+		info, err := os.Stat(path)
+		if err != nil || info.Size() <= 4096 {
+			t.Fatalf("expected a real source beyond the former 4KB limit: %s: %v", path, err)
+		}
+		paths = append(paths, path)
+	}
 	var stdin bytes.Buffer
 	var expected strings.Builder
 	var names []string
 	var ends []int
 	var inputEnds []int
 	appendObservation := func(name string, input []byte, previous bool, limits source.Limits, custom bool) {
-		if len(input) > 4096 || len(names) >= 10240 {
+		if len(input) > 16384 || len(names) >= 10240 {
 			t.Fatalf("candidate corpus bound exceeded by %s", name)
 		}
 		mode := byte(0)
@@ -141,6 +150,12 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 		}
 	}
 	appendCase("previous-defer", []byte("defer deferx return true"), true)
+	for _, length := range []int{4095, 4096, 4097, 16383, 16384} {
+		appendCase(fmt.Sprintf("identifier-%d", length), bytes.Repeat([]byte("a"), length), false)
+	}
+	appendCase("long-string", []byte(`"`+strings.Repeat("a", 6000)+`"`), false)
+	appendCase("long-comment", []byte("/*"+strings.Repeat("a", 12000)+"*/"), false)
+	appendCase("long-unterminated-comment", []byte("/*"+strings.Repeat("a", 12000)), false)
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
 	for _, name := range []string{"fairy.toml", "src/main.fy", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
@@ -199,7 +214,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 		badFrames := []struct {
 			input []byte
 			exit  int32
-		}{{[]byte{4}, 8}, {[]byte{2}, 8}, {[]byte{0}, 8}, {[]byte{0, 1, 0}, 8}, {[]byte{0, 1, 16}, 4}, {[]byte{2, 1, 16}, 4}}
+		}{{[]byte{4}, 8}, {[]byte{2}, 8}, {[]byte{0}, 8}, {[]byte{0, 1, 0}, 8}, {[]byte{0, 1, 64}, 4}, {[]byte{2, 1, 64}, 4}}
 		for length := 0; length <= 16; length++ {
 			// Include every truncated budget-header length and a complete header without its body.
 			badFrames = append(badFrames, struct {
@@ -214,5 +229,5 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 			}
 		}
 	}
-	t.Logf("compared %d source files and %d framed cases at both profiles", len(paths), len(names))
+	t.Logf("compared %d fixture files, %d real project files and %d framed cases at both profiles", fixtureCount, len(paths)-fixtureCount, len(names))
 }
