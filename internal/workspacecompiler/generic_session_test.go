@@ -86,6 +86,15 @@ func TestGenericSessionWarmResultRunsMSVC(t *testing.T) {
 
 func assertGenericWorkspaceNative(t *testing.T, workspace workspaceloader.Workspace, result Result) {
 	t.Helper()
+	// A platform skip must not abandon the caller's cache assertions or its
+	// subprocess completion marker. Only the native proof is platform-specific.
+	t.Run("windows-native", func(t *testing.T) {
+		assertGenericWorkspaceNativeOnly(t, workspace, result)
+	})
+}
+
+func assertGenericWorkspaceNativeOnly(t *testing.T, workspace workspaceloader.Workspace, result Result) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("native proof requires Windows amd64")
 	}
