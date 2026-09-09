@@ -441,6 +441,9 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			}
 			hirStatement.Target = target
 			hirStatement.Expression = value
+			if target != nil && target.Kind == "field-expression" {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Target.Span, "field assignment without executable field storage")
+			}
 			if statement.Target != nil && !c.mutableAssignmentTarget(statement.Target, target) {
 				c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, statement.Target.Span))
 			}

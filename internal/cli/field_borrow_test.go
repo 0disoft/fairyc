@@ -2,6 +2,7 @@ package cli
 
 import (
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -39,6 +40,29 @@ fn i32 main() {
 		code, stdout, stderr := runForTest(args, root)
 		if code != ExitSuccess || stdout != "" || stderr != "" {
 			t.Fatalf("field borrow release=%v: %d %q %s", release, code, stdout, stderr)
+		}
+	}
+}
+
+func TestFieldBorrowAssignmentFailsClosed(t *testing.T) {
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "test.cli.field-assignment"
+name = "fields"
+version = "1.0.0"
+language = "fairyc-language/14"
+source = "src"
+`)
+	writeTestSource(t, root, "src/main.fy", `module main;
+struct State { i32 count; }
+fn void edit(ref mut State state) { state.count = 1; }
+fn i32 main() { var State state = State { .count = 0 }; edit(ref mut state); assert(state.count == 1); return 0; }
+`)
+	for _, command := range []string{"check", "build", "run"} {
+		code, stdout, stderr := runForTest([]string{command}, root)
+		if code == ExitSuccess || stdout != "" || !strings.Contains(stderr, "field assignment without executable field storage") {
+			t.Fatalf("%s accepted field assignment: code=%d stdout=%q stderr=%q", command, code, stdout, stderr)
 		}
 	}
 }

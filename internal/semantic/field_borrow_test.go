@@ -2,6 +2,21 @@ package semantic_test
 
 import "testing"
 
+func TestAnalyzeFieldBorrowAssignmentDoesNotSilentlyDrop(t *testing.T) {
+	for name, body := range map[string]string{
+		"local":             "fn i32 main() { var State state = State { .count = 0 }; state.count = 1; return state.count; }",
+		"mutable reference": "fn void edit(ref mut State state) { state.count = 1; }",
+		"compound":          "fn void edit(ref mut State state) { state.count += 1; }",
+	} {
+		t.Run(name, func(t *testing.T) {
+			result := analyzeText(t, map[string]string{"main.fy": "module main; struct State { i32 count; } " + body})
+			if len(result.Unsupported) == 0 {
+				t.Fatal("field assignment accepted without executable storage")
+			}
+		})
+	}
+}
+
 func TestAnalyzeSharedFieldBorrow(t *testing.T) {
 	for name, body := range map[string]string{
 		"direct":   "let ref i32 value = ref owner.inner.number; assert(*value == 42);",

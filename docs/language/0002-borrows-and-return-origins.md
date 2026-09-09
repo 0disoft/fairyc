@@ -44,6 +44,11 @@ value is copied or moved. Owned call-result temporaries, mutable field borrows a
 projection through mutable aggregate references remain outside this executable
 slice.
 
+Field assignment is not yet executable: both owned-place and mutable-reference
+field assignment are rejected as unsupported before MIR generation. The MIR
+lowerer independently rejects field assignment instead of silently dropping it.
+This does not restrict the admitted shared field reads and borrows above.
+
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
 `ref mut T`. The original borrow becomes usable again after the call's last use. Returning, storing,
 or assigning the borrow to a longer-lived destination is not a call-bounded reborrow and must

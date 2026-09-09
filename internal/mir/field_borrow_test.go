@@ -1,10 +1,24 @@
 package mir
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
 )
+
+func TestLowerFieldBorrowAssignmentFailsClosed(t *testing.T) {
+	_, err := Lower(hir.Package{Modules: []hir.Module{{Path: "main", Functions: []hir.Function{{
+		Symbol: 1, Name: "edit", ResultType: hir.TypeVoid,
+		Body: hir.Block{Statements: []hir.Statement{{Kind: "assignment", Operator: "=",
+			Target:     &hir.Expression{Kind: "field-expression", Type: hir.TypeI32},
+			Expression: &hir.Expression{Kind: "integer", Type: hir.TypeI32, Value: "1"},
+		}}},
+	}}}}})
+	if err == nil || !strings.Contains(err.Error(), "field assignment requires executable field storage") {
+		t.Fatalf("field assignment must not disappear during lowering: %v", err)
+	}
+}
 
 func TestVerifyFieldBorrow(t *testing.T) {
 	owner := hir.Type("main::Owner")
