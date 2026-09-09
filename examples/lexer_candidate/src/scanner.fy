@@ -44,7 +44,8 @@ fn bool digit(u8 value) { return value >= 48 && value <= 57; }
 
 fn bool space(u8 value) { return value == 32 || value == 9 || value == 10; }
 
-fn bool keyword(ref u8[] input, usize start, usize end) {
+fn bool keyword(ref u8[] input, usize start, usize end, bool previous) {
+    if (previous && end - start == 5 && matches(input, start, b"defer")) { return false; }
     let ref u8[] words = b"as assert break case cleanup const continue discard else enum extern false fn for if import in let module mut null pub ptr ref region resource return struct switch true unsafe var while defer";
     var usize first = 0;
     while (first < words.len) {
@@ -72,7 +73,7 @@ fn usize symbol_width(ref u8[] input, usize start) {
 
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
-fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors) {
+fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors, bool previous) {
     if (input.len > 4096) { return 4; }
     var usize position = 0;
     var usize cooked_bytes = 0;
@@ -133,7 +134,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
         } else if (letter(current)) {
             position += 1;
             while (position < input.len && (letter(input[position]) || digit(input[position]))) { position += 1; }
-            kind = if (keyword(input, start, position)) { 4 } else { 3 };
+            kind = if (keyword(input, start, position, previous)) { 4 } else { 3 };
         } else if (digit(current)) {
             var bytes::Buffer cooked = bytes::empty();
             let numbers::Scan result = numbers::scan(input, start, ref mut cooked);
@@ -174,9 +175,14 @@ fn void number(usize value) {
 
 @effects(console)
 pub fn i32 report(ref u8[] input) {
+    return report_mode(input, false);
+}
+
+@effects(console)
+pub fn i32 report_mode(ref u8[] input, bool previous) {
     var v::Vec<Token> tokens = v::empty<Token>();
     var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
-    let i32 status = scan(input, ref mut tokens, ref mut errors);
+    let i32 status = scan(input, ref mut tokens, ref mut errors, previous);
     if (status != 0) { return status; }
     var usize index = 0;
     var usize position = 0;

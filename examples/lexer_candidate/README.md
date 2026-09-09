@@ -35,8 +35,8 @@ At most 256 diagnostics are published. A 257th insertion triggers status 4 and i
 dropped with the failed scan's owner; it is never sorted or printed.
 Output failures still use the existing assertion/trap boundary.
 
-Reference-budget parity, previous-revision mode and the complete differential
-corpus remain unfinished. Status 2 remains reserved for unsupported extensions;
+Reference-budget parity and compiler-component promotion remain unfinished.
+Status 2 remains reserved for unsupported extensions;
 it must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate
 are in `docs/architecture/self-hosting-readiness-v0.md`.
@@ -44,3 +44,25 @@ are in `docs/architecture/self-hosting-readiness-v0.md`.
 `TestWindowsFairyLexerCandidate` compares native low/optimized observations against
 the Go reference and separately tests unsupported and limit outcomes. The harness
 supplies only raw bytes, not precomputed candidate tokens or recognition tables.
+
+## Complete checked-in source corpus
+
+`TestWindowsFairyLexerCorpus` reads every `.fy` file below `spec/fixtures`, without
+filtering by pass/fail status. It compares current and immediately previous lexer
+revision modes and deterministic NUL insertion, first-byte deletion and invalid-byte
+replacement. The current corpus has 303 source files and 1516 framed cases, all
+matching Go under low and optimized Windows MSVC. Newly added oversized fixtures
+fail the lane rather than silently disappearing. Embedded Go-only seeds and
+arbitrary inputs outside the stated candidate limits are not a full conformance claim.
+
+The maintained `src/main.fy` driver reads private binary stdin frames: one mode
+byte (0 current, 1 previous), a two-byte little-endian length, then those exact
+source bytes. EOF is valid only between frames. Invalid mode, truncated framing
+or more than 2048 frames exits 8; oversized source exits 4. The harness checks
+invalid mode, truncated header/body and oversized length at both profiles.
+
+The harness compiles once per profile through the ordinary workspace compiler,
+then reuses that artifact for output-bounded batches. Each batch stays below 60KB
+of expected output and retains the existing native driver's 64KB output limit and
+trap classification. This is exact record comparison, not a token hash or a subset
+chosen to fit the output cap. Hosted CI for this new lane is still pending.
