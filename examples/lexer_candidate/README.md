@@ -22,7 +22,7 @@ their cooked spelling; numbers retain their canonical decimal bytes. EOF appears
 These numbers are private test observations tied to `internal/lexer/token.go`.
 After tokens, a diagnostic count precedes each diagnostic's length-prefixed code,
 repair and token bytes followed by its half-open start/end span. The current
-diagnostic subset is `E0001`/`E0004`/`E0005`/`E0006`, including comment and string
+diagnostic subset is `E0001`/`E0004`/`E0005`/`E0006`/`E0010`, including comment and string
 `exit` repairs and expected closing tokens. The separate diagnostic store uses
 stable source/code/repair/token ordering and preserves duplicate records.
 
@@ -31,8 +31,9 @@ and cumulative retained cooked data to 65536 bytes. Status 0 means a
 complete supported token/diagnostic stream (not syntactically valid code);
 2 means unsupported input, 3 allocation failure, and 4 candidate-limit exhaustion.
 Scanning finishes before output starts, so scan failure produces no partial stream.
-At most 256 diagnostics are published. A 257th insertion triggers status 4 and is
-dropped with the failed scan's owner; it is never sorted or printed.
+The default diagnostic budget admits 256 ordinary diagnostics. The next attempted
+diagnostic stops recognition before allocating that diagnostic and adds one
+uncharged `E0010`; the complete lossless exhaustion stream is printed normally.
 Output failures still use the existing assertion/trap boundary.
 
 `scanner::report_limits` accepts caller-selected source-byte and token limits
@@ -41,7 +42,12 @@ retains the denied token and remaining bytes as invalid records, and always emit
 an uncharged EOF. Byte limits are checked before recognition; token limits count
 trivia and the leading BOM. Native tests compare zero, exact and exceeded limits
 with the Go reference, including malformed-token diagnostic ordering.
-Work-unit and diagnostic-budget parity and compiler-component promotion remain unfinished.
+`scanner::report_budget` also accepts a diagnostic limit. The same counter follows
+code, numeric and string recognition, including escapes, invalid UTF-8, raw NUL,
+newline and final literal validation. Tests compare both the failure position and
+the retained diagnostics, including zero allowance and the default 256/257 boundary.
+Independent storage guards still apply if callers request more than 256 ordinary
+diagnostics. Work-unit parity and compiler-component promotion remain unfinished.
 Status 2 remains reserved for unsupported extensions;
 it must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate

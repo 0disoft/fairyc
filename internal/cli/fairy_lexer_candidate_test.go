@@ -33,6 +33,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		"\xc2\xa0 \xe0\xa0\x80 \xed\x9f\xbf \xf0\x90\x80\x80 \xf4\x8f\xbf\xbf",
 		"\xc0\xaf \xed\xa0\x80 \xf4\x90\x80\x80 \xe2\x82 a\xef\xbb\xbf \x80",
 		strings.Repeat("\x00", 256),
+		strings.Repeat("\x00", 257),
 		`"" b"" c"" "hello 한 😀" b"bytes" c"cstring"`,
 		`"\\\"\n\r\t\0\x41" "\u{0}\u{7f}\u{80}\u{7ff}\u{800}\u{ffff}\u{10000}\u{10ffff}"`,
 		`b"\xff\x00" c"\0\x00" "\xc2\xa0" "\xff" "\u{d800}\u{110000}"`,
@@ -79,7 +80,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		}
 		fmt.Fprintf(&expected, "%d ", len(result.Diagnostics))
 		for _, d := range result.Diagnostics {
-			if d.Code != "E0004" && d.Code != "E0001" && d.Code != "E0005" && d.Code != "E0006" {
+			if d.Code != "E0004" && d.Code != "E0001" && d.Code != "E0005" && d.Code != "E0006" && d.Code != "E0010" {
 				t.Fatalf("unexpected oracle diagnostic: %+v", d)
 			}
 			for _, value := range []string{d.Code, string(d.Repair), d.Token} {
@@ -95,7 +96,6 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	writeInput("1e20000", 101, 4)
 	writeInput("1e-20000", 102, 4)
 	writeInput(strings.Repeat("1e10000 ", 7), 103, 4)
-	writeInput(strings.Repeat("\x00", 257), 104, 4)
 	// Caller-selected byte/token budgets preserve the reference exhaustion stream.
 	budgetNames := map[int]string{}
 	for _, input := range []string{"", "abc", "a b", "\xef\xbb\xbfabc", "\r x", " \r x", "/*open", "\x00x", "1abc x", `"\q" x`, "true false"} {
@@ -130,6 +130,35 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 					}
 					fmt.Fprintf(&expected, "%d %d ", d.Span.StartByte, d.Span.EndByte)
 				}
+			}
+		}
+	}
+	for _, input := range []string{"", "abc", "\x00\x00x", "\r\xff x", "1abc 2abc", "/*open", `"\q\q" tail`, `c"\0\0" tail`, `"\xff" tail`, "\"a\x00\xff\" tail", "\"line\nend", "\"open", "\"open\\", "\x00 \"\\q\""} {
+		for _, limit := range []int{0, 1, 2, 4} {
+			budgetNames[expected.Len()] = fmt.Sprintf("diagnostics input=%q limit=%d", input, limit)
+			program.WriteString("assert(scanner::report_budget(b\"")
+			for _, b := range []byte(input) {
+				fmt.Fprintf(&program, "\\x%02X", b)
+			}
+			fmt.Fprintf(&program, "\", false, 4096, 1048576, %d) == 0);\n", limit)
+			limits := source.DefaultLimits()
+			limits.MaxDiagnostics = limit
+			result := lexer.Lex(source.NewFile("input.fy", []byte(input)), source.NewBudget(limits, len(input)))
+			for _, token := range result.Tokens {
+				fmt.Fprintf(&expected, "%d %d %d %d %d ", token.Kind, token.Trivia, token.Span.StartByte, token.Span.EndByte, len(token.Cooked))
+				for _, b := range []byte(token.Cooked) {
+					fmt.Fprintf(&expected, "%d ", b)
+				}
+			}
+			fmt.Fprintf(&expected, "%d ", len(result.Diagnostics))
+			for _, d := range result.Diagnostics {
+				for _, value := range []string{d.Code, string(d.Repair), d.Token} {
+					fmt.Fprintf(&expected, "%d ", len(value))
+					for _, b := range []byte(value) {
+						fmt.Fprintf(&expected, "%d ", b)
+					}
+				}
+				fmt.Fprintf(&expected, "%d %d ", d.Span.StartByte, d.Span.EndByte)
 			}
 		}
 	}

@@ -8,6 +8,12 @@ pub resource Entry {
     cleanup { }
 }
 
+// Status 5 is reference-budget exhaustion, distinct from allocation/storage failure.
+pub fn i32 add_limited(ref mut v::Vec<Entry> entries, usize count, usize limit, u32 code, usize start, usize end, bool exit_repair, ref u8[] token) {
+    if (count >= limit) { return 5; }
+    return add(entries, code, start, end, exit_repair, token);
+}
+
 // Bound sorting and retained diagnostic storage independently of input length.
 pub fn i32 add(ref mut v::Vec<Entry> entries, u32 code, usize start, usize end, bool exit_repair, ref u8[] token) {
     var bool allocated = true;
@@ -20,7 +26,7 @@ pub fn i32 add(ref mut v::Vec<Entry> entries, u32 code, usize start, usize end, 
     // Push returns the exact new length without converting a mutable borrow.
     // One overflow record is retained only until the failed scan drops its owner.
     return switch (v::push<Entry>(entries, entry)) {
-        case .ok(length) : { if (length > 256) { 4 } else { 0 } }
+        case .ok(length) : { if (length > 256 && !(code == 10 && length == 257)) { 4 } else { 0 } }
         case .err(_) : { 3 }
     };
 }

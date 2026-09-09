@@ -91,10 +91,11 @@ fn usize symbol_width(ref u8[] input, usize start) {
 
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
-fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens) {
+fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics) {
     if (input.len > 4096) { return 4; }
     if (input.len > max_bytes) { return exhausted(input, 0, tokens, errors); }
     var usize token_count = 0;
+    var usize diagnostic_count = 0;
     var bool token_exhausted = false;
     var usize position = 0;
     var usize cooked_bytes = 0;
@@ -122,8 +123,10 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
                 position += 1;
                 if (!emit(tokens, !token_exhausted, 0, 0, start, position)) { return 3; }
                 if (token_exhausted) { break; }
-                let i32 status = diagnostics::add(errors, 1, start, position, false, b"");
+                let i32 status = diagnostics::add_limited(errors, diagnostic_count, max_diagnostics, 1, start, position, false, b"");
+                if (status == 5) { return exhausted(input, position, tokens, errors); }
                 if (status != 0) { return status; }
+                diagnostic_count += 1;
                 continue;
             }
             kind = 2; trivia = 2;
@@ -146,8 +149,13 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             kind = if (current == 34) { 7 } else if (current == 98) { 8 } else { 9 };
             let usize opener = if (current == 34) { 1 } else { 2 };
             var bytes::Buffer cooked = bytes::empty();
-            let strings::Step step = strings::scan(input, start, kind, opener, ref mut cooked, errors);
+            let strings::Step step = strings::scan(input, start, kind, opener, ref mut cooked, errors, diagnostic_count, max_diagnostics);
+            if (step.status == 5) {
+                if (!append(tokens, 0, 0, start, step.end)) { return 3; }
+                return exhausted(input, step.end, tokens, errors);
+            }
             if (step.status != 0) { return step.status; }
+            diagnostic_count = step.diagnostics;
             position = step.end;
             let usize length = bytes::len(ref cooked);
             let usize cooked_limit = 65536;
@@ -171,8 +179,10 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             cooked_bytes += length;
             if (!emit_cooked(tokens, !token_exhausted, kind, start, position, cooked)) { return 3; }
             if (status == 1 && !token_exhausted) {
-                let i32 added = diagnostics::add(errors, 4, start, position, false, b"");
+                let i32 added = diagnostics::add_limited(errors, diagnostic_count, max_diagnostics, 4, start, position, false, b"");
+                if (added == 5) { return exhausted(input, position, tokens, errors); }
                 if (added != 0) { return added; }
+                diagnostic_count += 1;
             }
             continue;
         } else {
@@ -182,16 +192,20 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
                 position += if (decoded == 0) { 1 } else { decoded };
                 if (!emit(tokens, !token_exhausted, 0, 0, start, position)) { return 3; }
                 if (token_exhausted) { break; }
-                let i32 status = diagnostics::add(errors, 1, start, position, false, b"");
+                let i32 status = diagnostics::add_limited(errors, diagnostic_count, max_diagnostics, 1, start, position, false, b"");
+                if (status == 5) { return exhausted(input, position, tokens, errors); }
                 if (status != 0) { return status; }
+                diagnostic_count += 1;
                 continue;
             } else { position += width; kind = 10; }
         }
         assert(position > start && position <= input.len);
         if (!emit(tokens, !token_exhausted, kind, trivia, start, position)) { return 3; }
         if (unclosed_comment && !token_exhausted) {
-            let i32 status = diagnostics::add(errors, 1, start, position, true, b"*/");
+            let i32 status = diagnostics::add_limited(errors, diagnostic_count, max_diagnostics, 1, start, position, true, b"*/");
+            if (status == 5) { return exhausted(input, position, tokens, errors); }
             if (status != 0) { return status; }
+            diagnostic_count += 1;
         }
     }
     if (token_exhausted) { return exhausted(input, position, tokens, errors); }
@@ -217,9 +231,14 @@ pub fn i32 report_mode(ref u8[] input, bool previous) {
 
 @effects(console)
 pub fn i32 report_limits(ref u8[] input, bool previous, usize max_bytes, usize max_tokens) {
+    return report_budget(input, previous, max_bytes, max_tokens, 256);
+}
+
+@effects(console)
+pub fn i32 report_budget(ref u8[] input, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics) {
     var v::Vec<Token> tokens = v::empty<Token>();
     var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
-    let i32 status = scan(input, ref mut tokens, ref mut errors, previous, max_bytes, max_tokens);
+    let i32 status = scan(input, ref mut tokens, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics);
     if (status != 0) { return status; }
     var usize index = 0;
     var usize position = 0;
