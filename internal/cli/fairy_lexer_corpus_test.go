@@ -112,7 +112,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 	appendCase("previous-defer", []byte("defer deferx return true"), true)
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/main.fy", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy"} {
+	for _, name := range []string{"fairy.toml", "src/main.fy", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
 		data, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {
 			t.Fatal(err)

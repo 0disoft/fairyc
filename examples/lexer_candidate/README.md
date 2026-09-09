@@ -50,8 +50,14 @@ Independent storage guards still apply if callers request more than 256 ordinary
 diagnostics. `src/budget.fy` supplies the work meter as an immutable value returned
 by each charge. Native tests compare charge sequences against the Go budget and
 check exact-limit acceptance, sticky exhaustion and arithmetic at the maximum `usize` value.
-The meter is not yet connected to recognition: work-unit parity and
-compiler-component promotion remain unfinished.
+`scanner::report_work` connects the meter to BOM, whitespace, comments,
+identifiers, punctuation and non-ASCII code bytes. Native comparisons vary work
+limits at every source-byte boundary together with token limits, including the
+reference's one-byte progress guard when a multi-byte step cannot start.
+Numeric and string work charging is pending. Encountering either literal with a
+work limit below the reference default (16777216) returns status 2 without a
+partial stream. Existing default-budget corpus execution remains available;
+complete work-unit parity and compiler-component promotion remain unfinished.
 Status 2 remains reserved for unsupported extensions;
 it must not be interpreted as a successful empty token stream.
 The Go lexer stays authoritative. The start evidence and separate promotion gate
