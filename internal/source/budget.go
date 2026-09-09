@@ -77,16 +77,18 @@ func (b *Budget) ChargeNode() bool {
 	return !b.exhausted
 }
 
-// ChargeWork accounts for input scanning and parser decisions.
+// ChargeWork accounts for scanning, materialized decimal bytes and parser decisions.
+// Negative/unrepresentable charges exhaust the budget rather than wrapping it.
 func (b *Budget) ChargeWork(units int) bool {
-	if b == nil || b.exhausted || units < 0 {
+	if b == nil || b.exhausted {
+		return false
+	}
+	if units < 0 || b.workUnits > b.limits.MaxWorkUnits || units > b.limits.MaxWorkUnits-b.workUnits {
+		b.exhausted = true
 		return false
 	}
 	b.workUnits += units
-	if b.workUnits > b.limits.MaxWorkUnits {
-		b.exhausted = true
-	}
-	return !b.exhausted
+	return true
 }
 
 // Enter charges one recursive grammar level.

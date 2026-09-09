@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/diagnostic"
+	"github.com/0disoft/fairyc/internal/source"
 )
 
 func (s *scanner) scanNumber() {
@@ -72,14 +73,14 @@ func (s *scanner) scanNumber() {
 		return
 	}
 	raw := string(s.source[start:s.position])
-	cooked, valid := cookNumber(raw, kind)
+	cooked, valid := cookNumber(raw, kind, s.budget)
 	s.emit(kind, start, s.position, cooked)
 	if !valid {
 		s.emitDiagnostic("E0004", start, s.position, diagnostic.RepairNone, "")
 	}
 }
 
-func cookNumber(raw string, kind Kind) (string, bool) {
+func cookNumber(raw string, kind Kind, budget *source.Budget) (string, bool) {
 	if kind == Integer {
 		base := 10
 		digits := raw
@@ -102,7 +103,7 @@ func cookNumber(raw string, kind Kind) (string, bool) {
 		}
 		return value.String(), true
 	}
-	return cookDecimal(raw)
+	return cookDecimal(raw, budget)
 }
 
 func validSeparatedDigits(value string, validDigit func(byte) bool) bool {
@@ -121,7 +122,7 @@ func validSeparatedDigits(value string, validDigit func(byte) bool) bool {
 	return true
 }
 
-func cookDecimal(raw string) (string, bool) {
+func cookDecimal(raw string, budget *source.Budget) (string, bool) {
 	value := strings.ReplaceAll(raw, "_", "")
 	exponent := 0
 	if index := strings.IndexAny(value, "eE"); index >= 0 {
@@ -152,6 +153,11 @@ func cookDecimal(raw string) (string, bool) {
 	if digits == "" {
 		digits = "0"
 	}
+	// Charge the materialized (pre-trimming) bytes before Repeat or concatenation.
+	// A short exponent spelling must not bypass the shared work/allocation guard.
+	if !budget.ChargeWork(decimalExpansionWork(len(digits), len(fraction), exponent)) {
+		return "", false
+	}
 	decimalPlaces := len(fraction) - exponent
 	var cooked string
 	switch {
@@ -168,6 +174,32 @@ func cookDecimal(raw string) (string, bool) {
 		cooked = strings.TrimSuffix(cooked, ".")
 	}
 	return cooked, true
+}
+
+// A negative result is an unrepresentable charge, never a wrapped small cost.
+func decimalExpansionWork(digits, fraction, exponent int) int {
+	maxInt := int(^uint(0) >> 1)
+	if exponent < 0 && fraction > maxInt+exponent {
+		return -1
+	}
+	places := fraction - exponent
+	if places <= 0 {
+		zeros := -places
+		if digits > maxInt-zeros {
+			return -1
+		}
+		return digits + zeros
+	}
+	if places >= digits {
+		if places > maxInt-2 {
+			return -1
+		}
+		return places + 2
+	}
+	if digits == maxInt {
+		return -1
+	}
+	return digits + 1
 }
 
 func allDigits(value string) bool {
