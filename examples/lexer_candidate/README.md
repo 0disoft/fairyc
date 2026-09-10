@@ -169,6 +169,9 @@ CI for the exact pushed commit.
 an owned `Parsed` containing declarations, expressions, binding entries and
 statement trees, retaining the entire original Stream. This
 candidate recognizes `module path;`, `import path as alias;`, and functions with
+optional `pub` visibility (retained in `public`, `public_start`, `public_end`;
+private declarations use false and zero spans). The modifier is not discarded
+from unsupported declaration forms. Functions currently have
 scalar parameters and `void` or scalar return types using ordinary Fairy spelling
 (`fn i32 f(i32 x) { return x; }`). Scalar type spellings are `i32`, `usize`, `u8`,
 `u32` and `bool`. Parameter lists allow a trailing comma. Bodies admit empty blocks,
