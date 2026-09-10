@@ -175,7 +175,8 @@ scalar parameters and `void` or scalar return types using ordinary Fairy spellin
 `let`/`var` bindings with optional scalar annotations and required initializers,
 and `return` with an optional expression. Statement-only nested blocks, expression
 statements, ordinary and compound assignments, and `if (...) { ... } else if (...)
-{ ... } else { ... }` are admitted. Loops, tail-valued blocks and other statements
+{ ... } else { ... }`, `while (...) { ... }`, `break;` and `continue;` are admitted.
+Classic `for` loops, tail-valued blocks and other statements
 remain outside this subset.
 It does not resolve names or imports, validate types, module-to-file mapping or
 return obligations, admit the complete Stage 0 grammar, or produce executable MIR.
@@ -213,7 +214,10 @@ and are not checked here.
 `Declaration.body` is a one-based root in a separate postorder statement tree;
 zero is reserved for module/import declarations. `statement_at` and
 `statement_count` expose nodes: 1 block, 2 binding, 3 return, 4 assignment, 5 if,
-6 expression statement and 7 list link. Binding/return `entry` is a one-based
+6 expression statement, 7 list link, 8 while, 9 break and 10 continue.
+While preserves its condition in `expression` and its body in `first`; break and
+continue have no children. Loop-context legality remains a semantic concern.
+Binding/return `entry` is a one-based
 reference into the existing entry table. Assignment `target` and `expression`
 refer to distinct expression roots; `assignment_operator` returns its raw spelling.
 An if node's `expression` is the condition, `first` the then block, and `second`

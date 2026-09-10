@@ -13,6 +13,7 @@ pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize nam
 pub struct Expression { u32 kind; usize start; usize end; usize token; usize left; usize right; }
 pub struct Problem { u32 code; usize start; usize end; }
 // 1 block, 2 binding, 3 return, 4 assignment, 5 if, 6 expression, 7 list link.
+// 8 while (expression condition, first body), 9 break, 10 continue.
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;
@@ -201,7 +202,18 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
     let usize start = current(stream, cursor).start;
     if (word(stream, cursor.index, b"{")) { return block(stream, cursor, nodes, entries, statements, depth + 1); }
     var Statement value = statement_value(0, start, 0);
-    if (take(stream, cursor, b"if")) {
+    if (word(stream, cursor.index, b"break") || word(stream, cursor.index, b"continue")) {
+        value.kind = if (word(stream, cursor.index, b"break")) { 9 } else { 10 };
+        advance(stream, cursor);
+        if (!take(stream, cursor, b";")) { return 0; }
+    } else if (take(stream, cursor, b"while")) {
+        value.kind = 8;
+        if (!take(stream, cursor, b"(")) { return 0; }
+        value.expression = expression(stream, cursor, nodes, 1, 0);
+        if (value.expression == 0 || !take(stream, cursor, b")")) { return 0; }
+        value.first = block(stream, cursor, nodes, entries, statements, depth + 1);
+        if (value.first == 0) { return 0; }
+    } else if (take(stream, cursor, b"if")) {
         value.kind = 5;
         if (!take(stream, cursor, b"(")) { return 0; }
         value.expression = expression(stream, cursor, nodes, 1, 0);

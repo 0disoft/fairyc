@@ -77,6 +77,22 @@ fn i32 repeated(ref u8[] prefix, ref u8[] unit, usize count, ref u8[] suffix, us
     assert(switch (bytes::append(ref mut input, suffix)) { case .ok(_): { true } case .err(_): { false } });
     return exercise(bytes::view(ref input), 512, declarations, 0, 0, expected);
 }
+fn i32 nested_while(usize depth, usize declarations, i32 expected) {
+    var bytes::Buffer input = bytes::empty();
+    assert(switch (bytes::append(ref mut input, b"module main; fn void f() {")) { case .ok(_): { true } case .err(_): { false } });
+    var usize index = 0;
+    while (index < depth) {
+        assert(switch (bytes::append(ref mut input, b"while(true){")) { case .ok(_): { true } case .err(_): { false } });
+        index += 1;
+    }
+    assert(switch (bytes::append(ref mut input, b"break; continue;")) { case .ok(_): { true } case .err(_): { false } });
+    index = 0;
+    while (index <= depth) {
+        assert(switch (bytes::append(ref mut input, b"}")) { case .ok(_): { true } case .err(_): { false } });
+        index += 1;
+    }
+    return exercise(bytes::view(ref input), 512, declarations, 0, 0, expected);
+}
 fn i32 tree(syntax::Parsed parsed) {
 `)
 	imported := reference.AST.Imports[0]
@@ -169,11 +185,14 @@ fn i32 tree(syntax::Parsed parsed) {
 	cases[5].offset = strings.Index(cases[5].input, "{")
 	cases[6].offset = strings.Index(cases[6].input, "fn void nested")
 	cases[7].offset = strings.Index(cases[7].input, "import")
-	for _, body := range []string{"if (true) { var x = 1; } else ;", "{ x = ; }", "if (true) return;", "x += ;"} {
+	for _, body := range []string{"if (true) { var x = 1; } else ;", "{ x = ; }", "if (true) return;", "x += ;", "while (true) ;", "while (;", "break ; continue ; while (true) { break } ;"} {
 		input := "module main; fn void bad() { " + body + " } fn void kept() {}"
 		offset := strings.LastIndex(input, ";")
 		if strings.Contains(body, "return") {
 			offset = strings.Index(input, "return")
+		}
+		if strings.Contains(body, "break }") {
+			offset = strings.Index(input, "} ;")
 		}
 		cases = append(cases, struct {
 			input                                         string
@@ -190,6 +209,13 @@ fn i32 tree(syntax::Parsed parsed) {
 			input                                         string
 			limit, declarations, problems, offset, status int
 		}{input, 512, decls, 0, 0, status})
+	}
+	for _, depth := range []int{31, 32} {
+		decls, status := 2, 0
+		if depth == 32 {
+			decls, status = 0, 4
+		}
+		fmt.Fprintf(&program, "assert(nested_while(%d, %d, %d) == 0);\n", depth, decls, status)
 	}
 	for _, extra := range []string{"", " fn void h() {}"} {
 		decls, status := 3, 0
@@ -299,6 +325,7 @@ fn i32 tree(syntax::Parsed parsed) {
 	program.WriteString(", 512)) { case .ok(parsed): { tree(parsed) } case .err(_): { 1 } }; }")
 	writeTestSource(t, root, "src/main.fy", program.String())
 	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
+		t.Logf("native parser profile %v", args)
 		code, stdout, stderr := runForTest(args, root)
 		if code != ExitSuccess || stdout != "" || stderr != "" {
 			t.Fatalf("%v: %d %q %s", args, code, stdout, stderr)

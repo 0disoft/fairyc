@@ -13,7 +13,7 @@ import (
 
 func emitParserBlockOracle(t *testing.T, program *strings.Builder) string {
 	t.Helper()
-	input := "module main; fn i32 f(i32 a) { var x = 1; { let x = 2; call(x); } if (a > 0) { x += a; } else if (false) {} else { x = 3; } if (true) { return x; } return x; }"
+	input := "module main; fn i32 f(i32 a) { var x = 1; { let x = 2; call(x); } if (a > 0) { x += a; } else if (false) {} else { x = 3; } while (x < a) { while (true) { break; } if (false) { continue; } x += 1; } if (true) { return x; } return x; }"
 	result, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 	if err != nil || result.AST == nil {
 		t.Fatalf("block oracle: %v", err)
@@ -79,6 +79,14 @@ func emitParserBlockOracle(t *testing.T, program *strings.Builder) string {
 			kind = 4
 		case syntax.KindExprStmt:
 			kind = 6
+		case syntax.KindWhile:
+			kind = 8
+			expression = s.Expression.Children[0]
+			first = emitBlock(s.Expression.Children[1].Block)
+		case syntax.KindBreak:
+			kind, expression = 9, nil
+		case syntax.KindContinue:
+			kind, expression = 10, nil
 		case syntax.KindIf:
 			kind = 5
 			expression = s.Expression.Children[0]
