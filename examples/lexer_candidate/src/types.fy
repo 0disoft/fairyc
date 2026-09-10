@@ -3,10 +3,11 @@ import scanner as scanner;
 import std::vec as v;
 
 // Private postorder nodes: 1 path, 2 ref, 3 ref mut, 4 slice, 5 group.
+// 6 generic application (left base, right argument tail), 7 argument link.
 // Shared across the enclosing Parsed owner; IDs are one-based, zero absent.
 pub struct Node { u32 kind; usize start; usize end; usize left; usize right; }
 pub struct Attempt { usize next; usize end; usize count; usize root; i32 status; u32 expected; }
-struct Cursor { usize index; usize end; usize count; i32 status; u32 expected; }
+struct Cursor { usize index; usize end; usize count; i32 status; u32 expected; bool half; }
 
 pub fn bool word(ref scanner::Stream stream, usize index, ref u8[] text) {
     let ref u8[] raw = scanner::token_raw(stream, index);
@@ -24,8 +25,19 @@ fn void advance(ref scanner::Stream stream, ref mut Cursor cursor) {
     trivia(stream,cursor);
 }
 fn bool take(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] text) {
+    if (cursor.half) { return false; }
     if (!word(stream,cursor.index,text)) { return false; }
     advance(stream,cursor); return true;
+}
+// Consume one greater-than in type context without mutating retained tokens.
+fn bool close_argument(ref scanner::Stream stream, ref mut Cursor cursor) {
+    if (cursor.half) { cursor.half = false; advance(stream,cursor); return true; }
+    if (take(stream,cursor,b">")) { return true; }
+    if (word(stream,cursor.index,b">>")) {
+        cursor.half = true; cursor.end = scanner::token_info(stream,cursor.index).start + 1;
+        return true;
+    }
+    cursor.expected = 13; return false;
 }
 fn bool named(ref scanner::Stream stream, usize index) {
     return scanner::token_info(stream,index).kind == 3 || word(stream,index,b"void") || word(stream,index,b"bool") || word(stream,index,b"i32") || word(stream,index,b"usize") || word(stream,index,b"u8") || word(stream,index,b"u32");
@@ -58,6 +70,20 @@ fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
             advance(stream,cursor);
         }
         root = append(nodes,cursor,1,start,0,0);
+        if (root != 0 && take(stream,cursor,b"<")) {
+            var usize tail = 0;
+            while (true) {
+                let usize argument_start = scanner::token_info(stream,cursor.index).start;
+                let usize argument = type_node(stream,cursor,nodes,depth + 1);
+                if (argument == 0) { return 0; }
+                tail = append(nodes,cursor,7,argument_start,argument,tail);
+                if (tail == 0) { return 0; }
+                if (!take(stream,cursor,b",")) { break; }
+                if (word(stream,cursor.index,b">") || word(stream,cursor.index,b">>")) { break; }
+            }
+            if (!close_argument(stream,cursor)) { return 0; }
+            root = append(nodes,cursor,6,start,root,tail);
+        }
     } else { cursor.expected = 2; return 0; }
     while (root != 0 && take(stream,cursor,b"[")) {
         if (!take(stream,cursor,b"]")) { cursor.expected = 11; return 0; }
@@ -66,8 +92,9 @@ fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
     return root;
 }
 pub fn Attempt parse(ref scanner::Stream stream, usize index, usize count, ref mut v::Vec<Node> nodes) {
-    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .count = count, .status = 0, .expected = 0 };
+    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .count = count, .status = 0, .expected = 0, .half = false };
     trivia(stream,ref mut cursor);
-    let usize root = type_node(stream,ref mut cursor,nodes,0);
+    var usize root = type_node(stream,ref mut cursor,nodes,0);
+    if (cursor.half) { root = 0; cursor.expected = 0; }
     return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root = root, .status = cursor.status, .expected = cursor.expected };
 }

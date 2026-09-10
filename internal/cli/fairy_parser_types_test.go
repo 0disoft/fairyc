@@ -21,7 +21,30 @@ func emitCandidateType(t *testing.T, p *strings.Builder, typ ast.TypeReference, 
 	if typ.Mutable {
 		kind = 3
 	}
-	if kind == 0 || len(typ.Arguments) > 0 {
+	if len(typ.Arguments) > 0 {
+		if typ.Kind != ast.TypeKindNamed {
+			t.Fatal("arguments on non-name")
+		}
+		baseEnd := typ.Span.StartByte + len(strings.TrimSpace(strings.SplitN(typ.Text, "<", 2)[0]))
+		*count++
+		base, tail := *count, 0
+		fmt.Fprintf(p, "{ let n = syntax::type_at(ref parsed,%d); assert(n.kind == 1 && n.start == %d && n.end == %d && n.left == 0 && n.right == 0); }\n", base, typ.Span.StartByte, baseEnd)
+		var arguments []int
+		for _, arg := range typ.Arguments {
+			value := emitCandidateType(t, p, arg, count)
+			arguments = append(arguments, value)
+			*count++
+			fmt.Fprintf(p, "{ let n = syntax::type_at(ref parsed,%d); assert(n.kind == 7 && n.start == %d && n.end == %d && n.left == %d && n.right == %d); }\n", *count, arg.Span.StartByte, arg.Span.EndByte, value, tail)
+			tail = *count
+		}
+		*count++
+		fmt.Fprintf(p, "{ let n = syntax::type_at(ref parsed,%d); assert(n.kind == 6 && n.start == %d && n.end == %d && n.left == %d && n.right == %d); } assert(syntax::type_argument_count(ref parsed,%d) == %d);\n", *count, typ.Span.StartByte, typ.Span.EndByte, base, tail, *count, len(arguments))
+		for i, arg := range arguments {
+			fmt.Fprintf(p, "assert(syntax::type_argument(ref parsed,%d,%d) == %d);\n", *count, i, arg)
+		}
+		return *count
+	}
+	if kind == 0 {
 		t.Fatalf("unsupported type oracle %+v", typ)
 	}
 	*count++
@@ -47,7 +70,7 @@ func TestWindowsFairyParserTypes(t *testing.T) {
 		fmt.Fprintf(&p, "assert(syntax::declaration_at(ref parsed,1).result_type == %d && syntax::entry_at(ref parsed,0).type_root == %d && syntax::entry_at(ref parsed,1).type_root == %d && syntax::entry_at(ref parsed,2).type_root == 0 && syntax::type_count(ref parsed) == %d); return 0; }\n", result, param, local, count)
 		fmt.Fprintf(&main, "assert(switch(make(b%s)) { case .ok(parsed): { inspect_%d(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input), i)
 	}
-	for _, typ := range []string{"ptr u8", "u8[4]", "pkg::", "ref", "(ref u8", "A<B>"} {
+	for _, typ := range []string{"ptr u8", "u8[4]", "pkg::", "ref", "(ref u8", "A<>"} {
 		input := "module main; fn " + typ + " bad() {} fn void kept() {}"
 		fmt.Fprintf(&main, "{ let i32 r = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 1 && syntax::declaration_count(ref parsed) == 2 && syntax::type_count(ref parsed) == 1); 0 } case .err(_): { 1 } }; assert(r == 0); }\n", strconv.Quote(input))
 	}

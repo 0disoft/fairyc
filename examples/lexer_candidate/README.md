@@ -166,8 +166,8 @@ CI for the exact pushed commit.
 ## Bounded syntax parser
 
 `syntax::parse` consumes a Stream and an item limit no greater than 512. It returns
-an owned `Parsed` containing declarations, expressions, binding entries and
-statement trees, retaining the entire original Stream. This
+an owned `Parsed` containing declarations, expressions, binding entries,
+statement trees, written types and struct fields, retaining the entire original Stream. This
 candidate recognizes `module path;`, `import path as alias;`, and functions with
 optional `pub` visibility (retained in `public`, `public_start`, `public_end`;
 private declarations use false and zero spans). The modifier is not discarded
@@ -191,7 +191,16 @@ expose postorder nodes and exact source slices. Node kinds are 1 path, 2 referen
 3 mutable reference, 4 slice and 5 group; wrappers point to `left`, `right` is zero.
 All declarations share 4096 type nodes and a 32-active-call type-depth limit.
 Failed declarations roll back type nodes with the other tables. Fixed arrays,
-raw pointers, generic arguments and foreign function types remain unsupported.
+raw pointers and foreign function types remain unsupported.
+
+Named types also accept nonempty generic argument lists, trailing commas and
+nesting. Kind 6 retains the base path in `left` and a reverse argument-link tail
+in `right`; kind 7 links an argument root in `left` to its predecessor in `right`.
+`type_argument_count` and `type_argument` expose source order. Generic nodes and
+links share the same type-node budget, and argument nesting shares type depth.
+The type cursor consumes each half of `>>` at its actual byte boundary without
+rewriting source tokens or changing expression shifts. Stray closing halves fail.
+This does not admit generic declarations, specialization or type resolution.
 
 Ordinary `struct Name { ... }` declarations use declaration kind 4, with optional
 `pub` on the struct and individual fields. `field_start`/`field_count` select a
@@ -269,7 +278,7 @@ Problems additionally retain `expected` and the actual source `token` index.
 `problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
 renders the private expectation code: 0 supported syntax, 1 identifier, 2 type,
 3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
-12 `module`. Code 0 deliberately remains general for unsupported constructs;
+12 `module`, 13 `>`. Code 0 deliberately remains general for unsupported constructs;
 these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
 Expectations reset before each source item so recovery cannot leak an old hint.
 
@@ -294,8 +303,9 @@ hosted Go tests still discover all tests normally.
 ## Own-source syntax coverage
 
 Own-source syntax coverage is recorded in
-[the dated parser coverage report](parser-coverage-2026-09-10.md): all nine files
-are exercised under both Windows profiles, but none is yet diagnostic-free.
+[the declaration/type coverage report](parser-coverage-types-2026-09-10.md): all
+eleven files are exercised under both Windows profiles, and `utf8.fy` is now
+diagnostic-free. The earlier nine-file baseline is retained separately.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
 This must not be confused with the lexer's complete source-token comparison.
 

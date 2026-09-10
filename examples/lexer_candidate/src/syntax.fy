@@ -438,6 +438,7 @@ pub fn ref u8[] expected_text(u32 code) {
     if (code == 10) { return b"as"; }
     if (code == 11) { return b"]"; }
     if (code == 12) { return b"module"; }
+    if (code == 13) { return b">"; }
     return b"supported syntax";
 }
 pub fn ref u8[] source_view(ref Parsed parsed) { return scanner::source_view(ref parsed.source); }
@@ -489,3 +490,15 @@ pub fn ref u8[] type_text(ref Parsed parsed, usize id) {
 
 pub fn usize field_count(ref Parsed parsed) { return v::len<records::Field>(ref parsed.fields); }
 pub fn records::Field field_at(ref Parsed parsed, usize index) { return *v::at<records::Field>(ref parsed.fields,index); }
+pub fn usize type_argument_count(ref Parsed parsed, usize id) {
+    let types::Node node = type_at(parsed,id); assert(node.kind == 6);
+    var usize link = node.right; var usize count = 0;
+    while (link != 0) { count += 1; link = type_at(parsed,link).right; }
+    return count;
+}
+pub fn usize type_argument(ref Parsed parsed, usize id, usize index) {
+    let usize count = type_argument_count(parsed,id); assert(index < count);
+    var usize remaining = count - 1; var usize link = type_at(parsed,id).right;
+    while (remaining > index) { link = type_at(parsed,link).right; remaining -= 1; }
+    return type_at(parsed,link).left;
+}
