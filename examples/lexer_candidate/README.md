@@ -168,8 +168,10 @@ scalar parameters and `void` or scalar return types using ordinary Fairy spellin
 (`fn i32 f(i32 x) { return x; }`). Scalar type spellings are `i32`, `usize`, `u8`,
 `u32` and `bool`. Parameter lists allow a trailing comma. Bodies admit empty blocks,
 `let`/`var` bindings with optional scalar annotations and required initializers,
-and `return` with an optional expression. Nested blocks and other statements remain
-outside this subset.
+and `return` with an optional expression. Statement-only nested blocks, expression
+statements, ordinary and compound assignments, and `if (...) { ... } else if (...)
+{ ... } else { ... }` are admitted. Loops, tail-valued blocks and other statements
+remain outside this subset.
 It does not validate types, module-to-file mapping, imports, return obligations,
 the complete Stage 0 grammar, and does not produce executable MIR.
 
@@ -182,7 +184,7 @@ binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
 5 binary, 6 call and 7 argument link. One-based child IDs (zero absent), half-open source-byte spans and
 source token spelling preserve structure without evaluating or resolving names.
-Declaration `expression` is the last return root, or zero if absent/empty.
+Declaration `expression` is the last top-level return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
 Path text is its exact source slice, including intervening trivia. Calls retain
 the callee in `left` and a reverse-linked argument tail in `right`; each argument
@@ -202,6 +204,25 @@ plus its expression root. Zero name/type spans mean unwritten, not synthesized.
 Errors roll back entries and expression nodes together. Duplicate names, type
 compatibility, unreachable returns and binding resolution are semantic concerns
 and are not checked here.
+
+`Declaration.body` is a one-based root in a separate postorder statement tree;
+zero is reserved for module/import declarations. `statement_at` and
+`statement_count` expose nodes: 1 block, 2 binding, 3 return, 4 assignment, 5 if,
+6 expression statement and 7 list link. Binding/return `entry` is a one-based
+reference into the existing entry table. Assignment `target` and `expression`
+refer to distinct expression roots; `assignment_operator` returns its raw spelling.
+An if node's `expression` is the condition, `first` the then block, and `second`
+the optional else block or else-if node. A block's `first` is a reverse-linked
+statement-list tail and `second` its direct child count; list links use `first`
+for the child and `second` for the previous link. `block_statement_count` and
+`block_statement` return direct children in source order, without flattening nested
+scopes. The Go oracle's expression-statement wrapper around block/if is omitted;
+the underlying construct, order and byte spans are preserved.
+
+The statement tree has a shared 4096-node limit (including list links) and a
+32-frame block/conditional depth limit. Failures roll back statements, expressions
+and entries together. Assignment-target legality, shadowing, condition types and
+branch return obligations remain semantic checks, not parser acceptance criteria.
 
 Declarations preserve source order, complete spans and name/alias spans. Problems
 retain exact source-byte spans and private category codes (1 module, 2 import,

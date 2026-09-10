@@ -49,13 +49,15 @@ fn i32 inspect(syntax::Parsed parsed, usize declarations, usize problems, usize 
     assert(syntax::problem_count(ref parsed) == problems);
     let ref u8[] source = syntax::source_view(ref parsed);
     if (problems > 0) { assert(syntax::problem_at(ref parsed, 0).start == offset); assert(syntax::expression_count(ref parsed) == 0); assert(syntax::entry_count(ref parsed) == 0); }
-    var usize index = 0; var usize end = 0;
+    var usize index = 0; var usize end = 0; var usize functions = 0;
     while (index < declarations) {
         let syntax::Declaration value = syntax::declaration_at(ref parsed, index);
         assert(value.kind > 0 && value.kind < 4 && value.start >= end && value.end <= source.len);
         assert(value.name_start >= value.start && value.name_end > value.name_start && value.name_end <= value.end);
+        if (value.kind == 3) { functions += 1; }
         end = value.end; index += 1;
     }
+    if (problems > 0) { assert(syntax::statement_count(ref parsed) == functions); }
     return 0;
 }
 fn i32 exercise(ref u8[] input, usize limit, usize declarations, usize problems, usize offset, i32 expected) {
@@ -63,6 +65,17 @@ fn i32 exercise(ref u8[] input, usize limit, usize declarations, usize problems,
         case .ok(parsed): { inspect(parsed, declarations, problems, offset, expected) }
         case .err(status): { assert(status == expected && expected != 0); 0 }
     };
+}
+fn i32 repeated(ref u8[] prefix, ref u8[] unit, usize count, ref u8[] suffix, usize declarations, i32 expected) {
+    var bytes::Buffer input = bytes::empty();
+    assert(switch (bytes::append(ref mut input, prefix)) { case .ok(_): { true } case .err(_): { false } });
+    var usize index = 0;
+    while (index < count) {
+        assert(switch (bytes::append(ref mut input, unit)) { case .ok(_): { true } case .err(_): { false } });
+        index += 1;
+    }
+    assert(switch (bytes::append(ref mut input, suffix)) { case .ok(_): { true } case .err(_): { false } });
+    return exercise(bytes::view(ref input), 512, declarations, 0, 0, expected);
 }
 fn i32 tree(syntax::Parsed parsed) {
 `)
@@ -128,7 +141,9 @@ fn i32 tree(syntax::Parsed parsed) {
 		fmt.Fprintf(&program, "assert(syntax::expression_count(ref parsed) == %d && syntax::declaration_at(ref parsed, 1).expression == %d); return 0; }\n", count, rootID)
 	}
 	entryInput := emitParserEntryOracle(t, &program)
+	blockInput := emitParserBlockOracle(t, &program)
 	program.WriteString("fn i32 main() {\n")
+	fmt.Fprintf(&program, "assert(switch (make(b%s, 512)) { case .ok(parsed): { block_tree(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(blockInput))
 	fmt.Fprintf(&program, "assert(switch (make(b%s, 512)) { case .ok(parsed): { entry_tree(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(entryInput))
 	for index, expr := range expressions {
 		input := "module main; fn i32 f() { return " + expr + "; }"
@@ -154,6 +169,35 @@ fn i32 tree(syntax::Parsed parsed) {
 	cases[5].offset = strings.Index(cases[5].input, "{")
 	cases[6].offset = strings.Index(cases[6].input, "fn void nested")
 	cases[7].offset = strings.Index(cases[7].input, "import")
+	for _, body := range []string{"if (true) { var x = 1; } else ;", "{ x = ; }", "if (true) return;", "x += ;"} {
+		input := "module main; fn void bad() { " + body + " } fn void kept() {}"
+		offset := strings.LastIndex(input, ";")
+		if strings.Contains(body, "return") {
+			offset = strings.Index(input, "return")
+		}
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, 2, 1, offset, 0})
+	}
+	for _, depth := range []int{31, 32} {
+		input := "module main; fn void f() {" + strings.Repeat("{", depth) + strings.Repeat("}", depth) + "}"
+		decls, status := 2, 0
+		if depth == 32 {
+			decls, status = 0, 4
+		}
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, decls, 0, 0, status})
+	}
+	for _, extra := range []string{"", " fn void h() {}"} {
+		decls, status := 3, 0
+		if extra != "" {
+			decls, status = 0, 4
+		}
+		fmt.Fprintf(&program, "assert(repeated(b\"module main; fn void f() {\", b\"1;\", 2047, b%s, %d, %d) == 0);\n", strconv.Quote("} fn void g() {}"+extra), decls, status)
+	}
 	for _, expr := range []string{"f(,)", "f(a,,b)", "f(a", "a::", "true::x"} {
 		input := "module main; fn i32 bad() { return " + expr + "; } fn void kept() {}"
 		offset := strings.Index(input, "return ") + len("return ")
@@ -182,15 +226,11 @@ fn i32 tree(syntax::Parsed parsed) {
 		}{input, 512, 2, 1, strings.LastIndex(input, ";"), 0})
 	}
 	for _, count := range []int{1024, 1025} {
-		input := "module main; fn void f() { " + strings.Repeat("return;", count) + " }"
 		decls, status := 2, 0
 		if count == 1025 {
 			decls, status = 0, 4
 		}
-		cases = append(cases, struct {
-			input                                         string
-			limit, declarations, problems, offset, status int
-		}{input, 512, decls, 0, 0, status})
+		fmt.Fprintf(&program, "assert(repeated(b\"module main; fn void f() { \", b\"return;\", %d, b\" }\", %d, %d) == 0);\n", count, decls, status)
 	}
 	for _, expr := range []string{"a < b < c", "a + ;", "()", "(a", "a b"} {
 		input := "module main; fn i32 bad() { return " + expr + "; } fn void kept() {}"
@@ -226,15 +266,11 @@ fn i32 tree(syntax::Parsed parsed) {
 		}{input, 512, decls, 0, 0, status})
 	}
 	for _, prefix := range []string{"+", "+ +"} {
-		input := "module main; fn i32 f() { return " + prefix + strings.Repeat("1+", 2047) + "1; }"
 		decls, status := 2, 0
 		if prefix == "+ +" {
 			decls, status = 0, 4
 		}
-		cases = append(cases, struct {
-			input                                         string
-			limit, declarations, problems, offset, status int
-		}{input, 512, decls, 0, 0, status})
+		fmt.Fprintf(&program, "assert(repeated(b%s, b\"1+\", 2047, b\"1; }\", %d, %d) == 0);\n", strconv.Quote("module main; fn i32 f() { return "+prefix), decls, status)
 	}
 	for _, input := range []string{"module", "module main", "module main; import x as", "module main; fn void f(", "module main; fn i32 f() { return"} {
 		declarations := 0
