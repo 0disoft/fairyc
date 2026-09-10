@@ -37,7 +37,11 @@ jobs:
       - name: Vet
         run: go vet -mod=readonly ./...
       - name: Test
+        if: runner.os == 'Linux'
         run: go test -mod=readonly -count=1 ./...
+      - name: Test Windows except separately required parser proof
+        if: runner.os == 'Windows'
+        run: go test -mod=readonly -count=1 -skip '^TestWindowsFairyLexerStreamParser$' ./...
       - name: Race-test contract-state concurrency
         if: runner.os == 'Linux'
         env:
@@ -60,9 +64,24 @@ jobs:
       - name: Run Windows native target smoke
         run: go run -mod=readonly ./cmd/fairyc-windows-host-smoke
 
+  windows-parser:
+    name: Windows candidate parser proof
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Run bounded parser structure and recovery proof
+        run: go test -mod=readonly -count=1 -v -run '^TestWindowsFairyLexerStreamParser$' ./internal/cli
+
   native-c:
     name: C differential (Linux)
-    needs: [validate, windows-native]
+    needs: [validate, windows-native, windows-parser]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
