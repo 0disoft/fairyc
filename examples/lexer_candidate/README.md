@@ -165,9 +165,22 @@ promotion. Hosted verification of this API and page transport remains pending.
 an owned `Parsed` declaration index, retaining the entire original Stream. This
 candidate recognizes `module path;`, `import path as alias;`, and argument-free
 functions with `void` or `i32` return types using ordinary Fairy spelling
-(`fn void f() {}`). Bodies may be empty or contain one `return INTEGER;` statement.
+(`fn void f() {}`). Bodies may be empty or contain one `return expression;` statement.
 It does not validate types, module-to-file mapping, imports, return obligations,
-expressions or the complete Stage 0 grammar, and does not produce executable MIR.
+the complete Stage 0 grammar, and does not produce executable MIR.
+
+Expressions admit integers, single identifiers, nested parentheses, prefix
+`+ - ! ~ *`, and the grammar's binary operators from multiplicative through
+logical-or. Casts, calls, qualified names, reference prefixes and other literals
+remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
+binary operators associate left, while unparenthesized comparison chains fail.
+The private postorder node kinds are 1 integer, 2 name, 3 group, 4 prefix and
+5 binary. One-based child IDs (zero absent), half-open source-byte spans and
+source token spelling preserve structure without evaluating or resolving names.
+Declaration `expression` is the return root, or zero for an empty body.
+`expression_count`, `expression_at` and `expression_text` expose read-only views.
+Failed declarations roll back their nodes before recovery. A shared 4096-node
+ceiling and 64-active-expression-call limit return status 4 without a result.
 
 Declarations preserve source order, complete spans and name/alias spans. Problems
 retain exact source-byte spans and private category codes (1 module, 2 import,
@@ -184,7 +197,7 @@ to the parser. A successful Result can contain syntax problems: clients must che
 `problem_count`, and must not treat this partial declaration index as a compiler
 acceptance decision. `declaration_at`, `problem_at` and `source_view` are read-only.
 The scanner's source/work bounds plus monotone parsing and one bounded recovery
-rescan limit work; no recursive descent into arbitrary nested bodies is performed.
+rescan limit work; expression recursion is bounded separately as above.
 
 Native tests compare admitted function/import spans with the Go AST and exercise
 missing headers/delimiters, declaration recovery, import order, nested malformed

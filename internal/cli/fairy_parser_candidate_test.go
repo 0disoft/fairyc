@@ -5,11 +5,14 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/source"
+	"github.com/0disoft/fairyc/internal/syntax"
 )
 
 func TestWindowsFairyLexerStreamParser(t *testing.T) {
@@ -45,7 +48,7 @@ fn i32 inspect(syntax::Parsed parsed, usize declarations, usize problems, usize 
     assert(syntax::declaration_count(ref parsed) == declarations);
     assert(syntax::problem_count(ref parsed) == problems);
     let ref u8[] source = syntax::source_view(ref parsed);
-    if (problems > 0) { assert(syntax::problem_at(ref parsed, 0).start == offset); }
+    if (problems > 0) { assert(syntax::problem_at(ref parsed, 0).start == offset); assert(syntax::expression_count(ref parsed) == 0); }
     var usize index = 0; var usize end = 0;
     while (index < declarations) {
         let syntax::Declaration value = syntax::declaration_at(ref parsed, index);
@@ -68,7 +71,48 @@ fn i32 tree(syntax::Parsed parsed) {
 	for index, function := range reference.AST.Functions {
 		fmt.Fprintf(&program, "{ let syntax::Declaration value = syntax::declaration_at(ref parsed, %d); assert(value.kind == 3 && value.start == %d && value.end == %d && value.name_start == %d && value.name_end == %d); }\n", index+2, function.Span.StartByte, function.Span.EndByte, function.NameSpan.StartByte, function.NameSpan.EndByte)
 	}
-	program.WriteString("return 0; }\nfn i32 main() {\n")
+	program.WriteString("return 0; }\n")
+	expressions := []string{"42", "name", "((42))", "-a + +b * ~c", "!a && b || c", "a - b - c", "a << b + c", "a | b ^ c & d", "a + b < c * d", "(a < b) == c", "a < (b == c)", "*a / b % c", "a >= b && c != d", "a <= b || c > d", "a >> b - c", "a /* gap */ + (b - c)"}
+	for index, expr := range expressions {
+		input := "module main; fn i32 f() { return " + expr + "; }"
+		result, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+		if err != nil || result.AST == nil {
+			t.Fatalf("expression oracle %q: %v", expr, err)
+		}
+		fmt.Fprintf(&program, "fn i32 expression_%d(syntax::Parsed parsed) { assert(syntax::problem_count(ref parsed) == 0);\n", index)
+		count := 0
+		var emit func(*ast.Expression) int
+		emit = func(node *ast.Expression) int {
+			left, right := 0, 0
+			if len(node.Children) > 0 {
+				left = emit(node.Children[0])
+			}
+			if len(node.Children) > 1 {
+				right = emit(node.Children[1])
+			}
+			count++
+			kind := map[syntax.Kind]int{syntax.KindLiteral: 1, syntax.KindPath: 2, syntax.KindGroup: 3, syntax.KindPrefix: 4, syntax.KindBinary: 5}[node.Kind]
+			if kind == 0 {
+				t.Fatalf("unsupported oracle node %s", node.Kind)
+			}
+			fmt.Fprintf(&program, "{ let syntax::Expression node = syntax::expression_at(ref parsed, %d); assert(node.kind == %d && node.start == %d && node.end == %d && node.left == %d && node.right == %d); }\n", count, kind, node.Span.StartByte, node.Span.EndByte, left, right)
+			if node.Kind != syntax.KindGroup {
+				fmt.Fprintf(&program, "{ let ref u8[] text = syntax::expression_text(ref parsed, %d); assert(text.len == %d);", count, len(node.Text))
+				for offset, value := range []byte(node.Text) {
+					fmt.Fprintf(&program, " assert(text[%d] == %d);", offset, value)
+				}
+				program.WriteString(" }\n")
+			}
+			return count
+		}
+		rootID := emit(result.AST.Functions[0].Body.Statements[0].Expression)
+		fmt.Fprintf(&program, "assert(syntax::expression_count(ref parsed) == %d && syntax::declaration_at(ref parsed, 1).expression == %d); return 0; }\n", count, rootID)
+	}
+	program.WriteString("fn i32 main() {\n")
+	for index, expr := range expressions {
+		input := "module main; fn i32 f() { return " + expr + "; }"
+		fmt.Fprintf(&program, "assert(switch (make(b%s, 512)) { case .ok(parsed): { expression_%d(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input), index)
+	}
 	cases := []struct {
 		input                                         string
 		limit, declarations, problems, offset, status int
@@ -89,6 +133,50 @@ fn i32 tree(syntax::Parsed parsed) {
 	cases[5].offset = strings.Index(cases[5].input, "{")
 	cases[6].offset = strings.Index(cases[6].input, "fn void nested")
 	cases[7].offset = strings.Index(cases[7].input, "import")
+	for _, expr := range []string{"a < b < c", "a + ;", "()", "(a", "a b"} {
+		input := "module main; fn i32 bad() { return " + expr + "; } fn void kept() {}"
+		// Exact fault locations are checked separately from the Go AST oracle,
+		// because the candidate exposes private recovery categories.
+		offset := strings.Index(input, "return ") + len("return ")
+		switch expr {
+		case "a < b < c":
+			offset += 6
+		case "a + ;":
+			offset += 4
+		case "()":
+			offset++
+		case "(a":
+			offset += 2
+		case "a b":
+			offset += 2
+		}
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, 2, 1, offset, 0})
+	}
+	for _, count := range []int{63, 64} {
+		input := "module main; fn i32 f() { return " + strings.Repeat("(", count) + "1" + strings.Repeat(")", count) + "; }"
+		decls, status := 2, 0
+		if count == 64 {
+			decls, status = 0, 4
+		}
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, decls, 0, 0, status})
+	}
+	for _, prefix := range []string{"+", "+ +"} {
+		input := "module main; fn i32 f() { return " + prefix + strings.Repeat("1+", 2047) + "1; }"
+		decls, status := 2, 0
+		if prefix == "+ +" {
+			decls, status = 0, 4
+		}
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, decls, 0, 0, status})
+	}
 	for _, input := range []string{"module", "module main", "module main; import x as", "module main; fn void f(", "module main; fn i32 f() { return"} {
 		declarations := 0
 		if strings.HasPrefix(input, "module main;") {
