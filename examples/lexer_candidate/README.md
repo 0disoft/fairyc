@@ -171,11 +171,10 @@ statement trees, retaining the entire original Stream. This
 candidate recognizes `module path;`, `import path as alias;`, and functions with
 optional `pub` visibility (retained in `public`, `public_start`, `public_end`;
 private declarations use false and zero spans). The modifier is not discarded
-from unsupported declaration forms. Functions currently have
-scalar parameters and `void` or scalar return types using ordinary Fairy spelling
-(`fn i32 f(i32 x) { return x; }`). Scalar type spellings are `i32`, `usize`, `u8`,
-`u32` and `bool`. Parameter lists allow a trailing comma. Bodies admit empty blocks,
-`let`/`var` bindings with optional scalar annotations and required initializers,
+from unsupported declaration forms. Functions preserve written parameter and
+result types using ordinary Fairy spelling (`fn i32 f(i32 x) { return x; }`).
+Parameter lists allow a trailing comma. Bodies admit empty blocks,
+`let`/`var` bindings with optional type annotations and required initializers,
 and `return` with an optional expression. Statement-only nested blocks, expression
 statements, ordinary and compound assignments, and `if (...) { ... } else if (...)
 { ... } else { ... }`, `while (...) { ... }`, `break;` and `continue;` are admitted.
@@ -183,6 +182,16 @@ Classic `for` loops, tail-valued blocks and other statements
 remain outside this subset.
 It does not resolve names or imports, validate types, module-to-file mapping or
 return obligations, admit the complete Stage 0 grammar, or produce executable MIR.
+
+The private `types` module recognizes named/qualified types, `ref`, `ref mut`,
+grouping and unsized slices. It preserves `ref u8[]` versus `(ref u8)[]` without
+resolving names. `Declaration.result_type` and `Entry.type_root` are one-based
+roots; an inferred binding uses zero. `type_at`, `type_count` and `type_text`
+expose postorder nodes and exact source slices. Node kinds are 1 path, 2 reference,
+3 mutable reference, 4 slice and 5 group; wrappers point to `left`, `right` is zero.
+All declarations share 4096 type nodes and a 32-active-call type-depth limit.
+Failed declarations roll back type nodes with the other tables. Fixed arrays,
+raw pointers, generic arguments and foreign function types remain unsupported.
 
 Expressions admit integers, `true`/`false`, qualified identifier paths, calls,
 nested parentheses, prefix
@@ -249,8 +258,8 @@ available through the retained Stream rather than being reconstructed from nodes
 
 Problems additionally retain `expected` and the actual source `token` index.
 `problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
-renders the private expectation code: 0 supported syntax, 1 identifier, 2 scalar
-type, 3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
+renders the private expectation code: 0 supported syntax, 1 identifier, 2 type,
+3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
 12 `module`. Code 0 deliberately remains general for unsupported constructs;
 these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
 Expectations reset before each source item so recovery cannot leak an old hint.

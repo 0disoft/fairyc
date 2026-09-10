@@ -16,7 +16,7 @@ func TestWindowsFairyParserDiagnostics(t *testing.T) {
 		{"module ;", ";", 7, 1},
 		{"module main", "", 11, 8},
 		{"module main; import x y;", "y", 22, 10},
-		{"module main; fn Thing bad() {}", "Thing", 16, 2},
+		{"module main; fn 42 bad() {}", "42", 16, 2},
 		{"module main; fn void f { }", "{", 23, 4},
 		{"module main; fn void f() ", "", 25, 6},
 		{"module main; fn void f() {", "", 25, 7},
