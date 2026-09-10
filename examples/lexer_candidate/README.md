@@ -270,6 +270,14 @@ at runtime without reducing their tested sizes. Focused Mustflow lanes separate
 parser checks, Stream/self-lexing, corpus/budget checks and heap accounting;
 hosted Go tests still discover all tests normally.
 
+## Own-source syntax coverage
+
+Own-source syntax coverage is recorded in
+[the dated parser coverage report](parser-coverage-2026-09-10.md): all nine files
+are exercised under both Windows profiles, but none is yet diagnostic-free.
+Full-file exhaustion and separate first-blocker prefix probes are distinguished.
+This must not be confused with the lexer's complete source-token comparison.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token
