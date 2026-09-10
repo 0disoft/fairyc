@@ -193,6 +193,15 @@ All declarations share 4096 type nodes and a 32-active-call type-depth limit.
 Failed declarations roll back type nodes with the other tables. Fixed arrays,
 raw pointers, generic arguments and foreign function types remain unsupported.
 
+Ordinary `struct Name { ... }` declarations use declaration kind 4, with optional
+`pub` on the struct and individual fields. `field_start`/`field_count` select a
+zero-based source-ordered range in the separate `field_at`/`field_count` table.
+Each field preserves its full/name/public spans, visibility and `type_root`.
+Structs have no body or result-type root. All structs share a 1024-field limit;
+failed declarations roll back fields and types together. Duplicate-field legality,
+layout and ownership are not checked. Generic declarations, resource declarations,
+cleanup and record expressions remain unsupported.
+
 Expressions admit integers, `true`/`false`, qualified identifier paths, calls,
 nested parentheses, prefix
 `+ - ! ~ *`, and the grammar's binary operators from multiplicative through

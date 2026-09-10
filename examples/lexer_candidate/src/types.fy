@@ -8,7 +8,7 @@ pub struct Node { u32 kind; usize start; usize end; usize left; usize right; }
 pub struct Attempt { usize next; usize end; usize count; usize root; i32 status; u32 expected; }
 struct Cursor { usize index; usize end; usize count; i32 status; u32 expected; }
 
-fn bool word(ref scanner::Stream stream, usize index, ref u8[] text) {
+pub fn bool word(ref scanner::Stream stream, usize index, ref u8[] text) {
     let ref u8[] raw = scanner::token_raw(stream, index);
     if (raw.len != text.len) { return false; }
     var usize i = 0;

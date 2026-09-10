@@ -2,10 +2,11 @@ module syntax;
 import scanner as scanner;
 import std::vec as v;
 import types as types;
+import records as records;
 
-// Private candidate categories: 1 module, 2 import, 3 function; problem 4 is
+// Private declarations: 1 module, 2 import, 3 function, 4 struct; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
-pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; bool public; usize public_start; usize public_end; }
+pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
 // Zero name/type spans mean unwritten; expression zero means no initializer/value.
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; }
@@ -24,9 +25,10 @@ pub resource Parsed {
     v::Vec<Entry> entries;
     v::Vec<Statement> statements;
     v::Vec<types::Node> types;
+    v::Vec<records::Field> fields;
     cleanup { }
 }
-struct Cursor { usize index; usize previous_end; usize nodes; usize entries; usize statements; usize types; usize expression; usize top_return; i32 status; u32 expected; }
+struct Cursor { usize index; usize previous_end; usize nodes; usize entries; usize statements; usize types; usize fields; usize expression; usize top_return; i32 status; u32 expected; }
 struct Attempt { bool ok; Declaration value; Problem problem; }
 
 fn scanner::TokenInfo current(ref scanner::Stream stream, ref mut Cursor cursor) {
@@ -57,16 +59,21 @@ fn bool take(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] expecte
     advance(stream, cursor);
     return true;
 }
-fn bool public_function(ref scanner::Stream stream, usize index) {
-    if (!word(stream, index, b"pub")) { return false; }
-    var usize next = index + 1;
-    while (next < scanner::token_count(stream) && scanner::token_info(stream, next).kind == 2) { next += 1; }
-    return next < scanner::token_count(stream) && word(stream, next, b"fn");
+fn u32 item_kind(ref scanner::Stream stream, usize index) {
+    var usize next = index;
+    if (word(stream,next,b"pub")) {
+        next += 1;
+        while (next < scanner::token_count(stream) && scanner::token_info(stream,next).kind == 2) { next += 1; }
+    }
+    if (next >= scanner::token_count(stream)) { return 5; }
+    if (word(stream,next,b"fn")) { return 3; }
+    if (word(stream,next,b"struct")) { return 4; }
+    return 5;
 }
 fn Attempt failed(ref scanner::Stream stream, ref mut Cursor cursor, u32 code) {
     let scanner::TokenInfo token = current(stream, cursor);
     return Attempt { .ok = false,
-        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .public = false, .public_start = 0, .public_end = 0 },
+        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0 },
         .problem = Problem { .code = code, .start = token.start, .end = token.end, .expected = cursor.expected, .token = cursor.index } };
 }
 fn bool expect(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] text, u32 code) {
@@ -286,10 +293,11 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
     value.end = cursor.previous_end;
     return append_statement(statements, cursor, value);
 }
-fn Attempt declaration(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Expression> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<Statement> statements, ref mut v::Vec<types::Node> type_nodes, u32 kind) {
+fn Attempt declaration(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Expression> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<Statement> statements, ref mut v::Vec<types::Node> type_nodes, ref mut v::Vec<records::Field> fields, u32 kind) {
     let usize start = scanner::token_info(stream, cursor.index).start;
     let usize entry_start = cursor.entries;
-    let bool public = kind == 3 && take(stream, cursor, b"pub");
+    let bool public = kind >= 3 && take(stream, cursor, b"pub");
+    let usize field_start = cursor.fields;
     advance(stream, cursor);
     var usize result_type = 0;
     if (kind == 3) {
@@ -302,7 +310,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut Cursor cursor, ref mu
     var usize root = 0;
     var usize body = 0;
     advance(stream, cursor);
-    if (kind != 3) {
+    if (kind < 3) {
         while (take(stream, cursor, b"::")) {
             let scanner::TokenInfo part = scanner::token_info(stream, cursor.index);
             if (part.kind != 3) { cursor.expected = 1; return failed(stream, cursor, kind); }
@@ -315,6 +323,11 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut Cursor cursor, ref mu
             name_start = alias.start; name_end = alias.end; advance(stream, cursor);
         }
         if (!expect(stream, cursor, b";", 8)) { return failed(stream, cursor, kind); }
+    } else if (kind == 4) {
+        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields);
+        cursor.index = record.next; cursor.previous_end = record.end; cursor.types = record.types; cursor.fields = record.fields;
+        cursor.expected = record.expected; cursor.status = record.status;
+        if (!record.ok) { return failed(stream,cursor,4); }
     } else {
         if (!expect(stream, cursor, b"(", 4)) { return failed(stream, cursor, kind); }
         while (!word(stream, cursor.index, b")")) {
@@ -328,7 +341,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut Cursor cursor, ref mu
         root = cursor.top_return;
     }
     return Attempt { .ok = true,
-        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 } },
+        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 } },
         .problem = Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .token = 0 } };
 }
 
@@ -337,11 +350,11 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut Cursor cursor, ref mu
 fn void recover(ref scanner::Stream stream, ref mut Cursor cursor, usize start) {
     cursor.index = start;
     if (take(stream, cursor, b"pub")) {
-        if (word(stream, cursor.index, b"fn") || word(stream, cursor.index, b"import")) { advance(stream, cursor); }
+        if (word(stream, cursor.index, b"fn") || word(stream, cursor.index, b"struct") || word(stream, cursor.index, b"import")) { advance(stream, cursor); }
     }
     var usize depth = 0;
     while (scanner::token_info(stream, cursor.index).kind != 1) {
-        if (depth == 0 && cursor.index > start && (word(stream, cursor.index, b"fn") || public_function(stream, cursor.index) || word(stream, cursor.index, b"import"))) { return; }
+        if (depth == 0 && cursor.index > start && (word(stream, cursor.index, b"fn") || item_kind(stream, cursor.index) < 5 || word(stream, cursor.index, b"import"))) { return; }
         if (word(stream, cursor.index, b"{")) { depth += 1; }
         else if (word(stream, cursor.index, b"}")) {
             advance(stream, cursor);
@@ -365,7 +378,8 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
     var v::Vec<Entry> entries = v::empty<Entry>();
     var v::Vec<Statement> statements = v::empty<Statement>();
     var v::Vec<types::Node> type_nodes = v::empty<types::Node>();
-    var Cursor cursor = Cursor { .index = 0, .previous_end = 0, .nodes = 0, .entries = 0, .statements = 0, .types = 0, .expression = 0, .top_return = 0, .status = 0, .expected = 0 };
+    var v::Vec<records::Field> fields = v::empty<records::Field>();
+    var Cursor cursor = Cursor { .index = 0, .previous_end = 0, .nodes = 0, .entries = 0, .statements = 0, .types = 0, .fields = 0, .expression = 0, .top_return = 0, .status = 0, .expected = 0 };
     trivia(ref input, ref mut cursor);
     var bool first = true; var bool functions = false; var usize items = 0; var usize errors = 0;
     while (first || scanner::token_info(ref input, cursor.index).kind != 1) {
@@ -375,8 +389,9 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
         let usize entry_start = cursor.entries;
         let usize statement_start = cursor.statements;
         let usize type_start = cursor.types;
-        let u32 kind = if (first) { 1 } else if (!functions && word(ref input, cursor.index, b"import")) { 2 } else if (word(ref input, cursor.index, b"fn") || public_function(ref input, cursor.index)) { 3 } else { 4 };
-        let Attempt attempt = if ((first && !word(ref input, cursor.index, b"module")) || kind == 4) { failed(ref input, ref mut cursor, kind) } else { declaration(ref input, ref mut cursor, ref mut nodes, ref mut entries, ref mut statements, ref mut type_nodes, kind) };
+        let usize field_start = cursor.fields;
+        let u32 kind = if (first) { 1 } else if (!functions && word(ref input, cursor.index, b"import")) { 2 } else { item_kind(ref input,cursor.index) };
+        let Attempt attempt = if ((first && !word(ref input, cursor.index, b"module")) || kind == 5) { failed(ref input, ref mut cursor, if (kind == 5) { 4 } else { kind }) } else { declaration(ref input, ref mut cursor, ref mut nodes, ref mut entries, ref mut statements, ref mut type_nodes, ref mut fields, kind) };
         if (cursor.status != 0) { return .err(cursor.status); }
         if (attempt.ok) {
             if (items >= max_items) { return .err(4); }
@@ -391,15 +406,17 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
             cursor.statements = statement_start;
             discard v::truncate<types::Node>(ref mut type_nodes, type_start);
             cursor.types = type_start;
+            discard v::truncate<records::Field>(ref mut fields, field_start);
+            cursor.fields = field_start;
             if (errors >= 32) { return .err(4); }
             if (!switch (v::push<Problem>(ref mut problems, attempt.problem)) { case .ok(_): { true } case .err(_): { false } }) { return .err(3); }
             errors += 1;
             if (!first || word(ref input, start, b"module")) { recover(ref input, ref mut cursor, start); }
         }
-        if (kind == 3) { functions = true; }
+        if (kind == 3 || kind == 4) { functions = true; }
         first = false;
     }
-    return .ok(Parsed { .source = input, .declarations = declarations, .problems = problems, .expressions = nodes, .entries = entries, .statements = statements, .types = type_nodes });
+    return .ok(Parsed { .source = input, .declarations = declarations, .problems = problems, .expressions = nodes, .entries = entries, .statements = statements, .types = type_nodes, .fields = fields });
 }
 pub fn usize declaration_count(ref Parsed parsed) { return v::len<Declaration>(ref parsed.declarations); }
 pub fn usize problem_count(ref Parsed parsed) { return v::len<Problem>(ref parsed.problems); }
@@ -468,3 +485,7 @@ pub fn ref u8[] type_text(ref Parsed parsed, usize id) {
     let types::Node node = type_at(parsed,id);
     return scanner::source_view(ref parsed.source)[node.start..node.end];
 }
+
+
+pub fn usize field_count(ref Parsed parsed) { return v::len<records::Field>(ref parsed.fields); }
+pub fn records::Field field_at(ref Parsed parsed, usize index) { return *v::at<records::Field>(ref parsed.fields,index); }
