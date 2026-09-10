@@ -173,16 +173,24 @@ outside this subset.
 It does not validate types, module-to-file mapping, imports, return obligations,
 the complete Stage 0 grammar, and does not produce executable MIR.
 
-Expressions admit integers, single identifiers, nested parentheses, prefix
+Expressions admit integers, `true`/`false`, qualified identifier paths, calls,
+nested parentheses, prefix
 `+ - ! ~ *`, and the grammar's binary operators from multiplicative through
-logical-or. Casts, calls, qualified names, reference prefixes and other literals
+logical-or. Casts, reference prefixes and other literals
 remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
 binary operators associate left, while unparenthesized comparison chains fail.
-The private postorder node kinds are 1 integer, 2 name, 3 group, 4 prefix and
-5 binary. One-based child IDs (zero absent), half-open source-byte spans and
+The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
+5 binary, 6 call and 7 argument link. One-based child IDs (zero absent), half-open source-byte spans and
 source token spelling preserve structure without evaluating or resolving names.
 Declaration `expression` is the last return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
+Path text is its exact source slice, including intervening trivia. Calls retain
+the callee in `left` and a reverse-linked argument tail in `right`; each argument
+link points to its expression in `left` and its predecessor in `right`.
+`call_argument_count` and `call_argument` expose the original argument order.
+Empty calls, trailing argument commas and repeated call suffixes are admitted.
+All call/argument nodes share the existing node limit, and argument recursion
+shares the expression-depth limit. Generic specialization remains unsupported.
 Failed declarations roll back their nodes before recovery. A shared 4096-node
 ceiling and 64-active-expression-call limit return status 4 without a result.
 

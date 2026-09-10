@@ -80,9 +80,15 @@ fn usize expression(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v
     let usize token_index = cursor.index;
     let scanner::TokenInfo token = current(stream, cursor);
     var usize left = 0;
-    if (token.kind == 5 || token.kind == 3) {
+    if (token.kind == 5 || token.kind == 3 || word(stream, cursor.index, b"true") || word(stream, cursor.index, b"false")) {
         advance(stream, cursor);
-        left = append(nodes, cursor, Expression { .kind = if (token.kind == 5) { 1 } else { 2 }, .start = token.start, .end = token.end, .token = token_index, .left = 0, .right = 0 });
+        if (token.kind == 3) {
+            while (take(stream, cursor, b"::")) {
+                if (current(stream, cursor).kind != 3) { return 0; }
+                advance(stream, cursor);
+            }
+        }
+        left = append(nodes, cursor, Expression { .kind = if (token.kind == 3) { 2 } else { 1 }, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = 0, .right = 0 });
     } else if (take(stream, cursor, b"(")) {
         let usize child = expression(stream, cursor, nodes, 1, depth + 1);
         if (child == 0 || !take(stream, cursor, b")")) { return 0; }
@@ -95,6 +101,22 @@ fn usize expression(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v
     } else { return 0; }
     var bool comparison = false;
     while (left != 0) {
+        let usize opener = cursor.index;
+        if (take(stream, cursor, b"(")) {
+            var usize arguments = 0;
+            while (!word(stream, cursor.index, b")")) {
+                let usize argument_token = cursor.index;
+                let usize argument_start = current(stream, cursor).start;
+                let usize value = expression(stream, cursor, nodes, 1, depth + 1);
+                if (value == 0) { return 0; }
+                arguments = append(nodes, cursor, Expression { .kind = 7, .start = argument_start, .end = cursor.previous_end, .token = argument_token, .left = value, .right = arguments });
+                if (arguments == 0) { return 0; }
+                if (!take(stream, cursor, b",")) { break; }
+            }
+            if (!take(stream, cursor, b")")) { return 0; }
+            left = append(nodes, cursor, Expression { .kind = 6, .start = token.start, .end = cursor.previous_end, .token = opener, .left = left, .right = arguments });
+            continue;
+        }
         let usize power = precedence(stream, cursor.index);
         if (power < minimum) { return left; }
         if (power == 3 && comparison) { return 0; }
@@ -251,5 +273,19 @@ pub fn usize entry_count(ref Parsed parsed) { return v::len<Entry>(ref parsed.en
 pub fn Entry entry_at(ref Parsed parsed, usize index) { return *v::at<Entry>(ref parsed.entries, index); }
 pub fn Expression expression_at(ref Parsed parsed, usize id) { return *v::at<Expression>(ref parsed.expressions, id - 1); }
 pub fn ref u8[] expression_text(ref Parsed parsed, usize id) {
-    return scanner::token_raw(ref parsed.source, v::at<Expression>(ref parsed.expressions, id - 1).token);
+    let Expression node = expression_at(parsed, id);
+    if (node.kind == 2) { return scanner::source_view(ref parsed.source)[node.start..node.end]; }
+    return scanner::token_raw(ref parsed.source, node.token);
+}
+pub fn usize call_argument_count(ref Parsed parsed, usize call) {
+    let Expression node = expression_at(parsed, call); assert(node.kind == 6);
+    var usize link = node.right; var usize count = 0;
+    while (link != 0) { count += 1; link = expression_at(parsed, link).right; }
+    return count;
+}
+pub fn usize call_argument(ref Parsed parsed, usize call, usize index) {
+    let usize count = call_argument_count(parsed, call); assert(index < count);
+    var usize remaining = count - 1; var usize link = expression_at(parsed, call).right;
+    while (remaining > index) { link = expression_at(parsed, link).right; remaining -= 1; }
+    return expression_at(parsed, link).left;
 }

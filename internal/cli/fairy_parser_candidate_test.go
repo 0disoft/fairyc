@@ -73,6 +73,7 @@ fn i32 tree(syntax::Parsed parsed) {
 	}
 	program.WriteString("return 0; }\n")
 	expressions := []string{"42", "name", "((42))", "-a + +b * ~c", "!a && b || c", "a - b - c", "a << b + c", "a | b ^ c & d", "a + b < c * d", "(a < b) == c", "a < (b == c)", "*a / b % c", "a >= b && c != d", "a <= b || c > d", "a >> b - c", "a /* gap */ + (b - c)"}
+	expressions = append(expressions, "true", "false || !true", "a::b::c", "std /* gap */ :: io :: write", "f()", "f(a, b, c,)", "f(g(1), h(2, 3))", "-f(a) * g(b)", "f()(1)(2,3)", "std::io::write(a + 1, false)")
 	for index, expr := range expressions {
 		input := "module main; fn i32 f() { return " + expr + "; }"
 		result, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
@@ -84,21 +85,39 @@ fn i32 tree(syntax::Parsed parsed) {
 		var emit func(*ast.Expression) int
 		emit = func(node *ast.Expression) int {
 			left, right := 0, 0
+			var arguments []int
 			if len(node.Children) > 0 {
 				left = emit(node.Children[0])
 			}
-			if len(node.Children) > 1 {
+			if node.Kind == syntax.KindCall {
+				for _, argument := range node.Children[1:] {
+					value := emit(argument)
+					arguments = append(arguments, value)
+					count++
+					fmt.Fprintf(&program, "{ let syntax::Expression arg = syntax::expression_at(ref parsed, %d); assert(arg.kind == 7 && arg.left == %d && arg.right == %d && arg.start == %d && arg.end == %d); }\n", count, value, right, argument.Span.StartByte, argument.Span.EndByte)
+					right = count
+				}
+			} else if len(node.Children) > 1 {
 				right = emit(node.Children[1])
 			}
 			count++
-			kind := map[syntax.Kind]int{syntax.KindLiteral: 1, syntax.KindPath: 2, syntax.KindGroup: 3, syntax.KindPrefix: 4, syntax.KindBinary: 5}[node.Kind]
+			kind := map[syntax.Kind]int{syntax.KindLiteral: 1, syntax.KindPath: 2, syntax.KindGroup: 3, syntax.KindPrefix: 4, syntax.KindBinary: 5, syntax.KindCall: 6}[node.Kind]
 			if kind == 0 {
 				t.Fatalf("unsupported oracle node %s", node.Kind)
 			}
 			fmt.Fprintf(&program, "{ let syntax::Expression node = syntax::expression_at(ref parsed, %d); assert(node.kind == %d && node.start == %d && node.end == %d && node.left == %d && node.right == %d); }\n", count, kind, node.Span.StartByte, node.Span.EndByte, left, right)
-			if node.Kind != syntax.KindGroup {
-				fmt.Fprintf(&program, "{ let ref u8[] text = syntax::expression_text(ref parsed, %d); assert(text.len == %d);", count, len(node.Text))
-				for offset, value := range []byte(node.Text) {
+			if node.Kind == syntax.KindCall {
+				fmt.Fprintf(&program, "assert(syntax::call_argument_count(ref parsed, %d) == %d);\n", count, len(arguments))
+				for index, argument := range arguments {
+					fmt.Fprintf(&program, "assert(syntax::call_argument(ref parsed, %d, %d) == %d);\n", count, index, argument)
+				}
+			} else if node.Kind != syntax.KindGroup {
+				text := node.Text
+				if node.Kind == syntax.KindPath {
+					text = input[node.Span.StartByte:node.Span.EndByte]
+				}
+				fmt.Fprintf(&program, "{ let ref u8[] text = syntax::expression_text(ref parsed, %d); assert(text.len == %d);", count, len(text))
+				for offset, value := range []byte(text) {
 					fmt.Fprintf(&program, " assert(text[%d] == %d);", offset, value)
 				}
 				program.WriteString(" }\n")
@@ -135,6 +154,26 @@ fn i32 tree(syntax::Parsed parsed) {
 	cases[5].offset = strings.Index(cases[5].input, "{")
 	cases[6].offset = strings.Index(cases[6].input, "fn void nested")
 	cases[7].offset = strings.Index(cases[7].input, "import")
+	for _, expr := range []string{"f(,)", "f(a,,b)", "f(a", "a::", "true::x"} {
+		input := "module main; fn i32 bad() { return " + expr + "; } fn void kept() {}"
+		offset := strings.Index(input, "return ") + len("return ")
+		switch expr {
+		case "f(,)":
+			offset += 2
+		case "f(a,,b)":
+			offset += 4
+		case "f(a":
+			offset += 3
+		case "a::":
+			offset += 3
+		case "true::x":
+			offset += 4
+		}
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, 2, 1, offset, 0})
+	}
 	for _, body := range []string{"let i32 x = ;", "var x = 1; return +;"} {
 		input := "module main; fn i32 bad(i32 a) { " + body + " } fn void kept() {}"
 		cases = append(cases, struct {
