@@ -244,6 +244,14 @@ depth before resuming at a following import/function; nested functions cannot
 escape a malformed enclosing body. Original trivia and rejected source remain
 available through the retained Stream rather than being reconstructed from nodes.
 
+Problems additionally retain `expected` and the actual source `token` index.
+`problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
+renders the private expectation code: 0 supported syntax, 1 identifier, 2 scalar
+type, 3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
+12 `module`. Code 0 deliberately remains general for unsupported constructs;
+these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
+Expectations reset before each source item so recovery cannot leak an old hint.
+
 Allocation failure returns 3; item or 32-problem exhaustion returns 4; lexical
 diagnostics return 5. These failures consume the input and publish no Parsed value.
 Callers that need lexical diagnostics must inspect the Stream before passing it
