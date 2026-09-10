@@ -224,3 +224,8 @@ The opt-in `fairyc_go_measure_lexer_stream` lane records five native driver
 roundtrips after one warmup for each scenario/profile; ordinary tests skip it.
 See [the measured baseline](cost-baseline-2026-09-10.md) for raw samples, exact
 build identities, included overhead and the limits on interpretation.
+
+The separate [SDK heap observation](heap-baseline-2026-09-10.md) counts actual
+allocator requests, peak simultaneously live requested bytes, retained capacity
+and balanced destruction, including three injected failures. Its instrumented
+builds are not latency benchmarks or RSS measurements.
