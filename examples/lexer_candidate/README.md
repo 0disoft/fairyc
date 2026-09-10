@@ -189,3 +189,12 @@ rescan limit work; no recursive descent into arbitrary nested bodies is performe
 Native tests compare admitted function/import spans with the Go AST and exercise
 missing headers/delimiters, declaration recovery, import order, nested malformed
 bodies and item/diagnostic/lexical failure boundaries under both profiles.
+
+## Cost baseline
+
+`scanner::storage` reports source, separately owned cooked and diagnostic-token
+bytes plus record counts. It does not report allocator capacity or peak heap/RSS.
+The opt-in `fairyc_go_measure_lexer_stream` lane records five native driver
+roundtrips after one warmup for each scenario/profile; ordinary tests skip it.
+See [the measured baseline](cost-baseline-2026-09-10.md) for raw samples, exact
+build identities, included overhead and the limits on interpretation.

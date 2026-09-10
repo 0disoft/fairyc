@@ -55,6 +55,8 @@ fn Result<scanner::Stream, i32> make(ref u8[] input, usize limit) {
     return scanner::collect(owned, false, 16384, limit, 256, 16777216);
 }
 fn i32 check(scanner::Stream stream) {
+    let scanner::Storage storage = scanner::storage(ref stream);
+    assert(storage.source_bytes == 7 && storage.cooked_bytes == 2 && storage.diagnostic_bytes == 0);
     assert(scanner::token_count(ref stream) == 4 && scanner::diagnostic_count(ref stream) == 0);
     let scanner::TokenInfo first = scanner::token_info(ref stream, 0);
     assert(first.kind == 4 && first.start == 0 && first.end == 4);

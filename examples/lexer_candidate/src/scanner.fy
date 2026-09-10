@@ -362,3 +362,20 @@ pub fn diagnostics::Info diagnostic_info(ref Stream stream, usize index) {
 pub fn ref u8[] diagnostic_token(ref Stream stream, usize index) {
     return diagnostics::token_view(v::at<diagnostics::Entry>(ref stream.errors, index));
 }
+
+// Live logical payload sizes, not allocator capacity, heap/RSS or peak memory.
+pub struct Storage { usize source_bytes; usize cooked_bytes; usize diagnostic_bytes; usize tokens; usize diagnostics; }
+pub fn Storage storage(ref Stream stream) {
+    var usize cooked = 0; var usize diagnostic = 0; var usize index = 0;
+    while (index < v::len<Token>(ref stream.tokens)) {
+        let ref Token token = v::at<Token>(ref stream.tokens, index);
+        cooked += bytes::view(ref token.cooked).len; index += 1;
+    }
+    index = 0;
+    while (index < v::len<diagnostics::Entry>(ref stream.errors)) {
+        diagnostic += diagnostics::token_view(v::at<diagnostics::Entry>(ref stream.errors, index)).len;
+        index += 1;
+    }
+    return Storage { .source_bytes = bytes::view(ref stream.source).len, .cooked_bytes = cooked,
+        .diagnostic_bytes = diagnostic, .tokens = v::len<Token>(ref stream.tokens), .diagnostics = v::len<diagnostics::Entry>(ref stream.errors) };
+}
