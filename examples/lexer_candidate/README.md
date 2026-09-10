@@ -155,14 +155,19 @@ records in this API transport use recognition order.
 
 Paging repeats collection per request; it is bounded comparison transport, not a
 streaming lexer or a throughput optimization. The source remains owned in full.
-The initial run compared all eight source files and four boundary witnesses across
-148 pages. This is self-lexing evidence, not parser conformance or bootstrap
-promotion. Hosted verification of this API and page transport remains pending.
+The initial run compared eight source files across 148 pages; the expanded local
+corpus now compares nine source files and four boundary witnesses across 196 pages.
+This is self-lexing evidence, not full parser conformance or bootstrap promotion.
+The original Stream API/page transport and first parser passed hosted Linux and
+Windows verification at `ecf428a3` in [Frontend run 34441267986](https://github.com/0disoft/fairyc/actions/runs/34441267986).
+That historical receipt does not cover later changes; delivery requires successful
+CI for the exact pushed commit.
 
-## First declaration parser
+## Bounded syntax parser
 
 `syntax::parse` consumes a Stream and an item limit no greater than 512. It returns
-an owned `Parsed` declaration index, retaining the entire original Stream. This
+an owned `Parsed` containing declarations, expressions, binding entries and
+statement trees, retaining the entire original Stream. This
 candidate recognizes `module path;`, `import path as alias;`, and functions with
 scalar parameters and `void` or scalar return types using ordinary Fairy spelling
 (`fn i32 f(i32 x) { return x; }`). Scalar type spellings are `i32`, `usize`, `u8`,
@@ -172,8 +177,8 @@ and `return` with an optional expression. Statement-only nested blocks, expressi
 statements, ordinary and compound assignments, and `if (...) { ... } else if (...)
 { ... } else { ... }` are admitted. Loops, tail-valued blocks and other statements
 remain outside this subset.
-It does not validate types, module-to-file mapping, imports, return obligations,
-the complete Stage 0 grammar, and does not produce executable MIR.
+It does not resolve names or imports, validate types, module-to-file mapping or
+return obligations, admit the complete Stage 0 grammar, or produce executable MIR.
 
 Expressions admit integers, `true`/`false`, qualified identifier paths, calls,
 nested parentheses, prefix
@@ -236,14 +241,19 @@ Allocation failure returns 3; item or 32-problem exhaustion returns 4; lexical
 diagnostics return 5. These failures consume the input and publish no Parsed value.
 Callers that need lexical diagnostics must inspect the Stream before passing it
 to the parser. A successful Result can contain syntax problems: clients must check
-`problem_count`, and must not treat this partial declaration index as a compiler
+`problem_count`, and must not treat this partial syntax tree as a compiler
 acceptance decision. `declaration_at`, `problem_at` and `source_view` are read-only.
 The scanner's source/work bounds plus monotone parsing and one bounded recovery
 rescan limit work; expression recursion is bounded separately as above.
 
-Native tests compare admitted function/import spans with the Go AST and exercise
-missing headers/delimiters, declaration recovery, import order, nested malformed
-bodies and item/diagnostic/lexical failure boundaries under both profiles.
+Native tests compare function/import spans, expression/call structure, ordered
+parameters and bindings, nested blocks, conditional branches and assignment
+operands with normalized Go ASTs. They also exercise missing headers/delimiters,
+declaration recovery, import order, nested malformed bodies and byte, depth, node,
+entry, diagnostic and work boundaries. Large repetitive inputs are constructed
+at runtime without reducing their tested sizes. Focused Mustflow lanes separate
+parser checks, Stream/self-lexing, corpus/budget checks and heap accounting;
+hosted Go tests still discover all tests normally.
 
 ## Cost baseline
 
