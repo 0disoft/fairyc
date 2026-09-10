@@ -106,6 +106,19 @@ fn usize expression(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v
     var bool comparison = false;
     while (left != 0) {
         let usize opener = cursor.index;
+        if (take(stream, cursor, b".")) {
+            let usize member = cursor.index;
+            if (current(stream, cursor).kind != 3) { return 0; }
+            advance(stream, cursor);
+            left = append(nodes, cursor, Expression { .kind = 8, .start = token.start, .end = cursor.previous_end, .token = member, .left = left, .right = 0 });
+            continue;
+        }
+        if (take(stream, cursor, b"[")) {
+            let usize index = expression(stream, cursor, nodes, 1, depth + 1);
+            if (index == 0 || !take(stream, cursor, b"]")) { return 0; }
+            left = append(nodes, cursor, Expression { .kind = 9, .start = token.start, .end = cursor.previous_end, .token = opener, .left = left, .right = index });
+            continue;
+        }
         if (take(stream, cursor, b"(")) {
             var usize arguments = 0;
             while (!word(stream, cursor.index, b")")) {

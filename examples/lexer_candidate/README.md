@@ -188,7 +188,10 @@ logical-or. Casts, reference prefixes and other literals
 remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
 binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
-5 binary, 6 call and 7 argument link. One-based child IDs (zero absent), half-open source-byte spans and
+5 binary, 6 call, 7 argument link, 8 field and 9 index. Field/index receivers are
+in `left`; index expressions are in `right`. Field text is the exact member token.
+Calls, fields and single indices form repeatable postfix chains. Range slicing is
+not admitted. One-based child IDs (zero absent), half-open source-byte spans and
 source token spelling preserve structure without evaluating or resolving names.
 Declaration `expression` is the last top-level return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
