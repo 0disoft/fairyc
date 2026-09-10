@@ -48,7 +48,7 @@ fn i32 inspect(syntax::Parsed parsed, usize declarations, usize problems, usize 
     assert(syntax::declaration_count(ref parsed) == declarations);
     assert(syntax::problem_count(ref parsed) == problems);
     let ref u8[] source = syntax::source_view(ref parsed);
-    if (problems > 0) { assert(syntax::problem_at(ref parsed, 0).start == offset); assert(syntax::expression_count(ref parsed) == 0); }
+    if (problems > 0) { assert(syntax::problem_at(ref parsed, 0).start == offset); assert(syntax::expression_count(ref parsed) == 0); assert(syntax::entry_count(ref parsed) == 0); }
     var usize index = 0; var usize end = 0;
     while (index < declarations) {
         let syntax::Declaration value = syntax::declaration_at(ref parsed, index);
@@ -108,7 +108,9 @@ fn i32 tree(syntax::Parsed parsed) {
 		rootID := emit(result.AST.Functions[0].Body.Statements[0].Expression)
 		fmt.Fprintf(&program, "assert(syntax::expression_count(ref parsed) == %d && syntax::declaration_at(ref parsed, 1).expression == %d); return 0; }\n", count, rootID)
 	}
+	entryInput := emitParserEntryOracle(t, &program)
 	program.WriteString("fn i32 main() {\n")
+	fmt.Fprintf(&program, "assert(switch (make(b%s, 512)) { case .ok(parsed): { entry_tree(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(entryInput))
 	for index, expr := range expressions {
 		input := "module main; fn i32 f() { return " + expr + "; }"
 		fmt.Fprintf(&program, "assert(switch (make(b%s, 512)) { case .ok(parsed): { expression_%d(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input), index)
@@ -133,6 +135,24 @@ fn i32 tree(syntax::Parsed parsed) {
 	cases[5].offset = strings.Index(cases[5].input, "{")
 	cases[6].offset = strings.Index(cases[6].input, "fn void nested")
 	cases[7].offset = strings.Index(cases[7].input, "import")
+	for _, body := range []string{"let i32 x = ;", "var x = 1; return +;"} {
+		input := "module main; fn i32 bad(i32 a) { " + body + " } fn void kept() {}"
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, 2, 1, strings.LastIndex(input, ";"), 0})
+	}
+	for _, count := range []int{1024, 1025} {
+		input := "module main; fn void f() { " + strings.Repeat("return;", count) + " }"
+		decls, status := 2, 0
+		if count == 1025 {
+			decls, status = 0, 4
+		}
+		cases = append(cases, struct {
+			input                                         string
+			limit, declarations, problems, offset, status int
+		}{input, 512, decls, 0, 0, status})
+	}
 	for _, expr := range []string{"a < b < c", "a + ;", "()", "(a", "a b"} {
 		input := "module main; fn i32 bad() { return " + expr + "; } fn void kept() {}"
 		// Exact fault locations are checked separately from the Go AST oracle,

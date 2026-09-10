@@ -163,9 +163,13 @@ promotion. Hosted verification of this API and page transport remains pending.
 
 `syntax::parse` consumes a Stream and an item limit no greater than 512. It returns
 an owned `Parsed` declaration index, retaining the entire original Stream. This
-candidate recognizes `module path;`, `import path as alias;`, and argument-free
-functions with `void` or `i32` return types using ordinary Fairy spelling
-(`fn void f() {}`). Bodies may be empty or contain one `return expression;` statement.
+candidate recognizes `module path;`, `import path as alias;`, and functions with
+scalar parameters and `void` or scalar return types using ordinary Fairy spelling
+(`fn i32 f(i32 x) { return x; }`). Scalar type spellings are `i32`, `usize`, `u8`,
+`u32` and `bool`. Parameter lists allow a trailing comma. Bodies admit empty blocks,
+`let`/`var` bindings with optional scalar annotations and required initializers,
+and `return` with an optional expression. Nested blocks and other statements remain
+outside this subset.
 It does not validate types, module-to-file mapping, imports, return obligations,
 the complete Stage 0 grammar, and does not produce executable MIR.
 
@@ -177,10 +181,19 @@ binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 integer, 2 name, 3 group, 4 prefix and
 5 binary. One-based child IDs (zero absent), half-open source-byte spans and
 source token spelling preserve structure without evaluating or resolving names.
-Declaration `expression` is the return root, or zero for an empty body.
+Declaration `expression` is the last return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
 Failed declarations roll back their nodes before recovery. A shared 4096-node
 ceiling and 64-active-expression-call limit return status 4 without a result.
+
+`entry_at` and `entry_count` expose source-ordered parameters and statements,
+bounded to 1024 entries across the entire parse. Declaration `entry_start` and
+`entry_count` select a zero-based range. Entry kinds are 1 parameter, 2 let,
+3 var and 4 return; each preserves complete, name and optional type byte spans
+plus its expression root. Zero name/type spans mean unwritten, not synthesized.
+Errors roll back entries and expression nodes together. Duplicate names, type
+compatibility, unreachable returns and binding resolution are semantic concerns
+and are not checked here.
 
 Declarations preserve source order, complete spans and name/alias spans. Problems
 retain exact source-byte spans and private category codes (1 module, 2 import,
