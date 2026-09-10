@@ -43,13 +43,26 @@ jobs:
         env:
           CGO_ENABLED: "1"
         run: go test -race -mod=readonly -count=1 ./internal/contractstate
+
+  windows-native:
+    name: Windows native target smoke
+    runs-on: windows-latest
+    # Keep native proof independent of the full Go suite's timeout budget.
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version-file: go.mod
+          cache: false
       - name: Run Windows native target smoke
-        if: runner.os == 'Windows'
         run: go run -mod=readonly ./cmd/fairyc-windows-host-smoke
 
   native-c:
     name: C differential (Linux)
-    needs: validate
+    needs: [validate, windows-native]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
