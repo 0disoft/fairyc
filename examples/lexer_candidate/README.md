@@ -158,3 +158,34 @@ streaming lexer or a throughput optimization. The source remains owned in full.
 The initial run compared all eight source files and four boundary witnesses across
 148 pages. This is self-lexing evidence, not parser conformance or bootstrap
 promotion. Hosted verification of this API and page transport remains pending.
+
+## First declaration parser
+
+`syntax::parse` consumes a Stream and an item limit no greater than 512. It returns
+an owned `Parsed` declaration index, retaining the entire original Stream. This
+candidate recognizes `module path;`, `import path as alias;`, and argument-free
+functions with `void` or `i32` return types using ordinary Fairy spelling
+(`fn void f() {}`). Bodies may be empty or contain one `return INTEGER;` statement.
+It does not validate types, module-to-file mapping, imports, return obligations,
+expressions or the complete Stage 0 grammar, and does not produce executable MIR.
+
+Declarations preserve source order, complete spans and name/alias spans. Problems
+retain exact source-byte spans and private category codes (1 module, 2 import,
+3 function, 4 unsupported source item). A failed declaration never becomes an
+ordinary declaration node. Recovery rescans its bounded token range with brace
+depth before resuming at a following import/function; nested functions cannot
+escape a malformed enclosing body. Original trivia and rejected source remain
+available through the retained Stream rather than being reconstructed from nodes.
+
+Allocation failure returns 3; item or 32-problem exhaustion returns 4; lexical
+diagnostics return 5. These failures consume the input and publish no Parsed value.
+Callers that need lexical diagnostics must inspect the Stream before passing it
+to the parser. A successful Result can contain syntax problems: clients must check
+`problem_count`, and must not treat this partial declaration index as a compiler
+acceptance decision. `declaration_at`, `problem_at` and `source_view` are read-only.
+The scanner's source/work bounds plus monotone parsing and one bounded recovery
+rescan limit work; no recursive descent into arbitrary nested bodies is performed.
+
+Native tests compare admitted function/import spans with the Go AST and exercise
+missing headers/delimiters, declaration recovery, import order, nested malformed
+bodies and item/diagnostic/lexical failure boundaries under both profiles.
