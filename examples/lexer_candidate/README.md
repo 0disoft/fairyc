@@ -258,3 +258,8 @@ The separate [SDK heap observation](heap-baseline-2026-09-10.md) counts actual
 allocator requests, peak simultaneously live requested bytes, retained capacity
 and balanced destruction, including three injected failures. Its instrumented
 builds are not latency benchmarks or RSS measurements.
+
+The [sparse cooked-storage comparison](sparse-storage-2026-09-10.md) preserves the
+old baseline and records a 41.06% reduction in peak requested heap bytes for the
+same token-heavy input, with a small allocation-count increase. The private token
+layout changed; the Stream consumer API and logical payload metrics did not.

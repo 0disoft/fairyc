@@ -9,20 +9,20 @@ import strings as strings;
 import budget as budget;
 
 // Private numeric observations mirror internal/lexer/token.go, not a stable ABI.
-resource Token {
+struct Token {
     u32 kind; u32 trivia; usize start; usize end;
-    bytes::Buffer cooked;
-    cleanup { }
+    usize cooked_index;
 }
-
+// Only tokens with nonempty cooked bytes own a Buffer descriptor in this table.
+// Index zero means an empty cooked view; all other indices are one-based.
 fn bool emit(ref mut v::Vec<Token> tokens, bool admitted, u32 kind, u32 trivia, usize start, usize end) {
     if (!admitted) { return append(tokens, 0, 0, start, end); }
     return append(tokens, kind, trivia, start, end);
 }
 
-fn bool emit_cooked(ref mut v::Vec<Token> tokens, bool admitted, u32 kind, usize start, usize end, bytes::Buffer cooked) {
+fn bool emit_cooked(ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, bool admitted, u32 kind, usize start, usize end, bytes::Buffer cooked) {
     if (!admitted) { return append(tokens, 0, 0, start, end); }
-    return append_cooked(tokens, kind, 0, start, end, cooked);
+    return append_cooked(tokens, cooked_values, kind, 0, start, end, cooked);
 }
 
 fn i32 exhausted(ref u8[] input, usize position, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors) {
@@ -41,11 +41,15 @@ fn i32 work_exhausted(ref u8[] input, usize start, usize position, ref mut v::Ve
 }
 
 fn bool append(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end) {
-    return append_cooked(tokens, kind, trivia, start, end, bytes::empty());
+    let Token value = Token { .kind = kind, .trivia = trivia, .start = start, .end = end, .cooked_index = 0 };
+    return switch (v::push<Token>(tokens, value)) { case .ok(_): { true } case .err(_): { false } };
 }
 
-fn bool append_cooked(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end, bytes::Buffer cooked) {
-    let Token value = Token { .kind = kind, .trivia = trivia, .start = start, .end = end, .cooked = cooked };
+fn bool append_cooked(ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, u32 kind, u32 trivia, usize start, usize end, bytes::Buffer cooked) {
+    if (bytes::len(ref cooked) == 0) { return append(tokens, kind, trivia, start, end); }
+    let usize cooked_index = switch (v::push<bytes::Buffer>(cooked_values, cooked)) { case .ok(length): { length } case .err(_): { 0 } };
+    if (cooked_index == 0) { return false; }
+    let Token value = Token { .kind = kind, .trivia = trivia, .start = start, .end = end, .cooked_index = cooked_index };
     return switch (v::push<Token>(tokens, value)) {
         case .ok(_) : { true }
         case .err(_) : { false }
@@ -99,7 +103,7 @@ fn usize symbol_width(ref u8[] input, usize start) {
 
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
-fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
+fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
     if (input.len > 32768) { return 4; }
     if (input.len > max_bytes) { return exhausted(input, 0, tokens, errors); }
     var usize token_count = 0;
@@ -188,7 +192,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             let usize cooked_limit = 65536;
             if (length > cooked_limit - cooked_bytes) { return 4; }
             cooked_bytes += length;
-            if (!emit_cooked(tokens, !token_exhausted, kind, start, position, cooked)) { return 3; }
+            if (!emit_cooked(tokens, cooked_values, !token_exhausted, kind, start, position, cooked)) { return 3; }
             continue;
         } else if (letter(current)) {
             position += 1;
@@ -210,7 +214,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnos
             let usize cooked_limit = 65536;
             if (length > cooked_limit - cooked_bytes) { return 4; }
             cooked_bytes += length;
-            if (!emit_cooked(tokens, !token_exhausted, kind, start, position, cooked)) { return 3; }
+            if (!emit_cooked(tokens, cooked_values, !token_exhausted, kind, start, position, cooked)) { return 3; }
             if (status == 1 && !token_exhausted) {
                 let i32 added = diagnostics::add_limited(errors, diagnostic_count, max_diagnostics, 4, start, position, false, b"");
                 if (added == 5) { return exhausted(input, position, tokens, errors); }
@@ -281,8 +285,9 @@ pub fn i32 report_budget(ref u8[] input, bool previous, usize max_bytes, usize m
 @effects(console)
 pub fn i32 report_work(ref u8[] input, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
     var v::Vec<Token> tokens = v::empty<Token>();
+    var v::Vec<bytes::Buffer> cooked_values = v::empty<bytes::Buffer>();
     var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
-    let i32 status = scan(input, ref mut tokens, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work);
+    let i32 status = scan(input, ref mut tokens, ref mut cooked_values, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work);
     if (status != 0) { return status; }
     var usize index = 0;
     var usize position = 0;
@@ -293,7 +298,7 @@ pub fn i32 report_work(ref u8[] input, bool previous, usize max_bytes, usize max
         number(token.start); number(token.end);
         let usize width = token.end - token.start;
         let bool cooked = token.kind == 4 && ((width == 4 && (matches(input, token.start, b"true") || matches(input, token.start, b"null"))) || (width == 5 && matches(input, token.start, b"false")));
-        let ref u8[] numeric = bytes::view(ref token.cooked);
+        let ref u8[] numeric = if (token.cooked_index == 0) { input[0..0] } else { bytes::view(v::at<bytes::Buffer>(ref cooked_values, token.cooked_index - 1)) };
         number(if (cooked) { width } else { numeric.len });
         if (cooked) {
             var usize byte_index = token.start;
@@ -313,6 +318,7 @@ pub fn i32 report_work(ref u8[] input, bool previous, usize max_bytes, usize max
 pub resource Stream {
     bytes::Buffer source;
     v::Vec<Token> tokens;
+    v::Vec<bytes::Buffer> cooked;
     v::Vec<diagnostics::Entry> errors;
     cleanup { }
 }
@@ -323,10 +329,11 @@ pub struct TokenInfo { u32 kind; u32 trivia; usize start; usize end; }
 // successful lossless stream with E0010, not an allocation/storage failure.
 pub fn Result<Stream, i32> collect(bytes::Buffer input, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
     var v::Vec<Token> tokens = v::empty<Token>();
+    var v::Vec<bytes::Buffer> cooked_values = v::empty<bytes::Buffer>();
     var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
-    let i32 status = scan(bytes::view(ref input), ref mut tokens, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work);
+    let i32 status = scan(bytes::view(ref input), ref mut tokens, ref mut cooked_values, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work);
     if (status != 0) { return .err(status); }
-    return .ok(Stream { .source = input, .tokens = tokens, .errors = errors });
+    return .ok(Stream { .source = input, .tokens = tokens, .cooked = cooked_values, .errors = errors });
 }
 
 pub fn usize token_count(ref Stream stream) { return v::len<Token>(ref stream.tokens); }
@@ -352,7 +359,8 @@ pub fn ref u8[] token_cooked(ref Stream stream, usize index) {
     if (token.kind == 4 && ((width == 4 && (matches(input, token.start, b"true") || matches(input, token.start, b"null"))) || (width == 5 && matches(input, token.start, b"false")))) {
         return input[token.start..token.end];
     }
-    return bytes::view(ref token.cooked);
+    if (token.cooked_index == 0) { return input[0..0]; }
+    return bytes::view(v::at<bytes::Buffer>(ref stream.cooked, token.cooked_index - 1));
 }
 
 // Diagnostics are in recognition order; the legacy reporter sorts for display.
@@ -367,9 +375,8 @@ pub fn ref u8[] diagnostic_token(ref Stream stream, usize index) {
 pub struct Storage { usize source_bytes; usize cooked_bytes; usize diagnostic_bytes; usize tokens; usize diagnostics; }
 pub fn Storage storage(ref Stream stream) {
     var usize cooked = 0; var usize diagnostic = 0; var usize index = 0;
-    while (index < v::len<Token>(ref stream.tokens)) {
-        let ref Token token = v::at<Token>(ref stream.tokens, index);
-        cooked += bytes::view(ref token.cooked).len; index += 1;
+    while (index < v::len<bytes::Buffer>(ref stream.cooked)) {
+        cooked += bytes::view(v::at<bytes::Buffer>(ref stream.cooked, index)).len; index += 1;
     }
     index = 0;
     while (index < v::len<diagnostics::Entry>(ref stream.errors)) {

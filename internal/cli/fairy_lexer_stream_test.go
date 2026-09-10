@@ -25,6 +25,8 @@ func TestWindowsFairyLexerStreamBorrowBoundaries(t *testing.T) {
 		{"local escape", "E2102", "fn ref u8[] bad(scanner::Stream stream) { return scanner::source_view(ref stream); }"},
 		{"use after release", "E1101", "fn void bad(scanner::Stream stream) { scanner::release(stream); let usize count = scanner::token_count(ref stream); assert(count == 0); }"},
 		{"release while borrowed", "E2105", "fn void bad(scanner::Stream stream) { let ref u8[] view = scanner::source_view(ref stream); scanner::release(stream); assert(view.len == 0); }"},
+		{"cooked escape", "E2102", "fn ref u8[] bad(scanner::Stream stream) { return scanner::token_cooked(ref stream, 0); }"},
+		{"release while cooked borrowed", "E2105", "fn void bad(scanner::Stream stream) { let ref u8[] view = scanner::token_cooked(ref stream, 0); scanner::release(stream); assert(view.len == 0); }"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			root := t.TempDir()

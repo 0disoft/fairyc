@@ -32,6 +32,10 @@ func TestWindowsFairyLexerStreamHeap(t *testing.T) {
 		{"token-heavy-16k", heavy, 0}, {"literal-10k", `"` + strings.Repeat("a", 10000) + `"`, 0},
 		{"diagnostic", "/* unfinished", 0},
 		{"fail-source", "true 42", 1}, {"fail-token-vector", "true 42", 2}, {"fail-cooked", "true 42", 3},
+		{"fail-cooked-build", "true 42", 4}, {"fail-cooked-table", "true 42", 5},
+		{"fail-token-growth", "module main; fn i32 f() { return 42; }", 3},
+		{"fail-small-6", "module main; fn i32 f() { return 42; }", 6},
+		{"fail-small-7", "module main; fn i32 f() { return 42; }", 7},
 	}
 	for _, scenario := range scenarios {
 		root := t.TempDir()
@@ -98,6 +102,15 @@ fn i32 main() { let i32 status = exercise(); return unsafe { finish(status) }; }
 			}
 			if scenario.fail == 0 && (row.Failures != 0 || row.PeakBytes == 0 || row.RetainedBytes == 0) {
 				t.Fatalf("empty observation: %+v", row)
+			}
+			// Same-request baselines from heap-baseline-2026-09-10.md. Keep the
+			// memory win explicit without presenting this instrumented build as fast.
+			baselinePeak := map[string]uint64{"empty": 448, "small": 2726, "token-heavy-16k": 1396488, "literal-10k": 75538, "diagnostic": 975}
+			if peak, ok := baselinePeak[scenario.name]; ok && row.PeakBytes > peak {
+				t.Fatalf("peak regression %s: %+v", scenario.name, row)
+			}
+			if scenario.name == "token-heavy-16k" && (row.PeakBytes > 1396488*3/4 || row.RetainedBytes > 938688*3/4 || row.Allocations > 1213*102/100) {
+				t.Fatalf("sparse token storage budget: %+v", row)
 			}
 			record := map[string]any{"schema": "fairyc.lexer-heap-observation/v1", "scenario": scenario.name, "profile": profile.Name, "input_bytes": len(scenario.input), "cycles": 1, "counts": row, "go": runtime.Version(), "msvc": artifact.Toolchain.Version, "os": runtime.GOOS, "arch": runtime.GOARCH, "generated_c_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(unit.Source))), "support_c_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(support)))}
 			encoded, _ := json.Marshal(record)
