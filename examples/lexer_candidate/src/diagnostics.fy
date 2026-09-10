@@ -8,6 +8,12 @@ pub resource Entry {
     cleanup { }
 }
 
+pub struct Info { u32 code; usize start; usize end; bool exit_repair; }
+pub fn Info info(ref Entry entry) {
+    return Info { .code = entry.code, .start = entry.start, .end = entry.end, .exit_repair = entry.exit_repair };
+}
+pub fn ref u8[] token_view(ref Entry entry) { return bytes::view(ref entry.token); }
+
 // Status 5 is reference-budget exhaustion, distinct from allocation/storage failure.
 pub fn i32 add_limited(ref mut v::Vec<Entry> entries, usize count, usize limit, u32 code, usize start, usize end, bool exit_repair, ref u8[] token) {
     if (count >= limit) { return 5; }

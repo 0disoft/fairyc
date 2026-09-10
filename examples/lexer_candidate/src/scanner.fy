@@ -308,3 +308,57 @@ pub fn i32 report_work(ref u8[] input, bool previous, usize max_bytes, usize max
     diagnostics::report(ref errors);
     return 0;
 }
+
+// Experimental owned recognition result; no console capability is required.
+pub resource Stream {
+    bytes::Buffer source;
+    v::Vec<Token> tokens;
+    v::Vec<diagnostics::Entry> errors;
+    cleanup { }
+}
+
+pub struct TokenInfo { u32 kind; u32 trivia; usize start; usize end; }
+
+// Input is consumed on success and failure. Reference-budget exhaustion is a
+// successful lossless stream with E0010, not an allocation/storage failure.
+pub fn Result<Stream, i32> collect(bytes::Buffer input, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
+    var v::Vec<Token> tokens = v::empty<Token>();
+    var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
+    let i32 status = scan(bytes::view(ref input), ref mut tokens, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work);
+    if (status != 0) { return .err(status); }
+    return .ok(Stream { .source = input, .tokens = tokens, .errors = errors });
+}
+
+pub fn usize token_count(ref Stream stream) { return v::len<Token>(ref stream.tokens); }
+pub fn void release(Stream stream) { }
+pub fn usize diagnostic_count(ref Stream stream) { return v::len<diagnostics::Entry>(ref stream.errors); }
+pub fn ref u8[] source_view(ref Stream stream) { return bytes::view(ref stream.source); }
+
+pub fn TokenInfo token_info(ref Stream stream, usize index) {
+    let ref Token token = v::at<Token>(ref stream.tokens, index);
+    return TokenInfo { .kind = token.kind, .trivia = token.trivia, .start = token.start, .end = token.end };
+}
+
+pub fn ref u8[] token_raw(ref Stream stream, usize index) {
+    let ref Token token = v::at<Token>(ref stream.tokens, index);
+    let ref u8[] input = bytes::view(ref stream.source);
+    return input[token.start..token.end];
+}
+
+pub fn ref u8[] token_cooked(ref Stream stream, usize index) {
+    let ref Token token = v::at<Token>(ref stream.tokens, index);
+    let ref u8[] input = bytes::view(ref stream.source);
+    let usize width = token.end - token.start;
+    if (token.kind == 4 && ((width == 4 && (matches(input, token.start, b"true") || matches(input, token.start, b"null"))) || (width == 5 && matches(input, token.start, b"false")))) {
+        return input[token.start..token.end];
+    }
+    return bytes::view(ref token.cooked);
+}
+
+// Diagnostics are in recognition order; the legacy reporter sorts for display.
+pub fn diagnostics::Info diagnostic_info(ref Stream stream, usize index) {
+    return diagnostics::info(v::at<diagnostics::Entry>(ref stream.errors, index));
+}
+pub fn ref u8[] diagnostic_token(ref Stream stream, usize index) {
+    return diagnostics::token_view(v::at<diagnostics::Entry>(ref stream.errors, index));
+}

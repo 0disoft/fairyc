@@ -4,6 +4,32 @@ This is the first Fairy-written recognition slice, built by the Go stage0
 compiler for Windows AMD64 MSVC. It is not a compiler replacement or stable CLI.
 `src/scanner.fy` recognizes original bytes directly; Go does not supply its tokens.
 
+## Owned consumer API
+
+`scanner::collect` consumes an input `bytes::Buffer` and the same explicit revision
+and byte/token/diagnostic/work limits as recognition. It returns
+`Result<scanner::Stream, i32>` without console output. Stream owns the original
+source, token storage, cooked bytes and diagnostics; input is consumed on both
+success and failure. Status 3/4 means allocation/storage failure and publishes no
+Stream. Reference-budget exhaustion instead returns a complete lossless Stream
+containing `E0010`.
+
+`scanner::release(stream)` explicitly consumes and destroys the result. Ordinary
+scope exit also destroys it; the API does not use `discard` as an early-release
+operation.
+
+`token_count`, `token_info`, `token_raw`, `token_cooked`, `source_view`,
+`diagnostic_count`, `diagnostic_info` and `diagnostic_token` provide read-only
+access. Metadata is copied; returned byte views borrow the Stream and cannot
+outlive it or coexist with its move/drop. Indexed access retains the vector bounds
+trap. Diagnostic access uses recognition order, while the legacy report sorts for
+display. Numeric kinds/codes and cooked encoding remain experimental implementation
+contracts, not a stable SDK or public ABI. Native consumers exercise transfer and
+budget exhaustion; compile-fail tests cover local escape and use after/drop during
+a live borrow.
+
+## Recognition and limits
+
 Current recognition: leading UTF-8 BOM, ASCII identifiers and exact current
 keywords, longest-match punctuation, horizontal whitespace/LF/CRLF, line and
 documentation comments, nested block comments, arbitrary-width 2/10/16-base
