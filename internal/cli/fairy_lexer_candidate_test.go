@@ -126,7 +126,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	program.WriteString(`{
     var bytes::Buffer oversized = bytes::empty();
     var usize index = 0;
-    while (index < 16385) {
+    while (index < 32769) {
         assert(switch (bytes::append_byte(ref mut oversized, 97)) { case .ok(_) : { true } case .err(_) : { false } });
         index += 1;
     }

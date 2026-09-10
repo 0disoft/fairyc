@@ -44,8 +44,8 @@ fn i32 main() {
         let Byte low = read_byte(); let Byte high = read_byte();
         if (!low.ok || !high.ok || low.count != 1 || high.count != 1) { return 8; }
         let usize length = (low.value as usize) + (high.value as usize) * 256;
-        if (length > 16384) { return 4; }
-        var usize max_bytes = 16384;
+        if (length > 32768) { return 4; }
+        var usize max_bytes = 32768;
         var usize max_tokens = 1048576;
         var usize max_diagnostics = 256;
         var usize max_work = 16777216;

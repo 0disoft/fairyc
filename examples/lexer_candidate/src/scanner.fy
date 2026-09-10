@@ -100,7 +100,7 @@ fn usize symbol_width(ref u8[] input, usize start) {
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
 fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
-    if (input.len > 16384) { return 4; }
+    if (input.len > 32768) { return 4; }
     if (input.len > max_bytes) { return exhausted(input, 0, tokens, errors); }
     var usize token_count = 0;
     var usize diagnostic_count = 0;
@@ -265,7 +265,7 @@ pub fn i32 report(ref u8[] input) {
 
 @effects(console)
 pub fn i32 report_mode(ref u8[] input, bool previous) {
-    return report_limits(input, previous, 16384, 1048576);
+    return report_limits(input, previous, 32768, 1048576);
 }
 
 @effects(console)

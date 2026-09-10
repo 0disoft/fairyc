@@ -58,7 +58,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 	var ends []int
 	var inputEnds []int
 	appendObservation := func(name string, input []byte, previous bool, limits source.Limits, custom bool) {
-		if len(input) > 16384 || len(names) >= 10240 {
+		if len(input) > 32768 || len(names) >= 10240 {
 			t.Fatalf("candidate corpus bound exceeded by %s", name)
 		}
 		mode := byte(0)
@@ -214,7 +214,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 		badFrames := []struct {
 			input []byte
 			exit  int32
-		}{{[]byte{4}, 8}, {[]byte{2}, 8}, {[]byte{0}, 8}, {[]byte{0, 1, 0}, 8}, {[]byte{0, 1, 64}, 4}, {[]byte{2, 1, 64}, 4}}
+		}{{[]byte{4}, 8}, {[]byte{2}, 8}, {[]byte{0}, 8}, {[]byte{0, 1, 0}, 8}, {[]byte{0, 1, 128}, 4}, {[]byte{2, 1, 128}, 4}}
 		for length := 0; length <= 16; length++ {
 			// Include every truncated budget-header length and a complete header without its body.
 			badFrames = append(badFrames, struct {

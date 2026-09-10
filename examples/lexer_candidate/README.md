@@ -52,7 +52,7 @@ diagnostic subset is `E0001`/`E0004`/`E0005`/`E0006`/`E0010`, including comment 
 `exit` repairs and expected closing tokens. The separate diagnostic store uses
 stable source/code/repair/token ordering and preserves duplicate records.
 
-Input is bounded to 16384 bytes, each materialized decimal expansion to 16384 bytes
+Input is bounded to 32768 bytes, each materialized decimal expansion to 16384 bytes
 and cumulative retained cooked data to 65536 bytes. Status 0 means a
 complete supported token/diagnostic stream (not syntactically valid code);
 2 means unsupported input, 3 allocation failure, and 4 candidate-limit exhaustion.
@@ -123,7 +123,7 @@ modes 2/3 add four unsigned 32-bit little-endian limits in byte, token, diagnost
 work order. Odd modes use the previous revision. Exact source bytes follow the
 header. EOF is valid only between frames. Invalid mode, truncated framing or more
 than 2048 frames exits 8; oversized source exits 4. The harness checks invalid
-mode, every truncated extended-header length, missing body and a 16385-byte length
+mode, every truncated extended-header length, missing body and a 32769-byte length
 at both profiles.
 
 The harness compiles once per profile through the ordinary workspace compiler,
@@ -131,6 +131,30 @@ then reuses that artifact for output-bounded batches of at most 2048 frames. Eac
 of expected output and retains the existing native driver's 64KB output limit and
 trap classification. Fixture coverage remains complete; the two project sources
 are a bounded workload sample, not all project files. A single observation that
-exceeds the output cap fails explicitly, so 16KB source admission does not promise
+exceeds the output cap fails explicitly, so 32KB source admission does not promise
 that every such source fits this private reporting transport. This is exact record
-comparison, not a token hash. Hosted CI for the large-input expansion is pending.
+comparison, not a token hash.
+
+## Own-source comparison without increasing process output limits
+
+`TestWindowsFairyLexerStreamSelfCorpus` reads every `.fy` file in this candidate's
+`src` directory, including the scanner and observation driver themselves. Input
+admission is 32KB so the scanner with its consumer API fits without slicing source
+files into lexically unrelated fragments. Boundary witnesses include 32767/32768
+byte identifiers, a long cooked string and an unterminated long comment.
+
+`pages::run` is a separate private one-request driver. Its input is a revision byte
+(0 current, 1 previous), source length and observation start as u32 little-endian
+words, then exact source bytes and EOF. It rejects truncated headers/bodies,
+trailing bytes, source lengths above 32768 and observation starts above 1048576.
+Each request collects a full Stream, then prints at most 4096 observation integers.
+The harness rejoins every page and compares all token metadata and cooked bytes
+with Go, under both revisions and native profiles. It keeps the existing 64KB
+process-output guard and compares exact values rather than hashes. Diagnostic
+records in this API transport use recognition order.
+
+Paging repeats collection per request; it is bounded comparison transport, not a
+streaming lexer or a throughput optimization. The source remains owned in full.
+The initial run compared all eight source files and four boundary witnesses across
+148 pages. This is self-lexing evidence, not parser conformance or bootstrap
+promotion. Hosted verification of this API and page transport remains pending.
