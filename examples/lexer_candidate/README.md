@@ -211,10 +211,10 @@ failed declarations roll back fields and types together. Duplicate-field legalit
 layout and ownership are not checked. Generic declarations, resource declarations,
 cleanup and record expressions remain unsupported.
 
-Expressions admit integers, `true`/`false`, qualified identifier paths, calls,
+Expressions admit integers, `true`/`false`, strings, byte strings, qualified identifier paths, calls,
 nested parentheses, prefix
 `+ - ! ~ *`, and the grammar's binary operators from multiplicative through
-logical-or. Casts, reference prefixes and other literals
+logical-or. Casts, reference prefixes, C strings and other literals
 remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
 binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
@@ -225,6 +225,12 @@ not admitted. One-based child IDs (zero absent), half-open source-byte spans and
 source token spelling preserve structure without evaluating or resolving names.
 Declaration `expression` is the last top-level return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
+The independent `expressions.fy` module owns Pratt parsing and node allocation;
+`syntax.fy` retains declaration rollback and the existing query facade.
+`literal_kind` exposes the source token kind. `literal_cooked` borrows the
+scanner's canonical cooked representation: string/byte-string values are lowercase
+hexadecimal bytes, not a newly decoded buffer. Raw spelling and byte spans remain
+unchanged. Lexical diagnostics still reject the entire parse with status 5.
 Path text is its exact source slice, including intervening trivia. Calls retain
 the callee in `left` and a reverse-linked argument tail in `right`; each argument
 link points to its expression in `left` and its predecessor in `right`.

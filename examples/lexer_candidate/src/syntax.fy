@@ -397,6 +397,14 @@ pub fn usize call_argument_count(ref Parsed parsed, usize call) {
     while (link != 0) { count += 1; link = expression_at(parsed, link).right; }
     return count;
 }
+pub fn u32 literal_kind(ref Parsed parsed, usize id) {
+    let Expression node = expression_at(parsed, id); assert(node.kind == 1);
+    return scanner::token_info(ref parsed.source, node.token).kind;
+}
+pub fn ref u8[] literal_cooked(ref Parsed parsed, usize id) {
+    let Expression node = expression_at(parsed, id); assert(node.kind == 1);
+    return scanner::token_cooked(ref parsed.source, node.token);
+}
 pub fn usize call_argument(ref Parsed parsed, usize call, usize index) {
     let usize count = call_argument_count(parsed, call); assert(index < count);
     var usize remaining = count - 1; var usize link = expression_at(parsed, call).right;

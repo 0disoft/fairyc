@@ -62,7 +62,7 @@ fn usize expression(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v
     let usize token_index = cursor.index;
     let scanner::TokenInfo token = current(stream, cursor);
     var usize left = 0;
-    if (token.kind == 5 || token.kind == 3 || word(stream, cursor.index, b"true") || word(stream, cursor.index, b"false")) {
+    if (token.kind == 5 || token.kind == 7 || token.kind == 8 || token.kind == 3 || word(stream, cursor.index, b"true") || word(stream, cursor.index, b"false")) {
         advance(stream, cursor);
         if (token.kind == 3) {
             while (take(stream, cursor, b"::")) {
