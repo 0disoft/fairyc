@@ -342,6 +342,9 @@ Assert retains its condition in `expression` and its full keyword-through-semico
 span. It requires parentheses and a semicolon, including in value blocks; it is
 not a call or tail expression. Condition type and runtime assertion behavior are
 outside this syntax layer. Its nodes share existing expression/statement budgets.
+Kind 12 is a `discard` statement with a required operand in `expression` and a
+full keyword-through-semicolon span. It is neither a return entry nor a value
+block tail. No must-use, ownership transfer or destruction behavior is inferred.
 While preserves its condition in `expression` and its body in `first`; break and
 continue have no children. Loop-context legality remains a semantic concern.
 Binding/return `entry` is a one-based
