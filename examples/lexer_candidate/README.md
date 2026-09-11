@@ -167,7 +167,7 @@ CI for the exact pushed commit.
 
 `syntax::parse` consumes a Stream and an item limit no greater than 512. It returns
 an owned `Parsed` containing declarations, expressions, binding entries,
-statement trees, written types and struct fields, retaining the entire original Stream. This
+statement trees, written types, struct fields and item attributes, retaining the entire original Stream. This
 candidate recognizes `module path;`, `import path as alias;`, and functions with
 optional `pub` visibility (retained in `public`, `public_start`, `public_end`;
 private declarations use false and zero spans). The modifier is not discarded
@@ -182,6 +182,18 @@ Classic `for` loops, tail-valued blocks and other statements
 remain outside this subset.
 It does not resolve names or imports, validate types, module-to-file mapping or
 return obligations, admit the complete Stage 0 grammar, or produce executable MIR.
+
+Ordinary functions and structs accept ordered attributes before optional `pub`.
+`attributes.fy` retains qualified names, source spans and ordered path, integer
+or string arguments (including empty argument lists and trailing commas).
+Declaration `attribute_start`/`attribute_count` selects the global attribute range.
+`attribute_at` exposes each attribute's name span and argument range;
+`attribute_argument_at` and `attribute_argument_text` expose argument kind
+(1 path, 2 integer, 3 string), span, token and original spelling.
+The parse shares limits of 256 attributes and 1024 arguments, checked before
+allocation; exhaustion returns 4 without a tree. Failed items roll both tables
+back, and recovery does not attach a rejected prefix to a later declaration.
+Attribute semantics, effect validation and permissions remain outside this parser.
 
 The private `types` module recognizes named/qualified types, `ref`, `ref mut`,
 grouping and unsized slices. It preserves `ref u8[]` versus `(ref u8)[]` without
@@ -291,7 +303,7 @@ Problems additionally retain `expected` and the actual source `token` index.
 `problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
 renders the private expectation code: 0 supported syntax, 1 identifier, 2 type,
 3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
-12 `module`, 13 `>`, 14 `.`. Code 0 deliberately remains general for unsupported constructs;
+12 `module`, 13 `>`, 14 `.`, 15 attribute argument. Code 0 deliberately remains general for unsupported constructs;
 these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
 Expectations reset before each source item so recovery cannot leak an old hint.
 
@@ -316,9 +328,9 @@ hosted Go tests still discover all tests normally.
 ## Own-source syntax coverage
 
 Own-source syntax coverage is recorded in
-[the declaration/type coverage report](parser-coverage-types-2026-09-10.md): all
-eleven files are exercised under both Windows profiles, and `utf8.fy` is now
-diagnostic-free. The earlier nine-file baseline is retained separately.
+[the syntax coverage report](parser-coverage-syntax-2026-09-11.md): all
+thirteen files are exercised under both Windows profiles, and `budget.fy` and
+`utf8.fy` are diagnostic-free. Earlier eleven- and nine-file baselines are retained.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
 This must not be confused with the lexer's complete source-token comparison.
 
