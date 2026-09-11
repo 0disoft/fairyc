@@ -114,6 +114,15 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
     var bool comparison = false;
     while (left != 0) {
         let usize opener = cursor.index;
+        if (cursor.expression_kind == 2 && word(stream,cursor.index,b"<") && types::call_ahead(stream,cursor.index)) {
+            let types::Attempt result = types::parse_arguments(stream,cursor.index,cursor.types,type_nodes);
+            cursor.index = result.next; cursor.previous_end = result.end; cursor.types = result.count;
+            cursor.status = result.status; cursor.expected = result.expected;
+            if (result.root == 0) { return 0; }
+            left = append(nodes,cursor,Node { .kind = 20, .start = token.start, .end = cursor.previous_end, .token = opener, .left = left, .right = result.root });
+            if (left == 0) { return 0; }
+            continue;
+        }
         if (take(stream, cursor, b".")) {
             let usize member = cursor.index;
             if (current(stream, cursor).kind != 3) { cursor.expected = 1; return 0; }

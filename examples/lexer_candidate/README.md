@@ -249,7 +249,7 @@ link points to its expression in `left` and its predecessor in `right`.
 `call_argument_count` and `call_argument` expose the original argument order.
 Empty calls, trailing argument commas and repeated call suffixes are admitted.
 All call/argument nodes share the existing node limit, and argument recursion
-shares the expression-depth limit. Generic specialization remains unsupported.
+shares the expression-depth limit. Generic specialization execution remains unsupported.
 Ordinary records retain the path root in `left` and the reversed field-link tail
 in `right`. Field links retain the value in `left`, previous link in `right`,
 member token and full initializer span. `record_field_count` and `record_field`
@@ -289,6 +289,15 @@ exhaustiveness, reachability and payload/type validity are not checked.
 Record patterns, whole-value wildcards and multiple positional bindings remain
 unsupported. All pattern/case/link nodes use the same 4096-expression-node budget.
 Case bodies share block and expression depth limits with their enclosing tree.
+
+Explicit type calls are recognized only after a path and when the closing angle
+list is followed by a call, using read-only lookahead capped at 256 significant
+tokens. Trivia does not consume that token allowance. Kind 20 retains the path in
+`left` and a type-argument link tail in `right`; the ordinary kind-6 call owns
+this specialization node as its callee. `specialization_argument_count` and
+`specialization_argument` expose written type roots in source order. Type
+arguments share the declaration type arena and its limits. Nested `>>` is split
+only by the existing type cursor; ordinary comparisons and shifts are unchanged.
 
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and

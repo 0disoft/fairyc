@@ -355,6 +355,18 @@ pub fn usize type_argument(ref Parsed parsed, usize id, usize index) {
     return type_at(parsed,link).left;
 }
 pub fn usize attribute_count(ref Parsed parsed) { return v::len<attributes::Attribute>(ref parsed.attributes); }
+pub fn usize specialization_argument_count(ref Parsed parsed, usize id) {
+    let Expression node = expression_at(parsed,id); assert(node.kind == 20);
+    var usize link = node.right; var usize count = 0;
+    while (link != 0) { count += 1; link = type_at(parsed,link).right; }
+    return count;
+}
+pub fn usize specialization_argument(ref Parsed parsed, usize id, usize index) {
+    let usize count = specialization_argument_count(parsed,id); assert(index < count);
+    var usize remaining = count - 1; var usize link = expression_at(parsed,id).right;
+    while (remaining > index) { link = type_at(parsed,link).right; remaining -= 1; }
+    return type_at(parsed,link).left;
+}
 pub fn usize switch_case_count(ref Parsed parsed, usize id) {
     let Expression node = expression_at(parsed,id); assert(node.kind == 15);
     var usize link = node.right; var usize count = 0;
