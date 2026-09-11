@@ -432,6 +432,9 @@ Windows profiles; see the [current coverage report](parser-coverage-closure-2026
 The corpus test explicitly requires complete syntax for these
 named files and fails on diagnostics, budget exhaustion or file removal. New
 files remain observations until independently admitted to this regression gate.
+For admitted files, the native declaration list is also compared with the Go CST:
+kind, source order, complete byte span and declared name/alias span must match.
+This is a declaration-level comparison, not full expression-tree equivalence.
 The [statement/resource report](parser-coverage-statements-2026-09-11.md) records
 the earlier eleven-file result; older baselines are retained as historical evidence.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.

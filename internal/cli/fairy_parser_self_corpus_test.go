@@ -12,7 +12,9 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/source"
+	"github.com/0disoft/fairyc/internal/syntax"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -29,6 +31,12 @@ import std::bytes as bytes; import std::io as io;
   let syntax::Problem p = syntax::problem_at(ref parsed,0);
   number(p.expected as usize); number(p.start); number(p.end);
  } else { number(0); number(0); number(0); }
+ var usize i=0;
+ while(i<syntax::declaration_count(ref parsed)) {
+  let syntax::Declaration d=syntax::declaration_at(ref parsed,i);
+  number(d.kind as usize); number(d.start); number(d.end); number(d.name_start); number(d.name_end);
+  i+=1;
+ }
  return 0;
 }
 @effects(console) fn i32 main() {
@@ -90,16 +98,19 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 				t.Fatalf("native corpus: %+v %v", out, err)
 			}
 			fields := strings.Fields(out.Stdout)
-			if len(fields) != 6 {
+			if len(fields) < 6 {
 				t.Fatalf("invalid observation: %q", out.Stdout)
 			}
-			result := make([]int, 6)
+			result := make([]int, len(fields))
 			for i, s := range fields {
 				n, err := strconv.Atoi(s)
 				if err != nil || n < 0 {
 					t.Fatalf("invalid count %q", s)
 				}
 				result[i] = n
+			}
+			if len(result) != 6+5*result[1] {
+				t.Fatalf("invalid declaration transport: %v", result)
 			}
 			return result
 		}
@@ -125,6 +136,7 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 				if full[0] != 0 || full[2] != 0 {
 					t.Fatalf("complete-source regression %s: %v", file.Name(), full)
 				}
+				compareParserDeclarations(t, file.Name(), data, full[6:])
 				delete(missing, file.Name())
 			}
 			if full[0] != 0 && full[0] != 4 {
@@ -176,5 +188,51 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 			t.Fatalf("missing supported source files: %v", missing)
 		}
 		t.Logf("profile=%v files=%d; only status=0 AND problems=0 counts as complete syntax", profile, count)
+	}
+}
+
+func compareParserDeclarations(t *testing.T, name string, data []byte, actual []int) {
+	t.Helper()
+	oracle, err := frontend.AnalyzeSyntax(source.NewFile(name, data), source.DefaultLimits())
+	if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 {
+		t.Fatalf("declaration oracle %s: %v", name, err)
+	}
+	tree := oracle.Tree
+	root, _ := tree.Node(tree.Root)
+	want := make([]int, 0, len(root.Children)*5)
+	for _, id := range root.Children {
+		node, ok := tree.Node(id)
+		if !ok {
+			t.Fatal("missing oracle declaration")
+		}
+		kind := map[syntax.Kind]int{syntax.KindModule: 1, syntax.KindImport: 2, syntax.KindFunction: 3, syntax.KindStruct: 4, syntax.KindResource: 6}[node.Kind]
+		if kind == 0 {
+			t.Fatalf("unsupported declaration oracle %s: %s", name, node.Kind)
+		}
+		nameSpan := node.NameSpan
+		if kind == 1 {
+			path, ok := tree.Node(node.Children[0])
+			if !ok {
+				t.Fatal("missing module path")
+			}
+			nameSpan = path.Span
+		}
+		if kind == 2 {
+			alias := false
+			for _, token := range tree.Tokens[node.TokenStart:node.TokenEnd] {
+				if token.Text(data) == "as" {
+					alias = true
+					continue
+				}
+				if alias && token.Kind == lexer.Identifier {
+					nameSpan = token.Span
+					break
+				}
+			}
+		}
+		want = append(want, kind, node.Span.StartByte, node.Span.EndByte, nameSpan.StartByte, nameSpan.EndByte)
+	}
+	if fmt.Sprint(actual) != fmt.Sprint(want) {
+		t.Fatalf("declaration mismatch %s: got %v want %v", name, actual, want)
 	}
 }
