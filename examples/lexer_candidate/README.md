@@ -255,6 +255,9 @@ source token spelling preserve structure without evaluating or resolving names.
 Declaration `expression` is the last top-level return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
 The independent `bodies.fy` module owns recursive expression, statement and block parsing;
+`parse_tokens.fy` owns exact token spelling, trivia skipping and operator
+classification. Existing body helpers delegate to it; cursor mutation and mutual
+recursion remain in `bodies.fy`, without an import back from the token module.
 `syntax.fy` retains declaration rollback and the existing query facade.
 `literal_kind` exposes the source token kind. `literal_cooked` borrows the
 scanner's canonical cooked representation: string/byte-string values are lowercase
@@ -427,7 +430,7 @@ qualified-path length root. Private kinds 8/9/10 represent array/integer length/
 length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
-All fourteen current source files, including the integrity checker, parse without
+All fifteen current source files, including the integrity checker and token helpers, parse without
 syntax problems in both Windows profiles. The [earlier coverage report](parser-coverage-closure-2026-09-11.md)
 records the preceding thirteen-file milestone.
 The corpus test explicitly requires complete syntax for these

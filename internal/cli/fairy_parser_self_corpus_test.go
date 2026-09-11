@@ -90,7 +90,7 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 		// These unchanged sources have passed complete syntax. Keep this explicit
 		// set so deletion or a newly unsupported construct cannot silently regress it.
 		missing := map[string]bool{}
-		for _, name := range []string{"attributes.fy", "bodies.fy", "budget.fy", "diagnostics.fy", "integrity.fy", "main.fy", "numbers.fy", "pages.fy", "records.fy", "scanner.fy", "strings.fy", "syntax.fy", "types.fy", "utf8.fy"} {
+		for _, name := range []string{"attributes.fy", "bodies.fy", "budget.fy", "diagnostics.fy", "integrity.fy", "main.fy", "numbers.fy", "pages.fy", "parse_tokens.fy", "records.fy", "scanner.fy", "strings.fy", "syntax.fy", "types.fy", "utf8.fy"} {
 			missing[name] = true
 		}
 		var stderr strings.Builder

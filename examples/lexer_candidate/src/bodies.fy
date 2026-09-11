@@ -2,6 +2,7 @@ module bodies;
 import scanner as scanner;
 import std::vec as v;
 import types as types;
+import parse_tokens as tokens;
 
 pub struct Node { u32 kind; usize start; usize end; usize token; usize left; usize right; }
 pub struct Cursor { usize index; usize previous_end; usize nodes; usize entries; usize statements; usize types; usize fields; usize expression; usize top_return; i32 status; u32 expected; usize active_expressions; usize block_depth; usize tail; usize last_entry; u32 expression_kind; }
@@ -12,25 +13,15 @@ fn scanner::TokenInfo current(ref scanner::Stream stream, ref mut Cursor cursor)
     return scanner::token_info(stream, cursor.index);
 }
 fn void trivia(ref scanner::Stream stream, ref mut Cursor cursor) {
-    while (scanner::token_info(stream, cursor.index).kind == 2 && cursor.index + 1 < scanner::token_count(stream)) {
-        cursor.index = cursor.index + 1;
-    }
+    cursor.index = tokens::significant(stream,cursor.index);
 }
 fn void advance(ref scanner::Stream stream, ref mut Cursor cursor) {
     cursor.previous_end = scanner::token_info(stream, cursor.index).end;
     if (cursor.index + 1 < scanner::token_count(stream)) { cursor.index = cursor.index + 1; }
     trivia(stream, cursor);
 }
-fn bool word(ref scanner::Stream stream, usize index, ref u8[] expected) {
-    let ref u8[] raw = scanner::token_raw(stream, index);
-    if (raw.len != expected.len) { return false; }
-    var usize byte_index = 0;
-    while (byte_index < raw.len) {
-        if (raw[byte_index] != expected[byte_index]) { return false; }
-        byte_index += 1;
-    }
-    return true;
-}
+fn bool word(ref scanner::Stream stream, usize index, ref u8[] expected) { return tokens::word(stream,index,expected); }
+
 fn bool take(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] expected) {
     if (!word(stream, cursor.index, expected)) { return false; }
     advance(stream, cursor);
@@ -41,18 +32,8 @@ fn bool expect(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] text,
     cursor.expected = code;
     return false;
 }
-fn usize precedence(ref scanner::Stream stream, usize index) {
-    if (word(stream, index, b"||")) { return 1; }
-    if (word(stream, index, b"&&")) { return 2; }
-    if (word(stream, index, b"==") || word(stream, index, b"!=") || word(stream, index, b"<") || word(stream, index, b"<=") || word(stream, index, b">") || word(stream, index, b">=")) { return 3; }
-    if (word(stream, index, b"|")) { return 4; }
-    if (word(stream, index, b"^")) { return 5; }
-    if (word(stream, index, b"&")) { return 6; }
-    if (word(stream, index, b"<<") || word(stream, index, b">>")) { return 7; }
-    if (word(stream, index, b"+") || word(stream, index, b"-")) { return 8; }
-    if (word(stream, index, b"*") || word(stream, index, b"/") || word(stream, index, b"%")) { return 9; }
-    return 0;
-}
+fn usize precedence(ref scanner::Stream stream, usize index) { return tokens::precedence(stream,index); }
+
 fn usize append(ref mut v::Vec<Node> nodes, ref mut Cursor cursor, Node node) {
     if (cursor.nodes >= 4096) { cursor.status = 4; return 0; }
     if (!switch (v::push<Node>(nodes, node)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return 0; }
@@ -283,9 +264,8 @@ fn usize append_statement(ref mut v::Vec<Statement> statements, ref mut Cursor c
     cursor.statements = cursor.statements + 1;
     return cursor.statements;
 }
-fn bool assignment(ref scanner::Stream stream, usize index) {
-    return word(stream, index, b"=") || word(stream, index, b"+=") || word(stream, index, b"-=") || word(stream, index, b"*=") || word(stream, index, b"/=") || word(stream, index, b"%=") || word(stream, index, b"<<=") || word(stream, index, b">>=") || word(stream, index, b"&=") || word(stream, index, b"^=") || word(stream, index, b"|=");
-}
+fn bool assignment(ref scanner::Stream stream, usize index) { return tokens::assignment(stream,index); }
+
 fn usize block_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<Statement> statements, ref mut v::Vec<types::Node> type_nodes, usize depth, bool allow_tail) {
     if (depth >= 32) { cursor.status = 4; return 0; }
     let usize start = current(stream, cursor).start;
