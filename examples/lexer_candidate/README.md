@@ -271,6 +271,13 @@ overtake their source owner or bypass the 1024-entry budget. Completed records
 may be stored in postorder; `entry_at` resolves the source-order ID with a bounded
 scan. Statement entry references use those same IDs.
 
+Conditional expressions use kind 13 (`left` condition, `right` branch record).
+Kind 14 retains the then statement-block ID in `left` and the optional else
+expression ID in `right` (kind 12 block or kind 13 nested conditional).
+Conditions, branch order, written tails and full byte spans are retained.
+An unwritten else stays zero; branch type agreement and value availability are
+semantic questions. Else-if recursion remains bounded by the expression limit.
+
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and
 `entry_count` select a zero-based range. Entry kinds are 1 parameter, 2 let,

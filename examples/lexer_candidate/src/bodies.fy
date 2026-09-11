@@ -93,6 +93,8 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
             if (!expect(stream, cursor, b"}", 7)) { return 0; }
             left = append(nodes, cursor, Node { .kind = 10, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = left, .right = fields });
         }
+    } else if (word(stream,cursor.index,b"if")) {
+        left = conditional(stream,cursor,nodes,entries,statements,type_nodes,depth);
     } else if (word(stream,cursor.index,b"{")) {
         let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
         if (body == 0) { return 0; }
@@ -249,7 +251,7 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
         if (value.expression == 0 || !expect(stream, cursor, b")", 5)) { return 0; }
         value.first = block(stream, cursor, nodes, entries, statements, type_nodes, depth + 1, false);
         if (value.first == 0) { return 0; }
-    } else if (take(stream, cursor, b"if")) {
+    } else if (!allow_tail && take(stream, cursor, b"if")) {
         value.kind = 5;
         if (!expect(stream, cursor, b"(", 4)) { return 0; }
         value.expression = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, 0);
@@ -279,7 +281,7 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
                 if (value.expression == 0) { return 0; }
             }
             if (allow_tail && value.kind == 6 && word(stream,cursor.index,b"}")) { cursor.tail = left; return 0; }
-            if (value.kind == 6 && cursor.expression_kind == 12 && !word(stream,cursor.index,b";")) {
+            if (value.kind == 6 && (cursor.expression_kind == 12 || cursor.expression_kind == 13) && !word(stream,cursor.index,b";")) {
                 value.end = cursor.previous_end; return append_statement(statements,cursor,value);
             }
             if (!expect(stream, cursor, b";", 8)) { return 0; }
@@ -303,4 +305,34 @@ pub fn usize block(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
     let usize result = block_inner(stream,cursor,nodes,entries,statements,type_nodes,depth,allow_tail);
     cursor.block_depth = previous;
     return result;
+}
+
+fn usize conditional(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<Statement> statements, ref mut v::Vec<types::Node> type_nodes, usize depth) {
+    if (depth >= 64) { cursor.status = 4; return 0; }
+    let usize token = cursor.index; let usize start = current(stream,cursor).start;
+    advance(stream,cursor);
+    if (!expect(stream,cursor,b"(",4)) { return 0; }
+    let usize condition = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1);
+    if (condition == 0 || !expect(stream,cursor,b")",5)) { return 0; }
+    let usize branch_start = current(stream,cursor).start;
+    let usize consequent = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
+    if (consequent == 0) { return 0; }
+    var usize alternative = 0;
+    if (take(stream,cursor,b"else")) {
+        if (word(stream,cursor.index,b"if")) {
+            if (cursor.active_expressions >= 64) { cursor.status = 4; return 0; }
+            cursor.active_expressions = cursor.active_expressions + 1;
+            alternative = conditional(stream,cursor,nodes,entries,statements,type_nodes,depth + 1);
+            cursor.active_expressions = cursor.active_expressions - 1;
+        } else {
+            let usize opener = cursor.index; let usize body_start = current(stream,cursor).start;
+            let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
+            if (body == 0) { return 0; }
+            alternative = append(nodes,cursor,Node { .kind = 12, .start = body_start, .end = cursor.previous_end, .token = opener, .left = body, .right = 0 });
+        }
+        if (alternative == 0) { return 0; }
+    }
+    let usize branches = append(nodes,cursor,Node { .kind = 14, .start = branch_start, .end = cursor.previous_end, .token = token, .left = consequent, .right = alternative });
+    if (branches == 0) { return 0; }
+    return append(nodes,cursor,Node { .kind = 13, .start = start, .end = cursor.previous_end, .token = token, .left = condition, .right = branches });
 }
