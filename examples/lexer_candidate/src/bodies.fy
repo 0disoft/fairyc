@@ -93,6 +93,11 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
             if (!expect(stream, cursor, b"}", 7)) { return 0; }
             left = append(nodes, cursor, Node { .kind = 10, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = left, .right = fields });
         }
+    } else if (take(stream,cursor,b".")) {
+        let usize name = cursor.index;
+        if (current(stream,cursor).kind != 3) { cursor.expected = 1; return 0; }
+        advance(stream,cursor);
+        left = append(nodes,cursor,Node { .kind = 28, .start = token.start, .end = cursor.previous_end, .token = name, .left = 0, .right = 0 });
     } else if (word(stream,cursor.index,b"if")) {
         left = conditional(stream,cursor,nodes,entries,statements,type_nodes,depth);
     } else if (word(stream,cursor.index,b"switch")) {

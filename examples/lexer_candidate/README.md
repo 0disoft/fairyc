@@ -303,6 +303,13 @@ Record patterns, whole-value wildcards and multiple positional bindings remain
 unsupported. All pattern/case/link nodes use the same 4096-expression-node budget.
 Case bodies share block and expression depth limits with their enclosing tree.
 
+Contextual variant names such as `.ok`, `.err` and `.none` use kind 28, with no
+children. The full span includes the leading dot and intervening trivia; the
+token and `expression_text` retain the identifier. Existing call nodes wrap this
+callee for `.ok(value)`, preserving ordered arguments and shared budgets. Type
+inference and variant validity are not checked. Contextual record construction
+`.Variant { ... }` remains unsupported.
+
 Explicit type calls are recognized only after a path and when the closing angle
 list is followed by a call, using read-only lookahead capped at 256 significant
 tokens. Trivia does not consume that token allowance. Kind 20 retains the path in
