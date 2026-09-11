@@ -431,7 +431,9 @@ length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 All fifteen current source files, including the integrity checker and token helpers, parse without
-syntax problems in both Windows profiles. The [earlier coverage report](parser-coverage-closure-2026-09-11.md)
+syntax problems in both Windows profiles. The [current evidence report](parser-evidence-2026-09-11.md)
+records declaration comparison, integrity checks and the bounded fixture results.
+The [earlier coverage report](parser-coverage-closure-2026-09-11.md)
 records the preceding thirteen-file milestone.
 The corpus test explicitly requires complete syntax for these
 named files and fails on diagnostics, budget exhaustion or file removal. New
@@ -446,6 +448,11 @@ native corpus results, including incomplete results. It does not prove semantic
 validity, cross-arena graph acyclicity, unique ownership or full source coverage.
 Synthetic-node probes exercise missing, out-of-range, self-referential and
 wrong-kind links without mutating the published parse result.
+The fixture observation lane reads the checked-in parser manifest unchanged,
+with at most 32 cases and 32768 source bytes per case. It separates supported
+syntax, unsupported valid syntax, matching rejection and missing file/module
+context. Unexpected false acceptance or budget exhaustion fails the lane rather
+than becoming a supported result. Both profiles must return identical observations.
 The [statement/resource report](parser-coverage-statements-2026-09-11.md) records
 the earlier eleven-file result; older baselines are retained as historical evidence.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
