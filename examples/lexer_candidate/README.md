@@ -419,10 +419,12 @@ qualified-path length root. Private kinds 8/9/10 represent array/integer length/
 length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
-Own-source syntax coverage is recorded in
-[the statement/resource coverage report](parser-coverage-statements-2026-09-11.md): all
-thirteen files are exercised under both Windows profiles, and eleven are
-diagnostic-free. Earlier operand, value-expression and smaller baselines are retained.
+All thirteen current source files now parse without syntax problems in both
+Windows profiles. The corpus test explicitly requires complete syntax for these
+named files and fails on diagnostics, budget exhaustion or file removal. New
+files remain observations until independently admitted to this regression gate.
+The [statement/resource report](parser-coverage-statements-2026-09-11.md) records
+the earlier eleven-file result; older baselines are retained as historical evidence.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
 This must not be confused with the lexer's complete source-token comparison.
 

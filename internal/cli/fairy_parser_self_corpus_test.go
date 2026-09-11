@@ -72,6 +72,12 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 	writeTestSource(t, root, "src/main.fy", parserCorpusProgram)
 	baseline := map[string]string{}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		// These unchanged sources have passed complete syntax. Keep this explicit
+		// set so deletion or a newly unsupported construct cannot silently regress it.
+		missing := map[string]bool{}
+		for _, name := range []string{"attributes.fy", "bodies.fy", "budget.fy", "diagnostics.fy", "main.fy", "numbers.fy", "pages.fy", "records.fy", "scanner.fy", "strings.fy", "syntax.fy", "types.fy", "utf8.fy"} {
+			missing[name] = true
+		}
 		var stderr strings.Builder
 		compiled, code := compileWindowsWorkspace(root, workspaceTargetOptions{targetID: target.X8664WindowsMSVC, profile: profile, locked: profile == cdriver.OptimizedProfile}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, &stderr)
 		if code != ExitSuccess {
@@ -115,6 +121,12 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 				t.Fatalf("source %s: size=%d err=%v", file.Name(), len(data), err)
 			}
 			full := observe(data)
+			if missing[file.Name()] {
+				if full[0] != 0 || full[2] != 0 {
+					t.Fatalf("complete-source regression %s: %v", file.Name(), full)
+				}
+				delete(missing, file.Name())
+			}
 			if full[0] != 0 && full[0] != 4 {
 				t.Fatalf("unexpected source outcome %s: %v", file.Name(), full)
 			}
@@ -159,6 +171,9 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 		}
 		if count == 0 {
 			t.Fatal("empty self-source corpus")
+		}
+		if len(missing) != 0 {
+			t.Fatalf("missing supported source files: %v", missing)
 		}
 		t.Logf("profile=%v files=%d; only status=0 AND problems=0 counts as complete syntax", profile, count)
 	}
