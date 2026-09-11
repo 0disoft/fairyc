@@ -281,6 +281,11 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
         value.kind = if (word(stream, cursor.index, b"break")) { 9 } else { 10 };
         advance(stream, cursor);
         if (!expect(stream, cursor, b";", 8)) { return 0; }
+    } else if (take(stream,cursor,b"assert")) {
+        value.kind = 11;
+        if (!expect(stream,cursor,b"(",4)) { return 0; }
+        value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0);
+        if (value.expression == 0 || !expect(stream,cursor,b")",5) || !expect(stream,cursor,b";",8)) { return 0; }
     } else if (take(stream, cursor, b"while")) {
         value.kind = 8;
         if (!expect(stream, cursor, b"(", 4)) { return 0; }

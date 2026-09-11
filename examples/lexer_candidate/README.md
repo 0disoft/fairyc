@@ -331,7 +331,11 @@ and are not checked here.
 `Declaration.body` is a one-based root in a separate postorder statement tree;
 zero is reserved for module/import declarations. `statement_at` and
 `statement_count` expose nodes: 1 block, 2 binding, 3 return, 4 assignment, 5 if,
-6 expression statement, 7 list link, 8 while, 9 break and 10 continue.
+6 expression statement, 7 list link, 8 while, 9 break, 10 continue and 11 assert.
+Assert retains its condition in `expression` and its full keyword-through-semicolon
+span. It requires parentheses and a semicolon, including in value blocks; it is
+not a call or tail expression. Condition type and runtime assertion behavior are
+outside this syntax layer. Its nodes share existing expression/statement budgets.
 While preserves its condition in `expression` and its body in `first`; break and
 continue have no children. Loop-context legality remains a semantic concern.
 Binding/return `entry` is a one-based
