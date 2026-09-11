@@ -105,6 +105,19 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
         let usize child = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1);
         if (child == 0 || !expect(stream, cursor, b")", 5)) { return 0; }
         left = append(nodes, cursor, Node { .kind = 3, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = child, .right = 0 });
+    } else if (take(stream,cursor,b"[")) {
+        var usize elements = 0;
+        while (!word(stream,cursor.index,b"]")) {
+            let usize element_token = cursor.index;
+            let usize element_start = current(stream,cursor).start;
+            let usize value = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1);
+            if (value == 0) { return 0; }
+            elements = append(nodes,cursor,Node { .kind = 25, .start = element_start, .end = cursor.previous_end, .token = element_token, .left = value, .right = elements });
+            if (elements == 0) { return 0; }
+            if (!take(stream,cursor,b",")) { break; }
+        }
+        if (!expect(stream,cursor,b"]",11)) { return 0; }
+        left = append(nodes,cursor,Node { .kind = 24, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = 0, .right = elements });
     } else if (take(stream,cursor,b"ref")) {
         let bool mutable = take(stream,cursor,b"mut");
         let usize child = expression(stream,cursor,nodes,entries,statements,type_nodes,11,depth + 1);

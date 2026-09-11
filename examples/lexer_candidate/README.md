@@ -311,6 +311,14 @@ type root. Casts associate left, below prefixes and above multiplication; their
 operator tokens and full spans remain available. Targets use the shared type
 parser and budget. No conversion, range check or target-type validation occurs.
 
+Array lists `[]`, `[value]` and `[a, b,]` use kind 24 with absent `left` and a
+kind-25 element-link tail in `right`. Each link retains its value in `left` and
+the previous link in `right`. `array_element_count` and `array_element` expose
+source-ordered values without flattening nested arrays. Array spans include both
+brackets; element spans exclude separators. Both kinds share the expression-node
+and depth budgets. Repetition `[value; count]` remains unsupported, and element
+type compatibility and array evaluation remain outside this syntax candidate.
+
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and
 `entry_count` select a zero-based range. Entry kinds are 1 parameter, 2 let,
@@ -385,9 +393,9 @@ length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 Own-source syntax coverage is recorded in
-[the value-expression coverage report](parser-coverage-values-2026-09-11.md): all
-thirteen files are exercised under both Windows profiles, and `budget.fy` and
-`utf8.fy` are diagnostic-free. Earlier eleven- and nine-file baselines are retained.
+[the operand-expression coverage report](parser-coverage-operands-2026-09-11.md): all
+thirteen files are exercised under both Windows profiles, and seven are
+diagnostic-free. Earlier value-expression, eleven- and nine-file baselines are retained.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
 This must not be confused with the lexer's complete source-token comparison.
 

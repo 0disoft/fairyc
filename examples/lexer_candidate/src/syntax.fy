@@ -320,6 +320,18 @@ pub fn usize call_argument(ref Parsed parsed, usize call, usize index) {
 }
 
 
+pub fn usize array_element_count(ref Parsed parsed, usize id) {
+    let Expression node = expression_at(parsed,id); assert(node.kind == 24);
+    var usize link = node.right; var usize count = 0;
+    while (link != 0) { count += 1; link = expression_at(parsed,link).right; }
+    return count;
+}
+pub fn usize array_element(ref Parsed parsed, usize id, usize index) {
+    let usize count = array_element_count(parsed,id); assert(index < count);
+    var usize remaining = count - 1; var usize link = expression_at(parsed,id).right;
+    while (remaining > index) { link = expression_at(parsed,link).right; remaining -= 1; }
+    return expression_at(parsed,link).left;
+}
 pub fn usize type_count(ref Parsed parsed) { return v::len<types::Node>(ref parsed.types); }
 pub fn usize record_field_count(ref Parsed parsed, usize id) {
     let Expression node = expression_at(parsed, id); assert(node.kind == 10);
