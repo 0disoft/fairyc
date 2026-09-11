@@ -226,7 +226,7 @@ cleanup and generic record expressions remain unsupported.
 Expressions admit integers, `true`/`false`, strings, byte strings, qualified identifier paths, calls,
 nested parentheses, prefix
 `+ - ! ~ *`, and the grammar's binary operators from multiplicative through
-logical-or. Casts, C strings and other literals
+logical-or. C strings and other literals
 remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
 binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
@@ -305,6 +305,11 @@ and the mutable marker; the source token retains `ref`. Postfix operations bind
 inside the reference, while binary operators remain outside. These nodes consume
 the existing expression-node and active-depth budget. Borrow validity, operand
 mutability and lifetime rules are not checked by this syntax candidate.
+
+Kind 23 is a written `as` cast: `left` is the operand and `right` is the target
+type root. Casts associate left, below prefixes and above multiplication; their
+operator tokens and full spans remain available. Targets use the shared type
+parser and budget. No conversion, range check or target-type validation occurs.
 
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and
