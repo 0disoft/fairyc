@@ -178,7 +178,7 @@ Parameter lists allow a trailing comma. Bodies admit empty blocks,
 and `return` with an optional expression. Statement-only nested blocks, expression
 statements, ordinary and compound assignments, and `if (...) { ... } else if (...)
 { ... } else { ... }`, `while (...) { ... }`, `break;` and `continue;` are admitted.
-Classic `for` loops, tail-valued blocks and other statements
+Classic `for` loops and other statements
 remain outside this subset.
 It does not resolve names or imports, validate types, module-to-file mapping or
 return obligations, admit the complete Stage 0 grammar, or produce executable MIR.
@@ -237,7 +237,7 @@ not admitted. One-based child IDs (zero absent), half-open source-byte spans and
 source token spelling preserve structure without evaluating or resolving names.
 Declaration `expression` is the last top-level return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
-The independent `expressions.fy` module owns Pratt parsing and node allocation;
+The independent `bodies.fy` module owns recursive expression, statement and block parsing;
 `syntax.fy` retains declaration rollback and the existing query facade.
 `literal_kind` exposes the source token kind. `literal_cooked` borrows the
 scanner's canonical cooked representation: string/byte-string values are lowercase
@@ -259,6 +259,17 @@ field types and layout are not checked. Record and field-link nodes consume the
 same expression budget; no separate record arena or unbounded side table exists.
 Failed declarations roll back their nodes before recovery. A shared 4096-node
 ceiling and 64-active-expression-call limit return status 4 without a result.
+
+Value-block expressions have kind 12: `left` selects a statement-block ID and
+`right` is absent. The block's `expression` field is its optional tail root,
+separate from its ordered statement links. A semicolon keeps an expression in
+the statement list; an unwritten tail remains zero. Function bodies still require
+statement terminators. Nested value blocks share the 32-block-depth and
+64-active-expression bounds instead of resetting them at the expression/body edge.
+Entry IDs are reserved before parsing an initializer, so nested entries cannot
+overtake their source owner or bypass the 1024-entry budget. Completed records
+may be stored in postorder; `entry_at` resolves the source-order ID with a bounded
+scan. Statement entry references use those same IDs.
 
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and
