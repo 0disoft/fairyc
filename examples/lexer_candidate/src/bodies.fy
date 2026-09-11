@@ -95,6 +95,8 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
         }
     } else if (word(stream,cursor.index,b"if")) {
         left = conditional(stream,cursor,nodes,entries,statements,type_nodes,depth);
+    } else if (word(stream,cursor.index,b"switch")) {
+        left = switch_value(stream,cursor,nodes,entries,statements,type_nodes,depth);
     } else if (word(stream,cursor.index,b"{")) {
         let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
         if (body == 0) { return 0; }
@@ -335,4 +337,43 @@ fn usize conditional(ref scanner::Stream stream, ref mut Cursor cursor, ref mut 
     let usize branches = append(nodes,cursor,Node { .kind = 14, .start = branch_start, .end = cursor.previous_end, .token = token, .left = consequent, .right = alternative });
     if (branches == 0) { return 0; }
     return append(nodes,cursor,Node { .kind = 13, .start = start, .end = cursor.previous_end, .token = token, .left = condition, .right = branches });
+}
+
+fn usize pattern(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes) {
+    let usize start = current(stream,cursor).start;
+    if (!expect(stream,cursor,b".",14)) { return 0; }
+    let usize token = cursor.index;
+    if (current(stream,cursor).kind != 3) { cursor.expected = 1; return 0; }
+    advance(stream,cursor);
+    var usize binding = 0;
+    if (take(stream,cursor,b"(")) {
+        let usize name = cursor.index; let scanner::TokenInfo info = current(stream,cursor);
+        if (info.kind != 3) { cursor.expected = 1; return 0; }
+        advance(stream,cursor);
+        binding = append(nodes,cursor,Node { .kind = 17, .start = info.start, .end = info.end, .token = name, .left = 0, .right = 0 });
+        if (binding == 0 || !expect(stream,cursor,b")",5)) { return 0; }
+    }
+    return append(nodes,cursor,Node { .kind = 16, .start = start, .end = cursor.previous_end, .token = token, .left = binding, .right = 0 });
+}
+fn usize switch_value(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<Statement> statements, ref mut v::Vec<types::Node> type_nodes, usize depth) {
+    let usize token = cursor.index; let usize start = current(stream,cursor).start;
+    advance(stream,cursor);
+    if (!expect(stream,cursor,b"(",4)) { return 0; }
+    let usize subject = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1);
+    if (subject == 0 || !expect(stream,cursor,b")",5) || !expect(stream,cursor,b"{",6)) { return 0; }
+    var usize cases = 0;
+    while (!word(stream,cursor.index,b"}")) {
+        let usize case_token = cursor.index; let usize case_start = current(stream,cursor).start;
+        if (!expect(stream,cursor,b"case",18)) { return 0; }
+        let usize match = pattern(stream,cursor,nodes);
+        if (match == 0 || !expect(stream,cursor,b":",17)) { return 0; }
+        let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
+        if (body == 0) { return 0; }
+        let usize arm = append(nodes,cursor,Node { .kind = 18, .start = case_start, .end = cursor.previous_end, .token = case_token, .left = match, .right = body });
+        if (arm == 0) { return 0; }
+        cases = append(nodes,cursor,Node { .kind = 19, .start = case_start, .end = cursor.previous_end, .token = case_token, .left = arm, .right = cases });
+        if (cases == 0) { return 0; }
+    }
+    advance(stream,cursor);
+    return append(nodes,cursor,Node { .kind = 15, .start = start, .end = cursor.previous_end, .token = token, .left = subject, .right = cases });
 }

@@ -278,6 +278,18 @@ Conditions, branch order, written tails and full byte spans are retained.
 An unwritten else stays zero; branch type agreement and value availability are
 semantic questions. Else-if recursion remains bounded by the expression limit.
 
+Switch expressions use kind 15 (`left` subject, `right` reversed case-link tail).
+Kind 16 is a shallow leading-dot variant pattern with an optional kind-17 binding
+in `left`; kind 17 retains an identifier or `_` spelling. Kind 18 is a case
+(`left` pattern, `right` statement-block ID), and kind 19 links cases in reverse.
+`switch_case_count` and `switch_case` expose case IDs in written order.
+Variant names and binding names retain their own tokens; pattern, case and switch
+spans remain distinct. Empty and duplicate cases are syntax-only observations:
+exhaustiveness, reachability and payload/type validity are not checked.
+Record patterns, whole-value wildcards and multiple positional bindings remain
+unsupported. All pattern/case/link nodes use the same 4096-expression-node budget.
+Case bodies share block and expression depth limits with their enclosing tree.
+
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and
 `entry_count` select a zero-based range. Entry kinds are 1 parameter, 2 let,
@@ -321,7 +333,8 @@ Problems additionally retain `expected` and the actual source `token` index.
 `problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
 renders the private expectation code: 0 supported syntax, 1 identifier, 2 type,
 3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
-12 `module`, 13 `>`, 14 `.`, 15 attribute argument, 16 array length. Code 0 deliberately remains general for unsupported constructs;
+12 `module`, 13 `>`, 14 `.`, 15 attribute argument, 16 array length,
+17 `:`, 18 `case`. Code 0 deliberately remains general for unsupported constructs;
 these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
 Expectations reset before each source item so recovery cannot leak an old hint.
 
@@ -351,7 +364,7 @@ length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 Own-source syntax coverage is recorded in
-[the syntax coverage report](parser-coverage-syntax-2026-09-11.md): all
+[the value-expression coverage report](parser-coverage-values-2026-09-11.md): all
 thirteen files are exercised under both Windows profiles, and `budget.fy` and
 `utf8.fy` are diagnostic-free. Earlier eleven- and nine-file baselines are retained.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
