@@ -89,7 +89,7 @@ func TestWindowsFairyParserPostfix(t *testing.T) {
 		fmt.Fprintf(&main, "assert(switch(make(b%s)) { case .ok(parsed): { check_%d(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input), n)
 	}
 	p.WriteString("fn i32 rejected(syntax::Parsed parsed) { assert(syntax::problem_count(ref parsed) == 1 && syntax::declaration_count(ref parsed) == 2 && syntax::expression_count(ref parsed) == 0 && syntax::statement_count(ref parsed) == 1); return 0; }\n")
-	for _, expr := range []string{"a.", "a.true", "a[]", "a[1", "a[1..2]", "a[..]"} {
+	for _, expr := range []string{"a.", "a.true", "a[]", "a[1", "a[1..2..3]", "a[..,]"} {
 		input := "module main; fn i32 bad() { return " + expr + "; } fn void kept() {}"
 		fmt.Fprintf(&main, "assert(switch(make(b%s)) { case .ok(parsed): { rejected(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input))
 	}

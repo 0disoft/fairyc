@@ -6,9 +6,9 @@ import records as records;
 import bodies as bodies;
 import attributes as attributes;
 
-// Private declarations: 1 module, 2 import, 3 function, 4 struct; problem 4 is
+// Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
-pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; }
+pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
 // Zero name/type spans mean unwritten; expression zero means no initializer/value.
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; }
@@ -18,6 +18,7 @@ pub struct Expression { u32 kind; usize start; usize end; usize token; usize lef
 pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token; }
 // 1 block, 2 binding, 3 return, 4 assignment, 5 if, 6 expression, 7 list link.
 // 8 while (expression condition, first body), 9 break, 10 continue.
+// 11 assert and 12 discard retain their operands in expression.
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;
@@ -71,12 +72,13 @@ fn u32 item_kind(ref scanner::Stream stream, usize index) {
     if (next >= scanner::token_count(stream)) { return 5; }
     if (word(stream,next,b"fn")) { return 3; }
     if (word(stream,next,b"struct")) { return 4; }
+    if (word(stream,next,b"resource")) { return 6; }
     return 5;
 }
 fn Attempt failed(ref scanner::Stream stream, ref mut bodies::Cursor cursor, u32 code) {
     let scanner::TokenInfo token = current(stream, cursor);
     return Attempt { .ok = false,
-        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0 },
+        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0 },
         .problem = Problem { .code = code, .start = token.start, .end = token.end, .expected = cursor.expected, .token = cursor.index } };
 }
 fn bool expect(ref scanner::Stream stream, ref mut bodies::Cursor cursor, ref u8[] text, u32 code) {
@@ -99,7 +101,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
     if (name.kind != 3) { cursor.expected = 1; return failed(stream, cursor, kind); }
     var usize name_start = name.start; var usize name_end = name.end;
     var usize root = 0;
-    var usize body = 0;
+    var usize body = 0; var usize cleanup_start = 0; var usize cleanup_end = 0;
     advance(stream, cursor);
     if (kind < 3) {
         while (take(stream, cursor, b"::")) {
@@ -114,11 +116,12 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
             name_start = alias.start; name_end = alias.end; advance(stream, cursor);
         }
         if (!expect(stream, cursor, b";", 8)) { return failed(stream, cursor, kind); }
-    } else if (kind == 4) {
-        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields);
+    } else if (kind == 4 || kind == 6) {
+        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields,kind == 6);
         cursor.index = record.next; cursor.previous_end = record.end; cursor.types = record.types; cursor.fields = record.fields;
         cursor.expected = record.expected; cursor.status = record.status;
-        if (!record.ok) { return failed(stream,cursor,4); }
+        if (!record.ok) { return failed(stream,cursor,kind); }
+        cleanup_start = record.cleanup_start; cleanup_end = record.cleanup_end;
     } else {
         if (!expect(stream, cursor, b"(", 4)) { return failed(stream, cursor, kind); }
         while (!word(stream, cursor.index, b")")) {
@@ -132,7 +135,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
         root = cursor.top_return;
     }
     return Attempt { .ok = true,
-        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0 },
+        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end },
         .problem = Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .token = 0 } };
 }
 
@@ -146,11 +149,11 @@ fn void recover(ref scanner::Stream stream, ref mut bodies::Cursor cursor, usize
         boundary = cursor.index;
     }
     if (take(stream, cursor, b"pub")) {
-        if (word(stream, cursor.index, b"fn") || word(stream, cursor.index, b"struct") || word(stream, cursor.index, b"import")) { advance(stream, cursor); }
+        if (word(stream, cursor.index, b"fn") || word(stream, cursor.index, b"struct") || word(stream, cursor.index, b"resource") || word(stream, cursor.index, b"import")) { advance(stream, cursor); }
     }
     var usize depth = 0;
     while (scanner::token_info(stream, cursor.index).kind != 1) {
-        if (depth == 0 && cursor.index > boundary && (word(stream, cursor.index, b"fn") || item_kind(stream, cursor.index) < 5 || word(stream, cursor.index, b"import") || word(stream,cursor.index,b"@"))) { return; }
+        if (depth == 0 && cursor.index > boundary && (word(stream, cursor.index, b"fn") || item_kind(stream, cursor.index) != 5 || word(stream, cursor.index, b"import") || word(stream,cursor.index,b"@"))) { return; }
         if (word(stream, cursor.index, b"{")) { depth += 1; }
         else if (word(stream, cursor.index, b"}")) {
             advance(stream, cursor);
@@ -226,7 +229,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
             errors += 1;
             if (!first || word(ref input, start, b"module")) { recover(ref input, ref mut cursor, if (attributes_ok) { item_start } else { start }); }
         }
-        if (kind == 3 || kind == 4) { functions = true; }
+        if (kind == 3 || kind == 4 || kind == 6) { functions = true; }
         first = false;
     }
     return .ok(Parsed { .source = input, .declarations = declarations, .problems = problems, .expressions = nodes, .entries = entries, .statements = statements, .types = type_nodes, .fields = fields, .attributes = attribute_nodes, .attribute_arguments = attribute_arguments });

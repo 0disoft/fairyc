@@ -48,7 +48,7 @@ func TestWindowsFairyParserAttributes(t *testing.T) {
 		"@bad(x x) fn void bad() {}",
 		"@ns:: fn void bad() {}",
 		"@bad fn void bad() { let x = ; }",
-		"@bad resource R { cleanup {} }",
+		"@bad resource R<T> { cleanup {} }",
 		"@bad import x as x;",
 	} {
 		input := "module main; " + bad + " @kept fn void kept() {}"

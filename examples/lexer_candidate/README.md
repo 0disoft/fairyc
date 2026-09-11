@@ -167,7 +167,7 @@ CI for the exact pushed commit.
 
 `syntax::parse` consumes a Stream and an item limit no greater than 512. It returns
 an owned `Parsed` containing declarations, expressions, binding entries,
-statement trees, written types, struct fields and item attributes, retaining the entire original Stream. This
+statement trees, written types, struct/resource fields and item attributes, retaining the entire original Stream. This
 candidate recognizes `module path;`, `import path as alias;`, and functions with
 optional `pub` visibility (retained in `public`, `public_start`, `public_end`;
 private declarations use false and zero spans). The modifier is not discarded
@@ -183,7 +183,7 @@ remain outside this subset.
 It does not resolve names or imports, validate types, module-to-file mapping or
 return obligations, admit the complete Stage 0 grammar, or produce executable MIR.
 
-Ordinary functions and structs accept ordered attributes before optional `pub`.
+Ordinary functions, structs and resources accept ordered attributes before optional `pub`.
 `attributes.fy` retains qualified names, source spans and ordered path, integer
 or string arguments (including empty argument lists and trailing commas).
 Declaration `attribute_start`/`attribute_count` selects the global attribute range.
@@ -220,8 +220,15 @@ zero-based source-ordered range in the separate `field_at`/`field_count` table.
 Each field preserves its full/name/public spans, visibility and `type_root`.
 Structs have no body or result-type root. All structs share a 1024-field limit;
 failed declarations roll back fields and types together. Duplicate-field legality,
-layout and ownership are not checked. Generic declarations, resource declarations,
-cleanup and generic record expressions remain unsupported.
+layout and ownership are not checked. Non-generic resources use declaration kind 6
+and share the same field/type arenas and 1024-field budget. An optional empty
+`cleanup {}` is retained by `cleanup_start`/`cleanup_end` (keyword through closing
+brace); both zero means unwritten. Resources have no function body or result type.
+Declaration attributes and `pub` spans are preserved as for structs; imports
+cannot follow resources. Generic declarations, nonempty or attributed cleanup,
+and generic record expressions remain unsupported. No resource ownership or
+destruction behavior is implemented by the candidate. Malformed resources roll
+back fields, types and attributes before recovering to the next declaration.
 
 Expressions admit integers, `true`/`false`, strings, byte strings, qualified identifier paths, calls,
 nested parentheses, prefix
@@ -365,7 +372,7 @@ branch return obligations remain semantic checks, not parser acceptance criteria
 
 Declarations preserve source order, complete spans and name/alias spans. Problems
 retain exact source-byte spans and private category codes (1 module, 2 import,
-3 function, 4 unsupported source item). A failed declaration never becomes an
+3 function, 4 struct or unsupported source item, 6 resource). A failed declaration never becomes an
 ordinary declaration node. Recovery rescans its bounded token range with brace
 depth before resuming at a following import/function; nested functions cannot
 escape a malformed enclosing body. Original trivia and rejected source remain
@@ -406,9 +413,9 @@ length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 Own-source syntax coverage is recorded in
-[the operand-expression coverage report](parser-coverage-operands-2026-09-11.md): all
-thirteen files are exercised under both Windows profiles, and seven are
-diagnostic-free. Earlier value-expression, eleven- and nine-file baselines are retained.
+[the statement/resource coverage report](parser-coverage-statements-2026-09-11.md): all
+thirteen files are exercised under both Windows profiles, and eleven are
+diagnostic-free. Earlier operand, value-expression and smaller baselines are retained.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
 This must not be confused with the lexer's complete source-token comparison.
 
