@@ -196,14 +196,14 @@ back, and recovery does not attach a rejected prefix to a later declaration.
 Attribute semantics, effect validation and permissions remain outside this parser.
 
 The private `types` module recognizes named/qualified types, `ref`, `ref mut`,
-grouping and unsized slices. It preserves `ref u8[]` versus `(ref u8)[]` without
+grouping, unsized slices and fixed arrays. It preserves `ref u8[]` versus `(ref u8)[]` without
 resolving names. `Declaration.result_type` and `Entry.type_root` are one-based
 roots; an inferred binding uses zero. `type_at`, `type_count` and `type_text`
 expose postorder nodes and exact source slices. Node kinds are 1 path, 2 reference,
 3 mutable reference, 4 slice and 5 group; wrappers point to `left`, `right` is zero.
 All declarations share 4096 type nodes and a 32-active-call type-depth limit.
-Failed declarations roll back type nodes with the other tables. Fixed arrays,
-raw pointers and foreign function types remain unsupported.
+Failed declarations roll back type nodes with the other tables.
+Raw pointers and foreign function types remain unsupported.
 
 Named types also accept nonempty generic argument lists, trailing commas and
 nesting. Kind 6 retains the base path in `left` and a reverse argument-link tail
@@ -303,7 +303,7 @@ Problems additionally retain `expected` and the actual source `token` index.
 `problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
 renders the private expectation code: 0 supported syntax, 1 identifier, 2 type,
 3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
-12 `module`, 13 `>`, 14 `.`, 15 attribute argument. Code 0 deliberately remains general for unsupported constructs;
+12 `module`, 13 `>`, 14 `.`, 15 attribute argument, 16 array length. Code 0 deliberately remains general for unsupported constructs;
 these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
 Expectations reset before each source item so recovery cannot leak an old hint.
 
@@ -326,6 +326,11 @@ parser checks, Stream/self-lexing, corpus/budget checks and heap accounting;
 hosted Go tests still discover all tests normally.
 
 ## Own-source syntax coverage
+
+Fixed-array type nodes preserve an element root and an unevaluated integer or
+qualified-path length root. Private kinds 8/9/10 represent array/integer length/path
+length; all consume the existing 4096-node type budget. Empty brackets remain
+slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 Own-source syntax coverage is recorded in
 [the syntax coverage report](parser-coverage-syntax-2026-09-11.md): all

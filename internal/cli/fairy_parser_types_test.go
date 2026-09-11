@@ -9,6 +9,7 @@ import (
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/source"
+	"github.com/0disoft/fairyc/internal/syntax"
 )
 
 func emitCandidateType(t *testing.T, p *strings.Builder, typ ast.TypeReference, count *int) int {
@@ -20,6 +21,21 @@ func emitCandidateType(t *testing.T, p *strings.Builder, typ ast.TypeReference, 
 	kind := map[ast.TypeKind]int{ast.TypeKindNamed: 1, ast.TypeKindReference: 2, ast.TypeKindSlice: 4, ast.TypeKindGrouped: 5}[typ.Kind]
 	if typ.Mutable {
 		kind = 3
+	}
+	if typ.Kind == ast.TypeKindArray {
+		if typ.Length == nil {
+			t.Fatal("array without written length")
+		}
+		lengthKind := 9
+		if typ.Length.Kind == syntax.KindPath {
+			lengthKind = 10
+		}
+		*count++
+		length := *count
+		fmt.Fprintf(p, "{ let n = syntax::type_at(ref parsed,%d); assert(n.kind == %d && n.start == %d && n.end == %d && n.left == 0 && n.right == 0); }\n", length, lengthKind, typ.Length.Span.StartByte, typ.Length.Span.EndByte)
+		*count++
+		fmt.Fprintf(p, "{ let n = syntax::type_at(ref parsed,%d); assert(n.kind == 8 && n.start == %d && n.end == %d && n.left == %d && n.right == %d); }\n", *count, typ.Span.StartByte, typ.Span.EndByte, child, length)
+		return *count
 	}
 	if len(typ.Arguments) > 0 {
 		if typ.Kind != ast.TypeKindNamed {
@@ -55,7 +71,7 @@ func emitCandidateType(t *testing.T, p *strings.Builder, typ ast.TypeReference, 
 func TestWindowsFairyParserTypes(t *testing.T) {
 	var p, main strings.Builder
 	main.WriteString("fn i32 main() {\n")
-	for i, typ := range []string{"i32", "pkg::Thing", "ref u8[]", "ref mut pkg::Thing[]", "(ref u8)[]", "ref ref mut T[][]", "pkg /*gap*/ :: Thing"} {
+	for i, typ := range []string{"i32", "pkg::Thing", "ref u8[]", "ref mut pkg::Thing[]", "(ref u8)[]", "ref ref mut T[][]", "pkg /*gap*/ :: Thing", "u8[0]", "ref u8[16]", "Box<u8[0x10]>[cfg::N][]", "(ref u8)[2][3]", "u8[ cfg /*gap*/ :: N ]"} {
 		input := "module main; fn " + typ + " f(" + typ + " x) { let " + typ + " y = x; let z = y; return z; }"
 		ref, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || ref.AST == nil {
@@ -70,7 +86,7 @@ func TestWindowsFairyParserTypes(t *testing.T) {
 		fmt.Fprintf(&p, "assert(syntax::declaration_at(ref parsed,1).result_type == %d && syntax::entry_at(ref parsed,0).type_root == %d && syntax::entry_at(ref parsed,1).type_root == %d && syntax::entry_at(ref parsed,2).type_root == 0 && syntax::type_count(ref parsed) == %d); return 0; }\n", result, param, local, count)
 		fmt.Fprintf(&main, "assert(switch(make(b%s)) { case .ok(parsed): { inspect_%d(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input), i)
 	}
-	for _, typ := range []string{"ptr u8", "u8[4]", "pkg::", "ref", "(ref u8", "A<>"} {
+	for _, typ := range []string{"ptr u8", "u8[1+2]", "u8[-1]", "u8[1", "u8[N::]", "u8[1.0]", "pkg::", "ref", "(ref u8", "A<>"} {
 		input := "module main; fn " + typ + " bad() {} fn void kept() {}"
 		fmt.Fprintf(&main, "{ let i32 r = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 1 && syntax::declaration_count(ref parsed) == 2 && syntax::type_count(ref parsed) == 1); 0 } case .err(_): { 1 } }; assert(r == 0); }\n", strconv.Quote(input))
 	}
@@ -87,6 +103,8 @@ func TestWindowsFairyParserTypes(t *testing.T) {
 assert(bound(b"module main; fn ",b"ref ",32,b"T f() {}",4)==0);
 assert(bound(b"module main; fn T",b"[]",4095,b" f() {}",0)==0);
 assert(bound(b"module main; fn T",b"[]",4096,b" f() {}",4)==0);
+assert(bound(b"module main; fn T",b"[1]",2047,b"[] f() {}",0)==0);
+assert(bound(b"module main; fn T",b"[1]",2048,b" f() {}",4)==0);
 return 0; }`)
 	runParserProbe(t, p.String()+main.String())
 }

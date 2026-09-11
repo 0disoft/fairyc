@@ -388,6 +388,7 @@ pub fn ref u8[] expected_text(u32 code) {
     if (code == 13) { return b">"; }
     if (code == 14) { return b"."; }
     if (code == 15) { return b"attribute argument"; }
+    if (code == 16) { return b"array length"; }
     return b"supported syntax";
 }
 pub fn ref u8[] source_view(ref Parsed parsed) { return scanner::source_view(ref parsed.source); }

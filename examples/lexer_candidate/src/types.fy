@@ -4,6 +4,7 @@ import std::vec as v;
 
 // Private postorder nodes: 1 path, 2 ref, 3 ref mut, 4 slice, 5 group.
 // 6 generic application (left base, right argument tail), 7 argument link.
+// 8 fixed array (left element, right length), 9 integer length, 10 path length.
 // Shared across the enclosing Parsed owner; IDs are one-based, zero absent.
 pub struct Node { u32 kind; usize start; usize end; usize left; usize right; }
 pub struct Attempt { usize next; usize end; usize count; usize root; i32 status; u32 expected; }
@@ -86,8 +87,23 @@ fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
         }
     } else { cursor.expected = 2; return 0; }
     while (root != 0 && take(stream,cursor,b"[")) {
+        var usize length = 0;
+        if (!word(stream,cursor.index,b"]")) {
+            let usize length_start = scanner::token_info(stream,cursor.index).start;
+            let u32 kind = scanner::token_info(stream,cursor.index).kind;
+            if (kind != 5 && kind != 3) { cursor.expected = 16; return 0; }
+            advance(stream,cursor);
+            if (kind == 3) {
+                while (take(stream,cursor,b"::")) {
+                    if (scanner::token_info(stream,cursor.index).kind != 3) { cursor.expected = 1; return 0; }
+                    advance(stream,cursor);
+                }
+            }
+            length = append(nodes,cursor,if (kind == 5) { 9 } else { 10 },length_start,0,0);
+            if (length == 0) { return 0; }
+        }
         if (!take(stream,cursor,b"]")) { cursor.expected = 11; return 0; }
-        root = append(nodes,cursor,4,start,root,0);
+        root = append(nodes,cursor,if (length == 0) { 4 } else { 8 },start,root,length);
     }
     return root;
 }
