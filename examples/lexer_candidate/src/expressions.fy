@@ -71,6 +71,25 @@ fn usize expression(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v
             }
         }
         left = append(nodes, cursor, Node { .kind = if (token.kind == 3) { 2 } else { 1 }, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = 0, .right = 0 });
+        if (left == 0) { return 0; }
+        if (token.kind == 3 && take(stream, cursor, b"{")) {
+            var usize fields = 0;
+            while (!word(stream, cursor.index, b"}")) {
+                let usize start = current(stream, cursor).start;
+                if (!expect(stream, cursor, b".", 14)) { return 0; }
+                let usize name = cursor.index;
+                if (current(stream, cursor).kind != 3) { cursor.expected = 1; return 0; }
+                advance(stream, cursor);
+                if (!expect(stream, cursor, b"=", 9)) { return 0; }
+                let usize value = expression(stream, cursor, nodes, 1, depth + 1);
+                if (value == 0) { return 0; }
+                fields = append(nodes, cursor, Node { .kind = 11, .start = start, .end = cursor.previous_end, .token = name, .left = value, .right = fields });
+                if (fields == 0) { return 0; }
+                if (!take(stream, cursor, b",")) { break; }
+            }
+            if (!expect(stream, cursor, b"}", 7)) { return 0; }
+            left = append(nodes, cursor, Node { .kind = 10, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = left, .right = fields });
+        }
     } else if (take(stream, cursor, b"(")) {
         let usize child = expression(stream, cursor, nodes, 1, depth + 1);
         if (child == 0 || !expect(stream, cursor, b")", 5)) { return 0; }

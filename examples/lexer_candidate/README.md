@@ -209,7 +209,7 @@ Each field preserves its full/name/public spans, visibility and `type_root`.
 Structs have no body or result-type root. All structs share a 1024-field limit;
 failed declarations roll back fields and types together. Duplicate-field legality,
 layout and ownership are not checked. Generic declarations, resource declarations,
-cleanup and record expressions remain unsupported.
+cleanup and generic record expressions remain unsupported.
 
 Expressions admit integers, `true`/`false`, strings, byte strings, qualified identifier paths, calls,
 nested parentheses, prefix
@@ -218,7 +218,7 @@ logical-or. Casts, reference prefixes, C strings and other literals
 remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
 binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
-5 binary, 6 call, 7 argument link, 8 field and 9 index. Field/index receivers are
+5 binary, 6 call, 7 argument link, 8 field, 9 index, 10 record and 11 record-field link. Field/index receivers are
 in `left`; index expressions are in `right`. Field text is the exact member token.
 Calls, fields and single indices form repeatable postfix chains. Range slicing is
 not admitted. One-based child IDs (zero absent), half-open source-byte spans and
@@ -238,6 +238,13 @@ link points to its expression in `left` and its predecessor in `right`.
 Empty calls, trailing argument commas and repeated call suffixes are admitted.
 All call/argument nodes share the existing node limit, and argument recursion
 shares the expression-depth limit. Generic specialization remains unsupported.
+Ordinary records retain the path root in `left` and the reversed field-link tail
+in `right`. Field links retain the value in `left`, previous link in `right`,
+member token and full initializer span. `record_field_count` and `record_field`
+expose field-link IDs in source order; `expression_text` returns each field name.
+Empty records, nesting and trailing commas are admitted. Duplicate fields,
+field types and layout are not checked. Record and field-link nodes consume the
+same expression budget; no separate record arena or unbounded side table exists.
 Failed declarations roll back their nodes before recovery. A shared 4096-node
 ceiling and 64-active-expression-call limit return status 4 without a result.
 
@@ -284,7 +291,7 @@ Problems additionally retain `expected` and the actual source `token` index.
 `problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
 renders the private expectation code: 0 supported syntax, 1 identifier, 2 type,
 3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
-12 `module`, 13 `>`. Code 0 deliberately remains general for unsupported constructs;
+12 `module`, 13 `>`, 14 `.`. Code 0 deliberately remains general for unsupported constructs;
 these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
 Expectations reset before each source item so recovery cannot leak an old hint.
 
