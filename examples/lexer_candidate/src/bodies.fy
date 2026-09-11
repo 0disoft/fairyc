@@ -112,17 +112,34 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
         left = append(nodes, cursor, Node { .kind = 3, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = child, .right = 0 });
     } else if (take(stream,cursor,b"[")) {
         var usize elements = 0;
+        var usize repeated = 0; var usize repeat_count = 0;
         while (!word(stream,cursor.index,b"]")) {
             let usize element_token = cursor.index;
             let usize element_start = current(stream,cursor).start;
             let usize value = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1);
             if (value == 0) { return 0; }
+            if (take(stream,cursor,b";")) {
+                if (elements != 0) { cursor.expected = 11; return 0; }
+                let usize count_token = cursor.index;
+                let scanner::TokenInfo count = current(stream,cursor);
+                if (count.kind != 5 && count.kind != 3) { cursor.expected = 16; return 0; }
+                advance(stream,cursor);
+                if (count.kind == 3) {
+                    while (take(stream,cursor,b"::")) {
+                        if (current(stream,cursor).kind != 3) { cursor.expected = 1; return 0; }
+                        advance(stream,cursor);
+                    }
+                }
+                repeat_count = append(nodes,cursor,Node { .kind = if (count.kind == 5) { 1 } else { 2 }, .start = count.start, .end = cursor.previous_end, .token = count_token, .left = 0, .right = 0 });
+                if (repeat_count == 0) { return 0; }
+                repeated = value; break;
+            }
             elements = append(nodes,cursor,Node { .kind = 25, .start = element_start, .end = cursor.previous_end, .token = element_token, .left = value, .right = elements });
             if (elements == 0) { return 0; }
             if (!take(stream,cursor,b",")) { break; }
         }
         if (!expect(stream,cursor,b"]",11)) { return 0; }
-        left = append(nodes,cursor,Node { .kind = 24, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = 0, .right = elements });
+        left = append(nodes,cursor,Node { .kind = if (repeated == 0) { 24 } else { 29 }, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = repeated, .right = if (repeated == 0) { elements } else { repeat_count } });
     } else if (take(stream,cursor,b"ref")) {
         let bool mutable = take(stream,cursor,b"mut");
         let usize child = expression(stream,cursor,nodes,entries,statements,type_nodes,11,depth + 1);

@@ -340,8 +340,12 @@ kind-25 element-link tail in `right`. Each link retains its value in `left` and
 the previous link in `right`. `array_element_count` and `array_element` expose
 source-ordered values without flattening nested arrays. Array spans include both
 brackets; element spans exclude separators. Both kinds share the expression-node
-and depth budgets. Repetition `[value; count]` remains unsupported, and element
-type compatibility and array evaluation remain outside this syntax candidate.
+and depth budgets. Repetition `[value; count]` instead uses kind 29, retaining the
+single value expression in `left` and a written integer/path count in `right`.
+No element links, expansion, count evaluation or value duplication are performed.
+Qualified count paths are preserved; arithmetic, calls, casts and parenthesized
+count expressions remain outside this narrow subset. Element type compatibility,
+constant validity and array evaluation are not checked by the candidate.
 
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and
@@ -424,7 +428,8 @@ length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 All thirteen current source files now parse without syntax problems in both
-Windows profiles. The corpus test explicitly requires complete syntax for these
+Windows profiles; see the [current coverage report](parser-coverage-closure-2026-09-11.md).
+The corpus test explicitly requires complete syntax for these
 named files and fails on diagnostics, budget exhaustion or file removal. New
 files remain observations until independently admitted to this regression gate.
 The [statement/resource report](parser-coverage-statements-2026-09-11.md) records

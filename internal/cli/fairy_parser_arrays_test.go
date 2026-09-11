@@ -33,7 +33,7 @@ func TestWindowsFairyParserArrays(t *testing.T) {
  0}case .err(_):{1}};assert(r==0);}
 `, strconv.Quote(input), strings.Index(input, "["), strings.Index(input, "]")+1, strings.Index(input, "b,"), strings.Index(input, "b,")+1)
 	p.WriteString(`{let i32 r=switch(make(b"module main;fn void f(){return [];}")){case .ok(parsed):{assert(syntax::expression_count(ref parsed)==1 && syntax::array_element_count(ref parsed,1)==0 && syntax::expression_at(ref parsed,1).right==0);0}case .err(_):{1}};assert(r==0);}`)
-	for _, expr := range []string{"[,]", "[a,,b]", "[a b]", "[a,", "[x;n]", "[[a],"} {
+	for _, expr := range []string{"[,]", "[a,,b]", "[a b]", "[a,", "[x;]", "[[a],"} {
 		input := "module main;fn void bad(){return " + expr + ";}fn void kept(){}"
 		fmt.Fprintf(&p, "{let i32 r=switch(make(b%s)){case .ok(parsed):{assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==2);0}case .err(_):{1}};assert(r==0);}\n", strconv.Quote(input))
 	}
