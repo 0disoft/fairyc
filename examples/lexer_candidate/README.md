@@ -226,7 +226,7 @@ cleanup and generic record expressions remain unsupported.
 Expressions admit integers, `true`/`false`, strings, byte strings, qualified identifier paths, calls,
 nested parentheses, prefix
 `+ - ! ~ *`, and the grammar's binary operators from multiplicative through
-logical-or. Casts, reference prefixes, C strings and other literals
+logical-or. Casts, C strings and other literals
 remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
 binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
@@ -298,6 +298,13 @@ this specialization node as its callee. `specialization_argument_count` and
 `specialization_argument` expose written type roots in source order. Type
 arguments share the declaration type arena and its limits. Nested `>>` is split
 only by the existing type cursor; ordinary comparisons and shifts are unchanged.
+
+Reference expressions use kind 21 for `ref` and 22 for `ref mut`, with the
+operand root in `left` and absent `right`. Full spans retain intervening trivia
+and the mutable marker; the source token retains `ref`. Postfix operations bind
+inside the reference, while binary operators remain outside. These nodes consume
+the existing expression-node and active-depth budget. Borrow validity, operand
+mutability and lifetime rules are not checked by this syntax candidate.
 
 `entry_at` and `entry_count` expose source-ordered parameters and statements,
 bounded to 1024 entries across the entire parse. Declaration `entry_start` and
