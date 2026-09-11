@@ -157,9 +157,26 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
             continue;
         }
         if (take(stream, cursor, b"[")) {
-            let usize index = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1);
-            if (index == 0 || !expect(stream, cursor, b"]", 11)) { return 0; }
-            left = append(nodes, cursor, Node { .kind = 9, .start = token.start, .end = cursor.previous_end, .token = opener, .left = left, .right = index });
+            let usize bounds_start = current(stream,cursor).start;
+            var usize index = 0;
+            if (!word(stream,cursor.index,b"..")) {
+                index = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1);
+                if (index == 0) { return 0; }
+            }
+            let usize range_token = cursor.index;
+            if (take(stream,cursor,b"..")) {
+                var usize end = 0;
+                if (!word(stream,cursor.index,b"]")) {
+                    end = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1);
+                    if (end == 0) { return 0; }
+                }
+                let usize bounds = append(nodes,cursor,Node { .kind = 27, .start = bounds_start, .end = cursor.previous_end, .token = range_token, .left = index, .right = end });
+                if (bounds == 0 || !expect(stream,cursor,b"]",11)) { return 0; }
+                left = append(nodes,cursor,Node { .kind = 26, .start = token.start, .end = cursor.previous_end, .token = opener, .left = left, .right = bounds });
+            } else {
+                if (!expect(stream, cursor, b"]", 11)) { return 0; }
+                left = append(nodes, cursor, Node { .kind = 9, .start = token.start, .end = cursor.previous_end, .token = opener, .left = left, .right = index });
+            }
             continue;
         }
         if (take(stream, cursor, b"(")) {

@@ -232,8 +232,14 @@ binary operators associate left, while unparenthesized comparison chains fail.
 The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
 5 binary, 6 call, 7 argument link, 8 field, 9 index, 10 record and 11 record-field link. Field/index receivers are
 in `left`; index expressions are in `right`. Field text is the exact member token.
-Calls, fields and single indices form repeatable postfix chains. Range slicing is
-not admitted. One-based child IDs (zero absent), half-open source-byte spans and
+Calls, fields, single indices and range slices form repeatable postfix chains.
+Kind 26 retains a slice receiver in `left` and a kind-27 bounds node in `right`.
+Bounds retain optional start/end expression IDs in `left`/`right`; zero means a
+written omission, not a synthesized numeric value. The bounds token is `..`;
+its span excludes brackets, while the slice spans the complete receiver and suffix.
+All four forms `a[x..y]`, `a[..y]`, `a[x..]`, `a[..]` share existing node/depth
+budgets. No bounds evaluation, range ordering or borrow validation occurs.
+One-based child IDs (zero absent), half-open source-byte spans and
 source token spelling preserve structure without evaluating or resolving names.
 Declaration `expression` is the last top-level return root, or zero if absent/empty.
 `expression_count`, `expression_at` and `expression_text` expose read-only views.
