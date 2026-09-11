@@ -427,14 +427,22 @@ qualified-path length root. Private kinds 8/9/10 represent array/integer length/
 length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
-All thirteen current source files now parse without syntax problems in both
-Windows profiles; see the [current coverage report](parser-coverage-closure-2026-09-11.md).
+All fourteen current source files, including the integrity checker, parse without
+syntax problems in both Windows profiles. The [earlier coverage report](parser-coverage-closure-2026-09-11.md)
+records the preceding thirteen-file milestone.
 The corpus test explicitly requires complete syntax for these
 named files and fails on diagnostics, budget exhaustion or file removal. New
 files remain observations until independently admitted to this regression gate.
 For admitted files, the native declaration list is also compared with the Go CST:
 kind, source order, complete byte span and declared name/alias span must match.
 This is a declaration-level comparison, not full expression-tree equivalence.
+The private `integrity::valid` checker additionally validates expression/type/
+statement kinds, required and optional arena references, backward same-arena
+links, token/source bounds, block link counts and declaration ranges. It runs on
+native corpus results, including incomplete results. It does not prove semantic
+validity, cross-arena graph acyclicity, unique ownership or full source coverage.
+Synthetic-node probes exercise missing, out-of-range, self-referential and
+wrong-kind links without mutating the published parse result.
 The [statement/resource report](parser-coverage-statements-2026-09-11.md) records
 the earlier eleven-file result; older baselines are retained as historical evidence.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.

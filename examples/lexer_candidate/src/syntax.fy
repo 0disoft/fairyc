@@ -241,6 +241,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
     }
     return .ok(Parsed { .source = input, .declarations = declarations, .problems = problems, .expressions = nodes, .entries = entries, .statements = statements, .types = type_nodes, .fields = fields, .attributes = attribute_nodes, .attribute_arguments = attribute_arguments });
 }
+pub fn usize source_token_count(ref Parsed parsed) { return scanner::token_count(ref parsed.source); }
 pub fn usize declaration_count(ref Parsed parsed) { return v::len<Declaration>(ref parsed.declarations); }
 pub fn usize problem_count(ref Parsed parsed) { return v::len<Problem>(ref parsed.problems); }
 pub fn Declaration declaration_at(ref Parsed parsed, usize index) { return *v::at<Declaration>(ref parsed.declarations, index); }

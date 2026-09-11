@@ -20,12 +20,14 @@ import (
 
 const parserCorpusProgram = `module main;
 import scanner as scanner; import syntax as syntax;
+import integrity as integrity;
 import std::bytes as bytes; import std::io as io;
 @effects(console) fn void number(usize value) {
  assert(switch(io::write_usize(value)) { case .ok(_): { true } case .err(_): { false } });
  assert(switch(io::write(" ")) { case .ok(_): { true } case .err(_): { false } });
 }
 @effects(console) fn i32 report(syntax::Parsed parsed) {
+ assert(integrity::valid(ref parsed));
  number(0); number(syntax::declaration_count(ref parsed)); number(syntax::problem_count(ref parsed));
  if (syntax::problem_count(ref parsed) > 0) {
   let syntax::Problem p = syntax::problem_at(ref parsed,0);
@@ -77,13 +79,18 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeTestSource(t, root, "src/syntax.fy", string(parser))
+	check, err := os.ReadFile(filepath.Join(example, "integrity.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestSource(t, root, "src/integrity.fy", string(check))
 	writeTestSource(t, root, "src/main.fy", parserCorpusProgram)
 	baseline := map[string]string{}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		// These unchanged sources have passed complete syntax. Keep this explicit
 		// set so deletion or a newly unsupported construct cannot silently regress it.
 		missing := map[string]bool{}
-		for _, name := range []string{"attributes.fy", "bodies.fy", "budget.fy", "diagnostics.fy", "main.fy", "numbers.fy", "pages.fy", "records.fy", "scanner.fy", "strings.fy", "syntax.fy", "types.fy", "utf8.fy"} {
+		for _, name := range []string{"attributes.fy", "bodies.fy", "budget.fy", "diagnostics.fy", "integrity.fy", "main.fy", "numbers.fy", "pages.fy", "records.fy", "scanner.fy", "strings.fy", "syntax.fy", "types.fy", "utf8.fy"} {
 			missing[name] = true
 		}
 		var stderr strings.Builder

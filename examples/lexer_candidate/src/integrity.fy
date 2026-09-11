@@ -1,0 +1,104 @@
+module integrity;
+import syntax as syntax;
+import types as types;
+
+fn bool span(ref syntax::Parsed p, usize start, usize end) {
+    return start < end && end <= syntax::source_view(p).len;
+}
+fn bool value_kind(u32 kind) {
+    return (kind >= 1 && kind <= 6) || (kind >= 8 && kind <= 10) || kind == 12 || kind == 13 || kind == 15 || (kind >= 20 && kind <= 24) || kind == 26 || kind == 28 || kind == 29;
+}
+fn bool expr(ref syntax::Parsed p, usize id, usize before, u32 kind) {
+    if (id == 0 || id >= before || id > syntax::expression_count(p)) { return false; }
+    let u32 actual = syntax::expression_at(p,id).kind;
+    return if (kind == 0) { value_kind(actual) } else { actual == kind };
+}
+fn bool optional_expr(ref syntax::Parsed p, usize id, usize before, u32 kind) {
+    return id == 0 || expr(p,id,before,kind);
+}
+fn bool type_ref(ref syntax::Parsed p, usize id, usize before, u32 kind) {
+    if (id == 0 || id >= before || id > syntax::type_count(p)) { return false; }
+    let u32 actual = syntax::type_at(p,id).kind;
+    return if (kind == 0) { (actual >= 1 && actual <= 6) || actual == 8 } else { actual == kind };
+}
+fn bool stmt(ref syntax::Parsed p, usize id, usize before, u32 kind) {
+    if (id == 0 || id >= before || id > syntax::statement_count(p)) { return false; }
+    let u32 actual = syntax::statement_at(p,id).kind;
+    return if (kind == 0) { actual >= 1 && actual <= 12 && actual != 7 } else { actual == kind };
+}
+pub fn bool valid_expression(ref syntax::Parsed p, syntax::Expression n, usize id) {
+    if (id == 0 || id > syntax::expression_count(p) || !span(p,n.start,n.end) || n.token >= syntax::source_token_count(p)) { return false; }
+    let usize statements = syntax::statement_count(p) + 1;
+    let usize type_limit = syntax::type_count(p) + 1;
+    if (n.kind == 1 || n.kind == 2 || n.kind == 17 || n.kind == 28) { return n.left == 0 && n.right == 0; }
+    if (n.kind == 3 || n.kind == 4 || n.kind == 8 || n.kind == 21 || n.kind == 22) { return expr(p,n.left,id,0) && n.right == 0; }
+    if (n.kind == 5 || n.kind == 9) { return expr(p,n.left,id,0) && expr(p,n.right,id,0); }
+    if (n.kind == 29) { return expr(p,n.left,id,0) && (expr(p,n.right,id,1) || expr(p,n.right,id,2)); }
+    if (n.kind == 6) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,7); }
+    if (n.kind == 7 || n.kind == 11 || n.kind == 25) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,n.kind); }
+    if (n.kind == 10) { return expr(p,n.left,id,2) && optional_expr(p,n.right,id,11); }
+    if (n.kind == 12) { return stmt(p,n.left,statements,1) && n.right == 0; }
+    if (n.kind == 13) { return expr(p,n.left,id,0) && expr(p,n.right,id,14); }
+    if (n.kind == 14) { return stmt(p,n.left,statements,1) && (n.right == 0 || expr(p,n.right,id,12) || expr(p,n.right,id,13)); }
+    if (n.kind == 15) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,19); }
+    if (n.kind == 16) { return optional_expr(p,n.left,id,17) && n.right == 0; }
+    if (n.kind == 18) { return expr(p,n.left,id,16) && stmt(p,n.right,statements,1); }
+    if (n.kind == 19) { return expr(p,n.left,id,18) && optional_expr(p,n.right,id,19); }
+    if (n.kind == 20) { return expr(p,n.left,id,2) && type_ref(p,n.right,type_limit,7); }
+    if (n.kind == 23) { return expr(p,n.left,id,0) && type_ref(p,n.right,type_limit,0); }
+    if (n.kind == 24) { return n.left == 0 && optional_expr(p,n.right,id,25); }
+    if (n.kind == 26) { return expr(p,n.left,id,0) && expr(p,n.right,id,27); }
+    if (n.kind == 27) { return optional_expr(p,n.left,id,0) && optional_expr(p,n.right,id,0); }
+    return false;
+}
+pub fn bool valid_type(ref syntax::Parsed p, types::Node n, usize id) {
+    if (id == 0 || id > syntax::type_count(p) || !span(p,n.start,n.end)) { return false; }
+    if (n.kind == 1 || n.kind == 9 || n.kind == 10) { return n.left == 0 && n.right == 0; }
+    if (n.kind >= 2 && n.kind <= 5) { return type_ref(p,n.left,id,0) && n.right == 0; }
+    if (n.kind == 6) { return type_ref(p,n.left,id,0) && type_ref(p,n.right,id,7); }
+    if (n.kind == 7) { return type_ref(p,n.left,id,0) && (n.right == 0 || type_ref(p,n.right,id,7)); }
+    if (n.kind == 8) { return type_ref(p,n.left,id,0) && (type_ref(p,n.right,id,9) || type_ref(p,n.right,id,10)); }
+    return false;
+}
+pub fn bool valid_statement(ref syntax::Parsed p, syntax::Statement n, usize id) {
+    if (id == 0 || id > syntax::statement_count(p) || !span(p,n.start,n.end)) { return false; }
+    let usize expressions = syntax::expression_count(p) + 1;
+    if (n.kind == 1) {
+        if (!optional_expr(p,n.expression,expressions,0) || n.target != 0 || n.entry != 0 || n.operator != 0) { return false; }
+        var usize link = n.first; var usize count = 0; var usize before = id;
+        while (link != 0) {
+            if (!stmt(p,link,before,7)) { return false; }
+            before = link; link = syntax::statement_at(p,link).second; count += 1;
+        }
+        return count == n.second;
+    }
+    if (n.kind == 7) { return stmt(p,n.first,id,0) && (n.second == 0 || stmt(p,n.second,id,7)) && n.expression == 0 && n.target == 0 && n.entry == 0 && n.operator == 0; }
+    if (n.kind == 2 || n.kind == 3) { return n.entry > 0 && n.entry <= syntax::entry_count(p) && (if (n.kind == 2) { expr(p,n.expression,expressions,0) } else { optional_expr(p,n.expression,expressions,0) }) && n.target == 0 && n.first == 0 && n.second == 0 && n.operator == 0; }
+    if (n.kind == 4) { return expr(p,n.target,expressions,0) && expr(p,n.expression,expressions,0) && n.operator < syntax::source_token_count(p) && n.first == 0 && n.second == 0 && n.entry == 0; }
+    if (n.target != 0 || n.entry != 0 || n.operator != 0) { return false; }
+    if (n.kind == 5 || n.kind == 8) { return expr(p,n.expression,expressions,0) && stmt(p,n.first,id,1) && (if (n.kind == 8) { n.second == 0 } else { n.second == 0 || stmt(p,n.second,id,1) || stmt(p,n.second,id,5) }); }
+    if (n.first != 0 || n.second != 0) { return false; }
+    if (n.kind == 6 || n.kind == 11 || n.kind == 12) { return expr(p,n.expression,expressions,0); }
+    return (n.kind == 9 || n.kind == 10) && n.expression == 0;
+}
+pub fn bool valid(ref syntax::Parsed p) {
+    var usize i = 1;
+    while (i <= syntax::expression_count(p)) { if (!valid_expression(p,syntax::expression_at(p,i),i)) { return false; } i += 1; }
+    i = 1;
+    while (i <= syntax::type_count(p)) { if (!valid_type(p,syntax::type_at(p,i),i)) { return false; } i += 1; }
+    i = 1;
+    while (i <= syntax::statement_count(p)) { if (!valid_statement(p,syntax::statement_at(p,i),i)) { return false; } i += 1; }
+    i = 0;
+    while (i < syntax::declaration_count(p)) {
+        let syntax::Declaration d = syntax::declaration_at(p,i);
+        if (!span(p,d.start,d.end) || d.name_start < d.start || d.name_start >= d.name_end || d.name_end > d.end) { return false; }
+        if (d.entry_start > syntax::entry_count(p) || d.entry_count > syntax::entry_count(p) - d.entry_start || d.field_start > syntax::field_count(p) || d.field_count > syntax::field_count(p) - d.field_start) { return false; }
+        if (d.kind == 3) {
+            if (!stmt(p,d.body,syntax::statement_count(p) + 1,1) || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0)) { return false; }
+        } else if (d.body != 0 || d.result_type != 0 || (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6)) { return false; }
+        if (d.cleanup_body != 0 && (d.kind != 6 || !stmt(p,d.cleanup_body,syntax::statement_count(p) + 1,1))) { return false; }
+        if (!optional_expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
+        i += 1;
+    }
+    return true;
+}
