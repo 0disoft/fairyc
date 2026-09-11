@@ -30,7 +30,7 @@ func TestWindowsFairyParserResources(t *testing.T) {
  assert(absent.kind==6 && absent.cleanup_start==0 && absent.cleanup_end==0 && absent.field_start==1 && absent.field_count==0);
  0}case .err(_):{1}};assert(r==0);}
 `, strconv.Quote(input), strings.Index(input, "@"), strings.Index(input, " resource S"), strings.Index(input, "R {"), strings.Index(input, "R {")+1, strings.Index(input, "cleanup"), strings.Index(input, "}}")+1)
-	for _, bad := range []string{"resource R<T> {}", "pub resource R {u8 x}", "resource R {u8 x;cleanup {assert(true);}}", "resource R {cleanup {} u8 x;}", "resource R {cleanup {} cleanup {}}", "resource R {cleanup}", "resource R {cleanup { }", "resource R {@tag cleanup {}}", "struct R {cleanup {}}"} {
+	for _, bad := range []string{"resource R<T> {}", "pub resource R {u8 x}", "resource R {u8 x;cleanup {assert();}}", "resource R {cleanup {} u8 x;}", "resource R {cleanup {} cleanup {}}", "resource R {cleanup}", "resource R {cleanup { }", "resource R {@tag cleanup {}}", "struct R {cleanup {}}"} {
 		input := "module main;@bad " + bad + " @kept resource Kept {}"
 		// Leave an unmatched resource brace out of the recovery-to-sibling cases.
 		if bad == "resource R {cleanup { }" {

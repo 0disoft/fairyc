@@ -4,8 +4,8 @@ import types as types;
 import std::vec as v;
 
 pub struct Field { usize start; usize end; usize name_start; usize name_end; usize type_root; bool public; usize public_start; usize public_end; }
-pub struct Attempt { bool ok; usize next; usize end; usize fields; usize types; i32 status; u32 expected; usize cleanup_start; usize cleanup_end; }
-struct Cursor { usize index; usize end; usize fields; usize types; i32 status; u32 expected; usize cleanup_start; usize cleanup_end; }
+pub struct Attempt { bool ok; usize next; usize end; usize fields; usize types; i32 status; u32 expected; usize cleanup_start; }
+struct Cursor { usize index; usize end; usize fields; usize types; i32 status; u32 expected; usize cleanup_start; }
 fn void advance(ref scanner::Stream stream, ref mut Cursor cursor) {
     cursor.end = scanner::token_info(stream,cursor.index).end;
     if (cursor.index + 1 < scanner::token_count(stream)) { cursor.index = cursor.index + 1; }
@@ -36,17 +36,12 @@ fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<t
     }
     if (is_resource && types::word(stream,cursor.index,b"cleanup")) {
         cursor.cleanup_start = scanner::token_info(stream,cursor.index).start;
-        advance(stream,cursor);
-        if (!types::word(stream,cursor.index,b"{")) { cursor.expected = 6; return false; }
-        advance(stream,cursor);
-        if (!types::word(stream,cursor.index,b"}")) { cursor.expected = 7; return false; }
-        advance(stream,cursor); cursor.cleanup_end = cursor.end;
-        if (!types::word(stream,cursor.index,b"}")) { cursor.expected = 7; return false; }
+        return true;
     }
     advance(stream,cursor); return true;
 }
 pub fn Attempt parse(ref scanner::Stream stream, usize index, usize type_count, usize field_count, ref mut v::Vec<types::Node> nodes, ref mut v::Vec<Field> fields, bool is_resource) {
-    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .fields = field_count, .types = type_count, .status = 0, .expected = 0, .cleanup_start = 0, .cleanup_end = 0 };
+    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .fields = field_count, .types = type_count, .status = 0, .expected = 0, .cleanup_start = 0 };
     let bool ok = body(stream,ref mut cursor,nodes,fields,is_resource);
-    return Attempt { .ok = ok, .next = cursor.index, .end = cursor.end, .fields = cursor.fields, .types = cursor.types, .status = cursor.status, .expected = cursor.expected, .cleanup_start = cursor.cleanup_start, .cleanup_end = cursor.cleanup_end };
+    return Attempt { .ok = ok, .next = cursor.index, .end = cursor.end, .fields = cursor.fields, .types = cursor.types, .status = cursor.status, .expected = cursor.expected, .cleanup_start = cursor.cleanup_start };
 }

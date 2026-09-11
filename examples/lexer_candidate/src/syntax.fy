@@ -8,7 +8,7 @@ import attributes as attributes;
 
 // Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
-pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; }
+pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
 // Zero name/type spans mean unwritten; expression zero means no initializer/value.
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; }
@@ -78,7 +78,7 @@ fn u32 item_kind(ref scanner::Stream stream, usize index) {
 fn Attempt failed(ref scanner::Stream stream, ref mut bodies::Cursor cursor, u32 code) {
     let scanner::TokenInfo token = current(stream, cursor);
     return Attempt { .ok = false,
-        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0 },
+        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0, .cleanup_body = 0 },
         .problem = Problem { .code = code, .start = token.start, .end = token.end, .expected = cursor.expected, .token = cursor.index } };
 }
 fn bool expect(ref scanner::Stream stream, ref mut bodies::Cursor cursor, ref u8[] text, u32 code) {
@@ -101,7 +101,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
     if (name.kind != 3) { cursor.expected = 1; return failed(stream, cursor, kind); }
     var usize name_start = name.start; var usize name_end = name.end;
     var usize root = 0;
-    var usize body = 0; var usize cleanup_start = 0; var usize cleanup_end = 0;
+    var usize body = 0; var usize cleanup_start = 0; var usize cleanup_end = 0; var usize cleanup_body = 0;
     advance(stream, cursor);
     if (kind < 3) {
         while (take(stream, cursor, b"::")) {
@@ -121,7 +121,14 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
         cursor.index = record.next; cursor.previous_end = record.end; cursor.types = record.types; cursor.fields = record.fields;
         cursor.expected = record.expected; cursor.status = record.status;
         if (!record.ok) { return failed(stream,cursor,kind); }
-        cleanup_start = record.cleanup_start; cleanup_end = record.cleanup_end;
+        cleanup_start = record.cleanup_start;
+        if (cleanup_start != 0) {
+            advance(stream,cursor);
+            cleanup_body = bodies::block(stream,cursor,nodes,entries,statements,type_nodes,0,false);
+            if (cleanup_body == 0) { return failed(stream,cursor,kind); }
+            cleanup_end = cursor.previous_end;
+            if (!expect(stream,cursor,b"}",7)) { return failed(stream,cursor,kind); }
+        }
     } else {
         if (!expect(stream, cursor, b"(", 4)) { return failed(stream, cursor, kind); }
         while (!word(stream, cursor.index, b")")) {
@@ -135,7 +142,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
         root = cursor.top_return;
     }
     return Attempt { .ok = true,
-        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end },
+        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end, .cleanup_body = cleanup_body },
         .problem = Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .token = 0 } };
 }
 

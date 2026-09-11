@@ -221,11 +221,15 @@ Each field preserves its full/name/public spans, visibility and `type_root`.
 Structs have no body or result-type root. All structs share a 1024-field limit;
 failed declarations roll back fields and types together. Duplicate-field legality,
 layout and ownership are not checked. Non-generic resources use declaration kind 6
-and share the same field/type arenas and 1024-field budget. An optional empty
-`cleanup {}` is retained by `cleanup_start`/`cleanup_end` (keyword through closing
-brace); both zero means unwritten. Resources have no function body or result type.
+and share the same field/type arenas and 1024-field budget. Optional `cleanup`
+bodies reuse the statement parser and are retained by `cleanup_body` in the shared
+statement arena. `cleanup_start`/`cleanup_end` span the keyword through closing
+brace; all three zero means unwritten. Empty cleanup has a real empty block.
+Cleanup entries use the declaration's source-ordered entry range. Resources still
+have no function `body` or result type. Body nodes, entries and nesting share the
+same budgets as functions, and malformed cleanup rolls back the whole declaration.
 Declaration attributes and `pub` spans are preserved as for structs; imports
-cannot follow resources. Generic declarations, nonempty or attributed cleanup,
+cannot follow resources. Generic declarations, attributed cleanup,
 and generic record expressions remain unsupported. No resource ownership or
 destruction behavior is implemented by the candidate. Malformed resources roll
 back fields, types and attributes before recovering to the next declaration.
