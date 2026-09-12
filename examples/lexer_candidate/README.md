@@ -431,8 +431,9 @@ length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 All fifteen current source files, including the integrity checker and token helpers, parse without
-syntax problems in both Windows profiles. The [control syntax report](parser-control-items-2026-09-12.md)
-records the latest bounded fixture results. The [preceding evidence report](parser-evidence-2026-09-11.md)
+syntax problems in both Windows profiles. The [literal/item report](parser-literal-items-2026-09-12.md)
+records the latest bounded fixture results; the [control syntax report](parser-control-items-2026-09-12.md)
+retains the preceding milestone. The [preceding evidence report](parser-evidence-2026-09-11.md)
 records the initial declaration comparison, integrity checks and fixture baseline.
 The [earlier coverage report](parser-coverage-closure-2026-09-11.md)
 records the preceding thirteen-file milestone.
@@ -467,7 +468,7 @@ execution semantics.
 Private declaration kind 7 preserves a written `const` declaration: `result_type`
 is its declared type root and `expression` is its initializer. Visibility,
 attributes and declaration/name spans retain the existing declaration contract.
-Initializers are parsed, not evaluated; `static_assert` remains unsupported.
+Initializers are parsed, not evaluated.
 
 Private statement kind 13 preserves `defer expression;`, including its operand,
 source span and position in the enclosing block. Execution timing, call validity
@@ -489,6 +490,12 @@ conversion or floating-point evaluation.
 C-string tokens (kind 9) are also literal expressions. Their cooked view retains
 the lexer-produced terminal NUL in its hexadecimal representation; embedded NUL
 and invalid escapes remain lexical errors. No pointer or FFI behavior is added.
+
+Private declaration kind 8 preserves module-level `static_assert(expression);`.
+Its name spans and result type are zero because no name or type was written;
+`expression` is the required condition root. Attributes and public syntax retain
+the declaration contract. No constant evaluation occurs, and `static_assert`
+remains an ordinary identifier outside the module-item dispatch position.
 
 ## Cost baseline
 

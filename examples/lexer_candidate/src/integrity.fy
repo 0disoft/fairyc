@@ -93,10 +93,15 @@ pub fn bool valid(ref syntax::Parsed p) {
     i = 0;
     while (i < syntax::declaration_count(p)) {
         let syntax::Declaration d = syntax::declaration_at(p,i);
-        if (!span(p,d.start,d.end) || d.name_start < d.start || d.name_start >= d.name_end || d.name_end > d.end) { return false; }
+        if (!span(p,d.start,d.end)) { return false; }
+        if (d.kind == 8) {
+            if (d.name_start != 0 || d.name_end != 0) { return false; }
+        } else if (d.name_start < d.start || d.name_start >= d.name_end || d.name_end > d.end) { return false; }
         if (d.entry_start > syntax::entry_count(p) || d.entry_count > syntax::entry_count(p) - d.entry_start || d.field_start > syntax::field_count(p) || d.field_count > syntax::field_count(p) - d.field_start) { return false; }
         if (d.kind == 3) {
             if (!stmt(p,d.body,syntax::statement_count(p) + 1,1) || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0)) { return false; }
+        } else if (d.kind == 8) {
+            if (d.body != 0 || d.result_type != 0 || !expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
         } else if (d.kind == 7) {
             if (d.body != 0 || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0) || !expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
         } else if (d.body != 0 || d.result_type != 0 || (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6)) { return false; }
