@@ -212,7 +212,7 @@ func compareParserDeclarations(t *testing.T, name string, data []byte, actual []
 		if !ok {
 			t.Fatal("missing oracle declaration")
 		}
-		kind := map[syntax.Kind]int{syntax.KindModule: 1, syntax.KindImport: 2, syntax.KindFunction: 3, syntax.KindStruct: 4, syntax.KindResource: 6, syntax.KindConst: 7, syntax.KindStaticAssert: 8}[node.Kind]
+		kind := map[syntax.Kind]int{syntax.KindModule: 1, syntax.KindImport: 2, syntax.KindFunction: 3, syntax.KindStruct: 4, syntax.KindResource: 6, syntax.KindConst: 7, syntax.KindStaticAssert: 8, syntax.KindForeign: 9}[node.Kind]
 		if kind == 0 {
 			t.Fatalf("unsupported declaration oracle %s: %s", name, node.Kind)
 		}

@@ -102,6 +102,8 @@ pub fn bool valid(ref syntax::Parsed p) {
             if (!stmt(p,d.body,syntax::statement_count(p) + 1,1) || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0)) { return false; }
         } else if (d.kind == 8) {
             if (d.body != 0 || d.result_type != 0 || !expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
+        } else if (d.kind == 9) {
+            if (d.body != 0 || d.expression != 0 || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0)) { return false; }
         } else if (d.kind == 7) {
             if (d.body != 0 || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0) || !expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
         } else if (d.body != 0 || d.result_type != 0 || (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6)) { return false; }
