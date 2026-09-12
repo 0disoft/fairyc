@@ -135,6 +135,10 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
     var bool comparison = false;
     while (left != 0) {
         let usize opener = cursor.index;
+        if (take(stream,cursor,b"?")) {
+            left = append(nodes,cursor,Node { .kind = 30, .start = token.start, .end = cursor.previous_end, .token = opener, .left = left, .right = 0 });
+            continue;
+        }
         if (word(stream,cursor.index,b"as")) {
             if (minimum > 10) { return left; }
             advance(stream,cursor);

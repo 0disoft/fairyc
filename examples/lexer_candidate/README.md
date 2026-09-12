@@ -458,6 +458,11 @@ the earlier eleven-file result; older baselines are retained as historical evide
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
 This must not be confused with the lexer's complete source-token comparison.
 
+Postfix propagation uses private expression kind 30 with one operand and the
+written question-mark token. Chains, grouping and prefix/infix precedence are
+compared with Go AST shapes. This preserves syntax only, not error propagation
+execution semantics.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token

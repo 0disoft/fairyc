@@ -58,7 +58,7 @@ func runParserProbe(t *testing.T, program string) {
 func TestWindowsFairyParserPostfix(t *testing.T) {
 	var p, main strings.Builder
 	main.WriteString("fn i32 main() {\n")
-	for n, expr := range []string{"a.b", "a[1]", "a.b[i].c", "f().items[i + 1].value", "-a.b[i] * c", "a[b[c]]", "a /*gap*/ . b [ i ]", "a.b()"} {
+	for n, expr := range []string{"a.b", "a[1]", "a.b[i].c", "f().items[i + 1].value", "-a.b[i] * c", "a[b[c]]", "a /*gap*/ . b [ i ]", "a.b()", "a?", "a??", "f().items[i].value?", "-a? * b", "(a + b)?", "a?.b?[i]?", "a /*gap*/ ?"} {
 		input := "module main; fn i32 f() { return " + expr + "; }"
 		result, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || result.AST == nil || result.Tree == nil || len(result.Tree.Diagnostics) != 0 {
@@ -75,12 +75,15 @@ func TestWindowsFairyParserPostfix(t *testing.T) {
 			if len(e.Children) > 1 {
 				right = emit(e.Children[1])
 			}
-			kind := map[syntax.Kind]int{syntax.KindLiteral: 1, syntax.KindPath: 2, syntax.KindGroup: 3, syntax.KindPrefix: 4, syntax.KindBinary: 5, syntax.KindCall: 6, syntax.KindFieldExpr: 8, syntax.KindIndex: 9}[e.Kind]
+			kind := map[syntax.Kind]int{syntax.KindLiteral: 1, syntax.KindPath: 2, syntax.KindGroup: 3, syntax.KindPrefix: 4, syntax.KindBinary: 5, syntax.KindCall: 6, syntax.KindFieldExpr: 8, syntax.KindIndex: 9, syntax.KindPropagate: 30}[e.Kind]
 			if kind == 0 {
 				t.Fatalf("unknown oracle kind %s", e.Kind)
 			}
 			count++
 			fmt.Fprintf(&p, "{ let syntax::Expression e = syntax::expression_at(ref parsed,%d); assert(e.kind == %d && e.start == %d && e.end == %d && e.left == %d && e.right == %d); }\n", count, kind, e.Span.StartByte, e.Span.EndByte, left, right)
+			if kind == 30 {
+				fmt.Fprintf(&p, "{ let ref u8[] op = syntax::expression_text(ref parsed,%d); assert(op.len == 1 && op[0] == 63); }\n", count)
+			}
 			if kind == 8 {
 				fmt.Fprintf(&p, "{ let ref u8[] name = syntax::expression_text(ref parsed,%d); assert(name.len == %d);", count, len(e.Text))
 				for i, b := range []byte(e.Text) {
@@ -91,11 +94,11 @@ func TestWindowsFairyParserPostfix(t *testing.T) {
 			return count
 		}
 		root := emit(result.AST.Functions[0].Body.Statements[0].Expression)
-		fmt.Fprintf(&p, "assert(syntax::expression_count(ref parsed) == %d && syntax::declaration_at(ref parsed,1).expression == %d); return 0; }\n", count, root)
+		fmt.Fprintf(&p, "assert(integrity::valid(ref parsed)); assert(syntax::expression_count(ref parsed) == %d && syntax::declaration_at(ref parsed,1).expression == %d); return 0; }\n", count, root)
 		fmt.Fprintf(&main, "assert(switch(make(b%s)) { case .ok(parsed): { check_%d(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input), n)
 	}
 	p.WriteString("fn i32 rejected(syntax::Parsed parsed) { assert(syntax::problem_count(ref parsed) == 1 && syntax::declaration_count(ref parsed) == 2 && syntax::expression_count(ref parsed) == 0 && syntax::statement_count(ref parsed) == 1); return 0; }\n")
-	for _, expr := range []string{"a.", "a.true", "a[]", "a[1", "a[1..2..3]", "a[..,]"} {
+	for _, expr := range []string{"a.", "a.true", "a[]", "a[1", "a[1..2..3]", "a[..,]", "?a", "a? +", "a?."} {
 		input := "module main; fn i32 bad() { return " + expr + "; } fn void kept() {}"
 		fmt.Fprintf(&main, "assert(switch(make(b%s)) { case .ok(parsed): { rejected(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input))
 	}
