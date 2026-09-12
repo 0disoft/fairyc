@@ -113,7 +113,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
     var usize body = 0; var usize cleanup_start = 0; var usize cleanup_end = 0; var usize cleanup_body = 0;
     if (kind != 8 && kind != 10) { advance(stream, cursor); }
     var usize generic_parameters = 0; var usize generic_start = 0; var usize generic_end = 0;
-    if (kind == 3 && word(stream,cursor.index,b"<")) {
+    if ((kind == 3 || kind == 4 || kind == 6) && word(stream,cursor.index,b"<")) {
         generic_start = current(stream,cursor).start;
         let types::Attempt parameters = types::parse_parameters(stream,cursor.index,cursor.types,type_nodes);
         cursor.index = parameters.next; cursor.previous_end = parameters.end; cursor.types = parameters.count;

@@ -28,7 +28,7 @@ func TestWindowsFairyParserVisibility(t *testing.T) {
 	}
 	p.WriteString("return 0; } fn i32 main() {\n")
 	fmt.Fprintf(&p, "assert(switch(make(b%s)) { case .ok(parsed): { inspect(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input))
-	for _, bad := range []string{"pub struct X<T> {}", "pub resource X<T> { cleanup {} }", "pub import a as b;", "pub"} {
+	for _, bad := range []string{"pub struct X<T,,> {}", "pub resource X<T,,> { cleanup {} }", "pub import a as b;", "pub"} {
 		text := "module main; " + bad + " pub fn void kept() {}"
 		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) > 0 && syntax::declaration_count(ref parsed) == 2); let syntax::Declaration d = syntax::declaration_at(ref parsed,1); assert(d.public && d.start == %d); 0 } case .err(_): { 1 } }; assert(result == 0); }\n", strconv.Quote(text), strings.LastIndex(text, "pub fn"))
 	}

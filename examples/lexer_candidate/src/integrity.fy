@@ -98,7 +98,7 @@ pub fn bool valid(ref syntax::Parsed p) {
         if (d.generic_parameters == 0) {
             if (d.generic_start != 0 || d.generic_end != 0) { return false; }
         } else {
-            if (d.kind != 3 || d.generic_start < d.name_end || d.generic_end <= d.generic_start || d.generic_end > d.end || !type_ref(p,d.generic_parameters,syntax::type_count(p) + 1,14)) { return false; }
+            if ((d.kind != 3 && d.kind != 4 && d.kind != 6) || d.generic_start < d.name_end || d.generic_end <= d.generic_start || d.generic_end > d.end || !type_ref(p,d.generic_parameters,syntax::type_count(p) + 1,14)) { return false; }
             var usize link = d.generic_parameters;
             while (link != 0) {
                 let types::Node name = syntax::type_at(p,syntax::type_at(p,link).left);

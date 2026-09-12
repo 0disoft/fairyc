@@ -205,6 +205,14 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 
 func compareParserDeclarations(t *testing.T, name string, data []byte, actual []int) {
 	t.Helper()
+	want := parserDeclarationRecords(t, name, data)
+	if fmt.Sprint(actual) != fmt.Sprint(want) {
+		t.Fatalf("declaration mismatch %s: got %v want %v", name, actual, want)
+	}
+}
+
+func parserDeclarationRecords(t *testing.T, name string, data []byte) []int {
+	t.Helper()
 	oracle, err := frontend.AnalyzeSyntax(source.NewFile(name, data), source.DefaultLimits())
 	if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 {
 		t.Fatalf("declaration oracle %s: %v", name, err)
@@ -244,7 +252,5 @@ func compareParserDeclarations(t *testing.T, name string, data []byte, actual []
 		}
 		want = append(want, kind, node.Span.StartByte, node.Span.EndByte, nameSpan.StartByte, nameSpan.EndByte)
 	}
-	if fmt.Sprint(actual) != fmt.Sprint(want) {
-		t.Fatalf("declaration mismatch %s: got %v want %v", name, actual, want)
-	}
+	return want
 }

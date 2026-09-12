@@ -75,6 +75,19 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 				return row
 			}
 			full := observe(data)
+			if full[0] == 0 {
+				want := parserDeclarationRecords(t, file.name, data)
+				position := 0
+				for i := 6; i < len(full); i += 5 {
+					for position < len(want) && fmt.Sprint(want[position:position+5]) != fmt.Sprint(full[i:i+5]) {
+						position += 5
+					}
+					if position == len(want) {
+						t.Fatalf("SDK retained declaration differs from Go: %s %v", file.name, full[i:i+5])
+					}
+					position += 5
+				}
+			}
 			first := full
 			if full[0] == 4 {
 				for _, id := range top.Children {

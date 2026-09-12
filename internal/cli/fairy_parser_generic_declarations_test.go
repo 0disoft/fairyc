@@ -38,7 +38,7 @@ func genericDeclarationProbe(t *testing.T, input string, kind int) string {
 		n, _ := oracle.Tree.Node(id)
 		fmt.Fprintf(&p, `{let name=syntax::generic_parameter_at(ref parsed,1,%d);assert(name.kind==13 && name.start==%d && name.end==%d && name.left==0 && name.right==0);}`, index, n.Span.StartByte, n.Span.EndByte)
 	}
-	p.WriteString("0}case .err(_):{1}};assert(r==0);}")
+	p.WriteString("{var link=syntax::type_at(ref parsed,d.generic_parameters);link.left=0;assert(!integrity::valid_type(ref parsed,link,d.generic_parameters));}0}case .err(_):{1}};assert(r==0);}")
 	return p.String()
 }
 

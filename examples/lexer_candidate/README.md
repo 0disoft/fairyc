@@ -203,7 +203,9 @@ expose postorder nodes and exact source slices. Node kinds are 1 path, 2 referen
 3 mutable reference, 4 slice and 5 group; wrappers point to `left`, `right` is zero.
 All declarations share 4096 type nodes and a 32-active-call type-depth limit.
 Failed declarations roll back type nodes with the other tables.
-Raw pointers and foreign function types remain unsupported.
+Raw pointer types use kind 11 (`ptr`) and 12 (`ptr mut`), with their child in
+`left` and zero in `right`. Their prefix binding distinguishes `ptr u8[16]`
+from `(ptr u8)[16]`. Foreign function types remain unsupported.
 
 Named types also accept nonempty generic argument lists, trailing commas and
 nesting. Kind 6 retains the base path in `left` and a reverse argument-link tail
@@ -212,7 +214,7 @@ in `right`; kind 7 links an argument root in `left` to its predecessor in `right
 links share the same type-node budget, and argument nesting shares type depth.
 The type cursor consumes each half of `>>` at its actual byte boundary without
 rewriting source tokens or changing expression shifts. Stray closing halves fail.
-This does not admit generic declarations, specialization or type resolution.
+Type applications do not perform specialization or type resolution.
 
 Ordinary `struct Name { ... }` declarations use declaration kind 4, with optional
 `pub` on the struct and individual fields. `field_start`/`field_count` select a
@@ -220,7 +222,7 @@ zero-based source-ordered range in the separate `field_at`/`field_count` table.
 Each field preserves its full/name/public spans, visibility and `type_root`.
 Structs have no body or result-type root. All structs share a 1024-field limit;
 failed declarations roll back fields and types together. Duplicate-field legality,
-layout and ownership are not checked. Non-generic resources use declaration kind 6
+layout and ownership are not checked. Resources use declaration kind 6
 and share the same field/type arenas and 1024-field budget. Optional `cleanup`
 bodies reuse the statement parser and are retained by `cleanup_body` in the shared
 statement arena. `cleanup_start`/`cleanup_end` span the keyword through closing
@@ -432,7 +434,8 @@ slices. Length arithmetic, evaluation and size validity are not parser decisions
 
 All sixteen current source files, including the filename adapter, integrity checker and token helpers, parse without
 syntax problems in both Windows profiles. The [package syntax report](parser-package-items-2026-09-12.md)
-records the latest bounded fixture results; the [literal/item report](parser-literal-items-2026-09-12.md)
+records the preceding fixture milestone; the [SDK syntax report](parser-sdk-syntax-2026-09-12.md)
+records the current pointer/generic and SDK boundary. The [literal/item report](parser-literal-items-2026-09-12.md)
 and [control syntax report](parser-control-items-2026-09-12.md)
 retains the preceding milestone. The [preceding evidence report](parser-evidence-2026-09-11.md)
 records the initial declaration comparison, integrity checks and fixture baseline.
@@ -527,6 +530,30 @@ These private errors are not stable Go diagnostic IDs or diagnostic-span parity.
 The configured `fairyc_go_test_parser_package_items` lane verifies these additions
 in both native profiles. The filename-aware fixture driver uses a bounded path
 line followed by unchanged source bytes; it has no module-mismatch exception.
+
+## Generic declarations and SDK observations
+
+Functions, structs and resources preserve optional nonempty generic parameter
+lists, including source order, trailing commas and duplicate names. Duplicate-name
+validity and generic aggregate admission remain semantic concerns. This does not
+add parameter constraints, defaults, specialization or name resolution.
+
+`Declaration.generic_parameters` is a type-arena link root; zero means no written
+list. `generic_start`/`generic_end` retain its complete angle-bracket span.
+`generic_parameter_count` and `generic_parameter_at` expose ordered name nodes.
+Private type-arena kind 13 is a parameter-name leaf and 14 links that leaf in
+`left` to its preceding link in `right`. Neither kind is a value type. They share
+the existing 4096-node budget and declaration rollback with ordinary type syntax;
+two nodes are charged per parameter before successful declaration publication.
+
+`fairyc_go_test_parser_sdk` reads three unchanged SDK files (`std::vec`, `std::bytes`,
+`std::text`) as bounded input data, not as candidate modules. It reports the first
+unsupported token and requires identical records in both native profiles. Every
+retained declaration must match an ordered Go-CST subsequence by kind and full/name
+spans; only complete parses receive whole-declaration-list comparison. Exhaustion
+uses at most 128 complete top-level prefixes to locate a blocker, never cropped or
+rewritten source. Neither partial results nor a passing observation lane admit
+the whole SDK file. See the [SDK syntax report](parser-sdk-syntax-2026-09-12.md).
 
 ## Cost baseline
 

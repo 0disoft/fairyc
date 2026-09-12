@@ -44,7 +44,7 @@ func TestWindowsFairyParserStructs(t *testing.T) {
 fn i32 main() {
 `)
 	fmt.Fprintf(&p, "assert(switch(make(b%s)) { case .ok(parsed): { inspect(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input))
-	for _, bad := range []string{"struct X { i32 x }", "pub struct X { i32 x; ref ; }", "struct X<T> {}", "struct X { cleanup {} }", "struct X { fn void nested() {} }", "resource X<T> { cleanup {} }"} {
+	for _, bad := range []string{"struct X { i32 x }", "pub struct X { i32 x; ref ; }", "struct X<T,,> {}", "struct X { cleanup {} }", "struct X { fn void nested() {} }", "resource X<T,,> { cleanup {} }"} {
 		text := "module main; " + bad + " pub fn void kept() {}"
 		fmt.Fprintf(&p, "{ let i32 r = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) > 0 && syntax::declaration_count(ref parsed) == 2 && syntax::field_count(ref parsed) == 0 && syntax::type_count(ref parsed) == 1 && syntax::declaration_at(ref parsed,1).public); 0 } case .err(_): { 1 } }; assert(r == 0); }\n", strconv.Quote(text))
 	}
