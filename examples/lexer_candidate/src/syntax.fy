@@ -9,7 +9,7 @@ import attributes as attributes;
 // Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,
 // 8 static_assert, 9 unsafe extern C function, 10 state; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
-pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; }
+pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; usize generic_parameters; usize generic_start; usize generic_end; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
 // Zero name/type spans mean unwritten; expression zero means no initializer/value.
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; }
@@ -85,7 +85,7 @@ fn u32 item_kind(ref scanner::Stream stream, usize index) {
 fn Attempt failed(ref scanner::Stream stream, ref mut bodies::Cursor cursor, u32 code) {
     let scanner::TokenInfo token = current(stream, cursor);
     return Attempt { .ok = false,
-        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0, .cleanup_body = 0 },
+        .value = Declaration { .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0, .cleanup_body = 0, .generic_parameters = 0, .generic_start = 0, .generic_end = 0 },
         .problem = Problem { .code = code, .start = token.start, .end = token.end, .expected = cursor.expected, .token = cursor.index } };
 }
 fn bool expect(ref scanner::Stream stream, ref mut bodies::Cursor cursor, ref u8[] text, u32 code) {
@@ -112,6 +112,15 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
     var usize root = 0;
     var usize body = 0; var usize cleanup_start = 0; var usize cleanup_end = 0; var usize cleanup_body = 0;
     if (kind != 8 && kind != 10) { advance(stream, cursor); }
+    var usize generic_parameters = 0; var usize generic_start = 0; var usize generic_end = 0;
+    if (kind == 3 && word(stream,cursor.index,b"<")) {
+        generic_start = current(stream,cursor).start;
+        let types::Attempt parameters = types::parse_parameters(stream,cursor.index,cursor.types,type_nodes);
+        cursor.index = parameters.next; cursor.previous_end = parameters.end; cursor.types = parameters.count;
+        cursor.status = parameters.status; cursor.expected = parameters.expected;
+        if (parameters.root == 0) { return failed(stream,cursor,kind); }
+        generic_parameters = parameters.root; generic_end = parameters.end;
+    }
     if (kind < 3) {
         while (take(stream, cursor, b"::")) {
             let scanner::TokenInfo part = scanner::token_info(stream, cursor.index);
@@ -163,7 +172,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
         }
     }
     return Attempt { .ok = true,
-        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end, .cleanup_body = cleanup_body },
+        .value = Declaration { .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end, .cleanup_body = cleanup_body, .generic_parameters = generic_parameters, .generic_start = generic_start, .generic_end = generic_end },
         .problem = Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .token = 0 } };
 }
 
@@ -438,4 +447,15 @@ pub fn attributes::Argument attribute_argument_at(ref Parsed parsed, usize index
 pub fn ref u8[] attribute_argument_text(ref Parsed parsed, usize index) {
     let attributes::Argument argument = attribute_argument_at(parsed,index);
     return scanner::source_view(ref parsed.source)[argument.start..argument.end];
+}
+pub fn usize generic_parameter_count(ref Parsed parsed, usize declaration) {
+    var usize link = declaration_at(parsed,declaration).generic_parameters; var usize count = 0;
+    while (link != 0) { count += 1; link = type_at(parsed,link).right; }
+    return count;
+}
+pub fn types::Node generic_parameter_at(ref Parsed parsed, usize declaration, usize index) {
+    let usize count = generic_parameter_count(parsed,declaration); assert(index < count);
+    var usize link = declaration_at(parsed,declaration).generic_parameters; var usize remaining = count - 1;
+    while (remaining > index) { link = type_at(parsed,link).right; remaining -= 1; }
+    return type_at(parsed,type_at(parsed,link).left);
 }

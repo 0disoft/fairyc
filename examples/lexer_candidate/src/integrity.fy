@@ -53,7 +53,8 @@ pub fn bool valid_expression(ref syntax::Parsed p, syntax::Expression n, usize i
 }
 pub fn bool valid_type(ref syntax::Parsed p, types::Node n, usize id) {
     if (id == 0 || id > syntax::type_count(p) || !span(p,n.start,n.end)) { return false; }
-    if (n.kind == 1 || n.kind == 9 || n.kind == 10) { return n.left == 0 && n.right == 0; }
+    if (n.kind == 1 || n.kind == 9 || n.kind == 10 || n.kind == 13) { return n.left == 0 && n.right == 0; }
+    if (n.kind == 14) { return type_ref(p,n.left,id,13) && (n.right == 0 || type_ref(p,n.right,id,14)); }
     if ((n.kind >= 2 && n.kind <= 5) || n.kind == 11 || n.kind == 12) { return type_ref(p,n.left,id,0) && n.right == 0; }
     if (n.kind == 6) { return type_ref(p,n.left,id,0) && type_ref(p,n.right,id,7); }
     if (n.kind == 7) { return type_ref(p,n.left,id,0) && (n.right == 0 || type_ref(p,n.right,id,7)); }
@@ -94,6 +95,17 @@ pub fn bool valid(ref syntax::Parsed p) {
     while (i < syntax::declaration_count(p)) {
         let syntax::Declaration d = syntax::declaration_at(p,i);
         if (!span(p,d.start,d.end)) { return false; }
+        if (d.generic_parameters == 0) {
+            if (d.generic_start != 0 || d.generic_end != 0) { return false; }
+        } else {
+            if (d.kind != 3 || d.generic_start < d.name_end || d.generic_end <= d.generic_start || d.generic_end > d.end || !type_ref(p,d.generic_parameters,syntax::type_count(p) + 1,14)) { return false; }
+            var usize link = d.generic_parameters;
+            while (link != 0) {
+                let types::Node name = syntax::type_at(p,syntax::type_at(p,link).left);
+                if (name.start <= d.generic_start || name.end >= d.generic_end) { return false; }
+                link = syntax::type_at(p,link).right;
+            }
+        }
         if (d.kind == 8 || d.kind == 10) {
             if (d.name_start != 0 || d.name_end != 0) { return false; }
         } else if (d.name_start < d.start || d.name_start >= d.name_end || d.name_end > d.end) { return false; }

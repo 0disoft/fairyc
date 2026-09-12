@@ -6,6 +6,7 @@ import std::vec as v;
 // 6 generic application (left base, right argument tail), 7 argument link.
 // 8 fixed array (left element, right length), 9 integer length, 10 path length.
 // 11 raw pointer, 12 mutable raw pointer; prefix constructors retain the child.
+// 13 generic parameter name, 14 ordered parameter link; neither is a value type.
 // Shared across the enclosing Parsed owner; IDs are one-based, zero absent.
 pub struct Node { u32 kind; usize start; usize end; usize left; usize right; }
 pub struct Attempt { usize next; usize end; usize count; usize root; i32 status; u32 expected; }
@@ -127,6 +128,28 @@ pub fn Attempt parse_arguments(ref scanner::Stream stream, usize index, usize co
     var usize root = 0;
     if (take(stream,ref mut cursor,b"<")) { root = arguments(stream,ref mut cursor,nodes,0); }
     if (cursor.half) { root = 0; cursor.expected = 0; }
+    return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root = root, .status = cursor.status, .expected = cursor.expected };
+}
+fn usize parameter_list(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes) {
+    var usize tail = 0;
+    while (true) {
+        let scanner::TokenInfo name = scanner::token_info(stream,cursor.index);
+        if (name.kind != 3) { cursor.expected = 1; return 0; }
+        advance(stream,cursor);
+        let usize value = append(nodes,cursor,13,name.start,0,0);
+        if (value == 0) { return 0; }
+        tail = append(nodes,cursor,14,name.start,value,tail);
+        if (tail == 0) { return 0; }
+        if (!take(stream,cursor,b",")) { break; }
+        if (word(stream,cursor.index,b">")) { break; }
+    }
+    if (!take(stream,cursor,b">")) { cursor.expected = 13; return 0; }
+    return tail;
+}
+pub fn Attempt parse_parameters(ref scanner::Stream stream, usize index, usize count, ref mut v::Vec<Node> nodes) {
+    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .count = count, .status = 0, .expected = 0, .half = false };
+    var usize root = 0;
+    if (take(stream,ref mut cursor,b"<")) { root = parameter_list(stream,ref mut cursor,nodes); }
     return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root = root, .status = cursor.status, .expected = cursor.expected };
 }
 pub fn bool call_ahead(ref scanner::Stream stream, usize index) {
