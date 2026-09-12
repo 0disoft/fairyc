@@ -58,7 +58,7 @@ func runParserProbe(t *testing.T, program string) {
 func TestWindowsFairyParserPostfix(t *testing.T) {
 	var p, main strings.Builder
 	main.WriteString("fn i32 main() {\n")
-	for n, expr := range []string{"a.b", "a[1]", "a.b[i].c", "f().items[i + 1].value", "-a.b[i] * c", "a[b[c]]", "a /*gap*/ . b [ i ]", "a.b()", "a?", "a??", "f().items[i].value?", "-a? * b", "(a + b)?", "a?.b?[i]?", "a /*gap*/ ?"} {
+	for n, expr := range []string{"a.b", "a[1]", "a.b[i].c", "f().items[i + 1].value", "-a.b[i] * c", "a[b[c]]", "a /*gap*/ . b [ i ]", "a.b()", "a?", "a??", "f().items[i].value?", "-a? * b", "(a + b)?", "a?.b?[i]?", "a /*gap*/ ?", "-1.5 * 2.0 + 3e2", "1.5?"} {
 		input := "module main; fn i32 f() { return " + expr + "; }"
 		result, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || result.AST == nil || result.Tree == nil || len(result.Tree.Diagnostics) != 0 {

@@ -482,6 +482,10 @@ The body is not desugared into a while loop. Arbitrary expression-only header
 clauses remain outside this grammar-bounded slice, even where Go syntax recovery
 accepts them for later semantic rejection.
 
+Floating tokens (kind 6) are preserved as literal expressions with their original
+token, byte span and lexer-normalized spelling. The parser performs no numeric
+conversion or floating-point evaluation.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token
