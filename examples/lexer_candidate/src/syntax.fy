@@ -6,7 +6,8 @@ import records as records;
 import bodies as bodies;
 import attributes as attributes;
 
-// Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const, 8 static_assert, 9 unsafe extern C function; problem 4 is
+// Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,
+// 8 static_assert, 9 unsafe extern C function, 10 state; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
 pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
@@ -78,6 +79,7 @@ fn u32 item_kind(ref scanner::Stream stream, usize index) {
     if (word(stream,next,b"const")) { return 7; }
     if (word(stream,next,b"static_assert")) { return 8; }
     if (word(stream,next,b"unsafe")) { return 9; }
+    if (word(stream,next,b"state")) { return 10; }
     return 5;
 }
 fn Attempt failed(ref scanner::Stream stream, ref mut bodies::Cursor cursor, u32 code) {
@@ -104,12 +106,12 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
         if (result_type == 0) { return failed(stream, cursor, kind); }
     }
     let scanner::TokenInfo name = scanner::token_info(stream, cursor.index);
-    if (kind != 8 && name.kind != 3) { cursor.expected = 1; return failed(stream, cursor, kind); }
-    var usize name_start = if (kind == 8) { 0 } else { name.start };
-    var usize name_end = if (kind == 8) { 0 } else { name.end };
+    if (kind != 8 && kind != 10 && name.kind != 3) { cursor.expected = 1; return failed(stream, cursor, kind); }
+    var usize name_start = if (kind == 8 || kind == 10) { 0 } else { name.start };
+    var usize name_end = if (kind == 8 || kind == 10) { 0 } else { name.end };
     var usize root = 0;
     var usize body = 0; var usize cleanup_start = 0; var usize cleanup_end = 0; var usize cleanup_body = 0;
-    if (kind != 8) { advance(stream, cursor); }
+    if (kind != 8 && kind != 10) { advance(stream, cursor); }
     if (kind < 3) {
         while (take(stream, cursor, b"::")) {
             let scanner::TokenInfo part = scanner::token_info(stream, cursor.index);
@@ -131,8 +133,8 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
         if (!expect(stream,cursor,b"=",9)) { return failed(stream,cursor,kind); }
         root = bodies::read_expression(stream,cursor,nodes,entries,statements,type_nodes);
         if (root == 0 || !expect(stream,cursor,b";",8)) { return failed(stream,cursor,kind); }
-    } else if (kind == 4 || kind == 6) {
-        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields,kind == 6);
+    } else if (kind == 4 || kind == 6 || kind == 10) {
+        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields,kind == 6,kind == 10);
         cursor.index = record.next; cursor.previous_end = record.end; cursor.types = record.types; cursor.fields = record.fields;
         cursor.expected = record.expected; cursor.status = record.status;
         if (!record.ok) { return failed(stream,cursor,kind); }
@@ -261,7 +263,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
             errors += 1;
             if (!first || word(ref input, start, b"module")) { recover(ref input, ref mut cursor, if (attributes_ok) { item_start } else { start }); }
         }
-        if (kind == 3 || kind == 4 || kind == 6 || kind == 7 || kind == 8 || kind == 9) { functions = true; }
+        if (kind >= 3 && kind != 5) { functions = true; }
         first = false;
     }
     return .ok(Parsed { .source = input, .declarations = declarations, .problems = problems, .expressions = nodes, .entries = entries, .statements = statements, .types = type_nodes, .fields = fields, .attributes = attribute_nodes, .attribute_arguments = attribute_arguments });
@@ -296,6 +298,7 @@ pub fn ref u8[] expected_text(u32 code) {
     if (code == 19) { return b"extern"; }
     if (code == 20) { return b"C"; }
     if (code == 21) { return b"fn"; }
+    if (code == 22) { return b"cell or map"; }
     return b"supported syntax";
 }
 pub fn ref u8[] source_view(ref Parsed parsed) { return scanner::source_view(ref parsed.source); }
