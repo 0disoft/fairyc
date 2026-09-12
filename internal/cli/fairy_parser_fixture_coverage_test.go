@@ -110,7 +110,7 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 				t.Fatalf("unexpected native status for %s: %d", fixture.ID, row[0])
 			}
 			accepted := row[0] == 0 && row[2] == 0
-			if (fixture.ID == "pass.module-path" || fixture.ID == "pass.mutable-parameter" || fixture.ID == "pass.nested-type-close" || fixture.ID == "pass.array-forms" || fixture.ID == "pass.precedence" || fixture.ID == "pass.postfix-chain" || fixture.ID == "pass.lexical-defer" || fixture.ID == "pass.classic-for" || fixture.ID == "pass.literals" || fixture.ID == "pass.compile-time-items") && !accepted {
+			if (fixture.ID == "pass.module-path" || fixture.ID == "pass.mutable-parameter" || fixture.ID == "pass.nested-type-close" || fixture.ID == "pass.array-forms" || fixture.ID == "pass.precedence" || fixture.ID == "pass.postfix-chain" || fixture.ID == "pass.lexical-defer" || fixture.ID == "pass.classic-for" || fixture.ID == "pass.literals" || fixture.ID == "pass.compile-time-items" || fixture.ID == "pass.foreign-call") && !accepted {
 				t.Errorf("supported fixture regressed: %s", fixture.ID)
 			}
 			class := "rejected"
@@ -143,7 +143,7 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 				t.Errorf("unresolved fixture %s: %s", fixture.ID, observation)
 			}
 		}
-		for _, id := range []string{"pass.module-path", "pass.mutable-parameter", "pass.nested-type-close", "pass.array-forms", "pass.precedence", "pass.postfix-chain", "pass.lexical-defer", "pass.classic-for", "pass.literals", "pass.compile-time-items"} {
+		for _, id := range []string{"pass.module-path", "pass.mutable-parameter", "pass.nested-type-close", "pass.array-forms", "pass.precedence", "pass.postfix-chain", "pass.lexical-defer", "pass.classic-for", "pass.literals", "pass.compile-time-items", "pass.foreign-call"} {
 			if !seen[id] {
 				t.Errorf("missing supported fixture: %s", id)
 			}

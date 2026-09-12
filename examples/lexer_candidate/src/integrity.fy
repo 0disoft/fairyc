@@ -6,7 +6,7 @@ fn bool span(ref syntax::Parsed p, usize start, usize end) {
     return start < end && end <= syntax::source_view(p).len;
 }
 fn bool value_kind(u32 kind) {
-    return (kind >= 1 && kind <= 6) || (kind >= 8 && kind <= 10) || kind == 12 || kind == 13 || kind == 15 || (kind >= 20 && kind <= 24) || kind == 26 || kind == 28 || kind == 29 || kind == 30;
+    return (kind >= 1 && kind <= 6) || (kind >= 8 && kind <= 10) || kind == 12 || kind == 13 || kind == 15 || (kind >= 20 && kind <= 24) || kind == 26 || kind == 28 || kind == 29 || kind == 30 || kind == 31;
 }
 fn bool expr(ref syntax::Parsed p, usize id, usize before, u32 kind) {
     if (id == 0 || id >= before || id > syntax::expression_count(p)) { return false; }
@@ -37,7 +37,7 @@ pub fn bool valid_expression(ref syntax::Parsed p, syntax::Expression n, usize i
     if (n.kind == 6) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,7); }
     if (n.kind == 7 || n.kind == 11 || n.kind == 25) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,n.kind); }
     if (n.kind == 10) { return expr(p,n.left,id,2) && optional_expr(p,n.right,id,11); }
-    if (n.kind == 12) { return stmt(p,n.left,statements,1) && n.right == 0; }
+    if (n.kind == 12 || n.kind == 31) { return stmt(p,n.left,statements,1) && n.right == 0; }
     if (n.kind == 13) { return expr(p,n.left,id,0) && expr(p,n.right,id,14); }
     if (n.kind == 14) { return stmt(p,n.left,statements,1) && (n.right == 0 || expr(p,n.right,id,12) || expr(p,n.right,id,13)); }
     if (n.kind == 15) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,19); }

@@ -83,10 +83,11 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
         left = conditional(stream,cursor,nodes,entries,statements,type_nodes,depth);
     } else if (word(stream,cursor.index,b"switch")) {
         left = switch_value(stream,cursor,nodes,entries,statements,type_nodes,depth);
-    } else if (word(stream,cursor.index,b"{")) {
+    } else if (word(stream,cursor.index,b"{") || word(stream,cursor.index,b"unsafe")) {
+        let bool unsafe_block = take(stream,cursor,b"unsafe");
         let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
         if (body == 0) { return 0; }
-        left = append(nodes,cursor,Node { .kind = 12, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = body, .right = 0 });
+        left = append(nodes,cursor,Node { .kind = if (unsafe_block) { 31 } else { 12 }, .start = token.start, .end = cursor.previous_end, .token = token_index, .left = body, .right = 0 });
     } else if (take(stream, cursor, b"(")) {
         let usize child = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1);
         if (child == 0 || !expect(stream, cursor, b")", 5)) { return 0; }
@@ -385,7 +386,7 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
                 if (value.expression == 0) { return 0; }
             }
             if (allow_tail && value.kind == 6 && word(stream,cursor.index,b"}")) { cursor.tail = left; return 0; }
-            if (value.kind == 6 && (cursor.expression_kind == 12 || cursor.expression_kind == 13) && !word(stream,cursor.index,b";")) {
+            if (value.kind == 6 && (cursor.expression_kind == 12 || cursor.expression_kind == 13 || cursor.expression_kind == 31) && !word(stream,cursor.index,b";")) {
                 value.end = cursor.previous_end; return append_statement(statements,cursor,value);
             }
             if (!expect(stream, cursor, b";", 8)) { return 0; }
