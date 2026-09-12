@@ -360,6 +360,9 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
     return append_statement(statements, cursor, value);
 }
 
+pub fn usize read_expression(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<Statement> statements, ref mut v::Vec<types::Node> type_nodes) {
+    return expression(stream,cursor,nodes,entries,statements,type_nodes,1,0);
+}
 fn usize expression(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<Statement> statements, ref mut v::Vec<types::Node> type_nodes, usize minimum, usize depth) {
     if (cursor.active_expressions >= 64) { cursor.status = 4; return 0; }
     cursor.active_expressions = cursor.active_expressions + 1;

@@ -95,6 +95,8 @@ pub fn bool valid(ref syntax::Parsed p) {
         if (d.entry_start > syntax::entry_count(p) || d.entry_count > syntax::entry_count(p) - d.entry_start || d.field_start > syntax::field_count(p) || d.field_count > syntax::field_count(p) - d.field_start) { return false; }
         if (d.kind == 3) {
             if (!stmt(p,d.body,syntax::statement_count(p) + 1,1) || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0)) { return false; }
+        } else if (d.kind == 7) {
+            if (d.body != 0 || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0) || !expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
         } else if (d.body != 0 || d.result_type != 0 || (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6)) { return false; }
         if (d.cleanup_body != 0 && (d.kind != 6 || !stmt(p,d.cleanup_body,syntax::statement_count(p) + 1,1))) { return false; }
         if (!optional_expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }

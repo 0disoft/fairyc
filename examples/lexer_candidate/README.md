@@ -463,6 +463,11 @@ written question-mark token. Chains, grouping and prefix/infix precedence are
 compared with Go AST shapes. This preserves syntax only, not error propagation
 execution semantics.
 
+Private declaration kind 7 preserves a written `const` declaration: `result_type`
+is its declared type root and `expression` is its initializer. Visibility,
+attributes and declaration/name spans retain the existing declaration contract.
+Initializers are parsed, not evaluated; `static_assert` remains unsupported.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token
