@@ -430,9 +430,10 @@ qualified-path length root. Private kinds 8/9/10 represent array/integer length/
 length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
-All fifteen current source files, including the integrity checker and token helpers, parse without
-syntax problems in both Windows profiles. The [literal/item report](parser-literal-items-2026-09-12.md)
-records the latest bounded fixture results; the [control syntax report](parser-control-items-2026-09-12.md)
+All sixteen current source files, including the filename adapter, integrity checker and token helpers, parse without
+syntax problems in both Windows profiles. The [package syntax report](parser-package-items-2026-09-12.md)
+records the latest bounded fixture results; the [literal/item report](parser-literal-items-2026-09-12.md)
+and [control syntax report](parser-control-items-2026-09-12.md)
 retains the preceding milestone. The [preceding evidence report](parser-evidence-2026-09-11.md)
 records the initial declaration comparison, integrity checks and fixture baseline.
 The [earlier coverage report](parser-coverage-closure-2026-09-11.md)
@@ -452,8 +453,8 @@ Synthetic-node probes exercise missing, out-of-range, self-referential and
 wrong-kind links without mutating the published parse result.
 The fixture observation lane reads the checked-in parser manifest unchanged,
 with at most 32 cases and 32768 source bytes per case. It separates supported
-syntax, unsupported valid syntax, matching rejection and missing file/module
-context. Unexpected false acceptance or budget exhaustion fails the lane rather
+syntax, unsupported valid syntax and matching rejection using the filename-aware
+entry point. Unexpected false acceptance or budget exhaustion fails the lane rather
 than becoming a supported result. Both profiles must return identical observations.
 The [statement/resource report](parser-coverage-statements-2026-09-11.md) records
 the earlier eleven-file result; older baselines are retained as historical evidence.
@@ -496,6 +497,36 @@ Its name spans and result type are zero because no name or type was written;
 `expression` is the required condition root. Attributes and public syntax retain
 the declaration contract. No constant evaluation occurs, and `static_assert`
 remains an ordinary identifier outside the module-item dispatch position.
+
+## Package syntax and file identity
+
+Private declaration kind 9 retains `unsafe extern C fn Type name(...);` as a
+foreign declaration, with a result type, ordered parameters and no body or value.
+Kind 31 is a distinct unsafe-block expression: its left child is a statement block
+and its right child is zero. It retains the `unsafe` keyword in the full byte span,
+uses the existing block/depth budget, and participates in postfix/infix syntax.
+These nodes do not grant unsafe execution or perform foreign calls.
+
+Private declaration kind 10 is a nameless `state` item. Its ordered fields use the
+existing shared 1024-field arena with explicit tags: 0 struct/resource, 1 cell,
+2 map. `type_root` is the field value type; only maps have a nonzero `key_type`.
+Names, field spans and attribute/visibility syntax are retained. Storage validity,
+package ownership, duplicate names and persistence remain semantic concerns.
+
+`file_syntax::parse(stream, max_items, relative_path)` is a separate private entry
+point; `syntax::parse` stays byte-only. It accepts a caller-supplied source-root
+relative filename, normalizes slash/backslash and lexical dot/parent segments,
+then checks ASCII identifiers and the `.fy` extension like the Go source model.
+It reads no files and never normalizes source bytes or ignores source comments.
+Path length is bounded at 32768 bytes and at most 1024 live path segments. Errors
+3/4/5 retain allocation/budget/lexical meaning; 6 means invalid identity and 7
+means module mismatch. Invalid paths fail first. For valid paths, syntax problems
+remain owned incomplete results and take precedence over a module mismatch.
+These private errors are not stable Go diagnostic IDs or diagnostic-span parity.
+
+The configured `fairyc_go_test_parser_package_items` lane verifies these additions
+in both native profiles. The filename-aware fixture driver uses a bounded path
+line followed by unchanged source bytes; it has no module-mismatch exception.
 
 ## Cost baseline
 

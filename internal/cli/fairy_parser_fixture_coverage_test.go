@@ -45,14 +45,14 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
-	for _, name := range []string{"syntax.fy", "integrity.fy"} {
+	for _, name := range []string{"syntax.fy", "integrity.fy", "file_syntax.fy"} {
 		data, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "src", name))
 		if err != nil {
 			t.Fatal(err)
 		}
 		writeTestSource(t, root, "src/"+name, string(data))
 	}
-	writeTestSource(t, root, "src/main.fy", parserCorpusProgram)
+	writeTestSource(t, root, "src/main.fy", parserFileCorpusProgram(t))
 	baseline := map[string]string{}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		var stderr strings.Builder
@@ -87,7 +87,8 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 			if referenceOK != (fixture.Expect.Status == "pass") {
 				t.Fatalf("reference fixture drift: %s", fixture.ID)
 			}
-			out, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewReader(data))
+			transport := append([]byte(filepath.ToSlash(fixture.Source)+"\n"), data...)
+			out, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewReader(transport))
 			if err != nil || out.ExitCode != 0 || out.Stderr != "" || out.TrapControl != "" {
 				t.Fatalf("native fixture %s: %+v %v", fixture.ID, out, err)
 			}
@@ -106,7 +107,7 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 			if len(row) != 6+5*row[1] {
 				t.Fatal("invalid declaration observation")
 			}
-			if row[0] != 0 && row[0] != 4 && row[0] != 5 {
+			if row[0] != 0 && row[0] != 4 && row[0] != 5 && row[0] != 7 {
 				t.Fatalf("unexpected native status for %s: %d", fixture.ID, row[0])
 			}
 			accepted := row[0] == 0 && row[2] == 0
@@ -125,11 +126,6 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 				}
 			} else if accepted {
 				class = "difference"
-				// The candidate receives bytes, not a file/module identity. Keep this
-				// explicit contract gap separate from a grammar false-acceptance finding.
-				if fixture.ID == "fail.module-mismatch" {
-					class = "context-gap"
-				}
 			}
 			observation := fmt.Sprintf("%s status=%d problems=%d first=%d..%d", class, row[0], row[2], row[4], row[5])
 			totals[class]++

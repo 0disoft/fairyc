@@ -18,6 +18,7 @@ import (
 const parserProbePrelude = `module main;
 import scanner as scanner; import syntax as syntax; import std::bytes as bytes;
 import integrity as integrity;
+import file_syntax as file_syntax;
 fn Result<syntax::Parsed, i32> make(ref u8[] input) {
     var bool allocated = true;
     let bytes::Buffer owned = switch (bytes::copy(input)) { case .ok(value): { value } case .err(_): { allocated = false; bytes::empty() } };
@@ -45,6 +46,11 @@ func runParserProbe(t *testing.T, program string) {
 		t.Fatal(err)
 	}
 	writeTestSource(t, root, "src/integrity.fy", string(check))
+	identity, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "src", "file_syntax.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestSource(t, root, "src/file_syntax.fy", string(identity))
 	writeTestSource(t, root, "src/main.fy", parserProbePrelude+program)
 	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
 		t.Logf("native parser probe %v", args)
