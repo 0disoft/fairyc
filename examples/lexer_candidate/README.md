@@ -486,6 +486,10 @@ Floating tokens (kind 6) are preserved as literal expressions with their origina
 token, byte span and lexer-normalized spelling. The parser performs no numeric
 conversion or floating-point evaluation.
 
+C-string tokens (kind 9) are also literal expressions. Their cooked view retains
+the lexer-produced terminal NUL in its hexadecimal representation; embedded NUL
+and invalid escapes remain lexical errors. No pointer or FFI behavior is added.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token

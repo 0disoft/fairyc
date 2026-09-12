@@ -23,6 +23,10 @@ func TestWindowsFairyParserLiterals(t *testing.T) {
 		{`b""`, "", 8},
 		{`b"a\0\xFF"`, string([]byte{'a', 0, 255}), 8},
 		{`b"한글"`, "한글", 8},
+		{`c""`, "\x00", 9},
+		{`c"fairy"`, "fairy\x00", 9},
+		{`c"한글😀"`, "한글😀\x00", 9},
+		{`c"a\n"`, "a\n\x00", 9},
 	}
 	var p strings.Builder
 	p.WriteString("fn i32 main() {\n")
@@ -41,15 +45,12 @@ func TestWindowsFairyParserLiterals(t *testing.T) {
 			}
 			p.WriteString("}")
 		}
-		p.WriteString("0 } case .err(_): { 1 } }; assert(result == 0); }\n")
+		p.WriteString("assert(integrity::valid(ref parsed));0 } case .err(_): { 1 } }; assert(result == 0); }\n")
 	}
-	for _, raw := range []string{`"unterminated`, `"bad\q"`, `b"bad\xG0"`} {
+	for _, raw := range []string{`"unterminated`, `"bad\q"`, `b"bad\xG0"`, `c"unterminated`, `c"bad\q"`, `c"\0"`, `c"\x00"`, `c"\u{0}"`} {
 		input := "module main; fn void f() { return " + raw + "; }"
 		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(_): { 0 } case .err(status): { status } }; assert(result == 5); }\n", strconv.Quote(input))
 	}
-	p.WriteString(`{ let i32 result = switch(make(b"module main; fn void f() { return c\"not yet\"; } fn void kept() {}")) {
-case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 1 && syntax::declaration_count(ref parsed) == 2 && syntax::expression_count(ref parsed) == 0); 0 }
-case .err(_): { 1 } }; assert(result == 0); }
-return 0; }`)
+	p.WriteString("return 0; }")
 	runParserProbe(t, p.String())
 }
