@@ -19,7 +19,7 @@ fn bool optional_expr(ref syntax::Parsed p, usize id, usize before, u32 kind) {
 fn bool type_ref(ref syntax::Parsed p, usize id, usize before, u32 kind) {
     if (id == 0 || id >= before || id > syntax::type_count(p)) { return false; }
     let u32 actual = syntax::type_at(p,id).kind;
-    return if (kind == 0) { (actual >= 1 && actual <= 6) || actual == 8 } else { actual == kind };
+    return if (kind == 0) { (actual >= 1 && actual <= 6) || actual == 8 || actual == 11 || actual == 12 } else { actual == kind };
 }
 fn bool stmt(ref syntax::Parsed p, usize id, usize before, u32 kind) {
     if (id == 0 || id >= before || id > syntax::statement_count(p)) { return false; }
@@ -54,7 +54,7 @@ pub fn bool valid_expression(ref syntax::Parsed p, syntax::Expression n, usize i
 pub fn bool valid_type(ref syntax::Parsed p, types::Node n, usize id) {
     if (id == 0 || id > syntax::type_count(p) || !span(p,n.start,n.end)) { return false; }
     if (n.kind == 1 || n.kind == 9 || n.kind == 10) { return n.left == 0 && n.right == 0; }
-    if (n.kind >= 2 && n.kind <= 5) { return type_ref(p,n.left,id,0) && n.right == 0; }
+    if ((n.kind >= 2 && n.kind <= 5) || n.kind == 11 || n.kind == 12) { return type_ref(p,n.left,id,0) && n.right == 0; }
     if (n.kind == 6) { return type_ref(p,n.left,id,0) && type_ref(p,n.right,id,7); }
     if (n.kind == 7) { return type_ref(p,n.left,id,0) && (n.right == 0 || type_ref(p,n.right,id,7)); }
     if (n.kind == 8) { return type_ref(p,n.left,id,0) && (type_ref(p,n.right,id,9) || type_ref(p,n.right,id,10)); }

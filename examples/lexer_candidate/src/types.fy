@@ -5,6 +5,7 @@ import std::vec as v;
 // Private postorder nodes: 1 path, 2 ref, 3 ref mut, 4 slice, 5 group.
 // 6 generic application (left base, right argument tail), 7 argument link.
 // 8 fixed array (left element, right length), 9 integer length, 10 path length.
+// 11 raw pointer, 12 mutable raw pointer; prefix constructors retain the child.
 // Shared across the enclosing Parsed owner; IDs are one-based, zero absent.
 pub struct Node { u32 kind; usize start; usize end; usize left; usize right; }
 pub struct Attempt { usize next; usize end; usize count; usize root; i32 status; u32 expected; }
@@ -52,11 +53,13 @@ fn usize append(ref mut v::Vec<Node> nodes, ref mut Cursor cursor, u32 kind, usi
 fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, usize depth) {
     if (depth >= 32) { cursor.status = 4; return 0; }
     let usize start = scanner::token_info(stream,cursor.index).start;
-    if (take(stream,cursor,b"ref")) {
+    if (word(stream,cursor.index,b"ref") || word(stream,cursor.index,b"ptr")) {
+        let bool pointer = take(stream,cursor,b"ptr");
+        if (!pointer) { discard take(stream,cursor,b"ref"); }
         let bool mutable = take(stream,cursor,b"mut");
         let usize child = type_node(stream,cursor,nodes,depth + 1);
         if (child == 0) { return 0; }
-        return append(nodes,cursor,if (mutable) { 3 } else { 2 },start,child,0);
+        return append(nodes,cursor,if (pointer) { if (mutable) { 12 } else { 11 } } else { if (mutable) { 3 } else { 2 } },start,child,0);
     }
     var usize root = 0;
     if (take(stream,cursor,b"(")) {

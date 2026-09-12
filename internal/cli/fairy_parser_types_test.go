@@ -18,9 +18,12 @@ func emitCandidateType(t *testing.T, p *strings.Builder, typ ast.TypeReference, 
 	if typ.Element != nil {
 		child = emitCandidateType(t, p, *typ.Element, count)
 	}
-	kind := map[ast.TypeKind]int{ast.TypeKindNamed: 1, ast.TypeKindReference: 2, ast.TypeKindSlice: 4, ast.TypeKindGrouped: 5}[typ.Kind]
+	kind := map[ast.TypeKind]int{ast.TypeKindNamed: 1, ast.TypeKindReference: 2, ast.TypeKindSlice: 4, ast.TypeKindGrouped: 5, ast.TypeKindRawPointer: 11}[typ.Kind]
 	if typ.Mutable {
 		kind = 3
+		if typ.Kind == ast.TypeKindRawPointer {
+			kind = 12
+		}
 	}
 	if typ.Kind == ast.TypeKindArray {
 		if typ.Length == nil {
@@ -86,7 +89,7 @@ func TestWindowsFairyParserTypes(t *testing.T) {
 		fmt.Fprintf(&p, "assert(syntax::declaration_at(ref parsed,1).result_type == %d && syntax::entry_at(ref parsed,0).type_root == %d && syntax::entry_at(ref parsed,1).type_root == %d && syntax::entry_at(ref parsed,2).type_root == 0 && syntax::type_count(ref parsed) == %d); return 0; }\n", result, param, local, count)
 		fmt.Fprintf(&main, "assert(switch(make(b%s)) { case .ok(parsed): { inspect_%d(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input), i)
 	}
-	for _, typ := range []string{"ptr u8", "u8[1+2]", "u8[-1]", "u8[1", "u8[N::]", "u8[1.0]", "pkg::", "ref", "(ref u8", "A<>"} {
+	for _, typ := range []string{"ptr", "u8[1+2]", "u8[-1]", "u8[1", "u8[N::]", "u8[1.0]", "pkg::", "ref", "(ref u8", "A<>"} {
 		input := "module main; fn " + typ + " bad() {} fn void kept() {}"
 		fmt.Fprintf(&main, "{ let i32 r = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 1 && syntax::declaration_count(ref parsed) == 2 && syntax::type_count(ref parsed) == 1); 0 } case .err(_): { 1 } }; assert(r == 0); }\n", strconv.Quote(input))
 	}
