@@ -431,8 +431,9 @@ length; all consume the existing 4096-node type budget. Empty brackets remain
 slices. Length arithmetic, evaluation and size validity are not parser decisions.
 
 All fifteen current source files, including the integrity checker and token helpers, parse without
-syntax problems in both Windows profiles. The [current evidence report](parser-evidence-2026-09-11.md)
-records declaration comparison, integrity checks and the bounded fixture results.
+syntax problems in both Windows profiles. The [control syntax report](parser-control-items-2026-09-12.md)
+records the latest bounded fixture results. The [preceding evidence report](parser-evidence-2026-09-11.md)
+records the initial declaration comparison, integrity checks and fixture baseline.
 The [earlier coverage report](parser-coverage-closure-2026-09-11.md)
 records the preceding thirteen-file milestone.
 The corpus test explicitly requires complete syntax for these
@@ -471,6 +472,15 @@ Initializers are parsed, not evaluated; `static_assert` remains unsupported.
 Private statement kind 13 preserves `defer expression;`, including its operand,
 source span and position in the enclosing block. Execution timing, call validity
 and cleanup order remain semantic/lowering responsibilities.
+
+Private statement kind 14 preserves a classic `for`: optional condition in
+`expression`, body in `first` and a kind-15 header in `second`. Header children
+are optional initialization (binding/assignment) and post assignment. Zero means
+unwritten, not a synthetic true expression. The initialization statement span
+includes its terminating semicolon; the header span includes both parentheses.
+The body is not desugared into a while loop. Arbitrary expression-only header
+clauses remain outside this grammar-bounded slice, even where Go syntax recovery
+accepts them for later semantic rejection.
 
 ## Cost baseline
 

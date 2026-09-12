@@ -19,6 +19,8 @@ pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token
 // 1 block, 2 binding, 3 return, 4 assignment, 5 if, 6 expression, 7 list link.
 // 8 while (expression condition, first body), 9 break, 10 continue.
 // 11 assert, 12 discard and 13 defer retain their operands in expression.
+// 14 for: expression is optional condition, first body, second kind-15 header.
+// 15 header: first optional binding/assignment initializer, second optional assignment.
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;
@@ -192,7 +194,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
     var v::Vec<records::Field> fields = v::empty<records::Field>();
     var v::Vec<attributes::Attribute> attribute_nodes = v::empty<attributes::Attribute>();
     var v::Vec<attributes::Argument> attribute_arguments = v::empty<attributes::Argument>();
-    var bodies::Cursor cursor = bodies::Cursor { .index = 0, .previous_end = 0, .nodes = 0, .entries = 0, .statements = 0, .types = 0, .fields = 0, .expression = 0, .top_return = 0, .status = 0, .expected = 0, .active_expressions = 0, .block_depth = 0, .tail = 0, .last_entry = 0, .expression_kind = 0 };
+    var bodies::Cursor cursor = bodies::Cursor { .index = 0, .previous_end = 0, .nodes = 0, .entries = 0, .statements = 0, .types = 0, .fields = 0, .expression = 0, .top_return = 0, .status = 0, .expected = 0, .active_expressions = 0, .block_depth = 0, .tail = 0, .last_entry = 0, .expression_kind = 0, .statement_kind = 0 };
     trivia(ref input, ref mut cursor);
     var bool first = true; var bool functions = false; var usize items = 0; var usize errors = 0;
     while (first || scanner::token_info(ref input, cursor.index).kind != 1) {

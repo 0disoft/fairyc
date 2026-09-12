@@ -5,7 +5,7 @@ import types as types;
 import parse_tokens as tokens;
 
 pub struct Node { u32 kind; usize start; usize end; usize token; usize left; usize right; }
-pub struct Cursor { usize index; usize previous_end; usize nodes; usize entries; usize statements; usize types; usize fields; usize expression; usize top_return; i32 status; u32 expected; usize active_expressions; usize block_depth; usize tail; usize last_entry; u32 expression_kind; }
+pub struct Cursor { usize index; usize previous_end; usize nodes; usize entries; usize statements; usize types; usize fields; usize expression; usize top_return; i32 status; u32 expected; usize active_expressions; usize block_depth; usize tail; usize last_entry; u32 expression_kind; u32 statement_kind; }
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; usize id; }
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 
@@ -266,6 +266,7 @@ fn usize append_statement(ref mut v::Vec<Statement> statements, ref mut Cursor c
     if (cursor.statements >= 4096) { cursor.status = 4; return 0; }
     if (!switch (v::push<Statement>(statements, value)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return 0; }
     cursor.statements = cursor.statements + 1;
+    cursor.statement_kind = value.kind;
     return cursor.statements;
 }
 fn bool assignment(ref scanner::Stream stream, usize index) { return tokens::assignment(stream,index); }
@@ -314,6 +315,39 @@ fn usize statement(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
         advance(stream,cursor);
         value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0);
         if (value.expression == 0 || !expect(stream,cursor,b";",8)) { return 0; }
+    } else if (take(stream,cursor,b"for")) {
+        value.kind = 14;
+        let usize header_start = current(stream,cursor).start;
+        if (!expect(stream,cursor,b"(",4)) { return 0; }
+        var usize initial = 0; var usize post = 0;
+        if (!take(stream,cursor,b";")) {
+            initial = statement(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
+            if (initial == 0) { return 0; }
+            if (cursor.statement_kind != 2 && cursor.statement_kind != 4) { return 0; }
+        }
+        if (!word(stream,cursor.index,b";")) {
+            value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0);
+            if (value.expression == 0) { return 0; }
+        }
+        if (!expect(stream,cursor,b";",8)) { return 0; }
+        if (!word(stream,cursor.index,b")")) {
+            var Statement clause = statement_value(4,current(stream,cursor).start,0);
+            clause.target = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0);
+            if (clause.target == 0 || !assignment(stream,cursor.index)) { return 0; }
+            clause.operator = cursor.index; advance(stream,cursor);
+            clause.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0);
+            if (clause.expression == 0) { return 0; }
+            clause.end = cursor.previous_end;
+            post = append_statement(statements,cursor,clause);
+            if (post == 0) { return 0; }
+        }
+        if (!expect(stream,cursor,b")",5)) { return 0; }
+        var Statement header = statement_value(15,header_start,cursor.previous_end);
+        header.first = initial; header.second = post;
+        value.second = append_statement(statements,cursor,header);
+        if (value.second == 0) { return 0; }
+        value.first = block(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
+        if (value.first == 0) { return 0; }
     } else if (take(stream, cursor, b"while")) {
         value.kind = 8;
         if (!expect(stream, cursor, b"(", 4)) { return 0; }
