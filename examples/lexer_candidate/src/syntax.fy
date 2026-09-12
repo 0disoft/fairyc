@@ -18,7 +18,7 @@ pub struct Expression { u32 kind; usize start; usize end; usize token; usize lef
 pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token; }
 // 1 block, 2 binding, 3 return, 4 assignment, 5 if, 6 expression, 7 list link.
 // 8 while (expression condition, first body), 9 break, 10 continue.
-// 11 assert and 12 discard retain their operands in expression.
+// 11 assert, 12 discard and 13 defer retain their operands in expression.
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;

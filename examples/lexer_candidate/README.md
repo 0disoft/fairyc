@@ -468,6 +468,10 @@ is its declared type root and `expression` is its initializer. Visibility,
 attributes and declaration/name spans retain the existing declaration contract.
 Initializers are parsed, not evaluated; `static_assert` remains unsupported.
 
+Private statement kind 13 preserves `defer expression;`, including its operand,
+source span and position in the enclosing block. Execution timing, call validity
+and cleanup order remain semantic/lowering responsibilities.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token
