@@ -16,6 +16,9 @@ func TestWindowsFairyParserLiterals(t *testing.T) {
 		raw, cooked string
 		kind        int
 	}{
+		{`null`, "", 4},
+		{`true`, "", 4},
+		{`false`, "", 4},
 		{`""`, "", 7},
 		{`"hello"`, "hello", 7},
 		{`"한글😀"`, "한글😀", 7},
@@ -38,7 +41,11 @@ func TestWindowsFairyParserLiterals(t *testing.T) {
 		}
 		start := strings.Index(input, c.raw)
 		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 0 && syntax::expression_count(ref parsed) == 1); let syntax::Expression e = syntax::expression_at(ref parsed,1); assert(e.kind == 1 && e.start == %d && e.end == %d && e.left == 0 && e.right == 0); assert(syntax::literal_kind(ref parsed,1) == %d);", strconv.Quote(input), start, start+len(c.raw), c.kind)
-		for _, view := range []struct{ getter, want string }{{"expression_text", c.raw}, {"literal_cooked", hex.EncodeToString([]byte(c.cooked))}} {
+		cooked := hex.EncodeToString([]byte(c.cooked))
+		if c.kind == 4 {
+			cooked = c.raw // Keyword literals retain spelling, unlike hex-encoded string payloads.
+		}
+		for _, view := range []struct{ getter, want string }{{"expression_text", c.raw}, {"literal_cooked", cooked}} {
 			fmt.Fprintf(&p, "{ let ref u8[] value = syntax::%s(ref parsed,1); assert(value.len == %d);", view.getter, len(view.want))
 			for i, b := range []byte(view.want) {
 				fmt.Fprintf(&p, "assert(value[%d] == %d);", i, b)
@@ -50,6 +57,21 @@ func TestWindowsFairyParserLiterals(t *testing.T) {
 	for _, raw := range []string{`"unterminated`, `"bad\q"`, `b"bad\xG0"`, `c"unterminated`, `c"bad\q"`, `c"\0"`, `c"\x00"`, `c"\u{0}"`} {
 		input := "module main; fn void f() { return " + raw + "; }"
 		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(_): { 0 } case .err(status): { status } }; assert(result == 5); }\n", strconv.Quote(input))
+	}
+	for _, body := range []string{
+		"var ptr mut void slot = null; assert(slot != null); return slot == null;",
+		"let R value = R { .data = null }; consume(null); return (null);",
+	} {
+		input := "module main; fn void f() { " + body + " }"
+		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 {
+			t.Fatalf("null context oracle %q: %v", body, err)
+		}
+		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 0); var usize found = 0; var usize id = 1; while (id <= syntax::expression_count(ref parsed)) { let syntax::Expression e = syntax::expression_at(ref parsed,id); if (e.kind == 1) { assert(syntax::literal_kind(ref parsed,id) == 4 && e.left == 0 && e.right == 0 && e.end == e.start + 4); let ref u8[] raw = syntax::expression_text(ref parsed,id); assert(raw.len == 4 && raw[0] == 110 && raw[1] == 117 && raw[2] == 108 && raw[3] == 108); found += 1; } id += 1; } assert(found == 3); assert(integrity::valid(ref parsed)); 0 } case .err(_): { 1 } }; assert(result == 0); }\n", strconv.Quote(input))
+	}
+	for _, name := range []string{"nullish", "null_", "Null"} {
+		input := "module main; fn void f() { return " + name + "; }"
+		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 0 && syntax::expression_count(ref parsed) == 1); assert(syntax::expression_at(ref parsed,1).kind == 2); assert(integrity::valid(ref parsed)); 0 } case .err(_): { 1 } }; assert(result == 0); }\n", strconv.Quote(input))
 	}
 	p.WriteString("return 0; }")
 	runParserProbe(t, p.String())

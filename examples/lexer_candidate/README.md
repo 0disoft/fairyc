@@ -264,7 +264,10 @@ recursion remain in `bodies.fy`, without an import back from the token module.
 `literal_kind` exposes the source token kind. `literal_cooked` borrows the
 scanner's canonical cooked representation: string/byte-string values are lowercase
 hexadecimal bytes, not a newly decoded buffer. Raw spelling and byte spans remain
-unchanged. Lexical diagnostics still reject the entire parse with status 5.
+unchanged. Keyword literals `true`, `false` and `null` use expression kind 1,
+token kind 4, and preserve their spelling in both raw and cooked views. `null`
+support is syntax-only; it does not add pointer evaluation or type checking.
+Lexical diagnostics still reject the entire parse with status 5.
 Path text is its exact source slice, including intervening trivia. Calls retain
 the callee in `left` and a reverse-linked argument tail in `right`; each argument
 link points to its expression in `left` and its predecessor in `right`.

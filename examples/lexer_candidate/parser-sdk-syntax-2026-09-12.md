@@ -44,7 +44,37 @@ without changing those counts. This distinction matters: a later failure can sti
 roll back an otherwise recognized declaration. `null` is only the first remaining
 blocker; this run does not claim it explains every remaining problem.
 
-## Validation and limits
+## Null literal increment (2026-09-13)
+
+The candidate now retains `null` as an ordinary literal expression (kind 1),
+with keyword token kind 4, zero children and exact half-open byte spans. Both
+raw and cooked views preserve `null`, matching the existing scanner contract for
+`true` and `false`. No SDK source, Go compiler, normative grammar, stable version,
+pointer execution or type-checking behavior changes.
+
+| Unchanged SDK input | Retained declarations | Syntax problems | First remaining blocker |
+| --- | ---: | ---: | --- |
+| `optional/std/vec.fy` | 20 | 1 | `>` at 1790..1791 in `Vec<T> { ... }` |
+| `std/bytes.fy` | 33 | 0 | None |
+| `std/text.fy` | 38 | 0 | None |
+
+Both Windows native profiles produce identical records. The complete bytes/text
+declaration lists match Go by kind, full span and name span. Vector remains a
+partial syntax observation, not full SDK admission; generic record construction
+is deferred. Complete syntax does not establish expression-tree equivalence or
+runtime/semantic conformance. These files are not yet mandatory-complete gates.
+
+`fairyc_go_test_parser_literal_items` passed in 57.030s, covering keyword spelling,
+spans, child absence, pointer initialization/comparison, record fields, calls,
+grouping, identifier boundaries and the existing literal/postfix/assertion cases.
+Its first run failed because the new test incorrectly expected an empty cooked
+keyword value; correcting that expectation to the existing spelling contract
+resolved the failure without changing the scanner. `fairyc_go_test_parser_sdk`
+passed in 46.595s, including pointers and generic declarations in both profiles.
+Full compiler/release suites remain out of scope; the child docs validator is
+unconfigured. Only exact-path commit authority changes in the parent runner.
+
+## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.
   It covers Go type-tree shape/span comparisons, pointer depth 31/32, generic list
