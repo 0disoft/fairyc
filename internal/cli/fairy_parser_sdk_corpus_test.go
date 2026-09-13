@@ -28,6 +28,7 @@ func requiredParserSDKFiles() map[string]string {
 		"std/alloc.fy":        "std/alloc.fy",
 		"std/process.fy":      "std/process.fy",
 		"std/io.fy":           "std/io.fy",
+		"std/fs.fy":           "std/fs.fy",
 	}
 }
 
@@ -67,7 +68,7 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
 		{"std/io.fy", "std/io.fy"},
-		{"std/fs.fy", "std/fs.fy"}, // Observation-only; preserve failures under existing limits.
+		{"std/fs.fy", "std/fs.fy"},
 	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)
@@ -200,6 +201,7 @@ func TestParserSDKCorpusContract(t *testing.T) {
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
 		{"std/io.fy", "std/io.fy"},
+		{"std/fs.fy", "std/fs.fy"},
 	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)

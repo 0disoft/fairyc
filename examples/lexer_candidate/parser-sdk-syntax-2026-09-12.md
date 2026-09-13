@@ -296,6 +296,26 @@ remain unchanged. Full compiler/release suites are omitted for this private
 syntax increment; the child docs validator is unconfigured. No filesystem SDK
 operations or push are included.
 
+## Filesystem SDK promotion (2026-09-13)
+
+FS is now the seventh required-complete SDK input. The independent required
+inventory and contract controls reject its omission, partial syntax, exhaustion
+and truncated outcomes. All current corpus inputs are required; partial results
+cannot fall back to observations for these seven files.
+
+`fairyc_go_test_parser_sdk_gate` passed in 9.711s with `files=7 required=7` in
+both native profiles. FS retains 106 declarations with zero problems and exact
+whole Go declaration-list equality. The existing enum oracle and all seven
+required-file rejection controls pass. Source/node/depth limits are unchanged.
+
+Only the corpus test, candidate README/evidence and exact parent commit authority
+change. Formatting and scoped strict checks accompany the focused gate. Parser
+and SDK source, normative specifications, public API, DB, stable versions and
+repository hygiene policies are unchanged. Full compiler/release suites are
+omitted for this test-only promotion; the child docs validator is unconfigured.
+Payload-bearing enum syntax and semantic/SDK execution remain outside this
+increment. No filesystem SDK operations or push are included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.
