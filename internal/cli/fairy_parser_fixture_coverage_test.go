@@ -17,10 +17,39 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
-func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		t.Skip("requires Windows AMD64 MSVC")
+func requiredParserFixtures() map[string]string {
+	return map[string]string{
+		"pass.precedence": "pass", "pass.literals": "pass", "pass.module-path": "pass",
+		"pass.mutable-parameter": "pass", "pass.postfix-chain": "pass", "pass.nested-type-close": "pass",
+		"pass.array-forms": "pass", "pass.classic-for": "pass", "pass.lexical-defer": "pass",
+		"pass.foreign-call": "pass", "pass.compile-time-items": "pass", "pass.package-state": "pass",
+		"fail.invalid-numeric-separator": "fail", "fail.invalid-escape": "fail",
+		"fail.invalid-utf8-string-escape": "fail", "fail.c-string-interior-nul": "fail",
+		"fail.missing-semicolon": "fail", "fail.comparison-chain": "fail", "fail.module-mismatch": "fail",
+		"fail.import-without-alias": "fail", "fail.missing-delimiter": "fail", "fail.unexpected-token": "fail",
 	}
+}
+
+func validateParserFixtureInventory(inventory [][2]string) error {
+	seen := map[string]string{}
+	for _, item := range inventory {
+		if item[0] == "" || (item[1] != "pass" && item[1] != "fail") {
+			return fmt.Errorf("invalid fixture identity/status: %q", item)
+		}
+		if _, exists := seen[item[0]]; exists {
+			return fmt.Errorf("duplicate fixture: %s", item[0])
+		}
+		seen[item[0]] = item[1]
+	}
+	for id, expected := range requiredParserFixtures() {
+		if seen[id] != expected {
+			return fmt.Errorf("required fixture missing or changed: %s (want %s)", id, expected)
+		}
+	}
+	return nil
+}
+
+func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 	base := filepath.Join("..", "..", "spec", "fixtures", "parser")
 	manifest, err := os.ReadFile(filepath.Join(base, "manifest-v0.json"))
 	if err != nil {
@@ -43,6 +72,41 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 	if catalog.SchemaVersion != "fairyc.parser-fixtures/v0" || len(catalog.Cases) == 0 || len(catalog.Cases) > 32 {
 		t.Fatal("unreviewed fixture catalog or batch size")
 	}
+	inventory := make([][2]string, 0, len(catalog.Cases))
+	for _, fixture := range catalog.Cases {
+		inventory = append(inventory, [2]string{fixture.ID, fixture.Expect.Status})
+	}
+	if err := validateParserFixtureInventory(inventory); err != nil {
+		t.Fatal(err)
+	}
+	t.Run("inventory-controls", func(t *testing.T) {
+		for i, fixture := range inventory {
+			t.Run(fixture[0], func(t *testing.T) {
+				missing := append([][2]string{}, inventory[:i]...)
+				missing = append(missing, inventory[i+1:]...)
+				if validateParserFixtureInventory(missing) == nil {
+					t.Fatal("missing fixture accepted")
+				}
+				changed := append([][2]string{}, inventory...)
+				changed[i][1] = "fail"
+				if fixture[1] == "fail" {
+					changed[i][1] = "pass"
+				}
+				if validateParserFixtureInventory(changed) == nil {
+					t.Fatal("changed outcome accepted")
+				}
+			})
+		}
+		for _, extra := range [][2]string{inventory[0], {"", "pass"}, {"observation", "unknown"}} {
+			if validateParserFixtureInventory(append(append([][2]string{}, inventory...), extra)) == nil {
+				t.Fatal("invalid or duplicate fixture accepted")
+			}
+		}
+	})
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC; inventory controls completed")
+	}
+	required := requiredParserFixtures()
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
 	for _, name := range []string{"syntax.fy", "integrity.fy", "file_syntax.fy"} {
@@ -111,7 +175,7 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 				t.Fatalf("unexpected native status for %s: %d", fixture.ID, row[0])
 			}
 			accepted := row[0] == 0 && row[2] == 0
-			if (fixture.ID == "pass.module-path" || fixture.ID == "pass.mutable-parameter" || fixture.ID == "pass.nested-type-close" || fixture.ID == "pass.array-forms" || fixture.ID == "pass.precedence" || fixture.ID == "pass.postfix-chain" || fixture.ID == "pass.lexical-defer" || fixture.ID == "pass.classic-for" || fixture.ID == "pass.literals" || fixture.ID == "pass.compile-time-items" || fixture.ID == "pass.foreign-call" || fixture.ID == "pass.package-state") && !accepted {
+			if required[fixture.ID] == "pass" && !accepted {
 				t.Errorf("supported fixture regressed: %s", fixture.ID)
 			}
 			class := "rejected"
@@ -139,9 +203,9 @@ func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
 				t.Errorf("unresolved fixture %s: %s", fixture.ID, observation)
 			}
 		}
-		for _, id := range []string{"pass.module-path", "pass.mutable-parameter", "pass.nested-type-close", "pass.array-forms", "pass.precedence", "pass.postfix-chain", "pass.lexical-defer", "pass.classic-for", "pass.literals", "pass.compile-time-items", "pass.foreign-call", "pass.package-state"} {
+		for id := range required {
 			if !seen[id] {
-				t.Errorf("missing supported fixture: %s", id)
+				t.Errorf("missing required fixture: %s", id)
 			}
 		}
 		t.Logf("profile=%v cases=%d totals=%v", profile, len(catalog.Cases), totals)

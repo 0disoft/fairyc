@@ -351,6 +351,29 @@ description is synchronized without widening its execution scope. Full compiler
 and release suites are outside this private syntax increment; the child docs
 validator is unconfigured. SDK inputs are parsed, not executed. No push is included.
 
+## Required fixture inventory (2026-09-14)
+
+A fresh fixture run confirmed that all 12 valid cases were already required and
+supported; all 10 invalid cases were rejected. There was no new valid fixture to
+promote. Instead, the candidate test now independently requires the IDs and
+expected pass/fail classes of all 22 cases, including invalid-input cases that
+previously could disappear without a missing-case failure.
+
+Per-case removal and outcome-flip controls, duplicate IDs, empty IDs and unknown
+outcomes are checked before the Windows native guard. The same required map
+replaces duplicated successful-ID lists and checks completion per native profile.
+Future catalog additions require deliberate inventory/control review. Native
+false-acceptance, budget, Go declaration and cross-profile checks remain intact;
+the fixture manifest, source inputs and expected diagnostic contracts are unchanged.
+
+`fairyc_go_test_parser_evidence` passed in 19.375s, including all inventory
+controls, 12 supported/10 rejected cases in both Windows profiles and the existing
+integrity mutation probe. Formatting passed. Only the fixture test, candidate
+documentation and exact parent delivery authority change. Parser implementation,
+grammar, public API, DB, stable versions, hygiene and runner infrastructure are
+unchanged. Full compiler/release and SDK suites are omitted for this test-only
+change; the child docs validator is unconfigured. No push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

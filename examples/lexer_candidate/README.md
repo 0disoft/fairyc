@@ -463,6 +463,11 @@ with at most 32 cases and 32768 source bytes per case. It separates supported
 syntax, unsupported valid syntax and matching rejection using the filename-aware
 entry point. Unexpected false acceptance or budget exhaustion fails the lane rather
 than becoming a supported result. Both profiles must return identical observations.
+All 22 current cases are required: 12 successful inputs and 10 rejected inputs.
+An independent ID/status inventory rejects removal, outcome changes and duplicate
+IDs before native execution. Per-case removal/outcome-mutation controls run before
+the Windows platform guard; required native completion is also checked per profile.
+The fixture manifest and its expected diagnostics remain unchanged.
 The [statement/resource report](parser-coverage-statements-2026-09-11.md) records
 the earlier eleven-file result; older baselines are retained as historical evidence.
 Full-file exhaustion and separate first-blocker prefix probes are distinguished.
