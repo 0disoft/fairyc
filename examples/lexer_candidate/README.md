@@ -551,7 +551,7 @@ the existing 4096-node budget and declaration rollback with ordinary type syntax
 two nodes are charged per parameter before successful declaration publication.
 
 The SDK corpus reads unchanged sources as bounded input data, not as candidate
-modules. `std::vec`, `std::bytes`, `std::text`, `std::alloc` and `std::process`
+modules. `std::vec`, `std::bytes`, `std::text`, `std::alloc`, `std::process` and `std::io`
 are required-complete cases:
 both native profiles must return status 0, zero problems and the exact whole Go
 declaration list (kind, full span and name span). Exhaustion or partial parsing
@@ -560,8 +560,8 @@ required inventory rejects omissions, duplicate disk/name identities and renamed
 required mappings; each profile must finish all required files. Missing source
 files fail at read time.
 
-The five cases above are required; `std::io` is an additional observation-only
-input. Logs identify each file's required status. IO source is parsed as data;
+All six current cases are required. Logs identify each file's required status.
+IO source is parsed as data;
 its console functions and effects are not executed by the corpus probe.
 Future observation-only files may retain partial results with ordered Go-CST
 subsequence checks and at most 128 original complete top-level prefix probes on

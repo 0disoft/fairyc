@@ -27,6 +27,7 @@ func requiredParserSDKFiles() map[string]string {
 		"std/text.fy":         "std/text.fy",
 		"std/alloc.fy":        "std/alloc.fy",
 		"std/process.fy":      "std/process.fy",
+		"std/io.fy":           "std/io.fy",
 	}
 }
 
@@ -65,7 +66,7 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 	files := []parserSDKFile{
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
-		{"std/io.fy", "std/io.fy"}, // Observation-only until complete syntax is verified.
+		{"std/io.fy", "std/io.fy"},
 	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)
@@ -190,6 +191,7 @@ func TestParserSDKCorpusContract(t *testing.T) {
 	files := []parserSDKFile{
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
+		{"std/io.fy", "std/io.fy"},
 	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)
@@ -222,7 +224,8 @@ func TestParserSDKCorpusContract(t *testing.T) {
 	if err := validateParserSDKFiles(changed); err == nil {
 		t.Fatal("required disk/name remapping accepted")
 	}
-	observation := parserSDKFile{"std/io.fy", "std/io.fy"}
+	// Synthetic identity only: no source file is read by this policy control.
+	observation := parserSDKFile{"std/observation.fy", "std/observation.fy"}
 	if err := validateParserSDKFiles(append(append([]parserSDKFile{}, files...), observation)); err != nil {
 		t.Fatal(err)
 	}

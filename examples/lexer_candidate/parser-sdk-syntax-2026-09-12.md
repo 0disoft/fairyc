@@ -212,6 +212,26 @@ are omitted for this test-only increment; the child docs validator is unconfigur
 These observations establish bounded syntax and declaration parity, not semantic
 or console execution conformance. No push is included.
 
+## Console SDK promotion (2026-09-13)
+
+IO is now the sixth required-complete SDK input. Its inventory omission and
+partial/exhausted/truncated outcomes are explicit rejection controls. The
+observation-only policy control now uses a synthetic identity with no file read,
+so it cannot conflict with promotion of an actual SDK module.
+
+`fairyc_go_test_parser_sdk_gate` passed in 7.489s. Both native profiles report
+`files=6 required=6`, with zero problems and exact Go declaration records for all
+six sources; IO retains 29 declarations. Partial parsing or exhaustion of IO now
+fails before any prefix fallback. FS has not been added to the corpus.
+
+Only the corpus test, candidate README/evidence and exact parent commit authority
+change. Formatting and scoped strict checks accompany the focused gate. Parser
+and SDK source, normative specifications, public API, DB, stable versions,
+resource limits and repository hygiene policies are unchanged. Full compiler and
+release suites are omitted for this test-only promotion; the child documentation
+validator is unconfigured. This is syntax/declaration evidence, not console
+execution or semantic conformance. No push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.
