@@ -225,7 +225,7 @@ func parserDeclarationRecords(t *testing.T, name string, data []byte) []int {
 		if !ok {
 			t.Fatal("missing oracle declaration")
 		}
-		kind := map[syntax.Kind]int{syntax.KindModule: 1, syntax.KindImport: 2, syntax.KindFunction: 3, syntax.KindStruct: 4, syntax.KindResource: 6, syntax.KindConst: 7, syntax.KindStaticAssert: 8, syntax.KindForeign: 9, syntax.KindState: 10}[node.Kind]
+		kind := map[syntax.Kind]int{syntax.KindModule: 1, syntax.KindImport: 2, syntax.KindFunction: 3, syntax.KindStruct: 4, syntax.KindResource: 6, syntax.KindConst: 7, syntax.KindStaticAssert: 8, syntax.KindForeign: 9, syntax.KindState: 10, syntax.KindEnum: 11}[node.Kind]
 		if kind == 0 {
 			t.Fatalf("unsupported declaration oracle %s: %s", name, node.Kind)
 		}

@@ -67,6 +67,7 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
 		{"std/io.fy", "std/io.fy"},
+		{"std/fs.fy", "std/fs.fy"}, // Observation-only; preserve failures under existing limits.
 	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)
@@ -188,6 +189,13 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 }
 
 func TestParserSDKCorpusContract(t *testing.T) {
+	// Enum kind 11 is an oracle record, not candidate enum admission.
+	enumSource := "module sample;\npub enum Kind { First; Second; }\n"
+	enumStart, nameStart := strings.Index(enumSource, "pub"), strings.Index(enumSource, "Kind")
+	want := []int{1, 0, len("module sample;"), 7, 13, 11, enumStart, len(strings.TrimSpace(enumSource)), nameStart, nameStart + len("Kind")}
+	if got := parserDeclarationRecords(t, "sample.fy", []byte(enumSource)); fmt.Sprint(got) != fmt.Sprint(want) {
+		t.Fatalf("enum oracle records: got %v want %v", got, want)
+	}
 	files := []parserSDKFile{
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},

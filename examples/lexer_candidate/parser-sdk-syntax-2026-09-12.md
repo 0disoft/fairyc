@@ -232,6 +232,35 @@ release suites are omitted for this test-only promotion; the child documentation
 validator is unconfigured. This is syntax/declaration evidence, not console
 execution or semantic conformance. No push is included.
 
+## Filesystem SDK observation (2026-09-13)
+
+Unchanged `std/fs.fy` (28613 bytes) is now an observation-only corpus input.
+Both native profiles return status 0 with 104 retained declarations and two
+syntax problems. The first fault is `pub` at bytes 1361..1364, the beginning of
+`pub enum FileKind`. There is no exhaustion or prefix fallback. The 104 retained
+kind/name/span records form an exact ordered subsequence of Go declarations,
+and both profiles produce identical observations. This does not admit the whole
+file; the remaining errors are intentionally preserved for a later parser change.
+
+The Go declaration oracle now records enum declarations with comparison kind 11
+rather than aborting on their presence. A platform-neutral fixture verifies an
+enum's kind, full span and name span. This only extends the comparison vocabulary;
+the candidate parser has no new enum implementation.
+
+`fairyc_go_test_parser_sdk_gate` passed in 7.523s with `files=7 required=6`, the
+enum oracle fixture and existing required-inventory/outcome rejection controls.
+Passing this observation lane does not mean FS passed complete syntax. The six
+required files still fully match Go with zero problems. Source, node and prefix
+limits are unchanged, and no filesystem SDK operations are executed.
+
+The corpus test/oracle, candidate README/evidence and exact commit authority
+change. Formatting and scoped strict checks accompany the focused gate. Parser
+and SDK source, normative specifications, public API, DB, stable versions and
+repository hygiene policies remain unchanged. Full compiler/release suites are
+omitted for this test-only increment; the child docs validator is unconfigured.
+No push is included. The next implementation target is the observed unsupported
+enum declaration boundary, not a resource-limit increase.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

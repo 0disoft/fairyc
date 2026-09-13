@@ -560,9 +560,12 @@ required inventory rejects omissions, duplicate disk/name identities and renamed
 required mappings; each profile must finish all required files. Missing source
 files fail at read time.
 
-All six current cases are required. Logs identify each file's required status.
+The six cases above are required; `std::fs` is an additional observation-only
+input under the same source/node limits. Logs identify each file's required status.
 IO source is parsed as data;
-its console functions and effects are not executed by the corpus probe.
+its console functions and effects are not executed by the corpus probe. Likewise,
+FS input is only parsed; filesystem SDK operations are not executed. The Go oracle
+retains enum declarations as comparison kind 11 without claiming candidate enum support.
 Future observation-only files may retain partial results with ordered Go-CST
 subsequence checks and at most 128 original complete top-level prefix probes on
 exhaustion. They do not weaken the required cases. `fairyc_go_test_parser_sdk_gate`
