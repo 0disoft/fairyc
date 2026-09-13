@@ -550,14 +550,22 @@ Private type-arena kind 13 is a parameter-name leaf and 14 links that leaf in
 the existing 4096-node budget and declaration rollback with ordinary type syntax;
 two nodes are charged per parameter before successful declaration publication.
 
-`fairyc_go_test_parser_sdk` reads three unchanged SDK files (`std::vec`, `std::bytes`,
-`std::text`) as bounded input data, not as candidate modules. It reports the first
-unsupported token and requires identical records in both native profiles. Every
-retained declaration must match an ordered Go-CST subsequence by kind and full/name
-spans; only complete parses receive whole-declaration-list comparison. Exhaustion
-uses at most 128 complete top-level prefixes to locate a blocker, never cropped or
-rewritten source. Neither partial results nor a passing observation lane admit
-the whole SDK file. See the [SDK syntax report](parser-sdk-syntax-2026-09-12.md).
+The SDK corpus reads unchanged sources as bounded input data, not as candidate
+modules. `std::vec`, `std::bytes` and `std::text` are required-complete cases:
+both native profiles must return status 0, zero problems and the exact whole Go
+declaration list (kind, full span and name span). Exhaustion or partial parsing
+fails immediately instead of falling back to a prefix observation. An independent
+required inventory rejects omissions, duplicate disk/name identities and renamed
+required mappings; each profile must finish all required files. Missing source
+files fail at read time.
+
+Future observation-only files may retain partial results with ordered Go-CST
+subsequence checks and at most 128 original complete top-level prefix probes on
+exhaustion. They do not weaken the required cases. `fairyc_go_test_parser_sdk_gate`
+runs the inventory/outcome rejection controls and native corpus without unrelated
+syntax suites; `fairyc_go_test_parser_sdk` also runs the corpus. Complete syntax
+is not proof of SDK execution or semantic conformance. See the
+[SDK syntax report](parser-sdk-syntax-2026-09-12.md).
 
 ## Cost baseline
 

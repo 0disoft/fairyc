@@ -16,8 +16,54 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
+type parserSDKFile struct{ disk, name string }
+
+// Keep the admission baseline independent of the observation inventory so that
+// removing an inventory entry cannot silently remove its regression requirement.
+func requiredParserSDKFiles() map[string]string {
+	return map[string]string{
+		"optional/std/vec.fy": "std/vec.fy",
+		"std/bytes.fy":        "std/bytes.fy",
+		"std/text.fy":         "std/text.fy",
+	}
+}
+
+func validateParserSDKFiles(files []parserSDKFile) error {
+	missing := requiredParserSDKFiles()
+	disks, names := map[string]bool{}, map[string]bool{}
+	for _, file := range files {
+		if file.disk == "" || file.name == "" || disks[file.disk] || names[file.name] {
+			return fmt.Errorf("empty or duplicate SDK identity: %+v", file)
+		}
+		disks[file.disk], names[file.name] = true, true
+		if name, required := missing[file.disk]; required {
+			if name != file.name {
+				return fmt.Errorf("required SDK identity changed: %s: %s != %s", file.disk, file.name, name)
+			}
+			delete(missing, file.disk)
+		}
+	}
+	if len(missing) != 0 {
+		return fmt.Errorf("missing required SDK files: %v", missing)
+	}
+	return nil
+}
+
+func requireParserSDKComplete(file parserSDKFile, full []int) error {
+	if _, required := requiredParserSDKFiles()[file.disk]; required {
+		if len(full) < 6 || full[0] != 0 || full[2] != 0 {
+			return fmt.Errorf("complete-SDK regression %s: %v", file.name, full)
+		}
+	}
+	return nil
+}
+
 // Read unchanged SDK sources as data; never compile them as candidate modules.
 func TestWindowsFairyParserSDKCorpus(t *testing.T) {
+	files := []parserSDKFile{{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"}}
+	if err := validateParserSDKFiles(files); err != nil {
+		t.Fatal(err)
+	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
 	}
@@ -33,12 +79,13 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 	writeTestSource(t, root, "src/main.fy", parserFileCorpusProgram(t))
 	baseline := map[string]string{}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		missing := requiredParserSDKFiles()
 		var stderr strings.Builder
 		compiled, code := compileWindowsWorkspace(root, workspaceTargetOptions{targetID: target.X8664WindowsMSVC, profile: profile, locked: profile == cdriver.OptimizedProfile}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, &stderr)
 		if code != ExitSuccess {
 			t.Fatalf("compile: %d %s", code, stderr.String())
 		}
-		for _, file := range []struct{ disk, name string }{{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"}} {
+		for _, file := range files {
 			data, err := os.ReadFile(filepath.Join("..", "..", "internal", "sdkstdlib", "sources", filepath.FromSlash(file.disk)))
 			if err != nil || len(data) > 32768 {
 				t.Fatalf("SDK %s size=%d: %v", file.disk, len(data), err)
@@ -75,6 +122,9 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 				return row
 			}
 			full := observe(data)
+			if err := requireParserSDKComplete(file, full); err != nil {
+				t.Fatal(err)
+			}
 			if full[0] == 0 {
 				want := parserDeclarationRecords(t, file.name, data)
 				position := 0
@@ -120,7 +170,53 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 			} else if baseline[file.name] != evidence {
 				t.Fatalf("SDK profile mismatch: %s", file.name)
 			}
+			delete(missing, file.disk)
 		}
-		t.Logf("profile=%v SDK files=3; incomplete/exhausted results are observations, not admission", profile)
+		if len(missing) != 0 {
+			t.Fatalf("required SDK files not verified in profile %v: %v", profile, missing)
+		}
+		t.Logf("profile=%v SDK files=%d required=%d; required files need complete syntax and exact Go declarations; other files are observations", profile, len(files), len(requiredParserSDKFiles()))
+	}
+}
+
+func TestParserSDKCorpusContract(t *testing.T) {
+	files := []parserSDKFile{{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"}}
+	if err := validateParserSDKFiles(files); err != nil {
+		t.Fatal(err)
+	}
+	for i, file := range files {
+		t.Run("missing/"+file.name, func(t *testing.T) {
+			without := append(append([]parserSDKFile{}, files[:i]...), files[i+1:]...)
+			if err := validateParserSDKFiles(without); err == nil {
+				t.Fatal("required inventory omission accepted")
+			}
+		})
+		for label, row := range map[string][]int{"partial": {0, 0, 1, 3, 1, 2}, "exhausted": {4, 0, 0, 0, 0, 0}, "truncated": {0, 0}} {
+			t.Run(label+"/"+file.name, func(t *testing.T) {
+				if err := requireParserSDKComplete(file, row); err == nil {
+					t.Fatal("incomplete required SDK accepted")
+				}
+			})
+		}
+		if err := requireParserSDKComplete(file, []int{0, 0, 0, 0, 0, 0}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, extra := range []parserSDKFile{files[0], {files[0].disk, "std/alias.fy"}, {"std/alias.fy", files[0].name}, {"", "std/empty.fy"}} {
+		if err := validateParserSDKFiles(append(append([]parserSDKFile{}, files...), extra)); err == nil {
+			t.Fatalf("invalid identity accepted: %+v", extra)
+		}
+	}
+	changed := append([]parserSDKFile{}, files...)
+	changed[0].name = "std/renamed.fy"
+	if err := validateParserSDKFiles(changed); err == nil {
+		t.Fatal("required disk/name remapping accepted")
+	}
+	observation := parserSDKFile{"std/io.fy", "std/io.fy"}
+	if err := validateParserSDKFiles(append(append([]parserSDKFile{}, files...), observation)); err != nil {
+		t.Fatal(err)
+	}
+	if err := requireParserSDKComplete(observation, []int{0, 0, 1, 3, 1, 2}); err != nil {
+		t.Fatal("observation-only syntax should not require completeness:", err)
 	}
 }

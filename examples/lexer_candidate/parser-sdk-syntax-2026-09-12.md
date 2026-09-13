@@ -116,6 +116,36 @@ contract also scopes the exact seven-file implementation commit. Full compiler,
 benchmark and release suites remain out of scope; no child docs validator is
 configured. Public API, DB and repository hygiene policies are unchanged.
 
+## Required SDK completeness gate (2026-09-13)
+
+The three previously observed complete files are now mandatory regression cases.
+`requiredParserSDKFiles` independently fixes their disk/name identities. Before
+native execution the inventory rejects missing required entries, duplicate disks,
+duplicate source names and remapped required names. File read failures remain
+fatal, and each native profile must finish every required case.
+
+Required outcomes must have status 0 and zero syntax problems before any prefix
+fallback. Complete outcomes retain the existing exact whole Go declaration-list
+comparison and cross-profile equality. A required file cannot regress to a
+partial or exhausted observation and still pass. Future observation-only inputs
+remain separate from this requirement; no additional SDK files were read in this
+increment.
+
+`fairyc_go_test_parser_sdk_gate` passed in 7.618s. Native low/optimized results
+remain 21/33/38 declarations and zero problems for vec/bytes/text. Platform-neutral
+controls reject omission of each required file, partial/exhausted/truncated
+outcomes, duplicate disk/name identities and required mapping changes. Controls
+also accept a valid additional observation identity without making its partial
+result mandatory-complete. That synthetic identity control is not an SDK coverage
+claim. Go formatting and scoped strict checks cover the changed test/contract.
+
+The parser implementation, input/node limits, SDK sources, normative grammar,
+public API, DB, stable versions and repository hygiene policies are unchanged.
+Only the corpus test, candidate docs and exact verification/commit authority are
+updated. Full compiler/release suites are omitted because no compiler behavior
+changed; the child documentation validator remains unconfigured. The gate proves
+bounded syntax and declaration parity, not executable SDK semantics.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.
