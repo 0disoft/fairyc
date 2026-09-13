@@ -560,7 +560,9 @@ required inventory rejects omissions, duplicate disk/name identities and renamed
 required mappings; each profile must finish all required files. Missing source
 files fail at read time.
 
-All five current inputs are required; logs identify each file's required status.
+The five cases above are required; `std::io` is an additional observation-only
+input. Logs identify each file's required status. IO source is parsed as data;
+its console functions and effects are not executed by the corpus probe.
 Future observation-only files may retain partial results with ordered Go-CST
 subsequence checks and at most 128 original complete top-level prefix probes on
 exhaustion. They do not weaken the required cases. `fairyc_go_test_parser_sdk_gate`

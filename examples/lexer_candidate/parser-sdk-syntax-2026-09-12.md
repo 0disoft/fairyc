@@ -190,6 +190,28 @@ Full compiler/release suites are omitted for this test-only promotion; the child
 docs validator is unconfigured. IO/fs expansion and SDK execution remain outside
 this increment, and no push is included.
 
+## Console SDK observation (2026-09-13)
+
+Unchanged `std/io.fy` (6518 bytes) is now an observation-only corpus input. It
+parses completely with 29 declarations, status 0 and zero problems in both native
+profiles. Whole declaration kind/name/span records match Go, including the
+attributed external-function and console-wrapper declarations. No parser or SDK
+source modification was required.
+
+`fairyc_go_test_parser_sdk_gate` passed in 6.603s with `files=6 required=5` and
+the existing required-inventory/outcome rejection controls. IO logs explicitly
+retain `required=false`; promotion remains a separate increment. The native
+corpus does not run IO console functions or their declared effects. FS is not
+part of this comparison.
+
+Only the corpus inventory, candidate README/evidence and exact commit authority
+change. Formatting and scoped strict checks accompany the focused SDK gate.
+Normative specifications, public API, DB, stable versions, repository hygiene,
+parser limits and runtime behavior are unchanged. Full compiler/release suites
+are omitted for this test-only increment; the child docs validator is unconfigured.
+These observations establish bounded syntax and declaration parity, not semantic
+or console execution conformance. No push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

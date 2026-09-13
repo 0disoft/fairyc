@@ -65,6 +65,7 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 	files := []parserSDKFile{
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
+		{"std/io.fy", "std/io.fy"}, // Observation-only until complete syntax is verified.
 	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)
