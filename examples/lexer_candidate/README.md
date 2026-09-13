@@ -458,6 +458,13 @@ native corpus results, including incomplete results. It does not prove semantic
 validity, cross-arena graph acyclicity, unique ownership or full source coverage.
 Synthetic-node probes exercise missing, out-of-range, self-referential and
 wrong-kind links without mutating the published parse result.
+Private candidate helpers `valid_field(parsed, field, index)` and
+`valid_declaration_fields(parsed, declaration)` check detached copies through the
+same paths used by `valid`. Payload probes cover field/type/key categories,
+visibility metadata, member/brace/name bounds, backward payload ranges and orphaned
+or wrongly owned fields. Field-local checks and declaration-range checks are
+complementary; neither alone proves whole-tree validity. Payload fields must have
+zero visibility spans. No published parse-result mutation API is added.
 The fixture observation lane reads the checked-in parser manifest unchanged,
 with at most 32 cases and 32768 source bytes per case. It separates supported
 syntax, unsupported valid syntax and matching rejection using the filename-aware

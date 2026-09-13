@@ -374,6 +374,37 @@ grammar, public API, DB, stable versions, hygiene and runner infrastructure are
 unchanged. Full compiler/release and SDK suites are omitted for this test-only
 change; the child docs validator is unconfigured. No push is included.
 
+## Payload integrity mutation probes (2026-09-14)
+
+The private integrity module now exposes detached-copy field and declaration-field
+checks, mirroring its existing expression/type/statement helpers. The whole-result
+validator calls these same helpers, rather than using a test-only implementation.
+Published parse results remain immutable. The field helper guards its zero-based
+arena index before access; declaration ranges are bounds-checked before traversal.
+Payload fields now reject nonzero visibility spans as well as visibility itself.
+
+The existing integrity probe covers valid mixed absent/empty/nonempty payloads,
+then rejects bad field kinds, member type/key roots, missing/out-of-range child
+type roots, visibility flags/spans, name/source/brace bounds, invalid backward
+payload ranges, wrong-kind children, orphaned children, wrong declaration kinds,
+truncated owner ranges and source containment violations. It rechecks the original
+whole result afterward. Field-local and declaration-range checks remain separate;
+this does not establish general graph acyclicity, unique whole-tree ownership or
+semantic validity.
+
+`fairyc_go_test_parser_evidence` passed in 15.923s in both Windows profiles,
+including the new mutation probes and the unchanged 22-case fixture gate.
+`fairyc_go_test_parser_enums` passed in 112.985s, covering enum payload/arena
+boundaries, struct/resource/state regressions, all seven required SDK inputs and
+all sixteen candidate source files with exact Go declaration comparisons in both
+profiles. The refactored integrity source parses fully with zero problems.
+Formatting passed. The normative grammar, parser producers, fixture inputs,
+stable public API, DB, versions, hygiene and runner infrastructure are unchanged.
+Only private checker implementation, its existing test, candidate documentation
+and exact parent delivery authority change. Full compiler/release suites are
+outside this private verifier increment; the child docs validator is unconfigured.
+No SDK execution or push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.
