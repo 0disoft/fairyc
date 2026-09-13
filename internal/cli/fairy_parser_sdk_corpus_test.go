@@ -189,7 +189,7 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 }
 
 func TestParserSDKCorpusContract(t *testing.T) {
-	// Enum kind 11 is an oracle record, not candidate enum admission.
+	// Declaration kind 11 retains enum identity independently of member support.
 	enumSource := "module sample;\npub enum Kind { First; Second; }\n"
 	enumStart, nameStart := strings.Index(enumSource, "pub"), strings.Index(enumSource, "Kind")
 	want := []int{1, 0, len("module sample;"), 7, 13, 11, enumStart, len(strings.TrimSpace(enumSource)), nameStart, nameStart + len("Kind")}

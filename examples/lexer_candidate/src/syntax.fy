@@ -7,7 +7,7 @@ import bodies as bodies;
 import attributes as attributes;
 
 // Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,
-// 8 static_assert, 9 unsafe extern C function, 10 state; problem 4 is
+// 8 static_assert, 9 unsafe extern C function, 10 state, 11 payloadless enum; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
 pub struct Declaration { u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; usize generic_parameters; usize generic_start; usize generic_end; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
@@ -80,6 +80,7 @@ fn u32 item_kind(ref scanner::Stream stream, usize index) {
     if (word(stream,next,b"static_assert")) { return 8; }
     if (word(stream,next,b"unsafe")) { return 9; }
     if (word(stream,next,b"state")) { return 10; }
+    if (word(stream,next,b"enum")) { return 11; }
     return 5;
 }
 fn Attempt failed(ref scanner::Stream stream, ref mut bodies::Cursor cursor, u32 code) {
@@ -142,8 +143,8 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
         if (!expect(stream,cursor,b"=",9)) { return failed(stream,cursor,kind); }
         root = bodies::read_expression(stream,cursor,nodes,entries,statements,type_nodes);
         if (root == 0 || !expect(stream,cursor,b";",8)) { return failed(stream,cursor,kind); }
-    } else if (kind == 4 || kind == 6 || kind == 10) {
-        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields,kind == 6,kind == 10);
+    } else if (kind == 4 || kind == 6 || kind == 10 || kind == 11) {
+        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields,kind == 6,kind == 10,kind == 11);
         cursor.index = record.next; cursor.previous_end = record.end; cursor.types = record.types; cursor.fields = record.fields;
         cursor.expected = record.expected; cursor.status = record.status;
         if (!record.ok) { return failed(stream,cursor,kind); }
@@ -182,11 +183,11 @@ fn void recover(ref scanner::Stream stream, ref mut bodies::Cursor cursor, usize
     cursor.index = start;
     var usize boundary = start;
     if (word(stream,cursor.index,b"@")) {
-        while (current(stream,cursor).kind != 1 && !word(stream,cursor.index,b"fn") && !word(stream,cursor.index,b"pub") && !word(stream,cursor.index,b"struct") && !word(stream,cursor.index,b"resource") && !word(stream,cursor.index,b"const") && !word(stream,cursor.index,b"static_assert") && !word(stream,cursor.index,b"import")) { advance(stream,cursor); }
+        while (current(stream,cursor).kind != 1 && !word(stream,cursor.index,b"fn") && !word(stream,cursor.index,b"pub") && !word(stream,cursor.index,b"struct") && !word(stream,cursor.index,b"resource") && !word(stream,cursor.index,b"enum") && !word(stream,cursor.index,b"const") && !word(stream,cursor.index,b"static_assert") && !word(stream,cursor.index,b"import")) { advance(stream,cursor); }
         boundary = cursor.index;
     }
     if (take(stream, cursor, b"pub")) {
-        if (word(stream, cursor.index, b"fn") || word(stream, cursor.index, b"struct") || word(stream, cursor.index, b"resource") || word(stream, cursor.index, b"const") || word(stream, cursor.index, b"static_assert") || word(stream, cursor.index, b"import")) { advance(stream, cursor); }
+        if (word(stream, cursor.index, b"fn") || word(stream, cursor.index, b"struct") || word(stream, cursor.index, b"resource") || word(stream, cursor.index, b"enum") || word(stream, cursor.index, b"const") || word(stream, cursor.index, b"static_assert") || word(stream, cursor.index, b"import")) { advance(stream, cursor); }
     }
     var usize depth = 0;
     if (take(stream,cursor,b"unsafe")) {

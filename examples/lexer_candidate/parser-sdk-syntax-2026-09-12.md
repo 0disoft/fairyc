@@ -261,6 +261,41 @@ omitted for this test-only increment; the child docs validator is unconfigured.
 No push is included. The next implementation target is the observed unsupported
 enum declaration boundary, not a resource-limit increase.
 
+## Payloadless enum syntax (2026-09-13)
+
+The candidate now admits `enum Name { Member; ... }` as declaration kind 11.
+Empty enums, declaration attributes/visibility and duplicate member spelling are
+preserved. Ordered members use field tag 3 with full/name byte spans, zero
+type/key roots and no member visibility. They share the existing 1024-field arena
+with structs, resources and state. Malformed declarations roll back members and
+attributes; recovery recognizes enum boundaries without accepting nested functions.
+
+Payload fields, generic enum headers and explicit discriminant assignments remain
+unsupported. The tree verifier distinguishes member tags from typed fields and
+limits them to enum owners. No name resolution, duplicate-name validation, enum
+layout, execution or normative language change is introduced.
+
+`fairyc_go_test_parser_enums` passed in 62.697s in both native profiles. It covers
+Go-derived enum/member spans and source order, attributes, empty/duplicate members,
+malformed and unsupported syntax, rollback, 1024/1025-member bounds and shared
+enum/struct arena exhaustion, plus resource, state and struct regressions.
+All 16 candidate source files remain complete with exact Go declarations.
+
+FS now has 106 declarations and zero problems, with whole Go declaration-list
+equality in both profiles. All seven SDK inputs parse completely; six remain
+required and FS remains observation-only until a separate gate promotion.
+The 32768-byte source and existing node/depth limits are unchanged. `syntax.fy`
+is 29831 bytes and `records.fy` is 4811 bytes; no module split was needed.
+
+Candidate parser/validator code, enum tests, SDK oracle comment and candidate
+README/evidence were synchronized. Parent authority adds one bounded enum/related
+verification lane and the exact seven-file commit scope. Formatting and scoped
+strict checks accompany the native probes. SDK/Go compiler sources, normative
+specifications, public API, DB, stable versions and repository hygiene policies
+remain unchanged. Full compiler/release suites are omitted for this private
+syntax increment; the child docs validator is unconfigured. No filesystem SDK
+operations or push are included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

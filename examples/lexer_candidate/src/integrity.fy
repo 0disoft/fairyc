@@ -113,7 +113,7 @@ pub fn bool valid(ref syntax::Parsed p) {
         var usize field = d.field_start;
         while (field < d.field_start + d.field_count) {
             let u32 kind = syntax::field_at(p,field).kind;
-            if (if (d.kind == 10) { kind != 1 && kind != 2 } else { (d.kind != 4 && d.kind != 6) || kind != 0 }) { return false; }
+            if (if (d.kind == 11) { kind != 3 } else if (d.kind == 10) { kind != 1 && kind != 2 } else { (d.kind != 4 && d.kind != 6) || kind != 0 }) { return false; }
             if (syntax::field_at(p,field).start < d.start || syntax::field_at(p,field).end > d.end) { return false; }
             field += 1;
         }
@@ -125,7 +125,7 @@ pub fn bool valid(ref syntax::Parsed p) {
             if (d.body != 0 || d.expression != 0 || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0)) { return false; }
         } else if (d.kind == 7) {
             if (d.body != 0 || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0) || !expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
-        } else if (d.body != 0 || d.result_type != 0 || (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 10)) { return false; }
+        } else if (d.body != 0 || d.result_type != 0 || (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 10 && d.kind != 11)) { return false; }
         if (d.cleanup_body != 0 && (d.kind != 6 || !stmt(p,d.cleanup_body,syntax::statement_count(p) + 1,1))) { return false; }
         if (!optional_expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
         i += 1;
@@ -144,8 +144,8 @@ fn bool valid_field(ref syntax::Parsed p, usize index) {
     let usize name_end = syntax::field_at(p,index).name_end;
     let u32 kind = syntax::field_at(p,index).kind;
     let usize key = syntax::field_at(p,index).key_type;
-    return span(p,start,end) && name_start >= start && name_start < name_end && name_end <= end && kind <= 2
+    return span(p,start,end) && name_start >= start && name_start < name_end && name_end <= end && kind <= 3
         && (kind == 0 || !syntax::field_at(p,index).public)
-        && type_ref(p,syntax::field_at(p,index).type_root,syntax::type_count(p) + 1,0)
+        && (if (kind == 3) { syntax::field_at(p,index).type_root == 0 && syntax::field_at(p,index).public_start == 0 && syntax::field_at(p,index).public_end == 0 } else { type_ref(p,syntax::field_at(p,index).type_root,syntax::type_count(p) + 1,0) })
         && (if (kind == 2) { type_ref(p,key,syntax::type_count(p) + 1,0) } else { key == 0 });
 }
