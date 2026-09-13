@@ -25,6 +25,8 @@ func requiredParserSDKFiles() map[string]string {
 		"optional/std/vec.fy": "std/vec.fy",
 		"std/bytes.fy":        "std/bytes.fy",
 		"std/text.fy":         "std/text.fy",
+		"std/alloc.fy":        "std/alloc.fy",
+		"std/process.fy":      "std/process.fy",
 	}
 }
 
@@ -62,7 +64,6 @@ func requireParserSDKComplete(file parserSDKFile, full []int) error {
 func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 	files := []parserSDKFile{
 		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
-		// Observe new syntax coverage without weakening the required baseline.
 		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
 	}
 	if err := validateParserSDKFiles(files); err != nil {
@@ -185,7 +186,10 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 }
 
 func TestParserSDKCorpusContract(t *testing.T) {
-	files := []parserSDKFile{{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"}}
+	files := []parserSDKFile{
+		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
+		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
+	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)
 	}

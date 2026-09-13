@@ -169,6 +169,27 @@ Go formatting and scoped strict checks cover the test/contract changes; full
 compiler/release suites remain unnecessary for this test-only increment and the
 child documentation validator remains unconfigured. No push is included.
 
+## Allocation and process promotion (2026-09-13)
+
+Alloc/process are now required-complete cases alongside vec/bytes/text. The
+independent required inventory and contract controls cover all five files;
+omission, partial syntax, exhaustion and truncated outcomes are explicitly tested
+for each newly promoted file. No new SDK sources or parser behavior are introduced.
+
+`fairyc_go_test_parser_sdk_gate` passed in 6.813s. Both native profiles report
+`files=5 required=5`, zero problems and exact whole Go declaration records for
+21/33/38/10/8 declarations respectively. Required cases fail before prefix fallback
+and must complete in each profile. Observation-only support remains available for
+future inputs, but no current native input is observation-only.
+
+The corpus test and candidate README/evidence were updated; parent commit authority
+is restricted to those exact paths. Formatting and scoped strict checks accompany
+the gate. Parser/SDK sources, normative specifications, public API, DB, stable
+versions, resource limits and repository hygiene policies remain unchanged.
+Full compiler/release suites are omitted for this test-only promotion; the child
+docs validator is unconfigured. IO/fs expansion and SDK execution remain outside
+this increment, and no push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

@@ -551,7 +551,8 @@ the existing 4096-node budget and declaration rollback with ordinary type syntax
 two nodes are charged per parameter before successful declaration publication.
 
 The SDK corpus reads unchanged sources as bounded input data, not as candidate
-modules. `std::vec`, `std::bytes` and `std::text` are required-complete cases:
+modules. `std::vec`, `std::bytes`, `std::text`, `std::alloc` and `std::process`
+are required-complete cases:
 both native profiles must return status 0, zero problems and the exact whole Go
 declaration list (kind, full span and name span). Exhaustion or partial parsing
 fails immediately instead of falling back to a prefix observation. An independent
@@ -559,9 +560,8 @@ required inventory rejects omissions, duplicate disk/name identities and renamed
 required mappings; each profile must finish all required files. Missing source
 files fail at read time.
 
-`std::alloc` and `std::process` are currently observation-only inputs, separate
-from the three required-complete cases. Logs identify each file's required status.
-Observation-only files may retain partial results with ordered Go-CST
+All five current inputs are required; logs identify each file's required status.
+Future observation-only files may retain partial results with ordered Go-CST
 subsequence checks and at most 128 original complete top-level prefix probes on
 exhaustion. They do not weaken the required cases. `fairyc_go_test_parser_sdk_gate`
 runs the inventory/outcome rejection controls and native corpus without unrelated
