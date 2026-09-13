@@ -316,6 +316,41 @@ omitted for this test-only promotion; the child docs validator is unconfigured.
 Payload-bearing enum syntax and semantic/SDK execution remain outside this
 increment. No filesystem SDK operations or push are included.
 
+## Enum payload syntax (2026-09-13)
+
+The private candidate now accepts the existing normative `enum_payload` and
+`enum_field_decl` productions in `spec/grammar/stage0.ebnf`: named members may
+contain ordered typed fields, including an explicit empty brace pair. No grammar
+or semantic contract is changed. Generic enum headers and discriminant assignments
+remain unsupported.
+
+Payload fields use tag 4 in the shared 1024-field arena and are published directly
+before their tag-3 member. The declaration range includes both. A member's
+`payload_start`/`payload_count` selects its children; half-open
+`payload_open`/`payload_end` distinguishes explicit empty braces from absence.
+Other records have zero payload metadata. Validation checks owner ranges,
+categories, ordering, source containment and existing type roots. Declaration
+failure still rolls back fields, types and attributes together.
+
+The existing enum probe compares member/field full and name spans and payload
+type trees against Go, including mixed payloadless/nonempty/empty members,
+duplicate member spelling, multiple payloads, references and array types. It
+also checks malformed payload rollback and forbidden payload visibility. Boundary
+controls retain the old shared-arena cases and add 1023 payload fields plus their
+member (success) versus 1024 payload fields plus their member (status 4).
+
+`fairyc_go_test_parser_enums` passed in 114.897s in both Windows profiles,
+covering the enum probe, struct/resource/state regressions, all seven required
+SDK files and all sixteen candidate source files. SDK and self-source declarations
+match Go completely with zero syntax problems. Formatting also passed.
+
+Only private records/validation, the existing enum probe, candidate documentation
+and exact parent delivery authority change. Public API, DB, stable versions,
+repository hygiene and runner infrastructure are unchanged. The command's
+description is synchronized without widening its execution scope. Full compiler
+and release suites are outside this private syntax increment; the child docs
+validator is unconfigured. SDK inputs are parsed, not executed. No push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

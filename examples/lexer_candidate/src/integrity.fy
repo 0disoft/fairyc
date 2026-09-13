@@ -111,12 +111,21 @@ pub fn bool valid(ref syntax::Parsed p) {
         } else if (d.name_start < d.start || d.name_start >= d.name_end || d.name_end > d.end) { return false; }
         if (d.entry_start > syntax::entry_count(p) || d.entry_count > syntax::entry_count(p) - d.entry_start || d.field_start > syntax::field_count(p) || d.field_count > syntax::field_count(p) - d.field_start) { return false; }
         var usize field = d.field_start;
+        var usize pending = field;
         while (field < d.field_start + d.field_count) {
             let u32 kind = syntax::field_at(p,field).kind;
-            if (if (d.kind == 11) { kind != 3 } else if (d.kind == 10) { kind != 1 && kind != 2 } else { (d.kind != 4 && d.kind != 6) || kind != 0 }) { return false; }
+            if (if (d.kind == 11) { kind != 3 && kind != 4 } else if (d.kind == 10) { kind != 1 && kind != 2 } else { (d.kind != 4 && d.kind != 6) || kind != 0 }) { return false; }
+            if (d.kind == 11 && kind == 3) {
+                if (syntax::field_at(p,field).payload_count != field - pending) { return false; }
+                if (syntax::field_at(p,field).payload_open != 0) {
+                    if (syntax::field_at(p,field).payload_start != pending) { return false; }
+                } else if (pending != field) { return false; }
+                pending = field + 1;
+            }
             if (syntax::field_at(p,field).start < d.start || syntax::field_at(p,field).end > d.end) { return false; }
             field += 1;
         }
+        if (d.kind == 11 && pending != field) { return false; }
         if (d.kind == 3) {
             if (!stmt(p,d.body,syntax::statement_count(p) + 1,1) || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0)) { return false; }
         } else if (d.kind == 8) {
@@ -144,8 +153,24 @@ fn bool valid_field(ref syntax::Parsed p, usize index) {
     let usize name_end = syntax::field_at(p,index).name_end;
     let u32 kind = syntax::field_at(p,index).kind;
     let usize key = syntax::field_at(p,index).key_type;
-    return span(p,start,end) && name_start >= start && name_start < name_end && name_end <= end && kind <= 3
+    return span(p,start,end) && name_start >= start && name_start < name_end && name_end <= end && kind <= 4
         && (kind == 0 || !syntax::field_at(p,index).public)
         && (if (kind == 3) { syntax::field_at(p,index).type_root == 0 && syntax::field_at(p,index).public_start == 0 && syntax::field_at(p,index).public_end == 0 } else { type_ref(p,syntax::field_at(p,index).type_root,syntax::type_count(p) + 1,0) })
-        && (if (kind == 2) { type_ref(p,key,syntax::type_count(p) + 1,0) } else { key == 0 });
+        && (if (kind == 2) { type_ref(p,key,syntax::type_count(p) + 1,0) } else { key == 0 }) && valid_payload(p,index);
+}
+fn bool valid_payload(ref syntax::Parsed p, usize index) {
+    let usize open = syntax::field_at(p,index).payload_open;
+    let usize end = syntax::field_at(p,index).payload_end;
+    let usize first = syntax::field_at(p,index).payload_start;
+    let usize count = syntax::field_at(p,index).payload_count;
+    if (open == 0) { return end == 0 && first == 0 && count == 0; }
+    if (syntax::field_at(p,index).kind != 3 || open < syntax::field_at(p,index).name_end || end <= open || end >= syntax::field_at(p,index).end || first > index || count != index - first) { return false; }
+    var usize previous = open;
+    var usize i = first;
+    while (i < index) {
+        if (syntax::field_at(p,i).kind != 4 || syntax::field_at(p,i).start <= previous || syntax::field_at(p,i).end >= end) { return false; }
+        previous = syntax::field_at(p,i).end - 1;
+        i += 1;
+    }
+    return true;
 }

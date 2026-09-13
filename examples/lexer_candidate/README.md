@@ -516,19 +516,25 @@ These nodes do not grant unsafe execution or perform foreign calls.
 
 Private declaration kind 10 is a nameless `state` item. Its ordered fields use the
 existing shared 1024-field arena with explicit tags: 0 struct/resource, 1 cell,
-2 map, 3 payloadless enum member. `type_root` is the field value type for tags
-0..2; enum members have zero type roots. Only maps have a nonzero `key_type`.
+2 map, 3 enum member, 4 enum payload field. `type_root` is the field value type for tags
+0..2 and 4; enum members have zero type roots. Only maps have a nonzero `key_type`.
 Names, field spans and attribute/visibility syntax are retained. Storage validity,
 package ownership, duplicate names and persistence remain semantic concerns.
 
-Private declaration kind 11 preserves `enum Name { Member; ... }`, including
+Private declaration kind 11 preserves `enum Name { Member; Some { T value; }; ... }`, including
 empty enums, optional declaration attributes/`pub`, duplicate member spelling,
 source order and exact full/name byte spans. Members use tag 3 in the existing
 `field_start`/`field_count` range, with zero type/key roots and no member visibility.
+Payload fields use tag 4 and appear in source order immediately before their owner
+member (postorder) in that range. The member's `payload_start`/`payload_count`
+select those fields. `payload_open`/`payload_end` preserve the half-open brace
+span, distinguishing an explicit empty payload from no payload (all four values
+zero). Non-member records have all four payload values zero. The validator checks
+payload ownership, ordering, containment and field categories.
 They share the 1024-entry field arena with structs, resources and state fields;
 failed declarations roll back the whole member range and attribute prefix.
 Recovery recognizes enum boundaries without promoting nested declarations.
-Payload fields, generic enum headers and explicit discriminant assignments remain
+Generic enum headers and explicit discriminant assignments remain
 unsupported. No enum value layout, type checking or execution is introduced.
 `fairyc_go_test_parser_enums` verifies this boundary and related field consumers.
 
@@ -577,8 +583,8 @@ Logs identify each file's required status.
 IO source is parsed as data;
 its console functions and effects are not executed by the corpus probe. Likewise,
 FS input is only parsed; filesystem SDK operations are not executed. The Go oracle
-retains enum declarations as comparison kind 11; only payloadless member syntax
-is currently supported by the candidate.
+retains enum declarations as comparison kind 11; payloadless and payload-bearing
+member syntax are supported by the candidate.
 Future observation-only files may retain partial results with ordered Go-CST
 subsequence checks and at most 128 original complete top-level prefix probes on
 exhaustion. They do not weaken the required cases. `fairyc_go_test_parser_sdk_gate`
