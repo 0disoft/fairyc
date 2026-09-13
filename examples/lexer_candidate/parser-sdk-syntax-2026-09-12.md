@@ -74,6 +74,48 @@ passed in 46.595s, including pointers and generic declarations in both profiles.
 Full compiler/release suites remain out of scope; the child docs validator is
 unconfigured. Only exact-path commit authority changes in the parent runner.
 
+## Generic record increment (2026-09-13)
+
+Generic record construction now uses the existing kind-10 record and field list.
+Its constructor child may be a path or kind-20 type application, which retains
+the path and ordered type arguments. Read-only lookahead accepts `(` or `{` after
+a balanced type-argument list; its 256-significant-token bound is unchanged.
+The existing field parser is shared by ordinary and generic records. The tree
+verifier rejects literal constructors and non-link type-argument roots.
+
+All three unchanged SDK inputs now parse completely in both native profiles:
+`optional/std/vec.fy` has 21 declarations, `std/bytes.fy` 33, and `std/text.fy` 38,
+each with zero syntax problems. Full kind/name/span declaration records match Go.
+These are still observations, not mandatory-complete SDK regression gates or
+proof of generic semantics, executable SDK behavior or expression equivalence.
+
+The current 16 candidate source files also parse completely with exact Go
+declaration comparisons in both profiles. `bodies.fy` is 31732 bytes; the 32768-byte
+source cap, 4096-node arenas and recursion limits remain unchanged. No module
+split, arena expansion, normative grammar, SDK source or stable version change
+was needed.
+
+The record tests cover empty/qualified/nested generic construction, pointer and
+array arguments, trivia, trailing/duplicate fields, postfix chains, exact node
+links and byte spans, verifier mutations, malformed-input rollback and the
+existing expression-arena boundary. The old generic-record rejection fixtures
+now use malformed initializers. Go checks both accepted and rejected examples.
+
+Initial verification failures exposed two incorrect new test assumptions:
+`R<T>>{}` is accepted by Go as comparison/shift syntax, and an unclosed record
+may consume the following declaration during recovery. The tests now preserve
+that valid expression and check that retained declarations have no leaked type
+nodes. Temporary failure-location logging required a console effect annotation;
+both logging and annotation were removed before final validation.
+
+`fairyc_go_test_parser_records` passed in 23.234s in both native profiles. The
+combined `fairyc_go_test_parser_generic_records` lane passed in 46.536s and covers records, generic
+calls, SDK observations and self-source comparisons with a 180-second timeout,
+closed stdin, no network and exclusively locked cache writes. The parent command
+contract also scopes the exact seven-file implementation commit. Full compiler,
+benchmark and release suites remain out of scope; no child docs validator is
+configured. Public API, DB and repository hygiene policies are unchanged.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

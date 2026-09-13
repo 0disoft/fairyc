@@ -231,12 +231,12 @@ Cleanup entries use the declaration's source-ordered entry range. Resources stil
 have no function `body` or result type. Body nodes, entries and nesting share the
 same budgets as functions, and malformed cleanup rolls back the whole declaration.
 Declaration attributes and `pub` spans are preserved as for structs; imports
-cannot follow resources. Generic declarations, attributed cleanup,
-and generic record expressions remain unsupported. No resource ownership or
+cannot follow resources. Attributed cleanup remains unsupported. Generic
+declarations and record expressions preserve syntax only. No resource ownership or
 destruction behavior is implemented by the candidate. Malformed resources roll
 back fields, types and attributes before recovering to the next declaration.
 
-Expressions admit integers, `true`/`false`, strings, byte strings, qualified identifier paths, calls,
+Expressions admit integers, `true`/`false`/`null`, strings, byte strings, qualified identifier paths, calls,
 nested parentheses, prefix
 `+ - ! ~ *`, and the grammar's binary operators from multiplicative through
 logical-or. C strings and other literals
@@ -275,8 +275,8 @@ link points to its expression in `left` and its predecessor in `right`.
 Empty calls, trailing argument commas and repeated call suffixes are admitted.
 All call/argument nodes share the existing node limit, and argument recursion
 shares the expression-depth limit. Generic specialization execution remains unsupported.
-Ordinary records retain the path root in `left` and the reversed field-link tail
-in `right`. Field links retain the value in `left`, previous link in `right`,
+Records retain a path root (ordinary) or kind-20 type application (generic) in
+`left`, and the reversed field-link tail in `right`. Field links retain the value in `left`, previous link in `right`,
 member token and full initializer span. `record_field_count` and `record_field`
 expose field-link IDs in source order; `expression_text` returns each field name.
 Empty records, nesting and trailing commas are admitted. Duplicate fields,
@@ -322,11 +322,12 @@ callee for `.ok(value)`, preserving ordered arguments and shared budgets. Type
 inference and variant validity are not checked. Contextual record construction
 `.Variant { ... }` remains unsupported.
 
-Explicit type calls are recognized only after a path and when the closing angle
-list is followed by a call, using read-only lookahead capped at 256 significant
+Explicit type applications are recognized only after a path and when the closing angle
+list is followed by a call or record initializer, using read-only lookahead capped at 256 significant
 tokens. Trivia does not consume that token allowance. Kind 20 retains the path in
 `left` and a type-argument link tail in `right`; the ordinary kind-6 call owns
-this specialization node as its callee. `specialization_argument_count` and
+this specialization node as its callee, or a kind-10 record owns it as its constructor.
+`specialization_argument_count` and
 `specialization_argument` expose written type roots in source order. Type
 arguments share the declaration type arena and its limits. Nested `>>` is split
 only by the existing type cursor; ordinary comparisons and shifts are unchanged.

@@ -36,7 +36,7 @@ pub fn bool valid_expression(ref syntax::Parsed p, syntax::Expression n, usize i
     if (n.kind == 29) { return expr(p,n.left,id,0) && (expr(p,n.right,id,1) || expr(p,n.right,id,2)); }
     if (n.kind == 6) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,7); }
     if (n.kind == 7 || n.kind == 11 || n.kind == 25) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,n.kind); }
-    if (n.kind == 10) { return expr(p,n.left,id,2) && optional_expr(p,n.right,id,11); }
+    if (n.kind == 10) { return (expr(p,n.left,id,2) || expr(p,n.left,id,20)) && optional_expr(p,n.right,id,11); }
     if (n.kind == 12 || n.kind == 31) { return stmt(p,n.left,statements,1) && n.right == 0; }
     if (n.kind == 13) { return expr(p,n.left,id,0) && expr(p,n.right,id,14); }
     if (n.kind == 14) { return stmt(p,n.left,statements,1) && (n.right == 0 || expr(p,n.right,id,12) || expr(p,n.right,id,13)); }

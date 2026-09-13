@@ -32,7 +32,7 @@ func TestWindowsFairyParserGenericCalls(t *testing.T) {
  assert(syntax::type_text(ref parsed,2)[0]==84 && syntax::type_text(ref parsed,4)[0]==85);
  0}case .err(_):{1}};assert(r==0);}
 `, strconv.Quote(input), strings.Index(input, "f<T"), strings.Index(input, "(x)"))
-	for _, expr := range []string{"f<>()", "f<,T>()", "f<T,,U>()", "f<T>>()", "f<ptr>()", "f<T>{}", "f<T>(;)", "a < b < c"} {
+	for _, expr := range []string{"f<>()", "f<,T>()", "f<T,,U>()", "f<T>>()", "f<ptr>()", "f<T>{.x=}", "f<T>(;)", "a < b < c"} {
 		input := "module main; fn void bad(){return " + expr + ";} fn void kept(){}"
 		fmt.Fprintf(&p, "{let i32 r=switch(make(b%s)){case .ok(parsed):{assert(syntax::problem_count(ref parsed)>0 && syntax::declaration_count(ref parsed)==2 && syntax::expression_count(ref parsed)==0 && syntax::type_count(ref parsed)==1);0}case .err(_):{1}};assert(r==0);}\n", strconv.Quote(input))
 	}

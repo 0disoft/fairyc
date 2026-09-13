@@ -162,7 +162,7 @@ pub fn bool call_ahead(ref scanner::Stream stream, usize index) {
         else if (word(stream,next,b">>")) { depth -= 2; }
         if (next + 1 < scanner::token_count(stream)) { next += 1; }
         while (scanner::token_info(stream,next).kind == 2 && next + 1 < scanner::token_count(stream)) { next += 1; }
-        if (depth <= 0) { return depth == 0 && offset > 1 && word(stream,next,b"("); }
+        if (depth <= 0) { return depth == 0 && offset > 1 && (word(stream,next,b"(") || word(stream,next,b"{")); }
         offset += 1;
     }
     return false;
