@@ -146,6 +146,29 @@ updated. Full compiler/release suites are omitted because no compiler behavior
 changed; the child documentation validator remains unconfigured. The gate proves
 bounded syntax and declaration parity, not executable SDK semantics.
 
+## Allocation and process SDK observations (2026-09-13)
+
+The inventory now also reads unchanged `std/alloc.fy` (1453 bytes) and
+`std/process.fy` (1456 bytes) as observation-only data. Both complete successfully:
+alloc has 10 declarations and process has 8, with status 0 and zero problems.
+Their full kind/name/span declaration records match Go and are identical in both
+native profiles. No parser implementation or SDK source changes were necessary.
+
+`fairyc_go_test_parser_sdk_gate` passed in 7.698s, including the five-file native
+corpus and existing inventory/outcome rejection controls. Logs now label each
+file with `required=true` or `required=false`; vec/bytes/text remain the only
+three required-complete cases. Alloc/process promotion is a separate increment,
+so their current complete results are not yet mandatory regression guarantees.
+Neither `std/io.fy` nor `std/fs.fy` was added to the native corpus.
+
+This is source parsing and declaration comparison, not execution of allocation,
+process-argument access, foreign functions or SDK effects. The parser budgets,
+normative grammar, public API, DB, stable versions and repository hygiene policies
+are unchanged. Candidate README/evidence and exact commit authority are updated.
+Go formatting and scoped strict checks cover the test/contract changes; full
+compiler/release suites remain unnecessary for this test-only increment and the
+child documentation validator remains unconfigured. No push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

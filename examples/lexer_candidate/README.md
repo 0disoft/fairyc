@@ -559,7 +559,9 @@ required inventory rejects omissions, duplicate disk/name identities and renamed
 required mappings; each profile must finish all required files. Missing source
 files fail at read time.
 
-Future observation-only files may retain partial results with ordered Go-CST
+`std::alloc` and `std::process` are currently observation-only inputs, separate
+from the three required-complete cases. Logs identify each file's required status.
+Observation-only files may retain partial results with ordered Go-CST
 subsequence checks and at most 128 original complete top-level prefix probes on
 exhaustion. They do not weaken the required cases. `fairyc_go_test_parser_sdk_gate`
 runs the inventory/outcome rejection controls and native corpus without unrelated

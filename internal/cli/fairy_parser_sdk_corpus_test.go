@@ -60,7 +60,11 @@ func requireParserSDKComplete(file parserSDKFile, full []int) error {
 
 // Read unchanged SDK sources as data; never compile them as candidate modules.
 func TestWindowsFairyParserSDKCorpus(t *testing.T) {
-	files := []parserSDKFile{{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"}}
+	files := []parserSDKFile{
+		{"optional/std/vec.fy", "std/vec.fy"}, {"std/bytes.fy", "std/bytes.fy"}, {"std/text.fy", "std/text.fy"},
+		// Observe new syntax coverage without weakening the required baseline.
+		{"std/alloc.fy", "std/alloc.fy"}, {"std/process.fy", "std/process.fy"},
+	}
 	if err := validateParserSDKFiles(files); err != nil {
 		t.Fatal(err)
 	}
@@ -162,7 +166,8 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 			} else {
 				compareParserDeclarations(t, file.name, data, full[6:])
 			}
-			row := fmt.Sprintf("%s bytes=%d status=%d declarations=%d problems=%d first=%d..%d expected=%d actual=%q prefix=%t", class, len(data), full[0], full[1], full[2], first[4], first[5], first[3], actual, full[0] == 4)
+			_, required := requiredParserSDKFiles()[file.disk]
+			row := fmt.Sprintf("%s required=%t bytes=%d status=%d declarations=%d problems=%d first=%d..%d expected=%d actual=%q prefix=%t", class, required, len(data), full[0], full[1], full[2], first[4], first[5], first[3], actual, full[0] == 4)
 			evidence := fmt.Sprint(full, first)
 			if profile == cdriver.LowProfile {
 				baseline[file.name] = evidence
