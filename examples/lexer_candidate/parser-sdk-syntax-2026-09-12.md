@@ -467,6 +467,30 @@ are unchanged. Full compiler/release suites are outside this private syntax
 increment; the child docs validator is unconfigured. No SDK execution or push is
 included.
 
+## Contextual record rejection and limits (2026-09-14)
+
+The record probe now directly rejects contextual initializers with missing field
+names, equals signs or closing braces, missing/doubled commas and an extra record
+suffix. Go must also reject these inputs. Existing rollback checks require no
+retained expressions/entries and consistent surviving declaration/type counts;
+unclosed delimiters are not claimed to preserve every following declaration.
+
+Detached contextual record, field-link and variant-name copies exercise missing,
+wrong-kind, self-referential and out-of-range connections. The original parsed
+result remains unchanged and valid. Both ordinary `R{...}` and contextual
+`.R{...}` run the same boundary loop: 2047 literal fields plus constructor/record
+nodes exactly fill the 4096-node arena; 2048 fields fail with status 4. Successful
+results also require zero problems, valid integrity and the correct constructor
+kind. No resource limit was increased.
+
+`fairyc_go_test_parser_records` passed in 23.562s in both Windows profiles.
+Formatting passed. Only the existing record test, this evidence page and exact
+parent delivery authority change. Parser/validator implementation, normative
+specifications, fixture inputs, stable public API, DB, versions, hygiene and
+runner infrastructure are unchanged. SDK/self-source, full compiler and release
+suites are omitted for this test-only increment; the child docs validator is
+unconfigured. No SDK execution or push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

@@ -54,6 +54,15 @@ fn i32 main() {
 			fmt.Fprintf(&p, "assert(syntax::expression_text(ref parsed,%d)[%d] == %d);\n", id, j, b)
 		}
 	}
+	p.WriteString("let original = syntax::expression_at(ref parsed,6); var broken = original;\n")
+	for _, mutation := range []string{"left=0", "left=2", "left=6", "left=999999", "right=2", "right=6", "right=999999"} {
+		fmt.Fprintf(&p, "broken=original; broken.%s; assert(!integrity::valid_expression(ref parsed,broken,6));\n", mutation)
+	}
+	p.WriteString("let field = syntax::expression_at(ref parsed,5);\n")
+	for _, mutation := range []string{"left=0", "left=5", "right=5", "right=2"} {
+		fmt.Fprintf(&p, "broken=field; broken.%s; assert(!integrity::valid_expression(ref parsed,broken,5));\n", mutation)
+	}
+	p.WriteString("broken=syntax::expression_at(ref parsed,1); broken.left=2; assert(!integrity::valid_expression(ref parsed,broken,1)); assert(integrity::valid(ref parsed));\n")
 	p.WriteString("0 } case .err(_): {1} }; assert(result == 0); }\n")
 	p.WriteString(`{ let i32 result = switch(make(b"module main; fn void f() { return ns::R { .x = 1, .y = b\"ok\", }; }")) {
 case .ok(parsed): {
@@ -69,7 +78,7 @@ case .ok(parsed): {
  assert(syntax::expression_text(ref parsed,3)[0] == 120 && syntax::expression_text(ref parsed,5)[0] == 121);
  0 } case .err(_): { 1 } }; assert(result == 0); }
 `)
-	for _, expr := range []string{"R{", "R{x=1}", "R{.=1}", "R{.x 1}", "R{.x=}", "R{.x=1 .y=2}", "R{.x=1,,}", "R<T>{.x=}", "R<>{}", "R<T,,U>{}", "R<ptr>{}", "R<T>>{.x=1}", "R<T>{.x=1,,}", "R<T>{.x=1", "R<T>{}{}", "(R)<T>{}", ".Some{.value=}", ".Some{value=1}"} {
+	for _, expr := range []string{"R{", "R{x=1}", "R{.=1}", "R{.x 1}", "R{.x=}", "R{.x=1 .y=2}", "R{.x=1,,}", "R<T>{.x=}", "R<>{}", "R<T,,U>{}", "R<ptr>{}", "R<T>>{.x=1}", "R<T>{.x=1,,}", "R<T>{.x=1", "R<T>{}{}", "(R)<T>{}", ".Some{.value=}", ".Some{value=1}", ".Some{.=1}", ".Some{.value 1}", ".Some{.value=1", ".Some{.x=1 .y=2}", ".Some{.value=1,,}", ".Some{}{}"} {
 		input := "module main; fn void bad() { return " + expr + "; } fn void kept() {}"
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) == 0 {
@@ -103,18 +112,23 @@ case .ok(parsed): {
  0 } case .err(_): { 1 } }; assert(result == 0); }
 `)
 	p.WriteString(`
+var usize form = 0;
+while (form < 2) {
 var usize n = 2047;
 while (n <= 2048) {
- let bytes::Buffer input = switch(bytes::copy(b"module main; fn void f() { return R{")) { case .ok(value): { value } case .err(_): { bytes::empty() } };
+ let bytes::Buffer input = switch(bytes::copy(b"module main; fn void f() { return ")) { case .ok(value): { value } case .err(_): { bytes::empty() } };
  var bytes::Buffer data = input;
+ if (form == 0) { discard bytes::append(ref mut data,b"R{"); } else { discard bytes::append(ref mut data,b".R{"); }
  var usize i = 0;
  while (i < n) { discard bytes::append(ref mut data,b".x=0,"); i += 1; }
  discard bytes::append(ref mut data,b"};}");
  let i32 result = switch(make(bytes::view(ref data))) {
-  case .ok(parsed): { assert(n == 2047 && syntax::expression_count(ref parsed) == 4096); 0 }
+  case .ok(parsed): { assert(n == 2047 && syntax::expression_count(ref parsed) == 4096 && syntax::problem_count(ref parsed) == 0 && integrity::valid(ref parsed)); assert(syntax::expression_at(ref parsed,1).kind == (if (form == 0) { 2 } else { 28 })); 0 }
   case .err(status): { assert(n == 2048 && status == 4); 0 }
  };
  assert(result == 0); n += 1;
+}
+form += 1;
 }
 return 0; }`)
 	runParserProbe(t, p.String())
