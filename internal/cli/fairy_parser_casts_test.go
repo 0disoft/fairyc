@@ -13,7 +13,7 @@ import (
 func TestWindowsFairyParserCasts(t *testing.T) {
 	var p strings.Builder
 	p.WriteString("fn i32 main(){\n")
-	for _, expr := range []string{"x as T", "x as A as B", "-x as T * y", "a * b as T", "ref mut x as ref T", "(x as T).field", "f<T>() as Box<T[4]>", "(x as T) < y"} {
+	for _, expr := range []string{"x as T", "x as A as B", "-x as T * y", "a * b as T", "ref mut x as ref T", "(x as T).field", "f<T>() as Box<T[4]>", "(x as T) < y", "x as ptr T", "x as ptr mut u8", "x as unsafe extern C fn void()"} {
 		input := "module main;fn void f(){return " + expr + ";}"
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 {
@@ -30,7 +30,8 @@ func TestWindowsFairyParserCasts(t *testing.T) {
  assert(syntax::expression_at(ref parsed,2).kind==4 && syntax::type_text(ref parsed,2)[0]==84 && syntax::expression_text(ref parsed,3).len==2);
  0}case .err(_):{1}};assert(r==0);}
 `, strconv.Quote(input), strings.Index(input, "-x"), strings.Index(input, " *"))
-	for _, expr := range []string{"x as", "x as 1", "x as T<", "x as T[-1]", "x as ptr T"} {
+	// Pointer types are admitted: reject a missing pointee, not a valid pointer cast.
+	for _, expr := range []string{"x as", "x as 1", "x as T<", "x as T[-1]", "x as ptr"} {
 		input := "module main;fn void bad(){return " + expr + ";}fn void kept(){}"
 		fmt.Fprintf(&p, "{let i32 r=switch(make(b%s)){case .ok(parsed):{assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::type_count(ref parsed)==1 && syntax::declaration_count(ref parsed)==2);0}case .err(_):{1}};assert(r==0);}\n", strconv.Quote(input))
 	}

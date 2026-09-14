@@ -50,6 +50,7 @@ func validateParserFixtureInventory(inventory [][2]string) error {
 }
 
 func TestWindowsFairyParserFixtureCoverage(t *testing.T) {
+	t.Run("stage0 grammar productions", testParserStage0Grammar)
 	base := filepath.Join("..", "..", "spec", "fixtures", "parser")
 	manifest, err := os.ReadFile(filepath.Join(base, "manifest-v0.json"))
 	if err != nil {

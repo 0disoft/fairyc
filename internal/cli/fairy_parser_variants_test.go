@@ -12,7 +12,7 @@ import (
 func TestWindowsFairyParserVariants(t *testing.T) {
 	var p strings.Builder
 	p.WriteString("fn i32 main(){\n")
-	for _, expr := range []string{".none", ".ok(1)", ".err(status)", ".ok(.err(x))", ".ok(x,y,).field[0]", ". /*gap*/ ok()"} {
+	for _, expr := range []string{".none", ".ok(1)", ".err(status)", ".ok(.err(x))", ".ok(x,y,).field[0]", ". /*gap*/ ok()", ".R {.x=1}"} {
 		input := "module main;fn void f(){return " + expr + ";}"
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 {
@@ -29,7 +29,8 @@ func TestWindowsFairyParserVariants(t *testing.T) {
  assert(call.kind==6 && call.left==1 && syntax::call_argument(ref parsed,4,0)==2);
  0}case .err(_):{1}};assert(r==0);}
 `, strconv.Quote(input), strings.Index(input, ". /*"), strings.Index(input, "ok(")+2)
-	for _, expr := range []string{".", ".true", ".ok(,)", ".ok(x", ".R {.x=1}"} {
+	// Contextual record construction is admitted; a missing field value is not.
+	for _, expr := range []string{".", ".true", ".ok(,)", ".ok(x", ".R {.x=}"} {
 		input := "module main;fn void bad(){return " + expr + ";}fn void kept(){}"
 		fmt.Fprintf(&p, "{let i32 r=switch(make(b%s)){case .ok(parsed):{assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==2);0}case .err(_):{1}};assert(r==0);}\n", strconv.Quote(input))
 	}

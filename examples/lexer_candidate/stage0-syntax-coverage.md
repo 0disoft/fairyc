@@ -5,7 +5,7 @@ Scope: syntax recognition and source-faithful private trees for the existing
 the parsed corpus, replace the Go frontend, or establish self-hosting readiness.
 Existing source, arena, recursion and token-lookahead limits remain applicable.
 
-## Remaining-work ledger
+## Completed-work ledger
 
 | Grammar boundary | Implementation and evidence |
 | --- | --- |
@@ -17,7 +17,7 @@ Existing source, arena, recursion and token-lookahead limits remain applicable.
 | Attributed cleanup declarations | Implemented with separate declaration/cleanup attribute ranges; native source-span, rollback, mutation and shared attribute/argument-limit tests pass in both profiles. |
 | Unclosed named-pattern recovery | Production-specific missing-close marker at the case colon preserves the following function; empty, trailing-comma and nested-function isolation cases pass in both profiles (value suite 69.274s). |
 | Block/if expressions in statement position | Implemented through the shared expression reader; branch tails, explicit semicolons and continuations pass Go-backed native probes. |
-| Whole grammar coverage audit | Pending production-by-production audit and selected corpus gates after the above changes. |
+| Whole grammar coverage audit | Completed: [production map and final evidence](stage0-grammar-audit.md), 27 cross-family witnesses, required fixtures and SDK corpus. No identified existing Stage 0 syntax omission remains within the unchanged candidate limits. |
 
 ## Block expressions in statement position
 
