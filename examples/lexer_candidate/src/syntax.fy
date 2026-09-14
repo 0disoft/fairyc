@@ -22,6 +22,7 @@ pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token
 // 11 assert, 12 discard and 13 defer retain their operands in expression.
 // 14 for: expression is optional condition, first body, second kind-15 header.
 // 15 header: first optional binding/assignment initializer, second optional assignment.
+// 16 burn retains its operand in expression; syntax does not consume resources.
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;

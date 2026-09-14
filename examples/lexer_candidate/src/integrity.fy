@@ -25,7 +25,7 @@ fn bool type_ref(ref syntax::Parsed p, usize id, usize before, u32 kind) {
 fn bool stmt(ref syntax::Parsed p, usize id, usize before, u32 kind) {
     if (id == 0 || id >= before || id > syntax::statement_count(p)) { return false; }
     let u32 actual = syntax::statement_at(p,id).kind;
-    return if (kind == 0) { actual >= 1 && actual <= 14 && actual != 7 } else { actual == kind };
+    return if (kind == 0) { (actual >= 1 && actual <= 14 && actual != 7) || actual == 16 } else { actual == kind };
 }
 pub fn bool valid_expression(ref syntax::Parsed p, syntax::Expression n, usize id) {
     if (id == 0 || id > syntax::expression_count(p) || !span(p,n.start,n.end) || n.token >= syntax::source_token_count(p)) { return false; }
@@ -85,7 +85,7 @@ pub fn bool valid_statement(ref syntax::Parsed p, syntax::Statement n, usize id)
     if (n.kind == 15) { return n.expression == 0 && (n.first == 0 || stmt(p,n.first,id,2) || stmt(p,n.first,id,4)) && (n.second == 0 || stmt(p,n.second,id,4)); }
     if (n.kind == 5 || n.kind == 8) { return expr(p,n.expression,expressions,0) && stmt(p,n.first,id,1) && (if (n.kind == 8) { n.second == 0 } else { n.second == 0 || stmt(p,n.second,id,1) || stmt(p,n.second,id,5) }); }
     if (n.first != 0 || n.second != 0) { return false; }
-    if (n.kind == 6 || n.kind == 11 || n.kind == 12 || n.kind == 13) { return expr(p,n.expression,expressions,0); }
+    if (n.kind == 6 || n.kind == 11 || n.kind == 12 || n.kind == 13 || n.kind == 16) { return expr(p,n.expression,expressions,0); }
     return (n.kind == 9 || n.kind == 10) && n.expression == 0;
 }
 pub fn bool valid(ref syntax::Parsed p) {

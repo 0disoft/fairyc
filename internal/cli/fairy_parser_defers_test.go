@@ -10,6 +10,7 @@ import (
 )
 
 func TestWindowsFairyParserDefers(t *testing.T) {
+	t.Run("burn", testParserBurn)
 	var p strings.Builder
 	p.WriteString("fn i32 main(){\n")
 	for _, body := range []string{"defer x;", "defer f<T>(ref mut x);", "defer a[..];", "let x={defer f();1};", "defer {assert(true);1};", "defer 1;"} {
@@ -40,5 +41,46 @@ var usize n=2047;while(n<=2048){
  let i32 r=switch(make(bytes::view(ref data))){case .ok(parsed):{assert(n==2047 && syntax::problem_count(ref parsed)==0 && syntax::statement_count(ref parsed)==4095);0}case .err(status):{assert(n==2048 && status==4);0}};assert(r==0);n+=1;
 }
 return 0;}`)
+	runParserProbe(t, p.String())
+}
+
+func testParserBurn(t *testing.T) {
+	var p strings.Builder
+	p.WriteString("fn i32 main(){\n")
+	for _, operand := range []string{"x", "take<T>(ref mut x)", "a[..]", "{discard x;1}", "switch(x){case .Pair{.left=a}:{a}}", "1"} {
+		input := "module main; /* 한글 */\r\nfn void f(){burn " + operand + ";}"
+		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+		if err != nil || oracle.Tree == nil || oracle.AST == nil || len(oracle.Tree.Diagnostics) != 0 {
+			t.Fatalf("burn oracle %q: %v", operand, err)
+		}
+		s := oracle.AST.Functions[0].Body.Statements[0]
+		if s.Expression == nil {
+			t.Fatal("burn operand missing from oracle")
+		}
+		fmt.Fprintf(&p, `{let r=switch(make(b%s)){case .ok(parsed):{
+ assert(syntax::problem_count(ref parsed)==0 && integrity::valid(ref parsed));
+ let block=syntax::statement_at(ref parsed,syntax::declaration_at(ref parsed,1).body);
+ let id=syntax::statement_at(ref parsed,block.first).first; var s=syntax::statement_at(ref parsed,id);
+ assert(block.second==1 && s.kind==16 && s.start==%d && s.end==%d && s.first==0 && s.second==0 && s.entry==0 && s.target==0 && s.operator==0);
+ let e=syntax::expression_at(ref parsed,s.expression); assert(e.start==%d && e.end==%d);
+ let original=s; s.expression=0; assert(!integrity::valid_statement(ref parsed,s,id));
+ s=original; s.first=1; assert(!integrity::valid_statement(ref parsed,s,id));
+ assert(integrity::valid(ref parsed)); 0}case .err(_):{1}};assert(r==0);}
+`, strconv.Quote(input), s.Span.StartByte, s.Span.EndByte, s.Expression.Span.StartByte, s.Expression.Span.EndByte)
+	}
+	for _, body := range []string{"burn;", "burn x", "burn x,y;", "return burn x;", "let x={burn f()};"} {
+		input := "module main;fn void bad(){" + body + "}fn void kept(){}"
+		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) == 0 {
+			t.Fatalf("invalid burn oracle %q: %v", body, err)
+		}
+		fmt.Fprintf(&p, "assert(switch(make(b%s)){case .ok(parsed):{assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::statement_count(ref parsed)==1 && syntax::declaration_count(ref parsed)==2 && integrity::valid(ref parsed));0}case .err(_):{1}}==0);\n", strconv.Quote(input))
+	}
+	p.WriteString(`var usize n=2047;while(n<=2048){
+ var bytes::Buffer data=bytes::empty();discard bytes::append(ref mut data,b"module main;fn void f(){");
+ var usize i=0;while(i<n){discard bytes::append(ref mut data,b"burn 1;");i+=1;}
+ discard bytes::append(ref mut data,b"}");
+ assert(switch(make(bytes::view(ref data))){case .ok(parsed):{assert(n==2047 && syntax::problem_count(ref parsed)==0 && syntax::statement_count(ref parsed)==4095 && integrity::valid(ref parsed));0}case .err(status):{assert(n==2048 && status==4);0}}==0);n+=1;
+}return 0;}`)
 	runParserProbe(t, p.String())
 }

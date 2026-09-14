@@ -12,13 +12,18 @@ Existing source, arena, recursion and token-lookahead limits remain applicable.
 | Ordinary `unsafe fn` | Implemented in `src/syntax.fy`; `TestWindowsFairyParserForeign` compares ordinary/unsafe/public/attributed headers against Go. |
 | Type-owned function names | Implemented; owner and method have distinct spans, including trivia and generic parameters. Invalid empty/multiply-qualified/foreign owner names are rejected and following declarations recovered. |
 | C function types | Implemented in `src/types.fy`; native type-tree differential and recovery/limit tests pass in both Windows profiles (48.538s). |
-| `burn` statements | Pending implementation and differential tests. |
+| `burn` statements | Implemented as statement kind 16; native tests compare full statement/operand spans to Go, reject malformed statements, and check 2047/2048 shared statement-arena limits. |
 | `region` statements | Pending implementation and differential tests. |
 | Attributed cleanup declarations | Pending implementation and differential tests. |
 | Unclosed named-pattern recovery | Pending recovery improvement; the earlier test records consumption of the following function. |
 | Whole grammar coverage audit | Pending production-by-production audit and selected corpus gates after the above changes. |
 
 ## Function-header representation
+
+`burn` owns one expression and requires a semicolon, including inside a value
+block. It is not an expression or an inferred binding. Parsed ownership and
+resource-consumption semantics remain unchanged. Mutated burn nodes with a
+missing operand or unexpected statement child are rejected by the verifier.
 
 Ordinary functions, including `unsafe fn`, retain declaration kind 3. Raw foreign
 declarations remain kind 9 and require `unsafe extern C fn` plus a semicolon.
