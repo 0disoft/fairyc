@@ -98,6 +98,12 @@ pub fn bool valid(ref syntax::Parsed p) {
     while (i < syntax::declaration_count(p)) {
         let syntax::Declaration d = syntax::declaration_at(p,i);
         if (!span(p,d.start,d.end)) { return false; }
+        if (d.unsafe_start == 0) {
+            if (d.unsafe_end != 0 || d.kind == 9) { return false; }
+        } else if ((d.kind != 3 && d.kind != 9) || d.unsafe_start < d.start || d.unsafe_end != d.unsafe_start + 6 || d.unsafe_end > d.name_start) { return false; }
+        if (d.owner_start == 0) {
+            if (d.owner_end != 0) { return false; }
+        } else if (d.kind != 3 || d.owner_start < d.start || d.owner_start >= d.owner_end || d.owner_end >= d.name_start) { return false; }
         if (d.generic_parameters == 0) {
             if (d.generic_start != 0 || d.generic_end != 0) { return false; }
         } else {
