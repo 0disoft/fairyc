@@ -538,6 +538,36 @@ are unchanged. Type checking, binding resolution and exhaustiveness remain out o
 scope. Full compiler/release suites are omitted for this private syntax increment;
 the child docs validator is unconfigured. No SDK execution or push is included.
 
+## Named pattern rejection and limits (2026-09-14)
+
+The switch probe directly rejects missing field names, equals signs, bindings
+and closing braces, plus missing/doubled field separators. Go must reject each
+invalid source. Balanced cases retain the following function; the unclosed-pattern
+case consumes it during existing recovery and retains only the module. Initial
+assertion failures were traced to applying the balanced-case declaration count to
+that new unclosed input. The test now records this explicit limitation, preserving
+all earlier expectations and requiring no retained expressions/entries, consistent
+type counts and a valid partial result. No parser recovery behavior was changed.
+
+Detached kind-32/kind-33 copies reject wrong-kind, missing, self-referential and
+out-of-range links; the original whole tree remains valid. Explicit empty named
+patterns and payloadless patterns are checked as distinct kinds. A new single-case
+boundary has 2045 named fields plus surrounding nodes exactly fill 4096 expression
+slots, while 2046 fields exhaust with status 4. Existing positional-case and block
+depth boundaries remain in the probe. No limits were raised.
+
+`fairyc_go_test_parser_values` passed in 46.501s on the final test, including
+switch, if-value and value-block probes in both Windows profiles. Formatting
+passed. Temporary diagnostic return codes used to identify the failing case were
+removed; the final checks use explicit assertions.
+
+Only the existing switch test, this evidence page and exact parent delivery
+authority change. Parser/validator implementation, normative specifications,
+fixture inputs, stable public API, DB, versions, hygiene and runner infrastructure
+are unchanged. SDK/self-source, full compiler and release suites are omitted for
+this test-only increment; the child docs validator is unconfigured. No SDK execution
+or push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

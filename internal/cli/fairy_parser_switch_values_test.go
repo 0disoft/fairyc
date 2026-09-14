@@ -12,7 +12,11 @@ import (
 
 func TestWindowsFairyParserSwitchValues(t *testing.T) {
 	var p strings.Builder
-	p.WriteString("fn i32 main() {\n")
+	p.WriteString(`fn i32 rejected(syntax::Parsed parsed, usize declarations) {
+ assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==declarations && syntax::type_count(ref parsed)+1==declarations && integrity::valid(ref parsed)); return 0;
+}
+fn i32 main() {
+`)
 	for _, expr := range []string{
 		"switch(x){}",
 		"switch(x){case .ok(value):{value} case .err(_):{0}}",
@@ -73,7 +77,23 @@ func TestWindowsFairyParserSwitchValues(t *testing.T) {
 			}
 		}
 	}
-	p.WriteString("0 } case .err(_): {1} }; assert(r==0); }\n")
+	p.WriteString("let original=syntax::expression_at(ref parsed,6); var broken=original;\n")
+	for _, mutation := range []string{"left=2", "right=2", "right=6", "right=999999"} {
+		fmt.Fprintf(&p, "broken=original; broken.%s; assert(!integrity::valid_expression(ref parsed,broken,6));\n", mutation)
+	}
+	p.WriteString("let field=syntax::expression_at(ref parsed,5);\n")
+	for _, mutation := range []string{"left=0", "left=1", "left=5", "left=999999", "right=1", "right=5", "right=999999"} {
+		fmt.Fprintf(&p, "broken=field; broken.%s; assert(!integrity::valid_expression(ref parsed,broken,5));\n", mutation)
+	}
+	p.WriteString("assert(integrity::valid(ref parsed)); 0 } case .err(_): {1} }; assert(r==0); }\n")
+	for i, pattern := range []string{".Empty", ".Empty{}"} {
+		input := "module main; fn void f(){return switch(x){case " + pattern + ":{0}};}"
+		kind := 16
+		if i == 1 {
+			kind = 32
+		}
+		fmt.Fprintf(&p, "{ let r=switch(make(b%s)) { case .ok(parsed): { let n=syntax::expression_at(ref parsed,2); assert(n.kind==%d && n.left==0 && n.right==0 && syntax::problem_count(ref parsed)==0 && integrity::valid(ref parsed)); 0 } case .err(_): {1} }; assert(r==0); }\n", strconv.Quote(input), kind)
+	}
 	input := "module main; fn void f(){return switch(x){case .ok(v):{v} case .err(_):{0}};}"
 	fmt.Fprintf(&p, `{ let i32 r = switch(make(b%s)) { case .ok(parsed): {
  let syntax::Expression e = syntax::expression_at(ref parsed,12);
@@ -89,9 +109,19 @@ func TestWindowsFairyParserSwitchValues(t *testing.T) {
  assert(syntax::declaration_at(ref parsed,1).expression == 12); 0
  } case .err(_): { 1 } }; assert(r == 0); }
 `, strconv.Quote(input), strings.Index(input, "switch("), strings.LastIndex(input, ";"), strings.Index(input, "case"), strings.Index(input, " case .err"), strings.Index(input, ".ok"), strings.Index(input, ":{v}"))
-	for _, expr := range []string{"switch(x){case _: {1}}", "switch(x){case .ok():{1}}", "switch(x){case .ok(a,b):{1}}", "switch(x){case .ok(x) {1}}", "switch(x){case .ok(x):1}", "switch(x){.ok:{1}}", "switch(x){case .ok{.x=}:{1}}", "switch(){case .ok:{1}}"} {
+	for _, expr := range []string{"switch(x){case _: {1}}", "switch(x){case .ok():{1}}", "switch(x){case .ok(a,b):{1}}", "switch(x){case .ok(x) {1}}", "switch(x){case .ok(x):1}", "switch(x){.ok:{1}}", "switch(x){case .ok{.x=}:{1}}", "switch(){case .ok:{1}}", "switch(x){case .ok{.=v}:{1}}", "switch(x){case .ok{.x v}:{1}}", "switch(x){case .ok{.x=v:{1}}", "switch(x){case .ok{.x=v,,}:{1}}", "switch(x){case .ok{.x=v .y=w}:{1}}"} {
 		input := "module main; fn void bad(){return " + expr + ";} fn void kept(){}"
-		fmt.Fprintf(&p, "{ let i32 r = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) > 0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==2); 0 } case .err(_): { 1 } }; assert(r==0); }\n", strconv.Quote(input))
+		ref, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+		if err != nil || ref.Tree == nil || len(ref.Tree.Diagnostics) == 0 {
+			t.Fatalf("invalid pattern oracle %q: %v", expr, err)
+		}
+		declarations := 2
+		if expr == "switch(x){case .ok{.x=v:{1}}" {
+			// An unclosed pattern consumes the following function during recovery.
+			// Keep this explicit limitation separate from balanced-input recovery.
+			declarations = 1
+		}
+		fmt.Fprintf(&p, "assert(switch(make(b%s)) { case .ok(parsed): { rejected(parsed,%d) } case .err(_): {1} }==0);\n", strconv.Quote(input), declarations)
 	}
 	p.WriteString(`
 var usize n=818;
@@ -100,6 +130,16 @@ while(n<=819) {
  var usize i=0; while(i<n) { discard bytes::append(ref mut data,b"case .ok(x):{1}"); i+=1; }
  discard bytes::append(ref mut data,b"};}");
  let i32 r=switch(make(bytes::view(ref data))) { case .ok(parsed): { assert(n==818 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4096 && syntax::switch_case_count(ref parsed,4096)==818); 0 } case .err(status): { assert(n==819 && status==4); 0 } }; assert(r==0); n+=1;
+}
+n=2045;
+while(n<=2046) {
+ var bytes::Buffer data=bytes::empty(); discard bytes::append(ref mut data,b"module main;fn void f(){return switch(x){case .Pair{");
+ var usize i=0; while(i<n) { discard bytes::append(ref mut data,b".x=v,"); i+=1; }
+ discard bytes::append(ref mut data,b"}:{0}};}");
+ let i32 r=switch(make(bytes::view(ref data))) {
+  case .ok(parsed): { assert(n==2045 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4096 && syntax::pattern_field_count(ref parsed,4092)==2045 && integrity::valid(ref parsed)); 0 }
+  case .err(status): { assert(n==2046 && status==4); 0 }
+ }; assert(r==0); n+=1;
 }
 n=31;
 while(n<=32) {
