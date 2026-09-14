@@ -7,6 +7,7 @@ import std::vec as v;
 // 8 fixed array (left element, right length), 9 integer length, 10 path length.
 // 11 raw pointer, 12 mutable raw pointer; prefix constructors retain the child.
 // 13 generic parameter name, 14 ordered parameter link; neither is a value type.
+// 15 C function (left result, right parameter tail), 16 ordered function parameter.
 // Shared across the enclosing Parsed owner; IDs are one-based, zero absent.
 pub struct Node { u32 kind; usize start; usize end; usize left; usize right; }
 pub struct Attempt { usize next; usize end; usize count; usize root; i32 status; u32 expected; }
@@ -68,6 +69,24 @@ fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
         if (child == 0) { return 0; }
         if (!take(stream,cursor,b")")) { cursor.expected = 5; return 0; }
         root = append(nodes,cursor,5,start,child,0);
+    } else if (take(stream,cursor,b"unsafe")) {
+        if (!take(stream,cursor,b"extern")) { cursor.expected = 19; return 0; }
+        if (!take(stream,cursor,b"C")) { cursor.expected = 20; return 0; }
+        if (!take(stream,cursor,b"fn")) { cursor.expected = 21; return 0; }
+        let usize result = type_node(stream,cursor,nodes,depth + 1);
+        if (result == 0) { return 0; }
+        if (!take(stream,cursor,b"(")) { cursor.expected = 4; return 0; }
+        var usize tail = 0;
+        while (!word(stream,cursor.index,b")")) {
+            let usize parameter_start = scanner::token_info(stream,cursor.index).start;
+            let usize parameter = type_node(stream,cursor,nodes,depth + 1);
+            if (parameter == 0) { return 0; }
+            tail = append(nodes,cursor,16,parameter_start,parameter,tail);
+            if (tail == 0) { return 0; }
+            if (!take(stream,cursor,b",")) { break; }
+        }
+        if (!take(stream,cursor,b")")) { cursor.expected = 5; return 0; }
+        root = append(nodes,cursor,15,start,result,tail);
     } else if (named(stream,cursor.index)) {
         advance(stream,cursor);
         while (take(stream,cursor,b"::")) {

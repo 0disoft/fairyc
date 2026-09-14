@@ -18,6 +18,7 @@ func TestWindowsFairyParserAttributes(t *testing.T) {
 		"module main; @effects(console) pub fn void f() {}",
 		"module main; @marker @ns::tag(a::b, 0xFF, \"한글\",) fn void f() {}",
 		"module main; @empty() @same @same struct R { u8 x; }",
+		"module main; @bad resource R<T> { cleanup {} }",
 	} {
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || oracle.AST == nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 {
@@ -30,6 +31,10 @@ func TestWindowsFairyParserAttributes(t *testing.T) {
 			f := oracle.AST.Functions[0]
 			start, end = f.Span.StartByte, f.Span.EndByte
 			emitAttributeChecks(&p, input, f.Attributes)
+		} else if len(oracle.AST.Resources) > 0 {
+			r := oracle.AST.Resources[0]
+			start, end = r.Span.StartByte, r.Span.EndByte
+			emitAttributeChecks(&p, input, r.Attributes)
 		} else {
 			s := oracle.AST.Structs[0]
 			start, end = s.Span.StartByte, s.Span.EndByte
@@ -48,10 +53,17 @@ func TestWindowsFairyParserAttributes(t *testing.T) {
 		"@bad(x x) fn void bad() {}",
 		"@ns:: fn void bad() {}",
 		"@bad fn void bad() { let x = ; }",
-		"@bad resource R<T> { cleanup {} }",
+		"@bad resource R<T,,> { cleanup {} }",
 		"@bad import x as x;",
 	} {
 		input := "module main; " + bad + " @kept fn void kept() {}"
+		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+		// Go's attribute parser accepts a broader expression set than the
+		// normative path/integer/text-string grammar. Preserve that boundary.
+		normativeOnly := strings.HasPrefix(bad, "@bad(true)") || strings.HasPrefix(bad, "@bad(b\"x\")")
+		if err != nil || oracle.Tree == nil || (!normativeOnly && len(oracle.Tree.Diagnostics) == 0) {
+			t.Fatalf("invalid attribute oracle %q: %v", bad, err)
+		}
 		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 1 && syntax::declaration_count(ref parsed) == 2 && syntax::attribute_count(ref parsed) == 1); let syntax::Declaration d = syntax::declaration_at(ref parsed,1); assert(d.attribute_start == 0 && d.attribute_count == 1 && d.name_start == %d); assert(syntax::attribute_at(ref parsed,0).argument_start == 0 && syntax::attribute_at(ref parsed,0).argument_count == 0); 0 } case .err(_): { 1 } }; assert(result == 0); }\n", strconv.Quote(input), strings.LastIndex(input, "kept()"))
 	}
 	p.WriteString(`

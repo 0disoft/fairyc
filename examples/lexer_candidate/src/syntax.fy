@@ -191,6 +191,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut bodies::Cursor cursor
 // Restart at the failed declaration, then consume with brace depth. Never accept
 // a nested function as the next top-level declaration or repeat a zero-width step.
 fn void recover(ref scanner::Stream stream, ref mut bodies::Cursor cursor, usize start) {
+    let usize failed_index = cursor.index;
     cursor.index = start;
     var usize boundary = start;
     if (word(stream,cursor.index,b"@")) {
@@ -207,8 +208,11 @@ fn void recover(ref scanner::Stream stream, ref mut bodies::Cursor cursor, usize
         discard take(stream,cursor,b"fn");
         boundary = cursor.index;
     }
+    var bool type_header = false;
     while (scanner::token_info(stream, cursor.index).kind != 1) {
-        if (depth == 0 && cursor.index > boundary && (word(stream, cursor.index, b"fn") || item_kind(stream, cursor.index) != 5 || word(stream, cursor.index, b"import") || word(stream,cursor.index,b"@"))) { return; }
+        if (depth == 0 && cursor.index < failed_index && word(stream,cursor.index,b"unsafe")) { type_header = true; }
+        if (type_header && word(stream,cursor.index,b"fn")) { type_header = false; advance(stream,cursor); continue; }
+        if (depth == 0 && cursor.index > boundary && cursor.index >= failed_index && (word(stream, cursor.index, b"fn") || item_kind(stream, cursor.index) != 5 || word(stream, cursor.index, b"import") || word(stream,cursor.index,b"@"))) { return; }
         if (word(stream, cursor.index, b"{")) { depth += 1; }
         else if (word(stream, cursor.index, b"}")) {
             advance(stream, cursor);
