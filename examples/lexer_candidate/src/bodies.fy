@@ -118,7 +118,7 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut Cursor cursor, ref
     var bool comparison = false;
     while (left != 0) {
         let usize opener = cursor.index;
-        if ((cursor.expression_kind == 2 || cursor.expression_kind == 20) && take(stream, cursor, b"{")) {
+        if ((cursor.expression_kind == 2 || cursor.expression_kind == 20 || cursor.expression_kind == 28) && take(stream, cursor, b"{")) {
             var usize fields = 0;
             while (!word(stream, cursor.index, b"}")) {
                 let usize start = current(stream, cursor).start;

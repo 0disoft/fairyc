@@ -437,6 +437,36 @@ fixtures, stable public API, DB, versions, hygiene and runner infrastructure are
 unchanged. Full compiler/release suites are omitted for this test-only increment;
 the child docs validator is unconfigured. No SDK execution or push is included.
 
+## Contextual variant record construction (2026-09-14)
+
+The candidate now accepts the normative `.Variant { .field = value, ... }`
+expression by reusing record kind 10 with a contextual-name kind-28 left child.
+The existing kind-11 field links, ordered accessors, source spans, rollback and
+expression budgets are unchanged. The integrity checker admits that constructor
+category alongside ordinary paths and generic applications. No grammar, variant
+resolution, type inference, layout or execution semantics change.
+
+The record probe adds empty, single-field, nested contextual, mixed generic-record,
+postfix and duplicate-field/trivia examples checked against Go syntax acceptance.
+A detailed Go-derived example compares record/callee spans, exact variant and
+field names, field order and field spans. Two malformed contextual initializers
+retain the existing rejection/rollback checks. Ordinary/generic cases and arena
+limits remain covered; shared accepted/rejected helpers avoid growing a monolithic
+generated assertion function without removing its conditions.
+
+`fairyc_go_test_parser_generic_records` passed in 50.225s in both Windows
+profiles, including record probes, generic-call disambiguation, all seven required
+SDK inputs and all sixteen self-source files. All SDK/self-source declarations
+match Go completely with zero syntax problems. Formatting passed; source/node/depth
+limits were not increased.
+
+Only private expression dispatch/validation, the existing record test, candidate
+documentation and exact parent delivery authority change. Normative specifications,
+fixture inputs, stable public API, DB, versions, hygiene and runner infrastructure
+are unchanged. Full compiler/release suites are outside this private syntax
+increment; the child docs validator is unconfigured. No SDK execution or push is
+included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

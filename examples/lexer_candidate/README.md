@@ -275,7 +275,8 @@ link points to its expression in `left` and its predecessor in `right`.
 Empty calls, trailing argument commas and repeated call suffixes are admitted.
 All call/argument nodes share the existing node limit, and argument recursion
 shares the expression-depth limit. Generic specialization execution remains unsupported.
-Records retain a path root (ordinary) or kind-20 type application (generic) in
+Records retain a path root (ordinary), kind-20 type application (generic), or
+kind-28 variant name (contextual) in
 `left`, and the reversed field-link tail in `right`. Field links retain the value in `left`, previous link in `right`,
 member token and full initializer span. `record_field_count` and `record_field`
 expose field-link IDs in source order; `expression_text` returns each field name.
@@ -320,7 +321,11 @@ children. The full span includes the leading dot and intervening trivia; the
 token and `expression_text` retain the identifier. Existing call nodes wrap this
 callee for `.ok(value)`, preserving ordered arguments and shared budgets. Type
 inference and variant validity are not checked. Contextual record construction
-`.Variant { ... }` remains unsupported.
+`.Variant { .field = value, ... }` reuses kind 10 with a kind-28 left child and
+the existing ordered field-link tail. Its full span includes the leading dot;
+the kind-28 child's token/text identifies the variant name. Empty initializers,
+nesting, trailing commas and subsequent postfix access use existing record rules.
+No type inference, variant resolution, layout or execution is introduced.
 
 Explicit type applications are recognized only after a path and when the closing angle
 list is followed by a call or record initializer, using read-only lookahead capped at 256 significant

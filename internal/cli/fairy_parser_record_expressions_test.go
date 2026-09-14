@@ -12,15 +12,49 @@ import (
 
 func TestWindowsFairyParserRecordExpressions(t *testing.T) {
 	var p strings.Builder
-	p.WriteString("fn i32 main() {\n")
-	for _, expr := range []string{"R{}", "R<T>>{}", "ns::R { .x = 1, .y = b\"ok\", }", "R{.x=R{.y=2}}", "R{.x=f(1)}.x", "R{.x=1,.x=2}", "R{/*gap*/.x=1+2*3}", "R<T>{}", "ns::R<ptr mut T, U[],>{.x=null,.y=f<T>()}.x", "R<Box<Box<T>>>{.x=R<T>{.x=1}}", "R /*gap*/ <T> /*gap*/ {.x=1}.x[0]", "R<T>{.x=1,.x=2}"} {
+	p.WriteString(`fn i32 accepted(syntax::Parsed parsed) { assert(syntax::problem_count(ref parsed) == 0 && integrity::valid(ref parsed)); return 0; }
+fn i32 rejected(syntax::Parsed parsed) { assert(syntax::problem_count(ref parsed) > 0 && syntax::expression_count(ref parsed) == 0 && syntax::entry_count(ref parsed) == 0 && syntax::type_count(ref parsed) + 1 == syntax::declaration_count(ref parsed) && integrity::valid(ref parsed)); return 0; }
+fn i32 main() {
+`)
+	for _, expr := range []string{"R{}", "R<T>>{}", "ns::R { .x = 1, .y = b\"ok\", }", "R{.x=R{.y=2}}", "R{.x=f(1)}.x", "R{.x=1,.x=2}", "R{/*gap*/.x=1+2*3}", "R<T>{}", "ns::R<ptr mut T, U[],>{.x=null,.y=f<T>()}.x", "R<Box<Box<T>>>{.x=R<T>{.x=1}}", "R /*gap*/ <T> /*gap*/ {.x=1}.x[0]", "R<T>{.x=1,.x=2}", ".Empty{}", ".Some{.value=1}", ".Outer{.inner=.Inner{.value=2},}", ".Some{.value=R<T>{.x=1}}.value", ". /*gap*/ Some { .value=1,.value=2 }"} {
 		input := "module main; fn void f() { return " + expr + "; }"
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 {
 			t.Fatalf("record oracle %q: %v", expr, err)
 		}
-		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 0 && integrity::valid(ref parsed)); 0 } case .err(_): { 1 } }; assert(result == 0); }\n", strconv.Quote(input))
+		fmt.Fprintf(&p, "assert(switch(make(b%s)) { case .ok(parsed): { accepted(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input))
 	}
+	variantInput := "module main; fn void f() { return . /*gap*/ Pair { .left = 20, .right = 22, }; }"
+	variantOracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(variantInput)), source.DefaultLimits())
+	if err != nil || variantOracle.AST == nil || len(variantOracle.Tree.Diagnostics) != 0 {
+		t.Fatalf("contextual record oracle: %v", err)
+	}
+	record := variantOracle.AST.Functions[0].Body.Statements[0].Expression
+	if record == nil || len(record.Children) != 3 {
+		t.Fatal("contextual record oracle shape")
+	}
+	callee := record.Children[0]
+	fmt.Fprintf(&p, "{ let result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) == 0 && syntax::expression_count(ref parsed) == 6 && integrity::valid(ref parsed));\n", strconv.Quote(variantInput))
+	fmt.Fprintf(&p, "{ let r = syntax::expression_at(ref parsed,6); assert(r.kind == 10 && r.left == 1 && r.right == 5 && r.start == %d && r.end == %d); }\n", record.Span.StartByte, record.Span.EndByte)
+	fmt.Fprintf(&p, "{ let v = syntax::expression_at(ref parsed,1); assert(v.kind == 28 && v.left == 0 && v.right == 0 && v.start == %d && v.end == %d); }\n", callee.Span.StartByte, callee.Span.EndByte)
+	name := strings.TrimPrefix(callee.Text, ".")
+	fmt.Fprintf(&p, "assert(syntax::expression_text(ref parsed,1).len == %d);\n", len(name))
+	for i, b := range []byte(name) {
+		fmt.Fprintf(&p, "assert(syntax::expression_text(ref parsed,1)[%d] == %d);\n", i, b)
+	}
+	p.WriteString("assert(syntax::record_field_count(ref parsed,6) == 2);\n")
+	for i, f := range record.Children[1:] {
+		id, value, previous := 3+2*i, 2+2*i, 0
+		if i > 0 {
+			previous = id - 2
+		}
+		fmt.Fprintf(&p, "{ let f = syntax::expression_at(ref parsed,%d); assert(syntax::record_field(ref parsed,6,%d) == %d && f.kind == 11 && f.left == %d && f.right == %d && f.start == %d && f.end == %d); }\n", id, i, id, value, previous, f.Span.StartByte, f.Span.EndByte)
+		fmt.Fprintf(&p, "assert(syntax::expression_text(ref parsed,%d).len == %d);\n", id, len(f.Text))
+		for j, b := range []byte(f.Text) {
+			fmt.Fprintf(&p, "assert(syntax::expression_text(ref parsed,%d)[%d] == %d);\n", id, j, b)
+		}
+	}
+	p.WriteString("0 } case .err(_): {1} }; assert(result == 0); }\n")
 	p.WriteString(`{ let i32 result = switch(make(b"module main; fn void f() { return ns::R { .x = 1, .y = b\"ok\", }; }")) {
 case .ok(parsed): {
  assert(syntax::expression_count(ref parsed) == 6);
@@ -35,13 +69,13 @@ case .ok(parsed): {
  assert(syntax::expression_text(ref parsed,3)[0] == 120 && syntax::expression_text(ref parsed,5)[0] == 121);
  0 } case .err(_): { 1 } }; assert(result == 0); }
 `)
-	for _, expr := range []string{"R{", "R{x=1}", "R{.=1}", "R{.x 1}", "R{.x=}", "R{.x=1 .y=2}", "R{.x=1,,}", "R<T>{.x=}", "R<>{}", "R<T,,U>{}", "R<ptr>{}", "R<T>>{.x=1}", "R<T>{.x=1,,}", "R<T>{.x=1", "R<T>{}{}", "(R)<T>{}"} {
+	for _, expr := range []string{"R{", "R{x=1}", "R{.=1}", "R{.x 1}", "R{.x=}", "R{.x=1 .y=2}", "R{.x=1,,}", "R<T>{.x=}", "R<>{}", "R<T,,U>{}", "R<ptr>{}", "R<T>>{.x=1}", "R<T>{.x=1,,}", "R<T>{.x=1", "R<T>{}{}", "(R)<T>{}", ".Some{.value=}", ".Some{value=1}"} {
 		input := "module main; fn void bad() { return " + expr + "; } fn void kept() {}"
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) == 0 {
 			t.Fatalf("invalid record oracle accepted %q: %v", expr, err)
 		}
-		fmt.Fprintf(&p, "{ let i32 result = switch(make(b%s)) { case .ok(parsed): { assert(syntax::problem_count(ref parsed) > 0 && syntax::expression_count(ref parsed) == 0 && syntax::entry_count(ref parsed) == 0 && syntax::type_count(ref parsed) + 1 == syntax::declaration_count(ref parsed) && integrity::valid(ref parsed)); 0 } case .err(_): { 1 } }; assert(result == 0); }\n", strconv.Quote(input))
+		fmt.Fprintf(&p, "assert(switch(make(b%s)) { case .ok(parsed): { rejected(parsed) } case .err(_): { 1 } } == 0);\n", strconv.Quote(input))
 	}
 
 	p.WriteString(`{ let i32 result = switch(make(b"module main; fn void f() { return ns::R<T,U>{.x=null,.y=2}; }")) {
