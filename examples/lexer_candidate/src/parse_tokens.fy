@@ -1,4 +1,5 @@
 module parse_tokens;
+// Statement keyword classification shared without changing parser arena ownership.
 import scanner as scanner;
 
 pub fn bool atom(ref scanner::Stream stream, usize index) {
@@ -64,6 +65,20 @@ pub fn usize precedence(ref scanner::Stream stream, usize index) {
     return 0;
 }
 
+pub fn bool jump(ref scanner::Stream stream, usize index) {
+    return word(stream,index,b"break") || word(stream,index,b"continue");
+}
+pub fn bool block_start(ref scanner::Stream stream, usize index) {
+    return word(stream,index,b"{") || word(stream,index,b"unsafe");
+}
+pub fn bool constructor_kind(u32 kind) { return kind == 2 || kind == 20 || kind == 28; }
+pub fn bool block_kind(u32 kind) { return kind == 12 || kind == 13 || kind == 31; }
+pub fn u32 operand_statement(ref scanner::Stream stream, usize index) {
+    if (word(stream,index,b"discard")) { return 12; }
+    if (word(stream,index,b"defer")) { return 13; }
+    if (word(stream,index,b"burn")) { return 16; }
+    return 0;
+}
 pub fn bool assignment(ref scanner::Stream stream, usize index) {
     return word(stream, index, b"=") || word(stream, index, b"+=") || word(stream, index, b"-=") || word(stream, index, b"*=") || word(stream, index, b"/=") || word(stream, index, b"%=") || word(stream, index, b"<<=") || word(stream, index, b">>=") || word(stream, index, b"&=") || word(stream, index, b"^=") || word(stream, index, b"|=");
 }

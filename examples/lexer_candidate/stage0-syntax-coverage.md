@@ -13,7 +13,7 @@ Existing source, arena, recursion and token-lookahead limits remain applicable.
 | Type-owned function names | Implemented; owner and method have distinct spans, including trivia and generic parameters. Invalid empty/multiply-qualified/foreign owner names are rejected and following declarations recovered. |
 | C function types | Implemented in `src/types.fy`; native type-tree differential and recovery/limit tests pass in both Windows profiles (48.538s). |
 | `burn` statements | Implemented as statement kind 16; native tests compare full statement/operand spans to Go, reject malformed statements, and check 2047/2048 shared statement-arena limits. |
-| `region` statements | Pending implementation and differential tests. |
+| `region` statements | Implemented as statement kind 17; Go CST comparison, malformed-input rollback, detached-node checks and 31/32-level depth tests pass in both Windows profiles after module extraction. Control-item suite: 69.725s. |
 | Attributed cleanup declarations | Pending implementation and differential tests. |
 | Unclosed named-pattern recovery | Pending recovery improvement; the earlier test records consumption of the following function. |
 | Whole grammar coverage audit | Pending production-by-production audit and selected corpus gates after the above changes. |
@@ -36,6 +36,27 @@ The integrity verifier checks these ranges and their allowed declaration kinds.
 Header fixtures contain UTF-8 comments, CRLF, visibility, attributes, generic
 parameters, ordinary bodies and malformed headers. Recognition does not resolve
 the owner or check receiver, visibility, effects, or unsafe-call semantics.
+
+## Region statement representation
+
+Kind 17 stores the arena expression in `expression`, a kind-17 name expression
+in `target`, and the statement-only body in `first`. `second`, `entry` and
+`operator` are zero. The name has its own original token and half-open byte span.
+The verifier requires all three children and rejects absent or wrong-kind links.
+
+The arena's outer expression and its prefix/binary continuations stop before
+`{`; grouped expressions, call arguments and indices retain ordinary record
+construction. This follows Go's `allowRecord` distinction without changing
+ordinary expression parsing. Token-only statement classifiers live in the
+existing `parse_tokens` module to retain the unchanged per-source byte limit.
+The region increment initially exhausted a parser budget while parsing
+`bodies.fy` itself. Its unchanged cursor/node/statement records, token movement,
+node insertion and statement factory were moved to `body_state.fy`, with that seventeenth source explicitly included
+in probe copying and the mandatory self-corpus inventory. This does not raise
+the byte, expression, statement or type limits or allow partial corpus success.
+The complete seventeen-file self-corpus gate passes in both profiles (9.011s);
+`bodies.fy` is 31460 bytes and `body_state.fy` is 2759 bytes at this increment.
+No region allocation, borrow analysis, lifetime semantics or execution is added.
 
 ## C function type representation
 
