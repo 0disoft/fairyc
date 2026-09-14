@@ -4,6 +4,9 @@ import scanner as scanner;
 import parse_tokens as tokens;
 
 pub struct Node { u32 kind; usize start; usize end; usize token; usize left; usize right; }
+pub fn Node node_value(u32 kind, usize start, usize end, usize token, usize left, usize right) {
+    return Node { .kind = kind, .start = start, .end = end, .token = token, .left = left, .right = right };
+}
 pub fn scanner::TokenInfo current(ref scanner::Stream stream, ref mut Cursor cursor) {
     return scanner::token_info(stream, cursor.index);
 }
@@ -48,4 +51,30 @@ pub fn usize append_statement(ref mut v::Vec<Statement> statements, ref mut Curs
     cursor.statements = cursor.statements + 1;
     cursor.statement_kind = value.kind;
     return cursor.statements;
+}
+
+pub fn usize pattern(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes) {
+    let usize start = current(stream,cursor).start;
+    if (!expect(stream,cursor,b".",14)) { return 0; }
+    let usize token = cursor.index;
+    if (current(stream,cursor).kind != 3) { cursor.expected = 1; return 0; }
+    advance(stream,cursor);
+    var usize binding = 0;
+    let bool named = take(stream,cursor,b"{");
+    if (named || take(stream,cursor,b"(")) {
+      while (!named || !word(stream,cursor.index,b"}")) {
+        if (named && word(stream,cursor.index,b":")) { cursor.expected = 25; return 0; }
+        let tokens::PatternBinding item = tokens::pattern_binding(stream,cursor.index,named);
+        cursor.index=item.next; cursor.previous_end=item.end; cursor.expected=item.expected;
+        if (!item.ok) { return 0; }
+        let usize value = append(nodes,cursor,node_value(17,scanner::token_info(stream,item.name).start,item.end,item.name,0,0));
+        if (value == 0) { return 0; }
+        binding = if (named) { append(nodes,cursor,node_value(33,item.start,item.end,item.field,value,binding)) } else { value };
+        if (binding == 0) { return 0; }
+        if (!named || !take(stream,cursor,b",")) { break; }
+      }
+      if (named && word(stream,cursor.index,b":")) { cursor.expected = 25; return 0; }
+      if (!expect(stream,cursor,if (named) { b"}" } else { b")" },if (named) { 7 } else { 5 })) { return 0; }
+    }
+    return append(nodes,cursor,node_value(if (named) { 32 } else { 16 },start,cursor.previous_end,token,if (named) { 0 } else { binding },if (named) { binding } else { 0 }));
 }

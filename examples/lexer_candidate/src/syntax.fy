@@ -19,7 +19,8 @@ pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize nam
 // and the source token index retaining exact literal/name/operator spelling.
 pub struct Expression { u32 kind; usize start; usize end; usize token; usize left; usize right; }
 pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token; }
-// 1 block, 2 binding, 3 return, 4 assignment, 5 if, 6 expression, 7 list link.
+// 1 block, 2 binding, 3 return, 4 assignment, 6 expression, 7 list link.
+// Standalone block/if expressions use kind 6; legacy statement kind 5 is not emitted.
 // 8 while (expression condition, first body), 9 break, 10 continue.
 // 11 assert, 12 discard and 13 defer retain their operands in expression.
 // 14 for: expression is optional condition, first body, second kind-15 header.

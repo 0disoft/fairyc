@@ -16,7 +16,32 @@ Existing source, arena, recursion and token-lookahead limits remain applicable.
 | `region` statements | Implemented as statement kind 17; Go CST comparison, malformed-input rollback, detached-node checks and 31/32-level depth tests pass in both Windows profiles after module extraction. Control-item suite: 69.725s. |
 | Attributed cleanup declarations | Implemented with separate declaration/cleanup attribute ranges; native source-span, rollback, mutation and shared attribute/argument-limit tests pass in both profiles. |
 | Unclosed named-pattern recovery | Production-specific missing-close marker at the case colon preserves the following function; empty, trailing-comma and nested-function isolation cases pass in both profiles (value suite 69.274s). |
+| Block/if expressions in statement position | Implemented through the shared expression reader; branch tails, explicit semicolons and continuations pass Go-backed native probes. |
 | Whole grammar coverage audit | Pending production-by-production audit and selected corpus gates after the above changes. |
+
+## Block expressions in statement position
+
+The grammar audit found that the old standalone `if` reader rejected branch
+tails accepted in value position, and that standalone block/if shortcuts stopped
+before postfix or binary continuations. Both now use the ordinary expression
+reader and a kind-6 expression-statement wrapper, matching the Go surface tree.
+This also preserves an optional written semicolon. A function, while, for or
+region body still forbids its own tail; inner block/if expressions may have tails.
+Place validity and branch type agreement remain semantic, not parsing, checks.
+
+The block-tree oracle retains source-order, child-count and span assertions using
+the shared expression representation. A dedicated statement-position probe covers
+branch tails, else-if, semicolons, calls, fields, indexing, arithmetic, assignment,
+UTF-8/CRLF spans and malformed-declaration rollback.
+
+The additional expression nodes initially exhausted the self-corpus budget for
+`bodies.fy`. A shared node factory alone was insufficient; moving the leaf pattern
+reader to `body_state.fy` restored complete parsing of all eighteen sources in
+both profiles (8.711s) without increasing any budget. The factory preserves all
+six node fields and the moved reader retains the production-specific recovery
+marker. After the move, value regressions pass in both profiles (84.521s), as does
+the full candidate oracle including block/entry trees and resource-limit checks
+(197.530s). These are private syntax checks, not execution of the parsed inputs.
 
 ## Named-pattern recovery
 
@@ -116,8 +141,8 @@ is changed by the candidate work.
 
 Malformed function-type recovery remembers the original failure position and
 skips embedded `unsafe ... fn` headers rather than reclassifying their `fn` as
-a new module-level declaration. This is separate from the still-open unclosed
-named-pattern recovery item.
+a new module-level declaration. This is separate from the unclosed named-pattern
+recovery described above.
 
 The first enlarged type probe exceeded its 180-second lane budget. Splitting
 checks into borrowed per-position helpers and separate tree/recovery probes

@@ -22,12 +22,24 @@ func emitParserBlockOracle(t *testing.T, program *strings.Builder) string {
 	count, entries := 0, 1
 	var emitBlock func(*ast.Block) int
 	var emitStatement func(ast.Statement) int
+	var emitExpressionBlocks func(*ast.Expression)
+	emitExpressionBlocks = func(expression *ast.Expression) {
+		if expression == nil {
+			return
+		}
+		if expression.Block != nil {
+			emitBlock(expression.Block)
+		}
+		for _, child := range expression.Children {
+			emitExpressionBlocks(child)
+		}
+	}
 	checkExpression := func(field string, expression *ast.Expression) {
 		if expression == nil {
 			fmt.Fprintf(program, "assert(node.%s == 0);\n", field)
 			return
 		}
-		kind := map[syntax.Kind]int{syntax.KindLiteral: 1, syntax.KindPath: 2, syntax.KindGroup: 3, syntax.KindPrefix: 4, syntax.KindBinary: 5, syntax.KindCall: 6}[expression.Kind]
+		kind := map[syntax.Kind]int{syntax.KindLiteral: 1, syntax.KindPath: 2, syntax.KindGroup: 3, syntax.KindPrefix: 4, syntax.KindBinary: 5, syntax.KindCall: 6, syntax.KindBlock: 12, syntax.KindIf: 13}[expression.Kind]
 		if kind == 0 {
 			t.Fatalf("unsupported expression oracle %s", expression.Kind)
 		}
@@ -55,14 +67,6 @@ func emitParserBlockOracle(t *testing.T, program *strings.Builder) string {
 		return count
 	}
 	emitStatement = func(s ast.Statement) int {
-		// Go wraps block-like statements in expression-statement nodes. The
-		// candidate's statement layer retains the block/if directly.
-		if s.Kind == syntax.KindExprStmt && s.Expression != nil && (s.Expression.Kind == syntax.KindBlock || s.Expression.Kind == syntax.KindIf) {
-			s.Kind = s.Expression.Kind
-		}
-		if s.Kind == syntax.KindBlock {
-			return emitBlock(s.Expression.Block)
-		}
 		kind, first, second, entry := 0, 0, 0, 0
 		expression := s.Expression
 		switch s.Kind {
@@ -79,6 +83,7 @@ func emitParserBlockOracle(t *testing.T, program *strings.Builder) string {
 			kind = 4
 		case syntax.KindExprStmt:
 			kind = 6
+			emitExpressionBlocks(expression)
 		case syntax.KindWhile:
 			kind = 8
 			expression = s.Expression.Children[0]
@@ -87,18 +92,6 @@ func emitParserBlockOracle(t *testing.T, program *strings.Builder) string {
 			kind, expression = 9, nil
 		case syntax.KindContinue:
 			kind, expression = 10, nil
-		case syntax.KindIf:
-			kind = 5
-			expression = s.Expression.Children[0]
-			first = emitBlock(s.Expression.Children[1].Block)
-			if len(s.Expression.Children) > 2 {
-				other := s.Expression.Children[2]
-				if other.Kind == syntax.KindBlock {
-					second = emitBlock(other.Block)
-				} else {
-					second = emitStatement(ast.Statement{Kind: other.Kind, Span: other.Span, Expression: other})
-				}
-			}
 		default:
 			t.Fatalf("unsupported statement oracle %s", s.Kind)
 		}

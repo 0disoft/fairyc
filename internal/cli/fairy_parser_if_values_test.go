@@ -11,6 +11,7 @@ import (
 )
 
 func TestWindowsFairyParserIfValues(t *testing.T) {
+	t.Run("block expressions in statement position", testParserBlockExpressionStatements)
 	var p strings.Builder
 	p.WriteString("fn i32 main() {\n")
 	for _, expr := range []string{
@@ -54,6 +55,41 @@ while (n <= 63) {
  discard bytes::append(ref mut data,b"if(a){};}");
  let i32 r = switch(make(bytes::view(ref data))) { case .ok(parsed): { assert(n == 62 && syntax::problem_count(ref parsed)==0); 0 } case .err(status): { assert(n == 63 && status == 4); 0 } }; assert(r==0); n+=1;
 }
+
 return 0; }`)
+	runParserProbe(t, p.String())
+}
+
+func testParserBlockExpressionStatements(t *testing.T) {
+	var p strings.Builder
+	p.WriteString("fn i32 main(){\n")
+	for _, statement := range []string{
+		"if(a){1}else{2}", "if(a){1}else if(b){2}else{3}",
+		"if(a){1}else{2};", "if(a){1}else{2} + 3;",
+		"if(a){x}else{y}.field;", "if(a){x}else{y}(arg);",
+		"{ 1 };", "{ 1 } + 2;", "{ x }.field;", "{ x }[0];",
+		"{ x } = y;", "if(a){x}else{y} += z;",
+	} {
+		input := "module main; /* 한글 */\r\nfn void f(){" + statement + "} fn void kept(){}"
+		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+		if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) != 0 || oracle.AST == nil {
+			t.Fatalf("statement oracle %q: %v", statement, err)
+		}
+		s := oracle.AST.Functions[0].Body.Statements[0]
+		fmt.Fprintf(&p, `{let r=switch(make(b%s)){case .ok(parsed):{
+ assert(syntax::problem_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==3 && integrity::valid(ref parsed));
+ let body=syntax::declaration_at(ref parsed,1).body;
+ assert(syntax::block_statement_count(ref parsed,body)==1);
+ let s=syntax::statement_at(ref parsed,syntax::block_statement(ref parsed,body,0));
+ assert(s.start==%d && s.end==%d);
+ let e=syntax::expression_at(ref parsed,s.expression); assert(e.start==%d && e.end==%d);
+ 0 }case .err(_):{1}};assert(r==0);}
+`, strconv.Quote(input), s.Span.StartByte, s.Span.EndByte, s.Expression.Span.StartByte, s.Expression.Span.EndByte)
+	}
+	for _, body := range []string{"if(a){let x=;}else{2}", "if(a){1}else{2} + ;", "{x}.;", "1", "while(a){1}", "region r in pool {1}"} {
+		input := "module main;fn void bad(){" + body + "} fn void kept(){}"
+		fmt.Fprintf(&p, `{let r=switch(make(b%s)){case .ok(parsed):{assert(syntax::problem_count(ref parsed)>0 && syntax::declaration_count(ref parsed)==2 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && integrity::valid(ref parsed));0}case .err(_):{1}};assert(r==0);}`, strconv.Quote(input))
+	}
+	p.WriteString("return 0;}")
 	runParserProbe(t, p.String())
 }

@@ -380,7 +380,7 @@ and are not checked here.
 
 `Declaration.body` is a one-based root in a separate postorder statement tree;
 zero is reserved for module/import declarations. `statement_at` and
-`statement_count` expose nodes: 1 block, 2 binding, 3 return, 4 assignment, 5 if,
+`statement_count` expose nodes: 1 block, 2 binding, 3 return, 4 assignment,
 6 expression statement, 7 list link, 8 while, 9 break, 10 continue and 11 assert.
 Assert retains its condition in `expression` and its full keyword-through-semicolon
 span. It requires parentheses and a semicolon, including in value blocks; it is
@@ -394,13 +394,15 @@ continue have no children. Loop-context legality remains a semantic concern.
 Binding/return `entry` is a one-based
 reference into the existing entry table. Assignment `target` and `expression`
 refer to distinct expression roots; `assignment_operator` returns its raw spelling.
-An if node's `expression` is the condition, `first` the then block, and `second`
-the optional else block or else-if node. A block's `first` is a reverse-linked
+A block's `first` is a reverse-linked
 statement-list tail and `second` its direct child count; list links use `first`
 for the child and `second` for the previous link. `block_statement_count` and
 `block_statement` return direct children in source order, without flattening nested
-scopes. The Go oracle's expression-statement wrapper around block/if is omitted;
-the underlying construct, order and byte spans are preserved.
+scopes. Block/if statements use a kind-6 expression-statement wrapper, including
+an optional written semicolon. Their expression roots use the same block/if
+representation as value positions, preserving branch tails and any following
+postfix or binary expression. The former standalone if statement kind 5 is no
+longer emitted. Assignment-place validity remains a semantic check.
 
 The statement tree has a shared 4096-node limit (including list links) and a
 32-frame block/conditional depth limit. Failures roll back statements, expressions
