@@ -60,7 +60,13 @@ func referenceBodyTree(input string) (string, error) {
 	paths := map[[2]int]diagnostic.Span{}
 	fieldNames := map[[2]int]diagnostic.Span{}
 	patternKinds := map[[2]int]int{}
+	forInitializers := map[[2]int]diagnostic.Span{}
 	for _, node := range r.Tree.Nodes {
+		if node.Kind == syntax.KindFor && len(node.Children) > 0 {
+			if clause, ok := r.Tree.Node(node.Children[0]); ok && clause.Kind == syntax.KindForInit {
+				forInitializers[[2]int{node.Span.StartByte, node.Span.EndByte}] = clause.Span
+			}
+		}
 		if node.Kind == syntax.KindField {
 			fieldNames[[2]int{node.Span.StartByte, node.Span.EndByte}] = node.NameSpan
 			if node.NameSpan.EndByte == node.NameSpan.StartByte {
@@ -370,6 +376,44 @@ func referenceBodyTree(input string) (string, error) {
 		return true
 	}
 	stmt = func(s ast.Statement, d int) bool {
+		if s.Kind == syntax.KindFor {
+			loop := s.For
+			if loop == nil || loop.Body == nil || !record(111, s.Span, 4, diagnostic.Span{}, d, "") {
+				return false
+			}
+			if loop.Initializer != nil {
+				initial := *loop.Initializer
+				if initial.Kind != syntax.KindBinding && initial.Kind != syntax.KindAssignment {
+					return false
+				}
+				span, ok := forInitializers[[2]int{s.Span.StartByte, s.Span.EndByte}]
+				if !ok {
+					return false
+				}
+				// Include the written semicolon via its CST clause; leave the AST immutable.
+				initial.Span = span
+				if !stmt(initial, d+1) {
+					return false
+				}
+			} else if !record(112, diagnostic.Span{}, 0, diagnostic.Span{}, d+1, "") {
+				return false
+			}
+			if loop.Condition != nil {
+				if !expr(loop.Condition, d+1) {
+					return false
+				}
+			} else if !record(113, diagnostic.Span{}, 0, diagnostic.Span{}, d+1, "") {
+				return false
+			}
+			if loop.Post != nil {
+				if loop.Post.Kind != syntax.KindAssignment || !stmt(*loop.Post, d+1) {
+					return false
+				}
+			} else if !record(114, diagnostic.Span{}, 0, diagnostic.Span{}, d+1, "") {
+				return false
+			}
+			return block(loop.Body, d+1)
+		}
 		k := map[syntax.Kind]int{syntax.KindBinding: 101, syntax.KindReturn: 103, syntax.KindAssignment: 104, syntax.KindExprStmt: 105, syntax.KindWhile: 106, syntax.KindBreak: 107, syntax.KindContinue: 108}[s.Kind]
 		if k == 0 || s.For != nil {
 			failure = fmt.Errorf("unhandled statement %s at %d", s.Kind, s.Span.StartByte)
@@ -470,6 +514,24 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){return switch(x){};}",
 		"module main;fn void f(){return switch(x){" + strings.Repeat("case .N:{}", 63) + "};}",
 		"module main;fn void f(){return " + strings.Repeat("switch(x){case .N:{", 20) + "x?" + strings.Repeat("}}", 20) + ";}",
+		"module main; /* 반복 */\r\nfn void f(){for(let i=0 /* gap */ ;i<n;i+=1){while(flag){continue;}break;}for(i=1 /* end */ ;;i*=2){call(i);}}",
+		"module main;fn void f(){for(var i32 i=0;i<2;i+=1){for(j=0;j<3;j-=1){if(flag){continue;}break;}}}",
+		"module main;fn void f(){" + strings.Repeat("for(;;){}", 51) + "}",
+		"module main;fn void f(){" + strings.Repeat("for(;;){", 30) + "ref x;" + strings.Repeat("}", 30) + "}",
+	}
+	// All eight presence combinations retain the same four structural roles.
+	for mask := 0; mask < 8; mask++ {
+		initial, condition, post := "", "", ""
+		if mask&1 != 0 {
+			initial = "var i32 i=0"
+		}
+		if mask&2 != 0 {
+			condition = "i<2"
+		}
+		if mask&4 != 0 {
+			post = "i+=1"
+		}
+		inputs = append(inputs, "module main;fn void f(){for("+initial+";"+condition+";"+post+"){break;}}")
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
@@ -513,11 +575,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			if err != nil || out.ExitCode != 0 || out.Stderr != "" || out.TrapControl != "" || out.Stdout != want {
 				t.Fatalf("body tree mismatch %v: err=%v output=%+v want=%s", profile, err, out, want)
 			}
-			t.Logf("profile=%v complete body bytes=%d canonical bytes=%d", profile, len(input), len(want))
 		}
+		t.Logf("profile=%v complete canonical bodies=%d", profile, len(inputs))
 		for _, input := range []string{
 			"module main;fn void f(){let ref mut =1;}",
-			"module main;fn void f(){for(;;){}}",
+			"module main;fn void f(){assert(true);}",
 			"module main;fn void f(){return 1}",
 			"module main;fn void f(){" + strings.Repeat("x;", 128) + "}",
 			"module main;const i32 X=1;fn void f(){}",
@@ -550,6 +612,12 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){return switch(x){case .None {}};}",
 			"module main;fn void f(){return switch(x){" + strings.Repeat("case .N:{}", 62) + "case .N:{0}};}",
 			"module main;fn void f(){return " + strings.Repeat("switch(x){case .N:{", 20) + "ref x?" + strings.Repeat("}}", 20) + ";}",
+			"module main;fn void f(){for(var i=0 i<2;i+=1){}}",
+			"module main;fn void f(){for(;;var i=0){}}",
+			"module main;fn void f(){for(;i<;){}}",
+			"module main;fn void f(){for(;;)}",
+			"module main;fn void f(){" + strings.Repeat("for(;;){}", 51) + "return;}",
+			"module main;fn void f(){" + strings.Repeat("for(;;){", 30) + "ref ref x;" + strings.Repeat("}", 30) + "}",
 		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)

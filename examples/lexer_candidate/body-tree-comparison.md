@@ -6,7 +6,7 @@ adapter or decoder. Its first proof walks the complete body of one function with
 nested bindings, blocks, if/else-if, while, assignments, calls and returns,
 including explicitly written binding types, casts, specialized generic calls,
 field access, indexing, slicing, arrays, record construction, references,
-propagation, unsafe blocks and switch pattern decomposition.
+propagation, unsafe blocks, switch pattern decomposition and classic for loops.
 
 ## Encoding
 
@@ -38,6 +38,8 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 106 | While: condition, body block |
 | 107 / 108 | Break / continue: no children |
 | 109 / 110 | Explicitly typed let / var binding: written type, initializer |
+| 111 | For loop: initializer, condition, post, body block; always four children |
+| 112 / 113 / 114 | Absent initializer / condition / post: no children, zero span |
 | 200 / 201 | Literal / path: no children; spelling comes from the bound source span |
 | 202 / 203 | Group / prefix expression: operand |
 | 204 | Binary expression: left, right |
@@ -120,10 +122,21 @@ Pattern field-name origins likewise come from CST-owned identifier tokens rather
 than reparsing source text; binding spans retain the exact terminal spelling.
 The candidate uses existing pattern tags and token origins. No exhaustiveness,
 duplicate-case, duplicate-binding, type, scope or execution validity is claimed.
+For loops retain four positional roles even when header clauses are absent. Tags
+112/113/114 represent absence, not source-written expressions; their `(0,0)` span
+does not invent a source location. An absent condition is never replaced by `true`.
+Written clauses keep their structure, names and operators. The initial statement's
+span includes its semicolon, matching the candidate's statement parser; the Go
+writer obtains that exact envelope from the owning CST initializer clause and
+copies the statement value without mutating the AST. The post span excludes `)`.
+Header punctuation remains in the bound original source, but clause/header helper
+nodes are not separately exported. Initializers are binding or assignment forms;
+posts are assignments, matching the candidate parser's existing restriction. The
+comparison does not implement execution order, loop scope or continue routing.
 
 ## Failure and resource boundary
 
-Both writers reject unhandled nodes instead of skipping them. For loops,
+Both writers reject unhandled nodes instead of skipping them. Assert,
 defer statements and the other not-yet-mapped export forms therefore do
 not produce a successful partial comparison. This restriction belongs only to
 this first exporter, not to the parser's completed grammar support.
@@ -153,13 +166,13 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (16.353s).
-The bounded matrix contains thirty-seven complete bodies per profile, including
+`fairyc_go_test_parser_body_tree` passes in both native profiles (15.577s).
+The bounded matrix contains forty-nine complete bodies per profile, including
 ordinary, typed and generic-call exact 256-record boundaries, nested type families,
 chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
-and depth 63 reached through binding, cast and specialization type trees. Thirty-four
+and depth 63 reached through binding, cast and specialization type trees. Forty
 rejection cases cover malformed bindings, casts, calls and returns, unsupported
-for loops, an extra declaration, 257/259/261 records and depth 64 across
+assert statements, an extra declaration, 257/259/261 records and depth 64 across
 those same three type-entry roles. Access cases additionally compare field/index/
 call chains, assignment targets, all four slice-bound presence combinations,
 explicit zero versus omission and comments around delimiters. Slice records also
@@ -179,7 +192,12 @@ empty named versus unit patterns, wildcard and duplicate named fields, trivia/CR
 empty switch, construction-to-decomposition and nested case bodies. A 63-arm
 witness passes at 256 records; adding one body node rejects 257. Nested switch
 bodies pass at depth 63 and reject 64. Empty positional bindings, missing named
-bindings and a missing case colon are rejected. Rejected native
+bindings and a missing case colon are rejected. For-loop cases cover all eight
+header-presence combinations, inferred/typed declarations, assignment initializers,
+compound posts, comments before the initial semicolon, nested for/while bodies and
+break/continue. Repeated empty loops pass at 256 records and reject 257; nested
+loop bodies pass at depth 63 and reject 64. Missing separators, declaration posts,
+malformed conditions and a missing loop body fail. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice

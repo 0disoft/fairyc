@@ -112,10 +112,21 @@ struct ExportBudget {usize nodes; bool emit;}
  else if(s.kind==3){kind=103;count=if(s.expression==0){0}else{1};}
  else if(s.kind==4){kind=104;count=2;}else if(s.kind==6){kind=105;count=1;}
  else if(s.kind==8){kind=106;count=2;}else if(s.kind==9){kind=107;}else if(s.kind==10){kind=108;}
+ else if(s.kind==14){kind=111;count=4;}
  else{return false;}
  if(!record(budget,depth,kind,s.start,s.end,count,name_start,name_end)){return false;}
  if(budget.emit){if(kind==104){let ref u8[] op=syntax::assignment_operator(p,id);number(op.len);var usize i=0;while(i<op.len){number(op[i] as usize);i+=1;}}else{number(0);}}
  if(kind==100){var usize i=0;while(i<syntax::block_statement_count(p,id)){if(!statement_tree(p,syntax::block_statement(p,id,i),budget,depth+1)){return false;}i+=1;}return s.expression==0 || expression_tree(p,s.expression,budget,depth+1);}
+ if(kind==111){
+  let header=syntax::statement_at(p,s.second);
+  if(header.first!=0){if(!statement_tree(p,header.first,budget,depth+1)){return false;}}
+  else{if(!record(budget,depth+1,112,0,0,0,0,0)){return false;}if(budget.emit){number(0);}}
+  if(s.expression!=0){if(!expression_tree(p,s.expression,budget,depth+1)){return false;}}
+  else{if(!record(budget,depth+1,113,0,0,0,0,0)){return false;}if(budget.emit){number(0);}}
+  if(header.second!=0){if(!statement_tree(p,header.second,budget,depth+1)){return false;}}
+  else{if(!record(budget,depth+1,114,0,0,0,0,0)){return false;}if(budget.emit){number(0);}}
+  return statement_tree(p,s.first,budget,depth+1);
+ }
  if(kind==104 && !expression_tree(p,s.target,budget,depth+1)){return false;}
  if((kind==109 || kind==110) && !type_tree(p,syntax::entry_at(p,s.entry-1).type_root,budget,depth+1)){return false;}
  if(s.expression!=0 && !expression_tree(p,s.expression,budget,depth+1)){return false;}
