@@ -15,8 +15,24 @@ Existing source, arena, recursion and token-lookahead limits remain applicable.
 | `burn` statements | Implemented as statement kind 16; native tests compare full statement/operand spans to Go, reject malformed statements, and check 2047/2048 shared statement-arena limits. |
 | `region` statements | Implemented as statement kind 17; Go CST comparison, malformed-input rollback, detached-node checks and 31/32-level depth tests pass in both Windows profiles after module extraction. Control-item suite: 69.725s. |
 | Attributed cleanup declarations | Implemented with separate declaration/cleanup attribute ranges; native source-span, rollback, mutation and shared attribute/argument-limit tests pass in both profiles. |
-| Unclosed named-pattern recovery | Pending recovery improvement; the earlier test records consumption of the following function. |
+| Unclosed named-pattern recovery | Production-specific missing-close marker at the case colon preserves the following function; empty, trailing-comma and nested-function isolation cases pass in both profiles (value suite 69.274s). |
 | Whole grammar coverage audit | Pending production-by-production audit and selected corpus gates after the above changes. |
+
+## Named-pattern recovery
+
+Private expected-token code 25 means a missing named-pattern `}` at the case
+colon and renders as `}`. It is produced only by the named-pattern reader.
+Declaration recovery discounts exactly one unmatched opener at that recorded
+token; input bytes are neither rewritten nor accepted as a valid program.
+The malformed declaration and its nodes are discarded, while a following
+top-level declaration can survive. The marker is not used for arbitrary missing
+braces and does not promote a nested function to module scope.
+
+The prior regression expected the following function to disappear. It now
+requires that function to survive, with additional empty/trailing-comma cases
+and a subsequent malformed nested-function declaration testing marker isolation.
+Duplicate token-movement helpers in `syntax.fy` now use `body_state` implementations;
+the source and arena limits remain unchanged.
 
 ## Function-header representation
 

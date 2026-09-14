@@ -1,5 +1,10 @@
 # Private parser: SDK observations, pointers and generic declarations
 
+Historical evidence below is supplemented by [current Stage 0 syntax coverage](stage0-syntax-coverage.md).
+In particular, the recorded loss of a following function after a named pattern
+missing `}` at its case colon is superseded by production-specific recovery.
+Malformed input still produces diagnostics and is not admitted for execution.
+
 The four increments preserve syntax only. The SDK sources, Go compiler, language
 grammar, fixture manifest and stable compiler/SDK/runtime versions are unchanged.
 No generic aggregate semantic admission, specialization, pointer execution or

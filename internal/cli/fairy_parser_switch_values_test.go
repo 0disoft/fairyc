@@ -12,6 +12,7 @@ import (
 
 func TestWindowsFairyParserSwitchValues(t *testing.T) {
 	t.Run("enum declaration construction decomposition", testParserEnumSyntaxComposition)
+	t.Run("unclosed named pattern recovery", testParserNamedPatternRecovery)
 	var p strings.Builder
 	p.WriteString(`fn i32 rejected(syntax::Parsed parsed, usize declarations) {
  assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==declarations && syntax::type_count(ref parsed)+1==declarations && integrity::valid(ref parsed)); return 0;
@@ -117,11 +118,6 @@ fn i32 main() {
 			t.Fatalf("invalid pattern oracle %q: %v", expr, err)
 		}
 		declarations := 2
-		if expr == "switch(x){case .ok{.x=v:{1}}" {
-			// An unclosed pattern consumes the following function during recovery.
-			// Keep this explicit limitation separate from balanced-input recovery.
-			declarations = 1
-		}
 		fmt.Fprintf(&p, "assert(switch(make(b%s)) { case .ok(parsed): { rejected(parsed,%d) } case .err(_): {1} }==0);\n", strconv.Quote(input), declarations)
 	}
 	p.WriteString(`
@@ -157,6 +153,29 @@ return 0; }`)
 
 // The input is parsed, never type-checked or executed. Native execution below
 // exercises the candidate parser and its assertions, not the input program.
+func testParserNamedPatternRecovery(t *testing.T) {
+	var p strings.Builder
+	p.WriteString("fn i32 main(){\n")
+	for _, pattern := range []string{".Pair{.left=a", ".Pair{.left=a,", ".Empty{"} {
+		for _, middle := range []string{"", "fn void bad2(){fn void nested(){}}"} {
+			prefix := "module main; /* 한글 */ fn void bad(){return switch(x){case " + pattern
+			input := prefix + ":{1}};}" + middle + "@kept pub fn void kept(){}"
+			oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+			if err != nil || oracle.Tree == nil || len(oracle.Tree.Diagnostics) == 0 {
+				t.Fatalf("unclosed pattern oracle: %v", err)
+			}
+			fmt.Fprintf(&p, `assert(switch(make(b%s)){case .ok(parsed):{
+ assert(syntax::problem_count(ref parsed)>0 && syntax::declaration_count(ref parsed)==2 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::type_count(ref parsed)==1 && syntax::attribute_count(ref parsed)==1 && integrity::valid(ref parsed));
+ let problem=syntax::problem_at(ref parsed,0); assert(problem.expected==25 && problem.start==%d && problem.end==%d && syntax::expected_text(problem.expected)[0]==125);
+ let d=syntax::declaration_at(ref parsed,1); assert(d.kind==3 && d.public && d.name_start==%d && d.name_end==%d && d.end==%d);
+ assert(syntax::source_view(ref parsed).len==%d);0}case .err(_):{1}}==0);
+`, strconv.Quote(input), len(prefix), len(prefix)+1, strings.LastIndex(input, "kept()"), strings.LastIndex(input, "kept()")+4, len(input), len(input))
+		}
+	}
+	p.WriteString("return 0;}")
+	runParserProbe(t, p.String())
+}
+
 func testParserEnumSyntaxComposition(t *testing.T) {
 	input := "module main; /* 한글: byte offsets */ enum Item { Empty; Pair { i32 left; i32 right; }; }\r\n" +
 		"fn void inspect(){return switch(. /* construct */ Pair { .right=22, .left=20, }){case . /* match */ Pair { .left=first, .right=second, }:{first}};}"

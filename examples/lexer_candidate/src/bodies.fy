@@ -417,6 +417,7 @@ fn usize pattern(ref scanner::Stream stream, ref mut state::Cursor cursor, ref m
     let bool named = state::take(stream,cursor,b"{");
     if (named || state::take(stream,cursor,b"(")) {
       while (!named || !word(stream,cursor.index,b"}")) {
+        if (named && word(stream,cursor.index,b":")) { cursor.expected = 25; return 0; }
         let tokens::PatternBinding item = tokens::pattern_binding(stream,cursor.index,named);
         cursor.index=item.next; cursor.previous_end=item.end; cursor.expected=item.expected;
         if (!item.ok) { return 0; }
@@ -426,6 +427,7 @@ fn usize pattern(ref scanner::Stream stream, ref mut state::Cursor cursor, ref m
         if (binding == 0) { return 0; }
         if (!named || !state::take(stream,cursor,b",")) { break; }
       }
+      if (named && word(stream,cursor.index,b":")) { cursor.expected = 25; return 0; }
       if (!state::expect(stream,cursor,if (named) { b"}" } else { b")" },if (named) { 7 } else { 5 })) { return 0; }
     }
     return state::append(nodes,cursor,state::Node { .kind = if (named) { 32 } else { 16 }, .start = start, .end = cursor.previous_end, .token = token, .left = if (named) { 0 } else { binding }, .right = if (named) { binding } else { 0 } });
