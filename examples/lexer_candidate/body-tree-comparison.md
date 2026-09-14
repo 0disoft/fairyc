@@ -4,7 +4,8 @@ This is a private, disposable test transport between the Fairy candidate and the
 Go reference AST. It is not a public AST format, parser replacement, semantic
 adapter or decoder. Its first proof walks the complete body of one function with
 nested bindings, blocks, if/else-if, while, assignments, calls and returns,
-including explicitly written binding types, casts and specialized generic calls.
+including explicitly written binding types, casts, specialized generic calls,
+field access, indexing and slicing.
 
 ## Encoding
 
@@ -19,7 +20,7 @@ The remaining stream is a preorder tree. Each record has the following fields:
 
 `kind start_byte end_byte child_count name_start_byte name_end_byte operator_size operator_byte...`
 
-Spans are original half-open byte ranges. Name spans are present only on bindings;
+Spans are original half-open byte ranges. Name spans are present on bindings and field access;
 other records use zero. Prefix, binary and assignment operators carry their actual
 operator bytes, independently of the source-span envelope; other nodes use length
 zero. Child counts and preorder determine all structural edges;
@@ -43,6 +44,10 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 207 | If expression: condition, then block, optional else block or else-if expression |
 | 208 | Cast: operand, written target type |
 | 209 | Specialization: target path, then type arguments in source order |
+| 210 | Field access: target; name span identifies the selected field |
+| 211 | Index: target, index expression |
+| 212 | Slice: target, start bound, end bound |
+| 213 / 214 | Omitted start / end bound: no children; distinct from a literal zero |
 | 301 | Named type path: no children |
 | 302 / 303 | Reference / mutable reference type: element |
 | 304 / 305 | Slice / grouped type: element |
@@ -69,6 +74,13 @@ Specialized calls retain both the call (205) and specialization (209) nodes: the
 callee subtree contains the target and written types, followed by the call's value
 arguments. Casts retain their operand before the written type; chained casts are
 not flattened. Neither operation resolves names, converts values or checks types.
+Slice helper pairs are omitted from the common tree, but all three child roles
+remain explicit. An omitted start uses the Go AST's `..` token span; an omitted
+end uses its zero-width span at the closing `]`. These are syntax-origin markers,
+not fabricated expressions or missing-token recovery. The candidate derives those
+same origins from its bounds and slice envelopes. Field names use the final token's
+exact byte range, excluding intervening trivia. Access chains are not flattened;
+the comparison does not prove runtime indexing safety or assignment validity.
 
 ## Failure and resource boundary
 
@@ -102,14 +114,19 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (9.887s).
-The bounded matrix contains fourteen complete bodies per profile, including
+`fairyc_go_test_parser_body_tree` passes in both native profiles (23.519s).
+The bounded matrix contains nineteen complete bodies per profile, including
 ordinary, typed and generic-call exact 256-record boundaries, nested type families,
 chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
-and depth 63 reached through binding, cast and specialization type trees. Twelve
+and depth 63 reached through binding, cast and specialization type trees. Eighteen
 rejection cases cover malformed bindings, casts, calls and returns, unsupported
 array expressions, an extra declaration, 257/259/261 records and depth 64 across
-those same three type-entry roles. Rejected native
+those same three type-entry roles. Access cases additionally compare field/index/
+call chains, assignment targets, all four slice-bound presence combinations,
+explicit zero versus omission and comments around delimiters. Slice records also
+exercise the exact 256-record boundary and reject 261 records; field and slice
+chains pass at depth 63 and reject depth 64. Malformed field names, empty indices
+and an unclosed slice fail without output. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice

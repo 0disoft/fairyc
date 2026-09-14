@@ -34,13 +34,24 @@ struct ExportBudget {usize nodes; bool emit;}
  else if(e.kind==5){kind=204;count=2;}else if(e.kind==6){kind=205;count=syntax::call_argument_count(p,id);count+=1;}
  else if(e.kind==12){kind=206;count=1;}else if(e.kind==13){kind=207;count=if(syntax::expression_at(p,e.right).right==0){2}else{3};}
  else if(e.kind==23){kind=208;count=2;}else if(e.kind==20){kind=209;count=syntax::specialization_argument_count(p,id);if(count==0){return false;}count+=1;}
+ else if(e.kind==8){kind=210;count=1;}else if(e.kind==9){kind=211;count=2;}else if(e.kind==26){kind=212;count=3;}
  else{return false;}
- if(!record(budget,depth,kind,e.start,e.end,count,0,0)){return false;}
+ var usize name_start=0;var usize name_end=0;
+ if(kind==210){let ref u8[] name=syntax::expression_text(p,id);name_start=e.end-name.len;name_end=e.end;}
+ if(!record(budget,depth,kind,e.start,e.end,count,name_start,name_end)){return false;}
  if(budget.emit){if(kind==203 || kind==204){let ref u8[] op=syntax::expression_text(p,id);number(op.len);var usize i=0;while(i<op.len){number(op[i] as usize);i+=1;}}else{number(0);}}
  if(kind==200 || kind==201){return true;}
  if(kind==206){return statement_tree(p,e.left,budget,depth+1);}
  if(!expression_tree(p,e.left,budget,depth+1)){return false;}
  if(kind==204){return expression_tree(p,e.right,budget,depth+1);}
+ if(kind==211){return expression_tree(p,e.right,budget,depth+1);}
+ if(kind==212){
+  let bounds=syntax::expression_at(p,e.right);
+  if(bounds.left!=0){if(!expression_tree(p,bounds.left,budget,depth+1)){return false;}}
+  else{if(!record(budget,depth+1,213,bounds.start,bounds.start+2,0,0,0)){return false;}if(budget.emit){number(0);}}
+  if(bounds.right!=0){return expression_tree(p,bounds.right,budget,depth+1);}
+  if(!record(budget,depth+1,214,e.end-1,e.end-1,0,0,0)){return false;}if(budget.emit){number(0);}
+ }
  if(kind==208){return type_tree(p,e.right,budget,depth+1);}
  if(kind==209){var usize i=0;while(i+1<count){if(!type_tree(p,syntax::specialization_argument(p,id,i),budget,depth+1)){return false;}i+=1;}}
  if(kind==205){var usize i=0;while(i+1<count){if(!expression_tree(p,syntax::call_argument(p,id,i),budget,depth+1)){return false;}i+=1;}}

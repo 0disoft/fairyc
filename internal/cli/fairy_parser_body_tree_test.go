@@ -168,7 +168,14 @@ func referenceBodyTree(input string) (string, error) {
 		if e == nil || (e.Type != nil && e.Kind != syntax.KindCast) || (len(e.TypeArguments) != 0 && e.Kind != syntax.KindSpecialize) {
 			return false
 		}
-		k := map[syntax.Kind]int{syntax.KindLiteral: 200, syntax.KindPath: 201, syntax.KindGroup: 202, syntax.KindPrefix: 203, syntax.KindBinary: 204, syntax.KindCall: 205, syntax.KindBlock: 206, syntax.KindIf: 207, syntax.KindCast: 208, syntax.KindSpecialize: 209}[e.Kind]
+		k := map[syntax.Kind]int{syntax.KindLiteral: 200, syntax.KindPath: 201, syntax.KindGroup: 202, syntax.KindPrefix: 203, syntax.KindBinary: 204, syntax.KindCall: 205, syntax.KindBlock: 206, syntax.KindIf: 207, syntax.KindCast: 208, syntax.KindSpecialize: 209, syntax.KindFieldExpr: 210, syntax.KindIndex: 211, syntax.KindSlice: 212}[e.Kind]
+		if e.Kind == syntax.KindOmitBound {
+			if e.Text == "start" {
+				k = 213
+			} else if e.Text == "end" {
+				k = 214
+			}
+		}
 		if k == 0 {
 			failure = fmt.Errorf("unhandled expression %s at %d", e.Kind, e.Span.StartByte)
 			return false
@@ -193,7 +200,11 @@ func referenceBodyTree(input string) (string, error) {
 		if k == 203 || k == 204 {
 			operator = e.Text
 		}
-		if !record(k, e.Span, n, diagnostic.Span{}, d, operator) {
+		name := diagnostic.Span{}
+		if k == 210 {
+			name = diagnostic.Span{StartByte: e.Span.EndByte - len(e.Text), EndByte: e.Span.EndByte}
+		}
+		if !record(k, e.Span, n, name, d, operator) {
 			return false
 		}
 		if k == 206 {
@@ -296,6 +307,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){" + strings.Repeat("f<i32>();", 51) + "}",
 		"module main;fn void f(){x as i32" + strings.Repeat("[]", 60) + ";}",
 		"module main;fn void f(){f<i32" + strings.Repeat("[]", 59) + ">();}",
+		"module main; /* 접근 */\r\nfn void f(){obj /* gap */ .field[at(1)].value+=2;return factory<i32>(x).items[0].run(y);}",
+		"module main;fn void f(){a[..];a[0..];a[..0];a[0..0];a[start..end];a[ /* L */ .. /* R */ ];a[1.. /* R */ ];return a[..n][i].field;}",
+		"module main;fn void f(){" + strings.Repeat("a[..];", 51) + "}",
+		"module main;fn void f(){a" + strings.Repeat("[..]", 61) + ";}",
+		"module main;fn void f(){a" + strings.Repeat(".field", 61) + ";}",
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
@@ -349,6 +365,12 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){" + strings.Repeat("f<i32>();", 52) + "}",
 			"module main;fn void f(){x as i32" + strings.Repeat("[]", 61) + ";}",
 			"module main;fn void f(){f<i32" + strings.Repeat("[]", 60) + ">();}",
+			"module main;fn void f(){a.;}",
+			"module main;fn void f(){a[];}",
+			"module main;fn void f(){a[1..2;}",
+			"module main;fn void f(){" + strings.Repeat("a[..];", 52) + "}",
+			"module main;fn void f(){a" + strings.Repeat("[..]", 62) + ";}",
+			"module main;fn void f(){a" + strings.Repeat(".field", 62) + ";}",
 		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)
