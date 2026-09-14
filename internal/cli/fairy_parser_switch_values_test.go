@@ -11,6 +11,7 @@ import (
 )
 
 func TestWindowsFairyParserSwitchValues(t *testing.T) {
+	t.Run("enum declaration construction decomposition", testParserEnumSyntaxComposition)
 	var p strings.Builder
 	p.WriteString(`fn i32 rejected(syntax::Parsed parsed, usize declarations) {
  assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==declarations && syntax::type_count(ref parsed)+1==declarations && integrity::valid(ref parsed)); return 0;
@@ -151,5 +152,79 @@ while(n<=32) {
  let i32 r=switch(make(bytes::view(ref data))) { case .ok(parsed): { assert(n==31 && syntax::problem_count(ref parsed)==0); 0 } case .err(status): { assert(n==32 && status==4); 0 } }; assert(r==0); n+=1;
 }
 return 0; }`)
+	runParserProbe(t, p.String())
+}
+
+// The input is parsed, never type-checked or executed. Native execution below
+// exercises the candidate parser and its assertions, not the input program.
+func testParserEnumSyntaxComposition(t *testing.T) {
+	input := "module main; /* 한글: byte offsets */ enum Item { Empty; Pair { i32 left; i32 right; }; }\r\n" +
+		"fn void inspect(){return switch(. /* construct */ Pair { .right=22, .left=20, }){case . /* match */ Pair { .left=first, .right=second, }:{first}};}"
+	oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
+	if err != nil || oracle.Tree == nil || oracle.AST == nil || len(oracle.Tree.Diagnostics) != 0 {
+		t.Fatalf("enum composition oracle: %v", err)
+	}
+	if len(oracle.AST.Enums) != 1 || len(oracle.AST.Functions) != 1 || len(oracle.AST.Enums[0].Variants) != 2 {
+		t.Fatal("enum composition declaration shape")
+	}
+	e := oracle.AST.Enums[0]
+	v := e.Variants[1]
+	sw := oracle.AST.Functions[0].Body.Statements[0].Expression
+	if sw == nil || len(sw.Children) != 2 || len(sw.Children[1].Children) != 2 {
+		t.Fatal("enum composition switch shape")
+	}
+	record, pattern := sw.Children[0], sw.Children[1].Children[0]
+	if len(v.Fields) != 2 || len(record.Children) != 3 || len(pattern.Children) != 3 {
+		t.Fatal("enum composition field shape")
+	}
+	var p strings.Builder
+	p.WriteString("fn i32 main(){ return switch(make(b" + strconv.Quote(input) + ")){case .ok(parsed):{\n")
+	p.WriteString("assert(syntax::problem_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==3 && syntax::field_count(ref parsed)==4 && integrity::valid(ref parsed));\n")
+	fmt.Fprintf(&p, "{let d=syntax::declaration_at(ref parsed,1); assert(d.kind==11 && d.start==%d && d.end==%d && d.name_start==%d && d.name_end==%d && d.field_start==0 && d.field_count==4);}\n", e.Span.StartByte, e.Span.EndByte, e.NameSpan.StartByte, e.NameSpan.EndByte)
+	for i, member := range e.Variants {
+		id := []int{0, 3}[i]
+		fmt.Fprintf(&p, "{let m=syntax::field_at(ref parsed,%d); assert(m.kind==3 && m.start==%d && m.end==%d && m.name_start==%d && m.name_end==%d && m.payload_count==%d);}\n", id, member.Span.StartByte, member.Span.EndByte, member.NameSpan.StartByte, member.NameSpan.EndByte, len(member.Fields))
+	}
+	p.WriteString("assert(syntax::field_at(ref parsed,3).payload_start==1);\n")
+	for i, f := range v.Fields {
+		fmt.Fprintf(&p, "{let f=syntax::field_at(ref parsed,%d); assert(f.kind==4 && f.start==%d && f.end==%d && f.name_start==%d && f.name_end==%d);}\n", i+1, f.Span.StartByte, f.Span.EndByte, f.NameSpan.StartByte, f.NameSpan.EndByte)
+	}
+	p.WriteString("let root=syntax::declaration_at(ref parsed,2).expression; let s=syntax::expression_at(ref parsed,root);\n")
+	fmt.Fprintf(&p, "assert(s.kind==15 && s.start==%d && s.end==%d && syntax::switch_case_count(ref parsed,root)==1);\n", sw.Span.StartByte, sw.Span.EndByte)
+	p.WriteString("let constructor=s.left; let r=syntax::expression_at(ref parsed,constructor); let arm=syntax::switch_case(ref parsed,root,0); let matched=syntax::expression_at(ref parsed,arm).left; let pat=syntax::expression_at(ref parsed,matched);\n")
+	fmt.Fprintf(&p, "assert(r.kind==10 && r.start==%d && r.end==%d && syntax::record_field_count(ref parsed,constructor)==2);\n", record.Span.StartByte, record.Span.EndByte)
+	fmt.Fprintf(&p, "assert(pat.kind==32 && pat.start==%d && pat.end==%d && syntax::pattern_field_count(ref parsed,matched)==2);\n", pattern.Span.StartByte, pattern.Span.EndByte)
+	textCheck := func(node, want string) {
+		fmt.Fprintf(&p, "assert(syntax::expression_text(ref parsed,%s).len==%d);\n", node, len(want))
+		for i, b := range []byte(want) {
+			fmt.Fprintf(&p, "assert(syntax::expression_text(ref parsed,%s)[%d]==%d);\n", node, i, b)
+		}
+	}
+	callee := record.Children[0]
+	fmt.Fprintf(&p, "{let n=syntax::expression_at(ref parsed,r.left); assert(n.kind==28 && n.start==%d && n.end==%d);}\n", callee.Span.StartByte, callee.Span.EndByte)
+	textCheck("r.left", strings.TrimPrefix(callee.Text, "."))
+	textCheck("matched", strings.TrimPrefix(pattern.Text, "."))
+	for i := 0; i < 2; i++ {
+		f, binding := record.Children[i+1], pattern.Children[i+1]
+		if len(f.Children) != 1 || binding.Cooked == "" {
+			t.Fatal("enum composition initializer or binding shape")
+		}
+		p.WriteString("{\n")
+		fmt.Fprintf(&p, "let a=syntax::record_field(ref parsed,constructor,%d); let b=syntax::pattern_field(ref parsed,matched,%d); let a_node=syntax::expression_at(ref parsed,a); let b_node=syntax::expression_at(ref parsed,b);\n", i, i)
+		fmt.Fprintf(&p, "assert(a_node.kind==11 && a_node.start==%d && a_node.end==%d && b_node.kind==33 && b_node.start==%d && b_node.end==%d);\n", f.Span.StartByte, f.Span.EndByte, binding.Span.StartByte, binding.Span.EndByte)
+		value := f.Children[0]
+		fmt.Fprintf(&p, "{let n=syntax::expression_at(ref parsed,a_node.left); assert(n.kind==1 && n.start==%d && n.end==%d);}\n", value.Span.StartByte, value.Span.EndByte)
+		end := binding.Span.EndByte
+		start := end - len(binding.Cooked)
+		if input[start:end] != binding.Cooked {
+			t.Fatal("enum composition binding byte span")
+		}
+		fmt.Fprintf(&p, "{let n=syntax::expression_at(ref parsed,b_node.left); assert(n.kind==17 && n.start==%d && n.end==%d);}\n", start, end)
+		textCheck("a", f.Text)
+		textCheck("b", binding.Text)
+		textCheck("b_node.left", binding.Cooked)
+		p.WriteString("}\n")
+	}
+	p.WriteString("assert(integrity::valid(ref parsed)); 0 } case .err(_):{1}};}")
 	runParserProbe(t, p.String())
 }
