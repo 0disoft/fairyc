@@ -17,7 +17,7 @@ fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<t
     if (!types::word(stream,cursor.index,b"{")) { cursor.expected = 6; return false; }
     advance(stream,cursor);
     while (!types::word(stream,cursor.index,b"}")) {
-        if (is_resource && types::word(stream,cursor.index,b"cleanup")) { break; }
+        if (is_resource && (types::word(stream,cursor.index,b"cleanup") || types::word(stream,cursor.index,b"@"))) { break; }
         if (scanner::token_info(stream,cursor.index).kind == 1) { cursor.expected = 7; return false; }
         if (cursor.fields >= 1024) { cursor.status = 4; return false; }
         let usize start = scanner::token_info(stream,cursor.index).start;
@@ -64,7 +64,7 @@ fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<t
         if (!switch(v::push<Field>(fields,field)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return false; }
         cursor.fields = cursor.fields + 1;
     }
-    if (is_resource && types::word(stream,cursor.index,b"cleanup")) {
+    if (is_resource && (types::word(stream,cursor.index,b"cleanup") || types::word(stream,cursor.index,b"@"))) {
         cursor.cleanup_start = scanner::token_info(stream,cursor.index).start;
         return true;
     }

@@ -6,11 +6,12 @@ import records as records;
 import bodies as bodies;
 import body_state as state;
 import attributes as attributes;
+import cleanup_syntax as cleanups;
 
 // Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,
 // 8 static_assert, 9 unsafe extern C function, 10 state, 11 payloadless enum; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
-pub struct Declaration { usize unsafe_start; usize unsafe_end; usize owner_start; usize owner_end; u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; usize generic_parameters; usize generic_start; usize generic_end; }
+pub struct Declaration { usize cleanup_attribute_start; usize cleanup_attribute_count; usize unsafe_start; usize unsafe_end; usize owner_start; usize owner_end; u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; usize generic_parameters; usize generic_start; usize generic_end; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
 // Zero name/type spans mean unwritten; expression zero means no initializer/value.
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; }
@@ -89,7 +90,7 @@ fn u32 item_kind(ref scanner::Stream stream, usize index) {
 fn Attempt failed(ref scanner::Stream stream, ref mut state::Cursor cursor, u32 code) {
     let scanner::TokenInfo token = current(stream, cursor);
     return Attempt { .ok = false,
-        .value = Declaration { .unsafe_start = 0, .unsafe_end = 0, .owner_start = 0, .owner_end = 0, .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0, .cleanup_body = 0, .generic_parameters = 0, .generic_start = 0, .generic_end = 0 },
+        .value = Declaration { .cleanup_attribute_start = 0, .cleanup_attribute_count = 0, .unsafe_start = 0, .unsafe_end = 0, .owner_start = 0, .owner_end = 0, .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0, .cleanup_body = 0, .generic_parameters = 0, .generic_start = 0, .generic_end = 0 },
         .problem = Problem { .code = code, .start = token.start, .end = token.end, .expected = cursor.expected, .token = cursor.index } };
 }
 fn bool expect(ref scanner::Stream stream, ref mut state::Cursor cursor, ref u8[] text, u32 code) {
@@ -97,7 +98,7 @@ fn bool expect(ref scanner::Stream stream, ref mut state::Cursor cursor, ref u8[
     cursor.expected = code;
     return false;
 }
-fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor, ref mut v::Vec<state::Node> nodes, ref mut v::Vec<bodies::Entry> entries, ref mut v::Vec<state::Statement> statements, ref mut v::Vec<types::Node> type_nodes, ref mut v::Vec<records::Field> fields, u32 initial_kind) {
+fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor, ref mut v::Vec<state::Node> nodes, ref mut v::Vec<bodies::Entry> entries, ref mut v::Vec<state::Statement> statements, ref mut v::Vec<types::Node> type_nodes, ref mut v::Vec<records::Field> fields, ref mut v::Vec<attributes::Attribute> attribute_nodes, ref mut v::Vec<attributes::Argument> attribute_arguments, usize attribute_base, usize argument_base, u32 initial_kind) {
     var u32 kind = initial_kind;
     let usize start = scanner::token_info(stream, cursor.index).start;
     let usize entry_start = cursor.entries;
@@ -118,6 +119,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor,
     var usize name_start = if (kind == 8 || kind == 10) { 0 } else { name.start };
     var usize name_end = if (kind == 8 || kind == 10) { 0 } else { name.end };
     var usize root = 0;
+    var usize cleanup_attribute_start = 0; var usize cleanup_attribute_count = 0;
     var usize body = 0; var usize cleanup_start = 0; var usize cleanup_end = 0; var usize cleanup_body = 0;
     if (kind != 8 && kind != 10) { advance(stream, cursor); }
     var usize owner_start = 0; var usize owner_end = 0;
@@ -164,10 +166,10 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor,
         if (!record.ok) { return failed(stream,cursor,kind); }
         cleanup_start = record.cleanup_start;
         if (cleanup_start != 0) {
-            advance(stream,cursor);
-            cleanup_body = bodies::block(stream,cursor,nodes,entries,statements,type_nodes,0,false);
-            if (cleanup_body == 0) { return failed(stream,cursor,kind); }
-            cleanup_end = cursor.previous_end;
+            let cleanups::Attempt c = cleanups::parse(stream,cursor,nodes,entries,statements,type_nodes,attribute_nodes,attribute_arguments,attribute_base,argument_base);
+            if (!c.ok) { return failed(stream,cursor,kind); }
+            cleanup_start = c.start; cleanup_body = c.body; cleanup_end = c.end;
+            cleanup_attribute_start = c.attribute_start; cleanup_attribute_count = c.attribute_count;
             if (!expect(stream,cursor,b"}",7)) { return failed(stream,cursor,kind); }
         }
     } else {
@@ -187,7 +189,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor,
         }
     }
     return Attempt { .ok = true,
-        .value = Declaration { .unsafe_start = unsafe_start, .unsafe_end = unsafe_end, .owner_start = owner_start, .owner_end = owner_end, .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end, .cleanup_body = cleanup_body, .generic_parameters = generic_parameters, .generic_start = generic_start, .generic_end = generic_end },
+        .value = Declaration { .cleanup_attribute_start = cleanup_attribute_start, .cleanup_attribute_count = cleanup_attribute_count, .unsafe_start = unsafe_start, .unsafe_end = unsafe_end, .owner_start = owner_start, .owner_end = owner_end, .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end, .cleanup_body = cleanup_body, .generic_parameters = generic_parameters, .generic_start = generic_start, .generic_end = generic_end },
         .problem = Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .token = 0 } };
 }
 
@@ -261,10 +263,12 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
             cursor.index = prefix.next; cursor.previous_end = prefix.end; cursor.status = prefix.status; cursor.expected = prefix.expected;
             attributes_ok = prefix.ok;
         }
+        let usize attribute_base = v::len<attributes::Attribute>(ref attribute_nodes);
+        let usize argument_base = v::len<attributes::Argument>(ref attribute_arguments);
         let usize item_start = cursor.index;
         let usize attribute_count = v::len<attributes::Attribute>(ref attribute_nodes) - attribute_start;
         let u32 kind = if (first) { 1 } else if (attribute_count == 0 && !functions && word(ref input, cursor.index, b"import")) { 2 } else { item_kind(ref input,cursor.index) };
-        let Attempt attempt = if (!attributes_ok || (first && !word(ref input, cursor.index, b"module")) || kind == 5) { failed(ref input, ref mut cursor, if (kind == 5) { 4 } else { kind }) } else { declaration(ref input, ref mut cursor, ref mut nodes, ref mut entries, ref mut statements, ref mut type_nodes, ref mut fields, kind) };
+        let Attempt attempt = if (!attributes_ok || (first && !word(ref input, cursor.index, b"module")) || kind == 5) { failed(ref input, ref mut cursor, if (kind == 5) { 4 } else { kind }) } else { declaration(ref input, ref mut cursor, ref mut nodes, ref mut entries, ref mut statements, ref mut type_nodes, ref mut fields, ref mut attribute_nodes, ref mut attribute_arguments, attribute_base, argument_base, kind) };
         if (cursor.status != 0) { return .err(cursor.status); }
         if (attempt.ok) {
             if (items >= max_items) { return .err(4); }
@@ -328,6 +332,7 @@ pub fn ref u8[] expected_text(u32 code) {
     if (code == 21) { return b"fn"; }
     if (code == 22) { return b"cell or map"; }
     if (code == 23) { return b"in"; }
+    if (code == 24) { return b"cleanup"; }
     return b"supported syntax";
 }
 pub fn ref u8[] source_view(ref Parsed parsed) { return scanner::source_view(ref parsed.source); }
@@ -444,6 +449,7 @@ pub fn usize type_argument(ref Parsed parsed, usize id, usize index) {
     return type_at(parsed,link).left;
 }
 pub fn usize attribute_count(ref Parsed parsed) { return v::len<attributes::Attribute>(ref parsed.attributes); }
+pub fn usize attribute_argument_count(ref Parsed parsed) { return v::len<attributes::Argument>(ref parsed.attribute_arguments); }
 pub fn usize specialization_argument_count(ref Parsed parsed, usize id) {
     let Expression node = expression_at(parsed,id); assert(node.kind == 20);
     var usize link = node.right; var usize count = 0;

@@ -14,7 +14,7 @@ Existing source, arena, recursion and token-lookahead limits remain applicable.
 | C function types | Implemented in `src/types.fy`; native type-tree differential and recovery/limit tests pass in both Windows profiles (48.538s). |
 | `burn` statements | Implemented as statement kind 16; native tests compare full statement/operand spans to Go, reject malformed statements, and check 2047/2048 shared statement-arena limits. |
 | `region` statements | Implemented as statement kind 17; Go CST comparison, malformed-input rollback, detached-node checks and 31/32-level depth tests pass in both Windows profiles after module extraction. Control-item suite: 69.725s. |
-| Attributed cleanup declarations | Pending implementation and differential tests. |
+| Attributed cleanup declarations | Implemented with separate declaration/cleanup attribute ranges; native source-span, rollback, mutation and shared attribute/argument-limit tests pass in both profiles. |
 | Unclosed named-pattern recovery | Pending recovery improvement; the earlier test records consumption of the following function. |
 | Whole grammar coverage audit | Pending production-by-production audit and selected corpus gates after the above changes. |
 
@@ -36,6 +36,25 @@ The integrity verifier checks these ranges and their allowed declaration kinds.
 Header fixtures contain UTF-8 comments, CRLF, visibility, attributes, generic
 parameters, ordinary bodies and malformed headers. Recognition does not resolve
 the owner or check receiver, visibility, effects, or unsafe-call semantics.
+
+## Cleanup attribute representation
+
+The declaration's `attribute_start`/`attribute_count` still own only its outer
+attributes. `cleanup_attribute_start`/`cleanup_attribute_count` own the cleanup
+prefix in the same attribute arena; zero count requires zero start. A nonempty
+cleanup prefix may start at index zero when there are no earlier attributes.
+`cleanup_start` begins at the keyword, matching the Go cleanup node, while the
+prefix attributes retain their own byte spans. Failed declarations roll back
+both attribute and argument vectors along with fields, types and body nodes.
+
+`cleanup_syntax.fy` is explicitly required in probe copying and the self-corpus
+inventory. It receives current arena lengths from the vector owner, so no new
+mutable-to-shared reborrow support is required from the Go compiler. Declaration
+and cleanup prefixes share the unchanged 256-attribute and 1024-argument limits.
+All eighteen required candidate files pass the self-corpus gate in both native
+profiles (8.820s), including the unchanged 32768-byte per-source cap.
+Attributes before resource fields remain outside the normative grammar, even
+though Go's resource parser accepts a broader attribute placement.
 
 ## Region statement representation
 

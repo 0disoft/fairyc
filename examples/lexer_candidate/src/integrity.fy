@@ -130,13 +130,30 @@ pub fn bool valid(ref syntax::Parsed p) {
         } else if (d.kind == 7) {
             if (d.body != 0 || !type_ref(p,d.result_type,syntax::type_count(p) + 1,0) || !expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
         } else if (d.body != 0 || d.result_type != 0 || (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 10 && d.kind != 11)) { return false; }
-        if (d.cleanup_body != 0 && (d.kind != 6 || !stmt(p,d.cleanup_body,syntax::statement_count(p) + 1,1))) { return false; }
+        if (!valid_cleanup(p,d)) { return false; }
         if (!optional_expr(p,d.expression,syntax::expression_count(p) + 1,0)) { return false; }
         i += 1;
     }
     i = 0;
     while (i < syntax::field_count(p)) {
         if (!valid_field(p,syntax::field_at(p,i),i)) { return false; }
+        i += 1;
+    }
+    return true;
+}
+pub fn bool valid_cleanup(ref syntax::Parsed p, syntax::Declaration d) {
+    if (d.cleanup_body == 0) { return d.cleanup_start == 0 && d.cleanup_end == 0 && d.cleanup_attribute_start == 0 && d.cleanup_attribute_count == 0; }
+    if (d.kind != 6 || !stmt(p,d.cleanup_body,syntax::statement_count(p) + 1,1)) { return false; }
+    let syntax::Statement body = syntax::statement_at(p,d.cleanup_body);
+    if (d.cleanup_start < d.start || d.cleanup_start >= body.start || d.cleanup_end != body.end || d.cleanup_end > d.end) { return false; }
+    if (d.cleanup_attribute_count == 0) { return d.cleanup_attribute_start == 0; }
+    let usize count = syntax::attribute_count(p);
+    if (d.attribute_start > count || d.attribute_count > count - d.attribute_start) { return false; }
+    if (d.cleanup_attribute_start > count || d.cleanup_attribute_count > count - d.cleanup_attribute_start || d.cleanup_attribute_start < d.attribute_start + d.attribute_count) { return false; }
+    var usize i = 0;
+    while (i < d.cleanup_attribute_count) {
+        let a = syntax::attribute_at(p,d.cleanup_attribute_start + i);
+        if (a.start < d.start || a.start >= a.end || a.end > d.cleanup_start) { return false; }
         i += 1;
     }
     return true;
