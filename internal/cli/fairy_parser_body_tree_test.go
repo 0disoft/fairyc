@@ -165,15 +165,27 @@ func referenceBodyTree(input string) (string, error) {
 		return b.Tail == nil || expr(b.Tail, d+1)
 	}
 	expr = func(e *ast.Expression, d int) bool {
-		if e == nil || e.Type != nil || len(e.TypeArguments) != 0 {
+		if e == nil || (e.Type != nil && e.Kind != syntax.KindCast) || (len(e.TypeArguments) != 0 && e.Kind != syntax.KindSpecialize) {
 			return false
 		}
-		k := map[syntax.Kind]int{syntax.KindLiteral: 200, syntax.KindPath: 201, syntax.KindGroup: 202, syntax.KindPrefix: 203, syntax.KindBinary: 204, syntax.KindCall: 205, syntax.KindBlock: 206, syntax.KindIf: 207}[e.Kind]
+		k := map[syntax.Kind]int{syntax.KindLiteral: 200, syntax.KindPath: 201, syntax.KindGroup: 202, syntax.KindPrefix: 203, syntax.KindBinary: 204, syntax.KindCall: 205, syntax.KindBlock: 206, syntax.KindIf: 207, syntax.KindCast: 208, syntax.KindSpecialize: 209}[e.Kind]
 		if k == 0 {
 			failure = fmt.Errorf("unhandled expression %s at %d", e.Kind, e.Span.StartByte)
 			return false
 		}
 		n := len(e.Children)
+		if k == 208 {
+			if e.Type == nil || n != 1 {
+				return false
+			}
+			n++
+		}
+		if k == 209 {
+			if n != 1 || len(e.TypeArguments) == 0 {
+				return false
+			}
+			n += len(e.TypeArguments)
+		}
 		if k == 206 {
 			n = 1
 		}
@@ -193,6 +205,14 @@ func referenceBodyTree(input string) (string, error) {
 					return false
 				}
 			} else if !expr(c, d+1) {
+				return false
+			}
+		}
+		if k == 208 {
+			return typeTree(e.Type, d+1)
+		}
+		for i := range e.TypeArguments {
+			if !typeTree(&e.TypeArguments[i], d+1) {
 				return false
 			}
 		}
@@ -271,6 +291,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){let unsafe extern C fn void() x=callback;var (unsafe /* gap */ extern C fn ptr mut u8(i32,ref u8[],))[] y=x;let Box<unsafe extern C fn i32(Box<u8>,unsafe extern C fn void(u32))> z=y;}",
 		"module main;fn void f(){" + strings.Repeat("let i32 x=1;", 85) + "}",
 		"module main;fn void f(){let i32" + strings.Repeat("[]", 61) + " x=1;}",
+		"module main; /* 변환 */\r\nfn void f(){let x=(a+b) as i32 as u8;var ptr mut u8 p=value as ptr mut u8;return callback as unsafe extern C fn i32(ref u8[]);}",
+		"module main;fn void f(){let x=pkg::choose /* gap */ <Box<Pair<u8,i32>>,ref mut T>(first<i32>(1),second as u8);if(a<b){call(x);}return empty<unsafe extern C fn void(),u8[0x10]>();}",
+		"module main;fn void f(){" + strings.Repeat("f<i32>();", 51) + "}",
+		"module main;fn void f(){x as i32" + strings.Repeat("[]", 60) + ";}",
+		"module main;fn void f(){f<i32" + strings.Repeat("[]", 59) + ">();}",
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
@@ -311,7 +336,20 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			}
 			t.Logf("profile=%v complete body bytes=%d canonical bytes=%d", profile, len(input), len(want))
 		}
-		for _, input := range []string{"module main;fn void f(){let ref mut =1;}", "module main;fn void f(){return [1];}", "module main;fn void f(){return 1}", "module main;fn void f(){" + strings.Repeat("x;", 128) + "}", "module main;const i32 X=1;fn void f(){}", "module main;fn void f(){" + strings.Repeat("let i32 x=1;", 86) + "}", "module main;fn void f(){let i32" + strings.Repeat("[]", 62) + " x=1;}"} {
+		for _, input := range []string{
+			"module main;fn void f(){let ref mut =1;}",
+			"module main;fn void f(){return [1];}",
+			"module main;fn void f(){return 1}",
+			"module main;fn void f(){" + strings.Repeat("x;", 128) + "}",
+			"module main;const i32 X=1;fn void f(){}",
+			"module main;fn void f(){" + strings.Repeat("let i32 x=1;", 86) + "}",
+			"module main;fn void f(){let i32" + strings.Repeat("[]", 62) + " x=1;}",
+			"module main;fn void f(){x as ;}",
+			"module main;fn void f(){f<i32>(;}",
+			"module main;fn void f(){" + strings.Repeat("f<i32>();", 52) + "}",
+			"module main;fn void f(){x as i32" + strings.Repeat("[]", 61) + ";}",
+			"module main;fn void f(){f<i32" + strings.Repeat("[]", 60) + ">();}",
+		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)
 			}

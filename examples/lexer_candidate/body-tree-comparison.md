@@ -4,7 +4,7 @@ This is a private, disposable test transport between the Fairy candidate and the
 Go reference AST. It is not a public AST format, parser replacement, semantic
 adapter or decoder. Its first proof walks the complete body of one function with
 nested bindings, blocks, if/else-if, while, assignments, calls and returns,
-including explicitly written binding type trees.
+including explicitly written binding types, casts and specialized generic calls.
 
 ## Encoding
 
@@ -41,6 +41,8 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 205 | Call: callee, then arguments in source order |
 | 206 | Block expression: body block |
 | 207 | If expression: condition, then block, optional else block or else-if expression |
+| 208 | Cast: operand, written target type |
+| 209 | Specialization: target path, then type arguments in source order |
 | 301 | Named type path: no children |
 | 302 / 303 | Reference / mutable reference type: element |
 | 304 / 305 | Slice / grouped type: element |
@@ -63,11 +65,15 @@ the exact generic base-path span from its originating CST, never by reparsing ty
 text. The Fairy writer omits its reverse-list helper nodes and restores source
 order. Those helpers are not exported records; C parameter-link scans are capped
 at 255 parameters, and the shared record budget still charges every emitted type.
+Specialized calls retain both the call (205) and specialization (209) nodes: the
+callee subtree contains the target and written types, followed by the call's value
+arguments. Casts retain their operand before the written type; chained casts are
+not flattened. Neither operation resolves names, converts values or checks types.
 
 ## Failure and resource boundary
 
-Both writers reject unhandled nodes instead of skipping them. Specialized calls,
-array expressions, casts and the other not-yet-mapped export forms therefore do
+Both writers reject unhandled nodes instead of skipping them. Array expressions,
+record construction and the other not-yet-mapped export forms therefore do
 not produce a successful partial comparison. This restriction belongs only to
 this first exporter, not to the parser's completed grammar support.
 
@@ -96,12 +102,14 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (8.454s).
-The bounded matrix contains nine complete bodies per profile, including ordinary
-and typed exact 256-record boundaries, nested type families, trivia/CRLF and
-depth 63 reached through iterative slice suffixes. Seven rejection cases cover
-malformed typed bindings, array expressions, malformed returns, 257 ordinary or
-259 mixed type/body records, an extra declaration and depth 64. Rejected native
+`fairyc_go_test_parser_body_tree` passes in both native profiles (9.887s).
+The bounded matrix contains fourteen complete bodies per profile, including
+ordinary, typed and generic-call exact 256-record boundaries, nested type families,
+chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
+and depth 63 reached through binding, cast and specialization type trees. Twelve
+rejection cases cover malformed bindings, casts, calls and returns, unsupported
+array expressions, an extra declaration, 257/259/261 records and depth 64 across
+those same three type-entry roles. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice
