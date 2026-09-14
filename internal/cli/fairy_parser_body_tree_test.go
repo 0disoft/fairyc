@@ -54,6 +54,98 @@ func referenceBodyTree(input string) (string, error) {
 	var block func(*ast.Block, int) bool
 	var expr func(*ast.Expression, int) bool
 	var stmt func(ast.Statement, int) bool
+	// Surface AST keeps the generic path spelling, but its precise path-only
+	// span belongs to the CST. Read that origin instead of reparsing Type.Text.
+	paths := map[[2]int]diagnostic.Span{}
+	for _, node := range r.Tree.Nodes {
+		if node.Kind == syntax.KindType && node.Cooked == string(syntax.TypeFormNamed) && len(node.Children) != 0 {
+			if path, ok := r.Tree.Node(node.Children[0]); ok && path.Kind == syntax.KindPath {
+				paths[[2]int{node.Span.StartByte, node.Span.EndByte}] = path.Span
+			}
+		}
+	}
+	var typeTree func(*ast.TypeReference, int) bool
+	typeTree = func(typ *ast.TypeReference, d int) bool {
+		if typ == nil {
+			return false
+		}
+		k, n := 0, 0
+		switch typ.Kind {
+		case ast.TypeKindNamed:
+			k = 301
+			if len(typ.Arguments) != 0 {
+				k, n = 306, len(typ.Arguments)+1
+			}
+		case ast.TypeKindReference:
+			k, n = 302, 1
+			if typ.Mutable {
+				k = 303
+			}
+		case ast.TypeKindRawPointer:
+			k, n = 311, 1
+			if typ.Mutable {
+				k = 312
+			}
+		case ast.TypeKindSlice:
+			k, n = 304, 1
+		case ast.TypeKindGrouped:
+			k, n = 305, 1
+		case ast.TypeKindArray:
+			k, n = 308, 2
+		case ast.TypeKindForeignFunction:
+			if typ.ABI != "C" || typ.Result == nil {
+				return false
+			}
+			k, n = 315, len(typ.Parameters)+1
+		default:
+			return false
+		}
+		if !record(k, typ.Span, n, diagnostic.Span{}, d, "") {
+			return false
+		}
+		if k == 301 {
+			return true
+		}
+		if k == 306 {
+			span, ok := paths[[2]int{typ.Span.StartByte, typ.Span.EndByte}]
+			if !ok || !record(301, span, 0, diagnostic.Span{}, d+1, "") {
+				return false
+			}
+			for i := range typ.Arguments {
+				if !typeTree(&typ.Arguments[i], d+1) {
+					return false
+				}
+			}
+			return true
+		}
+		if k == 315 {
+			if !typeTree(typ.Result, d+1) {
+				return false
+			}
+			for i := range typ.Parameters {
+				if !typeTree(&typ.Parameters[i], d+1) {
+					return false
+				}
+			}
+			return true
+		}
+		if !typeTree(typ.Element, d+1) {
+			return false
+		}
+		if k == 308 {
+			if typ.Length == nil {
+				return false
+			}
+			lengthKind := 309
+			if typ.Length.Kind == syntax.KindPath {
+				lengthKind = 310
+			} else if typ.Length.Kind != syntax.KindLiteral {
+				return false
+			}
+			return record(lengthKind, typ.Length.Span, 0, diagnostic.Span{}, d+1, "")
+		}
+		return true
+	}
 	block = func(b *ast.Block, d int) bool {
 		if b == nil {
 			return false
@@ -113,15 +205,20 @@ func referenceBodyTree(input string) (string, error) {
 			return false
 		}
 		var children []*ast.Expression
+		var writtenType *ast.TypeReference
 		name := diagnostic.Span{}
 		if k == 101 {
-			if s.Binding == nil || s.Binding.Type != nil {
+			if s.Binding == nil {
 				return false
 			}
 			if s.Binding.Mutable {
 				k = 102
 			}
 			name = s.Binding.NameSpan
+			writtenType = s.Binding.Type
+			if writtenType != nil {
+				k += 8
+			}
 			children = append(children, s.Binding.Expression)
 		} else if k == 104 {
 			children = append(children, s.Target, s.Expression)
@@ -130,7 +227,14 @@ func referenceBodyTree(input string) (string, error) {
 		} else if k != 107 && k != 108 && s.Expression != nil {
 			children = append(children, s.Expression)
 		}
-		if !record(k, s.Span, len(children), name, d, s.Operator) {
+		n := len(children)
+		if writtenType != nil {
+			n++
+		}
+		if !record(k, s.Span, n, name, d, s.Operator) {
+			return false
+		}
+		if writtenType != nil && !typeTree(writtenType, d+1) {
 			return false
 		}
 		for i, c := range children {
@@ -162,6 +266,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main; /* 한글 */\r\nfn void f(){let x={1};if(a){call((x),-2);}else{3}return;}",
 		"module main;fn void f(){}",
 		"module main;fn void f(){" + strings.Repeat("x;", 127) + "return;}",
+		"module main;fn void f(){let i32 x=1;var pkg::Thing y=x;{let ref mut ptr u8[] z=y;}}",
+		"module main; /* 타입 */\r\nfn void f(){let Box /* gap */ <Pair<u8,i32>,ref T> x=seed;var (ref u8)[0x10][cfg /* gap */ :: N][] y=x;let ptr void p=x;}",
+		"module main;fn void f(){let unsafe extern C fn void() x=callback;var (unsafe /* gap */ extern C fn ptr mut u8(i32,ref u8[],))[] y=x;let Box<unsafe extern C fn i32(Box<u8>,unsafe extern C fn void(u32))> z=y;}",
+		"module main;fn void f(){" + strings.Repeat("let i32 x=1;", 85) + "}",
+		"module main;fn void f(){let i32" + strings.Repeat("[]", 61) + " x=1;}",
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
@@ -202,9 +311,9 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			}
 			t.Logf("profile=%v complete body bytes=%d canonical bytes=%d", profile, len(input), len(want))
 		}
-		for _, input := range []string{"module main;fn void f(){let i32 x=1;}", "module main;fn void f(){return [1];}", "module main;fn void f(){return 1}", "module main;fn void f(){" + strings.Repeat("x;", 128) + "}", "module main;const i32 X=1;fn void f(){}"} {
+		for _, input := range []string{"module main;fn void f(){let ref mut =1;}", "module main;fn void f(){return [1];}", "module main;fn void f(){return 1}", "module main;fn void f(){" + strings.Repeat("x;", 128) + "}", "module main;const i32 X=1;fn void f(){}", "module main;fn void f(){" + strings.Repeat("let i32 x=1;", 86) + "}", "module main;fn void f(){let i32" + strings.Repeat("[]", 62) + " x=1;}"} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
-				t.Fatal("reference accepted unsupported/invalid/budget input")
+				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)
 			}
 			out, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewBufferString(input))
 			if err != nil || out.ExitCode == 0 || out.Stdout != "" || out.Stderr != "" || out.TrapControl != "" {
