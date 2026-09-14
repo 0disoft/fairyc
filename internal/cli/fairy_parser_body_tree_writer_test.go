@@ -115,6 +115,7 @@ struct ExportBudget {usize nodes; bool emit;}
  else if(s.kind==14){kind=111;count=4;}
  else if(s.kind==11){kind=115;count=1;}else if(s.kind==13){kind=116;count=1;}
  else if(s.kind==12){kind=117;count=1;}else if(s.kind==16){kind=118;count=1;}
+ else if(s.kind==17){kind=119;count=2;let name=syntax::expression_at(p,s.target);name_start=name.start;name_end=name.end;}
  else{return false;}
  if(kind>=115 && kind<=118 && s.expression==0){return false;}
  if(!record(budget,depth,kind,s.start,s.end,count,name_start,name_end)){return false;}
@@ -133,7 +134,7 @@ struct ExportBudget {usize nodes; bool emit;}
  if(kind==104 && !expression_tree(p,s.target,budget,depth+1)){return false;}
  if((kind==109 || kind==110) && !type_tree(p,syntax::entry_at(p,s.entry-1).type_root,budget,depth+1)){return false;}
  if(s.expression!=0 && !expression_tree(p,s.expression,budget,depth+1)){return false;}
- if(kind==106){return statement_tree(p,s.first,budget,depth+1);}return true;
+ if(kind==106 || kind==119){return statement_tree(p,s.first,budget,depth+1);}return true;
 }
 @effects(console) fn i32 report(syntax::Parsed parsed){
  if(syntax::problem_count(ref parsed)!=0 || !integrity::valid(ref parsed) || syntax::declaration_count(ref parsed)!=2){return 4;}

@@ -7,7 +7,7 @@ nested bindings, blocks, if/else-if, while, assignments, calls and returns,
 including explicitly written binding types, casts, specialized generic calls,
 field access, indexing, slicing, arrays, record construction, references,
 propagation, unsafe blocks, switch pattern decomposition, classic for loops and
-assert/defer/discard/burn statements.
+assert/defer/discard/burn statements and region statements.
 
 ## Encoding
 
@@ -23,7 +23,7 @@ The remaining stream is a preorder tree. Each record has the following fields:
 `kind start_byte end_byte child_count name_start_byte name_end_byte operator_size operator_byte...`
 
 Spans are original half-open byte ranges. Name spans are present on bindings,
-field access, record fields and named pattern fields;
+field access, record fields, named pattern fields and region names;
 other records use zero. Prefix, binary and assignment operators carry their actual
 operator bytes, independently of the source-span envelope; other nodes use length
 zero. Child counts and preorder determine all structural edges;
@@ -42,6 +42,7 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 111 | For loop: initializer, condition, post, body block; always four children |
 | 112 / 113 / 114 | Absent initializer / condition / post: no children, zero span |
 | 115 / 116 / 117 / 118 | Assert / defer / discard / burn statement: exactly one operand |
+| 119 | Region: backing expression, body block; exact region-name span is present |
 | 200 / 201 | Literal / path: no children; spelling comes from the bound source span |
 | 202 / 203 | Group / prefix expression: operand |
 | 204 | Binary expression: left, right |
@@ -76,7 +77,7 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 315 | C function type: result, then parameters in source order |
 
 Go's block-expression wrapper is omitted specifically for if branches, while
-bodies, unsafe bodies and case bodies, where the common format has an explicit block child. The candidate's
+bodies, unsafe bodies, case bodies and region bodies, where the common format has an explicit block child. The candidate's
 branch-pair helper is likewise omitted. A standalone block expression retains tag
 206. Go's operandless break/continue self-expression placeholders are not separate
 children; the jump statement itself remains visible. Statement wrappers, grouping,
@@ -141,13 +142,21 @@ same expression walker and shared budget, without desugaring into calls or ordin
 expression statements. Their syntax-only fixtures may intentionally lack semantic
 validity: this comparison proves no assertion outcome, delayed-call scheduling,
 must-use handling, ownership transfer or resource destruction.
+Regions preserve their written name, backing expression and body in source order.
+The Go writer reads the name's identifier token from the owning CST region node;
+the candidate uses its existing region-name node's span. That name is metadata,
+not an expression child or a new allocation node. Repeated names and nested regions
+are compared as written without resolving scope, allocating storage or validating
+lifetimes, ownership and destruction. Bodies retain ordinary statement/tail rules;
+the exporter does not turn a region into a value-producing block.
 
 ## Failure and resource boundary
 
-Both writers reject unhandled nodes instead of skipping them. Region statements
-and any other not-yet-mapped export forms therefore do
-not produce a successful partial comparison. This restriction belongs only to
-this first exporter, not to the parser's completed grammar support.
+Both writers reject unhandled nodes instead of skipping them, so a future or
+otherwise unmapped node cannot produce a successful partial comparison. Mapping
+the named families here is not a complete grammar-to-export coverage audit.
+The body-only input and shared budgets below still apply independently of the
+parser's grammar support.
 
 Input must be an error-free module plus exactly one ordinary function, within
 32768 source bytes. Header/parameter trees are not the root of this body-only
@@ -174,13 +183,13 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (17.112s).
-The bounded matrix contains fifty-six complete bodies per profile, including
+`fairyc_go_test_parser_body_tree` passes in both native profiles (16.067s).
+The bounded matrix contains sixty-one complete bodies per profile, including
 ordinary, typed and generic-call exact 256-record boundaries, nested type families,
 chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
-and depth 63 reached through binding, cast and specialization type trees. Forty-nine
-rejection cases cover malformed bindings, casts, calls and returns, unsupported
-region statements, an extra declaration, 257/259/261 records and depth 64 across
+and depth 63 reached through binding, cast and specialization type trees. Fifty-five
+rejection cases cover malformed bindings, casts, calls and returns,
+an extra declaration or function, 257/259/261 records and depth 64 across
 those same three type-entry roles. Access cases additionally compare field/index/
 call chains, assignment targets, all four slice-bound presence combinations,
 explicit zero versus omission and comments around delimiters. Slice records also
@@ -210,7 +219,11 @@ compare with comments/CRLF, generic calls, propagation, field access and nested
 loop/switch/unsafe bodies. Their mixed witness passes at 256 records and rejects
 257; each operand role passes at depth 63 and rejects 64, and each missing operand
 is rejected. The first new fixture used the reserved word `cleanup` as a callee;
-it was corrected to an ordinary identifier without changing grammar. Rejected native
+it was corrected to an ordinary identifier without changing grammar. Regions cover
+empty and nested bodies, repeated names, comments/CRLF, call/index/field backing
+expressions and for/switch composition. Repeated regions pass at 256 records and
+reject 257; nested region bodies pass at depth 63 and reject 64. Missing names,
+`in`, backing expressions and bodies are rejected. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice

@@ -61,7 +61,16 @@ func referenceBodyTree(input string) (string, error) {
 	fieldNames := map[[2]int]diagnostic.Span{}
 	patternKinds := map[[2]int]int{}
 	forInitializers := map[[2]int]diagnostic.Span{}
+	regionNames := map[[2]int]diagnostic.Span{}
 	for _, node := range r.Tree.Nodes {
+		if node.Kind == syntax.KindRegion {
+			for _, token := range r.Tree.Tokens[node.TokenStart:node.TokenEnd] {
+				if token.Kind == lexer.Identifier {
+					regionNames[[2]int{node.Span.StartByte, node.Span.EndByte}] = token.Span
+					break
+				}
+			}
+		}
 		if node.Kind == syntax.KindFor && len(node.Children) > 0 {
 			if clause, ok := r.Tree.Node(node.Children[0]); ok && clause.Kind == syntax.KindForInit {
 				forInitializers[[2]int{node.Span.StartByte, node.Span.EndByte}] = clause.Span
@@ -414,7 +423,7 @@ func referenceBodyTree(input string) (string, error) {
 			}
 			return block(loop.Body, d+1)
 		}
-		k := map[syntax.Kind]int{syntax.KindBinding: 101, syntax.KindReturn: 103, syntax.KindAssignment: 104, syntax.KindExprStmt: 105, syntax.KindWhile: 106, syntax.KindBreak: 107, syntax.KindContinue: 108, syntax.KindAssert: 115, syntax.KindDefer: 116, syntax.KindDiscard: 117, syntax.KindBurn: 118}[s.Kind]
+		k := map[syntax.Kind]int{syntax.KindBinding: 101, syntax.KindReturn: 103, syntax.KindAssignment: 104, syntax.KindExprStmt: 105, syntax.KindWhile: 106, syntax.KindBreak: 107, syntax.KindContinue: 108, syntax.KindAssert: 115, syntax.KindDefer: 116, syntax.KindDiscard: 117, syntax.KindBurn: 118, syntax.KindRegion: 119}[s.Kind]
 		if k == 0 || s.For != nil {
 			failure = fmt.Errorf("unhandled statement %s at %d", s.Kind, s.Span.StartByte)
 			return false
@@ -437,8 +446,18 @@ func referenceBodyTree(input string) (string, error) {
 			children = append(children, s.Binding.Expression)
 		} else if k == 104 {
 			children = append(children, s.Target, s.Expression)
-		} else if k == 106 {
+		} else if k == 106 || k == 119 {
+			if s.Expression == nil || len(s.Expression.Children) != 2 || s.Expression.Children[1].Kind != syntax.KindBlock {
+				return false
+			}
 			children = s.Expression.Children
+			if k == 119 {
+				var ok bool
+				name, ok = regionNames[[2]int{s.Span.StartByte, s.Span.EndByte}]
+				if !ok || name.EndByte <= name.StartByte {
+					return false
+				}
+			}
 		} else if k != 107 && k != 108 && s.Expression != nil {
 			children = append(children, s.Expression)
 		}
@@ -456,7 +475,7 @@ func referenceBodyTree(input string) (string, error) {
 			return false
 		}
 		for i, c := range children {
-			if k == 106 && i == 1 {
+			if (k == 106 || k == 119) && i == 1 {
 				if !block(c.Block, d+1) {
 					return false
 				}
@@ -528,6 +547,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){defer " + strings.Repeat("ref ", 61) + "x;}",
 		"module main;fn void f(){discard " + strings.Repeat("ref ", 61) + "x;}",
 		"module main;fn void f(){burn " + strings.Repeat("ref ", 61) + "x;}",
+		"module main;fn void f(){region r in source {}}",
+		"module main; /* 영역 */\r\nfn void f(){region /* name */ outer in pools[i].view(){let x=1;region inner in select<Pool>(outer){use(inner,x);}region outer in source{use(outer);}}}",
+		"module main;fn void f(){for(;;){region r in source{discard switch(x){case .Some(v):{use(r,v)}case .None:{0}};defer release_handle(r);break;}}}",
+		"module main;fn void f(){" + strings.Repeat("region r in src{}", 85) + "}",
+		"module main;fn void f(){" + strings.Repeat("region r in src{", 30) + "ref x;" + strings.Repeat("}", 30) + "}",
 	}
 	// All eight presence combinations retain the same four structural roles.
 	for mask := 0; mask < 8; mask++ {
@@ -589,7 +613,7 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		t.Logf("profile=%v complete canonical bodies=%d", profile, len(inputs))
 		for _, input := range []string{
 			"module main;fn void f(){let ref mut =1;}",
-			"module main;fn void f(){region r in source {}}",
+			"module main;fn void f(){}fn void g(){}",
 			"module main;fn void f(){return 1}",
 			"module main;fn void f(){" + strings.Repeat("x;", 128) + "}",
 			"module main;const i32 X=1;fn void f(){}",
@@ -637,6 +661,12 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){defer " + strings.Repeat("ref ", 62) + "x;}",
 			"module main;fn void f(){discard " + strings.Repeat("ref ", 62) + "x;}",
 			"module main;fn void f(){burn " + strings.Repeat("ref ", 62) + "x;}",
+			"module main;fn void f(){region in source{}}",
+			"module main;fn void f(){region r source{}}",
+			"module main;fn void f(){region r in {}}",
+			"module main;fn void f(){region r in source;}",
+			"module main;fn void f(){" + strings.Repeat("region r in src{}", 85) + "return;}",
+			"module main;fn void f(){" + strings.Repeat("region r in src{", 30) + "ref ref x;" + strings.Repeat("}", 30) + "}",
 		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)
