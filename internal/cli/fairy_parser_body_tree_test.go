@@ -193,11 +193,26 @@ func referenceBodyTree(input string) (string, error) {
 		if e.Kind == syntax.KindField {
 			k = 217
 		}
+		if e.Kind == syntax.KindPrefix && e.Text == "&" {
+			k = 219
+		}
+		if e.Kind == syntax.KindPrefix && e.Text == "&mut" {
+			k = 220
+		}
+		if e.Kind == syntax.KindPropagate {
+			k = 221
+		}
+		if e.Kind == syntax.KindUnsafe {
+			k = 222
+		}
 		if k == 0 {
 			failure = fmt.Errorf("unhandled expression %s at %d", e.Kind, e.Span.StartByte)
 			return false
 		}
 		n := len(e.Children)
+		if k >= 219 && k <= 222 && n != 1 {
+			return false
+		}
 		if k == 216 {
 			if n == 0 {
 				return false
@@ -239,6 +254,12 @@ func referenceBodyTree(input string) (string, error) {
 		}
 		if k == 206 {
 			return block(e.Block, d+1)
+		}
+		if k == 222 {
+			if e.Children[0].Kind != syntax.KindBlock {
+				return false
+			}
+			return block(e.Children[0].Block, d+1)
 		}
 		if k == 216 {
 			if !expr(e.Children[0], d+1) {
@@ -363,6 +384,13 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){return pkg::Box<Pair<u8,i32>,ref T>{. /* name */ z=Inner{.value=[1;2]},.a=2,.z=3};}",
 		"module main;fn void f(){[" + strings.Repeat("1,", 253) + "];}",
 		"module main;fn void f(){" + strings.Repeat("R{.x=1};", 51) + "}",
+		"module main; /* 참조 */\r\nfn void f(){let a=ref object.field;let b=ref /* gap */ mut values[i];use(ref a,ref mut b);return ref ref mut a;}",
+		"module main;fn void f(){let a=fetch<i32>()?.items[0]?;return (ref mut a)?;}",
+		"module main;fn void f(){let a=unsafe /* gap */ {};let b=unsafe{let p=ref mut a;unsafe{call(p)?}};return {unsafe{ref b}};}",
+		"module main;fn void f(){" + strings.Repeat("unsafe{ref mut x?;};", 36) + "x;return;}",
+		"module main;fn void f(){" + strings.Repeat("ref ", 61) + "x;}",
+		"module main;fn void f(){x" + strings.Repeat("?", 61) + ";}",
+		"module main;fn void f(){return " + strings.Repeat("unsafe{", 30) + "x?" + strings.Repeat("}", 30) + ";}",
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
@@ -410,7 +438,7 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		}
 		for _, input := range []string{
 			"module main;fn void f(){let ref mut =1;}",
-			"module main;fn void f(){return x?;}",
+			"module main;fn void f(){for(;;){}}",
 			"module main;fn void f(){return 1}",
 			"module main;fn void f(){" + strings.Repeat("x;", 128) + "}",
 			"module main;const i32 X=1;fn void f(){}",
@@ -431,6 +459,13 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){R{.x=};}",
 			"module main;fn void f(){[" + strings.Repeat("1,", 254) + "];}",
 			"module main;fn void f(){" + strings.Repeat("R{.x=1};", 52) + "}",
+			"module main;fn void f(){ref mut ;}",
+			"module main;fn void f(){?x;}",
+			"module main;fn void f(){unsafe x;}",
+			"module main;fn void f(){" + strings.Repeat("unsafe{ref mut x?;};", 36) + "x;x;}",
+			"module main;fn void f(){" + strings.Repeat("ref ", 62) + "x;}",
+			"module main;fn void f(){x" + strings.Repeat("?", 62) + ";}",
+			"module main;fn void f(){return " + strings.Repeat("unsafe{", 30) + "ref x?" + strings.Repeat("}", 30) + ";}",
 		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)

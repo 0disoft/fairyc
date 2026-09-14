@@ -5,7 +5,8 @@ Go reference AST. It is not a public AST format, parser replacement, semantic
 adapter or decoder. Its first proof walks the complete body of one function with
 nested bindings, blocks, if/else-if, while, assignments, calls and returns,
 including explicitly written binding types, casts, specialized generic calls,
-field access, indexing, slicing, arrays and record construction.
+field access, indexing, slicing, arrays, record construction, references,
+propagation and unsafe blocks.
 
 ## Encoding
 
@@ -53,6 +54,9 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 216 | Record construction: target path, type arguments, fields in source order |
 | 217 | Record field: value; exact field-name span is present |
 | 218 | Repeat array: value, written count expression; no expansion or folding |
+| 219 / 220 | Immutable / mutable reference expression: operand |
+| 221 | Propagation: operand |
+| 222 | Unsafe expression: body block |
 | 301 | Named type path: no children |
 | 302 / 303 | Reference / mutable reference type: element |
 | 304 / 305 | Slice / grouped type: element |
@@ -62,8 +66,8 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 311 / 312 | Raw pointer / mutable raw pointer type: element |
 | 315 | C function type: result, then parameters in source order |
 
-Go's block-expression wrapper is omitted specifically for if branches and while
-bodies, where the common format has an explicit block child. The candidate's
+Go's block-expression wrapper is omitted specifically for if branches, while
+bodies and unsafe bodies, where the common format has an explicit block child. The candidate's
 branch-pair helper is likewise omitted. A standalone block expression retains tag
 206. Go's operandless break/continue self-expression placeholders are not separate
 children; the jump statement itself remains visible. Statement wrappers, grouping,
@@ -94,10 +98,18 @@ only to the temporary test copy of `syntax.fy`. The shipped parser API and priva
 specialization wrapper and place its type arguments directly before the fields,
 matching the Go AST. Dot-prefixed constructor paths retain their complete span
 under tag 201. Array list links and record-field links are never exported as edges.
+Go's prefix operator values `&` and `&mut` for written `ref` and `ref mut` map
+to tags 219 and 220 instead of the ordinary prefix tag. Their operator payload is
+empty: the tag preserves mutability and the source span preserves original words
+and trivia. Propagation has its own tag, retaining its position in call/access
+chains. Unsafe remains distinct from a normal block even when empty or nested.
+All three forms charge the same record/depth budget as their operands and blocks.
+No borrow validity, error propagation semantics or unsafe-operation permission is
+checked or granted by this syntax-only comparison.
 
 ## Failure and resource boundary
 
-Both writers reject unhandled nodes instead of skipping them. Propagation,
+Both writers reject unhandled nodes instead of skipping them. For loops,
 switch expressions and the other not-yet-mapped export forms therefore do
 not produce a successful partial comparison. This restriction belongs only to
 this first exporter, not to the parser's completed grammar support.
@@ -127,13 +139,13 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (12.690s).
-The bounded matrix contains twenty-four complete bodies per profile, including
+`fairyc_go_test_parser_body_tree` passes in both native profiles (12.823s).
+The bounded matrix contains thirty-one complete bodies per profile, including
 ordinary, typed and generic-call exact 256-record boundaries, nested type families,
 chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
-and depth 63 reached through binding, cast and specialization type trees. Twenty-two
+and depth 63 reached through binding, cast and specialization type trees. Twenty-nine
 rejection cases cover malformed bindings, casts, calls and returns, unsupported
-propagation, an extra declaration, 257/259/261 records and depth 64 across
+for loops, an extra declaration, 257/259/261 records and depth 64 across
 those same three type-entry roles. Access cases additionally compare field/index/
 call chains, assignment targets, all four slice-bound presence combinations,
 explicit zero versus omission and comments around delimiters. Slice records also
@@ -143,7 +155,12 @@ and an unclosed slice fail without output. Array and record cases cover empty,
 nested, trailing-comma and repeat forms, generic and dot-prefixed constructors,
 non-alphabetical and duplicate fields, and comments before field names. A wide
 array and repeated records each pass at exactly 256 records; 257/261 records,
-malformed array separators and missing record values fail. Rejected native
+malformed array separators and missing record values fail. Reference mutability,
+propagation/access composition, empty and nested unsafe blocks, comments and CRLF
+also compare exactly. A combined unsafe/reference/propagation witness passes at
+256 records and rejects 257; reference chains, propagation chains and nested unsafe
+bodies pass at depth 63 and reject depth 64. Missing reference operands, prefix
+`?` and unsafe without a block fail. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice

@@ -37,6 +37,8 @@ struct ExportBudget {usize nodes; bool emit;}
  else if(e.kind==8){kind=210;count=1;}else if(e.kind==9){kind=211;count=2;}else if(e.kind==26){kind=212;count=3;}
  else if(e.kind==24){kind=215;count=syntax::array_element_count(p,id);}
  else if(e.kind==29){kind=218;count=2;}
+ else if(e.kind==21){kind=219;count=1;}else if(e.kind==22){kind=220;count=1;}
+ else if(e.kind==30){kind=221;count=1;}else if(e.kind==31){kind=222;count=1;}
  else if(e.kind==10){kind=216;count=syntax::record_field_count(p,id);count+=1;let target=syntax::expression_at(p,e.left);if(target.kind==20){count+=syntax::specialization_argument_count(p,e.left);}}
  else{return false;}
  var usize name_start=0;var usize name_end=0;
@@ -44,7 +46,7 @@ struct ExportBudget {usize nodes; bool emit;}
  if(!record(budget,depth,kind,e.start,e.end,count,name_start,name_end)){return false;}
  if(budget.emit){if(kind==203 || kind==204){let ref u8[] op=syntax::expression_text(p,id);number(op.len);var usize i=0;while(i<op.len){number(op[i] as usize);i+=1;}}else{number(0);}}
  if(kind==200 || kind==201){return true;}
- if(kind==206){return statement_tree(p,e.left,budget,depth+1);}
+ if(kind==206 || kind==222){return statement_tree(p,e.left,budget,depth+1);}
  if(kind==215){var usize i=0;while(i<count){if(!expression_tree(p,syntax::array_element(p,id,i),budget,depth+1)){return false;}i+=1;}return true;}
  if(kind==216){
   let target=syntax::expression_at(p,e.left);
