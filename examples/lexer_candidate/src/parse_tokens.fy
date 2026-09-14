@@ -1,6 +1,39 @@
 module parse_tokens;
 import scanner as scanner;
 
+pub fn bool atom(ref scanner::Stream stream, usize index) {
+    let u32 kind=scanner::token_info(stream,index).kind;
+    return kind == 5 || kind == 6 || kind == 7 || kind == 8 || kind == 9 || kind == 3 || word(stream,index,b"true") || word(stream,index,b"false") || word(stream,index,b"null");
+}
+pub fn bool prefix(ref scanner::Stream stream, usize index) {
+    return word(stream,index,b"-") || word(stream,index,b"+") || word(stream,index,b"!") || word(stream,index,b"~") || word(stream,index,b"*");
+}
+
+pub struct PatternBinding { bool ok; usize next; usize end; usize start; usize field; usize name; u32 expected; }
+pub fn PatternBinding pattern_binding(ref scanner::Stream stream, usize index, bool named) {
+    var PatternBinding r = PatternBinding { .ok=false, .next=index, .end=scanner::token_info(stream,index).start, .start=scanner::token_info(stream,index).start, .field=index, .name=index, .expected=0 };
+    if (named) {
+        r.expected=14; if (!word(stream,r.next,b".")) { return r; }
+        r.end=scanner::token_info(stream,r.next).end; r.next=significant(stream,r.next+1);
+        r.field=r.next; r.expected=1;
+        if (scanner::token_info(stream,r.next).kind != 3) { return r; }
+        r.end=scanner::token_info(stream,r.next).end; r.next=significant(stream,r.next+1);
+        r.expected=9; if (!word(stream,r.next,b"=")) { return r; }
+        r.end=scanner::token_info(stream,r.next).end; r.next=significant(stream,r.next+1);
+    }
+    r.name=r.next; r.expected=1;
+    if (scanner::token_info(stream,r.next).kind != 3) { return r; }
+    r.end=scanner::token_info(stream,r.next).end; r.next=significant(stream,r.next+1);
+    r.ok=true; r.expected=0; return r;
+}
+
+pub fn bool inferred_binding(ref scanner::Stream stream, usize index) {
+    if (scanner::token_info(stream,index).kind != 3) { return false; }
+    var usize next = index + 1;
+    while (next < scanner::token_count(stream) && scanner::token_info(stream,next).kind == 2) { next += 1; }
+    return next < scanner::token_count(stream) && word(stream,next,b"=");
+}
+
 pub fn usize significant(ref scanner::Stream stream, usize start) {
     var usize index = start;
     while (scanner::token_info(stream,index).kind == 2 && index + 1 < scanner::token_count(stream)) { index += 1; }

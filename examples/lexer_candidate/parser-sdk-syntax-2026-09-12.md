@@ -491,6 +491,53 @@ runner infrastructure are unchanged. SDK/self-source, full compiler and release
 suites are omitted for this test-only increment; the child docs validator is
 unconfigured. No SDK execution or push is included.
 
+## Named payload switch patterns (2026-09-14)
+
+The candidate admits the normative named-field pattern production, preserving
+`.Pair { .left = first, .right = second }` as kind 32 with a reversed kind-33
+field tail. Kind 33 retains the field-name token, full field span and a kind-17
+binding; kind 32 retains the variant-name token and whole pattern span. Explicit
+empty braces remain distinct from the existing kind-16 payloadless/positional
+patterns. Ordered private accessors share record-field traversal. The integrity
+checker accepts either pattern category for cases, and enforces backward typed
+field/binding links. All new nodes use the existing shared expression budget.
+
+The switch probe covers empty and nonempty named patterns, trailing commas,
+duplicate field spelling, `_` bindings and coexistence with positional bindings.
+Go-derived comparisons cover full pattern/field/binding spans, exact names and
+field order. The former unsupported-pattern rejection was replaced with a real
+missing-binding error. Existing switch node/depth boundaries remain unchanged.
+
+The first values run failed in the new test's Go-tree shape assumption before
+native switch execution. Go stores a variant path first and binding names in
+field metadata, not binding child nodes. Correcting that oracle adapter preserved
+the intended assertions. `fairyc_go_test_parser_values` then passed in 39.254s
+in both Windows profiles, including switch, if and value-block regressions.
+Formatting passed.
+
+Initial self-source checks exhausted the unchanged candidate budget on `bodies.fy`.
+Moving only inferred-binding lookahead was insufficient; named-binding token
+reading and the unchanged atom/prefix predicates were then placed in the existing
+`parse_tokens` module. Token reading owns no syntax arena; `bodies` still charges
+and constructs every pattern node. No resource cap or required-source gate was
+relaxed. `fairyc_go_test_parser_surface` passed in 44.572s after that separation:
+all sixteen sources parse completely with exact Go declaration equality, alongside
+postfix, diagnostic and struct regressions. `bodies.fy` is 31725 bytes and
+`parse_tokens.fy` is 3909 bytes.
+
+On the final refactored source, `fairyc_go_test_parser_values` passed again in
+38.537s and `fairyc_go_test_parser_sdk_gate` passed in 6.832s, including all seven
+required SDK files and their inventory/outcome rejection controls. Native record
+and generic-call probes also passed during the earlier self-source failure runs;
+those combined runs are not recorded as wholly passing.
+
+Private pattern dispatch, token helpers, accessors, validation, the existing switch test,
+candidate documentation and exact parent delivery authority change. Grammar,
+fixture inputs, stable public API, DB, versions, hygiene and runner infrastructure
+are unchanged. Type checking, binding resolution and exhaustiveness remain out of
+scope. Full compiler/release suites are omitted for this private syntax increment;
+the child docs validator is unconfigured. No SDK execution or push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.

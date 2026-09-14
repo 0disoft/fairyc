@@ -386,7 +386,7 @@ pub fn usize array_element(ref Parsed parsed, usize id, usize index) {
 }
 pub fn usize type_count(ref Parsed parsed) { return v::len<types::Node>(ref parsed.types); }
 pub fn usize record_field_count(ref Parsed parsed, usize id) {
-    let Expression node = expression_at(parsed, id); assert(node.kind == 10);
+    let Expression node = expression_at(parsed, id); assert(node.kind == 10 || node.kind == 32);
     var usize link = node.right; var usize count = 0;
     while (link != 0) { count += 1; link = expression_at(parsed, link).right; }
     return count;
@@ -398,6 +398,12 @@ pub fn usize record_field(ref Parsed parsed, usize id, usize index) {
     return link;
 }
 pub fn types::Node type_at(ref Parsed parsed, usize id) { return *v::at<types::Node>(ref parsed.types,id - 1); }
+pub fn usize pattern_field_count(ref Parsed parsed, usize id) {
+    assert(expression_at(parsed,id).kind == 32); return record_field_count(parsed,id);
+}
+pub fn usize pattern_field(ref Parsed parsed, usize id, usize index) {
+    assert(expression_at(parsed,id).kind == 32); return record_field(parsed,id,index);
+}
 pub fn ref u8[] type_text(ref Parsed parsed, usize id) {
     let types::Node node = type_at(parsed,id);
     return scanner::source_view(ref parsed.source)[node.start..node.end];

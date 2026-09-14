@@ -43,7 +43,9 @@ pub fn bool valid_expression(ref syntax::Parsed p, syntax::Expression n, usize i
     if (n.kind == 14) { return stmt(p,n.left,statements,1) && (n.right == 0 || expr(p,n.right,id,12) || expr(p,n.right,id,13)); }
     if (n.kind == 15) { return expr(p,n.left,id,0) && optional_expr(p,n.right,id,19); }
     if (n.kind == 16) { return optional_expr(p,n.left,id,17) && n.right == 0; }
-    if (n.kind == 18) { return expr(p,n.left,id,16) && stmt(p,n.right,statements,1); }
+    if (n.kind == 18) { return (expr(p,n.left,id,16) || expr(p,n.left,id,32)) && stmt(p,n.right,statements,1); }
+    if (n.kind == 32) { return n.left == 0 && optional_expr(p,n.right,id,33); }
+    if (n.kind == 33) { return expr(p,n.left,id,17) && optional_expr(p,n.right,id,33); }
     if (n.kind == 19) { return expr(p,n.left,id,18) && optional_expr(p,n.right,id,19); }
     if (n.kind == 20) { return expr(p,n.left,id,2) && type_ref(p,n.right,type_limit,7); }
     if (n.kind == 23) { return expr(p,n.left,id,0) && type_ref(p,n.right,type_limit,0); }

@@ -312,8 +312,16 @@ in `left`; kind 17 retains an identifier or `_` spelling. Kind 18 is a case
 Variant names and binding names retain their own tokens; pattern, case and switch
 spans remain distinct. Empty and duplicate cases are syntax-only observations:
 exhaustiveness, reachability and payload/type validity are not checked.
-Record patterns, whole-value wildcards and multiple positional bindings remain
-unsupported. All pattern/case/link nodes use the same 4096-expression-node budget.
+Named record patterns such as `.Pair { .left = first, .right = second }` use
+kind 32, distinct from kind 16 even for explicit empty braces. Their `left` is
+zero and `right` is a reverse-linked kind-33 field tail. Each field retains its
+name token and full span, a kind-17 binding in `left`, and its predecessor in
+`right`. `pattern_field_count` and `pattern_field` expose field links in source
+order (sharing the record-field traversal). Name tokens retain exact spelling.
+Trailing commas, duplicate field names and `_` bindings are syntax-only; no
+binding resolution or exhaustiveness check is performed. Whole-value wildcards
+and multiple positional bindings remain unsupported. All pattern/case/link nodes
+use the same 4096-expression-node budget.
 Case bodies share block and expression depth limits with their enclosing tree.
 
 Contextual variant names such as `.ok`, `.err` and `.none` use kind 28, with no
