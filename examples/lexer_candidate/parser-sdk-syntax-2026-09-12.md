@@ -405,6 +405,38 @@ and exact parent delivery authority change. Full compiler/release suites are
 outside this private verifier increment; the child docs validator is unconfigured.
 No SDK execution or push is included.
 
+## Compound payload type compatibility (2026-09-14)
+
+The existing enum probe now compares a further member containing nested
+`Box<Pair<u8,i32>>`, a mutable reference to a slice of `Box<u8[4]>`, and grouped
+references combined with named-length arrays and slices. The shared Go oracle
+checks complete type-tree shapes, ordered generic arguments, field/member order,
+name spans, full spans and payload ownership metadata. Existing absent/empty
+payload and shared-arena boundary cases remain in the same probe.
+
+Four malformed payload types cover missing/extra generic closers, missing group
+closure and missing array closure. Go must reject each input. The candidate must
+discard the entire failed enum, including an earlier valid payload member and
+its attribute prefix, while retaining the following public enum with no leaked
+fields, types or attributes. This tests declaration recovery, not recovery of
+individual members inside a failed enum.
+
+The initial monolithic probe timed out at 180s during the first native profile.
+No related process remained after termination. Generated type assertions were
+split into per-field borrowed-result helpers and duplicate rejection assertions
+were factored into one helper, without removing checks or raising the timeout.
+The rerun of `fairyc_go_test_parser_enums` passed in 113.338s, including both native
+profiles, enum/field regressions, all seven SDK inputs and all sixteen self-source
+files. This resolves the bounded test delivery, not a compiler performance root
+cause diagnosis. Formatting passed. A command preflight also required synchronizing
+the exact edited parent authority hashes before the successful rerun.
+
+Only the existing enum test, this evidence page and exact parent delivery
+authority change. Parser and validator implementation, normative grammar,
+fixtures, stable public API, DB, versions, hygiene and runner infrastructure are
+unchanged. Full compiler/release suites are omitted for this test-only increment;
+the child docs validator is unconfigured. No SDK execution or push is included.
+
 ## Earlier validation and limits (2026-09-12)
 
 - `fairyc_go_test_parser_sdk` passed in both Windows MSVC profiles: final 51.582s.
