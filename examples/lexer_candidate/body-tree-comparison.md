@@ -6,7 +6,8 @@ adapter or decoder. Its first proof walks the complete body of one function with
 nested bindings, blocks, if/else-if, while, assignments, calls and returns,
 including explicitly written binding types, casts, specialized generic calls,
 field access, indexing, slicing, arrays, record construction, references,
-propagation, unsafe blocks, switch pattern decomposition and classic for loops.
+propagation, unsafe blocks, switch pattern decomposition, classic for loops and
+assert/defer/discard/burn statements.
 
 ## Encoding
 
@@ -40,6 +41,7 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 109 / 110 | Explicitly typed let / var binding: written type, initializer |
 | 111 | For loop: initializer, condition, post, body block; always four children |
 | 112 / 113 / 114 | Absent initializer / condition / post: no children, zero span |
+| 115 / 116 / 117 / 118 | Assert / defer / discard / burn statement: exactly one operand |
 | 200 / 201 | Literal / path: no children; spelling comes from the bound source span |
 | 202 / 203 | Group / prefix expression: operand |
 | 204 | Binary expression: left, right |
@@ -133,11 +135,17 @@ Header punctuation remains in the bound original source, but clause/header helpe
 nodes are not separately exported. Initializers are binding or assignment forms;
 posts are assignments, matching the candidate parser's existing restriction. The
 comparison does not implement execution order, loop scope or continue routing.
+Assert, defer, discard and burn retain separate tags and their complete statement
+spans, including written terminators. Each visits exactly one operand through the
+same expression walker and shared budget, without desugaring into calls or ordinary
+expression statements. Their syntax-only fixtures may intentionally lack semantic
+validity: this comparison proves no assertion outcome, delayed-call scheduling,
+must-use handling, ownership transfer or resource destruction.
 
 ## Failure and resource boundary
 
-Both writers reject unhandled nodes instead of skipping them. Assert,
-defer statements and the other not-yet-mapped export forms therefore do
+Both writers reject unhandled nodes instead of skipping them. Region statements
+and any other not-yet-mapped export forms therefore do
 not produce a successful partial comparison. This restriction belongs only to
 this first exporter, not to the parser's completed grammar support.
 
@@ -166,13 +174,13 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (15.577s).
-The bounded matrix contains forty-nine complete bodies per profile, including
+`fairyc_go_test_parser_body_tree` passes in both native profiles (17.112s).
+The bounded matrix contains fifty-six complete bodies per profile, including
 ordinary, typed and generic-call exact 256-record boundaries, nested type families,
 chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
-and depth 63 reached through binding, cast and specialization type trees. Forty
+and depth 63 reached through binding, cast and specialization type trees. Forty-nine
 rejection cases cover malformed bindings, casts, calls and returns, unsupported
-assert statements, an extra declaration, 257/259/261 records and depth 64 across
+region statements, an extra declaration, 257/259/261 records and depth 64 across
 those same three type-entry roles. Access cases additionally compare field/index/
 call chains, assignment targets, all four slice-bound presence combinations,
 explicit zero versus omission and comments around delimiters. Slice records also
@@ -197,7 +205,12 @@ header-presence combinations, inferred/typed declarations, assignment initialize
 compound posts, comments before the initial semicolon, nested for/while bodies and
 break/continue. Repeated empty loops pass at 256 records and reject 257; nested
 loop bodies pass at depth 63 and reject 64. Missing separators, declaration posts,
-malformed conditions and a missing loop body fail. Rejected native
+malformed conditions and a missing loop body fail. The four operand statements
+compare with comments/CRLF, generic calls, propagation, field access and nested
+loop/switch/unsafe bodies. Their mixed witness passes at 256 records and rejects
+257; each operand role passes at depth 63 and rejects 64, and each missing operand
+is rejected. The first new fixture used the reserved word `cleanup` as a callee;
+it was corrected to an ordinary identifier without changing grammar. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice

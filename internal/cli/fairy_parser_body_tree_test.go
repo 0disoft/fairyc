@@ -414,7 +414,7 @@ func referenceBodyTree(input string) (string, error) {
 			}
 			return block(loop.Body, d+1)
 		}
-		k := map[syntax.Kind]int{syntax.KindBinding: 101, syntax.KindReturn: 103, syntax.KindAssignment: 104, syntax.KindExprStmt: 105, syntax.KindWhile: 106, syntax.KindBreak: 107, syntax.KindContinue: 108}[s.Kind]
+		k := map[syntax.Kind]int{syntax.KindBinding: 101, syntax.KindReturn: 103, syntax.KindAssignment: 104, syntax.KindExprStmt: 105, syntax.KindWhile: 106, syntax.KindBreak: 107, syntax.KindContinue: 108, syntax.KindAssert: 115, syntax.KindDefer: 116, syntax.KindDiscard: 117, syntax.KindBurn: 118}[s.Kind]
 		if k == 0 || s.For != nil {
 			failure = fmt.Errorf("unhandled statement %s at %d", s.Kind, s.Span.StartByte)
 			return false
@@ -443,6 +443,9 @@ func referenceBodyTree(input string) (string, error) {
 			children = append(children, s.Expression)
 		}
 		n := len(children)
+		if k >= 115 && k <= 118 && n != 1 {
+			return false
+		}
 		if writtenType != nil {
 			n++
 		}
@@ -518,6 +521,13 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){for(var i32 i=0;i<2;i+=1){for(j=0;j<3;j-=1){if(flag){continue;}break;}}}",
 		"module main;fn void f(){" + strings.Repeat("for(;;){}", 51) + "}",
 		"module main;fn void f(){" + strings.Repeat("for(;;){", 30) + "ref x;" + strings.Repeat("}", 30) + "}",
+		"module main; /* 문장 */\r\nfn void f(){assert /* gap */ (a<b);defer /* gap */ release_handle(ref mut x);discard fetch<i32>()?.value;burn object.field;}",
+		"module main;fn void f(){for(var i=0;i<2;i+=1){assert(i>=0);defer release_handle(i);discard switch(x){case .Some(v):{v}case .None:{0}};unsafe{burn item;}continue;}}",
+		"module main;fn void f(){" + strings.Repeat("assert(x);defer x;discard x;burn x;", 31) + "assert(x);defer x;discard x;return;}",
+		"module main;fn void f(){assert(" + strings.Repeat("ref ", 61) + "x);}",
+		"module main;fn void f(){defer " + strings.Repeat("ref ", 61) + "x;}",
+		"module main;fn void f(){discard " + strings.Repeat("ref ", 61) + "x;}",
+		"module main;fn void f(){burn " + strings.Repeat("ref ", 61) + "x;}",
 	}
 	// All eight presence combinations retain the same four structural roles.
 	for mask := 0; mask < 8; mask++ {
@@ -579,7 +589,7 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		t.Logf("profile=%v complete canonical bodies=%d", profile, len(inputs))
 		for _, input := range []string{
 			"module main;fn void f(){let ref mut =1;}",
-			"module main;fn void f(){assert(true);}",
+			"module main;fn void f(){region r in source {}}",
 			"module main;fn void f(){return 1}",
 			"module main;fn void f(){" + strings.Repeat("x;", 128) + "}",
 			"module main;const i32 X=1;fn void f(){}",
@@ -618,6 +628,15 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){for(;;)}",
 			"module main;fn void f(){" + strings.Repeat("for(;;){}", 51) + "return;}",
 			"module main;fn void f(){" + strings.Repeat("for(;;){", 30) + "ref ref x;" + strings.Repeat("}", 30) + "}",
+			"module main;fn void f(){assert();}",
+			"module main;fn void f(){defer ;}",
+			"module main;fn void f(){discard ;}",
+			"module main;fn void f(){burn ;}",
+			"module main;fn void f(){" + strings.Repeat("assert(x);defer x;discard x;burn x;", 31) + "assert(x);defer x;discard x;burn x;}",
+			"module main;fn void f(){assert(" + strings.Repeat("ref ", 62) + "x);}",
+			"module main;fn void f(){defer " + strings.Repeat("ref ", 62) + "x;}",
+			"module main;fn void f(){discard " + strings.Repeat("ref ", 62) + "x;}",
+			"module main;fn void f(){burn " + strings.Repeat("ref ", 62) + "x;}",
 		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)

@@ -113,7 +113,10 @@ struct ExportBudget {usize nodes; bool emit;}
  else if(s.kind==4){kind=104;count=2;}else if(s.kind==6){kind=105;count=1;}
  else if(s.kind==8){kind=106;count=2;}else if(s.kind==9){kind=107;}else if(s.kind==10){kind=108;}
  else if(s.kind==14){kind=111;count=4;}
+ else if(s.kind==11){kind=115;count=1;}else if(s.kind==13){kind=116;count=1;}
+ else if(s.kind==12){kind=117;count=1;}else if(s.kind==16){kind=118;count=1;}
  else{return false;}
+ if(kind>=115 && kind<=118 && s.expression==0){return false;}
  if(!record(budget,depth,kind,s.start,s.end,count,name_start,name_end)){return false;}
  if(budget.emit){if(kind==104){let ref u8[] op=syntax::assignment_operator(p,id);number(op.len);var usize i=0;while(i<op.len){number(op[i] as usize);i+=1;}}else{number(0);}}
  if(kind==100){var usize i=0;while(i<syntax::block_statement_count(p,id)){if(!statement_tree(p,syntax::block_statement(p,id,i),budget,depth+1)){return false;}i+=1;}return s.expression==0 || expression_tree(p,s.expression,budget,depth+1);}
