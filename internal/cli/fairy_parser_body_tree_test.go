@@ -57,7 +57,11 @@ func referenceBodyTree(input string) (string, error) {
 	// Surface AST keeps the generic path spelling, but its precise path-only
 	// span belongs to the CST. Read that origin instead of reparsing Type.Text.
 	paths := map[[2]int]diagnostic.Span{}
+	fieldNames := map[[2]int]diagnostic.Span{}
 	for _, node := range r.Tree.Nodes {
+		if node.Kind == syntax.KindField {
+			fieldNames[[2]int{node.Span.StartByte, node.Span.EndByte}] = node.NameSpan
+		}
 		if node.Kind == syntax.KindType && node.Cooked == string(syntax.TypeFormNamed) && len(node.Children) != 0 {
 			if path, ok := r.Tree.Node(node.Children[0]); ok && path.Kind == syntax.KindPath {
 				paths[[2]int{node.Span.StartByte, node.Span.EndByte}] = path.Span
@@ -165,7 +169,7 @@ func referenceBodyTree(input string) (string, error) {
 		return b.Tail == nil || expr(b.Tail, d+1)
 	}
 	expr = func(e *ast.Expression, d int) bool {
-		if e == nil || (e.Type != nil && e.Kind != syntax.KindCast) || (len(e.TypeArguments) != 0 && e.Kind != syntax.KindSpecialize) {
+		if e == nil || (e.Type != nil && e.Kind != syntax.KindCast) || (len(e.TypeArguments) != 0 && e.Kind != syntax.KindSpecialize && e.Kind != syntax.KindRecord) {
 			return false
 		}
 		k := map[syntax.Kind]int{syntax.KindLiteral: 200, syntax.KindPath: 201, syntax.KindGroup: 202, syntax.KindPrefix: 203, syntax.KindBinary: 204, syntax.KindCall: 205, syntax.KindBlock: 206, syntax.KindIf: 207, syntax.KindCast: 208, syntax.KindSpecialize: 209, syntax.KindFieldExpr: 210, syntax.KindIndex: 211, syntax.KindSlice: 212}[e.Kind]
@@ -176,11 +180,30 @@ func referenceBodyTree(input string) (string, error) {
 				k = 214
 			}
 		}
+		if e.Kind == syntax.KindArray {
+			if e.Text == "empty" || e.Text == "list" {
+				k = 215
+			} else if e.Text == "repeat" {
+				k = 218
+			}
+		}
+		if e.Kind == syntax.KindRecord {
+			k = 216
+		}
+		if e.Kind == syntax.KindField {
+			k = 217
+		}
 		if k == 0 {
 			failure = fmt.Errorf("unhandled expression %s at %d", e.Kind, e.Span.StartByte)
 			return false
 		}
 		n := len(e.Children)
+		if k == 216 {
+			if n == 0 {
+				return false
+			}
+			n += len(e.TypeArguments)
+		}
 		if k == 208 {
 			if e.Type == nil || n != 1 {
 				return false
@@ -204,11 +227,34 @@ func referenceBodyTree(input string) (string, error) {
 		if k == 210 {
 			name = diagnostic.Span{StartByte: e.Span.EndByte - len(e.Text), EndByte: e.Span.EndByte}
 		}
+		if k == 217 {
+			var ok bool
+			name, ok = fieldNames[[2]int{e.Span.StartByte, e.Span.EndByte}]
+			if !ok || name.EndByte <= name.StartByte || n != 1 {
+				return false
+			}
+		}
 		if !record(k, e.Span, n, name, d, operator) {
 			return false
 		}
 		if k == 206 {
 			return block(e.Block, d+1)
+		}
+		if k == 216 {
+			if !expr(e.Children[0], d+1) {
+				return false
+			}
+			for i := range e.TypeArguments {
+				if !typeTree(&e.TypeArguments[i], d+1) {
+					return false
+				}
+			}
+			for _, field := range e.Children[1:] {
+				if field.Kind != syntax.KindField || !expr(field, d+1) {
+					return false
+				}
+			}
+			return true
 		}
 		for i, c := range e.Children {
 			if k == 207 && i > 0 && c.Kind == syntax.KindBlock {
@@ -312,6 +358,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){" + strings.Repeat("a[..];", 51) + "}",
 		"module main;fn void f(){a" + strings.Repeat("[..]", 61) + ";}",
 		"module main;fn void f(){a" + strings.Repeat(".field", 61) + ";}",
+		"module main;fn void f(){[];[1];[first(),2,third(),];[[1,2],[]];[value;0];[value;cfg::N];}",
+		"module main; /* 생성 */\r\nfn void f(){Empty{};let x=Pair{.z=3,.a=[1,2],};return .Pair{.right=call(x),.left=0};}",
+		"module main;fn void f(){return pkg::Box<Pair<u8,i32>,ref T>{. /* name */ z=Inner{.value=[1;2]},.a=2,.z=3};}",
+		"module main;fn void f(){[" + strings.Repeat("1,", 253) + "];}",
+		"module main;fn void f(){" + strings.Repeat("R{.x=1};", 51) + "}",
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
@@ -320,7 +371,12 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		writeTestSource(t, root, "src/"+name, string(data))
+		text := string(data)
+		if name == "syntax.fy" {
+			// Test-only origin access: do not expose Parsed.source or change the shipped API.
+			text += "\npub fn scanner::TokenInfo comparison_token(ref Parsed p,usize index){return scanner::token_info(ref p.source,index);}\n"
+		}
+		writeTestSource(t, root, "src/"+name, text)
 	}
 	program := parserCorpusProgram
 	a := strings.Index(program, "@effects(console) fn i32 report(")
@@ -354,7 +410,7 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		}
 		for _, input := range []string{
 			"module main;fn void f(){let ref mut =1;}",
-			"module main;fn void f(){return [1];}",
+			"module main;fn void f(){return x?;}",
 			"module main;fn void f(){return 1}",
 			"module main;fn void f(){" + strings.Repeat("x;", 128) + "}",
 			"module main;const i32 X=1;fn void f(){}",
@@ -371,6 +427,10 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){" + strings.Repeat("a[..];", 52) + "}",
 			"module main;fn void f(){a" + strings.Repeat("[..]", 62) + ";}",
 			"module main;fn void f(){a" + strings.Repeat(".field", 62) + ";}",
+			"module main;fn void f(){[1,,2];}",
+			"module main;fn void f(){R{.x=};}",
+			"module main;fn void f(){[" + strings.Repeat("1,", 254) + "];}",
+			"module main;fn void f(){" + strings.Repeat("R{.x=1};", 52) + "}",
 		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)
