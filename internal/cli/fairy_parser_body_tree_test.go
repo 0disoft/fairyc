@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/syntax"
 	"github.com/0disoft/fairyc/internal/target"
@@ -58,9 +59,28 @@ func referenceBodyTree(input string) (string, error) {
 	// span belongs to the CST. Read that origin instead of reparsing Type.Text.
 	paths := map[[2]int]diagnostic.Span{}
 	fieldNames := map[[2]int]diagnostic.Span{}
+	patternKinds := map[[2]int]int{}
 	for _, node := range r.Tree.Nodes {
 		if node.Kind == syntax.KindField {
 			fieldNames[[2]int{node.Span.StartByte, node.Span.EndByte}] = node.NameSpan
+			if node.NameSpan.EndByte == node.NameSpan.StartByte {
+				for _, token := range r.Tree.Tokens[node.TokenStart:node.TokenEnd] {
+					if token.Kind == lexer.Identifier {
+						fieldNames[[2]int{node.Span.StartByte, node.Span.EndByte}] = token.Span
+						break
+					}
+				}
+			}
+		}
+		if node.Kind == syntax.KindPattern && node.Text != "arm" && node.TokenEnd > node.TokenStart {
+			kind := 225
+			switch r.Tree.Tokens[node.TokenEnd-1].Text(r.Tree.Source) {
+			case ")":
+				kind = 226
+			case "}":
+				kind = 227
+			}
+			patternKinds[[2]int{node.Span.StartByte, node.Span.EndByte}] = kind
 		}
 		if node.Kind == syntax.KindType && node.Cooked == string(syntax.TypeFormNamed) && len(node.Children) != 0 {
 			if path, ok := r.Tree.Node(node.Children[0]); ok && path.Kind == syntax.KindPath {
@@ -150,6 +170,42 @@ func referenceBodyTree(input string) (string, error) {
 		}
 		return true
 	}
+	patternTree := func(p *ast.Expression, d int) bool {
+		if p == nil || p.Kind != syntax.KindPattern || len(p.Children) == 0 {
+			return false
+		}
+		kind := patternKinds[[2]int{p.Span.StartByte, p.Span.EndByte}]
+		if kind == 0 || (kind == 225 && len(p.Children) != 1) || (kind == 226 && len(p.Children) != 2) {
+			return false
+		}
+		if !record(kind, p.Span, len(p.Children), diagnostic.Span{}, d, "") {
+			return false
+		}
+		variant := p.Children[0]
+		if variant.Kind != syntax.KindPath || !record(201, variant.Span, 0, diagnostic.Span{}, d+1, "") {
+			return false
+		}
+		for _, child := range p.Children[1:] {
+			if kind == 226 {
+				if child.Kind != syntax.KindPath || !record(229, child.Span, 0, diagnostic.Span{}, d+1, "") {
+					return false
+				}
+			} else {
+				name, ok := fieldNames[[2]int{child.Span.StartByte, child.Span.EndByte}]
+				if child.Kind != syntax.KindField || !ok || name.EndByte <= name.StartByte || child.Cooked == "" || len(child.Children) != 0 {
+					return false
+				}
+				if !record(228, child.Span, 1, name, d+1, "") {
+					return false
+				}
+				binding := diagnostic.Span{StartByte: child.Span.EndByte - len(child.Cooked), EndByte: child.Span.EndByte}
+				if !record(229, binding, 0, diagnostic.Span{}, d+2, "") {
+					return false
+				}
+			}
+		}
+		return true
+	}
 	block = func(b *ast.Block, d int) bool {
 		if b == nil {
 			return false
@@ -204,6 +260,9 @@ func referenceBodyTree(input string) (string, error) {
 		}
 		if e.Kind == syntax.KindUnsafe {
 			k = 222
+		}
+		if e.Kind == syntax.KindSwitch {
+			k = 223
 		}
 		if k == 0 {
 			failure = fmt.Errorf("unhandled expression %s at %d", e.Kind, e.Span.StartByte)
@@ -260,6 +319,20 @@ func referenceBodyTree(input string) (string, error) {
 				return false
 			}
 			return block(e.Children[0].Block, d+1)
+		}
+		if k == 223 {
+			if n == 0 || !expr(e.Children[0], d+1) {
+				return false
+			}
+			for _, arm := range e.Children[1:] {
+				if arm.Kind != syntax.KindPattern || arm.Text != "arm" || len(arm.Children) != 2 || arm.Children[1].Kind != syntax.KindBlock {
+					return false
+				}
+				if !record(224, arm.Span, 2, diagnostic.Span{}, d+1, "") || !patternTree(arm.Children[0], d+2) || !block(arm.Children[1].Block, d+2) {
+					return false
+				}
+			}
+			return true
 		}
 		if k == 216 {
 			if !expr(e.Children[0], d+1) {
@@ -391,6 +464,12 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){" + strings.Repeat("ref ", 61) + "x;}",
 		"module main;fn void f(){x" + strings.Repeat("?", 61) + ";}",
 		"module main;fn void f(){return " + strings.Repeat("unsafe{", 30) + "x?" + strings.Repeat("}", 30) + ";}",
+		"module main;fn void f(){return switch(value){case .None:{}case .Some(value):{value}case .Some(_):{0}};}",
+		"module main; /* 패턴 */\r\nfn void f(){return switch(value){case .Pair{. /* field */ right = b,.left=_,.right=c,}:{call(b,c)}case .Empty{}:{}case .Empty:{}};}",
+		"module main;fn void f(){let v=.Pair{.left=1,.right=2};return switch(v){case .Pair{.right=y,.left=x}:{switch(x){case .Some(z):{unsafe{z?}}}}};}",
+		"module main;fn void f(){return switch(x){};}",
+		"module main;fn void f(){return switch(x){" + strings.Repeat("case .N:{}", 63) + "};}",
+		"module main;fn void f(){return " + strings.Repeat("switch(x){case .N:{", 20) + "x?" + strings.Repeat("}}", 20) + ";}",
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
@@ -466,6 +545,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){" + strings.Repeat("ref ", 62) + "x;}",
 			"module main;fn void f(){x" + strings.Repeat("?", 62) + ";}",
 			"module main;fn void f(){return " + strings.Repeat("unsafe{", 30) + "ref x?" + strings.Repeat("}", 30) + ";}",
+			"module main;fn void f(){return switch(x){case .Some():{}};}",
+			"module main;fn void f(){return switch(x){case .Pair{.left=}:{}};}",
+			"module main;fn void f(){return switch(x){case .None {}};}",
+			"module main;fn void f(){return switch(x){" + strings.Repeat("case .N:{}", 62) + "case .N:{0}};}",
+			"module main;fn void f(){return " + strings.Repeat("switch(x){case .N:{", 20) + "ref x?" + strings.Repeat("}}", 20) + ";}",
 		} {
 			if text, err := referenceBodyTree(input); err == nil || text != "" {
 				t.Fatalf("reference accepted unsupported/invalid/budget input %q", input)

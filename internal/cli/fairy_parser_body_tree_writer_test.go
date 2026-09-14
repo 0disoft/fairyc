@@ -26,6 +26,23 @@ struct ExportBudget {usize nodes; bool emit;}
  if(kind==315){var usize i=0;while(i+1<count){var usize link=t.right;var usize skip=count-2-i;while(skip>0){link=syntax::type_at(p,link).right;skip-=1;}if(!type_tree(p,syntax::type_at(p,link).left,budget,depth+1)){return false;}i+=1;}}
  return true;
 }
+@effects(console) fn bool pattern_tree(ref syntax::Parsed p,usize id,ref mut ExportBudget budget,usize depth){
+ if(id==0){return false;}let pattern=syntax::expression_at(p,id);
+ var usize kind=225;var usize count=1;
+ if(pattern.kind==32){kind=227;count+=syntax::pattern_field_count(p,id);}
+ else if(pattern.kind==16){if(pattern.left!=0){kind=226;count=2;}}else{return false;}
+ if(!record(budget,depth,kind,pattern.start,pattern.end,count,0,0)){return false;}if(budget.emit){number(0);}
+ let variant=syntax::comparison_token(p,pattern.token);
+ if(!record(budget,depth+1,201,pattern.start,variant.end,0,0,0)){return false;}if(budget.emit){number(0);}
+ if(kind==226){let binding=syntax::expression_at(p,pattern.left);if(!record(budget,depth+1,229,binding.start,binding.end,0,0,0)){return false;}if(budget.emit){number(0);}}
+ if(kind==227){var usize i=0;while(i+1<count){
+  let field=syntax::expression_at(p,syntax::pattern_field(p,id,i));let name=syntax::comparison_token(p,field.token);
+  if(!record(budget,depth+1,228,field.start,field.end,1,name.start,name.end)){return false;}if(budget.emit){number(0);}
+  let binding=syntax::expression_at(p,field.left);
+  if(!record(budget,depth+2,229,binding.start,binding.end,0,0,0)){return false;}if(budget.emit){number(0);}
+  i+=1;
+ }}return true;
+}
 @effects(console) fn bool expression_tree(ref syntax::Parsed p,usize id,ref mut ExportBudget budget,usize depth){
  if(id==0){return false;}let e=syntax::expression_at(p,id);
  var usize kind=0;var usize count=0;
@@ -39,6 +56,7 @@ struct ExportBudget {usize nodes; bool emit;}
  else if(e.kind==29){kind=218;count=2;}
  else if(e.kind==21){kind=219;count=1;}else if(e.kind==22){kind=220;count=1;}
  else if(e.kind==30){kind=221;count=1;}else if(e.kind==31){kind=222;count=1;}
+ else if(e.kind==15){kind=223;count=syntax::switch_case_count(p,id);count+=1;}
  else if(e.kind==10){kind=216;count=syntax::record_field_count(p,id);count+=1;let target=syntax::expression_at(p,e.left);if(target.kind==20){count+=syntax::specialization_argument_count(p,e.left);}}
  else{return false;}
  var usize name_start=0;var usize name_end=0;
@@ -61,6 +79,11 @@ struct ExportBudget {usize nodes; bool emit;}
   }return true;
  }
  if(!expression_tree(p,e.left,budget,depth+1)){return false;}
+ if(kind==223){var usize i=0;while(i+1<count){
+  let arm=syntax::expression_at(p,syntax::switch_case(p,id,i));
+  if(!record(budget,depth+1,224,arm.start,arm.end,2,0,0)){return false;}if(budget.emit){number(0);}
+  if(!pattern_tree(p,arm.left,budget,depth+2) || !statement_tree(p,arm.right,budget,depth+2)){return false;}i+=1;
+ }return true;}
  if(kind==204){return expression_tree(p,e.right,budget,depth+1);}
  if(kind==211){return expression_tree(p,e.right,budget,depth+1);}
  if(kind==218){return expression_tree(p,e.right,budget,depth+1);}

@@ -6,7 +6,7 @@ adapter or decoder. Its first proof walks the complete body of one function with
 nested bindings, blocks, if/else-if, while, assignments, calls and returns,
 including explicitly written binding types, casts, specialized generic calls,
 field access, indexing, slicing, arrays, record construction, references,
-propagation and unsafe blocks.
+propagation, unsafe blocks and switch pattern decomposition.
 
 ## Encoding
 
@@ -22,7 +22,7 @@ The remaining stream is a preorder tree. Each record has the following fields:
 `kind start_byte end_byte child_count name_start_byte name_end_byte operator_size operator_byte...`
 
 Spans are original half-open byte ranges. Name spans are present on bindings,
-field access and record fields;
+field access, record fields and named pattern fields;
 other records use zero. Prefix, binary and assignment operators carry their actual
 operator bytes, independently of the source-span envelope; other nodes use length
 zero. Child counts and preorder determine all structural edges;
@@ -57,6 +57,11 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 219 / 220 | Immutable / mutable reference expression: operand |
 | 221 | Propagation: operand |
 | 222 | Unsafe expression: body block |
+| 223 | Switch: subject, then case arms in source order |
+| 224 | Case arm: pattern, body block |
+| 225 / 226 / 227 | Unit / positional / named-field pattern: variant path, then bindings or fields |
+| 228 | Named pattern field: binding; exact field-name span is present |
+| 229 | Pattern binding (including `_`): no children; spelling from its own span |
 | 301 | Named type path: no children |
 | 302 / 303 | Reference / mutable reference type: element |
 | 304 / 305 | Slice / grouped type: element |
@@ -67,7 +72,7 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 | 315 | C function type: result, then parameters in source order |
 
 Go's block-expression wrapper is omitted specifically for if branches, while
-bodies and unsafe bodies, where the common format has an explicit block child. The candidate's
+bodies, unsafe bodies and case bodies, where the common format has an explicit block child. The candidate's
 branch-pair helper is likewise omitted. A standalone block expression retains tag
 206. Go's operandless break/continue self-expression placeholders are not separate
 children; the jump statement itself remains visible. Statement wrappers, grouping,
@@ -106,11 +111,20 @@ chains. Unsafe remains distinct from a normal block even when empty or nested.
 All three forms charge the same record/depth budget as their operands and blocks.
 No borrow validity, error propagation semantics or unsafe-operation permission is
 checked or granted by this syntax-only comparison.
+Switch subjects, case order and bodies remain explicit; reverse case-link nodes
+are omitted. Patterns are not record constructions: the variant path and each
+binding have separate spans, and named fields retain their written order, including
+duplicates. Go's pattern AST omits the empty named-field delimiter distinction,
+so its owning CST closing token distinguishes `.N {}` (227) from `.N` (225).
+Pattern field-name origins likewise come from CST-owned identifier tokens rather
+than reparsing source text; binding spans retain the exact terminal spelling.
+The candidate uses existing pattern tags and token origins. No exhaustiveness,
+duplicate-case, duplicate-binding, type, scope or execution validity is claimed.
 
 ## Failure and resource boundary
 
 Both writers reject unhandled nodes instead of skipping them. For loops,
-switch expressions and the other not-yet-mapped export forms therefore do
+defer statements and the other not-yet-mapped export forms therefore do
 not produce a successful partial comparison. This restriction belongs only to
 this first exporter, not to the parser's completed grammar support.
 
@@ -139,11 +153,11 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (12.823s).
-The bounded matrix contains thirty-one complete bodies per profile, including
+`fairyc_go_test_parser_body_tree` passes in both native profiles (16.353s).
+The bounded matrix contains thirty-seven complete bodies per profile, including
 ordinary, typed and generic-call exact 256-record boundaries, nested type families,
 chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
-and depth 63 reached through binding, cast and specialization type trees. Twenty-nine
+and depth 63 reached through binding, cast and specialization type trees. Thirty-four
 rejection cases cover malformed bindings, casts, calls and returns, unsupported
 for loops, an extra declaration, 257/259/261 records and depth 64 across
 those same three type-entry roles. Access cases additionally compare field/index/
@@ -160,7 +174,12 @@ propagation/access composition, empty and nested unsafe blocks, comments and CRL
 also compare exactly. A combined unsafe/reference/propagation witness passes at
 256 records and rejects 257; reference chains, propagation chains and nested unsafe
 bodies pass at depth 63 and reject depth 64. Missing reference operands, prefix
-`?` and unsafe without a block fail. Rejected native
+`?` and unsafe without a block fail. Switch cases cover all three pattern forms,
+empty named versus unit patterns, wildcard and duplicate named fields, trivia/CRLF,
+empty switch, construction-to-decomposition and nested case bodies. A 63-arm
+witness passes at 256 records; adding one body node rejects 257. Nested switch
+bodies pass at depth 63 and reject 64. Empty positional bindings, missing named
+bindings and a missing case colon are rejected. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice
