@@ -247,7 +247,7 @@ hit the existing parser recursion limit before the exporter depth limit, so slic
 suffixes isolate that exporter boundary. Formatting and the scoped
 Mustflow contract are checked separately; no full compiler/release suite is needed
 for test-only writers. No stable compiler, grammar, ABI, SDK, package format or
-default CLI path changes. Function mode has 37 positive and 39 rejection
+default CLI path changes. Function mode has 39 positive and 43 rejection
 witnesses per profile, including empty/trailing-comma parameter lists, nested and
 C-function types, non-alphabetical and duplicate names, trivia/CRLF and malformed
 headers. Header and body share the same 256-record/depth-below-64 budget. Combined
@@ -308,3 +308,7 @@ byte/C strings and call arguments reject without partial output. This does not
 add string decoding, attribute semantics, default compiler integration or a public
 AST format. An initial test-driver tag arithmetic type error was corrected using
 a usize accumulator; no parser change was required.
+
+The [function closure audit](function-tree-integration.md) maps header roles and
+intentional field exclusions, adds combined-function and selection witnesses, and
+defines conditions before any private adapter or default frontend integration.

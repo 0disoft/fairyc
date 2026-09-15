@@ -66,6 +66,18 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		genericParams = append(genericParams, fmt.Sprintf("T%d", i))
 	}
 	inputs = append(inputs, "module main;fn void f<"+strings.Join(genericParams, ",")+">(){}") // 256
+	inputs = append(inputs,
+		`module main;
+@note(pkg::value,7,"a\n") @effects(console)
+pub unsafe fn Pair<T,U> Owner::make<T,U>(ref mut T value,U extra,){
+ let Pair<T,U> pair=Pair<T,U>{.right=extra,.left=value};
+ var i32 n=0;
+ for(var i=0;i<2;i+=1){if(flag){continue;}else{assert(n>=0);}n+=1;}
+ region r in pools[n].view(){defer release_handle(r);discard fetch<T>()?.items[..n];}
+ return switch(pair){case .Pair{.right=y,.left=x}:{unsafe{[ref x,ref mut y];x as T}}};
+}`,
+		"module main;\r\n/// 함수 문서: pub unsafe fn\r\n@note() fn unsafe extern C fn void() callback(){return value;}",
+	)
 	rejected := []string{
 		"module main;pub pub fn void f(){}",
 		"module main;unsafe unsafe fn void f(){}",
@@ -106,6 +118,10 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		"module main;fn void f(i32" + strings.Repeat("[]", 62) + " p){}",
 		"module main;fn void f(){x" + strings.Repeat("?", 61) + ";}",
 		"module main;fn void f(" + strings.Join(params, ",") + "){x;}", // 257 across header and body
+		"module main;import lib as lib;fn void f(){}",
+		"module main;fn void f(){}fn void g(){}",
+		"module main;unsafe extern C fn void raw();fn void f(){}",
+		strings.Repeat(" ", 32769) + "module main;fn void f(){}",
 	}
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)

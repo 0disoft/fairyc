@@ -102,7 +102,7 @@ Remaining **verification gaps**, not newly discovered implementation defects:
   health, hosted CI, public frontend replacement or release readiness.
 
 Basic function-header structural comparison now has a separate native subtest:
-37 positive functions and 39 rejection cases per low/optimized profile. These cover
+39 positive functions and 43 rejection cases per low/optimized profile. These cover
 shared header/body record and depth boundaries without changing the earlier
 body-only witnesses, all eight pub/unsafe/owner presence combinations, and generic
 declaration and attribute/argument order/origins with 256/257-record boundaries.
@@ -111,3 +111,8 @@ CST declaration prefix and must agree with the lowered AST flags, not a keyword
 scan through result types. A separate semantic regression checks unsafe call
 boundaries while preserving unsupported C function value types. General semantic
 integration remains a separate design step.
+
+The [function closure audit and integration conditions](function-tree-integration.md)
+extend this body-family inventory through every ordinary-function header role.
+They record deliberate AST-field exclusions, new composition/selection witnesses
+and a proposed private scalar-adapter boundary, without promoting the frontend.
