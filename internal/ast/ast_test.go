@@ -381,6 +381,9 @@ func TestLowerPreservesNestedTypeStructure(t *testing.T) {
 		t.Fatalf("functions = %+v", module.Functions)
 	}
 	parameter := module.Functions[0].Parameters[0].Type
+	if module.Functions[0].Unsafe {
+		t.Fatal("unsafe in the result type must not mark the function unsafe")
+	}
 	if parameter.Kind != TypeKindNamed || parameter.Path != "Result" || len(parameter.Arguments) != 2 {
 		t.Fatalf("parameter type = %+v", parameter)
 	}

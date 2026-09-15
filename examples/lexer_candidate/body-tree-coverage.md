@@ -106,5 +106,7 @@ Basic function-header structural comparison now has a separate native subtest:
 shared header/body record and depth boundaries without changing the earlier
 body-only witnesses, and all eight pub/unsafe/owner presence combinations. Generic
 parameter and attribute comparison remains excluded. Modifier origins use the Go
-CST declaration prefix, not a keyword scan through result types; semantic modifier
-handling is not verified. Semantic integration remains a separate design step.
+CST declaration prefix and must agree with the lowered AST flags, not a keyword
+scan through result types. A separate semantic regression checks unsafe call
+boundaries while preserving unsupported C function value types. General semantic
+integration remains a separate design step.

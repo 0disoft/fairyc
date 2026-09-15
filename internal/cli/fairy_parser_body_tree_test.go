@@ -47,7 +47,7 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 			return "", fmt.Errorf("expected ordinary function")
 		}
 		// Modifier origins belong to the declaration prefix, not its result type.
-		// The AST's keyword-before-name scan can include an unsafe C function type.
+		// Keep the independently read origins consistent with the lowered flags.
 		for _, token := range r.Tree.Tokens[decl.TokenStart:decl.TokenEnd] {
 			if token.Kind != lexer.Keyword {
 				continue
@@ -62,6 +62,9 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 			if word == "unsafe" {
 				unsafeSpan = token.Span
 			}
+		}
+		if fn.Public != (publicSpan.EndByte > publicSpan.StartByte) || fn.Unsafe != (unsafeSpan.EndByte > unsafeSpan.StartByte) {
+			return "", fmt.Errorf("function modifier flags disagree with declaration origins")
 		}
 	}
 	var out strings.Builder

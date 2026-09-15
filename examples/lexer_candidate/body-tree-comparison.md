@@ -262,8 +262,12 @@ comments containing decoy keywords, CRLF and non-ASCII trivia. Decorated functio
 pass at 256 records/depth 63 and reject at 257/depth 64. Duplicate or reordered
 modifiers and missing/multiply-qualified owner names fail without output.
 Modifier spans come from the candidate declaration fields and the Go CST tokens
-before the declaration's first `fn`. The Go surface AST keyword-before-name scan
-can include `unsafe` in a C function result type, so it is not the origin authority
-for this syntax-only comparison. Separate result-type witnesses prevent confusing
-that keyword or an unsafe body with a declaration modifier. This normalization
-does not change or validate semantic modifier handling.
+before the declaration's first `fn`. Go AST lowering likewise restricts modifier
+flags to this prefix, skipping attributes. The comparison checks that the lowered
+flags agree with the independently read origins. Separate result-type witnesses
+prevent confusing that keyword or an unsafe body with a declaration modifier.
+An AST regression reproduced the former keyword-before-name scan incorrectly
+setting Unsafe for a C function result type. Separate semantic tests preserve the
+existing unsupported C function value types while requiring E5101 for an unguarded
+foreign call and no such diagnostic inside explicit unsafe boundaries. This does
+not admit C function values to semantic analysis or native execution.

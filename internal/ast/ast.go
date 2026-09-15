@@ -554,10 +554,11 @@ func lowerImport(tree *syntax.Tree, node syntax.Node) Import {
 }
 
 func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
+	public, unsafe := functionModifiers(tree, node)
 	value := Function{
 		Name:              node.Text,
-		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Unsafe:            containsKeywordBeforeName(tree, node, "unsafe", node.Text),
+		Public:            public,
+		Unsafe:            unsafe,
 		Span:              node.Span,
 		NameSpan:          findIdentifierSpan(tree, node, node.Text, "fn"),
 		DocumentationSpan: node.DocumentationSpan,
