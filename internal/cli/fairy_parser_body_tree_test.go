@@ -37,8 +37,32 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		return "", fmt.Errorf("expected module and one function only")
 	}
 	fn := r.AST.Functions[0]
-	if header && (fn.Owner != "" || len(fn.TypeParameters) != 0 || fn.Public || fn.Unsafe || len(fn.Attributes) != 0) {
+	if header && (len(fn.TypeParameters) != 0 || len(fn.Attributes) != 0) {
 		return "", fmt.Errorf("unsupported function header")
+	}
+	var publicSpan, unsafeSpan diagnostic.Span
+	if header {
+		decl, found := r.Tree.Node(root.Children[1])
+		if !found || decl.Kind != syntax.KindFunction {
+			return "", fmt.Errorf("expected ordinary function")
+		}
+		// Modifier origins belong to the declaration prefix, not its result type.
+		// The AST's keyword-before-name scan can include an unsafe C function type.
+		for _, token := range r.Tree.Tokens[decl.TokenStart:decl.TokenEnd] {
+			if token.Kind != lexer.Keyword {
+				continue
+			}
+			word := token.Text(r.Tree.Source)
+			if word == "fn" {
+				break
+			}
+			if word == "pub" {
+				publicSpan = token.Span
+			}
+			if word == "unsafe" {
+				unsafeSpan = token.Span
+			}
+		}
 	}
 	var out strings.Builder
 	fmt.Fprintf(&out, "1 %d ", len(input))
@@ -496,7 +520,22 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 	bodyDepth := 0
 	if header {
 		bodyDepth = 1
-		if !record(90, fn.Span, len(fn.Parameters)+2, fn.NameSpan, 0, "") || !typeTree(&fn.ResultType, 1) {
+		headerSpans := []diagnostic.Span{publicSpan, unsafeSpan, fn.OwnerSpan}
+		children := len(fn.Parameters) + 2
+		for _, span := range headerSpans {
+			if span.EndByte > span.StartByte {
+				children++
+			}
+		}
+		if !record(90, fn.Span, children, fn.NameSpan, 0, "") {
+			return "", failure
+		}
+		for i, span := range headerSpans {
+			if span.EndByte > span.StartByte && !record(92+i, span, 0, diagnostic.Span{}, 1, "") {
+				return "", failure
+			}
+		}
+		if !typeTree(&fn.ResultType, 1) {
 			return "", fmt.Errorf("function result export: %v", failure)
 		}
 		for _, p := range fn.Parameters {

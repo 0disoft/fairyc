@@ -10,9 +10,9 @@ propagation, unsafe blocks, switch pattern decomposition, classic for loops and
 assert/defer/discard/burn statements and region statements.
 
 A separate function-tree mode wraps that body with a basic ordinary function
-header: function/name spans, result type, and parameter/name spans with types in
-source order. It rejects owner-qualified names, generic parameter declarations,
-`pub`, `unsafe`, and attributes before emitting anything. These forms remain
+header: function/name spans, owner, `pub`/`unsafe` modifiers, result type, and
+parameter/name spans with types in source order. It rejects generic parameter
+declarations and attributes before emitting anything. These forms remain
 accepted by the parser and by the unchanged body-only comparison where applicable.
 Documentation trivia remains bound raw source, not a documentation AST export.
 
@@ -38,8 +38,9 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 
 | Tags | Meaning and child order |
 | --- | --- |
-| 90 | Basic function: result type, ordered parameters, body block; function-name span |
+| 90 | Function: optional pub, optional unsafe, optional owner, result type, ordered parameters, body block; function-name span |
 | 91 | Parameter: written type; parameter-name span |
+| 92 / 93 / 94 | Present pub / unsafe / owner leaf: exact keyword or owner span, no children and zero name span |
 | 100 | Block: statements in source order, followed by an optional tail expression |
 | 101 / 102 | Inferred let / var binding: initializer |
 | 103 | Return: optional operand |
@@ -242,7 +243,7 @@ hit the existing parser recursion limit before the exporter depth limit, so slic
 suffixes isolate that exporter boundary. Formatting and the scoped
 Mustflow contract are checked separately; no full compiler/release suite is needed
 for test-only writers. No stable compiler, grammar, ABI, SDK, package format or
-default CLI path changes. Function mode adds nine positive and fifteen rejection
+default CLI path changes. Function mode has 21 positive and 19 rejection
 witnesses per profile, including empty/trailing-comma parameter lists, nested and
 C-function types, non-alphabetical and duplicate names, trivia/CRLF and malformed
 headers. Header and body share the same 256-record/depth-below-64 budget. Combined
@@ -252,3 +253,17 @@ declaration's entry range are emitted as parameters; body bindings/returns are
 visited through the body. Both preflight and emission traverse the entire function.
 The original 112-body/57-rejection mode and its boundary witnesses remain unchanged.
 Neither mode is a public API or a semantic adapter.
+
+Function modifier/owner leaves are omitted when absent (no placeholder); their
+fixed role order precedes the result type, rather than following lexical order.
+They consume the same record budget as parameters and body. All eight presence
+combinations are checked, including identical owner/result/function spellings,
+comments containing decoy keywords, CRLF and non-ASCII trivia. Decorated functions
+pass at 256 records/depth 63 and reject at 257/depth 64. Duplicate or reordered
+modifiers and missing/multiply-qualified owner names fail without output.
+Modifier spans come from the candidate declaration fields and the Go CST tokens
+before the declaration's first `fn`. The Go surface AST keyword-before-name scan
+can include `unsafe` in a C function result type, so it is not the origin authority
+for this syntax-only comparison. Separate result-type witnesses prevent confusing
+that keyword or an unsafe body with a declaration modifier. This normalization
+does not change or validate semantic modifier handling.

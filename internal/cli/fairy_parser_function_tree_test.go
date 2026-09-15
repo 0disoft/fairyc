@@ -22,6 +22,24 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		"module main;fn i32" + strings.Repeat("[]", 62) + " f(){}",          // deepest result node: 63
 		"module main;fn void f(i32" + strings.Repeat("[]", 61) + " p){}",    // deepest parameter node: 63
 		"module main;fn void f(){x" + strings.Repeat("?", 60) + ";}",        // body shares root depth
+		"module main;fn unsafe extern C fn void() callback(){return value;}",
+		"module main;pub unsafe fn unsafe extern C fn void() Owner::callback(){return value;}",
+		"module main;pub unsafe fn void Owner::f(){" + strings.Repeat("x;", 125) + "}", // 256 with three header leaves
+		"module main;pub unsafe fn i32" + strings.Repeat("[]", 62) + " Owner::f(){}",
+	}
+	// All modifier/owner presence combinations, with trivia that contains decoys.
+	for mask := 0; mask < 8; mask++ {
+		prefix, owner := "", ""
+		if mask&1 != 0 {
+			prefix += "pub /* unsafe fn */ "
+		}
+		if mask&2 != 0 {
+			prefix += "unsafe /* pub fn */ "
+		}
+		if mask&4 != 0 {
+			owner = "Thing /* owner */ :: "
+		}
+		inputs = append(inputs, "module main; /* 한글 */\r\n"+prefix+"fn Thing "+owner+"Thing(ref mut Thing value,){return unsafe{value};}")
 	}
 	var params []string
 	for i := 0; i < 126; i++ {
@@ -29,9 +47,13 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 	}
 	inputs = append(inputs, "module main;fn void f("+strings.Join(params, ",")+"){return;}") // 256
 	rejected := []string{
-		"module main;pub fn void f(){}",
-		"module main;unsafe fn void f(){}",
-		"module main;fn void Owner::f(){}",
+		"module main;pub pub fn void f(){}",
+		"module main;unsafe unsafe fn void f(){}",
+		"module main;unsafe pub fn void f(){}",
+		"module main;fn void Owner::(){}",
+		"module main;fn void Owner::Nested::f(){}",
+		"module main;pub unsafe fn void Owner::f(){" + strings.Repeat("x;", 125) + "return;}",
+		"module main;pub unsafe fn i32" + strings.Repeat("[]", 63) + " Owner::f(){}",
 		"module main;fn T f<T>(T p){return p;}",
 		"module main;@effects(console) fn void f(){}",
 		"module main;@effects(console) pub unsafe fn T Owner::f<T>(ref mut T arg,){return arg;}",

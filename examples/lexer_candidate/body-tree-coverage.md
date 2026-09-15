@@ -66,7 +66,7 @@ documented in the encoding owner; this ledger does not authorize new normalizati
 | Surface | Current behavior |
 | --- | --- |
 | Source/module/imports/multiple items | Selection requires module plus one ordinary function. Imports and extra declarations/functions are rejected. Module bytes are bound, but module structure is not exported. |
-| Function headers | Body-only mode still omits header structure. Separate function mode compares basic function/name spans, result type, ordered parameter/name spans and types, and body (tags 90/91 plus existing tags). Owner, generic parameter declarations, pub/unsafe and attributes are explicitly rejected in function mode; the body-mode decorated witness proves acceptance only. |
+| Function headers | Body-only mode still omits header structure. Function mode compares function/name spans, optional pub/unsafe/owner leaves, result type, ordered parameter/name spans and types, and body (tags 90-94 plus existing tags). Generic parameter declarations and attributes remain explicitly rejected in function mode; the body-mode decorated witness proves acceptance only. |
 | Const/static_assert/state/struct/resource/cleanup/enum/foreign declarations and fields | Not selected as roots. Separate parser tests are not promoted into body-export evidence. |
 | Lexical productions, identifier classes, trivia, cooked literal values | Raw bytes and spans participate. Token kinds, cooked values and a separate lossless token/CST stream are not exported. Literal witnesses do not prove decoding semantics or exhaustive Unicode handling. |
 | Error/missing nodes and recovery trees | Error-free parsing and candidate integrity are preconditions. No successful partial output; recovery fidelity is not this format's contract. |
@@ -102,7 +102,9 @@ Remaining **verification gaps**, not newly discovered implementation defects:
   health, hosted CI, public frontend replacement or release readiness.
 
 Basic function-header structural comparison now has a separate native subtest:
-9 positive functions and 15 rejection cases per low/optimized profile. These cover
+21 positive functions and 19 rejection cases per low/optimized profile. These cover
 shared header/body record and depth boundaries without changing the earlier
-body-only witnesses. Full owner/generic/modifier/attribute header comparison remains
-excluded. Semantic integration remains a separate design and verification step.
+body-only witnesses, and all eight pub/unsafe/owner presence combinations. Generic
+parameter and attribute comparison remains excluded. Modifier origins use the Go
+CST declaration prefix, not a keyword scan through result types; semantic modifier
+handling is not verified. Semantic integration remains a separate design step.
