@@ -241,6 +241,42 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		if depth >= 64 {
 			return nil
 		}
+		if statement.kind == 105 {
+			if statement.name != zero || len(statement.children) != 1 {
+				return nil
+			}
+			value := statement.children[0]
+			if value.kind != 207 || value.name != zero || len(value.children) < 2 || len(value.children) > 3 {
+				return nil
+			}
+			condition := expression(value.children[0], depth+2)
+			if condition == nil {
+				return nil
+			}
+			expr := &ast.Expression{Kind: syntax.KindIf, Span: value.span, Children: []*ast.Expression{condition}}
+			last := value.children[0].span.EndByte
+			for _, branch := range value.children[1:] {
+				if branch.kind != 100 || branch.name != zero || branch.span.StartByte < last {
+					return nil
+				}
+				block := &ast.Block{Span: branch.span}
+				end := branch.span.StartByte
+				for _, entry := range branch.children {
+					if entry.span.StartByte < end {
+						return nil
+					}
+					converted := localStatement(entry, depth+3)
+					if converted == nil {
+						return nil
+					}
+					block.Statements = append(block.Statements, *converted)
+					end = entry.span.EndByte
+				}
+				expr.Children = append(expr.Children, &ast.Expression{Kind: syntax.KindBlock, Span: branch.span, Block: block})
+				last = branch.span.EndByte
+			}
+			return &ast.Statement{Kind: syntax.KindExprStmt, Span: statement.span, Expression: expr}
+		}
 		if statement.kind == 104 {
 			if statement.name != zero || len(statement.children) != 2 || statement.children[0].kind != 201 || statement.children[0].span.EndByte > statement.children[1].span.StartByte {
 				return nil

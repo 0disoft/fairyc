@@ -95,6 +95,18 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		{"module main;fn i32 f(){let i32 x=1;return if(true){x=2;x}else{3};}", false},
 		{"module main;fn bool f(){return if(true){var bool x=false;x=1;x}else{false};}", false},
 		{"module main;fn i32 f(){return if(true){let i32 x=" + strings.Repeat("+ ", 57) + "1;x}else{2};}", true},
+		{"module main;fn i32 f(bool a){var i32 x=0;if(a){x=1;}return x;}", true},
+		{"module main;fn i32 f(bool a){var i32 x=0;if(a){x=1;}else{x=2;}x=x+3;return x;}", true},
+		{"module main;fn i32 f(bool a){if(a){}return 1;}", true},
+		{"module main;fn i32 f(bool a){if(a){}else{}return 1;}", true},
+		{"module main;fn i32 f(i32 x){if(x>0){let i32 x=x+1;}else{var i32 x=2;x=3;}return x;}", true},
+		{"module main;fn i32 f(bool a,bool b){var i32 x=0;if(a){if(b){x=1;}else{x=2;};}return x;}", true},
+		{"module main;\r\nfn bool f(bool a){var bool x=false;\r\nif(a){let bool y=if(a){true}else{false}; /* 문장 */ x=y;}\r\nreturn x;}", true},
+		{"module main;fn i32 f(bool a){return if(a){var i32 x=0;if(a){x=1;}x}else{2};}", true},
+		{"module main;fn i32 f(){if(1){}return 0;}", false},
+		{"module main;fn i32 f(bool a){if(a){let i32 x=1;}return x;}", false},
+		{"module main;fn i32 f(bool a){var i32 y=0;if(a){let i32 x=1;}else{y=x;}return y;}", false},
+		{"module main;fn i32 f(){let i32 x=0;if(true){x=1;}return x;}", false},
 	}
 	for _, op := range []string{"==", "!=", "<", "<=", ">", ">="} {
 		cases = append(cases, struct {
@@ -103,6 +115,14 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		}{"module main;fn bool f(i32 a,i32 b){return a" + op + "b;}", true})
 	}
 	var firstWire string
+	nestedStatements := "let i32 x=1;"
+	for i := 0; i < 20; i++ {
+		nestedStatements = "if(true){" + nestedStatements + "};"
+	}
+	cases = append(cases, struct {
+		input string
+		clean bool
+	}{"module main;fn i32 f(){" + nestedStatements + "return 0;}", true}) // initializer at depth 63
 	nestedIf := "1"
 	for i := 0; i < 30; i++ {
 		nestedIf = "if(true){" + nestedIf + "}else{2}"
@@ -189,6 +209,12 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		"module main;fn bool f(){return 1.0<2.0;}",
 		"module main;fn bool f(){return null;}",
 		"module main;fn bool f(){if(true){return false;}return true;}",
+		"module main;fn i32 f(){if(true){1}return 0;}",
+		"module main;fn i32 f(){if(true){}else{1}return 0;}",
+		"module main;fn i32 f(){if(true){}else if(false){}return 0;}",
+		"module main;fn i32 f(){if(true){call();}return 0;}",
+		"module main;fn i32 f(){if(true){while(false){}}return 0;}",
+		"module main;fn i32 f(){if(true){if(false){}}return 0;}",
 		"module main;fn i32 f(){return if(true){1};}",
 		"module main;fn i32 f(){return if(true){}else{2};}",
 		"module main;fn i32 f(){return if(true){1}else{};}",
@@ -426,6 +452,33 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 			t.Fatal("accepted malformed branch statements or tail")
 		}
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 42 malformed transports", len(cases), len(unsupported))
-	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}", "module main;fn i32 f(){return if(true){" + nestedIf + "}else{2};}", "module main;fn i32 f(){return if(true){let i32 x=" + strings.Repeat("+ ", 58) + "1;x}else{2};}"}
+	statementIf := "module main;fn i32 f(){if(true){}else{}return 0;}"
+	parts = strings.Fields(native(statementIf))
+	foundStatementIf := false
+	for p := 2 + len(statementIf); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "105" {
+			foundStatementIf = true
+			if parts[p+7] != "207" || parts[p+21] != "100" {
+				t.Fatal("invalid statement conditional witness")
+			}
+			for _, change := range []struct {
+				offset int
+				value  string
+			}{{3, "0"}, {7, "200"}, {10, "1"}, {21, "206"}} {
+				copy := append([]string(nil), parts...)
+				copy[p+change.offset] = change.value
+				if module, err := adaptFairyScalar(statementIf, strings.Join(copy, " ")); err == nil || module != nil {
+					t.Fatal("accepted malformed statement conditional")
+				}
+			}
+			break
+		}
+		p += 7 + op
+	}
+	if !foundStatementIf {
+		t.Fatal("missing statement conditional witness")
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 46 malformed transports", len(cases), len(unsupported))
+	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}", "module main;fn i32 f(){return if(true){" + nestedIf + "}else{2};}", "module main;fn i32 f(){return if(true){let i32 x=" + strings.Repeat("+ ", 58) + "1;x}else{2};}", "module main;fn i32 f(){if(true){" + nestedStatements + "}return 0;}"}
 }

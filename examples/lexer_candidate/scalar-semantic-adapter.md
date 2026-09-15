@@ -12,15 +12,23 @@ restriction or executable Fairy bootstrap stage.
   simple ASCII names.
 - Zero or more sequential explicitly typed `let` / `var` declarations (`i32`
   or `bool`) and simple-name
-  assignments (`name = expression;`), followed by exactly one final return
+  assignments (`name = expression;`) or statement-form conditionals, followed by exactly one final return
   statement. Initializers, assignment values and the return
   expression contain decimal integers, `true` / `false`, simple names, groups,
   unary `+`/`-`, binary `+`/`-`/`*`, and comparisons `== != < <= > >=`.
   Value-producing `if (condition) { value } else { value }` expressions are
   admitted recursively. Both branches must be explicit blocks containing zero or
-  more typed `let`/`var` declarations or simple-name assignments followed by exactly
+  more typed `let`/`var` declarations, simple-name assignments or statement conditionals followed by exactly
   one tail expression. A direct `else if` chain is excluded;
   a nested `if` as a branch's tail expression is admitted.
+  Statement-form `if (condition) { statements }` permits an optional `else`
+  block. These branches may be empty and contain declarations, assignments or
+  nested statement conditionals, but no tail expression. Both forms retain their
+  distinct block rules; a value-form branch may include statement conditionals
+  before its required tail.
+  At the end of a branch, a nested statement `if` needs a trailing semicolon;
+  without it the existing parser classifies the nested `if` as a tail expression,
+  which is excluded from statement-form branches.
   Decimal zero is `0`; leading zeroes,
   separators and radix prefixes are excluded. Signs remain separate unary nodes.
   Decimal spelling already equals its cooked value; no general literal
@@ -30,7 +38,7 @@ restriction or executable Fairy bootstrap stage.
 - At most 4096 source bytes, 262144 wire bytes, 36000 numeric fields, 256 records
   and depth below 64. Exact source bytes in the wire must match the supplied input.
 - Attributes, modifiers, owners, generics, other types, calls, loops,
-  statement-form conditionals and branch-local early returns,
+  branch-local early returns,
   inferred bindings, compound or non-name assignments, standalone block expressions,
   division/remainder, logical operators (including unary `!`) and
   extra items are excluded. These remain language/parser
@@ -88,6 +96,12 @@ Lexical scopes are not recreated by the adapter: the Go consumer resolves outer
 names, shadowing, same-scope duplicates and invalid sibling/escaped local uses.
 The module binding summary reserves a declaration's position before converting
 its initializer so nested branch declarations retain preorder, matching Go lowering.
+Statement conditionals use an expression-statement record (105) wrapping an if
+record (207) with a condition and one or two explicit blocks (100). They build
+AST KindExprStmt/KindIf nodes and blocks with Statements but no Tail. The adapter
+does not synthesize an absent else or discard non-void branch values. It rejects
+other expression statements and direct else-if chains. Existing scope and type
+analysis owns effects of outer-variable assignment and invalid condition types.
 
 `fairy_scalar_semantic_test.go` separately invokes the Go frontend as an oracle.
 Each AST is independently passed to `semantic.Analyze` through a `semantic.File`
@@ -102,7 +116,7 @@ the independently lowered oracle, including names, spans and initializer order.
 
 The existing native function test reuses each low/optimized MSVC artifact for:
 
-- 89 semantic differential cases: constants, parameter use, CRLF/comments,
+- 102 semantic differential cases: constants, parameter use, CRLF/comments,
   source/parameter boundaries, precedence, left-associative subtraction, groups,
   unary signs, i32 minimum, unknown names, duplicates and integer range errors,
   sequential locals, parameter shadowing, self/forward references, reassignment,
@@ -113,17 +127,20 @@ The existing native function test reuses each low/optimized MSVC artifact for:
   conditions, branch/return type mismatches and unresolved names in both conditions
   and unselected branches, branch declarations/assignments, shadowing, sibling
   isolation, escaped locals, duplicate/forward names, immutable targets, nested
-  initializer summary order and branch initializer depth;
-- 48 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
-- 42 malformed private wire cases, including truncation, extra data, source/revision
+  initializer summary order, branch initializer depth, statement conditionals
+  with optional/empty else blocks, nested statements, following computations,
+  scope isolation and statement/value conditional composition;
+- 54 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
+- 46 malformed private wire cases, including truncation, extra data, source/revision
   mismatch, unknown tag, invalid span/count/operator field, wrong expression arity,
   size overflow, independently injected excess expression depth/record count and
   inferred binding tags, child roles, name spans, statement overlap and invalid
   assignment operators, target roles and operand overlap, plus invalid comparison
   length, byte range, operator combination and node role, and invalid conditional
   arity, condition/branch roles, tail count, branch span order and name metadata,
-  plus overlapping branch statements/tails and an early-return record;
-- five candidate-output rejection cases: excess unary or conditional nesting,
+  plus overlapping branch statements/tails, an early-return record and invalid
+  statement-conditional wrapper, if arity and branch roles;
+- six candidate-output rejection cases: excess unary or conditional nesting,
   or one more record beyond the accepted arithmetic/local witnesses, with empty output.
 
 The 256-record witness combines sixteen parameters with a balanced grouped
@@ -133,7 +150,9 @@ also covers a depth-63 initializer and 83 locals plus a return at 256 records.
 An 84-local body reaches 257 records and is rejected. Semantic equality
 also covers thirty nested value conditionals with a deepest tail at depth 63;
 one more conditional is rejected by the producer. A branch-local initializer with
-57 unary prefixes reaches depth 63; 58 prefixes are rejected. This comparison
+57 unary prefixes reaches depth 63; 58 prefixes are rejected. Twenty nested
+statement conditionals with an innermost declaration reach initializer depth 63;
+one additional statement conditional is rejected. This comparison
 does not prove runtime arithmetic results or overflow trapping; no input function
 is executed by this test.
 
