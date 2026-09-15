@@ -241,19 +241,29 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		if depth >= 64 {
 			return nil
 		}
-		if statement.kind == 105 {
-			if statement.name != zero || len(statement.children) != 1 {
+		if statement.kind == 105 || statement.kind == 106 {
+			if statement.name != zero {
 				return nil
 			}
-			value := statement.children[0]
-			if value.kind != 207 || value.name != zero || len(value.children) < 2 || len(value.children) > 3 {
+			value, statementKind, expressionKind, childDepth := statement, syntax.KindWhile, syntax.KindWhile, depth+1
+			if statement.kind == 105 {
+				if len(statement.children) != 1 {
+					return nil
+				}
+				value = statement.children[0]
+				statementKind, expressionKind, childDepth = syntax.KindExprStmt, syntax.KindIf, depth+2
+				if value.kind != 207 {
+					return nil
+				}
+			}
+			if value.name != zero || len(value.children) < 2 || len(value.children) > 3 || statement.kind == 106 && len(value.children) != 2 {
 				return nil
 			}
-			condition := expression(value.children[0], depth+2)
+			condition := expression(value.children[0], childDepth)
 			if condition == nil {
 				return nil
 			}
-			expr := &ast.Expression{Kind: syntax.KindIf, Span: value.span, Children: []*ast.Expression{condition}}
+			expr := &ast.Expression{Kind: expressionKind, Span: value.span, Children: []*ast.Expression{condition}}
 			last := value.children[0].span.EndByte
 			for _, branch := range value.children[1:] {
 				if branch.kind != 100 || branch.name != zero || branch.span.StartByte < last {
@@ -265,7 +275,7 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 					if entry.span.StartByte < end {
 						return nil
 					}
-					converted := localStatement(entry, depth+3)
+					converted := localStatement(entry, childDepth+1)
 					if converted == nil {
 						return nil
 					}
@@ -275,7 +285,7 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 				expr.Children = append(expr.Children, &ast.Expression{Kind: syntax.KindBlock, Span: branch.span, Block: block})
 				last = branch.span.EndByte
 			}
-			return &ast.Statement{Kind: syntax.KindExprStmt, Span: statement.span, Expression: expr}
+			return &ast.Statement{Kind: statementKind, Span: statement.span, Expression: expr}
 		}
 		if statement.kind == 104 {
 			if statement.name != zero || len(statement.children) != 2 || statement.children[0].kind != 201 || statement.children[0].span.EndByte > statement.children[1].span.StartByte {

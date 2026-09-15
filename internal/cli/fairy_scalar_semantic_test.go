@@ -107,6 +107,18 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		{"module main;fn i32 f(bool a){if(a){let i32 x=1;}return x;}", false},
 		{"module main;fn i32 f(bool a){var i32 y=0;if(a){let i32 x=1;}else{y=x;}return y;}", false},
 		{"module main;fn i32 f(){let i32 x=0;if(true){x=1;}return x;}", false},
+		{"module main;fn i32 f(i32 n){var i32 i=0;var i32 sum=0;while(i<n){sum=sum+i;i=i+1;}return sum;}", true},
+		{"module main;fn i32 f(){while(false){}return 1;}", true},
+		{"module main;fn bool f(bool a){var bool active=a;while(active){active=false;}return active;}", true},
+		{"module main;fn i32 f(i32 n){var i32 x=0;while(x<n){let i32 step=1;if(x<2){x=x+step;}else{x=x+2;};}return x;}", true},
+		{"module main;fn i32 f(i32 n){var i32 x=0;while(x<n){var i32 y=0;while(y<2){y=y+1;}x=x+y;}return x;}", true},
+		{"module main;fn i32 f(bool a){var i32 x=0;if(a){while(x<2){x=x+1;}}return x;}", true},
+		{"module main;fn i32 f(){return if(true){var i32 x=0;while(x<2){x=x+1;}x}else{2};}", true},
+		{"module main;\r\nfn i32 f(i32 x){while(false){let i32 x=x+1; /* 루프 변수 */ }\r\nreturn x;}", true},
+		{"module main;fn i32 f(){while(1){}return 0;}", false},
+		{"module main;fn i32 f(){while(missing){}return 0;}", false},
+		{"module main;fn i32 f(){while(false){let i32 x=1;}return x;}", false},
+		{"module main;fn i32 f(){let i32 x=0;while(false){x=1;}return x;}", false},
 	}
 	for _, op := range []string{"==", "!=", "<", "<=", ">", ">="} {
 		cases = append(cases, struct {
@@ -115,6 +127,12 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		}{"module main;fn bool f(i32 a,i32 b){return a" + op + "b;}", true})
 	}
 	var firstWire string
+	// Exercise the same wire depth without multiplying semantic loop fixed points.
+	nestedLoops := "while(false){let i32 x=" + strings.Repeat("+ ", 58) + "1;}"
+	cases = append(cases, struct {
+		input string
+		clean bool
+	}{"module main;fn i32 f(){" + nestedLoops + "return 0;}", true}) // initializer at depth 63
 	nestedStatements := "let i32 x=1;"
 	for i := 0; i < 20; i++ {
 		nestedStatements = "if(true){" + nestedStatements + "};"
@@ -213,7 +231,11 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		"module main;fn i32 f(){if(true){}else{1}return 0;}",
 		"module main;fn i32 f(){if(true){}else if(false){}return 0;}",
 		"module main;fn i32 f(){if(true){call();}return 0;}",
-		"module main;fn i32 f(){if(true){while(false){}}return 0;}",
+		"module main;fn i32 f(){while(true){break;}return 0;}",
+		"module main;fn i32 f(){while(true){continue;}return 0;}",
+		"module main;fn i32 f(){while(true){return 1;}return 0;}",
+		"module main;fn i32 f(){while(true){call();}return 0;}",
+		"module main;fn i32 f(){for(var i32 x=0;x<2;x=x+1){}return 0;}",
 		"module main;fn i32 f(){if(true){if(false){}}return 0;}",
 		"module main;fn i32 f(){return if(true){1};}",
 		"module main;fn i32 f(){return if(true){}else{2};}",
@@ -479,6 +501,33 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 	if !foundStatementIf {
 		t.Fatal("missing statement conditional witness")
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 46 malformed transports", len(cases), len(unsupported))
-	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}", "module main;fn i32 f(){return if(true){" + nestedIf + "}else{2};}", "module main;fn i32 f(){return if(true){let i32 x=" + strings.Repeat("+ ", 58) + "1;x}else{2};}", "module main;fn i32 f(){if(true){" + nestedStatements + "}return 0;}"}
+	loop := "module main;fn i32 f(){while(false){}return 0;}"
+	parts = strings.Fields(native(loop))
+	foundLoop := false
+	for p := 2 + len(loop); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "106" {
+			foundLoop = true
+			if parts[p+14] != "100" {
+				t.Fatal("loop witness has no body block")
+			}
+			for _, change := range []struct {
+				offset int
+				value  string
+			}{{3, "3"}, {7, "100"}, {14, "206"}, {15, parts[p+8]}} {
+				copy := append([]string(nil), parts...)
+				copy[p+change.offset] = change.value
+				if module, err := adaptFairyScalar(loop, strings.Join(copy, " ")); err == nil || module != nil {
+					t.Fatal("accepted malformed loop record")
+				}
+			}
+			break
+		}
+		p += 7 + op
+	}
+	if !foundLoop {
+		t.Fatal("missing loop witness")
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 50 malformed transports", len(cases), len(unsupported))
+	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}", "module main;fn i32 f(){return if(true){" + nestedIf + "}else{2};}", "module main;fn i32 f(){return if(true){let i32 x=" + strings.Repeat("+ ", 58) + "1;x}else{2};}", "module main;fn i32 f(){if(true){" + nestedStatements + "}return 0;}", "module main;fn i32 f(){while(false){" + nestedLoops + "}return 0;}"}
 }
