@@ -14,6 +14,7 @@ import (
 // public interchange format. It never invokes the Go lexer/parser or AST lowerer.
 type scalarWireNode struct {
 	kind       int
+	operator   string
 	span, name diagnostic.Span
 	children   []*scalarWireNode
 }
@@ -61,13 +62,22 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			return nil
 		}
 		kind, start, end, children, ns, ne, op := read(), read(), read(), read(), read(), read(), read()
-		if kind < 0 || start < 0 || end <= start || end > len(input) || children < 0 || children > 256 || op != 0 {
+		if kind < 0 || start < 0 || end <= start || end > len(input) || children < 0 || children > 256 || op < 0 || op > 1 {
 			return nil
 		}
 		if ns < 0 || ne < ns || ne > len(input) || (ns != 0 || ne != 0) && (ns < start || ne > end || ns == ne) {
 			return nil
 		}
 		n := &scalarWireNode{kind: kind, span: diagnostic.Span{StartByte: start, EndByte: end}, name: diagnostic.Span{StartByte: ns, EndByte: ne}}
+		if op == 1 {
+			b := read()
+			if (kind != 203 && kind != 204) || (b != 43 && b != 45 && (kind != 204 || b != 42)) {
+				return nil
+			}
+			n.operator = string(byte(b))
+		} else if kind == 203 || kind == 204 {
+			return nil
+		}
 		for i := 0; i < children; i++ {
 			child := node(depth + 1)
 			if child == nil || child.span.StartByte < start || child.span.EndByte > end {
@@ -120,26 +130,68 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 	if ret.kind != 103 || ret.name != zero || len(ret.children) != 1 {
 		return fail()
 	}
-	value := ret.children[0]
-	if value.name != zero || len(value.children) != 0 || (value.kind != 200 && value.kind != 201) {
-		return fail()
-	}
-	raw := text(value.span)
-	expr := &ast.Expression{Kind: syntax.KindPath, Span: value.span, Text: raw}
 	module := &ast.Module{Path: "main", Span: diagnostic.Span{StartByte: 0, EndByte: len(input)}, SourceSize: len(input), SourceLineStarts: []int{0}}
-	if value.kind == 200 {
-		if raw == "" || len(raw) > 1 && raw[0] == '0' {
-			return fail()
+	var expression func(*scalarWireNode, int) *ast.Expression
+	expression = func(value *scalarWireNode, depth int) *ast.Expression {
+		if depth >= 64 || value.name != zero {
+			return nil
 		}
-		for _, c := range raw {
-			if c < '0' || c > '9' {
-				return fail()
+		expr := &ast.Expression{Span: value.span}
+		arity := 0
+		switch value.kind {
+		case 200:
+			raw := text(value.span)
+			if raw == "" || len(raw) > 1 && raw[0] == '0' {
+				return nil
 			}
+			for _, c := range raw {
+				if c < '0' || c > '9' {
+					return nil
+				}
+			}
+			expr.Kind = syntax.KindLiteral
+			expr.Text = raw
+			expr.Cooked = raw
+			module.Literals = append(module.Literals, ast.Literal{Raw: raw, Kind: "integer", Cooked: raw})
+		case 201:
+			expr.Kind = syntax.KindPath
+			expr.Text = text(value.span)
+			if !identifier(expr.Text) {
+				return nil
+			}
+		case 202:
+			expr.Kind = syntax.KindGroup
+			arity = 1
+		case 203:
+			expr.Kind = syntax.KindPrefix
+			expr.Text = value.operator
+			arity = 1
+		case 204:
+			expr.Kind = syntax.KindBinary
+			expr.Text = value.operator
+			arity = 2
+		default:
+			return nil
 		}
-		expr.Kind = syntax.KindLiteral
-		expr.Cooked = raw
-		module.Literals = []ast.Literal{{Raw: raw, Kind: "integer", Cooked: raw}}
-	} else if !identifier(raw) {
+		if len(value.children) != arity {
+			return nil
+		}
+		last := value.span.StartByte
+		for _, child := range value.children {
+			if child.span.StartByte < last {
+				return nil
+			}
+			part := expression(child, depth+1)
+			if part == nil {
+				return nil
+			}
+			expr.Children = append(expr.Children, part)
+			last = child.span.EndByte
+		}
+		return expr
+	}
+	expr := expression(ret.children[0], 3)
+	if expr == nil {
 		return fail()
 	}
 	fn.Body = &ast.Block{Span: body.span, Statements: []ast.Statement{{Kind: syntax.KindReturn, Span: ret.span, Expression: expr}}}

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-func testFairyScalarAdapter(t *testing.T, native func(string) string) {
+func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 	cases := []struct {
 		input string
 		clean bool
@@ -23,6 +24,17 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) {
 		{"module main;fn i32 bad(){return missing;}", false},
 		{"module main;fn i32 duplicate(i32 x,i32 x){return x;}", false},
 		{"module main;fn i32 overflow(){return 2147483648;}", false},
+		{"module main;fn i32 f(i32 a,i32 b){return (a+2)*-b;}", true},
+		{"module main;fn i32 f(i32 a,i32 b,i32 c){return a-b-c;}", true},
+		{"module main;fn i32 f(i32 a,i32 b){return +a*b-2;}", true},
+		{"module main;fn i32 f(){return -1;}", true},
+		{"module main;fn i32 f(){return -2147483648;}", true},
+		{"module main;fn i32 f(){return (-2147483648);}", true},
+		{"module main;fn i32 f(){return -2147483649;}", false},
+		{"module main;fn i32 f(i32 a){return a+missing;}", false},
+		{"module main;fn i32 f(){return +2147483648;}", false},
+		{"module main;\r\nfn i32 f(i32 a,i32 b){return +(a /* 연산 */ - -b);}", true},
+		{"module main;fn i32 f(){return " + strings.Repeat("+ ", 60) + "1;}", true},
 	}
 	var firstWire string
 	var params []string
@@ -30,6 +42,15 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) {
 		params = append(params, fmt.Sprintf("i32 p%d", i))
 	}
 	wide := "module main;fn i32 wide(" + strings.Join(params, ",") + "){return p15;}"
+	var balanced func(int) string
+	balanced = func(n int) string {
+		if n == 1 {
+			return "1"
+		}
+		return "(" + balanced(n/2) + "+" + balanced(n-n/2) + ")"
+	}
+	wideExpr := balanced(74)
+	budgetHeader := "module main;fn i32 wide(" + strings.Join(params, ",") + "){return "
 	base := "module main;fn i32 f(){return 1;}"
 	atLimit := "module main;" + strings.Repeat(" ", 4096-len(base)) + "fn i32 f(){return 1;}"
 	cases = append(cases, struct {
@@ -39,6 +60,10 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) {
 		input string
 		clean bool
 	}{atLimit, true})
+	cases = append(cases, struct {
+		input string
+		clean bool
+	}{budgetHeader + wideExpr + ";}", true}) // 256 records
 	for i, c := range cases {
 		wire := native(c.input)
 		if i == 0 {
@@ -71,7 +96,12 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) {
 		"module main;fn i32 f<T>(){return 1;}",
 		"module main;fn bool f(){return true;}",
 		"module main;fn i32 f(u8 x){return x;}",
-		"module main;fn i32 f(){return -1;}",
+		"module main;fn i32 f(){return 6/2;}",
+		"module main;fn i32 f(){return 6%2;}",
+		"module main;fn i32 f(){return 1<2;}",
+		"module main;fn i32 f(){return true&&false;}",
+		"module main;fn i32 f(){return ~1;}",
+		"module main;fn i32 f(i32 x){return *x;}",
 		"module main;fn i32 f(){return 0x2A;}",
 		"module main;fn i32 f(){return 1_000;}",
 		"module main;fn i32 f(){return call();}",
@@ -106,5 +136,54 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) {
 			t.Fatal("accepted malformed private transport")
 		}
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 11 malformed transports", len(cases), len(unsupported))
+	arithmetic := "module main;fn i32 f(){return 1+2;}"
+	parts := strings.Fields(native(arithmetic))
+	foundBinary := false
+	for p := 2 + len(arithmetic); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "204" {
+			foundBinary = true
+			for _, change := range []struct {
+				offset int
+				value  string
+			}{{7, "47"}, {6, "0"}, {3, "1"}} {
+				copy := append([]string(nil), parts...)
+				copy[p+change.offset] = change.value
+				if module, err := adaptFairyScalar(arithmetic, strings.Join(copy, " ")); err == nil || module != nil {
+					t.Fatal("accepted malformed arithmetic record")
+				}
+			}
+			break
+		}
+		p += 7 + op
+	}
+	if !foundBinary {
+		t.Fatal("arithmetic witness has no binary record")
+	}
+	// Insert one unary record into an otherwise valid boundary-sized native
+	// stream. This tests the reader's limits separately from producer rejection.
+	for _, boundary := range []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 60) + "1;}", budgetHeader + wideExpr + ";}"} {
+		parts := strings.Fields(native(boundary))
+		inserted := false
+		for p := 2 + len(boundary); p < len(parts); {
+			op, _ := strconv.Atoi(parts[p+6])
+			if parts[p] == "202" || parts[p] == "203" {
+				record := []string{"203", parts[p+1], parts[p+2], "1", "0", "0", "1", "43"}
+				changed := append([]string(nil), parts[:p]...)
+				changed = append(changed, record...)
+				changed = append(changed, parts[p:]...)
+				if module, err := adaptFairyScalar(boundary, strings.Join(changed, " ")); err == nil || module != nil {
+					t.Fatal("reader accepted excess arithmetic depth/nodes")
+				}
+				inserted = true
+				break
+			}
+			p += 7 + op
+		}
+		if !inserted {
+			t.Fatal("missing arithmetic boundary node")
+		}
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 16 malformed transports", len(cases), len(unsupported))
+	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}"}
 }
