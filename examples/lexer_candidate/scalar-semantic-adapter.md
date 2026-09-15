@@ -17,8 +17,9 @@ restriction or executable Fairy bootstrap stage.
   expression contain decimal integers, `true` / `false`, simple names, groups,
   unary `+`/`-`, binary `+`/`-`/`*`, and comparisons `== != < <= > >=`.
   Value-producing `if (condition) { value } else { value }` expressions are
-  admitted recursively. Both branches must be explicit blocks with exactly one
-  tail expression and no statements. A direct `else if` chain is excluded;
+  admitted recursively. Both branches must be explicit blocks containing zero or
+  more typed `let`/`var` declarations or simple-name assignments followed by exactly
+  one tail expression. A direct `else if` chain is excluded;
   a nested `if` as a branch's tail expression is admitted.
   Decimal zero is `0`; leading zeroes,
   separators and radix prefixes are excluded. Signs remain separate unary nodes.
@@ -29,7 +30,7 @@ restriction or executable Fairy bootstrap stage.
 - At most 4096 source bytes, 262144 wire bytes, 36000 numeric fields, 256 records
   and depth below 64. Exact source bytes in the wire must match the supplied input.
 - Attributes, modifiers, owners, generics, other types, calls, loops,
-  statement-form conditionals, branch-local declarations/assignments/returns,
+  statement-form conditionals and branch-local early returns,
   inferred bindings, compound or non-name assignments, standalone block expressions,
   division/remainder, logical operators (including unary `!`) and
   extra items are excluded. These remain language/parser
@@ -75,11 +76,18 @@ source order; overlapping operands are rejected. Immutable or unresolved targets
 are admitted so the semantic consumer, not the adapter, owns their diagnostics.
 
 Conditional records (207) require three ordered children: a condition expression
-and two block records (100). Each branch becomes an AST block expression with a
-single Tail; the transport has no separate tail record. Only expression nodes
-may occupy that role. Branch and condition spans are preserved without folding
+and two block records (100). Each branch becomes an AST block expression with
+ordered Statements and a single Tail; the transport has no separate tail record.
+Only expression nodes may occupy the final role. The same bounded declaration/
+assignment converter serves the function body and branches; early returns are
+not accepted inside branches. Statement and tail spans cannot overlap.
+Branch and condition spans are preserved without folding
 constant conditions or dropping an unselected branch. The Go analyzer owns
 condition typing, branch type compatibility and final return compatibility.
+Lexical scopes are not recreated by the adapter: the Go consumer resolves outer
+names, shadowing, same-scope duplicates and invalid sibling/escaped local uses.
+The module binding summary reserves a declaration's position before converting
+its initializer so nested branch declarations retain preorder, matching Go lowering.
 
 `fairy_scalar_semantic_test.go` separately invokes the Go frontend as an oracle.
 Each AST is independently passed to `semantic.Analyze` through a `semantic.File`
@@ -94,7 +102,7 @@ the independently lowered oracle, including names, spans and initializer order.
 
 The existing native function test reuses each low/optimized MSVC artifact for:
 
-- 76 semantic differential cases: constants, parameter use, CRLF/comments,
+- 89 semantic differential cases: constants, parameter use, CRLF/comments,
   source/parameter boundaries, precedence, left-associative subtraction, groups,
   unary signs, i32 minimum, unknown names, duplicates and integer range errors,
   sequential locals, parameter shadowing, self/forward references, reassignment,
@@ -103,16 +111,19 @@ The existing native function test reuses each low/optimized MSVC artifact for:
   precedence inside comparisons, mismatched return/binding/assignment/operand types,
   value conditionals in returns/initializers/assignments, nested branches, invalid
   conditions, branch/return type mismatches and unresolved names in both conditions
-  and unselected branches;
-- 46 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
-- 39 malformed private wire cases, including truncation, extra data, source/revision
+  and unselected branches, branch declarations/assignments, shadowing, sibling
+  isolation, escaped locals, duplicate/forward names, immutable targets, nested
+  initializer summary order and branch initializer depth;
+- 48 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
+- 42 malformed private wire cases, including truncation, extra data, source/revision
   mismatch, unknown tag, invalid span/count/operator field, wrong expression arity,
   size overflow, independently injected excess expression depth/record count and
   inferred binding tags, child roles, name spans, statement overlap and invalid
   assignment operators, target roles and operand overlap, plus invalid comparison
   length, byte range, operator combination and node role, and invalid conditional
-  arity, condition/branch roles, tail count, branch span order and name metadata;
-- four candidate-output rejection cases: excess unary or conditional nesting,
+  arity, condition/branch roles, tail count, branch span order and name metadata,
+  plus overlapping branch statements/tails and an early-return record;
+- five candidate-output rejection cases: excess unary or conditional nesting,
   or one more record beyond the accepted arithmetic/local witnesses, with empty output.
 
 The 256-record witness combines sixteen parameters with a balanced grouped
@@ -121,7 +132,8 @@ Both reader and producer retain the original limits. Arithmetic semantic equalit
 also covers a depth-63 initializer and 83 locals plus a return at 256 records.
 An 84-local body reaches 257 records and is rejected. Semantic equality
 also covers thirty nested value conditionals with a deepest tail at depth 63;
-one more conditional is rejected by the producer. This comparison
+one more conditional is rejected by the producer. A branch-local initializer with
+57 unary prefixes reaches depth 63; 58 prefixes are rejected. This comparison
 does not prove runtime arithmetic results or overflow trapping; no input function
 is executed by this test.
 

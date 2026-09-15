@@ -82,6 +82,19 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		{"module main;fn bool f(bool a){return if(a){1}else{2};}", false},
 		{"module main;fn i32 f(){return if(true){1}else{missing};}", false},
 		{"module main;fn i32 f(){return if(missing){1}else{2};}", false},
+		{"module main;fn i32 f(){return if(true){let i32 x=1;x}else{2};}", true},
+		{"module main;fn i32 f(){var i32 x=1;return if(true){x=2;x}else{2};}", true},
+		{"module main;fn i32 f(i32 x){return if(x>0){let i32 x=x+1;x}else{let i32 x=0;x};}", true},
+		{"module main;fn bool f(bool a){return if(a){var bool x=false;x=a;x}else{let bool x=true;x};}", true},
+		{"module main;fn i32 f(bool a){let i32 x=if(a){let i32 y=if(a){let i32 z=1;z}else{2};y}else{let i32 y=3;y};return x;}", true},
+		{"module main;\r\nfn i32 f(i32 a){return if(a>0){\r\nvar i32 x=a; /* 분기 변수 */ x=x+2;\r\nx}else{a};}", true},
+		{"module main;fn i32 f(){let i32 y=if(true){let i32 x=1;x}else{2};return x;}", false},
+		{"module main;fn i32 f(bool a){return if(a){let i32 x=1;x}else{x};}", false},
+		{"module main;fn i32 f(){return if(true){let i32 x=1;let i32 x=2;x}else{3};}", false},
+		{"module main;fn i32 f(){return if(true){let i32 x=y;let i32 y=2;x}else{3};}", false},
+		{"module main;fn i32 f(){let i32 x=1;return if(true){x=2;x}else{3};}", false},
+		{"module main;fn bool f(){return if(true){var bool x=false;x=1;x}else{false};}", false},
+		{"module main;fn i32 f(){return if(true){let i32 x=" + strings.Repeat("+ ", 57) + "1;x}else{2};}", true},
 	}
 	for _, op := range []string{"==", "!=", "<", "<=", ">", ">="} {
 		cases = append(cases, struct {
@@ -179,8 +192,10 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		"module main;fn i32 f(){return if(true){1};}",
 		"module main;fn i32 f(){return if(true){}else{2};}",
 		"module main;fn i32 f(){return if(true){1}else{};}",
-		"module main;fn i32 f(){return if(true){let i32 x=1;x}else{2};}",
-		"module main;fn i32 f(){var i32 x=1;return if(true){x=2;x}else{2};}",
+		"module main;fn i32 f(){return if(true){let i32 x=1;}else{2};}",
+		"module main;fn i32 f(){return if(true){let x=1;x}else{2};}",
+		"module main;fn i32 f(){return if(true){var i32 x=1;x+=1;x}else{2};}",
+		"module main;fn i32 f(){return if(true){call();1}else{2};}",
 		"module main;fn i32 f(){return if(true){return 1;}else{2};}",
 		"module main;fn i32 f(){return if(true){1}else if(false){2}else{3};}",
 		"module main;fn i32 f(){return ~1;}",
@@ -387,6 +402,30 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 	if !foundIf {
 		t.Fatal("missing conditional witness")
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 39 malformed transports", len(cases), len(unsupported))
-	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}", "module main;fn i32 f(){return if(true){" + nestedIf + "}else{2};}"}
+	branchLocals := "module main;fn i32 f(){return if(true){let i32 x=1;let i32 y=2;y}else{3};}"
+	parts = strings.Fields(native(branchLocals))
+	var declarations []int
+	for p := 2 + len(branchLocals); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "109" {
+			declarations = append(declarations, p)
+		}
+		p += 7 + op
+	}
+	if len(declarations) != 2 {
+		t.Fatal("missing branch declaration witnesses")
+	}
+	p, q = declarations[0], declarations[1]
+	for _, change := range []struct {
+		index int
+		value string
+	}{{q + 1, parts[p+1]}, {q + 22, parts[q+1]}, {p, "103"}} {
+		copy := append([]string(nil), parts...)
+		copy[change.index] = change.value
+		if module, err := adaptFairyScalar(branchLocals, strings.Join(copy, " ")); err == nil || module != nil {
+			t.Fatal("accepted malformed branch statements or tail")
+		}
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 42 malformed transports", len(cases), len(unsupported))
+	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}", "module main;fn i32 f(){return if(true){" + nestedIf + "}else{2};}", "module main;fn i32 f(){return if(true){let i32 x=" + strings.Repeat("+ ", 58) + "1;x}else{2};}"}
 }

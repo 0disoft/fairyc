@@ -140,6 +140,7 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 	}
 	module := &ast.Module{Path: "main", Span: diagnostic.Span{StartByte: 0, EndByte: len(input)}, SourceSize: len(input), SourceLineStarts: []int{0}}
 	var expression func(*scalarWireNode, int) *ast.Expression
+	var localStatement func(*scalarWireNode, int) *ast.Statement
 	expression = func(value *scalarWireNode, depth int) *ast.Expression {
 		if depth >= 64 || value.name != zero {
 			return nil
@@ -199,14 +200,32 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			}
 			var part *ast.Expression
 			if value.kind == 207 && i > 0 {
-				if child.kind != 100 || child.name != zero || len(child.children) != 1 {
+				if child.kind != 100 || child.name != zero || len(child.children) == 0 {
 					return nil
 				}
-				tail := expression(child.children[0], depth+2)
+				block := &ast.Block{Span: child.span}
+				last := child.span.StartByte
+				for _, entry := range child.children[:len(child.children)-1] {
+					if entry.span.StartByte < last {
+						return nil
+					}
+					statement := localStatement(entry, depth+2)
+					if statement == nil {
+						return nil
+					}
+					block.Statements = append(block.Statements, *statement)
+					last = entry.span.EndByte
+				}
+				tailNode := child.children[len(child.children)-1]
+				if tailNode.span.StartByte < last {
+					return nil
+				}
+				tail := expression(tailNode, depth+2)
 				if tail == nil {
 					return nil
 				}
-				part = &ast.Expression{Kind: syntax.KindBlock, Span: child.span, Block: &ast.Block{Span: child.span, Tail: tail}}
+				block.Tail = tail
+				part = &ast.Expression{Kind: syntax.KindBlock, Span: child.span, Block: block}
 			} else {
 				part = expression(child, depth+1)
 			}
@@ -217,6 +236,39 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			last = child.span.EndByte
 		}
 		return expr
+	}
+	localStatement = func(statement *scalarWireNode, depth int) *ast.Statement {
+		if depth >= 64 {
+			return nil
+		}
+		if statement.kind == 104 {
+			if statement.name != zero || len(statement.children) != 2 || statement.children[0].kind != 201 || statement.children[0].span.EndByte > statement.children[1].span.StartByte {
+				return nil
+			}
+			target, value := expression(statement.children[0], depth+1), expression(statement.children[1], depth+1)
+			if target == nil || value == nil {
+				return nil
+			}
+			return &ast.Statement{Kind: syntax.KindAssignment, Span: statement.span, Operator: statement.operator, Target: target, Expression: value}
+		}
+		if (statement.kind != 109 && statement.kind != 110) || len(statement.children) != 2 || !identifier(text(statement.name)) || !typeOK(statement.children[0]) {
+			return nil
+		}
+		typ, value := statement.children[0], statement.children[1]
+		if typ.span.EndByte > statement.name.StartByte || statement.name.EndByte > value.span.StartByte {
+			return nil
+		}
+		// Reserve the outer declaration before nested initializer declarations.
+		bindingIndex := len(module.Bindings)
+		module.Bindings = append(module.Bindings, ast.Binding{})
+		expr := expression(value, depth+1)
+		if expr == nil {
+			return nil
+		}
+		typeRef := ast.NamedTypeReference(text(typ.span), typ.span)
+		binding := ast.Binding{Name: text(statement.name), Mutable: statement.kind == 110, Span: statement.span, NameSpan: statement.name, Type: &typeRef, Expression: expr}
+		module.Bindings[bindingIndex] = binding
+		return &ast.Statement{Kind: syntax.KindBinding, Span: statement.span, Binding: &binding}
 	}
 	fn.Body = &ast.Block{Span: body.span}
 	last = body.span.StartByte
@@ -236,32 +288,11 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindReturn, Span: statement.span, Expression: expr})
 			continue
 		}
-		if statement.kind == 104 {
-			if statement.name != zero || len(statement.children) != 2 || statement.children[0].kind != 201 || statement.children[0].span.EndByte > statement.children[1].span.StartByte {
-				return fail()
-			}
-			target, value := expression(statement.children[0], 3), expression(statement.children[1], 3)
-			if target == nil || value == nil {
-				return fail()
-			}
-			fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindAssignment, Span: statement.span, Operator: statement.operator, Target: target, Expression: value})
-			continue
-		}
-		if (statement.kind != 109 && statement.kind != 110) || len(statement.children) != 2 || !identifier(text(statement.name)) || !typeOK(statement.children[0]) {
+		converted := localStatement(statement, 2)
+		if converted == nil {
 			return fail()
 		}
-		typ, value := statement.children[0], statement.children[1]
-		if typ.span.EndByte > statement.name.StartByte || statement.name.EndByte > value.span.StartByte {
-			return fail()
-		}
-		expr := expression(value, 3)
-		if expr == nil {
-			return fail()
-		}
-		typeRef := ast.NamedTypeReference(text(typ.span), typ.span)
-		binding := ast.Binding{Name: text(statement.name), Mutable: statement.kind == 110, Span: statement.span, NameSpan: statement.name, Type: &typeRef, Expression: expr}
-		fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindBinding, Span: statement.span, Binding: &binding})
-		module.Bindings = append(module.Bindings, binding)
+		fn.Body.Statements = append(fn.Body.Statements, *converted)
 	}
 	module.Functions = []ast.Function{fn}
 	for i, b := range []byte(input) {
