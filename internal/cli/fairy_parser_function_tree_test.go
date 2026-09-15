@@ -26,6 +26,12 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		"module main;pub unsafe fn unsafe extern C fn void() Owner::callback(){return value;}",
 		"module main;pub unsafe fn void Owner::f(){" + strings.Repeat("x;", 125) + "}", // 256 with three header leaves
 		"module main;pub unsafe fn i32" + strings.Repeat("[]", 62) + " Owner::f(){}",
+		"module main;fn T f<T>(T p){return p;}",
+		"module main; /* 제네릭 */\r\nfn Pair<Z,A> make /* gap */ <Z, /* 이름 */ A,>(A a,Z z,){return Pair<Z,A>{.z=z,.a=a};}",
+		"module main;pub unsafe fn Box<T> Owner::make<T,U>(ref mut T value,U extra){return choose<T,U>(value,extra);}",
+		"module main;fn T T<T,T>(T T){return T;}", // duplicates are syntax, not resolution
+		"module main;fn T" + strings.Repeat("[]", 62) + " f<T>(){}",
+		"module main;pub unsafe fn void Owner::f<T,U>(){" + strings.Repeat("x;", 123) + "return;}", // 256 shared records
 	}
 	// All modifier/owner presence combinations, with trivia that contains decoys.
 	for mask := 0; mask < 8; mask++ {
@@ -46,6 +52,11 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		params = append(params, fmt.Sprintf("i32 p%d", i))
 	}
 	inputs = append(inputs, "module main;fn void f("+strings.Join(params, ",")+"){return;}") // 256
+	var genericParams []string
+	for i := 0; i < 252; i++ {
+		genericParams = append(genericParams, fmt.Sprintf("T%d", i))
+	}
+	inputs = append(inputs, "module main;fn void f<"+strings.Join(genericParams, ",")+">(){}") // 256
 	rejected := []string{
 		"module main;pub pub fn void f(){}",
 		"module main;unsafe unsafe fn void f(){}",
@@ -54,7 +65,16 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		"module main;fn void Owner::Nested::f(){}",
 		"module main;pub unsafe fn void Owner::f(){" + strings.Repeat("x;", 125) + "return;}",
 		"module main;pub unsafe fn i32" + strings.Repeat("[]", 63) + " Owner::f(){}",
-		"module main;fn T f<T>(T p){return p;}",
+		"module main;fn void f<>(){}",
+		"module main;fn void f<T,,U>(){}",
+		"module main;fn void f<T U>(){}",
+		"module main;fn void f<T(){}",
+		"module main;fn void f<ref T>(){}",
+		"module main;fn void f<T:Trait>(){}",
+		"module main;fn void f<T=i32>(){}",
+		"module main;fn void f<" + strings.Join(genericParams, ",") + ",Extra>(){}", // 257
+		"module main;fn T" + strings.Repeat("[]", 63) + " f<T>(){}",
+		"module main;pub unsafe fn void Owner::f<T,U>(){" + strings.Repeat("x;", 124) + "}", // 257
 		"module main;@effects(console) fn void f(){}",
 		"module main;@effects(console) pub unsafe fn T Owner::f<T>(ref mut T arg,){return arg;}",
 		"module main;fn void f(i32){}",

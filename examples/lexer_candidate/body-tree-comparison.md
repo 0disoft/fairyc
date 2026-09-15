@@ -10,9 +10,9 @@ propagation, unsafe blocks, switch pattern decomposition, classic for loops and
 assert/defer/discard/burn statements and region statements.
 
 A separate function-tree mode wraps that body with a basic ordinary function
-header: function/name spans, owner, `pub`/`unsafe` modifiers, result type, and
-parameter/name spans with types in source order. It rejects generic parameter
-declarations and attributes before emitting anything. These forms remain
+header: function/name spans, owner, `pub`/`unsafe` modifiers, generic parameter
+declarations, result type, and parameter/name spans with types in source order.
+It rejects attributes before emitting anything. Attributed functions remain
 accepted by the parser and by the unchanged body-only comparison where applicable.
 Documentation trivia remains bound raw source, not a documentation AST export.
 
@@ -38,9 +38,11 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 
 | Tags | Meaning and child order |
 | --- | --- |
-| 90 | Function: optional pub, optional unsafe, optional owner, result type, ordered parameters, body block; function-name span |
+| 90 | Function: optional pub, optional unsafe, optional owner, optional generic declaration list, result type, ordered parameters, body block; function-name span |
 | 91 | Parameter: written type; parameter-name span |
 | 92 / 93 / 94 | Present pub / unsafe / owner leaf: exact keyword or owner span, no children and zero name span |
+| 95 | Generic declaration list: angle-list span, parameter declarations in source order |
+| 96 | Generic parameter declaration: identifier span, no children and zero name span |
 | 100 | Block: statements in source order, followed by an optional tail expression |
 | 101 / 102 | Inferred let / var binding: initializer |
 | 103 | Return: optional operand |
@@ -243,7 +245,7 @@ hit the existing parser recursion limit before the exporter depth limit, so slic
 suffixes isolate that exporter boundary. Formatting and the scoped
 Mustflow contract are checked separately; no full compiler/release suite is needed
 for test-only writers. No stable compiler, grammar, ABI, SDK, package format or
-default CLI path changes. Function mode has 21 positive and 19 rejection
+default CLI path changes. Function mode has 28 positive and 28 rejection
 witnesses per profile, including empty/trailing-comma parameter lists, nested and
 C-function types, non-alphabetical and duplicate names, trivia/CRLF and malformed
 headers. Header and body share the same 256-record/depth-below-64 budget. Combined
@@ -271,3 +273,16 @@ setting Unsafe for a C function result type. Separate semantic tests preserve th
 existing unsupported C function value types while requiring E5101 for an unguarded
 foreign call and no such diagnostic inside explicit unsafe boundaries. This does
 not admit C function values to semantic analysis or native execution.
+
+Generic declaration lists are omitted when absent; an empty written list is
+invalid, not an absent-list spelling. The Go writer checks AST name count and order
+against the owning CST list and reads its list/name spans. The candidate uses
+declaration generic spans and source-order generic accessors, omitting arena links.
+Non-alphabetical and duplicate names, identical declaration/use spellings,
+trailing commas, comments/CRLF, nested types, generic calls and owner/modifier
+composition are compared. No name resolution, type inference, constraints or
+execution support is added. A 252-name empty function passes at 256 shared records;
+253 names reject at 257. A mixed generic/owner/modifier/body case tests the same
+boundary; a generic function's result path passes at depth 63 and rejects at 64.
+Empty lists, missing separators/closers, reference declarations, constraints and
+defaults are rejected without output. Attributes remain explicitly excluded.

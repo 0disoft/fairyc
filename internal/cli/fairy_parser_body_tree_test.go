@@ -37,14 +37,36 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		return "", fmt.Errorf("expected module and one function only")
 	}
 	fn := r.AST.Functions[0]
-	if header && (len(fn.TypeParameters) != 0 || len(fn.Attributes) != 0) {
+	if header && len(fn.Attributes) != 0 {
 		return "", fmt.Errorf("unsupported function header")
 	}
 	var publicSpan, unsafeSpan diagnostic.Span
+	var genericSpan diagnostic.Span
+	var genericNames []diagnostic.Span
 	if header {
 		decl, found := r.Tree.Node(root.Children[1])
 		if !found || decl.Kind != syntax.KindFunction {
 			return "", fmt.Errorf("expected ordinary function")
+		}
+		// The AST retains generic names, while their declaration origins live in
+		// the owning CST list. Do not search unrelated type uses by spelling.
+		for _, id := range decl.Children {
+			list, ok := r.Tree.Node(id)
+			if !ok || list.Kind != syntax.KindTypeParameters {
+				continue
+			}
+			genericSpan = list.Span
+			for _, nameID := range list.Children {
+				name, ok := r.Tree.Node(nameID)
+				i := len(genericNames)
+				if !ok || name.Kind != syntax.KindPath || i >= len(fn.TypeParameters) || name.Text != fn.TypeParameters[i] {
+					return "", fmt.Errorf("generic parameter names disagree with declaration origins")
+				}
+				genericNames = append(genericNames, name.NameSpan)
+			}
+		}
+		if len(genericNames) != len(fn.TypeParameters) {
+			return "", fmt.Errorf("generic parameter count disagrees with declaration origins")
 		}
 		// Modifier origins belong to the declaration prefix, not its result type.
 		// Keep the independently read origins consistent with the lowered flags.
@@ -525,6 +547,9 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		bodyDepth = 1
 		headerSpans := []diagnostic.Span{publicSpan, unsafeSpan, fn.OwnerSpan}
 		children := len(fn.Parameters) + 2
+		if len(genericNames) != 0 {
+			children++
+		}
 		for _, span := range headerSpans {
 			if span.EndByte > span.StartByte {
 				children++
@@ -536,6 +561,16 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		for i, span := range headerSpans {
 			if span.EndByte > span.StartByte && !record(92+i, span, 0, diagnostic.Span{}, 1, "") {
 				return "", failure
+			}
+		}
+		if len(genericNames) != 0 {
+			if !record(95, genericSpan, len(genericNames), diagnostic.Span{}, 1, "") {
+				return "", failure
+			}
+			for _, span := range genericNames {
+				if !record(96, span, 0, diagnostic.Span{}, 2, "") {
+					return "", failure
+				}
 			}
 		}
 		if !typeTree(&fn.ResultType, 1) {
