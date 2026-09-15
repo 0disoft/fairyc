@@ -32,6 +32,15 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		"module main;fn T T<T,T>(T T){return T;}", // duplicates are syntax, not resolution
 		"module main;fn T" + strings.Repeat("[]", 62) + " f<T>(){}",
 		"module main;pub unsafe fn void Owner::f<T,U>(){" + strings.Repeat("x;", 123) + "return;}", // 256 shared records
+		"module main;@effects(console) fn void f(){}",
+		"module main;@effects(console) pub unsafe fn T Owner::f<T>(ref mut T arg,){return arg;}",
+		"module main;@tag @tag() @tag(first,second,) fn void f(){}",
+		`module main;@pkg /* name */ :: note(pkg /* arg */ :: value,0xA_F,0b10_01,1_000,"a\n\u{AC00}",) fn void f(){}`,
+		"module main; /* 속성 */\r\n@note(\"pub unsafe fn\")\r\n@other() pub fn unsafe extern C fn void() f(){return value;}",
+		"module main;" + strings.Repeat("@tag ", 253) + "fn void f(){}",                           // 256
+		"module main;@tag(" + strings.Repeat("value,", 252) + ") fn void f(){}",                   // 256
+		"module main;@tag(T) pub unsafe fn void Owner::f<T>(){" + strings.Repeat("x;", 123) + "}", // 256 across attributes/header/body
+		"module main;@tag fn T" + strings.Repeat("[]", 62) + " f<T>(){}",
 	}
 	// All modifier/owner presence combinations, with trivia that contains decoys.
 	for mask := 0; mask < 8; mask++ {
@@ -75,8 +84,19 @@ func testWindowsFairyFunctionTree(t *testing.T) {
 		"module main;fn void f<" + strings.Join(genericParams, ",") + ",Extra>(){}", // 257
 		"module main;fn T" + strings.Repeat("[]", 63) + " f<T>(){}",
 		"module main;pub unsafe fn void Owner::f<T,U>(){" + strings.Repeat("x;", 124) + "}", // 257
-		"module main;@effects(console) fn void f(){}",
-		"module main;@effects(console) pub unsafe fn T Owner::f<T>(ref mut T arg,){return arg;}",
+		"module main;@ fn void f(){}",
+		"module main;@pkg:: fn void f(){}",
+		"module main;@tag(a,,b) fn void f(){}",
+		"module main;@tag(a fn void f(){}",
+		"module main;@tag(true) fn void f(){}",
+		"module main;@tag(1.5) fn void f(){}",
+		"module main;@tag(b\"bytes\") fn void f(){}",
+		"module main;@tag(c\"cstring\") fn void f(){}",
+		"module main;@tag(call()) fn void f(){}",
+		"module main;" + strings.Repeat("@tag ", 254) + "fn void f(){}",         // 257
+		"module main;@tag(" + strings.Repeat("value,", 253) + ") fn void f(){}", // 257
+		"module main;@tag(T) pub unsafe fn void Owner::f<T>(){" + strings.Repeat("x;", 123) + "return;}",
+		"module main;@tag fn T" + strings.Repeat("[]", 63) + " f<T>(){}",
 		"module main;fn void f(i32){}",
 		"module main;fn void f(i32 x,,){}",
 		"module main;fn void f(i32 x {}",

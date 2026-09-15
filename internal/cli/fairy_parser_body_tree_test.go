@@ -37,9 +37,11 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		return "", fmt.Errorf("expected module and one function only")
 	}
 	fn := r.AST.Functions[0]
-	if header && len(fn.Attributes) != 0 {
-		return "", fmt.Errorf("unsupported function header")
+	type attributeOrigin struct {
+		name  diagnostic.Span
+		kinds []int
 	}
+	var attributeOrigins []attributeOrigin
 	var publicSpan, unsafeSpan diagnostic.Span
 	var genericSpan diagnostic.Span
 	var genericNames []diagnostic.Span
@@ -48,10 +50,52 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		if !found || decl.Kind != syntax.KindFunction {
 			return "", fmt.Errorf("expected ordinary function")
 		}
+		modifierStart := decl.TokenStart
 		// The AST retains generic names, while their declaration origins live in
 		// the owning CST list. Do not search unrelated type uses by spelling.
 		for _, id := range decl.Children {
 			list, ok := r.Tree.Node(id)
+			if ok && list.Kind == syntax.KindAttribute {
+				index := len(attributeOrigins)
+				if index >= len(fn.Attributes) || len(list.Children) == 0 {
+					return "", fmt.Errorf("attribute origin missing")
+				}
+				attribute := fn.Attributes[index]
+				name, found := r.Tree.Node(list.Children[0])
+				if !found || name.Kind != syntax.KindPath || name.Text != attribute.Name || len(list.Children)-1 != len(attribute.Arguments) {
+					return "", fmt.Errorf("attribute disagrees with declaration origin")
+				}
+				origin := attributeOrigin{name: name.Span}
+				for i, argID := range list.Children[1:] {
+					arg, found := r.Tree.Node(argID)
+					if !found || arg.Text != attribute.Arguments[i].Raw || arg.Span != attribute.Arguments[i].Span {
+						return "", fmt.Errorf("attribute argument origin mismatch")
+					}
+					kind := 0
+					if arg.Kind == syntax.KindPath {
+						kind = 401
+					} else {
+						for _, token := range r.Tree.Tokens[arg.TokenStart:arg.TokenEnd] {
+							if token.Kind == lexer.Trivia {
+								continue
+							}
+							if token.Kind == lexer.Integer {
+								kind = 402
+							}
+							if token.Kind == lexer.String {
+								kind = 403
+							}
+							break
+						}
+					}
+					if kind == 0 {
+						return "", fmt.Errorf("unsupported attribute argument")
+					}
+					origin.kinds = append(origin.kinds, kind)
+				}
+				attributeOrigins = append(attributeOrigins, origin)
+				modifierStart = max(modifierStart, list.TokenEnd)
+			}
 			if !ok || list.Kind != syntax.KindTypeParameters {
 				continue
 			}
@@ -68,9 +112,12 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		if len(genericNames) != len(fn.TypeParameters) {
 			return "", fmt.Errorf("generic parameter count disagrees with declaration origins")
 		}
+		if len(attributeOrigins) != len(fn.Attributes) {
+			return "", fmt.Errorf("attribute count mismatch")
+		}
 		// Modifier origins belong to the declaration prefix, not its result type.
 		// Keep the independently read origins consistent with the lowered flags.
-		for _, token := range r.Tree.Tokens[decl.TokenStart:decl.TokenEnd] {
+		for _, token := range r.Tree.Tokens[modifierStart:decl.TokenEnd] {
 			if token.Kind != lexer.Keyword {
 				continue
 			}
@@ -546,7 +593,7 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 	if header {
 		bodyDepth = 1
 		headerSpans := []diagnostic.Span{publicSpan, unsafeSpan, fn.OwnerSpan}
-		children := len(fn.Parameters) + 2
+		children := len(fn.Parameters) + 2 + len(fn.Attributes)
 		if len(genericNames) != 0 {
 			children++
 		}
@@ -557,6 +604,17 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 		}
 		if !record(90, fn.Span, children, fn.NameSpan, 0, "") {
 			return "", failure
+		}
+		for i, attribute := range fn.Attributes {
+			origin := attributeOrigins[i]
+			if !record(400, attribute.Span, len(attribute.Arguments), origin.name, 1, "") {
+				return "", failure
+			}
+			for j, argument := range attribute.Arguments {
+				if !record(origin.kinds[j], argument.Span, 0, diagnostic.Span{}, 2, "") {
+					return "", failure
+				}
+			}
 		}
 		for i, span := range headerSpans {
 			if span.EndByte > span.StartByte && !record(92+i, span, 0, diagnostic.Span{}, 1, "") {

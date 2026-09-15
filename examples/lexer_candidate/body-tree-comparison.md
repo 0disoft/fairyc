@@ -10,10 +10,10 @@ propagation, unsafe blocks, switch pattern decomposition, classic for loops and
 assert/defer/discard/burn statements and region statements.
 
 A separate function-tree mode wraps that body with a basic ordinary function
-header: function/name spans, owner, `pub`/`unsafe` modifiers, generic parameter
-declarations, result type, and parameter/name spans with types in source order.
-It rejects attributes before emitting anything. Attributed functions remain
-accepted by the parser and by the unchanged body-only comparison where applicable.
+header: ordered attributes, function/name spans, owner, `pub`/`unsafe` modifiers,
+generic parameter declarations, result type, and parameter/name spans with types
+in source order. Attribute arguments compare path/integer/string syntax only;
+cooked strings and attribute meaning remain excluded.
 Documentation trivia remains bound raw source, not a documentation AST export.
 
 ## Encoding
@@ -38,11 +38,13 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 
 | Tags | Meaning and child order |
 | --- | --- |
-| 90 | Function: optional pub, optional unsafe, optional owner, optional generic declaration list, result type, ordered parameters, body block; function-name span |
+| 90 | Function: ordered attributes, optional pub, optional unsafe, optional owner, optional generic declaration list, result type, ordered parameters, body block; function-name span |
 | 91 | Parameter: written type; parameter-name span |
 | 92 / 93 / 94 | Present pub / unsafe / owner leaf: exact keyword or owner span, no children and zero name span |
 | 95 | Generic declaration list: angle-list span, parameter declarations in source order |
 | 96 | Generic parameter declaration: identifier span, no children and zero name span |
+| 400 | Attribute: exact attribute and name-path spans, arguments in source order |
+| 401 / 402 / 403 | Attribute path / integer / string argument: exact raw span, no children and zero name span |
 | 100 | Block: statements in source order, followed by an optional tail expression |
 | 101 / 102 | Inferred let / var binding: initializer |
 | 103 | Return: optional operand |
@@ -245,7 +247,7 @@ hit the existing parser recursion limit before the exporter depth limit, so slic
 suffixes isolate that exporter boundary. Formatting and the scoped
 Mustflow contract are checked separately; no full compiler/release suite is needed
 for test-only writers. No stable compiler, grammar, ABI, SDK, package format or
-default CLI path changes. Function mode has 28 positive and 28 rejection
+default CLI path changes. Function mode has 37 positive and 39 rejection
 witnesses per profile, including empty/trailing-comma parameter lists, nested and
 C-function types, non-alphabetical and duplicate names, trivia/CRLF and malformed
 headers. Header and body share the same 256-record/depth-below-64 budget. Combined
@@ -285,4 +287,24 @@ execution support is added. A 252-name empty function passes at 256 shared recor
 253 names reject at 257. A mixed generic/owner/modifier/body case tests the same
 boundary; a generic function's result path passes at depth 63 and rejects at 64.
 Empty lists, missing separators/closers, reference declarations, constraints and
-defaults are rejected without output. Attributes remain explicitly excluded.
+defaults are rejected without output.
+
+Attributes are direct function children before modifiers. The Go writer checks
+AST attribute/argument order against owning CST nodes, reads the name-path span
+and classifies arguments as path/integer/string; it does not export Cooked.
+The candidate reads the declaration's attribute range and each attribute's argument
+range, retaining order, repeated attributes and repeated argument names. Modifier
+origin lookup skips the attribute range. `@tag` and `@tag()` both have zero
+argument children; their syntax differs in the bound raw source and outer span,
+without a fabricated empty argument node. Unknown names are syntax witnesses,
+not newly admitted semantic attributes.
+Coverage includes all three argument kinds, qualified paths with comments,
+numeric spellings, escaped strings, no arguments, empty parentheses, trailing
+commas, repeated attributes, CRLF/non-ASCII trivia and generic/modifier/body
+composition. 253 empty attributes or 252 arguments pass at 256 shared records;
+one more rejects at 257. Mixed attribute/header/body and depth 63/64 boundaries
+are also checked. Missing names/closers, malformed separators, booleans, floats,
+byte/C strings and call arguments reject without partial output. This does not
+add string decoding, attribute semantics, default compiler integration or a public
+AST format. An initial test-driver tag arithmetic type error was corrected using
+a usize accumulator; no parser change was required.

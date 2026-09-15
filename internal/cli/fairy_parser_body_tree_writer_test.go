@@ -151,14 +151,24 @@ struct ExportBudget {usize nodes; bool emit;}
 const candidateFunctionTreeWriter = `
 @effects(console) fn bool function_tree(ref syntax::Parsed p,ref mut ExportBudget budget){
  let d=syntax::declaration_at(p,1);
- if(d.kind!=3 || d.attribute_count!=0){return false;}
+ if(d.kind!=3){return false;}
  var usize parameters=0;var usize i=0;
  while(i<d.entry_count){let e=syntax::entry_at(p,d.entry_start+i);if(e.kind==1){parameters+=1;}i+=1;}
- var usize children=parameters+2;
+ var usize children=parameters+2+d.attribute_count;
  let usize generics=syntax::generic_parameter_count(p,1);
  if(generics!=0){children+=1;}
  if(d.public){children+=1;}if(d.unsafe_end!=0){children+=1;}if(d.owner_end!=0){children+=1;}
  if(!record(budget,0,90,d.start,d.end,children,d.name_start,d.name_end)){return false;}if(budget.emit){number(0);}
+ i=0;while(i<d.attribute_count){
+  let a=syntax::attribute_at(p,d.attribute_start+i);
+  if(!record(budget,1,400,a.start,a.end,a.argument_count,a.name_start,a.name_end)){return false;}if(budget.emit){number(0);}
+  var usize j=0;while(j<a.argument_count){
+   let arg=syntax::attribute_argument_at(p,a.argument_start+j);
+   if(arg.kind<1 || arg.kind>3){return false;}
+   var usize kind=400;kind+=arg.kind as usize;
+   if(!record(budget,2,kind,arg.start,arg.end,0,0,0)){return false;}if(budget.emit){number(0);}j+=1;
+  }i+=1;
+ }
  if(d.public){if(!record(budget,1,92,d.public_start,d.public_end,0,0,0)){return false;}if(budget.emit){number(0);}}
  if(d.unsafe_end!=0){if(!record(budget,1,93,d.unsafe_start,d.unsafe_end,0,0,0)){return false;}if(budget.emit){number(0);}}
  if(d.owner_end!=0){if(!record(budget,1,94,d.owner_start,d.owner_end,0,0,0)){return false;}if(budget.emit){number(0);}}
