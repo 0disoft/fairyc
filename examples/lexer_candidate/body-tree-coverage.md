@@ -66,7 +66,7 @@ documented in the encoding owner; this ledger does not authorize new normalizati
 | Surface | Current behavior |
 | --- | --- |
 | Source/module/imports/multiple items | Selection requires module plus one ordinary function. Imports and extra declarations/functions are rejected. Module bytes are bound, but module structure is not exported. |
-| Function name/owner, result, parameters, generic parameters, pub/unsafe/attributes | Header syntax may be accepted, but is not structurally compared. The decorated-header witness proves acceptance only; raw bytes are not a header-tree comparison. |
+| Function headers | Body-only mode still omits header structure. Separate function mode compares basic function/name spans, result type, ordered parameter/name spans and types, and body (tags 90/91 plus existing tags). Owner, generic parameter declarations, pub/unsafe and attributes are explicitly rejected in function mode; the body-mode decorated witness proves acceptance only. |
 | Const/static_assert/state/struct/resource/cleanup/enum/foreign declarations and fields | Not selected as roots. Separate parser tests are not promoted into body-export evidence. |
 | Lexical productions, identifier classes, trivia, cooked literal values | Raw bytes and spans participate. Token kinds, cooked values and a separate lossless token/CST stream are not exported. Literal witnesses do not prove decoding semantics or exhaustive Unicode handling. |
 | Error/missing nodes and recovery trees | Error-free parsing and candidate integrity are preconditions. No successful partial output; recovery fidelity is not this format's contract. |
@@ -101,6 +101,8 @@ Remaining **verification gaps**, not newly discovered implementation defects:
 - No claim is made about non-Windows native execution, full compiler/release
   health, hosted CI, public frontend replacement or release readiness.
 
-The next bounded integration target is **function-header structural comparison**,
-not another speculative body grammar addition. Semantic integration remains a
-separate design and verification step after its required tree boundary is complete.
+Basic function-header structural comparison now has a separate native subtest:
+9 positive functions and 15 rejection cases per low/optimized profile. These cover
+shared header/body record and depth boundaries without changing the earlier
+body-only witnesses. Full owner/generic/modifier/attribute header comparison remains
+excluded. Semantic integration remains a separate design and verification step.

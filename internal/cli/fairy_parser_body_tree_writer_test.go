@@ -147,3 +147,23 @@ struct ExportBudget {usize nodes; bool emit;}
  if(!statement_tree(ref parsed,d.body,ref mut budget,0)){return 4;}return 0;
 }
 `
+
+const candidateFunctionTreeWriter = `
+@effects(console) fn bool function_tree(ref syntax::Parsed p,ref mut ExportBudget budget){
+ let d=syntax::declaration_at(p,1);
+ if(d.kind!=3 || d.owner_end!=0 || d.generic_parameters!=0 || d.public || d.unsafe_end!=0 || d.attribute_count!=0){return false;}
+ var usize parameters=0;var usize i=0;
+ while(i<d.entry_count){let e=syntax::entry_at(p,d.entry_start+i);if(e.kind==1){parameters+=1;}i+=1;}
+ let usize children=parameters+2;
+ if(!record(budget,0,90,d.start,d.end,children,d.name_start,d.name_end)){return false;}if(budget.emit){number(0);}
+ if(!type_tree(p,d.result_type,budget,1)){return false;}
+ i=0;while(i<d.entry_count){
+  let e=syntax::entry_at(p,d.entry_start+i);
+  if(e.kind==1){
+   if(!record(budget,1,91,e.start,e.end,1,e.name_start,e.name_end)){return false;}if(budget.emit){number(0);}
+   if(!type_tree(p,e.type_root,budget,2)){return false;}
+  }i+=1;
+ }
+ return statement_tree(p,d.body,budget,1);
+}
+`

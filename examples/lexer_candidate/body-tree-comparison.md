@@ -9,6 +9,13 @@ field access, indexing, slicing, arrays, record construction, references,
 propagation, unsafe blocks, switch pattern decomposition, classic for loops and
 assert/defer/discard/burn statements and region statements.
 
+A separate function-tree mode wraps that body with a basic ordinary function
+header: function/name spans, result type, and parameter/name spans with types in
+source order. It rejects owner-qualified names, generic parameter declarations,
+`pub`, `unsafe`, and attributes before emitting anything. These forms remain
+accepted by the parser and by the unchanged body-only comparison where applicable.
+Documentation trivia remains bound raw source, not a documentation AST export.
+
 ## Encoding
 
 The two independently implemented writers emit space-terminated unsigned decimal
@@ -23,7 +30,7 @@ The remaining stream is a preorder tree. Each record has the following fields:
 `kind start_byte end_byte child_count name_start_byte name_end_byte operator_size operator_byte...`
 
 Spans are original half-open byte ranges. Name spans are present on bindings,
-field access, record fields, named pattern fields and region names;
+field access, record fields, named pattern fields, region names, functions and parameters;
 other records use zero. Prefix, binary and assignment operators carry their actual
 operator bytes, independently of the source-span envelope; other nodes use length
 zero. Child counts and preorder determine all structural edges;
@@ -31,6 +38,8 @@ no arena indices, list-link nodes, pointers or host enum values are exported.
 
 | Tags | Meaning and child order |
 | --- | --- |
+| 90 | Basic function: result type, ordered parameters, body block; function-name span |
+| 91 | Parameter: written type; parameter-name span |
 | 100 | Block: statements in source order, followed by an optional tail expression |
 | 101 / 102 | Inferred let / var binding: initializer |
 | 103 | Return: optional operand |
@@ -233,5 +242,13 @@ hit the existing parser recursion limit before the exporter depth limit, so slic
 suffixes isolate that exporter boundary. Formatting and the scoped
 Mustflow contract are checked separately; no full compiler/release suite is needed
 for test-only writers. No stable compiler, grammar, ABI, SDK, package format or
-default CLI path changes. The coverage ledger identifies header structure as the
-next separate integration boundary; it does not promote this format to a public API.
+default CLI path changes. Function mode adds nine positive and fifteen rejection
+witnesses per profile, including empty/trailing-comma parameter lists, nested and
+C-function types, non-alphabetical and duplicate names, trivia/CRLF and malformed
+headers. Header and body share the same 256-record/depth-below-64 budget. Combined
+header/body cases pass at 256 records and reject 257; result, parameter and body
+paths pass at depth 63 and reject 64. Only parameter entries (kind 1) in the
+declaration's entry range are emitted as parameters; body bindings/returns are
+visited through the body. Both preflight and emission traverse the entire function.
+The original 112-body/57-rejection mode and its boundary witnesses remain unchanged.
+Neither mode is a public API or a semantic adapter.

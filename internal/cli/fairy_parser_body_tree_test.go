@@ -21,6 +21,10 @@ import (
 
 // This is a disposable comparison format, not a serialized compiler AST.
 func referenceBodyTree(input string) (string, error) {
+	return referenceComparisonTree(input, false)
+}
+
+func referenceComparisonTree(input string, header bool) (string, error) {
 	if len(input) > 32768 {
 		return "", fmt.Errorf("source budget")
 	}
@@ -31,6 +35,10 @@ func referenceBodyTree(input string) (string, error) {
 	root, ok := r.Tree.Node(r.Tree.Root)
 	if !ok || len(root.Children) != 2 {
 		return "", fmt.Errorf("expected module and one function only")
+	}
+	fn := r.AST.Functions[0]
+	if header && (fn.Owner != "" || len(fn.TypeParameters) != 0 || fn.Public || fn.Unsafe || len(fn.Attributes) != 0) {
+		return "", fmt.Errorf("unsupported function header")
 	}
 	var out strings.Builder
 	fmt.Fprintf(&out, "1 %d ", len(input))
@@ -485,7 +493,19 @@ func referenceBodyTree(input string) (string, error) {
 		}
 		return true
 	}
-	if !block(r.AST.Functions[0].Body, 0) {
+	bodyDepth := 0
+	if header {
+		bodyDepth = 1
+		if !record(90, fn.Span, len(fn.Parameters)+2, fn.NameSpan, 0, "") || !typeTree(&fn.ResultType, 1) {
+			return "", fmt.Errorf("function result export: %v", failure)
+		}
+		for _, p := range fn.Parameters {
+			if !record(91, p.Span, 1, p.NameSpan, 1, "") || !typeTree(&p.Type, 2) {
+				return "", fmt.Errorf("function parameter export: %v", failure)
+			}
+		}
+	}
+	if !block(fn.Body, bodyDepth) {
 		if failure == nil {
 			failure = fmt.Errorf("unsupported body-tree node")
 		}
@@ -498,6 +518,7 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
 	}
+	t.Run("function-header", testWindowsFairyFunctionTree)
 	inputs := []string{
 		"module main; fn i32 f(i32 a){var x=1;{let y=2;call(x,y);}if(a>0){x+=a;}else if(false){}else{x=3;}while(x<a){if(false){continue;}x+=1;break;}return x;}",
 		"module main; /* 한글 */\r\nfn void f(){let x={1};if(a){call((x),-2);}else{3}return;}",
