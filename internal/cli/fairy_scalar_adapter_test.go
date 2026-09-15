@@ -62,20 +62,31 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			return nil
 		}
 		kind, start, end, children, ns, ne, op := read(), read(), read(), read(), read(), read(), read()
-		if kind < 0 || start < 0 || end <= start || end > len(input) || children < 0 || children > 256 || op < 0 || op > 1 {
+		if kind < 0 || start < 0 || end <= start || end > len(input) || children < 0 || children > 256 || op < 0 || op > 2 {
 			return nil
 		}
 		if ns < 0 || ne < ns || ne > len(input) || (ns != 0 || ne != 0) && (ns < start || ne > end || ns == ne) {
 			return nil
 		}
 		n := &scalarWireNode{kind: kind, span: diagnostic.Span{StartByte: start, EndByte: end}, name: diagnostic.Span{StartByte: ns, EndByte: ne}}
-		if op == 1 {
-			b := read()
-			valid := kind == 104 && b == 61 || kind == 203 && (b == 43 || b == 45) || kind == 204 && (b == 43 || b == 45 || b == 42)
+		if op > 0 {
+			for i := 0; i < op; i++ {
+				b := read()
+				if b < 0 || b > 127 {
+					return nil
+				}
+				n.operator += string(byte(b))
+			}
+			valid := kind == 104 && n.operator == "=" || kind == 203 && (n.operator == "+" || n.operator == "-")
+			if kind == 204 {
+				switch n.operator {
+				case "+", "-", "*", "==", "!=", "<", "<=", ">", ">=":
+					valid = true
+				}
+			}
 			if !valid {
 				return nil
 			}
-			n.operator = string(byte(b))
 		} else if kind == 104 || kind == 203 || kind == 204 {
 			return nil
 		}
@@ -109,18 +120,18 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		return true
 	}
 	typeOK := func(n *scalarWireNode) bool {
-		return n.kind == 301 && len(n.children) == 0 && n.name == zero && text(n.span) == "i32"
+		return n.kind == 301 && len(n.children) == 0 && n.name == zero && (text(n.span) == "i32" || text(n.span) == "bool")
 	}
 	if !identifier(text(root.name)) || !typeOK(root.children[0]) {
 		return fail()
 	}
-	fn := ast.Function{Name: text(root.name), NameSpan: root.name, Span: root.span, ResultType: ast.NamedTypeReference("i32", root.children[0].span)}
+	fn := ast.Function{Name: text(root.name), NameSpan: root.name, Span: root.span, ResultType: ast.NamedTypeReference(text(root.children[0].span), root.children[0].span)}
 	last := root.name.EndByte
 	for _, p := range root.children[1 : len(root.children)-1] {
 		if p.kind != 91 || len(p.children) != 1 || !typeOK(p.children[0]) || !identifier(text(p.name)) || p.span.StartByte < last || p.children[0].span.EndByte > p.name.StartByte {
 			return fail()
 		}
-		fn.Parameters = append(fn.Parameters, ast.Parameter{Name: text(p.name), NameSpan: p.name, Span: p.span, Type: ast.NamedTypeReference("i32", p.children[0].span)})
+		fn.Parameters = append(fn.Parameters, ast.Parameter{Name: text(p.name), NameSpan: p.name, Span: p.span, Type: ast.NamedTypeReference(text(p.children[0].span), p.children[0].span)})
 		last = p.span.EndByte
 	}
 	body := root.children[len(root.children)-1]
@@ -138,18 +149,23 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		switch value.kind {
 		case 200:
 			raw := text(value.span)
-			if raw == "" || len(raw) > 1 && raw[0] == '0' {
-				return nil
-			}
-			for _, c := range raw {
-				if c < '0' || c > '9' {
+			literalKind := "integer"
+			if raw == "true" || raw == "false" {
+				literalKind = "boolean"
+			} else {
+				if raw == "" || len(raw) > 1 && raw[0] == '0' {
 					return nil
+				}
+				for _, c := range raw {
+					if c < '0' || c > '9' {
+						return nil
+					}
 				}
 			}
 			expr.Kind = syntax.KindLiteral
 			expr.Text = raw
 			expr.Cooked = raw
-			module.Literals = append(module.Literals, ast.Literal{Raw: raw, Kind: "integer", Cooked: raw})
+			module.Literals = append(module.Literals, ast.Literal{Raw: raw, Kind: literalKind, Cooked: raw})
 		case 201:
 			expr.Kind = syntax.KindPath
 			expr.Text = text(value.span)
@@ -227,7 +243,7 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		if expr == nil {
 			return fail()
 		}
-		typeRef := ast.NamedTypeReference("i32", typ.span)
+		typeRef := ast.NamedTypeReference(text(typ.span), typ.span)
 		binding := ast.Binding{Name: text(statement.name), Mutable: statement.kind == 110, Span: statement.span, NameSpan: statement.name, Type: &typeRef, Expression: expr}
 		fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindBinding, Span: statement.span, Binding: &binding})
 		module.Bindings = append(module.Bindings, binding)

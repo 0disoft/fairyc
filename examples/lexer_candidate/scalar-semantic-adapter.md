@@ -8,28 +8,32 @@ restriction or executable Fairy bootstrap stage.
 
 - Exactly `module main;` followed by one ordinary function, with whitespace allowed
   between the module prefix and function and after the function.
-- One `i32` result; zero to sixteen `i32` parameters; simple ASCII names.
-- Zero or more sequential `let i32` / `var i32` declarations and simple-name
+- One `i32` or `bool` result; zero to sixteen `i32` / `bool` parameters;
+  simple ASCII names.
+- Zero or more sequential explicitly typed `let` / `var` declarations (`i32`
+  or `bool`) and simple-name
   assignments (`name = expression;`), followed by exactly one final return
   statement. Initializers, assignment values and the return
-  expression contain decimal integers, simple names, groups,
-  unary `+`/`-`, and binary `+`/`-`/`*`. Decimal zero is `0`; leading zeroes,
+  expression contain decimal integers, `true` / `false`, simple names, groups,
+  unary `+`/`-`, binary `+`/`-`/`*`, and comparisons `== != < <= > >=`.
+  Decimal zero is `0`; leading zeroes,
   separators and radix prefixes are excluded. Signs remain separate unary nodes.
   Decimal spelling already equals its cooked value; no general literal
   decoder is implemented. Unknown names, duplicate parameters and out-of-range
-  integers are admitted to the adapter so semantic diagnostics can be compared.
+  integers and type-incompatible operands/values are admitted to the adapter so
+  semantic diagnostics can be compared. It does not infer operand types.
 - At most 4096 source bytes, 262144 wire bytes, 36000 numeric fields, 256 records
   and depth below 64. Exact source bytes in the wire must match the supplied input.
 - Attributes, modifiers, owners, generics, other types, calls, control flow,
   inferred bindings, compound or non-name assignments, nested blocks,
-  division/remainder, comparisons/logical operators and
+  division/remainder, logical operators (including unary `!`) and
   extra items are excluded. These remain language/parser
   features, not omissions to silently fill or fall back to the Go parser.
 
 The private reader verifies the revision/source binding, numeric fields, child
 counts, span bounds and containment, record roles and complete consumption. It
 constructs function/parameter/type/block/binding/assignment/return/expression fields, source line
-starts and the binding and integer literal summaries in `ast.Module`. Module identity is fixed
+starts and the binding and integer/boolean literal summaries in `ast.Module`. Module identity is fixed
 only after validating the exact closed module prefix; it is not inferred from a
 function record. Documentation attachment and generalized module parsing remain
 outside this subset.
@@ -46,10 +50,13 @@ certification.
 
 Expression conversion recursively retains group/prefix/binary records (202-204),
 source envelopes and ordered operands. Prefix and binary Text comes from the
-one-byte operator payload, restricted by node role. Assignment records require
+one- or two-byte operator payload, restricted by node role. Binary operators may
+include the six comparisons; prefix operators remain only `+` and `-`.
+Assignment records require
 exactly `=`; other records require no operator payload. The adapter does not parse precedence from source, flatten
-groups, fold arithmetic or attach a sign to a literal. It preserves integer
-literal summaries in traversal order. Thus the existing semantic analyzer owns
+groups, fold arithmetic or attach a sign to a literal. It preserves integer and
+boolean literal summaries in traversal order (`true`/`false` retain their cooked
+spelling and `boolean` kind). Thus the existing semantic analyzer owns
 direct `-2147483648` handling and out-of-range diagnostics. These AST expression
 nodes carry full expression spans, not a new standalone operator-token span field.
 
@@ -75,17 +82,20 @@ the independently lowered oracle, including names, spans and initializer order.
 
 The existing native function test reuses each low/optimized MSVC artifact for:
 
-- 44 semantic differential cases: constants, parameter use, CRLF/comments,
+- 65 semantic differential cases: constants, parameter use, CRLF/comments,
   source/parameter boundaries, precedence, left-associative subtraction, groups,
   unary signs, i32 minimum, unknown names, duplicates and integer range errors,
   sequential locals, parameter shadowing, self/forward references, reassignment,
-  immutable/unresolved targets, assignment range errors and depth boundaries;
-- 37 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
-- 27 malformed private wire cases, including truncation, extra data, source/revision
+  immutable/unresolved targets, assignment range errors, depth boundaries,
+  boolean signatures/bindings/literals, all six integer comparisons, arithmetic
+  precedence inside comparisons, and mismatched return/binding/assignment/operand types;
+- 39 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
+- 33 malformed private wire cases, including truncation, extra data, source/revision
   mismatch, unknown tag, invalid span/count/operator field, wrong expression arity,
   size overflow, independently injected excess expression depth/record count and
   inferred binding tags, child roles, name spans, statement overlap and invalid
-  assignment operators, target roles and operand overlap;
+  assignment operators, target roles and operand overlap, plus invalid comparison
+  length, byte range, operator combination and node role;
 - three candidate-output rejection cases: one more unary level or one more record
   beyond the accepted depth-63 / 256-record arithmetic and local witnesses, with empty output.
 

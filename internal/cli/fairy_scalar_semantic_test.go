@@ -57,6 +57,27 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		{"module main;fn i32 f(i32 x){x=2;return x;}", false},
 		{"module main;fn i32 f(i32 x){var i32 x=x+1;x=x*2;return x;}", true},
 		{"module main;fn i32 f(){var i32 x=1;x=" + strings.Repeat("+ ", 60) + "x;return x;}", true},
+		{"module main;fn bool f(){return true;}", true},
+		{"module main;fn bool f(){return false;}", true},
+		{"module main;fn bool f(bool ready){return ready;}", true},
+		{"module main;fn bool f(i32 a,bool ready){let bool x=ready;let bool y=a<2;return y;}", true},
+		{"module main;fn bool f(i32 a){var bool x=false;x=a>=2;return x;}", true},
+		{"module main;fn i32 f(){return true;}", false},
+		{"module main;fn i32 f(){return 1<2;}", false},
+		{"module main;fn bool f(){return 1;}", false},
+		{"module main;fn bool f(){let bool x=1;return x;}", false},
+		{"module main;fn i32 f(){let i32 x=false;return x;}", false},
+		{"module main;fn bool f(){var bool x=false;x=1;return x;}", false},
+		{"module main;fn bool f(){return 1==true;}", false},
+		{"module main;fn bool f(){return true+false;}", false},
+		{"module main;fn bool f(){return missing<2;}", false},
+		{"module main;\r\nfn bool f(i32 a,i32 b){return (a+2)*3 /* 비교 */ <= b-1;}", true},
+	}
+	for _, op := range []string{"==", "!=", "<", "<=", ">", ">="} {
+		cases = append(cases, struct {
+			input string
+			clean bool
+		}{"module main;fn bool f(i32 a,i32 b){return a" + op + "b;}", true})
 	}
 	var firstWire string
 	var params []string
@@ -128,12 +149,15 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		"module main;fn i32 Owner::f(){return 1;}",
 		"module main;@tag fn i32 f(){return 1;}",
 		"module main;fn i32 f<T>(){return 1;}",
-		"module main;fn bool f(){return true;}",
 		"module main;fn i32 f(u8 x){return x;}",
 		"module main;fn i32 f(){return 6/2;}",
 		"module main;fn i32 f(){return 6%2;}",
-		"module main;fn i32 f(){return 1<2;}",
 		"module main;fn i32 f(){return true&&false;}",
+		"module main;fn bool f(){return true||false;}",
+		"module main;fn bool f(){return !true;}",
+		"module main;fn bool f(){return 1.0<2.0;}",
+		"module main;fn bool f(){return null;}",
+		"module main;fn bool f(){if(true){return false;}return true;}",
 		"module main;fn i32 f(){return ~1;}",
 		"module main;fn i32 f(i32 x){return *x;}",
 		"module main;fn i32 f(){return 0x2A;}",
@@ -157,7 +181,6 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		atLimit + " ",
 		"module main;fn i32 f(){return 01;}",
 		"module main;fn i32 f(){return pkg::value;}",
-		"module main;fn i32 f(){return true;}",
 		"module main;fn i32 f(){return;}",
 	}
 	for _, input := range unsupported {
@@ -285,6 +308,33 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 	if !foundAssignment {
 		t.Fatal("missing assignment witness")
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 27 malformed transports", len(cases), len(unsupported))
+	comparison := "module main;fn bool f(i32 a,i32 b){return a<=b;}"
+	parts = strings.Fields(native(comparison))
+	foundComparison := false
+	for p := 2 + len(comparison); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "204" {
+			foundComparison = true
+			if op != 2 || parts[p+7] != "60" || parts[p+8] != "61" {
+				t.Fatal("comparison witness must have a two-byte <= operator")
+			}
+			for _, change := range []struct {
+				offset int
+				value  string
+			}{{6, "3"}, {7, "256"}, {8, "62"}, {0, "203"}, {0, "104"}, {6, "1"}} {
+				copy := append([]string(nil), parts...)
+				copy[p+change.offset] = change.value
+				if module, err := adaptFairyScalar(comparison, strings.Join(copy, " ")); err == nil || module != nil {
+					t.Fatal("accepted malformed comparison operator")
+				}
+			}
+			break
+		}
+		p += 7 + op
+	}
+	if !foundComparison {
+		t.Fatal("missing comparison witness")
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 33 malformed transports", len(cases), len(unsupported))
 	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}"}
 }
