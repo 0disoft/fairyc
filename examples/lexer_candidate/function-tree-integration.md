@@ -72,10 +72,11 @@ consumer is the chosen next task; unsupported forms must stop explicitly, not
    bootstrap promotion still follows the same-commit CI and stage1/stage2 gates in
    [self-hosting readiness](../../docs/architecture/self-hosting-readiness-v0.md).
 
-The proposed first integration unit is a **test-only adapter for one ordinary,
+The first integration unit is a **test-only adapter for one ordinary,
 non-generic scalar function with explicit closed input support**, feeding the Go
-semantic boundary for differential verification. It is a proposal, not admission:
-the adapter's exact field/subset contract must be established before implementation.
+semantic boundary for differential verification. The implemented private subset
+and its evidence are recorded in [scalar semantic adapter](scalar-semantic-adapter.md).
+This does not admit the general candidate into the default compiler.
 The existing consumer is `semantic.Analyze([]semantic.File)`; each File holds an
 `*ast.Module` and a source-relative Path. A prototype must populate and validate
 the module identity as well as its function; function records alone are not a File.

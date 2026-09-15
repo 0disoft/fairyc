@@ -1,0 +1,110 @@
+package cli
+
+import (
+	"fmt"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/semantic"
+	"github.com/0disoft/fairyc/internal/source"
+)
+
+func testFairyScalarAdapter(t *testing.T, native func(string) string) {
+	cases := []struct {
+		input string
+		clean bool
+	}{
+		{"module main;fn i32 answer(){return 42;}", true},
+		{"module main;\r\nfn i32 pick(i32 z,i32 a,){return a;}\r\n", true},
+		{"module main;fn i32 zero(){return 0;}", true},
+		{"module main;fn i32 max(){return 2147483647;}", true},
+		{"module main;fn i32 bad(){return missing;}", false},
+		{"module main;fn i32 duplicate(i32 x,i32 x){return x;}", false},
+		{"module main;fn i32 overflow(){return 2147483648;}", false},
+	}
+	var firstWire string
+	var params []string
+	for i := 0; i < 16; i++ {
+		params = append(params, fmt.Sprintf("i32 p%d", i))
+	}
+	wide := "module main;fn i32 wide(" + strings.Join(params, ",") + "){return p15;}"
+	base := "module main;fn i32 f(){return 1;}"
+	atLimit := "module main;" + strings.Repeat(" ", 4096-len(base)) + "fn i32 f(){return 1;}"
+	cases = append(cases, struct {
+		input string
+		clean bool
+	}{wide, true}, struct {
+		input string
+		clean bool
+	}{atLimit, true})
+	for i, c := range cases {
+		wire := native(c.input)
+		if i == 0 {
+			firstWire = wire
+		}
+		module, err := adaptFairyScalar(c.input, wire)
+		if err != nil {
+			t.Fatalf("adapter %q: %v", c.input, err)
+		}
+		// Oracle-only Go parsing. Its AST is never passed into the adapter.
+		ref, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(c.input)), source.DefaultLimits())
+		if err != nil || ref.AST == nil {
+			t.Fatalf("oracle: %v", err)
+		}
+		got := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: module}})
+		want := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: ref.AST}})
+		if (len(want.Diagnostics) == 0 && len(want.Unsupported) == 0) != c.clean {
+			t.Fatalf("oracle class %q: %+v", c.input, want)
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("semantic mismatch %q:\ngot=%+v\nwant=%+v", c.input, got, want)
+		}
+	}
+	unsupported := []string{
+		"module other;fn i32 f(){return 1;}",
+		"module main;pub fn i32 f(){return 1;}",
+		"module main;unsafe fn i32 f(){return 1;}",
+		"module main;fn i32 Owner::f(){return 1;}",
+		"module main;@tag fn i32 f(){return 1;}",
+		"module main;fn i32 f<T>(){return 1;}",
+		"module main;fn bool f(){return true;}",
+		"module main;fn i32 f(u8 x){return x;}",
+		"module main;fn i32 f(){return -1;}",
+		"module main;fn i32 f(){return 0x2A;}",
+		"module main;fn i32 f(){return 1_000;}",
+		"module main;fn i32 f(){return call();}",
+		"module main;fn i32 f(){let x=1;return x;}",
+		"module main;fn i32 f(){if(true){return 1;}return 0;}",
+		"module main;fn i32 wide(" + strings.Join(params, ",") + ",i32 extra){return p15;}",
+		atLimit + " ",
+		"module main;fn i32 f(){return 01;}",
+		"module main;fn i32 f(){return pkg::value;}",
+		"module main;fn i32 f(){return true;}",
+		"module main;fn i32 f(){return;}",
+	}
+	for _, input := range unsupported {
+		if module, err := adaptFairyScalar(input, native(input)); err == nil || module != nil {
+			t.Fatalf("adapter accepted %q", input)
+		}
+	}
+	input := cases[0].input
+	fields := strings.Fields(firstWire)
+	mutate := func(index int, value string) string {
+		copy := append([]string(nil), fields...)
+		copy[index] = value
+		return strings.Join(copy, " ")
+	}
+	root := 2 + len(input)
+	for _, wire := range []string{
+		"", strings.Join(fields[:len(fields)-1], " "), firstWire + "0 ",
+		mutate(0, "2"), mutate(2, "0"), mutate(root, "999"), mutate(root+2, "99999"),
+		mutate(root+3, "257"), mutate(root+6, "1"), mutate(root+1, "-1"), strings.Repeat("0 ", 131073),
+	} {
+		if module, err := adaptFairyScalar(input, wire); err == nil || module != nil {
+			t.Fatal("accepted malformed private transport")
+		}
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 11 malformed transports", len(cases), len(unsupported))
+}

@@ -169,5 +169,12 @@ pub unsafe fn Pair<T,U> Owner::make<T,U>(ref mut T value,U extra,){
 			}
 		}
 		t.Logf("profile=%v complete functions=%d rejections=%d", profile, len(inputs), len(rejected))
+		testFairyScalarAdapter(t, func(input string) string {
+			out, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewBufferString(input))
+			if err != nil || out.ExitCode != 0 || out.Stderr != "" || out.TrapControl != "" {
+				t.Fatalf("scalar candidate: %v %+v", err, out)
+			}
+			return out.Stdout
+		})
 	}
 }
