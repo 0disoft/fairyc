@@ -9,8 +9,9 @@ restriction or executable Fairy bootstrap stage.
 - Exactly `module main;` followed by one ordinary function, with whitespace allowed
   between the module prefix and function and after the function.
 - One `i32` result; zero to sixteen `i32` parameters; simple ASCII names.
-- Zero or more sequential immutable `let i32 name = expression;` declarations,
-  followed by exactly one final return statement. Initializers and the return
+- Zero or more sequential `let i32` / `var i32` declarations and simple-name
+  assignments (`name = expression;`), followed by exactly one final return
+  statement. Initializers, assignment values and the return
   expression contain decimal integers, simple names, groups,
   unary `+`/`-`, and binary `+`/`-`/`*`. Decimal zero is `0`; leading zeroes,
   separators and radix prefixes are excluded. Signs remain separate unary nodes.
@@ -20,13 +21,14 @@ restriction or executable Fairy bootstrap stage.
 - At most 4096 source bytes, 262144 wire bytes, 36000 numeric fields, 256 records
   and depth below 64. Exact source bytes in the wire must match the supplied input.
 - Attributes, modifiers, owners, generics, other types, calls, control flow,
-  inferred or mutable bindings, assignments, nested blocks, division/remainder, comparisons/logical operators and
+  inferred bindings, compound or non-name assignments, nested blocks,
+  division/remainder, comparisons/logical operators and
   extra items are excluded. These remain language/parser
   features, not omissions to silently fill or fall back to the Go parser.
 
 The private reader verifies the revision/source binding, numeric fields, child
 counts, span bounds and containment, record roles and complete consumption. It
-constructs function/parameter/type/block/binding/return/expression fields, source line
+constructs function/parameter/type/block/binding/assignment/return/expression fields, source line
 starts and the binding and integer literal summaries in `ast.Module`. Module identity is fixed
 only after validating the exact closed module prefix; it is not inferred from a
 function record. Documentation attachment and generalized module parsing remain
@@ -44,18 +46,21 @@ certification.
 
 Expression conversion recursively retains group/prefix/binary records (202-204),
 source envelopes and ordered operands. Prefix and binary Text comes from the
-one-byte operator payload, restricted by node role; other records require no
-operator payload. The adapter does not parse precedence from source, flatten
+one-byte operator payload, restricted by node role. Assignment records require
+exactly `=`; other records require no operator payload. The adapter does not parse precedence from source, flatten
 groups, fold arithmetic or attach a sign to a literal. It preserves integer
 literal summaries in traversal order. Thus the existing semantic analyzer owns
 direct `-2147483648` handling and out-of-range diagnostics. These AST expression
 nodes carry full expression spans, not a new standalone operator-token span field.
 
-Typed immutable binding records (109) retain the declared type, name, initializer,
+Typed binding records (109/110) retain mutability, the declared type, name, initializer,
 statement span and source order. Type/name/initializer spans must be ordered;
 statement envelopes cannot overlap. Earlier returns and a missing final return
 are rejected. Resolution and typing remain entirely owned by the Go analyzer,
 including parameter shadowing, same-scope duplicates and use before declaration.
+Assignment records (104) retain the operator, simple-name target and value in
+source order; overlapping operands are rejected. Immutable or unresolved targets
+are admitted so the semantic consumer, not the adapter, owns their diagnostics.
 
 `fairy_scalar_semantic_test.go` separately invokes the Go frontend as an oracle.
 Each AST is independently passed to `semantic.Analyze` through a `semantic.File`
@@ -70,15 +75,17 @@ the independently lowered oracle, including names, spans and initializer order.
 
 The existing native function test reuses each low/optimized MSVC artifact for:
 
-- 33 semantic differential cases: constants, parameter use, CRLF/comments,
+- 44 semantic differential cases: constants, parameter use, CRLF/comments,
   source/parameter boundaries, precedence, left-associative subtraction, groups,
   unary signs, i32 minimum, unknown names, duplicates and integer range errors,
-  sequential locals, parameter shadowing, self/forward references and local budgets;
-- 33 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
-- 22 malformed private wire cases, including truncation, extra data, source/revision
+  sequential locals, parameter shadowing, self/forward references, reassignment,
+  immutable/unresolved targets, assignment range errors and depth boundaries;
+- 37 parser-valid but adapter-unsupported shapes, requiring nil AST plus error;
+- 27 malformed private wire cases, including truncation, extra data, source/revision
   mismatch, unknown tag, invalid span/count/operator field, wrong expression arity,
   size overflow, independently injected excess expression depth/record count and
-  invalid binding mutability, child roles, name spans and statement overlap;
+  inferred binding tags, child roles, name spans, statement overlap and invalid
+  assignment operators, target roles and operand overlap;
 - three candidate-output rejection cases: one more unary level or one more record
   beyond the accepted depth-63 / 256-record arithmetic and local witnesses, with empty output.
 

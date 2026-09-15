@@ -71,11 +71,12 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		n := &scalarWireNode{kind: kind, span: diagnostic.Span{StartByte: start, EndByte: end}, name: diagnostic.Span{StartByte: ns, EndByte: ne}}
 		if op == 1 {
 			b := read()
-			if (kind != 203 && kind != 204) || (b != 43 && b != 45 && (kind != 204 || b != 42)) {
+			valid := kind == 104 && b == 61 || kind == 203 && (b == 43 || b == 45) || kind == 204 && (b == 43 || b == 45 || b == 42)
+			if !valid {
 				return nil
 			}
 			n.operator = string(byte(b))
-		} else if kind == 203 || kind == 204 {
+		} else if kind == 104 || kind == 203 || kind == 204 {
 			return nil
 		}
 		for i := 0; i < children; i++ {
@@ -204,7 +205,18 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindReturn, Span: statement.span, Expression: expr})
 			continue
 		}
-		if statement.kind != 109 || len(statement.children) != 2 || !identifier(text(statement.name)) || !typeOK(statement.children[0]) {
+		if statement.kind == 104 {
+			if statement.name != zero || len(statement.children) != 2 || statement.children[0].kind != 201 || statement.children[0].span.EndByte > statement.children[1].span.StartByte {
+				return fail()
+			}
+			target, value := expression(statement.children[0], 3), expression(statement.children[1], 3)
+			if target == nil || value == nil {
+				return fail()
+			}
+			fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindAssignment, Span: statement.span, Operator: statement.operator, Target: target, Expression: value})
+			continue
+		}
+		if (statement.kind != 109 && statement.kind != 110) || len(statement.children) != 2 || !identifier(text(statement.name)) || !typeOK(statement.children[0]) {
 			return fail()
 		}
 		typ, value := statement.children[0], statement.children[1]
@@ -216,7 +228,7 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			return fail()
 		}
 		typeRef := ast.NamedTypeReference("i32", typ.span)
-		binding := ast.Binding{Name: text(statement.name), Span: statement.span, NameSpan: statement.name, Type: &typeRef, Expression: expr}
+		binding := ast.Binding{Name: text(statement.name), Mutable: statement.kind == 110, Span: statement.span, NameSpan: statement.name, Type: &typeRef, Expression: expr}
 		fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindBinding, Span: statement.span, Binding: &binding})
 		module.Bindings = append(module.Bindings, binding)
 	}

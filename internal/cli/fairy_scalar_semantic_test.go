@@ -46,6 +46,17 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		{"module main;fn i32 f(){let i32 x=1;let i32 x=2;return x;}", false},
 		{"module main;fn i32 f(i32 x){let i32 x=x+2;return x;}", true},
 		{"module main;fn i32 f(){let i32 x=" + strings.Repeat("+ ", 60) + "1;return x;}", true},
+		{"module main;fn i32 f(){var i32 x=1;return x;}", true},
+		{"module main;fn i32 f(i32 a){var i32 x=a;x=x+2;x=(x-3)*-a;let i32 y=x;return y;}", true},
+		{"module main;\r\nfn i32 f(){var i32 x=1;\r\nx /* 대입 */ = -2147483648;\r\nreturn x;}", true},
+		{"module main;fn i32 f(){let i32 x=1;x=2;return x;}", false},
+		{"module main;fn i32 f(){missing=2;return 1;}", false},
+		{"module main;fn i32 f(){x=2;var i32 x=1;return x;}", false},
+		{"module main;fn i32 f(){var i32 x=1;x=missing;return x;}", false},
+		{"module main;fn i32 f(){var i32 x=1;x=2147483648;return x;}", false},
+		{"module main;fn i32 f(i32 x){x=2;return x;}", false},
+		{"module main;fn i32 f(i32 x){var i32 x=x+1;x=x*2;return x;}", true},
+		{"module main;fn i32 f(){var i32 x=1;x=" + strings.Repeat("+ ", 60) + "x;return x;}", true},
 	}
 	var firstWire string
 	var params []string
@@ -129,10 +140,14 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		"module main;fn i32 f(){return 1_000;}",
 		"module main;fn i32 f(){return call();}",
 		"module main;fn i32 f(){let x=1;return x;}",
-		"module main;fn i32 f(){var i32 x=1;return x;}",
+		"module main;fn i32 f(){var x=1;return x;}",
+		"module main;fn i32 f(){var i32 x=1;x+=2;return x;}",
+		"module main;fn i32 f(){var i32 x=1;x.field=2;return x;}",
+		"module main;fn i32 f(){var i32 x=1;x[0]=2;return x;}",
+		"module main;fn i32 f(){var i32 x=1;(x)=2;return x;}",
+		"module main;fn i32 f(){var i32 x=1;*x=2;return x;}",
 		"module main;fn i32 f(){let u8 x=1;return x;}",
 		"module main;fn i32 f(){let i32 x=call();return x;}",
-		"module main;fn i32 f(){let i32 x=1;x=2;return x;}",
 		"module main;fn i32 f(){let i32 x={1};return x;}",
 		"module main;fn i32 f(){let i32 x=1;}",
 		"module main;fn i32 f(){return 1;let i32 x=2;}",
@@ -233,7 +248,7 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		index int
 		value string
 	}{
-		{p, "110"},           // mutable binding
+		{p, "102"},           // inferred mutable binding
 		{p + 3, "1"},         // missing child role
 		{p + 4, "0"},         // invalid name span
 		{p + 7, "200"},       // non-type first child
@@ -246,6 +261,30 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 			t.Fatal("accepted malformed binding record")
 		}
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 22 malformed transports", len(cases), len(unsupported))
+	assignment := "module main;fn i32 f(){var i32 x=1;x=2;return x;}"
+	parts = strings.Fields(native(assignment))
+	foundAssignment := false
+	for p := 2 + len(assignment); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "104" {
+			foundAssignment = true
+			for _, change := range []struct {
+				offset int
+				value  string
+			}{{7, "43"}, {6, "0"}, {3, "1"}, {8, "202"}, {10, parts[p+17]}} {
+				copy := append([]string(nil), parts...)
+				copy[p+change.offset] = change.value
+				if module, err := adaptFairyScalar(assignment, strings.Join(copy, " ")); err == nil || module != nil {
+					t.Fatal("accepted malformed assignment record")
+				}
+			}
+			break
+		}
+		p += 7 + op
+	}
+	if !foundAssignment {
+		t.Fatal("missing assignment witness")
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 27 malformed transports", len(cases), len(unsupported))
 	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}"}
 }
