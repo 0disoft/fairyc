@@ -72,6 +72,16 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		{"module main;fn bool f(){return true+false;}", false},
 		{"module main;fn bool f(){return missing<2;}", false},
 		{"module main;\r\nfn bool f(i32 a,i32 b){return (a+2)*3 /* 비교 */ <= b-1;}", true},
+		{"module main;fn i32 f(i32 a){return if(a<0){-a}else{a};}", true},
+		{"module main;fn bool f(bool a){return if(a){false}else{true};}", true},
+		{"module main;fn i32 f(i32 a){let i32 x=if(a>0){a+1}else{2};return x;}", true},
+		{"module main;fn bool f(i32 a){var bool x=false;x=if(a>0){a<3}else{true};return x;}", true},
+		{"module main;\r\nfn i32 f(i32 a){return if(a<0){ /* 분기 */ if(a<-2){1}else{2} }else{3};}", true},
+		{"module main;fn i32 f(){return if(1){2}else{3};}", false},
+		{"module main;fn i32 f(bool a){return if(a){1}else{false};}", false},
+		{"module main;fn bool f(bool a){return if(a){1}else{2};}", false},
+		{"module main;fn i32 f(){return if(true){1}else{missing};}", false},
+		{"module main;fn i32 f(){return if(missing){1}else{2};}", false},
 	}
 	for _, op := range []string{"==", "!=", "<", "<=", ">", ">="} {
 		cases = append(cases, struct {
@@ -80,6 +90,14 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		}{"module main;fn bool f(i32 a,i32 b){return a" + op + "b;}", true})
 	}
 	var firstWire string
+	nestedIf := "1"
+	for i := 0; i < 30; i++ {
+		nestedIf = "if(true){" + nestedIf + "}else{2}"
+	}
+	cases = append(cases, struct {
+		input string
+		clean bool
+	}{"module main;fn i32 f(){return " + nestedIf + ";}", true}) // deepest tail at depth 63
 	var params []string
 	for i := 0; i < 16; i++ {
 		params = append(params, fmt.Sprintf("i32 p%d", i))
@@ -158,6 +176,13 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		"module main;fn bool f(){return 1.0<2.0;}",
 		"module main;fn bool f(){return null;}",
 		"module main;fn bool f(){if(true){return false;}return true;}",
+		"module main;fn i32 f(){return if(true){1};}",
+		"module main;fn i32 f(){return if(true){}else{2};}",
+		"module main;fn i32 f(){return if(true){1}else{};}",
+		"module main;fn i32 f(){return if(true){let i32 x=1;x}else{2};}",
+		"module main;fn i32 f(){var i32 x=1;return if(true){x=2;x}else{2};}",
+		"module main;fn i32 f(){return if(true){return 1;}else{2};}",
+		"module main;fn i32 f(){return if(true){1}else if(false){2}else{3};}",
 		"module main;fn i32 f(){return ~1;}",
 		"module main;fn i32 f(i32 x){return *x;}",
 		"module main;fn i32 f(){return 0x2A;}",
@@ -335,6 +360,33 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 	if !foundComparison {
 		t.Fatal("missing comparison witness")
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 33 malformed transports", len(cases), len(unsupported))
-	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}"}
+	conditional := "module main;fn i32 f(){return if(true){1}else{2};}"
+	parts = strings.Fields(native(conditional))
+	foundIf := false
+	for p := 2 + len(conditional); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "207" {
+			foundIf = true
+			if parts[p+14] != "100" || parts[p+28] != "100" {
+				t.Fatal("conditional witness must contain two one-value blocks")
+			}
+			for _, change := range []struct {
+				offset int
+				value  string
+			}{{3, "2"}, {7, "100"}, {14, "206"}, {17, "0"}, {29, parts[p+15]}, {18, parts[p+15]}} {
+				copy := append([]string(nil), parts...)
+				copy[p+change.offset] = change.value
+				if module, err := adaptFairyScalar(conditional, strings.Join(copy, " ")); err == nil || module != nil {
+					t.Fatal("accepted malformed conditional record")
+				}
+			}
+			break
+		}
+		p += 7 + op
+	}
+	if !foundIf {
+		t.Fatal("missing conditional witness")
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 39 malformed transports", len(cases), len(unsupported))
+	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}", "module main;fn i32 f(){return if(true){" + nestedIf + "}else{2};}"}
 }

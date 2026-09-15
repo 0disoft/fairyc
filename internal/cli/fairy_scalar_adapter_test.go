@@ -183,6 +183,9 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			expr.Kind = syntax.KindBinary
 			expr.Text = value.operator
 			arity = 2
+		case 207:
+			expr.Kind = syntax.KindIf
+			arity = 3
 		default:
 			return nil
 		}
@@ -190,11 +193,23 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 			return nil
 		}
 		last := value.span.StartByte
-		for _, child := range value.children {
+		for i, child := range value.children {
 			if child.span.StartByte < last {
 				return nil
 			}
-			part := expression(child, depth+1)
+			var part *ast.Expression
+			if value.kind == 207 && i > 0 {
+				if child.kind != 100 || child.name != zero || len(child.children) != 1 {
+					return nil
+				}
+				tail := expression(child.children[0], depth+2)
+				if tail == nil {
+					return nil
+				}
+				part = &ast.Expression{Kind: syntax.KindBlock, Span: child.span, Block: &ast.Block{Span: child.span, Tail: tail}}
+			} else {
+				part = expression(child, depth+1)
+			}
 			if part == nil {
 				return nil
 			}
