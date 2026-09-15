@@ -567,6 +567,7 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		}
 		inputs = append(inputs, "module main;fn void f(){for("+initial+";"+condition+";"+post+"){break;}}")
 	}
+	inputs = append(inputs, bodyTreeGrammarAuditInputs()...)
 	root := t.TempDir()
 	copyLexerStreamExample(t, root)
 	for _, name := range []string{"syntax.fy", "integrity.fy"} {
@@ -614,6 +615,8 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		for _, input := range []string{
 			"module main;fn void f(){let ref mut =1;}",
 			"module main;fn void f(){}fn void g(){}",
+			"module main;import lib as lib;fn void f(){}",
+			strings.Repeat(" ", 32769) + "module main;fn void f(){}",
 			"module main;fn void f(){return 1}",
 			"module main;fn void f(){" + strings.Repeat("x;", 128) + "}",
 			"module main;const i32 X=1;fn void f(){}",

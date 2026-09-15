@@ -153,8 +153,9 @@ the exporter does not turn a region into a value-producing block.
 ## Failure and resource boundary
 
 Both writers reject unhandled nodes instead of skipping them, so a future or
-otherwise unmapped node cannot produce a successful partial comparison. Mapping
-the named families here is not a complete grammar-to-export coverage audit.
+otherwise unmapped node cannot produce a successful partial comparison. The
+[coverage ledger](body-tree-coverage.md) records the bounded production-family
+audit, intentional exclusions and remaining verification gaps.
 The body-only input and shared budgets below still apply independently of the
 parser's grammar support.
 
@@ -183,11 +184,11 @@ not a hash or just declaration counts. The transport is neither loaded nor cache
 - `TestWindowsFairyParserBodyTree`: the configured
   `fairyc_go_test_parser_body_tree` lane runs only this bounded comparison.
 
-`fairyc_go_test_parser_body_tree` passes in both native profiles (16.067s).
-The bounded matrix contains sixty-one complete bodies per profile, including
+`fairyc_go_test_parser_body_tree` passes in both native profiles (18.407s).
+The bounded matrix contains 112 complete bodies per profile, including
 ordinary, typed and generic-call exact 256-record boundaries, nested type families,
 chained casts, generic/value argument order, ordinary `<` comparison, trivia/CRLF
-and depth 63 reached through binding, cast and specialization type trees. Fifty-five
+and depth 63 reached through binding, cast and specialization type trees. Fifty-seven
 rejection cases cover malformed bindings, casts, calls and returns,
 an extra declaration or function, 257/259/261 records and depth 64 across
 those same three type-entry roles. Access cases additionally compare field/index/
@@ -223,12 +224,14 @@ it was corrected to an ordinary identifier without changing grammar. Regions cov
 empty and nested bodies, repeated names, comments/CRLF, call/index/field backing
 expressions and for/switch composition. Repeated regions pass at 256 records and
 reject 257; nested region bodies pass at depth 63 and reject 64. Missing names,
-`in`, backing expressions and bodies are rejected. Rejected native
+`in`, backing expressions and bodies are rejected. The coverage audit adds every
+operator alternative and literal class, mixed-precedence and header/trailing-comma
+witnesses, plus import and oversized-source rejection. Rejected native
 exports must have empty output and nonzero status. A name-only `let i32 =1;`
 is valid inferred-binding syntax, not a malformed typed-binding test. Deep groups
 hit the existing parser recursion limit before the exporter depth limit, so slice
 suffixes isolate that exporter boundary. Formatting and the scoped
 Mustflow contract are checked separately; no full compiler/release suite is needed
 for test-only writers. No stable compiler, grammar, ABI, SDK, package format or
-default CLI path changes. The next exporter extension must map additional node
-families explicitly before those bodies can participate in this comparison.
+default CLI path changes. The coverage ledger identifies header structure as the
+next separate integration boundary; it does not promote this format to a public API.
