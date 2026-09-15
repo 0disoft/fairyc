@@ -123,11 +123,7 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		last = p.span.EndByte
 	}
 	body := root.children[len(root.children)-1]
-	if body.kind != 100 || body.name != zero || len(body.children) != 1 || body.span.StartByte < last {
-		return fail()
-	}
-	ret := body.children[0]
-	if ret.kind != 103 || ret.name != zero || len(ret.children) != 1 {
+	if body.kind != 100 || body.name != zero || len(body.children) == 0 || body.span.StartByte < last {
 		return fail()
 	}
 	module := &ast.Module{Path: "main", Span: diagnostic.Span{StartByte: 0, EndByte: len(input)}, SourceSize: len(input), SourceLineStarts: []int{0}}
@@ -190,11 +186,40 @@ func adaptFairyScalar(input, wire string) (*ast.Module, error) {
 		}
 		return expr
 	}
-	expr := expression(ret.children[0], 3)
-	if expr == nil {
-		return fail()
+	fn.Body = &ast.Block{Span: body.span}
+	last = body.span.StartByte
+	for i, statement := range body.children {
+		if statement.span.StartByte < last {
+			return fail()
+		}
+		last = statement.span.EndByte
+		if i == len(body.children)-1 {
+			if statement.kind != 103 || statement.name != zero || len(statement.children) != 1 {
+				return fail()
+			}
+			expr := expression(statement.children[0], 3)
+			if expr == nil {
+				return fail()
+			}
+			fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindReturn, Span: statement.span, Expression: expr})
+			continue
+		}
+		if statement.kind != 109 || len(statement.children) != 2 || !identifier(text(statement.name)) || !typeOK(statement.children[0]) {
+			return fail()
+		}
+		typ, value := statement.children[0], statement.children[1]
+		if typ.span.EndByte > statement.name.StartByte || statement.name.EndByte > value.span.StartByte {
+			return fail()
+		}
+		expr := expression(value, 3)
+		if expr == nil {
+			return fail()
+		}
+		typeRef := ast.NamedTypeReference("i32", typ.span)
+		binding := ast.Binding{Name: text(statement.name), Span: statement.span, NameSpan: statement.name, Type: &typeRef, Expression: expr}
+		fn.Body.Statements = append(fn.Body.Statements, ast.Statement{Kind: syntax.KindBinding, Span: statement.span, Binding: &binding})
+		module.Bindings = append(module.Bindings, binding)
 	}
-	fn.Body = &ast.Block{Span: body.span, Statements: []ast.Statement{{Kind: syntax.KindReturn, Span: ret.span, Expression: expr}}}
 	module.Functions = []ast.Function{fn}
 	for i, b := range []byte(input) {
 		if b == '\n' {

@@ -35,6 +35,17 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		{"module main;fn i32 f(){return +2147483648;}", false},
 		{"module main;\r\nfn i32 f(i32 a,i32 b){return +(a /* 연산 */ - -b);}", true},
 		{"module main;fn i32 f(){return " + strings.Repeat("+ ", 60) + "1;}", true},
+		{"module main;fn i32 f(){let i32 x=1;return x;}", true},
+		{"module main;fn i32 f(i32 a){let i32 x=a+2;let i32 y=(x-3)*-a;return y+x;}", true},
+		{"module main;\r\nfn i32 f(i32 a){\r\nlet i32 x = +(a /* 초기값 */ - 2);\r\nlet i32 y=x*3;\r\nreturn y;\r\n}", true},
+		{"module main;fn i32 f(){let i32 x=-2147483648;return x;}", true},
+		{"module main;fn i32 f(){let i32 x=2147483648;return x;}", false},
+		{"module main;fn i32 f(){let i32 x=missing;return x;}", false},
+		{"module main;fn i32 f(){let i32 x=y;let i32 y=1;return x;}", false},
+		{"module main;fn i32 f(){let i32 x=x;return x;}", false},
+		{"module main;fn i32 f(){let i32 x=1;let i32 x=2;return x;}", false},
+		{"module main;fn i32 f(i32 x){let i32 x=x+2;return x;}", true},
+		{"module main;fn i32 f(){let i32 x=" + strings.Repeat("+ ", 60) + "1;return x;}", true},
 	}
 	var firstWire string
 	var params []string
@@ -64,6 +75,15 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		input string
 		clean bool
 	}{budgetHeader + wideExpr + ";}", true}) // 256 records
+	var locals strings.Builder
+	for i := 0; i < 83; i++ {
+		fmt.Fprintf(&locals, "let i32 x%d=1;", i)
+	}
+	localHeader := "module main;fn i32 f(){" + locals.String()
+	cases = append(cases, struct {
+		input string
+		clean bool
+	}{localHeader + "return + + x82;}", true}) // 3 + 83*3 + 4 = 256 records
 	for i, c := range cases {
 		wire := native(c.input)
 		if i == 0 {
@@ -77,6 +97,9 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		ref, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(c.input)), source.DefaultLimits())
 		if err != nil || ref.AST == nil {
 			t.Fatalf("oracle: %v", err)
+		}
+		if !reflect.DeepEqual(module.Functions, ref.AST.Functions) || !reflect.DeepEqual(module.Bindings, ref.AST.Bindings) || !reflect.DeepEqual(module.Literals, ref.AST.Literals) {
+			t.Fatalf("AST fields or summary mismatch %q", c.input)
 		}
 		got := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: module}})
 		want := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: ref.AST}})
@@ -106,6 +129,14 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		"module main;fn i32 f(){return 1_000;}",
 		"module main;fn i32 f(){return call();}",
 		"module main;fn i32 f(){let x=1;return x;}",
+		"module main;fn i32 f(){var i32 x=1;return x;}",
+		"module main;fn i32 f(){let u8 x=1;return x;}",
+		"module main;fn i32 f(){let i32 x=call();return x;}",
+		"module main;fn i32 f(){let i32 x=1;x=2;return x;}",
+		"module main;fn i32 f(){let i32 x={1};return x;}",
+		"module main;fn i32 f(){let i32 x=1;}",
+		"module main;fn i32 f(){return 1;let i32 x=2;}",
+		"module main;fn i32 f(){return 1;return 2;}",
 		"module main;fn i32 f(){if(true){return 1;}return 0;}",
 		"module main;fn i32 wide(" + strings.Join(params, ",") + ",i32 extra){return p15;}",
 		atLimit + " ",
@@ -184,6 +215,37 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 			t.Fatal("missing arithmetic boundary node")
 		}
 	}
-	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 16 malformed transports", len(cases), len(unsupported))
-	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}"}
+	bindings := "module main;fn i32 f(){let i32 x=1;let i32 y=2;return x+y;}"
+	parts = strings.Fields(native(bindings))
+	var bindingRecords []int
+	for p := 2 + len(bindings); p < len(parts); {
+		op, _ := strconv.Atoi(parts[p+6])
+		if parts[p] == "109" {
+			bindingRecords = append(bindingRecords, p)
+		}
+		p += 7 + op
+	}
+	if len(bindingRecords) != 2 {
+		t.Fatal("binding witness must contain two declarations")
+	}
+	p, q := bindingRecords[0], bindingRecords[1]
+	for _, change := range []struct {
+		index int
+		value string
+	}{
+		{p, "110"},           // mutable binding
+		{p + 3, "1"},         // missing child role
+		{p + 4, "0"},         // invalid name span
+		{p + 7, "200"},       // non-type first child
+		{p + 5, parts[p+16]}, // name overlaps initializer
+		{q + 1, parts[p+1]},  // overlapping statement envelopes
+	} {
+		copy := append([]string(nil), parts...)
+		copy[change.index] = change.value
+		if module, err := adaptFairyScalar(bindings, strings.Join(copy, " ")); err == nil || module != nil {
+			t.Fatal("accepted malformed binding record")
+		}
+	}
+	t.Logf("scalar adapter: %d semantic comparisons, %d unsupported shapes, 22 malformed transports", len(cases), len(unsupported))
+	return []string{"module main;fn i32 f(){return " + strings.Repeat("+ ", 61) + "1;}", budgetHeader + "+" + wideExpr + ";}", localHeader + "let i32 x83=1;return x83;}"}
 }
