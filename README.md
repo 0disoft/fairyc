@@ -5,6 +5,9 @@
 - Repository type: cli-tool
 - Addon: monorepo
 
+- License: [Apache-2.0](LICENSE) for project-owned components; see
+  [licensing scope](LICENSING.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+
 Fairy C is an experimental systems programming language for new native software that needs C-like control, predictable costs, explicit C interoperability, and a substantially safer default resource model without a garbage collector or a heavy runtime.
 
 The project is not trying to beat every hand-tuned C program or make every C ownership graph safe. Its intended advantage is that ordinary Fairy C code carries enough ownership, aliasing, bounds, and effect information for the compiler to reject common failures and generate competitive machine code without relying on build-mode-dependent undefined behavior.

@@ -1,5 +1,16 @@
 # Third-party notices
 
+Third-party licenses are not replaced by Fairy C's Apache-2.0 license.
+
+## Go runtime and standard library
+
+- Toolchain inspected: Go 1.26.4 (Windows AMD64, CGO disabled)
+- License text: [GO-LICENSE.txt](GO-LICENSE.txt), copied from the installed Go
+  toolchain LICENSE; upstream: https://go.dev/LICENSE
+- Binary distributions include the full copyright, conditions and disclaimer.
+- This top-level notice is not a substitute for checking component-specific
+  terms when the linked toolchain or distributed contents change.
+
 ## github.com/BurntSushi/toml
 
 - Version: v1.6.0

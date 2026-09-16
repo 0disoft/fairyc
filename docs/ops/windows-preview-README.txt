@@ -1,10 +1,13 @@
 Fairy C - LOCAL VERIFICATION PACKAGE ONLY
 
-NOT FOR PUBLIC DISTRIBUTION. This is not an approved release or installer.
-Distribution terms, third-party notices and release ownership are not finalized.
-Do not upload this archive or describe it as a supported public release.
+NOT AN APPROVED PUBLIC RELEASE. This is not an installer or supported release.
+Project-owned components use Apache-2.0; third-party components retain their
+licenses. LOCAL-ONLY describes release status, not additional license restrictions.
+Release ownership and complete release validation remain outstanding.
 
-Contents: fairyc.exe, this README, SHA256SUMS.txt.
+Contents: fairyc.exe, this README, SHA256SUMS.txt, LICENSE, LICENSING.md,
+THIRD_PARTY_NOTICES.md and GO-LICENSE.txt. Keep applicable licenses/notices
+with redistributions. See LICENSING.md for runtime/SDK and generated-code scope.
 The adjacent .zip.sha256 file checks the archive. SHA-256 detects changes; it
 does not authenticate a publisher. This build is unsigned and experimental.
 

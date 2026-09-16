@@ -4,6 +4,14 @@
 - Repository baseline: `f3e29321c2adc2c02168d4ad84e4c981ebc1c963`
 - Status: engineering inventory and selection proposal; no license adopted
 
+Subsequent owner decision (2026-09-16): Apache-2.0 was approved for project-owned
+compiler/runtime/SDK material. [LICENSING.md](../../LICENSING.md) now owns the
+applied scope. The inventory and options below are the pre-adoption record,
+not a statement that the current project is still unlicensed. Existing TOML
+terms are preserved; Go's license and all current project notice files are now
+included by the local ZIP script. This does not establish full provenance or
+authorize an official release.
+
 ## Verified inventory
 
 | Surface | Evidence | Distribution action still required |

@@ -48,7 +48,9 @@ if (packageLocal) {
   mkdirSync(stage);
   copyFileSync(exe, join(stage, 'fairyc.exe'));
   copyFileSync(join(repo, 'docs/ops/windows-preview-README.txt'), join(stage, 'README.txt'));
-  const entries = ['README.txt', 'fairyc.exe'];
+  const notices = ['LICENSE', 'LICENSING.md', 'THIRD_PARTY_NOTICES.md', 'GO-LICENSE.txt'];
+  for (const name of notices) copyFileSync(join(repo, name), join(stage, name));
+  const entries = ['README.txt', 'fairyc.exe', ...notices];
   const hashes = entries.map(name => sha(join(stage, name)));
   writeFileSync(join(stage, 'SHA256SUMS.txt'), entries.map((name, i) => `${hashes[i]}  ${name}`).join('\n') + '\n', { flag: 'wx' });
   const checksumHash = sha(join(stage, 'SHA256SUMS.txt'));
@@ -59,7 +61,7 @@ if (packageLocal) {
   process.env.FAIRYC_PREVIEW_ZIP = archive;
   process.env.FAIRYC_PREVIEW_EXTRACTED = extracted;
   command('zip-roundtrip', 'powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-    "$ErrorActionPreference='Stop'; Compress-Archive -LiteralPath @((Join-Path $env:FAIRYC_PREVIEW_STAGE 'fairyc.exe'),(Join-Path $env:FAIRYC_PREVIEW_STAGE 'README.txt'),(Join-Path $env:FAIRYC_PREVIEW_STAGE 'SHA256SUMS.txt')) -DestinationPath $env:FAIRYC_PREVIEW_ZIP; Expand-Archive -LiteralPath $env:FAIRYC_PREVIEW_ZIP -DestinationPath $env:FAIRYC_PREVIEW_EXTRACTED"], repo);
+    "$ErrorActionPreference='Stop'; $names=@('fairyc.exe','README.txt','LICENSE','LICENSING.md','THIRD_PARTY_NOTICES.md','GO-LICENSE.txt','SHA256SUMS.txt'); $paths=@($names | ForEach-Object { Join-Path $env:FAIRYC_PREVIEW_STAGE $_ }); Compress-Archive -LiteralPath $paths -DestinationPath $env:FAIRYC_PREVIEW_ZIP; Expand-Archive -LiteralPath $env:FAIRYC_PREVIEW_ZIP -DestinationPath $env:FAIRYC_PREVIEW_EXTRACTED"], repo);
   delete process.env.FAIRYC_PREVIEW_STAGE;
   delete process.env.FAIRYC_PREVIEW_ZIP;
   delete process.env.FAIRYC_PREVIEW_EXTRACTED;

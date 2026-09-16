@@ -4,6 +4,12 @@
 - Reviewed compiler baseline: `39221d05a8375aa25fef2ecc60eddef3974a6377`
 - Status: local documentation review, not release approval or a current CI attestation
 
+Update 2026-09-16: the owner approved Apache-2.0; see
+[current licensing scope](../../LICENSING.md). Earlier unselected-license and
+missing-notice rows below describe the reviewed historical baselines. The local
+ZIP now includes project and TOML/Go notices. This does not close release-owner,
+clean-host, clean-candidate or complete component-provenance checks.
+
 ## Decision boundary
 
 Publishing the Go Stage 0 prototype and promoting the Fairy-written parser are
@@ -170,3 +176,21 @@ No runtime, API, DB, language/SDK version or native parser promotion changed.
 The subsequent [license review](license-review.md) identifies the existing TOML
 notice, missing ZIP notice coverage, Go/runtime/SDK boundaries and two owner
 license options. It adopts no license and does not clear this local ZIP for release.
+
+### Approved license and notice-bearing ZIP (2026-09-16)
+
+The owner subsequently selected Apache-2.0. `LICENSE` preserves the complete
+official text; `LICENSING.md` declares project-owned scope and excludes third-party
+relicensing. `GO-LICENSE.txt` preserves the installed Go license, and the existing
+TOML MIT text remains intact. The ZIP now contains seven verified entries:
+the executable, README, checksums, LICENSE, LICENSING.md, THIRD_PARTY_NOTICES.md
+and GO-LICENSE.txt. Missing notice files fail packaging; extraction checks every
+content hash and the complete inventory.
+
+The local run based on `b65a13f1595a5541c6fd95749e0d95485e6cb3d8` passed ZIP
+roundtrip plus new/check/locked check, semantic/default-native/release-native
+tests and default/release runs. No compiler behavior or version was changed.
+Receipt: `.cache/starter-smoke-x9d5I3/receipt.json`.
+ZIP SHA-256: `6646451a382b3a6e59fa8575245278827005e027c9dd517ea26303eda3147674`.
+This confirms packaging and local execution, not clean-candidate provenance,
+clean-PC compatibility, all linked-component notices or hosted release CI.
