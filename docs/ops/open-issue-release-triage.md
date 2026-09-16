@@ -1,5 +1,34 @@
 # Open issue release triage — 2026-09-16
 
+## Owner-approved action update
+
+The owner subsequently authorized pruning low-value issues and resolving concrete
+remaining work. The historical 19-issue snapshot below is retained as the review
+basis; the current open count after this action is **10**, not 19.
+
+- Closed as **not planned**, never as implemented: #28, #29, #30, #32, #33,
+  #34, #41, #42 and #43. Their bodies preserve original proposals and now explain
+  the missing concrete workload/target/codec or host contract and a reopening
+  condition. Candidate ADRs, existing tools and safety rejection gates remain intact.
+- Reconciled #18: fourteen already-completed children are checked with a bounded
+  scope caveat; nine deferred proposals are explicitly not implemented; the stale
+  branch baseline and formerly-open PR guidance are corrected. The tracker stays open.
+- Reconciled #49: only the existing owner/evidence matrix acceptance item is
+  checked. Same-commit CI and the second-laptop report are linked without claiming
+  toolchain-free deployment closure or complete target maturity.
+- Retained concrete work: #27 measurement evidence; #31 Linux profile; #36 portable
+  paths; #37 resource arenas; #45 resource-bearing enums; #46 broader burn;
+  #47 public tagged C ABI; #49 Windows maturity. These are **not resolved** by pruning.
+  #18 and #1 remain tracking/maintenance issues.
+
+GitHub states and `not_planned` closure reasons were reread after mutation. No
+compiler changes, issue deletion, push, release or visibility change occurred.
+Next implementation/evidence unit is #27: reuse the existing growth probes, but
+verify public scalar-workspace coverage before treating retained private-probe
+measurements as satisfying the entire issue. That work was not executed in this unit.
+
+## Historical review snapshot
+
 Reviewed local baseline: `7196f699ce86d751874bb8998efafc85e4c5b204`.
 GitHub API snapshot: 19 open issues, zero open PRs in the returned collection.
 This is a source-publication scope review, not implementation of the backlog,
