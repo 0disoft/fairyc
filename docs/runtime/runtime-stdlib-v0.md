@@ -84,7 +84,7 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.59` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.60` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, positioning,
 and logical size, Windows MSVC `std::fs` extensions, console I/O, scalar output, and effect-free
 `std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through 0334.
@@ -347,7 +347,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.59` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.60` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -900,7 +900,7 @@ Composite resources may contain resources for infallible reverse-order drop. Sta
 
 ## `Vec<T>` on Windows
 
-SDK `0.0.0-stage0.59` selects the core-plus-vector bundle when source imports
+SDK `0.0.0-stage0.60` selects the core-plus-vector bundle when source imports
 `std::vec`; other SDK imports keep the six-module core. The bundle's exact digest
 and SDK version participate in lock and cache identity. The stable workspace CLI
 checks, builds and runs it; tests require `--native` on Windows AMD64 MSVC.

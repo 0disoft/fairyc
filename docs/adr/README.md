@@ -359,6 +359,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0392-nested-resource-c-storage-and-cleanup.md`: adds acyclic resource-field layout and reverse cleanup, post-cleanup receiver propagation, native trace comparison and token Buffer ownership evidence.
 - `0393-public-vector-truncation.md`: adds capacity-preserving reverse tail destruction through SDK vector truncation.
 - `0394-direct-scalar-field-stores.md`: executes direct scalar field assignment with value-copy isolation and whole-root loan checks.
+- `0395-field-initializer-shorthand.md`: adds `.field` initialization through ordinary lexical values and existing ownership rules in language `/15`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

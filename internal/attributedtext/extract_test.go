@@ -285,7 +285,7 @@ func prepareAttributedTextWorkspaceSchema(t *testing.T, sourceBytes []byte, vers
 uid = "test.attributed-text"
 name = "attributed-text"
 version = "1.0.0"
-language = "fairyc-language/14"
+language = "fairyc-language/15"
 source = "src"
 `
 	writeAttributedTextFixture(t, filepath.Join(root, "fairy.toml"), []byte(manifest))

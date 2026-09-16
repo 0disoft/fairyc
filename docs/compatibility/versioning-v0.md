@@ -836,8 +836,8 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.59`, language
-`fairyc-language/14`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.60`, language
+`fairyc-language/15`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
@@ -1423,5 +1423,11 @@ ADR 0393 advances only the SDK to `0.0.0-stage0.59` for `std::vec::truncate<T>`.
 It is source-additive and preserves `clear<T>` behavior; the SDK version and
 source digest require lock refresh. Language `/14`, runtime `/0`, private vector
 transport and target admission remain unchanged.
+
+ADR 0395 advances the exact language pin to `/15` and SDK to `0.0.0-stage0.60`
+for same-name field initializers. Existing source remains valid after updating
+manifest pins and refreshing locks. The existing cache revision field isolates
+the new grammar; runtime ABI, MIR and public-interface schemas remain unchanged.
+The legacy source migrator is not a general `/14` to `/15` migration path.
 
 Language 1.0 compatibility, stable native ABI and mangling, stable MIR exchange, binary package ABI, stable `SymbolId`, stable anchors, exact diagnostic-span guarantees, stable debugger formats, and cross-version `.fymap` migration are not Stage 0 promises.

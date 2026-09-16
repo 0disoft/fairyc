@@ -183,7 +183,7 @@ func writeVectorCacheWorkspace(t *testing.T, client, provider string) string {
 uid = "test.vector-cache.client"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/14"
+language = "fairyc-language/15"
 source = "src"
 [workspace]
 members = ["storage"]
@@ -197,7 +197,7 @@ features = []
 uid = "test.vector-cache.storage"
 name = "storage"
 version = "1.0.0"
-language = "fairyc-language/14"
+language = "fairyc-language/15"
 source = "src"
 `)
 	writeVectorCacheFile(t, root, "src/main.fy", client)

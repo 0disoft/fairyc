@@ -116,7 +116,7 @@ func TestWorkspaceCallV3RejectsMissingCleanupTargetAndStaleMaps(t *testing.T) {
 func aggregateCallPartitions(t *testing.T) ([]Partition, map[string]LoadExpectation) {
 	t.Helper()
 	root := t.TempDir()
-	manifest := "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.cleanup.join.PACKAGE\"\nname = \"PACKAGE\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/14\"\nsource = \"src\"\n"
+	manifest := "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.cleanup.join.PACKAGE\"\nname = \"PACKAGE\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/15\"\nsource = \"src\"\n"
 	files := map[string]string{
 		"fairy.toml":     strings.ReplaceAll(manifest, "PACKAGE", "app") + "[workspace]\nmembers = [\"lib\"]\n[dependencies.lib]\npath = \"lib\"\nversion = \"1.0.0\"\nfeatures = []\n",
 		"lib/fairy.toml": strings.ReplaceAll(manifest, "PACKAGE", "lib"),

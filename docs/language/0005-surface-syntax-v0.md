@@ -26,6 +26,10 @@
   explicit calls as `identity<i32>(42)`. Specialization precedes ordinary typed HIR/MIR; see the
   bounded generic function contract below.
 - Source-level locals have initializers. `let` prevents reassignment; `var` permits reassignment and mutable borrowing.
+- Language 15 admits `.field` in record initializers as exactly `.field = field`, using
+  the ordinary lexical value of that name. Explicit and shorthand fields may be mixed.
+  Field completeness, duplicate checks, visibility, evaluation order and resource moves
+  are unchanged. This adds no defaults, spreads or implicit copies (ADR 0395).
 - A written local is `let Type name = value;` or `var Type name = value;`. The inferred forms are
   exactly `let name = value;` and `var name = value;`; `auto` is not a source declaration marker.
 - Parameters use `Type name`. A callee that needs a reassignable local explicitly initializes a

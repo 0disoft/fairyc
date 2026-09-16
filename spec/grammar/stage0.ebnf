@@ -216,7 +216,7 @@ array_contents = expression (";" const_expression | ("," expression)* ","?) ;
    before semantic admission, like the generic aggregate declarations above. *)
 record_expression = path type_arguments? "{" record_field_list? "}" ;
 record_field_list = record_field ("," record_field)* ","? ;
-record_field = "." IDENT "=" expression ;
+record_field = "." IDENT ("=" expression)? ;
 
 if_expression = "if" "(" expression ")" block
                 ("else" (block | if_expression))?

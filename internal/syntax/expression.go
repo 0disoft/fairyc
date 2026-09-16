@@ -211,9 +211,9 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				fieldStart := p.currentFullIndex()
 				p.expect(".")
+				nameStart := p.currentFullIndex()
 				field, fieldSpan := p.parseNameWithSpan()
-				p.expect("=")
-				value := p.parseExpression(0, true)
+				value := p.parseFieldValue(nameStart, field)
 				children = append(children, p.addNamedNode(KindField, fieldStart, []NodeID{value}, field, "", fieldSpan))
 				if !p.match(",") {
 					break
@@ -235,9 +235,9 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				fieldStart := p.currentFullIndex()
 				if p.match(".") {
+					nameStart := p.currentFullIndex()
 					name, nameSpan := p.parseNameWithSpan()
-					p.expect("=")
-					valueID := p.parseExpression(0, true)
+					valueID := p.parseFieldValue(nameStart, name)
 					children = append(children, p.addNamedNode(KindField, fieldStart, []NodeID{valueID}, name, "", nameSpan))
 					if !p.match(",") {
 						break

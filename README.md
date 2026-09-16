@@ -522,7 +522,11 @@ Fairy source into the existing typed HIR layout, public-interface v5 hash, and c
 The first fields are explicit `cell Value name;` and `map Key Value name;` declarations over a closed
 fixed codec set. Source state operations, native persistence, and deployable targets remain closed.
 
-ADR 0385 advances the current language to `fairyc-language/14` and SDK `0.0.0-stage0.57`.
+ADR 0385 introduced stable explicit scalar generics in language `/14`. ADR 0395 advances
+the current language to `fairyc-language/15` and SDK `0.0.0-stage0.60`.
+Record initializers may now use `Token { .kind, .start, .end }` as shorthand for
+same-name lexical values. Mixed explicit fields remain supported; ownership rules
+are unchanged. Existing workspaces must update the language pin and refresh locks.
 Stable workspace `check`, `build`, `run`, and `test` accept explicit scalar generic functions such
 as `fn T identity<T>(T value) { return value; }` and `identity<i32>(42)`, including public functions
 across imports. Type inference, nominal generic arguments, and user-defined static interfaces

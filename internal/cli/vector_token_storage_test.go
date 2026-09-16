@@ -17,7 +17,7 @@ func TestWindowsVectorTokenStorage(t *testing.T) {
 uid = "test.cli.vector-token-storage"
 name = "tokens"
 version = "1.0.0"
-language = "fairyc-language/14"
+language = "fairyc-language/15"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", vectorTokenStorageSource)
