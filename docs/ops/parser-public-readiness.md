@@ -254,3 +254,22 @@ setup and may increase runner usage. A local discovery check verifies exhaustive
 non-overlapping selection against Go's actual test inventory and rejects missing
 or duplicate group mutations. The replacement hosted run is still required before
 claiming that the cancellation is fixed. No compiler behavior or version changes.
+
+### Replacement CI success and reporting routes (2026-09-16)
+
+The approved push of `34fe041c8100d3a7e7da161cf9eac8fc0921bb03` produced
+[Frontend run 35103049037](https://github.com/0disoft/fairyc/actions/runs/35103049037),
+which completed successfully: Windows frontend, Windows native smoke, all four
+Fairy proof groups, Linux frontend and dependent Linux C differential passed.
+This replaces the pending-run statement above for that exact revision. It proves
+one successful replacement run, not a general performance or flakiness guarantee.
+The retained ZIP was built from `56175317`; subsequent commits changed only
+documentation and the workflow, not compiler code. No new ZIP was built or released.
+
+GitHub repository metadata confirms Issues are enabled and the repository remains
+private. Non-sensitive bug reports can use the repository Issues page with access;
+this is not yet an anonymously accessible public reporting route. No `SECURITY.md`
+or confirmed private vulnerability-reporting channel was found in this review.
+Private reporting capability, owner and response policy remain unconfirmed; the
+README explicitly warns against sending sensitive details to public issues.
+No repository visibility, reporting settings, release, tag or support SLA was changed.

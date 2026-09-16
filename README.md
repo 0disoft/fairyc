@@ -14,18 +14,56 @@ The project is not trying to beat every hand-tuned C program or make every C own
 
 ## Human quickstart
 
+### Get the compiler
+
+There is no approved public installer or binary release yet. For a source checkout,
+follow the [Windows compiler build guide](DEVELOPMENT.md#local-windows-compiler-executable).
+If you received the separately verified experimental ZIP, extract it and keep its
+license files together. Go and Bun are compiler-build tools, not prerequisites for
+using that executable.
+
+The verified starter path is native Windows/AMD64 with x64 MSVC and a Windows SDK.
+Install Microsoft's [C++ Build Tools](https://learn.microsoft.com/en-us/cpp/overview/acquire-msvc)
+with the Desktop development with C++ workload for native tests and execution.
+WSL2, Linux and a virtual machine are not required. Source checking and semantic
+tests do not require the C compiler. Other target mechanisms and CI probes are not
+a promise of equivalent end-user support.
+
+### Create, test and run
+
 With a built `fairyc` executable, run these product commands manually from a scratch parent
-directory to create one explicit-identity starter:
+directory to create one explicit-identity starter. The commands below assume the
+executable is on PATH; in PowerShell you can instead use its absolute path with `&`.
 
 ```text
 fairyc new hello-fairy --uid example.hello-fairy
 cd hello-fairy
 fairyc check
+fairyc check --locked
 fairyc test --list --json --locked
 fairyc test --json --locked
 fairyc test --locked
 fairyc test --native --locked
+fairyc test --native --release --locked
+fairyc run --locked
+fairyc run --release --locked
 ```
+
+The generated `src/main.fy` is a small complete program:
+
+```text
+module main;
+
+pub fn i32 answer() {
+    return 42;
+}
+
+fn i32 main() {
+    return answer() - 42;
+}
+```
+
+Its test reports one passed, zero failed. Both run modes exit zero without output.
 
 The first check validates the generated source and publishes `fairy.lock`. On Windows/amd64 with
 local x64 MSVC, `fairyc test --native --locked` compiles each generated test into an isolated
@@ -34,6 +72,25 @@ its temporary native image with the caller's stdin attached after successful com
 generated `README.md` contains the exact next steps and a safe
 `std::io::write` example for direct stable execution. `fairyc new` never merges, upgrades, or
 overwrites an existing path.
+
+### Experimental limits and reporting
+
+This is the Go Stage 0 compiler, not the experimental Fairy-written parser or a
+self-hosted release. No production-readiness, stable compatibility or complete
+language/backend coverage is promised. See the [readiness evidence](docs/ops/parser-public-readiness.md)
+for local and second-laptop evidence, exact candidate hashes, and the
+[successful CI run on `34fe041c`](https://github.com/0disoft/fairyc/actions/runs/35103049037).
+
+For non-sensitive bugs, use [GitHub Issues](https://github.com/0disoft/fairyc/issues)
+with the compiler commit or executable hash, OS/toolchain versions, a minimal
+reproducer, expected/actual behavior and redacted diagnostics. Issues are enabled;
+while the repository is private, repository access is required.
+
+A private vulnerability-reporting channel has not yet been confirmed. Do not post
+credentials, private code, personal data or vulnerability details in public issues.
+Confirm a private reporting channel with the maintainer before sending sensitive
+details. Establishing that channel remains a public-launch prerequisite; no
+response-time or supported-version commitment is implied.
 
 ## Current phase
 

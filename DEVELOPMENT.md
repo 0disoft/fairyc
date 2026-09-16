@@ -17,8 +17,9 @@ This document records the executable development boundary for the Go Stage 0 com
 
 - `go.mod` declares the current development toolchain language level. It is not yet a released
   minimum supported Go version.
-- The implementation uses only the Go standard library in this slice. Verification is configured
-  to run with module and checksum network access disabled.
+- Compiler dependencies are declared in `go.mod` and `go.sum`, including the TOML
+  parser. The local wrapper requires an already installed compatible Go toolchain,
+  Bun and cached modules; it disables module and checksum network access.
 - Local Go caches belong under ignored `.cache/go-*` paths. Cache contents are never test evidence
   or source truth.
 - In the containing Mustflow workspace, use `fairyc_go_format`, `fairyc_go_vet`,
@@ -28,8 +29,9 @@ This document records the executable development boundary for the Go Stage 0 com
 ## Local Windows compiler executable
 
 The Stage 0 compiler can be built as an ordinary local Windows executable. This removes `go run`
-from repeated compiler invocations; it does not make the compiler self-hosted, released, installed,
-or redistributable. From the repository root in PowerShell:
+from repeated compiler invocations; it does not make the compiler self-hosted,
+installed or an approved release. Redistribution terms are in [LICENSING.md](LICENSING.md).
+From the repository root in PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force build | Out-Null
