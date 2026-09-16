@@ -166,3 +166,7 @@ clean-machine test, reproducible archive claim or release. ZIP bytes may vary
 with timestamps. Source publication, license selection, third-party notices,
 signing policy, release ownership and external distribution remain unperformed.
 No runtime, API, DB, language/SDK version or native parser promotion changed.
+
+The subsequent [license review](license-review.md) identifies the existing TOML
+notice, missing ZIP notice coverage, Go/runtime/SDK boundaries and two owner
+license options. It adopts no license and does not clear this local ZIP for release.
