@@ -65,3 +65,12 @@ The counts alone overstate the language-level problem:
 - The SDK audit provides a repeatable baseline for a later comparison without treating raw token
   frequency as user harm.
 - `docs/product/02-spec.md` remains unchanged because no language behavior was accepted.
+
+## Follow-up evidence (2026-09-17)
+
+The [real scanner boundary experiment](../ops/token-index-struct-experiment.md)
+demonstrates TokenIndex/ByteOffset interchange and compares ordinary structs.
+The [nominal scalar prototype proposal](../architecture/nominal-scalar-prototype-v0.md)
+defines a bounded validation/erasure experiment and its remaining admission gates.
+This follow-up does not accept syntax or lift the stable-language implementation
+deferral; the original revision `/8` audit remains historical evidence.
