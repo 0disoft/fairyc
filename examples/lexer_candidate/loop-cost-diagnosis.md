@@ -297,3 +297,43 @@ Only test input and this report changed in the compiler repository: no productio
 code, grammar, API, ABI, SDK or version revision changes. The bounded 8/12/16
 profiling test is unchanged and was not rerun; full release validation is omitted
 for this test-only increment.
+
+## Stateful loop observations (2026-09-16)
+
+Compiler baseline: `19f9f0f45463f14761b4b90cc0a36bfef5f425d9`. Production analysis
+is unchanged. `TestStatefulLoopCost` adds four Go-frontend-only fixtures: a live
+reference used after the loop, a Result reassigned and discarded each iteration,
+a Result overwritten across `continue`, and an unhandled local Result at `break`.
+The private native scalar adapter does not admit these forms; this diagnostic
+does not expand its grammar or claim native/reference parity for them.
+
+The configured `fairyc_go_test_stateful_loop_cost` uses depths 1/4/8 and three
+samples each (36 total), with separate frontend and semantic wall times. Every
+sample parses a fresh AST and checks no unsupported forms, the expected presence
+or absence of diagnostics, only E4101 for unhandled fixtures, and required borrow
+or handling facts. Complete semantic results must repeat exactly at each depth.
+Input functions are never executed. A semantic sample of at least 250ms stops
+further samples/depths for that fixture; it cannot cancel an in-flight Analyze.
+The Go process has a 60-second timeout and the wrapper a 90-second timeout.
+
+Observed on Windows/AMD64, Go 1.26.4; semantic medians in milliseconds:
+
+| Fixture | Depth 1 | Depth 4 | Depth 8 | Observed facts at every depth |
+| --- | ---: | ---: | ---: | --- |
+| Live reference | 0.000 | 0.552 | 2.783 | no diagnostics, one borrow |
+| Result reassigned and handled | 0.000 | 0.000 | 1.630 | no diagnostics, two handling facts |
+| Result continue overwrite | 0.000 | 0.555 | 1.661 | one E4101, two handling facts |
+| Result pending at break | 0.000 | 0.000 | 1.088 | one E4101, no handling facts |
+
+All samples completed; the largest semantic observation was 5.440ms (live
+reference, depth 8). The dedicated package test passed in 0.082s. Zero reflects
+timer granularity, not zero work. Three samples and these shallow inputs cannot
+establish asymptotic complexity, p95/p99, or general performance. No CPU/heap
+profile was collected and no individual pass is identified as responsible.
+
+There is measurable growth but no long delay in this bounded corpus. These
+observations alone do not justify another production optimization or a claim that
+deeper stateful loops are safe. No extra depth, algorithm, memoization or timeout
+change is included. Test and documentation changes require no compiler/API/DB/ABI,
+SDK or compatibility revision. Native corpus and release suites were not rerun:
+the new input shapes are Go-only and no production code or release artifact changes.
