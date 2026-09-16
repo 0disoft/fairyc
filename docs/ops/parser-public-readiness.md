@@ -273,3 +273,8 @@ or confirmed private vulnerability-reporting channel was found in this review.
 Private reporting capability, owner and response policy remain unconfirmed; the
 README explicitly warns against sending sensitive details to public issues.
 No repository visibility, reporting settings, release, tag or support SLA was changed.
+
+The [open-issue release triage](open-issue-release-triage.md) reviews all 19 open
+issues against this experimental source-publication scope. It separates future
+features, partial evidence and stale tracking without closing issues or promoting
+complete target/distribution claims.
