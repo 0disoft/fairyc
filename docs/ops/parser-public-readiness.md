@@ -119,3 +119,24 @@ release-mode matrix, interactive stdin, other platform or current hosted CI was
 verified. Publication terms, ownership and candidate-specific release checks
 above remain open. The added smoke runner does not change compiler behavior,
 language/API/DB/ABI/SDK versions or grant installation/publication authority.
+
+### Release-mode starter verification (2026-09-16)
+
+On baseline `0a746f70c89c342c4cc86b6a7d5ea614a2e5608e`, the same executable
+workflow also passed `test --native --release --locked` and
+`run --release --locked`. Semantic, default-native and release-native test output
+matched exactly: one passed, zero failed. Default and release runs both returned
+zero with empty stdout; all commands had empty stderr. Source/manifest/test/README
+and lock hashes were checked after each locked step and remained unchanged.
+
+The fresh scratch receipt is `.cache/starter-smoke-fny90B/receipt.json`;
+compiler SHA-256 is
+`46ab755143b846151d6da3d086af521d048ef10a605592c4100807a246ee47bf`.
+The default/release native tests took 981/931ms and runs 894/883ms in this single
+local observation, not a speed comparison. The existing 150-second workflow
+deadline and 180-second wrapper limit were unchanged.
+
+This closes release-mode coverage for the generated starter on the current
+Windows/AMD64 MSVC host. It does not verify clean-PC installation, other targets,
+hosted CI, a packaged release or arbitrary user programs. No compiler production
+code or version changed; only the smoke runner and this evidence were extended.

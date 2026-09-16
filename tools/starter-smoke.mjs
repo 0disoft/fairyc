@@ -45,16 +45,28 @@ const files = ['fairy.toml', 'src/main.fy', 'tests/main.fy', 'README.md'];
 const original = files.map(path => sha(join(workspace, path)));
 assert.match(command('check', exe, ['check'], workspace), /lock updated\n$/);
 const lockHash = sha(join(workspace, 'fairy.lock'));
+function unchanged() {
+  assert.equal(sha(join(workspace, 'fairy.lock')), lockHash, 'locked workflow changed lock');
+  assert.deepEqual(files.map(path => sha(join(workspace, path))), original, 'workflow changed starter files');
+}
 assert.match(command('check-locked', exe, ['check', '--locked'], workspace), /lock verified\n$/);
+unchanged();
+let testOutput;
 for (const [name, args] of [
   ['test', ['test', '--locked']],
   ['native-test', ['test', '--native', '--locked']],
+  ['native-test-release', ['test', '--native', '--release', '--locked']],
 ]) {
-  assert.match(command(name, exe, args, workspace), /1 passed; 0 failed/);
+  const output = command(name, exe, args, workspace);
+  assert.match(output, /1 passed; 0 failed/);
+  if (testOutput === undefined) testOutput = output;
+  else assert.equal(output, testOutput, 'test modes disagree');
+  unchanged();
 }
 assert.equal(command('run', exe, ['run', '--locked'], workspace), '');
-assert.equal(sha(join(workspace, 'fairy.lock')), lockHash, 'locked workflow changed lock');
-assert.deepEqual(files.map(path => sha(join(workspace, path))), original, 'workflow changed starter files');
+unchanged();
+assert.equal(command('run-release', exe, ['run', '--release', '--locked'], workspace), '');
+unchanged();
 assert.equal(sha(exe), executableHash, 'compiler executable changed');
 const receipt = { schema: 'fairyc.local-starter-smoke/v1', executable_sha256: executableHash,
   lock_sha256: lockHash, node: process.version, platform: `${process.platform}/${process.arch}`, steps };
