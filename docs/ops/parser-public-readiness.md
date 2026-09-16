@@ -86,3 +86,36 @@ The [release document](release.md) remains the owner of release decisions, and
 Missing publication decisions must not be silently filled in by a parser test pass.
 No code, runtime behavior, API, DB, language revision, ABI, SDK or version changes
 are made by this documentation-only snapshot.
+
+## Local executable starter verification (2026-09-16)
+
+On baseline `f1a305a72b74827c759a7ca20934f199c3d0e775`, the configured
+`fairyc_starter_executable_smoke` built `cmd/fairyc` through the existing offline
+Go wrapper and called that executable as separate processes, not in-process CLI
+test functions. The [bounded smoke script](../../tools/starter-smoke.mjs) creates
+a unique empty scratch parent under ignored `.cache/`, accepts no arguments,
+closes stdin, checks output/status and preserves its local receipt.
+
+| Step | Local result | Elapsed ms |
+| --- | --- | ---: |
+| Build compiler executable | success | 5401 |
+| `new hello-fairy --uid example.hello-fairy` | starter created | 252 |
+| `check` | lock created | 172 |
+| `check --locked` | lock verified | 187 |
+| `test --locked` | one passed, zero failed | 170 |
+| `test --native --locked` | one passed, zero failed | 1739 |
+| `run --locked` | exit zero, no stdout | 1714 |
+
+Every step returned zero and empty stderr. Generated manifest, source, test,
+README and the lock after its initial creation retained their hashes. Compiler
+SHA-256: `9c244cbdcf6c54684e951a98856a09608de1433899b296827469fafd9faf2470`.
+Receipt: `.cache/starter-smoke-fA71mR/receipt.json` (ignored, local-only).
+These timings are single-run observations, not performance thresholds.
+
+This closes the basic executable quickstart check on this Windows/AMD64 host with
+its installed MSVC toolchain. The scratch project is fresh, but the host and Go
+dependency cache are not clean installations. No installer/downloaded artifact,
+release-mode matrix, interactive stdin, other platform or current hosted CI was
+verified. Publication terms, ownership and candidate-specific release checks
+above remain open. The added smoke runner does not change compiler behavior,
+language/API/DB/ABI/SDK versions or grant installation/publication authority.
