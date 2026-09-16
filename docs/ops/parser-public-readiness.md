@@ -194,3 +194,38 @@ Receipt: `.cache/starter-smoke-x9d5I3/receipt.json`.
 ZIP SHA-256: `6646451a382b3a6e59fa8575245278827005e027c9dd517ea26303eda3147674`.
 This confirms packaging and local execution, not clean-candidate provenance,
 clean-PC compatibility, all linked-component notices or hosted release CI.
+
+### Clean candidate and second Windows laptop report (2026-09-16)
+
+The retained candidate was built from clean commit
+`561753170191970400024ddcb4646319e060fa12`. Local configured
+`fairyc_local_preview_zip` and `fairyc_license_inventory` checks passed; embedded
+Go build metadata matched that revision and reported `vcs.modified=false`.
+
+- Archive: `.cache/starter-smoke-rZ4bov/fairyc-windows-amd64-LOCAL-ONLY.zip`
+- Archive SHA-256: `bed0891133e91270546366561f73995a6adba5f22565ce60dab7cde7cf2b149d`
+- Executable SHA-256: `25c99e1b109c9047112b009a58360af0d070b2d11c982e2bb5671784dce9da45`
+- Local receipt: `.cache/starter-smoke-rZ4bov/receipt.json`
+
+The user relayed a separate Codex report from another Windows laptop and then
+confirmed that the archive hash matched the value above. The report states:
+MSVC and Windows SDK were present; all archive file SHA-256 checks matched;
+`check` and `check --locked` succeeded; semantic, default-native and release-native
+tests each reported one passed and zero failed; default and release runs exited
+zero with no output. Execution used a temporary directory without repository
+edits, WSL, Linux or a virtual machine.
+
+Evidence level: user-relayed external execution report, not a locally observed
+run or an independently inspected original log. The other agent reported direct
+command execution and no `mf run` receipt. Exact OS/toolchain versions and a
+fresh-OS installation were not established. This supports the same candidate's
+starter workflow on a second Windows host; it is not universal compatibility or
+clean-install certification. No archive rebuild was needed.
+
+On 2026-09-16, the GitHub connector's commit lookup for `0disoft/fairyc` at the
+exact revision returned HTTP 422, `No commit found for SHA`; the combined-status
+lookup returned an empty status list. Same-commit Windows CI is therefore
+unverified, not passed or failed. No push, workflow dispatch, tag or publication
+was performed. Publishing the candidate revision and obtaining hosted CI evidence
+remain separate authorized work. This documentation update does not alter the
+candidate binary, compiler/API/DB/ABI/SDK versions or release approval.
