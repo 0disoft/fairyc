@@ -93,7 +93,7 @@ On baseline `f1a305a72b74827c759a7ca20934f199c3d0e775`, the configured
 `fairyc_starter_executable_smoke` built `cmd/fairyc` through the existing offline
 Go wrapper and called that executable as separate processes, not in-process CLI
 test functions. The [bounded smoke script](../../tools/starter-smoke.mjs) creates
-a unique empty scratch parent under ignored `.cache/`, accepts no arguments,
+a unique empty scratch parent under ignored `.cache/`, accepts no arbitrary paths,
 closes stdin, checks output/status and preserves its local receipt.
 
 | Step | Local result | Elapsed ms |
@@ -140,3 +140,29 @@ This closes release-mode coverage for the generated starter on the current
 Windows/AMD64 MSVC host. It does not verify clean-PC installation, other targets,
 hosted CI, a packaged release or arbitrary user programs. No compiler production
 code or version changed; only the smoke runner and this evidence were extended.
+
+### Local-only ZIP rehearsal (2026-09-16)
+
+On baseline `d9936781cf0a39a70944662b9d5ee901722f42e7`,
+`fairyc_local_preview_zip` built an executable, packaged only `fairyc.exe`,
+`README.txt` and `SHA256SUMS.txt`, then extracted it into a separate folder.
+All extracted file hashes and the exact entry inventory matched the staged
+files. The same full default/release starter workflow passed using the extracted
+executable. No test used the original unarchived binary after extraction.
+
+The fixed `--package-local` mode writes only unique ignored scratch outputs;
+the archive is explicitly LOCAL-ONLY and NOT FOR PUBLIC DISTRIBUTION. The
+[included guide](windows-preview-README.txt) states prerequisites, commands and
+unresolved distribution terms. Checksums detect changes, not publisher identity;
+no signing or authentication claim is made.
+
+- Archive: `.cache/starter-smoke-XtQlDi/fairyc-windows-amd64-LOCAL-ONLY.zip`
+- Archive SHA-256: `4cc59b0fa6faee2d37456c262c575d4c012418f1f95efc2c1d0c7528595d1389`
+- Compiler SHA-256: `911fc1f19ab3fe85c82e7915b161c96969111e78afff7a1777ea88be744edd67`
+- Local receipt: `.cache/starter-smoke-XtQlDi/receipt.json`
+
+This is packaging mechanics evidence on the existing development host, not a
+clean-machine test, reproducible archive claim or release. ZIP bytes may vary
+with timestamps. Source publication, license selection, third-party notices,
+signing policy, release ownership and external distribution remain unperformed.
+No runtime, API, DB, language/SDK version or native parser promotion changed.

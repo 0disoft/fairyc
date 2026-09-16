@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { resolve, join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-// Fixed local workflow; no user arguments, network, installation or publication.
-assert.equal(process.argv.length, 2, 'no arguments accepted');
+// Fixed local workflow; only a local packaging mode, no arbitrary paths,
+// network, installation or publication.
+const packageLocal = process.argv.length === 3 && process.argv[2] === '--package-local';
+assert.ok(process.argv.length === 2 || packageLocal, 'only --package-local is accepted');
 assert.equal(process.platform, 'win32', 'requires Windows');
 assert.equal(process.arch, 'x64', 'requires AMD64');
 const repo = resolve(import.meta.dirname, '..');
@@ -16,7 +18,7 @@ const root = mkdtempSync(join(cache, 'starter-smoke-'));
 const scratch = join(root, 'scratch');
 mkdirSync(scratch);
 assert.deepEqual(readdirSync(scratch), []);
-const exe = join(root, 'fairyc.exe');
+let exe = join(root, 'fairyc.exe');
 const deadline = Date.now() + 150_000;
 const steps = [];
 function command(name, binary, args, cwd, timeout = 45_000) {
@@ -39,6 +41,34 @@ function command(name, binary, args, cwd, timeout = 45_000) {
 const sha = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 command('build', 'bun', ['tools/run-go.ts', 'build', '-mod=readonly', '-o', exe, './cmd/fairyc'], repo, 60_000);
 const executableHash = sha(exe);
+let archive;
+if (packageLocal) {
+  const stage = join(root, 'stage');
+  const extracted = join(root, 'extracted');
+  mkdirSync(stage);
+  copyFileSync(exe, join(stage, 'fairyc.exe'));
+  copyFileSync(join(repo, 'docs/ops/windows-preview-README.txt'), join(stage, 'README.txt'));
+  const entries = ['README.txt', 'fairyc.exe'];
+  const hashes = entries.map(name => sha(join(stage, name)));
+  writeFileSync(join(stage, 'SHA256SUMS.txt'), entries.map((name, i) => `${hashes[i]}  ${name}`).join('\n') + '\n', { flag: 'wx' });
+  const checksumHash = sha(join(stage, 'SHA256SUMS.txt'));
+  archive = join(root, 'fairyc-windows-amd64-LOCAL-ONLY.zip');
+  // Paths originate exclusively from this run's unique cache directory. Avoid
+  // interpolated shell paths, overwrites, deletion and external archive inputs.
+  process.env.FAIRYC_PREVIEW_STAGE = stage;
+  process.env.FAIRYC_PREVIEW_ZIP = archive;
+  process.env.FAIRYC_PREVIEW_EXTRACTED = extracted;
+  command('zip-roundtrip', 'powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
+    "$ErrorActionPreference='Stop'; Compress-Archive -LiteralPath @((Join-Path $env:FAIRYC_PREVIEW_STAGE 'fairyc.exe'),(Join-Path $env:FAIRYC_PREVIEW_STAGE 'README.txt'),(Join-Path $env:FAIRYC_PREVIEW_STAGE 'SHA256SUMS.txt')) -DestinationPath $env:FAIRYC_PREVIEW_ZIP; Expand-Archive -LiteralPath $env:FAIRYC_PREVIEW_ZIP -DestinationPath $env:FAIRYC_PREVIEW_EXTRACTED"], repo);
+  delete process.env.FAIRYC_PREVIEW_STAGE;
+  delete process.env.FAIRYC_PREVIEW_ZIP;
+  delete process.env.FAIRYC_PREVIEW_EXTRACTED;
+  assert.deepEqual(readdirSync(extracted).sort(), [...entries, 'SHA256SUMS.txt'].sort());
+  assert.deepEqual(entries.map(name => sha(join(extracted, name))), hashes, 'ZIP changed contents');
+  assert.equal(sha(join(extracted, 'SHA256SUMS.txt')), checksumHash);
+  writeFileSync(archive + '.sha256', `${sha(archive)}  fairyc-windows-amd64-LOCAL-ONLY.zip\n`, { flag: 'wx' });
+  exe = join(extracted, 'fairyc.exe');
+}
 assert.match(command('new', exe, ['new', 'hello-fairy', '--uid', 'example.hello-fairy'], scratch), /created Fairy C package/);
 const workspace = join(scratch, 'hello-fairy');
 const files = ['fairy.toml', 'src/main.fy', 'tests/main.fy', 'README.md'];
@@ -69,6 +99,7 @@ assert.equal(command('run-release', exe, ['run', '--release', '--locked'], works
 unchanged();
 assert.equal(sha(exe), executableHash, 'compiler executable changed');
 const receipt = { schema: 'fairyc.local-starter-smoke/v1', executable_sha256: executableHash,
-  lock_sha256: lockHash, node: process.version, platform: `${process.platform}/${process.arch}`, steps };
+  lock_sha256: lockHash, node: process.version, platform: `${process.platform}/${process.arch}`, steps,
+  ...(archive ? { local_only_archive: relative(repo, archive), archive_sha256: sha(archive) } : {}) };
 writeFileSync(join(root, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
 console.log(JSON.stringify({ receipt: relative(repo, join(root, 'receipt.json')), executable_sha256: executableHash }));
