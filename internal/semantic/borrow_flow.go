@@ -99,6 +99,7 @@ type borrowFlowAnalyzer struct {
 	loanByKey           map[borrowLoanKey]int
 	loops               []borrowLoopFrame
 	probeDepth          int
+	neutralScalars      map[*ast.Expression]bool
 
 	summarizing   bool
 	returnSeen    bool
@@ -805,6 +806,9 @@ func (f *borrowFlowAnalyzer) evaluateWhile(expression *ast.Expression, environme
 	// canonical loan-site IDs. Probe iterations suppress diagnostics and return
 	// facts; the converged header is evaluated once with observable effects.
 	limit := len(f.analyzer.expressionTypes) + 1
+	if f.canSkipScalarLoopProbe(expression, environment) {
+		limit = 0
+	}
 	for iteration := 0; iteration < limit; iteration++ {
 		f.probeDepth++
 		conditionEnvironment := cloneBorrowEnvironment(header)

@@ -139,3 +139,71 @@ than summing annotated-line totals. Unlabelled background GC and compiler work
 are excluded, so these shares describe labelled samples, not all process CPU.
 Shallow depths have too few samples for stable percentages. No heap/allocation
 profile, 30-level rerun, algorithm change, memoization or timeout increase was made.
+
+## Closed scalar borrow-probe optimization (2026-09-16)
+
+Compared with `429245166cc20156f3d905395918693746611a45`, production borrow flow
+now omits convergence probing only for a closed scalar loop with empty incoming
+borrow environment, no prior loans, no pending call borrows, and no borrow-return
+summary analysis. The ordinary observable condition/body pass still runs.
+
+The classifier accepts typed `i32`/`bool` leaves, grouping, unary `+`/`-`, scalar
+arithmetic/comparisons, scalar bindings, simple path assignment, blocks and nested
+`while`. References, calls, other types, compound assignments, conditionals,
+`for`, early returns and loop exits retain the previous path. This subset cannot
+create borrow state or capture an exit, so the empty header is already a fixed
+point. An analyzer-local AST classification memo avoids repeatedly classifying
+nested subtrees; it does not cache environments, diagnostics or flow results.
+Unknown forms and recursive cycles fail closed. The optimization does not rely
+on `while(false)` constant folding and also admits scalar variable conditions.
+
+Tests force the old probe path and compare typed results, diagnostics and borrow
+facts against the optimized path. Separate guards cover active borrow state,
+summary mode, references, control exits and compound assignment. The complete
+semantic unit suite and native adapted/reference corpus remain the regression
+checks; no language, API, ABI, SDK or diagnostic contract is changed. This is
+compiler patch-level performance work, not a new compatibility-vector revision.
+
+The unchanged labelled diagnostic ran on Windows/AMD64 with Go 1.26.4, three
+samples per depth and native profile. The following are semantic wall-time
+medians in milliseconds (adapted / reference AST), using the previous **profiled**
+run above as the baseline, not the earlier unprofiled measurements:
+
+| Native profile | Depth | Before | After |
+| --- | ---: | ---: | ---: |
+| low | 8 | 1.174 / 1.090 | 0.548 / 0.000 |
+| low | 12 | 10.052 / 9.920 | 3.319 / 3.320 |
+| low | 16 | 189.161 / 189.677 | 48.188 / 53.539 |
+| optimized | 8 | 0.591 / 0.608 | 0.553 / 0.000 |
+| optimized | 12 | 8.551 / 10.098 | 2.829 / 2.689 |
+| optimized | 16 | 153.505 / 142.509 | 53.825 / 53.134 |
+
+Zero is timer granularity, not zero work. Depth 16 improved by about 2.7-3.9x
+on this fixture; three local samples are not a general performance guarantee.
+Native profile flags do not change the Go analyzer binary. Both AST origins
+still produce equal complete semantic results. No input function is executed.
+
+The profiled test passed in 10.154s. Of 18.58 total sampled CPU-seconds, 0.63s
+carried the semantic label (previously 1.98s). `resultFlowWhile` accounts for
+0.62s cumulative, 98.41% of labelled samples; borrow loop probing no longer
+appears in sampled attribution, which does not mean literally zero cost.
+Depth 16 accounts for 0.57s, depth 12 for 0.05s. Result-use analysis still visits
+the nested body twice and remains the next separately scoped optimization target.
+Neither this change nor these samples establish linear overall semantic cost.
+
+New ignored artifacts preserve the baseline pair:
+
+- `.cache/loop-cost-20260916-scalar.cpu.pprof`, SHA-256
+  `83f562228bcc22fc881ff540b542d59ce46b442b0cc74622fc6e8663d1ca3fc2`
+- `.cache/loop-cost-20260916-scalar.test.exe`, SHA-256
+  `0c982aa517713432d69670575329abbf0727772e8a45d6ae4efa170bbf2f7e1a`
+
+The profile intents now use these names. No timeout/admission-limit increase,
+depth-30 retry, result-use optimization or full release validation is included.
+
+Validation passed: Go formatting, `internal/genericsource` and
+`internal/semantic` tests, both profile readers, and the native body-tree suite
+(53.951s). Each native profile retained 115 semantic comparisons, 58 unsupported
+shapes, 50 malformed transports, seven producer-budget rejections and 112
+canonical bodies. Full release validation is deferred because this increment
+changes only borrow-probe selection and no release artifact is being published.
