@@ -229,3 +229,28 @@ unverified, not passed or failed. No push, workflow dispatch, tag or publication
 was performed. Publishing the candidate revision and obtaining hosted CI evidence
 remain separate authorized work. This documentation update does not alter the
 candidate binary, compiler/API/DB/ABI/SDK versions or release approval.
+
+### Windows CI budget isolation (2026-09-16)
+
+After the approved push, Frontend run `35090573362` on `6066c906` passed Linux
+frontend, Windows native smoke and the separately required parser proof. Windows
+frontend completed setup and vet but was cancelled during the full test step near
+its ten-minute job limit; dependent Linux C differential was skipped. The last
+successful Frontend run `34470050319` on `c798331d` already spent 9m44s in Windows
+frontend. The workflow was unchanged between these revisions. The cancelled
+non-verbose log does not identify an individual stuck test or establish its cause.
+
+The Windows Fairy lexer/parser native tests now run in four required matrix groups:
+lexer, parser A-H, parser I-R and parser S-Z. The ordinary Windows job excludes
+exactly their union; all other tests remain there. Group runs use `./...`, so a
+matching test in another package is not lost. The Linux full suite, vet, race test,
+Windows native smoke and downstream C differential dependency are unchanged.
+All job timeouts remain ten minutes; no assertions, retries or allowed failures
+were added. Verbose Windows output identifies active tests and completed durations.
+
+This is provisional budget isolation, not duration-balanced sharding or a measured
+speedup. Per-test hosted timings were unavailable, and extra runners duplicate
+setup and may increase runner usage. A local discovery check verifies exhaustive,
+non-overlapping selection against Go's actual test inventory and rejects missing
+or duplicate group mutations. The replacement hosted run is still required before
+claiming that the cancellation is fixed. No compiler behavior or version changes.

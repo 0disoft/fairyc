@@ -39,9 +39,9 @@ jobs:
       - name: Test
         if: runner.os == 'Linux'
         run: go test -mod=readonly -count=1 ./...
-      - name: Test Windows except separately required parser proof
+      - name: Test Windows except separately required Fairy native proofs
         if: runner.os == 'Windows'
-        run: go test -mod=readonly -count=1 -skip '^TestWindowsFairyLexerStreamParser$' ./...
+        run: go test -mod=readonly -count=1 -v -skip '^TestWindowsFairy(Lexer|Parser[A-Z])' ./...
       - name: Race-test contract-state concurrency
         if: runner.os == 'Linux'
         env:
@@ -65,9 +65,23 @@ jobs:
         run: go run -mod=readonly ./cmd/fairyc-windows-host-smoke
 
   windows-parser:
-    name: Windows candidate parser proof
+    name: Windows candidate proof (${{ matrix.group }})
     runs-on: windows-latest
     timeout-minutes: 10
+    # All groups remain required by native-c. Separate runners avoid shared
+    # native-build state; verbose output preserves the active test on timeout.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: lexer
+            tests: '^TestWindowsFairyLexer'
+          - group: parser-a-h
+            tests: '^TestWindowsFairyParser[A-H]'
+          - group: parser-i-r
+            tests: '^TestWindowsFairyParser[I-R]'
+          - group: parser-s-z
+            tests: '^TestWindowsFairyParser[S-Z]'
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -76,8 +90,8 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Run bounded parser structure and recovery proof
-        run: go test -mod=readonly -count=1 -v -run '^TestWindowsFairyLexerStreamParser$' ./internal/cli
+      - name: Run required Fairy native proof group
+        run: go test -mod=readonly -count=1 -v -run '${{ matrix.tests }}' ./...
 
   native-c:
     name: C differential (Linux)
