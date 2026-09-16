@@ -1,8 +1,11 @@
 package cli
 
 import (
+	"context"
 	"reflect"
 	"runtime"
+	"runtime/pprof"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -43,10 +46,15 @@ func testFairyScalarLoopCost(t *testing.T, native func(string) string) {
 				t.Fatalf("frontend: %v", err)
 			}
 			start = time.Now()
-			got := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: module}})
+			var got, want semantic.Result
+			pprof.Do(context.Background(), pprof.Labels("phase", "semantic", "depth", strconv.Itoa(depth), "ast", "adapted"), func(context.Context) {
+				got = semantic.Analyze([]semantic.File{{Path: "main.fy", Module: module}})
+			})
 			adaptedTime := time.Since(start)
 			start = time.Now()
-			want := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: ref.AST}})
+			pprof.Do(context.Background(), pprof.Labels("phase", "semantic", "depth", strconv.Itoa(depth), "ast", "reference"), func(context.Context) {
+				want = semantic.Analyze([]semantic.File{{Path: "main.fy", Module: ref.AST}})
+			})
 			referenceTime := time.Since(start)
 			if len(want.Diagnostics) != 0 || len(want.Unsupported) != 0 || !reflect.DeepEqual(got, want) {
 				t.Fatalf("semantic divergence at depth %d", depth)
