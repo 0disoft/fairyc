@@ -127,8 +127,9 @@ func testFairyScalarAdapter(t *testing.T, native func(string) string) []string {
 		}{"module main;fn bool f(i32 a,i32 b){return a" + op + "b;}", true})
 	}
 	var firstWire string
-	// Exercise the same wire depth without multiplying semantic loop fixed points.
-	nestedLoops := "while(false){let i32 x=" + strings.Repeat("+ ", 58) + "1;}"
+	// Retain the original nested-loop regression after the scalar flow optimizations.
+	// One more loop below must still fail the unchanged wire-depth budget.
+	nestedLoops := strings.Repeat("while(false){", 30) + "let i32 x=1;" + strings.Repeat("}", 30)
 	cases = append(cases, struct {
 		input string
 		clean bool

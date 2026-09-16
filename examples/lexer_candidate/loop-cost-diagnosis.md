@@ -273,3 +273,27 @@ profile diagnostic and cumulative reader, and the native body-tree suite
 shapes, 50 malformed transports, seven producer-budget rejections and 112
 canonical bodies. Full release validation was not run because this increment
 does not publish a release or change its contracts.
+
+## Thirty-loop regression restored (2026-09-16)
+
+On compiler baseline `5be39d0679849e1d03adc20137570f1194e78b90`, the ordinary
+native scalar corpus again uses 30 nested `while(false)` bodies around
+`let i32 x=1;`. This replaces the temporary one-loop/58-prefix depth witness.
+The initializer remains at wire depth 63. Wrapping the restored input in a 31st
+loop still triggers producer-budget rejection; no adapter or producer limit
+was raised.
+
+The existing body-tree intent passed in 50.484s under its unchanged 120-second
+wrapper timeout. Both low and optimized native profiles compared the restored
+input's AST fields/summaries and complete semantic results against the Go parser,
+with no diagnostics or unsupported results. Each profile retained 115 semantic
+comparisons, 58 unsupported shapes, 50 malformed transports, seven producer-budget
+rejections and 112 canonical bodies. The duration is for the entire suite,
+including compilation and native process startup, not an individual loop timing.
+
+This closes the original timed-out scalar regression with local evidence. It does
+not establish performance for Result-bearing loops or unrestricted control flow.
+Only test input and this report changed in the compiler repository: no production
+code, grammar, API, ABI, SDK or version revision changes. The bounded 8/12/16
+profiling test is unchanged and was not rerun; full release validation is omitted
+for this test-only increment.
