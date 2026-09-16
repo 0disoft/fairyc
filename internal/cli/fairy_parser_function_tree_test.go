@@ -13,6 +13,10 @@ import (
 )
 
 func testWindowsFairyFunctionTree(t *testing.T) {
+	runWindowsFairyFunctionTree(t, nil)
+}
+
+func runWindowsFairyFunctionTree(t *testing.T, probe func(*testing.T, func(string) string)) {
 	inputs := []string{
 		"module main;fn void empty(){}",
 		"module main; /* 헤더 */\r\nfn pkg::Value choose(i32 z,ref mut u8[] a,){let x=z;return a;}",
@@ -155,6 +159,17 @@ pub unsafe fn Pair<T,U> Owner::make<T,U>(ref mut T value,U extra,){
 		if code != ExitSuccess {
 			t.Fatalf("compile: %d %s", code, stderr.String())
 		}
+		native := func(input string) string {
+			out, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewBufferString(input))
+			if err != nil || out.ExitCode != 0 || out.Stderr != "" || out.TrapControl != "" {
+				t.Fatalf("scalar candidate: %v %+v", err, out)
+			}
+			return out.Stdout
+		}
+		if probe != nil {
+			t.Run(profile.Name, func(t *testing.T) { probe(t, native) })
+			continue
+		}
 		for i, input := range append(append([]string{}, inputs...), rejected...) {
 			want, refErr := referenceComparisonTree(input, true)
 			if i < len(inputs) && refErr != nil {
@@ -169,13 +184,7 @@ pub unsafe fn Pair<T,U> Owner::make<T,U>(ref mut T value,U extra,){
 			}
 		}
 		t.Logf("profile=%v complete functions=%d rejections=%d", profile, len(inputs), len(rejected))
-		scalarLimits := testFairyScalarAdapter(t, func(input string) string {
-			out, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewBufferString(input))
-			if err != nil || out.ExitCode != 0 || out.Stderr != "" || out.TrapControl != "" {
-				t.Fatalf("scalar candidate: %v %+v", err, out)
-			}
-			return out.Stdout
-		})
+		scalarLimits := testFairyScalarAdapter(t, native)
 		for _, input := range scalarLimits {
 			out, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewBufferString(input))
 			if err != nil || out.ExitCode == 0 || out.Stdout != "" || out.Stderr != "" || out.TrapControl != "" {

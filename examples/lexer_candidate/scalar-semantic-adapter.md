@@ -170,6 +170,8 @@ one additional statement conditional is rejected. A loop-local initializer with
 58 unary prefixes reaches depth 63; wrapping that loop in another loop exceeds
 the limit and is rejected. Deep loop-fixed-point stress is not part of this
 adapter suite; ordinary nested loops still undergo full semantic comparison.
+The separate [bounded loop-cost diagnosis](loop-cost-diagnosis.md) records phase
+timings and source-level repeated-work evidence without changing semantic behavior.
 This comparison
 does not prove runtime arithmetic results or overflow trapping; no input function
 is executed by this test.
