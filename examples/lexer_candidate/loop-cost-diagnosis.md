@@ -207,3 +207,69 @@ Validation passed: Go formatting, `internal/genericsource` and
 shapes, 50 malformed transports, seven producer-budget rejections and 112
 canonical bodies. Full release validation is deferred because this increment
 changes only borrow-probe selection and no release artifact is being published.
+
+## Closed scalar Result back-edge optimization (2026-09-16)
+
+Baseline: `b7241dfcb0f78f2ddaf6c4adc639bbeece585fad`, including the borrow-probe
+optimization above. `resultFlowWhile` now retains the first condition/body visit
+but skips the second body visit for the same closed typed scalar subset when
+the incoming Result environment is empty. The common structural classifier lives
+in `internal/semantic/scalar_loop.go`; borrow and Result analyses own separate
+classification memos. The borrow guard and admitted scalar operators are unchanged.
+
+The subset cannot produce, transfer or handle Result obligations, emit handling
+facts, or capture loop exits. With an empty incoming environment, every branch
+state remains empty; the omitted second visit therefore adds neither state nor
+diagnostics. References, calls, Result values, conditional control flow and exits
+fall back to the existing path. Even handled entries in a nonempty environment
+retain that path. Only source-typed while nodes qualify: synthesized `for`
+wrappers are explicitly excluded. No constant-false pruning is involved.
+
+Tests compare the flow outputs with the second visit forcibly restored, including
+pending Result parameters, overwrite, break/continue, early return, handling and
+propagation fixtures. Tests also check fast-path admission and conservative guards.
+The existing borrow comparison tests exercise the shared-classifier extraction.
+
+The unchanged Windows/AMD64 diagnostic used three samples per native profile and
+depth, with the same Go runtime and timeouts as the previous run. Semantic wall-time
+medians in milliseconds (adapted / reference AST) were:
+
+| Native profile | Depth | Before | After |
+| --- | ---: | ---: | ---: |
+| low | 8 | 0.548 / 0.000 | 0.000 / 0.537 |
+| low | 12 | 3.319 / 3.320 | 0.000 / 0.000 |
+| low | 16 | 48.188 / 53.539 | 0.000 / 0.556 |
+| optimized | 8 | 0.553 / 0.000 | 0.000 / 0.000 |
+| optimized | 12 | 2.829 / 2.689 | 0.000 / 0.000 |
+| optimized | 16 | 53.825 / 53.134 | 0.000 / 0.568 |
+
+Zero denotes timer granularity, not zero work. Every depth-16 sample was between
+0 and 1.009ms. This shows removal of the observed large nested-loop cost on this
+fixture, but cannot support an accurate speedup ratio or general scalability claim.
+Full semantic results still match between adapted and reference ASTs.
+
+The profiled test passed in 8.786s. Only 0.01 CPU-seconds carried the semantic
+label, compared with 0.63s before this change. Neither optimized loop path appears
+in that sample. One sample is insufficient to rank remaining hot paths, including
+the resource-flow frame it happened to observe. The detailed annotated-loop
+profile read was skipped because there were no samples for those loop functions.
+Native process startup and compilation remain outside semantic timings.
+
+Ignored profile artifacts use separate names to preserve both earlier baselines:
+
+- `.cache/loop-cost-20260916-result.cpu.pprof`, SHA-256
+  `1c0b597fc1e1193d07fdeae1cc9d0d131269fb50a1f28d92634a813c46cd1b0d`
+- `.cache/loop-cost-20260916-result.test.exe`, SHA-256
+  `f537b7329c8df9e87801be4d9974a3f4d01358ddd480621ffd768269fd7eeb72`
+
+This is compiler patch-level performance work, with no language, API, DB, ABI,
+SDK or compatibility-vector change. Admission limits and timeout budgets are
+unchanged. Depth 30 and full release validation remain outside this local
+increment; general Result-bearing loops still use the previous algorithm.
+
+Validation passed: Go formatting, generic-source and semantic unit tests, the
+profile diagnostic and cumulative reader, and the native body-tree suite
+(43.798s). Both native profiles retained 115 semantic comparisons, 58 unsupported
+shapes, 50 malformed transports, seven producer-budget rejections and 112
+canonical bodies. Full release validation was not run because this increment
+does not publish a release or change its contracts.

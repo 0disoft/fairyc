@@ -312,7 +312,7 @@ func (a *analyzer) resultFlowWhile(module *moduleScope, expression *ast.Expressi
 	for _, branch := range backBranches {
 		exitBranches = append(exitBranches, branch)
 	}
-	if len(backBranches) > 0 {
+	if len(backBranches) > 0 && !a.canSkipScalarResultBackEdge(expression, baseline) {
 		backEnvironment := cloneResultEnvironment(baseline)
 		mergeResultBranches(backEnvironment, baseline, backBranches)
 		secondEnvironment := cloneResultEnvironment(backEnvironment)
