@@ -42,10 +42,10 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 	}
 	var samples []sample
 	var msvc string
-	variants := []string{"scalar", "struct", "nominal"}
+	variants := []string{"scalar", "struct", "nominal", "nominal-patch"}
 	for repetition := 0; repetition < 3; repetition++ {
-		for turn := 0; turn < 3; turn++ {
-			variant := variants[(turn+repetition)%3]
+		for turn := 0; turn < len(variants); turn++ {
+			variant := variants[(turn+repetition)%len(variants)]
 			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 				root, hashes := tokenIndexWorkspace(t, variant == "struct")
 				start := time.Now()
@@ -66,6 +66,17 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 					annotationNS = time.Since(start).Nanoseconds()
 					start = time.Now()
 					program, err = nominalhir.LowerBoundary(checked, overlay)
+					boundaryNS = time.Since(start).Nanoseconds()
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+				if variant == "nominal-patch" {
+					start = time.Now()
+					patch := nominalTokenScannerPatch(t, checked)
+					annotationNS = time.Since(start).Nanoseconds()
+					start = time.Now()
+					program, err = nominalhir.LowerBoundaryPatch(checked, patch)
 					boundaryNS = time.Since(start).Nanoseconds()
 					if err != nil {
 						t.Fatal(err)
@@ -112,7 +123,7 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 		t.Fatal(err)
 	}
 	hashes := map[string]string{}
-	for _, path := range []string{"token_index_nominal_cost_test.go", "token_index_nominal_test.go", "../nominalhir/boundary.go"} {
+	for _, path := range []string{"token_index_nominal_cost_test.go", "token_index_nominal_test.go", "../nominalhir/boundary.go", "../nominalhir/patch.go"} {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
@@ -128,8 +139,8 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 		Method   string            `json:"method"`
 		Hashes   map[string]string `json:"harness_source_sha256"`
 		Samples  []sample          `json:"samples"`
-	}{"fairyc.nominal-scanner-cost/v1", "1fae6f0fa1388a0a70f3b8657acf8ccdfe72b6c1", identity.String(), runtime.Version(), msvc,
-		"3 repetitions, rotating variant order, fresh workspaces, ambient caches. check includes workspace load/lock and existing scalar/struct HIR+MIR checking. Nominal uses scalar source: test annotation and exact-baseline validation/erasure are separate extra costs, not a nominal source frontend. Native compiles already checked MIR after separate C inspection; final EXE write and execution time excluded. No PDB requested. No runtime benchmark or cache/debug size measurement.", hashes, samples}
+	}{"fairyc.nominal-scanner-cost/v2", "76bbc5479c2a4b35d1469293cde30e5c4283d531", identity.String(), runtime.Version(), msvc,
+		"4 variants x 2 profiles x 3 repetitions, rotating variant order, fresh workspaces, ambient caches. check includes workspace load/lock and existing scalar/struct HIR+MIR checking. Nominal uses whole-closure annotation/validation; nominal-patch copies only edited functions, checks retained source resolutions and MIR caller coverage, validates erasure of edited functions then lowers baseline HIR. Both are extra costs over scalar checking, not a nominal source frontend. Annotation and boundary times include their entire respective preparation/validation work. Native compiles checked MIR after separate C inspection; final EXE write and execution time excluded. No PDB requested. No runtime benchmark or cache/debug size measurement.", hashes, samples}
 	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)

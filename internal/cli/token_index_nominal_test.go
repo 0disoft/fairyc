@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
@@ -38,6 +39,38 @@ func nominalTokenScanner(t *testing.T, checked compiler.Result) nominalhir.Progr
 	if err = json.Unmarshal(data, &modules); err != nil {
 		t.Fatal(err)
 	}
+	return annotateTokenScanner(t, modules)
+}
+
+// Copy only the two edited function headers. The shared annotation helper clones
+// their bodies before changing expressions; all other modules remain untouched.
+func nominalTokenScannerPatch(t *testing.T, checked compiler.Result) nominalhir.BoundaryPatch {
+	t.Helper()
+	var modules []hir.Module
+	for _, m := range checked.Semantic.HIR.Modules {
+		copy := hir.Module{Package: m.Package, Path: m.Path, SourcePath: m.SourcePath}
+		for _, f := range m.Functions {
+			if !(m.Path == "scanner" && f.Name == "token_info" || m.Path == "main" && f.Name == "inspect") {
+				continue
+			}
+			f.Parameters = slices.Clone(f.Parameters)
+			f.Locals = slices.Clone(f.Locals)
+			copy.Functions = append(copy.Functions, f)
+		}
+		if len(copy.Functions) > 0 {
+			modules = append(modules, copy)
+		}
+	}
+	annotated := annotateTokenScanner(t, modules)
+	patch := nominalhir.BoundaryPatch{Declarations: annotated.Declarations}
+	for _, m := range annotated.Modules {
+		patch.Functions = append(patch.Functions, m.Functions...)
+	}
+	return patch
+}
+
+func annotateTokenScanner(t *testing.T, modules []hir.Module) nominalhir.Program {
+	t.Helper()
 	var callee hir.SymbolID
 	var index, offset nominalhir.Declaration
 	found := false
