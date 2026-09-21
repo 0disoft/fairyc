@@ -1,0 +1,755 @@
+{
+  "schema": "fairyc.nominal-scanner-cost/v3",
+  "compiler_source": "0465013c0ce5069895cab6a6e39c17611cddda8b",
+  "test_executable_identity": "fairyc.compiler-executable-sha256/v1:b94ca2758aa77817b81019e694378858292c85f1eaddabf986015013b6e89b95",
+  "go_version": "go1.26.4",
+  "msvc_version": "14.51.36231",
+  "method": "3 variants x 2 profiles x 3 repetitions, rotating variant order, fresh workspaces, ambient caches. check includes workspace load/lock and ordinary scalar HIR+MIR checking. Both nominal variants use identical function-scoped annotations and validation. nominal-patch materializes by relowering HIR; nominal-reuse materializes by independent mir.Clone. patch_phases separately time indexing/caller coverage, edited-function validation, and materialization; boundary_ns includes their clock overhead. Annotation and boundary are extra work, not a nominal source frontend. Native compiles checked MIR after separate C inspection; final EXE write and execution time excluded. No PDB requested. No runtime benchmark or cache/debug size measurement.",
+  "harness_source_sha256": {
+    "../mir/clone.go": "04f4050924d9f48f3fbad21bc3f8c9aaabc40a7236ea2f54fd0bfd9724ea76ff",
+    "../nominalhir/boundary.go": "61509b80d73e2df4b8f7e5d035fa308915818294288a26565347b150fab45d64",
+    "../nominalhir/patch.go": "3461ab98833b27ccb410434a9922bdac07e6c93e6d93a92ac2facbce5d2657a3",
+    "token_index_nominal_cost_test.go": "2d7c240d70adc8307da2580cd2a4d1cccd5fd2fc79378d20571ac74aa824cdab",
+    "token_index_nominal_test.go": "a3a21b647b39aa25a33969ac8b725ae30802aaae917006e222a5e3b471a7afdd"
+  },
+  "samples": [
+    {
+      "repetition": 0,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 358059600,
+      "annotation_ns": 0,
+      "boundary_ns": 0,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 0
+      },
+      "native_ns": 688906300,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 314707600,
+      "annotation_ns": 0,
+      "boundary_ns": 0,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 0
+      },
+      "native_ns": 1448941500,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "nominal-patch",
+      "profile": "low",
+      "check_ns": 309062900,
+      "annotation_ns": 0,
+      "boundary_ns": 10165800,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 985100,
+        "materialization_ns": 9180700
+      },
+      "native_ns": 568830500,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "nominal-patch",
+      "profile": "optimized",
+      "check_ns": 315412700,
+      "annotation_ns": 0,
+      "boundary_ns": 10719900,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 10719900
+      },
+      "native_ns": 1420905300,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "nominal-reuse",
+      "profile": "low",
+      "check_ns": 306525600,
+      "annotation_ns": 0,
+      "boundary_ns": 3914800,
+      "patch_phases": {
+        "coverage_ns": 1429700,
+        "validation_ns": 0,
+        "materialization_ns": 2485100
+      },
+      "native_ns": 564447100,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "nominal-reuse",
+      "profile": "optimized",
+      "check_ns": 307939600,
+      "annotation_ns": 0,
+      "boundary_ns": 3013700,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 3013700
+      },
+      "native_ns": 1423623300,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "nominal-patch",
+      "profile": "low",
+      "check_ns": 373205000,
+      "annotation_ns": 1022700,
+      "boundary_ns": 9983200,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 9983200
+      },
+      "native_ns": 638909400,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "nominal-patch",
+      "profile": "optimized",
+      "check_ns": 350583900,
+      "annotation_ns": 0,
+      "boundary_ns": 9179400,
+      "patch_phases": {
+        "coverage_ns": 996100,
+        "validation_ns": 0,
+        "materialization_ns": 8183300
+      },
+      "native_ns": 1549979300,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "nominal-reuse",
+      "profile": "low",
+      "check_ns": 350023300,
+      "annotation_ns": 0,
+      "boundary_ns": 5149400,
+      "patch_phases": {
+        "coverage_ns": 1515500,
+        "validation_ns": 0,
+        "materialization_ns": 3633900
+      },
+      "native_ns": 621957500,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14189,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "nominal-reuse",
+      "profile": "optimized",
+      "check_ns": 352907500,
+      "annotation_ns": 0,
+      "boundary_ns": 4652200,
+      "patch_phases": {
+        "coverage_ns": 1332900,
+        "validation_ns": 0,
+        "materialization_ns": 3319300
+      },
+      "native_ns": 1648759600,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 328827000,
+      "annotation_ns": 0,
+      "boundary_ns": 0,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 0
+      },
+      "native_ns": 617108200,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 375742700,
+      "annotation_ns": 0,
+      "boundary_ns": 0,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 0
+      },
+      "native_ns": 1540605900,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "nominal-reuse",
+      "profile": "low",
+      "check_ns": 386778100,
+      "annotation_ns": 0,
+      "boundary_ns": 5000900,
+      "patch_phases": {
+        "coverage_ns": 997300,
+        "validation_ns": 350000,
+        "materialization_ns": 3653600
+      },
+      "native_ns": 688429700,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "nominal-reuse",
+      "profile": "optimized",
+      "check_ns": 378750500,
+      "annotation_ns": 0,
+      "boundary_ns": 4855600,
+      "patch_phases": {
+        "coverage_ns": 578500,
+        "validation_ns": 552400,
+        "materialization_ns": 3724700
+      },
+      "native_ns": 1935751200,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 396581100,
+      "annotation_ns": 0,
+      "boundary_ns": 0,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 0
+      },
+      "native_ns": 819154100,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 415522600,
+      "annotation_ns": 0,
+      "boundary_ns": 0,
+      "patch_phases": {
+        "coverage_ns": 0,
+        "validation_ns": 0,
+        "materialization_ns": 0
+      },
+      "native_ns": 2059053700,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "nominal-patch",
+      "profile": "low",
+      "check_ns": 517724200,
+      "annotation_ns": 0,
+      "boundary_ns": 13992100,
+      "patch_phases": {
+        "coverage_ns": 1111500,
+        "validation_ns": 0,
+        "materialization_ns": 12880600
+      },
+      "native_ns": 797427600,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "nominal-patch",
+      "profile": "optimized",
+      "check_ns": 415006800,
+      "annotation_ns": 544700,
+      "boundary_ns": 10178600,
+      "patch_phases": {
+        "coverage_ns": 535100,
+        "validation_ns": 548700,
+        "materialization_ns": 9094800
+      },
+      "native_ns": 1724486700,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "source_sha256": {
+        "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+        "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+        "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+        "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+        "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+        "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+        "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+        "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      "exit_code": 0
+    }
+  ]
+}

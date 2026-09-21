@@ -105,3 +105,73 @@ func TestTokenIndexNominalScannerPatch(t *testing.T) {
 		})
 	}
 }
+
+func TestTokenIndexNominalScannerReuseIsolation(t *testing.T) {
+	checked := checkedTokenScanner(t, false)
+	patch := nominalTokenScannerPatch(t, checked)
+	want, _ := json.Marshal(checked.MIR)
+	program, err := nominalhir.LowerBoundaryPatch(checked, patch)
+	if err != nil {
+		t.Fatal(err)
+	}
+	control, _, err := nominalhir.MeasureBoundaryPatch(checked, patch, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	measured, _, err := nominalhir.MeasureBoundaryPatch(checked, patch, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(program, control) || !reflect.DeepEqual(program, measured) {
+		t.Fatal("reuse and relowering disagree")
+	}
+	// Mutate every scalar leaf, including nested operands, branch tables and
+	// cleanup facts, so any shared mutable backing slice changes the baseline.
+	if changed := mutateMIRLeaves(reflect.ValueOf(&program).Elem()); changed < 100 {
+		t.Fatalf("insufficient mutation coverage: %d", changed)
+	}
+	got, _ := json.Marshal(checked.MIR)
+	if string(got) != string(want) {
+		t.Fatal("result mutation leaked into baseline")
+	}
+	second, err := nominalhir.LowerBoundaryPatch(checked, patch)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ = json.Marshal(second)
+	if string(got) != string(want) {
+		t.Fatal("one caller corrupted another result")
+	}
+	mutateMIRLeaves(reflect.ValueOf(&checked.MIR).Elem())
+	got, _ = json.Marshal(second)
+	if string(got) != string(want) {
+		t.Fatal("baseline mutation leaked into result")
+	}
+}
+
+func mutateMIRLeaves(v reflect.Value) int {
+	count := 0
+	switch v.Kind() {
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			count += mutateMIRLeaves(v.Field(i))
+		}
+	case reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			count += mutateMIRLeaves(v.Index(i))
+		}
+	case reflect.String:
+		v.SetString(v.String() + "!")
+		count++
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		v.SetInt(v.Int() + 1)
+		count++
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v.SetUint(v.Uint() + 1)
+		count++
+	case reflect.Bool:
+		v.SetBool(!v.Bool())
+		count++
+	}
+	return count
+}

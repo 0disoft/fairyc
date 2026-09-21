@@ -24,30 +24,31 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 		t.Skip("Windows AMD64 MSVC measurement")
 	}
 	type sample struct {
-		Repetition   int               `json:"repetition"`
-		Variant      string            `json:"variant"`
-		Profile      string            `json:"profile"`
-		CheckNS      int64             `json:"check_ns"`
-		AnnotationNS int64             `json:"annotation_ns"`
-		BoundaryNS   int64             `json:"boundary_ns"`
-		NativeNS     int64             `json:"native_ns"`
-		CBytes       int               `json:"c_bytes"`
-		CHash        string            `json:"c_sha256"`
-		ExeBytes     int               `json:"exe_bytes"`
-		Sections     map[string]uint32 `json:"pe_virtual_section_bytes"`
-		Objects      map[string]int    `json:"object_bytes"`
-		PDBBytes     int               `json:"pdb_bytes"`
-		Sources      map[string]string `json:"source_sha256"`
-		ExitCode     int               `json:"exit_code"`
+		Repetition   int                     `json:"repetition"`
+		Variant      string                  `json:"variant"`
+		Profile      string                  `json:"profile"`
+		CheckNS      int64                   `json:"check_ns"`
+		AnnotationNS int64                   `json:"annotation_ns"`
+		BoundaryNS   int64                   `json:"boundary_ns"`
+		PatchPhases  nominalhir.PatchTimings `json:"patch_phases"`
+		NativeNS     int64                   `json:"native_ns"`
+		CBytes       int                     `json:"c_bytes"`
+		CHash        string                  `json:"c_sha256"`
+		ExeBytes     int                     `json:"exe_bytes"`
+		Sections     map[string]uint32       `json:"pe_virtual_section_bytes"`
+		Objects      map[string]int          `json:"object_bytes"`
+		PDBBytes     int                     `json:"pdb_bytes"`
+		Sources      map[string]string       `json:"source_sha256"`
+		ExitCode     int                     `json:"exit_code"`
 	}
 	var samples []sample
 	var msvc string
-	variants := []string{"scalar", "struct", "nominal", "nominal-patch"}
+	variants := []string{"scalar", "nominal-patch", "nominal-reuse"}
 	for repetition := 0; repetition < 3; repetition++ {
 		for turn := 0; turn < len(variants); turn++ {
 			variant := variants[(turn+repetition)%len(variants)]
 			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-				root, hashes := tokenIndexWorkspace(t, variant == "struct")
+				root, hashes := tokenIndexWorkspace(t, false)
 				start := time.Now()
 				workspace, _, err := loadWorkspaceWithLock(root, false)
 				if err != nil {
@@ -60,23 +61,13 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 				checkNS := time.Since(start).Nanoseconds()
 				program := checked.MIR
 				var annotationNS, boundaryNS int64
-				if variant == "nominal" {
-					start = time.Now()
-					overlay := nominalTokenScanner(t, checked)
-					annotationNS = time.Since(start).Nanoseconds()
-					start = time.Now()
-					program, err = nominalhir.LowerBoundary(checked, overlay)
-					boundaryNS = time.Since(start).Nanoseconds()
-					if err != nil {
-						t.Fatal(err)
-					}
-				}
-				if variant == "nominal-patch" {
+				var phases nominalhir.PatchTimings
+				if variant == "nominal-patch" || variant == "nominal-reuse" {
 					start = time.Now()
 					patch := nominalTokenScannerPatch(t, checked)
 					annotationNS = time.Since(start).Nanoseconds()
 					start = time.Now()
-					program, err = nominalhir.LowerBoundaryPatch(checked, patch)
+					program, phases, err = nominalhir.MeasureBoundaryPatch(checked, patch, variant == "nominal-reuse")
 					boundaryNS = time.Since(start).Nanoseconds()
 					if err != nil {
 						t.Fatal(err)
@@ -114,7 +105,7 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 				for _, o := range artifact.Objects {
 					objects[o.Name] = len(o.Bytes)
 				}
-				samples = append(samples, sample{repetition, variant, profile.Name, checkNS, annotationNS, boundaryNS, nativeNS, len(unit.Source), tokenIndexHash([]byte(unit.Source)), len(artifact.Bytes), sections, objects, len(artifact.ProgramDatabase), hashes, int(outcome.ExitCode)})
+				samples = append(samples, sample{repetition, variant, profile.Name, checkNS, annotationNS, boundaryNS, phases, nativeNS, len(unit.Source), tokenIndexHash([]byte(unit.Source)), len(artifact.Bytes), sections, objects, len(artifact.ProgramDatabase), hashes, int(outcome.ExitCode)})
 			}
 		}
 	}
@@ -123,7 +114,7 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 		t.Fatal(err)
 	}
 	hashes := map[string]string{}
-	for _, path := range []string{"token_index_nominal_cost_test.go", "token_index_nominal_test.go", "../nominalhir/boundary.go", "../nominalhir/patch.go"} {
+	for _, path := range []string{"token_index_nominal_cost_test.go", "token_index_nominal_test.go", "../nominalhir/boundary.go", "../nominalhir/patch.go", "../mir/clone.go"} {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
@@ -139,8 +130,8 @@ func TestTokenIndexNominalCostMSVC(t *testing.T) {
 		Method   string            `json:"method"`
 		Hashes   map[string]string `json:"harness_source_sha256"`
 		Samples  []sample          `json:"samples"`
-	}{"fairyc.nominal-scanner-cost/v2", "76bbc5479c2a4b35d1469293cde30e5c4283d531", identity.String(), runtime.Version(), msvc,
-		"4 variants x 2 profiles x 3 repetitions, rotating variant order, fresh workspaces, ambient caches. check includes workspace load/lock and existing scalar/struct HIR+MIR checking. Nominal uses whole-closure annotation/validation; nominal-patch copies only edited functions, checks retained source resolutions and MIR caller coverage, validates erasure of edited functions then lowers baseline HIR. Both are extra costs over scalar checking, not a nominal source frontend. Annotation and boundary times include their entire respective preparation/validation work. Native compiles checked MIR after separate C inspection; final EXE write and execution time excluded. No PDB requested. No runtime benchmark or cache/debug size measurement.", hashes, samples}
+	}{"fairyc.nominal-scanner-cost/v3", "0465013c0ce5069895cab6a6e39c17611cddda8b", identity.String(), runtime.Version(), msvc,
+		"3 variants x 2 profiles x 3 repetitions, rotating variant order, fresh workspaces, ambient caches. check includes workspace load/lock and ordinary scalar HIR+MIR checking. Both nominal variants use identical function-scoped annotations and validation. nominal-patch materializes by relowering HIR; nominal-reuse materializes by independent mir.Clone. patch_phases separately time indexing/caller coverage, edited-function validation, and materialization; boundary_ns includes their clock overhead. Annotation and boundary are extra work, not a nominal source frontend. Native compiles checked MIR after separate C inspection; final EXE write and execution time excluded. No PDB requested. No runtime benchmark or cache/debug size measurement.", hashes, samples}
 	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)

@@ -3,6 +3,7 @@ package nominalhir
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -18,9 +19,33 @@ type BoundaryPatch struct {
 }
 
 // LowerBoundaryPatch validates edited functions and their caller coverage before
-// reusing the baseline HIR for ordinary MIR lowering. Whole-HIR/MIR equality is
+// cloning its verified MIR instead of lowering the baseline HIR again. Whole-HIR/MIR equality is
 // a test oracle; exact erasure of each edited function remains an admission check.
 func LowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch) (mir.Program, error) {
+	return lowerBoundaryPatch(baseline, patch, nil, true)
+}
+
+// PatchTimings separates retained-caller coverage, edited-function validation,
+// and result materialization. Ordinary LowerBoundaryPatch does not read a clock.
+type PatchTimings struct {
+	Coverage        time.Duration `json:"coverage_ns"`
+	Validation      time.Duration `json:"validation_ns"`
+	Materialization time.Duration `json:"materialization_ns"`
+}
+
+// MeasureBoundaryPatch is an experimental measurement entry. Both alternatives
+// execute identical validation; reuse=false retains the old lowering control.
+func MeasureBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, reuse bool) (mir.Program, PatchTimings, error) {
+	var timings PatchTimings
+	program, err := lowerBoundaryPatch(baseline, patch, &timings, reuse)
+	return program, timings, err
+}
+
+func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *PatchTimings, reuse bool) (mir.Program, error) {
+	var started time.Time
+	if timings != nil {
+		started = time.Now()
+	}
 	if !baseline.Verified || len(baseline.Semantic.Diagnostics)+len(baseline.Semantic.Unsupported) != 0 || len(patch.Declarations) == 0 || len(patch.Functions) == 0 {
 		return mir.Program{}, fmt.Errorf("nominal patch requires a verified baseline, declarations and functions")
 	}
@@ -100,6 +125,10 @@ func LowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch) (mir.Prog
 			}
 		}
 	}
+	if timings != nil {
+		timings.Coverage = time.Since(started)
+		started = time.Now()
+	}
 	for _, f := range patch.Functions {
 		o := owners[f.Symbol]
 		b.owner = o.packageID
@@ -111,7 +140,21 @@ func LowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch) (mir.Prog
 			return mir.Program{}, fmt.Errorf("nominal patch changed the verified function %s", o.function.Name)
 		}
 	}
-	return mir.Lower(baseline.Semantic.HIR)
+	if timings != nil {
+		timings.Validation = time.Since(started)
+		started = time.Now()
+	}
+	var program mir.Program
+	var err error
+	if reuse {
+		program = mir.Clone(baseline.MIR)
+	} else {
+		program, err = mir.Lower(baseline.Semantic.HIR)
+	}
+	if timings != nil {
+		timings.Materialization = time.Since(started)
+	}
+	return program, err
 }
 
 func within(use, body hir.Span) bool {
