@@ -8,12 +8,19 @@ import std::vec as v;
 pub struct Field { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_root; usize key_type; bool public; usize public_start; usize public_end; usize payload_start; usize payload_count; usize payload_open; usize payload_end; }
 pub struct Attempt { bool ok; usize next; usize end; usize fields; usize types; i32 status; u32 expected; usize cleanup_start; }
 struct Cursor { usize index; usize end; usize fields; usize types; i32 status; u32 expected; usize cleanup_start; }
+// Declaration kinds 4/6/10/11 select struct/resource/state/enum bodies.
+// Payload fields use a separate internal mode, never a declaration kind.
+const u32 PAYLOAD_BODY = 0;
 fn void advance(ref scanner::Stream stream, ref mut Cursor cursor) {
     cursor.end = scanner::token_info(stream,cursor.index).end;
     if (cursor.index + 1 < scanner::token_count(stream)) { cursor.index = cursor.index + 1; }
     while (scanner::token_info(stream,cursor.index).kind == 2 && cursor.index + 1 < scanner::token_count(stream)) { cursor.index = cursor.index + 1; }
 }
-fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<types::Node> nodes, ref mut v::Vec<Field> fields, bool is_resource, bool is_state, bool is_enum, bool is_payload) {
+fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<types::Node> nodes, ref mut v::Vec<Field> fields, u32 body_kind) {
+    let bool is_resource = body_kind == 6;
+    let bool is_state = body_kind == 10;
+    let bool is_enum = body_kind == 11;
+    let bool is_payload = body_kind == PAYLOAD_BODY;
     if (!types::word(stream,cursor.index,b"{")) { cursor.expected = 6; return false; }
     advance(stream,cursor);
     while (!types::word(stream,cursor.index,b"}")) {
@@ -53,7 +60,7 @@ fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<t
         if (is_enum && types::word(stream,cursor.index,b"{")) {
             payload_start = cursor.fields;
             payload_open = scanner::token_info(stream,cursor.index).start;
-            if (!body(stream,cursor,nodes,fields,false,false,false,true)) { return false; }
+            if (!body(stream,cursor,nodes,fields,PAYLOAD_BODY)) { return false; }
             payload_count = cursor.fields - payload_start;
             payload_end = cursor.end;
         }
@@ -70,8 +77,8 @@ fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<t
     }
     advance(stream,cursor); return true;
 }
-pub fn Attempt parse(ref scanner::Stream stream, usize index, usize type_count, usize field_count, ref mut v::Vec<types::Node> nodes, ref mut v::Vec<Field> fields, bool is_resource, bool is_state, bool is_enum) {
+pub fn Attempt parse(ref scanner::Stream stream, usize index, usize type_count, usize field_count, ref mut v::Vec<types::Node> nodes, ref mut v::Vec<Field> fields, u32 declaration_kind) {
     var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .fields = field_count, .types = type_count, .status = 0, .expected = 0, .cleanup_start = 0 };
-    let bool ok = body(stream,ref mut cursor,nodes,fields,is_resource,is_state,is_enum,false);
+    let bool ok = body(stream,ref mut cursor,nodes,fields,declaration_kind);
     return Attempt { .ok = ok, .next = cursor.index, .end = cursor.end, .fields = cursor.fields, .types = cursor.types, .status = cursor.status, .expected = cursor.expected, .cleanup_start = cursor.cleanup_start };
 }

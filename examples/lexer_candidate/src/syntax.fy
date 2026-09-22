@@ -128,7 +128,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor,
         root = bodies::read_expression(stream,cursor,nodes,entries,statements,type_nodes);
         if (root == 0 || !state::expect(stream,cursor,b";",8)) { return failed(stream,cursor,kind); }
     } else if (kind == 4 || kind == 6 || kind == 10 || kind == 11) {
-        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields,kind == 6,kind == 10,kind == 11);
+        let records::Attempt record = records::parse(stream,cursor.index,cursor.types,cursor.fields,type_nodes,fields,kind);
         cursor.index = record.next; cursor.previous_end = record.end; cursor.types = record.types; cursor.fields = record.fields;
         cursor.expected = record.expected; cursor.status = record.status;
         if (!record.ok) { return failed(stream,cursor,kind); }
