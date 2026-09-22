@@ -165,8 +165,19 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
         if (state::take(stream, cursor, b"(")) {
             var usize arguments = 0;
             while (!word(stream, cursor.index, b")")) {
-                let usize argument_token = cursor.index;
+                var usize argument_token = cursor.index;
                 let usize argument_start = state::current(stream, cursor).start;
+                if (word(stream,cursor.index,b".")) {
+                    let usize name = tokens::significant(stream,cursor.index + 1);
+                    if (scanner::token_info(stream,name).kind == 3) {
+                        let usize equals = tokens::significant(stream,name + 1);
+                        if (word(stream,equals,b"=")) {
+                            argument_token = name;
+                            cursor.index = equals;
+                            state::advance(stream,cursor);
+                        }
+                    }
+                }
                 let usize value = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1,true);
                 if (value == 0) { return 0; }
                 arguments = state::append(nodes, cursor, state::node_value(7,argument_start,cursor.previous_end,argument_token,value,arguments));

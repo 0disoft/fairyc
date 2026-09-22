@@ -180,7 +180,7 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 				forInitializers[[2]int{node.Span.StartByte, node.Span.EndByte}] = clause.Span
 			}
 		}
-		if node.Kind == syntax.KindField {
+		if node.Kind == syntax.KindField || node.Kind == syntax.KindArgumentLabel {
 			fieldNames[[2]int{node.Span.StartByte, node.Span.EndByte}] = node.NameSpan
 			if node.NameSpan.EndByte == node.NameSpan.StartByte {
 				for _, token := range r.Tree.Tokens[node.TokenStart:node.TokenEnd] {
@@ -470,11 +470,23 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 			return true
 		}
 		for i, c := range e.Children {
+			childDepth := d + 1
+			if k == 205 && e.CallLabels != nil {
+				for _, label := range e.CallLabels.Labels {
+					if label.Index == i-1 {
+						name, ok := fieldNames[[2]int{label.Span.StartByte, label.Span.EndByte}]
+						if !ok || name.EndByte <= name.StartByte || input[name.StartByte:name.EndByte] != label.Name || !record(230, label.Span, 1, name, childDepth, "") {
+							return false
+						}
+						childDepth++
+					}
+				}
+			}
 			if k == 207 && i > 0 && c.Kind == syntax.KindBlock {
 				if !block(c.Block, d+1) {
 					return false
 				}
-			} else if !expr(c, d+1) {
+			} else if !expr(c, childDepth) {
 				return false
 			}
 		}
@@ -684,6 +696,11 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 		"module main;fn void f(){pkg::Box<i32>{.value};return .Pair{.left,.right};}",
 		"module main;fn void f(){return Outer{.inner=Inner{.value},.tail};}",
 		"module main;fn void f(){" + strings.Repeat("R{.x};", 51) + "}",
+		"module main;fn void f(){call(.value=1);call(0,.value=2,3,);call(.a=first(),.b=second());}",
+		"module main; /* 이름표 */\r\nfn void f(){call(. /* 이름 */ value /* 등호 */ = /* 값 */ other(.inner=2),.tail=R{.x});}",
+		"module main;fn void f(){call(.Some(1),.None,.Pair{.left,.right},.value=.Some(2));}",
+		"module main;fn void f(){pkg::call<i32>(.value=1);object.call(.value=2);(callback)(.value=3);call(.same=1,.same=2);}",
+		"module main;fn void f(){" + strings.Repeat("call(.value=1);", 51) + "}",
 		"module main; /* 참조 */\r\nfn void f(){let a=ref object.field;let b=ref /* gap */ mut values[i];use(ref a,ref mut b);return ref ref mut a;}",
 		"module main;fn void f(){let a=fetch<i32>()?.items[0]?;return (ref mut a)?;}",
 		"module main;fn void f(){let a=unsafe /* gap */ {};let b=unsafe{let p=ref mut a;unsafe{call(p)?}};return {unsafe{ref b}};}",
@@ -797,6 +814,13 @@ func TestWindowsFairyParserBodyTree(t *testing.T) {
 			"module main;fn void f(){[1,,2];}",
 			"module main;fn void f(){R{.x=};}",
 			"module main;fn void f(){R{.x+1};}",
+			"module main;fn void f(){call(.value=);}",
+			"module main;fn void f(){call(.value=1 .other=2);}",
+			"module main;fn void f(){call(.true=1);}",
+			"module main;fn void f(){call(.=1);}",
+			"module main;fn void f(){call(.",
+			"module main;fn void f(){call(.value=",
+			"module main;fn void f(){" + strings.Repeat("call(.value=1);", 52) + "}",
 			"module main;fn void f(){R{.x y};}",
 			"module main;fn void f(){R{.x",
 			"module main;fn void f(){R{.};}",

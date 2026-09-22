@@ -96,7 +96,14 @@ struct ExportBudget {usize nodes; bool emit;}
  }
  if(kind==208){return type_tree(p,e.right,budget,depth+1);}
  if(kind==209){var usize i=0;while(i+1<count){if(!type_tree(p,syntax::specialization_argument(p,id,i),budget,depth+1)){return false;}i+=1;}}
- if(kind==205){var usize i=0;while(i+1<count){if(!expression_tree(p,syntax::call_argument(p,id,i),budget,depth+1)){return false;}i+=1;}}
+ if(kind==205){var usize i=0;while(i+1<count){
+  let entry=syntax::expression_at(p,syntax::call_argument_entry(p,id,i));let name=syntax::comparison_token(p,entry.token);
+  var usize child_depth=depth+1;
+  if(name.start>entry.start){
+   if(name.kind!=3 || !record(budget,child_depth,230,entry.start,entry.end,1,name.start,name.end)){return false;}if(budget.emit){number(0);}child_depth+=1;
+  }
+  if(!expression_tree(p,syntax::call_argument(p,id,i),budget,child_depth)){return false;}i+=1;
+ }}
  if(kind==207){
   let branches=syntax::expression_at(p,e.right);
   if(!statement_tree(p,branches.left,budget,depth+1)){return false;}

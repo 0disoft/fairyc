@@ -360,10 +360,15 @@ pub fn ref u8[] literal_cooked(ref Parsed parsed, usize id) {
     return scanner::token_cooked(ref parsed.source, node.token);
 }
 pub fn usize call_argument(ref Parsed parsed, usize call, usize index) {
+    return expression_at(parsed,call_argument_entry(parsed,call,index)).left;
+}
+// A labeled entry retains the identifier token after its opening dot; ordinary
+// entries retain the first value token at entry.start. Value children stay intact.
+pub fn usize call_argument_entry(ref Parsed parsed, usize call, usize index) {
     let usize count = call_argument_count(parsed, call); assert(index < count);
     var usize remaining = count - 1; var usize link = expression_at(parsed, call).right;
     while (remaining > index) { link = expression_at(parsed, link).right; remaining -= 1; }
-    return expression_at(parsed, link).left;
+    return link;
 }
 
 

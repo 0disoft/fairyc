@@ -37,8 +37,7 @@ Implementation advances `fairyc-language/15` to `/16` and SDK
 `0.0.0-stage0.60` to `0.0.0-stage0.61`. Synchronize current manifests,
 scaffolds, and tests; retain historical records.
 
-The Fairy-written candidate parser does not support labels. Keep its own source
-unlabeled and exercise the real call triple in a host-compiler fixture.
+The candidate parser now parses labels for syntax parity, retaining the label identifier and byte span in the existing argument node with original values and order intact. This is not a semantic eligibility promotion: keep its own source unlabeled and exercise the real call triple in a host-compiler fixture.
 Acceptance covers mixed positional/labeled arguments, trailing commas, constant
 evaluation, side effects, and resource movement. Rejection covers target
 eligibility, misspelled/reordered/duplicate labels, arity, and generic expansion.
