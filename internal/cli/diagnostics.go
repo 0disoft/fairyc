@@ -42,7 +42,7 @@ func writeSemanticDiagnostics(writer io.Writer, sources map[string][]byte, value
 			line,
 			column,
 			value.Code,
-			semanticDiagnosticSummary(value.Code),
+			semanticDiagnosticMessage(value),
 			value.Primary.StartByte,
 			value.Primary.EndByte,
 		); err != nil {

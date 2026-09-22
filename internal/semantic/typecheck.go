@@ -1383,8 +1383,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		child, actual := c.checkExpression(argument, expected)
 		result.Children = appendExpression(result.Children, child)
 		if expected != hir.TypeInvalid {
-			c.requireType(
-				"E1006",
+			c.requireCallArgumentType(
 				span(c.module.file.Path, argument.Span),
 				actual,
 				expected,

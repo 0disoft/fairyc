@@ -137,7 +137,7 @@ func writeWorkspaceDiagnostics(writer io.Writer, workspace workspaceloader.Works
 			return fmt.Errorf("resolve workspace diagnostic source")
 		}
 		line, column := bytePosition(contents, value.Primary.StartByte)
-		if _, err := fmt.Fprintf(writer, "%s:%d:%d: %s: %s [bytes %d..%d]\n", safeDisplayPath(display), line, column, value.Code, semanticDiagnosticSummary(value.Code), value.Primary.StartByte, value.Primary.EndByte); err != nil {
+		if _, err := fmt.Fprintf(writer, "%s:%d:%d: %s: %s [bytes %d..%d]\n", safeDisplayPath(display), line, column, value.Code, semanticDiagnosticMessage(value), value.Primary.StartByte, value.Primary.EndByte); err != nil {
 			return err
 		}
 		for _, related := range value.Related {
