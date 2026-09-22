@@ -1,0 +1,1707 @@
+{
+  "schema": "fairyc.argument-label-cost/v1",
+  "baseline": "2a5d2dd7dd05114154522fe22818ff299f60abda",
+  "current": "d5dc062b44e413f8e308bd402052513e034e7875",
+  "overlay_sha256": {
+    "internal/ast/argument_labels.go": "bac7946bcef75b7192ef4dc386f3250a3e44762f1fb73ef7f91538b65792a31e",
+    "internal/ast/ast.go": "b8adf7084dcc46b84585a0d6e21e8619efcc69f0b296b8021090f960871cdf1b",
+    "internal/diagnostic/catalog.go": "33169785a3cbe29e21b64c81b4c43b72298abe613aab9465ce84bf57c34edee5",
+    "internal/genericsource/clone.go": "0f193ff9d4ad901505c04df7a3212ab07c1c4a493cf2cf5584fcdffaeddeb337",
+    "internal/projectscaffold/scaffold.go": "0192cb2918333703eb12471d9cd4f2d97c76a0c5f2f6e7319ad6f6f8eccf12d8",
+    "internal/sdkstdlib/stdlib.go": "c107b1cc421b8a9ecfd887edd3c295b317b6158589d954b5d79a70fbb24e0f36",
+    "internal/semantic/argument_labels.go": "1b3db5fa1421ff29eaa268b7d38ea462a05f3c02e91373b0c632cdd782e119c2",
+    "internal/semantic/compile_time.go": "c659ce87a1749381be4b4aa7ac96ef704cb1fba893458434e78382e63b922884",
+    "internal/semantic/typecheck.go": "449a82874c96f5aadabd22909fe2f6679d2935d263745cad5c6f444d87396b34",
+    "internal/syntax/argument_labels.go": "62a1b3884b42c55df60c592c9693df0ab4f544ce421b98fcf169f185f453c99d",
+    "internal/syntax/expression.go": "6c4b2efa9763ebbb1080b4eca050fd820aa95fa61b16c3381ce44c2025ba3d79",
+    "internal/syntax/tree.go": "896a545b419557e96b2bf0ebcc021ffbe401dcc2dd984a9419de616046cc4e6c"
+  },
+  "harness_sha256": {
+    "tools/measure-argument-labels.ts": "e355d801c0d3fc3d0881bdb80d98cb967f4531894f5bfc7db95c9423c51bf18c",
+    "internal/cli/argument_labels_cost_test.go": "ff9e7c542c4ed26611ca69b9e36fe16f525b0ac326152f75cc5f089a0e87b88d",
+    "internal/cdriver/argument_labels_cost_test.go": "bcf7a603f608e259d86df4718a57fa9613caf43d6052509e58fc1ff094ca90aa"
+  },
+  "binaries_sha256": {
+    "baseline": "b1fa9b96fe793bfeded397245919a8b0b1574a6e32c9048f6dde048bbd467ab0",
+    "current": "b8778529cf6e6cc486668d518b17b997603e6f547a6f7f35842a1393a43ede98"
+  },
+  "method": "Six alternating process pairs, GOMAXPROCS=1; one warmup then eight uncached load/parse/check/verified-MIR iterations per corpus and process. Forced GC before timing; normal GC within. Go cumulative allocations, not peak/RSS or child allocations. Setup, lock creation, process startup, Go compilation and cache serialization excluded. Same unlabeled .fy bytes across revisions; manifests use each compiler's exact language pin. Scanner+SDK control is frontend-only. Synthetic 64-call corpus additionally measures ordinary C/native builds in both profiles, artifact bytes, in-memory package-cache bytes with verified warm hits; separate existing private /Z7 /DEBUG:FULL probes capture PDB. Ambient OS/tool caches; source spans and random MSVC temporary paths may affect metadata. Sizes are observations, not filtered by equality. No runtime-speed, Linux, full application or disk-cache/fymap conclusion.",
+  "samples": [
+    {
+      "repetition": 0,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "baseline",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 900589600,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 585761300,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 17573800,
+          "gc_cycles": 17,
+          "go_alloc_bytes": 5460074,
+          "go_mallocs": 13349,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        },
+        {
+          "check_ns": 459108112,
+          "gc_cycles": 188,
+          "go_alloc_bytes": 169227837,
+          "go_mallocs": 445719,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        }
+      ]
+    },
+    {
+      "repetition": 0,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "current",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 383909300,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 513686700,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 18483475,
+          "gc_cycles": 16,
+          "go_alloc_bytes": 5466428,
+          "go_mallocs": 13413,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        },
+        {
+          "check_ns": 439245987,
+          "gc_cycles": 177,
+          "go_alloc_bytes": 169616459,
+          "go_mallocs": 447151,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "2b0327c6bf2106572722b1f942c7d9501506ed7a82ef8fa73b9e332b3a65b5d9",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 346892700,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 425609000,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339644,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 22333887,
+          "gc_cycles": 16,
+          "go_alloc_bytes": 5728484,
+          "go_mallocs": 14121,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4"
+          },
+          "variant": "labels"
+        }
+      ]
+    },
+    {
+      "repetition": 1,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "current",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 408336900,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 481657900,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339644,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16326075,
+          "gc_cycles": 18,
+          "go_alloc_bytes": 5736770,
+          "go_mallocs": 14123,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4"
+          },
+          "variant": "labels"
+        },
+        {
+          "check_ns": 433908800,
+          "gc_cycles": 182,
+          "go_alloc_bytes": 169668861,
+          "go_mallocs": 447154,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "2b0327c6bf2106572722b1f942c7d9501506ed7a82ef8fa73b9e332b3a65b5d9",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 400432700,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 447999700,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 20317987,
+          "gc_cycles": 16,
+          "go_alloc_bytes": 5458221,
+          "go_mallocs": 13412,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        }
+      ]
+    },
+    {
+      "repetition": 1,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "baseline",
+      "rows": [
+        {
+          "check_ns": 397794875,
+          "gc_cycles": 191,
+          "go_alloc_bytes": 169230409,
+          "go_mallocs": 445716,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 329791500,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 414705600,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16203087,
+          "gc_cycles": 16,
+          "go_alloc_bytes": 5451785,
+          "go_mallocs": 13348,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        }
+      ]
+    },
+    {
+      "repetition": 2,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "baseline",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 332270600,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 431297600,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16082712,
+          "gc_cycles": 15,
+          "go_alloc_bytes": 5451869,
+          "go_mallocs": 13349,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        },
+        {
+          "check_ns": 392628587,
+          "gc_cycles": 185,
+          "go_alloc_bytes": 169215241,
+          "go_mallocs": 445717,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        }
+      ]
+    },
+    {
+      "repetition": 2,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "current",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 339507400,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 414162800,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 15015837,
+          "gc_cycles": 16,
+          "go_alloc_bytes": 5466447,
+          "go_mallocs": 13413,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        },
+        {
+          "check_ns": 385849462,
+          "gc_cycles": 180,
+          "go_alloc_bytes": 169677480,
+          "go_mallocs": 447154,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "2b0327c6bf2106572722b1f942c7d9501506ed7a82ef8fa73b9e332b3a65b5d9",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 392326800,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 440846000,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339644,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 22017812,
+          "gc_cycles": 17,
+          "go_alloc_bytes": 5728539,
+          "go_mallocs": 14122,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4"
+          },
+          "variant": "labels"
+        }
+      ]
+    },
+    {
+      "repetition": 3,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "current",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 339550200,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 469690100,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339644,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16229600,
+          "gc_cycles": 17,
+          "go_alloc_bytes": 5736751,
+          "go_mallocs": 14123,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4"
+          },
+          "variant": "labels"
+        },
+        {
+          "check_ns": 417158350,
+          "gc_cycles": 180,
+          "go_alloc_bytes": 169687633,
+          "go_mallocs": 447154,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "2b0327c6bf2106572722b1f942c7d9501506ed7a82ef8fa73b9e332b3a65b5d9",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 341468600,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 396688500,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 20932400,
+          "gc_cycles": 16,
+          "go_alloc_bytes": 5449986,
+          "go_mallocs": 13411,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        }
+      ]
+    },
+    {
+      "repetition": 3,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "baseline",
+      "rows": [
+        {
+          "check_ns": 364653712,
+          "gc_cycles": 189,
+          "go_alloc_bytes": 169221113,
+          "go_mallocs": 445718,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 320806000,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 411531700,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16947912,
+          "gc_cycles": 17,
+          "go_alloc_bytes": 5451833,
+          "go_mallocs": 13348,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        }
+      ]
+    },
+    {
+      "repetition": 4,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "baseline",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 339930500,
+              "object_bytes": {
+                "runtime.obj": 1041,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 402442700,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 15717112,
+          "gc_cycles": 17,
+          "go_alloc_bytes": 5460074,
+          "go_mallocs": 13349,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        },
+        {
+          "check_ns": 395141762,
+          "gc_cycles": 186,
+          "go_alloc_bytes": 169210821,
+          "go_mallocs": 445716,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        }
+      ]
+    },
+    {
+      "repetition": 4,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "current",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 353466700,
+              "object_bytes": {
+                "runtime.obj": 1041,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 407208400,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16611987,
+          "gc_cycles": 17,
+          "go_alloc_bytes": 5466473,
+          "go_mallocs": 13413,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        },
+        {
+          "check_ns": 382690575,
+          "gc_cycles": 176,
+          "go_alloc_bytes": 169667692,
+          "go_mallocs": 447149,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "2b0327c6bf2106572722b1f942c7d9501506ed7a82ef8fa73b9e332b3a65b5d9",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 353762700,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 453224200,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339644,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 18529212,
+          "gc_cycles": 18,
+          "go_alloc_bytes": 5728550,
+          "go_mallocs": 14122,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4"
+          },
+          "variant": "labels"
+        }
+      ]
+    },
+    {
+      "repetition": 5,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "current",
+      "rows": [
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 333781800,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 403254200,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339644,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16007150,
+          "gc_cycles": 17,
+          "go_alloc_bytes": 5736735,
+          "go_mallocs": 14122,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4"
+          },
+          "variant": "labels"
+        },
+        {
+          "check_ns": 384058112,
+          "gc_cycles": 178,
+          "go_alloc_bytes": 169677625,
+          "go_mallocs": 447153,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "2b0327c6bf2106572722b1f942c7d9501506ed7a82ef8fa73b9e332b3a65b5d9",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 356408200,
+              "object_bytes": {
+                "runtime.obj": 1041,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 423306700,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 21709387,
+          "gc_cycles": 18,
+          "go_alloc_bytes": 5458246,
+          "go_mallocs": 13413,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        }
+      ]
+    },
+    {
+      "repetition": 5,
+      "go": "go1.26.4",
+      "gomaxprocs": 1,
+      "lane": "baseline",
+      "rows": [
+        {
+          "check_ns": 360955350,
+          "gc_cycles": 189,
+          "go_alloc_bytes": 169240707,
+          "go_mallocs": 445719,
+          "iterations": 8,
+          "source_sha256": {
+            "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+            "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+            "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+            "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+            "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+            "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+            "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+            "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+          },
+          "variant": "scanner"
+        },
+        {
+          "artifacts": [
+            {
+              "exe_bytes": 116736,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 343460300,
+              "object_bytes": {
+                "runtime.obj": 1045,
+                "unit.obj": 10970
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4116,
+                ".rdata": 39112,
+                ".reloc": 1620,
+                ".text": 65712
+              },
+              "profile": "low"
+            },
+            {
+              "exe_bytes": 107520,
+              "exit_code": 0,
+              "msvc": "14.51.36231",
+              "native_ns": 464820200,
+              "object_bytes": {
+                "runtime.obj": 1040,
+                "unit.obj": 1216
+              },
+              "pdb_bytes": 0,
+              "pe_virtual_section_bytes": {
+                ".data": 5552,
+                ".fptable": 256,
+                ".pdata": 4068,
+                ".rdata": 39080,
+                ".reloc": 1620,
+                ".text": 57216
+              },
+              "profile": "optimized"
+            }
+          ],
+          "c_bytes": 34567,
+          "c_sha256": "ec143d24783367cfbc436c3590ac2713ae2af59597b4d4722e279a0143350ca1",
+          "cache_stats": {
+            "Store": {
+              "Entries": 1,
+              "Bytes": 339228,
+              "Hits": 1,
+              "Misses": 1,
+              "Evictions": 0
+            },
+            "VerifiedHits": 1,
+            "Misses": 1,
+            "Rejected": 0
+          },
+          "check_ns": 16729800,
+          "gc_cycles": 16,
+          "go_alloc_bytes": 5443569,
+          "go_mallocs": 13348,
+          "iterations": 8,
+          "source_sha256": {
+            "src/main.fy": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a"
+          },
+          "variant": "plain"
+        }
+      ]
+    }
+  ],
+  "debug": [
+    {
+      "exe_bytes": 558080,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4317,
+        "unit.obj": 36447
+      },
+      "pdb_bytes": 6172672,
+      "profile": "low",
+      "repetition": 0,
+      "variant": "baseline-plain"
+    },
+    {
+      "exe_bytes": 549376,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4552,
+        "unit.obj": 34012
+      },
+      "pdb_bytes": 6164480,
+      "profile": "optimized",
+      "repetition": 0,
+      "variant": "baseline-plain"
+    },
+    {
+      "exe_bytes": 558080,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4317,
+        "unit.obj": 36447
+      },
+      "pdb_bytes": 6164480,
+      "profile": "low",
+      "repetition": 0,
+      "variant": "current-plain"
+    },
+    {
+      "exe_bytes": 549376,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4552,
+        "unit.obj": 34012
+      },
+      "pdb_bytes": 6164480,
+      "profile": "optimized",
+      "repetition": 0,
+      "variant": "current-plain"
+    },
+    {
+      "exe_bytes": 558080,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4317,
+        "unit.obj": 36447
+      },
+      "pdb_bytes": 6172672,
+      "profile": "low",
+      "repetition": 0,
+      "variant": "current-labels"
+    },
+    {
+      "exe_bytes": 549376,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4552,
+        "unit.obj": 34012
+      },
+      "pdb_bytes": 6164480,
+      "profile": "optimized",
+      "repetition": 0,
+      "variant": "current-labels"
+    },
+    {
+      "exe_bytes": 558080,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4317,
+        "unit.obj": 36447
+      },
+      "pdb_bytes": 6172672,
+      "profile": "low",
+      "repetition": 1,
+      "variant": "current-labels"
+    },
+    {
+      "exe_bytes": 549376,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4552,
+        "unit.obj": 34012
+      },
+      "pdb_bytes": 6164480,
+      "profile": "optimized",
+      "repetition": 1,
+      "variant": "current-labels"
+    },
+    {
+      "exe_bytes": 558080,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4317,
+        "unit.obj": 36447
+      },
+      "pdb_bytes": 6172672,
+      "profile": "low",
+      "repetition": 1,
+      "variant": "current-plain"
+    },
+    {
+      "exe_bytes": 549376,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4552,
+        "unit.obj": 34012
+      },
+      "pdb_bytes": 6164480,
+      "profile": "optimized",
+      "repetition": 1,
+      "variant": "current-plain"
+    },
+    {
+      "exe_bytes": 558080,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4305,
+        "unit.obj": 36439
+      },
+      "pdb_bytes": 6172672,
+      "profile": "low",
+      "repetition": 1,
+      "variant": "baseline-plain"
+    },
+    {
+      "exe_bytes": 549376,
+      "exit_code": 0,
+      "msvc": "14.51.36231",
+      "object_bytes": {
+        "runtime.obj": 4552,
+        "unit.obj": 34012
+      },
+      "pdb_bytes": 6164480,
+      "profile": "optimized",
+      "repetition": 1,
+      "variant": "baseline-plain"
+    }
+  ]
+}

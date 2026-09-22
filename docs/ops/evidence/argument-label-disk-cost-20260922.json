@@ -1,0 +1,147 @@
+{
+  "compiler": "d5dc062b44e413f8e308bd402052513e034e7875",
+  "method": "Current compiler only; same 64-call corpus as frontend measurement. Three fresh directories per variant; store one package, close session, reopen and verify all-hit. Sum actual regular file lengths after closing; no disk allocation-block/RSS/fymap claim.",
+  "rows": [
+    {
+      "cache_stats": {
+        "Store": {
+          "Entries": 1,
+          "Bytes": 461346,
+          "Hits": 1,
+          "Misses": 0,
+          "Rejected": 0,
+          "Evictions": 0
+        },
+        "VerifiedHits": 1,
+        "Misses": 0,
+        "Rejected": 0
+      },
+      "file_bytes": 461346,
+      "files": {
+        "v1/9c391eb6dcb43deb3aad39b6c7e84f38267acd4a6f7de03737ba518808e7414e/427702b441122a93210e5be48a764f20806db67cf04bbe486019b441a8a790e1.json": 461346
+      },
+      "repetition": 0,
+      "source_sha256": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a",
+      "variant": "plain",
+      "warm_hit": "all-hit"
+    },
+    {
+      "cache_stats": {
+        "Store": {
+          "Entries": 1,
+          "Bytes": 461902,
+          "Hits": 1,
+          "Misses": 0,
+          "Rejected": 0,
+          "Evictions": 0
+        },
+        "VerifiedHits": 1,
+        "Misses": 0,
+        "Rejected": 0
+      },
+      "file_bytes": 461902,
+      "files": {
+        "v1/e408b94c5c9fc41f3c2800435860cef139223442228d8c0748fe82ebc03c7b27/f94d3ea0034365fd89ae2663912539e7115eb872bd676f747822508206c7052b.json": 461902
+      },
+      "repetition": 0,
+      "source_sha256": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4",
+      "variant": "labels",
+      "warm_hit": "all-hit"
+    },
+    {
+      "cache_stats": {
+        "Store": {
+          "Entries": 1,
+          "Bytes": 461346,
+          "Hits": 1,
+          "Misses": 0,
+          "Rejected": 0,
+          "Evictions": 0
+        },
+        "VerifiedHits": 1,
+        "Misses": 0,
+        "Rejected": 0
+      },
+      "file_bytes": 461346,
+      "files": {
+        "v1/9c391eb6dcb43deb3aad39b6c7e84f38267acd4a6f7de03737ba518808e7414e/427702b441122a93210e5be48a764f20806db67cf04bbe486019b441a8a790e1.json": 461346
+      },
+      "repetition": 1,
+      "source_sha256": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a",
+      "variant": "plain",
+      "warm_hit": "all-hit"
+    },
+    {
+      "cache_stats": {
+        "Store": {
+          "Entries": 1,
+          "Bytes": 461902,
+          "Hits": 1,
+          "Misses": 0,
+          "Rejected": 0,
+          "Evictions": 0
+        },
+        "VerifiedHits": 1,
+        "Misses": 0,
+        "Rejected": 0
+      },
+      "file_bytes": 461902,
+      "files": {
+        "v1/e408b94c5c9fc41f3c2800435860cef139223442228d8c0748fe82ebc03c7b27/f94d3ea0034365fd89ae2663912539e7115eb872bd676f747822508206c7052b.json": 461902
+      },
+      "repetition": 1,
+      "source_sha256": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4",
+      "variant": "labels",
+      "warm_hit": "all-hit"
+    },
+    {
+      "cache_stats": {
+        "Store": {
+          "Entries": 1,
+          "Bytes": 461346,
+          "Hits": 1,
+          "Misses": 0,
+          "Rejected": 0,
+          "Evictions": 0
+        },
+        "VerifiedHits": 1,
+        "Misses": 0,
+        "Rejected": 0
+      },
+      "file_bytes": 461346,
+      "files": {
+        "v1/9c391eb6dcb43deb3aad39b6c7e84f38267acd4a6f7de03737ba518808e7414e/427702b441122a93210e5be48a764f20806db67cf04bbe486019b441a8a790e1.json": 461346
+      },
+      "repetition": 2,
+      "source_sha256": "fad737b7923bc5bf97469c7bc6e096b105a4fb1c18670f9c60af19de8ce3409a",
+      "variant": "plain",
+      "warm_hit": "all-hit"
+    },
+    {
+      "cache_stats": {
+        "Store": {
+          "Entries": 1,
+          "Bytes": 461902,
+          "Hits": 1,
+          "Misses": 0,
+          "Rejected": 0,
+          "Evictions": 0
+        },
+        "VerifiedHits": 1,
+        "Misses": 0,
+        "Rejected": 0
+      },
+      "file_bytes": 461902,
+      "files": {
+        "v1/e408b94c5c9fc41f3c2800435860cef139223442228d8c0748fe82ebc03c7b27/f94d3ea0034365fd89ae2663912539e7115eb872bd676f747822508206c7052b.json": 461902
+      },
+      "repetition": 2,
+      "source_sha256": "72a57035136578d2125e3618c0e80ef7713a0c9eff2b74e5ad4d324f9ce078e4",
+      "variant": "labels",
+      "warm_hit": "all-hit"
+    }
+  ],
+  "schema": "fairyc.argument-label-disk-cost/v1",
+  "test_executable": "fairyc.compiler-executable-sha256/v1:a528e708f42cbafd09bc67a680ad16754ab0f3e72ef693625fa21e80d34383cd",
+  "harness_sha256": "b03788bdd89d20c7988016ead79ca5bc1f1289326cfe28fcd6562a8a62c27a79"
+}
