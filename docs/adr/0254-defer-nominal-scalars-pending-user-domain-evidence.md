@@ -74,3 +74,12 @@ The [nominal scalar prototype proposal](../architecture/nominal-scalar-prototype
 defines a bounded validation/erasure experiment and its remaining admission gates.
 This follow-up does not accept syntax or lift the stable-language implementation
 deferral; the original revision `/8` audit remains historical evidence.
+
+## Follow-up evidence (2026-09-22)
+
+[Nominal scalar source usability v0](../architecture/nominal-scalar-source-usability-v0.md)
+keeps the deferral, including the experimental source frontend. The real
+`body_state` caller cannot retain a nominal `Cursor.index` field under the current
+proposal. Call-site wrapping alone does not establish the raw value's domain,
+and a source usability advantage over ordinary structs remains unproven.
+This is not a permanent rejection; the review records bounded reopening criteria.
