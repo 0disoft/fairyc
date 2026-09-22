@@ -151,6 +151,11 @@ func (t transform) expr(v *ast.Expression) (*ast.Expression, error) {
 	}
 	result := *v
 	result.Type = t.typePointer(v.Type)
+	if v.CallLabels != nil {
+		labels := *v.CallLabels
+		labels.Labels = slices.Clone(labels.Labels)
+		result.CallLabels = &labels
+	}
 	result.TypeArguments = t.types(v.TypeArguments)
 	result.Children = slices.Clone(v.Children)
 	for i, child := range v.Children {

@@ -23,7 +23,7 @@ features = []
 `), map[string]string{
 		"src/main.fy": "module main;\npub fn i32 value() { return 42; }\n",
 	})
-	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/15", ""), map[string]string{
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/16", ""), map[string]string{
 		"src/answer.fy": "module answer;\npub fn i32 value() { return 42; }\n",
 	})
 	writeWorkspaceLoaderFile(t, root, "tests/answer.fy", `module tests::answer;
@@ -121,7 +121,7 @@ path = "libs/answer"
 version = "1.0.0"
 features = []
 `), validRootSource())
-	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/15", ""), map[string]string{
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/16", ""), map[string]string{
 		"src/answer.fy": "module answer;\npub fn i32 value() { return 42; }\n",
 	})
 	writeWorkspaceLoaderFile(t, root, "tests/root.fy", "module tests::root;\n@test\nfn void root_test() {}\n")
@@ -168,10 +168,10 @@ path = "libs/answer"
 version = "1.0.0"
 features = []
 `), validRootSource())
-	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/15", ""), map[string]string{
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/16", ""), map[string]string{
 		"src/answer.fy": "module answer;\npub fn i32 value() { return 42; }\n",
 	})
-	writePackage(t, root, "libs/unused", memberManifest("example.libs.unused", "unused", "1.0.0", "fairyc-language/15", ""), validMemberSource("unused"))
+	writePackage(t, root, "libs/unused", memberManifest("example.libs.unused", "unused", "1.0.0", "fairyc-language/16", ""), validMemberSource("unused"))
 	writeWorkspaceLoaderFile(t, root, "tests/root.fy", "module tests::root;\n@test\nfn void root_test() {}\n")
 	writeWorkspaceLoaderFile(t, root, "libs/answer/tests/member.fy", "module tests::member;\n@test\nfn void member_test() {}\n")
 	writeWorkspaceLoaderFile(t, root, "libs/unused/tests/unused.fy", "module tests::unused;\n@test\nfn void unused_test() {}\n")
@@ -219,7 +219,7 @@ path = "libs/answer"
 version = "1.0.0"
 features = ["extra"]
 `), validRootSource())
-	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/15", ""), validMemberSource("answer"))
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/16", ""), validMemberSource("answer"))
 	workspace, err := Load(root)
 	if err != nil {
 		t.Fatal(err)
@@ -273,7 +273,7 @@ func TestWithRootTestsRejectsAmbiguousOrOverlappingTrees(t *testing.T) {
 			name: "workspace member overlap", reason: ReasonTestSourceRoot,
 			setup: func(t *testing.T, root string) Workspace {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"tests/member\"]\n"), validRootSource())
-				writePackage(t, root, "tests/member", memberManifest("example.tests.member", "member", "1.0.0", "fairyc-language/15", ""), validMemberSource("member"))
+				writePackage(t, root, "tests/member", memberManifest("example.tests.member", "member", "1.0.0", "fairyc-language/16", ""), validMemberSource("member"))
 				workspace, err := Load(root)
 				if err != nil {
 					t.Fatal(err)

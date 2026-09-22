@@ -1318,6 +1318,9 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 }
 
 func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
+	if !c.analyzer.checkCallArgumentLabels(c.module, expression) {
+		return hir.TypeInvalid
+	}
 	if len(expression.Children) == 0 {
 		return hir.TypeInvalid
 	}

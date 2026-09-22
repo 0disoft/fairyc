@@ -55,6 +55,7 @@ const (
 	KindField          Kind = "field"
 	KindVariant        Kind = "variant"
 	KindParameter      Kind = "parameter"
+	KindArgumentLabel  Kind = "argument-label"
 	KindType           Kind = "type"
 	KindTypeParameters Kind = "type-parameters"
 	KindSpecialize     Kind = "specialize"

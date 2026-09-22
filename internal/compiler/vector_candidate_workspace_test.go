@@ -25,7 +25,7 @@ func TestPrivateVectorSDKWorkspaceCache(t *testing.T) {
 uid = "test.vector-candidate.client"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/15"
+language = "fairyc-language/16"
 source = "src"
 `)
 			client := vectorCandidateProgram()
@@ -172,7 +172,7 @@ func TestPrivateVectorSDKWorkspaceSourceAdmission(t *testing.T) {
 uid = "test.sdk.source-admission"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/15"
+language = "fairyc-language/16"
 source = "src"
 `)
 	const client = `module main;

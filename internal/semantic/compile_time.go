@@ -698,6 +698,9 @@ func (e *compileTimeEvaluator) conditional(module *moduleScope, expression *ast.
 }
 
 func (e *compileTimeEvaluator) call(module *moduleScope, expression *ast.Expression, environment map[*symbol]compileTimeValue, depth int) (compileTimeValue, bool) {
+	if !e.analyzer.checkCallArgumentLabels(module, expression) {
+		return compileTimeValue{}, false
+	}
 	if len(expression.Children) == 0 {
 		e.rejectExpression(module, expression)
 		return compileTimeValue{}, false

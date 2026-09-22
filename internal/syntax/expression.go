@@ -58,7 +58,7 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 			p.advance()
 			children := []NodeID{left}
 			for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
-				children = append(children, p.parseExpression(0, true))
+				children = append(children, p.parseCallArgument())
 				if !p.match(",") {
 					break
 				}

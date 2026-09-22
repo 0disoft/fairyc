@@ -245,6 +245,7 @@ type Literal struct {
 
 // Expression is a structural AST expression used before name resolution and typing.
 type Expression struct {
+	CallLabels    *CallArgumentLabels `json:",omitempty"`
 	TypeArguments []TypeReference
 	Kind          syntax.Kind
 	Span          diagnostic.Span
@@ -754,6 +755,15 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 		return expression
 	}
 	for _, child := range node.Children {
+		if node.Kind == syntax.KindCall {
+			if label, found := tree.Node(child); found && label.Kind == syntax.KindArgumentLabel && len(label.Children) == 1 {
+				if expression.CallLabels == nil {
+					expression.CallLabels = &CallArgumentLabels{}
+				}
+				expression.CallLabels.Labels = append(expression.CallLabels.Labels, ArgumentLabel{Index: len(expression.Children) - 1, Name: label.Text, Span: label.Span})
+				child = label.Children[0]
+			}
+		}
 		if node.Kind == syntax.KindSpecialize || node.Kind == syntax.KindRecord {
 			if typeNode, found := tree.Node(child); found && typeNode.Kind == syntax.KindType {
 				expression.TypeArguments = append(expression.TypeArguments, lowerType(tree, typeNode))
@@ -770,6 +780,9 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 		if lowered := lowerExpression(tree, child); lowered != nil {
 			expression.Children = append(expression.Children, lowered)
 		}
+	}
+	if expression.CallLabels != nil && len(expression.Children) > 0 {
+		expression.CallLabels.ExplicitTypeArguments = expression.Children[0].Kind == syntax.KindSpecialize
 	}
 	return expression
 }

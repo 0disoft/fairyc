@@ -186,7 +186,8 @@ postfix_suffix = call_suffix | explicit_type_call_suffix | index_suffix | field_
    Lookahead is bounded to 256 significant tokens; ordinary comparisons remain unchanged. *)
 explicit_type_call_suffix = "<" type ("," type)* ","? ">" call_suffix ;
 call_suffix = "(" argument_list? ")" ;
-argument_list = expression ("," expression)* ","? ;
+argument_list = call_argument ("," call_argument)* ","? ;
+call_argument = ("." IDENT "=")? expression ;
 index_suffix = "[" (expression ".." expression? | ".." expression? | expression) "]" ;
 field_suffix = "." IDENT ;
 

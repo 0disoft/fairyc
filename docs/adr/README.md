@@ -360,6 +360,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0393-public-vector-truncation.md`: adds capacity-preserving reverse tail destruction through SDK vector truncation.
 - `0394-direct-scalar-field-stores.md`: executes direct scalar field assignment with value-copy isolation and whole-root loan checks.
 - `0395-field-initializer-shorthand.md`: adds `.field` initialization through ordinary lexical values and existing ownership rules in language `/15`.
+- `0396-position-preserving-argument-labels.md`: defines argument labels for private direct calls without argument reordering in language `/16`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

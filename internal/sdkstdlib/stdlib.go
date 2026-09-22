@@ -19,8 +19,8 @@ const (
 	SDKIdentity      = "fairyc-sdk-stdlib/0"
 	PackageUID       = "fairyc.std"
 	PackageName      = "fairyc-std"
-	Version          = "0.0.0-stage0.60"
-	LanguageRevision = "fairyc-language/15"
+	Version          = "0.0.0-stage0.61"
+	LanguageRevision = "fairyc-language/16"
 	RuntimeABI       = "fairyc-runtime/0"
 	PackagePath      = "@sdk/stdlib"
 )

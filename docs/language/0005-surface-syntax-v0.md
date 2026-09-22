@@ -452,6 +452,10 @@ rejected.
 
 A recovered syntax tree is retained for diagnostics only. It cannot silently legalize a missing semicolon, delimiter, import alias, invalid escape, chained comparison, or module mismatch.
 
+## Position-preserving argument labels
+
+An argument may repeat its positional parameter name: `f(value, .minimum = 1, .depth = 0, .allow_record = true)`. Labels do not reorder, omit, duplicate, rename, or supply defaults; each label must exactly name the parameter at that position. Positional arguments may appear before or after labeled ones. Labels are allowed only on same-module private non-generic ordinary direct calls, never on public, external, method, indirect, intrinsic, contextual-constructor, or explicitly generic calls. Evaluation order, ownership, effects, and cleanup retain their existing rules.
+
 ## Explicit exclusions
 
-Function overloading, default and named arguments, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user-defined generic aggregates/methods and inferred instantiation, dynamic dispatch, closures, async, rich patterns, type-wide must-use contracts, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.
+Function overloading, default arguments and argument reordering, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user-defined generic aggregates/methods and inferred instantiation, dynamic dispatch, closures, async, rich patterns, type-wide must-use contracts, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.

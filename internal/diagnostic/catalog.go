@@ -59,6 +59,7 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E1008", Category: categoryType, Meaning: "Assignment target is not a mutable place."},
 	{Code: "E1009", Category: categoryType, Meaning: "Return expression is incompatible with the declared return type."},
 	{Code: "E1010", Category: categoryType, Meaning: "Call argument count does not match the resolved declaration."},
+	{Code: "E1014", Category: categoryType, Meaning: "Call argument label does not match its position or the call target does not support labels."},
 	{Code: "E1012", Category: categoryType, Meaning: "`break` or `continue` has no enclosing loop."},
 	{Code: "E1013", Category: categoryType, Meaning: "Integer literal is outside the range of its selected `i32`, `u8`, `u32`, or `usize` type."},
 	{Code: "E1101", Category: categoryResource, Meaning: "Resource used after move or consumption."},

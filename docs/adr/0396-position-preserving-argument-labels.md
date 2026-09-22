@@ -1,9 +1,7 @@
 # ADR 0396: Position-preserving argument labels
 
-- Status: Accepted design
+- Status: Implemented
 - Date: 2026-09-22
-
-This rule is planned for implementation in the next commit; this ADR claims design only.
 
 ## Evidence and decision
 

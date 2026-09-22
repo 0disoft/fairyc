@@ -109,7 +109,7 @@ func catalogFixtureMode(t *testing.T, generic, aggregate bool) (string, *atlasma
 uid = "test.symbol-catalog"
 name = "symbol-catalog"
 version = "1.0.0"
-language = "fairyc-language/15"
+language = "fairyc-language/16"
 source = "src"
 `)
 	writeCatalogFile(t, filepath.Join(root, "src", "main.fy"), `module main;
