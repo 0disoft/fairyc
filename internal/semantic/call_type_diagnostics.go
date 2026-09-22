@@ -6,9 +6,24 @@ func (c *typeChecker) requireCallArgumentType(primary hir.Span, actual, expected
 	if actual == hir.TypeInvalid || expected == hir.TypeInvalid || actual == expected {
 		return
 	}
+	related := []RelatedSpan{{Role: "expected-type", Span: expectedSpan}}
+	for _, entry := range []struct {
+		typ  hir.Type
+		role string
+	}{
+		{expected, "expected-type-declaration"},
+		{actual, "actual-type-declaration"},
+	} {
+		if info := c.analyzer.structTypes[entry.typ]; info != nil {
+			related = append(related, RelatedSpan{
+				Role: entry.role,
+				Span: span(info.symbol.source, info.symbol.declaration),
+			})
+		}
+	}
 	c.analyzer.diagnostics = append(c.analyzer.diagnostics, Diagnostic{
 		Code: "E1006", Primary: primary,
-		Related:      []RelatedSpan{{Role: "expected-type", Span: expectedSpan}},
+		Related:      related,
 		ExpectedType: expected, ActualType: actual,
 	})
 }

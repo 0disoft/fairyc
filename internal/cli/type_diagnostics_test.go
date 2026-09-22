@@ -1,12 +1,63 @@
 package cli
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
+
+func TestCallTypeDiagnosticsScannerDeclarations(t *testing.T) {
+	root, _ := tokenIndexWorkspace(t, true)
+	data, err := os.ReadFile(filepath.Join(root, "src", "main.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := strings.Replace(string(data), "token_info(ref stream, token_index)", "token_info(ref stream, byte_offset)", 1)
+	if text == string(data) {
+		t.Fatal("call mutation missed")
+	}
+	writeTestSource(t, root, "src/main.fy", text)
+	code, stdout, stderr := runForTest([]string{"check"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, `expected "scanner::TokenIndex", got "scanner::ByteOffset"`) {
+		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout, stderr)
+	}
+	scanner, err := os.ReadFile(filepath.Join(root, "src", "scanner.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range []struct{ role, name string }{
+		{"expected-type-declaration", "TokenIndex"}, {"actual-type-declaration", "ByteOffset"},
+	} {
+		start := strings.Index(string(scanner), "struct "+item.name) + len("struct ")
+		line, column := bytePosition(scanner, start)
+		want := fmt.Sprintf("%s: scanner.fy:%d:%d [bytes %d..%d]", item.role, line, column, start, start+len(item.name))
+		if !strings.Contains(stderr, want) {
+			t.Fatalf("missing %q in %s", want, stderr)
+		}
+	}
+}
+
+func TestCallTypeDiagnosticsStructJSONFailure(t *testing.T) {
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "src/left.fy", "module left; pub struct Index { usize raw; } pub fn void take(Index value) {}")
+	writeWorkspaceFile(t, root, "src/right.fy", "module right; pub struct Index { usize raw; }")
+	writeWorkspaceFile(t, root, "tests/bad.fy", "module tests::bad; import left as l; import right as r; @test fn void bad() { l::take(r::Index { .raw = 0 }); }")
+	code, stdout, stderr := runForTest([]string{"test", "--json"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" {
+		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout, stderr)
+	}
+	for _, want := range []string{`expected "left::Index", got "right::Index"`, "expected-type:", "expected-type-declaration: left.fy:", "actual-type-declaration: right.fy:"} {
+		if !strings.Contains(stderr, want) {
+			t.Fatalf("missing %q in %s", want, stderr)
+		}
+	}
+}
 
 func TestCallTypeDiagnosticsMessage(t *testing.T) {
 	for _, test := range []struct{ expected, actual, suffix string }{

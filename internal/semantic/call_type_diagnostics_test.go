@@ -24,13 +24,49 @@ func TestCallTypeDiagnostics(t *testing.T) {
 }
 
 func TestCallTypeDiagnosticsQualifiedNames(t *testing.T) {
-	result := analyzeText(t, map[string]string{
+	sources := map[string]string{
 		"left.fy":  "module left; pub struct Index { usize raw; } pub fn void take(Index value) {}",
 		"right.fy": "module right; pub struct Index { usize raw; }",
 		"main.fy":  "module main; import left as l; import right as r; fn void caller() { let r::Index value = r::Index { .raw = 0 }; l::take(value); }",
-	})
+	}
+	result := analyzeText(t, sources)
 	if len(result.Diagnostics) != 1 || result.Diagnostics[0].ExpectedType != "left::Index" || result.Diagnostics[0].ActualType != "right::Index" {
 		t.Fatalf("result = %+v", result)
+	}
+	d := result.Diagnostics[0]
+	if d.Code != "E1006" || len(d.Related) != 3 || d.Related[0].Role != "actual-type-declaration" || d.Related[1].Role != "expected-type" || d.Related[2].Role != "expected-type-declaration" {
+		t.Fatalf("diagnostic = %+v", d)
+	}
+	argument := strings.LastIndex(sources["main.fy"], "value")
+	assertSpan(t, d.Primary, "main.fy", argument, argument+5)
+	parameter := strings.Index(sources["left.fy"], "Index value")
+	assertSpan(t, d.Related[1].Span, "left.fy", parameter, parameter+5)
+	for index, path := range []string{"left.fy", "right.fy"} {
+		start := strings.Index(sources[path], "Index")
+		assertSpan(t, d.Related[2-index*2].Span, path, start, start+5)
+	}
+}
+
+func TestCallTypeDiagnosticsOneStructDeclaration(t *testing.T) {
+	for _, test := range []struct{ parameter, argument, role string }{
+		{"Index", "1", "expected-type-declaration"},
+		{"i32", "Index { .raw = 1 }", "actual-type-declaration"},
+	} {
+		text := "module main; struct Index { usize raw; } fn void take(" + test.parameter + " value) {} fn void caller() { take(" + test.argument + "); }"
+		result := analyzeText(t, map[string]string{"main.fy": text})
+		if len(result.Diagnostics) != 1 {
+			t.Fatalf("result = %+v", result)
+		}
+		d := result.Diagnostics[0]
+		if d.Code != "E1006" || len(d.Related) != 2 || d.Related[0].Role != min("expected-type", test.role) || d.Related[1].Role != max("expected-type", test.role) {
+			t.Fatalf("diagnostic = %+v", d)
+		}
+		start := strings.Index(text, "Index")
+		for _, related := range d.Related {
+			if related.Role == test.role {
+				assertSpan(t, related.Span, "main.fy", start, start+5)
+			}
+		}
 	}
 }
 

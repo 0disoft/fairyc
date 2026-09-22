@@ -38,6 +38,8 @@ Help is deterministic, ANSI-free compiler-owned text. Stable machine reports con
 
 For ordinary direct function call type mismatches, E1006 retains the expected and actual canonical types internally. stderr shows both names quoted and module-qualified, preserving build-local package qualifiers when the names differ only by package instance. Exit code 3, the primary argument span, and the expected-type related span are unchanged. No semantic-diagnostic JSON report is added: stable --json test modes report compilation failure on stderr without a partial stdout report, and success schemas are unchanged. Other mismatch sites, method and foreign calls, grammar, and SDK version are unchanged.
 
+For ordinary direct calls, E1006 adds expected-type-declaration and actual-type-declaration related spans only when the canonical type is itself a named struct, with no fabricated declaration span for scalar, ref, or container types. Related spans retain the existing role-based ordering and expected-type parameter span; code 3, the primary span, and the JSON contract are unchanged.
+
 ## Machine-readable envelopes
 
 Only commands that explicitly advertise `--json` or an experimental versioned JSON command may emit machine-readable success documents. Stable test reports use the existing `fairyc.test-report/v1`, `/v2`, `/v3`, and `/v4` families and stable test listing uses `fairyc.test-list/v1`, `/v2`, and `/v3`. Schema selection is driven only by the documented command mode, workspace/package scope, locations flag, and native capture mode.
