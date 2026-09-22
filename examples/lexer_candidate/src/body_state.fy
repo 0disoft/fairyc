@@ -5,7 +5,7 @@ import parse_tokens as tokens;
 
 pub struct Node { u32 kind; usize start; usize end; usize token; usize left; usize right; }
 pub fn Node node_value(u32 kind, usize start, usize end, usize token, usize left, usize right) {
-    return Node { .kind = kind, .start = start, .end = end, .token = token, .left = left, .right = right };
+    return Node { .kind, .start, .end, .token, .left, .right };
 }
 pub fn scanner::TokenInfo current(ref scanner::Stream stream, ref mut Cursor cursor) {
     return scanner::token_info(stream, cursor.index);
@@ -43,7 +43,7 @@ pub struct Cursor { usize index; usize previous_end; usize nodes; usize entries;
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 
 pub fn Statement statement_value(u32 kind, usize start, usize end) {
-    return Statement { .kind = kind, .start = start, .end = end, .expression = 0, .target = 0, .first = 0, .second = 0, .entry = 0, .operator = 0 };
+    return Statement { .kind, .start, .end, .expression = 0, .target = 0, .first = 0, .second = 0, .entry = 0, .operator = 0 };
 }
 pub fn usize append_statement(ref mut v::Vec<Statement> statements, ref mut Cursor cursor, Statement value) {
     if (cursor.statements >= 4096) { cursor.status = 4; return 0; }
