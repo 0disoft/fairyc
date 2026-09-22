@@ -3650,6 +3650,10 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 				fmt.Fprintf(output, "    fy_l_%d = (%s) %s (%s);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
 			}
 		case "/", "%":
+			if directUnsignedDivisor(operation) {
+				fmt.Fprintf(output, "    fy_l_%d = (%s) %s (%s);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+				break
+			}
 			divisor, err := checkedDivisorName(operation.OwnerType)
 			if err != nil {
 				return fmt.Errorf("checked division in %s: %w", function, err)
@@ -4181,7 +4185,7 @@ func functionCheckedDivisorTypes(function mir.Function) []hir.Type {
 	found := make(map[hir.Type]bool)
 	for _, block := range function.Blocks {
 		for _, operation := range block.Operations {
-			if operation.Kind == mir.OperationBinary && (operation.Operator == "/" || operation.Operator == "%") {
+			if operation.Kind == mir.OperationBinary && (operation.Operator == "/" || operation.Operator == "%") && !directUnsignedDivisor(operation) {
 				found[operation.OwnerType] = true
 			}
 		}

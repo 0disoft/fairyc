@@ -815,16 +815,16 @@ fn i32 main() {
 		t.Fatalf("Emit() error = %v", err)
 	}
 	for _, required := range []string{
-		"volatile uint8_t fy_checked_divisor_u8;",
-		"volatile uint32_t fy_checked_divisor_u32;",
-		"volatile uintptr_t fy_checked_divisor_usize;",
-		"/ fy_checked_divisor_u8;",
-		"% fy_checked_divisor_u32;",
-		"/ fy_checked_divisor_usize;",
+		"/ (UINT8_C(2));",
+		"% (UINT32_C(43));",
+		"/ (((uintptr_t)UINT64_C(2)));",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing checked unsigned division %q:\n%s", required, unit.Source)
 		}
+	}
+	if strings.Contains(unit.Source, "fy_checked_divisor_") {
+		t.Fatalf("constant unsigned division uses volatile storage:\n%s", unit.Source)
 	}
 	if strings.Contains(unit.Source, "FY_TRAP_SIGNED_DIVISION_OVERFLOW") {
 		t.Fatalf("unsigned-only C unit includes signed division overflow machinery:\n%s", unit.Source)
