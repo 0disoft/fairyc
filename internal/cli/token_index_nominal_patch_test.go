@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/nominalhir"
@@ -101,6 +102,10 @@ func TestTokenIndexNominalScannerPatch(t *testing.T) {
 			}
 			if kind == "missing-caller" && !strings.Contains(err.Error(), "caller") {
 				t.Fatalf("wrong missing caller rejection: %v", err)
+			}
+			preMIR, err := nominalhir.LowerAnalyzedStoragePatch(compiler.Analysis{Semantic: base.Semantic}, p)
+			if err == nil || !reflect.DeepEqual(preMIR, compiler.Result{}) {
+				t.Fatalf("invalid pre-MIR patch published a result: %v", err)
 			}
 		})
 	}

@@ -8,11 +8,13 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
+	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 // BoundaryPatch contains only annotated functions, not a cloned source closure.
-// The baseline and its semantic resolutions must come from the same verified
-// compilation. This build-local experiment does not load patches from caches.
+// The baseline and its semantic resolutions must come from the same completed
+// Flow analysis (and verified compilation for MIR reuse). This build-local
+// experiment does not load patches from caches.
 type BoundaryPatch struct {
 	Declarations []Declaration
 	Functions    []hir.Function
@@ -42,12 +44,39 @@ func MeasureBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, reuse b
 }
 
 func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *PatchTimings, reuse bool) (mir.Program, error) {
+	if !baseline.Verified {
+		return mir.Program{}, fmt.Errorf("nominal patch requires a verified baseline")
+	}
+	if err := validateAnalysisPatch(baseline.Semantic, patch, &baseline.MIR, timings); err != nil {
+		return mir.Program{}, err
+	}
 	var started time.Time
 	if timings != nil {
 		started = time.Now()
 	}
-	if !baseline.Verified || len(baseline.Semantic.Diagnostics)+len(baseline.Semantic.Unsupported) != 0 || len(patch.Declarations) == 0 || len(patch.Functions) == 0 {
-		return mir.Program{}, fmt.Errorf("nominal patch requires a verified baseline, declarations and functions")
+	var program mir.Program
+	var err error
+	if reuse {
+		program = mir.Clone(baseline.MIR)
+	} else {
+		program, err = mir.Lower(baseline.Semantic.HIR)
+	}
+	if timings != nil {
+		timings.Materialization = time.Since(started)
+	}
+	return program, err
+}
+
+// validateAnalysisPatch accepts only an in-process completed semantic analysis.
+// Source resolutions cover all uses before lowering, including unreachable calls.
+// Retained MIR, when available in the comparison harness, adds a redundant check.
+func validateAnalysisPatch(analysis semantic.Result, patch BoundaryPatch, retained *mir.Program, timings *PatchTimings) error {
+	var started time.Time
+	if timings != nil {
+		started = time.Now()
+	}
+	if analysis.CompletedThrough != semantic.PhaseFlow || analysis.FailedPhase != semantic.PhaseNone || len(analysis.Diagnostics)+len(analysis.Unsupported) != 0 || len(patch.Declarations) == 0 || len(patch.Functions) == 0 {
+		return fmt.Errorf("nominal patch requires completed Flow analysis, declarations and functions")
 	}
 	type owner struct {
 		packageID hir.PackageID
@@ -57,11 +86,11 @@ func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *
 	owners := map[hir.SymbolID]owner{}
 	modules := map[string]bool{}
 	b := boundary{types: map[hir.Type]Declaration{}, functions: map[hir.SymbolID]hir.Function{}, remaining: 1000000}
-	for _, m := range baseline.Semantic.HIR.Modules {
+	for _, m := range analysis.HIR.Modules {
 		modules[hir.QualifiedModulePath(m.Package, m.Path)] = true
 		for _, f := range m.Functions {
 			if _, ok := owners[f.Symbol]; ok {
-				return mir.Program{}, fmt.Errorf("duplicate baseline function")
+				return fmt.Errorf("duplicate baseline function")
 			}
 			owners[f.Symbol] = owner{m.Package, m.Path, f}
 			b.functions[f.Symbol] = f
@@ -70,7 +99,7 @@ func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *
 	for _, d := range patch.Declarations {
 		_, exists := b.types[d.Type()]
 		if exists || !validName(d.Name) || !validPath(d.Module) || d.Underlying != hir.TypeUSize || !modules[hir.QualifiedModulePath(d.Package, d.Module)] {
-			return mir.Program{}, fmt.Errorf("invalid patch declaration %s", d.Type())
+			return fmt.Errorf("invalid patch declaration %s", d.Type())
 		}
 		b.types[d.Type()] = d
 	}
@@ -79,13 +108,13 @@ func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *
 	for _, f := range patch.Functions {
 		o, ok := owners[f.Symbol]
 		if !ok || edited[f.Symbol] {
-			return mir.Program{}, fmt.Errorf("unknown or duplicate patch function")
+			return fmt.Errorf("unknown or duplicate patch function")
 		}
 		edited[f.Symbol] = true
 		b.functions[f.Symbol] = f
 		if !reflect.DeepEqual(f.Parameters, o.function.Parameters) || f.ResultType != o.function.ResultType {
 			if o.function.OwnerType != "" {
-				return mir.Program{}, fmt.Errorf("method signature patches are not supported")
+				return fmt.Errorf("method signature patches are not supported")
 			}
 			changed[f.Symbol] = true
 		}
@@ -94,7 +123,7 @@ func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *
 	// an unreachable call). Never use executable call edges as the sole coverage
 	// oracle. A changed callee with no retained resolution is outside this slice.
 	resolved := map[hir.SymbolID]bool{}
-	for _, r := range baseline.Semantic.Resolutions {
+	for _, r := range analysis.Resolutions {
 		for id := range changed {
 			o := owners[id]
 			if r.Target.Package != o.packageID || r.Target.Module != o.module || r.Target.Name != o.function.Name {
@@ -109,19 +138,21 @@ func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *
 				}
 			}
 			if !covered {
-				return mir.Program{}, fmt.Errorf("nominal signature change has an unpatched source caller at %s:%d", r.Use.Source, r.Use.StartByte)
+				return fmt.Errorf("nominal signature change has an unpatched source caller at %s:%d", r.Use.Source, r.Use.StartByte)
 			}
 		}
 	}
 	for id := range changed {
 		if !resolved[id] {
-			return mir.Program{}, fmt.Errorf("changed signature lacks retained source resolutions")
+			return fmt.Errorf("changed signature lacks retained source resolutions")
 		}
 	}
-	for _, f := range baseline.MIR.Functions {
-		for _, block := range f.Blocks {
-			if block.Terminator.Kind == mir.TerminatorCall && changed[block.Terminator.Callee] && !edited[f.Symbol] {
-				return mir.Program{}, fmt.Errorf("nominal signature change has an unpatched MIR caller")
+	if retained != nil {
+		for _, f := range retained.Functions {
+			for _, block := range f.Blocks {
+				if block.Terminator.Kind == mir.TerminatorCall && changed[block.Terminator.Callee] && !edited[f.Symbol] {
+					return fmt.Errorf("nominal signature change has an unpatched MIR caller")
+				}
 			}
 		}
 	}
@@ -134,27 +165,16 @@ func lowerBoundaryPatch(baseline compiler.Result, patch BoundaryPatch, timings *
 		b.owner = o.packageID
 		erased, err := b.walk(reflect.ValueOf(f), 0)
 		if err != nil {
-			return mir.Program{}, err
+			return err
 		}
 		if !reflect.DeepEqual(erased.Interface().(hir.Function), o.function) {
-			return mir.Program{}, fmt.Errorf("nominal patch changed the verified function %s", o.function.Name)
+			return fmt.Errorf("nominal patch changed the analyzed function %s", o.function.Name)
 		}
 	}
 	if timings != nil {
 		timings.Validation = time.Since(started)
-		started = time.Now()
 	}
-	var program mir.Program
-	var err error
-	if reuse {
-		program = mir.Clone(baseline.MIR)
-	} else {
-		program, err = mir.Lower(baseline.Semantic.HIR)
-	}
-	if timings != nil {
-		timings.Materialization = time.Since(started)
-	}
-	return program, err
+	return nil
 }
 
 func within(use, body hir.Span) bool {
