@@ -22,17 +22,16 @@ pub fn i32 add_limited(ref mut v::Vec<Entry> entries, usize count, usize limit, 
 
 // Bound sorting and retained diagnostic storage independently of input length.
 pub fn i32 add(ref mut v::Vec<Entry> entries, u32 code, usize start, usize end, bool exit_repair, ref u8[] token) {
-    var bool allocated = true;
-    let bytes::Buffer owned = switch (bytes::copy(token)) {
-        case .ok(value) : { value }
-        case .err(_) : { allocated = false; bytes::empty() }
-    };
-    if (!allocated) { return 3; }
-    let Entry entry = Entry { .code = code, .start = start, .end = end, .exit_repair = exit_repair, .token = owned };
-    // Push returns the exact new length without converting a mutable borrow.
-    // One overflow record is retained only until the failed scan drops its owner.
-    return switch (v::push<Entry>(entries, entry)) {
-        case .ok(length) : { if (length > 256 && !(code == 10 && length == 257)) { 4 } else { 0 } }
+    return switch (bytes::copy(token)) {
+        case .ok(owned) : {
+            let Entry entry = Entry { .code = code, .start = start, .end = end, .exit_repair = exit_repair, .token = owned };
+            // Push returns the exact new length without converting a mutable borrow.
+            // One overflow record is retained only until the failed scan drops its owner.
+            switch (v::push<Entry>(entries, entry)) {
+                case .ok(length) : { if (length > 256 && !(code == 10 && length == 257)) { 4 } else { 0 } }
+                case .err(_) : { 3 }
+            }
+        }
         case .err(_) : { 3 }
     };
 }
