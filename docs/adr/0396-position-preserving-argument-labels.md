@@ -37,7 +37,22 @@ Implementation advances `fairyc-language/15` to `/16` and SDK
 `0.0.0-stage0.60` to `0.0.0-stage0.61`. Synchronize current manifests,
 scaffolds, and tests; retain historical records.
 
-The candidate parser now parses labels for syntax parity, retaining the label identifier and byte span in the existing argument node with original values and order intact. This is not a semantic eligibility promotion: keep its own source unlabeled and exercise the real call triple in a host-compiler fixture.
+The candidate parser now parses labels for syntax parity, retaining the label
+identifier and byte span in the existing argument node with original values
+and order intact. This is not a semantic eligibility promotion: limited
+adoption labels 11 private `expression` calls in `bodies.fy` passing
+`minimum = 1`, `depth = 0`, and `allow_record = true/false`. The unmodified
+workspace pipeline self corpus passed low/O2 over all 18 own-source files. Raw
+generated C comparison reports nonidentity: whole-AST hashing in
+`collectNominalTypes` (`internal/genericsource/nominal.go`) and
+`bindNominalContext` (`nominal_packages.go`) lets labels alter nominal
+definition and specialization order, so raw C byte identity is false. The
+check passed with no C size growth: both raw generated C sizes 1,114,847
+bytes, both MIR functions 407. This asserts no executable-size, runtime, or
+compile-time guarantee, no semantic adapter promotion, and no measured 8%
+cumulative C compliance (tracked separately). No compiler identity algorithm
+changes. The parser adoption check is `TestArgumentLabelsParserAdoption`.
+The real call triple remains exercised in a host-compiler fixture.
 Acceptance covers mixed positional/labeled arguments, trailing commas, constant
 evaluation, side effects, and resource movement. Rejection covers target
 eligibility, misspelled/reordered/duplicate labels, arity, and generic expansion.

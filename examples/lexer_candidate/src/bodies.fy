@@ -229,7 +229,7 @@ pub fn bool entry(ref scanner::Stream stream, ref mut state::Cursor cursor, ref 
     }
     if (kind != 1) {
         if (kind != 4 || !word(stream, cursor.index, b";")) {
-            root = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, 0,true);
+            root = expression(stream, cursor, nodes, entries, statements, type_nodes, .minimum = 1, .depth = 0,.allow_record = true);
             if (root == 0) { return false; }
         }
         if (!state::expect(stream, cursor, b";", 8)) { return false; }
@@ -276,12 +276,12 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
     } else if (state::take(stream,cursor,b"assert")) {
         value.kind = 11;
         if (!state::expect(stream,cursor,b"(",4)) { return 0; }
-        value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0,true);
+        value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
         if (value.expression == 0 || !state::expect(stream,cursor,b")",5) || !state::expect(stream,cursor,b";",8)) { return 0; }
     } else if (tokens::operand_statement(stream,cursor.index) != 0) {
         value.kind = tokens::operand_statement(stream,cursor.index);
         state::advance(stream,cursor);
-        value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0,true);
+        value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
         if (value.expression == 0 || !state::expect(stream,cursor,b";",8)) { return 0; }
     } else if (state::take(stream,cursor,b"region")) {
         value.kind = 17;
@@ -290,7 +290,7 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
         state::advance(stream,cursor);
         value.target = state::append(nodes,cursor,state::node_value(17,name.start,name.end,name_token,0,0));
         if (value.target == 0 || !state::take(stream,cursor,b"in")) { cursor.expected = 23; return 0; }
-        value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0,false);
+        value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = false);
         if (value.expression == 0) { return 0; }
         value.first = block(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
         if (value.first == 0) { return 0; }
@@ -305,16 +305,16 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
             if (cursor.statement_kind != 2 && cursor.statement_kind != 4) { return 0; }
         }
         if (!word(stream,cursor.index,b";")) {
-            value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0,true);
+            value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
             if (value.expression == 0) { return 0; }
         }
         if (!state::expect(stream,cursor,b";",8)) { return 0; }
         if (!word(stream,cursor.index,b")")) {
             var state::Statement clause = state::statement_value(4,state::current(stream,cursor).start,0);
-            clause.target = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0,true);
+            clause.target = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
             if (clause.target == 0 || !tokens::assignment(stream,cursor.index)) { return 0; }
             clause.operator = cursor.index; state::advance(stream,cursor);
-            clause.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,1,0,true);
+            clause.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
             if (clause.expression == 0) { return 0; }
             clause.end = cursor.previous_end;
             post = state::append_statement(statements,cursor,clause);
@@ -330,7 +330,7 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
     } else if (state::take(stream, cursor, b"while")) {
         value.kind = 8;
         if (!state::expect(stream, cursor, b"(", 4)) { return 0; }
-        value.expression = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, 0,true);
+        value.expression = expression(stream, cursor, nodes, entries, statements, type_nodes, .minimum = 1, .depth = 0,.allow_record = true);
         if (value.expression == 0 || !state::expect(stream, cursor, b")", 5)) { return 0; }
         value.first = block(stream, cursor, nodes, entries, statements, type_nodes, depth + 1, false);
         if (value.first == 0) { return 0; }
@@ -342,13 +342,13 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
             value.entry = cursor.last_entry; value.expression = cursor.expression;
             if (kind == 4 && depth == 0) { cursor.top_return = cursor.expression; }
         } else {
-            let usize left = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, 0,true);
+            let usize left = expression(stream, cursor, nodes, entries, statements, type_nodes, .minimum = 1, .depth = 0,.allow_record = true);
             if (left == 0) { return 0; }
             value.kind = 6; value.expression = left;
             if (tokens::assignment(stream, cursor.index)) {
                 value.kind = 4; value.target = left; value.operator = cursor.index;
                 state::advance(stream, cursor);
-                value.expression = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, 0,true);
+                value.expression = expression(stream, cursor, nodes, entries, statements, type_nodes, .minimum = 1, .depth = 0,.allow_record = true);
                 if (value.expression == 0) { return 0; }
             }
             if (allow_tail && value.kind == 6 && word(stream,cursor.index,b"}")) { cursor.tail = left; return 0; }
@@ -363,7 +363,7 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
 }
 
 pub fn usize read_expression(ref scanner::Stream stream, ref mut state::Cursor cursor, ref mut v::Vec<state::Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<state::Statement> statements, ref mut v::Vec<types::Node> type_nodes) {
-    return expression(stream,cursor,nodes,entries,statements,type_nodes,1,0,true);
+    return expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
 }
 fn usize expression(ref scanner::Stream stream, ref mut state::Cursor cursor, ref mut v::Vec<state::Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<state::Statement> statements, ref mut v::Vec<types::Node> type_nodes, usize minimum, usize depth, bool allow_record) {
     if (cursor.active_expressions >= 64) { cursor.status = 4; return 0; }
