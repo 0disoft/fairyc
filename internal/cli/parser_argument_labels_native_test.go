@@ -15,10 +15,15 @@ import (
 // This compares one source edit, not Fairy's cumulative overhead against C.
 // Sizes are observations, not timing claims or binary-byte identity claims.
 func TestArgumentLabelsParserNativeSizes(t *testing.T) {
+	root, plain, labeled := parserLabelWorkspace(t)
+	compareParserNativeEdit(t, root, "src/bodies.fy", plain, labeled, "PARSER_LABEL_NATIVE_SIZES")
+}
+
+func compareParserNativeEdit(t *testing.T, root, path, plain, changed, reportName string) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
 	}
-	root, plain, labeled := parserLabelWorkspace(t)
 	type row struct {
 		Profile, Variant, MSVC string
 		EXE, PDB               int
@@ -34,12 +39,12 @@ func TestArgumentLabelsParserNativeSizes(t *testing.T) {
 		{"module main;fn void f(){call(.value=R{.x},.mode=true);}", "0"},
 		{"module main;fn void f(){for(var i=0;i<2;i+=1){if(i==1){break;}}}", "0"},
 		{"module main;fn void f(){return 1}", "1"},
-		{labeled, "0"},
+		{changed, "0"},
 	}
 	baseline := make([]string, len(inputs))
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-		for variant, input := range []string{plain, labeled} {
-			writeTestSource(t, root, "src/bodies.fy", input)
+		for variant, input := range []string{plain, changed} {
+			writeTestSource(t, root, path, input)
 			var diagnostics strings.Builder
 			compiled, code := compileWindowsWorkspace(root, workspaceTargetOptions{targetID: target.X8664WindowsMSVC, profile: profile}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, &diagnostics)
 			if code != ExitSuccess {
@@ -52,7 +57,7 @@ func TestArgumentLabelsParserNativeSizes(t *testing.T) {
 			if toolchain == "" || artifact.Toolchain.Version != toolchain {
 				t.Fatal("missing or changed MSVC version")
 			}
-			r := row{Profile: profile.Name, Variant: []string{"plain", "labeled"}[variant], MSVC: toolchain,
+			r := row{Profile: profile.Name, Variant: []string{"plain", "changed"}[variant], MSVC: toolchain,
 				EXE: len(artifact.Bytes), PDB: len(artifact.ProgramDatabase), Objects: map[string]int{}, Sections: map[string]uint32{}}
 			for _, object := range artifact.Objects {
 				r.Objects[object.Name] = len(object.Bytes)
@@ -90,6 +95,6 @@ func TestArgumentLabelsParserNativeSizes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("PARSER_LABEL_NATIVE_SIZES %s", report)
+	t.Logf("%s %s", reportName, report)
 	t.Logf("matching declaration/diagnostic output for %d inputs across 4 builds", len(inputs))
 }
