@@ -361,6 +361,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0394-direct-scalar-field-stores.md`: executes direct scalar field assignment with value-copy isolation and whole-root loan checks.
 - `0395-field-initializer-shorthand.md`: adds `.field` initialization through ordinary lexical values and existing ownership rules in language `/15`.
 - `0396-position-preserving-argument-labels.md`: defines argument labels for private direct calls without argument reordering in language `/16`.
+- `0397-defer-named-loops-pending-workload-evidence.md`: defers named-loop break/continue pending a real checked-in workload, with conditional-only future constraints and no grammar or pin change.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
