@@ -41,21 +41,21 @@ fn bool read(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<A
                 let u32 kind = if (info.kind == 3) { 1 } else if (info.kind == 5) { 2 } else if (info.kind == 7) { 3 } else { 0 };
                 if (kind == 0) { cursor.expected = 15; return false; }
                 if (kind == 1) { if (!path(stream,cursor)) { return false; } } else { advance(stream,cursor); }
-                let Argument value = Argument { .kind = kind, .start = info.start, .end = cursor.end, .token = token };
+                let Argument value = Argument { .kind, .start = info.start, .end = cursor.end, .token };
                 if (!switch(v::push<Argument>(arguments,value)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return false; }
                 cursor.arguments = cursor.arguments + 1;
                 if (!take(stream,cursor,b",")) { break; }
             }
             if (!take(stream,cursor,b")")) { cursor.expected = 5; return false; }
         }
-        let Attribute value = Attribute { .start = start, .end = cursor.end, .name_start = name_start, .name_end = name_end, .argument_start = argument_start, .argument_count = cursor.arguments - argument_start };
+        let Attribute value = Attribute { .start, .end = cursor.end, .name_start, .name_end, .argument_start, .argument_count = cursor.arguments - argument_start };
         if (!switch(v::push<Attribute>(attributes,value)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return false; }
         cursor.count = cursor.count + 1;
     }
     return true;
 }
 pub fn Attempt parse(ref scanner::Stream stream, usize start, usize count, usize argument_count, ref mut v::Vec<Attribute> attributes, ref mut v::Vec<Argument> arguments) {
-    var Cursor cursor = Cursor { .index = start, .end = 0, .count = count, .arguments = argument_count, .status = 0, .expected = 0 };
+    var Cursor cursor = Cursor { .index = start, .end = 0, .count, .arguments = argument_count, .status = 0, .expected = 0 };
     let bool ok = read(stream,ref mut cursor,attributes,arguments);
-    return Attempt { .ok = ok, .next = cursor.index, .end = cursor.end, .count = cursor.count, .arguments = cursor.arguments, .status = cursor.status, .expected = cursor.expected };
+    return Attempt { .ok, .next = cursor.index, .end = cursor.end, .count = cursor.count, .arguments = cursor.arguments, .status = cursor.status, .expected = cursor.expected };
 }

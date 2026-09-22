@@ -48,7 +48,7 @@ fn bool named(ref scanner::Stream stream, usize index) {
 }
 fn usize append(ref mut v::Vec<Node> nodes, ref mut Cursor cursor, u32 kind, usize start, usize left, usize right) {
     if (cursor.count >= 4096) { cursor.status = 4; return 0; }
-    let Node node = Node { .kind = kind, .start = start, .end = cursor.end, .left = left, .right = right };
+    let Node node = Node { .kind, .start, .end = cursor.end, .left, .right };
     if (!switch(v::push<Node>(nodes,node)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return 0; }
     cursor.count = cursor.count + 1; return cursor.count;
 }
@@ -122,11 +122,11 @@ fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
     return root;
 }
 pub fn Attempt parse(ref scanner::Stream stream, usize index, usize count, ref mut v::Vec<Node> nodes) {
-    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .count = count, .status = 0, .expected = 0, .half = false };
+    var Cursor cursor = Cursor { .index, .end = scanner::token_info(stream,index).start, .count, .status = 0, .expected = 0, .half = false };
     trivia(stream,ref mut cursor);
     var usize root = type_node(stream,ref mut cursor,nodes,0);
     if (cursor.half) { root = 0; cursor.expected = 0; }
-    return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root = root, .status = cursor.status, .expected = cursor.expected };
+    return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root, .status = cursor.status, .expected = cursor.expected };
 }
 fn usize arguments(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, usize depth) {
     var usize tail = 0;
@@ -143,11 +143,11 @@ fn usize arguments(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
     return tail;
 }
 pub fn Attempt parse_arguments(ref scanner::Stream stream, usize index, usize count, ref mut v::Vec<Node> nodes) {
-    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .count = count, .status = 0, .expected = 0, .half = false };
+    var Cursor cursor = Cursor { .index, .end = scanner::token_info(stream,index).start, .count, .status = 0, .expected = 0, .half = false };
     var usize root = 0;
     if (take(stream,ref mut cursor,b"<")) { root = arguments(stream,ref mut cursor,nodes,0); }
     if (cursor.half) { root = 0; cursor.expected = 0; }
-    return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root = root, .status = cursor.status, .expected = cursor.expected };
+    return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root, .status = cursor.status, .expected = cursor.expected };
 }
 fn usize parameter_list(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes) {
     var usize tail = 0;
@@ -166,10 +166,10 @@ fn usize parameter_list(ref scanner::Stream stream, ref mut Cursor cursor, ref m
     return tail;
 }
 pub fn Attempt parse_parameters(ref scanner::Stream stream, usize index, usize count, ref mut v::Vec<Node> nodes) {
-    var Cursor cursor = Cursor { .index = index, .end = scanner::token_info(stream,index).start, .count = count, .status = 0, .expected = 0, .half = false };
+    var Cursor cursor = Cursor { .index, .end = scanner::token_info(stream,index).start, .count, .status = 0, .expected = 0, .half = false };
     var usize root = 0;
     if (take(stream,ref mut cursor,b"<")) { root = parameter_list(stream,ref mut cursor,nodes); }
-    return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root = root, .status = cursor.status, .expected = cursor.expected };
+    return Attempt { .next = cursor.index, .end = cursor.end, .count = cursor.count, .root, .status = cursor.status, .expected = cursor.expected };
 }
 pub fn bool call_ahead(ref scanner::Stream stream, usize index) {
     var usize next = index; var usize offset = 0; var i32 depth = 0;

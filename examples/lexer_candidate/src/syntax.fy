@@ -64,7 +64,7 @@ fn Attempt failed(ref scanner::Stream stream, ref mut state::Cursor cursor, u32 
     let scanner::TokenInfo token = state::current(stream, cursor);
     return Attempt { .ok = false,
         .value = Declaration { .cleanup_attribute_start = 0, .cleanup_attribute_count = 0, .unsafe_start = 0, .unsafe_end = 0, .owner_start = 0, .owner_end = 0, .kind = 0, .start = 0, .end = 0, .name_start = 0, .name_end = 0, .expression = 0, .entry_start = 0, .entry_count = 0, .body = 0, .result_type = 0, .field_start = 0, .field_count = 0, .public = false, .public_start = 0, .public_end = 0, .attribute_start = 0, .attribute_count = 0, .cleanup_start = 0, .cleanup_end = 0, .cleanup_body = 0, .generic_parameters = 0, .generic_start = 0, .generic_end = 0 },
-        .problem = Problem { .code = code, .start = token.start, .end = token.end, .expected = cursor.expected, .token = cursor.index } };
+        .problem = Problem { .code, .start = token.start, .end = token.end, .expected = cursor.expected, .token = cursor.index } };
 }
 fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor, ref mut v::Vec<state::Node> nodes, ref mut v::Vec<bodies::Entry> entries, ref mut v::Vec<state::Statement> statements, ref mut v::Vec<types::Node> type_nodes, ref mut v::Vec<records::Field> fields, ref mut v::Vec<attributes::Attribute> attribute_nodes, ref mut v::Vec<attributes::Argument> attribute_arguments, usize attribute_base, usize argument_base, u32 initial_kind) {
     var u32 kind = initial_kind;
@@ -157,7 +157,7 @@ fn Attempt declaration(ref scanner::Stream stream, ref mut state::Cursor cursor,
         }
     }
     return Attempt { .ok = true,
-        .value = Declaration { .cleanup_attribute_start = cleanup_attribute_start, .cleanup_attribute_count = cleanup_attribute_count, .unsafe_start = unsafe_start, .unsafe_end = unsafe_end, .owner_start = owner_start, .owner_end = owner_end, .kind = kind, .start = start, .end = cursor.previous_end, .name_start = name_start, .name_end = name_end, .expression = root, .entry_start = entry_start, .entry_count = cursor.entries - entry_start, .body = body, .result_type = result_type, .field_start = field_start, .field_count = cursor.fields - field_start, .public = public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start = cleanup_start, .cleanup_end = cleanup_end, .cleanup_body = cleanup_body, .generic_parameters = generic_parameters, .generic_start = generic_start, .generic_end = generic_end },
+        .value = Declaration { .cleanup_attribute_start, .cleanup_attribute_count, .unsafe_start, .unsafe_end, .owner_start, .owner_end, .kind, .start, .end = cursor.previous_end, .name_start, .name_end, .expression = root, .entry_start, .entry_count = cursor.entries - entry_start, .body, .result_type, .field_start, .field_count = cursor.fields - field_start, .public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .attribute_start = 0, .attribute_count = 0, .cleanup_start, .cleanup_end, .cleanup_body, .generic_parameters, .generic_start, .generic_end },
         .problem = Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .token = 0 } };
 }
 
@@ -268,7 +268,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
         if (kind >= 3 && kind != 5) { functions = true; }
         first = false;
     }
-    return .ok(Parsed { .source = input, .declarations = declarations, .problems = problems, .expressions = nodes, .entries = entries, .statements = statements, .types = type_nodes, .fields = fields, .attributes = attribute_nodes, .attribute_arguments = attribute_arguments });
+    return .ok(Parsed { .source = input, .declarations, .problems, .expressions = nodes, .entries, .statements, .types = type_nodes, .fields, .attributes = attribute_nodes, .attribute_arguments });
 }
 pub fn usize source_token_count(ref Parsed parsed) { return scanner::token_count(ref parsed.source); }
 pub fn usize declaration_count(ref Parsed parsed) { return v::len<Declaration>(ref parsed.declarations); }
