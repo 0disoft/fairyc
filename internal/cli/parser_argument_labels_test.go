@@ -9,8 +9,9 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackend"
 )
 
-func TestArgumentLabelsParserAdoption(t *testing.T) {
-	root := t.TempDir()
+func parserLabelWorkspace(t *testing.T) (root, plain, labeled string) {
+	t.Helper()
+	root = t.TempDir()
 	copyLexerStreamExample(t, root)
 	for _, name := range []string{"syntax.fy", "integrity.fy"} {
 		data, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "src", name))
@@ -25,13 +26,18 @@ func TestArgumentLabelsParserAdoption(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	labeled := string(data)
+	labeled = string(data)
 	for _, label := range []string{".minimum = ", ".depth = ", ".allow_record = "} {
 		if strings.Count(labeled, label) != 11 {
 			t.Fatalf("expected 11 adopted calls for %q", label)
 		}
 	}
-	plain := strings.NewReplacer(".minimum = ", "", ".depth = ", "", ".allow_record = ", "").Replace(labeled)
+	plain = strings.NewReplacer(".minimum = ", "", ".depth = ", "", ".allow_record = ", "").Replace(labeled)
+	return root, plain, labeled
+}
+
+func TestArgumentLabelsParserAdoption(t *testing.T) {
+	root, plain, labeled := parserLabelWorkspace(t)
 	var sources [2]string
 	var functions [2]int
 	for i, input := range []string{plain, labeled} {
