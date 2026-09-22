@@ -1,0 +1,1063 @@
+{
+  "schema": "fairyc.nominal-scanner-total/v1",
+  "compiler_source": "0fa4ea36a650a5f84c51689eeff9ffc6674d9db0",
+  "test_executable_identity": "fairyc.compiler-executable-sha256/v1:aa96604d64680130108be33a5d718ce51eb945747ff18c2bf3dc4b40beb4bb8f",
+  "go_version": "go1.26.4",
+  "msvc_version": "14.51.36231",
+  "gomaxprocs": 12,
+  "method": "One warmup per variant/profile, then 6 repetitions x 3 rotating variants x 2 profiles (36 samples, 42 builds/executions). Fresh scalar/nominal/struct workspaces each time; identical scalar/nominal source. Explicit GC and MemStats snapshots outside time window; GC remains enabled inside. check_ns covers workspace load/lock plus analysis and one verified MIR lowering; nominal additionally includes test-owned annotation and validation. native_ns covers normal C emission/tool discovery/MSVC compile/link/artifact reading. total_ns continuously spans both phases plus entry selection, excluding workspace setup, final user EXE write and execution. go_alloc_bytes and go_mallocs are cumulative Go process allocations over that window, not peak/RSS or MSVC/linker child allocations. Ambient OS/tool caches; in-process harness, no compiler-process startup. Extra C inspection and correctness execution outside measurement. No nominal source parser, runtime benchmark, Linux, cache or debug-size claim; no PDB requested.",
+  "source_sha256": {
+    "nominal": {
+      "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+      "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+      "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+      "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+      "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+      "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+      "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+      "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    "scalar": {
+      "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+      "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+      "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+      "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+      "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+      "src/scanner.fy": "da1ab3a001c03a50e303b3b9f4786821d1f507cc897fc84ea3cb3b0299464a68",
+      "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+      "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    "struct": {
+      "fairy.toml": "011d6e185eff14446cb86e4fd2b862cfa5997eed2727d9c46ca9d24d9fcf9650",
+      "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+      "src/diagnostics.fy": "5dd26624947b855b6411ab32d8f1f07c00afad4336fef1fe6e0cb409655c9607",
+      "src/main.fy": "0876ffc99eefc9c6b45a975a05e55f4aa4674683d95594bdbd123627f66bee79",
+      "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+      "src/scanner.fy": "e7142b9dddc40bee127a5bdf510059fa1319eabe1dd6012e45067d387e1ecbc4",
+      "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+      "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  },
+  "harness_source_sha256": {
+    "../compiler/check.go": "864333939c955f24121932a476c17c648e878c04d2edcbcb6fbe4e5ac7a91eb9",
+    "../compiler/storage_source.go": "1c8416d308dbfde1eead32f641e69dd2ed0840f090f77f21789ecce9a08a637f",
+    "../nominalhir/analysis.go": "ac27426dd2a0366ce942d0a8bb212744b85478d9f9827285a02ed9f65cda01a5",
+    "../nominalhir/boundary.go": "61509b80d73e2df4b8f7e5d035fa308915818294288a26565347b150fab45d64",
+    "../nominalhir/patch.go": "3f9b0a9df0f3c61bc9f58e9b1afdef5711625300f9166bd08e2895966cf68047",
+    "../workspacecompiler/check.go": "62a276e9ee4e9f8d6e4ad0753ada0fc77400e80a575090f6c617efd972708054",
+    "target_build.go": "50d8d8840571e289657ebd6fc62991ddd01742f37c2b72dc4d8d1c76519256fa",
+    "token_index_experiment_test.go": "ed094ab2cba072ca27c7f8535ef27506edc953b163140c605e1beb79b6648287",
+    "token_index_nominal_test.go": "a3a21b647b39aa25a33969ac8b725ae30802aaae917006e222a5e3b471a7afdd",
+    "token_index_nominal_total_test.go": "3cf73c08aea6dafd272c839598524b162496a7f2fa8671059ba360181669f894"
+  },
+  "samples": [
+    {
+      "repetition": 0,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 1696670100,
+      "native_ns": 1516331200,
+      "total_ns": 3213001300,
+      "go_alloc_bytes": 226591176,
+      "go_mallocs": 650577,
+      "go_gc_cycles": 27,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 1156342300,
+      "native_ns": 3544554900,
+      "total_ns": 4700897200,
+      "go_alloc_bytes": 226520728,
+      "go_mallocs": 654288,
+      "go_gc_cycles": 30,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69017
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "nominal",
+      "profile": "low",
+      "check_ns": 621668300,
+      "native_ns": 914209000,
+      "total_ns": 1535877300,
+      "go_alloc_bytes": 226689488,
+      "go_mallocs": 651844,
+      "go_gc_cycles": 35,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "nominal",
+      "profile": "optimized",
+      "check_ns": 455798800,
+      "native_ns": 2504948100,
+      "total_ns": 2960746900,
+      "go_alloc_bytes": 227776344,
+      "go_mallocs": 655537,
+      "go_gc_cycles": 36,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "struct",
+      "profile": "low",
+      "check_ns": 489353600,
+      "native_ns": 974990700,
+      "total_ns": 1464344300,
+      "go_alloc_bytes": 229748384,
+      "go_mallocs": 651069,
+      "go_gc_cycles": 35,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 204288,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150624
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108767
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 0,
+      "variant": "struct",
+      "profile": "optimized",
+      "check_ns": 503531500,
+      "native_ns": 2224446200,
+      "total_ns": 2727977700,
+      "go_alloc_bytes": 227488624,
+      "go_mallocs": 654736,
+      "go_gc_cycles": 35,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85328
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69200
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "nominal",
+      "profile": "low",
+      "check_ns": 430422800,
+      "native_ns": 811278600,
+      "total_ns": 1241701400,
+      "go_alloc_bytes": 227400856,
+      "go_mallocs": 651847,
+      "go_gc_cycles": 37,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "nominal",
+      "profile": "optimized",
+      "check_ns": 390345800,
+      "native_ns": 1885891300,
+      "total_ns": 2276237100,
+      "go_alloc_bytes": 226552752,
+      "go_mallocs": 655556,
+      "go_gc_cycles": 36,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "struct",
+      "profile": "low",
+      "check_ns": 395698200,
+      "native_ns": 659256700,
+      "total_ns": 1054954900,
+      "go_alloc_bytes": 230683848,
+      "go_mallocs": 651059,
+      "go_gc_cycles": 38,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 204288,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150624
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108767
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "struct",
+      "profile": "optimized",
+      "check_ns": 392712600,
+      "native_ns": 1883483900,
+      "total_ns": 2276196500,
+      "go_alloc_bytes": 230869096,
+      "go_mallocs": 654778,
+      "go_gc_cycles": 37,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85328
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69200
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 408570400,
+      "native_ns": 791002200,
+      "total_ns": 1199572600,
+      "go_alloc_bytes": 227139536,
+      "go_mallocs": 650630,
+      "go_gc_cycles": 38,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14189,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 1,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 445498600,
+      "native_ns": 2508604400,
+      "total_ns": 2954103000,
+      "go_alloc_bytes": 227593544,
+      "go_mallocs": 654366,
+      "go_gc_cycles": 37,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "struct",
+      "profile": "low",
+      "check_ns": 524582300,
+      "native_ns": 1146632900,
+      "total_ns": 1671215200,
+      "go_alloc_bytes": 231833432,
+      "go_mallocs": 651068,
+      "go_gc_cycles": 34,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 204288,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150624
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108767
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "struct",
+      "profile": "optimized",
+      "check_ns": 572605800,
+      "native_ns": 2537096700,
+      "total_ns": 3109702500,
+      "go_alloc_bytes": 231907280,
+      "go_mallocs": 654772,
+      "go_gc_cycles": 36,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85328
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69200
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 513544400,
+      "native_ns": 987980800,
+      "total_ns": 1501525200,
+      "go_alloc_bytes": 224270912,
+      "go_mallocs": 650548,
+      "go_gc_cycles": 35,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 487086800,
+      "native_ns": 2652602300,
+      "total_ns": 3139689100,
+      "go_alloc_bytes": 223286120,
+      "go_mallocs": 654284,
+      "go_gc_cycles": 34,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "nominal",
+      "profile": "low",
+      "check_ns": 580210000,
+      "native_ns": 1001271300,
+      "total_ns": 1581481300,
+      "go_alloc_bytes": 224611520,
+      "go_mallocs": 651767,
+      "go_gc_cycles": 33,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14189,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 2,
+      "variant": "nominal",
+      "profile": "optimized",
+      "check_ns": 573056600,
+      "native_ns": 2279832100,
+      "total_ns": 2852888700,
+      "go_alloc_bytes": 226821968,
+      "go_mallocs": 655542,
+      "go_gc_cycles": 32,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 3,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 455761100,
+      "native_ns": 812702400,
+      "total_ns": 1268463500,
+      "go_alloc_bytes": 227432472,
+      "go_mallocs": 650661,
+      "go_gc_cycles": 36,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 3,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 658015400,
+      "native_ns": 2391907700,
+      "total_ns": 3049923100,
+      "go_alloc_bytes": 225750872,
+      "go_mallocs": 654330,
+      "go_gc_cycles": 37,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 3,
+      "variant": "nominal",
+      "profile": "low",
+      "check_ns": 424718400,
+      "native_ns": 821239300,
+      "total_ns": 1245957700,
+      "go_alloc_bytes": 226686832,
+      "go_mallocs": 651844,
+      "go_gc_cycles": 37,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 3,
+      "variant": "nominal",
+      "profile": "optimized",
+      "check_ns": 443429200,
+      "native_ns": 2496734700,
+      "total_ns": 2940163900,
+      "go_alloc_bytes": 227814688,
+      "go_mallocs": 655544,
+      "go_gc_cycles": 37,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 3,
+      "variant": "struct",
+      "profile": "low",
+      "check_ns": 405766800,
+      "native_ns": 840927100,
+      "total_ns": 1246693900,
+      "go_alloc_bytes": 228953528,
+      "go_mallocs": 651089,
+      "go_gc_cycles": 37,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 204288,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150624
+      },
+      "object_bytes": {
+        "runtime.obj": 14189,
+        "unit.obj": 108767
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 3,
+      "variant": "struct",
+      "profile": "optimized",
+      "check_ns": 698717500,
+      "native_ns": 2687663000,
+      "total_ns": 3386380500,
+      "go_alloc_bytes": 229582776,
+      "go_mallocs": 654714,
+      "go_gc_cycles": 29,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85328
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69200
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 4,
+      "variant": "nominal",
+      "profile": "low",
+      "check_ns": 615880600,
+      "native_ns": 956939400,
+      "total_ns": 1572820000,
+      "go_alloc_bytes": 225631112,
+      "go_mallocs": 651789,
+      "go_gc_cycles": 33,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 4,
+      "variant": "nominal",
+      "profile": "optimized",
+      "check_ns": 604798100,
+      "native_ns": 2885133200,
+      "total_ns": 3489931300,
+      "go_alloc_bytes": 226458880,
+      "go_mallocs": 655500,
+      "go_gc_cycles": 33,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 4,
+      "variant": "struct",
+      "profile": "low",
+      "check_ns": 571866900,
+      "native_ns": 835856800,
+      "total_ns": 1407723700,
+      "go_alloc_bytes": 227627376,
+      "go_mallocs": 650999,
+      "go_gc_cycles": 34,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 204288,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150624
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108767
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 4,
+      "variant": "struct",
+      "profile": "optimized",
+      "check_ns": 497371200,
+      "native_ns": 3095202500,
+      "total_ns": 3592573700,
+      "go_alloc_bytes": 228754408,
+      "go_mallocs": 654719,
+      "go_gc_cycles": 35,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85328
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69200
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 4,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 1110790900,
+      "native_ns": 1087011300,
+      "total_ns": 2197802200,
+      "go_alloc_bytes": 225060032,
+      "go_mallocs": 650535,
+      "go_gc_cycles": 31,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14189,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 4,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 827251200,
+      "native_ns": 2844881800,
+      "total_ns": 3672133000,
+      "go_alloc_bytes": 226121192,
+      "go_mallocs": 654277,
+      "go_gc_cycles": 25,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 5,
+      "variant": "struct",
+      "profile": "low",
+      "check_ns": 495616400,
+      "native_ns": 1012590400,
+      "total_ns": 1508206800,
+      "go_alloc_bytes": 230853728,
+      "go_mallocs": 651060,
+      "go_gc_cycles": 37,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 204288,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150624
+      },
+      "object_bytes": {
+        "runtime.obj": 14189,
+        "unit.obj": 108767
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 5,
+      "variant": "struct",
+      "profile": "optimized",
+      "check_ns": 843442800,
+      "native_ns": 2670456300,
+      "total_ns": 3513899100,
+      "go_alloc_bytes": 229616088,
+      "go_mallocs": 654727,
+      "go_gc_cycles": 27,
+      "c_bytes": 345271,
+      "c_sha256": "1ea25004ce930fc792e6aa107493cb9fd17e403a0c824d37fc8601106872f359",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85328
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69200
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 5,
+      "variant": "scalar",
+      "profile": "low",
+      "check_ns": 500385200,
+      "native_ns": 956535300,
+      "total_ns": 1456920500,
+      "go_alloc_bytes": 226324760,
+      "go_mallocs": 650624,
+      "go_gc_cycles": 35,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14189,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 5,
+      "variant": "scalar",
+      "profile": "optimized",
+      "check_ns": 544400100,
+      "native_ns": 2231450800,
+      "total_ns": 2775850900,
+      "go_alloc_bytes": 226497968,
+      "go_mallocs": 654313,
+      "go_gc_cycles": 33,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20669,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 5,
+      "variant": "nominal",
+      "profile": "low",
+      "check_ns": 471242200,
+      "native_ns": 895602100,
+      "total_ns": 1366844300,
+      "go_alloc_bytes": 226623120,
+      "go_mallocs": 651836,
+      "go_gc_cycles": 36,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 203776,
+      "pe_virtual_section_bytes": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 5256,
+        ".rdata": 40624,
+        ".reloc": 1620,
+        ".text": 150528
+      },
+      "object_bytes": {
+        "runtime.obj": 14193,
+        "unit.obj": 108671
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    },
+    {
+      "repetition": 5,
+      "variant": "nominal",
+      "profile": "optimized",
+      "check_ns": 409901600,
+      "native_ns": 2335070800,
+      "total_ns": 2744972400,
+      "go_alloc_bytes": 227105488,
+      "go_mallocs": 655582,
+      "go_gc_cycles": 36,
+      "c_bytes": 344257,
+      "c_sha256": "bb043196bb7e8fefd55991ca436fc2328bdf6a601c3ec71513b0439dcb734b9a",
+      "exe_bytes": 138240,
+      "pe_virtual_section_bytes": {
+        ".data": 5552,
+        ".fptable": 256,
+        ".pdata": 4956,
+        ".rdata": 40696,
+        ".reloc": 1620,
+        ".text": 85296
+      },
+      "object_bytes": {
+        "runtime.obj": 20673,
+        "unit.obj": 69021
+      },
+      "pdb_bytes": 0,
+      "exit_code": 0
+    }
+  ]
+}

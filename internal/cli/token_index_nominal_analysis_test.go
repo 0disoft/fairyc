@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
-	"time"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -72,26 +71,6 @@ func TestTokenIndexNominalScannerAnalyzed(t *testing.T) {
 	invalid.Semantic.FailedPhase = semantic.PhaseFlow
 	if got, err := nominalhir.LowerAnalyzedStoragePatch(invalid, patch); err == nil || !reflect.DeepEqual(got, compiler.Result{}) {
 		t.Fatal("failed analysis published MIR")
-	}
-	// Short same-process observations, not a statistical compile-time gate.
-	// Both lanes start at completed Flow; candidate includes annotation+validation.
-	for repetition := 0; repetition < 3; repetition++ {
-		for turn := 0; turn < 2; turn++ {
-			nominal := (repetition+turn)%2 == 1
-			start := time.Now()
-			var got compiler.Result
-			if nominal {
-				p := nominalTokenScannerPatch(t, compiler.Result{Semantic: analysis.Analysis.Semantic})
-				got, err = nominalhir.LowerAnalyzedStoragePatch(analysis.Analysis, p)
-			} else {
-				got, err = compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
-			}
-			elapsed := time.Since(start)
-			if err != nil || !reflect.DeepEqual(got, baseline) {
-				t.Fatalf("timed path: %v", err)
-			}
-			t.Logf("Flow-to-verified-MIR repetition=%d nominal=%t elapsed=%s", repetition, nominal, elapsed)
-		}
 	}
 	entry := tokenScannerEntry(t, candidate)
 	var sources [2]string
