@@ -21,7 +21,7 @@ import (
 )
 
 // This opt-in pilot compares separately authored source, never generated C
-// against itself. It does not establish a language-wide 5% performance claim.
+// against itself. It does not establish a language-wide 8% performance claim.
 func TestCBudgetBaseline(t *testing.T) {
 	if os.Getenv("FAIRYC_C_BUDGET") != "1" {
 		t.Skip("opt-in C baseline")
@@ -126,7 +126,7 @@ func TestCBudgetBaseline(t *testing.T) {
 		}
 	}
 	report := map[string]any{"schema": "fairyc.c-budget-baseline/v1", "compiler_source": "7983ab0db07fd83d4fe28f7c4b9d88ab9cf3cc78", "go": runtime.Version(), "msvc": toolchain.Version, "gomaxprocs": runtime.GOMAXPROCS(0), "flags": []string{"/std:c11", "/TC", "/W4", "/WX", "/MT", "/O2", "/INCREMENTAL:NO"}, "profile": "optimized", "source_sha256": hashes, "boundary_cases": boundary, "boundary_checks": 20, "seed": 12345, "rounds": 50000000, "samples": samples,
-		"method": "Two independently authored scalar kernels. Same stdin input and QPC/output support. Both guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. Five alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", "budget": map[string]any{"runtime_ratio": 1.05, "exe_ratio": 1.05, "build_ratio_observation": 1.05, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
+		"method": "Two independently authored scalar kernels. Same stdin input and QPC/output support. Both guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. Five alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
 	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)

@@ -6,11 +6,11 @@ Flags: `/std:c11 /TC /W4 /WX /MT /O2 /INCREMENTAL:NO`. Seed 12345, rounds 500000
 
 ## Budget policy
 
-- Runtime budget: 5% cumulative against equivalent C per workload, never a per-feature allowance.
-- EXE budget: 5% cumulative against equivalent C per workload, never a per-feature allowance.
-- Build time: 5% is an observation-only provisional marker per workload; cold CLI startup was not measured.
+- Runtime budget: 8% cumulative against equivalent C per workload, never a per-feature allowance.
+- EXE budget: 8% cumulative against equivalent C per workload, never a per-feature allowance.
+- Build time: 8% is an observation-only provisional marker per workload; cold CLI startup was not measured.
 - Cache and debug sizes are tracked separately and are not part of the runtime/EXE budget.
-- This 5% policy replaces the previous strict-zero policy by user agreement. The earlier cache +0.12% alone is therefore not blocking.
+- This 8% policy replaces the previous strict-zero and interim 5% policies by user agreement. The original run recorded 5%; the same preserved numbers are re-evaluated here under 8% without a new measurement. The raw evidence JSON is left unchanged. The earlier cache +0.12% alone is therefore not blocking.
 
 ## Method
 
@@ -33,7 +33,7 @@ Flags: `/std:c11 /TC /W4 /WX /MT /O2 /INCREMENTAL:NO`. Seed 12345, rounds 500000
 | checksum | 327.6545 ms | 343.1993 ms | +4.7443% | 1.05836, 1.05374, 1.03340, 1.04993, 1.06223 |
 | classifier | 236.4271 ms | 306.4154 ms | +29.6025% | 1.2659..1.3184, all 5 exceed |
 
-Do not confuse the ratio of separate medians with the median of paired ratios. The table deltas +4.7443% and +29.6025% are ratios of separate medians and are kept as observations. The medians of the paired runtime ratios are +5.374% for checksum and +29.852% for classifier. Both estimators are shown together so that neither favorable statistic is selected. Checksum therefore sits on opposite sides of the 5% boundary by estimator, so PASS must not be declared.
+Do not confuse the ratio of separate medians with the median of paired ratios. The table deltas +4.7443% and +29.6025% are ratios of separate medians and are kept as observations. The medians of the paired runtime ratios are +5.374% for checksum and +29.852% for classifier. Both estimators are shown together so that neither favorable statistic is selected. Under the current 8% policy, both checksum estimators sit inside the observed 8%.
 
 | workload | C EXE | Fairy EXE | delta |
 |---|---|---:|---:|
@@ -44,10 +44,10 @@ EXE bytes were identical on every repetition per workload and lane. Build median
 
 ## Decision
 
-- Checksum is a first-pilot borderline: the ratio of medians is +4.7443% while the paired-ratio median is +5.374%. No PASS is declared and no hard rule is created that every noisy sample must fall inside a fixed 5%.
-- Classifier is a clear exceed on this workload: the ratio of medians is +29.6025%, the paired-ratio median is +29.852%, and all 5 pairs exceed.
-- EXE sizes meet 5% on both workloads.
-- No whole-language no-regression is claimed: this baseline covers 2 synthetic kernels on Windows O2 only and does not certify the full language.
+- Checksum is within the observed 8%: the ratio of medians is +4.7443% while the paired-ratio median is +5.374%. This is a first-pilot observation only, and no hard rule is created that every noisy sample must fall inside a fixed 8%.
+- Classifier still exceeds on this workload: the ratio of medians is +29.6025%, the paired-ratio median is +29.852%, and all 5 pairs exceed.
+- EXE sizes meet 8% on both workloads.
+- No whole-language no-regression is claimed and no whole-language certification is made: this baseline covers 2 synthetic kernels on Windows O2 only and does not certify the full language.
 - This result is not judged as label cost: the prior measurement kept generated C identical between plain and labels.
 - Recommended next work is classifier emitted-C inspection, range-proof review, and branch-lowering cause separation first; the execution bottleneck outranks small AST allocation work.
 - No development-code API, ABI, database, or version change was made.
