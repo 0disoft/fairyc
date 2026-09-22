@@ -94,8 +94,14 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
                 let usize name = cursor.index;
                 if (state::current(stream, cursor).kind != 3) { cursor.expected = 1; return 0; }
                 state::advance(stream, cursor);
-                if (!state::expect(stream, cursor, b"=", 9)) { return 0; }
-                let usize value = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1,true);
+                var usize value = 0;
+                if (word(stream,cursor.index,b",") || word(stream,cursor.index,b"}")) {
+                    let scanner::TokenInfo identifier = scanner::token_info(stream,name);
+                    value = state::append(nodes,cursor,state::node_value(2,identifier.start,identifier.end,name,0,0));
+                } else {
+                    if (!state::expect(stream, cursor, b"=", 9)) { return 0; }
+                    value = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1,true);
+                }
                 if (value == 0) { return 0; }
                 fields = state::append(nodes, cursor, state::node_value(11,start,cursor.previous_end,name,value,fields));
                 if (fields == 0) { return 0; }
