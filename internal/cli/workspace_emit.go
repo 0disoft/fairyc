@@ -44,7 +44,11 @@ func runExperimentalWorkspaceEmit(arguments []string, sourceRoot string, stdout,
 	default:
 		return internalError(stderr)
 	}
-	unit, err := cbackend.Emit(lowered.program, lowered.entryName, profile)
+	emit := cbackend.Emit
+	if lowered.sdkStorage {
+		emit = cbackend.EmitStorageTransfers
+	}
+	unit, err := emit(lowered.program, lowered.entryName, profile)
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {

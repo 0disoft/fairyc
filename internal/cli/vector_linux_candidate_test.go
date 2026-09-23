@@ -50,6 +50,36 @@ func TestLinuxVectorSupportSource(t *testing.T) {
 	}
 }
 
+func TestVectorWorkspaceEmitTargets(t *testing.T) {
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "test.cli.vector-emit"
+name = "client"
+version = "1.0.0"
+language = "fairyc-language/17"
+source = "src"
+`)
+	writeTestSource(t, root, "src/main.fy", nativeVectorClient)
+	for index, targetID := range []target.ID{target.X8664LinuxGNU, target.X8664WindowsMSVC} {
+		t.Run(string(targetID), func(t *testing.T) {
+			arguments := []string{"experimental", experimentalWorkspaceCCommand, "--target", string(targetID)}
+			if index != 0 {
+				arguments = append(arguments, "--locked")
+			}
+			code, emitted, diagnostics := runForTest(arguments, root)
+			if code != ExitSuccess || diagnostics != "" ||
+				!strings.Contains(emitted, "fy_private_vector_initialize_v0") ||
+				!strings.Contains(emitted, "int main(void)") || !strings.HasSuffix(emitted, "\n") {
+				t.Fatalf("vector workspace emit: code=%d bytes=%d diagnostics=%q", code, len(emitted), diagnostics)
+			}
+		})
+	}
+	if _, err := os.Stat(filepath.Join(root, "build")); !os.IsNotExist(err) {
+		t.Fatalf("workspace C inspection created a build directory: %v", err)
+	}
+}
+
 func TestLinuxVectorCandidateNativeBuild(t *testing.T) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Linux amd64 glibc and GCC")
