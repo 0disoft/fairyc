@@ -280,6 +280,9 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 		return Unit{}, err
 	}
 	functions = filterFunctions(functions, reachable)
+	structTypes, structByType, enumTypes, enumByType, resourceTypes, resourceByType =
+		filterReachableAggregateTypes(functions, program.ForeignFunctions, reachableForeign,
+			structTypes, enumTypes, resourceTypes)
 	arrayTypes, arrayByType, err := prepareScalarArrayTypes(functions)
 	if err != nil {
 		return Unit{}, err

@@ -3300,6 +3300,22 @@ func TestEmitReachableTransitiveCalleesAreRetained(t *testing.T) {
 	}
 }
 
+func TestEmitOmitsUnusedPrivateAggregateDeclarations(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+struct Dormant { i32 value; }
+struct AlsoDormant { Dormant child; }
+fn i32 main() { return 42; }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if strings.Contains(unit.Source, "fy_struct_") || slices.Contains(unit.Features, "inert-struct") {
+		t.Fatalf("unused private aggregates leaked into C transport:\n%s", unit.Source)
+	}
+}
+
 func TestEmitUnreachableForeignDeclarationIsPruned(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
