@@ -45,7 +45,7 @@ func TestOwnedStorageProviderCallPreservesSource(t *testing.T) {
 }
 
 func TestOwnedStorageRejectsConsumerIntrinsics(t *testing.T) {
-	for _, operation := range []string{"storage_size<i32>()", "storage_alignment<i32>()", "storage_take<i32>(null)", "storage_put<i32>(null, 1)", "storage_borrow<i32>(null, null)"} {
+	for _, operation := range []string{"storage_size<i32>()", "storage_alignment<i32>()", "storage_take<i32>(null)", "storage_put<i32>(null, 1)", "storage_borrow<i32>(null, null)", "storage_borrow_mut<i32>(null, null)"} {
 		t.Run(operation, func(t *testing.T) {
 			inputs := ownedStorageInputs(t, "module main; import provider as p; fn usize main() { return "+operation+"; }")
 			if _, err := genericsource.PrepareOwnedStorageTransferPackages(inputs, genericplan.DefaultPlanLimits(), []genericplan.PackageID{"sdk"}); err == nil {

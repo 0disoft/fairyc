@@ -135,6 +135,79 @@ func TestPrivateVectorStorageBorrowSourceRejections(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorStorageBorrowSourceMutableOrigin(t *testing.T) {
+	analysis, err := analyzeStorageBorrow(t, storageBorrowMutSource)
+	result := analysis.Analysis.Semantic
+	if err != nil || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
+		t.Fatalf("mutable storage borrow source: %v %+v %+v", err, result.Diagnostics, result.Unsupported)
+	}
+	encoded, _ := json.Marshal(result.HIR)
+	if !strings.Contains(string(encoded), "storage-borrow-mut") {
+		t.Fatal("typed mutable storage borrow missing")
+	}
+	var escaped bool
+	for _, fact := range result.Borrows {
+		if fact.Escapes && fact.Origin == "Param(0)" {
+			escaped = true
+		}
+	}
+	if !escaped {
+		t.Fatalf("mutable borrow lost its owner origin: %+v", result.Borrows)
+	}
+}
+
+func TestPrivateVectorStorageBorrowSourceMutableRejections(t *testing.T) {
+	for name, test := range map[string]struct {
+		from, to, code, unsupported string
+	}{
+		"shared owner":           {from: "fn ref mut T borrow_element<T>(ref mut Owner owner)", to: "fn ref mut T borrow_element<T>(ref Owner owner)", unsupported: "matching owner and void pointer mutability"},
+		"shared address":         {from: "ptr mut void data", to: "ptr void data", unsupported: "matching owner and void pointer mutability"},
+		"unsafe missing":         {from: "unsafe { storage_borrow_mut<T>(owner, owner.data) }", to: "storage_borrow_mut<T>(owner, owner.data)", code: "E5101"},
+		"owner moved before use": {from: "observe(view); consume(owner);", to: "consume(owner); observe(view);", code: "E2105"},
+		"exclusive alias":        {from: "observe(view); consume(owner);", to: "mutate(ref mut owner); observe(view); consume(owner);", code: "E2101"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			text := strings.Replace(storageBorrowMutSource, test.from, test.to, 1)
+			if text == storageBorrowMutSource {
+				t.Fatal("mutable borrow rejection fixture unchanged")
+			}
+			analysis, err := analyzeStorageBorrow(t, text)
+			result := analysis.Analysis.Semantic
+			if err == nil && len(result.Diagnostics) == 0 && len(result.Unsupported) == 0 {
+				t.Fatal("invalid mutable storage borrow admitted")
+			}
+			if test.code != "" {
+				for _, diagnostic := range result.Diagnostics {
+					if diagnostic.Code == test.code {
+						return
+					}
+				}
+				t.Fatalf("missing %s: %v %+v %+v", test.code, err, result.Diagnostics, result.Unsupported)
+			}
+			for _, unsupported := range result.Unsupported {
+				if strings.Contains(unsupported.Feature, test.unsupported) {
+					return
+				}
+			}
+			t.Fatalf("missing rejection %q: %v %+v %+v", test.unsupported, err, result.Diagnostics, result.Unsupported)
+		})
+	}
+}
+
+const storageBorrowMutSource = `module main;
+resource Owner { ptr mut void data; cleanup {} }
+fn ref mut T borrow_element<T>(ref mut Owner owner) { return unsafe { storage_borrow_mut<T>(owner, owner.data) }; }
+fn void observe(ref mut i32 value) {}
+fn void consume(Owner value) {}
+fn void mutate(ref mut Owner value) {}
+fn i32 main() {
+    var Owner owner = Owner { .data = null };
+    let ref mut i32 view = borrow_element<i32>(ref mut owner);
+    observe(view); consume(owner);
+    return 42;
+}
+`
+
 const storageBorrowSource = `module main;
 resource Owner { ptr mut void data; cleanup {} }
 fn ref T borrow_element<T>(ref Owner owner) { return unsafe { storage_borrow<T>(owner, owner.data) }; }

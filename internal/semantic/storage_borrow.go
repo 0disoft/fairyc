@@ -7,7 +7,8 @@ import (
 
 func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir.Expression) hir.Type {
 	if expression.Type == nil || len(expression.Children) != 2 || expression.Children[0] == nil || expression.Children[1] == nil ||
-		expression.Block != nil || len(expression.TypeArguments) != 0 || expression.Text != "borrow" {
+		expression.Block != nil || len(expression.TypeArguments) != 0 ||
+		(expression.Text != "borrow" && expression.Text != "borrow-mut") {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed private storage borrow")
 		return hir.TypeInvalid
 	}
@@ -20,10 +21,11 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 	}
 	owner, ownerType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	pointer, pointerType := c.checkExpression(expression.Children[1], hir.TypeInvalid)
-	_, mutable, borrowed := hir.BorrowElement(ownerType)
-	element, _, raw := hir.RawPointerElement(pointerType)
-	if !borrowed || mutable || !raw || element != hir.TypeVoid {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private storage borrow requires a shared owner borrow and a void pointer")
+	_, ownerMutable, borrowed := hir.BorrowElement(ownerType)
+	element, pointerMutable, raw := hir.RawPointerElement(pointerType)
+	mutable := expression.Text == "borrow-mut"
+	if !borrowed || ownerMutable != mutable || !raw || element != hir.TypeVoid || (mutable && !pointerMutable) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private storage borrow requires matching owner and void pointer mutability")
 		return hir.TypeInvalid
 	}
 	result.Children = appendExpression(result.Children, owner, pointer)
@@ -34,5 +36,9 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 		result.UnsafeScope = &scope
 	}
 	result.Kind, result.Value, result.TargetType = "storage-borrow", "", typ
+	if mutable {
+		result.Kind = "storage-borrow-mut"
+		return hir.MutableBorrow(typ)
+	}
 	return hir.SharedBorrow(typ)
 }
