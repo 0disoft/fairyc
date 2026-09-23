@@ -53,6 +53,29 @@ the package source digest, so stable generated names alone would not make an
 edited package reuse its previous compilation. No compiler-time or C-compiler-time
 gain was measured, so this observation does not authorize an identity change.
 
+A Windows AMD64 MSVC 14.51.36231 native comparison on 2026-09-23 rebuilt that
+scanner with the two `Token` initializers explicit or shorthand, using the same
+workspace and inputs under low and optimized profiles. The focused
+`TestScannerFieldShorthandNativeSizes` passed: four parse inputs had matching
+declaration and diagnostic output in all four builds. The test also sums raw
+`.text` and `.text$*` sections in each COFF object; PE section sizes below are
+virtual sizes, not hashes of executable instructions.
+
+| Profile | Variant | `unit.obj` / code sections | PE `.text` / `.rdata` | EXE |
+| --- | --- | ---: | ---: | ---: |
+| low | explicit and shorthand | 362,164 / 286,078 bytes | 351,584 / 44,062 bytes | 410,624 bytes |
+| optimized | explicit and shorthand | 274,635 / 109,349 bytes | 162,624 / 44,302 bytes | 221,696 bytes |
+
+`runtime.obj` code sections also matched within each profile (8,314 bytes low,
+7,013 optimized). Its total low-profile COFF size differed by four bytes between
+variants in this run (20,829 versus 20,825), while an earlier run reported equal
+totals. No PDB was emitted. Equal code-section and PE sizes plus matching outputs
+show no observed size increase for this edit, but do not prove byte-identical
+machine code, repeatable COFF totals, unchanged compilation time or runtime speed.
+The comparison is Fairy explicit versus Fairy shorthand, not the cumulative 8%
+budget comparison against equivalent handwritten C. Generated-name churn remains
+an observation, not a reason to change type or cache identity.
+
 Parsing adds a bounded local terminator check per designated field. Benchmarks
 compare explicit and shorthand input with allocation counts; this is not a claim
 of universally unchanged end-to-end compile time or debug/cache size. Separately
@@ -83,8 +106,9 @@ release validation remains separate from this bounded implementation.
 The focused 11-package suite, eight Atlas/identity consumer packages and Windows
 stable CLI tests passed locally. Scalar records, contextual enum payloads and
 moved resources produce byte-identical C to their explicit counterparts.
-Formatting and scoped Mustflow strict validation passed. Full-suite, Linux native
-execution, final object/executable size comparison and CI were not run here.
+Formatting and scoped Mustflow strict validation passed for the original feature.
+The later focused Windows object/EXE comparison above passed locally. Full-suite,
+Linux native execution and CI were not run for that later comparison.
 
 On the local Ryzen 5 7430U, five 200ms old-syntax parser samples had a baseline
 median of 2.112ms and current median of 2.044ms, with wide overlapping ranges

@@ -28,6 +28,7 @@ func compareParserNativeEdit(t *testing.T, root, path, plain, changed, reportNam
 		Profile, Variant, MSVC string
 		EXE, PDB               int
 		Objects                map[string]int
+		ObjectText             map[string]uint32
 		Sections               map[string]uint32
 	}
 	var rows []row
@@ -58,9 +59,19 @@ func compareParserNativeEdit(t *testing.T, root, path, plain, changed, reportNam
 				t.Fatal("missing or changed MSVC version")
 			}
 			r := row{Profile: profile.Name, Variant: []string{"plain", "changed"}[variant], MSVC: toolchain,
-				EXE: len(artifact.Bytes), PDB: len(artifact.ProgramDatabase), Objects: map[string]int{}, Sections: map[string]uint32{}}
+				EXE: len(artifact.Bytes), PDB: len(artifact.ProgramDatabase), Objects: map[string]int{}, ObjectText: map[string]uint32{}, Sections: map[string]uint32{}}
 			for _, object := range artifact.Objects {
 				r.Objects[object.Name] = len(object.Bytes)
+				coff, err := pe.NewFile(bytes.NewReader(object.Bytes))
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, section := range coff.Sections {
+					if section.Name == ".text" || strings.HasPrefix(section.Name, ".text$") {
+						r.ObjectText[object.Name] += section.Size
+					}
+				}
+				coff.Close()
 			}
 			image, err := pe.NewFile(bytes.NewReader(artifact.Bytes))
 			if err != nil {
@@ -70,7 +81,7 @@ func compareParserNativeEdit(t *testing.T, root, path, plain, changed, reportNam
 				r.Sections[section.Name] = section.VirtualSize
 			}
 			image.Close()
-			if r.EXE == 0 || len(r.Objects) == 0 || r.Sections[".text"] == 0 {
+			if r.EXE == 0 || len(r.Objects) == 0 || r.ObjectText["unit.obj"] == 0 || r.Sections[".text"] == 0 {
 				t.Fatal("incomplete artifact measurements")
 			}
 			rows = append(rows, r)
