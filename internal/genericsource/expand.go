@@ -81,7 +81,6 @@ type expander struct {
 	scalarTemplatesOnly   bool
 	packageNominal        bool
 	nominalContext        string
-	nominalModuleJSON     []byte
 	boundNominals         map[genericplan.TypeID]NominalBinding
 	nominalPublic         map[string]bool
 	nominalTypes          map[string]genericplan.TypeID
