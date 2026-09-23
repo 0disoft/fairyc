@@ -27,7 +27,7 @@ const (
 uid = "test.workspace-cache.app"
 name = "workspace-cache"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 
 [workspace]
@@ -44,7 +44,7 @@ features = []
 uid = "test.workspace-cache.answer"
 name = "answer"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `
 	testRootSource = `module main;

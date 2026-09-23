@@ -129,7 +129,7 @@ func loadGenericPlanWorkspace(t *testing.T, used bool) (workspaceloader.Workspac
 uid = "test.atlas.generic-plan"
 name = "generic-plan"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `
 	source := `module main;

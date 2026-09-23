@@ -4,7 +4,7 @@ schema = "fairyc.manifest/v1"
 uid = "example.app"
 name = "app"
 version = "0.1.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 
 [dependencies.util]

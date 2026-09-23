@@ -24,7 +24,7 @@ func TestWindowsVectorStableCLI(t *testing.T) {
 uid = "test.cli.stable-vector"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", nativeVectorClient)
@@ -124,7 +124,7 @@ func TestWindowsVectorCandidateNativeTests(t *testing.T) {
 uid = "test.cli.vector-tests"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main() { return 0; }")
@@ -208,7 +208,7 @@ func TestWindowsVectorCandidateNativeBuild(t *testing.T) {
 uid = "test.cli.vector"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 		client := nativeVectorClient

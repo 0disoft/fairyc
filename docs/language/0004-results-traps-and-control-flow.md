@@ -13,7 +13,7 @@ Fairy C evaluates expression operands, aggregate fields, and call arguments from
 
 `Option<T>` and `Result<T, E>` are tagged values. Their copyability and cleanup obligations follow their active payloads. Reading a resource payload by value moves it.
 
-`Result` is must-use. It must be switched over, returned, propagated with `?`, or discarded with
+`Result` is must-use. It must be switched over, returned, propagated with `?`, handled by `.is_ok`, or discarded with
 `discard expression;`. `?` is not defined for `Option` in Stage 0.
 
 The explicit discard spelling is `discard expression;`. Discarding `Option` or `Result` drops only the active payload. A restricted user enum cannot contain a resource payload in Stage 0.
@@ -21,7 +21,14 @@ The explicit discard spelling is `discard expression;`. Discarding `Option` or `
 Every evaluated Result carries one must-use obligation. Storing it transfers that obligation to the
 destination local, and passing it by value transfers the obligation to the callee's Result
 parameter. Result parameters therefore begin pending. Return, `discard`, exhaustive Result switch,
-and `?` discharge the obligation; assignment cannot silently discharge the previous destination.
+`.is_ok`, and `?` discharge the obligation; assignment cannot silently discharge the previous destination.
+
+`value.is_ok` evaluates one owned `Result<T, E>` once and yields `bool`: true for `.ok`, false for
+`.err`. It handles that Result exactly like `switch (value) { case .ok(_): { true } case .err(_): { false } }`.
+The active payload is dropped if it owns resources; both possible payload types must allow implicit
+drop and the caller must declare their required cleanup effects. A resource-bearing local moves into
+the test, while copyable locals retain the ordinary copy rules. Borrowed Results, payload extraction,
+and an `Option.is_ok` property are not admitted.
 
 Any pending obligation at a normal scope exit, function exit, earlier return edge, or overwrite is
 `E4101`. A branch join is pending when any reachable incoming path is pending. Loop analysis covers

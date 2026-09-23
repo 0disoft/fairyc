@@ -4,7 +4,7 @@ schema = "fairyc.manifest/v1"
 uid = "example.tools.app"
 name = "example-app"
 version = "1.2.3"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 
 [workspace]

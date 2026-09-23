@@ -101,7 +101,7 @@ func workspaceCallCatalogFixtureMode(t *testing.T, generic, aggregate bool) (str
 uid = "test.workspace-call.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 [workspace]
 members = ["libs/answer"]
@@ -116,7 +116,7 @@ features = []
 uid = "test.workspace-call.answer"
 name = "answer"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeCatalogFixture(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), "module answer;\npub fn i32 value() { return 42; }\n")

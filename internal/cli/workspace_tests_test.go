@@ -99,7 +99,7 @@ func TestStableWorkspaceTestSelectsOneReachableMemberByPackageUID(t *testing.T) 
 uid = "example.member-test.app"
 name = "member-test-app"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 [workspace]
 members = ["libs/answer", "libs/unused"]
@@ -114,7 +114,7 @@ features = []
 uid = "example.member-test.answer"
 name = "answer"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", "module answer;\npub fn i32 value() { return 42; }\n")
@@ -123,7 +123,7 @@ source = "src"
 uid = "example.member-test.unused"
 name = "unused"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "libs/unused/src/unused.fy", "module unused;\npub fn i32 value() { return 7; }\n")
@@ -800,7 +800,7 @@ func writeStableTestWorkspace(t *testing.T, root string) {
 uid = "example.stable-test.app"
 name = "stable-test-app"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/library.fy", "module library;\npub fn i32 answer() { return 42; }\n")

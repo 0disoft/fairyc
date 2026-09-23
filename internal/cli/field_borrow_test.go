@@ -16,7 +16,7 @@ func TestWindowsSharedFieldBorrow(t *testing.T) {
 uid = "test.cli.field-borrow"
 name = "fields"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", `module main;
@@ -51,7 +51,7 @@ func TestFieldBorrowAssignmentFailsClosed(t *testing.T) {
 uid = "test.cli.field-assignment"
 name = "fields"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", `module main;

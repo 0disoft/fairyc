@@ -836,8 +836,8 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.61`, language
-`fairyc-language/16`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.62`, language
+`fairyc-language/17`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
@@ -1431,5 +1431,7 @@ the new grammar; runtime ABI, MIR and public-interface schemas remain unchanged.
 The legacy source migrator is not a general `/14` to `/15` migration path.
 
 ADR 0396 advances the exact language pin from `fairyc-language/15` to `/16` and SDK from `0.0.0-stage0.60` to `0.0.0-stage0.61`. Current manifests, scaffolds, and tests move together; historical records retain their versions. Existing unlabeled source remains valid with updated manifest pins and refreshed SDK locks. Labeled calls require the new parser and typechecker; runtime ABI and public-interface schemas are unchanged.
+
+ADR 0399 advances the exact language pin from `fairyc-language/16` to `/17` and SDK from `0.0.0-stage0.61` to `0.0.0-stage0.62`. Owned `Result.is_ok` uses existing Result-switch semantics. Current manifests, scaffolds, and test inputs move together; existing source remains valid after pin and lock refresh. Runtime ABI and public-interface schemas are unchanged.
 
 Language 1.0 compatibility, stable native ABI and mangling, stable MIR exchange, binary package ABI, stable `SymbolId`, stable anchors, exact diagnostic-span guarantees, stable debugger formats, and cross-version `.fymap` migration are not Stage 0 promises.

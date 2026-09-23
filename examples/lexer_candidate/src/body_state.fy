@@ -33,7 +33,7 @@ pub fn bool expect(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] t
 
 pub fn usize append(ref mut v::Vec<Node> nodes, ref mut Cursor cursor, Node node) {
     if (cursor.nodes >= 4096) { cursor.status = 4; return 0; }
-    if (!switch (v::push<Node>(nodes, node)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return 0; }
+    if (!v::push<Node>(nodes, node).is_ok) { cursor.status = 3; return 0; }
     cursor.nodes = cursor.nodes + 1;
     cursor.expression_kind = node.kind;
     return cursor.nodes;
@@ -47,7 +47,7 @@ pub fn Statement statement_value(u32 kind, usize start, usize end) {
 }
 pub fn usize append_statement(ref mut v::Vec<Statement> statements, ref mut Cursor cursor, Statement value) {
     if (cursor.statements >= 4096) { cursor.status = 4; return 0; }
-    if (!switch (v::push<Statement>(statements, value)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return 0; }
+    if (!v::push<Statement>(statements, value).is_ok) { cursor.status = 3; return 0; }
     cursor.statements = cursor.statements + 1;
     cursor.statement_kind = value.kind;
     return cursor.statements;

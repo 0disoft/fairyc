@@ -175,7 +175,7 @@ func writeSDKWorkspace(t *testing.T, root string) {
 uid = "example.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/16"
+language = "fairyc-language/17"
 source = "src"
 `
 	source := `module main;

@@ -156,6 +156,10 @@ a trap. The same views expose `.is_empty` with result type `bool`, true exactly 
 byte count is zero and with the same no-scan and no-call guarantees. These properties do not define
 capacity, Unicode scalar or grapheme counting, `CStr` metadata, or a public view representation.
 
+An owned `Result<T, E>` exposes `.is_ok` as a consuming boolean test. It handles the Result through
+the existing exhaustive two-variant switch semantics, including active-payload cleanup. The
+receiver is evaluated once; borrowed Results and `Option` do not expose this property.
+
 An immutable `ref u8[]` supports the read-only expression `bytes[index]`. The index has type `usize`;
 an unsuffixed integer literal receives that contextual type. The result has type `u8`. The receiver
 and index evaluate once from left to right, and an index greater than or equal to `.len` traps with

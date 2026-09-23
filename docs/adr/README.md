@@ -363,6 +363,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0396-position-preserving-argument-labels.md`: defines argument labels for private direct calls without argument reordering in language `/16`.
 - `0397-defer-named-loops-pending-workload-evidence.md`: defers named-loop break/continue pending a real checked-in workload, with conditional-only future constraints and no grammar or pin change.
 - `0398-result-branch-local-continuation.md`: accepts branch-local continuation for the diagnostics add refactor using existing return-switch syntax; diverging-arm typing and let-else stay deferred with no compiler or language-version change.
+- `0399-consuming-result-success-test.md`: adds owned `Result.is_ok` with the existing exhaustive switch cleanup semantics in language `/17`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

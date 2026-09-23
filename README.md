@@ -529,6 +529,10 @@ ADR 0396 is now current at `fairyc-language/16` and SDK `0.0.0-stage0.61`, addin
 position-preserving argument labels such as `f(.minimum=1, .depth=0, .allow_record=true)`.
 Labels are permitted only for same-module private non-generic direct calls and do not
 change source evaluation order. Existing workspaces must update the language pin and refresh locks.
+ADR 0399 advances language to `fairyc-language/17` and SDK to `0.0.0-stage0.62`.
+An owned Result now supports `value.is_ok` as the existing two-arm success test,
+including active-payload cleanup and its ability/effect checks. Existing workspaces
+must update the language pin and refresh locks.
 Stable workspace `check`, `build`, `run`, and `test` accept explicit scalar generic functions such
 as `fn T identity<T>(T value) { return value; }` and `identity<i32>(42)`, including public functions
 across imports. Type inference, nominal generic arguments, and user-defined static interfaces
