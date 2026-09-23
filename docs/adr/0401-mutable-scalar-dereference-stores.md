@@ -37,4 +37,8 @@ profiles, and rejects an overlapping alias. Generated C contains a direct
 pointer write. These checks establish behavior. A later
 [paired C comparison](../ops/c-budget-scalar-deref-20260924.md) places the
 local-scalar workload within the observed cumulative 8% runtime and EXE
-budget, while leaving sustained performance and vector-slot cost unproven.
+budget. A subsequent [checked vector-slot comparison](../ops/c-budget-vector-slot-20260924.md)
+measured the actual `Vec<u32>.at_mut` path at 1.44971 times the C runtime
+median, outside that workload's 1.08 budget. The feature's vector hot-path
+cost is therefore unresolved; neither comparison establishes sustained or
+whole-language performance.
