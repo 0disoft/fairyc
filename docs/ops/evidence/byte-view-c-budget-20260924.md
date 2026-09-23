@@ -26,7 +26,20 @@ size in each profile; the optimized `unit.obj` size was 2495 bytes for both.
 The low-profile result is a baseline compiler/backend cost issue, not evidence
 that byte-view syntax caused a regression. This result does not establish a
 language-wide performance claim or release readiness; the real lexer/parser
-workload, low-profile cost diagnosis, and full-suite evidence remain open.
+workload, low-profile check-cost isolation, and full-suite evidence remain open.
+
+Low-profile source and object inspection narrows the likely cost. The generated
+Fairy C keeps a bounds check before every byte load, checked hidden and outer
+index increments, checked multiplication and additions, and divide-by-zero
+guards around constant divisors. The independently written C loop uses the same
+input guard and arithmetic, but has no explicit runtime checks because its
+fixed four-element array and value ranges make those operations safe. MSVC
+`/Od` retains substantially more of the generated control flow; `/O2` removes
+or folds enough work for the measured kernel to pass. This source inspection
+does not isolate the cost of any single check. The next compiler work is a
+bounded proof that can eliminate only checks shown redundant by the loop bound
+and numeric ranges, then a new paired measurement without changing safe-mode
+trap behavior.
 
 Fixture SHA-256 values: `byte_loop.c`
 `34330de4572da9ed49d6e9aed63e2781eb9cd493eacd1cfa2e4ebab31a6413a3`,

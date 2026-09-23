@@ -76,6 +76,8 @@ measured the new form, the equivalent explicit-index Fairy form and independent
 C in both MSVC profiles. Optimized runtime and EXE size are within the 8% limit
 for this microkernel; low-profile runtime is about 21% above C, similar to the
 existing explicit-index form, so the cumulative gate remains open.
+Generated-C inspection points to retained safe checks under `/Od`; this is
+not yet a measured attribution to an individual check.
 The Fairy-written parser candidate now retains this form as statement kind 18
 and validates its node references. Its expression arena bound grows from 4096
 to 4160 nodes to parse its own updated source without changing the separate
