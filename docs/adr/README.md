@@ -365,6 +365,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0398-result-branch-local-continuation.md`: accepts branch-local continuation for the diagnostics add refactor using existing return-switch syntax; diverging-arm typing and let-else stay deferred with no compiler or language-version change.
 - `0399-consuming-result-success-test.md`: adds owned `Result.is_ok` with the existing exhaustive switch cleanup semantics in language `/17`.
 - `0400-mutable-vector-element-access.md`: adds owner-bound exclusive `Vec.at_mut` with checked slot lookup and alias rejection in SDK `0.0.0-stage0.63`.
+- `0401-mutable-scalar-dereference-stores.md`: executes plain writes through named mutable scalar references, including `Vec.at_mut<i32>`, without changing the language or SDK revision.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

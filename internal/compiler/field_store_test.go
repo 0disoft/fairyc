@@ -58,6 +58,35 @@ fn i32 main() { var i32 value = 1; set(ref mut value); return value; }`
 	if stores != 1 {
 		t.Fatalf("want one dereference store, got %d", stores)
 	}
+	encoded, err := mircodec.Encode(result.MIR, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := mircodec.Decode(encoded, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := interpreter.Execute(decoded, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("dereference store artifact round trip: %+v %v", outcome, err)
+	}
+}
+
+func TestFieldStoreScalarDerefRejectsMutableFieldProjection(t *testing.T) {
+	const source = `module main; struct State { i32 count; }
+fn i32 main() {
+    var State state = State { .count = 1 };
+    let ref mut i32 slot = ref mut state.count;
+    *slot = 42;
+    return state.count;
+}`
+	result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", source)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Verified {
+		t.Fatal("mutable field projection must remain unsupported")
+	}
 }
 
 func TestFieldStoreAdmissionBoundaries(t *testing.T) {

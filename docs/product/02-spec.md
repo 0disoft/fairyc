@@ -278,6 +278,8 @@ Whole-root `Live`, `Dead`, and rejected `MaybeLive` transitions, live replacemen
 
 The Stage 0 borrow model uses local last-use loans and whole-root overlap. It does not infer disjoint mutable field borrows or two-phase borrows. A returned safe borrow must have one unambiguous origin. Stored borrows, self-reference, and multiple-origin returns must use an index or generation handle, a redesigned API, a lexical region, or a narrow unsafe module.
 
+Plain `*slot = value` may update a named `ref mut` to `bool`, `u8`, `i32`, `u32`, or `usize`, including a scalar element selected by `Vec.at_mut`. The target's exclusive loan covers right-hand-side evaluation. Aggregate and temporary-target writes, compound dereference assignment, and mutable field-address projection are not admitted. ADR 0401 records the executable and verification boundary without changing language `/17` or SDK `0.0.0-stage0.63`.
+
 ### Regions and arenas
 
 `Region` is a compiler-known lexical capability, not an ordinary mutable arena object. It cannot be

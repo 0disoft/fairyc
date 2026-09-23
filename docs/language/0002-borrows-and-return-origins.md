@@ -55,6 +55,14 @@ replacement remain source-located unsupported lowering results,
 without publishing executable MIR. Shared field reads and borrows retain the
 separate projection boundary above; field stores do not admit mutable field borrows.
 
+ADR 0401 admits plain `*slot = value` for a named `ref mut` to `bool`, `u8`,
+`i32`, `u32`, or `usize`. The exclusive loan remains live while the right-hand
+side is evaluated once; competing borrows, direct owner reads, and moves are
+rejected. A read through the same reference is allowed. `Vec.at_mut<i32>` may
+therefore update its selected element without copying or resizing the vector.
+Aggregate replacement, compound dereference assignment, temporary reference
+targets, and mutable field-address projection remain unsupported.
+
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
 `ref mut T`. The original borrow becomes usable again after the call's last use. Returning, storing,
 or assigning the borrow to a longer-lived destination is not a call-bounded reborrow and must
