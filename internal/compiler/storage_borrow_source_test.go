@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -246,6 +247,29 @@ func TestPrivateVectorStorageBorrowSourceElementAddressMIRMutations(t *testing.T
 				t.Fatalf("malformed element address admitted: changed=%d", changed)
 			}
 		})
+	}
+}
+
+func TestPrivateVectorStorageBorrowSourceElementAddressBackend(t *testing.T) {
+	text := strings.Replace(storageBorrowMutSource,
+		"storage_borrow_mut<T>(owner, owner.data)",
+		"storage_borrow_mut<T>(owner, storage_element_address<T>(owner.data, 0))", 1)
+	analysis, err := analyzeStorageBorrow(t, text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	compiled, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+	if err != nil || !compiled.Verified {
+		t.Fatalf("private element address MIR: %v", err)
+	}
+	entry := hir.QualifiedModulePath(1, "main") + "::main"
+	if _, err := cbackend.Emit(compiled.MIR, entry, cbackend.Stage0WindowsMSVCProfile()); err == nil {
+		t.Fatal("ordinary C emission admitted private element address")
+	}
+	unit, err := cbackend.EmitStorageTransfers(compiled.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil || !strings.Contains(unit.Source, "UINTPTR_MAX / ((uintptr_t)UINT64_C(4))") ||
+		!strings.Contains(unit.Source, "(unsigned char *)") {
+		t.Fatalf("private element address C emission: %v", err)
 	}
 }
 
