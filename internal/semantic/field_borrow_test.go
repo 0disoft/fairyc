@@ -32,6 +32,22 @@ func TestAnalyzeFieldBorrowAssignmentPreservesTypedForm(t *testing.T) {
 	}
 }
 
+func TestAnalyzeFieldStoreKeepsMutableReferenceLive(t *testing.T) {
+	result := analyzeText(t, map[string]string{"main.fy": `module main;
+struct State { i32 count; }
+fn i32 main() {
+    var State state = State { .count = 1 };
+    let ref mut State selected = ref mut state;
+    let ref State alias = ref state;
+    selected.count = 2;
+    assert(alias.count == 1);
+    return 0;
+}`})
+	if len(result.Diagnostics) == 0 || result.Diagnostics[0].Code != "E2101" {
+		t.Fatalf("field store lost mutable reference last-use: %+v %+v", result.Diagnostics, result.Unsupported)
+	}
+}
+
 func TestAnalyzeSharedFieldBorrow(t *testing.T) {
 	for name, body := range map[string]string{
 		"direct":   "let ref i32 value = ref owner.inner.number; assert(*value == 42);",

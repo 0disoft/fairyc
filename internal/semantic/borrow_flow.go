@@ -1362,7 +1362,7 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 				delete(live, target)
 			}
 			live = f.liveExpression(statement.Expression, live, context)
-			if indexedAssignmentTarget(statement.Target) {
+			if indexedAssignmentTarget(statement.Target) || statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr {
 				live = f.liveExpression(statement.Target, live, context)
 			}
 		case statement.Kind == syntax.KindFor:
