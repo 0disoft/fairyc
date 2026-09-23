@@ -28,8 +28,30 @@ The implicit path span covers the written identifier, excluding the dot and
 trivia. Source tokens remain lossless; formatter output preserves the chosen form.
 AST, typed HIR, MIR, cleanup, interpreter, and C emission reuse existing paths.
 No new executable operation, tag, function specialization or runtime metadata is
-introduced. Identical generated C is the executable-code oracle, with source
-location-sensitive operations excluded from that identity claim.
+introduced. Scalar and non-nominal fixtures use identical generated C as the
+executable-code oracle, excluding source-location-sensitive operations.
+Closed-graph generic specialization can change generated names without changing
+executable behavior.
+
+A later scanner comparison expanded two `Token` shorthand initializers back to
+`.field = field` without changing the other sources. Both variants emitted
+1,114,847 C bytes and 407 MIR functions. Each contained 91 generated generic
+function names, but the sorted name lists differed; the first observed changed
+name was an imported `std::vec` `$drop` specialization. The first C byte
+difference was at offset 110721 in `fy_fn` prototype order. This establishes
+name and ordering churn, not extra executable work or slower compilation.
+
+The code path explains the reach of this change: `bindNominalContext` hashes
+the closed graph's module ASTs, `collectNominalTypes` hashes the module AST and
+that context, and `genericplan.specializationID` includes definition digests.
+Generated `_fy_generic_` names carry those IDs; the C backend sorts functions
+by name before numbering `fy_fn` declarations. The comparison does not isolate
+every changed hash or show that all 91 names changed. Removing spans or source
+spelling from these hashes needs separate proof for `source_location`, package
+cache inputs and interface identity. The whole-package cache key already includes
+the package source digest, so stable generated names alone would not make an
+edited package reuse its previous compilation. No compiler-time or C-compiler-time
+gain was measured, so this observation does not authorize an identity change.
 
 Parsing adds a bounded local terminator check per designated field. Benchmarks
 compare explicit and shorthand input with allocation counts; this is not a claim
