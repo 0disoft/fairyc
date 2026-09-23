@@ -19,8 +19,12 @@ func (e *emitter) inspectStorageBorrow(functionIndex int, operation mir.Operatio
 		return fmt.Errorf("private storage borrow has incompatible owner/address types %q/%q", ownerType, addressType)
 	}
 	element, mutable, borrowed := hir.BorrowElement(operation.Type)
-	if !borrowed || mutable {
-		return fmt.Errorf("private storage borrow requires a shared result")
+	wantsMutable := operation.Kind == mir.OperationStorageBorrowMut
+	_, ownerMutable, ownerBorrowed := hir.BorrowElement(operation.OwnerType)
+	pointerElement, pointerMutable, pointer := hir.RawPointerElement(operation.IndexType)
+	if !borrowed || mutable != wantsMutable || !ownerBorrowed || ownerMutable != wantsMutable ||
+		!pointer || pointerElement != hir.TypeVoid || (wantsMutable && !pointerMutable) {
+		return fmt.Errorf("private storage borrow has incompatible mutability")
 	}
 	computed, err := preparedStorageLayout(element, e.targetID, e.layoutEngine,
 		e.structTypes, e.structByType, e.enumTypes, e.enumByType, e.resourceTypes, e.resourceByType)
