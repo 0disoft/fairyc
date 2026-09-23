@@ -48,6 +48,12 @@ comparison does not exercise an allocation-failure branch of the newly adopted
 sites, prove compiler-time parity, or establish the cumulative 8% budget
 against a C implementation.
 
+The [no-cache check timing diagnostic](../ops/result-is-ok-check-timing.md) compares
+those two source spellings on the parser workspace. Both produce 407 MIR
+functions. Its eight alternating pairs have a 1.053354 median paired ratio,
+but roughly 20% relative full spans make a compile-time regression verdict
+inconclusive. This does not change the C-relative runtime or EXE budget.
+
 `TestResultBranchReviewIsOkResourceFailureNative` compares the existing switch
 and `.is_ok` on the same `Vec<bytes::Buffer>::push` operation. A first allocation
 fills the Buffer; the second allocation is either allowed or failed. Under both
