@@ -81,3 +81,41 @@ Disk file bytes were identical on every run per variant (3 of 3 each). The disk 
 - Cause candidates only, without proof: the existing AST pointer addition may enlarge node memory, and cache growth may include longer source-location metadata. Neither cause is proven and no optimization completion is claimed.
 - Labels input is longer than plain input, and the synthetic small workload cannot be generalized.
 - Recommended next work is to separate unused-code cost causes from metadata-representation cost, improve the metadata representation, and not set an arbitrary cache allowance.
+
+## Follow-up: separate source length from label metadata
+
+On 2026-09-23, `TestArgumentLabelsCacheAttribution` used compiler source
+`ac302ae2cf5f065ce88f05e93f532e81c502ae1c`
+and the same 64-call synthetic package with three variants. `plain` has ordinary
+calls; `padded` has ordinary calls with spaces replacing each label spelling;
+`labels` has the actual argument labels. `padded` and `labels` have equal source
+lengths and the same byte positions for the three argument values in each call.
+Each variant produced one verified memory-cache store/hit and one persistent
+store/reopened all-hit. These are deterministic byte counts, not timing samples.
+
+| Variant | Source bytes | Memory-cache bytes | Disk-record bytes | Decoded disk artifact bytes | Other disk JSON bytes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| plain | 2,326 | 339,228 | 461,346 | 345,761 | 328 |
+| padded | 4,630 | 339,644 | 461,902 | 346,177 | 328 |
+| labels | 4,630 | 339,644 | 461,902 | 346,177 | 328 |
+
+The longer, value-aligned ordinary source reproduces the entire observed +416
+memory and +556 disk bytes. The persistent artifact accounts for its increase;
+the other JSON bytes remain 328. Padded and labeled stable artifact payloads
+are **not** byte-identical, so equal sizes do not prove identical serialization.
+`CallLabels` is AST-only metadata; HIR uses ordinary calls, and the caches store
+process or stable compiler artifacts rather than AST objects. This comparison
+finds no additional label-specific cache-size cost in this corpus. It does not
+establish that all source spellings or workloads have equal cache size.
+
+The same test measures the current 64-bit `ast.Expression` layout: 136 bytes,
+versus 128 bytes for the current struct with only `CallLabels` omitted. That
+pointer is present even for unlabeled expressions. The earlier baseline/current
+Go allocation increase is consistent with a per-expression size cost, but the
+test does not isolate heap size-class rounding, expression counts, or other
+frontend changes; no allocation or compilation-time speedup is claimed.
+Changing the AST representation solely to shrink these cache records is not
+supported by this evidence. Any representation experiment should first quantify
+the unlabeled-expression allocation contribution and preserve the existing
+source diagnostics and generated-C behavior. The C-relative cumulative 8%
+runtime/EXE budget does not apply to these separate cache-byte observations.
