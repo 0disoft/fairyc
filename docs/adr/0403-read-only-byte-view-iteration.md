@@ -1,0 +1,80 @@
+# ADR 0403: Read-only byte-view iteration
+
+- Status: Accepted design; implementation pending
+- Date: 2026-09-24
+- Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
+- Reopens only the byte-view part of [ADR 0224](0224-defer-unproven-surface-shorthands.md)
+
+## Workload and decision
+
+The Fairy-written lexer candidate now has three independent, non-fixture loops
+that read every byte of an immutable `ref u8[]` in order and increment an index
+solely to reach the next byte: [diagnostics text output](../../examples/lexer_candidate/src/diagnostics.fy),
+[pages text output](../../examples/lexer_candidate/src/pages.fy), and
+[scanner numeric output](../../examples/lexer_candidate/src/scanner.fy). All
+three belong to one application; this is evidence for repeated local code, not
+for demand across unrelated applications. A library cannot express their common
+loop body without a callback or collection-wide operation, neither of which is
+part of the current language. The old one-loop audit in ADR 0224 is historical.
+
+Accept one source form, pending implementation and its evidence:
+
+```fy
+for (let u8 byte in view) {
+    number(byte as usize);
+}
+```
+
+`view` must resolve to a named immutable local or parameter of exact type
+`ref u8[]`. The byte binding is a fresh immutable `u8` in the loop-body scope.
+There is no index binding, ownership transfer, callback, user iterator,
+generic collection, `Vec<T>`, mutable slice, string, array, range value, or
+expression-valued loop in this decision. An eligible path has no call or other
+effect to evaluate repeatedly. A non-path expression, mutable view binding,
+or wrong type is rejected before MIR.
+
+## Execution and ownership
+
+The view's length is observed once before the first iteration. The compiler
+retains the view's borrow origin until loop exit. Iteration visits indices
+`0..len` in order; each body entry copies one checked `u8` element into the
+binding. An empty view executes no body. A safe mutation or move of the
+borrowed owner while iterating remains an error. The hidden index and bound
+cannot be named by source code.
+
+`continue` advances the hidden index exactly once before the next condition;
+`break` skips that advance. `return` and `?` leave the function through their
+existing cleanup paths. `defer`, resource drops and Region resets on every
+exit follow the same order as the equivalent classic scalar `for`. The final
+index increment is representable even when `len == SIZE_MAX`: the largest
+executed index is `SIZE_MAX - 1`. Checked element access remains in safe mode
+unless a later optimization proves it redundant without changing trap behavior.
+
+The intended lowering reuses existing scalar-loop control flow, cleanup and
+verified MIR. No runtime iterator, allocation, vtable, metadata, public ABI or
+specialized function is admitted. Source spans and the byte binding must remain
+available to diagnostics and formatting; implementation cannot silently rewrite
+the user's source file.
+
+## Implementation and release gate
+
+Acceptance does not add the syntax to the current grammar or parser. The
+implementation must change the normative grammar, lexer/parser and recovery,
+formatter, AST/HIR, semantic borrow and control-flow analysis, verified MIR,
+interpreter and native C path together. Positive fixtures cover empty and
+non-empty views, each of the three real caller shapes, early exits, nested
+loops, and cleanup. Negative fixtures cover wrong or mutable iterable types,
+effectful expressions, binding escape, and owner mutation while iterating.
+Compare the same algorithm in explicit-index Fairy, the new form, and
+independent C at low and optimized profiles. Check generated functions,
+runtime and EXE size, build/check time, and unused-syntax overhead; the
+cumulative runtime and EXE limit is 8% relative to equivalent C, while build
+8% is an observation marker. A syntax-only or interpreter-only change does
+not complete this decision.
+
+The implemented cutover needs a new exact language revision and synchronized
+current manifests, SDK requirement, locks and examples. This design record
+alone changes no language pin, SDK or compiler version, generated C, runtime
+ABI, CLI behavior or target maturity. ADR 0224 still defers checked narrowing
+and expression-bodied functions; named loops and nominal scalars have separate
+decisions.

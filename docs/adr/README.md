@@ -367,6 +367,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0400-mutable-vector-element-access.md`: adds owner-bound exclusive `Vec.at_mut` with checked slot lookup and alias rejection in SDK `0.0.0-stage0.63`.
 - `0401-mutable-scalar-dereference-stores.md`: executes plain writes through named mutable scalar references, including `Vec.at_mut<i32>`, without changing the language or SDK revision.
 - `0402-result-return-only-match-arm.md`: admits a direct-return-only Result case beside a value-producing case in language `/18` without a new backend operation.
+- `0403-read-only-byte-view-iteration.md`: accepts a narrow immutable `ref u8[]` iteration design from three real loops; syntax and compiler implementation remain pending.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

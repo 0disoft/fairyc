@@ -52,3 +52,12 @@ as future evidence rather than prepaying permanent language complexity.
 
 Language `/6`, public-interface v3, MIR v0, C11 transport, caches, runtime ABI, and target schemas
 remain unchanged.
+
+## Follow-up evidence (2026-09-24)
+
+The Fairy-written lexer candidate now contains three independent full-byte
+loops in `diagnostics.fy`, `pages.fy`, and `scanner.fy`. [ADR 0403](0403-read-only-byte-view-iteration.md)
+accepts a narrow read-only `ref u8[]` iteration design on that evidence,
+without adding syntax to the current grammar yet. This supersedes only the
+range-iteration deferral for that exact shape. The earlier `/6` audit remains
+historical; checked narrowing and expression-bodied functions stay deferred.

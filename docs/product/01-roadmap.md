@@ -104,6 +104,11 @@ grammar. Classic scalar `for`, explicit `while`, lossless widening casts, and br
 the complete implemented forms. Provider-qualified imports and formatter work retain their own
 package and tooling gates.
 
+The later lexer candidate contains three independent full-byte loops over immutable `ref u8[]`
+views. ADR 0403 accepts a narrow read-only iteration design on this newer evidence, pending the
+grammar, compiler, native and C-relative cost gates. Checked narrowing, expression-bodied
+functions, generic iteration and mutable collection iteration remain deferred.
+
 Exceptions, class inheritance, implicit virtual dispatch, user-defined implicit conversions,
 operator or function overloading, unrestricted template metaprogramming, runtime reflection,
 garbage-collected object roots, and language-owned async, coroutines, virtual threads, or hidden
