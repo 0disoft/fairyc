@@ -48,6 +48,16 @@ comparison does not exercise an allocation-failure branch of the newly adopted
 sites, prove compiler-time parity, or establish the cumulative 8% budget
 against a C implementation.
 
+`TestResultBranchReviewIsOkResourceFailureNative` compares the existing switch
+and `.is_ok` on the same `Vec<bytes::Buffer>::push` operation. A first allocation
+fills the Buffer; the second allocation is either allowed or failed. Under both
+MSVC profiles, success reports status `0`, two allocations, two frees, and no
+live blocks. Failed push reports status `3`, one allocation, one free, one
+failure, and no live blocks. The complete heap ledgers match between both
+spellings for each profile and failure setting. This exercises cleanup of an
+owned resource returned in `.err`; it does not measure execution time or the
+C-relative cumulative 8% budget.
+
 ## Compatibility
 
 This adds source behavior, so the exact language pin advances from
