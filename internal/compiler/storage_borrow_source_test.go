@@ -156,6 +156,38 @@ func TestPrivateVectorStorageBorrowSourceMutableOrigin(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorStorageBorrowSourceElementAddressPreparation(t *testing.T) {
+	const original = "storage_borrow_mut<T>(owner, owner.data)"
+	const address = "storage_borrow_mut<T>(owner, storage_element_address<T>(owner.data, 0))"
+	text := strings.Replace(storageBorrowMutSource, original, address, 1)
+	if text == storageBorrowMutSource {
+		t.Fatal("element address fixture unchanged")
+	}
+	analysis, err := analyzeStorageBorrow(t, text)
+	result := analysis.Analysis.Semantic
+	if err != nil || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
+		t.Fatalf("private element address source: %v %+v %+v", err, result.Diagnostics, result.Unsupported)
+	}
+	encoded, err := json.Marshal(result.HIR)
+	if err != nil || !strings.Contains(string(encoded), "storage-element-address") {
+		t.Fatalf("typed element address missing: %v %s", err, encoded)
+	}
+	for _, invalid := range []string{
+		"storage_element_address<T>(owner.data)",
+		"storage_element_address<T>(owner.data, 0, 1)",
+		"storage_element_address<T>(0, 0)",
+		"storage_element_address<T>(owner.data, true)",
+	} {
+		t.Run(invalid, func(t *testing.T) {
+			candidate := strings.Replace(text, "storage_element_address<T>(owner.data, 0)", invalid, 1)
+			analysis, err := analyzeStorageBorrow(t, candidate)
+			if err == nil && len(analysis.Analysis.Semantic.Diagnostics) == 0 && len(analysis.Analysis.Semantic.Unsupported) == 0 {
+				t.Fatal("invalid private element address was admitted")
+			}
+		})
+	}
+}
+
 func TestPrivateVectorStorageBorrowSourceMutableMIR(t *testing.T) {
 	analysis, err := analyzeStorageBorrow(t, storageBorrowMutSource)
 	if err != nil {

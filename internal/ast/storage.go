@@ -15,3 +15,7 @@ const PrivateStoragePut syntax.Kind = "private-storage-put"
 // PrivateStorageBorrow ties a raw element address to the owner's shared or
 // exclusive borrow lifetime. Text selects the private borrow mode.
 const PrivateStorageBorrow syntax.Kind = "private-storage-borrow"
+
+// PrivateStorageElementAddress is an SDK-only unsafe address calculation for
+// one initialized element; its caller proves the allocation extent.
+const PrivateStorageElementAddress syntax.Kind = "private-storage-element-address"

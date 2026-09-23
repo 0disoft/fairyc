@@ -38,6 +38,9 @@ func (x *expander) storageSelector(name string) string {
 	if x.allowStorageTransfers && name == "storage_borrow_mut" {
 		return "borrow-mut"
 	}
+	if x.allowStorageTransfers && name == "storage_element_address" {
+		return "element-address"
+	}
 	if !x.allowStorage {
 		return ""
 	}
@@ -71,6 +74,13 @@ func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
 				return true, fmt.Errorf("private storage borrow requires an owner borrow and a pointer")
 			}
 			*e = ast.Expression{Kind: ast.PrivateStorageBorrow, Span: e.Span, Text: callee.Text, Type: callee.Type, Children: e.Children[1:]}
+			return true, nil
+		}
+		if callee.Text == "element-address" {
+			if len(e.Children) != 3 {
+				return true, fmt.Errorf("private storage element address requires a mutable void pointer and index")
+			}
+			*e = ast.Expression{Kind: ast.PrivateStorageElementAddress, Span: e.Span, Text: callee.Text, Type: callee.Type, Children: e.Children[1:]}
 			return true, nil
 		}
 		if callee.Text == "put" {
