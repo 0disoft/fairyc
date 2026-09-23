@@ -686,6 +686,7 @@ func lowerStatement(tree *syntax.Tree, node syntax.Node) Statement {
 		statement.For = lowerForLoop(tree, node)
 	case syntax.KindByteFor:
 		statement.ByteFor = lowerByteForLoop(tree, node)
+		statement.Expression = byteForAsBlock(statement.ByteFor)
 	default:
 		statement.Expression = lowerExpressionNode(tree, node)
 	}

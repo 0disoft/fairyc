@@ -58,8 +58,10 @@ the user's source file.
 
 ## Implementation and release gate
 
-The grammar and lossless parser now retain this form, and AST lowering preserves
-its name, type, view and body. Current semantic analysis rejects it explicitly;
+The grammar and lossless parser retain this form, and AST lowering preserves
+its name, type, view and body. It also prepares a hidden length snapshot and
+scalar `for` path for typed analysis without rewriting the source. Current
+semantic analysis still rejects execution explicitly;
 there is no executable source admission or language revision change yet. The
 remaining implementation must connect semantic borrow and control-flow
 analysis, verified MIR, interpreter and native C paths. Positive fixtures cover empty and
