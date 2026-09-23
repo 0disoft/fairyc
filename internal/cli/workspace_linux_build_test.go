@@ -123,7 +123,7 @@ func TestExperimentalLinuxVectorWorkspaceRun(t *testing.T) {
 		trap   bool
 	}{
 		{name: "ordinary-reserved-status", source: client},
-		{name: "bounds-trap", source: strings.Replace(client, "ref items, 0", "ref items, 1", 1), trap: true},
+		{name: "out-of-range-assertion", source: strings.Replace(client, "ref items, 0", "ref items, 1", 1), trap: true},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			root := t.TempDir()
@@ -151,7 +151,7 @@ source = "src"
 				}
 				code, stdout, stderr := runForTest(arguments, root)
 				if scenario.trap {
-					if code != ExitProgramTrap || stdout != "" || stderr != "trap: bounds\n" {
+					if code != ExitProgramTrap || stdout != "" || stderr != "trap: assertion-failed\n" {
 						t.Fatalf("%s: code=%d stdout=%q stderr=%q", profile, code, stdout, stderr)
 					}
 				} else if code != ExitSuccess || !strings.Contains(stdout, "native workspace status: 131 (") || stderr != "" {
