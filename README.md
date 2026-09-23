@@ -532,6 +532,7 @@ change source evaluation order. Existing workspaces must update the language pin
 ADR 0399 advances language to `fairyc-language/17` and SDK to `0.0.0-stage0.62`.
 ADR 0400 adds checked mutable `Vec.at_mut` access in SDK `0.0.0-stage0.63` without changing the language revision.
 SDK `0.0.0-stage0.64` preserves that API and lowers its checked slot address directly in generated C.
+ADR 0402 advances language to `fairyc-language/18` and SDK to `0.0.0-stage0.65` so a Result switch case ending in a direct `return` can coexist with a value-producing case.
 An owned Result now supports `value.is_ok` as the existing two-arm success test,
 including active-payload cleanup and its ability/effect checks. Existing workspaces
 must update the language pin and refresh locks.

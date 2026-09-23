@@ -366,6 +366,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0399-consuming-result-success-test.md`: adds owned `Result.is_ok` with the existing exhaustive switch cleanup semantics in language `/17`.
 - `0400-mutable-vector-element-access.md`: adds owner-bound exclusive `Vec.at_mut` with checked slot lookup and alias rejection in SDK `0.0.0-stage0.63`.
 - `0401-mutable-scalar-dereference-stores.md`: executes plain writes through named mutable scalar references, including `Vec.at_mut<i32>`, without changing the language or SDK revision.
+- `0402-result-return-only-match-arm.md`: admits a direct-return-only Result case beside a value-producing case in language `/18` without a new backend operation.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

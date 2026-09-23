@@ -14,8 +14,6 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-// Admission evidence for ADR 0398, not a claim that return-only arms are
-// fundamentally invalid. Replace this observation when that feature is admitted.
 func TestResultBranchReviewReturnOnlyArm(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "fairy.toml", "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.result-review\"\nname = \"result-review\"\nversion = \"1.0.0\"\nlanguage = \""+sdkstdlib.LanguageRevision+"\"\nsource = \"src\"\n")
@@ -34,14 +32,95 @@ fn i32 main() {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if !checked.Verified {
+		t.Fatalf("return-only Result arm rejected: diagnostics=%+v unsupported=%+v", checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+	}
+}
+
+func TestResultBranchReviewVoidArmStillRejected(t *testing.T) {
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.result-void-arm\"\nname = \"result-void-arm\"\nversion = \"1.0.0\"\nlanguage = \""+sdkstdlib.LanguageRevision+"\"\nsource = \"src\"\n")
+	writeTestSource(t, root, "src/main.fy", `module main;
+fn Result<i32, i32> make() { return .ok(42); }
+fn i32 main() {
+ let i32 value = switch (make()) { case .ok(value): { value } case .err(_): {} };
+ return value;
+}`)
+	w, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checked, err := workspacecompiler.Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if checked.Verified {
+		t.Fatal("non-returning void arm accepted in value-producing Result switch")
+	}
 	found := false
 	for _, d := range checked.Semantic.Diagnostics {
-		if d.Code == "E1006" {
-			found = true
-		}
+		found = found || d.Code == "E1006"
 	}
-	if checked.Verified || !found {
-		t.Fatalf("expected current arm type mismatch, verified=%t diagnostics=%+v unsupported=%+v", checked.Verified, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+	if !found {
+		t.Fatalf("expected E1006, diagnostics=%+v unsupported=%+v", checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+	}
+}
+
+func TestResultBranchReviewAllReturnCannotInitialize(t *testing.T) {
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.result-all-return\"\nname = \"result-all-return\"\nversion = \"1.0.0\"\nlanguage = \""+sdkstdlib.LanguageRevision+"\"\nsource = \"src\"\n")
+	writeTestSource(t, root, "src/main.fy", `module main;
+fn Result<i32, i32> make() { return .ok(42); }
+fn i32 main() {
+ let i32 value = switch (make()) { case .ok(_): { return 1; } case .err(_): { return 2; } };
+ return value;
+}`)
+	w, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checked, err := workspacecompiler.Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if checked.Verified {
+		t.Fatal("all-return Result switch initialized a value")
+	}
+	found := false
+	for _, d := range checked.Semantic.Diagnostics {
+		found = found || d.Code == "E1006"
+	}
+	if !found {
+		t.Fatalf("expected E1006, diagnostics=%+v unsupported=%+v", checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+	}
+}
+
+func TestResultBranchReviewReturnOnlyArmNative(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("Windows AMD64 MSVC")
+	}
+	for _, tc := range []struct{ name, result string }{
+		{"success", ".ok(Item { .number = 42 })"},
+		{"error", ".err(7)"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := t.TempDir()
+			writeTestSource(t, root, "fairy.toml", "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.result-return-native\"\nname = \"result-return-native\"\nversion = \"1.0.0\"\nlanguage = \""+sdkstdlib.LanguageRevision+"\"\nsource = \"src\"\n")
+			writeTestSource(t, root, "src/main.fy", `module main;
+resource Item { i32 number; cleanup {} }
+fn Result<Item, i32> make() { return `+tc.result+`; }
+fn i32 main() {
+ let Item owned = switch (make()) { case .ok(value): { value } case .err(_): { return 0; } };
+ assert(owned.number == 42);
+ return 0;
+}`)
+			for _, args := range [][]string{{"check"}, {"run", "--locked"}, {"run", "--release", "--locked"}} {
+				code, out, stderr := runForTest(args, root)
+				if code != ExitSuccess || stderr != "" {
+					t.Fatalf("%v: code=%d out=%q stderr=%q", args, code, out, stderr)
+				}
+			}
+		})
 	}
 }
 

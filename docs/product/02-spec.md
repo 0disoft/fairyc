@@ -331,7 +331,8 @@ not external effects. Full rules are in `docs/language/0008-effects-and-capabili
 - Result variants are constructed only as contextual `.ok(expression)` and `.err(expression)`
   where one `Result<T, E>` type is known.
 - A shallow Result switch contains exactly one `case .ok(binding): { ... }` and one
-  `case .err(binding): { ... }`; both cases produce one compatible type.
+  `case .err(binding): { ... }`; continuing cases produce one compatible type.
+  A case ending in a direct `return` without a tail does not contribute a value to the join.
 - Stage 0 constructs Option with contextual `.some(expression)` or bare `.none`. A shallow Option
   switch contains exactly one `case .some(binding): { ... }` and one bare
   `case .none: { ... }`; both cases produce one compatible type.

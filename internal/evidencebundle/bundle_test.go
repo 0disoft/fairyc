@@ -224,7 +224,7 @@ func newEvidenceFixtureMode(t *testing.T, generic, aggregate bool) evidenceFixtu
 uid = "test.evidence"
 name = "evidence"
 version = "1.0.0"
-language = "fairyc-language/17"
+language = "fairyc-language/18"
 source = "src"
 `)
 	source := `module main;

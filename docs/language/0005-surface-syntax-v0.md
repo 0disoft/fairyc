@@ -327,6 +327,9 @@ Every case owns a mandatory block, never falls through, and cannot target `break
 user-enum patterns use shallow named inert fields and exact exhaustiveness. Whole-value wildcards,
 nested destructuring, guards, or-patterns, slice patterns, and resource-field extraction are
 excluded; `_` may discard only a selected payload.
+In a Result switch, an arm block with no tail and a final direct `return` does not
+contribute a value to the join. Other arms still need matching value types when the switch
+produces a value. This does not add a source `never` type or change Option and user-enum arms.
 
 `if`, `while`, classic `for`, and `switch` require parenthesized headers, conditions, or scrutinees.
 In classic `for`, `continue` executes the post clause before the next condition and `break` skips

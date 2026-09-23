@@ -59,7 +59,9 @@ Stage 0 constructs Result variants with contextual leading-dot forms:
 These forms require one contextual `Result<T, E>` type and do not perform ordinary function
 lookup. A shallow switch uses exactly one `case .ok(binding)` and one
 `case .err(binding)`. The binding is local to its case, the scrutinee is evaluated once, and
-both cases have one compatible result type. Wildcard Result cases, guards, nested patterns, and
+both continuing cases have one compatible result type. A case block with no tail and a final
+direct `return` contributes no value to the join; its return value must still match the
+enclosing function's result type. This does not add a general `never` type. Wildcard Result cases, guards, nested patterns, and
 ref-style payload bindings are outside this slice.
 
 ## Propagation

@@ -836,8 +836,8 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.63`, language
-`fairyc-language/17`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.65`, language
+`fairyc-language/18`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
@@ -1437,5 +1437,7 @@ ADR 0399 advances the exact language pin from `fairyc-language/16` to `/17` and 
 ADR 0400 advances only the SDK to `0.0.0-stage0.63` for owner-bound mutable vector element access. The language remains `/17` and runtime ABI remains `/0`. Existing source remains valid; workspaces importing `std::vec` refresh their SDK lock digest.
 
 SDK `0.0.0-stage0.64` keeps the `Vec.at_mut` source contract and replaces its private C slot lookup with an SDK-only, typed element-address operation after the existing bounds check. The compiler verifies the operation and generated C guards null and offset overflow. Language `/17` and runtime ABI `/0` remain unchanged. Workspaces importing `std::vec` refresh their SDK lock digest.
+
+ADR 0402 advances the exact language pin to `/18` and SDK to `0.0.0-stage0.65` for a direct-return-only Result switch arm. Current manifests, starter output, and tests move together. The syntax and backend operations are unchanged; existing source remains valid after pin and lock refresh. Runtime ABI, MIR version, and public-interface schemas are unchanged.
 
 Language 1.0 compatibility, stable native ABI and mangling, stable MIR exchange, binary package ABI, stable `SymbolId`, stable anchors, exact diagnostic-span guarantees, stable debugger formats, and cross-version `.fymap` migration are not Stage 0 promises.
