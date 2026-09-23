@@ -38,8 +38,7 @@ fn void number(ref mut Window window, usize value) {
 @effects(console)
 fn void text(ref mut Window window, ref u8[] value) {
     number(window, value.len);
-    var usize index = 0;
-    while (index < value.len) { number(window, value[index] as usize); index += 1; }
+    for (let u8 byte in value) { number(window, byte as usize); }
 }
 
 // Each independent request scans the entire input and selects at most 4096

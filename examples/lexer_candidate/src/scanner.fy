@@ -304,8 +304,7 @@ pub fn i32 report_work(ref u8[] input, bool previous, usize max_bytes, usize max
             var usize byte_index = token.start;
             while (byte_index < token.end) { number(input[byte_index] as usize); byte_index += 1; }
         }
-        var usize n = 0;
-        while (n < numeric.len) { number(numeric[n] as usize); n += 1; }
+        for (let u8 byte in numeric) { number(byte as usize); }
         position = token.end;
         index += 1;
     }

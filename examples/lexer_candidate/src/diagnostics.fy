@@ -61,8 +61,7 @@ fn void number(usize value) {
 @effects(console)
 fn void text(ref u8[] value) {
     number(value.len);
-    var usize i = 0;
-    while (i < value.len) { number(value[i] as usize); i += 1; }
+    for (let u8 byte in value) { number(byte as usize); }
 }
 
 // Stable total-order selection needs no mutable vector view or copied resource.
