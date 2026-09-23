@@ -12,7 +12,7 @@ import (
 // namespace or stable SDK linkage. Descriptor validity remains the unsafe
 // caller's responsibility; the SDK candidate owns that caller.
 func validVectorRuntimeFunction(function mir.ForeignFunction, targetID target.ID) bool {
-	if targetID != target.X8664WindowsMSVC {
+	if targetID != target.X8664WindowsMSVC && targetID != target.X8664LinuxGNU {
 		return false
 	}
 	pointer := hir.RawPointer(hir.TypeVoid, true)

@@ -1,9 +1,15 @@
 package compiler_test
 
 import (
+	"context"
+	"errors"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -14,10 +20,59 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestPrivateVectorStorageGeneratedNative(t *testing.T) {
 	runPrivateVectorStorageNative(t, vectorStorageProgram, "")
+}
+
+func TestPrivateVectorStorageGeneratedLinuxNative(t *testing.T) {
+	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
+		t.Skip("private vector storage Linux proof requires linux/amd64")
+	}
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", vectorStorageProgram)
+	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
+	if err != nil || !result.Verified {
+		t.Fatalf("compile: %v phase=%s diagnostics=%+v unsupported=%+v", err,
+			result.Semantic.FailedPhase, result.Semantic.Diagnostics, result.Semantic.Unsupported)
+	}
+	unit, err := cbackend.Emit(result.MIR, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	storage, err := cstdlib.LinuxGNUVectorStorageSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	scalar, err := cruntime.ScalarSource(192)
+	if err != nil {
+		t.Fatal(err)
+	}
+	toolchain, err := cdriver.Resolve(target.X8664LinuxGNU, "gcc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.Build(toolchain, profile, unit.Source, scalar+vectorStorageAllocator+storage+vectorStorageProbe)
+			if err != nil {
+				t.Fatal(err)
+			}
+			path := filepath.Join(t.TempDir(), "vector-probe")
+			if err := os.WriteFile(path, artifact.Bytes, 0o700); err != nil {
+				t.Fatal(err)
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			command := exec.CommandContext(ctx, path)
+			output, err := command.CombinedOutput()
+			var exit *exec.ExitError
+			if !errors.As(err, &exit) || exit.ExitCode() != 42 || len(output) != 0 || ctx.Err() != nil {
+				t.Fatalf("native: %v output=%q", err, output)
+			}
+		})
+	}
 }
 
 func runPrivateVectorStorageNative(t *testing.T, program, probe string) {
@@ -162,8 +217,8 @@ static void vector_free(void *data) { if (data != NULL) { vector_live--; vector_
 `
 
 const vectorStorageProbe = `
-_Static_assert(sizeof(struct fy_private_vector_storage_v0) == 48, "Windows descriptor size");
-_Static_assert(offsetof(struct fy_private_vector_storage_v0, length) == 24, "Windows length offset");
+_Static_assert(sizeof(struct fy_private_vector_storage_v0) == 48, "x86_64 descriptor size");
+_Static_assert(offsetof(struct fy_private_vector_storage_v0, length) == 24, "x86_64 length offset");
 _Static_assert(sizeof(int32_t) == 4 && _Alignof(int32_t) == 4, "fixture i32 layout");
 uint32_t fairyc_fixture_vector_initialize(void *storage, size_t size, size_t alignment) {
     return fy_private_vector_initialize_v0(storage, size, alignment);

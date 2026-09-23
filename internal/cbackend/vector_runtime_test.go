@@ -23,33 +23,38 @@ func TestPrivateVectorRuntimeSymbolBoundary(t *testing.T) {
 @link_name("fy_private_vector_%s_v0") unsafe extern C fn %s operation(%s);
 fn i32 main() { let %s result = unsafe { operation(%s) }; return 42; }`, entry.name, entry.result, entry.parameters, entry.result, entry.arguments)
 			program := lowerSource(t, text)
-			if _, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile()); err == nil {
-				t.Fatal("ordinary backend admitted private vector symbol")
-			}
-			if _, err := cbackend.EmitStorageTransfers(program, "main::main", cbackend.Stage0WindowsMSVCProfile()); err != nil {
-				t.Fatal(err)
-			}
-			if _, err := cbackend.EmitStorageTransfers(program, "main::main", cbackend.Stage0Profile()); err == nil {
-				t.Fatal("unvalidated target admitted vector runtime")
-			}
 			wrong := strings.Replace(text, "fn "+entry.result+" operation", "fn i32 operation", 1)
 			wrong = strings.Replace(wrong, "let "+entry.result+" result", "let i32 result", 1)
-			if _, err := cbackend.EmitStorageTransfers(lowerSource(t, wrong), "main::main", cbackend.Stage0WindowsMSVCProfile()); err == nil {
-				t.Fatal("incorrect result ABI admitted")
-			}
+			wrongResult := lowerSource(t, wrong)
 			wrong = strings.ReplaceAll(text, "ptr mut void storage", "ptr void storage")
 			if wrong == text {
 				wrong = strings.ReplaceAll(text, "ptr void storage", "ptr mut void storage")
 			}
-			if _, err := cbackend.EmitStorageTransfers(lowerSource(t, wrong), "main::main", cbackend.Stage0WindowsMSVCProfile()); err == nil {
-				t.Fatal("incorrect parameter ABI admitted")
+			wrongParameter := lowerSource(t, wrong)
+			for _, profile := range []cbackend.Profile{cbackend.Stage0WindowsMSVCProfile(), cbackend.Stage0Profile()} {
+				t.Run(string(profile.Target), func(t *testing.T) {
+					if _, err := cbackend.Emit(program, "main::main", profile); err == nil {
+						t.Fatal("ordinary backend admitted private vector symbol")
+					}
+					if _, err := cbackend.EmitStorageTransfers(program, "main::main", profile); err != nil {
+						t.Fatal(err)
+					}
+					if _, err := cbackend.EmitStorageTransfers(wrongResult, "main::main", profile); err == nil {
+						t.Fatal("incorrect result ABI admitted")
+					}
+					if _, err := cbackend.EmitStorageTransfers(wrongParameter, "main::main", profile); err == nil {
+						t.Fatal("incorrect parameter ABI admitted")
+					}
+				})
 			}
 		})
 	}
 	program := lowerSource(t, `module main;
 @link_name("fy_private_vector_unknown_v0") unsafe extern C fn u32 operation(ptr mut void storage);
 fn i32 main() { let u32 status = unsafe { operation(null) }; return 42; }`)
-	if _, err := cbackend.EmitStorageTransfers(program, "main::main", cbackend.Stage0WindowsMSVCProfile()); err == nil {
-		t.Fatal("unknown vector symbol admitted")
+	for _, profile := range []cbackend.Profile{cbackend.Stage0WindowsMSVCProfile(), cbackend.Stage0Profile()} {
+		if _, err := cbackend.EmitStorageTransfers(program, "main::main", profile); err == nil {
+			t.Fatalf("%s admitted unknown vector symbol", profile.Target)
+		}
 	}
 }
