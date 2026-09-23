@@ -313,6 +313,7 @@ entry or backend capability failures use code `2`; toolchain, compile, link, PE/
 unexpected-output, and execution failures use code `6`; canonical traps use code `5`. Neither
 command emits partial success output. Workspace run consumes a compiler-private trap token, so all
 normal `i32` results remain distinct from code-5 traps.
+The experimental Linux `run-workspace` command uses an explicit GCC or Clang selection and retains no ELF. It writes `native workspace status: <0..255> (x86_64-linux-gnu, <compiler> <version>, <profile>, lock <state>)` on normal completion. Linux process status retains only the low eight bits of `main`'s `i32` return; this command does not claim the full Windows result contract. Its separate one-byte trap channel preserves the distinction between an ordinary status in the reserved range and a canonical trap. Program stdout or stderr is currently a code-6 unexpected-output failure. The same package, source, capability, build, and trap failure classes apply; stable Linux native commands are not admitted.
 `experimental exec-target` instead writes the program's captured stdout and stderr bytes to their
 matching streams without a compiler receipt, then returns the program's full 32-bit Windows process
 status. A nonzero status in this command is a program result, not automatically a compiler failure.

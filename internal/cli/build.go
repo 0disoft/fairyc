@@ -104,6 +104,14 @@ func combineWindowsRunSupportSource(standardLibrarySource string) (string, error
 	return combineStandardLibraryAndRuntime(standardLibrarySource, runtimeSource), nil
 }
 
+func combineLinuxRunSupportSource(standardLibrarySource string) (string, error) {
+	runtimeSource, err := cruntime.LinuxRunSource(productTrapExitBase)
+	if err != nil {
+		return "", err
+	}
+	return combineStandardLibraryAndRuntime(standardLibrarySource, runtimeSource), nil
+}
+
 func combineStandardLibraryAndRuntime(standardLibrarySource, runtimeSource string) string {
 	if standardLibrarySource == "" {
 		return runtimeSource

@@ -49,6 +49,13 @@ func TestParseWorkspaceTargetOptions(t *testing.T) {
 	if run.targetID != target.X8664WindowsMSVC || run.profile != cdriver.LowProfile || run.output != "" || run.locked {
 		t.Fatalf("run options = %+v", run)
 	}
+	linuxRun, err := parseWorkspaceTargetOptions("run-workspace", []string{
+		"--target", string(target.X8664LinuxGNU), "--cc", "gcc", "--profile", "optimized", "--locked",
+	}, false)
+	if err != nil || linuxRun.targetID != target.X8664LinuxGNU || linuxRun.compilerName != "gcc" ||
+		linuxRun.profile != cdriver.OptimizedProfile || !linuxRun.locked || linuxRun.output != "" {
+		t.Fatalf("Linux run options = %+v, %v", linuxRun, err)
+	}
 
 	for _, test := range []struct {
 		command       string
@@ -64,7 +71,8 @@ func TestParseWorkspaceTargetOptions(t *testing.T) {
 		{command: "build-workspace", arguments: []string{"--target", string(target.X8664LinuxGNU), "--cc", "gcc", "--profile", "low", "--output", "build/app.exe"}, requireOutput: true, contains: "Linux output must not end"},
 		{command: "build-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--cc", "gcc", "--profile", "low", "--output", "build/app.exe"}, requireOutput: true, contains: "does not accept --cc"},
 		{command: "run-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--profile", "low", "--output", "build/app.exe"}, contains: "does not accept"},
-		{command: "run-workspace", arguments: []string{"--target", string(target.X8664LinuxGNU), "--profile", "low"}, contains: "currently requires --target"},
+		{command: "run-workspace", arguments: []string{"--target", string(target.X8664LinuxGNU), "--profile", "low"}, contains: "requires --cc"},
+		{command: "run-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--cc", "gcc", "--profile", "low"}, contains: "does not accept --cc"},
 		{command: "run-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--profile", "fast"}, contains: "profile low"},
 		{command: "run-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--profile"}, contains: "requires a value"},
 		{command: "run-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--profile", "low", "--locked", "--locked"}, contains: "more than once"},

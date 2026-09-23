@@ -58,6 +58,7 @@ Usage:
   fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]
   fairyc experimental build-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> --output <build/path> [--locked]
   fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]
+  fairyc experimental run-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> [--locked]
   fairyc experimental emit-workspace-c --target <target-id> [--locked]
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <entry.fy> [--source <file.fy>]...

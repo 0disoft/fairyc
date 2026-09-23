@@ -10,7 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
-func compileLinuxWorkspace(sourceRoot string, options workspaceTargetOptions, stderr io.Writer) (cdriver.Artifact, string, int) {
+func compileLinuxWorkspace(sourceRoot string, options workspaceTargetOptions, runReceipt bool, stderr io.Writer) (cdriver.Artifact, string, int) {
 	if options.targetID != target.X8664LinuxGNU {
 		return cdriver.Artifact{}, "", invocationError(stderr, fmt.Sprintf("Linux workspace build requires %s", target.X8664LinuxGNU))
 	}
@@ -33,7 +33,11 @@ func compileLinuxWorkspace(sourceRoot string, options workspaceTargetOptions, st
 	if unit.Target != string(target.X8664LinuxGNU) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
 		return cdriver.Artifact{}, "", internalError(stderr)
 	}
-	support, err := linuxVectorSupportSource(unit.ForeignSymbols)
+	supportSource := linuxVectorSupportSource
+	if runReceipt {
+		supportSource = linuxVectorRunSupportSource
+	}
+	support, err := supportSource(unit.ForeignSymbols)
 	if err != nil {
 		return cdriver.Artifact{}, "", subsetCapabilityError(stderr, "Linux workspace support linkage", err)
 	}

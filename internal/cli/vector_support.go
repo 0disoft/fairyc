@@ -79,6 +79,14 @@ func windowsVectorSupportSource(symbols []string, runReceipt bool) (string, erro
 // linuxVectorSupportSource is a private Linux native candidate path. Stable
 // workspace build/run/test target admission remains separate.
 func linuxVectorSupportSource(symbols []string) (string, error) {
+	return linuxVectorSupportSourcePolicy(symbols, false)
+}
+
+func linuxVectorRunSupportSource(symbols []string) (string, error) {
+	return linuxVectorSupportSourcePolicy(symbols, true)
+}
+
+func linuxVectorSupportSourcePolicy(symbols []string, runReceipt bool) (string, error) {
 	standard, vector, err := splitVectorRuntimeSymbols(symbols)
 	if err != nil {
 		return "", err
@@ -103,6 +111,9 @@ func linuxVectorSupportSource(symbols []string) (string, error) {
 			return "", fmt.Errorf("private vector heap source boundary changed")
 		}
 		support += strings.TrimPrefix(storage, heap)
+	}
+	if runReceipt {
+		return combineLinuxRunSupportSource(support)
 	}
 	return combineProductSupportSource(support)
 }

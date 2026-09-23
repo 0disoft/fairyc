@@ -113,6 +113,7 @@ state into source truth.
 retains a package-aware Windows PE, while
 `fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]`
 compiles and executes the root package's exact `main::main` without retaining an artifact.
+On Linux amd64 glibc, `fairyc experimental build-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> --output <build/path> [--locked]` retains an ELF, while `fairyc experimental run-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> [--locked]` runs a temporary ELF. The run command reports the eight-bit process status, uses a private trap channel, and currently rejects program output.
 The compiler prototype also exposes
 `fairyc experimental target-spec <x86_64-linux-gnu|x86_64-windows-msvc>` for deterministic
 host-independent target inspection,
