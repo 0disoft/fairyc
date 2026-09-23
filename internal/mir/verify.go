@@ -81,6 +81,12 @@ func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []
 						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage borrow is unadmitted or malformed"})
 					}
 				}
+				if operation.Kind == OperationStorageElementAddress {
+					if !allowStorageTransfers || !validStorageElementAddressShape(operation, properties) ||
+						!validStorageTransferProvenance(&program.Functions[index], operation) {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage element address is unadmitted or malformed"})
+					}
+				}
 				if operation.Kind == OperationStorageTake {
 					if !allowStorageTransfers || !validStorageTakeShape(operation) || !storageQueryType(operation.Type, properties) ||
 						!validStorageTransferProvenance(&program.Functions[index], operation) {
@@ -538,6 +544,14 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStorageTake, OperationStorageBorrow, OperationStorageBorrowMut:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationStorageElementAddress:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if len(operation.Operands) != 2 ||
+					fieldStoreOperandType(operation.Operands[0], storeTypes) != hir.RawPointer(hir.TypeVoid, true) ||
+					fieldStoreOperandType(operation.Operands[1], storeTypes) != hir.TypeUSize {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "private storage element address operand types are invalid"})
+				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStoragePut:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)

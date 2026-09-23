@@ -7,7 +7,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 	needed := false
 	for _, block := range function.Blocks {
 		for _, op := range block.Operations {
-			needed = needed || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore
+			needed = needed || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress
 		}
 	}
 	if !needed {
@@ -53,7 +53,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 					OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,
 					OperationArrayLength, OperationArrayIndex, OperationViewLength, OperationViewEmpty,
 					OperationViewIndex, OperationViewSlice, OperationStorageLayout, OperationStorageTake,
-					OperationStorageBorrow, OperationStorageBorrowMut, OperationRegionPlace:
+					OperationStorageBorrow, OperationStorageBorrowMut, OperationStorageElementAddress, OperationRegionPlace:
 					typ = op.Type
 				}
 				changed = set(op.DestinationLocal, typ) || changed

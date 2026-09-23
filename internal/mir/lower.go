@@ -801,6 +801,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerStoragePut(expression)
 	case "storage-borrow", "storage-borrow-mut":
 		return l.lowerStorageBorrow(expression)
+	case "storage-element-address":
+		return l.lowerStorageElementAddress(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
 	case "field-borrow":

@@ -172,6 +172,26 @@ func TestPrivateVectorStorageBorrowSourceElementAddressPreparation(t *testing.T)
 	if err != nil || !strings.Contains(string(encoded), "storage-element-address") {
 		t.Fatalf("typed element address missing: %v %s", err, encoded)
 	}
+	program, err := mir.Lower(result.HIR)
+	if err != nil || len(mir.VerifyStorageTransfers(program)) != 0 {
+		t.Fatalf("private element address MIR: %v %+v", err, mir.VerifyStorageTransfers(program))
+	}
+	if len(mir.Verify(program)) == 0 || len(mir.VerifyStorageQueries(program)) == 0 {
+		t.Fatal("element address escaped private MIR admission")
+	}
+	addresses := 0
+	for _, function := range program.Functions {
+		for _, block := range function.Blocks {
+			for _, operation := range block.Operations {
+				if operation.Kind == mir.OperationStorageElementAddress {
+					addresses++
+				}
+			}
+		}
+	}
+	if addresses != 1 {
+		t.Fatalf("element address operations = %d, want one", addresses)
+	}
 	for _, invalid := range []string{
 		"storage_element_address<T>(owner.data)",
 		"storage_element_address<T>(owner.data, 0, 1)",
@@ -183,6 +203,47 @@ func TestPrivateVectorStorageBorrowSourceElementAddressPreparation(t *testing.T)
 			analysis, err := analyzeStorageBorrow(t, candidate)
 			if err == nil && len(analysis.Analysis.Semantic.Diagnostics) == 0 && len(analysis.Analysis.Semantic.Unsupported) == 0 {
 				t.Fatal("invalid private element address was admitted")
+			}
+		})
+	}
+}
+
+func TestPrivateVectorStorageBorrowSourceElementAddressMIRMutations(t *testing.T) {
+	text := strings.Replace(storageBorrowMutSource,
+		"storage_borrow_mut<T>(owner, owner.data)",
+		"storage_borrow_mut<T>(owner, storage_element_address<T>(owner.data, 0))", 1)
+	analysis, err := analyzeStorageBorrow(t, text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, mutate := range map[string]func(*mir.Operation){
+		"shared result":  func(op *mir.Operation) { op.Type = hir.RawPointer(hir.TypeVoid, false) },
+		"wrong element":  func(op *mir.Operation) { op.OwnerType = hir.TypeInvalid },
+		"wrong index":    func(op *mir.Operation) { op.IndexType = hir.TypeU32 },
+		"missing base":   func(op *mir.Operation) { op.Operands = op.Operands[1:] },
+		"aliased result": func(op *mir.Operation) { op.DestinationLocal = op.Operands[0].Local },
+		"forged scope":   func(op *mir.Operation) { op.UnsafeScope = hir.Span{} },
+		"forged origin":  func(op *mir.Operation) { op.Entity = "forged" },
+	} {
+		t.Run(name, func(t *testing.T) {
+			program, err := mir.Lower(analysis.Analysis.Semantic.HIR)
+			if err != nil {
+				t.Fatal(err)
+			}
+			changed := 0
+			for fi := range program.Functions {
+				for bi := range program.Functions[fi].Blocks {
+					for oi := range program.Functions[fi].Blocks[bi].Operations {
+						op := &program.Functions[fi].Blocks[bi].Operations[oi]
+						if op.Kind == mir.OperationStorageElementAddress {
+							mutate(op)
+							changed++
+						}
+					}
+				}
+			}
+			if changed != 1 || len(mir.VerifyStorageTransfers(program)) == 0 {
+				t.Fatalf("malformed element address admitted: changed=%d", changed)
 			}
 		})
 	}
