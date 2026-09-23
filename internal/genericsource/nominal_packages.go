@@ -43,7 +43,7 @@ func bindNominalContext(modules []*expander) error {
 	}
 	// Conservative private identity: every definition and exact import provider
 	// in this closed request participates. This is not a reusable public interface.
-	context := genericplan.DigestText("source-nominal-closed-graph-v0", string(encoded)).String()
+	context := genericplan.DigestChunks("source-nominal-closed-graph-v0", encoded).String()
 	for _, module := range modules {
 		module.nominalContext = context
 	}

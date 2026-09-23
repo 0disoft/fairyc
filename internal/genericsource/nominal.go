@@ -31,9 +31,9 @@ func (x *expander) collectNominalTypes(builder *genericplan.Builder) error {
 			continue
 		}
 		id := genericplan.TypeID("source_nominal_v0::" + string(x.owner) + "::" + x.module.Path + "::" + shape.Name)
-		definition := genericplan.DigestText("source-nominal-module-v0", string(encoded)+"\n"+shape.Name)
+		definition := genericplan.DigestChunks("source-nominal-module-v0", encoded, []byte("\n"), []byte(shape.Name))
 		if x.packageNominal {
-			definition = genericplan.DigestText("source-nominal-package-v0", x.nominalContext+"\n"+string(encoded)+"\n"+shape.Name)
+			definition = genericplan.DigestChunks("source-nominal-package-v0", []byte(x.nominalContext), []byte("\n"), encoded, []byte("\n"), []byte(shape.Name))
 		}
 		if err := builder.AddType(genericplan.TypeDescriptor{ID: id, Owner: x.owner, Definition: definition}); err != nil {
 			return err
