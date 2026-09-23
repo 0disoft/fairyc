@@ -1,0 +1,183 @@
+{
+  "changed_sha256": "a8251abc0888bae4da24bd43c8ac3a2ef746c2a6a44d1b295d66247989d6a4f5",
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "plain_sha256": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+  "samples": [
+    {
+      "repetition": 0,
+      "variant": "changed",
+      "workspace_lower_ns": 1059349200,
+      "c_emit_ns": 617153800,
+      "c_bytes": 1114970,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 0,
+      "variant": "plain",
+      "workspace_lower_ns": 1018490900,
+      "c_emit_ns": 539856400,
+      "c_bytes": 1114718,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 1,
+      "variant": "plain",
+      "workspace_lower_ns": 966811500,
+      "c_emit_ns": 520932500,
+      "c_bytes": 1114718,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 1,
+      "variant": "changed",
+      "workspace_lower_ns": 936170500,
+      "c_emit_ns": 531708100,
+      "c_bytes": 1114970,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 2,
+      "variant": "changed",
+      "workspace_lower_ns": 934509300,
+      "c_emit_ns": 539101200,
+      "c_bytes": 1114970,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 2,
+      "variant": "plain",
+      "workspace_lower_ns": 977883800,
+      "c_emit_ns": 516330200,
+      "c_bytes": 1114718,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 3,
+      "variant": "plain",
+      "workspace_lower_ns": 942058400,
+      "c_emit_ns": 525897100,
+      "c_bytes": 1114718,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 3,
+      "variant": "changed",
+      "workspace_lower_ns": 964338300,
+      "c_emit_ns": 537070300,
+      "c_bytes": 1114970,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 4,
+      "variant": "changed",
+      "workspace_lower_ns": 949515800,
+      "c_emit_ns": 533984200,
+      "c_bytes": 1114970,
+      "mir_functions": 407
+    },
+    {
+      "repetition": 4,
+      "variant": "plain",
+      "workspace_lower_ns": 952708400,
+      "c_emit_ns": 504607500,
+      "c_bytes": 1114718,
+      "mir_functions": 407
+    }
+  ],
+  "schema": "fairyc.result-return-adoption/v1",
+  "native_sizes": [
+    {
+      "Profile": "low",
+      "Variant": "plain",
+      "MSVC": "14.51.36231",
+      "EXE": 410624,
+      "PDB": 0,
+      "Objects": {
+        "runtime.obj": 21228,
+        "unit.obj": 362164
+      },
+      "ObjectText": {
+        "runtime.obj": 8442,
+        "unit.obj": 286078
+      },
+      "Sections": {
+        ".data": 5584,
+        ".fptable": 256,
+        ".pdata": 7500,
+        ".rdata": 44070,
+        ".reloc": 1620,
+        ".text": 351712
+      }
+    },
+    {
+      "Profile": "low",
+      "Variant": "changed",
+      "MSVC": "14.51.36231",
+      "EXE": 411136,
+      "PDB": 0,
+      "Objects": {
+        "runtime.obj": 21228,
+        "unit.obj": 362228
+      },
+      "ObjectText": {
+        "runtime.obj": 8442,
+        "unit.obj": 286142
+      },
+      "Sections": {
+        ".data": 5584,
+        ".fptable": 256,
+        ".pdata": 7500,
+        ".rdata": 44070,
+        ".reloc": 1620,
+        ".text": 351776
+      }
+    },
+    {
+      "Profile": "optimized",
+      "Variant": "plain",
+      "MSVC": "14.51.36231",
+      "EXE": 221696,
+      "PDB": 0,
+      "Objects": {
+        "runtime.obj": 33222,
+        "unit.obj": 274635
+      },
+      "ObjectText": {
+        "runtime.obj": 7205,
+        "unit.obj": 109349
+      },
+      "Sections": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 7200,
+        ".rdata": 44302,
+        ".reloc": 1620,
+        ".text": 162624
+      }
+    },
+    {
+      "Profile": "optimized",
+      "Variant": "changed",
+      "MSVC": "14.51.36231",
+      "EXE": 221696,
+      "PDB": 0,
+      "Objects": {
+        "runtime.obj": 33222,
+        "unit.obj": 274571
+      },
+      "ObjectText": {
+        "runtime.obj": 7205,
+        "unit.obj": 109285
+      },
+      "Sections": {
+        ".data": 5520,
+        ".fptable": 256,
+        ".pdata": 7200,
+        ".rdata": 44302,
+        ".reloc": 1620,
+        ".text": 162560
+      }
+    }
+  ]
+}

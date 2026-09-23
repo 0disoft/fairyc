@@ -24,7 +24,7 @@ Single evaluation moves `owned` exactly once. Copy failure returns `3` with no `
 
 ## Evidence
 
-[TestResultBranchReviewReturnOnlyArm](../../internal/cli/result_branch_review_test.go) confirms the current resource-initializer `.err` return form is rejected with `E1006`. `TestResultBranchReviewDiagnosticsNative` passed 4 scenarios x 2 MSVC profiles (8 executions): success status `0` alloc 2 free 2; copy-failure status `3` alloc 0 free 0 failures 1; push-failure status `3` alloc 1 free 1 failures 1; limits status `0` alloc 529 free 529. All live bytes and blocks `0`. Limits: 256 normal adds `0`; `add_limited` at count 256 limit 256 returns `5` leaving length 256; 257th normal code 1 returns `4`; code 10 at 257 returns `0` and at 258 returns `4`. No broader lexer or perf-benchmark tests were run for this narrow change; no perf claim.
+At this ADR's date, the resource-initializer `.err` return form was rejected with `E1006`. [ADR 0402](0402-result-return-only-match-arm.md) later admitted that exact direct-return arm; [TestResultBranchReviewReturnOnlyArm](../../internal/cli/result_branch_review_test.go) now verifies acceptance. `TestResultBranchReviewDiagnosticsNative` passed 4 scenarios x 2 MSVC profiles (8 executions): success status `0` alloc 2 free 2; copy-failure status `3` alloc 0 free 0 failures 1; push-failure status `3` alloc 1 free 1 failures 1; limits status `0` alloc 529 free 529. All live bytes and blocks `0`. Limits: 256 normal adds `0`; `add_limited` at count 256 limit 256 returns `5` leaving length 256; 257th normal code 1 returns `4`; code 10 at 257 returns `0` and at 258 returns `4`. No broader lexer or perf-benchmark tests were run for this narrow change; no perf claim.
 
 ## Scope
 

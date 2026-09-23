@@ -37,5 +37,10 @@ refresh. Runtime ABI, MIR version, and public-interface schemas are unchanged.
 `TestResultBranchReviewReturnOnlyArm` verifies resource-bearing binding and
 the complete verified compiler path. The void-arm negative case retains
 `E1006`. Windows low and optimized native runs cover the success and early
-return paths. ADR 0398's example-only deferral is superseded for this one
-Result arm shape; its broader `never` and `let-else` candidates remain deferred.
+return paths. The [lexer-candidate diagnostics](../../examples/lexer_candidate/src/diagnostics.fy)
+now use the form for both byte-copy and vector-push failures; the existing
+native failure and limit scenarios still pass. The [same-program comparison](../ops/result-return-adoption-20260924.md)
+records parser output, frontend timings, and low/optimized native sizes without
+claiming a C-relative runtime or whole-build budget result. ADR 0398's
+example-only deferral is superseded for this one Result arm shape; its broader
+`never` and `let-else` candidates remain deferred.
