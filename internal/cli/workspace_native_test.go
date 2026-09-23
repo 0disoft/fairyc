@@ -27,6 +27,19 @@ func TestParseWorkspaceTargetOptions(t *testing.T) {
 	if build.targetID != target.X8664WindowsMSVC || build.profile != cdriver.OptimizedProfile || build.output != "build/app.exe" || !build.locked {
 		t.Fatalf("build options = %+v", build)
 	}
+	linuxBuild, err := parseWorkspaceTargetOptions("build-workspace", []string{
+		"--output", "build/app", "--profile", "optimized", "--cc", "gcc", "--target", string(target.X8664LinuxGNU),
+	}, true)
+	if err != nil || linuxBuild.targetID != target.X8664LinuxGNU || linuxBuild.compilerName != "gcc" ||
+		linuxBuild.output != "build/app" || linuxBuild.profile != cdriver.OptimizedProfile {
+		t.Fatalf("Linux build options = %+v, %v", linuxBuild, err)
+	}
+	clangBuild, err := parseWorkspaceTargetOptions("build-workspace", []string{
+		"--target", string(target.X8664LinuxGNU), "--cc", "clang", "--profile", "low", "--output", "build/app",
+	}, true)
+	if err != nil || clangBuild.compilerName != "clang" {
+		t.Fatalf("Linux Clang build options = %+v, %v", clangBuild, err)
+	}
 	run, err := parseWorkspaceTargetOptions("run-workspace", []string{
 		"--target", string(target.X8664WindowsMSVC), "--profile", "low",
 	}, false)
@@ -46,6 +59,10 @@ func TestParseWorkspaceTargetOptions(t *testing.T) {
 		{command: "build-workspace", requireOutput: true, contains: "requires --target"},
 		{command: "build-workspace", arguments: []string{"main.fy"}, requireOutput: true, contains: "does not accept"},
 		{command: "build-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--profile", "low"}, requireOutput: true, contains: "requires --output"},
+		{command: "build-workspace", arguments: []string{"--target", string(target.X8664LinuxGNU), "--profile", "low", "--output", "build/app"}, requireOutput: true, contains: "requires --cc"},
+		{command: "build-workspace", arguments: []string{"--target", string(target.X8664LinuxGNU), "--cc", "msvc", "--profile", "low", "--output", "build/app"}, requireOutput: true, contains: "--cc gcc or --cc clang"},
+		{command: "build-workspace", arguments: []string{"--target", string(target.X8664LinuxGNU), "--cc", "gcc", "--profile", "low", "--output", "build/app.exe"}, requireOutput: true, contains: "Linux output must not end"},
+		{command: "build-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--cc", "gcc", "--profile", "low", "--output", "build/app.exe"}, requireOutput: true, contains: "does not accept --cc"},
 		{command: "run-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--profile", "low", "--output", "build/app.exe"}, contains: "does not accept"},
 		{command: "run-workspace", arguments: []string{"--target", string(target.X8664LinuxGNU), "--profile", "low"}, contains: "currently requires --target"},
 		{command: "run-workspace", arguments: []string{"--target", string(target.X8664WindowsMSVC), "--profile", "fast"}, contains: "profile low"},

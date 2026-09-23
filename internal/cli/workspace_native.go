@@ -17,10 +17,11 @@ import (
 )
 
 type workspaceTargetOptions struct {
-	targetID target.ID
-	profile  cdriver.Profile
-	output   string
-	locked   bool
+	targetID     target.ID
+	profile      cdriver.Profile
+	output       string
+	locked       bool
+	compilerName string
 }
 
 type stableNativeOptions struct {
@@ -174,6 +175,21 @@ func runWorkspaceBuild(arguments []string, sourceRoot string, stdout, stderr io.
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
+	if options.targetID == target.X8664LinuxGNU {
+		artifact, lockState, code := compileLinuxWorkspace(sourceRoot, options, stderr)
+		if code != ExitSuccess {
+			return code
+		}
+		if err := writeBuildArtifact(sourceRoot, options.output, artifact.Bytes); err != nil {
+			return buildFailure(stderr, err)
+		}
+		if _, err := fmt.Fprintf(stdout, "built workspace: %s (%s, %s %s, %s, lock %s)\n",
+			options.output, options.targetID, artifact.Toolchain.Name, artifact.Toolchain.Version,
+			artifact.Profile.Name, lockState); err != nil {
+			return outputError(stderr)
+		}
+		return ExitSuccess
+	}
 	compiled, code := compileWindowsWorkspace(sourceRoot, options, workspaceCompilePolicy{}, stderr)
 	if code != ExitSuccess {
 		return code
@@ -246,7 +262,7 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 			index++
 			continue
 		}
-		if flag != "--target" && flag != "--profile" && (!requireOutput || flag != "--output") {
+		if flag != "--target" && flag != "--profile" && !(requireOutput && (flag == "--output" || flag == "--cc")) {
 			return workspaceTargetOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
 		}
 		if seen[flag] {
@@ -259,10 +275,10 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 		value := arguments[index+1]
 		switch flag {
 		case "--target":
-			if target.ID(value) != target.X8664WindowsMSVC {
+			if target.ID(value) != target.X8664WindowsMSVC && !(command == "build-workspace" && target.ID(value) == target.X8664LinuxGNU) {
 				return workspaceTargetOptions{}, fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)
 			}
-			options.targetID = target.X8664WindowsMSVC
+			options.targetID = target.ID(value)
 		case "--profile":
 			switch value {
 			case cdriver.LowProfile.Name:
@@ -277,10 +293,12 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 			if err != nil {
 				return workspaceTargetOptions{}, err
 			}
-			if !strings.HasSuffix(strings.ToLower(normalized), ".exe") {
-				return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace Windows output must end with .exe")
-			}
 			options.output = normalized
+		case "--cc":
+			if value != "gcc" && value != "clang" {
+				return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace requires --cc gcc or --cc clang")
+			}
+			options.compilerName = value
 		}
 		index += 2
 	}
@@ -291,6 +309,21 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 	}
 	if requireOutput && !seen["--output"] {
 		return workspaceTargetOptions{}, fmt.Errorf("experimental command %q requires --output", command)
+	}
+	if options.targetID == target.X8664LinuxGNU {
+		if !seen["--cc"] {
+			return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace with Linux target requires --cc gcc or --cc clang")
+		}
+		if strings.HasSuffix(strings.ToLower(options.output), ".exe") {
+			return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace Linux output must not end with .exe")
+		}
+	} else if requireOutput {
+		if seen["--cc"] {
+			return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace Windows target does not accept --cc")
+		}
+		if !strings.HasSuffix(strings.ToLower(options.output), ".exe") {
+			return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace Windows output must end with .exe")
+		}
 	}
 	return options, nil
 }

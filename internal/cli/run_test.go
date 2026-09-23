@@ -1060,6 +1060,7 @@ func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 		"Explicit --capture-output requires", "fairyc experimental emit-workspace-c --target <target-id> [--locked]", "fairyc explain",
 		"experimental parse", "experimental check <primary.fy>", "experimental check-workspace",
 		"experimental check-workspace-session", "experimental build-workspace", "experimental run-workspace",
+		"experimental build-workspace --target x86_64-linux-gnu --cc <gcc|clang>",
 		"experimental target-spec", "experimental emit-c", "experimental build", "experimental build-target",
 		"experimental run-target", "experimental exec-target", "experimental build-host", "experimental run-host",
 	}

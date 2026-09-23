@@ -56,6 +56,7 @@ Usage:
   fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]
   fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]
   fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]
+  fairyc experimental build-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> --output <build/path> [--locked]
   fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]
   fairyc experimental emit-workspace-c --target <target-id> [--locked]
   fairyc experimental target-spec <target-id>

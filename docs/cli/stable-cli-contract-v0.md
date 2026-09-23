@@ -64,6 +64,8 @@ Stable `build` and `run`, and `test --native`, currently admit only `x86_64-wind
 
 Experimental Linux C/native commands do not promote Linux to the stable native-command floor. Linux target promotion remains a separate target issue.
 
+The experimental `build-workspace --target x86_64-linux-gnu` path requires an explicit `--cc gcc` or `--cc clang`, a Linux amd64 glibc host, and an output under `build/`. It links SDK-owned vectors through the private Linux storage transport; this does not change stable `build`, `run`, or native `test` target admission.
+
 ## Compatibility rule
 
 Language /14 admits explicit scalar generic functions in stable workspace check/build/run/test
