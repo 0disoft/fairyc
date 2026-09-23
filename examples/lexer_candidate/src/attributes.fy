@@ -42,14 +42,14 @@ fn bool read(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<A
                 if (kind == 0) { cursor.expected = 15; return false; }
                 if (kind == 1) { if (!path(stream,cursor)) { return false; } } else { advance(stream,cursor); }
                 let Argument value = Argument { .kind, .start = info.start, .end = cursor.end, .token };
-                if (!switch(v::push<Argument>(arguments,value)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return false; }
+                if (!v::push<Argument>(arguments,value).is_ok) { cursor.status = 3; return false; }
                 cursor.arguments = cursor.arguments + 1;
                 if (!take(stream,cursor,b",")) { break; }
             }
             if (!take(stream,cursor,b")")) { cursor.expected = 5; return false; }
         }
         let Attribute value = Attribute { .start, .end = cursor.end, .name_start, .name_end, .argument_start, .argument_count = cursor.arguments - argument_start };
-        if (!switch(v::push<Attribute>(attributes,value)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return false; }
+        if (!v::push<Attribute>(attributes,value).is_ok) { cursor.status = 3; return false; }
         cursor.count = cursor.count + 1;
     }
     return true;
