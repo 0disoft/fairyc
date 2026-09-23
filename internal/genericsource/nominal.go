@@ -18,9 +18,14 @@ func (x *expander) collectNominalTypes(builder *genericplan.Builder) error {
 	// This private lane conservatively binds all local definitions and helper
 	// bodies, including transitive field/cleanup dependencies, to the module AST.
 	// It is not a minimal public-interface or cache identity algorithm.
-	encoded, err := json.Marshal(x.module)
-	if err != nil {
-		return err
+	encoded := x.nominalModuleJSON
+	if encoded == nil {
+		var err error
+		encoded, err = json.Marshal(x.module)
+		if err != nil {
+			return err
+		}
+		x.nominalModuleJSON = encoded
 	}
 	x.nominalTypes = map[string]genericplan.TypeID{}
 	x.nominalNames = map[genericplan.TypeID]string{}

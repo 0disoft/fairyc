@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"slices"
 
-	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
 )
 
@@ -20,22 +19,28 @@ type NominalBinding struct {
 func bindNominalContext(modules []*expander) error {
 	type entry struct {
 		Owner   genericplan.PackageID
-		Module  *ast.Module
+		Module  json.RawMessage
 		Imports map[string]genericplan.PackageID
+		path    string
 	}
 	entries := make([]entry, 0, len(modules))
 	for _, module := range modules {
+		encoded, err := json.Marshal(module.module)
+		if err != nil {
+			return err
+		}
+		module.nominalModuleJSON = encoded
 		imports := make(map[string]genericplan.PackageID, len(module.imports))
 		for alias, provider := range module.imports {
 			imports[alias] = provider.owner
 		}
-		entries = append(entries, entry{module.owner, module.module, imports})
+		entries = append(entries, entry{Owner: module.owner, Module: json.RawMessage(encoded), Imports: imports, path: module.module.Path})
 	}
 	slices.SortFunc(entries, func(a, b entry) int {
 		if order := cmp.Compare(a.Owner, b.Owner); order != 0 {
 			return order
 		}
-		return cmp.Compare(a.Module.Path, b.Module.Path)
+		return cmp.Compare(a.path, b.path)
 	})
 	encoded, err := json.Marshal(entries)
 	if err != nil {
