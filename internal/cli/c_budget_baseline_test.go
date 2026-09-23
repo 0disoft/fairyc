@@ -46,6 +46,10 @@ func TestCBudgetBaseline(t *testing.T) {
 	workloads := []string{"checksum", "classifier"}
 	if os.Getenv("FAIRYC_C_BUDGET_RESULT_RETURN_ONLY") == "1" {
 		workloads = []string{"result_return"}
+	} else if os.Getenv("FAIRYC_C_BUDGET_BYTE_VIEW_ONLY") == "1" {
+		workloads = []string{"byte_view"}
+	} else if os.Getenv("FAIRYC_C_BUDGET_BYTE_INDEX_ONLY") == "1" {
+		workloads = []string{"byte_index"}
 	} else if os.Getenv("FAIRYC_C_BUDGET_DEREF_ONLY") == "1" {
 		workloads = []string{"deref"}
 	} else if os.Getenv("FAIRYC_C_BUDGET_VECTOR_ONLY") == "1" {
@@ -59,12 +63,23 @@ func TestCBudgetBaseline(t *testing.T) {
 	}
 	oneTU := os.Getenv("FAIRYC_C_BUDGET_ONE_TU") == "1"
 	measurePhases := os.Getenv("FAIRYC_C_BUDGET_PHASES") == "1"
+	profile := cdriver.OptimizedProfile
+	if os.Getenv("FAIRYC_C_BUDGET_LOW_PROFILE") == "1" {
+		profile = cdriver.LowProfile
+	}
+	flags := []string{"/std:c11", "/TC", "/W4", "/WX", "/MT", "/O2", "/INCREMENTAL:NO"}
+	if profile == cdriver.LowProfile {
+		flags[5] = "/Od"
+	}
 	if oneTU && (len(workloads) != 1 || workloads[0] != "vector_slot") {
 		t.Fatal("one-translation-unit diagnostic requires vector_slot only")
 	}
+	if oneTU && profile == cdriver.LowProfile {
+		t.Fatal("one-translation-unit diagnostic requires optimized profile")
+	}
 	fixtureNames := []string{"support.c"}
 	for _, workload := range workloads {
-		fixtureNames = append(fixtureNames, workload+".fy", workload+".c")
+		fixtureNames = append(fixtureNames, workload+".fy", cBudgetCSource(workload))
 	}
 	hashes := map[string]string{}
 	for _, name := range fixtureNames {
@@ -94,7 +109,7 @@ func TestCBudgetBaseline(t *testing.T) {
 					phaseNS = make(map[string]int64, 5)
 				}
 				if lane == "c" {
-					unit = read(workload + ".c")
+					unit = read(cBudgetCSource(workload))
 					if measurePhases {
 						phaseNS["load_ns"] = time.Since(start).Nanoseconds()
 					}
@@ -163,7 +178,7 @@ func TestCBudgetBaseline(t *testing.T) {
 				if oneTU && lane == "fairy" {
 					artifact, err = cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile, support+"\n"+unit)
 				} else {
-					artifact, err = cdriver.BuildWindowsMSVCTarget(toolchain, cdriver.OptimizedProfile, unit, support)
+					artifact, err = cdriver.BuildWindowsMSVCTarget(toolchain, profile, unit, support)
 				}
 				if err != nil {
 					t.Fatal(err)
@@ -209,8 +224,8 @@ func TestCBudgetBaseline(t *testing.T) {
 			}
 		}
 	}
-	report := map[string]any{"schema": "fairyc.c-budget-baseline/v1", "compiler_source": os.Getenv("FAIRYC_C_BUDGET_SOURCE"), "go": runtime.Version(), "msvc": toolchain.Version, "gomaxprocs": runtime.GOMAXPROCS(0), "flags": []string{"/std:c11", "/TC", "/W4", "/WX", "/MT", "/O2", "/INCREMENTAL:NO"}, "profile": "optimized", "one_translation_unit": oneTU, "source_sha256": hashes, "boundary_cases": boundary, "boundary_checks": len(workloads) * len(boundary) * 2, "seed": 12345, "rounds": 50000000, "samples": samples,
-		"method": fmt.Sprintf("Independently authored scalar kernels; optional deref pair compares mutable scalar references with C pointer writes; optional vector_slot pair compares checked one-element Vec<u32>.at_mut with a checked C vector slot; optional result_return pair compares one direct-return Result arm with an equivalent C branch. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. %d alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", repetitions), "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
+	report := map[string]any{"schema": "fairyc.c-budget-baseline/v1", "compiler_source": os.Getenv("FAIRYC_C_BUDGET_SOURCE"), "go": runtime.Version(), "msvc": toolchain.Version, "gomaxprocs": runtime.GOMAXPROCS(0), "flags": flags, "profile": profile.Name, "one_translation_unit": oneTU, "source_sha256": hashes, "boundary_cases": boundary, "boundary_checks": len(workloads) * len(boundary) * 2, "seed": 12345, "rounds": 50000000, "samples": samples,
+		"method": fmt.Sprintf("Independently authored scalar kernels; optional deref, vector_slot, result_return and byte-loop pairs each compare the same algorithm with C. Byte_view and byte_index share one independent C loop and differ only in the Fairy inner-loop spelling. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. %d alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", repetitions), "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
 	if measurePhases {
 		report["phase_method"] = "Opt-in wall-clock subdivisions: load includes support-file read and workspace load or C source read; check covers the verified workspace compile; emit_support covers authority check, C emission and support assembly; msvc_build covers C compile, link and artifact read; exe_write covers final file write. Phases exclude harness startup, workspace setup, warm toolchain discovery and program execution."
 	}
@@ -252,7 +267,11 @@ func cBudgetReference(workload string, seed, rounds uint32) uint32 {
 		value = 0
 	}
 	for i := uint32(0); i < rounds; i++ {
-		if workload == "checksum" || workload == "deref" || workload == "vector_slot" {
+		if workload == "byte_view" || workload == "byte_index" {
+			for _, b := range [...]uint32{7, 11, 13, 17} {
+				value = (value*33 + b + i%251) % 65521
+			}
+		} else if workload == "checksum" || workload == "deref" || workload == "vector_slot" {
 			value = (value*33 + i%251) % 65521
 		} else if workload == "result_return" {
 			byteValue := (i + seed) % 128
@@ -275,6 +294,13 @@ func cBudgetReference(workload string, seed, rounds uint32) uint32 {
 		}
 	}
 	return value
+}
+
+func cBudgetCSource(workload string) string {
+	if workload == "byte_view" || workload == "byte_index" {
+		return "byte_loop.c"
+	}
+	return workload + ".c"
 }
 
 // Inspection is outside timed builds and only requested by the bounded runner.

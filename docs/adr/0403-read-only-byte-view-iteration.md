@@ -1,6 +1,6 @@
 # ADR 0403: Read-only byte-view iteration
 
-- Status: Implementation candidate; C-relative cost gate pending
+- Status: Implementation candidate; low-profile C-relative runtime gate failing
 - Date: 2026-09-24
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
 - Reopens only the byte-view part of [ADR 0224](0224-defer-unproven-surface-shorthands.md)
@@ -68,10 +68,14 @@ compiler publishes verified MIR, and interpreter tests cover empty, ordered,
 empty iteration and `continue`/`break`. The backend omits unreachable MIR blocks
 when emitting C, avoiding unreferenced labels after an early return.
 
-The remaining release evidence includes each of the three real caller shapes,
-early exits, nested loops and cleanup. Negative fixtures cover wrong or mutable
-iterable types, effectful expressions, binding escape and owner mutation while
-iterating. The C-relative cost comparison below is still pending.
+The remaining release evidence includes early exits, nested loops and cleanup
+in the real workload. Negative fixtures cover wrong or mutable iterable types,
+effectful expressions, binding escape and owner mutation while iterating.
+The [paired C comparison](../ops/evidence/byte-view-c-budget-20260924.md)
+measured the new form, the equivalent explicit-index Fairy form and independent
+C in both MSVC profiles. Optimized runtime and EXE size are within the 8% limit
+for this microkernel; low-profile runtime is about 21% above C, similar to the
+existing explicit-index form, so the cumulative gate remains open.
 The Fairy-written parser candidate now retains this form as statement kind 18
 and validates its node references. Its expression arena bound grows from 4096
 to 4160 nodes to parse its own updated source without changing the separate
