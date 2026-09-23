@@ -16,7 +16,7 @@ func TestWindowsVectorMutableElement(t *testing.T) {
 uid = "test.cli.vector-mutable"
 name = "vector-mutable"
 version = "1.0.0"
-language = "fairyc-language/18"
+language = "fairyc-language/19"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", vectorMutableSource)

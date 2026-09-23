@@ -6,13 +6,14 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/mir"
+	"github.com/0disoft/fairyc/internal/semantic"
 )
 
-func TestByteViewForPreparesVerifiedMIRButFailsClosed(t *testing.T) {
+func TestByteViewForLowersToVerifiedMIR(t *testing.T) {
 	result := analyzeText(t, map[string]string{
 		"main.fy": "module main; fn void show(ref u8[] view) { for (let u8 byte in view) { if (byte == 7) { continue; } break; } }",
 	})
-	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "byte-view iteration awaits semantic and MIR lowering" {
+	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 || result.CompletedThrough != semantic.PhaseFlow {
 		t.Fatalf("diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
 	}
 	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 1 {
@@ -71,11 +72,11 @@ func TestByteViewForRejectsNonAdmittedSourceShapes(t *testing.T) {
 	}
 }
 
-func TestByteViewForAcceptsImmutableLocalForPreparedAnalysis(t *testing.T) {
+func TestByteViewForAcceptsImmutableLocal(t *testing.T) {
 	result := analyzeText(t, map[string]string{
 		"main.fy": "module main; fn void show(ref u8[] view) { let ref u8[] local = view; for (let u8 byte in local) { assert(byte == 7); } }",
 	})
-	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "byte-view iteration awaits semantic and MIR lowering" {
+	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 || result.CompletedThrough != semantic.PhaseFlow {
 		t.Fatalf("diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
 	}
 }
@@ -89,7 +90,7 @@ func TestByteViewForBindingCannotEscapeLoop(t *testing.T) {
 	}
 }
 
-func TestByteViewForPreparedMIRExecutesWithoutPublicAdmission(t *testing.T) {
+func TestByteViewForExecutesVerifiedMIR(t *testing.T) {
 	for _, sample := range []struct {
 		name string
 		view string
@@ -103,7 +104,7 @@ func TestByteViewForPreparedMIRExecutesWithoutPublicAdmission(t *testing.T) {
 		t.Run(sample.name, func(t *testing.T) {
 			text := "module main; fn i32 main() { let ref u8[] view = " + sample.view + "; var i32 total = 0; " + sample.loop + " return total; }"
 			result := analyzeText(t, map[string]string{"main.fy": text})
-			if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "byte-view iteration awaits semantic and MIR lowering" {
+			if len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 || result.CompletedThrough != semantic.PhaseFlow {
 				t.Fatalf("public boundary: diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
 			}
 			program, err := mir.Lower(result.HIR)

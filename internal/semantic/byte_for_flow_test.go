@@ -7,9 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// The public pipeline still rejects byte-for before Flow. Exercise its prepared
-// scalar loop directly so admission cannot silently bypass owner liveness.
-func TestByteForPreparedFlowRetainsOwnerBorrowThroughLoop(t *testing.T) {
+func TestByteForFlowRetainsOwnerBorrowThroughLoop(t *testing.T) {
 	for _, sample := range []struct {
 		name string
 		body string
@@ -24,21 +22,18 @@ func TestByteForPreparedFlowRetainsOwnerBorrowThroughLoop(t *testing.T) {
 			if err != nil || parsed.AST == nil {
 				t.Fatalf("parse: %v", err)
 			}
-			a := newAnalyzer([]File{{Path: "main.fy", Module: parsed.AST}}, nil)
-			a.resolve()
-			a.typeCheck()
-			if len(a.diagnostics) != 0 || len(a.unsupported) != 1 || a.unsupported[0].Feature != "byte-view iteration awaits semantic and MIR lowering" {
-				t.Fatalf("prepared typecheck: diagnostics = %+v, unsupported = %+v", a.diagnostics, a.unsupported)
+			result := Analyze([]File{{Path: "main.fy", Module: parsed.AST}})
+			if len(result.Unsupported) != 0 {
+				t.Fatalf("unsupported: %+v", result.Unsupported)
 			}
-			a.flowCheck()
 			if sample.want == "" {
-				if len(a.diagnostics) != 0 {
-					t.Fatalf("after-loop mutation: %+v", a.diagnostics)
+				if len(result.Diagnostics) != 0 || result.CompletedThrough != PhaseFlow {
+					t.Fatalf("after-loop mutation: %+v", result.Diagnostics)
 				}
 				return
 			}
-			if len(a.diagnostics) != 1 || a.diagnostics[0].Code != sample.want {
-				t.Fatalf("in-loop mutation: %+v", a.diagnostics)
+			if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != sample.want || result.FailedPhase != PhaseFlow {
+				t.Fatalf("in-loop mutation: %+v", result.Diagnostics)
 			}
 		})
 	}

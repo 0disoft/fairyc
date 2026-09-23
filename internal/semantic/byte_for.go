@@ -19,7 +19,21 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if prepared == nil || loop.View.Kind != syntax.KindPath || len(loop.View.Children) != 0 {
 		return "byte-view iteration requires a named immutable ref u8[] view"
 	}
-	value := c.analyzer.resolved[loop.View]
+	if prepared.Kind != syntax.KindBlock || prepared.Block == nil || len(prepared.Block.Statements) != 2 {
+		return "malformed byte-view iteration"
+	}
+	bound := prepared.Block.Statements[0].Binding
+	if bound == nil || bound.Expression == nil || bound.Expression.Kind != syntax.KindFieldExpr ||
+		bound.Expression.Text != "len" || len(bound.Expression.Children) != 1 {
+		return "malformed byte-view iteration"
+	}
+	view := bound.Expression.Children[0]
+	if view == nil || view.Kind != syntax.KindPath || view.Text != loop.View.Text || view.Span != loop.View.Span {
+		return "malformed byte-view iteration"
+	}
+	// AST cloning may detach the source node from the prepared bound expression.
+	// Resolve the actual checked path instead of relying on shared pointers.
+	value := c.analyzer.resolved[view]
 	if value == nil || value.kind != "local" && value.kind != "parameter" || value.mutable || value.typ != hir.SharedBorrow(hir.TypeByteSlice) {
 		return "byte-view iteration requires a named immutable ref u8[] view"
 	}

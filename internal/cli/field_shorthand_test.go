@@ -16,7 +16,7 @@ func TestFieldShorthandStableNative(t *testing.T) {
 uid = "test.cli.shorthand"
 name = "shorthand"
 version = "1.0.0"
-language = "fairyc-language/18"
+language = "fairyc-language/19"
 source = "src"
 `
 	writeTestSource(t, root, "fairy.toml", manifest)

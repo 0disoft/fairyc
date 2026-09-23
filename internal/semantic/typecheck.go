@@ -493,7 +493,6 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			} else {
 				hirStatement.Expression, _ = c.checkExpression(statement.Expression, hir.TypeVoid)
 				hirStatement.Kind = string(syntax.KindExprStmt)
-				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "byte-view iteration awaits semantic and MIR lowering")
 			}
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
 			if c.loopDepth == 0 {

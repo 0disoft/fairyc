@@ -45,6 +45,10 @@
   one pure boolean condition, and one direct scalar assignment. The post and direct-assignment
   initializer may use ordinary `=` or an admitted compound assignment. Calls, borrows, indexing, blocks,
   propagation, resource movement, `++`, `--`, and comma expressions are not header forms.
+- Language 19 also permits `for (let u8 byte in view) { ... }` when `view` is a named
+  immutable local or parameter of exact type `ref u8[]`. The view length is
+  captured once; every iteration copies one checked byte. `continue` advances
+  the hidden index, and exits use ordinary scalar-loop cleanup (ADR 0403).
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

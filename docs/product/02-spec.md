@@ -85,8 +85,8 @@ compile-time source rewrites remain forbidden.
 
 Classic scalar `for` and bounded lexical `defer` are the separate decisions in ADR 0213 and ADR
 0217. ADR 0224 deferred range `for`, checked narrowing conversions, and expression-bodied function
-shorthand after an earlier source audit. ADR 0403 later accepted only read-only `ref u8[]` iteration;
-its parser shape is staged but semantic analysis still rejects execution. Provider-qualified package imports,
+shorthand after an earlier source audit. ADR 0403 later admitted only read-only `ref u8[]` iteration;
+Flow, verified MIR and Windows native checks pass, while its C-relative cost gate remains pending. Provider-qualified package imports,
 generic iterators, and formatter behavior retain separate follow-up gates.
 
 ADR 0218 owns the admission boundary for concepts borrowed from modern C++, Java after 17, Go, and

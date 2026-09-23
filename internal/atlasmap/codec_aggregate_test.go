@@ -206,7 +206,7 @@ fn Token<T> make<T>(T value) { return Token<T> { .payload = Cell<T> { .value = v
 	} else {
 		text += `fn i32 main() { return 0; }`
 	}
-	manifest := "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.atlas.aggregate\"\nname = \"aggregate\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/18\"\nsource = \"src\"\n"
+	manifest := "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.atlas.aggregate\"\nname = \"aggregate\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/19\"\nsource = \"src\"\n"
 	for path, contents := range map[string]string{"fairy.toml": manifest, "src/main.fy": text} {
 		if err := os.WriteFile(filepath.Join(root, path), []byte(contents), 0600); err != nil {
 			t.Fatal(err)

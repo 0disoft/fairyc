@@ -4,6 +4,6 @@ schema = "fairyc.package/v1"
 uid = "example.contract-state-declaration"
 name = "contract-state-declaration"
 version = "0.1.0"
-language = "fairyc-language/18"
+language = "fairyc-language/19"
 source = "src"
 features = []

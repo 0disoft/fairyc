@@ -1,6 +1,6 @@
 # ADR 0403: Read-only byte-view iteration
 
-- Status: Accepted design; parser staged, implementation pending
+- Status: Implementation candidate; C-relative cost gate pending
 - Date: 2026-09-24
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
 - Reopens only the byte-view part of [ADR 0224](0224-defer-unproven-surface-shorthands.md)
@@ -17,7 +17,7 @@ for demand across unrelated applications. A library cannot express their common
 loop body without a callback or collection-wide operation, neither of which is
 part of the current language. The old one-loop audit in ADR 0224 is historical.
 
-Accept one source form, pending implementation and its evidence:
+Admit one source form, subject to the release evidence below:
 
 ```fy
 for (let u8 byte in view) {
@@ -50,7 +50,7 @@ index increment is representable even when `len == SIZE_MAX`: the largest
 executed index is `SIZE_MAX - 1`. Checked element access remains in safe mode
 unless a later optimization proves it redundant without changing trap behavior.
 
-The intended lowering reuses existing scalar-loop control flow, cleanup and
+The lowering reuses existing scalar-loop control flow, cleanup and
 verified MIR. No runtime iterator, allocation, vtable, metadata, public ABI or
 specialized function is admitted. Source spans and the byte binding must remain
 available to diagnostics and formatting; implementation cannot silently rewrite
@@ -59,18 +59,22 @@ the user's source file.
 ## Implementation and release gate
 
 The grammar and lossless parser retain this form, and AST lowering preserves
-its name, type, view and body. It also prepares a hidden length snapshot and
-scalar `for` path for typed analysis without rewriting the source. Current
-semantic analysis validates the exact `u8` item and named immutable `ref u8[]`
-local or parameter, rejecting other shapes, but still rejects execution explicitly.
-The prepared HIR lowers to verified MIR and direct interpreter tests cover
-empty, ordered, `continue` and `break` cases. A separate direct Flow test checks
-owner mutation during and after the loop. The public pipeline still skips Flow
-and rejects execution; there is no language revision change yet. The remaining
-implementation must admit public Flow, fixtures and native C paths. Positive
-fixtures cover empty and non-empty views, each of the three real caller shapes,
-early exits, nested loops, and cleanup. Negative fixtures cover wrong or mutable iterable types,
-effectful expressions, binding escape, and owner mutation while iterating.
+its name, type, view and body. It prepares a hidden length snapshot and scalar
+`for` path without rewriting the source. Semantic analysis admits only the exact
+`u8` item and named immutable `ref u8[]` local or parameter. Public Flow rejects
+owner mutation during iteration and permits it after the loop. The ordinary
+compiler publishes verified MIR, and interpreter tests cover empty, ordered,
+`continue` and `break` cases. Windows MSVC low and optimized native tests cover
+empty iteration and `continue`/`break`. The backend omits unreachable MIR blocks
+when emitting C, avoiding unreferenced labels after an early return.
+
+The remaining release evidence includes each of the three real caller shapes,
+early exits, nested loops and cleanup. Negative fixtures cover wrong or mutable
+iterable types, effectful expressions, binding escape and owner mutation while
+iterating. The C-relative cost comparison below is still pending.
+The Fairy-written parser candidate does not yet recognize this new form, so
+its three workload loops retain their explicit-index spelling until that parser
+can parse its own updated source.
 Compare the same algorithm in explicit-index Fairy, the new form, and
 independent C at low and optimized profiles. Check generated functions,
 runtime and EXE size, build/check time, and unused-syntax overhead; the
@@ -78,9 +82,9 @@ cumulative runtime and EXE limit is 8% relative to equivalent C, while build
 8% is an observation marker. A syntax-only or interpreter-only change does
 not complete this decision.
 
-The implemented cutover needs a new exact language revision and synchronized
-current manifests, SDK requirement, locks and examples. This design record
-alone changes no language pin, SDK or compiler version, generated C, runtime
-ABI, CLI behavior or target maturity. ADR 0224 still defers checked narrowing
+The source cutover advances `fairyc-language/18` to `/19` and SDK
+`0.0.0-stage0.65` to `0.0.0-stage0.66`, synchronizing current manifests,
+scaffolds, tests and examples. Runtime ABI, MIR version, public-interface
+schemas and target maturity do not change. ADR 0224 still defers checked narrowing
 and expression-bodied functions; named loops and nominal scalars have separate
 decisions.

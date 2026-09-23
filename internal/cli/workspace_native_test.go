@@ -235,7 +235,7 @@ func TestStableNativeCommandsPreserveWorkspaceFailureCategories(t *testing.T) {
 uid = "example.stable-build.invalid"
 name = "invalid"
 version = "1.0.0"
-language = "fairyc-language/18"
+language = "fairyc-language/19"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nfn i32 broken( { return 0; }\n")
@@ -524,7 +524,7 @@ func writeNativeWorkspace(t *testing.T, root string, withEntry bool) {
 uid = "example.native.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/18"
+language = "fairyc-language/19"
 source = "src"
 [workspace]
 members = ["libs/answer"]
@@ -543,7 +543,7 @@ features = []
 uid = "example.native.answer"
 name = "answer"
 version = "1.0.0"
-language = "fairyc-language/18"
+language = "fairyc-language/19"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", "module answer;\n\npub fn i32 value() { return 42; }\n")

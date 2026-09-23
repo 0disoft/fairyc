@@ -3153,8 +3153,12 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	fmt.Fprintf(output, "    goto fy_b_%d;\n", function.Entry)
 	blocks := slices.Clone(function.Blocks)
 	slices.SortFunc(blocks, func(left, right mir.Block) int { return int(left.ID - right.ID) })
+	reachable := reachableBlocksForC(*function)
 	for blockIndex := range blocks {
 		block := &blocks[blockIndex]
+		if !reachable[int(block.ID)] {
+			continue
+		}
 		fmt.Fprintf(output, "fy_b_%d:\n", block.ID)
 		for operationIndex := range block.Operations {
 			if err := e.emitOperation(output, functionIndex, block.Operations[operationIndex]); err != nil {

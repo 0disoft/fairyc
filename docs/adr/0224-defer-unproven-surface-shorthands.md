@@ -58,7 +58,7 @@ remain unchanged.
 The Fairy-written lexer candidate now contains three independent full-byte
 loops in `diagnostics.fy`, `pages.fy`, and `scanner.fy`. [ADR 0403](0403-read-only-byte-view-iteration.md)
 accepts a narrow read-only `ref u8[]` iteration design on that evidence.
-The current grammar and parser retain its shape, but semantic analysis still
-rejects execution. This supersedes only the
+The current compiler admits that exact shape through Flow, verified MIR and
+native C, with C-relative cost evidence pending. This supersedes only the
 range-iteration deferral for that exact shape. The earlier `/6` audit remains
 historical; checked narrowing and expression-bodied functions stay deferred.

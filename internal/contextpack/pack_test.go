@@ -185,7 +185,7 @@ func loadContextPackFixtureMode(t *testing.T, generic, aggregate bool) contextPa
 uid = "test.context-pack"
 name = "context-pack"
 version = "1.0.0"
-language = "fairyc-language/18"
+language = "fairyc-language/19"
 source = "src"
 `)
 	writeContextPackFixture(t, filepath.Join(root, "src", "main.fy"), `module main;
