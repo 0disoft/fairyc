@@ -4,9 +4,10 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func TestByteViewForFailsClosedUntilSemanticLowering(t *testing.T) {
+func TestByteViewForPreparesVerifiedMIRButFailsClosed(t *testing.T) {
 	result := analyzeText(t, map[string]string{
 		"main.fy": "module main; fn void show(ref u8[] view) { for (let u8 byte in view) { if (byte == 7) { continue; } break; } }",
 	})
@@ -17,12 +18,19 @@ func TestByteViewForFailsClosedUntilSemanticLowering(t *testing.T) {
 		t.Fatalf("prepared HIR = %+v", result.HIR)
 	}
 	statements := result.HIR.Modules[0].Functions[0].Body.Statements
-	if len(statements) != 1 || statements[0].Expression == nil || statements[0].Expression.Block == nil {
+	if len(statements) != 1 || statements[0].Kind != "expression-statement" || statements[0].Expression == nil || statements[0].Expression.Block == nil {
 		t.Fatalf("prepared statement = %+v", statements)
 	}
 	prepared := statements[0].Expression.Block.Statements
 	if len(prepared) != 2 || prepared[0].Expression == nil || prepared[0].Expression.Type != hir.TypeUSize || prepared[1].For == nil || prepared[1].For.Post == nil {
 		t.Fatalf("prepared length and loop = %+v", prepared)
+	}
+	program, err := mir.Lower(result.HIR)
+	if err != nil {
+		t.Fatalf("lower prepared HIR: %v", err)
+	}
+	if failures := mir.Verify(program); len(failures) != 0 {
+		t.Fatalf("verify prepared MIR: %+v", failures)
 	}
 }
 
