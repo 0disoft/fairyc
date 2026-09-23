@@ -24,8 +24,9 @@ The checker ignores the return-only case when selecting or comparing the
 switch's result type. Existing Result ownership and must-use flow checks,
 verified MIR branches and cleanup, and constrained C emission remain in use.
 The other case still provides the join value. No runtime helper, metadata,
-tag, or new backend operation is introduced. A same-behavior C comparison is
-still needed before claiming a measured build-time or binary-size result.
+tag, or new backend operation is introduced. The
+[independent C comparison](../ops/c-budget-result-return-20260924.md) measures
+one optimized scalar workload and records its runtime, build and EXE ratios.
 
 ## Compatibility and evidence
 
@@ -41,6 +42,7 @@ return paths. The [lexer-candidate diagnostics](../../examples/lexer_candidate/s
 now use the form for both byte-copy and vector-push failures; the existing
 native failure and limit scenarios still pass. The [same-program comparison](../ops/result-return-adoption-20260924.md)
 records parser output, frontend timings, and low/optimized native sizes without
-claiming a C-relative runtime or whole-build budget result. ADR 0398's
+claiming a C-relative runtime or whole-build budget result. The separate C
+comparison covers that narrower scalar workload, not the full parser. ADR 0398's
 example-only deferral is superseded for this one Result arm shape; its broader
 `never` and `let-else` candidates remain deferred.

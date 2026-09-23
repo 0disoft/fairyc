@@ -44,7 +44,9 @@ func TestCBudgetBaseline(t *testing.T) {
 		return string(b)
 	}
 	workloads := []string{"checksum", "classifier"}
-	if os.Getenv("FAIRYC_C_BUDGET_DEREF_ONLY") == "1" {
+	if os.Getenv("FAIRYC_C_BUDGET_RESULT_RETURN_ONLY") == "1" {
+		workloads = []string{"result_return"}
+	} else if os.Getenv("FAIRYC_C_BUDGET_DEREF_ONLY") == "1" {
 		workloads = []string{"deref"}
 	} else if os.Getenv("FAIRYC_C_BUDGET_VECTOR_ONLY") == "1" {
 		workloads = []string{"vector_slot"}
@@ -208,7 +210,7 @@ func TestCBudgetBaseline(t *testing.T) {
 		}
 	}
 	report := map[string]any{"schema": "fairyc.c-budget-baseline/v1", "compiler_source": os.Getenv("FAIRYC_C_BUDGET_SOURCE"), "go": runtime.Version(), "msvc": toolchain.Version, "gomaxprocs": runtime.GOMAXPROCS(0), "flags": []string{"/std:c11", "/TC", "/W4", "/WX", "/MT", "/O2", "/INCREMENTAL:NO"}, "profile": "optimized", "one_translation_unit": oneTU, "source_sha256": hashes, "boundary_cases": boundary, "boundary_checks": len(workloads) * len(boundary) * 2, "seed": 12345, "rounds": 50000000, "samples": samples,
-		"method": fmt.Sprintf("Independently authored scalar kernels; optional deref pair compares mutable scalar references with C pointer writes; optional vector_slot pair compares checked one-element Vec<u32>.at_mut with a checked C vector slot. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. %d alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", repetitions), "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
+		"method": fmt.Sprintf("Independently authored scalar kernels; optional deref pair compares mutable scalar references with C pointer writes; optional vector_slot pair compares checked one-element Vec<u32>.at_mut with a checked C vector slot; optional result_return pair compares one direct-return Result arm with an equivalent C branch. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. %d alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", repetitions), "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
 	if measurePhases {
 		report["phase_method"] = "Opt-in wall-clock subdivisions: load includes support-file read and workspace load or C source read; check covers the verified workspace compile; emit_support covers authority check, C emission and support assembly; msvc_build covers C compile, link and artifact read; exe_write covers final file write. Phases exclude harness startup, workspace setup, warm toolchain discovery and program execution."
 	}
@@ -246,12 +248,19 @@ func cBudgetExecute(t *testing.T, artifact cdriver.WindowsHostArtifact, seed, ro
 
 func cBudgetReference(workload string, seed, rounds uint32) uint32 {
 	value := seed
-	if workload == "classifier" {
+	if workload == "classifier" || workload == "result_return" {
 		value = 0
 	}
 	for i := uint32(0); i < rounds; i++ {
 		if workload == "checksum" || workload == "deref" || workload == "vector_slot" {
 			value = (value*33 + i%251) % 65521
+		} else if workload == "result_return" {
+			byteValue := (i + seed) % 128
+			decoded := uint32(3)
+			if byteValue%8 != 0 {
+				decoded = byteValue + 1
+			}
+			value = (value + decoded) % 65521
 		} else {
 			b := (i + seed) % 128
 			kind := uint32(4)
