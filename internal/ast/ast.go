@@ -213,6 +213,18 @@ type Statement struct {
 	Target     *Expression
 	Expression *Expression
 	For        *ForLoop
+	ByteFor    *ByteForLoop
+}
+
+// ByteForLoop retains the proposed read-only byte-view form until semantic
+// admission; the parser must not silently turn it into a classic counter loop.
+type ByteForLoop struct {
+	Span     diagnostic.Span
+	Name     string
+	NameSpan diagnostic.Span
+	Type     TypeReference
+	View     *Expression
+	Body     *Block
 }
 
 // ForLoop preserves the four source regions of one classic C-shaped loop.
@@ -672,10 +684,27 @@ func lowerStatement(tree *syntax.Tree, node syntax.Node) Statement {
 		}
 	case syntax.KindFor:
 		statement.For = lowerForLoop(tree, node)
+	case syntax.KindByteFor:
+		statement.ByteFor = lowerByteForLoop(tree, node)
 	default:
 		statement.Expression = lowerExpressionNode(tree, node)
 	}
 	return statement
+}
+
+func lowerByteForLoop(tree *syntax.Tree, node syntax.Node) *ByteForLoop {
+	loop := &ByteForLoop{Span: node.Span, Name: node.Text, NameSpan: node.NameSpan}
+	if len(node.Children) != 3 {
+		return loop
+	}
+	if itemType, found := tree.Node(node.Children[0]); found {
+		loop.Type = lowerType(tree, itemType)
+	}
+	loop.View = lowerExpression(tree, node.Children[1])
+	if body, found := tree.Node(node.Children[2]); found && body.Kind == syntax.KindBlock {
+		loop.Body = lowerBlock(tree, body)
+	}
+	return loop
 }
 
 func lowerForLoop(tree *syntax.Tree, node syntax.Node) *ForLoop {

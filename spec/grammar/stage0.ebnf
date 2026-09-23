@@ -151,7 +151,10 @@ while_stmt = "while" "(" expression ")" statement_block ;
    small: initialization is a binding or direct assignment, post is a direct
    assignment, and semantic analysis admits only pure scalar header values.
    Each clause is optional; an omitted condition is true. *)
-for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block ;
+(* The byte-view alternative is parsed for lossless source handling but remains
+   semantically unsupported until ADR 0403's compiler and native gates pass. *)
+for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block
+         | "for" "(" "let" type IDENT "in" expression ")" statement_block ;
 for_init = binding_kind (IDENT | type IDENT) "=" expression
          | expression assignment_operator expression ;
 for_post = expression assignment_operator expression ;

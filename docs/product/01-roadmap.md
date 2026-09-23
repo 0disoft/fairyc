@@ -105,8 +105,9 @@ the complete implemented forms. Provider-qualified imports and formatter work re
 package and tooling gates.
 
 The later lexer candidate contains three independent full-byte loops over immutable `ref u8[]`
-views. ADR 0403 accepts a narrow read-only iteration design on this newer evidence, pending the
-grammar, compiler, native and C-relative cost gates. Checked narrowing, expression-bodied
+views. ADR 0403 accepts a narrow read-only iteration design on this newer evidence. Its grammar,
+parser and AST shape are staged with explicit semantic rejection, pending compiler execution,
+native and C-relative cost gates. Checked narrowing, expression-bodied
 functions, generic iteration and mutable collection iteration remain deferred.
 
 Exceptions, class inheritance, implicit virtual dispatch, user-defined implicit conversions,

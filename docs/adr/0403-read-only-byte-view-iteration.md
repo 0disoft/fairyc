@@ -1,6 +1,6 @@
 # ADR 0403: Read-only byte-view iteration
 
-- Status: Accepted design; implementation pending
+- Status: Accepted design; parser staged, implementation pending
 - Date: 2026-09-24
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
 - Reopens only the byte-view part of [ADR 0224](0224-defer-unproven-surface-shorthands.md)
@@ -58,10 +58,11 @@ the user's source file.
 
 ## Implementation and release gate
 
-Acceptance does not add the syntax to the current grammar or parser. The
-implementation must change the normative grammar, lexer/parser and recovery,
-formatter, AST/HIR, semantic borrow and control-flow analysis, verified MIR,
-interpreter and native C path together. Positive fixtures cover empty and
+The grammar and lossless parser now retain this form, and AST lowering preserves
+its name, type, view and body. Current semantic analysis rejects it explicitly;
+there is no executable source admission or language revision change yet. The
+remaining implementation must connect semantic borrow and control-flow
+analysis, verified MIR, interpreter and native C paths. Positive fixtures cover empty and
 non-empty views, each of the three real caller shapes, early exits, nested
 loops, and cleanup. Negative fixtures cover wrong or mutable iterable types,
 effectful expressions, binding escape, and owner mutation while iterating.

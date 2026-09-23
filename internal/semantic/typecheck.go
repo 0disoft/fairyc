@@ -487,6 +487,8 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			hirStatement.Expression = expression
 		case statement.Kind == syntax.KindFor:
 			hirStatement.For = c.checkFor(statement.For)
+		case statement.Kind == syntax.KindByteFor:
+			c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "byte-view iteration awaits semantic and MIR lowering")
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
 			if c.loopDepth == 0 {
 				c.analyzer.addDiagnostic("E1012", span(c.module.file.Path, statement.Span))

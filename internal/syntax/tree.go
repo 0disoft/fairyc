@@ -69,6 +69,7 @@ const (
 	KindBurn           Kind = "burn"
 	KindWhile          Kind = "while"
 	KindFor            Kind = "for"
+	KindByteFor        Kind = "byte-for"
 	KindForInit        Kind = "for-init"
 	KindForCond        Kind = "for-condition"
 	KindForPost        Kind = "for-post"

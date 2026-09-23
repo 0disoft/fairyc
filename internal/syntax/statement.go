@@ -192,6 +192,9 @@ func (p *parser) parseFor() NodeID {
 	start := p.currentFullIndex()
 	p.advance()
 	p.expect("(")
+	if p.looksLikeByteFor() {
+		return p.parseByteFor(start)
+	}
 
 	initStart := p.currentFullIndex()
 	var initChildren []NodeID
@@ -218,6 +221,38 @@ func (p *parser) parseFor() NodeID {
 	post := p.addNode(KindForPost, postStart, postChildren, "", "")
 	body := p.parseBlockForStatement()
 	return p.addNode(KindFor, start, []NodeID{init, condition, post, body}, "", "")
+}
+
+// A bounded header lookahead leaves every existing semicolon form on the
+// classic-for path. The wider type shapes are parsed for a useful semantic
+// rejection rather than accidentally becoming iterable types.
+func (p *parser) looksLikeByteFor() bool {
+	if !p.at("let") {
+		return false
+	}
+	for offset := 1; offset <= 16; offset++ {
+		switch p.peekText(offset) {
+		case "in":
+			return true
+		case "=", ";", ")", "":
+			return false
+		}
+	}
+	return false
+}
+
+func (p *parser) parseByteFor(start int) NodeID {
+	if p.isPreviousRevision() {
+		p.emit("E0008", p.current().Span, diagnostic.RepairNone, "byte-view for")
+	}
+	p.expect("let")
+	itemType := p.parseType()
+	name, nameSpan := p.parseNameWithSpan()
+	p.expect("in")
+	view := p.parseExpression(0, true)
+	p.expect(")")
+	body := p.parseBlockForStatement()
+	return p.addNamedNode(KindByteFor, start, []NodeID{itemType, view, body}, name, "", nameSpan)
 }
 
 func (p *parser) parseForClause(allowBinding bool) NodeID {
