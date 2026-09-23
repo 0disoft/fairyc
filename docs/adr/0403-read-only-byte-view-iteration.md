@@ -63,13 +63,13 @@ its name, type, view and body. It also prepares a hidden length snapshot and
 scalar `for` path for typed analysis without rewriting the source. Current
 semantic analysis validates the exact `u8` item and named immutable `ref u8[]`
 local or parameter, rejecting other shapes, but still rejects execution explicitly.
-The prepared HIR lowers to verified MIR in a direct test, and a separate direct
-Flow test checks owner mutation during and after the loop. The public pipeline
-still skips Flow and rejects execution; there is no language revision change yet.
-The remaining implementation must admit public Flow, interpreter and native C
-paths. Positive fixtures cover empty and non-empty views, each of the three
-real caller shapes, early exits, nested
-loops, and cleanup. Negative fixtures cover wrong or mutable iterable types,
+The prepared HIR lowers to verified MIR and direct interpreter tests cover
+empty, ordered, `continue` and `break` cases. A separate direct Flow test checks
+owner mutation during and after the loop. The public pipeline still skips Flow
+and rejects execution; there is no language revision change yet. The remaining
+implementation must admit public Flow, fixtures and native C paths. Positive
+fixtures cover empty and non-empty views, each of the three real caller shapes,
+early exits, nested loops, and cleanup. Negative fixtures cover wrong or mutable iterable types,
 effectful expressions, binding escape, and owner mutation while iterating.
 Compare the same algorithm in explicit-index Fairy, the new form, and
 independent C at low and optimized profiles. Check generated functions,

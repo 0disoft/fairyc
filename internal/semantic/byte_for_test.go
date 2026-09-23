@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
@@ -85,5 +86,34 @@ func TestByteViewForBindingCannotEscapeLoop(t *testing.T) {
 	})
 	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E0101" {
 		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestByteViewForPreparedMIRExecutesWithoutPublicAdmission(t *testing.T) {
+	for _, sample := range []struct {
+		name string
+		view string
+		loop string
+		want int32
+	}{
+		{name: "empty", view: `b"abc"[0..0]`, loop: "for (let u8 byte in view) { total += byte as i32; }", want: 0},
+		{name: "ordered", view: `b"abc"[..]`, loop: "for (let u8 byte in view) { total += byte as i32; }", want: 294},
+		{name: "continue and break", view: `b"abc"[..]`, loop: "for (let u8 byte in view) { if (byte == 98) { continue; } total += byte as i32; if (byte == 99) { break; } }", want: 196},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			text := "module main; fn i32 main() { let ref u8[] view = " + sample.view + "; var i32 total = 0; " + sample.loop + " return total; }"
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "byte-view iteration awaits semantic and MIR lowering" {
+				t.Fatalf("public boundary: diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
+			}
+			program, err := mir.Lower(result.HIR)
+			if err != nil {
+				t.Fatalf("lower prepared HIR: %v", err)
+			}
+			outcome, err := interpreter.Execute(program, "main::main")
+			if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != sample.want {
+				t.Fatalf("execute prepared MIR: outcome = %+v, error = %v", outcome, err)
+			}
+		})
 	}
 }
