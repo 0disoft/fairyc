@@ -55,6 +55,10 @@ func TestCBudgetBaseline(t *testing.T) {
 	if os.Getenv("FAIRYC_C_BUDGET_SMOKE") == "1" {
 		repetitions = 1
 	}
+	oneTU := os.Getenv("FAIRYC_C_BUDGET_ONE_TU") == "1"
+	if oneTU && (len(workloads) != 1 || workloads[0] != "vector_slot") {
+		t.Fatal("one-translation-unit diagnostic requires vector_slot only")
+	}
 	fixtureNames := []string{"support.c"}
 	for _, workload := range workloads {
 		fixtureNames = append(fixtureNames, workload+".fy", workload+".c")
@@ -129,7 +133,12 @@ func TestCBudgetBaseline(t *testing.T) {
 					unit = emitted.Source
 				}
 				translationNS := time.Since(start).Nanoseconds()
-				artifact, err := cdriver.BuildWindowsMSVCTarget(toolchain, cdriver.OptimizedProfile, unit, support)
+				var artifact cdriver.WindowsHostArtifact
+				if oneTU && lane == "fairy" {
+					artifact, err = cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile, support+"\n"+unit)
+				} else {
+					artifact, err = cdriver.BuildWindowsMSVCTarget(toolchain, cdriver.OptimizedProfile, unit, support)
+				}
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -163,7 +172,7 @@ func TestCBudgetBaseline(t *testing.T) {
 			}
 		}
 	}
-	report := map[string]any{"schema": "fairyc.c-budget-baseline/v1", "compiler_source": os.Getenv("FAIRYC_C_BUDGET_SOURCE"), "go": runtime.Version(), "msvc": toolchain.Version, "gomaxprocs": runtime.GOMAXPROCS(0), "flags": []string{"/std:c11", "/TC", "/W4", "/WX", "/MT", "/O2", "/INCREMENTAL:NO"}, "profile": "optimized", "source_sha256": hashes, "boundary_cases": boundary, "boundary_checks": len(workloads) * len(boundary) * 2, "seed": 12345, "rounds": 50000000, "samples": samples,
+	report := map[string]any{"schema": "fairyc.c-budget-baseline/v1", "compiler_source": os.Getenv("FAIRYC_C_BUDGET_SOURCE"), "go": runtime.Version(), "msvc": toolchain.Version, "gomaxprocs": runtime.GOMAXPROCS(0), "flags": []string{"/std:c11", "/TC", "/W4", "/WX", "/MT", "/O2", "/INCREMENTAL:NO"}, "profile": "optimized", "one_translation_unit": oneTU, "source_sha256": hashes, "boundary_cases": boundary, "boundary_checks": len(workloads) * len(boundary) * 2, "seed": 12345, "rounds": 50000000, "samples": samples,
 		"method": fmt.Sprintf("Independently authored scalar kernels; optional deref pair compares mutable scalar references with C pointer writes; optional vector_slot pair compares checked one-element Vec<u32>.at_mut with a checked C vector slot. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. %d alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", repetitions), "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
 	encoded, err := json.Marshal(report)
 	if err != nil {

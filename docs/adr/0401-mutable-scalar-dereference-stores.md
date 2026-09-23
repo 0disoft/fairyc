@@ -42,3 +42,7 @@ measured the actual `Vec<u32>.at_mut` path at 1.44971 times the C runtime
 median, outside that workload's 1.08 budget. The feature's vector hot-path
 cost is therefore unresolved; neither comparison establishes sustained or
 whole-language performance.
+Compiling Fairy's support and generated C in [one translation unit](../ops/c-budget-vector-one-tu-20260924.md)
+reduced the observed runtime ratio to 1.14837 on the same fixture, still above
+the workload budget. This is a diagnostic build layout, not an admitted product
+optimization.
