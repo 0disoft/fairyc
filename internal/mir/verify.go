@@ -75,7 +75,7 @@ func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []
 	for index := range program.Functions {
 		for _, block := range program.Functions[index].Blocks {
 			for operationIndex, operation := range block.Operations {
-				if operation.Kind == OperationStorageBorrow {
+				if operation.Kind == OperationStorageBorrow || operation.Kind == OperationStorageBorrowMut {
 					if !allowStorageTransfers || !validStorageBorrowShape(operation, properties) ||
 						!validStorageTransferProvenance(&program.Functions[index], operation) {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage borrow is unadmitted or malformed"})
@@ -536,7 +536,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStorageLayout:
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
-			case OperationStorageTake, OperationStorageBorrow:
+			case OperationStorageTake, OperationStorageBorrow, OperationStorageBorrowMut:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStoragePut:

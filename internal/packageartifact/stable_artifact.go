@@ -126,7 +126,7 @@ func validateStableArtifact(artifact StableArtifact, transfers bool) error {
 		if !transfers {
 			for _, block := range body.Function.Blocks {
 				for _, operation := range block.Operations {
-					if operation.Kind == mir.OperationStorageLayout || operation.Kind == mir.OperationStorageTake || operation.Kind == mir.OperationStoragePut || operation.Kind == mir.OperationStorageBorrow {
+					if operation.Kind == mir.OperationStorageLayout || operation.Kind == mir.OperationStorageTake || operation.Kind == mir.OperationStoragePut || operation.Kind == mir.OperationStorageBorrow || operation.Kind == mir.OperationStorageBorrowMut {
 						return fmt.Errorf("ordinary stable package MIR does not admit private storage operations")
 					}
 				}

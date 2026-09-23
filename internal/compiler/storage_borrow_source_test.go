@@ -156,6 +156,75 @@ func TestPrivateVectorStorageBorrowSourceMutableOrigin(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorStorageBorrowSourceMutableMIR(t *testing.T) {
+	analysis, err := analyzeStorageBorrow(t, storageBorrowMutSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	compiled, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+	if err != nil || !compiled.Verified {
+		t.Fatalf("mutable storage borrow MIR: %v", err)
+	}
+	program, err := mir.Lower(analysis.Analysis.Semantic.HIR)
+	if err != nil || len(mir.VerifyStorageTransfers(program)) != 0 {
+		t.Fatalf("mutable storage borrow lowering: %v %+v", err, mir.VerifyStorageTransfers(program))
+	}
+	if len(mir.Verify(program)) == 0 || len(mir.VerifyStorageQueries(program)) == 0 {
+		t.Fatal("mutable storage borrow escaped private MIR admission")
+	}
+	count := 0
+	for _, function := range program.Functions {
+		for _, block := range function.Blocks {
+			for _, operation := range block.Operations {
+				if operation.Kind != mir.OperationStorageBorrowMut {
+					continue
+				}
+				ownerElement, ownerMutable, ownerBorrowed := hir.BorrowElement(operation.OwnerType)
+				if operation.Type != hir.MutableBorrow(hir.TypeI32) ||
+					!ownerBorrowed || !ownerMutable || !strings.HasSuffix(string(ownerElement), "::main::Owner") ||
+					operation.IndexType != hir.RawPointer(hir.TypeVoid, true) {
+					t.Fatalf("mutable storage borrow lost operand types: %+v", operation)
+				}
+				count++
+			}
+		}
+	}
+	if count != 1 {
+		t.Fatalf("mutable storage borrow operation count = %d", count)
+	}
+	for name, mutate := range map[string]func(*mir.Operation){
+		"shared result": func(op *mir.Operation) { op.Type = hir.SharedBorrow(hir.TypeI32) },
+		"shared owner": func(op *mir.Operation) {
+			owner, _, _ := hir.BorrowElement(op.OwnerType)
+			op.OwnerType = hir.SharedBorrow(owner)
+		},
+		"shared address": func(op *mir.Operation) { op.IndexType = hir.RawPointer(hir.TypeVoid, false) },
+		"forged origin":  func(op *mir.Operation) { op.Entity = "forged" },
+	} {
+		t.Run(name, func(t *testing.T) {
+			copy, err := mir.Lower(analysis.Analysis.Semantic.HIR)
+			if err != nil {
+				t.Fatal(err)
+			}
+			changed := 0
+			for fi := range copy.Functions {
+				for bi := range copy.Functions[fi].Blocks {
+					for oi := range copy.Functions[fi].Blocks[bi].Operations {
+						op := &copy.Functions[fi].Blocks[bi].Operations[oi]
+						if op.Kind == mir.OperationStorageBorrowMut {
+							mutate(op)
+							changed++
+						}
+					}
+				}
+			}
+			if changed != 1 || len(mir.VerifyStorageTransfers(copy)) == 0 {
+				t.Fatalf("mutable MIR mutation was accepted: %d operations", changed)
+			}
+		})
+	}
+}
+
 func TestPrivateVectorStorageBorrowSourceMutableRejections(t *testing.T) {
 	for name, test := range map[string]struct {
 		from, to, code, unsupported string

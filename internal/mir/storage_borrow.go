@@ -10,12 +10,21 @@ import (
 // address. It creates no owned value and transfers no destruction obligation.
 const OperationStorageBorrow OperationKind = "storage-borrow"
 
+// OperationStorageBorrowMut retains an exclusive owner while borrowing an
+// initialized element mutably. It creates no owned value or cleanup duty.
+const OperationStorageBorrowMut OperationKind = "storage-borrow-mut"
+
 func validStorageBorrowShape(op Operation, properties typeProperties) bool {
+	if op.Kind != OperationStorageBorrow && op.Kind != OperationStorageBorrowMut {
+		return false
+	}
+	wantsMutable := op.Kind == OperationStorageBorrowMut
 	element, mutable, borrowed := hir.BorrowElement(op.Type)
 	_, ownerMutable, ownerBorrowed := hir.BorrowElement(op.OwnerType)
-	pointerElement, _, pointer := hir.RawPointerElement(op.IndexType)
-	return borrowed && !mutable && storageQueryType(element, properties) &&
-		ownerBorrowed && !ownerMutable && pointer && pointerElement == hir.TypeVoid &&
+	pointerElement, pointerMutable, pointer := hir.RawPointerElement(op.IndexType)
+	return borrowed && mutable == wantsMutable && storageQueryType(element, properties) &&
+		ownerBorrowed && ownerMutable == wantsMutable && pointer && pointerElement == hir.TypeVoid &&
+		(!wantsMutable || pointerMutable) &&
 		op.DestinationLocal >= 0 && op.Symbol == hir.NoSymbol && len(op.Operands) == 2 &&
 		op.Operands[0].Kind == OperandLocal && op.Operands[1].Kind == OperandLocal &&
 		op.Operands[0].Local >= 0 && op.Operands[1].Local >= 0 &&
@@ -28,7 +37,12 @@ func validStorageBorrowShape(op Operation, properties typeProperties) bool {
 }
 
 func (l *functionLowerer) lowerStorageBorrow(expression *hir.Expression) (Operand, error) {
-	if len(expression.Children) != 2 || expression.Type != hir.SharedBorrow(expression.TargetType) ||
+	mutable := expression.Kind == string(OperationStorageBorrowMut)
+	wantType := hir.SharedBorrow(expression.TargetType)
+	if mutable {
+		wantType = hir.MutableBorrow(expression.TargetType)
+	}
+	if len(expression.Children) != 2 || expression.Type != wantType ||
 		expression.UnsafeScope == nil || expression.Operator != "" || len(expression.Effects) != 0 {
 		return Operand{}, fmt.Errorf("malformed private storage borrow")
 	}
@@ -47,7 +61,11 @@ func (l *functionLowerer) lowerStorageBorrow(expression *hir.Expression) (Operan
 	if err != nil {
 		return Operand{}, err
 	}
-	op := Operation{Kind: OperationStorageBorrow, Entity: sourceEntity("storage-borrow", expression.Span),
+	kind := OperationStorageBorrow
+	if mutable {
+		kind = OperationStorageBorrowMut
+	}
+	op := Operation{Kind: kind, Entity: sourceEntity(string(kind), expression.Span),
 		Span: expression.Span, Symbol: hir.NoSymbol, DestinationLocal: l.newTemporary(),
 		Type: expression.Type, OwnerType: expression.Children[0].Type, IndexType: expression.Children[1].Type,
 		Operands: []Operand{{Kind: OperandLocal, Local: retained}, address}, UnsafeScope: *expression.UnsafeScope}

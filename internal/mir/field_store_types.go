@@ -53,7 +53,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 					OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,
 					OperationArrayLength, OperationArrayIndex, OperationViewLength, OperationViewEmpty,
 					OperationViewIndex, OperationViewSlice, OperationStorageLayout, OperationStorageTake,
-					OperationStorageBorrow, OperationRegionPlace:
+					OperationStorageBorrow, OperationStorageBorrowMut, OperationRegionPlace:
 					typ = op.Type
 				}
 				changed = set(op.DestinationLocal, typ) || changed
