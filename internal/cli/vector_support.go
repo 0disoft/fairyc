@@ -128,7 +128,7 @@ func splitVectorRuntimeSymbols(symbols []string) ([]string, bool, error) {
 		}
 		switch symbol {
 		case "fy_private_vector_initialize_v0", "fy_private_vector_release_empty_v0", "fy_private_vector_reserve_v0",
-			"fy_private_vector_prepare_push_v0", "fy_private_vector_commit_push_v0", "fy_private_vector_pop_slot_v0", "fy_private_vector_element_slot_v0":
+			"fy_private_vector_prepare_push_v0", "fy_private_vector_commit_push_v0", "fy_private_vector_pop_slot_v0", "fy_private_vector_element_slot_v0", "fy_private_vector_element_slot_mut_v0":
 			vector = true
 		default:
 			return nil, false, fmt.Errorf("unrecognized private vector runtime symbol %q", symbol)

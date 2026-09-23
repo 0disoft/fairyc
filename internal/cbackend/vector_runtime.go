@@ -34,6 +34,8 @@ func validVectorRuntimeFunction(function mir.ForeignFunction, targetID target.ID
 	case "fy_private_vector_element_slot_v0":
 		shared := hir.RawPointer(hir.TypeVoid, false)
 		result, parameters = shared, []hir.Type{shared, hir.TypeUSize, hir.TypeUSize}
+	case "fy_private_vector_element_slot_mut_v0":
+		result, parameters = pointer, []hir.Type{pointer, hir.TypeUSize, hir.TypeUSize}
 	default:
 		return false
 	}

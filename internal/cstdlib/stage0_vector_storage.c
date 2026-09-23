@@ -186,6 +186,19 @@ const void *fy_private_vector_element_slot_v0(const void *storage, size_t index,
     return (const unsigned char *)value.block.data + index * value.element_size;
 }
 
+/* The caller must retain an exclusive owner borrow until the mutable element
+ * reference ends. Validation mirrors the shared slot route without changing
+ * descriptor state or element ownership. */
+void *fy_private_vector_element_slot_mut_v0(void *storage, size_t index, size_t element_size) {
+    if (storage == NULL) return NULL;
+    struct fy_private_vector_storage_v0 value;
+    memcpy(&value, storage, sizeof value);
+    if (!fy_private_vector_storage_valid_v0(&value) || element_size != value.element_size || index >= value.length) {
+        return NULL;
+    }
+    return (unsigned char *)value.block.data + index * value.element_size;
+}
+
 uint32_t fy_private_vector_read_copy_v0(const void *storage, size_t index, void *output, size_t element_size) {
     if (storage == NULL || output == NULL) {
         return FY_STD_ALLOC_INVALID_ARGUMENT_V0;

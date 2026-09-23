@@ -17,6 +17,7 @@ func TestPrivateVectorRuntimeSymbolBoundary(t *testing.T) {
 		{"commit_push", "u32", "ptr mut void storage, ptr mut void slot, usize size", "null, null, 0"},
 		{"pop_slot", "ptr mut void", "ptr mut void storage, usize size", "null, 0"},
 		{"element_slot", "ptr void", "ptr void storage, usize index, usize size", "null, 0, 0"},
+		{"element_slot_mut", "ptr mut void", "ptr mut void storage, usize index, usize size", "null, 0, 0"},
 	} {
 		t.Run(entry.name, func(t *testing.T) {
 			text := fmt.Sprintf(`module main;
