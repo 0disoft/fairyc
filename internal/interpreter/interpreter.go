@@ -313,6 +313,11 @@ type taggedState struct {
 	dropped bool
 }
 
+type scalarReference struct {
+	locals map[mir.LocalID]runtimeValue
+	local  mir.LocalID
+}
+
 type runtimeValue struct {
 	kind      valueKind
 	i32       int32
@@ -324,6 +329,7 @@ type runtimeValue struct {
 	resource  *resourceState
 	array     *arrayState
 	view      *byteViewState
+	reference *scalarReference
 }
 
 func staticByteView(data string, typ hir.Type) runtimeValue {
@@ -878,6 +884,10 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err := storeScalarField(locals, operation); err != nil {
 					return callCompletion{}, fmt.Errorf("field store in %q: %w", function.Name, err)
 				}
+			case mir.OperationDerefStore:
+				if err := storeScalarDeref(locals, operation); err != nil {
+					return callCompletion{}, fmt.Errorf("dereference store in %q: %w", function.Name, err)
+				}
 			case mir.OperationFieldRead, mir.OperationFieldBorrow:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -1226,16 +1236,27 @@ func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation)
 		if operation.Operator == "&mut" {
 			wantType = hir.MutableBorrow(operation.OwnerType)
 		}
-		if operation.Type != wantType || value.typ != operation.OwnerType {
+		if operation.Type != wantType ||
+			value.typ != operation.OwnerType && (!hir.FixedArrayScalarElement(operation.OwnerType) || !scalarStoreValueMatches(value, operation.OwnerType)) {
 			return runtimeValue{}, "", capabilityError("safe borrow has incompatible operand or result type")
 		}
 		value.typ = operation.Type
+		if hir.FixedArrayScalarElement(operation.OwnerType) && operation.Operands[0].Kind == mir.OperandLocal {
+			value.reference = &scalarReference{locals: locals, local: operation.Operands[0].Local}
+		}
 		return value, "", nil
 	}
 	if operation.Operator == "*" {
 		element, _, borrow := hir.BorrowElement(operation.OwnerType)
 		if !borrow || operation.Type != element || value.typ != operation.OwnerType {
 			return runtimeValue{}, "", capabilityError("safe dereference has incompatible operand or result type")
+		}
+		if value.reference != nil {
+			referent, exists := value.reference.locals[value.reference.local]
+			if !exists || !scalarStoreValueMatches(referent, element) {
+				return runtimeValue{}, "", capabilityError("safe dereference has invalid scalar referent")
+			}
+			return referent.cloneForValueCopy(), "", nil
 		}
 		value.typ = element
 		return value, "", nil
