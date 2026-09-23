@@ -488,10 +488,12 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindFor:
 			hirStatement.For = c.checkFor(statement.For)
 		case statement.Kind == syntax.KindByteFor:
-			if statement.Expression != nil {
+			if reason := c.byteForSourceIssue(statement.ByteFor, statement.Expression); reason != "" {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, reason)
+			} else {
 				hirStatement.Expression, _ = c.checkExpression(statement.Expression, hir.TypeVoid)
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "byte-view iteration awaits semantic and MIR lowering")
 			}
-			c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "byte-view iteration awaits semantic and MIR lowering")
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
 			if c.loopDepth == 0 {
 				c.analyzer.addDiagnostic("E1012", span(c.module.file.Path, statement.Span))

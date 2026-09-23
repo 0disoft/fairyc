@@ -61,7 +61,8 @@ the user's source file.
 The grammar and lossless parser retain this form, and AST lowering preserves
 its name, type, view and body. It also prepares a hidden length snapshot and
 scalar `for` path for typed analysis without rewriting the source. Current
-semantic analysis still rejects execution explicitly;
+semantic analysis validates the exact `u8` item and named immutable `ref u8[]`
+local or parameter, rejecting other shapes, but still rejects execution explicitly;
 there is no executable source admission or language revision change yet. The
 remaining implementation must connect semantic borrow and control-flow
 analysis, verified MIR, interpreter and native C paths. Positive fixtures cover empty and
