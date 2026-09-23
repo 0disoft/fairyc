@@ -119,3 +119,34 @@ supported by this evidence. Any representation experiment should first quantify
 the unlabeled-expression allocation contribution and preserve the existing
 source diagnostics and generated-C behavior. The C-relative cumulative 8%
 runtime/EXE budget does not apply to these separate cache-byte observations.
+
+## Follow-up: unused-expression object space
+
+`TestArgumentLabelsUnusedASTCost` loaded the unwrapped real scanner workspace
+from the earlier token-index experiment, including its selected vector SDK.
+The currently reachable AST has seven local source files and seven SDK source
+files. It counts each `*ast.Expression` pointer once and checks that no call
+in this corpus uses an argument label. On Windows AMD64 with Go 1.26.4:
+
+| Scope | Reachable unlabeled expressions | 16-byte class difference |
+| --- | ---: | ---: |
+| `scanner.fy` alone | 2,218 | 35,488 bytes |
+| Seven local files, including scanner | 5,757 | 92,112 bytes |
+| Seven selected SDK files | 3,269 | 52,304 bytes |
+| Combined | 9,026 | 144,416 bytes |
+
+The current `ast.Expression` is 136 bytes; removing only `CallLabels` from its
+layout would make it 128 bytes. The Go allocator's applicable small-object
+classes are 144 and 128 bytes, respectively. Multiplying their 16-byte gap by
+the reachable expression count gives **direct object-space exposure** for this
+source AST. It does not measure actual `TotalAlloc`, transient or cloned ASTs,
+GC overhead, or compilation time, and it is not an upper bound for the entire
+compiler. The earlier allocation experiment used different `scanner.fy` and
+`diagnostics.fy` source hashes, so its baseline/current medians cannot be
+subtracted from this current-source count to assign a causal share.
+
+This bound alone does not justify a side table or another AST representation:
+such a change would touch parsing, diagnostics and ownership of label spans.
+Leave the representation unchanged unless a same-source controlled comparison
+shows a meaningful end-to-end allocation or check-time benefit. No runtime,
+EXE, cache schema, language, SDK or API change follows from this count.
