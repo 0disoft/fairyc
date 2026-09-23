@@ -1,0 +1,400 @@
+{
+  "schema": "fairyc.retained-growth-evidence/v1",
+  "compiler_source_commit": "f2ec982b32563cc2557082baeaf5584752295dee",
+  "test_source": "internal/cli/workspace_generic_growth_test.go",
+  "test_source_sha256": "9a247077f27fc7cebe7ddeec998d0f2923e963a5d993b9d9bfd238472aec992f",
+  "source_state": "baseline plus this new test; production files unchanged",
+  "measurement": {
+    "schema": "fairyc.stable-generic-workspace-growth/v0",
+    "test_executable_identity": "fairyc.compiler-executable-sha256/v1:5a42e8d4218f7652dcbe16c285983288eba24f8250f543a019db6ce4d8f0ee1c",
+    "go_version": "go1.26.4",
+    "msvc_version": "14.51.36231",
+    "cache": "fresh workspace per sample; in-process CLI; ambient OS/toolchain caches; run rebuilds",
+    "samples": [
+      {
+        "repetition": 0,
+        "types": 1,
+        "mode": "generic",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "35e85e9f144f28ce8608b1365d529680b153b78b39c0466a67b9d6495938a826"
+        },
+        "check_ns": 10245200,
+        "build_ns": 880137800,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 1,
+        "mode": "generic",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "35e85e9f144f28ce8608b1365d529680b153b78b39c0466a67b9d6495938a826"
+        },
+        "check_ns": 6751800,
+        "build_ns": 316873900,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 1,
+        "mode": "manual",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "06e1267eac89fbe47fffad26f636f93eb75f338d02bcbee3592c2cbf9bea721b",
+          "src/main.fy": "90170f725c02d83aaeaaece1902749179851dcae6e6baebd72d9f837d735d2ec"
+        },
+        "check_ns": 6713100,
+        "build_ns": 309757700,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 1,
+        "mode": "manual",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "06e1267eac89fbe47fffad26f636f93eb75f338d02bcbee3592c2cbf9bea721b",
+          "src/main.fy": "90170f725c02d83aaeaaece1902749179851dcae6e6baebd72d9f837d735d2ec"
+        },
+        "check_ns": 7983000,
+        "build_ns": 316636300,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 3,
+        "mode": "generic",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "0e172f83d693a4d3368a99d067d116ef51364d5ff54e3840ab58b5f592603e39"
+        },
+        "check_ns": 7159900,
+        "build_ns": 302804700,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 3,
+        "mode": "generic",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "0e172f83d693a4d3368a99d067d116ef51364d5ff54e3840ab58b5f592603e39"
+        },
+        "check_ns": 7961000,
+        "build_ns": 306207900,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 3,
+        "mode": "manual",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "8be59dd4ebc03d4658dd6a8c00c88dcb5deaae0a0d2df9c832e04430d50e5c64",
+          "src/main.fy": "fbae037f85b1af6d6b4023ed3f25f83ff73645b03790918296df8bb30b98325d"
+        },
+        "check_ns": 6616400,
+        "build_ns": 298268500,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 3,
+        "mode": "manual",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "8be59dd4ebc03d4658dd6a8c00c88dcb5deaae0a0d2df9c832e04430d50e5c64",
+          "src/main.fy": "fbae037f85b1af6d6b4023ed3f25f83ff73645b03790918296df8bb30b98325d"
+        },
+        "check_ns": 7683000,
+        "build_ns": 301944100,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 5,
+        "mode": "generic",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "cbf13bfb921525cf953e8e672951956526c660f2c4b3c96543cac4083cb466a2"
+        },
+        "check_ns": 8525100,
+        "build_ns": 300901700,
+        "executable_bytes": 109056,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 5,
+        "mode": "generic",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "cbf13bfb921525cf953e8e672951956526c660f2c4b3c96543cac4083cb466a2"
+        },
+        "check_ns": 8116400,
+        "build_ns": 312759300,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 5,
+        "mode": "manual",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "cecea5c5487ee28bd6f223fcd9b1cbeb13e9589694e5b1392a445085895e97c8",
+          "src/main.fy": "aeb8d92e21dde26fe4a236af32a1b57442b58c649311e9925d06a181e4bfe88e"
+        },
+        "check_ns": 8231500,
+        "build_ns": 299980500,
+        "executable_bytes": 109056,
+        "exit_code": 42
+      },
+      {
+        "repetition": 0,
+        "types": 5,
+        "mode": "manual",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "cecea5c5487ee28bd6f223fcd9b1cbeb13e9589694e5b1392a445085895e97c8",
+          "src/main.fy": "aeb8d92e21dde26fe4a236af32a1b57442b58c649311e9925d06a181e4bfe88e"
+        },
+        "check_ns": 9899700,
+        "build_ns": 306317800,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 5,
+        "mode": "manual",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "cecea5c5487ee28bd6f223fcd9b1cbeb13e9589694e5b1392a445085895e97c8",
+          "src/main.fy": "aeb8d92e21dde26fe4a236af32a1b57442b58c649311e9925d06a181e4bfe88e"
+        },
+        "check_ns": 7533300,
+        "build_ns": 324113200,
+        "executable_bytes": 109056,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 5,
+        "mode": "manual",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "cecea5c5487ee28bd6f223fcd9b1cbeb13e9589694e5b1392a445085895e97c8",
+          "src/main.fy": "aeb8d92e21dde26fe4a236af32a1b57442b58c649311e9925d06a181e4bfe88e"
+        },
+        "check_ns": 8784900,
+        "build_ns": 320839300,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 5,
+        "mode": "generic",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "cbf13bfb921525cf953e8e672951956526c660f2c4b3c96543cac4083cb466a2"
+        },
+        "check_ns": 9598900,
+        "build_ns": 327431200,
+        "executable_bytes": 109056,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 5,
+        "mode": "generic",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "cbf13bfb921525cf953e8e672951956526c660f2c4b3c96543cac4083cb466a2"
+        },
+        "check_ns": 8832900,
+        "build_ns": 313910000,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 3,
+        "mode": "manual",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "8be59dd4ebc03d4658dd6a8c00c88dcb5deaae0a0d2df9c832e04430d50e5c64",
+          "src/main.fy": "fbae037f85b1af6d6b4023ed3f25f83ff73645b03790918296df8bb30b98325d"
+        },
+        "check_ns": 8774500,
+        "build_ns": 299439400,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 3,
+        "mode": "manual",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "8be59dd4ebc03d4658dd6a8c00c88dcb5deaae0a0d2df9c832e04430d50e5c64",
+          "src/main.fy": "fbae037f85b1af6d6b4023ed3f25f83ff73645b03790918296df8bb30b98325d"
+        },
+        "check_ns": 7775600,
+        "build_ns": 318263600,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 3,
+        "mode": "generic",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "0e172f83d693a4d3368a99d067d116ef51364d5ff54e3840ab58b5f592603e39"
+        },
+        "check_ns": 8873600,
+        "build_ns": 336142900,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 3,
+        "mode": "generic",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "0e172f83d693a4d3368a99d067d116ef51364d5ff54e3840ab58b5f592603e39"
+        },
+        "check_ns": 9538100,
+        "build_ns": 369434500,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 1,
+        "mode": "manual",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "06e1267eac89fbe47fffad26f636f93eb75f338d02bcbee3592c2cbf9bea721b",
+          "src/main.fy": "90170f725c02d83aaeaaece1902749179851dcae6e6baebd72d9f837d735d2ec"
+        },
+        "check_ns": 7811600,
+        "build_ns": 307092900,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 1,
+        "mode": "manual",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "06e1267eac89fbe47fffad26f636f93eb75f338d02bcbee3592c2cbf9bea721b",
+          "src/main.fy": "90170f725c02d83aaeaaece1902749179851dcae6e6baebd72d9f837d735d2ec"
+        },
+        "check_ns": 7769600,
+        "build_ns": 330472100,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 1,
+        "mode": "generic",
+        "release": false,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "35e85e9f144f28ce8608b1365d529680b153b78b39c0466a67b9d6495938a826"
+        },
+        "check_ns": 8164100,
+        "build_ns": 306381800,
+        "executable_bytes": 108544,
+        "exit_code": 42
+      },
+      {
+        "repetition": 1,
+        "types": 1,
+        "mode": "generic",
+        "release": true,
+        "source_hashes": {
+          "fairy.toml": "9be53ec34f758b020f5d1a7c1099d62603d3561df37a317998f9de7539dc0648",
+          "libs/answer/fairy.toml": "71b471c9c7f5977aca6962468453a78b9a160963e185df00b914f9397091da70",
+          "libs/answer/src/answer.fy": "79191afef84612d77fc5ddb179603052d9bddad3f23284541f3c0aaaffd0474f",
+          "src/main.fy": "35e85e9f144f28ce8608b1365d529680b153b78b39c0466a67b9d6495938a826"
+        },
+        "check_ns": 7748400,
+        "build_ns": 304526600,
+        "executable_bytes": 107520,
+        "exit_code": 42
+      }
+    ]
+  }
+}
