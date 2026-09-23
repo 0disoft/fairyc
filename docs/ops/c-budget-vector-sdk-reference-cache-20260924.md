@@ -15,3 +15,5 @@ The same `vector_slot.fy`, `vector_slot.c` and `support.c` fixture hashes, gener
 | Whole build | 779.009 ms | 718.306 ms |
 
 The C whole-build medians were 553.748ms before and 537.367ms after, yielding Fairy/C ratios of 1.40679 and 1.33672. The check and support-assembly reductions are consistent with removing repeated embedded-catalog parsing. MSVC time also moved despite identical generated C and support bytes, so the 60.703ms whole-build difference cannot all be attributed to this change. These are separate local runs with uncontrolled OS caches, not a paired A/B experiment. The post-change ordinary build remains above the cumulative 1.08 C observation target; runtime and EXE size were unchanged in code. More build-cost work is required.
+
+The [nominal JSON reuse experiment](c-budget-vector-nominal-encoding-20260924.md) found no measurable benefit and records the decision to revert that source change.
