@@ -96,6 +96,8 @@ type borrowFlowAnalyzer struct {
 	liveAfter           map[*ast.Statement]borrowLiveMap
 	liveAfterExpression map[*ast.Expression]borrowLiveMap
 	callBorrows         []borrowValueState
+	assignmentBorrow    *borrowValueState
+	assignmentLastUse   hir.Span
 	loanByKey           map[borrowLoanKey]int
 	loops               []borrowLoopFrame
 	probeDepth          int
@@ -306,6 +308,31 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		f.checkReturn(statement.Expression, value)
 		return false
 	case syntax.KindAssignment:
+		if scalarDerefAssignmentTarget(statement.Target) {
+			previous := f.liveAfter[statement]
+			receiver := assignmentRootPath(statement.Target.Children[0])
+			if binding := f.analyzer.resolved[receiver]; isSafeBorrowSymbol(binding) {
+				retained := cloneBorrowLive(previous)
+				retained[binding] = span(f.module.file.Path, statement.Target.Span)
+				f.liveAfter[statement] = retained
+			}
+			f.checkDirectOwnerMove(statement, statement.Expression, environment)
+			f.checkCallOwnerMoves(statement, statement.Expression, environment)
+			f.liveAfter[statement] = previous
+			held, reachable := f.evaluateExpression(statement.Target, environment)
+			if !reachable {
+				return false
+			}
+			base := len(f.callBorrows)
+			f.callBorrows = append(f.callBorrows, held)
+			priorBorrow, priorLastUse := f.assignmentBorrow, f.assignmentLastUse
+			f.assignmentBorrow = &held
+			f.assignmentLastUse = span(f.module.file.Path, statement.Target.Span)
+			_, reachable = f.evaluateExpression(statement.Expression, environment)
+			f.assignmentBorrow, f.assignmentLastUse = priorBorrow, priorLastUse
+			f.callBorrows = f.callBorrows[:base]
+			return reachable
+		}
 		f.checkDirectOwnerMove(statement, statement.Expression, environment)
 		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		if statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr && len(statement.Target.Children) == 1 {
@@ -416,6 +443,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 			}
 		}
 		value := f.analyzer.resolved[expression]
+		f.checkAssignmentOwnerRead(expression, value)
 		if !isSafeBorrowSymbol(value) {
 			return borrowValueState{}, true
 		}
@@ -1362,7 +1390,7 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 				delete(live, target)
 			}
 			live = f.liveExpression(statement.Expression, live, context)
-			if indexedAssignmentTarget(statement.Target) || statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr {
+			if indexedAssignmentTarget(statement.Target) || scalarDerefAssignmentTarget(statement.Target) || statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr {
 				live = f.liveExpression(statement.Target, live, context)
 			}
 		case statement.Kind == syntax.KindFor:

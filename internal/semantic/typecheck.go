@@ -435,6 +435,10 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindAssignment:
 			target, targetType := c.checkExpression(statement.Target, hir.TypeInvalid)
 			value, actual := c.checkExpression(statement.Expression, targetType)
+			if scalarDerefAssignmentTarget(statement.Target) &&
+				(!hir.FixedArrayScalarElement(targetType) || !directDerefBorrowPath(statement.Target.Children[0])) {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Target.Span, "scalar dereference assignment requires a named mutable reference to an admitted scalar")
+			}
 			hirStatement.Operator = statement.Operator
 			if hirStatement.Operator == "" {
 				hirStatement.Operator = "="
@@ -840,6 +844,13 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		return fixedArray && resolved != nil && resolved.mutable
 	case "view-index":
 		return len(target.Children) == 2 && target.Children[0].Type == hir.MutableBorrow(hir.TypeByteSlice)
+	case "prefix":
+		if !scalarDerefAssignmentTarget(source) || target.Operator != "*" || len(target.Children) != 1 ||
+			!hir.FixedArrayScalarElement(target.Type) || !directDerefBorrowPath(source.Children[0]) {
+			return false
+		}
+		element, mutable, borrowed := hir.BorrowElement(target.Children[0].Type)
+		return borrowed && mutable && element == target.Type
 	case "field-expression":
 		if len(source.Children) != 1 || len(target.Children) != 1 {
 			return false
@@ -853,6 +864,17 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 	default:
 		return false
 	}
+}
+
+func scalarDerefAssignmentTarget(expression *ast.Expression) bool {
+	return expression != nil && expression.Kind == syntax.KindPrefix && expression.Text == "*" && len(expression.Children) == 1
+}
+
+func directDerefBorrowPath(expression *ast.Expression) bool {
+	for expression != nil && expression.Kind == syntax.KindGroup && len(expression.Children) == 1 {
+		expression = expression.Children[0]
+	}
+	return expression != nil && expression.Kind == syntax.KindPath
 }
 
 func assignmentRootPath(expression *ast.Expression) *ast.Expression {
