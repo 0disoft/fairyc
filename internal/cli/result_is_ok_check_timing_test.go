@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"flag"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -35,7 +36,12 @@ type resultIsOkCheckTiming struct {
 	PairedMedian float64  `json:"median_paired_ratio"`
 }
 
+var measureResultIsOkCheckTiming = flag.Bool("fairyc-measure-result-is-ok-check", false, "run the opt-in Result.is_ok check-timing diagnostic")
+
 func TestResultBranchReviewIsOkCheckTiming(t *testing.T) {
+	if !*measureResultIsOkCheckTiming {
+		t.Skip("run the check-timing diagnostic with fairyc_measure_result_is_ok_check_timing")
+	}
 	const pairs = 8
 	const switchTail = ").is_ok"
 	const switchArms = ")) { case .ok(_): { true } case .err(_): { false } }"
