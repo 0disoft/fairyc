@@ -6,6 +6,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/mircodec"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
@@ -30,6 +31,32 @@ b.x = next(ref mut a); assert(a.x == 41); assert(b.x == 41); b.x = b.x + 1; retu
 	outcome, err := interpreter.Execute(decoded, "main::main")
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
 		t.Fatalf("round trip: %+v %v", outcome, err)
+	}
+}
+
+func TestFieldStoreScalarDerefLowersWithoutTargetRead(t *testing.T) {
+	const source = `module main;
+fn void set(ref mut i32 slot) { *slot = 42; }
+fn i32 main() { var i32 value = 1; set(ref mut value); return value; }`
+	result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", source)})
+	if err != nil || !result.Verified {
+		t.Fatalf("compile: %+v %v", result, err)
+	}
+	stores := 0
+	for _, function := range result.MIR.Functions {
+		for _, block := range function.Blocks {
+			for _, operation := range block.Operations {
+				if operation.Kind == mir.OperationDerefStore {
+					stores++
+				}
+				if operation.Kind == mir.OperationUnary && operation.Operator == "*" && function.Name == "main::set" {
+					t.Fatal("store loaded the old value")
+				}
+			}
+		}
+	}
+	if stores != 1 {
+		t.Fatalf("want one dereference store, got %d", stores)
 	}
 }
 

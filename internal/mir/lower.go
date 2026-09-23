@@ -401,6 +401,12 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			})
 			l.live[statement.Expression.Symbol] = false
 		case "assignment":
+			if statement.Target != nil && statement.Target.Kind == "prefix" && statement.Target.Operator == "*" {
+				if err := l.lowerDerefStore(statement); err != nil {
+					return false, err
+				}
+				continue
+			}
 			if statement.Target != nil && statement.Target.Kind == "field-expression" {
 				if err := l.lowerFieldStore(statement); err != nil {
 					return false, err

@@ -7,7 +7,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 	needed := false
 	for _, block := range function.Blocks {
 		for _, op := range block.Operations {
-			needed = needed || op.Kind == OperationFieldStore
+			needed = needed || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore
 		}
 	}
 	if !needed {

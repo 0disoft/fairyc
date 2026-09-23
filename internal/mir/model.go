@@ -278,6 +278,7 @@ const (
 	OperationFieldRead                OperationKind = "field-read"
 	OperationFieldBorrow              OperationKind = "field-borrow"
 	OperationFieldStore               OperationKind = "field-store"
+	OperationDerefStore               OperationKind = "deref-store"
 	OperationViewLength               OperationKind = "view-length"
 	OperationViewEmpty                OperationKind = "view-empty"
 	OperationViewIndexCheck           OperationKind = "view-index-check"
