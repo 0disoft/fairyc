@@ -390,6 +390,7 @@ func TestAnalyzeBuildsContextualResultConstructorsAndSwitch(t *testing.T) {
 fn Result<i32, i32> classify(i32 value) {
     return if (value >= 0) { .ok(value) } else { .err(-value) };
 }
+
 fn i32 unwrap(Result<i32, i32> input) {
     return switch (input) {
         case .ok(value) : { value }
@@ -414,6 +415,53 @@ fn i32 unwrap(Result<i32, i32> input) {
 	}
 	if unwrapReturn.Arms[0].Variant != "ok" || unwrapReturn.Arms[1].Variant != "err" {
 		t.Fatalf("match arms = %+v", unwrapReturn.Arms)
+	}
+}
+
+func TestAnalyzeResultIsOkConsumesResultIntoExistingMatch(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{"main.fy": `module main;
+resource Token { i32 value; cleanup {} }
+fn bool success(Result<Token, i32> input) { return input.is_ok; }
+fn bool failure(Result<i32, Token> input) { return input.is_ok; }
+fn bool scalar(Result<i32, i32> input) { return input.is_ok; }
+`})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 3 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	for _, function := range result.HIR.Modules[0].Functions {
+		value := soleReturnExpression(t, function)
+		if value.Kind != "match" || value.Type != hir.TypeBool || len(value.Arms) != 2 ||
+			value.Arms[0].Variant != "ok" || value.Arms[0].Expression.Value != "true" ||
+			value.Arms[1].Variant != "err" || value.Arms[1].Expression.Value != "false" {
+			t.Fatalf("%s is_ok = %+v", function.Name, value)
+		}
+	}
+}
+
+func TestAnalyzeResultIsOkRequiresPayloadDropEffects(t *testing.T) {
+	t.Parallel()
+	text := `module main;
+@effects(filesystem)
+resource Token { i32 value; cleanup { let i32 marker = this.value; } }
+fn bool check(Result<Token, i32> input) { return input.is_ok; }
+`
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseFlow || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E7102" {
+		t.Fatalf("missing drop effect = %+v", result)
+	}
+}
+
+func TestAnalyzeResultIsOkRejectsNonDroppablePayload(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{"main.fy": `module main;
+@abilities(store, key)
+resource Token { i32 value; cleanup {} }
+fn bool check(Result<Token, i32> input) { return input.is_ok; }
+`})
+	if result.FailedPhase != semantic.PhaseFlow || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1108" {
+		t.Fatalf("non-droppable payload = %+v", result)
 	}
 }
 

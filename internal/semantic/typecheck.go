@@ -1104,6 +1104,26 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	}
 	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, receiver)
+	if successType, errorType, isResult := hir.ResultElements(receiverType); isResult && expression.Text == "is_ok" {
+		result.Kind = "match"
+		for _, arm := range []struct {
+			variant string
+			value   string
+		}{{"ok", "true"}, {"err", "false"}} {
+			binding := c.analyzer.allocateSymbol()
+			bindingSpan := span(c.module.file.Path, expression.Span)
+			payloadType := successType
+			if arm.variant == "err" {
+				payloadType = errorType
+			}
+			c.hir.Locals = append(c.hir.Locals, hir.Local{Symbol: binding, Name: "_", Type: payloadType, Span: bindingSpan})
+			result.Arms = append(result.Arms, hir.MatchArm{
+				Variant: arm.variant, Binding: binding, BindingSpan: bindingSpan,
+				Expression: hir.Expression{Kind: "literal", Type: hir.TypeBool, Span: bindingSpan, Value: arm.value, Symbol: hir.NoSymbol},
+			})
+		}
+		return hir.TypeBool
+	}
 	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice) {
 		switch expression.Text {
 		case "len":

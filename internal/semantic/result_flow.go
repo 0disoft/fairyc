@@ -187,6 +187,16 @@ func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Exp
 		return a.resultFlowIf(module, expression, environment, use)
 	case syntax.KindSwitch:
 		return a.resultFlowMatch(module, expression, environment, use)
+	case syntax.KindFieldExpr:
+		if expression.Text == "is_ok" && len(expression.Children) == 1 && isResultType(a.expressionTypes[expression.Children[0]]) {
+			a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseHandled, mode: "match"})
+			return true
+		}
+		for _, child := range expression.Children {
+			a.resultFlowExpression(module, child, environment, resultUse{kind: resultUseIgnore})
+		}
+		a.applyResultUse(module, expression, environment, use)
+		return true
 	case syntax.KindWhile:
 		return a.resultFlowWhile(module, expression, environment)
 	case syntax.KindRegion:

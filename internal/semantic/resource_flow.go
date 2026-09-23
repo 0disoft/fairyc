@@ -278,7 +278,19 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 	case syntax.KindRecord:
 		a.resourceRecord(module, expression, environment)
 	case syntax.KindFieldExpr:
-		a.resourceField(module, expression, environment, mode)
+		if expression.Text == "is_ok" && len(expression.Children) == 1 && isResultType(a.expressionTypes[expression.Children[0]]) {
+			scrutinee := expression.Children[0]
+			scrutineeMode := resourceRead
+			if a.isResource(a.expressionTypes[scrutinee]) {
+				scrutineeMode = resourceMove
+			}
+			a.resourceExpression(module, scrutinee, environment, scrutineeMode)
+			if scrutineeMode == resourceMove {
+				a.checkResourceValueEffects(&symbol{typ: a.expressionTypes[scrutinee]}, at)
+			}
+		} else {
+			a.resourceField(module, expression, environment, mode)
+		}
 	case syntax.KindIf:
 		reachable = a.resourceIf(module, expression, environment, mode)
 	case syntax.KindWhile:

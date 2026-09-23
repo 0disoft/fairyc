@@ -1572,6 +1572,36 @@ func TestCloneDeepCopiesStructDefinitions(t *testing.T) {
 	}
 }
 
+func TestLowerResultIsOkDropsEitherOwnedPayload(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+resource Token { i32 value; cleanup {} }
+fn bool success(Result<Token, Token> input) { return input.is_ok; }
+`)
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	var payloads, drops int
+	for _, function := range program.Functions {
+		if function.Name != "main::success" {
+			continue
+		}
+		for _, block := range function.Blocks {
+			for _, operation := range block.Operations {
+				if operation.Kind == OperationResultPayload {
+					payloads++
+				}
+				if operation.Kind == OperationDrop {
+					drops++
+				}
+			}
+		}
+	}
+	if payloads != 2 || drops != 2 {
+		t.Fatalf("result is_ok payloads=%d drops=%d, want 2 each", payloads, drops)
+	}
+}
+
 func TestLowerPropagateRebuildsDeclaredResultType(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
