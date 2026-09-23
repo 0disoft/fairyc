@@ -34,5 +34,7 @@ shared or mistyped references and malformed stores. A private artifact round
 trip executes the operation in the interpreter. The Windows `Vec<i32>` source
 probe writes and reads the same element under default and optimized MSVC
 profiles, and rejects an overlapping alias. Generated C contains a direct
-pointer write. These checks establish behavior, not a measured compile-time or
-binary-size regression bound.
+pointer write. These checks establish behavior. A later
+[paired C comparison](../ops/c-budget-scalar-deref-20260924.md) places the
+local-scalar workload within the observed cumulative 8% runtime and EXE
+budget, while leaving sustained performance and vector-slot cost unproven.
