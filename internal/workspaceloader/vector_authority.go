@@ -4,11 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"sync"
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
 )
+
+// Embedded SDK bytes cannot change within a process. Keep the parsed reference
+// private; each authority check still compares the current workspace bytes and AST.
+var referenceVectorSDK = sync.OnceValues(sdkstdlib.LoadVector)
+var referenceVectorCandidateSDK = sync.OnceValues(sdkstdlib.LoadVectorCandidate)
 
 // VectorCandidateStorageOwners verifies exact embedded source authority before
 // selecting disposable compiler owner IDs. A claimed SDK name/digest is not proof.
@@ -22,9 +28,9 @@ func (workspace Workspace) VectorCandidateStorageOwners() ([]hir.PackageID, erro
 // SDKStorageOwners authenticates the selected core-plus-vector source bundle.
 // Module presence requests verification; it never grants authority by itself.
 func (workspace Workspace) SDKStorageOwners() ([]hir.PackageID, error) {
-	load, identity := sdkstdlib.LoadVector, sdkstdlib.SDKIdentity
+	load, identity := referenceVectorSDK, sdkstdlib.SDKIdentity
 	if workspace.vectorCandidate {
-		load, identity = sdkstdlib.LoadVectorCandidate, sdkstdlib.VectorCandidateIdentity
+		load, identity = referenceVectorCandidateSDK, sdkstdlib.VectorCandidateIdentity
 	} else {
 		present := false
 		for _, pkg := range workspace.Packages {
