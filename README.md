@@ -531,6 +531,7 @@ Labels are permitted only for same-module private non-generic direct calls and d
 change source evaluation order. Existing workspaces must update the language pin and refresh locks.
 ADR 0399 advances language to `fairyc-language/17` and SDK to `0.0.0-stage0.62`.
 ADR 0400 adds checked mutable `Vec.at_mut` access in SDK `0.0.0-stage0.63` without changing the language revision.
+SDK `0.0.0-stage0.64` preserves that API and lowers its checked slot address directly in generated C.
 An owned Result now supports `value.is_ok` as the existing two-arm success test,
 including active-payload cleanup and its ability/effect checks. Existing workspaces
 must update the language pin and refresh locks.

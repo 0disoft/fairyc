@@ -1436,4 +1436,6 @@ ADR 0399 advances the exact language pin from `fairyc-language/16` to `/17` and 
 
 ADR 0400 advances only the SDK to `0.0.0-stage0.63` for owner-bound mutable vector element access. The language remains `/17` and runtime ABI remains `/0`. Existing source remains valid; workspaces importing `std::vec` refresh their SDK lock digest.
 
+SDK `0.0.0-stage0.64` keeps the `Vec.at_mut` source contract and replaces its private C slot lookup with an SDK-only, typed element-address operation after the existing bounds check. The compiler verifies the operation and generated C guards null and offset overflow. Language `/17` and runtime ABI `/0` remain unchanged. Workspaces importing `std::vec` refresh their SDK lock digest.
+
 Language 1.0 compatibility, stable native ABI and mangling, stable MIR exchange, binary package ABI, stable `SymbolId`, stable anchors, exact diagnostic-span guarantees, stable debugger formats, and cross-version `.fymap` migration are not Stage 0 promises.
