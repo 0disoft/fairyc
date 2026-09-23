@@ -283,7 +283,7 @@ expose field-link IDs in source order; `expression_text` returns each field name
 Empty records, nesting and trailing commas are admitted. Duplicate fields,
 field types and layout are not checked. Record and field-link nodes consume the
 same expression budget; no separate record arena or unbounded side table exists.
-Failed declarations roll back their nodes before recovery. A shared 4096-node
+Failed declarations roll back their nodes before recovery. A shared 4160-expression-node
 ceiling and 64-active-expression-call limit return status 4 without a result.
 
 Value-block expressions have kind 12: `left` selects a statement-block ID and
@@ -321,7 +321,7 @@ order (sharing the record-field traversal). Name tokens retain exact spelling.
 Trailing commas, duplicate field names and `_` bindings are syntax-only; no
 binding resolution or exhaustiveness check is performed. Whole-value wildcards
 and multiple positional bindings remain unsupported. All pattern/case/link nodes
-use the same 4096-expression-node budget.
+use the same 4160-expression-node budget.
 Case bodies share block and expression depth limits with their enclosing tree.
 
 Contextual variant names such as `.ok`, `.err` and `.none` use kind 28, with no
@@ -517,6 +517,13 @@ includes its terminating semicolon; the header span includes both parentheses.
 The body is not desugared into a while loop. Arbitrary expression-only header
 clauses remain outside this grammar-bounded slice, even where Go syntax recovery
 accepts them for later semantic rejection.
+
+Private statement kind 18 retains `for (let u8 byte in view) { ... }` with the
+item name in `target`, iterable expression in `expression`, body in `first`, and
+item type in `second`. The parser keeps source spans and checks node references;
+the compiler's semantic pass enforces the exact immutable byte-view type. The
+expression arena admits at most 4160 nodes so the parser can parse its own
+updated `bodies.fy`; the type and statement arenas remain bounded at 4096.
 
 Floating tokens (kind 6) are preserved as literal expressions with their original
 token, byte span and lexer-normalized spelling. The parser performs no numeric

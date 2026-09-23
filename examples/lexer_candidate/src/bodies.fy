@@ -295,38 +295,55 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
         value.first = block(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
         if (value.first == 0) { return 0; }
     } else if (state::take(stream,cursor,b"for")) {
-        value.kind = 14;
         let usize header_start = state::current(stream,cursor).start;
         if (!state::expect(stream,cursor,b"(",4)) { return 0; }
-        var usize initial = 0; var usize post = 0;
-        if (!state::take(stream,cursor,b";")) {
-            initial = statement(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
-            if (initial == 0) { return 0; }
-            if (cursor.statement_kind != 2 && cursor.statement_kind != 4) { return 0; }
-        }
-        if (!word(stream,cursor.index,b";")) {
+        if (tokens::byte_for_header(stream,cursor.index)) {
+            value.kind = 18;
+            state::advance(stream,cursor);
+            value.second = read_type(stream,cursor,type_nodes);
+            if (value.second == 0) { return 0; }
+            let usize name_token = cursor.index;
+            let scanner::TokenInfo name = state::current(stream,cursor);
+            if (name.kind != 3) { cursor.expected = 1; return 0; }
+            state::advance(stream,cursor);
+            value.target = state::append(nodes,cursor,state::node_value(17,name.start,name.end,name_token,0,0));
+            if (value.target == 0 || !state::expect(stream,cursor,b"in",23)) { return 0; }
             value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
-            if (value.expression == 0) { return 0; }
+            if (value.expression == 0 || !state::expect(stream,cursor,b")",5)) { return 0; }
+            value.first = block(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
+            if (value.first == 0) { return 0; }
+        } else {
+            value.kind = 14;
+            var usize initial = 0; var usize post = 0;
+            if (!state::take(stream,cursor,b";")) {
+                initial = statement(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
+                if (initial == 0) { return 0; }
+                if (cursor.statement_kind != 2 && cursor.statement_kind != 4) { return 0; }
+            }
+            if (!word(stream,cursor.index,b";")) {
+                value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
+                if (value.expression == 0) { return 0; }
+            }
+            if (!state::expect(stream,cursor,b";",8)) { return 0; }
+            if (!word(stream,cursor.index,b")")) {
+                var state::Statement clause = state::statement_value(4,state::current(stream,cursor).start,0);
+                clause.target = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
+                if (clause.target == 0 || !tokens::assignment(stream,cursor.index)) { return 0; }
+                clause.operator = cursor.index; state::advance(stream,cursor);
+                clause.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
+                if (clause.expression == 0) { return 0; }
+                clause.end = cursor.previous_end;
+                post = state::append_statement(statements,cursor,clause);
+                if (post == 0) { return 0; }
+            }
+            if (!state::expect(stream,cursor,b")",5)) { return 0; }
+            var state::Statement header = state::statement_value(15,header_start,cursor.previous_end);
+            header.first = initial; header.second = post;
+            value.second = state::append_statement(statements,cursor,header);
+            if (value.second == 0) { return 0; }
+            value.first = block(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
+            if (value.first == 0) { return 0; }
         }
-        if (!state::expect(stream,cursor,b";",8)) { return 0; }
-        if (!word(stream,cursor.index,b")")) {
-            var state::Statement clause = state::statement_value(4,state::current(stream,cursor).start,0);
-            clause.target = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
-            if (clause.target == 0 || !tokens::assignment(stream,cursor.index)) { return 0; }
-            clause.operator = cursor.index; state::advance(stream,cursor);
-            clause.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
-            if (clause.expression == 0) { return 0; }
-            clause.end = cursor.previous_end;
-            post = state::append_statement(statements,cursor,clause);
-            if (post == 0) { return 0; }
-        }
-        if (!state::expect(stream,cursor,b")",5)) { return 0; }
-        var state::Statement header = state::statement_value(15,header_start,cursor.previous_end);
-        header.first = initial; header.second = post;
-        value.second = state::append_statement(statements,cursor,header);
-        if (value.second == 0) { return 0; }
-        value.first = block(stream,cursor,nodes,entries,statements,type_nodes,depth + 1,false);
-        if (value.first == 0) { return 0; }
     } else if (state::take(stream, cursor, b"while")) {
         value.kind = 8;
         if (!state::expect(stream, cursor, b"(", 4)) { return 0; }

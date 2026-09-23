@@ -72,9 +72,11 @@ The remaining release evidence includes each of the three real caller shapes,
 early exits, nested loops and cleanup. Negative fixtures cover wrong or mutable
 iterable types, effectful expressions, binding escape and owner mutation while
 iterating. The C-relative cost comparison below is still pending.
-The Fairy-written parser candidate does not yet recognize this new form, so
-its three workload loops retain their explicit-index spelling until that parser
-can parse its own updated source.
+The Fairy-written parser candidate now retains this form as statement kind 18
+and validates its node references. Its expression arena bound grows from 4096
+to 4160 nodes to parse its own updated source without changing the separate
+type and statement bounds. The three workload loops retain their explicit-index
+spelling until their native behavior and cost comparison is complete.
 Compare the same algorithm in explicit-index Fairy, the new form, and
 independent C at low and optimized profiles. Check generated functions,
 runtime and EXE size, build/check time, and unused-syntax overhead; the

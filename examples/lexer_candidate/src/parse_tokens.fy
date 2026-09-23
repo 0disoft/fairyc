@@ -35,6 +35,20 @@ pub fn bool inferred_binding(ref scanner::Stream stream, usize index) {
     return next < scanner::token_count(stream) && word(stream,next,b"=");
 }
 
+pub fn bool byte_for_header(ref scanner::Stream stream, usize index) {
+    if (!word(stream,index,b"let")) { return false; }
+    var usize next = index;
+    var usize checked = 0;
+    while (checked < 16 && next < scanner::token_count(stream)) {
+        if (word(stream,next,b"in")) { return true; }
+        if (word(stream,next,b"=") || word(stream,next,b";") || word(stream,next,b")")) { return false; }
+        if (next + 1 >= scanner::token_count(stream)) { return false; }
+        next = significant(stream,next + 1);
+        checked += 1;
+    }
+    return false;
+}
+
 pub fn usize significant(ref scanner::Stream stream, usize start) {
     var usize index = start;
     while (scanner::token_info(stream,index).kind == 2 && index + 1 < scanner::token_count(stream)) { index += 1; }

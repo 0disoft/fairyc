@@ -32,7 +32,7 @@ pub fn bool expect(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] t
 }
 
 pub fn usize append(ref mut v::Vec<Node> nodes, ref mut Cursor cursor, Node node) {
-    if (cursor.nodes >= 4096) { cursor.status = 4; return 0; }
+    if (cursor.nodes >= 4160) { cursor.status = 4; return 0; }
     if (!v::push<Node>(nodes, node).is_ok) { cursor.status = 3; return 0; }
     cursor.nodes = cursor.nodes + 1;
     cursor.expression_kind = node.kind;

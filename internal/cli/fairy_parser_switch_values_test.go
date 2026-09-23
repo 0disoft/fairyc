@@ -121,21 +121,21 @@ fn i32 main() {
 		fmt.Fprintf(&p, "assert(switch(make(b%s)) { case .ok(parsed): { rejected(parsed,%d) } case .err(_): {1} }==0);\n", strconv.Quote(input), declarations)
 	}
 	p.WriteString(`
-var usize n=818;
-while(n<=819) {
+var usize n=830;
+while(n<=831) {
  var bytes::Buffer data=bytes::empty(); discard bytes::append(ref mut data,b"module main;fn void f(){return switch(a+a+a){");
  var usize i=0; while(i<n) { discard bytes::append(ref mut data,b"case .ok(x):{1}"); i+=1; }
  discard bytes::append(ref mut data,b"};}");
- let i32 r=switch(make(bytes::view(ref data))) { case .ok(parsed): { assert(n==818 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4096 && syntax::switch_case_count(ref parsed,4096)==818); 0 } case .err(status): { assert(n==819 && status==4); 0 } }; assert(r==0); n+=1;
+ let i32 r=switch(make(bytes::view(ref data))) { case .ok(parsed): { assert(n==830 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4156 && syntax::switch_case_count(ref parsed,4156)==830); 0 } case .err(status): { assert(n==831 && status==4); 0 } }; assert(r==0); n+=1;
 }
-n=2045;
-while(n<=2046) {
+n=2077;
+while(n<=2078) {
  var bytes::Buffer data=bytes::empty(); discard bytes::append(ref mut data,b"module main;fn void f(){return switch(x){case .Pair{");
  var usize i=0; while(i<n) { discard bytes::append(ref mut data,b".x=v,"); i+=1; }
  discard bytes::append(ref mut data,b"}:{0}};}");
  let i32 r=switch(make(bytes::view(ref data))) {
-  case .ok(parsed): { assert(n==2045 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4096 && syntax::pattern_field_count(ref parsed,4092)==2045 && integrity::valid(ref parsed)); 0 }
-  case .err(status): { assert(n==2046 && status==4); 0 }
+  case .ok(parsed): { assert(n==2077 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4160 && syntax::pattern_field_count(ref parsed,4156)==2077 && integrity::valid(ref parsed)); 0 }
+  case .err(status): { assert(n==2078 && status==4); 0 }
  }; assert(r==0); n+=1;
 }
 n=31;

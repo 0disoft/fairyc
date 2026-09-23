@@ -27,6 +27,7 @@ pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token
 // 15 header: first optional binding/assignment initializer, second optional assignment.
 // 16 burn retains its operand in expression; syntax does not consume resources.
 // 17 region: target is a kind-17 name node, expression the arena, first the body.
+// 18 byte for: target is the item name, expression the view, first the body, second the item type.
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;

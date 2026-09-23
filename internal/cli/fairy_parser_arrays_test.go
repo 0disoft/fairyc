@@ -46,12 +46,12 @@ while(depth<=64) {
  discard bytes::append(ref mut data,b";}");
  let i32 r=switch(make(bytes::view(ref data))){case .ok(parsed):{assert(depth==63 && syntax::problem_count(ref parsed)==0);0}case .err(status):{assert(depth==64 && status==4);0}};assert(r==0);depth+=1;
 }
-var usize count=2047;
-while(count<=2048) {
+var usize count=2079;
+while(count<=2080) {
  var bytes::Buffer data=bytes::empty();discard bytes::append(ref mut data,b"module main;fn void f(){return +[");
  var usize i=0;while(i<count){discard bytes::append(ref mut data,b"0,");i+=1;}
  discard bytes::append(ref mut data,b"];}");
- let i32 r=switch(make(bytes::view(ref data))){case .ok(parsed):{assert(count==2047 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4096);0}case .err(status):{assert(count==2048 && status==4);0}};assert(r==0);count+=1;
+ let i32 r=switch(make(bytes::view(ref data))){case .ok(parsed):{assert(count==2079 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4160);0}case .err(status):{assert(count==2080 && status==4);0}};assert(r==0);count+=1;
 }
 return 0;}`)
 	runParserProbe(t, p.String())
