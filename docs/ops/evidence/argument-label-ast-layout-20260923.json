@@ -1,0 +1,326 @@
+{
+  "schema": "fairyc.argument-ast-layout/v1",
+  "compiler_head": "bd0085b0dcf7b159268ea75debad9652afb2d336",
+  "harness_sha256": {
+    "tools/measure-argument-ast-layout.ts": "c240741a859ba5435d41abe940594662f26c9b985b024bab6fdd95a8d76cca68",
+    "internal/cli/argument_labels_ast_layout_measure_test.go": "104e7b63eedcea2948be98f3fc97381c2920ed22643261270157e0ec4482b3e7"
+  },
+  "overlay_sha256": {
+    "internal/ast/ast.go": "b8adf7084dcc46b84585a0d6e21e8619efcc69f0b296b8021090f960871cdf1b",
+    "internal/genericsource/clone.go": "0f193ff9d4ad901505c04df7a3212ab07c1c4a493cf2cf5584fcdffaeddeb337",
+    "internal/semantic/argument_labels.go": "d8de5c82b503683d1d3273b5623bc5a3e601b6b189c42d4d89f8eb97a56981af",
+    "internal/cli/fairy_parser_body_tree_test.go": "2a94ad2ab645e647a827b4c2d66e7a874b4935e9b31fdb690da0816090dceaf8",
+    "internal/cli/argument_labels_ast_cost_test.go": "55feb8da8d74ead61adcf05dfbc90d4ec717e9510e8f14e0e89bf1e838d3bd23",
+    "internal/cli/argument_labels_cache_attribution_test.go": "55feb8da8d74ead61adcf05dfbc90d4ec717e9510e8f14e0e89bf1e838d3bd23"
+  },
+  "binary_sha256": {
+    "current": "80d0377aa93de7e7d1e05cb69b587c4558a788739b377fa2910b728d0f42df34",
+    "without-label-field": "99bcb3793140e2c0df70a167f91075a68c4a206679f913b5e408c5d62512b58c"
+  },
+  "method": "Six alternating isolated process pairs, GOMAXPROCS=1; four fresh load/parse/check/verified-MIR iterations after one warmup per process. Source setup, process startup, Go build, and MIR JSON hashing excluded. Go TotalAlloc and Mallocs are per-iteration cumulative differences, not retained heap or peak RSS. Experimental compact lane removes label support and test-only label inspections; both lanes process the same unlabeled scanner source. This is not a shippable compiler variant or a language-wide speed claim.",
+  "paired_median_time_ratio_compact_over_current": 0.9392329654843574,
+  "paired_median_alloc_byte_delta": -448239,
+  "paired_median_malloc_delta": 0,
+  "pairs": [
+    {
+      "pair": 1,
+      "first": "current",
+      "current": {
+        "ast_expression_bytes": 136,
+        "check_ns_per_iteration": 518182000,
+        "gc_cycles": 99,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 169418140,
+        "go_mallocs_per_iteration": 446046,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "current",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      },
+      "compact": {
+        "ast_expression_bytes": 128,
+        "check_ns_per_iteration": 456875775,
+        "gc_cycles": 96,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 168973000,
+        "go_mallocs_per_iteration": 446038,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "without-label-field",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "first": "without-label-field",
+      "current": {
+        "ast_expression_bytes": 136,
+        "check_ns_per_iteration": 536440800,
+        "gc_cycles": 95,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 169416788,
+        "go_mallocs_per_iteration": 446042,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "current",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      },
+      "compact": {
+        "ast_expression_bytes": 128,
+        "check_ns_per_iteration": 460000600,
+        "gc_cycles": 101,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 168965450,
+        "go_mallocs_per_iteration": 446045,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "without-label-field",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      }
+    },
+    {
+      "pair": 3,
+      "first": "current",
+      "current": {
+        "ast_expression_bytes": 136,
+        "check_ns_per_iteration": 425695675,
+        "gc_cycles": 99,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 169408118,
+        "go_mallocs_per_iteration": 446042,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "current",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      },
+      "compact": {
+        "ast_expression_bytes": 128,
+        "check_ns_per_iteration": 407306950,
+        "gc_cycles": 101,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 168963426,
+        "go_mallocs_per_iteration": 446038,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "without-label-field",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      }
+    },
+    {
+      "pair": 4,
+      "first": "without-label-field",
+      "current": {
+        "ast_expression_bytes": 136,
+        "check_ns_per_iteration": 399588300,
+        "gc_cycles": 96,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 169408616,
+        "go_mallocs_per_iteration": 446042,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "current",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      },
+      "compact": {
+        "ast_expression_bytes": 128,
+        "check_ns_per_iteration": 477424800,
+        "gc_cycles": 99,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 168966332,
+        "go_mallocs_per_iteration": 446046,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "without-label-field",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      }
+    },
+    {
+      "pair": 5,
+      "first": "current",
+      "current": {
+        "ast_expression_bytes": 136,
+        "check_ns_per_iteration": 458870000,
+        "gc_cycles": 97,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 169418408,
+        "go_mallocs_per_iteration": 446042,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "current",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      },
+      "compact": {
+        "ast_expression_bytes": 128,
+        "check_ns_per_iteration": 521312725,
+        "gc_cycles": 99,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 168964474,
+        "go_mallocs_per_iteration": 446039,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "without-label-field",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      }
+    },
+    {
+      "pair": 6,
+      "first": "without-label-field",
+      "current": {
+        "ast_expression_bytes": 136,
+        "check_ns_per_iteration": 452839200,
+        "gc_cycles": 96,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 169426900,
+        "go_mallocs_per_iteration": 446041,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "current",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      },
+      "compact": {
+        "ast_expression_bytes": 128,
+        "check_ns_per_iteration": 417365050,
+        "gc_cycles": 97,
+        "go": "go1.26.4",
+        "go_alloc_bytes_per_iteration": 168974006,
+        "go_mallocs_per_iteration": 446044,
+        "gomaxprocs": 1,
+        "iterations": 4,
+        "lane": "without-label-field",
+        "mir_functions": 212,
+        "mir_json_sha256": "435907e33f49ed234083a7826fccba26d2c836e20ea9e3a1225eb0b836717b86",
+        "source_sha256": {
+          "fairy.toml": "82cbd740efd46a7f221791a579cca16e87db1faf79dc23c8f930851514b4dd9a",
+          "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+          "src/diagnostics.fy": "b37f43104048d0a17f8f14afd0442c138e07709106a97ec8b9f1be8fd11fe843",
+          "src/main.fy": "a58a5dd727e0aefe858a4c26babe935c0e469cd85bf6f931523a9a1cd138719c",
+          "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+          "src/scanner.fy": "f74811dc9cd008d3afcfe397a75eaaa4d0048caae1a2152aa18f5fca019325dd",
+          "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+          "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        }
+      }
+    }
+  ]
+}
