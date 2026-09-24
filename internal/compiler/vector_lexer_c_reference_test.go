@@ -597,9 +597,9 @@ int main(void) {
 				}
 			})
 			t.Run("diagnostic payload ownership", func(t *testing.T) {
-				if !strings.Contains(scannerCBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n") ||
-					!strings.Contains(scannerCGeometricBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n") {
-					t.Fatal("C budget images omitted owned diagnostic payloads")
+				if !strings.Contains(scannerCBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT\n") ||
+					!strings.Contains(scannerCGeometricBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT\n") {
+					t.Fatal("C budget images omitted the owned diagnostic Entry layout")
 				}
 				const payloadProbe = `
 int main(void) {
@@ -729,7 +729,7 @@ func scannerCGeometricBenchmarkSource(t *testing.T) string {
 
 func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n"
+	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT\n"
 	if geometric {
 		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
 	}

@@ -30,6 +30,9 @@ enum { FC_CANDIDATE_DIAGNOSTICS = 256 };
 #ifdef FC_CANDIDATE_TOKEN_LIMIT
 enum { FC_CANDIDATE_TOKENS = 1 << 20 };
 #endif
+#if defined(FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT) && !defined(FC_CANDIDATE_DIAGNOSTIC_PAYLOAD)
+#error FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT requires owned diagnostic payloads
+#endif
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
 enum { FC_NO_TRIVIA, FC_PREAMBLE, FC_WHITESPACE, FC_LINE_COMMENT,
@@ -41,6 +44,20 @@ struct fc_token {
     const unsigned char *cooked;
     size_t cooked_length;
 };
+// Only the candidate budget lane uses the Fairy Entry/Buffer field shape.
+// The broad Go-oracle reference retains its independently readable strings.
+#ifdef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+struct fc_diagnostic_buffer {
+    unsigned char *data;
+    size_t capacity, alignment, length;
+};
+struct fc_diagnostic {
+    uint32_t code;
+    size_t start, end;
+    unsigned char exit_repair;
+    struct fc_diagnostic_buffer token;
+};
+#else
 struct fc_diagnostic {
     const char *code, *repair, *token;
     size_t start, end;
@@ -48,6 +65,7 @@ struct fc_diagnostic {
     size_t token_length;
 #endif
 };
+#endif
 struct fc_scanner {
     const unsigned char *source;
     size_t length, position, token_count, diagnostic_count;
@@ -170,6 +188,36 @@ static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
     fc_token_unlimited(s, kind, trivia, start, end, cooked, cooked_length);
 }
 
+#ifdef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+static uint32_t fc_diagnostic_number(const char *code) {
+    if (strcmp(code, "E0001") == 0) return 1u;
+    if (strcmp(code, "E0004") == 0) return 4u;
+    if (strcmp(code, "E0005") == 0) return 5u;
+    if (strcmp(code, "E0006") == 0) return 6u;
+    if (strcmp(code, "E0010") == 0) return 10u;
+    abort();
+}
+
+static const char *fc_diagnostic_code_text(const struct fc_diagnostic *d) {
+    switch (d->code) {
+        case 1u: return "E0001";
+        case 4u: return "E0004";
+        case 5u: return "E0005";
+        case 6u: return "E0006";
+        case 10u: return "E0010";
+        default: abort();
+    }
+}
+#endif
+
+static const unsigned char *fc_diagnostic_token_data(const struct fc_diagnostic *d) {
+#ifdef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+    return d->token.data;
+#else
+    return (const unsigned char *)d->token;
+#endif
+}
+
 static void fc_diagnostic(struct fc_scanner *s, const char *code,
                           size_t start, size_t end, const char *repair,
                           const char *token) {
@@ -209,15 +257,27 @@ static void fc_diagnostic(struct fc_scanner *s, const char *code,
         return;
     }
 #endif
+#ifdef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+    struct fc_diagnostic value = {0};
+    value.code = fc_diagnostic_number(code);
+    value.start = start;
+    value.end = end;
+    value.exit_repair = (unsigned char)(strcmp(repair, "exit") == 0);
+    value.token = (struct fc_diagnostic_buffer){(unsigned char *)owned,
+                                                token_length, 1u, token_length};
+#else
     struct fc_diagnostic value = {code, repair, token, start, end};
 #ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
     value.token_length = token_length;
+#endif
 #endif
     s->diagnostics[s->diagnostic_count++] = value;
 }
 
 static size_t fc_diagnostic_token_length(const struct fc_diagnostic *diagnostic) {
-#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+#ifdef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+    return diagnostic->token.length;
+#elif defined(FC_CANDIDATE_DIAGNOSTIC_PAYLOAD)
     return diagnostic->token_length;
 #else
     return strlen(diagnostic->token);
@@ -1000,16 +1060,22 @@ static int fc_compare_diagnostic(const void *left, const void *right) {
     const struct fc_diagnostic *b = (const struct fc_diagnostic *)right;
     if (a->start != b->start) return a->start < b->start ? -1 : 1;
     if (a->end != b->end) return a->end < b->end ? -1 : 1;
+#ifdef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+    if (a->code != b->code) return a->code < b->code ? -1 : 1;
+    if (a->exit_repair != b->exit_repair)
+        return a->exit_repair < b->exit_repair ? -1 : 1;
+#else
     int value = strcmp(a->code, b->code);
     if (value != 0) return value;
     value = strcmp(a->repair, b->repair);
     if (value != 0) return value;
+#endif
     size_t a_length = fc_diagnostic_token_length(a);
     size_t b_length = fc_diagnostic_token_length(b);
     size_t minimum = a_length < b_length ? a_length : b_length;
     if (minimum != 0) {
-        value = memcmp(a->token, b->token, minimum);
-        if (value != 0) return value;
+        int token_cmp = memcmp(fc_diagnostic_token_data(a), fc_diagnostic_token_data(b), minimum);
+        if (token_cmp != 0) return token_cmp;
     }
     return a_length == b_length ? 0 : a_length < b_length ? -1 : 1;
 }
@@ -1032,9 +1098,16 @@ static void fc_print(const struct fc_scanner *s) {
     }
     for (size_t i = 0; i < s->diagnostic_count; i++) {
         const struct fc_diagnostic *diagnostic = &s->diagnostics[i];
-        printf("D %s %zu %zu %s ", diagnostic->code, diagnostic->start,
-               diagnostic->end, diagnostic->repair);
-        fc_hex((const unsigned char *)diagnostic->token,
+#ifdef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+        const char *code = fc_diagnostic_code_text(diagnostic);
+        const char *repair = diagnostic->exit_repair ? "exit" : "none";
+#else
+        const char *code = diagnostic->code;
+        const char *repair = diagnostic->repair;
+#endif
+        printf("D %s %zu %zu %s ", code, diagnostic->start,
+               diagnostic->end, repair);
+        fc_hex(fc_diagnostic_token_data(diagnostic),
                fc_diagnostic_token_length(diagnostic));
         putchar('\n');
     }
@@ -1052,8 +1125,8 @@ static void fc_release_cooked(const struct fc_scanner *s) {
 static void fc_release_diagnostics(const struct fc_scanner *s) {
 #ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
     for (size_t i = 0; i < s->diagnostic_count; i++) {
-        if (s->diagnostics[i].token_length != 0)
-            free((void *)s->diagnostics[i].token);
+        if (fc_diagnostic_token_length(&s->diagnostics[i]) != 0)
+            free((void *)fc_diagnostic_token_data(&s->diagnostics[i]));
     }
 #else
     (void)s;

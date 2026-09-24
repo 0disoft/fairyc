@@ -260,9 +260,8 @@ Runs with 256, 257 and 258 invalid bytes match the Go lexer exactly in both
 C storage modes under low and optimized MSVC. The actual Fairy scanner checks
 the same boundary's token count, diagnostic count, terminal span and EOF.
 This establishes the diagnostic-count boundary for those inputs, not all
-multi-diagnostic lexical paths. Other low-budget recognition paths, combined
-limits and diagnostic record layout remain unproven, so this is not a complete
-C-relative baseline.
+multi-diagnostic lexical paths. Other low-budget recognition paths and combined
+limits remain unproven, so this is not a complete C-relative baseline.
 The C budget images also apply the candidate's 1,048,576-token default limit.
 A separate probe sets limits 0 through 3 and compares both C storage modes
 against the Go lexer under low and optimized MSVC. Empty input, exact-limit
@@ -283,8 +282,14 @@ the payload before reserving a geometric diagnostic slot, matching Fairy's
 `bytes::copy` then `v::push<Entry>` order. Fault-injected low/optimized MSVC
 probes cover failure of each allocation and success: both failures return
 storage status 3, publish no diagnostic and leave no allocation live after
-caller cleanup. This covers one nonempty diagnostic path, not identical record
-layout, all allocation failures or a new runtime/EXE measurement.
+caller cleanup. This covers one nonempty diagnostic path, not all allocation
+failures or a new runtime/EXE measurement. Both C budget storage lanes now use
+the declared Fairy `diagnostics::Entry` field shape: numeric code, two byte
+positions, repair flag and an owned four-word Buffer descriptor. A C11 MSVC
+probe asserts the 64-byte record and field offsets, and checks the retained
+payload, ordering and Go-observed output under low and optimized profiles in
+both storage lanes. The broad Go-oracle C build keeps its original record.
+This target-layout proof is not a stable runtime-cost or full-failure verdict.
 The measured short sample is inside all three supported ranges; a broader
 budget comparison needs the same accepted input and limit behavior in both
 implementations before using executable-size or runtime ratios as a gate.
@@ -366,8 +371,8 @@ access is not equivalent to the current source loop.
    `Vec<Token>` and `Vec<diagnostics::Entry>`; the up-front C storage lane
    remains available. Use the faster equivalent C lane for runtime and the
    smaller equivalent C image for size when applying the gate.
-   Diagnostic record layout, failure paths and remaining scanner limits still
-   need parity; nonempty diagnostic payload copies are now modeled in C.
+   The target C diagnostic record now mirrors the Fairy source shape, while
+   other failure paths and remaining scanner limits still need parity.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
