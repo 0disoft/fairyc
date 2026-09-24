@@ -169,6 +169,7 @@ fn i32 main() {
 	}{
 		{name: "empty", body: "        assert(false);", returned: "    return 42;", expected: 42},
 		{name: "ordered control", setup: pushes, body: body, returned: "    return 40 + sum;", expected: 44},
+		{name: "early return cleanup", setup: pushes, body: "        if (*item == 3) { return 43; }", returned: "    return 9;", expected: 43},
 	} {
 		t.Run(sample.name, func(t *testing.T) {
 			for _, form := range []struct {
