@@ -188,10 +188,12 @@ keywords, trivia, comments, punctuation, UTF-8 recovery and diagnostics under
 low and optimized Windows MSVC, compared with the Go lexer oracle. A subsequent
 integer-cooking step covers decimal, binary and hexadecimal values beyond 64
 bits, invalid spellings and the representative cooked-number/unclosed-comment
-input. Floats and strings still return an unsupported status. This remains
-insufficient for an 8% C budget baseline: remaining lexical forms, limits,
-storage and output must be implemented and checked before timing or comparing
-executable sizes.
+input. A bounded decimal-float step now checks exponent normalization and
+malformed spellings against the same oracle. Strings and decimal expansions
+larger than 65,536 cooked bytes still return an unsupported status. This
+remains insufficient for an 8% C budget baseline: remaining lexical forms,
+limits, storage and output must be implemented and checked before timing or
+comparing executable sizes.
 
 ## Proposed first boundary
 

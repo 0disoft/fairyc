@@ -1,5 +1,6 @@
-// Independent C11 lexical reference. Strings and floats still return an
-// unsupported status; this is not yet an equivalent full-scanner budget lane.
+// Independent C11 lexical reference. Strings and large decimal expansions
+// still return an unsupported status; this is not yet a full-scanner budget lane.
+#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,8 @@
 #include <io.h>
 #endif
 
-enum { FC_MAX_SOURCE = 32768, FC_UNSUPPORTED = 7, FC_BAD_INPUT = 8 };
+enum { FC_MAX_SOURCE = 32768, FC_MAX_COOKED = 65536,
+       FC_UNSUPPORTED = 7, FC_BAD_INPUT = 8 };
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
 enum { FC_NO_TRIVIA, FC_PREAMBLE, FC_WHITESPACE, FC_LINE_COMMENT,
@@ -122,6 +124,94 @@ static int fc_cook_integer(const unsigned char *raw, size_t length,
     return 1;
 }
 
+// Return 1 for cooked decimal, 0 for an invalid spelling, -1 on OOM and
+// -2 when its expansion exceeds this still-partial reference's limit.
+static int fc_cook_float(const unsigned char *raw, size_t length,
+                          unsigned char **cooked, size_t *cooked_length) {
+    unsigned char *clean = (unsigned char *)malloc(length + 1u);
+    if (clean == NULL) return -1;
+    size_t clean_length = 0;
+    for (size_t i = 0; i < length; i++) {
+        if (raw[i] != '_') clean[clean_length++] = raw[i];
+    }
+    clean[clean_length] = 0;
+    size_t exponent_at = clean_length;
+    for (size_t i = 0; i < clean_length; i++) {
+        if (clean[i] == 'e' || clean[i] == 'E') { exponent_at = i; break; }
+    }
+    long long exponent = 0;
+    if (exponent_at < clean_length) {
+        char *end = NULL;
+        errno = 0;
+        exponent = strtoll((const char *)clean + exponent_at + 1u, &end, 10);
+        if (errno == ERANGE || end == (char *)clean + exponent_at + 1u || *end != 0) {
+            free(clean); return 0;
+        }
+    }
+    size_t integer_length = 0, fraction_length = 0;
+    int dot = 0, valid = 1;
+    for (size_t i = 0; i < exponent_at; i++) {
+        if (clean[i] == '.') {
+            if (dot) { valid = 0; break; }
+            dot = 1;
+        } else if (!fc_decimal_digit(clean[i])) {
+            valid = 0; break;
+        } else if (dot) fraction_length++;
+        else integer_length++;
+    }
+    if (!valid || integer_length == 0 || (dot && fraction_length == 0) ||
+        (!dot && exponent_at == clean_length)) {
+        free(clean); return 0;
+    }
+    unsigned char *digits = (unsigned char *)malloc(integer_length + fraction_length + 1u);
+    if (digits == NULL) { free(clean); return -1; }
+    size_t digit_count = 0;
+    for (size_t i = 0; i < exponent_at; i++) {
+        if (clean[i] != '.') digits[digit_count++] = clean[i];
+    }
+    free(clean);
+    size_t first = 0;
+    while (first < digit_count && digits[first] == '0') first++;
+    if (first == digit_count) {
+        digits[0] = '0';
+        digit_count = 1;
+        first = 0;
+    }
+    size_t significant = digit_count - first;
+    if (exponent < -(long long)FC_MAX_COOKED ||
+        exponent > (long long)FC_MAX_COOKED) {
+        free(digits); return -2;
+    }
+    long long places = (long long)fraction_length - exponent;
+    size_t output_length = places <= 0 ? significant + (size_t)-places :
+                           places >= (long long)significant ? 2u + (size_t)places :
+                           significant + 1u;
+    if (output_length > FC_MAX_COOKED) { free(digits); return -2; }
+    unsigned char *output = (unsigned char *)malloc(output_length);
+    if (output == NULL) { free(digits); return -1; }
+    if (places <= 0) {
+        memcpy(output, digits + first, significant);
+        memset(output + significant, '0', output_length - significant);
+    } else if (places >= (long long)significant) {
+        output[0] = '0'; output[1] = '.';
+        memset(output + 2, '0', (size_t)places - significant);
+        memcpy(output + 2u + (size_t)places - significant, digits + first, significant);
+    } else {
+        size_t whole = significant - (size_t)places;
+        memcpy(output, digits + first, whole);
+        output[whole] = '.';
+        memcpy(output + whole + 1u, digits + first + whole, (size_t)places);
+    }
+    free(digits);
+    if (places > 0) {
+        while (output_length > 0 && output[output_length - 1u] == '0') output_length--;
+        if (output_length > 0 && output[output_length - 1u] == '.') output_length--;
+    }
+    *cooked = output;
+    *cooked_length = output_length;
+    return 1;
+}
+
 static int fc_scan_number(struct fc_scanner *s) {
     size_t start = s->position;
     int is_float = 0;
@@ -155,13 +245,16 @@ static int fc_scan_number(struct fc_scanner *s) {
         while (s->position < s->length && fc_identifier_continue(s->source[s->position]))
             s->position++;
     }
-    if (is_float) return FC_UNSUPPORTED;
     unsigned char *cooked = NULL;
     size_t cooked_length = 0;
-    int valid = fc_cook_integer(s->source + start, s->position - start,
-                                &cooked, &cooked_length);
+    int valid = is_float ? fc_cook_float(s->source + start, s->position - start,
+                                        &cooked, &cooked_length) :
+                           fc_cook_integer(s->source + start, s->position - start,
+                                           &cooked, &cooked_length);
+    if (valid == -2) return FC_UNSUPPORTED;
     if (valid < 0) return 3;
-    fc_token(s, FC_INTEGER, FC_NO_TRIVIA, start, s->position, cooked, cooked_length);
+    fc_token(s, is_float ? FC_FLOAT : FC_INTEGER, FC_NO_TRIVIA, start,
+             s->position, cooked, cooked_length);
     if (!valid) fc_diagnostic(s, "E0004", start, s->position, "none", "");
     return 0;
 }
@@ -326,7 +419,8 @@ static void fc_print(const struct fc_scanner *s) {
 
 static void fc_release_cooked(const struct fc_scanner *s) {
     for (size_t i = 0; i < s->token_count; i++) {
-        if (s->tokens[i].kind == FC_INTEGER) free((void *)s->tokens[i].cooked);
+        if (s->tokens[i].kind == FC_INTEGER || s->tokens[i].kind == FC_FLOAT)
+            free((void *)s->tokens[i].cooked);
     }
 }
 
