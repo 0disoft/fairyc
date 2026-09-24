@@ -122,3 +122,89 @@ fn ref i32 leak(ref i32 fallback) {
 	t.Fatalf("local vector item escaped without a borrow error: %+v %+v",
 		result.Analysis.Semantic.Diagnostics, result.Analysis.Semantic.Unsupported)
 }
+
+const vectorForNativeProbe = `
+int32_t fairyc_fixture_vector_clean(void) {
+    return vector_live == 0 && vector_allocations == vector_frees ? 1 : 0;
+}
+`
+
+func TestPrivateVectorSDKCandidateLoopNativeParity(t *testing.T) {
+	const header = `module main;
+import std::vec as v;
+import std::bytes as bytes;
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+fn i32 exercise() {
+    var v::Vec<i32> values = v::empty<i32>();
+`
+	const footer = `
+}
+fn i32 main() {
+    let i32 result = exercise();
+    assert(unsafe { clean() } == 1);
+    return result;
+}`
+	const pushes = `
+    assert(switch (v::push<i32>(ref mut values, 1)) { case .ok(_) : { true } case .err(_) : { false } });
+    assert(switch (v::push<i32>(ref mut values, 2)) { case .ok(_) : { true } case .err(_) : { false } });
+    assert(switch (v::push<i32>(ref mut values, 3)) { case .ok(_) : { true } case .err(_) : { false } });
+    assert(switch (v::push<i32>(ref mut values, 4)) { case .ok(_) : { true } case .err(_) : { false } });
+    var i32 sum = 0;
+`
+	const body = `
+        if (*item == 2) { continue; }
+        sum += *item;
+        if (*item == 3) { break; }
+`
+	for _, sample := range []struct {
+		name     string
+		setup    string
+		body     string
+		returned string
+		expected int32
+	}{
+		{name: "empty", body: "        assert(false);", returned: "    return 42;", expected: 42},
+		{name: "ordered control", setup: pushes, body: body, returned: "    return 40 + sum;", expected: 44},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			for _, form := range []struct {
+				name      string
+				candidate bool
+				loop      string
+			}{
+				{name: "vector for", candidate: true,
+					loop: "    for (let ref i32 item in ref values) {\n" + sample.body + "\n    }"},
+				{name: "explicit index", loop: `    let usize bound = v::len<i32>(ref values);
+    for (var usize index = 0; index < bound; index += 1) {
+        let ref i32 item = v::at<i32>(ref values, index);
+` + sample.body + `
+    }`},
+			} {
+				t.Run(form.name, func(t *testing.T) {
+					client := header + sample.setup + form.loop + "\n" + sample.returned + footer
+					input, coordinates := vectorSDKInputWithCandidate(t, client, true)
+					owners := []hir.PackageID{3}
+					var analysis compiler.GenericAnalysis
+					var err error
+					if form.candidate {
+						analysis, err = compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+							genericplan.DefaultPlanLimits(), owners)
+					} else {
+						analysis, err = compiler.AnalyzeSDKStoragePackages(input, coordinates,
+							genericplan.DefaultPlanLimits(), owners)
+					}
+					if err != nil || analysis.Analysis.Semantic.CompletedThrough != semantic.PhaseFlow {
+						t.Fatalf("native source analysis: %v diagnostics=%+v unsupported=%+v", err,
+							analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+					}
+					result, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+					if err != nil || !result.Verified {
+						t.Fatalf("native MIR: %v %+v", err, result.Semantic.Diagnostics)
+					}
+					runVectorStorageMIRNativeExit(t, result.MIR,
+						hir.QualifiedModulePath(1, "main")+"::main", vectorForNativeProbe, true, sample.expected)
+				})
+			}
+		})
+	}
+}

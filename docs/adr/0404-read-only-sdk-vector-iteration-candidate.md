@@ -41,8 +41,8 @@ once, and sketches calls to that alias's `len<T>` and `at<T>`. Generic cloning
 keeps the written loop and prepared block detached from the original source.
 Only the authenticated SDK package graph now exposes those prepared calls to
 bounded generic planning; an import spelling or unowned provider alone cannot
-activate them. Semantic analysis still rejects the vector source form before
-lowering, so there is no new accepted syntax or generated C. Exact type and
+activate them. Stable workspace semantic analysis still rejects the vector
+source form before lowering, so it emits no C for that form. Exact type and
 borrow checking, Flow and verified-MIR execution remain future gates for stable
 admission. A separate compiler-private proof lane now checks the exact
 authenticated, specialized `std::vec::Vec` resource identity, the written
@@ -51,6 +51,13 @@ over the prepared loop. Its first empty-vector and named-borrow cases reach
 verified MIR; wrong element type, mutable item, in-loop owner replacement and
 returning an item borrowed from a local vector are rejected. Stable workspace
 commands still use the closed source gate.
+
+The private Windows AMD64 MSVC probe now runs both the candidate and explicit
+index form under low and optimized profiles. Empty vectors execute no body;
+four initialized scalar elements produce the same ordered `continue`/`break`
+result. The C probe observes no live vector allocation after function return.
+This proves these control and cleanup cases, not the representative lexer
+workload or the cumulative C-relative cost gate.
 
 ## Proposed first boundary
 
