@@ -241,6 +241,29 @@ type realScannerVectorEvidence struct {
 
 func runRealScannerVectorNative(t *testing.T, program mir.Program, entry string, profile cdriver.Profile) realScannerVectorEvidence {
 	t.Helper()
+	artifact, unit := buildRealScannerVectorNative(t, program, entry, profile, "")
+	outcome, err := cdriver.ExecuteWindowsHost(artifact)
+	if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
+		t.Fatalf("native scanner: %+v %v", outcome, err)
+	}
+	unitBytes := 0
+	for _, object := range artifact.Objects {
+		if object.Name == "unit.obj" {
+			unitBytes = len(object.Bytes)
+		}
+	}
+	if unitBytes == 0 {
+		t.Fatal("native scanner is missing its generated unit object")
+	}
+	return realScannerVectorEvidence{
+		Stdout: outcome.Stdout, CBytes: len(unit.Source), Functions: len(unit.Functions),
+		ForeignSymbols: len(unit.ForeignSymbols), UnitObjectBytes: unitBytes,
+		EXEBytes: len(artifact.Bytes), MSVC: artifact.Toolchain.Version,
+	}
+}
+
+func buildRealScannerVectorNative(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport string) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		t.Fatal(err)
@@ -272,26 +295,9 @@ func runRealScannerVectorNative(t *testing.T, program mir.Program, entry string,
 		t.Fatalf("private scanner storage heap boundary: %v", err)
 	}
 	artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source,
-		scalar+vectorStorageAllocator+sdk+strings.TrimPrefix(storage, heap)+vectorForNativeProbe)
+		scalar+vectorStorageAllocator+sdk+strings.TrimPrefix(storage, heap)+vectorForNativeProbe+extraSupport)
 	if err != nil {
 		t.Fatal(err)
 	}
-	outcome, err := cdriver.ExecuteWindowsHost(artifact)
-	if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
-		t.Fatalf("native scanner: %+v %v", outcome, err)
-	}
-	unitBytes := 0
-	for _, object := range artifact.Objects {
-		if object.Name == "unit.obj" {
-			unitBytes = len(object.Bytes)
-		}
-	}
-	if unitBytes == 0 {
-		t.Fatal("native scanner is missing its generated unit object")
-	}
-	return realScannerVectorEvidence{
-		Stdout: outcome.Stdout, CBytes: len(unit.Source), Functions: len(unit.Functions),
-		ForeignSymbols: len(unit.ForeignSymbols), UnitObjectBytes: unitBytes,
-		EXEBytes: len(artifact.Bytes), MSVC: artifact.Toolchain.Version,
-	}
+	return artifact, unit
 }
