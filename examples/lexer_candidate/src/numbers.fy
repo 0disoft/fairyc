@@ -137,7 +137,7 @@ fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial
         return Cook { .status = 5, .work = budget::Work { .remaining = work.remaining, .exhausted = true } };
     }
     // Charge the full expansion before materialization, including later-trimmed zeros.
-    work = budget::charge(work, length);
+    budget::charge(ref mut work, length);
     if (work.exhausted) { return Cook { .status = 5, .work = work }; }
     if (length > 16384) { return Cook { .status = 4, .work = work }; }
     if (!trailing && places >= width) {
@@ -175,49 +175,49 @@ pub fn Scan scan(ref u8[] input, usize start, ref mut bytes::Buffer output, budg
     var usize p = start + 1;
     var u32 kind = 5;
     if (p < input.len && input[start] == 48 && (input[p] == 120 || input[p] == 98)) {
-        work = budget::charge(work, 1);
+        budget::charge(ref mut work, 1);
         if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
         p += 1;
         while (p < input.len && identifier(input[p])) {
-            work = budget::charge(work, 1);
+            budget::charge(ref mut work, 1);
             if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
         }
     } else {
         while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-            work = budget::charge(work, 1);
+            budget::charge(ref mut work, 1);
             if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
         }
         if (p + 1 < input.len && input[p] == 46 && digit(input[p+1])) {
             kind = 6;
-            work = budget::charge(work, 2);
+            budget::charge(ref mut work, 2);
             if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 2;
             while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-                work = budget::charge(work, 1);
+                budget::charge(ref mut work, 1);
                 if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
                 p += 1;
             }
         }
         if (p < input.len && (input[p] == 101 || input[p] == 69)) {
             kind = 6;
-            work = budget::charge(work, 1);
+            budget::charge(ref mut work, 1);
             if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
             if (p < input.len && (input[p] == 43 || input[p] == 45)) {
-                work = budget::charge(work, 1);
+                budget::charge(ref mut work, 1);
                 if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
                 p += 1;
             }
             while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-                work = budget::charge(work, 1);
+                budget::charge(ref mut work, 1);
                 if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
                 p += 1;
             }
         }
         while (p < input.len && identifier(input[p])) {
-            work = budget::charge(work, 1);
+            budget::charge(ref mut work, 1);
             if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
         }

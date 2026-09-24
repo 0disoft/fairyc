@@ -126,7 +126,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
     var usize cooked_bytes = 0;
     var budget::Work work = budget::create(max_work);
     if (matches(input, 0, b"\xEF\xBB\xBF")) {
-        work = budget::charge(work, 3);
+        budget::charge(ref mut work, 3);
         if (work.exhausted) { return exhausted(input, 0, tokens, errors); }
         token_exhausted = max_tokens == 0;
         if (!emit(tokens, !token_exhausted, 2, 1, 0, 3)) { return 3; }
@@ -134,7 +134,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
         position = 3;
     }
     while (position < input.len && !token_exhausted) {
-        work = budget::charge(work, 1);
+        budget::charge(ref mut work, 1);
         if (work.exhausted) { return exhausted(input, position, tokens, errors); }
         token_exhausted = token_count >= max_tokens;
         if (!token_exhausted) { token_count += 1; }
@@ -147,7 +147,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
             while (position < input.len) {
                 let usize width = if (space(input[position])) { 1 } else if (matches(input, position, b"\r\n")) { 2 } else { 0 };
                 if (width == 0) { break; }
-                work = budget::charge(work, if (position == start) { width - 1 } else { width });
+                budget::charge(ref mut work, if (position == start) { width - 1 } else { width });
                 if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
                 position += width;
             }
@@ -164,23 +164,23 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
             kind = 2; trivia = 2;
         } else if (matches(input, position, b"//")) {
             trivia = if (matches(input, position, b"///")) { 5 } else { 3 };
-            work = budget::charge(work, 1);
+            budget::charge(ref mut work, 1);
             if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
             position += 2;
             while (position < input.len && input[position] != 10 && input[position] != 13) {
-                work = budget::charge(work, 1);
+                budget::charge(ref mut work, 1);
                 if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
                 position += 1;
             }
             kind = 2;
         } else if (matches(input, position, b"/*")) {
-            work = budget::charge(work, 1);
+            budget::charge(ref mut work, 1);
             if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
             position += 2;
             var usize depth = 1;
             while (position < input.len && depth > 0) {
                 let usize width = if (matches(input, position, b"/*") || matches(input, position, b"*/")) { 2 } else { 1 };
-                work = budget::charge(work, width);
+                budget::charge(ref mut work, width);
                 if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
                 if (matches(input, position, b"/*")) { depth += 1; position += 2; }
                 else if (matches(input, position, b"*/")) { depth -= 1; position += 2; }
@@ -210,7 +210,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
         } else if (letter(current)) {
             position += 1;
             while (position < input.len && (letter(input[position]) || digit(input[position]))) {
-                work = budget::charge(work, 1);
+                budget::charge(ref mut work, 1);
                 if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
                 position += 1;
             }
@@ -239,7 +239,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
             let usize width = symbol_width(input, position);
             if (width == 0) {
                 let usize decoded = utf8::width(input, position);
-                work = budget::charge(work, if (decoded == 0) { 0 } else { decoded - 1 });
+                budget::charge(ref mut work, if (decoded == 0) { 0 } else { decoded - 1 });
                 if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
                 position += if (decoded == 0) { 1 } else { decoded };
                 if (!emit(tokens, !token_exhausted, 0, 0, start, position)) { return 3; }
@@ -250,7 +250,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
                 diagnostic_count += 1;
                 continue;
             } else {
-                work = budget::charge(work, width - 1);
+                budget::charge(ref mut work, width - 1);
                 if (work.exhausted) { return work_exhausted(input, start, position, tokens, errors); }
                 position += width; kind = 10;
             }

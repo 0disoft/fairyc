@@ -7,9 +7,10 @@ pub fn Work create(usize limit) {
     return Work { .remaining = limit, .exhausted = false };
 }
 
-pub fn Work charge(Work work, usize units) {
+pub fn void charge(ref mut Work work, usize units) {
     if (work.exhausted || units > work.remaining) {
-        return Work { .remaining = work.remaining, .exhausted = true };
+        work.exhausted = true;
+        return;
     }
-    return Work { .remaining = work.remaining - units, .exhausted = false };
+    work.remaining = work.remaining - units;
 }

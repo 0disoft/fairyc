@@ -426,6 +426,10 @@ reduces both Fairy scanner EXEs by 1,536 bytes to 204,800 without changing
 the checked lexical or work-limit observations. Its C-relative timing series
 fail the predeclared stability rule, and the EXE ratio remains 1.11111; this
 improvement does not admit the vector source form.
+A [mutable work-budget update](../ops/scanner-inplace-work-20260925.md)
+removes another 1,024 bytes from each Fairy scanner EXE while preserving the
+checked lexical and limit behavior. The EXE ratio is still 1.10556 against
+up-front C, and the one-thousand-round smoke is not a stable runtime result.
 
 ## Proposed first boundary
 
