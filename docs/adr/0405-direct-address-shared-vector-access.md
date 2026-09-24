@@ -52,3 +52,9 @@ above 1.08, so this is an observed microkernel pass on the paired median,
 not a stable, full-lexer or language-wide certification. Timing stability,
 the real lexer workload and unused-feature overhead remain separate gates.
 No stable source admission follows from this SDK improvement.
+
+The [prebuilt three-way execution comparison](../ops/vector-read-three-way-20260924.md)
+reuses the exact post-commit images for twelve rotated triads. Its private
+candidate/C paired median is 1.07226, and candidate/indexed is 0.99563;
+indexed/C remains inconclusive at the 1.08 boundary. This still does not
+replace the real lexer and unused-feature admission evidence.

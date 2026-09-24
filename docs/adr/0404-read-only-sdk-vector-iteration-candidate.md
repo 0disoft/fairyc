@@ -124,6 +124,13 @@ observed both indexed and private-candidate four-element kernels below 1.08
 on paired runtime medians and EXE size. Individual pairs cross the runtime
 limit, and the representative lexer and unused-feature gates remain open.
 
+A [prebuilt-image three-way comparison](../ops/vector-read-three-way-20260924.md)
+rotates C, indexed Fairy and the private candidate through twelve measured
+triads. Candidate/C is observed within 1.08 on paired and lane-median ratios,
+and candidate/indexed is close to parity. Indexed/C is inconclusive because
+its two median estimators straddle 1.08. This remains microkernel evidence;
+the representative lexer, cleanup and unused-feature gates are open.
+
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
 computed vector expression as the iterable. The latter cannot acquire an
