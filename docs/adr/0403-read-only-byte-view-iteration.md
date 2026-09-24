@@ -65,12 +65,15 @@ its name, type, view and body. It prepares a hidden length snapshot and scalar
 owner mutation during iteration and permits it after the loop. The ordinary
 compiler publishes verified MIR, and interpreter tests cover empty, ordered,
 `continue` and `break` cases. Windows MSVC low and optimized native tests cover
-empty iteration and `continue`/`break`. The backend omits unreachable MIR blocks
-when emitting C, avoiding unreferenced labels after an early return.
+empty iteration, `continue`/`break`, and nested loops with an early `return`.
+The nested return also executes in the verified-MIR interpreter. The backend
+omits unreachable MIR blocks when emitting C, avoiding unreferenced labels
+after an early return.
 
-The remaining release evidence includes early exits, nested loops and cleanup
-in the real workload. Negative fixtures cover wrong or mutable iterable types,
-effectful expressions, binding escape and owner mutation while iterating.
+The remaining release evidence includes resource and `defer` cleanup on loop
+exits and representative real-workload execution. Negative fixtures cover
+wrong or mutable iterable types, effectful expressions, binding escape and
+owner mutation while iterating.
 The [paired C comparison](../ops/evidence/byte-view-c-budget-20260924.md)
 measured the new form, the equivalent explicit-index Fairy form and independent
 C in both MSVC profiles. Optimized runtime and EXE size are within the 8% limit

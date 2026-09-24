@@ -45,6 +45,30 @@ fn i32 main() {
 	}
 }
 
+func TestByteForCompilerNestedEarlyReturn(t *testing.T) {
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", `module main;
+fn i32 main() {
+    let ref u8[] outer = b"ab"[..];
+    let ref u8[] inner = b"XY"[..];
+    var i32 total = 0;
+    for (let u8 a in outer) {
+        for (let u8 b in inner) {
+            if (a == 98) { if (b == 89) { return total; } }
+            total += 1;
+        }
+    }
+    return 0;
+}`)
+	result, err := compiler.Check([]semantic.File{file})
+	if err != nil || !result.Verified || len(result.Semantic.Diagnostics) != 0 || len(result.Semantic.Unsupported) != 0 {
+		t.Fatalf("compile nested byte loops: result = %+v, error = %v", result.Semantic, err)
+	}
+	outcome, err := interpreter.Execute(result.MIR, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 3 {
+		t.Fatalf("execute nested byte loops: outcome = %+v, error = %v", outcome, err)
+	}
+}
+
 func TestByteForCompilerWindowsNative(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("native proof requires Windows amd64")
@@ -64,6 +88,7 @@ func TestByteForCompilerWindowsNative(t *testing.T) {
 	}{
 		{name: "empty", body: `let ref u8[] view = b"*"[0..0]; for (let u8 byte in view) { return byte as i32; } return 0;`, exit: 0},
 		{name: "continue-break", body: `let ref u8[] view = b"AB*"[..]; var i32 value = 0; for (let u8 byte in view) { if (byte != 42) { continue; } value += byte as i32; break; } return value;`, exit: 42},
+		{name: "nested-early-return", body: `let ref u8[] outer = b"ab"[..]; let ref u8[] inner = b"XY"[..]; var i32 total = 0; for (let u8 a in outer) { for (let u8 b in inner) { if (a == 98) { if (b == 89) { return total; } } total += 1; } } return 0;`, exit: 3},
 	} {
 		file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main; fn i32 main() { "+sample.body+" }")
 		result, err := compiler.Check([]semantic.File{file})
