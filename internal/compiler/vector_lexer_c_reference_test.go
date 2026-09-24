@@ -16,8 +16,8 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// This C source is independently authored and deliberately rejects literals
-// until its number and string implementation can match the full scanner.
+// This C source is independently authored and rejects floats and strings
+// until their cooked values can match the full scanner.
 func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
@@ -41,6 +41,9 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 		{"unclosed comment", []byte("let x; /* still open")},
 		{"invalid bytes", []byte{'m', ' ', 0xff, ' ', 0xe3, 0x95, 0x9c, ' ', '#', 0}},
 		{"lone CR", []byte("abc \rnext")},
+		{"real scanner sample", []byte("let n=12345; /*open")},
+		{"integer spellings", []byte("0 000_42 0xDEAD_BEEF 0b1010_0011 0xffffffffffffffffffffffffffffffff")},
+		{"invalid integers", []byte("0x 0b 1__2 12abc 0xG 0b102")},
 	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
@@ -60,7 +63,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 					}
 				})
 			}
-			for _, unsupported := range []string{"12345", "42.5", `"text"`, `b"bytes"`, `c"text"`} {
+			for _, unsupported := range []string{"42.5", "1e10", `"text"`, `b"bytes"`, `c"text"`} {
 				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput([]byte(unsupported)))
 				if err != nil || outcome.ExitCode != 7 || outcome.Stdout != "" || outcome.Stderr != "" {
 					t.Fatalf("unsupported %q: %+v %v", unsupported, outcome, err)

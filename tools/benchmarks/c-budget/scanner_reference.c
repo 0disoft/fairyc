@@ -1,5 +1,5 @@
-// Independent C11 lexical reference. The core slice rejects unsupported
-// literal forms; it is not yet an equivalent full-scanner budget lane.
+// Independent C11 lexical reference. Strings and floats still return an
+// unsupported status; this is not yet an equivalent full-scanner budget lane.
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,6 +63,107 @@ static int fc_identifier_start(unsigned char byte) {
 
 static int fc_identifier_continue(unsigned char byte) {
     return fc_identifier_start(byte) || (byte >= '0' && byte <= '9');
+}
+
+static int fc_decimal_digit(unsigned char byte) {
+    return byte >= '0' && byte <= '9';
+}
+
+static int fc_digit_value(unsigned char byte) {
+    if (fc_decimal_digit(byte)) return byte - '0';
+    if (byte >= 'a' && byte <= 'f') return byte - 'a' + 10;
+    if (byte >= 'A' && byte <= 'F') return byte - 'A' + 10;
+    return -1;
+}
+
+// Return 1 for a cooked integer, 0 for an invalid spelling and -1 on OOM.
+// The decimal accumulator is deliberately independent of Go's math/big.
+static int fc_cook_integer(const unsigned char *raw, size_t length,
+                           unsigned char **cooked, size_t *cooked_length) {
+    unsigned base = 10;
+    size_t start = 0;
+    if (length >= 2 && raw[0] == '0' && (raw[1] == 'x' || raw[1] == 'b')) {
+        base = raw[1] == 'x' ? 16u : 2u;
+        start = 2;
+    }
+    if (start == length) return 0;
+    for (size_t i = start; i < length; i++) {
+        int value = fc_digit_value(raw[i]);
+        if (value >= 0 && (unsigned)value < base) continue;
+        if (raw[i] != '_' || i == start || i + 1 >= length ||
+            fc_digit_value(raw[i - 1]) < 0 ||
+            (unsigned)fc_digit_value(raw[i - 1]) >= base ||
+            fc_digit_value(raw[i + 1]) < 0 ||
+            (unsigned)fc_digit_value(raw[i + 1]) >= base) return 0;
+    }
+    unsigned char *decimal = (unsigned char *)malloc(length * 2u + 1u);
+    if (decimal == NULL) return -1;
+    size_t used = 1;
+    decimal[0] = 0;
+    for (size_t i = start; i < length; i++) {
+        if (raw[i] == '_') continue;
+        unsigned carry = (unsigned)fc_digit_value(raw[i]);
+        for (size_t j = 0; j < used; j++) {
+            unsigned product = (unsigned)decimal[j] * base + carry;
+            decimal[j] = (unsigned char)(product % 10u);
+            carry = product / 10u;
+        }
+        while (carry != 0) {
+            decimal[used++] = (unsigned char)(carry % 10u);
+            carry /= 10u;
+        }
+    }
+    unsigned char *text = (unsigned char *)malloc(used);
+    if (text == NULL) { free(decimal); return -1; }
+    for (size_t i = 0; i < used; i++) text[i] = (unsigned char)('0' + decimal[used - 1u - i]);
+    free(decimal);
+    *cooked = text;
+    *cooked_length = used;
+    return 1;
+}
+
+static int fc_scan_number(struct fc_scanner *s) {
+    size_t start = s->position;
+    int is_float = 0;
+    if (fc_match(s, start, "0x") || fc_match(s, start, "0b")) {
+        s->position += 2;
+        while (s->position < s->length && fc_identifier_continue(s->source[s->position]))
+            s->position++;
+    } else {
+        s->position++;
+        while (s->position < s->length &&
+               (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_'))
+            s->position++;
+        if (s->position + 1 < s->length && s->source[s->position] == '.' &&
+            fc_decimal_digit(s->source[s->position + 1])) {
+            is_float = 1;
+            s->position += 2;
+            while (s->position < s->length &&
+                   (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_'))
+                s->position++;
+        }
+        if (s->position < s->length &&
+            (s->source[s->position] == 'e' || s->source[s->position] == 'E')) {
+            is_float = 1;
+            s->position++;
+            if (s->position < s->length &&
+                (s->source[s->position] == '+' || s->source[s->position] == '-')) s->position++;
+            while (s->position < s->length &&
+                   (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_'))
+                s->position++;
+        }
+        while (s->position < s->length && fc_identifier_continue(s->source[s->position]))
+            s->position++;
+    }
+    if (is_float) return FC_UNSUPPORTED;
+    unsigned char *cooked = NULL;
+    size_t cooked_length = 0;
+    int valid = fc_cook_integer(s->source + start, s->position - start,
+                                &cooked, &cooked_length);
+    if (valid < 0) return 3;
+    fc_token(s, FC_INTEGER, FC_NO_TRIVIA, start, s->position, cooked, cooked_length);
+    if (!valid) fc_diagnostic(s, "E0004", start, s->position, "none", "");
+    return 0;
 }
 
 static int fc_keyword(const unsigned char *bytes, size_t length) {
@@ -157,8 +258,9 @@ static int fc_scan_one(struct fc_scanner *s) {
         return 0;
     }
     if (current == '"' || ((current == 'b' || current == 'c') &&
-                           start + 1 < s->length && s->source[start + 1] == '"') ||
-        (current >= '0' && current <= '9')) return FC_UNSUPPORTED;
+                           start + 1 < s->length && s->source[start + 1] == '"'))
+        return FC_UNSUPPORTED;
+    if (fc_decimal_digit(current)) return fc_scan_number(s);
     if (fc_identifier_start(current)) {
         s->position++;
         while (s->position < s->length && fc_identifier_continue(s->source[s->position]))
@@ -222,6 +324,12 @@ static void fc_print(const struct fc_scanner *s) {
     }
 }
 
+static void fc_release_cooked(const struct fc_scanner *s) {
+    for (size_t i = 0; i < s->token_count; i++) {
+        if (s->tokens[i].kind == FC_INTEGER) free((void *)s->tokens[i].cooked);
+    }
+}
+
 int main(void) {
 #ifdef _WIN32
     if (_setmode(_fileno(stdin), _O_BINARY) == -1 ||
@@ -244,6 +352,7 @@ int main(void) {
     struct fc_scanner scanner = {source, (size_t)length, 0, 0, 0, tokens, diagnostics};
     int status = fc_scan(&scanner);
     if (status == 0) fc_print(&scanner);
+    fc_release_cooked(&scanner);
     free(source); free(tokens); free(diagnostics);
     return status;
 }

@@ -185,11 +185,13 @@ object/EXE size, or overhead in a future integrated stable compiler path.
 An independently authored C11 scanner reference now starts the full-scanner
 comparison lane. Its first checked slice covers source token boundaries,
 keywords, trivia, comments, punctuation, UTF-8 recovery and diagnostics under
-low and optimized Windows MSVC, compared with the Go lexer oracle. Numbers and
-strings deliberately return an unsupported status, so this source cannot yet
-run the representative cooked-number input or serve as an 8% C budget baseline.
-The remaining lexical forms, limits, storage and output must be implemented and
-checked before timing or comparing executable sizes.
+low and optimized Windows MSVC, compared with the Go lexer oracle. A subsequent
+integer-cooking step covers decimal, binary and hexadecimal values beyond 64
+bits, invalid spellings and the representative cooked-number/unclosed-comment
+input. Floats and strings still return an unsupported status. This remains
+insufficient for an 8% C budget baseline: remaining lexical forms, limits,
+storage and output must be implemented and checked before timing or comparing
+executable sizes.
 
 ## Proposed first boundary
 
