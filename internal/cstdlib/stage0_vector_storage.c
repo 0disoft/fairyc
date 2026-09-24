@@ -266,9 +266,12 @@ uint32_t fy_private_vector_prepare_push_v0(void *storage, size_t element_size, v
         return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
     }
     if (value.length == SIZE_MAX / value.element_size) return FY_STD_ALLOC_SIZE_OVERFLOW_V0;
-    uint32_t status = fy_private_vector_reserve_v0(storage, value.length + 1);
-    if (status != FY_STD_ALLOC_OK_V0) return status;
-    memcpy(&value, storage, sizeof value);
+    /* A validated spare slot needs no second descriptor check or allocation. */
+    if (value.length == value.block.size / value.element_size) {
+        uint32_t status = fy_private_vector_reserve_v0(storage, value.length + 1);
+        if (status != FY_STD_ALLOC_OK_V0) return status;
+        memcpy(&value, storage, sizeof value);
+    }
     void *slot = (unsigned char *)value.block.data + value.length * value.element_size;
     memcpy(slot_output, &slot, sizeof slot);
     return FY_STD_ALLOC_OK_V0;

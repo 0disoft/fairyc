@@ -418,6 +418,16 @@ exact tail address and element size. Commit checks available capacity/address,
 increments length and leaves payload and allocation metadata alone. Invalid or
 duplicate commit leaves the descriptor unchanged.
 
+The private prepare path now uses an already validated spare slot directly.
+Only a full vector calls `reserve` and reloads the descriptor after possible
+growth; the empty, full, overflow and OOM paths retain their existing checks
+and failure behavior. Focused native storage, resource-ownership and real-lexer
+tests pass. The current optimized real-lexer size probe reports 144,384 EXE
+bytes for both indexed and private vector-loop spellings, with 21
+specializations each. This is a current-artifact observation, not an exact
+before/after runtime or EXE comparison for this C helper change; no 8% C-relative
+claim follows from it.
+
 This is an unsafe sequential protocol, not a persistent reservation token or a
 transaction across callbacks. No storage mutation, escaping slot, alias access or
 callback may intervene; the caller proves the write initialized one owned element
