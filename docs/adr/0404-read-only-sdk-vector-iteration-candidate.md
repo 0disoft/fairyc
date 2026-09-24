@@ -79,6 +79,11 @@ independent Go lexer observation, and the allocator probe finds no live SDK
 allocation after the scanner calls and owned stream return. The C-relative
 cost gate remains open.
 
+The private rejection matrix also rejects moving a borrowed vector owner
+(`E2105`), treating a scalar as the vector owner (`E1006`), and using a
+computed vector expression as the iterable. The latter cannot acquire an
+implicit temporary owner or hide evaluation in this source form.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

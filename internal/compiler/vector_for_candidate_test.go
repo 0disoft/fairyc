@@ -66,6 +66,9 @@ func TestPrivateVectorSDKCandidateLoopRejectsUnsafeSource(t *testing.T) {
 		{name: "wrong element", loop: "for (let ref u8 item in ref values) { assert(*item == 0); }", wantCode: "E1006"},
 		{name: "mutable item", loop: "for (let ref mut i32 item in ref values) { assert(*item == 0); }", wantUnsupported: true},
 		{name: "owner mutation", loop: "for (let ref i32 item in ref values) { values = v::empty<i32>(); assert(*item == 0); }", wantCode: "E2101"},
+		{name: "owner move", loop: "for (let ref i32 item in ref values) { let v::Vec<i32> moved = values; assert(*item == 0); }", wantCode: "E2105"},
+		{name: "scalar owner", loop: "var i32 scalar = 0; for (let ref i32 item in ref scalar) { assert(*item == 0); }", wantCode: "E1006"},
+		{name: "computed iterable", loop: "for (let ref i32 item in v::empty<i32>()) { assert(*item == 0); }", wantUnsupported: true},
 	} {
 		t.Run(sample.name, func(t *testing.T) {
 			client := `module main;
