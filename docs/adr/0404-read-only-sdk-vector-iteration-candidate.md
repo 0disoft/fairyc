@@ -208,6 +208,11 @@ cleanup loop between QPC calls, with its reporter flushed beforehand. Its
 one-thousand-round smoke checks the independent lexical output, completed
 rounds and checksum under low and optimized MSVC; it does not compare Fairy
 runtime or executable size yet.
+An opt-in three-image smoke now builds standalone optimized C, explicit-index
+Fairy and private-candidate Fairy executables for that sample. It checks the
+same completed-round count and checksum in all three, compares the two Fairy
+reporters, and records QPC ticks and EXE bytes. One execution per image is not
+a stable paired measurement, so these observations do not decide the 8% gate.
 
 ## Proposed first boundary
 

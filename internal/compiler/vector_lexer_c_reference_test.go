@@ -146,17 +146,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
-	parts := []string{
-		"#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n",
-	}
-	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
-		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))
-		if err != nil {
-			t.Fatal(err)
-		}
-		parts = append(parts, string(data), "\n")
-	}
-	code := strings.Join(parts, "")
+	code := scannerCBenchmarkSource(t)
 	const sample = "let n=12345; /*open"
 	lexed := lexer.Lex(source.NewFile("input.fy", []byte(sample)), source.NewBudget(source.DefaultLimits(), len(sample)))
 	perRound := len(sample) + len(lexed.Tokens) + len(lexed.Diagnostics)
@@ -197,6 +187,19 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T
 			}
 		})
 	}
+}
+
+func scannerCBenchmarkSource(t *testing.T) string {
+	t.Helper()
+	parts := []string{"#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
+	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
+		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		parts = append(parts, string(data), "\n")
+	}
+	return strings.Join(parts, "")
 }
 
 func scannerCWorkloadInput(rounds uint32, data []byte) *bytes.Reader {
