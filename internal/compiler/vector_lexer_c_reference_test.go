@@ -16,8 +16,8 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// This C source is independently authored and still rejects strings and
-// large decimal expansions until it can match the full scanner.
+// This C source is independently authored and still rejects Unicode escapes
+// and large decimal expansions until it can match the full scanner.
 func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
@@ -46,6 +46,16 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 		{"invalid integers", []byte("0x 0b 1__2 12abc 0xG 0b102")},
 		{"decimal floats", []byte("1.25 1_024.5e-2 1e2 1e-2 1.0e2 0.000 00.0e2 1e_2 -1.5")},
 		{"invalid floats", []byte("1e 1e+ 1.2abc 1e+foo 1e999999999999999999999999999999")},
+		{"plain strings", []byte(`"text" b"bytes" c"cstr" "" b"" c""`)},
+		{"simple escapes", []byte(`"a\n\\\"" b"\x00A" c"\0" c"\x00"`)},
+		{"raw Unicode", []byte(`"한" b"한" c"한"`)},
+		{"invalid string bytes", []byte{'"', 'a', 0xff, 'b', '"'}},
+		{"invalid escaped UTF-8", []byte(`"\xff"`)},
+		{"invalid escapes", []byte(`"\q" "\xG" "\xF"`)},
+		{"unclosed string", []byte(`"open`)},
+		{"newline in string", []byte("\"line\nnext")},
+		{"trailing escape", []byte{'"', 'x', '\\'}},
+		{"raw C NUL", []byte{'c', '"', 'a', 0, 'b', '"'}},
 	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
@@ -65,7 +75,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 					}
 				})
 			}
-			for _, unsupported := range []string{"1e70000", "1e-70000", `"text"`, `b"bytes"`, `c"text"`} {
+			for _, unsupported := range []string{"1e70000", "1e-70000", `"\u{03BB}"`, `b"\u{03BB}"`} {
 				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput([]byte(unsupported)))
 				if err != nil || outcome.ExitCode != 7 || outcome.Stdout != "" || outcome.Stderr != "" {
 					t.Fatalf("unsupported %q: %+v %v", unsupported, outcome, err)

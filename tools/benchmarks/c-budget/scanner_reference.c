@@ -1,5 +1,5 @@
-// Independent C11 lexical reference. Strings and large decimal expansions
-// still return an unsupported status; this is not yet a full-scanner budget lane.
+// Independent C11 lexical reference. Unicode escapes and large decimal
+// expansions remain unsupported; this is not yet a full-scanner budget lane.
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -298,6 +298,110 @@ static size_t fc_utf8_width(const unsigned char *bytes, size_t length) {
     return width;
 }
 
+static int fc_valid_utf8(const unsigned char *bytes, size_t length) {
+    for (size_t i = 0; i < length;) {
+        if (bytes[i] < 0x80) { i++; continue; }
+        size_t width = fc_utf8_width(bytes + i, length - i);
+        if (width == 1) return 0;
+        i += width;
+    }
+    return 1;
+}
+
+static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
+    size_t start = s->position;
+    s->position += opener;
+    unsigned char *bytes = (unsigned char *)malloc(s->length - start + 2u);
+    if (bytes == NULL) return 3;
+    size_t used = 0;
+    int terminated = 0;
+    while (s->position < s->length) {
+        unsigned char current = s->source[s->position];
+        if (current == '"') { s->position++; terminated = 1; break; }
+        if (current == '\n' || current == '\r') {
+            fc_diagnostic(s, "E0005", s->position, s->position + 1u, "exit", "\"");
+            break;
+        }
+        if (current == '\\') {
+            size_t escape = s->position++;
+            if (s->position == s->length) {
+                fc_diagnostic(s, "E0005", escape, s->position, "none", "");
+                break;
+            }
+            current = s->source[s->position++];
+            switch (current) {
+            case '\\': case '"': bytes[used++] = current; break;
+            case 'n': bytes[used++] = '\n'; break;
+            case 'r': bytes[used++] = '\r'; break;
+            case 't': bytes[used++] = '\t'; break;
+            case '0':
+                bytes[used++] = 0;
+                if (kind == FC_C_STRING)
+                    fc_diagnostic(s, "E0006", escape, s->position, "none", "");
+                break;
+            case 'x': {
+                if (s->position + 2u > s->length ||
+                    fc_digit_value(s->source[s->position]) < 0 ||
+                    fc_digit_value(s->source[s->position + 1u]) < 0) {
+                    while (s->position < s->length && s->position < escape + 4u &&
+                           fc_digit_value(s->source[s->position]) >= 0)
+                        s->position++;
+                    fc_diagnostic(s, "E0005", escape, s->position, "none", "");
+                    break;
+                }
+                unsigned value = (unsigned)(fc_digit_value(s->source[s->position]) * 16 +
+                                            fc_digit_value(s->source[s->position + 1u]));
+                s->position += 2;
+                bytes[used++] = (unsigned char)value;
+                if (kind == FC_C_STRING && value == 0)
+                    fc_diagnostic(s, "E0006", escape, s->position, "none", "");
+                break;
+            }
+            case 'u': free(bytes); return FC_UNSUPPORTED;
+            default: fc_diagnostic(s, "E0005", escape, s->position, "none", ""); break;
+            }
+            continue;
+        }
+        if (current == 0) {
+            s->position++;
+            fc_diagnostic(s, kind == FC_C_STRING ? "E0006" : "E0005",
+                          s->position - 1u, s->position, "none", "");
+            bytes[used++] = 0;
+            continue;
+        }
+        if (current >= 0x80) {
+            size_t width = fc_utf8_width(s->source + s->position,
+                                          s->length - s->position);
+            if (width == 1) {
+                fc_diagnostic(s, "E0001", s->position, s->position + 1u, "none", "");
+                s->position++;
+                continue;
+            }
+            memcpy(bytes + used, s->source + s->position, width);
+            used += width;
+            s->position += width;
+            continue;
+        }
+        bytes[used++] = current;
+        s->position++;
+    }
+    if (!terminated && s->position == s->length)
+        fc_diagnostic(s, "E0005", start, s->position, "exit", "\"");
+    if (kind == FC_STRING && terminated && !fc_valid_utf8(bytes, used))
+        fc_diagnostic(s, "E0005", start, s->position, "none", "");
+    if (kind == FC_C_STRING) bytes[used++] = 0;
+    unsigned char *hex = (unsigned char *)malloc(used * 2u + 1u);
+    if (hex == NULL) { free(bytes); return 3; }
+    static const char digits[] = "0123456789abcdef";
+    for (size_t i = 0; i < used; i++) {
+        hex[i * 2u] = (unsigned char)digits[bytes[i] >> 4];
+        hex[i * 2u + 1u] = (unsigned char)digits[bytes[i] & 15u];
+    }
+    free(bytes);
+    fc_token(s, kind, FC_NO_TRIVIA, start, s->position, hex, used * 2u);
+    return 0;
+}
+
 static size_t fc_symbol_width(const struct fc_scanner *s) {
     static const char *const symbols[] = {
         "<<=", ">>=", "+=", "-=", "*=", "/=", "%=", "&=", "^=", "|=",
@@ -350,9 +454,10 @@ static int fc_scan_one(struct fc_scanner *s) {
         if (depth != 0) fc_diagnostic(s, "E0001", start, s->position, "exit", "*/");
         return 0;
     }
-    if (current == '"' || ((current == 'b' || current == 'c') &&
-                           start + 1 < s->length && s->source[start + 1] == '"'))
-        return FC_UNSUPPORTED;
+    if ((current == 'b' || current == 'c') && start + 1 < s->length &&
+        s->source[start + 1u] == '"')
+        return fc_scan_string(s, current == 'b' ? FC_BYTE_STRING : FC_C_STRING, 2);
+    if (current == '"') return fc_scan_string(s, FC_STRING, 1);
     if (fc_decimal_digit(current)) return fc_scan_number(s);
     if (fc_identifier_start(current)) {
         s->position++;
@@ -392,6 +497,17 @@ static int fc_scan(struct fc_scanner *s) {
     return 0;
 }
 
+static int fc_compare_diagnostic(const void *left, const void *right) {
+    const struct fc_diagnostic *a = (const struct fc_diagnostic *)left;
+    const struct fc_diagnostic *b = (const struct fc_diagnostic *)right;
+    if (a->start != b->start) return a->start < b->start ? -1 : 1;
+    if (a->end != b->end) return a->end < b->end ? -1 : 1;
+    int value = strcmp(a->code, b->code);
+    if (value != 0) return value;
+    value = strcmp(a->repair, b->repair);
+    return value != 0 ? value : strcmp(a->token, b->token);
+}
+
 static void fc_hex(const unsigned char *bytes, size_t length) {
     static const char digits[] = "0123456789abcdef";
     if (length == 0) { putchar('-'); return; }
@@ -419,7 +535,9 @@ static void fc_print(const struct fc_scanner *s) {
 
 static void fc_release_cooked(const struct fc_scanner *s) {
     for (size_t i = 0; i < s->token_count; i++) {
-        if (s->tokens[i].kind == FC_INTEGER || s->tokens[i].kind == FC_FLOAT)
+        if (s->tokens[i].kind == FC_INTEGER || s->tokens[i].kind == FC_FLOAT ||
+            s->tokens[i].kind == FC_STRING || s->tokens[i].kind == FC_BYTE_STRING ||
+            s->tokens[i].kind == FC_C_STRING)
             free((void *)s->tokens[i].cooked);
     }
 }
@@ -445,7 +563,11 @@ int main(void) {
     }
     struct fc_scanner scanner = {source, (size_t)length, 0, 0, 0, tokens, diagnostics};
     int status = fc_scan(&scanner);
-    if (status == 0) fc_print(&scanner);
+    if (status == 0) {
+        qsort(scanner.diagnostics, scanner.diagnostic_count,
+              sizeof(*scanner.diagnostics), fc_compare_diagnostic);
+        fc_print(&scanner);
+    }
     fc_release_cooked(&scanner);
     free(source); free(tokens); free(diagnostics);
     return status;
