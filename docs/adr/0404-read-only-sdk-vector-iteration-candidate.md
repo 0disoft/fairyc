@@ -389,6 +389,10 @@ access is not equivalent to the current source loop.
    smaller equivalent C image for size when applying the gate.
    The target C diagnostic record now mirrors the Fairy source shape, while
    other failure paths and remaining scanner limits still need parity.
+   A low/optimized MSVC fault-injection probe now covers both decimal-cooking
+   allocations and the first geometric token-slot allocation in the C lane.
+   Each injected failure returns status 3 with no retained allocation or
+   published token; this is C cleanup evidence, not Fairy/C failure parity.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,

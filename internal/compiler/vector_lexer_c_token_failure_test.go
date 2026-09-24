@@ -1,0 +1,86 @@
+package compiler_test
+
+import (
+	"os"
+	"path/filepath"
+	"runtime"
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/cdriver"
+)
+
+func TestPrivateVectorSDKCandidateCTokenAllocationFailureOrder(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	core, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "scanner_reference.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const injection = `
+#include <stdlib.h>
+static size_t probe_calls, probe_live, probe_fail_at;
+static void *probe_malloc(size_t size) {
+    probe_calls++;
+    if (probe_calls == probe_fail_at) return NULL;
+    void *value = malloc(size);
+    if (value != NULL) probe_live++;
+    return value;
+}
+static void probe_free(void *value) {
+    if (value != NULL) probe_live--;
+    free(value);
+}
+#define malloc probe_malloc
+#define free probe_free
+#define FC_CANDIDATE_GEOMETRIC_TOKENS
+#define FC_SCANNER_LIBRARY
+`
+	const probe = `
+static int check(size_t fail_at, size_t wanted_calls) {
+    struct fc_scanner scanner = {0};
+    scanner.source = (const unsigned char *)"12";
+    scanner.length = 2;
+    probe_calls = 0;
+    probe_live = 0;
+    probe_fail_at = fail_at;
+    int status = fc_scan(&scanner);
+    int failing = fail_at != 0;
+    int bad = status != (failing ? 3 : 0) || probe_calls != wanted_calls ||
+              scanner.token_count != (failing ? 0u : 2u) ||
+              scanner.token_allocation_failed != (fail_at == 3u);
+    if (!bad && !failing)
+        bad = scanner.tokens[0].kind != FC_INTEGER ||
+              scanner.tokens[0].cooked_length != 2u ||
+              memcmp(scanner.tokens[0].cooked, "12", 2u) != 0 ||
+              scanner.tokens[1].kind != FC_EOF;
+    fc_release_cooked(&scanner);
+    probe_free(scanner.tokens);
+    return bad || probe_live != 0;
+}
+int main(void) {
+    if (check(1u, 1u)) return 1;
+    if (check(2u, 2u)) return 2;
+    if (check(3u, 3u)) return 3;
+    if (check(0u, 3u)) return 4;
+    return 0;
+}
+`
+	code := injection + string(core) + probe
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			image, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			outcome, err := cdriver.ExecuteWindowsHost(image)
+			if err != nil || outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
+				t.Fatalf("C token allocation order: %+v %v", outcome, err)
+			}
+		})
+	}
+}
