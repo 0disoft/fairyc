@@ -81,8 +81,11 @@ the inner resource drop and before the loop-body drop. A Windows native test
 opens a fresh Region on the same public Arena after those exits in both low
 and optimized profiles, proving that each exit releases the active Region.
 The checked-MIR interpreter also records exactly one Region reset after the
-inner resource drop on byte-loop `return` and `?` propagation. Native Region
-`return`/`?` execution remains open.
+inner resource drop on byte-loop `return` and `?` propagation. Windows native
+tests execute both function exits in low and optimized profiles and then
+successfully drop the owning Arena; dropping it with an active Region would
+fail. This proves native reset on those exits, while the interpreter checks
+the exact drop order.
 Negative fixtures cover wrong or mutable iterable types,
 effectful expressions, binding escape and owner mutation while iterating.
 The [paired C comparison](../ops/evidence/byte-view-c-budget-20260924.md)
