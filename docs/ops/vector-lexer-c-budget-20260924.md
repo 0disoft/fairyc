@@ -25,9 +25,11 @@ The subsequent source audit also found that the Fairy-written scanner rejects de
 
 After this raw run, the C benchmark build gained a 16,384-byte per-number
 decimal materialization limit matching the Fairy candidate at four
-positive/negative exponent boundary cases. The standalone C Go-oracle build
-still accepts the 70,000-digit cases. These changes produce a new C image;
-none of the earlier executable hashes, sizes or QPC samples above describe
-that image. Cumulative cooked bytes, work-budget charging, remaining lexical
-forms and the C/Fairy storage difference are still open, so the 8% gate remains
-undecided.
+positive/negative exponent boundary cases. It now also caps total cooked
+bytes at 65,536: four 16,384-byte decimals succeed and a fifth returns
+candidate-size status 4 in both C and Fairy under low and optimized MSVC.
+The standalone C Go-oracle build still accepts the 70,000-digit cases. These
+changes produce a new C image; none of the earlier executable hashes, sizes
+or QPC samples above describe that image. Work-budget charging, remaining
+lexical forms and the C/Fairy storage difference are still open, so the 8%
+gate remains undecided.

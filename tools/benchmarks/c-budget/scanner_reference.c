@@ -17,6 +17,9 @@ enum { FC_MAX_SOURCE = 32768, FC_MAX_COOKED = 16 << 20,
 // Keep the broader Go-oracle reference available without this build switch.
 enum { FC_CANDIDATE_DECIMAL = 16384, FC_CANDIDATE_SIZE = 4 };
 #endif
+#ifdef FC_CANDIDATE_COOKED_LIMIT
+enum { FC_CANDIDATE_COOKED = 65536, FC_CANDIDATE_COOKED_SIZE = 4 };
+#endif
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
 enum { FC_NO_TRIVIA, FC_PREAMBLE, FC_WHITESPACE, FC_LINE_COMMENT,
@@ -37,7 +40,18 @@ struct fc_scanner {
     size_t length, position, token_count, diagnostic_count;
     struct fc_token *tokens;
     struct fc_diagnostic *diagnostics;
+#ifdef FC_CANDIDATE_COOKED_LIMIT
+    size_t cooked_total;
+#endif
 };
+
+#ifdef FC_CANDIDATE_COOKED_LIMIT
+static int fc_accept_cooked(struct fc_scanner *s, size_t length) {
+    if (length > FC_CANDIDATE_COOKED - s->cooked_total) return 0;
+    s->cooked_total += length;
+    return 1;
+}
+#endif
 
 static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
                      size_t start, size_t end, const unsigned char *cooked,
@@ -264,6 +278,9 @@ static int fc_scan_number(struct fc_scanner *s) {
     if (valid == -3) return FC_CANDIDATE_SIZE;
 #endif
     if (valid < 0) return 3;
+#ifdef FC_CANDIDATE_COOKED_LIMIT
+    if (!fc_accept_cooked(s, cooked_length)) { free(cooked); return FC_CANDIDATE_COOKED_SIZE; }
+#endif
     fc_token(s, is_float ? FC_FLOAT : FC_INTEGER, FC_NO_TRIVIA, start,
              s->position, cooked, cooked_length);
     if (!valid) fc_diagnostic(s, "E0004", start, s->position, "none", "");
@@ -454,6 +471,9 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
         hex[i * 2u + 1u] = (unsigned char)digits[bytes[i] & 15u];
     }
     free(bytes);
+#ifdef FC_CANDIDATE_COOKED_LIMIT
+    if (!fc_accept_cooked(s, used * 2u)) { free(hex); return FC_CANDIDATE_COOKED_SIZE; }
+#endif
     fc_token(s, kind, FC_NO_TRIVIA, start, s->position, hex, used * 2u);
     return 0;
 }

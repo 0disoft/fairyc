@@ -265,7 +265,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T
 
 func scannerCBenchmarkSource(t *testing.T) string {
 	t.Helper()
-	parts := []string{"#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
+	parts := []string{"#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
 	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
 		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))
 		if err != nil {
