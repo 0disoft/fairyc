@@ -1,0 +1,189 @@
+{
+  "images": [
+    {
+      "exe_bytes": 184320,
+      "exe_sha256": "7438e52419345ea8e7b9a5b634512b2d90b7ca04fb7aaa0828019cd46c5b7a86",
+      "file_alignment": 512,
+      "header_bytes": 1024,
+      "lane": "independent C",
+      "sections": [
+        {
+          "name": ".text",
+          "raw_bytes": 124416,
+          "raw_offset": 1024,
+          "virtual_bytes": 124320
+        },
+        {
+          "name": ".rdata",
+          "raw_bytes": 46592,
+          "raw_offset": 125440,
+          "virtual_bytes": 46540
+        },
+        {
+          "name": ".data",
+          "raw_bytes": 3072,
+          "raw_offset": 172032,
+          "virtual_bytes": 5720
+        },
+        {
+          "name": ".pdata",
+          "raw_bytes": 6656,
+          "raw_offset": 175104,
+          "virtual_bytes": 6312
+        },
+        {
+          "name": ".fptable",
+          "raw_bytes": 512,
+          "raw_offset": 181760,
+          "virtual_bytes": 256
+        },
+        {
+          "name": ".reloc",
+          "raw_bytes": 2048,
+          "raw_offset": 182272,
+          "virtual_bytes": 1824
+        }
+      ],
+      "unattributed_bytes": 0
+    },
+    {
+      "exe_bytes": 185344,
+      "exe_sha256": "405dfdb2544b4f41864a813ec70b4ffb5528108fe89768c20344c67ddb554ffc",
+      "file_alignment": 512,
+      "header_bytes": 1024,
+      "lane": "geometric C",
+      "sections": [
+        {
+          "name": ".text",
+          "raw_bytes": 125440,
+          "raw_offset": 1024,
+          "virtual_bytes": 125024
+        },
+        {
+          "name": ".rdata",
+          "raw_bytes": 46592,
+          "raw_offset": 126464,
+          "virtual_bytes": 46588
+        },
+        {
+          "name": ".data",
+          "raw_bytes": 3072,
+          "raw_offset": 173056,
+          "virtual_bytes": 5720
+        },
+        {
+          "name": ".pdata",
+          "raw_bytes": 6656,
+          "raw_offset": 176128,
+          "virtual_bytes": 6324
+        },
+        {
+          "name": ".fptable",
+          "raw_bytes": 512,
+          "raw_offset": 182784,
+          "virtual_bytes": 256
+        },
+        {
+          "name": ".reloc",
+          "raw_bytes": 2048,
+          "raw_offset": 183296,
+          "virtual_bytes": 1824
+        }
+      ],
+      "unattributed_bytes": 0
+    },
+    {
+      "exe_bytes": 206336,
+      "exe_sha256": "994b7807a332ab4833e0af7a6b7b35795e369573c31d0ccedc47b383c880d623",
+      "file_alignment": 512,
+      "header_bytes": 1024,
+      "lane": "explicit index",
+      "sections": [
+        {
+          "name": ".text",
+          "raw_bytes": 145408,
+          "raw_offset": 1024,
+          "virtual_bytes": 144912
+        },
+        {
+          "name": ".rdata",
+          "raw_bytes": 47104,
+          "raw_offset": 146432,
+          "virtual_bytes": 46696
+        },
+        {
+          "name": ".data",
+          "raw_bytes": 3072,
+          "raw_offset": 193536,
+          "virtual_bytes": 5712
+        },
+        {
+          "name": ".pdata",
+          "raw_bytes": 7168,
+          "raw_offset": 196608,
+          "virtual_bytes": 7068
+        },
+        {
+          "name": ".fptable",
+          "raw_bytes": 512,
+          "raw_offset": 203776,
+          "virtual_bytes": 256
+        },
+        {
+          "name": ".reloc",
+          "raw_bytes": 2048,
+          "raw_offset": 204288,
+          "virtual_bytes": 1668
+        }
+      ],
+      "unattributed_bytes": 0
+    },
+    {
+      "exe_bytes": 206336,
+      "exe_sha256": "72a35d6b176268e75969277cf65e4c677afad3a9331415fbd1cdc2fb5b92ca06",
+      "file_alignment": 512,
+      "header_bytes": 1024,
+      "lane": "all vector for",
+      "sections": [
+        {
+          "name": ".text",
+          "raw_bytes": 145408,
+          "raw_offset": 1024,
+          "virtual_bytes": 144912
+        },
+        {
+          "name": ".rdata",
+          "raw_bytes": 47104,
+          "raw_offset": 146432,
+          "virtual_bytes": 46696
+        },
+        {
+          "name": ".data",
+          "raw_bytes": 3072,
+          "raw_offset": 193536,
+          "virtual_bytes": 5712
+        },
+        {
+          "name": ".pdata",
+          "raw_bytes": 7168,
+          "raw_offset": 196608,
+          "virtual_bytes": 7068
+        },
+        {
+          "name": ".fptable",
+          "raw_bytes": 512,
+          "raw_offset": 203776,
+          "virtual_bytes": 256
+        },
+        {
+          "name": ".reloc",
+          "raw_bytes": 2048,
+          "raw_offset": 204288,
+          "virtual_bytes": 1668
+        }
+      ],
+      "unattributed_bytes": 0
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-sections/v1"
+}

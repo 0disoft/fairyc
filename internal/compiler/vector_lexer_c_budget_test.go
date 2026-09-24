@@ -17,6 +17,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/mir"
+	"github.com/0disoft/fairyc/internal/pecoff"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -91,6 +92,40 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		images = append(images, scannerBudgetImage{
 			name: variant.name, artifact: artifact, sourceBytes: len(unit.Source), specializations: specializations,
 		})
+	}
+	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SECTIONS") == "1" {
+		sectionRows := make([]map[string]any, 0, len(images))
+		for _, image := range images {
+			pe, inspectErr := pecoff.InspectExecutable(image.artifact.Bytes)
+			if inspectErr != nil {
+				t.Fatalf("%s PE inspection: %v", image.name, inspectErr)
+			}
+			sections := make([]map[string]any, 0, len(pe.Sections))
+			accounted := uint64(pe.SizeOfHeaders)
+			for _, section := range pe.Sections {
+				sections = append(sections, map[string]any{
+					"name": section.Name, "raw_bytes": section.RawSize,
+					"virtual_bytes": section.VirtualSize, "raw_offset": section.RawOffset,
+				})
+				accounted += uint64(section.RawSize)
+			}
+			if accounted > uint64(len(image.artifact.Bytes)) {
+				t.Fatalf("%s PE section bytes exceed image: %d > %d", image.name, accounted, len(image.artifact.Bytes))
+			}
+			sectionRows = append(sectionRows, map[string]any{
+				"lane": image.name, "exe_bytes": len(image.artifact.Bytes),
+				"exe_sha256":   fmt.Sprintf("%x", sha256.Sum256(image.artifact.Bytes)),
+				"header_bytes": pe.SizeOfHeaders, "file_alignment": pe.FileAlignment,
+				"sections": sections, "unattributed_bytes": uint64(len(image.artifact.Bytes)) - accounted,
+			})
+		}
+		sectionReport, marshalErr := json.Marshal(map[string]any{
+			"schema": "fairyc.vector-lexer-c-budget-sections/v1", "images": sectionRows,
+		})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		t.Log("VECTOR_LEXER_C_BUDGET_SECTIONS " + string(sectionReport))
 	}
 	reporter := ""
 	rows := make([]map[string]any, 0, len(images))

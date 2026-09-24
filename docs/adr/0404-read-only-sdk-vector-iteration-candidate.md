@@ -374,6 +374,11 @@ exceed the predeclared stability limit, so the lower point estimates do not
 establish a runtime improvement or 8% admission. Both Fairy EXEs grow to
 206,336 bytes and remain 11.94% above the up-front C image; generated C grows
 another 2,486 bytes per Fairy image. The source form stays private.
+The [PE section receipt](../ops/scanner-pe-section-budget-20260925.md) accounts
+for the entire 22,016-byte optimized EXE difference against up-front C:
+20,992 bytes in `.text` and 512 each in `.rdata` and `.pdata`. It narrows the
+size investigation to emitted code and linked support but does not identify
+individual functions or satisfy the cumulative 8% gate.
 
 ## Proposed first boundary
 
