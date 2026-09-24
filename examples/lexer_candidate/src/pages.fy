@@ -27,18 +27,16 @@ fn Word read_word() {
     }
     return Word { .value = value, .ok = true };
 }
-@effects(console)
-fn void number(ref mut Window window, usize value) {
+fn void number(ref mut Window window, ref mut bytes::Buffer output, usize value) {
     if (window.position >= window.start && window.position - window.start < 4096) {
-        assert(switch (io::write_usize(value)) { case .ok(_): { true } case .err(_): { false } });
-        assert(switch (io::write(" ")) { case .ok(_): { true } case .err(_): { false } });
+        assert(switch (bytes::append_usize(output, value)) { case .ok(_): { true } case .err(_): { false } });
+        assert(switch (bytes::append(output, b" ")) { case .ok(_): { true } case .err(_): { false } });
     }
     window.position = window.position + 1;
 }
-@effects(console)
-fn void text(ref mut Window window, ref u8[] value) {
-    number(window, value.len);
-    for (let u8 byte in value) { number(window, byte as usize); }
+fn void text(ref mut Window window, ref mut bytes::Buffer output, ref u8[] value) {
+    number(window, output, value.len);
+    for (let u8 byte in value) { number(window, output, byte as usize); }
 }
 
 // Each independent request scans the entire input and selects at most 4096
@@ -46,24 +44,27 @@ fn void text(ref mut Window window, ref u8[] value) {
 @effects(console)
 pub fn void report(ref scanner::Stream stream, usize start) {
     var Window window = Window { .start = start, .position = 0 };
-    number(ref mut window, scanner::token_count(stream));
+    // At most 4096 observations are retained; one exact write replaces per-number writes.
+    var bytes::Buffer output = bytes::empty();
+    number(ref mut window, ref mut output, scanner::token_count(stream));
     var usize index = 0;
     while (index < scanner::token_count(stream)) {
         let scanner::TokenInfo token = scanner::token_info(stream, index);
-        number(ref mut window, token.kind as usize); number(ref mut window, token.trivia as usize);
-        number(ref mut window, token.start); number(ref mut window, token.end);
-        text(ref mut window, scanner::token_cooked(stream, index));
+        number(ref mut window, ref mut output, token.kind as usize); number(ref mut window, ref mut output, token.trivia as usize);
+        number(ref mut window, ref mut output, token.start); number(ref mut window, ref mut output, token.end);
+        text(ref mut window, ref mut output, scanner::token_cooked(stream, index));
         index += 1;
     }
-    number(ref mut window, scanner::diagnostic_count(stream));
+    number(ref mut window, ref mut output, scanner::diagnostic_count(stream));
     index = 0;
     while (index < scanner::diagnostic_count(stream)) {
         let diagnostics::Info info = scanner::diagnostic_info(stream, index);
-        number(ref mut window, info.code as usize); number(ref mut window, info.start); number(ref mut window, info.end);
-        number(ref mut window, if (info.exit_repair) { 1 } else { 0 });
-        text(ref mut window, scanner::diagnostic_token(stream, index));
+        number(ref mut window, ref mut output, info.code as usize); number(ref mut window, ref mut output, info.start); number(ref mut window, ref mut output, info.end);
+        number(ref mut window, ref mut output, if (info.exit_repair) { 1 } else { 0 });
+        text(ref mut window, ref mut output, scanner::diagnostic_token(stream, index));
         index += 1;
     }
+    assert(switch (io::write_bytes(bytes::view(ref output))) { case .ok(_): { true } case .err(_): { false } });
 }
 
 // Private one-request protocol: mode u8, source length u32 LE, observation start

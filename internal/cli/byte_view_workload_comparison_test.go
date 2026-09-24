@@ -51,7 +51,7 @@ import pages as pages; import scanner as scanner;
 }`
 	changes := []struct{ path, before, after string }{
 		{"src/diagnostics.fy", "var usize i = 0; while (i < value.len) { number(value[i] as usize); i += 1; }", "for (let u8 byte in value) { number(byte as usize); }"},
-		{"src/pages.fy", "var usize index = 0; while (index < value.len) { number(window, value[index] as usize); index += 1; }", "for (let u8 byte in value) { number(window, byte as usize); }"},
+		{"src/pages.fy", "var usize index = 0; while (index < value.len) { number(window, output, value[index] as usize); index += 1; }", "for (let u8 byte in value) { number(window, output, byte as usize); }"},
 		{"src/scanner.fy", "var usize n = 0; while (n < numeric.len) { number(numeric[n] as usize); n += 1; }", "for (let u8 byte in numeric) { number(byte as usize); }"},
 	}
 	current := make(map[string]string, len(changes))
