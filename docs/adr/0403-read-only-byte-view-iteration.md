@@ -80,7 +80,9 @@ also records one Region reset on each byte-loop `continue` and `break`, after
 the inner resource drop and before the loop-body drop. A Windows native test
 opens a fresh Region on the same public Arena after those exits in both low
 and optimized profiles, proving that each exit releases the active Region.
-Byte-loop Region `return`/`?` exits remain open.
+The checked-MIR interpreter also records exactly one Region reset after the
+inner resource drop on byte-loop `return` and `?` propagation. Native Region
+`return`/`?` execution remains open.
 Negative fixtures cover wrong or mutable iterable types,
 effectful expressions, binding escape and owner mutation while iterating.
 The [paired C comparison](../ops/evidence/byte-view-c-budget-20260924.md)
