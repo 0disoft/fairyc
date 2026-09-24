@@ -29,6 +29,7 @@ type scannerBudgetImage struct {
 	artifact        cdriver.WindowsHostArtifact
 	sourceBytes     int
 	specializations int
+	functions       []string
 }
 
 // One execution per lane proves the independent images can be compared.
@@ -91,7 +92,8 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		artifact, unit := buildRealScannerVectorNative(t, program, entry, cdriver.OptimizedProfile,
 			"\n"+string(support)+"\nvoid fc_budget_flush(void) { fflush(stdout); }\n")
 		images = append(images, scannerBudgetImage{
-			name: variant.name, artifact: artifact, sourceBytes: len(unit.Source), specializations: specializations,
+			name: variant.name, artifact: artifact, sourceBytes: len(unit.Source),
+			specializations: specializations, functions: unit.Functions,
 		})
 	}
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SECTIONS") == "1" {
@@ -165,7 +167,8 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		}
 		t.Log("VECTOR_LEXER_C_BUDGET_OBJECT_SECTIONS " + string(objectReport))
 	}
-	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_FUNCTIONS") == "1" {
+	sourceMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SOURCE_MAP") == "1"
+	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_FUNCTIONS") == "1" || sourceMap {
 		imageRows := make([]map[string]any, 0, len(images))
 		for _, image := range images {
 			objectRows := make([]map[string]any, 0, len(image.artifact.Objects))
@@ -176,6 +179,19 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 				}
 				spans, codeBytes, attributedBytes := scannerCOFFFunctionSpans(coff)
 				functionCount := len(spans)
+				if sourceMap && object.Name == "unit.obj" {
+					for i := range spans {
+						indexText, ok := strings.CutPrefix(spans[i].Name, "fy_fn_")
+						if !ok {
+							continue
+						}
+						index, parseErr := strconv.Atoi(indexText)
+						if parseErr != nil || index < 0 || index >= len(image.functions) {
+							t.Fatalf("%s/%s function symbol %q has no emitted source name", image.name, object.Name, spans[i].Name)
+						}
+						spans[i].SourceName = image.functions[index]
+					}
+				}
 				const top = 20
 				if len(spans) > top {
 					spans = spans[:top]
@@ -193,13 +209,17 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 				"objects": objectRows,
 			})
 		}
-		functionReport, marshalErr := json.Marshal(map[string]any{
-			"schema": "fairyc.vector-lexer-c-budget-functions/v1", "images": imageRows,
-		})
+		schema := "fairyc.vector-lexer-c-budget-functions/v1"
+		marker := "VECTOR_LEXER_C_BUDGET_FUNCTIONS "
+		if sourceMap {
+			schema = "fairyc.vector-lexer-c-budget-function-source-map/v1"
+			marker = "VECTOR_LEXER_C_BUDGET_SOURCE_MAP "
+		}
+		functionReport, marshalErr := json.Marshal(map[string]any{"schema": schema, "images": imageRows})
 		if marshalErr != nil {
 			t.Fatal(marshalErr)
 		}
-		t.Log("VECTOR_LEXER_C_BUDGET_FUNCTIONS " + string(functionReport))
+		t.Log(marker + string(functionReport))
 	}
 	reporter := ""
 	rows := make([]map[string]any, 0, len(images))
@@ -261,6 +281,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 
 type scannerCOFFFunctionSpan struct {
 	Name         string `json:"name"`
+	SourceName   string `json:"source_name,omitempty"`
 	Section      string `json:"section"`
 	Offset       uint32 `json:"offset"`
 	RawSpanBytes uint32 `json:"raw_span_bytes"`

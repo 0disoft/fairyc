@@ -1,0 +1,843 @@
+{
+  "images": [
+    {
+      "exe_sha256": "5e3adce06d665d9376a5f283c3bdd81e01d63701eb8a1b7825c5e53f5b95f061",
+      "lane": "independent C",
+      "objects": [
+        {
+          "attributed_raw_bytes": 13653,
+          "code_raw_bytes": 13653,
+          "function_count": 45,
+          "name": "probe.obj",
+          "top_functions": [
+            {
+              "name": "fc_scan_string",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3291
+            },
+            {
+              "name": "fc_scan_one",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1876
+            },
+            {
+              "name": "fc_scan_number",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1252
+            },
+            {
+              "name": "fc_cook_float",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 921
+            },
+            {
+              "name": "fc_cook_integer",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 790
+            },
+            {
+              "name": "fc_diagnostic",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 632
+            },
+            {
+              "name": "fc_workload_round",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 579
+            },
+            {
+              "name": "fc_scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 564
+            },
+            {
+              "name": "fc_print",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 474
+            },
+            {
+              "name": "main",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 442
+            },
+            {
+              "name": "fc_valid_utf8",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 259
+            },
+            {
+              "name": "fc_diagnostic_number",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 244
+            },
+            {
+              "name": "fc_token",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 194
+            },
+            {
+              "name": "fc_work_exhausted",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 182
+            },
+            {
+              "name": "fc_utf8_width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 179
+            },
+            {
+              "name": "fc_compare_diagnostic",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 161
+            },
+            {
+              "name": "fc_symbol_width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 131
+            },
+            {
+              "name": "fc_hex",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 127
+            },
+            {
+              "name": "fc_match",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 109
+            },
+            {
+              "name": "fc_keyword",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 105
+            }
+          ],
+          "unattributed_raw_bytes": 0
+        }
+      ]
+    },
+    {
+      "exe_sha256": "d9e9d31459a948e48d808b4c44f174da19230e92294b197273b9a2c6112fde91",
+      "lane": "geometric C",
+      "objects": [
+        {
+          "attributed_raw_bytes": 14803,
+          "code_raw_bytes": 14803,
+          "function_count": 47,
+          "name": "probe.obj",
+          "top_functions": [
+            {
+              "name": "fc_scan_string",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3291
+            },
+            {
+              "name": "fc_scan_one",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1876
+            },
+            {
+              "name": "fc_scan_number",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1252
+            },
+            {
+              "name": "fc_cook_float",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 921
+            },
+            {
+              "name": "fc_diagnostic",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 875
+            },
+            {
+              "name": "fc_cook_integer",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 790
+            },
+            {
+              "name": "fc_scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 759
+            },
+            {
+              "name": "fc_workload_round",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 561
+            },
+            {
+              "name": "fc_print",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 474
+            },
+            {
+              "name": "main",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 442
+            },
+            {
+              "name": "fc_token_unlimited",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 344
+            },
+            {
+              "name": "fc_valid_utf8",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 259
+            },
+            {
+              "name": "fc_reserve_token_slot",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 254
+            },
+            {
+              "name": "fc_reserve_diagnostic_slot",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 246
+            },
+            {
+              "name": "fc_diagnostic_number",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 244
+            },
+            {
+              "name": "fc_utf8_width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 179
+            },
+            {
+              "name": "fc_work_exhausted",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 167
+            },
+            {
+              "name": "fc_compare_diagnostic",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 161
+            },
+            {
+              "name": "fc_token",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 156
+            },
+            {
+              "name": "fc_symbol_width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 131
+            }
+          ],
+          "unattributed_raw_bytes": 0
+        }
+      ]
+    },
+    {
+      "exe_sha256": "e737b2d881b77746a039928ff76f4188c3a851e42813f53e4c20a2c1b7215ad2",
+      "lane": "explicit index",
+      "objects": [
+        {
+          "attributed_raw_bytes": 32116,
+          "code_raw_bytes": 32116,
+          "function_count": 81,
+          "name": "unit.obj",
+          "top_functions": [
+            {
+              "name": "fy_fn_29",
+              "source_name": "$p1::scanner::scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 5297
+            },
+            {
+              "name": "fy_fn_41",
+              "source_name": "$p1::strings::scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3134
+            },
+            {
+              "name": "fy_fn_10",
+              "source_name": "$p1::numbers::decimal",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3118
+            },
+            {
+              "name": "fy_fn_36",
+              "source_name": "$p1::strings::escape",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3071
+            },
+            {
+              "name": "fy_fn_28",
+              "source_name": "$p1::scanner::report_work",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 2495
+            },
+            {
+              "name": "fy_fn_15",
+              "source_name": "$p1::numbers::scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1705
+            },
+            {
+              "name": "fy_fn_9",
+              "source_name": "$p1::main::main",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1528
+            },
+            {
+              "name": "fy_fn_19",
+              "source_name": "$p1::scanner::collect",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1381
+            },
+            {
+              "name": "fy_fn_13",
+              "source_name": "$p1::numbers::integer",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1135
+            },
+            {
+              "name": "fy_fn_6",
+              "source_name": "$p1::diagnostics::report",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1056
+            },
+            {
+              "name": "fy_fn_24",
+              "source_name": "$p1::scanner::keyword",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 610
+            },
+            {
+              "name": "fy_fn_18",
+              "source_name": "$p1::scanner::append_cooked",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 483
+            },
+            {
+              "name": "fy_fn_34",
+              "source_name": "$p1::strings::encode",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 388
+            },
+            {
+              "name": "fy_fn_32",
+              "source_name": "$p1::scanner::symbol_width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 359
+            },
+            {
+              "name": "fy_fn_43",
+              "source_name": "$p1::utf8::width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 350
+            },
+            {
+              "name": "fy_fn_2",
+              "source_name": "$p1::diagnostics::add",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 337
+            },
+            {
+              "name": "fy_fn_31",
+              "source_name": "$p1::scanner::storage",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 321
+            },
+            {
+              "name": "fy_fn_48",
+              "source_name": "$p2::std::bytes::copy",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 318
+            },
+            {
+              "name": "fy_fn_79",
+              "source_name": "$p2::std::vec::_fy_generic_g0_ec36724edef51886d2f35c9207f11bf512c2c67f805e18fe4f9e6a6306ee02cb",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 318
+            },
+            {
+              "name": "fy_fn_7",
+              "source_name": "$p1::diagnostics::text",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 238
+            }
+          ],
+          "unattributed_raw_bytes": 0
+        },
+        {
+          "attributed_raw_bytes": 8039,
+          "code_raw_bytes": 8039,
+          "function_count": 59,
+          "name": "runtime.obj",
+          "top_functions": [
+            {
+              "name": "fy_private_vector_reserve_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 585
+            },
+            {
+              "name": "fy_std_buffer_reserve_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 408
+            },
+            {
+              "name": "fy_private_vector_push_bytes_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 370
+            },
+            {
+              "name": "fy_std_system_heap_resize_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 328
+            },
+            {
+              "name": "fy_std_buffer_append_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 319
+            },
+            {
+              "name": "fy_std_system_heap_allocate_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 276
+            },
+            {
+              "name": "fy_private_vector_release_empty_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 263
+            },
+            {
+              "name": "fy_private_vector_prepare_push_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 261
+            },
+            {
+              "name": "fy_private_vector_pop_bytes_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 249
+            },
+            {
+              "name": "fy_std_windows_write_all_impl_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 245
+            },
+            {
+              "name": "fy_private_vector_read_copy_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 234
+            },
+            {
+              "name": "fy_private_vector_commit_push_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 215
+            },
+            {
+              "name": "fy_std_buffer_initialize_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 211
+            },
+            {
+              "name": "fy_std_stdin_read_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 202
+            },
+            {
+              "name": "fy_private_vector_element_slot_mut_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 192
+            },
+            {
+              "name": "fy_private_vector_element_slot_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 192
+            },
+            {
+              "name": "fy_std_windows_write_i32_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 186
+            },
+            {
+              "name": "fy_std_buffer_drop_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 182
+            },
+            {
+              "name": "fy_private_vector_pop_slot_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 181
+            },
+            {
+              "name": "fy_private_vector_clear_copy_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 169
+            }
+          ],
+          "unattributed_raw_bytes": 0
+        }
+      ]
+    },
+    {
+      "exe_sha256": "09d915ece4a4688e92dc048eb276b1d0eed0a3fd45f0addd1f920adec2636724",
+      "lane": "all vector for",
+      "objects": [
+        {
+          "attributed_raw_bytes": 32116,
+          "code_raw_bytes": 32116,
+          "function_count": 81,
+          "name": "unit.obj",
+          "top_functions": [
+            {
+              "name": "fy_fn_29",
+              "source_name": "$p1::scanner::scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 5297
+            },
+            {
+              "name": "fy_fn_41",
+              "source_name": "$p1::strings::scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3134
+            },
+            {
+              "name": "fy_fn_10",
+              "source_name": "$p1::numbers::decimal",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3118
+            },
+            {
+              "name": "fy_fn_36",
+              "source_name": "$p1::strings::escape",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 3071
+            },
+            {
+              "name": "fy_fn_28",
+              "source_name": "$p1::scanner::report_work",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 2495
+            },
+            {
+              "name": "fy_fn_15",
+              "source_name": "$p1::numbers::scan",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1705
+            },
+            {
+              "name": "fy_fn_9",
+              "source_name": "$p1::main::main",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1528
+            },
+            {
+              "name": "fy_fn_19",
+              "source_name": "$p1::scanner::collect",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1381
+            },
+            {
+              "name": "fy_fn_13",
+              "source_name": "$p1::numbers::integer",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1135
+            },
+            {
+              "name": "fy_fn_6",
+              "source_name": "$p1::diagnostics::report",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 1056
+            },
+            {
+              "name": "fy_fn_24",
+              "source_name": "$p1::scanner::keyword",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 610
+            },
+            {
+              "name": "fy_fn_18",
+              "source_name": "$p1::scanner::append_cooked",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 483
+            },
+            {
+              "name": "fy_fn_34",
+              "source_name": "$p1::strings::encode",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 388
+            },
+            {
+              "name": "fy_fn_32",
+              "source_name": "$p1::scanner::symbol_width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 359
+            },
+            {
+              "name": "fy_fn_43",
+              "source_name": "$p1::utf8::width",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 350
+            },
+            {
+              "name": "fy_fn_2",
+              "source_name": "$p1::diagnostics::add",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 337
+            },
+            {
+              "name": "fy_fn_31",
+              "source_name": "$p1::scanner::storage",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 321
+            },
+            {
+              "name": "fy_fn_48",
+              "source_name": "$p2::std::bytes::copy",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 318
+            },
+            {
+              "name": "fy_fn_69",
+              "source_name": "$p2::std::vec::_fy_generic_g0_4b72d1819964c8f00ea8e64f95409824392fda9227d43fa501d41c87acc3f1af",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 318
+            },
+            {
+              "name": "fy_fn_7",
+              "source_name": "$p1::diagnostics::text",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 238
+            }
+          ],
+          "unattributed_raw_bytes": 0
+        },
+        {
+          "attributed_raw_bytes": 8039,
+          "code_raw_bytes": 8039,
+          "function_count": 59,
+          "name": "runtime.obj",
+          "top_functions": [
+            {
+              "name": "fy_private_vector_reserve_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 585
+            },
+            {
+              "name": "fy_std_buffer_reserve_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 408
+            },
+            {
+              "name": "fy_private_vector_push_bytes_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 370
+            },
+            {
+              "name": "fy_std_system_heap_resize_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 328
+            },
+            {
+              "name": "fy_std_buffer_append_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 319
+            },
+            {
+              "name": "fy_std_system_heap_allocate_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 276
+            },
+            {
+              "name": "fy_private_vector_release_empty_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 263
+            },
+            {
+              "name": "fy_private_vector_prepare_push_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 261
+            },
+            {
+              "name": "fy_private_vector_pop_bytes_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 249
+            },
+            {
+              "name": "fy_std_windows_write_all_impl_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 245
+            },
+            {
+              "name": "fy_private_vector_read_copy_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 234
+            },
+            {
+              "name": "fy_private_vector_commit_push_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 215
+            },
+            {
+              "name": "fy_std_buffer_initialize_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 211
+            },
+            {
+              "name": "fy_std_stdin_read_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 202
+            },
+            {
+              "name": "fy_private_vector_element_slot_mut_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 192
+            },
+            {
+              "name": "fy_private_vector_element_slot_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 192
+            },
+            {
+              "name": "fy_std_windows_write_i32_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 186
+            },
+            {
+              "name": "fy_std_buffer_drop_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 182
+            },
+            {
+              "name": "fy_private_vector_pop_slot_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 181
+            },
+            {
+              "name": "fy_private_vector_clear_copy_v0",
+              "section": ".text$mn",
+              "offset": 0,
+              "raw_span_bytes": 169
+            }
+          ],
+          "unattributed_raw_bytes": 0
+        }
+      ]
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-function-source-map/v1"
+}

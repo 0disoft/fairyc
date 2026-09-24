@@ -389,6 +389,10 @@ The [function-span receipt](../ops/scanner-function-spans-20260925.md) records
 source forms. `fy_fn_29` has the largest raw section span at 5,297 bytes.
 These COFF spans can include padding and do not show which functions survived
 linking; source-name and link-map attribution remain open.
+The [source-name map](../ops/scanner-function-source-map-20260925.md) now
+identifies the five largest Fairy unit spans as `scanner::scan`,
+`strings::scan`, `numbers::decimal`, `strings::escape` and
+`scanner::report_work`. Their retained linked sizes are still unknown.
 
 ## Proposed first boundary
 
