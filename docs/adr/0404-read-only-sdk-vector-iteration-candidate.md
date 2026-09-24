@@ -301,6 +301,8 @@ access is not equivalent to the current source loop.
    under the optimized profile against the cumulative 8% runtime and EXE
    budget. A new source form cannot claim a zero-cost result from syntax or
    interpreter parity alone. Separately measure unused-feature overhead.
+   The C budget reference now matches `Vec<Token>`'s geometric capacity steps,
+   but diagnostic storage and remaining scanner limits still need parity.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
    formatter and release pin only after the proof. A failed gate keeps this
    feature a candidate; it does not authorize relaxing checks.

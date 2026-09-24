@@ -44,6 +44,10 @@ struct fc_scanner {
     size_t length, position, token_count, diagnostic_count;
     struct fc_token *tokens;
     struct fc_diagnostic *diagnostics;
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+    size_t token_capacity;
+    int token_allocation_failed;
+#endif
 #ifdef FC_CANDIDATE_COOKED_LIMIT
     size_t cooked_total;
 #endif
@@ -51,6 +55,29 @@ struct fc_scanner {
     size_t expansion_work, work_limit;
 #endif
 };
+
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+// Match Vec<Token>'s empty, 8, 16, ... capacity path for the C budget lane.
+// This mode requires an initially null token pointer owned by the scanner.
+static int fc_reserve_token_slot(struct fc_scanner *s) {
+    if (s->token_count > s->token_capacity) return 0;
+    if (s->token_capacity > s->token_count) return s->tokens != NULL;
+    size_t maximum = SIZE_MAX / sizeof(*s->tokens);
+    if ((s->tokens != NULL && s->token_capacity == 0) ||
+        s->token_capacity >= maximum) return 0;
+    size_t next = s->token_capacity == 0 ? (maximum < 8u ? maximum : 8u) :
+                  s->token_capacity > maximum / 2u ? maximum : s->token_capacity * 2u;
+    if (next <= s->token_count) return 0;
+    struct fc_token *replacement = (struct fc_token *)malloc(next * sizeof(*replacement));
+    if (replacement == NULL) return 0;
+    if (s->token_count != 0)
+        memcpy(replacement, s->tokens, s->token_count * sizeof(*replacement));
+    free(s->tokens);
+    s->tokens = replacement;
+    s->token_capacity = next;
+    return 1;
+}
+#endif
 
 #ifdef FC_CANDIDATE_COOKED_LIMIT
 static int fc_accept_cooked(struct fc_scanner *s, size_t length) {
@@ -63,6 +90,14 @@ static int fc_accept_cooked(struct fc_scanner *s, size_t length) {
 static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
                      size_t start, size_t end, const unsigned char *cooked,
                      size_t cooked_length) {
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+    if (s->token_allocation_failed || !fc_reserve_token_slot(s)) {
+        s->token_allocation_failed = 1;
+        if (kind == FC_INTEGER || kind == FC_FLOAT || kind == FC_STRING ||
+            kind == FC_BYTE_STRING || kind == FC_C_STRING) free((void *)cooked);
+        return;
+    }
+#endif
     s->tokens[s->token_count++] = (struct fc_token){kind, trivia, start, end,
                                                    cooked, cooked_length};
 }
@@ -600,13 +635,22 @@ static int fc_scan(struct fc_scanner *s) {
     if (s->length >= 3 && s->source[0] == 0xef && s->source[1] == 0xbb &&
         s->source[2] == 0xbf) {
         fc_token(s, FC_TRIVIA, FC_PREAMBLE, 0, 3, NULL, 0);
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+        if (s->token_allocation_failed) return 3;
+#endif
         s->position = 3;
     }
     while (s->position < s->length) {
         int status = fc_scan_one(s);
         if (status != 0) return status;
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+        if (s->token_allocation_failed) return 3;
+#endif
     }
     fc_token(s, FC_EOF, FC_NO_TRIVIA, s->length, s->length, NULL, 0);
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+    if (s->token_allocation_failed) return 3;
+#endif
     return 0;
 }
 
@@ -667,9 +711,16 @@ int main(void) {
                       ((uint32_t)header[2] << 16) | ((uint32_t)header[3] << 24);
     if (length > FC_MAX_SOURCE) return FC_BAD_INPUT;
     unsigned char *source = (unsigned char *)malloc(length == 0 ? 1u : (size_t)length);
-    struct fc_token *tokens = (struct fc_token *)calloc((size_t)length + 1u, sizeof(*tokens));
+    struct fc_token *tokens = NULL;
+#ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
+    tokens = (struct fc_token *)calloc((size_t)length + 1u, sizeof(*tokens));
+#endif
     struct fc_diagnostic *diagnostics = (struct fc_diagnostic *)calloc((size_t)length + 1u, sizeof(*diagnostics));
-    if (source == NULL || tokens == NULL || diagnostics == NULL) {
+    if (source == NULL || diagnostics == NULL
+#ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
+        || tokens == NULL
+#endif
+    ) {
         free(source); free(tokens); free(diagnostics); return 3;
     }
     if (fread(source, 1, length, stdin) != length || getchar() != EOF) {
@@ -680,6 +731,7 @@ int main(void) {
     scanner.work_limit = FC_CANDIDATE_WORK;
 #endif
     int status = fc_scan(&scanner);
+    tokens = scanner.tokens;
     if (status == 0) {
         qsort(scanner.diagnostics, scanner.diagnostic_count,
               sizeof(*scanner.diagnostics), fc_compare_diagnostic);

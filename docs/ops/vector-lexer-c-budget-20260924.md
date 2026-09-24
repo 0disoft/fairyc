@@ -36,3 +36,12 @@ these changes produces a new C image; none of the earlier executable hashes,
 sizes or QPC samples above describe the current image. Other recognition work
 paths, remaining lexical forms and the C/Fairy storage difference are still
 open, so the 8% gate remains undecided.
+
+The next C budget image now grows token storage from 8 slots by doubling,
+matching the private `Vec<Token>` capacity sequence; low and optimized C
+probes check the 8/16/32-slot boundaries and exact Go-lexer output. The broad
+standalone C reference retains its original up-front token allocation. C
+diagnostics still allocate `length + 1` slots up front, while Fairy uses
+`Vec<diagnostics::Entry>`. This is another new image: the earlier hashes,
+sizes and timing samples do not measure it. Storage parity and the full
+scanner 8% gate remain open.

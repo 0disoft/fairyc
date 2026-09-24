@@ -4,10 +4,17 @@
 static int fc_workload_round(const unsigned char *input, size_t length,
                              int report, uint64_t *work) {
     unsigned char *owned = (unsigned char *)malloc(length == 0 ? 1u : length);
-    struct fc_token *tokens = (struct fc_token *)malloc((length + 1u) * sizeof(*tokens));
+    struct fc_token *tokens = NULL;
+#ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
+    tokens = (struct fc_token *)malloc((length + 1u) * sizeof(*tokens));
+#endif
     struct fc_diagnostic *diagnostics =
         (struct fc_diagnostic *)malloc((length + 1u) * sizeof(*diagnostics));
-    if (owned == NULL || tokens == NULL || diagnostics == NULL) {
+    if (owned == NULL || diagnostics == NULL
+#ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
+        || tokens == NULL
+#endif
+    ) {
         free(owned); free(tokens); free(diagnostics);
         return 3;
     }
@@ -17,6 +24,7 @@ static int fc_workload_round(const unsigned char *input, size_t length,
     scanner.work_limit = FC_CANDIDATE_WORK;
 #endif
     int status = fc_scan(&scanner);
+    tokens = scanner.tokens;
     if (status == 0) {
         *work = (uint64_t)length + scanner.token_count + scanner.diagnostic_count;
         for (size_t i = 0; i < scanner.token_count; i++)
