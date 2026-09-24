@@ -124,6 +124,13 @@ func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits,
 			ordered[i].imports[imported.Alias] = target
 		}
 	}
+	if sdkTemplates {
+		for _, module := range ordered {
+			if err := module.activateSDKVectorLoops(); err != nil {
+				return PackageExpansion{}, err
+			}
+		}
+	}
 	var templates []PublicTemplate
 	if nominal {
 		if err := bindNominalContext(ordered); err != nil {

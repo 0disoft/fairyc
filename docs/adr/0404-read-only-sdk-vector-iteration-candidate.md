@@ -34,14 +34,16 @@ The existing parser's `for (let type name in expression)` shape can retain this
 source; semantic analysis currently admits only an immutable `ref u8[]` byte
 view with a copied `u8` item. Parsing a shape is not language admission.
 
-The first experimental implementation step now prepares a separate, inert AST
-block for eligible shared-reference item loops. It finds the actual
-`std::vec` import alias, captures a named borrowed view or explicit borrow of
-a path/field place once, and sketches calls to that alias's `len<T>` and
-`at<T>`. The original loop remains intact. Semantic analysis still rejects
-the vector form before that block is resolved or lowered, so there is no new
-source behavior, generated C or SDK dependency yet. Authentication, type
-checking, Flow and verified-MIR execution remain future gates.
+The first experimental implementation step prepares a separate AST block for
+eligible shared-reference item loops. It finds the actual `std::vec` import
+alias, captures a named borrowed view or explicit borrow of a path/field place
+once, and sketches calls to that alias's `len<T>` and `at<T>`. Generic cloning
+keeps the written loop and prepared block detached from the original source.
+Only the authenticated SDK package graph now exposes those prepared calls to
+bounded generic planning; an import spelling or unowned provider alone cannot
+activate them. Semantic analysis still rejects the vector source form before
+lowering, so there is no new accepted syntax or generated C. Exact type and
+borrow checking, Flow and verified-MIR execution remain future gates.
 
 ## Proposed first boundary
 
