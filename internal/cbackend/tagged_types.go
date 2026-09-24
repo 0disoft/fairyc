@@ -23,7 +23,7 @@ type taggedCType struct {
 	needsDrop bool
 }
 
-func sharedScalarBorrowOptionNiche(value hir.Type) bool {
+func sharedBorrowOptionNiche(value hir.Type, structByType map[hir.Type]int) bool {
 	element, option := hir.OptionElement(value)
 	if !option {
 		return false
@@ -36,7 +36,8 @@ func sharedScalarBorrowOptionNiche(value hir.Type) bool {
 	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return true
 	default:
-		return false
+		_, structure := structByType[canonicalCValueType(borrowed)]
+		return structure
 	}
 }
 
@@ -161,7 +162,7 @@ func prepareTaggedTypes(
 		}
 		layoutState[value] = 1
 		fields := make([]layout.Field, 0, len(candidate.payloads)+1)
-		if !sharedScalarBorrowOptionNiche(value) {
+		if !sharedBorrowOptionNiche(value, structByType) {
 			fields = append(fields, layout.Field{
 				Name: "tag",
 				Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"},
@@ -438,7 +439,7 @@ func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
 func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
 	tagged := e.taggedTypes[index]
 	output.WriteString("typedef struct {\n")
-	if !sharedScalarBorrowOptionNiche(tagged.typ) {
+	if !sharedBorrowOptionNiche(tagged.typ, e.structByType) {
 		output.WriteString("    uint32_t tag;\n")
 	}
 	for payloadIndex, payload := range tagged.payloads {
@@ -453,7 +454,7 @@ func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
 	fmt.Fprintf(output, "_Static_assert(_Alignof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d alignment\");\n", index, tagged.layout.AlignmentBytes, index)
 	for fieldIndex, field := range tagged.layout.Fields {
 		fieldName := "tag"
-		if sharedScalarBorrowOptionNiche(tagged.typ) {
+		if sharedBorrowOptionNiche(tagged.typ, e.structByType) {
 			fieldName = fmt.Sprintf("p_%d", fieldIndex)
 		} else if fieldIndex > 0 {
 			fieldName = fmt.Sprintf("p_%d", fieldIndex-1)

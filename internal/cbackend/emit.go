@@ -3751,7 +3751,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	case mir.OperationOptionConstruct:
 		cType := "fy_option_i32"
 		field := "payload"
-		nullNiche := sharedScalarBorrowOptionNiche(operation.Type)
+		nullNiche := sharedBorrowOptionNiche(operation.Type, e.structByType)
 		if index, resourceTagged := e.taggedByType[operation.Type]; resourceTagged {
 			cType = fmt.Sprintf("fy_tagged_%d", index)
 			field = "p_0"
@@ -3951,7 +3951,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("Option switch in %s: %w", function.Name, err)
 		}
-		if sharedScalarBorrowOptionNiche(valueType) {
+		if sharedBorrowOptionNiche(valueType, e.structByType) {
 			fmt.Fprintf(output, "    if ((%s).p_0 != ((void *)0)) goto fy_b_%d;\n", value, success)
 			fmt.Fprintf(output, "    goto fy_b_%d;\n", failure)
 			break

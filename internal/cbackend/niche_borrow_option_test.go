@@ -32,6 +32,69 @@ fn i32 main() {
 `, scalar, initial)
 }
 
+const sharedStructBorrowOptionSource = `module main;
+struct Token { i32 value; }
+fn Option<ref Token> choose(ref Token value, bool include) {
+    return if (include) { .some(value) } else { .none };
+}
+fn i32 main() {
+    let Token source = Token { .value = 42 };
+    let Option<ref Token> present = choose(ref source, true);
+    let Option<ref Token> absent = choose(ref source, false);
+    let i32 first = switch (present) { case .some(view): { view.value } case .none: { 1 } };
+    let i32 second = switch (absent) { case .some(_): { 2 } case .none: { 0 } };
+    return first + second;
+}
+`
+
+func TestSharedStructBorrowOptionUsesNullNiche(t *testing.T) {
+	program := lowerSource(t, sharedStructBorrowOptionSource)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpret Option<ref Token>: %+v %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"_Static_assert(sizeof(fy_tagged_0) == UINT64_C(8)",
+		".p_0 = ((void *)0)",
+		".p_0 != ((void *)0)",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	scalarRuntime, err := cruntime.ScalarSource(192)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+			if err != nil {
+				t.Fatal(err)
+			}
+			artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source, scalarRuntime)
+			if err != nil {
+				t.Fatal(err)
+			}
+			outcome, err := cdriver.ExecuteWindowsHost(artifact)
+			if err != nil || outcome.ExitCode != 42 || outcome.Stdout != "" || outcome.Stderr != "" {
+				t.Fatalf("execute: %+v %v", outcome, err)
+			}
+		})
+	}
+}
+
 func TestEmitSharedScalarBorrowOptionUsesNullNiche(t *testing.T) {
 	t.Parallel()
 	for _, scalar := range []string{"bool", "u8", "i32", "u32", "usize"} {
