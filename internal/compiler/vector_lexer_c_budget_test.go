@@ -124,6 +124,86 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log("VECTOR_LEXER_C_BUDGET_SMOKE " + string(report))
+	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_MEASURE") == "1" {
+		measureScannerBudgetTriplets(t, images, sample, uint64(perRound))
+	}
+}
+
+// Twelve fixed, rotating triplets follow one warmup. Raw QPC samples are
+// evidence for a later stability and 8% assessment, not an automatic verdict.
+func measureScannerBudgetTriplets(t *testing.T, images []scannerBudgetImage, sample string, perRound uint64) {
+	t.Helper()
+	if len(images) != 3 {
+		t.Fatalf("budget lane count=%d", len(images))
+	}
+	const rounds = 250000
+	const measured = 12
+	const seed = 12345
+	prefixes := [3]string{}
+	rows := make([]map[string]any, 0, measured+1)
+	for triplet := 0; triplet <= measured; triplet++ {
+		order := [3]string{}
+		lanes := make([]map[string]any, 0, len(images))
+		for position := range images {
+			index := (triplet + position) % len(images)
+			image := images[index]
+			order[position] = image.name
+			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(image.artifact,
+				strings.NewReader(fmt.Sprintf("%d %d\n", seed, rounds)))
+			if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
+				t.Fatalf("triplet %d lane %s: %+v %v", triplet, image.name, outcome, err)
+			}
+			fields := strings.Fields(outcome.Stdout)
+			if len(fields) < 5 {
+				t.Fatalf("triplet %d lane %s missing timing: %q", triplet, image.name, outcome.Stdout)
+			}
+			prefix := strings.Join(fields[:len(fields)-4], " ")
+			if prefixes[index] == "" {
+				prefixes[index] = prefix
+			} else if prefixes[index] != prefix {
+				t.Fatalf("triplet %d lane %s reporter changed", triplet, image.name)
+			}
+			last := fields[len(fields)-4:]
+			completed, completedErr := strconv.ParseUint(last[0], 10, 32)
+			ticks, ticksErr := strconv.ParseUint(last[1], 10, 64)
+			frequency, frequencyErr := strconv.ParseUint(last[2], 10, 64)
+			total, totalErr := strconv.ParseUint(last[3], 10, 64)
+			if completedErr != nil || ticksErr != nil || frequencyErr != nil || totalErr != nil ||
+				completed != rounds || ticks == 0 || frequency == 0 || total != perRound*rounds {
+				t.Fatalf("triplet %d lane %s timing=%v errors=%v,%v,%v,%v", triplet, image.name,
+					last, completedErr, ticksErr, frequencyErr, totalErr)
+			}
+			lanes = append(lanes, map[string]any{
+				"lane": image.name, "qpc_ticks": ticks, "qpc_frequency": frequency,
+				"total": total, "completed": completed,
+			})
+		}
+		rows = append(rows, map[string]any{
+			"triplet": triplet, "warmup": triplet == 0, "order": order, "lanes": lanes,
+		})
+	}
+	imageRows := make([]map[string]any, 0, len(images))
+	for _, image := range images {
+		imageRows = append(imageRows, map[string]any{
+			"lane": image.name, "exe_bytes": len(image.artifact.Bytes),
+			"exe_sha256":   fmt.Sprintf("%x", sha256.Sum256(image.artifact.Bytes)),
+			"source_bytes": image.sourceBytes, "specializations": image.specializations,
+		})
+	}
+	report, err := json.Marshal(map[string]any{
+		"schema":        "fairyc.vector-lexer-c-budget-triplets/v1",
+		"sample_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(sample))),
+		"go":            runtime.Version(), "msvc": images[0].artifact.Toolchain.Version,
+		"gomaxprocs": runtime.GOMAXPROCS(0), "seed": seed,
+		"profile": cdriver.OptimizedProfile.Name,
+		"rounds":  rounds, "warmup_triplets": 1, "measured_triplets": measured,
+		"per_round_result": perRound, "images": imageRows, "samples": rows,
+		"scope": "Three standalone optimized images, one fixed warmup and twelve rotating measured triplets; each execution verifies reporter, completed rounds and checksum. QPC excludes process startup and final output. No retries, exclusions or adaptive stopping. Token reporting is outside the timed loop; this sample does not prove a full-language 8% budget.",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log("VECTOR_LEXER_C_BUDGET_TRIPLETS " + string(report))
 }
 
 func scannerBudgetFairyProgram(t *testing.T, variant realScannerVectorVariant) (mir.Program, string, int) {

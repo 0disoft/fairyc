@@ -213,6 +213,21 @@ Fairy and private-candidate Fairy executables for that sample. It checks the
 same completed-round count and checksum in all three, compares the two Fairy
 reporters, and records QPC ticks and EXE bytes. One execution per image is not
 a stable paired measurement, so these observations do not decide the 8% gate.
+The follow-up three-image measurement keeps those builds and the sample fixed:
+one warmup triplet, then twelve measured triplets with C, indexed Fairy and
+candidate Fairy rotated through every execution position. Each lane performs
+250,000 checked scanner rounds per triplet; QPC brackets only the scanner work.
+Every run must retain its reporter, completed count and independent Go checksum.
+All raw timings and image bytes are retained without retries or exclusions.
+The existing 10% relative-full-span heuristic applies to lane and paired-ratio
+series before interpreting an 8% result. The timed loop omits token reporting,
+so this is a scanner-workload comparison, not a whole-application verdict.
+The [measured triplets](../ops/vector-lexer-c-budget-20260924.md) preserve all
+thirteen triplets. Every runtime series exceeds the predeclared stability
+heuristic. The two Fairy images have the same EXE byte count, but both exceed
+the restricted C reference's size by 13.24%. That C reference is not yet a
+complete scanner, so this does not close the representative 8% gate or admit
+the private vector source form.
 
 ## Proposed first boundary
 

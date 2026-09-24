@@ -1,0 +1,455 @@
+{
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "images": [
+    {
+      "exe_bytes": 181760,
+      "exe_sha256": "c79890ce55043244d00592080f735b7714d14d95460ce1eac36eb30ad588e004",
+      "lane": "independent C",
+      "source_bytes": 31205,
+      "specializations": 0
+    },
+    {
+      "exe_bytes": 205824,
+      "exe_sha256": "9afeae7292c020dbc5c560a942e6bc089cdc498da8b82021a74650218069f158",
+      "lane": "explicit index",
+      "source_bytes": 384636,
+      "specializations": 21
+    },
+    {
+      "exe_bytes": 205824,
+      "exe_sha256": "6964fa7e1bbea983f5f4a6419c089daeb9d6311714c48be94a2d9393bf499d39",
+      "lane": "all vector for",
+      "source_bytes": 385464,
+      "specializations": 21
+    }
+  ],
+  "measured_triplets": 12,
+  "msvc": "14.51.36231",
+  "per_round_result": 36,
+  "profile": "optimized",
+  "rounds": 250000,
+  "sample_sha256": "27270bb224790aca7d077b8f03b6092e4ab29b7a12bf6756265e7aaf7a2a2133",
+  "samples": [
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 3688209,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6909684,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7047156,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "explicit index",
+        "all vector for"
+      ],
+      "triplet": 0,
+      "warmup": true
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7438381,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7421865,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4265337,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "explicit index",
+        "all vector for",
+        "independent C"
+      ],
+      "triplet": 1,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 9183846,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6125313,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 11863266,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "all vector for",
+        "independent C",
+        "explicit index"
+      ],
+      "triplet": 2,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4845297,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7602317,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7037281,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "explicit index",
+        "all vector for"
+      ],
+      "triplet": 3,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6867415,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7020400,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 3866503,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "explicit index",
+        "all vector for",
+        "independent C"
+      ],
+      "triplet": 4,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7131376,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 3695608,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7612623,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "all vector for",
+        "independent C",
+        "explicit index"
+      ],
+      "triplet": 5,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4121604,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7565199,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7869322,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "explicit index",
+        "all vector for"
+      ],
+      "triplet": 6,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7492758,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7498452,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4744827,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "explicit index",
+        "all vector for",
+        "independent C"
+      ],
+      "triplet": 7,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8697398,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4491343,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 9706773,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "all vector for",
+        "independent C",
+        "explicit index"
+      ],
+      "triplet": 8,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4668742,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8439667,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7655982,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "explicit index",
+        "all vector for"
+      ],
+      "triplet": 9,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7703036,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8590402,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4371212,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "explicit index",
+        "all vector for",
+        "independent C"
+      ],
+      "triplet": 10,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7949397,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4499055,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 17684706,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "all vector for",
+        "independent C",
+        "explicit index"
+      ],
+      "triplet": 11,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7201295,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12113482,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12711797,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "explicit index",
+        "all vector for"
+      ],
+      "triplet": 12,
+      "warmup": false
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-triplets/v1",
+  "scope": "Three standalone optimized images, one fixed warmup and twelve rotating measured triplets; each execution verifies reporter, completed rounds and checksum. QPC excludes process startup and final output. No retries, exclusions or adaptive stopping. Token reporting is outside the timed loop; this sample does not prove a full-language 8% budget.",
+  "seed": 12345,
+  "warmup_triplets": 1
+}
