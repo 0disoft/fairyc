@@ -75,7 +75,10 @@ func TestPrivateVectorSDKCandidateRealScannerExecution(t *testing.T) {
 	if len(lexed.Tokens) == 0 || len(lexed.Diagnostics) == 0 || perRound <= len(sample) {
 		t.Fatal("scanner sample lost required token, cooked or diagnostic coverage")
 	}
-	const rounds = 10000
+	rounds := 10000
+	if os.Getenv("FAIRYC_VECTOR_LEXER_LONG") == "1" {
+		rounds = 250000
+	}
 	if perRound*rounds >= 1<<32 {
 		t.Fatal("checksum no longer fits u32")
 	}
@@ -191,7 +194,7 @@ func TestPrivateVectorSDKCandidateRealScannerExecution(t *testing.T) {
 		ticks, ticksErr := strconv.ParseInt(fields[len(fields)-3], 10, 64)
 		frequency, frequencyErr := strconv.ParseInt(fields[len(fields)-2], 10, 64)
 		value, valueErr := strconv.ParseUint(fields[len(fields)-1], 10, 64)
-		if completedErr != nil || valueErr != nil || ticksErr != nil || frequencyErr != nil || completed != rounds || value != uint64(perRound*rounds) || ticks <= 0 || frequency <= 0 {
+		if completedErr != nil || valueErr != nil || ticksErr != nil || frequencyErr != nil || completed != uint64(rounds) || value != uint64(perRound*rounds) || ticks <= 0 || frequency <= 0 {
 			t.Fatalf("%s result or QPC mismatch: %v %v %v %v got=%d want=%d", name, completedErr, valueErr, ticksErr, frequencyErr, value, perRound*rounds)
 		}
 		return map[string]any{"lane": name, "repetition": repetition, "position": position, "warmup": warmup, "kernel_ns": ticks * 1000000000 / frequency, "result": value, "exe_sha256": images[lane].hash}
@@ -236,7 +239,7 @@ import std::io as io;
     assert(scanner::report_work(b"let n=12345; /*open"[..], false, 32768, 1048576, 256, 16777216) == 0);
     let u32 seed = unsafe { benchmark_seed() };
     let u32 rounds = unsafe { benchmark_rounds() };
-    if (seed != 12345 || rounds > 10000) { return 2; }
+    if (seed != 12345 || rounds > 250000) { return 2; }
     unsafe { benchmark_begin(); }
     var usize total = 0;
     var u32 iteration = 0;
