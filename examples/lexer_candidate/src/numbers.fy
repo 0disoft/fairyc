@@ -134,7 +134,7 @@ fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial
         }
     }
     if (unrepresentable) {
-        return Cook { .status = 5, .work = budget::Work { .used = work.used, .limit = work.limit, .exhausted = true } };
+        return Cook { .status = 5, .work = budget::Work { .remaining = work.remaining, .exhausted = true } };
     }
     // Charge the full expansion before materialization, including later-trimmed zeros.
     work = budget::charge(work, length);

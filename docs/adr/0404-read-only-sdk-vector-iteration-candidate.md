@@ -421,6 +421,11 @@ finds identical selected archive members for both Fairy images and just one
 additional C member, `libucrt.lib(strlen.obj)`. It rules out extra Fairy
 archive-member extraction as the size explanation, but does not measure
 retained COMDAT or generated function bytes.
+A [two-field work-budget experiment](../ops/scanner-remaining-work-20260925.md)
+reduces both Fairy scanner EXEs by 1,536 bytes to 204,800 without changing
+the checked lexical or work-limit observations. Its C-relative timing series
+fail the predeclared stability rule, and the EXE ratio remains 1.11111; this
+improvement does not admit the vector source form.
 
 ## Proposed first boundary
 
