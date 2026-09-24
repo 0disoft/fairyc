@@ -214,6 +214,12 @@ Low and optimized MSVC runs check positive and negative exponent forms at
 the actual Fairy scanner. The accepted C output also matches the Go lexer.
 The C budget image now also caps total cooked bytes at 65,536 and returns
 candidate-size status 4 before publishing an over-limit number or string.
+For strings, the C budget image now charges decoded bytes, including the
+terminating NUL in a C string, rather than the twice-as-long hex reporter
+representation. A library-mode MSVC probe checks exact and one-byte-over
+boundaries for plain, byte, C and Unicode-escaped strings under low and
+optimized profiles. This fixes a C reference accounting mismatch; it does not
+establish the full-scanner cost gate.
 Four 16,384-byte decimals succeed, while a fifth is rejected, in both C and
 Fairy under low and optimized MSVC; the standalone C Go-oracle build remains
 unrestricted by these candidate switches. The C budget image also charges

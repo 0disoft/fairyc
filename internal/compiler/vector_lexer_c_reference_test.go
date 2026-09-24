@@ -90,6 +90,74 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorSDKCandidateCStringCookedLimit(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	core, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "scanner_reference.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const probe = `
+int main(void) {
+    struct sample {
+        const char *source;
+        unsigned kind;
+        size_t opener, initial;
+        int status;
+        size_t total, hex_length;
+        const char *hex;
+    };
+    static const struct sample cases[] = {
+        {"\"A\"", FC_STRING, 1, 65535, 0, 65536, 2, "41"},
+        {"\"A\"", FC_STRING, 1, 65536, FC_CANDIDATE_COOKED_SIZE, 65536, 0, ""},
+        {"b\"A\"", FC_BYTE_STRING, 2, 65535, 0, 65536, 2, "41"},
+        {"c\"A\"", FC_C_STRING, 2, 65534, 0, 65536, 4, "4100"},
+        {"c\"A\"", FC_C_STRING, 2, 65535, FC_CANDIDATE_COOKED_SIZE, 65535, 0, ""},
+        {"\"\"", FC_STRING, 1, 65536, 0, 65536, 0, ""},
+        {"\"\\u{1f600}\"", FC_STRING, 1, 65532, 0, 65536, 8, "f09f9880"},
+        {"\"\\u{1f600}\"", FC_STRING, 1, 65533, FC_CANDIDATE_COOKED_SIZE, 65533, 0, ""},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+        const struct sample *item = &cases[i];
+        struct fc_token tokens[1] = {0};
+        struct fc_diagnostic diagnostics[2] = {0};
+        struct fc_scanner scanner = {(const unsigned char *)item->source,
+                                     strlen(item->source), 0, 0, 0, tokens, diagnostics};
+        scanner.cooked_total = item->initial;
+        int status = fc_scan_string(&scanner, item->kind, item->opener);
+        int failed = status != item->status || scanner.cooked_total != item->total ||
+                     scanner.token_count != (item->status == 0 ? 1u : 0u) ||
+                     scanner.diagnostic_count != 0;
+        if (!failed && item->status == 0)
+            failed = tokens[0].kind != item->kind ||
+                     tokens[0].cooked_length != item->hex_length ||
+                     memcmp(tokens[0].cooked, item->hex, item->hex_length) != 0;
+        fc_release_cooked(&scanner);
+        if (failed) return (int)(i + 1u);
+    }
+    return 0;
+}
+`
+	code := "#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_SCANNER_LIBRARY\n" + string(core) + probe
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			outcome, err := cdriver.ExecuteWindowsHost(artifact)
+			if err != nil || outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
+				t.Fatalf("string cooked limit: %+v %v", outcome, err)
+			}
+		})
+	}
+}
+
 // A compact digest keeps large cooked tokens below the native driver's output
 // cap while checking their full-payload digest against the independent Go lexer.
 func TestPrivateVectorSDKCandidateIndependentCScannerLargeDecimal(t *testing.T) {

@@ -652,7 +652,7 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
     }
     free(bytes);
 #ifdef FC_CANDIDATE_COOKED_LIMIT
-    if (!fc_accept_cooked(s, used * 2u)) { free(hex); return FC_CANDIDATE_COOKED_SIZE; }
+    if (!fc_accept_cooked(s, used)) { free(hex); return FC_CANDIDATE_COOKED_SIZE; }
 #endif
     fc_token(s, kind, FC_NO_TRIVIA, start, s->position, hex, used * 2u);
     return 0;
