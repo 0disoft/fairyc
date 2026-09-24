@@ -403,38 +403,86 @@ static int fc_cook_float(struct fc_scanner *s, const unsigned char *raw, size_t 
     return 1;
 }
 
+#ifdef FC_CANDIDATE_WORK_LIMIT
+static int fc_work_available(const struct fc_scanner *s, size_t units);
+static int fc_work_exhausted(struct fc_scanner *s, size_t start, size_t end);
+#endif
+
 static int fc_scan_number(struct fc_scanner *s) {
     size_t start = s->position;
     int is_float = 0;
     if (fc_match(s, start, "0x") || fc_match(s, start, "0b")) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+        if (!fc_work_available(s, 2u))
+            return fc_work_exhausted(s, start, start + 1u);
+#endif
         s->position += 2;
-        while (s->position < s->length && fc_identifier_continue(s->source[s->position]))
+        while (s->position < s->length && fc_identifier_continue(s->source[s->position])) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_work_available(s, 1u))
+                return fc_work_exhausted(s, start, s->position);
+#endif
             s->position++;
+        }
     } else {
         s->position++;
         while (s->position < s->length &&
-               (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_'))
+               (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_')) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_work_available(s, 1u))
+                return fc_work_exhausted(s, start, s->position);
+#endif
             s->position++;
+        }
         if (s->position + 1 < s->length && s->source[s->position] == '.' &&
             fc_decimal_digit(s->source[s->position + 1])) {
             is_float = 1;
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_work_available(s, 2u))
+                return fc_work_exhausted(s, start, s->position);
+#endif
             s->position += 2;
             while (s->position < s->length &&
-                   (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_'))
+                   (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_')) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                if (!fc_work_available(s, 1u))
+                    return fc_work_exhausted(s, start, s->position);
+#endif
                 s->position++;
+            }
         }
         if (s->position < s->length &&
             (s->source[s->position] == 'e' || s->source[s->position] == 'E')) {
             is_float = 1;
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_work_available(s, 1u))
+                return fc_work_exhausted(s, start, s->position);
+#endif
             s->position++;
             if (s->position < s->length &&
-                (s->source[s->position] == '+' || s->source[s->position] == '-')) s->position++;
-            while (s->position < s->length &&
-                   (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_'))
+                (s->source[s->position] == '+' || s->source[s->position] == '-')) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                if (!fc_work_available(s, 1u))
+                    return fc_work_exhausted(s, start, s->position);
+#endif
                 s->position++;
+            }
+            while (s->position < s->length &&
+                   (fc_decimal_digit(s->source[s->position]) || s->source[s->position] == '_')) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                if (!fc_work_available(s, 1u))
+                    return fc_work_exhausted(s, start, s->position);
+#endif
+                s->position++;
+            }
         }
-        while (s->position < s->length && fc_identifier_continue(s->source[s->position]))
+        while (s->position < s->length && fc_identifier_continue(s->source[s->position])) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_work_available(s, 1u))
+                return fc_work_exhausted(s, start, s->position);
+#endif
             s->position++;
+        }
     }
     unsigned char *cooked = NULL;
     size_t cooked_length = 0;
@@ -443,15 +491,7 @@ static int fc_scan_number(struct fc_scanner *s) {
                            fc_cook_integer(s->source + start, s->position - start,
                                            &cooked, &cooked_length);
 #ifdef FC_CANDIDATE_WORK_LIMIT
-    if (valid == -4) {
-        size_t end = s->position;
-        fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, start, end, NULL, 0);
-        fc_diagnostic(s, "E0010", end, end, "none", "");
-        if (end < s->length)
-            fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, end, s->length, NULL, 0);
-        s->position = s->length;
-        return 0;
-    }
+    if (valid == -4) return fc_work_exhausted(s, start, s->position);
 #endif
     if (valid == -2) return FC_UNSUPPORTED;
 #ifdef FC_CANDIDATE_DECIMAL_LIMIT
