@@ -249,8 +249,11 @@ Twenty C/Fairy native cases now cover numeric source-work boundaries for
 decimal, base-prefixed and malformed integers, fraction and exponent scanning,
 and the transition to decimal expansion work. They compare the first invalid
 token, retained tail, `E0010` or `E0004` span, EOF and accepted token kind
-under low and optimized MSVC. Combined limits and whole-scanner runtime remain
-unproven.
+under low and optimized MSVC. Seven further C/Fairy cases exercise competing
+work and token limits on short source and the 256-diagnostic boundary on
+257 invalid bytes. They check which terminal `E0010` position wins, token and
+diagnostic counts, retained tail and EOF in both profiles. Other combined
+limits and whole-scanner runtime remain unproven.
 The candidate C budget images also stop after 256 ordinary diagnostics and
 retain one terminal `E0010`.
 Runs with 256, 257 and 258 invalid bytes match the Go lexer exactly in both
