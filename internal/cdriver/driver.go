@@ -345,10 +345,15 @@ func firstLine(value string) string {
 type boundedBuffer struct {
 	bytes     []byte
 	truncated bool
+	limit     int
 }
 
 func (b *boundedBuffer) Write(value []byte) (int, error) {
-	available := maxProcessOutput - len(b.bytes)
+	limit := b.limit
+	if limit <= 0 {
+		limit = maxProcessOutput
+	}
+	available := limit - len(b.bytes)
 	if available > 0 {
 		b.bytes = append(b.bytes, value[:min(available, len(value))]...)
 	}

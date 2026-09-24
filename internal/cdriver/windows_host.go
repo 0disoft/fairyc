@@ -41,6 +41,7 @@ type WindowsHostArtifact struct {
 	Objects         []WindowsHostObject
 	LinkMap         []byte
 	ProgramDatabase []byte
+	LinkerVerbose   []byte
 	Toolchain       WindowsHostToolchain
 	Profile         Profile
 	ConsumerMode    ConsumerMode
@@ -175,6 +176,20 @@ func BuildWindowsHostWithDebugMap(toolchain WindowsHostToolchain, profile Profil
 	}, windowsMSVCBuildOptions{CaptureMap: true, CaptureProgramDatabase: true, EmbeddedCodeView: true, PreserveOptimizedLinking: true})
 }
 
+// BuildWindowsHostWithLibraryLog retains bounded MSVC library-selection output.
+func BuildWindowsHostWithLibraryLog(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if unitSource == "" || runtimeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
+	}
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
+		{Name: "unit.c", Contents: unitSource},
+		{Name: "runtime.c", Contents: runtimeSource},
+	}, windowsMSVCBuildOptions{CaptureMap: true, CaptureLibraryLog: true})
+}
+
 func buildWindowsHostWithMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, captureMap bool) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
@@ -224,6 +239,19 @@ func BuildWindowsMSVCProbeWithDebugMap(toolchain WindowsHostToolchain, profile P
 	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode,
 		[]windowsMSVCSource{{Name: "probe.c", Contents: probeSource}},
 		windowsMSVCBuildOptions{CaptureMap: true, CaptureProgramDatabase: true, EmbeddedCodeView: true, PreserveOptimizedLinking: true})
+}
+
+// BuildWindowsMSVCProbeWithLibraryLog retains bounded MSVC library-selection output.
+func BuildWindowsMSVCProbeWithLibraryLog(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if probeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
+	}
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode,
+		[]windowsMSVCSource{{Name: "probe.c", Contents: probeSource}},
+		windowsMSVCBuildOptions{CaptureMap: true, CaptureLibraryLog: true})
 }
 
 func buildWindowsMSVCProbeWithMap(toolchain WindowsHostToolchain, profile Profile, probeSource string, captureMap bool) (WindowsHostArtifact, error) {
@@ -561,6 +589,7 @@ type windowsMSVCSource struct {
 
 type windowsMSVCBuildOptions struct {
 	CaptureMap               bool
+	CaptureLibraryLog        bool
 	CaptureProgramDatabase   bool
 	DisableICF               bool
 	EmbeddedCodeView         bool
@@ -664,7 +693,15 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	if options.DisableICF {
 		arguments = append(arguments, "/OPT:NOICF")
 	}
-	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot, arguments...); err != nil {
+	if options.CaptureLibraryLog {
+		arguments = append(arguments, "/VERBOSE")
+	}
+	outputLimit := maxProcessOutput
+	if options.CaptureLibraryLog {
+		outputLimit = 8 * 1024 * 1024
+	}
+	output, err := runWindowsHostCommandWithLimit(toolchain.Path, toolchain.Environment, temporaryRoot, outputLimit, arguments...)
+	if err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("%s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 	}
 	contents, err := readArtifact(executablePath)
@@ -696,9 +733,14 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 			return WindowsHostArtifact{}, fmt.Errorf("read MSVC program database: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 		}
 	}
+	var linkerVerbose []byte
+	if options.CaptureLibraryLog {
+		linkerVerbose = []byte(output)
+	}
 	return WindowsHostArtifact{
 		Bytes: contents, Objects: objects, LinkMap: linkMap, ProgramDatabase: programDatabase,
-		Toolchain: toolchain, Profile: profile, ConsumerMode: consumerMode,
+		LinkerVerbose: linkerVerbose,
+		Toolchain:     toolchain, Profile: profile, ConsumerMode: consumerMode,
 	}, nil
 }
 
@@ -1027,6 +1069,10 @@ func replaceWindowsEnvironment(environment []string, key, value string) []string
 }
 
 func runWindowsHostCommand(name string, environment []string, directory string, arguments ...string) (string, error) {
+	return runWindowsHostCommandWithLimit(name, environment, directory, maxProcessOutput, arguments...)
+}
+
+func runWindowsHostCommandWithLimit(name string, environment []string, directory string, limit int, arguments ...string) (string, error) {
 	contextValue, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, name, arguments...)
@@ -1035,7 +1081,7 @@ func runWindowsHostCommand(name string, environment []string, directory string, 
 		command.Env = environment
 	}
 	command.Dir = directory
-	var output boundedBuffer
+	output := boundedBuffer{limit: limit}
 	command.Stdout = &output
 	command.Stderr = &output
 	err := command.Run()
@@ -1043,7 +1089,7 @@ func runWindowsHostCommand(name string, environment []string, directory string, 
 		return output.String(), fmt.Errorf("MSVC host command exceeded %s", commandTimeout)
 	}
 	if output.truncated {
-		return output.String(), fmt.Errorf("MSVC host command exceeded %d output bytes", maxProcessOutput)
+		return output.String(), fmt.Errorf("MSVC host command exceeded %d output bytes", limit)
 	}
 	if err != nil {
 		return output.String(), fmt.Errorf("MSVC host command failed: %w: %s", err, strings.TrimSpace(output.String()))
