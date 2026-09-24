@@ -196,6 +196,26 @@ struct fy_std_file_result_v0 fy_std_file_open_v0(
     return fy_std_file_result_v0(FY_STD_FILE_OK_V0, 0, 0);
 }
 
+struct fy_std_file_result_v0 fy_std_file_open_utf8_v0(
+    const uint8_t *path,
+    size_t length,
+    const struct fy_std_file_open_options_v0 *options,
+    void *output_storage
+) {
+    if (path == NULL || length == 0 || length >= (size_t)FY_STD_FILE_PATH_CAPACITY_V0) {
+        return fy_std_file_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+    }
+    for (size_t index = 0; index < length; ++index) {
+        if (path[index] == UINT8_C(0)) {
+            return fy_std_file_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+        }
+    }
+    uint8_t terminated[FY_STD_FILE_PATH_CAPACITY_V0];
+    memcpy(terminated, path, length);
+    terminated[length] = UINT8_C(0);
+    return fy_std_file_open_v0(terminated, options, output_storage);
+}
+
 struct fy_std_file_result_v0 fy_std_file_read_v0(
     void *file_storage,
     uint8_t *buffer,

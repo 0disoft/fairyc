@@ -78,6 +78,12 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     const struct fy_std_windows_open_options_v0 *,
     void *
 );
+struct fy_std_windows_file_result_v0 fy_std_file_open_utf8_v0(
+    const uint8_t *,
+    size_t,
+    const struct fy_std_windows_open_options_v0 *,
+    void *
+);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_directory_create_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_directory_ensure_v0(const uint8_t *);
@@ -603,12 +609,25 @@ int main(void) {
     result = fy_std_windows_file_open_v0(invalid_utf8_path, &write_options, &file);
     if (!fy_result_is(result, FY_STD_WINDOWS_FILE_PATH_ENCODING_V0, ERROR_SUCCESS) ||
         !fy_std_windows_file_closed_v0(&file)) return 132;
-    result = fy_std_windows_file_open_v0(utf8_path, &write_options, &file);
+    static const uint8_t interior_nul[] = {UINT8_C(97), UINT8_C(0), UINT8_C(98)};
+    if (!fy_result_is(fy_std_file_open_utf8_v0(utf8_path, 0, &write_options, &file),
+            FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0, ERROR_SUCCESS) ||
+        !fy_std_windows_file_closed_v0(&file)) return 140;
+    if (!fy_result_is(fy_std_file_open_utf8_v0(interior_nul, sizeof interior_nul,
+            &write_options, &file), FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0, ERROR_SUCCESS) ||
+        !fy_std_windows_file_closed_v0(&file)) return 141;
+    if (!fy_result_is(fy_std_file_open_utf8_v0(invalid_utf8_path,
+            sizeof invalid_utf8_path - 1, &write_options, &file),
+            FY_STD_WINDOWS_FILE_PATH_ENCODING_V0, ERROR_SUCCESS) ||
+        !fy_std_windows_file_closed_v0(&file)) return 142;
+    uint8_t utf8_view[sizeof utf8_path - 1];
+    memcpy(utf8_view, utf8_path, sizeof utf8_view);
+    result = fy_std_file_open_utf8_v0(utf8_view, sizeof utf8_view, &write_options, &file);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 133;
     result = fy_std_windows_file_write_all_v0(&file, payload, sizeof payload);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != sizeof payload) return 134;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 135;
-    result = fy_std_windows_file_open_v0(utf8_path, &read_options, &file);
+    result = fy_std_file_open_utf8_v0(utf8_view, sizeof utf8_view, &read_options, &file);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 136;
     uint8_t utf8_received[sizeof payload] = {0};
     result = fy_std_windows_file_read_exact_v0(&file, utf8_received, sizeof utf8_received);

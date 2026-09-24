@@ -107,6 +107,7 @@ func TestTargetNeutralFileCorePositioningSeekAndSizeSelectOneTargetOwnedComponen
 	t.Parallel()
 	symbols := []string{
 		"fy_std_file_open_v0",
+		"fy_std_file_open_utf8_v0",
 		"fy_std_file_read_v0",
 		"fy_std_file_position_v0",
 		"fy_std_file_size_v0",

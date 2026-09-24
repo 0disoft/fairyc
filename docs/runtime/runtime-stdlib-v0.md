@@ -597,6 +597,14 @@ and non-closed output storage fail before ownership changes. `ref CStr` itself d
 UTF-8, so this is a Windows path-entry contract, not a cross-target path type or Unicode
 normalization policy.
 
+The target-neutral `std::fs::create_truncate_utf8(ref str)` and
+`std::fs::open_read_utf8(ref str)` entries use a bounded stack copy with one
+terminator and reject empty, embedded-NUL, or 4,096-byte-or-longer text before
+opening a file. The `ref str` type supplies valid UTF-8; Windows decodes it
+strictly to UTF-16 and Linux passes the same UTF-8 bytes to `open`. Neither
+entry allocates or changes the existing `ref CStr` functions. Filesystem name
+normalization, case behavior, and path containment remain target-specific.
+
 Read performs one `ReadFile` call and returns its exact partial count, including zero at EOF.
 `read_exact` repeatedly uses that same bounded primitive and advances only within the caller's
 exclusive mutable view. Complete fill succeeds with the requested length. A successful zero read

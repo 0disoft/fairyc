@@ -859,7 +859,40 @@ fn i32 check_read_append_error(ref CStr path) {
 }
 
 @effects(filesystem)
+fn i32 utf8_path_probe() {
+    let ref str path = "fairyc-std-fs-한글.tmp";
+    let i32 create_code = switch (fs::create_truncate_utf8(path)) {
+        case .ok(file) : { switch (fs::close(file)) {
+            case .ok(_) : { 0 }
+            case .err(_) : { 201 }
+        } }
+        case .err(_) : { 200 }
+    };
+    if (create_code != 0) {
+        return create_code;
+    }
+    let i32 read_code = switch (fs::open_read_utf8(path)) {
+        case .ok(file) : { switch (fs::close(file)) {
+            case .ok(_) : { 0 }
+            case .err(_) : { 203 }
+        } }
+        case .err(_) : { 202 }
+    };
+    if (read_code != 0) {
+        return read_code;
+    }
+    return switch (fs::remove_file(c"fairyc-std-fs-한글.tmp")) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 204 }
+    };
+}
+
+@effects(filesystem)
 fn i32 main() {
+    let i32 utf8_code = utf8_path_probe();
+    if (utf8_code != 0) {
+        return utf8_code;
+    }
     let ref CStr data_path = c"fairyc-std-fs-data.tmp";
     let ref CStr drop_path = c"fairyc-std-fs-drop.tmp";
     let ref CStr open_or_create_path = c"fairyc-std-fs-open-or-create.tmp";

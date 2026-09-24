@@ -429,6 +429,8 @@ SDK `0.0.0-stage0.67` preserves shared `Vec.at<T>` bounds and owner-bound borrow
 
 SDK `0.0.0-stage0.68` accepts bounded, strictly decoded UTF-8 paths for Windows `std::fs` operations. The public argument remains `ref CStr`; Linux still treats path bytes as bytes, so a portable path type and cross-target Unicode semantics remain separate work.
 
+SDK `0.0.0-stage0.69` adds allocation-free `create_truncate_utf8(ref str)` and `open_read_utf8(ref str)` on Windows and Linux. Both reject empty, embedded-NUL, and overlong text before filesystem access; they retain target filesystem behavior and the existing `ref CStr` APIs.
+
 An independent example-level owned-text wrapper exposes move-only Fairy `String` and `CString`
 resources, source `Result` errors, scalar length access, owner-bound `ref str` and `ref CStr` views, and
 verified drop cleanup over alias-safe opaque C storage bridges. Two exact unsafe compiler built-ins

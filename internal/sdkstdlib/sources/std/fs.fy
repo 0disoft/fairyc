@@ -132,6 +132,10 @@ pub resource File {
 unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_options options, ptr mut void output) ;
 
 @effects(filesystem)
+@link_name("fy_std_file_open_utf8_v0")
+unsafe extern C fn raw_file_result file_open_utf8_raw(ptr u8 path, usize length, ptr raw_open_options options, ptr mut void output) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_remove_v0")
 unsafe extern C fn raw_file_result file_remove_raw(ptr u8 path) ;
 
@@ -320,6 +324,51 @@ fn Result<File, FileError> open_with(ref CStr path, raw_open_options options) {
         let i32 discarded = discard_closed(file);
         .err(file_error(result))
     };
+}
+
+@effects(filesystem)
+fn Result<File, FileError> open_with_utf8(ref str path, raw_open_options options) {
+    var File file = File { .handle = 0, .open = 0 };
+    let raw_file_result result = unsafe {
+        file_open_utf8_raw(
+            path as ptr u8,
+            path.len,
+            ref options as ptr raw_open_options,
+            ref mut file as ptr mut void
+        )
+    };
+    return if (result.status == 0) {
+        .ok(file)
+    } else {
+        let i32 discarded = discard_closed(file);
+        .err(file_error(result))
+    };
+}
+
+/// Creates or truncates a file from valid UTF-8 text without allocation.
+@effects(filesystem)
+pub fn Result<File, FileError> create_truncate_utf8(ref str path) {
+    return open_with_utf8(path, raw_open_options {
+        .read = 0,
+        .write = 1,
+        .create = 1,
+        .truncate = 1,
+        .exclusive = 0,
+        .append = 0,
+    });
+}
+
+/// Opens an existing file from valid UTF-8 text without allocation.
+@effects(filesystem)
+pub fn Result<File, FileError> open_read_utf8(ref str path) {
+    return open_with_utf8(path, raw_open_options {
+        .read = 1,
+        .write = 0,
+        .create = 0,
+        .truncate = 0,
+        .exclusive = 0,
+        .append = 0,
+    });
 }
 
 /// Creates a writable file, replacing its previous contents when it already exists.

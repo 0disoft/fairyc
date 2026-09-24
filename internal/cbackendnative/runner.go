@@ -223,7 +223,27 @@ fn i32 read_then_close(fs::File input) {
 }
 
 @effects(filesystem)
+fn i32 utf8_round_trip() {
+    let ref str path = "fairyc-public-file-한글.tmp";
+    let i32 write_code = switch (fs::create_truncate_utf8(path)) {
+        case .ok(file) : { write_then_close(file) }
+        case .err(_) : { 40 }
+    };
+    if (write_code != 0) {
+        return write_code;
+    }
+    return switch (fs::open_read_utf8(path)) {
+        case .ok(file) : { if (read_then_close(file) == 42) { 0 } else { 41 } }
+        case .err(_) : { 42 }
+    };
+}
+
+@effects(filesystem)
 fn i32 main() {
+    let i32 utf8_code = utf8_round_trip();
+    if (utf8_code != 0) {
+        return utf8_code;
+    }
     let ref CStr path = c"fairyc-public-file-smoke.tmp";
     let i32 write_code = switch (fs::create_truncate(path)) {
         case .ok(file) : { write_then_close(file) }

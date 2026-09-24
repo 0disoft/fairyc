@@ -372,6 +372,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0405-direct-address-shared-vector-access.md`: preserves checked owner-bound `Vec.at<T>` reads while removing the per-element private C slot call in SDK `0.0.0-stage0.67`; the C-relative runtime gate remains open.
 - `0406-shared-scalar-borrow-option-null-niche.md`: stores immutable scalar-borrow Options in one pointer-sized private C record while preserving Option and borrow semantics.
 - `0407-windows-file-utf8-paths.md`: accepts bounded strict UTF-8 paths in Windows File operations while retaining the existing CStr transport and ASCII fast path.
+- `0408-target-neutral-utf8-file-open.md`: adds allocation-free UTF-8 text path factories on both File targets without replacing the CStr byte-path API.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
