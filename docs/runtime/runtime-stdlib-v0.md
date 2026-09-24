@@ -589,11 +589,13 @@ seven beyond EOF; rejecting `usize` maximum without cursor movement; and restori
 
 The provisional `x86_64-windows-msvc` component stores one `HANDLE` token plus an explicit open byte
 inline and normalizes the closed state to `{ 0, 0 }`. It performs no hidden allocation. Open
-accepts a bounded NUL-terminated ASCII byte path and closed read/write/create/truncate options,
-converts the path into a stack-owned `WCHAR[4096]`, and calls `CreateFileW`. Empty paths, non-ASCII
-bytes, missing termination within the bound, invalid option combinations, and non-closed output
-storage fail before ownership changes. This narrow bootstrap boundary is not the future portable or
-Unicode-complete path contract.
+accepts a bounded NUL-terminated UTF-8 byte path and closed read/write/create/truncate options,
+converts the path into a stack-owned `WCHAR[4096]`, and calls `CreateFileW`. ASCII paths retain
+their direct conversion; a non-ASCII path uses strict UTF-8 decoding without replacement characters.
+Empty paths, malformed UTF-8, missing termination within the bound, invalid option combinations,
+and non-closed output storage fail before ownership changes. `ref CStr` itself does not promise
+UTF-8, so this is a Windows path-entry contract, not a cross-target path type or Unicode
+normalization policy.
 
 Read performs one `ReadFile` call and returns its exact partial count, including zero at EOF.
 `read_exact` repeatedly uses that same bounded primitive and advances only within the caller's

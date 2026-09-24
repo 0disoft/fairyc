@@ -595,6 +595,30 @@ int main(void) {
     result = fy_std_windows_file_remove_v0(rename_destination);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 131;
 
+    static const uint8_t utf8_path[] =
+        "fairyc-windows-file-\xED\x95\x9C\xEA\xB8\x80.tmp";
+    static const uint8_t invalid_utf8_path[] = {
+        UINT8_C(0xc0), UINT8_C(0xaf), UINT8_C(0)
+    };
+    result = fy_std_windows_file_open_v0(invalid_utf8_path, &write_options, &file);
+    if (!fy_result_is(result, FY_STD_WINDOWS_FILE_PATH_ENCODING_V0, ERROR_SUCCESS) ||
+        !fy_std_windows_file_closed_v0(&file)) return 132;
+    result = fy_std_windows_file_open_v0(utf8_path, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 133;
+    result = fy_std_windows_file_write_all_v0(&file, payload, sizeof payload);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != sizeof payload) return 134;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 135;
+    result = fy_std_windows_file_open_v0(utf8_path, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 136;
+    uint8_t utf8_received[sizeof payload] = {0};
+    result = fy_std_windows_file_read_exact_v0(&file, utf8_received, sizeof utf8_received);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof payload ||
+        memcmp(utf8_received, payload, sizeof payload) != 0) return 137;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 138;
+    result = fy_std_windows_file_remove_v0(utf8_path);
+    if (!fy_result_is(result, FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS)) return 139;
+
     int directory_code = fy_std_windows_file_directory_probe_v0();
     if (directory_code != 0) return directory_code;
     int remove_tree_code = fy_std_windows_file_remove_tree_probe_v0();

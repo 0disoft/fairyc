@@ -156,7 +156,15 @@ static uint32_t fy_std_windows_path_v0(const uint8_t *path, WCHAR *wide_path) {
             return FY_STD_WINDOWS_FILE_OK_V0;
         }
         if (value > UINT8_C(0x7f)) {
-            return FY_STD_WINDOWS_FILE_PATH_ENCODING_V0;
+            for (size_t tail = index + 1; tail < (size_t)FY_STD_WINDOWS_PATH_CAPACITY_V0; ++tail) {
+                if (path[tail] == UINT8_C(0)) {
+                    return MultiByteToWideChar(
+                        CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)path, -1,
+                        wide_path, FY_STD_WINDOWS_PATH_CAPACITY_V0
+                    ) != 0 ? FY_STD_WINDOWS_FILE_OK_V0 : FY_STD_WINDOWS_FILE_PATH_ENCODING_V0;
+                }
+            }
+            return FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0;
         }
         wide_path[index] = (WCHAR)value;
     }

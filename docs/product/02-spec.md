@@ -427,6 +427,8 @@ Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `R
 
 SDK `0.0.0-stage0.67` preserves shared `Vec.at<T>` bounds and owner-bound borrowing while deriving a typed element address inside the authenticated SDK source. It removes the private C slot-lookup call from newly generated read paths without adding a public operation or changing safe source syntax.
 
+SDK `0.0.0-stage0.68` accepts bounded, strictly decoded UTF-8 paths for Windows `std::fs` operations. The public argument remains `ref CStr`; Linux still treats path bytes as bytes, so a portable path type and cross-target Unicode semantics remain separate work.
+
 An independent example-level owned-text wrapper exposes move-only Fairy `String` and `CString`
 resources, source `Result` errors, scalar length access, owner-bound `ref str` and `ref CStr` views, and
 verified drop cleanup over alias-safe opaque C storage bridges. Two exact unsafe compiler built-ins
