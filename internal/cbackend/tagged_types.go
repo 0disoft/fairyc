@@ -264,9 +264,9 @@ func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir
 	if value == hir.SharedBorrow(hir.TypeStr) {
 		return true
 	}
-	if element, _, borrow := hir.BorrowElement(value); borrow {
+	if element, mutable, borrow := hir.BorrowElement(value); borrow {
 		element = canonicalCValueType(element)
-		if element == hir.TypeBool || element == hir.TypeU8 || element == hir.TypeI32 || element == hir.TypeU32 || element == hir.TypeUSize {
+		if (element == hir.TypeBool && !mutable) || element == hir.TypeU8 || element == hir.TypeI32 || element == hir.TypeU32 || element == hir.TypeUSize {
 			return true
 		}
 		if _, structure := structByType[element]; structure {
