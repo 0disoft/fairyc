@@ -214,6 +214,83 @@ fn i32 main() {
 	}
 }
 
+func TestPrivateVectorSDKCandidateLoopPropagationCleanup(t *testing.T) {
+	const ownedProbe = `
+int32_t fairyc_fixture_vector_clean(void) {
+    return vector_live == 0 && vector_allocations >= 3 && vector_allocations == vector_frees ? 1 : 0;
+}
+`
+	const header = `module main;
+import std::vec as v;
+import std::bytes as bytes;
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+fn bytes::Buffer make(ref u8[] text) {
+    return switch (bytes::copy(text)) {
+        case .ok(value): { value }
+        case .err(_): { assert(false); bytes::empty() }
+    };
+}
+fn Result<i32, i32> step(u8 byte) {
+    if (byte == 66) { return .err(5); }
+    return .ok(1);
+}
+fn Result<i32, i32> route() {
+    var v::Vec<bytes::Buffer> values = v::empty<bytes::Buffer>();
+    assert(switch (v::push<bytes::Buffer>(ref mut values, make(b"A"[..]))) { case .ok(_): { true } case .err(_): { false } });
+    assert(switch (v::push<bytes::Buffer>(ref mut values, make(b"B"[..]))) { case .ok(_): { true } case .err(_): { false } });
+`
+	const footer = `
+    return .ok(0);
+}
+fn i32 main() {
+    let Result<i32, i32> result = route();
+    assert(switch (result) { case .ok(_): { false } case .err(code): { code == 5 } });
+    assert(unsafe { clean() } == 1);
+    return 42;
+}`
+	for _, form := range []struct {
+		name      string
+		candidate bool
+		loop      string
+	}{
+		{name: "vector for", candidate: true, loop: `    for (let ref bytes::Buffer item in ref values) {
+        let ref u8[] view = bytes::view(item);
+        let i32 value = step(view[0])?;
+    }`},
+		{name: "explicit index", loop: `    let usize bound = v::len<bytes::Buffer>(ref values);
+    for (var usize index = 0; index < bound; index += 1) {
+        let ref bytes::Buffer item = v::at<bytes::Buffer>(ref values, index);
+        let ref u8[] view = bytes::view(item);
+        let i32 value = step(view[0])?;
+    }`},
+	} {
+		t.Run(form.name, func(t *testing.T) {
+			input, coordinates := vectorSDKInputWithCandidate(t, header+form.loop+footer, true)
+			owners := []hir.PackageID{3}
+			var analysis compiler.GenericAnalysis
+			var err error
+			if form.candidate {
+				analysis, err = compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), owners)
+			} else {
+				analysis, err = compiler.AnalyzeSDKStoragePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), owners)
+			}
+			if err != nil || analysis.Analysis.Semantic.CompletedThrough != semantic.PhaseFlow ||
+				len(analysis.Analysis.Semantic.Diagnostics) != 0 || len(analysis.Analysis.Semantic.Unsupported) != 0 {
+				t.Fatalf("propagation source and Flow: %v diagnostics=%+v unsupported=%+v", err,
+					analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+			}
+			result, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+			if err != nil || !result.Verified {
+				t.Fatalf("propagation verified MIR: %v diagnostics=%+v", err, result.Semantic.Diagnostics)
+			}
+			runVectorStorageMIRNativeExit(t, result.MIR,
+				hir.QualifiedModulePath(1, "main")+"::main", ownedProbe, true, 42)
+		})
+	}
+}
+
 func TestPrivateVectorSDKCandidateBufferLoopNativeParity(t *testing.T) {
 	const anchor = "    let bytes::Buffer last ="
 	for _, form := range []struct {

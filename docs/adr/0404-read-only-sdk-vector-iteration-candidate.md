@@ -59,6 +59,14 @@ result. The C probe observes no live vector allocation after function return.
 This proves these control and cleanup cases, not the representative lexer
 workload or the cumulative C-relative cost gate.
 
+The private native parity test also compares an early `return` from a scalar
+vector loop and, separately, `?` propagation while a vector owns two
+`bytes::Buffer` elements.
+Both forms pass Flow and verified MIR, then run under low and optimized Windows
+MSVC. The propagation probe observes at least three allocations (both buffers
+and vector storage) and no live allocation after the caller handles the error.
+This does not yet prove Region reset or exact resource-drop order on these exits.
+
 A second private native probe now inserts a shared `Vec<bytes::Buffer>` loop
 into the existing nine-buffer ownership workload. The candidate and explicit
 index forms both sum the nine five-byte views to 45, then complete the same
