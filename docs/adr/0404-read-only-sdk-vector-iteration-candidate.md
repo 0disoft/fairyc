@@ -442,6 +442,10 @@ A [string state-borrow experiment](../ops/scanner-string-state-borrow-20260925.m
 removes another 512 bytes from each Fairy EXE while preserving checked
 lexical and limit behavior. The C-relative EXE ratio remains 1.09722;
 compile-time and stable runtime evidence remain open.
+A [current COFF function comparison](../ops/scanner-current-function-source-map-20260925.md)
+finds `unit.obj` raw code reduced by 4,470 bytes from the earlier scanner
+image, with the five largest function spans now smaller or unchanged. This
+does not attribute the remaining final-image gap to any one function.
 
 ## Proposed first boundary
 
