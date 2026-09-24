@@ -94,6 +94,15 @@ candidate source form was not measured in that stable harness, so this result
 cannot isolate the syntax cost. It keeps source admission open and points to
 the existing vector access path as a performance investigation target.
 
+The [private candidate C comparison](../ops/c-budget-vector-read-candidate-20260924.md)
+now measures the proposed loop against the same independent checked C source.
+Its five-pair runtime median is 1.37255 relative to C, still above 1.08;
+EXE ratio is 1.01824. Ten boundary executions and the stable source rejection
+preflight pass. The candidate and earlier indexed Fairy reports come from
+separate runs, so their difference cannot yet be attributed to iteration
+syntax. A directly paired index/candidate measurement and access-path
+inspection remain open before any source admission decision.
+
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
 computed vector expression as the iterable. The latter cannot acquire an
