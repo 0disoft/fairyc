@@ -61,3 +61,30 @@ whether either meets the C-relative 8% budget. Further local reruns under the
 same uncontrolled host conditions would not settle the admission decision;
 the next timing gate needs controlled machine load and frequency or another
 measurement method with the same output and ownership checks.
+
+## Same-image paired follow-up
+
+The [same-image raw report](evidence/vector-lexer-inprocess-20260924.json)
+uses source `df7986f1ad4630871b025e0080d60ef9719a48cd`. It compiles the
+indexed and private-candidate versions of the checked-in scanner as separate
+modules in **one** optimized PE, then times adjacent `collect`/`storage` calls
+in a single process. Each lane performs 250,000 scans per pair on the same
+input. One warmup pair precedes twelve measured pairs; their order alternates.
+Both lanes return the independent Go checksum of 36 per scan, and the native
+cleanup assertion passes. The token reporter remains outside the timed work.
+
+| Lane | Median QPC time | Relative full span |
+| --- | ---: | ---: |
+| Explicit index | 1,309.39535 ms | 68.27% |
+| Private vector candidate | 1,166.54895 ms | 82.13% |
+
+The paired candidate/index median is 1.00427, while the ratio of lane
+medians is 0.89091. Individual paired ratios range from 0.80788 to 1.23234;
+their relative full span is 42.27%. Even adjacent calls in one process exceed
+the 10% stability heuristic, and the two median estimators disagree sharply.
+The combined PE is 142,336 bytes; it contains both scanner modules and cannot
+be compared with the standalone PE sizes above.
+This experiment cannot establish which source form is faster.
+It also cannot satisfy the independent-C 8% budget.
+Further repeats on this uncontrolled host would not turn these data into an
+admission verdict.

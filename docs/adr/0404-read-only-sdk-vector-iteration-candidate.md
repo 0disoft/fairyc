@@ -140,6 +140,10 @@ full-scanner budget remains unmeasured.
 A predeclared 25-times-longer window also exceeded the stability limit and
 reversed the point-estimate ordering. Runtime cost remains inconclusive; more
 repetitions under the same uncontrolled host are not an admission substitute.
+A [single-image paired run](../ops/vector-lexer-execution-20260924.md#same-image-paired-follow-up)
+also exceeded the stability limit despite adjacent calls in one process. The
+private source form stays closed pending controlled runtime and independent-C
+evidence; this combined image does not measure the token reporter's hot loop.
 
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
