@@ -23,6 +23,23 @@ type taggedCType struct {
 	needsDrop bool
 }
 
+func sharedScalarBorrowOptionNiche(value hir.Type) bool {
+	element, option := hir.OptionElement(value)
+	if !option {
+		return false
+	}
+	borrowed, mutable, borrow := hir.BorrowElement(canonicalCValueType(element))
+	if !borrow || mutable {
+		return false
+	}
+	switch borrowed {
+	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+		return true
+	default:
+		return false
+	}
+}
+
 func prepareTaggedTypes(
 	functions []mir.Function,
 	structures []structCType,
@@ -143,10 +160,13 @@ func prepareTaggedTypes(
 			return layout.Type{}, fmt.Errorf("missing tagged layout candidate %q", value)
 		}
 		layoutState[value] = 1
-		fields := []layout.Field{{
-			Name: "tag",
-			Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"},
-		}}
+		fields := make([]layout.Field, 0, len(candidate.payloads)+1)
+		if !sharedScalarBorrowOptionNiche(value) {
+			fields = append(fields, layout.Field{
+				Name: "tag",
+				Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"},
+			})
+		}
 		for index, payload := range candidate.payloads {
 			payload = canonicalCValueType(payload)
 			var payloadType layout.Type
@@ -418,7 +438,9 @@ func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
 func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
 	tagged := e.taggedTypes[index]
 	output.WriteString("typedef struct {\n")
-	output.WriteString("    uint32_t tag;\n")
+	if !sharedScalarBorrowOptionNiche(tagged.typ) {
+		output.WriteString("    uint32_t tag;\n")
+	}
 	for payloadIndex, payload := range tagged.payloads {
 		cType, err := e.cValueType(payload)
 		if err != nil {
@@ -431,7 +453,9 @@ func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
 	fmt.Fprintf(output, "_Static_assert(_Alignof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d alignment\");\n", index, tagged.layout.AlignmentBytes, index)
 	for fieldIndex, field := range tagged.layout.Fields {
 		fieldName := "tag"
-		if fieldIndex > 0 {
+		if sharedScalarBorrowOptionNiche(tagged.typ) {
+			fieldName = fmt.Sprintf("p_%d", fieldIndex)
+		} else if fieldIndex > 0 {
 			fieldName = fmt.Sprintf("p_%d", fieldIndex-1)
 		}
 		fmt.Fprintf(output, "_Static_assert(offsetof(fy_tagged_%d, %s) == UINT64_C(%d), \"fairyc tagged %d field %d offset\");\n", index, fieldName, field.OffsetBytes, index, fieldIndex)

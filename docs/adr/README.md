@@ -370,6 +370,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0403-read-only-byte-view-iteration.md`: admits narrow immutable `ref u8[]` iteration through Flow, verified MIR and native C; C-relative cost evidence remains pending.
 - `0404-read-only-sdk-vector-iteration-candidate.md`: records three read-only lexer `Vec<T>` loops and the ownership, native, and C-relative gates for a candidate reference-iteration form; no syntax is admitted.
 - `0405-direct-address-shared-vector-access.md`: preserves checked owner-bound `Vec.at<T>` reads while removing the per-element private C slot call in SDK `0.0.0-stage0.67`; the C-relative runtime gate remains open.
+- `0406-shared-scalar-borrow-option-null-niche.md`: stores immutable scalar-borrow Options in one pointer-sized private C record while preserving Option and borrow semantics.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

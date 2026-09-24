@@ -3751,12 +3751,17 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	case mir.OperationOptionConstruct:
 		cType := "fy_option_i32"
 		field := "payload"
+		nullNiche := sharedScalarBorrowOptionNiche(operation.Type)
 		if index, resourceTagged := e.taggedByType[operation.Type]; resourceTagged {
 			cType = fmt.Sprintf("fy_tagged_%d", index)
 			field = "p_0"
 		}
 		if operation.Variant == "none" {
-			fmt.Fprintf(output, "    fy_l_%d = (%s){ .tag = FY_OPTION_NONE };\n", operation.DestinationLocal, cType)
+			if nullNiche {
+				fmt.Fprintf(output, "    fy_l_%d = (%s){ .p_0 = ((void *)0) };\n", operation.DestinationLocal, cType)
+			} else {
+				fmt.Fprintf(output, "    fy_l_%d = (%s){ .tag = FY_OPTION_NONE };\n", operation.DestinationLocal, cType)
+			}
 			break
 		}
 		operand, err := oneOperand(operation.Operands)
@@ -3767,7 +3772,11 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return fmt.Errorf("Option::Some construction in %s: %w", function, err)
 		}
-		fmt.Fprintf(output, "    fy_l_%d = (%s){ .tag = FY_OPTION_SOME, .%s = %s };\n", operation.DestinationLocal, cType, field, payload)
+		if nullNiche {
+			fmt.Fprintf(output, "    fy_l_%d = (%s){ .p_0 = %s };\n", operation.DestinationLocal, cType, payload)
+		} else {
+			fmt.Fprintf(output, "    fy_l_%d = (%s){ .tag = FY_OPTION_SOME, .%s = %s };\n", operation.DestinationLocal, cType, field, payload)
+		}
 	case mir.OperationOptionPayload:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -3937,6 +3946,15 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		value, err := cOperand(operand)
 		if err != nil {
 			return fmt.Errorf("Option switch in %s: %w", function.Name, err)
+		}
+		valueType, err := e.operandType(functionIndex, operand)
+		if err != nil {
+			return fmt.Errorf("Option switch in %s: %w", function.Name, err)
+		}
+		if sharedScalarBorrowOptionNiche(valueType) {
+			fmt.Fprintf(output, "    if ((%s).p_0 != ((void *)0)) goto fy_b_%d;\n", value, success)
+			fmt.Fprintf(output, "    goto fy_b_%d;\n", failure)
+			break
 		}
 		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_SOME) goto fy_b_%d;\n", value, success)
 		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_NONE) goto fy_b_%d;\n", value, failure)
