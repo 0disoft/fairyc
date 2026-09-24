@@ -54,6 +54,8 @@ func TestCBudgetBaseline(t *testing.T) {
 		workloads = []string{"deref"}
 	} else if os.Getenv("FAIRYC_C_BUDGET_VECTOR_ONLY") == "1" {
 		workloads = []string{"vector_slot"}
+	} else if os.Getenv("FAIRYC_C_BUDGET_VECTOR_READ_ONLY") == "1" {
+		workloads = []string{"vector_read_index"}
 	} else if os.Getenv("FAIRYC_C_BUDGET_INCLUDE_DEREF") == "1" {
 		workloads = append(workloads, "deref")
 	}
@@ -132,7 +134,7 @@ func TestCBudgetBaseline(t *testing.T) {
 						phaseStart = time.Now()
 					}
 					emit := cbackend.Emit
-					if workload == "vector_slot" {
+					if workload == "vector_slot" || workload == "vector_read_index" {
 						storage, err := workspaceSDKStorage(w)
 						if err != nil || !storage {
 							t.Fatalf("vector SDK storage authority: %v, %v", storage, err)
@@ -144,12 +146,12 @@ func TestCBudgetBaseline(t *testing.T) {
 						t.Fatal(err)
 					}
 					for _, symbol := range emitted.ForeignSymbols {
-						if symbol != "fc_budget_seed" && symbol != "fc_budget_rounds" && symbol != "fc_budget_begin" && symbol != "fc_budget_finish" && !(workload == "vector_slot" && strings.HasPrefix(symbol, "fy_private_vector_")) {
+						if symbol != "fc_budget_seed" && symbol != "fc_budget_rounds" && symbol != "fc_budget_begin" && symbol != "fc_budget_finish" && !((workload == "vector_slot" || workload == "vector_read_index") && strings.HasPrefix(symbol, "fy_private_vector_")) {
 							t.Fatalf("unexpected foreign symbol %s", symbol)
 						}
 					}
 					var product string
-					if workload == "vector_slot" {
+					if workload == "vector_slot" || workload == "vector_read_index" {
 						var vectorSymbols []string
 						for _, symbol := range emitted.ForeignSymbols {
 							if strings.HasPrefix(symbol, "fy_private_vector_") {
@@ -225,7 +227,7 @@ func TestCBudgetBaseline(t *testing.T) {
 		}
 	}
 	report := map[string]any{"schema": "fairyc.c-budget-baseline/v1", "compiler_source": os.Getenv("FAIRYC_C_BUDGET_SOURCE"), "go": runtime.Version(), "msvc": toolchain.Version, "gomaxprocs": runtime.GOMAXPROCS(0), "flags": flags, "profile": profile.Name, "one_translation_unit": oneTU, "source_sha256": hashes, "boundary_cases": boundary, "boundary_checks": len(workloads) * len(boundary) * 2, "seed": 12345, "rounds": 50000000, "samples": samples,
-		"method": fmt.Sprintf("Independently authored scalar kernels; optional deref, vector_slot, result_return and byte-loop pairs each compare the same algorithm with C. Byte_view and byte_index share one independent C loop and differ only in the Fairy inner-loop spelling. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. %d alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", repetitions), "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
+		"method": fmt.Sprintf("Independently authored scalar kernels; optional deref, vector_slot, vector_read_index, result_return and byte-loop pairs each compare the same algorithm with C. Byte_view and byte_index share one independent C loop and differ only in the Fairy inner-loop spelling. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. %d alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.", repetitions), "budget": map[string]any{"runtime_ratio": 1.08, "exe_ratio": 1.08, "build_ratio_observation": 1.08, "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"}}
 	if measurePhases {
 		report["phase_method"] = "Opt-in wall-clock subdivisions: load includes support-file read and workspace load or C source read; check covers the verified workspace compile; emit_support covers authority check, C emission and support assembly; msvc_build covers C compile, link and artifact read; exe_write covers final file write. Phases exclude harness startup, workspace setup, warm toolchain discovery and program execution."
 	}
@@ -267,7 +269,7 @@ func cBudgetReference(workload string, seed, rounds uint32) uint32 {
 		value = 0
 	}
 	for i := uint32(0); i < rounds; i++ {
-		if workload == "byte_view" || workload == "byte_index" {
+		if workload == "byte_view" || workload == "byte_index" || workload == "vector_read_index" {
 			for _, b := range [...]uint32{7, 11, 13, 17} {
 				value = (value*33 + b + i%251) % 65521
 			}
@@ -299,6 +301,9 @@ func cBudgetReference(workload string, seed, rounds uint32) uint32 {
 func cBudgetCSource(workload string) string {
 	if workload == "byte_view" || workload == "byte_index" {
 		return "byte_loop.c"
+	}
+	if workload == "vector_read_index" {
+		return "vector_read.c"
 	}
 	return workload + ".c"
 }

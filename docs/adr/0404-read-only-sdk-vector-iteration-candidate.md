@@ -85,6 +85,11 @@ size for all three rewritten loops together. Generated C grew by 711 bytes;
 optimized `unit.obj` grew by 24 bytes against the indexed Fairy source. This
 does not establish check/build time, runtime or the independent-C budget.
 
+An independently written checked C vector-read kernel and the indexed Fairy
+SDK equivalent now pass one paired smoke run plus ten shared boundary
+executions. The candidate source form is not in that stable harness yet, and
+this smoke run is not an 8% budget measurement.
+
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
 computed vector expression as the iterable. The latter cannot acquire an
