@@ -2,6 +2,7 @@
 package genericsource
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -141,6 +142,37 @@ func (t transform) statement(v *ast.Statement) error {
 			return err
 		}
 		v.For = &loop
+	}
+	if v.ByteFor != nil {
+		// The parsed loop and its vector candidate are source facts until the
+		// authenticated SDK lane admits them. Clone and substitute their types
+		// without registering candidate calls in the generic plan.
+		inert := transform{bindings: t.bindings}
+		loop := *v.ByteFor
+		if loop.PreparedVector != nil {
+			if loop.PreparedVector.Block == nil || len(loop.PreparedVector.Block.Statements) != 3 ||
+				loop.PreparedVector.Block.Statements[0].Binding == nil ||
+				loop.PreparedVector.Block.Statements[0].Binding.Expression != loop.View {
+				return fmt.Errorf("vector loop preparation does not retain its written view")
+			}
+		}
+		loop.Type = inert.typ(loop.Type)
+		loop.View, err = inert.expr(loop.View)
+		if err != nil {
+			return err
+		}
+		loop.Body, err = inert.block(loop.Body)
+		if err != nil {
+			return err
+		}
+		loop.PreparedVector, err = inert.expr(loop.PreparedVector)
+		if err != nil {
+			return err
+		}
+		if loop.PreparedVector != nil {
+			loop.PreparedVector.Block.Statements[0].Binding.Expression = loop.View
+		}
+		v.ByteFor = &loop
 	}
 	return nil
 }
