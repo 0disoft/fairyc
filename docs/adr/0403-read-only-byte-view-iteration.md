@@ -77,8 +77,10 @@ The same interpreter and native observer now check `Result` `?` error
 propagation from inside the loop, including exactly-once `defer` and resource
 cleanup before the caller handles the error. A checked-MIR interpreter proof
 also records one Region reset on each byte-loop `continue` and `break`, after
-the inner resource drop and before the loop-body drop. Native Region cleanup
-and byte-loop Region `return`/`?` exits remain open.
+the inner resource drop and before the loop-body drop. A Windows native test
+opens a fresh Region on the same public Arena after those exits in both low
+and optimized profiles, proving that each exit releases the active Region.
+Byte-loop Region `return`/`?` exits remain open.
 Negative fixtures cover wrong or mutable iterable types,
 effectful expressions, binding escape and owner mutation while iterating.
 The [paired C comparison](../ops/evidence/byte-view-c-budget-20260924.md)
