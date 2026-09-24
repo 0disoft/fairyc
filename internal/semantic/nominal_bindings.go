@@ -17,10 +17,35 @@ type NominalTypeBinding struct {
 	Name    string
 }
 
+// VectorTypeAdmission names one concrete resource produced from the exact
+// authenticated std::vec::Vec template in a compiler-private proof lane.
+type VectorTypeAdmission struct {
+	Package hir.PackageID
+	Module  string
+	Name    string
+}
+
+type vectorTypeKey struct {
+	packageID hir.PackageID
+	module    string
+	name      string
+}
+
 // AnalyzeBoundNominalPackages consumes a checked expander's nominal references.
 // The caller owns source argument visibility; this boundary validates exact
 // targets and preserves their declaration owners for ordinary access checking.
 func AnalyzeBoundNominalPackages(input PackageInput, nominals []NominalTypeBinding) (Result, error) {
+	return analyzeBoundNominalPackages(input, nominals, nil)
+}
+
+// AnalyzeBoundNominalVectorCandidatePackages is a compiler-private proof lane.
+// The caller must authenticate the SDK provider before selecting it; ordinary
+// package analysis keeps the vector source form closed.
+func AnalyzeBoundNominalVectorCandidatePackages(input PackageInput, nominals []NominalTypeBinding, vectors []VectorTypeAdmission) (Result, error) {
+	return analyzeBoundNominalPackages(input, nominals, vectors)
+}
+
+func analyzeBoundNominalPackages(input PackageInput, nominals []NominalTypeBinding, vectors []VectorTypeAdmission) (Result, error) {
 	imports, err := validatePackageInput(input)
 	if err != nil {
 		return Result{}, err
@@ -30,6 +55,7 @@ func AnalyzeBoundNominalPackages(input PackageInput, nominals []NominalTypeBindi
 		module, name string
 	}
 	known := map[target]bool{}
+	knownResources := map[target]bool{}
 	for _, file := range input.Files {
 		for _, declaration := range file.Module.Structs {
 			if len(declaration.TypeParameters) == 0 {
@@ -38,7 +64,8 @@ func AnalyzeBoundNominalPackages(input PackageInput, nominals []NominalTypeBindi
 		}
 		for _, declaration := range file.Module.Resources {
 			if len(declaration.TypeParameters) == 0 {
-				known[target{file.Package, file.Module.Path, declaration.Name}] = true
+				key := target{file.Package, file.Module.Path, declaration.Name}
+				known[key], knownResources[key] = true, true
 			}
 		}
 	}
@@ -52,7 +79,19 @@ func AnalyzeBoundNominalPackages(input PackageInput, nominals []NominalTypeBindi
 		}
 		bindings[binding.Key] = binding
 	}
-	return analyzeBoundNominals(input.Files, imports, bindings), nil
+	admitted := make(map[vectorTypeKey]bool, len(vectors))
+	for _, vector := range vectors {
+		key := target{vector.Package, vector.Module, vector.Name}
+		if vector.Module != "std::vec" || !knownResources[key] {
+			return Result{}, fmt.Errorf("vector candidate requires an exact SDK resource declaration")
+		}
+		identity := vectorTypeKey{vector.Package, vector.Module, vector.Name}
+		if admitted[identity] {
+			return Result{}, fmt.Errorf("duplicate vector candidate resource")
+		}
+		admitted[identity] = true
+	}
+	return analyzeBoundNominalsWithVectorCandidate(input.Files, imports, bindings, admitted), nil
 }
 
 func (a *analyzer) canonicalBoundNominal(reference ast.TypeReference) (hir.Type, bool) {

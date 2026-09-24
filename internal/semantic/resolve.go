@@ -62,6 +62,7 @@ type lexicalScope struct {
 
 type analyzer struct {
 	nominalBindings       map[string]NominalTypeBinding
+	vectorForTypes        map[vectorTypeKey]bool
 	files                 []File
 	modules               map[moduleKey]*moduleScope
 	packageImports        map[packageImportKey]hir.PackageID

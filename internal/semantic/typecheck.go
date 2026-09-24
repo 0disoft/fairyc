@@ -488,7 +488,12 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindFor:
 			hirStatement.For = c.checkFor(statement.For)
 		case statement.Kind == syntax.KindByteFor:
-			if reason := c.byteForSourceIssue(statement.ByteFor, statement.Expression); reason != "" {
+			reason := c.byteForSourceIssue(statement.ByteFor, statement.Expression)
+			if len(c.analyzer.vectorForTypes) != 0 && statement.ByteFor != nil &&
+				statement.ByteFor.Type.Kind == ast.TypeKindReference {
+				reason = c.vectorForSourceIssue(statement.ByteFor, statement.Expression)
+			}
+			if reason != "" {
 				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, reason)
 			} else {
 				hirStatement.Expression, _ = c.checkExpression(statement.Expression, hir.TypeVoid)

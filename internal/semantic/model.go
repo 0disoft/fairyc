@@ -200,6 +200,10 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 }
 
 func analyzeBoundNominals(files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding) Result {
+	return analyzeBoundNominalsWithVectorCandidate(files, bindings, nominals, nil)
+}
+
+func analyzeBoundNominalsWithVectorCandidate(files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool) Result {
 	ordered := cloneResourceAbilityInputs(files)
 	slices.SortFunc(ordered, func(a, b File) int {
 		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
@@ -212,6 +216,7 @@ func analyzeBoundNominals(files []File, bindings map[packageImportKey]hir.Packag
 	}
 	analyzer := newAnalyzer(ordered, bindings)
 	analyzer.nominalBindings = nominals
+	analyzer.vectorForTypes = vectorTypes
 	analyzer.resolve()
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()

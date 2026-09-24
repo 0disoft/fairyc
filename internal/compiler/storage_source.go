@@ -118,6 +118,20 @@ func AnalyzeSDKStoragePackages(input semantic.PackageInput, coordinates map[hir.
 	return analysis, err
 }
 
+// AnalyzeSDKVectorCandidatePackages checks vector-loop source and Flow only in
+// a compiler-private proof lane. Stable workspace commands keep using
+// AnalyzeSDKStoragePackages until native and C-relative evidence is complete.
+func AnalyzeSDKVectorCandidatePackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID) (GenericAnalysis, error) {
+	if len(storageOwners) == 0 {
+		return GenericAnalysis{}, fmt.Errorf("SDK vector candidate requires authenticated storage owners")
+	}
+	analysis, expansion, err := analyzeStoragePackageGraphOwnedVectorCandidate(input, coordinates, limits, true, true, storageOwners, true, true)
+	if err != nil {
+		return GenericAnalysis{}, err
+	}
+	return publishGenericAnalysis(input, coordinates, expansion, Analysis{Semantic: analysis})
+}
+
 func analyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID, sdkTemplates bool) (GenericAnalysis, error) {
 	if len(storageOwners) == 0 {
 		return GenericAnalysis{}, fmt.Errorf("storage operation owners must be explicit")
@@ -130,6 +144,10 @@ func analyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinate
 }
 
 func analyzeStoragePackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool, storageOwners []hir.PackageID, sdkTemplates bool) (semantic.Result, genericsource.PackageExpansion, error) {
+	return analyzeStoragePackageGraphOwnedVectorCandidate(input, coordinates, limits, nominal, transfers, storageOwners, sdkTemplates, false)
+}
+
+func analyzeStoragePackageGraphOwnedVectorCandidate(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool, storageOwners []hir.PackageID, sdkTemplates, vectorCandidate bool) (semantic.Result, genericsource.PackageExpansion, error) {
 	prepared, expansion, err := prepareGenericPackageGraphOwned(input, coordinates, limits, true, nominal, transfers, storageOwners, sdkTemplates)
 	if err != nil {
 		return semantic.Result{}, genericsource.PackageExpansion{}, err
@@ -148,7 +166,30 @@ func analyzeStoragePackageGraphOwned(input semantic.PackageInput, coordinates ma
 			}
 			bindings = append(bindings, semantic.NominalTypeBinding{Key: string(binding.ID), Package: id, Module: binding.Module, Name: binding.Name})
 		}
-		analysis, err = semantic.AnalyzeBoundNominalPackages(prepared, bindings)
+		if vectorCandidate {
+			selected := map[genericplan.PackageID]bool{}
+			for _, owner := range storageOwners {
+				selected[genericPackageOwner(coordinates[owner])] = true
+			}
+			vectorDeclarations := map[genericplan.DeclarationID]hir.PackageID{}
+			for _, declaration := range expansion.Declarations {
+				if declaration.Kind == genericsource.OriginResource && declaration.Module == "std::vec" &&
+					declaration.Name == "Vec" && selected[declaration.Owner] {
+					vectorDeclarations[declaration.ID] = byOwner[declaration.Owner]
+				}
+			}
+			var vectors []semantic.VectorTypeAdmission
+			for _, specialization := range expansion.Origins {
+				if owner, found := vectorDeclarations[specialization.Declaration]; found {
+					vectors = append(vectors, semantic.VectorTypeAdmission{
+						Package: owner, Module: "std::vec", Name: specialization.GeneratedName,
+					})
+				}
+			}
+			analysis, err = semantic.AnalyzeBoundNominalVectorCandidatePackages(prepared, bindings, vectors)
+		} else {
+			analysis, err = semantic.AnalyzeBoundNominalPackages(prepared, bindings)
+		}
 	} else {
 		analysis, err = semantic.AnalyzePackages(prepared)
 	}

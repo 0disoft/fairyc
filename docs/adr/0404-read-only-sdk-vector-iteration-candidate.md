@@ -1,6 +1,6 @@
 # ADR 0404: Candidate for read-only SDK vector iteration
 
-- Status: Candidate; inert AST preparation only, no source admission
+- Status: Candidate; compiler-private source and Flow proof, no stable source admission
 - Date: 2026-09-24
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
 - Related boundaries: [byte-view iteration](0403-read-only-byte-view-iteration.md), [public vector](0390-public-windows-sdk-vector.md), [owner-bound storage borrows](0389-owner-bound-storage-borrows.md)
@@ -43,7 +43,14 @@ Only the authenticated SDK package graph now exposes those prepared calls to
 bounded generic planning; an import spelling or unowned provider alone cannot
 activate them. Semantic analysis still rejects the vector source form before
 lowering, so there is no new accepted syntax or generated C. Exact type and
-borrow checking, Flow and verified-MIR execution remain future gates.
+borrow checking, Flow and verified-MIR execution remain future gates for stable
+admission. A separate compiler-private proof lane now checks the exact
+authenticated, specialized `std::vec::Vec` resource identity, the written
+shared item and eligible view shape, then runs ordinary type checking and Flow
+over the prepared loop. Its first empty-vector and named-borrow cases reach
+verified MIR; wrong element type, mutable item, in-loop owner replacement and
+returning an item borrowed from a local vector are rejected. Stable workspace
+commands still use the closed source gate.
 
 ## Proposed first boundary
 

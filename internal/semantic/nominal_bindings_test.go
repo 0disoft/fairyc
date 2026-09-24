@@ -82,3 +82,28 @@ func TestPrivateNominalBindingDoesNotGrantFieldAccess(t *testing.T) {
 		t.Fatalf("private field accessible through binding: %v %+v", err, result.Diagnostics)
 	}
 }
+
+func TestPrivateVectorCandidateRequiresExactConcreteSDKResource(t *testing.T) {
+	input := semantic.PackageInput{Files: []semantic.File{
+		parsePackageFile(t, 1, "std/vec.fy", "module std::vec; resource ConcreteVec { usize length; cleanup {} }"),
+		parsePackageFile(t, 2, "std/vec.fy", "module std::vec; struct FakeVec { usize length; }"),
+	}}
+	valid := semantic.VectorTypeAdmission{Package: 1, Module: "std::vec", Name: "ConcreteVec"}
+	accepted, err := semantic.AnalyzeBoundNominalVectorCandidatePackages(input, nil, []semantic.VectorTypeAdmission{valid})
+	if err != nil || accepted.CompletedThrough != semantic.PhaseFlow {
+		t.Fatalf("exact candidate resource rejected: %v %+v", err, accepted)
+	}
+	for _, vector := range []semantic.VectorTypeAdmission{
+		{Package: 2, Module: "std::vec", Name: "FakeVec"},
+		{Package: 1, Module: "other::vec", Name: "ConcreteVec"},
+		{Package: 1, Module: "std::vec", Name: "Missing"},
+	} {
+		if _, err := semantic.AnalyzeBoundNominalVectorCandidatePackages(input, nil, []semantic.VectorTypeAdmission{vector}); err == nil {
+			t.Fatalf("invalid vector candidate authority accepted: %+v", vector)
+		}
+	}
+	if _, err := semantic.AnalyzeBoundNominalVectorCandidatePackages(input, nil,
+		[]semantic.VectorTypeAdmission{valid, valid}); err == nil {
+		t.Fatal("duplicate vector candidate authority accepted")
+	}
+}

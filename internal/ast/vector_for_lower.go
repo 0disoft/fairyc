@@ -71,7 +71,7 @@ func prepareVectorForExpression(expression *Expression, alias string) {
 
 func vectorForAsBlock(loop *ByteForLoop, alias string) *Expression {
 	if loop == nil || loop.Body == nil || loop.View == nil || loop.Type.Kind != TypeKindReference ||
-		loop.Type.Mutable || loop.Type.Element == nil || alias == "" || !vectorForEligibleView(loop.View) {
+		loop.Type.Mutable || loop.Type.Element == nil || alias == "" || !VectorForEligibleView(loop.View) {
 		return nil
 	}
 	itemType := *loop.Type.Element
@@ -123,7 +123,9 @@ func vectorForAsBlock(loop *ByteForLoop, alias string) *Expression {
 	return &Expression{Kind: syntax.KindBlock, Span: loop.Span, Block: block}
 }
 
-func vectorForEligibleView(view *Expression) bool {
+// VectorForEligibleView is the shared source-shape check used by preparation
+// and the semantic candidate gate.
+func VectorForEligibleView(view *Expression) bool {
 	if view == nil {
 		return false
 	}
