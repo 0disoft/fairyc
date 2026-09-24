@@ -261,6 +261,148 @@ int main(void) {
 					t.Fatalf("tokens=%d: %+v %v\nwant %q", count, outcome, err, want)
 				}
 			}
+			t.Run("token limit", func(t *testing.T) {
+				if !strings.Contains(scannerCBenchmarkSource(t), "#define FC_CANDIDATE_TOKEN_LIMIT\n") ||
+					!strings.Contains(scannerCGeometricBenchmarkSource(t), "#define FC_CANDIDATE_TOKEN_LIMIT\n") {
+					t.Fatal("C budget images omitted the token limit")
+				}
+				const limitProbe = `
+int main(void) {
+#ifdef _WIN32
+    if (_setmode(_fileno(stdin), _O_BINARY) == -1 ||
+        _setmode(_fileno(stdout), _O_BINARY) == -1) return FC_BAD_INPUT;
+#endif
+    int limit = getchar(), length = getchar();
+    if (limit < 0 || limit > 3 || length < 0 || length > 16) return FC_BAD_INPUT;
+    unsigned char source[16] = {0};
+    if (fread(source, 1, (size_t)length, stdin) != (size_t)length || getchar() != EOF)
+        return FC_BAD_INPUT;
+    struct fc_token *tokens = NULL;
+#ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
+    tokens = (struct fc_token *)calloc((size_t)length + 2u, sizeof(*tokens));
+#endif
+    struct fc_diagnostic *diagnostics = NULL;
+#ifndef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    diagnostics = (struct fc_diagnostic *)calloc((size_t)length + 2u, sizeof(*diagnostics));
+#endif
+    if (
+#ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
+        tokens == NULL ||
+#endif
+#ifndef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+        diagnostics == NULL ||
+#endif
+        0) { free(tokens); free(diagnostics); return 3; }
+    struct fc_scanner scanner = {source, (size_t)length, 0, 0, 0, tokens, diagnostics};
+    scanner.token_limit = (size_t)limit;
+    int status = fc_scan(&scanner);
+    if (status == 0) {
+        qsort(scanner.diagnostics, scanner.diagnostic_count,
+              sizeof(*scanner.diagnostics), fc_compare_diagnostic);
+        fc_print(&scanner);
+    }
+    fc_release_cooked(&scanner);
+    free(scanner.tokens);
+    free(scanner.diagnostics);
+    return status;
+}`
+				cases := []struct {
+					name  string
+					data  []byte
+					limit byte
+				}{
+					{"empty", nil, 0},
+					{"first token", []byte("a"), 0},
+					{"exactly one token", []byte("a"), 1},
+					{"middle token", []byte("a b"), 1},
+					{"last token", []byte("a b"), 2},
+					{"exactly three tokens", []byte("a b"), 3},
+					{"invalid diagnostic suppressed", []byte("#x"), 0},
+					{"BOM", []byte{0xef, 0xbb, 0xbf, 'a'}, 0},
+					{"BOM exactly at limit", []byte{0xef, 0xbb, 0xbf}, 1},
+					{"cooked value discarded", []byte("1e3 x"), 0},
+				}
+				for _, storage := range []struct {
+					name    string
+					defines string
+				}{
+					{"preallocated", ""},
+					{"geometric", "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"},
+				} {
+					t.Run(storage.name, func(t *testing.T) {
+						code := "#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_SCANNER_LIBRARY\n" + storage.defines + string(core) + limitProbe
+						image, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+						if err != nil {
+							t.Fatal(err)
+						}
+						for _, item := range cases {
+							input := append([]byte{item.limit, byte(len(item.data))}, item.data...)
+							outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(image, bytes.NewReader(input))
+							limits := source.DefaultLimits()
+							limits.MaxTokens = int(item.limit)
+							want := scannerGoObservationWithLimits(item.data, limits)
+							if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" ||
+								outcome.TrapControl != "" || outcome.Stdout != want {
+								t.Fatalf("%s: %+v %v\nwant %q", item.name, outcome, err, want)
+							}
+						}
+					})
+				}
+				const fairyMain = `module main;
+import scanner as scanner;
+import diagnostics as diagnostics;
+import std::bytes as bytes;
+fn i32 check(ref u8[] input, usize limit, usize wanted_tokens, usize position, usize rejected_index, bool over) {
+    let bytes::Buffer owned = switch (bytes::copy(input)) {
+        case .ok(value): { value }
+        case .err(_): { return 3; }
+    };
+    let scanner::Stream stream = switch (scanner::collect(owned, false, 32768, limit, 256, 16777216)) {
+        case .ok(value): { value }
+        case .err(code): { return code; }
+    };
+    if (scanner::token_count(ref stream) != wanted_tokens) { return 10; }
+    let scanner::TokenInfo eof = scanner::token_info(ref stream, wanted_tokens - 1);
+    if (eof.kind != 1 || eof.start != input.len || eof.end != input.len) { return 11; }
+    if (!over) {
+        if (scanner::diagnostic_count(ref stream) != 0) { return 12; }
+    } else {
+        if (scanner::diagnostic_count(ref stream) != 1) { return 13; }
+        let diagnostics::Info exhausted = scanner::diagnostic_info(ref stream, 0);
+        if (exhausted.code != 10 || exhausted.start != position || exhausted.end != position) { return 14; }
+        let scanner::TokenInfo rejected = scanner::token_info(ref stream, rejected_index);
+        if (rejected.kind != 0 || rejected.end != position) { return 15; }
+        if (position < input.len) {
+            let scanner::TokenInfo tail = scanner::token_info(ref stream, wanted_tokens - 2);
+            if (tail.kind != 0 || tail.start != position || tail.end != input.len) { return 16; }
+        }
+    }
+    return 0;
+}
+fn i32 main() {
+    if (check(b""[..], 0, 1, 0, 0, false) != 0) { return 21; }
+    if (check(b"a"[..], 0, 2, 1, 0, true) != 0) { return 22; }
+    if (check(b"a"[..], 1, 2, 0, 0, false) != 0) { return 23; }
+    if (check(b"a b"[..], 1, 4, 2, 1, true) != 0) { return 24; }
+    if (check(b"a b"[..], 2, 4, 3, 2, true) != 0) { return 25; }
+    if (check(b"a b"[..], 3, 4, 0, 0, false) != 0) { return 26; }
+    if (check(b"#x"[..], 0, 3, 1, 0, true) != 0) { return 27; }
+    if (check(b"\xEF\xBB\xBFa"[..], 0, 3, 3, 0, true) != 0) { return 28; }
+    if (check(b"\xEF\xBB\xBF"[..], 1, 2, 0, 0, false) != 0) { return 29; }
+    if (check(b"1e3 x"[..], 0, 3, 3, 0, true) != 0) { return 30; }
+    return 0;
+}`
+				variants := realScannerVectorVariants(t)
+				if len(variants) != 5 || variants[0].name != "explicit index" {
+					t.Fatal("real scanner source changed")
+				}
+				program, entry, _ := scannerBudgetFairyProgramWithMain(t, variants[0], fairyMain)
+				fairyImage, _ := buildRealScannerVectorNative(t, program, entry, profile, "")
+				fairyOutcome, err := cdriver.ExecuteWindowsHost(fairyImage)
+				if err != nil || fairyOutcome.ExitCode != 0 || fairyOutcome.Stdout != "" || fairyOutcome.Stderr != "" {
+					t.Fatalf("Fairy token limit: %+v %v", fairyOutcome, err)
+				}
+			})
 		})
 	}
 }
@@ -466,7 +608,7 @@ func scannerCGeometricBenchmarkSource(t *testing.T) string {
 
 func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n"
+	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n"
 	if geometric {
 		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
 	}

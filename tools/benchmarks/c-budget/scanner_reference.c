@@ -27,6 +27,9 @@ enum { FC_CANDIDATE_WORK = 16 << 20 };
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
 enum { FC_CANDIDATE_DIAGNOSTICS = 256 };
 #endif
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+enum { FC_CANDIDATE_TOKENS = 1 << 20 };
+#endif
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
 enum { FC_NO_TRIVIA, FC_PREAMBLE, FC_WHITESPACE, FC_LINE_COMMENT,
@@ -63,6 +66,10 @@ struct fc_scanner {
 #endif
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
     int diagnostic_limit_exhausted;
+#endif
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+    size_t token_limit;
+    int token_limit_exhausted;
 #endif
 };
 
@@ -124,9 +131,9 @@ static int fc_accept_cooked(struct fc_scanner *s, size_t length) {
 }
 #endif
 
-static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
-                     size_t start, size_t end, const unsigned char *cooked,
-                     size_t cooked_length) {
+static void fc_token_unlimited(struct fc_scanner *s, unsigned kind, unsigned trivia,
+                               size_t start, size_t end, const unsigned char *cooked,
+                               size_t cooked_length) {
 #ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
     if (s->token_allocation_failed || !fc_reserve_token_slot(s)) {
         s->token_allocation_failed = 1;
@@ -139,9 +146,30 @@ static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
                                                    cooked, cooked_length};
 }
 
+static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
+                     size_t start, size_t end, const unsigned char *cooked,
+                     size_t cooked_length) {
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+    if (s->token_limit_exhausted || s->token_count >= s->token_limit) {
+        if (kind == FC_INTEGER || kind == FC_FLOAT || kind == FC_STRING ||
+            kind == FC_BYTE_STRING || kind == FC_C_STRING) free((void *)cooked);
+        if (!s->token_limit_exhausted) {
+            s->token_limit_exhausted = 1;
+            if (start < end)
+                fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, start, end, NULL, 0);
+        }
+        return;
+    }
+#endif
+    fc_token_unlimited(s, kind, trivia, start, end, cooked, cooked_length);
+}
+
 static void fc_diagnostic(struct fc_scanner *s, const char *code,
                           size_t start, size_t end, const char *repair,
                           const char *token) {
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+    if (s->token_limit_exhausted && strcmp(code, "E0010") != 0) return;
+#endif
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
     // The one terminal E0010 is outside the ordinary diagnostic budget.
     if (s->diagnostic_count >= FC_CANDIDATE_DIAGNOSTICS &&
@@ -388,10 +416,10 @@ static int fc_scan_number(struct fc_scanner *s) {
 #ifdef FC_CANDIDATE_WORK_LIMIT
     if (valid == -4) {
         size_t end = s->position;
-        fc_token(s, FC_INVALID, FC_NO_TRIVIA, start, end, NULL, 0);
+        fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, start, end, NULL, 0);
         fc_diagnostic(s, "E0010", end, end, "none", "");
         if (end < s->length)
-            fc_token(s, FC_INVALID, FC_NO_TRIVIA, end, s->length, NULL, 0);
+            fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, end, s->length, NULL, 0);
         s->position = s->length;
         return 0;
     }
@@ -691,7 +719,11 @@ static int fc_scan(struct fc_scanner *s) {
 #endif
         s->position = 3;
     }
-    while (s->position < s->length) {
+    while (s->position < s->length
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+           && !s->token_limit_exhausted
+#endif
+    ) {
         int status = fc_scan_one(s);
         if (status != 0) return status;
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
@@ -713,7 +745,22 @@ static int fc_scan(struct fc_scanner *s) {
         if (s->diagnostic_allocation_failed) return 3;
 #endif
     }
-    fc_token(s, FC_EOF, FC_NO_TRIVIA, s->length, s->length, NULL, 0);
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+    if (s->token_limit_exhausted) {
+        fc_diagnostic(s, "E0010", s->position, s->position, "none", "");
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+        if (s->diagnostic_allocation_failed) return 3;
+#endif
+        if (s->position < s->length)
+            fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, s->position,
+                               s->length, NULL, 0);
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+        if (s->token_allocation_failed) return 3;
+#endif
+        s->position = s->length;
+    }
+#endif
+    fc_token_unlimited(s, FC_EOF, FC_NO_TRIVIA, s->length, s->length, NULL, 0);
 #ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
     if (s->token_allocation_failed) return 3;
 #endif
@@ -801,6 +848,9 @@ int main(void) {
     struct fc_scanner scanner = {source, (size_t)length, 0, 0, 0, tokens, diagnostics};
 #ifdef FC_CANDIDATE_WORK_LIMIT
     scanner.work_limit = FC_CANDIDATE_WORK;
+#endif
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+    scanner.token_limit = FC_CANDIDATE_TOKENS;
 #endif
     int status = fc_scan(&scanner);
     tokens = scanner.tokens;

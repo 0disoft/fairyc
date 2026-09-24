@@ -61,3 +61,11 @@ under low and optimized MSVC; the actual Fairy scanner checks matching counts,
 terminal location and EOF. This does not establish parity for every diagnostic
 path or diagnostic payload allocation. The earlier executable hashes and QPC
 samples do not describe these revised C images.
+
+The candidate C images now also use the Fairy scanner's 1,048,576-token
+default. A configurable probe checked limits 0 through 3, including empty and
+exact-limit input, BOM, invalid input, cooked-number discard and a remaining
+input suffix. Both C storage modes matched the Go lexer under low and optimized
+MSVC; the actual Fairy scanner checked token and diagnostic counts, `E0010`
+position and EOF. This does not establish all combined budget-exhaustion paths
+or update the earlier runtime and EXE measurements.

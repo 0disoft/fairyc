@@ -230,6 +230,15 @@ This establishes the diagnostic-count boundary for those inputs, not all
 multi-diagnostic lexical paths. Other low-budget recognition paths and
 diagnostic payload ownership remain different or unproven, so this is not a
 complete C-relative baseline.
+The C budget images also apply the candidate's 1,048,576-token default limit.
+A separate probe sets limits 0 through 3 and compares both C storage modes
+against the Go lexer under low and optimized MSVC. Empty input, exact-limit
+success, BOM, invalid bytes, a cooked number and exhaustion with remaining
+input are covered. The actual Fairy scanner checks the corresponding counts,
+terminal `E0010` location, rejected token and EOF. The broad standalone C
+Go-oracle build remains unlimited by this candidate switch. These small
+boundary inputs do not prove every interaction between token, diagnostic and
+work exhaustion or establish an 8% cost result.
 The measured short sample is inside all three supported ranges; a broader
 budget comparison needs the same accepted input and limit behavior in both
 implementations before using executable-size or runtime ratios as a gate.

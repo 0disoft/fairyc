@@ -28,6 +28,9 @@ static int fc_workload_round(const unsigned char *input, size_t length,
 #ifdef FC_CANDIDATE_WORK_LIMIT
     scanner.work_limit = FC_CANDIDATE_WORK;
 #endif
+#ifdef FC_CANDIDATE_TOKEN_LIMIT
+    scanner.token_limit = FC_CANDIDATE_TOKENS;
+#endif
     int status = fc_scan(&scanner);
     tokens = scanner.tokens;
     diagnostics = scanner.diagnostics;
