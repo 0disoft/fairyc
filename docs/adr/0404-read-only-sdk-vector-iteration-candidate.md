@@ -340,6 +340,12 @@ heuristic. The two Fairy images have the same EXE byte count, but both exceed
 the restricted C reference's size by 13.24%. That C reference is not yet a
 complete scanner, so this does not close the representative 8% gate or admit
 the private vector source form.
+The [current-image triplets](../ops/vector-lexer-c-budget-20260925.md) repeat
+the fixed three-way workload after the intervening C scanner changes. Both
+Fairy images again have equal EXE size, 11.67% above the still restricted C
+image. The private-vector/index paired median is 0.98705 with an 8.88% full
+span; the C lane and both C-relative ratios exceed the 10% stability limit.
+This remains diagnostic evidence, not an 8% admission result.
 
 ## Proposed first boundary
 
