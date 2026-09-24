@@ -73,6 +73,7 @@ func scannerCReferenceInputs() []struct {
 		{"identifier and keyword", []byte("module fairy; true false null defer")},
 		{"BOM CRLF and nested comment", append([]byte{0xef, 0xbb, 0xbf}, []byte("module main;\r\n/// doc\r\n/* outer /* inner */ done */\r\n")...)},
 		{"symbols and whitespace", []byte("a <<= b::c -> d..e += f\t\n")},
+		{"all symbol spellings", []byte("<<= >>= += -= *= /= %= &= ^= |= :: -> => == != <= >= << >> && || .. @ ( ) { } [ ] , ; : . ? = + - * / % ! ~ & | ^ < >")},
 		{"unclosed comment", []byte("let x; /* still open")},
 		{"invalid bytes", []byte{'m', ' ', 0xff, ' ', 0xe3, 0x95, 0x9c, ' ', '#', 0}},
 		{"lone CR", []byte("abc \rnext")},

@@ -88,17 +88,24 @@ fn bool keyword(ref u8[] input, usize start, usize end, bool previous) {
 }
 
 fn usize symbol_width(ref u8[] input, usize start) {
-    let ref u8[] words = b"<<= >>= += -= *= /= %= &= ^= |= :: -> => == != <= >= << >> && || .. @ ( ) { } [ ] , ; : . ? = + - * / % ! ~ & | ^ < >";
-    var usize first = 0;
-    var usize best = 0;
-    while (first < words.len) {
-        var usize last = first;
-        while (last < words.len && words[last] != 32) { last += 1; }
-        let usize width = last - first;
-        if (width > best && matches(input, start, words[first..last])) { best = width; }
-        first = last + 1;
+    if (start >= input.len) { return 0; }
+    let u8 first = input[start];
+    let u8 next = if (start + 1 < input.len) { input[start + 1] } else { 0 };
+    if ((first == 60 || first == 62) && next == first) {
+        if (start + 2 < input.len && input[start + 2] == 61) { return 3; }
+        return 2;
     }
-    return best;
+    if (next == 61 && (first == 43 || first == 45 || first == 42 || first == 47 ||
+                       first == 37 || first == 38 || first == 94 || first == 124 ||
+                       first == 61 || first == 33 || first == 60 || first == 62)) { return 2; }
+    if ((first == 58 && next == 58) || (first == 46 && next == 46) ||
+        (first == 38 && next == 38) || (first == 124 && next == 124) ||
+        ((first == 45 || first == 61) && next == 62)) { return 2; }
+    if (first == 33 || first == 37 || first == 38 ||
+        (first >= 40 && first <= 47) || (first >= 58 && first <= 64) ||
+        first == 91 || first == 93 || first == 94 ||
+        (first >= 123 && first <= 126)) { return 1; }
+    return 0;
 }
 
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.

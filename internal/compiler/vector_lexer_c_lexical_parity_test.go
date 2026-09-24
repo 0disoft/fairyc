@@ -28,7 +28,7 @@ func TestPrivateVectorSDKCandidateCScannerLexicalParity(t *testing.T) {
 		t.Fatal(err)
 	}
 	inputs := scannerCReferenceInputs()
-	if len(inputs) != 25 {
+	if len(inputs) != 26 {
 		t.Fatalf("lexical corpus changed: %d cases", len(inputs))
 	}
 	variants := realScannerVectorVariants(t)
