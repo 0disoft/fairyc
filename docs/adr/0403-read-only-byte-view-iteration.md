@@ -73,8 +73,10 @@ after an early return.
 An executable proof now checks `defer` before resource cleanup, exactly once
 per body, on byte-loop `continue`, `break`, and early `return`. It compares the
 verified-MIR interpreter trace with low and optimized Windows native execution.
-Result `?` and Region cleanup exits and representative real-workload execution
-remain open. Negative fixtures cover wrong or mutable iterable types,
+The same interpreter and native observer now check `Result` `?` error
+propagation from inside the loop, including exactly-once `defer` and resource
+cleanup before the caller handles the error. Region cleanup exits remain open.
+Negative fixtures cover wrong or mutable iterable types,
 effectful expressions, binding escape and owner mutation while iterating.
 The [paired C comparison](../ops/evidence/byte-view-c-budget-20260924.md)
 measured the new form, the equivalent explicit-index Fairy form and independent
