@@ -47,8 +47,32 @@ fn i32 main() {
 }
 `
 
+const sharedResourceBorrowOptionSource = `module main;
+resource Token { i32 value; cleanup {} }
+fn Option<ref Token> choose(ref Token value, bool include) {
+    return if (include) { .some(value) } else { .none };
+}
+fn i32 main() {
+    let Token source = Token { .value = 42 };
+    let Option<ref Token> present = choose(ref source, true);
+    let Option<ref Token> absent = choose(ref source, false);
+    let i32 first = switch (present) { case .some(view): { view.value } case .none: { 1 } };
+    let i32 second = switch (absent) { case .some(_): { 2 } case .none: { 0 } };
+    return first + second;
+}
+`
+
 func TestSharedStructBorrowOptionUsesNullNiche(t *testing.T) {
-	program := lowerSource(t, sharedStructBorrowOptionSource)
+	checkSharedNamedBorrowOptionNiche(t, sharedStructBorrowOptionSource)
+}
+
+func TestSharedResourceBorrowOptionUsesNullNiche(t *testing.T) {
+	checkSharedNamedBorrowOptionNiche(t, sharedResourceBorrowOptionSource)
+}
+
+func checkSharedNamedBorrowOptionNiche(t *testing.T, source string) {
+	t.Helper()
+	program := lowerSource(t, source)
 	outcome, err := interpreter.Execute(program, "main::main")
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
 		t.Fatalf("interpret Option<ref Token>: %+v %v", outcome, err)

@@ -1,6 +1,6 @@
-# ADR 0406: Null niche for shared scalar and structure borrow options
+# ADR 0406: Null niche for shared scalar, structure and resource borrow options
 
-- Status: Implemented private C transport (shared scalars and structures)
+- Status: Implemented private C transport (shared scalars, structures and resources)
 - Date: 2026-09-24
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
 
@@ -17,8 +17,12 @@ is a resolved structure. Its shared borrow is a non-null pointer, and the
 tagged payload was already supported. Structure contents and layouts are
 unchanged; only the surrounding Option record loses its redundant tag.
 
+`Option<ref R>` now uses the same representation for a resolved resource `R`.
+The borrowed pointer remains tied to the resource owner; the resource itself
+is neither moved nor dropped by constructing or switching the Option.
+
 The whitelist excludes mutable borrows, byte and string views, raw pointers,
-array and resource borrows, and nested tagged values. A raw pointer can itself
+fixed-array borrows, and nested tagged values. A raw pointer can itself
 be null; a view may use null data for an empty value. Neither representation
 provides this spare value. Included safe borrows are non-null by contract; unsafe
 code that fabricates an invalid borrow does not create an additional safe value.
@@ -47,8 +51,9 @@ The `ref bool` case uses the same non-null borrow representation; its private C
 transport was added after the initial four-integer whitelist without changing
 the language or SDK pin.
 
-The structure case checks `Some` and `None` through the interpreter, asserts
-the one-word C record and null test, and executes both Windows MSVC profiles.
+The structure and resource cases check `Some` and `None` through the
+interpreter, assert the one-word C record and null test, and execute both
+Windows MSVC profiles.
 
 Whole-program build time, generated C bytes, object size, executable size, and
 the cumulative 8% C-relative budget are not established by this local layout
