@@ -32,7 +32,40 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	inputs := []struct {
+	inputs := scannerCReferenceInputs()
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, string(code))
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, item := range inputs {
+				t.Run(item.name, func(t *testing.T) {
+					outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput(item.data))
+					if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
+						t.Fatalf("C scanner execution: %+v %v", outcome, err)
+					}
+					want := scannerGoObservation(item.data)
+					if outcome.Stdout != want {
+						t.Fatalf("C scanner differs from Go lexer\n got: %q\nwant: %q", outcome.Stdout, want)
+					}
+				})
+			}
+			for _, unsupported := range []string{"1e17000000", "1e-17000000"} {
+				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput([]byte(unsupported)))
+				if err != nil || outcome.ExitCode != 7 || outcome.Stdout != "" || outcome.Stderr != "" {
+					t.Fatalf("unsupported %q: %+v %v", unsupported, outcome, err)
+				}
+			}
+		})
+	}
+}
+
+func scannerCReferenceInputs() []struct {
+	name string
+	data []byte
+} {
+	return []struct {
 		name string
 		data []byte
 	}{
@@ -61,32 +94,6 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 		{"newline in string", []byte("\"line\nnext")},
 		{"trailing escape", []byte{'"', 'x', '\\'}},
 		{"raw C NUL", []byte{'c', '"', 'a', 0, 'b', '"'}},
-	}
-	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-		t.Run(profile.Name, func(t *testing.T) {
-			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, string(code))
-			if err != nil {
-				t.Fatal(err)
-			}
-			for _, item := range inputs {
-				t.Run(item.name, func(t *testing.T) {
-					outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput(item.data))
-					if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
-						t.Fatalf("C scanner execution: %+v %v", outcome, err)
-					}
-					want := scannerGoObservation(item.data)
-					if outcome.Stdout != want {
-						t.Fatalf("C scanner differs from Go lexer\n got: %q\nwant: %q", outcome.Stdout, want)
-					}
-				})
-			}
-			for _, unsupported := range []string{"1e17000000", "1e-17000000"} {
-				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput([]byte(unsupported)))
-				if err != nil || outcome.ExitCode != 7 || outcome.Stdout != "" || outcome.Stderr != "" {
-					t.Fatalf("unsupported %q: %+v %v", unsupported, outcome, err)
-				}
-			}
-		})
 	}
 }
 
@@ -729,10 +736,7 @@ func scannerCGeometricBenchmarkSource(t *testing.T) string {
 
 func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	defines := "#define FC_CANDIDATE_SOURCE_LIMIT\n#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT\n"
-	if geometric {
-		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
-	}
+	defines := scannerCBudgetDefines(geometric)
 	parts := []string{defines + "#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
 	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
 		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))
@@ -742,6 +746,14 @@ func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 		parts = append(parts, string(data), "\n")
 	}
 	return strings.Join(parts, "")
+}
+
+func scannerCBudgetDefines(geometric bool) string {
+	defines := "#define FC_CANDIDATE_SOURCE_LIMIT\n#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT\n"
+	if geometric {
+		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
+	}
+	return defines
 }
 
 func scannerCWorkloadInput(rounds uint32, data []byte) *bytes.Reader {
