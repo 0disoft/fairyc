@@ -23,7 +23,15 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
+type realScannerVectorVariant struct {
+	name      string
+	candidate bool
+	scanner   string
+}
+
+// Keep the checked-in scanner edits in one place for parity and cost probes.
+func realScannerVectorVariants(t *testing.T) []realScannerVectorVariant {
+	t.Helper()
 	const before = `    var usize index = 0;
     var usize position = 0;
     while (index < v::len<Token>(ref tokens)) {
@@ -50,8 +58,6 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 	const diagnosticAfter = `    for (let ref diagnostics::Entry item in ref stream.errors) {
         diagnostic += diagnostics::token_view(item).len;
     }`
-	const scannerInput = "let n=12345; /*open"
-
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
 	scannerBytes, err := os.ReadFile(filepath.Join(example, "src", "scanner.fy"))
 	if err != nil {
@@ -62,6 +68,25 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 		strings.Count(scanner, cookedBefore) != 1 || strings.Count(scanner, diagnosticBefore) != 1 {
 		t.Fatal("real scanner loop changed; refresh the private candidate comparison")
 	}
+	tokenScanner := strings.Replace(strings.Replace(scanner, before, after, 1), endBefore, endAfter, 1)
+	cookedScanner := strings.Replace(scanner, cookedBefore, cookedAfter, 1)
+	diagnosticScanner := strings.Replace(scanner, diagnosticBefore, diagnosticAfter, 1)
+	allScanner := strings.Replace(strings.Replace(tokenScanner, cookedBefore, cookedAfter, 1),
+		diagnosticBefore, diagnosticAfter, 1)
+	return []realScannerVectorVariant{
+		{name: "explicit index", scanner: scanner},
+		{name: "token vector for", candidate: true, scanner: tokenScanner},
+		{name: "cooked vector for", candidate: true, scanner: cookedScanner},
+		{name: "diagnostic vector for", candidate: true, scanner: diagnosticScanner},
+		{name: "all vector for", candidate: true, scanner: allScanner},
+	}
+}
+
+func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
+	const scannerInput = "let n=12345; /*open"
+	example := filepath.Join("..", "..", "examples", "lexer_candidate")
+	variants := realScannerVectorVariants(t)
+
 	lexed := lexer.Lex(source.NewFile("input.fy", []byte(scannerInput)),
 		source.NewBudget(source.DefaultLimits(), len(scannerInput)))
 	cookedBytes, diagnosticBytes := 0, 0
@@ -76,23 +101,8 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 	}
 	wantStorage := fmt.Sprintf("%d %d %d %d %d ", len(scannerInput), cookedBytes,
 		diagnosticBytes, len(lexed.Tokens), len(lexed.Diagnostics))
-	tokenScanner := strings.Replace(strings.Replace(scanner, before, after, 1), endBefore, endAfter, 1)
-	cookedScanner := strings.Replace(scanner, cookedBefore, cookedAfter, 1)
-	diagnosticScanner := strings.Replace(scanner, diagnosticBefore, diagnosticAfter, 1)
-	allScanner := strings.Replace(strings.Replace(tokenScanner, cookedBefore, cookedAfter, 1),
-		diagnosticBefore, diagnosticAfter, 1)
 	outputs := make(map[string]map[string]realScannerVectorEvidence)
-	for _, variant := range []struct {
-		name      string
-		candidate bool
-		scanner   string
-	}{
-		{name: "explicit index", scanner: scanner},
-		{name: "token vector for", candidate: true, scanner: tokenScanner},
-		{name: "cooked vector for", candidate: true, scanner: cookedScanner},
-		{name: "diagnostic vector for", candidate: true, scanner: diagnosticScanner},
-		{name: "all vector for", candidate: true, scanner: allScanner},
-	} {
+	for _, variant := range variants {
 		t.Run(variant.name, func(t *testing.T) {
 			root := t.TempDir()
 			for _, name := range []string{"fairy.toml", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
