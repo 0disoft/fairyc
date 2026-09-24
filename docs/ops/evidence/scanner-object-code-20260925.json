@@ -1,0 +1,81 @@
+{
+  "images": [
+    {
+      "exe_bytes": 184320,
+      "exe_sha256": "51d1b3328b67865c7551059a539ec4f9d20e92160f35ee1fc934f04ddc081f9b",
+      "lane": "independent C",
+      "objects": [
+        {
+          "code_raw_bytes": 13653,
+          "name": "probe.obj",
+          "object_bytes": 61311,
+          "other_raw_bytes": 5887,
+          "relocations": 721,
+          "sections": 288
+        }
+      ]
+    },
+    {
+      "exe_bytes": 185344,
+      "exe_sha256": "1786b83ee199f56d42017d52b88e015d331fc3a62a61531f4ac9dba8db6cdd3f",
+      "lane": "geometric C",
+      "objects": [
+        {
+          "code_raw_bytes": 14803,
+          "name": "probe.obj",
+          "object_bytes": 63987,
+          "other_raw_bytes": 6103,
+          "relocations": 749,
+          "sections": 296
+        }
+      ]
+    },
+    {
+      "exe_bytes": 206336,
+      "exe_sha256": "2aa1d58c604703f97864adca8aed105fc94f90ff9e8040d615680c559b6d1313",
+      "lane": "explicit index",
+      "objects": [
+        {
+          "code_raw_bytes": 32116,
+          "name": "unit.obj",
+          "object_bytes": 88595,
+          "other_raw_bytes": 6620,
+          "relocations": 1189,
+          "sections": 313
+        },
+        {
+          "code_raw_bytes": 8039,
+          "name": "runtime.obj",
+          "object_bytes": 42132,
+          "other_raw_bytes": 3703,
+          "relocations": 414,
+          "sections": 195
+        }
+      ]
+    },
+    {
+      "exe_bytes": 206336,
+      "exe_sha256": "3cb6687d8fa109af7b83e570e9ce8a951c848e7085f7402b2d587d489f3a8518",
+      "lane": "all vector for",
+      "objects": [
+        {
+          "code_raw_bytes": 32116,
+          "name": "unit.obj",
+          "object_bytes": 88595,
+          "other_raw_bytes": 6620,
+          "relocations": 1189,
+          "sections": 313
+        },
+        {
+          "code_raw_bytes": 8039,
+          "name": "runtime.obj",
+          "object_bytes": 42128,
+          "other_raw_bytes": 3699,
+          "relocations": 414,
+          "sections": 195
+        }
+      ]
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-object-sections/v1"
+}

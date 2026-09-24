@@ -127,6 +127,43 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		}
 		t.Log("VECTOR_LEXER_C_BUDGET_SECTIONS " + string(sectionReport))
 	}
+	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_OBJECT_SECTIONS") == "1" {
+		objectRows := make([]map[string]any, 0, len(images))
+		for _, image := range images {
+			objects := make([]map[string]any, 0, len(image.artifact.Objects))
+			for _, object := range image.artifact.Objects {
+				coff, inspectErr := pecoff.InspectObject(object.Bytes)
+				if inspectErr != nil {
+					t.Fatalf("%s/%s COFF inspection: %v", image.name, object.Name, inspectErr)
+				}
+				var codeBytes, otherBytes uint64
+				for _, section := range coff.Sections {
+					if section.Characteristics&0x20 != 0 { // IMAGE_SCN_CNT_CODE
+						codeBytes += uint64(section.RawSize)
+					} else {
+						otherBytes += uint64(section.RawSize)
+					}
+				}
+				objects = append(objects, map[string]any{
+					"name": object.Name, "object_bytes": len(object.Bytes),
+					"code_raw_bytes": codeBytes, "other_raw_bytes": otherBytes,
+					"sections": len(coff.Sections), "relocations": coff.Relocations,
+				})
+			}
+			objectRows = append(objectRows, map[string]any{
+				"lane": image.name, "exe_bytes": len(image.artifact.Bytes),
+				"exe_sha256": fmt.Sprintf("%x", sha256.Sum256(image.artifact.Bytes)),
+				"objects":    objects,
+			})
+		}
+		objectReport, marshalErr := json.Marshal(map[string]any{
+			"schema": "fairyc.vector-lexer-c-budget-object-sections/v1", "images": objectRows,
+		})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		t.Log("VECTOR_LEXER_C_BUDGET_OBJECT_SECTIONS " + string(objectReport))
+	}
 	reporter := ""
 	rows := make([]map[string]any, 0, len(images))
 	for _, image := range images {

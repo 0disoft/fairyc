@@ -379,6 +379,11 @@ for the entire 22,016-byte optimized EXE difference against up-front C:
 20,992 bytes in `.text` and 512 each in `.rdata` and `.pdata`. It narrows the
 size investigation to emitted code and linked support but does not identify
 individual functions or satisfy the cumulative 8% gate.
+The [COFF object receipt](../ops/scanner-coff-code-budget-20260925.md) finds
+identical 32,116-byte `unit.obj` code totals for indexed and private-vector
+Fairy forms, plus 8,039 runtime-object code bytes in each. The up-front C
+`probe.obj` has 13,653 code bytes. Object bytes are not final linked-image
+contributions; function-level attribution remains necessary before a size fix.
 
 ## Proposed first boundary
 
