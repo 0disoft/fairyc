@@ -393,6 +393,10 @@ The [source-name map](../ops/scanner-function-source-map-20260925.md) now
 identifies the five largest Fairy unit spans as `scanner::scan`,
 `strings::scan`, `numbers::decimal`, `strings::escape` and
 `scanner::report_work`. Their retained linked sizes are still unknown.
+The [MSVC link-map receipt](../ops/scanner-link-map-20260925.md) observes
+positive `unit.obj` symbol addresses for those five functions in both
+Fairy images and retains the same four EXE byte counts. It does not
+measure exact linked function lengths or account for CRT contributions.
 
 ## Proposed first boundary
 

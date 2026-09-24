@@ -153,16 +153,25 @@ func resolveProgramFilesX86() (string, error) {
 
 // BuildWindowsHost compiles generated C for a target-neutral Windows host smoke only.
 func BuildWindowsHost(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
+	return buildWindowsHostWithMap(toolchain, profile, unitSource, runtimeSource, false)
+}
+
+// BuildWindowsHostWithMap retains the MSVC link map for local size attribution.
+func BuildWindowsHostWithMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
+	return buildWindowsHostWithMap(toolchain, profile, unitSource, runtimeSource, true)
+}
+
+func buildWindowsHostWithMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, captureMap bool) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	if unitSource == "" || runtimeSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "unit.c", Contents: unitSource},
 		{Name: "runtime.c", Contents: runtimeSource},
-	})
+	}, windowsMSVCBuildOptions{CaptureMap: captureMap})
 }
 
 // BuildWindowsMSVCTarget compiles a unit emitted for the declared
@@ -182,13 +191,22 @@ func BuildWindowsMSVCTarget(toolchain WindowsHostToolchain, profile Profile, uni
 
 // BuildWindowsMSVCProbe compiles one closed target-evidence probe with local x64 MSVC.
 func BuildWindowsMSVCProbe(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
+	return buildWindowsMSVCProbeWithMap(toolchain, profile, probeSource, false)
+}
+
+// BuildWindowsMSVCProbeWithMap retains the MSVC link map for local C comparison.
+func BuildWindowsMSVCProbeWithMap(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
+	return buildWindowsMSVCProbeWithMap(toolchain, profile, probeSource, true)
+}
+
+func buildWindowsMSVCProbeWithMap(toolchain WindowsHostToolchain, profile Profile, probeSource string, captureMap bool) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	if probeSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{{Name: "probe.c", Contents: probeSource}})
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{{Name: "probe.c", Contents: probeSource}}, windowsMSVCBuildOptions{CaptureMap: captureMap})
 }
 
 // BuildWindowsMSVCABIProbe compiles one caller and one callee translation unit

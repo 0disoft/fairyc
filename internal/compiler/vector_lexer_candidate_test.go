@@ -267,6 +267,10 @@ func buildRealScannerVectorNative(t *testing.T, program mir.Program, entry strin
 }
 
 func buildRealScannerVectorNativeWithStorage(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+	return buildRealScannerVectorNativeWithStorageAndMap(t, program, entry, profile, extraSupport, storageOverride, false)
+}
+
+func buildRealScannerVectorNativeWithStorageAndMap(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap bool) (cdriver.WindowsHostArtifact, cbackend.Unit) {
 	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
@@ -301,8 +305,13 @@ func buildRealScannerVectorNativeWithStorage(t *testing.T, program mir.Program, 
 	if err != nil || !strings.HasPrefix(storage, heap) {
 		t.Fatalf("private scanner storage heap boundary: %v", err)
 	}
-	artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source,
-		scalar+vectorStorageAllocator+sdk+strings.TrimPrefix(storage, heap)+vectorForNativeProbe+extraSupport)
+	runtimeSource := scalar + vectorStorageAllocator + sdk + strings.TrimPrefix(storage, heap) + vectorForNativeProbe + extraSupport
+	var artifact cdriver.WindowsHostArtifact
+	if captureMap {
+		artifact, err = cdriver.BuildWindowsHostWithMap(toolchain, profile, unit.Source, runtimeSource)
+	} else {
+		artifact, err = cdriver.BuildWindowsHost(toolchain, profile, unit.Source, runtimeSource)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}

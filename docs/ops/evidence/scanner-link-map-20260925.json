@@ -1,0 +1,870 @@
+{
+  "images": [
+    {
+      "exe_bytes": 184320,
+      "lane": "independent C",
+      "map_bytes": 301225,
+      "map_sha256": "f24faff0d79a200d3e7752c2e91b2e184279d92617a6443c3b7a77d93ca84bda",
+      "symbols": [
+        {
+          "name": "fc_compare_diagnostic",
+          "section": 1,
+          "offset": 32,
+          "preferred_address": 5368713248,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_cook_float",
+          "section": 1,
+          "offset": 208,
+          "preferred_address": 5368713424,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_cook_integer",
+          "section": 1,
+          "offset": 1136,
+          "preferred_address": 5368714352,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_diagnostic",
+          "section": 1,
+          "offset": 1936,
+          "preferred_address": 5368715152,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_print",
+          "section": 1,
+          "offset": 2576,
+          "preferred_address": 5368715792,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan",
+          "section": 1,
+          "offset": 3056,
+          "preferred_address": 5368716272,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan_number",
+          "section": 1,
+          "offset": 3632,
+          "preferred_address": 5368716848,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan_one",
+          "section": 1,
+          "offset": 4896,
+          "preferred_address": 5368718112,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan_string",
+          "section": 1,
+          "offset": 6784,
+          "preferred_address": 5368720000,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_string_work_exhausted",
+          "section": 1,
+          "offset": 10080,
+          "preferred_address": 5368723296,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_token",
+          "section": 1,
+          "offset": 10144,
+          "preferred_address": 5368723360,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_utf8_width",
+          "section": 1,
+          "offset": 10352,
+          "preferred_address": 5368723568,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_work_exhausted",
+          "section": 1,
+          "offset": 10544,
+          "preferred_address": 5368723760,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_workload_round",
+          "section": 1,
+          "offset": 10736,
+          "preferred_address": 5368723952,
+          "owner": "probe.obj"
+        }
+      ]
+    },
+    {
+      "exe_bytes": 185344,
+      "lane": "geometric C",
+      "map_bytes": 301385,
+      "map_sha256": "26f4240654d0a325fb1c920d76d1c950041ee9c1adf864c180aec182373a4265",
+      "symbols": [
+        {
+          "name": "fc_compare_diagnostic",
+          "section": 1,
+          "offset": 32,
+          "preferred_address": 5368713248,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_cook_float",
+          "section": 1,
+          "offset": 208,
+          "preferred_address": 5368713424,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_cook_integer",
+          "section": 1,
+          "offset": 1136,
+          "preferred_address": 5368714352,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_diagnostic",
+          "section": 1,
+          "offset": 1936,
+          "preferred_address": 5368715152,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_print",
+          "section": 1,
+          "offset": 2816,
+          "preferred_address": 5368716032,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan",
+          "section": 1,
+          "offset": 3296,
+          "preferred_address": 5368716512,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan_number",
+          "section": 1,
+          "offset": 4064,
+          "preferred_address": 5368717280,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan_one",
+          "section": 1,
+          "offset": 5328,
+          "preferred_address": 5368718544,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_scan_string",
+          "section": 1,
+          "offset": 7216,
+          "preferred_address": 5368720432,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_string_work_exhausted",
+          "section": 1,
+          "offset": 10512,
+          "preferred_address": 5368723728,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_token",
+          "section": 1,
+          "offset": 10576,
+          "preferred_address": 5368723792,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_token_unlimited",
+          "section": 1,
+          "offset": 10736,
+          "preferred_address": 5368723952,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_utf8_width",
+          "section": 1,
+          "offset": 11088,
+          "preferred_address": 5368724304,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_work_exhausted",
+          "section": 1,
+          "offset": 11280,
+          "preferred_address": 5368724496,
+          "owner": "probe.obj"
+        },
+        {
+          "name": "fc_workload_round",
+          "section": 1,
+          "offset": 11456,
+          "preferred_address": 5368724672,
+          "owner": "probe.obj"
+        }
+      ]
+    },
+    {
+      "exe_bytes": 206336,
+      "lane": "explicit index",
+      "map_bytes": 307010,
+      "map_sha256": "0785944d208759623357ab73485434991ff95b07ff1f5663d3ea5dc8b31dd081",
+      "symbols": [
+        {
+          "name": "fy_fn_10",
+          "source_name": "$p1::numbers::decimal",
+          "section": 1,
+          "offset": 0,
+          "preferred_address": 5368713216,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_12",
+          "source_name": "$p1::numbers::identifier",
+          "section": 1,
+          "offset": 3120,
+          "preferred_address": 5368716336,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_13",
+          "source_name": "$p1::numbers::integer",
+          "section": 1,
+          "offset": 3168,
+          "preferred_address": 5368716384,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_15",
+          "source_name": "$p1::numbers::scan",
+          "section": 1,
+          "offset": 4304,
+          "preferred_address": 5368717520,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_16",
+          "source_name": "$p1::numbers::value",
+          "section": 1,
+          "offset": 6016,
+          "preferred_address": 5368719232,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_17",
+          "source_name": "$p1::scanner::append",
+          "section": 1,
+          "offset": 6128,
+          "preferred_address": 5368719344,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_18",
+          "source_name": "$p1::scanner::append_cooked",
+          "section": 1,
+          "offset": 6304,
+          "preferred_address": 5368719520,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_19",
+          "source_name": "$p1::scanner::collect",
+          "section": 1,
+          "offset": 6800,
+          "preferred_address": 5368720016,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_2",
+          "source_name": "$p1::diagnostics::add",
+          "section": 1,
+          "offset": 8192,
+          "preferred_address": 5368721408,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_23",
+          "source_name": "$p1::scanner::exhausted",
+          "section": 1,
+          "offset": 8544,
+          "preferred_address": 5368721760,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_24",
+          "source_name": "$p1::scanner::keyword",
+          "section": 1,
+          "offset": 8752,
+          "preferred_address": 5368721968,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_25",
+          "source_name": "$p1::scanner::letter",
+          "section": 1,
+          "offset": 9376,
+          "preferred_address": 5368722592,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_26",
+          "source_name": "$p1::scanner::matches",
+          "section": 1,
+          "offset": 9424,
+          "preferred_address": 5368722640,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_28",
+          "source_name": "$p1::scanner::report_work",
+          "section": 1,
+          "offset": 9616,
+          "preferred_address": 5368722832,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_29",
+          "source_name": "$p1::scanner::scan",
+          "section": 1,
+          "offset": 12112,
+          "preferred_address": 5368725328,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_31",
+          "source_name": "$p1::scanner::storage",
+          "section": 1,
+          "offset": 17424,
+          "preferred_address": 5368730640,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_32",
+          "source_name": "$p1::scanner::symbol_width",
+          "section": 1,
+          "offset": 17760,
+          "preferred_address": 5368730976,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_33",
+          "source_name": "$p1::scanner::work_exhausted",
+          "section": 1,
+          "offset": 18128,
+          "preferred_address": 5368731344,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_34",
+          "source_name": "$p1::strings::encode",
+          "section": 1,
+          "offset": 18272,
+          "preferred_address": 5368731488,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_36",
+          "source_name": "$p1::strings::escape",
+          "section": 1,
+          "offset": 18672,
+          "preferred_address": 5368731888,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_38",
+          "source_name": "$p1::strings::hex",
+          "section": 1,
+          "offset": 21744,
+          "preferred_address": 5368734960,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_39",
+          "source_name": "$p1::strings::octet",
+          "section": 1,
+          "offset": 21808,
+          "preferred_address": 5368735024,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_4",
+          "source_name": "$p1::diagnostics::less",
+          "section": 1,
+          "offset": 21936,
+          "preferred_address": 5368735152,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_41",
+          "source_name": "$p1::strings::scan",
+          "section": 1,
+          "offset": 22160,
+          "preferred_address": 5368735376,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_43",
+          "source_name": "$p1::utf8::width",
+          "section": 1,
+          "offset": 25296,
+          "preferred_address": 5368738512,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_46",
+          "source_name": "$p2::std::bytes::append_byte",
+          "section": 1,
+          "offset": 25648,
+          "preferred_address": 5368738864,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_48",
+          "source_name": "$p2::std::bytes::copy",
+          "section": 1,
+          "offset": 25792,
+          "preferred_address": 5368739008,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_53",
+          "source_name": "$p2::std::bytes::truncate",
+          "section": 1,
+          "offset": 26112,
+          "preferred_address": 5368739328,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_59",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_404e9adb44dcd8971ed8e5b35f35ce838fff78a2246868b43a4aa395c2aa1874",
+          "section": 1,
+          "offset": 26240,
+          "preferred_address": 5368739456,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_6",
+          "source_name": "$p1::diagnostics::report",
+          "section": 1,
+          "offset": 26352,
+          "preferred_address": 5368739568,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_61",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_9ed97b67ee021b25c811f8ea4b2c151fb2a9a584e86197882790536f228726fe",
+          "section": 1,
+          "offset": 27408,
+          "preferred_address": 5368740624,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_7",
+          "source_name": "$p1::diagnostics::text",
+          "section": 1,
+          "offset": 27536,
+          "preferred_address": 5368740752,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_72",
+          "source_name": "$p2::std::vec::_fy_generic_g0_6f09af4d3991f4d2ec6f4246dd5dd55a9cf9f49beb73eb75209df1ad19107a91",
+          "section": 1,
+          "offset": 27776,
+          "preferred_address": 5368740992,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_79",
+          "source_name": "$p2::std::vec::_fy_generic_g0_ec36724edef51886d2f35c9207f11bf512c2c67f805e18fe4f9e6a6306ee02cb",
+          "section": 1,
+          "offset": 27984,
+          "preferred_address": 5368741200,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_9",
+          "source_name": "$p1::main::main",
+          "section": 1,
+          "offset": 28304,
+          "preferred_address": 5368741520,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fc_budget_begin",
+          "section": 1,
+          "offset": 29936,
+          "preferred_address": 5368743152,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_finish",
+          "section": 1,
+          "offset": 30000,
+          "preferred_address": 5368743216,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_flush",
+          "section": 1,
+          "offset": 30096,
+          "preferred_address": 5368743312,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_rounds",
+          "section": 1,
+          "offset": 30128,
+          "preferred_address": 5368743344,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_seed",
+          "section": 1,
+          "offset": 30144,
+          "preferred_address": 5368743360,
+          "owner": "runtime.obj"
+        }
+      ]
+    },
+    {
+      "exe_bytes": 206336,
+      "lane": "all vector for",
+      "map_bytes": 307010,
+      "map_sha256": "ac376d7f36b79cd7ae03f5646f445bac589256438be0c0f1d8f99e73f3fe3714",
+      "symbols": [
+        {
+          "name": "fy_fn_10",
+          "source_name": "$p1::numbers::decimal",
+          "section": 1,
+          "offset": 0,
+          "preferred_address": 5368713216,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_12",
+          "source_name": "$p1::numbers::identifier",
+          "section": 1,
+          "offset": 3120,
+          "preferred_address": 5368716336,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_13",
+          "source_name": "$p1::numbers::integer",
+          "section": 1,
+          "offset": 3168,
+          "preferred_address": 5368716384,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_15",
+          "source_name": "$p1::numbers::scan",
+          "section": 1,
+          "offset": 4304,
+          "preferred_address": 5368717520,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_16",
+          "source_name": "$p1::numbers::value",
+          "section": 1,
+          "offset": 6016,
+          "preferred_address": 5368719232,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_17",
+          "source_name": "$p1::scanner::append",
+          "section": 1,
+          "offset": 6128,
+          "preferred_address": 5368719344,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_18",
+          "source_name": "$p1::scanner::append_cooked",
+          "section": 1,
+          "offset": 6304,
+          "preferred_address": 5368719520,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_19",
+          "source_name": "$p1::scanner::collect",
+          "section": 1,
+          "offset": 6800,
+          "preferred_address": 5368720016,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_2",
+          "source_name": "$p1::diagnostics::add",
+          "section": 1,
+          "offset": 8192,
+          "preferred_address": 5368721408,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_23",
+          "source_name": "$p1::scanner::exhausted",
+          "section": 1,
+          "offset": 8544,
+          "preferred_address": 5368721760,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_24",
+          "source_name": "$p1::scanner::keyword",
+          "section": 1,
+          "offset": 8752,
+          "preferred_address": 5368721968,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_25",
+          "source_name": "$p1::scanner::letter",
+          "section": 1,
+          "offset": 9376,
+          "preferred_address": 5368722592,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_26",
+          "source_name": "$p1::scanner::matches",
+          "section": 1,
+          "offset": 9424,
+          "preferred_address": 5368722640,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_28",
+          "source_name": "$p1::scanner::report_work",
+          "section": 1,
+          "offset": 9616,
+          "preferred_address": 5368722832,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_29",
+          "source_name": "$p1::scanner::scan",
+          "section": 1,
+          "offset": 12112,
+          "preferred_address": 5368725328,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_31",
+          "source_name": "$p1::scanner::storage",
+          "section": 1,
+          "offset": 17424,
+          "preferred_address": 5368730640,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_32",
+          "source_name": "$p1::scanner::symbol_width",
+          "section": 1,
+          "offset": 17760,
+          "preferred_address": 5368730976,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_33",
+          "source_name": "$p1::scanner::work_exhausted",
+          "section": 1,
+          "offset": 18128,
+          "preferred_address": 5368731344,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_34",
+          "source_name": "$p1::strings::encode",
+          "section": 1,
+          "offset": 18272,
+          "preferred_address": 5368731488,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_36",
+          "source_name": "$p1::strings::escape",
+          "section": 1,
+          "offset": 18672,
+          "preferred_address": 5368731888,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_38",
+          "source_name": "$p1::strings::hex",
+          "section": 1,
+          "offset": 21744,
+          "preferred_address": 5368734960,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_39",
+          "source_name": "$p1::strings::octet",
+          "section": 1,
+          "offset": 21808,
+          "preferred_address": 5368735024,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_4",
+          "source_name": "$p1::diagnostics::less",
+          "section": 1,
+          "offset": 21936,
+          "preferred_address": 5368735152,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_41",
+          "source_name": "$p1::strings::scan",
+          "section": 1,
+          "offset": 22160,
+          "preferred_address": 5368735376,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_43",
+          "source_name": "$p1::utf8::width",
+          "section": 1,
+          "offset": 25296,
+          "preferred_address": 5368738512,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_46",
+          "source_name": "$p2::std::bytes::append_byte",
+          "section": 1,
+          "offset": 25648,
+          "preferred_address": 5368738864,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_48",
+          "source_name": "$p2::std::bytes::copy",
+          "section": 1,
+          "offset": 25792,
+          "preferred_address": 5368739008,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_53",
+          "source_name": "$p2::std::bytes::truncate",
+          "section": 1,
+          "offset": 26112,
+          "preferred_address": 5368739328,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_59",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_699fb4087c93965f43fdad71df9ccf0903911eda49f922f60c4652bfd8d96f1a",
+          "section": 1,
+          "offset": 26240,
+          "preferred_address": 5368739456,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_6",
+          "source_name": "$p1::diagnostics::report",
+          "section": 1,
+          "offset": 26352,
+          "preferred_address": 5368739568,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_60",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_6ceb1f2e852bd9eb9b9a4e3ff2f92faa7f52e99c97debc9bf4a11ff0e57c13ac",
+          "section": 1,
+          "offset": 27408,
+          "preferred_address": 5368740624,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_62",
+          "source_name": "$p2::std::vec::_fy_generic_g0_073e92218d83fdf4f8a0fe06af393e621708aa633fc6c9eaad7d1997057799b0",
+          "section": 1,
+          "offset": 27536,
+          "preferred_address": 5368740752,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_69",
+          "source_name": "$p2::std::vec::_fy_generic_g0_4b72d1819964c8f00ea8e64f95409824392fda9227d43fa501d41c87acc3f1af",
+          "section": 1,
+          "offset": 27744,
+          "preferred_address": 5368740960,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_7",
+          "source_name": "$p1::diagnostics::text",
+          "section": 1,
+          "offset": 28064,
+          "preferred_address": 5368741280,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fy_fn_9",
+          "source_name": "$p1::main::main",
+          "section": 1,
+          "offset": 28304,
+          "preferred_address": 5368741520,
+          "owner": "unit.obj"
+        },
+        {
+          "name": "fc_budget_begin",
+          "section": 1,
+          "offset": 29936,
+          "preferred_address": 5368743152,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_finish",
+          "section": 1,
+          "offset": 30000,
+          "preferred_address": 5368743216,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_flush",
+          "section": 1,
+          "offset": 30096,
+          "preferred_address": 5368743312,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_rounds",
+          "section": 1,
+          "offset": 30128,
+          "preferred_address": 5368743344,
+          "owner": "runtime.obj"
+        },
+        {
+          "name": "fc_budget_seed",
+          "section": 1,
+          "offset": 30144,
+          "preferred_address": 5368743360,
+          "owner": "runtime.obj"
+        }
+      ]
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-link-map/v1"
+}

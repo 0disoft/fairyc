@@ -43,6 +43,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		t.Fatalf("unknown C scanner storage mode %q", storageMode)
 	}
 	bothStorage := storageMode == "1"
+	captureMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_LINK_MAP") == "1"
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Fatal("requires Windows AMD64 MSVC")
 	}
@@ -64,14 +65,25 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		t.Fatal("scanner sample lost cooked or diagnostic coverage")
 	}
 	cSource := scannerCBenchmarkSource(t)
-	cArtifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile, cSource)
+	var cArtifact cdriver.WindowsHostArtifact
+	if captureMap {
+		cArtifact, err = cdriver.BuildWindowsMSVCProbeWithMap(toolchain, cdriver.OptimizedProfile, cSource)
+	} else {
+		cArtifact, err = cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile, cSource)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
 	images := []scannerBudgetImage{{name: "independent C", artifact: cArtifact, sourceBytes: len(cSource)}}
 	if bothStorage {
 		geometricSource := scannerCGeometricBenchmarkSource(t)
-		geometricArtifact, buildErr := cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile, geometricSource)
+		var geometricArtifact cdriver.WindowsHostArtifact
+		var buildErr error
+		if captureMap {
+			geometricArtifact, buildErr = cdriver.BuildWindowsMSVCProbeWithMap(toolchain, cdriver.OptimizedProfile, geometricSource)
+		} else {
+			geometricArtifact, buildErr = cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile, geometricSource)
+		}
 		if buildErr != nil {
 			t.Fatal(buildErr)
 		}
@@ -89,12 +101,34 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	}
 	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
 		program, entry, specializations := scannerBudgetFairyProgram(t, variant)
-		artifact, unit := buildRealScannerVectorNative(t, program, entry, cdriver.OptimizedProfile,
-			"\n"+string(support)+"\nvoid fc_budget_flush(void) { fflush(stdout); }\n")
+		artifact, unit := buildRealScannerVectorNativeWithStorageAndMap(t, program, entry, cdriver.OptimizedProfile,
+			"\n"+string(support)+"\nvoid fc_budget_flush(void) { fflush(stdout); }\n", "", captureMap)
 		images = append(images, scannerBudgetImage{
 			name: variant.name, artifact: artifact, sourceBytes: len(unit.Source),
 			specializations: specializations, functions: unit.Functions,
 		})
+	}
+	if captureMap {
+		mapRows := make([]map[string]any, 0, len(images))
+		for _, image := range images {
+			if len(image.artifact.LinkMap) == 0 {
+				t.Fatalf("%s missing MSVC link map", image.name)
+			}
+			symbols := scannerBudgetMapSymbols(image.artifact.LinkMap, image.functions)
+			mapRows = append(mapRows, map[string]any{
+				"lane": image.name, "exe_bytes": len(image.artifact.Bytes),
+				"map_bytes":  len(image.artifact.LinkMap),
+				"map_sha256": fmt.Sprintf("%x", sha256.Sum256(image.artifact.LinkMap)),
+				"symbols":    symbols,
+			})
+		}
+		mapReport, marshalErr := json.Marshal(map[string]any{
+			"schema": "fairyc.vector-lexer-c-budget-link-map/v1", "images": mapRows,
+		})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		t.Log("VECTOR_LEXER_C_BUDGET_LINK_MAP " + string(mapReport))
 	}
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SECTIONS") == "1" {
 		sectionRows := make([]map[string]any, 0, len(images))
@@ -285,6 +319,58 @@ type scannerCOFFFunctionSpan struct {
 	Section      string `json:"section"`
 	Offset       uint32 `json:"offset"`
 	RawSpanBytes uint32 `json:"raw_span_bytes"`
+}
+
+type scannerBudgetMapSymbol struct {
+	Name             string `json:"name"`
+	SourceName       string `json:"source_name,omitempty"`
+	Section          uint64 `json:"section"`
+	Offset           uint64 `json:"offset"`
+	PreferredAddress uint64 `json:"preferred_address"`
+	Owner            string `json:"owner"`
+}
+
+// Keep only scanner or generated-function rows; the MSVC map itself may
+// contain local temporary paths and unrelated CRT symbols.
+func scannerBudgetMapSymbols(linkMap []byte, functions []string) []scannerBudgetMapSymbol {
+	rows := make([]scannerBudgetMapSymbol, 0)
+	for _, line := range strings.Split(strings.ReplaceAll(string(linkMap), "\r\n", "\n"), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 4 {
+			continue
+		}
+		name := fields[1]
+		if !strings.HasPrefix(name, "fy_fn_") && !strings.HasPrefix(name, "fc_") {
+			continue
+		}
+		sectionText, offsetText, ok := strings.Cut(fields[0], ":")
+		if !ok {
+			continue
+		}
+		section, sectionErr := strconv.ParseUint(sectionText, 16, 16)
+		offset, offsetErr := strconv.ParseUint(offsetText, 16, 32)
+		address, addressErr := strconv.ParseUint(fields[2], 16, 64)
+		if sectionErr != nil || offsetErr != nil || addressErr != nil || address == 0 {
+			continue
+		}
+		row := scannerBudgetMapSymbol{
+			Name: name, Section: section, Offset: offset, PreferredAddress: address,
+			Owner: filepath.Base(strings.ReplaceAll(fields[len(fields)-1], "\\", "/")),
+		}
+		if indexText, mapped := strings.CutPrefix(name, "fy_fn_"); mapped {
+			if index, parseErr := strconv.Atoi(indexText); parseErr == nil && index >= 0 && index < len(functions) {
+				row.SourceName = functions[index]
+			}
+		}
+		rows = append(rows, row)
+	}
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].PreferredAddress != rows[j].PreferredAddress {
+			return rows[i].PreferredAddress < rows[j].PreferredAddress
+		}
+		return rows[i].Name < rows[j].Name
+	})
+	return rows
 }
 
 // COFF function symbols provide starts, not exact linked function sizes. The
