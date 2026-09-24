@@ -160,6 +160,14 @@ A [single-image paired run](../ops/vector-lexer-execution-20260924.md#same-image
 also exceeded the stability limit despite adjacent calls in one process. The
 private source form stays closed pending controlled runtime and independent-C
 evidence; this combined image does not measure the token reporter's hot loop.
+An [additional paired run](../ops/vector-lexer-cpu-time-20260924.md) records
+QPC and current-thread CPU time for the same two real scanner forms in one
+optimized image. This run meets the prior timing-stability heuristic and finds
+the two timed storage loops close to parity. Its CPU readings are coarsely
+quantized, and the difference from earlier unstable QPC runs cannot be
+attributed to the added timer. The reporter, unused-feature overhead and
+independent-C full-scanner budget remain unmeasured; stable source admission
+is unchanged.
 
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
