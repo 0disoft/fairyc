@@ -113,14 +113,14 @@ int main(void) {
         const char *hex;
     };
     static const struct sample cases[] = {
-        {"\"A\"", FC_STRING, 1, 65535, 0, 65536, 2, "41"},
-        {"\"A\"", FC_STRING, 1, 65536, FC_CANDIDATE_COOKED_SIZE, 65536, 0, ""},
-        {"b\"A\"", FC_BYTE_STRING, 2, 65535, 0, 65536, 2, "41"},
-        {"c\"A\"", FC_C_STRING, 2, 65534, 0, 65536, 4, "4100"},
-        {"c\"A\"", FC_C_STRING, 2, 65535, FC_CANDIDATE_COOKED_SIZE, 65535, 0, ""},
+        {"\"A\"", FC_STRING, 1, 65534, 0, 65536, 2, "41"},
+        {"\"A\"", FC_STRING, 1, 65535, FC_CANDIDATE_COOKED_SIZE, 65535, 0, ""},
+        {"b\"A\"", FC_BYTE_STRING, 2, 65534, 0, 65536, 2, "41"},
+        {"c\"A\"", FC_C_STRING, 2, 65532, 0, 65536, 4, "4100"},
+        {"c\"A\"", FC_C_STRING, 2, 65533, FC_CANDIDATE_COOKED_SIZE, 65533, 0, ""},
         {"\"\"", FC_STRING, 1, 65536, 0, 65536, 0, ""},
-        {"\"\\u{1f600}\"", FC_STRING, 1, 65532, 0, 65536, 8, "f09f9880"},
-        {"\"\\u{1f600}\"", FC_STRING, 1, 65533, FC_CANDIDATE_COOKED_SIZE, 65533, 0, ""},
+        {"\"\\u{1f600}\"", FC_STRING, 1, 65528, 0, 65536, 8, "f09f9880"},
+        {"\"\\u{1f600}\"", FC_STRING, 1, 65529, FC_CANDIDATE_COOKED_SIZE, 65529, 0, ""},
     };
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
         const struct sample *item = &cases[i];

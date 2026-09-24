@@ -214,12 +214,12 @@ Low and optimized MSVC runs check positive and negative exponent forms at
 the actual Fairy scanner. The accepted C output also matches the Go lexer.
 The C budget image now also caps total cooked bytes at 65,536 and returns
 candidate-size status 4 before publishing an over-limit number or string.
-For strings, the C budget image now charges decoded bytes, including the
-terminating NUL in a C string, rather than the twice-as-long hex reporter
-representation. A library-mode MSVC probe checks exact and one-byte-over
-boundaries for plain, byte, C and Unicode-escaped strings under low and
-optimized profiles. This fixes a C reference accounting mismatch; it does not
-establish the full-scanner cost gate.
+For strings, Fairy stores ASCII hex bytes as the cooked payload, so both Fairy
+and the C budget image charge twice the decoded-byte length; C strings include
+the terminating NUL before encoding. The prior claim that the limit used raw
+decoded bytes was incorrect. A library-mode MSVC probe checks exact and
+one-byte-over boundaries for plain, byte, C and Unicode-escaped strings under
+low and optimized profiles. This does not establish the full-scanner cost gate.
 Four 16,384-byte decimals succeed, while a fifth is rejected, in both C and
 Fairy under low and optimized MSVC; the standalone C Go-oracle build remains
 unrestricted by these candidate switches. The C budget image also charges
@@ -228,6 +228,12 @@ materialization. At work limits 6 and 7, `1e3` respectively yields lossless
 `E0010` exhaustion and a normal token in C and Go; the actual Fairy scanner
 follows the same boundary. A default-budget large exponent also yields
 `E0010` before allocating its expansion. The candidate C budget images now
+charge string source bytes before consuming them, including prefixes, UTF-8
+sequences and escape components. Thirteen low-budget cases compare the first
+invalid token, remaining-input token, `E0010` position, EOF and accepted cooked
+length with the actual Fairy scanner under low and optimized Windows MSVC.
+This does not establish work-budget parity for other lexical forms or a
+whole-scanner runtime result. The candidate C budget images now
 also stop after 256 ordinary diagnostics and retain one terminal `E0010`.
 Runs with 256, 257 and 258 invalid bytes match the Go lexer exactly in both
 C storage modes under low and optimized MSVC. The actual Fairy scanner checks

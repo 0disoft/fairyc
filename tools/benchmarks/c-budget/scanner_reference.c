@@ -516,26 +516,72 @@ static int fc_valid_utf8(const unsigned char *bytes, size_t length) {
     return 1;
 }
 
+#ifdef FC_CANDIDATE_WORK_LIMIT
+static int fc_string_work_available(const struct fc_scanner *s, size_t units) {
+    return s->position <= s->work_limit &&
+           s->expansion_work <= s->work_limit - s->position &&
+           units <= s->work_limit - s->position - s->expansion_work;
+}
+
+static int fc_string_work_exhausted(struct fc_scanner *s, size_t start,
+                                    unsigned char *bytes) {
+    free(bytes);
+    size_t end = s->position;
+    if (end > start)
+        fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, start, end, NULL, 0);
+    fc_diagnostic(s, "E0010", end, end, "none", "");
+    if (end < s->length)
+        fc_token_unlimited(s, FC_INVALID, FC_NO_TRIVIA, end, s->length, NULL, 0);
+    s->position = s->length;
+    return 0;
+}
+#endif
+
 static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
     size_t start = s->position;
-    s->position += opener;
+#ifdef FC_CANDIDATE_WORK_LIMIT
+    if (!fc_string_work_available(s, 1u))
+        return fc_string_work_exhausted(s, start, NULL);
+#endif
+    s->position++;
+    if (opener > 1u) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+        if (!fc_string_work_available(s, opener - 1u))
+            return fc_string_work_exhausted(s, start, NULL);
+#endif
+        s->position += opener - 1u;
+    }
     unsigned char *bytes = (unsigned char *)malloc(s->length - start + 2u);
     if (bytes == NULL) return 3;
     size_t used = 0;
     int terminated = 0;
     while (s->position < s->length) {
         unsigned char current = s->source[s->position];
-        if (current == '"') { s->position++; terminated = 1; break; }
+        if (current == '"') {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_string_work_available(s, 1u))
+                return fc_string_work_exhausted(s, start, bytes);
+#endif
+            s->position++; terminated = 1; break;
+        }
         if (current == '\n' || current == '\r') {
             fc_diagnostic(s, "E0005", s->position, s->position + 1u, "exit", "\"");
             break;
         }
         if (current == '\\') {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_string_work_available(s, 1u))
+                return fc_string_work_exhausted(s, start, bytes);
+#endif
             size_t escape = s->position++;
             if (s->position == s->length) {
                 fc_diagnostic(s, "E0005", escape, s->position, "none", "");
                 break;
             }
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_string_work_available(s, 1u))
+                return fc_string_work_exhausted(s, start, bytes);
+#endif
             current = s->source[s->position++];
             switch (current) {
             case '\\': case '"': bytes[used++] = current; break;
@@ -552,13 +598,22 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
                     fc_digit_value(s->source[s->position]) < 0 ||
                     fc_digit_value(s->source[s->position + 1u]) < 0) {
                     while (s->position < s->length && s->position < escape + 4u &&
-                           fc_digit_value(s->source[s->position]) >= 0)
+                           fc_digit_value(s->source[s->position]) >= 0) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                        if (!fc_string_work_available(s, 1u))
+                            return fc_string_work_exhausted(s, start, bytes);
+#endif
                         s->position++;
+                    }
                     fc_diagnostic(s, "E0005", escape, s->position, "none", "");
                     break;
                 }
                 unsigned value = (unsigned)(fc_digit_value(s->source[s->position]) * 16 +
                                             fc_digit_value(s->source[s->position + 1u]));
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                if (!fc_string_work_available(s, 2u))
+                    return fc_string_work_exhausted(s, start, bytes);
+#endif
                 s->position += 2;
                 bytes[used++] = (unsigned char)value;
                 if (kind == FC_C_STRING && value == 0)
@@ -571,25 +626,48 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
                     fc_diagnostic(s, "E0005", escape, s->position, "none", "");
                     break;
                 }
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                if (!fc_string_work_available(s, 1u))
+                    return fc_string_work_exhausted(s, start, bytes);
+#endif
                 s->position++;
                 size_t digits_start = s->position;
                 while (s->position < s->length &&
                        fc_digit_value(s->source[s->position]) >= 0 &&
-                       s->position - digits_start < 6u)
+                       s->position - digits_start < 6u) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                    if (!fc_string_work_available(s, 1u))
+                        return fc_string_work_exhausted(s, start, bytes);
+#endif
                     s->position++;
+                }
                 if (digits_start == s->position || s->position == s->length ||
                     s->source[s->position] != '}') {
                     while (s->position < s->length && s->source[s->position] != '}' &&
-                           s->source[s->position] != '"')
+                           s->source[s->position] != '"') {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                        if (!fc_string_work_available(s, 1u))
+                            return fc_string_work_exhausted(s, start, bytes);
+#endif
                         s->position++;
-                    if (s->position < s->length && s->source[s->position] == '}')
+                    }
+                    if (s->position < s->length && s->source[s->position] == '}') {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                        if (!fc_string_work_available(s, 1u))
+                            return fc_string_work_exhausted(s, start, bytes);
+#endif
                         s->position++;
+                    }
                     fc_diagnostic(s, "E0005", escape, s->position, "none", "");
                     break;
                 }
                 unsigned value = 0;
                 for (size_t i = digits_start; i < s->position; i++)
                     value = value * 16u + (unsigned)fc_digit_value(s->source[i]);
+#ifdef FC_CANDIDATE_WORK_LIMIT
+                if (!fc_string_work_available(s, 1u))
+                    return fc_string_work_exhausted(s, start, bytes);
+#endif
                 s->position++;
                 if (value > 0x10ffffu || (value >= 0xd800u && value <= 0xdfffu)) {
                     fc_diagnostic(s, "E0005", escape, s->position, "none", "");
@@ -616,6 +694,10 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
             continue;
         }
         if (current == 0) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_string_work_available(s, 1u))
+                return fc_string_work_exhausted(s, start, bytes);
+#endif
             s->position++;
             fc_diagnostic(s, kind == FC_C_STRING ? "E0006" : "E0005",
                           s->position - 1u, s->position, "none", "");
@@ -625,6 +707,10 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
         if (current >= 0x80) {
             size_t width = fc_utf8_width(s->source + s->position,
                                           s->length - s->position);
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_string_work_available(s, width))
+                return fc_string_work_exhausted(s, start, bytes);
+#endif
             if (width == 1) {
                 fc_diagnostic(s, "E0001", s->position, s->position + 1u, "none", "");
                 s->position++;
@@ -635,6 +721,10 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
             s->position += width;
             continue;
         }
+#ifdef FC_CANDIDATE_WORK_LIMIT
+        if (!fc_string_work_available(s, 1u))
+            return fc_string_work_exhausted(s, start, bytes);
+#endif
         bytes[used++] = current;
         s->position++;
     }
@@ -652,7 +742,7 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
     }
     free(bytes);
 #ifdef FC_CANDIDATE_COOKED_LIMIT
-    if (!fc_accept_cooked(s, used)) { free(hex); return FC_CANDIDATE_COOKED_SIZE; }
+    if (!fc_accept_cooked(s, used * 2u)) { free(hex); return FC_CANDIDATE_COOKED_SIZE; }
 #endif
     fc_token(s, kind, FC_NO_TRIVIA, start, s->position, hex, used * 2u);
     return 0;
