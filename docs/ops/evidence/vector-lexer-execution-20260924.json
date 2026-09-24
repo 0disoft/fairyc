@@ -1,0 +1,282 @@
+{
+  "builds": [
+    {
+      "analysis_lower_ns": 316408300,
+      "exe_bytes": 205824,
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "lane": "explicit index",
+      "native_build_ns": 1752857400,
+      "scanner_sha256": "ee8ff097e70effa01565b0f96af8e365ae1be3482b300050d0cd35b964005e8a",
+      "specializations": 21,
+      "unit_bytes": 384503
+    },
+    {
+      "analysis_lower_ns": 295719900,
+      "exe_bytes": 205824,
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "lane": "all vector for",
+      "native_build_ns": 2033653300,
+      "scanner_sha256": "50f148474fcbaa75c9e58a5f1bb56e6a5665125255848948fe816497c8fee0f1",
+      "specializations": 21,
+      "unit_bytes": 385217
+    }
+  ],
+  "compiler_source": "6e92ebd38ddb0b18e374925aa963ce22e5d56bfa",
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "measured_pairs": 12,
+  "msvc": "14.51.36231",
+  "per_round_result": 36,
+  "rounds": 10000,
+  "samples": [
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 43829800,
+      "lane": "explicit index",
+      "position": 0,
+      "repetition": -1,
+      "result": 360000,
+      "warmup": true
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 31000000,
+      "lane": "all vector for",
+      "position": 1,
+      "repetition": -1,
+      "result": 360000,
+      "warmup": true
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 34838200,
+      "lane": "explicit index",
+      "position": 0,
+      "repetition": 0,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 52887500,
+      "lane": "all vector for",
+      "position": 1,
+      "repetition": 0,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 53953300,
+      "lane": "all vector for",
+      "position": 0,
+      "repetition": 1,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 37888500,
+      "lane": "explicit index",
+      "position": 1,
+      "repetition": 1,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 43577800,
+      "lane": "explicit index",
+      "position": 0,
+      "repetition": 2,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 40693600,
+      "lane": "all vector for",
+      "position": 1,
+      "repetition": 2,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 46875800,
+      "lane": "all vector for",
+      "position": 0,
+      "repetition": 3,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 32981500,
+      "lane": "explicit index",
+      "position": 1,
+      "repetition": 3,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 36632400,
+      "lane": "explicit index",
+      "position": 0,
+      "repetition": 4,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 44722200,
+      "lane": "all vector for",
+      "position": 1,
+      "repetition": 4,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 42369300,
+      "lane": "all vector for",
+      "position": 0,
+      "repetition": 5,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 40065600,
+      "lane": "explicit index",
+      "position": 1,
+      "repetition": 5,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 40850700,
+      "lane": "explicit index",
+      "position": 0,
+      "repetition": 6,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 56849300,
+      "lane": "all vector for",
+      "position": 1,
+      "repetition": 6,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 54022800,
+      "lane": "all vector for",
+      "position": 0,
+      "repetition": 7,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 51121600,
+      "lane": "explicit index",
+      "position": 1,
+      "repetition": 7,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 40710800,
+      "lane": "explicit index",
+      "position": 0,
+      "repetition": 8,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 36238200,
+      "lane": "all vector for",
+      "position": 1,
+      "repetition": 8,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 43930900,
+      "lane": "all vector for",
+      "position": 0,
+      "repetition": 9,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 38854200,
+      "lane": "explicit index",
+      "position": 1,
+      "repetition": 9,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 44341800,
+      "lane": "explicit index",
+      "position": 0,
+      "repetition": 10,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 40507900,
+      "lane": "all vector for",
+      "position": 1,
+      "repetition": 10,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "8b22db134281669b57b915f7d0f8d3e9b18bed7f08bc9f8b291d115a87529d6e",
+      "kernel_ns": 44311500,
+      "lane": "all vector for",
+      "position": 0,
+      "repetition": 11,
+      "result": 360000,
+      "warmup": false
+    },
+    {
+      "exe_sha256": "c6904e902d7e37f7849445fc1e4e1ec830644055d802b2374b90b216b74fbfcd",
+      "kernel_ns": 39979100,
+      "lane": "explicit index",
+      "position": 1,
+      "repetition": 11,
+      "result": 360000,
+      "warmup": false
+    }
+  ],
+  "schema": "fairyc.real-scanner-vector-execution/v1",
+  "scope": "Actual checked-in scanner source; two storage loops execute in every timed round. The token reporter executes once before QPC. This is indexed-versus-private-candidate Fairy, not an independent C comparison. Analysis/lowering and native build intervals are one-shot diagnostics, not cold CLI latency. No outlier removal or retry; host load and frequency are uncontrolled.",
+  "source_sha256": {
+    "benchmark-main.fy": "1eb68e5a68ea864c92ada3f411a01976ee3755fefe17c64585ad65586df5b123",
+    "fairy.toml": "faa949c5f26f522b5a1addaab775f35ea462794ce4ad0b603b1ffb227bbd6838",
+    "internal/compiler/vector_lexer_execution_test.go": "58f59eed2343d593a6bbcd37f85ec44d7aec181d9f01c50b3beed23675f83a9d",
+    "src/budget.fy": "15295b6a847e46a4e605476bd11bd93f757f3a69aeb2501ce4a98472e377d328",
+    "src/diagnostics.fy": "3235e9307f2ad31c0fa74bafd3bd03ccda526053458db45b9c760fff3a3c2839",
+    "src/numbers.fy": "76ed9152470e41215eda1cd6cf867e24763a2bc1d6106cc9f28afb681786b62b",
+    "src/scanner.fy": "ee8ff097e70effa01565b0f96af8e365ae1be3482b300050d0cd35b964005e8a",
+    "src/strings.fy": "db8d4780745a21455307c511ff02fd0ffbcecb4f30420a4c2886efd2204b7b91",
+    "src/utf8.fy": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d",
+    "tools/benchmarks/c-budget/support.c": "962709f9f447611e0e9e3149dbce6baddde287ac6c1e84317ac2868a3bf305be"
+  },
+  "warmup_pairs": 1
+}

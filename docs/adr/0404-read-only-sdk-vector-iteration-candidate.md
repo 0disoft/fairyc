@@ -131,6 +131,13 @@ and candidate/indexed is close to parity. Indexed/C is inconclusive because
 its two median estimators straddle 1.08. This remains microkernel evidence;
 the representative lexer, cleanup and unused-feature gates are open.
 
+The [real-scanner execution comparison](../ops/vector-lexer-execution-20260924.md)
+builds both optimized Fairy forms once and times the checked-in lexer's two
+storage loops over 10,000 scans. Both EXEs are the same size, but the runtime
+samples exceed the predeclared stability span; they support no speed verdict.
+The token reporter runs outside the timed section, and the independent-C
+full-scanner budget remains unmeasured.
+
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
 computed vector expression as the iterable. The latter cannot acquire an
