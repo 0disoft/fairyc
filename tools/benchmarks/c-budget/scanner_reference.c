@@ -12,6 +12,11 @@
 
 enum { FC_MAX_SOURCE = 32768, FC_MAX_COOKED = 16 << 20,
        FC_UNSUPPORTED = 7, FC_BAD_INPUT = 8 };
+#ifdef FC_CANDIDATE_DECIMAL_LIMIT
+// The Fairy-written scanner materializes at most 16,384 decimal bytes.
+// Keep the broader Go-oracle reference available without this build switch.
+enum { FC_CANDIDATE_DECIMAL = 16384, FC_CANDIDATE_SIZE = 4 };
+#endif
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
 enum { FC_NO_TRIVIA, FC_PREAMBLE, FC_WHITESPACE, FC_LINE_COMMENT,
@@ -187,6 +192,9 @@ static int fc_cook_float(const unsigned char *raw, size_t length,
                            places >= (long long)significant ? 2u + (size_t)places :
                            significant + 1u;
     if (output_length > FC_MAX_COOKED) { free(digits); return -2; }
+#ifdef FC_CANDIDATE_DECIMAL_LIMIT
+    if (output_length > FC_CANDIDATE_DECIMAL) { free(digits); return -3; }
+#endif
     unsigned char *output = (unsigned char *)malloc(output_length);
     if (output == NULL) { free(digits); return -1; }
     if (places <= 0) {
@@ -252,6 +260,9 @@ static int fc_scan_number(struct fc_scanner *s) {
                            fc_cook_integer(s->source + start, s->position - start,
                                            &cooked, &cooked_length);
     if (valid == -2) return FC_UNSUPPORTED;
+#ifdef FC_CANDIDATE_DECIMAL_LIMIT
+    if (valid == -3) return FC_CANDIDATE_SIZE;
+#endif
     if (valid < 0) return 3;
     fc_token(s, is_float ? FC_FLOAT : FC_INTEGER, FC_NO_TRIVIA, start,
              s->position, cooked, cooked_length);

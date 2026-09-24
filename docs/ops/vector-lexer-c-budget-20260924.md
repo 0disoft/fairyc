@@ -22,3 +22,12 @@ The current data leave two separate questions: reproduce stable C-relative timin
 The later C-reference expansion of the decimal-cooking cap is not part of these image hashes or timings. The raw report remains evidence for the exact earlier images, not a measurement of the revised reference.
 
 The subsequent source audit also found that the Fairy-written scanner rejects decimal materialization above 16,384 bytes and limits all cooked bytes to 65,536, while the revised C reference accepts the 70,000-digit cases checked against Go. Those cases are outside Fairy/C parity today. The short timed sample is common to all three lanes, but its C token and diagnostic arrays are allocated for `length + 1` items up front, whereas Fairy uses geometrically growing `Vec<T>` storage. The timing gap cannot be assigned solely to the loop syntax or compiler overhead without controlling that algorithmic difference.
+
+After this raw run, the C benchmark build gained a 16,384-byte per-number
+decimal materialization limit matching the Fairy candidate at four
+positive/negative exponent boundary cases. The standalone C Go-oracle build
+still accepts the 70,000-digit cases. These changes produce a new C image;
+none of the earlier executable hashes, sizes or QPC samples above describe
+that image. Cumulative cooked bytes, work-budget charging, remaining lexical
+forms and the C/Fairy storage difference are still open, so the 8% gate remains
+undecided.

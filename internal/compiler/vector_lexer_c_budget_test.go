@@ -207,6 +207,10 @@ func measureScannerBudgetTriplets(t *testing.T, images []scannerBudgetImage, sam
 }
 
 func scannerBudgetFairyProgram(t *testing.T, variant realScannerVectorVariant) (mir.Program, string, int) {
+	return scannerBudgetFairyProgramWithMain(t, variant, realScannerExecutionMain)
+}
+
+func scannerBudgetFairyProgramWithMain(t *testing.T, variant realScannerVectorVariant, mainSource string) (mir.Program, string, int) {
 	t.Helper()
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
@@ -218,7 +222,7 @@ func scannerBudgetFairyProgram(t *testing.T, variant realScannerVectorVariant) (
 		writeVectorCacheFile(t, root, name, string(data))
 	}
 	writeVectorCacheFile(t, root, "src/scanner.fy", variant.scanner)
-	writeVectorCacheFile(t, root, "src/main.fy", realScannerExecutionMain)
+	writeVectorCacheFile(t, root, "src/main.fy", mainSource)
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
 		t.Fatal(err)
