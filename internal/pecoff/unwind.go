@@ -19,11 +19,19 @@ const (
 // UnwindReport records bounded Microsoft x64 exception-directory structure.
 type UnwindReport struct {
 	RuntimeFunctions   int
+	Functions          []RuntimeFunction
 	UniqueUnwindInfos  int
 	HandlerInfos       int
 	ChainedInfos       int
 	Version2Infos      int
 	MaximumUnwindCodes int
+}
+
+// RuntimeFunction is one validated final-image .pdata function interval.
+type RuntimeFunction struct {
+	BeginRVA      uint32
+	EndRVA        uint32
+	UnwindInfoRVA uint32
 }
 
 // InspectAMD64Unwind validates the linked image's Microsoft x64 exception table
@@ -54,7 +62,7 @@ func InspectAMD64Unwind(image []byte) (UnwindReport, error) {
 		return UnwindReport{}, fmt.Errorf("PE unwind exception directory is not readable non-executable .pdata")
 	}
 	count := int(directory.Size / runtimeFunctionBytes)
-	report := UnwindReport{RuntimeFunctions: count}
+	report := UnwindReport{RuntimeFunctions: count, Functions: make([]RuntimeFunction, 0, count)}
 	seenUnwind := make(map[uint32]struct{}, count)
 	previousBegin := uint32(0)
 	previousEnd := uint32(0)
@@ -72,6 +80,7 @@ func InspectAMD64Unwind(image []byte) (UnwindReport, error) {
 		if err := requireExecutableRVARange(executable, begin, end); err != nil {
 			return UnwindReport{}, fmt.Errorf("PE unwind runtime function %d: %w", index, err)
 		}
+		report.Functions = append(report.Functions, RuntimeFunction{BeginRVA: begin, EndRVA: end, UnwindInfoRVA: unwindRVA})
 		previousBegin = begin
 		previousEnd = end
 		if _, duplicate := seenUnwind[unwindRVA]; duplicate {

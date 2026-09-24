@@ -1,0 +1,837 @@
+{
+  "images": [
+    {
+      "exe_bytes": 184320,
+      "lane": "independent C",
+      "mapped_functions": [
+        {
+          "begin_rva": 4128,
+          "end_rva": 4189,
+          "linked_code_bytes": 61,
+          "name": "fc_compare_diagnostic",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 4304,
+          "end_rva": 4359,
+          "linked_code_bytes": 55,
+          "name": "fc_cook_float",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 5232,
+          "end_rva": 5391,
+          "linked_code_bytes": 159,
+          "name": "fc_cook_integer",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 6032,
+          "end_rva": 6154,
+          "linked_code_bytes": 122,
+          "name": "fc_diagnostic",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 6672,
+          "end_rva": 7146,
+          "linked_code_bytes": 474,
+          "name": "fc_print",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 7152,
+          "end_rva": 7184,
+          "linked_code_bytes": 32,
+          "name": "fc_scan",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 7728,
+          "end_rva": 8980,
+          "linked_code_bytes": 1252,
+          "name": "fc_scan_number",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 8992,
+          "end_rva": 9066,
+          "linked_code_bytes": 74,
+          "name": "fc_scan_one",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 10880,
+          "end_rva": 10996,
+          "linked_code_bytes": 116,
+          "name": "fc_scan_string",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 14176,
+          "end_rva": 14225,
+          "linked_code_bytes": 49,
+          "name": "fc_string_work_exhausted",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 14240,
+          "end_rva": 14434,
+          "linked_code_bytes": 194,
+          "name": "fc_token",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 14640,
+          "end_rva": 14822,
+          "linked_code_bytes": 182,
+          "name": "fc_work_exhausted",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 14832,
+          "end_rva": 14958,
+          "linked_code_bytes": 126,
+          "name": "fc_workload_round",
+          "owner": "probe.obj",
+          "source_name": ""
+        }
+      ],
+      "runtime_function_count": 526,
+      "text_raw_bytes": 124416,
+      "text_virtual_bytes": 124320,
+      "unwind_covered_code_bytes": 115387
+    },
+    {
+      "exe_bytes": 185344,
+      "lane": "geometric C",
+      "mapped_functions": [
+        {
+          "begin_rva": 4128,
+          "end_rva": 4189,
+          "linked_code_bytes": 61,
+          "name": "fc_compare_diagnostic",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 4304,
+          "end_rva": 4359,
+          "linked_code_bytes": 55,
+          "name": "fc_cook_float",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 5232,
+          "end_rva": 5391,
+          "linked_code_bytes": 159,
+          "name": "fc_cook_integer",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 6032,
+          "end_rva": 6156,
+          "linked_code_bytes": 124,
+          "name": "fc_diagnostic",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 6912,
+          "end_rva": 7386,
+          "linked_code_bytes": 474,
+          "name": "fc_print",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 7392,
+          "end_rva": 7424,
+          "linked_code_bytes": 32,
+          "name": "fc_scan",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 8160,
+          "end_rva": 9412,
+          "linked_code_bytes": 1252,
+          "name": "fc_scan_number",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 9424,
+          "end_rva": 9498,
+          "linked_code_bytes": 74,
+          "name": "fc_scan_one",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 11312,
+          "end_rva": 11428,
+          "linked_code_bytes": 116,
+          "name": "fc_scan_string",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 14608,
+          "end_rva": 14657,
+          "linked_code_bytes": 49,
+          "name": "fc_string_work_exhausted",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 14672,
+          "end_rva": 14828,
+          "linked_code_bytes": 156,
+          "name": "fc_token",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 14832,
+          "end_rva": 15176,
+          "linked_code_bytes": 344,
+          "name": "fc_token_unlimited",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 15376,
+          "end_rva": 15543,
+          "linked_code_bytes": 167,
+          "name": "fc_work_exhausted",
+          "owner": "probe.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 15552,
+          "end_rva": 15650,
+          "linked_code_bytes": 98,
+          "name": "fc_workload_round",
+          "owner": "probe.obj",
+          "source_name": ""
+        }
+      ],
+      "runtime_function_count": 527,
+      "text_raw_bytes": 125440,
+      "text_virtual_bytes": 125024,
+      "unwind_covered_code_bytes": 116098
+    },
+    {
+      "exe_bytes": 206336,
+      "lane": "explicit index",
+      "mapped_functions": [
+        {
+          "begin_rva": 4096,
+          "end_rva": 7214,
+          "linked_code_bytes": 3118,
+          "name": "fy_fn_10",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::decimal"
+        },
+        {
+          "begin_rva": 7264,
+          "end_rva": 7420,
+          "linked_code_bytes": 156,
+          "name": "fy_fn_13",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::integer"
+        },
+        {
+          "begin_rva": 8400,
+          "end_rva": 8455,
+          "linked_code_bytes": 55,
+          "name": "fy_fn_15",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::scan"
+        },
+        {
+          "begin_rva": 10112,
+          "end_rva": 10210,
+          "linked_code_bytes": 98,
+          "name": "fy_fn_16",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::value"
+        },
+        {
+          "begin_rva": 10224,
+          "end_rva": 10395,
+          "linked_code_bytes": 171,
+          "name": "fy_fn_17",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::append"
+        },
+        {
+          "begin_rva": 10400,
+          "end_rva": 10517,
+          "linked_code_bytes": 117,
+          "name": "fy_fn_18",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::append_cooked"
+        },
+        {
+          "begin_rva": 10896,
+          "end_rva": 11961,
+          "linked_code_bytes": 1065,
+          "name": "fy_fn_19",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::collect"
+        },
+        {
+          "begin_rva": 12288,
+          "end_rva": 12625,
+          "linked_code_bytes": 337,
+          "name": "fy_fn_2",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::add"
+        },
+        {
+          "begin_rva": 12640,
+          "end_rva": 12838,
+          "linked_code_bytes": 198,
+          "name": "fy_fn_23",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::exhausted"
+        },
+        {
+          "begin_rva": 12848,
+          "end_rva": 12876,
+          "linked_code_bytes": 28,
+          "name": "fy_fn_24",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::keyword"
+        },
+        {
+          "begin_rva": 13520,
+          "end_rva": 13706,
+          "linked_code_bytes": 186,
+          "name": "fy_fn_26",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::matches"
+        },
+        {
+          "begin_rva": 13712,
+          "end_rva": 14436,
+          "linked_code_bytes": 724,
+          "name": "fy_fn_28",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::report_work"
+        },
+        {
+          "begin_rva": 16208,
+          "end_rva": 16342,
+          "linked_code_bytes": 134,
+          "name": "fy_fn_29",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::scan"
+        },
+        {
+          "begin_rva": 21520,
+          "end_rva": 21637,
+          "linked_code_bytes": 117,
+          "name": "fy_fn_31",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::storage"
+        },
+        {
+          "begin_rva": 21856,
+          "end_rva": 22215,
+          "linked_code_bytes": 359,
+          "name": "fy_fn_32",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::symbol_width"
+        },
+        {
+          "begin_rva": 22224,
+          "end_rva": 22365,
+          "linked_code_bytes": 141,
+          "name": "fy_fn_33",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::work_exhausted"
+        },
+        {
+          "begin_rva": 22368,
+          "end_rva": 22756,
+          "linked_code_bytes": 388,
+          "name": "fy_fn_34",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::encode"
+        },
+        {
+          "begin_rva": 22768,
+          "end_rva": 22866,
+          "linked_code_bytes": 98,
+          "name": "fy_fn_36",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::escape"
+        },
+        {
+          "begin_rva": 25904,
+          "end_rva": 26024,
+          "linked_code_bytes": 120,
+          "name": "fy_fn_39",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::octet"
+        },
+        {
+          "begin_rva": 26032,
+          "end_rva": 26155,
+          "linked_code_bytes": 123,
+          "name": "fy_fn_4",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::less"
+        },
+        {
+          "begin_rva": 26256,
+          "end_rva": 26325,
+          "linked_code_bytes": 69,
+          "name": "fy_fn_41",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::scan"
+        },
+        {
+          "begin_rva": 29392,
+          "end_rva": 29742,
+          "linked_code_bytes": 350,
+          "name": "fy_fn_43",
+          "owner": "unit.obj",
+          "source_name": "$p1::utf8::width"
+        },
+        {
+          "begin_rva": 29744,
+          "end_rva": 29885,
+          "linked_code_bytes": 141,
+          "name": "fy_fn_46",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::bytes::append_byte"
+        },
+        {
+          "begin_rva": 29888,
+          "end_rva": 30206,
+          "linked_code_bytes": 318,
+          "name": "fy_fn_48",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::bytes::copy"
+        },
+        {
+          "begin_rva": 30208,
+          "end_rva": 30336,
+          "linked_code_bytes": 128,
+          "name": "fy_fn_53",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::bytes::truncate"
+        },
+        {
+          "begin_rva": 30336,
+          "end_rva": 30443,
+          "linked_code_bytes": 107,
+          "name": "fy_fn_59",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_404e9adb44dcd8971ed8e5b35f35ce838fff78a2246868b43a4aa395c2aa1874"
+        },
+        {
+          "begin_rva": 30448,
+          "end_rva": 30527,
+          "linked_code_bytes": 79,
+          "name": "fy_fn_6",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::report"
+        },
+        {
+          "begin_rva": 31504,
+          "end_rva": 31629,
+          "linked_code_bytes": 125,
+          "name": "fy_fn_61",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_9ed97b67ee021b25c811f8ea4b2c151fb2a9a584e86197882790536f228726fe"
+        },
+        {
+          "begin_rva": 31632,
+          "end_rva": 31703,
+          "linked_code_bytes": 71,
+          "name": "fy_fn_7",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::text"
+        },
+        {
+          "begin_rva": 31872,
+          "end_rva": 32080,
+          "linked_code_bytes": 208,
+          "name": "fy_fn_72",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::_fy_generic_g0_6f09af4d3991f4d2ec6f4246dd5dd55a9cf9f49beb73eb75209df1ad19107a91"
+        },
+        {
+          "begin_rva": 32080,
+          "end_rva": 32398,
+          "linked_code_bytes": 318,
+          "name": "fy_fn_79",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::_fy_generic_g0_ec36724edef51886d2f35c9207f11bf512c2c67f805e18fe4f9e6a6306ee02cb"
+        },
+        {
+          "begin_rva": 32400,
+          "end_rva": 32490,
+          "linked_code_bytes": 90,
+          "name": "fy_fn_9",
+          "owner": "unit.obj",
+          "source_name": "$p1::main::main"
+        },
+        {
+          "begin_rva": 34032,
+          "end_rva": 34081,
+          "linked_code_bytes": 49,
+          "name": "fc_budget_begin",
+          "owner": "runtime.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 34096,
+          "end_rva": 34177,
+          "linked_code_bytes": 81,
+          "name": "fc_budget_finish",
+          "owner": "runtime.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 34192,
+          "end_rva": 34218,
+          "linked_code_bytes": 26,
+          "name": "fc_budget_flush",
+          "owner": "runtime.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 34240,
+          "end_rva": 34296,
+          "linked_code_bytes": 56,
+          "name": "fc_budget_seed",
+          "owner": "runtime.obj",
+          "source_name": ""
+        }
+      ],
+      "runtime_function_count": 589,
+      "text_raw_bytes": 145408,
+      "text_virtual_bytes": 144912,
+      "unwind_covered_code_bytes": 135509
+    },
+    {
+      "exe_bytes": 206336,
+      "lane": "all vector for",
+      "mapped_functions": [
+        {
+          "begin_rva": 4096,
+          "end_rva": 7214,
+          "linked_code_bytes": 3118,
+          "name": "fy_fn_10",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::decimal"
+        },
+        {
+          "begin_rva": 7264,
+          "end_rva": 7420,
+          "linked_code_bytes": 156,
+          "name": "fy_fn_13",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::integer"
+        },
+        {
+          "begin_rva": 8400,
+          "end_rva": 8455,
+          "linked_code_bytes": 55,
+          "name": "fy_fn_15",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::scan"
+        },
+        {
+          "begin_rva": 10112,
+          "end_rva": 10210,
+          "linked_code_bytes": 98,
+          "name": "fy_fn_16",
+          "owner": "unit.obj",
+          "source_name": "$p1::numbers::value"
+        },
+        {
+          "begin_rva": 10224,
+          "end_rva": 10395,
+          "linked_code_bytes": 171,
+          "name": "fy_fn_17",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::append"
+        },
+        {
+          "begin_rva": 10400,
+          "end_rva": 10517,
+          "linked_code_bytes": 117,
+          "name": "fy_fn_18",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::append_cooked"
+        },
+        {
+          "begin_rva": 10896,
+          "end_rva": 11961,
+          "linked_code_bytes": 1065,
+          "name": "fy_fn_19",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::collect"
+        },
+        {
+          "begin_rva": 12288,
+          "end_rva": 12625,
+          "linked_code_bytes": 337,
+          "name": "fy_fn_2",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::add"
+        },
+        {
+          "begin_rva": 12640,
+          "end_rva": 12838,
+          "linked_code_bytes": 198,
+          "name": "fy_fn_23",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::exhausted"
+        },
+        {
+          "begin_rva": 12848,
+          "end_rva": 12876,
+          "linked_code_bytes": 28,
+          "name": "fy_fn_24",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::keyword"
+        },
+        {
+          "begin_rva": 13520,
+          "end_rva": 13706,
+          "linked_code_bytes": 186,
+          "name": "fy_fn_26",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::matches"
+        },
+        {
+          "begin_rva": 13712,
+          "end_rva": 14436,
+          "linked_code_bytes": 724,
+          "name": "fy_fn_28",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::report_work"
+        },
+        {
+          "begin_rva": 16208,
+          "end_rva": 16342,
+          "linked_code_bytes": 134,
+          "name": "fy_fn_29",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::scan"
+        },
+        {
+          "begin_rva": 21520,
+          "end_rva": 21634,
+          "linked_code_bytes": 114,
+          "name": "fy_fn_31",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::storage"
+        },
+        {
+          "begin_rva": 21856,
+          "end_rva": 22215,
+          "linked_code_bytes": 359,
+          "name": "fy_fn_32",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::symbol_width"
+        },
+        {
+          "begin_rva": 22224,
+          "end_rva": 22365,
+          "linked_code_bytes": 141,
+          "name": "fy_fn_33",
+          "owner": "unit.obj",
+          "source_name": "$p1::scanner::work_exhausted"
+        },
+        {
+          "begin_rva": 22368,
+          "end_rva": 22756,
+          "linked_code_bytes": 388,
+          "name": "fy_fn_34",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::encode"
+        },
+        {
+          "begin_rva": 22768,
+          "end_rva": 22866,
+          "linked_code_bytes": 98,
+          "name": "fy_fn_36",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::escape"
+        },
+        {
+          "begin_rva": 25904,
+          "end_rva": 26024,
+          "linked_code_bytes": 120,
+          "name": "fy_fn_39",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::octet"
+        },
+        {
+          "begin_rva": 26032,
+          "end_rva": 26155,
+          "linked_code_bytes": 123,
+          "name": "fy_fn_4",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::less"
+        },
+        {
+          "begin_rva": 26256,
+          "end_rva": 26325,
+          "linked_code_bytes": 69,
+          "name": "fy_fn_41",
+          "owner": "unit.obj",
+          "source_name": "$p1::strings::scan"
+        },
+        {
+          "begin_rva": 29392,
+          "end_rva": 29742,
+          "linked_code_bytes": 350,
+          "name": "fy_fn_43",
+          "owner": "unit.obj",
+          "source_name": "$p1::utf8::width"
+        },
+        {
+          "begin_rva": 29744,
+          "end_rva": 29885,
+          "linked_code_bytes": 141,
+          "name": "fy_fn_46",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::bytes::append_byte"
+        },
+        {
+          "begin_rva": 29888,
+          "end_rva": 30206,
+          "linked_code_bytes": 318,
+          "name": "fy_fn_48",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::bytes::copy"
+        },
+        {
+          "begin_rva": 30208,
+          "end_rva": 30336,
+          "linked_code_bytes": 128,
+          "name": "fy_fn_53",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::bytes::truncate"
+        },
+        {
+          "begin_rva": 30336,
+          "end_rva": 30443,
+          "linked_code_bytes": 107,
+          "name": "fy_fn_59",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_699fb4087c93965f43fdad71df9ccf0903911eda49f922f60c4652bfd8d96f1a"
+        },
+        {
+          "begin_rva": 30448,
+          "end_rva": 30527,
+          "linked_code_bytes": 79,
+          "name": "fy_fn_6",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::report"
+        },
+        {
+          "begin_rva": 31504,
+          "end_rva": 31629,
+          "linked_code_bytes": 125,
+          "name": "fy_fn_60",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::$drop$_fy_generic_g0_6ceb1f2e852bd9eb9b9a4e3ff2f92faa7f52e99c97debc9bf4a11ff0e57c13ac"
+        },
+        {
+          "begin_rva": 31632,
+          "end_rva": 31840,
+          "linked_code_bytes": 208,
+          "name": "fy_fn_62",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::_fy_generic_g0_073e92218d83fdf4f8a0fe06af393e621708aa633fc6c9eaad7d1997057799b0"
+        },
+        {
+          "begin_rva": 31840,
+          "end_rva": 32158,
+          "linked_code_bytes": 318,
+          "name": "fy_fn_69",
+          "owner": "unit.obj",
+          "source_name": "$p2::std::vec::_fy_generic_g0_4b72d1819964c8f00ea8e64f95409824392fda9227d43fa501d41c87acc3f1af"
+        },
+        {
+          "begin_rva": 32160,
+          "end_rva": 32231,
+          "linked_code_bytes": 71,
+          "name": "fy_fn_7",
+          "owner": "unit.obj",
+          "source_name": "$p1::diagnostics::text"
+        },
+        {
+          "begin_rva": 32400,
+          "end_rva": 32490,
+          "linked_code_bytes": 90,
+          "name": "fy_fn_9",
+          "owner": "unit.obj",
+          "source_name": "$p1::main::main"
+        },
+        {
+          "begin_rva": 34032,
+          "end_rva": 34081,
+          "linked_code_bytes": 49,
+          "name": "fc_budget_begin",
+          "owner": "runtime.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 34096,
+          "end_rva": 34177,
+          "linked_code_bytes": 81,
+          "name": "fc_budget_finish",
+          "owner": "runtime.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 34192,
+          "end_rva": 34218,
+          "linked_code_bytes": 26,
+          "name": "fc_budget_flush",
+          "owner": "runtime.obj",
+          "source_name": ""
+        },
+        {
+          "begin_rva": 34240,
+          "end_rva": 34296,
+          "linked_code_bytes": 56,
+          "name": "fc_budget_seed",
+          "owner": "runtime.obj",
+          "source_name": ""
+        }
+      ],
+      "runtime_function_count": 589,
+      "text_raw_bytes": 145408,
+      "text_virtual_bytes": 144912,
+      "unwind_covered_code_bytes": 135509
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-unwind-sizes/v1"
+}

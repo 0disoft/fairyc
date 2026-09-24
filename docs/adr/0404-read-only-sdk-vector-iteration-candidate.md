@@ -397,6 +397,12 @@ The [MSVC link-map receipt](../ops/scanner-link-map-20260925.md) observes
 positive `unit.obj` symbol addresses for those five functions in both
 Fairy images and retains the same four EXE byte counts. It does not
 measure exact linked function lengths or account for CRT contributions.
+The [final-image unwind receipt](../ops/scanner-unwind-sizes-20260925.md)
+finds that validated `.pdata` function intervals explain 20,122 of the
+20,592-byte Fairy/up-front-C `.text` virtual-size gap. The five largest
+COFF spans do not retain those sizes after linking: `scanner::scan` is
+5,297 raw object bytes but its matched final `.pdata` interval is 134 bytes.
+Object and CRT ownership of the interval gap remains unassigned.
 
 ## Proposed first boundary
 

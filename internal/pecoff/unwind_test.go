@@ -25,6 +25,9 @@ func TestInspectAMD64UnwindAcceptsClosedRuntimeFunction(t *testing.T) {
 	if report.RuntimeFunctions != 1 || report.UniqueUnwindInfos != 1 || report.HandlerInfos != 0 || report.ChainedInfos != 0 || report.MaximumUnwindCodes != 0 {
 		t.Fatalf("unwind report = %+v", report)
 	}
+	if len(report.Functions) != 1 || report.Functions[0] != (RuntimeFunction{BeginRVA: 0x1000, EndRVA: 0x1001, UnwindInfoRVA: 0x3000}) {
+		t.Fatalf("runtime function intervals = %+v", report.Functions)
+	}
 }
 
 func TestInspectAMD64UnwindAcceptsUnusedSetFrameOperationInfo(t *testing.T) {

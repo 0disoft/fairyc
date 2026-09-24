@@ -43,7 +43,8 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		t.Fatalf("unknown C scanner storage mode %q", storageMode)
 	}
 	bothStorage := storageMode == "1"
-	captureMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_LINK_MAP") == "1"
+	unwindSizes := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_UNWIND_SIZES") == "1"
+	captureMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_LINK_MAP") == "1" || unwindSizes
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Fatal("requires Windows AMD64 MSVC")
 	}
@@ -129,6 +130,63 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 			t.Fatal(marshalErr)
 		}
 		t.Log("VECTOR_LEXER_C_BUDGET_LINK_MAP " + string(mapReport))
+	}
+	if unwindSizes {
+		imageRows := make([]map[string]any, 0, len(images))
+		for _, image := range images {
+			pe, inspectErr := pecoff.InspectExecutable(image.artifact.Bytes)
+			if inspectErr != nil {
+				t.Fatalf("%s PE inspection: %v", image.name, inspectErr)
+			}
+			unwind, inspectErr := pecoff.InspectAMD64Unwind(image.artifact.Bytes)
+			if inspectErr != nil {
+				t.Fatalf("%s unwind inspection: %v", image.name, inspectErr)
+			}
+			byBegin := make(map[uint32]pecoff.RuntimeFunction, len(unwind.Functions))
+			var coveredBytes uint64
+			for _, function := range unwind.Functions {
+				byBegin[function.BeginRVA] = function
+				coveredBytes += uint64(function.EndRVA - function.BeginRVA)
+			}
+			mapped := make([]map[string]any, 0)
+			for _, symbol := range scannerBudgetMapSymbols(image.artifact.LinkMap, image.functions) {
+				if symbol.PreferredAddress < pe.ImageBase || symbol.PreferredAddress-pe.ImageBase > uint64(^uint32(0)) {
+					continue
+				}
+				function, found := byBegin[uint32(symbol.PreferredAddress-pe.ImageBase)]
+				if !found {
+					continue
+				}
+				mapped = append(mapped, map[string]any{
+					"name": symbol.Name, "source_name": symbol.SourceName, "owner": symbol.Owner,
+					"begin_rva": function.BeginRVA, "end_rva": function.EndRVA,
+					"linked_code_bytes": function.EndRVA - function.BeginRVA,
+				})
+			}
+			var textVirtual, textRaw uint32
+			for _, section := range pe.Sections {
+				if section.Name == ".text" {
+					textVirtual, textRaw = section.VirtualSize, section.RawSize
+				}
+			}
+			if textVirtual == 0 || coveredBytes > uint64(textVirtual) {
+				t.Fatalf("%s invalid .pdata/.text accounting: %d/%d", image.name, coveredBytes, textVirtual)
+			}
+			imageRows = append(imageRows, map[string]any{
+				"lane": image.name, "exe_bytes": len(image.artifact.Bytes),
+				"text_virtual_bytes": textVirtual, "text_raw_bytes": textRaw,
+				"runtime_function_count":    len(unwind.Functions),
+				"unwind_covered_code_bytes": coveredBytes,
+				"mapped_functions":          mapped,
+			})
+		}
+		unwindReport, marshalErr := json.Marshal(map[string]any{
+			"schema": "fairyc.vector-lexer-c-budget-unwind-sizes/v1", "images": imageRows,
+		})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		t.Log("VECTOR_LEXER_C_BUDGET_UNWIND_SIZES " + string(unwindReport))
 	}
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SECTIONS") == "1" {
 		sectionRows := make([]map[string]any, 0, len(images))
