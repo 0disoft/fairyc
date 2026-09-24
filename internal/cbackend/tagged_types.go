@@ -33,7 +33,7 @@ func sharedScalarBorrowOptionNiche(value hir.Type) bool {
 		return false
 	}
 	switch borrowed {
-	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return true
 	default:
 		return false
@@ -266,7 +266,7 @@ func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir
 	}
 	if element, _, borrow := hir.BorrowElement(value); borrow {
 		element = canonicalCValueType(element)
-		if element == hir.TypeU8 || element == hir.TypeI32 || element == hir.TypeU32 || element == hir.TypeUSize {
+		if element == hir.TypeBool || element == hir.TypeU8 || element == hir.TypeI32 || element == hir.TypeU32 || element == hir.TypeUSize {
 			return true
 		}
 		if _, structure := structByType[element]; structure {

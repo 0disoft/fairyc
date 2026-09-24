@@ -13,24 +13,28 @@ import (
 )
 
 func sharedScalarBorrowOptionSource(scalar string) string {
+	initial := "42"
+	if scalar == "bool" {
+		initial = "true"
+	}
 	return fmt.Sprintf(`module main;
 fn Option<ref %[1]s> choose(ref %[1]s value, bool include) {
     return if (include) { .some(value) } else { .none };
 }
 fn i32 main() {
-    let %[1]s source = 42;
+    let %[1]s source = %[2]s;
     let Option<ref %[1]s> present = choose(ref source, true);
     let Option<ref %[1]s> absent = choose(ref source, false);
     let i32 first = switch (present) { case .some(value): { if (*value == source) { 42 } else { 1 } } case .none: { 2 } };
     let i32 second = switch (absent) { case .some(_): { 3 } case .none: { 0 } };
     return first + second;
 }
-`, scalar)
+`, scalar, initial)
 }
 
 func TestEmitSharedScalarBorrowOptionUsesNullNiche(t *testing.T) {
 	t.Parallel()
-	for _, scalar := range []string{"u8", "i32", "u32", "usize"} {
+	for _, scalar := range []string{"bool", "u8", "i32", "u32", "usize"} {
 		t.Run(scalar, func(t *testing.T) {
 			program := lowerSource(t, sharedScalarBorrowOptionSource(scalar))
 			outcome, err := interpreter.Execute(program, "main::main")
@@ -66,7 +70,7 @@ func TestSharedScalarBorrowOptionRunsUnderMSVC(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, scalar := range []string{"u8", "i32", "u32", "usize"} {
+	for _, scalar := range []string{"bool", "u8", "i32", "u32", "usize"} {
 		t.Run(scalar, func(t *testing.T) {
 			program := lowerSource(t, sharedScalarBorrowOptionSource(scalar))
 			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())

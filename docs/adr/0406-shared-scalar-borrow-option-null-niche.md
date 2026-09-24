@@ -6,9 +6,9 @@
 
 ## Decision
 
-The constrained C backend represents `Option<ref u8>`, `Option<ref i32>`,
-`Option<ref u32>`, and `Option<ref usize>` with one pointer field. `None` is a
-null pointer; `Some` stores the existing non-null safe borrow. The MIR and
+The constrained C backend represents `Option<ref bool>`, `Option<ref u8>`,
+`Option<ref i32>`, `Option<ref u32>`, and `Option<ref usize>` with one pointer
+field. `None` is a null pointer; `Some` stores the existing non-null safe borrow. The MIR and
 interpreter retain the ordinary two-variant Option semantics. This changes no
 source syntax, borrow origin, payload extraction rule, or cleanup obligation.
 
@@ -38,6 +38,10 @@ The backend test checks `Some` and `None` through the interpreter, asserts the
 one-word generated C layout and null tests, then compiles and runs the result
 under low and optimized Windows AMD64 MSVC profiles. The former tagged shape
 contained a `u32` tag plus pointer, occupying two words on this target.
+The `ref bool` case uses the same non-null borrow representation; its private C
+transport was added after the initial four-integer whitelist without changing
+the language or SDK pin.
+
 Whole-program build time, generated C bytes, object size, executable size, and
 the cumulative 8% C-relative budget are not established by this local layout
 proof. Those require representative comparisons before claiming a product-wide
