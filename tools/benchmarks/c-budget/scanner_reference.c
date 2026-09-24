@@ -44,6 +44,9 @@ struct fc_token {
 struct fc_diagnostic {
     const char *code, *repair, *token;
     size_t start, end;
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+    size_t token_length;
+#endif
 };
 struct fc_scanner {
     const unsigned char *source;
@@ -70,6 +73,9 @@ struct fc_scanner {
 #ifdef FC_CANDIDATE_TOKEN_LIMIT
     size_t token_limit;
     int token_limit_exhausted;
+#endif
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+    int diagnostic_payload_failed;
 #endif
 };
 
@@ -184,8 +190,31 @@ static void fc_diagnostic(struct fc_scanner *s, const char *code,
         return;
     }
 #endif
-    s->diagnostics[s->diagnostic_count++] =
-        (struct fc_diagnostic){code, repair, token, start, end};
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+    size_t token_length = strlen(token);
+    if (token_length != 0) {
+        char *owned = (char *)malloc(token_length);
+        if (owned == NULL) {
+            s->diagnostic_payload_failed = 1;
+            return;
+        }
+        memcpy(owned, token, token_length);
+        token = owned;
+    }
+#endif
+    struct fc_diagnostic value = {code, repair, token, start, end};
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+    value.token_length = token_length;
+#endif
+    s->diagnostics[s->diagnostic_count++] = value;
+}
+
+static size_t fc_diagnostic_token_length(const struct fc_diagnostic *diagnostic) {
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+    return diagnostic->token_length;
+#else
+    return strlen(diagnostic->token);
+#endif
 }
 
 static int fc_match(const struct fc_scanner *s, size_t at, const char *text) {
@@ -725,10 +754,16 @@ static int fc_scan(struct fc_scanner *s) {
 #endif
     ) {
         int status = fc_scan_one(s);
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+        if (s->diagnostic_payload_failed) return 3;
+#endif
         if (status != 0) return status;
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
         if (s->diagnostic_limit_exhausted) {
             fc_diagnostic(s, "E0010", s->position, s->position, "none", "");
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+            if (s->diagnostic_payload_failed) return 3;
+#endif
 #ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
             if (s->diagnostic_allocation_failed) return 3;
 #endif
@@ -748,6 +783,9 @@ static int fc_scan(struct fc_scanner *s) {
 #ifdef FC_CANDIDATE_TOKEN_LIMIT
     if (s->token_limit_exhausted) {
         fc_diagnostic(s, "E0010", s->position, s->position, "none", "");
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+        if (s->diagnostic_payload_failed) return 3;
+#endif
 #ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
         if (s->diagnostic_allocation_failed) return 3;
 #endif
@@ -775,7 +813,15 @@ static int fc_compare_diagnostic(const void *left, const void *right) {
     int value = strcmp(a->code, b->code);
     if (value != 0) return value;
     value = strcmp(a->repair, b->repair);
-    return value != 0 ? value : strcmp(a->token, b->token);
+    if (value != 0) return value;
+    size_t a_length = fc_diagnostic_token_length(a);
+    size_t b_length = fc_diagnostic_token_length(b);
+    size_t minimum = a_length < b_length ? a_length : b_length;
+    if (minimum != 0) {
+        value = memcmp(a->token, b->token, minimum);
+        if (value != 0) return value;
+    }
+    return a_length == b_length ? 0 : a_length < b_length ? -1 : 1;
 }
 
 static void fc_hex(const unsigned char *bytes, size_t length) {
@@ -798,7 +844,8 @@ static void fc_print(const struct fc_scanner *s) {
         const struct fc_diagnostic *diagnostic = &s->diagnostics[i];
         printf("D %s %zu %zu %s ", diagnostic->code, diagnostic->start,
                diagnostic->end, diagnostic->repair);
-        fc_hex((const unsigned char *)diagnostic->token, strlen(diagnostic->token));
+        fc_hex((const unsigned char *)diagnostic->token,
+               fc_diagnostic_token_length(diagnostic));
         putchar('\n');
     }
 }
@@ -810,6 +857,17 @@ static void fc_release_cooked(const struct fc_scanner *s) {
             s->tokens[i].kind == FC_C_STRING)
             free((void *)s->tokens[i].cooked);
     }
+}
+
+static void fc_release_diagnostics(const struct fc_scanner *s) {
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+    for (size_t i = 0; i < s->diagnostic_count; i++) {
+        if (s->diagnostics[i].token_length != 0)
+            free((void *)s->diagnostics[i].token);
+    }
+#else
+    (void)s;
+#endif
 }
 
 #ifndef FC_SCANNER_LIBRARY
@@ -861,6 +919,7 @@ int main(void) {
         fc_print(&scanner);
     }
     fc_release_cooked(&scanner);
+    fc_release_diagnostics(&scanner);
     free(source); free(tokens); free(diagnostics);
     return status;
 }

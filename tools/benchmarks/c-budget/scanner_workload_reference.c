@@ -39,7 +39,7 @@ static int fc_workload_round(const unsigned char *input, size_t length,
         for (size_t i = 0; i < scanner.token_count; i++)
             *work += scanner.tokens[i].cooked_length;
         for (size_t i = 0; i < scanner.diagnostic_count; i++)
-            *work += strlen(scanner.diagnostics[i].token);
+            *work += fc_diagnostic_token_length(&scanner.diagnostics[i]);
         if (report) {
             qsort(scanner.diagnostics, scanner.diagnostic_count,
                   sizeof(*scanner.diagnostics), fc_compare_diagnostic);
@@ -47,6 +47,7 @@ static int fc_workload_round(const unsigned char *input, size_t length,
         }
     }
     fc_release_cooked(&scanner);
+    fc_release_diagnostics(&scanner);
     free(owned); free(tokens); free(diagnostics);
     return status;
 }

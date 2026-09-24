@@ -45,7 +45,7 @@ checks the geometric C workload's reporter and 1000-round checksum. Preserving
 both C strategies prevents the storage experiment from silently replacing the
 C-relative baseline. A future budget verdict must compare against the faster
 equivalent C lane for runtime and the smaller equivalent C image for EXE size;
-Fairy diagnostic payload ownership remains different.
+At this earlier stage, Fairy diagnostic payload ownership remained different.
 The old executable hashes, sizes and timings describe neither current C image.
 The full scanner 8% gate remains open.
 
@@ -69,3 +69,11 @@ input suffix. Both C storage modes matched the Go lexer under low and optimized
 MSVC; the actual Fairy scanner checked token and diagnostic counts, `E0010`
 position and EOF. This does not establish all combined budget-exhaustion paths
 or update the earlier runtime and EXE measurements.
+
+The candidate C budget images now allocate an owned copy for each nonempty
+diagnostic token and release it after the scan; empty tokens allocate nothing.
+A low/optimized MSVC probe checks retained bytes after caller mutation in both
+C storage modes. The optimized three-image scanner smoke passed reporter and
+1,000-round checksum checks with this C change. Diagnostic record layouts and
+allocation-failure paths are not fully equivalent, and the prior storage A/B
+timings and executable sizes do not describe these images.

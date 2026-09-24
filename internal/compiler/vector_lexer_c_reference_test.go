@@ -528,6 +528,59 @@ int main(void) {
 					t.Fatalf("Fairy diagnostic limit: %+v %v", fairyOutcome, err)
 				}
 			})
+			t.Run("diagnostic payload ownership", func(t *testing.T) {
+				if !strings.Contains(scannerCBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n") ||
+					!strings.Contains(scannerCGeometricBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n") {
+					t.Fatal("C budget images omitted owned diagnostic payloads")
+				}
+				const payloadProbe = `
+int main(void) {
+    char token[] = "*/", empty[] = "";
+#ifndef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    struct fc_diagnostic entries[2] = {0};
+#endif
+    struct fc_scanner scanner = {0};
+#ifndef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    scanner.diagnostics = entries;
+#endif
+    fc_diagnostic(&scanner, "E0001", 0, 2, "exit", token);
+    int status = scanner.diagnostic_count != 1u ||
+                 scanner.diagnostic_payload_failed ||
+                 scanner.diagnostics[0].token_length != 2u ||
+                 scanner.diagnostics[0].token == token;
+    token[0] = '!';
+    if (!status && memcmp(scanner.diagnostics[0].token, "*/", 2u) != 0)
+        status = 2;
+    fc_diagnostic(&scanner, "E0010", 2, 2, "none", empty);
+    if (!status && (scanner.diagnostic_count != 2u ||
+                    scanner.diagnostics[1].token_length != 0u ||
+                    scanner.diagnostics[1].token != empty)) status = 3;
+    fc_release_diagnostics(&scanner);
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    free(scanner.diagnostics);
+#endif
+    return status;
+}`
+				for _, storage := range []struct {
+					name    string
+					defines string
+				}{
+					{"preallocated", ""},
+					{"geometric", "#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"},
+				} {
+					t.Run(storage.name, func(t *testing.T) {
+						code := "#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_SCANNER_LIBRARY\n" + storage.defines + string(core) + payloadProbe
+						image, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+						if err != nil {
+							t.Fatal(err)
+						}
+						outcome, err := cdriver.ExecuteWindowsMSVCProbe(image)
+						if err != nil || outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
+							t.Fatalf("payload ownership: %+v %v", outcome, err)
+						}
+					})
+				}
+			})
 		})
 	}
 }
@@ -608,7 +661,7 @@ func scannerCGeometricBenchmarkSource(t *testing.T) string {
 
 func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n"
+	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n"
 	if geometric {
 		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
 	}

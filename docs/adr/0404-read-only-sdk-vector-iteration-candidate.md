@@ -239,11 +239,20 @@ terminal `E0010` location, rejected token and EOF. The broad standalone C
 Go-oracle build remains unlimited by this candidate switch. These small
 boundary inputs do not prove every interaction between token, diagnostic and
 work exhaustion or establish an 8% cost result.
+The C budget images now copy each nonempty diagnostic token into its own
+allocation and release it with the diagnostic record. Empty tokens retain no
+heap allocation, matching `bytes::copy` and the underlying system-heap
+zero-size behavior used by the Fairy scanner. A low/optimized MSVC probe
+checks that changing the caller's token bytes cannot change the retained
+diagnostic in either C storage mode. The optimized three-image scanner smoke
+still matches output and 1,000-round checksums. This covers payload ownership
+on the current lexical paths, not identical diagnostic record layout,
+allocation-failure behavior or a new runtime/EXE measurement.
 The measured short sample is inside all three supported ranges; a broader
 budget comparison needs the same accepted input and limit behavior in both
 implementations before using executable-size or runtime ratios as a gate.
 An independent-C workload entry now copies the real scanner sample on every
-round, scans it, releases its token and cooked storage, and checks the exact
+round, scans it, releases token, cooked and diagnostic payload storage, and checks the exact
 first-round observations plus source/cooked/diagnostic byte and item totals
 against the Go lexer under both MSVC profiles. One- and two-round runs verify
 repeatability. This is an untimed parity gate, not the whole-scanner runtime
@@ -320,7 +329,8 @@ access is not equivalent to the current source loop.
    `Vec<Token>` and `Vec<diagnostics::Entry>`; the up-front C storage lane
    remains available. Use the faster equivalent C lane for runtime and the
    smaller equivalent C image for size when applying the gate.
-   Diagnostic payload ownership and remaining scanner limits still need parity.
+   Diagnostic record layout, failure paths and remaining scanner limits still
+   need parity; nonempty diagnostic payload copies are now modeled in C.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
