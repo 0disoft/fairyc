@@ -428,6 +428,17 @@ specializations each. This is a current-artifact observation, not an exact
 before/after runtime or EXE comparison for this C helper change; no 8% C-relative
 claim follows from it.
 
+The [exact helper A/B](../ops/vector-prepare-push-ab-20260924.md) restores the
+prior unconditional reserve call in one otherwise identical optimized scanner
+image. The generated C unit and 21 specializations match. Both benchmark EXEs
+are 205,824 bytes and both generated unit objects are 86,925 bytes; the current
+runtime object is 14 bytes smaller. Twelve alternating measured pairs have a
+current/prior median ratio of 0.98287, but their 37.90% relative full span
+exceeds the declared 10% stability heuristic. The helper change has no
+measured runtime improvement verdict, and this same-program comparison does
+not decide the independent-C 8% gate. These timing-support EXEs are separate
+from the 144,384-byte native parity images above.
+
 This is an unsafe sequential protocol, not a persistent reservation token or a
 transaction across callbacks. No storage mutation, escaping slot, alias access or
 callback may intervene; the caller proves the write initialized one owned element

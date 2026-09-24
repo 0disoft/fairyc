@@ -1,0 +1,352 @@
+{
+  "generated_c_sha256": "44db963dd52d9b6e4da51d804eb167aebf07b68c1c383cbac1baaca974f97797",
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "images": [
+    {
+      "exe_bytes": 205824,
+      "exe_sha256": "0ba0b162d220e6b816254c7225326aaad420f6d82401acc5caec73178c4fa040",
+      "lane": "prior reserve",
+      "objects": {
+        "runtime.obj": 41858,
+        "unit.obj": 86925
+      },
+      "storage_sha256": "8340d0fc0507547e1107cd5a1c8ceda8a81e2d25bcb12973ed58b600d5ffe115"
+    },
+    {
+      "exe_bytes": 205824,
+      "exe_sha256": "c08b2ca67ffbc47180ad02ba80392926b17551b3ea33bbd5fb46e9d1f74d17dd",
+      "lane": "spare-slot fast path",
+      "objects": {
+        "runtime.obj": 41844,
+        "unit.obj": 86925
+      },
+      "storage_sha256": "5df8feb0383336538744c99e83dfe2a7d8f7831b62e0cd50563fdc64ea8b474d"
+    }
+  ],
+  "measured_pairs": 12,
+  "msvc": "14.51.36231",
+  "per_round_result": 36,
+  "profile": "optimized",
+  "rounds": 250000,
+  "sample_sha256": "27270bb224790aca7d077b8f03b6092e4ab29b7a12bf6756265e7aaf7a2a2133",
+  "samples": [
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 9725384,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8463344,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "prior reserve",
+        "spare-slot fast path"
+      ],
+      "pair": 0,
+      "warmup": true
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8523332,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8689974,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "spare-slot fast path",
+        "prior reserve"
+      ],
+      "pair": 1,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 9991367,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 9655854,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "prior reserve",
+        "spare-slot fast path"
+      ],
+      "pair": 2,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 11912560,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 11455398,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "spare-slot fast path",
+        "prior reserve"
+      ],
+      "pair": 3,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 11403484,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12954308,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "prior reserve",
+        "spare-slot fast path"
+      ],
+      "pair": 4,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12379667,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12569300,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "spare-slot fast path",
+        "prior reserve"
+      ],
+      "pair": 5,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 13058251,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 10977523,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "prior reserve",
+        "spare-slot fast path"
+      ],
+      "pair": 6,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 11844062,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 13688861,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "spare-slot fast path",
+        "prior reserve"
+      ],
+      "pair": 7,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 13627160,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 11820742,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "prior reserve",
+        "spare-slot fast path"
+      ],
+      "pair": 8,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 11266743,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 9472743,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "spare-slot fast path",
+        "prior reserve"
+      ],
+      "pair": 9,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8377624,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 9596787,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "prior reserve",
+        "spare-slot fast path"
+      ],
+      "pair": 10,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 10001358,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12243239,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "spare-slot fast path",
+        "prior reserve"
+      ],
+      "pair": 11,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "prior reserve",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12871633,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "spare-slot fast path",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 12888932,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "prior reserve",
+        "spare-slot fast path"
+      ],
+      "pair": 12,
+      "warmup": false
+    }
+  ],
+  "schema": "fairyc.vector-prepare-push-ab/v1",
+  "scope": "Exact prior/current private prepare-push C source with shared verified scanner MIR; one warmup and twelve alternating measured pairs. QPC excludes startup and final output. Raw samples only; no automatic 8% verdict.",
+  "seed": 12345,
+  "specializations": 21,
+  "warmup_pairs": 1
+}
