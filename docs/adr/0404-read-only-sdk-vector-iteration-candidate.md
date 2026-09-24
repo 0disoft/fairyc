@@ -434,6 +434,10 @@ A [one-word work-budget experiment](../ops/scanner-one-word-work-20260925.md)
 removes another 512 EXE bytes per Fairy source form, leaving a 1.10278
 C-relative size ratio. Generated C grows by 2,353 bytes, so check/build cost
 and runtime still require separate measurement before any admission claim.
+A [numeric work-borrow experiment](../ops/scanner-numeric-work-borrow-20260925.md)
+removes 512 more bytes from each Fairy EXE and 3,774 bytes from each generated
+C source by leaving work state in the caller. The EXE ratio remains 1.10;
+neither check/build time nor stable runtime has been established.
 
 ## Proposed first boundary
 

@@ -209,8 +209,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
             kind = if (keyword(input, start, position, previous)) { 4 } else { 3 };
         } else if (digit(current)) {
             var bytes::Buffer cooked = bytes::empty();
-            let numbers::Scan result = numbers::scan(input, start, ref mut cooked, work);
-            work = result.work;
+            let numbers::Scan result = numbers::scan(input, start, ref mut cooked, ref mut work);
             if (result.status == 5) { return work_exhausted(input, start, result.end, tokens, errors); }
             position = result.end; kind = result.kind;
             let i32 status = result.status;

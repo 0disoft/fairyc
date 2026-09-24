@@ -62,13 +62,10 @@ fn i32 integer(ref u8[] raw, ref mut bytes::Buffer output) {
     return 0;
 }
 
-struct Cook { i32 status; budget::Work work; }
-
-fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial) {
-    var budget::Work work = initial;
+fn i32 decimal(ref u8[] raw, ref mut bytes::Buffer output, ref mut budget::Work work) {
     var bytes::Buffer clean = bytes::empty();
     var usize i = 0;
-    while (i < raw.len) { if (raw[i] != 95 && !put(ref mut clean, raw[i])) { return Cook { .status = 3, .work = work }; } i += 1; }
+    while (i < raw.len) { if (raw[i] != 95 && !put(ref mut clean, raw[i])) { return 3; } i += 1; }
     let ref u8[] text = bytes::view(ref clean);
     var usize mantissa_end = text.len;
     i = 0;
@@ -80,10 +77,10 @@ fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial
     if (mantissa_end < text.len) {
         i = mantissa_end + 1;
         if (i < text.len && (text[i] == 43 || text[i] == 45)) { negative = text[i] == 45; i += 1; }
-        if (i == text.len) { return Cook { .status = 1, .work = work }; }
+        if (i == text.len) { return 1; }
         let usize maximum = if (negative) { max_int + 1 } else { max_int };
         while (i < text.len) {
-            if (!digit(text[i])) { return Cook { .status = 1, .work = work }; }
+            if (!digit(text[i])) { return 1; }
             let usize next = (text[i] - 48) as usize;
             if (!overflow) {
                 if (exponent > maximum / 10 || (exponent == maximum / 10 && next > maximum % 10)) { overflow = true; }
@@ -92,18 +89,18 @@ fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial
             i += 1;
         }
     }
-    if (overflow || mantissa_end == 0) { return Cook { .status = 1, .work = work }; }
+    if (overflow || mantissa_end == 0) { return 1; }
     var bytes::Buffer significant = bytes::empty();
     var bool dot = false;
     var usize fraction = 0;
     i = 0;
     while (i < mantissa_end) {
         if (text[i] == 46) {
-            if (dot || i == 0 || i + 1 == mantissa_end) { return Cook { .status = 1, .work = work }; }
+            if (dot || i == 0 || i + 1 == mantissa_end) { return 1; }
             dot = true;
         } else {
-            if (!digit(text[i])) { return Cook { .status = 1, .work = work }; }
-            if (!put(ref mut significant, text[i])) { return Cook { .status = 3, .work = work }; }
+            if (!digit(text[i])) { return 1; }
+            if (!put(ref mut significant, text[i])) { return 3; }
             if (dot) { fraction += 1; }
         }
         i += 1;
@@ -134,25 +131,25 @@ fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial
         }
     }
     if (unrepresentable) {
-        return Cook { .status = 5, .work = work };
+        return 5;
     }
     // Charge the full expansion before materialization, including later-trimmed zeros.
-    if (!budget::charge(ref mut work, length)) { return Cook { .status = 5, .work = work }; }
-    if (length > 16384) { return Cook { .status = 4, .work = work }; }
+    if (!budget::charge(work, length)) { return 5; }
+    if (length > 16384) { return 4; }
     if (!trailing && places >= width) {
-        if (!put(output, 48) || !put(output, 46)) { return Cook { .status = 3, .work = work }; }
+        if (!put(output, 48) || !put(output, 46)) { return 3; }
         var usize leading = places - width;
-        while (leading > 0) { if (!put(output, 48)) { return Cook { .status = 3, .work = work }; } leading -= 1; }
+        while (leading > 0) { if (!put(output, 48)) { return 3; } leading -= 1; }
     }
     i = first;
     var usize offset = 0;
     while (i < data.len) {
-        if (!trailing && places < width && offset == width - places) { if (!put(output, 46)) { return Cook { .status = 3, .work = work }; } }
-        if (!put(output, data[i])) { return Cook { .status = 3, .work = work }; }
+        if (!trailing && places < width && offset == width - places) { if (!put(output, 46)) { return 3; } }
+        if (!put(output, data[i])) { return 3; }
         i += 1; offset += 1;
     }
     if (trailing) {
-        while (zeros > 0) { if (!put(output, 48)) { return Cook { .status = 3, .work = work }; } zeros -= 1; }
+        while (zeros > 0) { if (!put(output, 48)) { return 3; } zeros -= 1; }
     } else {
         var usize retained = 0;
         {
@@ -161,61 +158,60 @@ fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial
             while (retained > 0 && data_out[retained-1] == 48) { retained -= 1; }
             if (retained > 0 && data_out[retained-1] == 46) { retained -= 1; }
         }
-        if (!switch (bytes::truncate(output, retained)) { case .ok(_) : { true } case .err(_) : { false } }) { return Cook { .status = 3, .work = work }; }
+        if (!switch (bytes::truncate(output, retained)) { case .ok(_) : { true } case .err(_) : { false } }) { return 3; }
     }
-    return Cook { .status = 0, .work = work };
+    return 0;
 }
 
 // Status 1 is a complete malformed numeric token; 5 is work exhaustion.
-pub struct Scan { usize end; u32 kind; i32 status; budget::Work work; }
+pub struct Scan { usize end; u32 kind; i32 status; }
 
-pub fn Scan scan(ref u8[] input, usize start, ref mut bytes::Buffer output, budget::Work initial) {
-    var budget::Work work = initial;
+pub fn Scan scan(ref u8[] input, usize start, ref mut bytes::Buffer output, ref mut budget::Work work) {
     var usize p = start + 1;
     var u32 kind = 5;
     if (p < input.len && input[start] == 48 && (input[p] == 120 || input[p] == 98)) {
-        if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+        if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
         p += 1;
         while (p < input.len && identifier(input[p])) {
-            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
             p += 1;
         }
     } else {
         while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
             p += 1;
         }
         if (p + 1 < input.len && input[p] == 46 && digit(input[p+1])) {
             kind = 6;
-            if (!budget::charge(ref mut work, 2)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(work, 2)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
             p += 2;
             while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-                if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+                if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
                 p += 1;
             }
         }
         if (p < input.len && (input[p] == 101 || input[p] == 69)) {
             kind = 6;
-            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
             p += 1;
             if (p < input.len && (input[p] == 43 || input[p] == 45)) {
-                if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+                if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
                 p += 1;
             }
             while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-                if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+                if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
                 p += 1;
             }
         }
         while (p < input.len && identifier(input[p])) {
-            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(work, 1)) { return Scan { .end = p, .kind = kind, .status = 5 }; }
             p += 1;
         }
     }
     if (kind == 5) {
         let i32 status = integer(input[start..p], output);
-        return Scan { .end = p, .kind = kind, .status = status, .work = work };
+        return Scan { .end = p, .kind = kind, .status = status };
     }
-    let Cook result = decimal(input[start..p], output, work);
-    return Scan { .end = p, .kind = kind, .status = result.status, .work = result.work };
+    let i32 status = decimal(input[start..p], output, work);
+    return Scan { .end = p, .kind = kind, .status = status };
 }
