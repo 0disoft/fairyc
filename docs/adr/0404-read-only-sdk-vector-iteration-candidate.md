@@ -174,6 +174,14 @@ The private rejection matrix also rejects moving a borrowed vector owner
 computed vector expression as the iterable. The latter cannot acquire an
 implicit temporary owner or hide evaluation in this source form.
 
+The indexed real scanner also serves as an unused-source-form control. A
+compiler test analyzes the same checked-in package graph through the stable
+and private candidate lanes, verifies both MIR programs, and compares their
+canonical private MIR serialization, generated C bytes, function count,
+foreign-symbol list and specialization count. Equality here is an executable
+artifact check for this workload; it does not measure analysis time, native
+object/EXE size, or overhead in a future integrated stable compiler path.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
