@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -164,6 +165,42 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		}
 		t.Log("VECTOR_LEXER_C_BUDGET_OBJECT_SECTIONS " + string(objectReport))
 	}
+	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_FUNCTIONS") == "1" {
+		imageRows := make([]map[string]any, 0, len(images))
+		for _, image := range images {
+			objectRows := make([]map[string]any, 0, len(image.artifact.Objects))
+			for _, object := range image.artifact.Objects {
+				coff, inspectErr := pecoff.InspectObject(object.Bytes)
+				if inspectErr != nil {
+					t.Fatalf("%s/%s COFF inspection: %v", image.name, object.Name, inspectErr)
+				}
+				spans, codeBytes, attributedBytes := scannerCOFFFunctionSpans(coff)
+				functionCount := len(spans)
+				const top = 20
+				if len(spans) > top {
+					spans = spans[:top]
+				}
+				objectRows = append(objectRows, map[string]any{
+					"name": object.Name, "code_raw_bytes": codeBytes,
+					"attributed_raw_bytes":   attributedBytes,
+					"unattributed_raw_bytes": codeBytes - attributedBytes,
+					"function_count":         functionCount,
+					"top_functions":          spans,
+				})
+			}
+			imageRows = append(imageRows, map[string]any{
+				"lane": image.name, "exe_sha256": fmt.Sprintf("%x", sha256.Sum256(image.artifact.Bytes)),
+				"objects": objectRows,
+			})
+		}
+		functionReport, marshalErr := json.Marshal(map[string]any{
+			"schema": "fairyc.vector-lexer-c-budget-functions/v1", "images": imageRows,
+		})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		t.Log("VECTOR_LEXER_C_BUDGET_FUNCTIONS " + string(functionReport))
+	}
 	reporter := ""
 	rows := make([]map[string]any, 0, len(images))
 	for _, image := range images {
@@ -220,6 +257,59 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_MEASURE") == "1" {
 		measureScannerBudgetRotations(t, images, sample, uint64(perRound))
 	}
+}
+
+type scannerCOFFFunctionSpan struct {
+	Name         string `json:"name"`
+	Section      string `json:"section"`
+	Offset       uint32 `json:"offset"`
+	RawSpanBytes uint32 `json:"raw_span_bytes"`
+}
+
+// COFF function symbols provide starts, not exact linked function sizes. The
+// section span up to the next start includes any alignment padding.
+func scannerCOFFFunctionSpans(coff pecoff.ObjectReport) ([]scannerCOFFFunctionSpan, uint64, uint64) {
+	spans := make([]scannerCOFFFunctionSpan, 0)
+	var codeBytes, attributedBytes uint64
+	for sectionIndex, section := range coff.Sections {
+		if section.Characteristics&0x20 == 0 { // IMAGE_SCN_CNT_CODE
+			continue
+		}
+		codeBytes += uint64(section.RawSize)
+		starts := make(map[uint32][]string)
+		for _, symbol := range coff.SymbolRecords {
+			if symbol.SectionNumber != int32(sectionIndex+1) || symbol.Type&0x20 == 0 || symbol.Value >= section.RawSize {
+				continue
+			}
+			starts[symbol.Value] = append(starts[symbol.Value], symbol.Name)
+		}
+		offsets := make([]uint32, 0, len(starts))
+		for offset := range starts {
+			offsets = append(offsets, offset)
+		}
+		sort.Slice(offsets, func(i, j int) bool { return offsets[i] < offsets[j] })
+		for i, offset := range offsets {
+			end := section.RawSize
+			if i+1 < len(offsets) {
+				end = offsets[i+1]
+			}
+			names := starts[offset]
+			sort.Strings(names)
+			span := end - offset
+			attributedBytes += uint64(span)
+			spans = append(spans, scannerCOFFFunctionSpan{
+				Name: strings.Join(names, " | "), Section: section.Name,
+				Offset: offset, RawSpanBytes: span,
+			})
+		}
+	}
+	sort.Slice(spans, func(i, j int) bool {
+		if spans[i].RawSpanBytes != spans[j].RawSpanBytes {
+			return spans[i].RawSpanBytes > spans[j].RawSpanBytes
+		}
+		return spans[i].Name < spans[j].Name
+	})
+	return spans, codeBytes, attributedBytes
 }
 
 // Twelve fixed, rotating image sets follow one warmup. Raw QPC samples are

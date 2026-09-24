@@ -384,6 +384,11 @@ identical 32,116-byte `unit.obj` code totals for indexed and private-vector
 Fairy forms, plus 8,039 runtime-object code bytes in each. The up-front C
 `probe.obj` has 13,653 code bytes. Object bytes are not final linked-image
 contributions; function-level attribution remains necessary before a size fix.
+The [function-span receipt](../ops/scanner-function-spans-20260925.md) records
+81 function starts in each Fairy unit object and identical five largest spans for both
+source forms. `fy_fn_29` has the largest raw section span at 5,297 bytes.
+These COFF spans can include padding and do not show which functions survived
+linking; source-name and link-map attribution remain open.
 
 ## Proposed first boundary
 
