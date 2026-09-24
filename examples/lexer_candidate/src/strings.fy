@@ -42,14 +42,12 @@ fn bool encode(ref mut bytes::Buffer output, u32 value) {
 
 fn Step escape(ref u8[] input, usize start, u32 kind, ref mut bytes::Buffer output, ref mut v::Vec<diagnostics::Entry> errors, usize count, usize limit, budget::Work initial) {
     var budget::Work work = initial;
-    budget::charge(ref mut work, 1);
     var usize p = start;
-    if (work.exhausted) { return finish(p, 5, count, work); }
+    if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
     p += 1;
     if (p == input.len) { return error(errors, count, limit, 5, start, p, work); }
     let u8 current = input[p];
-    budget::charge(ref mut work, 1);
-    if (work.exhausted) { return finish(p, 5, count, work); }
+    if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
     p += 1;
     var u8 value = current;
     if (current == 92 || current == 34 || current == 110 || current == 114 || current == 116 || current == 48) {
@@ -62,45 +60,38 @@ fn Step escape(ref u8[] input, usize start, u32 kind, ref mut bytes::Buffer outp
     } else if (current == 120) {
         if (input.len - p < 2 || hex(input[p]) >= 16 || hex(input[p+1]) >= 16) {
             while (p < input.len && p < start + 4 && hex(input[p]) < 16) {
-                budget::charge(ref mut work, 1);
-                if (work.exhausted) { return finish(p, 5, count, work); }
+                if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
                 p += 1;
             }
             return error(errors, count, limit, 5, start, p, work);
         }
         value = octet(hex(input[p]) * 16 + hex(input[p+1]));
-        budget::charge(ref mut work, 2);
-        if (work.exhausted) { return finish(p, 5, count, work); }
+        if (!budget::charge(ref mut work, 2)) { return finish(p, 5, count, work); }
         p += 2;
         if (!put(output, value)) { return finish(p, 3, count, work); }
         if (kind == 9 && value == 0) { return error(errors, count, limit, 6, start, p, work); }
     } else if (current == 117) {
         if (kind != 7 || p == input.len || input[p] != 123) { return error(errors, count, limit, 5, start, p, work); }
-        budget::charge(ref mut work, 1);
-        if (work.exhausted) { return finish(p, 5, count, work); }
+        if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
         p += 1;
         let usize digits_start = p;
         var u32 scalar = 0;
         while (p < input.len && hex(input[p]) < 16 && p - digits_start < 6) {
-            budget::charge(ref mut work, 1);
-            if (work.exhausted) { return finish(p, 5, count, work); }
+            if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
             scalar = scalar * 16 + hex(input[p]); p += 1;
         }
         if (p == digits_start || p == input.len || input[p] != 125) {
             while (p < input.len && input[p] != 125 && input[p] != 34) {
-                budget::charge(ref mut work, 1);
-                if (work.exhausted) { return finish(p, 5, count, work); }
+                if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
                 p += 1;
             }
             if (p < input.len && input[p] == 125) {
-                budget::charge(ref mut work, 1);
-                if (work.exhausted) { return finish(p, 5, count, work); }
+                if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
                 p += 1;
             }
             return error(errors, count, limit, 5, start, p, work);
         }
-        budget::charge(ref mut work, 1);
-        if (work.exhausted) { return finish(p, 5, count, work); }
+        if (!budget::charge(ref mut work, 1)) { return finish(p, 5, count, work); }
         p += 1;
         if (scalar > 1114111 || (scalar >= 55296 && scalar <= 57343)) { return error(errors, count, limit, 5, start, p, work); }
         if (!encode(output, scalar)) { return finish(p, 3, count, work); }
@@ -112,8 +103,7 @@ pub fn Step scan(ref u8[] input, usize start, u32 kind, usize opener, ref mut by
     var budget::Work work = initial;
     var usize p = start + 1;
     if (opener > 1) {
-        budget::charge(ref mut work, opener - 1);
-        if (work.exhausted) { return finish(p, 5, count, work); }
+        if (!budget::charge(ref mut work, opener - 1)) { return finish(p, 5, count, work); }
         p += opener - 1;
     }
     var usize diagnostic_count = count;
@@ -122,8 +112,7 @@ pub fn Step scan(ref u8[] input, usize start, u32 kind, usize opener, ref mut by
     while (p < input.len) {
         let u8 current = input[p];
         if (current == 34) {
-            budget::charge(ref mut work, 1);
-            if (work.exhausted) { return finish(p, 5, diagnostic_count, work); }
+            if (!budget::charge(ref mut work, 1)) { return finish(p, 5, diagnostic_count, work); }
             p += 1; terminated = true; break;
         }
         if (current == 10 || current == 13) {
@@ -139,8 +128,7 @@ pub fn Step scan(ref u8[] input, usize start, u32 kind, usize opener, ref mut by
             p = next.end; continue;
         }
         if (current == 0) {
-            budget::charge(ref mut work, 1);
-            if (work.exhausted) { return finish(p, 5, diagnostic_count, work); }
+            if (!budget::charge(ref mut work, 1)) { return finish(p, 5, diagnostic_count, work); }
             p += 1;
             let u32 code = if (kind == 9) { 6 } else { 5 };
             let i32 status = diagnostics::add_limited(errors, diagnostic_count, limit, code, p-1, p, false, b"");
@@ -150,8 +138,7 @@ pub fn Step scan(ref u8[] input, usize start, u32 kind, usize opener, ref mut by
             continue;
         }
         let usize width = utf8::width(input, p);
-        budget::charge(ref mut work, if (width == 0) { 1 } else { width });
-        if (work.exhausted) { return finish(p, 5, diagnostic_count, work); }
+        if (!budget::charge(ref mut work, if (width == 0) { 1 } else { width })) { return finish(p, 5, diagnostic_count, work); }
         if (width == 0) {
             p += 1;
             let i32 status = diagnostics::add_limited(errors, diagnostic_count, limit, 1, p-1, p, false, b"");

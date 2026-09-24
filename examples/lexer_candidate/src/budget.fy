@@ -1,16 +1,14 @@
 module budget;
 
-// Values are returned explicitly: the candidate does not require mutable fields.
-pub struct Work { usize remaining; bool exhausted; }
+// Callers stop on a failed charge; no exhausted state must cross a return.
+pub struct Work { usize remaining; }
 
 pub fn Work create(usize limit) {
-    return Work { .remaining = limit, .exhausted = false };
+    return Work { .remaining = limit };
 }
 
-pub fn void charge(ref mut Work work, usize units) {
-    if (work.exhausted || units > work.remaining) {
-        work.exhausted = true;
-        return;
-    }
+pub fn bool charge(ref mut Work work, usize units) {
+    if (units > work.remaining) { return false; }
     work.remaining = work.remaining - units;
+    return true;
 }

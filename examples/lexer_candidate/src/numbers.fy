@@ -134,11 +134,10 @@ fn Cook decimal(ref u8[] raw, ref mut bytes::Buffer output, budget::Work initial
         }
     }
     if (unrepresentable) {
-        return Cook { .status = 5, .work = budget::Work { .remaining = work.remaining, .exhausted = true } };
+        return Cook { .status = 5, .work = work };
     }
     // Charge the full expansion before materialization, including later-trimmed zeros.
-    budget::charge(ref mut work, length);
-    if (work.exhausted) { return Cook { .status = 5, .work = work }; }
+    if (!budget::charge(ref mut work, length)) { return Cook { .status = 5, .work = work }; }
     if (length > 16384) { return Cook { .status = 4, .work = work }; }
     if (!trailing && places >= width) {
         if (!put(output, 48) || !put(output, 46)) { return Cook { .status = 3, .work = work }; }
@@ -175,50 +174,41 @@ pub fn Scan scan(ref u8[] input, usize start, ref mut bytes::Buffer output, budg
     var usize p = start + 1;
     var u32 kind = 5;
     if (p < input.len && input[start] == 48 && (input[p] == 120 || input[p] == 98)) {
-        budget::charge(ref mut work, 1);
-        if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+        if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
         p += 1;
         while (p < input.len && identifier(input[p])) {
-            budget::charge(ref mut work, 1);
-            if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
         }
     } else {
         while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-            budget::charge(ref mut work, 1);
-            if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
         }
         if (p + 1 < input.len && input[p] == 46 && digit(input[p+1])) {
             kind = 6;
-            budget::charge(ref mut work, 2);
-            if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(ref mut work, 2)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 2;
             while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-                budget::charge(ref mut work, 1);
-                if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+                if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
                 p += 1;
             }
         }
         if (p < input.len && (input[p] == 101 || input[p] == 69)) {
             kind = 6;
-            budget::charge(ref mut work, 1);
-            if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
             if (p < input.len && (input[p] == 43 || input[p] == 45)) {
-                budget::charge(ref mut work, 1);
-                if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+                if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
                 p += 1;
             }
             while (p < input.len && (digit(input[p]) || input[p] == 95)) {
-                budget::charge(ref mut work, 1);
-                if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+                if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
                 p += 1;
             }
         }
         while (p < input.len && identifier(input[p])) {
-            budget::charge(ref mut work, 1);
-            if (work.exhausted) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
+            if (!budget::charge(ref mut work, 1)) { return Scan { .end = p, .kind = kind, .status = 5, .work = work }; }
             p += 1;
         }
     }

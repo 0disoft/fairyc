@@ -430,6 +430,10 @@ A [mutable work-budget update](../ops/scanner-inplace-work-20260925.md)
 removes another 1,024 bytes from each Fairy scanner EXE while preserving the
 checked lexical and limit behavior. The EXE ratio is still 1.10556 against
 up-front C, and the one-thousand-round smoke is not a stable runtime result.
+A [one-word work-budget experiment](../ops/scanner-one-word-work-20260925.md)
+removes another 512 EXE bytes per Fairy source form, leaving a 1.10278
+C-relative size ratio. Generated C grows by 2,353 bytes, so check/build cost
+and runtime still require separate measurement before any admission claim.
 
 ## Proposed first boundary
 
