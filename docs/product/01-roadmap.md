@@ -109,6 +109,10 @@ views. ADR 0403 admits narrow read-only iteration on this newer evidence.
 Compiler Flow, verified MIR and low/optimized Windows native checks pass; the
 C-relative cost gate remains pending. Checked narrowing, expression-bodied
 functions, generic iteration and mutable collection iteration remain deferred.
+ADR 0404 separately records a candidate for exact SDK-owned `Vec<T>` read-only
+reference iteration, based on three full-visit loops in the lexer candidate.
+It admits no source behavior until ownership, native cleanup and cumulative
+C-relative cost gates pass; user-defined and mutable iterators remain deferred.
 
 Exceptions, class inheritance, implicit virtual dispatch, user-defined implicit conversions,
 operator or function overloading, unrestricted template metaprogramming, runtime reflection,

@@ -368,6 +368,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0401-mutable-scalar-dereference-stores.md`: executes plain writes through named mutable scalar references, including `Vec.at_mut<i32>`, without changing the language or SDK revision.
 - `0402-result-return-only-match-arm.md`: admits a direct-return-only Result case beside a value-producing case in language `/18` without a new backend operation.
 - `0403-read-only-byte-view-iteration.md`: admits narrow immutable `ref u8[]` iteration through Flow, verified MIR and native C; C-relative cost evidence remains pending.
+- `0404-read-only-sdk-vector-iteration-candidate.md`: records three read-only lexer `Vec<T>` loops and the ownership, native, and C-relative gates for a candidate reference-iteration form; no syntax is admitted.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
