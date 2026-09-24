@@ -19,14 +19,16 @@ measurement harness. OS cache and CPU scheduling were not controlled.
 | `/Od` | explicit index | 1.2262, 1.2869, 1.2101, 1.2283, 1.2271 | 1.2271 | 1.0061 | 1.0238 |
 
 The optimized byte-view kernel is within the cumulative 1.08 runtime and EXE
-limits for this one workload. The low-profile byte-view runtime exceeds 1.08 in
-all five pairs, as does the explicit-index version. Build 1.08 is an observation
+limits for this one workload under the `/O2` profile used by the existing
+[budget policy](../c-performance-budget-baseline.md). Both `/Od` Fairy versions
+exceed 1.08 against C in all five pairs. `/Od` is a correctness and cost
+diagnostic here, not a second release-budget gate. Build 1.08 is an observation
 marker rather than a pass/fail threshold. The loops have the same Fairy EXE
 size in each profile; the optimized `unit.obj` size was 2495 bytes for both.
 The low-profile result is a baseline compiler/backend cost issue, not evidence
 that byte-view syntax caused a regression. This result does not establish a
-language-wide performance claim or release readiness; the real lexer/parser
-workload, low-profile check-cost isolation, and full-suite evidence remain open.
+language-wide performance claim or release readiness; a representative
+lexer/parser comparison and remaining semantic fixtures are still open.
 
 Low-profile source and object inspection narrows the likely cost. The generated
 Fairy C keeps a bounds check before every byte load, checked hidden and outer
@@ -36,10 +38,10 @@ input guard and arithmetic, but has no explicit runtime checks because its
 fixed four-element array and value ranges make those operations safe. MSVC
 `/Od` retains substantially more of the generated control flow; `/O2` removes
 or folds enough work for the measured kernel to pass. This source inspection
-does not isolate the cost of any single check. The next compiler work is a
-bounded proof that can eliminate only checks shown redundant by the loop bound
-and numeric ranges, then a new paired measurement without changing safe-mode
-trap behavior.
+does not isolate the cost of any single check. A future check-elimination change
+would need a bounded proof of redundancy and a new paired measurement without
+changing safe-mode trap behavior; this diagnostic alone does not require that
+optimization before evaluating the real workload.
 
 Fixture SHA-256 values: `byte_loop.c`
 `34330de4572da9ed49d6e9aed63e2781eb9cd493eacd1cfa2e4ebab31a6413a3`,
