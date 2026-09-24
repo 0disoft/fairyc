@@ -263,6 +263,10 @@ func runRealScannerVectorNative(t *testing.T, program mir.Program, entry string,
 }
 
 func buildRealScannerVectorNative(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport string) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+	return buildRealScannerVectorNativeWithStorage(t, program, entry, profile, extraSupport, "")
+}
+
+func buildRealScannerVectorNativeWithStorage(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string) (cdriver.WindowsHostArtifact, cbackend.Unit) {
 	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
@@ -279,6 +283,9 @@ func buildRealScannerVectorNative(t *testing.T, program mir.Program, entry strin
 	storage, err := cstdlib.WindowsMSVCVectorStorageSource()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if storageOverride != "" {
+		storage = storageOverride
 	}
 	symbols := []string{"fy_std_system_heap_allocate_v0"}
 	for _, symbol := range unit.ForeignSymbols {
