@@ -403,6 +403,11 @@ finds that validated `.pdata` function intervals explain 20,122 of the
 COFF spans do not retain those sizes after linking: `scanner::scan` is
 5,297 raw object bytes but its matched final `.pdata` interval is 134 bytes.
 Object and CRT ownership of the interval gap remains unassigned.
+The [map-owner join](../ops/scanner-unwind-owners-20260925.md) attributes
+only 7,775 bytes of the 20,122-byte unwind-interval gap to uniquely named
+owners. The other 12,370-byte difference has no matching public symbol
+start; optimizing `unit.obj` or the runtime on this partial map alone
+would be unsupported.
 
 ## Proposed first boundary
 

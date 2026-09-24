@@ -1,0 +1,2853 @@
+{
+  "images": [
+    {
+      "ambiguous_code_bytes": 285,
+      "exe_bytes": 184320,
+      "known_code_bytes": 102279,
+      "lane": "independent C",
+      "owners": [
+        {
+          "linked_code_bytes": 20021,
+          "owner": "libucrt:input.obj",
+          "runtime_functions": 41
+        },
+        {
+          "linked_code_bytes": 7779,
+          "owner": "libucrt:output.obj",
+          "runtime_functions": 21
+        },
+        {
+          "linked_code_bytes": 4735,
+          "owner": "libucrt:cfout.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 4459,
+          "owner": "libvcruntime:frame.obj",
+          "runtime_functions": 18
+        },
+        {
+          "linked_code_bytes": 3559,
+          "owner": "libucrt:cvt.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 3317,
+          "owner": "probe.obj",
+          "runtime_functions": 16
+        },
+        {
+          "linked_code_bytes": 3189,
+          "owner": "libucrt:write.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 2934,
+          "owner": "libucrt:mbctype.obj",
+          "runtime_functions": 11
+        },
+        {
+          "linked_code_bytes": 2727,
+          "owner": "libucrt:read.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 2661,
+          "owner": "libucrt:argv_wildcards.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 1677,
+          "owner": "libvcruntime:memcpy.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1482,
+          "owner": "libucrt:per_thread_data.obj",
+          "runtime_functions": 15
+        },
+        {
+          "linked_code_bytes": 1451,
+          "owner": "libucrt:log10.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 1429,
+          "owner": "libvcruntime:risctrnsctrl.obj",
+          "runtime_functions": 14
+        },
+        {
+          "linked_code_bytes": 1312,
+          "owner": "libucrt:winapi_thunks.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1123,
+          "owner": "libucrt:fflush.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1106,
+          "owner": "libucrt:strpbrk.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1089,
+          "owner": "libucrt:strtox.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 1085,
+          "owner": "libucrt:setenv.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1048,
+          "owner": "libucrt:comparestringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 986,
+          "owner": "libucrt:invalid_parameter.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 967,
+          "owner": "libucrt:lcmapstringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 964,
+          "owner": "libucrt:onexit.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 932,
+          "owner": "libucrt:environment_initialization.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 920,
+          "owner": "libvcruntime:memset.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 919,
+          "owner": "libucrt:argv_parsing.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 871,
+          "owner": "libucrt:fpexcept.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 833,
+          "owner": "libucrt:locale_refcounting.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 803,
+          "owner": "libucrt:ieee.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 769,
+          "owner": "libucrt:lseek.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 755,
+          "owner": "libucrt:signal.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 725,
+          "owner": "libucrt:exit.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 716,
+          "owner": "libucrt:osfinfo.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 654,
+          "owner": "libcmt:exe_main.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 640,
+          "owner": "libucrt:ioinit.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 590,
+          "owner": "libcmt:utility.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 586,
+          "owner": "libucrt:_flsbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 572,
+          "owner": "libucrt:setmode.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 570,
+          "owner": "libucrt:getmodulefilenamea.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 567,
+          "owner": "libucrt:fputc.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 539,
+          "owner": "libucrt:mbtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 538,
+          "owner": "libvcruntime:riscchandler.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 527,
+          "owner": "libucrt:strnicmp.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 517,
+          "owner": "libucrt:close.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 508,
+          "owner": "libucrt:mbrtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 482,
+          "owner": "libcmt:gshandler.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 480,
+          "owner": "libucrt:_fptostr.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 463,
+          "owner": "libucrt:fclose.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 458,
+          "owner": "libvcruntime:ehhelpers.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 445,
+          "owner": "libucrt:mbrtoc32.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 432,
+          "owner": "libucrt:wctomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 415,
+          "owner": "libucrt:setenvironmentvariablea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 399,
+          "owner": "libucrt:getstringtypea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 379,
+          "owner": "libucrt:_file.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 363,
+          "owner": "libucrt:exception_filter.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 362,
+          "owner": "libucrt:_filbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 351,
+          "owner": "libucrt:libm_error.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 348,
+          "owner": "libucrt:errno.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 346,
+          "owner": "libvcruntime:per_thread_data.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 337,
+          "owner": "libvcruntime:ehstate.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 333,
+          "owner": "libucrt:_sftbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 320,
+          "owner": "libucrt:initialization.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 314,
+          "owner": "libucrt:inittime.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 300,
+          "owner": "libucrt:initcon.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 298,
+          "owner": "libucrt:strncpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 287,
+          "owner": "libucrt:wsetlocale.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 286,
+          "owner": "libucrt:ungetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 284,
+          "owner": "libucrt:commit.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 270,
+          "owner": "libucrt:get_environment_from_os.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 266,
+          "owner": "libucrt:initmon.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 264,
+          "owner": "libucrt:isctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 239,
+          "owner": "libucrt:new_handler.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 222,
+          "owner": "libucrt:widechartomultibyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 204,
+          "owner": "libucrt:locale_update.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 203,
+          "owner": "libucrt:closeall.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 199,
+          "owner": "libvcruntime:memcmp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 191,
+          "owner": "libcmt:gs_support.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:log_special.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:shared_initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 178,
+          "owner": "libucrt:fma3_available.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 176,
+          "owner": "libcmt:utility_desktop.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 169,
+          "owner": "libvcruntime:throw.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 168,
+          "owner": "libucrt:strlen.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 167,
+          "owner": "libucrt:lcidtoname_downlevel.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 166,
+          "owner": "libucrt:_ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 165,
+          "owner": "libucrt:fpctrl.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 163,
+          "owner": "libucrt:c16rtomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 151,
+          "owner": "libvcruntime:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 149,
+          "owner": "libucrt:recalloc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 148,
+          "owner": "libucrt:mbsdec.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 146,
+          "owner": "libucrt:qsort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 132,
+          "owner": "libcmt:initsect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 127,
+          "owner": "libucrt:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 126,
+          "owner": "libucrt:strcpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 125,
+          "owner": "libucrt:strncmp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 122,
+          "owner": "libucrt:realloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 117,
+          "owner": "libucrt:calloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 115,
+          "owner": "libucrt:ismbbyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 114,
+          "owner": "libucrt:initterm.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 111,
+          "owner": "libucrt:contrlfp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 108,
+          "owner": "libucrt:initnum.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 107,
+          "owner": "libucrt:_getbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 106,
+          "owner": "libcmt:pesect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 104,
+          "owner": "libcmt:gshandlereh.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 97,
+          "owner": "libucrt:fesetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 95,
+          "owner": "libucrt:isatty.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 94,
+          "owner": "libucrt:malloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 87,
+          "owner": "libvcruntime:std_exception.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 86,
+          "owner": "libucrt:abort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 81,
+          "owner": "libucrt:feholdexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 78,
+          "owner": "libcmt:chkstk.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 75,
+          "owner": "libvcruntime:chandler_noexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 67,
+          "owner": "libucrt:fgetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libucrt:_freebuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libvcruntime:initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libucrt:putwch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libvcruntime:handlers.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 60,
+          "owner": "libucrt:free_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 57,
+          "owner": "libucrt:msize.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 51,
+          "owner": "libucrt:strnicol.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:win_policies.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libcmt:std_type_info_static.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libucrt:new_mode.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 42,
+          "owner": "libvcruntime:jmpuwind.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 39,
+          "owner": "libucrt:fileno.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 37,
+          "owner": "libucrt:argv_data.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 32,
+          "owner": "libucrt:fegetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 31,
+          "owner": "libucrt:terminate.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 30,
+          "owner": "libcmt:amdsecgs.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 29,
+          "owner": "libvcruntime:notify.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 28,
+          "owner": "libucrt:heap_handle.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 27,
+          "owner": "libcmt:default_local_stdio_options.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 22,
+          "owner": "libucrt:checkcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:fegetround.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:multibyte_initializer.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 11,
+          "owner": "libcmt:cpu_disp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 8,
+          "owner": "libucrt:_fenvutils.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libcmt:guard_xfg_dispatch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libucrt:dispatchcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 2,
+          "owner": "libcmt:guard_dispatch.obj",
+          "runtime_functions": 1
+        }
+      ],
+      "public_map_rows": 2421,
+      "runtime_function_count": 526,
+      "unmatched_code_bytes": 12823,
+      "unwind_covered_code_bytes": 115387
+    },
+    {
+      "ambiguous_code_bytes": 285,
+      "exe_bytes": 185344,
+      "known_code_bytes": 102544,
+      "lane": "geometric C",
+      "owners": [
+        {
+          "linked_code_bytes": 20021,
+          "owner": "libucrt:input.obj",
+          "runtime_functions": 41
+        },
+        {
+          "linked_code_bytes": 7779,
+          "owner": "libucrt:output.obj",
+          "runtime_functions": 21
+        },
+        {
+          "linked_code_bytes": 4735,
+          "owner": "libucrt:cfout.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 4459,
+          "owner": "libvcruntime:frame.obj",
+          "runtime_functions": 18
+        },
+        {
+          "linked_code_bytes": 3582,
+          "owner": "probe.obj",
+          "runtime_functions": 17
+        },
+        {
+          "linked_code_bytes": 3559,
+          "owner": "libucrt:cvt.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 3189,
+          "owner": "libucrt:write.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 2934,
+          "owner": "libucrt:mbctype.obj",
+          "runtime_functions": 11
+        },
+        {
+          "linked_code_bytes": 2727,
+          "owner": "libucrt:read.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 2661,
+          "owner": "libucrt:argv_wildcards.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 1677,
+          "owner": "libvcruntime:memcpy.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1482,
+          "owner": "libucrt:per_thread_data.obj",
+          "runtime_functions": 15
+        },
+        {
+          "linked_code_bytes": 1451,
+          "owner": "libucrt:log10.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 1429,
+          "owner": "libvcruntime:risctrnsctrl.obj",
+          "runtime_functions": 14
+        },
+        {
+          "linked_code_bytes": 1312,
+          "owner": "libucrt:winapi_thunks.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1123,
+          "owner": "libucrt:fflush.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1106,
+          "owner": "libucrt:strpbrk.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1089,
+          "owner": "libucrt:strtox.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 1085,
+          "owner": "libucrt:setenv.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1048,
+          "owner": "libucrt:comparestringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 986,
+          "owner": "libucrt:invalid_parameter.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 967,
+          "owner": "libucrt:lcmapstringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 964,
+          "owner": "libucrt:onexit.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 932,
+          "owner": "libucrt:environment_initialization.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 920,
+          "owner": "libvcruntime:memset.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 919,
+          "owner": "libucrt:argv_parsing.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 871,
+          "owner": "libucrt:fpexcept.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 833,
+          "owner": "libucrt:locale_refcounting.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 803,
+          "owner": "libucrt:ieee.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 769,
+          "owner": "libucrt:lseek.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 755,
+          "owner": "libucrt:signal.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 725,
+          "owner": "libucrt:exit.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 716,
+          "owner": "libucrt:osfinfo.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 654,
+          "owner": "libcmt:exe_main.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 640,
+          "owner": "libucrt:ioinit.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 590,
+          "owner": "libcmt:utility.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 586,
+          "owner": "libucrt:_flsbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 572,
+          "owner": "libucrt:setmode.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 570,
+          "owner": "libucrt:getmodulefilenamea.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 567,
+          "owner": "libucrt:fputc.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 539,
+          "owner": "libucrt:mbtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 538,
+          "owner": "libvcruntime:riscchandler.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 527,
+          "owner": "libucrt:strnicmp.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 517,
+          "owner": "libucrt:close.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 508,
+          "owner": "libucrt:mbrtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 482,
+          "owner": "libcmt:gshandler.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 480,
+          "owner": "libucrt:_fptostr.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 463,
+          "owner": "libucrt:fclose.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 458,
+          "owner": "libvcruntime:ehhelpers.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 445,
+          "owner": "libucrt:mbrtoc32.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 432,
+          "owner": "libucrt:wctomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 415,
+          "owner": "libucrt:setenvironmentvariablea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 399,
+          "owner": "libucrt:getstringtypea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 379,
+          "owner": "libucrt:_file.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 363,
+          "owner": "libucrt:exception_filter.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 362,
+          "owner": "libucrt:_filbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 351,
+          "owner": "libucrt:libm_error.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 348,
+          "owner": "libucrt:errno.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 346,
+          "owner": "libvcruntime:per_thread_data.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 337,
+          "owner": "libvcruntime:ehstate.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 333,
+          "owner": "libucrt:_sftbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 320,
+          "owner": "libucrt:initialization.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 314,
+          "owner": "libucrt:inittime.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 300,
+          "owner": "libucrt:initcon.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 298,
+          "owner": "libucrt:strncpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 287,
+          "owner": "libucrt:wsetlocale.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 286,
+          "owner": "libucrt:ungetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 284,
+          "owner": "libucrt:commit.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 270,
+          "owner": "libucrt:get_environment_from_os.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 266,
+          "owner": "libucrt:initmon.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 264,
+          "owner": "libucrt:isctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 239,
+          "owner": "libucrt:new_handler.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 222,
+          "owner": "libucrt:widechartomultibyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 204,
+          "owner": "libucrt:locale_update.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 203,
+          "owner": "libucrt:closeall.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 199,
+          "owner": "libvcruntime:memcmp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 191,
+          "owner": "libcmt:gs_support.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:log_special.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:shared_initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 178,
+          "owner": "libucrt:fma3_available.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 176,
+          "owner": "libcmt:utility_desktop.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 169,
+          "owner": "libvcruntime:throw.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 168,
+          "owner": "libucrt:strlen.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 167,
+          "owner": "libucrt:lcidtoname_downlevel.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 166,
+          "owner": "libucrt:_ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 165,
+          "owner": "libucrt:fpctrl.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 163,
+          "owner": "libucrt:c16rtomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 151,
+          "owner": "libvcruntime:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 149,
+          "owner": "libucrt:recalloc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 148,
+          "owner": "libucrt:mbsdec.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 146,
+          "owner": "libucrt:qsort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 132,
+          "owner": "libcmt:initsect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 127,
+          "owner": "libucrt:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 126,
+          "owner": "libucrt:strcpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 125,
+          "owner": "libucrt:strncmp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 122,
+          "owner": "libucrt:realloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 117,
+          "owner": "libucrt:calloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 115,
+          "owner": "libucrt:ismbbyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 114,
+          "owner": "libucrt:initterm.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 111,
+          "owner": "libucrt:contrlfp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 108,
+          "owner": "libucrt:initnum.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 107,
+          "owner": "libucrt:_getbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 106,
+          "owner": "libcmt:pesect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 104,
+          "owner": "libcmt:gshandlereh.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 97,
+          "owner": "libucrt:fesetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 95,
+          "owner": "libucrt:isatty.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 94,
+          "owner": "libucrt:malloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 87,
+          "owner": "libvcruntime:std_exception.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 86,
+          "owner": "libucrt:abort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 81,
+          "owner": "libucrt:feholdexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 78,
+          "owner": "libcmt:chkstk.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 75,
+          "owner": "libvcruntime:chandler_noexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 67,
+          "owner": "libucrt:fgetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libucrt:_freebuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libvcruntime:initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libucrt:putwch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libvcruntime:handlers.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 60,
+          "owner": "libucrt:free_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 57,
+          "owner": "libucrt:msize.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 51,
+          "owner": "libucrt:strnicol.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:win_policies.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libcmt:std_type_info_static.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libucrt:new_mode.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 42,
+          "owner": "libvcruntime:jmpuwind.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 39,
+          "owner": "libucrt:fileno.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 37,
+          "owner": "libucrt:argv_data.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 32,
+          "owner": "libucrt:fegetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 31,
+          "owner": "libucrt:terminate.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 30,
+          "owner": "libcmt:amdsecgs.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 29,
+          "owner": "libvcruntime:notify.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 28,
+          "owner": "libucrt:heap_handle.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 27,
+          "owner": "libcmt:default_local_stdio_options.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 22,
+          "owner": "libucrt:checkcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:fegetround.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:multibyte_initializer.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 11,
+          "owner": "libcmt:cpu_disp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 8,
+          "owner": "libucrt:_fenvutils.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libcmt:guard_xfg_dispatch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libucrt:dispatchcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 2,
+          "owner": "libcmt:guard_dispatch.obj",
+          "runtime_functions": 1
+        }
+      ],
+      "public_map_rows": 2423,
+      "runtime_function_count": 527,
+      "unmatched_code_bytes": 13269,
+      "unwind_covered_code_bytes": 116098
+    },
+    {
+      "ambiguous_code_bytes": 262,
+      "exe_bytes": 206336,
+      "known_code_bytes": 110054,
+      "lane": "explicit index",
+      "owners": [
+        {
+          "linked_code_bytes": 20021,
+          "owner": "libucrt:input.obj",
+          "runtime_functions": 41
+        },
+        {
+          "linked_code_bytes": 9737,
+          "owner": "unit.obj",
+          "runtime_functions": 32
+        },
+        {
+          "linked_code_bytes": 7779,
+          "owner": "libucrt:output.obj",
+          "runtime_functions": 21
+        },
+        {
+          "linked_code_bytes": 4735,
+          "owner": "libucrt:cfout.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 4459,
+          "owner": "libvcruntime:frame.obj",
+          "runtime_functions": 18
+        },
+        {
+          "linked_code_bytes": 3559,
+          "owner": "libucrt:cvt.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 3189,
+          "owner": "libucrt:write.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 2998,
+          "owner": "runtime.obj",
+          "runtime_functions": 21
+        },
+        {
+          "linked_code_bytes": 2934,
+          "owner": "libucrt:mbctype.obj",
+          "runtime_functions": 11
+        },
+        {
+          "linked_code_bytes": 2750,
+          "owner": "libucrt:read.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 2661,
+          "owner": "libucrt:argv_wildcards.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 1677,
+          "owner": "libvcruntime:memcpy.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1482,
+          "owner": "libucrt:per_thread_data.obj",
+          "runtime_functions": 15
+        },
+        {
+          "linked_code_bytes": 1451,
+          "owner": "libucrt:log10.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 1429,
+          "owner": "libvcruntime:risctrnsctrl.obj",
+          "runtime_functions": 14
+        },
+        {
+          "linked_code_bytes": 1312,
+          "owner": "libucrt:winapi_thunks.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1123,
+          "owner": "libucrt:fflush.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1106,
+          "owner": "libucrt:strpbrk.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1085,
+          "owner": "libucrt:setenv.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1048,
+          "owner": "libucrt:comparestringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 986,
+          "owner": "libucrt:invalid_parameter.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 967,
+          "owner": "libucrt:lcmapstringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 964,
+          "owner": "libucrt:onexit.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 932,
+          "owner": "libucrt:environment_initialization.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 920,
+          "owner": "libvcruntime:memset.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 919,
+          "owner": "libucrt:argv_parsing.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 871,
+          "owner": "libucrt:fpexcept.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 833,
+          "owner": "libucrt:locale_refcounting.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 803,
+          "owner": "libucrt:ieee.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 769,
+          "owner": "libucrt:lseek.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 755,
+          "owner": "libucrt:signal.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 731,
+          "owner": "libucrt:atox.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 725,
+          "owner": "libucrt:exit.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 716,
+          "owner": "libucrt:osfinfo.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 654,
+          "owner": "libcmt:exe_main.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 640,
+          "owner": "libucrt:ioinit.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 590,
+          "owner": "libcmt:utility.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 586,
+          "owner": "libucrt:_flsbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 570,
+          "owner": "libucrt:getmodulefilenamea.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 539,
+          "owner": "libucrt:mbtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 538,
+          "owner": "libvcruntime:riscchandler.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 527,
+          "owner": "libucrt:strnicmp.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 517,
+          "owner": "libucrt:close.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 508,
+          "owner": "libucrt:mbrtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 482,
+          "owner": "libcmt:gshandler.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 480,
+          "owner": "libucrt:_fptostr.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 463,
+          "owner": "libucrt:fclose.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 458,
+          "owner": "libvcruntime:ehhelpers.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 445,
+          "owner": "libucrt:mbrtoc32.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 432,
+          "owner": "libucrt:wctomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 415,
+          "owner": "libucrt:setenvironmentvariablea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 399,
+          "owner": "libucrt:getstringtypea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 379,
+          "owner": "libucrt:_file.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 363,
+          "owner": "libucrt:exception_filter.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 362,
+          "owner": "libucrt:_filbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 351,
+          "owner": "libucrt:libm_error.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 348,
+          "owner": "libucrt:errno.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 346,
+          "owner": "libvcruntime:per_thread_data.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 337,
+          "owner": "libvcruntime:ehstate.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 333,
+          "owner": "libucrt:_sftbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 320,
+          "owner": "libucrt:initialization.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 314,
+          "owner": "libucrt:inittime.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 300,
+          "owner": "libucrt:initcon.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 298,
+          "owner": "libucrt:strncpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 287,
+          "owner": "libucrt:wsetlocale.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 286,
+          "owner": "libucrt:ungetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 284,
+          "owner": "libucrt:commit.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 270,
+          "owner": "libucrt:get_environment_from_os.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 266,
+          "owner": "libucrt:initmon.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 264,
+          "owner": "libucrt:isctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 239,
+          "owner": "libucrt:new_handler.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 222,
+          "owner": "libucrt:widechartomultibyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 204,
+          "owner": "libucrt:locale_update.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 203,
+          "owner": "libucrt:closeall.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 191,
+          "owner": "libcmt:gs_support.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:log_special.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:shared_initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 179,
+          "owner": "libucrt:strtox.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 178,
+          "owner": "libucrt:fma3_available.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 176,
+          "owner": "libcmt:utility_desktop.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 169,
+          "owner": "libvcruntime:throw.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 167,
+          "owner": "libucrt:lcidtoname_downlevel.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 166,
+          "owner": "libucrt:_ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 165,
+          "owner": "libucrt:fpctrl.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 163,
+          "owner": "libucrt:c16rtomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 151,
+          "owner": "libvcruntime:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 149,
+          "owner": "libucrt:recalloc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 148,
+          "owner": "libucrt:mbsdec.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 146,
+          "owner": "libucrt:qsort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 132,
+          "owner": "libcmt:initsect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 127,
+          "owner": "libucrt:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 126,
+          "owner": "libucrt:strcpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 125,
+          "owner": "libucrt:strncmp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 122,
+          "owner": "libucrt:realloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 117,
+          "owner": "libucrt:calloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 115,
+          "owner": "libucrt:ismbbyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 114,
+          "owner": "libucrt:initterm.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 111,
+          "owner": "libucrt:contrlfp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 108,
+          "owner": "libucrt:initnum.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 107,
+          "owner": "libucrt:_getbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 106,
+          "owner": "libcmt:pesect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 104,
+          "owner": "libcmt:gshandlereh.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 97,
+          "owner": "libucrt:fesetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 95,
+          "owner": "libucrt:isatty.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 94,
+          "owner": "libucrt:malloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 87,
+          "owner": "libvcruntime:std_exception.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 86,
+          "owner": "libucrt:abort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 81,
+          "owner": "libucrt:feholdexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 78,
+          "owner": "libcmt:chkstk.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 75,
+          "owner": "libvcruntime:chandler_noexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 67,
+          "owner": "libucrt:fgetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libucrt:_freebuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libvcruntime:initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libucrt:putwch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libvcruntime:handlers.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 61,
+          "owner": "libucrt:setmode.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 60,
+          "owner": "libucrt:free_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 57,
+          "owner": "libucrt:msize.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 51,
+          "owner": "libucrt:strnicol.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:win_policies.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libcmt:std_type_info_static.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libucrt:new_mode.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 39,
+          "owner": "libucrt:fileno.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 37,
+          "owner": "libucrt:argv_data.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 32,
+          "owner": "libucrt:fegetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 31,
+          "owner": "libucrt:terminate.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 30,
+          "owner": "libcmt:amdsecgs.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 29,
+          "owner": "libvcruntime:notify.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 28,
+          "owner": "libucrt:heap_handle.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 27,
+          "owner": "libcmt:default_local_stdio_options.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 22,
+          "owner": "libucrt:checkcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:fegetround.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:multibyte_initializer.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 11,
+          "owner": "libcmt:cpu_disp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 8,
+          "owner": "libucrt:_fenvutils.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libcmt:guard_xfg_dispatch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libucrt:dispatchcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 2,
+          "owner": "libcmt:guard_dispatch.obj",
+          "runtime_functions": 1
+        }
+      ],
+      "public_map_rows": 2470,
+      "runtime_function_count": 589,
+      "unmatched_code_bytes": 25193,
+      "unwind_covered_code_bytes": 135509
+    },
+    {
+      "ambiguous_code_bytes": 262,
+      "exe_bytes": 206336,
+      "known_code_bytes": 110051,
+      "lane": "all vector for",
+      "owners": [
+        {
+          "linked_code_bytes": 20021,
+          "owner": "libucrt:input.obj",
+          "runtime_functions": 41
+        },
+        {
+          "linked_code_bytes": 9734,
+          "owner": "unit.obj",
+          "runtime_functions": 32
+        },
+        {
+          "linked_code_bytes": 7779,
+          "owner": "libucrt:output.obj",
+          "runtime_functions": 21
+        },
+        {
+          "linked_code_bytes": 4735,
+          "owner": "libucrt:cfout.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 4459,
+          "owner": "libvcruntime:frame.obj",
+          "runtime_functions": 18
+        },
+        {
+          "linked_code_bytes": 3559,
+          "owner": "libucrt:cvt.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 3189,
+          "owner": "libucrt:write.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 2998,
+          "owner": "runtime.obj",
+          "runtime_functions": 21
+        },
+        {
+          "linked_code_bytes": 2934,
+          "owner": "libucrt:mbctype.obj",
+          "runtime_functions": 11
+        },
+        {
+          "linked_code_bytes": 2750,
+          "owner": "libucrt:read.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 2661,
+          "owner": "libucrt:argv_wildcards.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 1677,
+          "owner": "libvcruntime:memcpy.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1482,
+          "owner": "libucrt:per_thread_data.obj",
+          "runtime_functions": 15
+        },
+        {
+          "linked_code_bytes": 1451,
+          "owner": "libucrt:log10.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 1429,
+          "owner": "libvcruntime:risctrnsctrl.obj",
+          "runtime_functions": 14
+        },
+        {
+          "linked_code_bytes": 1312,
+          "owner": "libucrt:winapi_thunks.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1123,
+          "owner": "libucrt:fflush.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 1106,
+          "owner": "libucrt:strpbrk.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1085,
+          "owner": "libucrt:setenv.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 1048,
+          "owner": "libucrt:comparestringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 986,
+          "owner": "libucrt:invalid_parameter.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 967,
+          "owner": "libucrt:lcmapstringa.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 964,
+          "owner": "libucrt:onexit.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 932,
+          "owner": "libucrt:environment_initialization.obj",
+          "runtime_functions": 9
+        },
+        {
+          "linked_code_bytes": 920,
+          "owner": "libvcruntime:memset.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 919,
+          "owner": "libucrt:argv_parsing.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 871,
+          "owner": "libucrt:fpexcept.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 833,
+          "owner": "libucrt:locale_refcounting.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 803,
+          "owner": "libucrt:ieee.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 769,
+          "owner": "libucrt:lseek.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 755,
+          "owner": "libucrt:signal.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 731,
+          "owner": "libucrt:atox.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 725,
+          "owner": "libucrt:exit.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 716,
+          "owner": "libucrt:osfinfo.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 654,
+          "owner": "libcmt:exe_main.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 640,
+          "owner": "libucrt:ioinit.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 590,
+          "owner": "libcmt:utility.obj",
+          "runtime_functions": 8
+        },
+        {
+          "linked_code_bytes": 586,
+          "owner": "libucrt:_flsbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 570,
+          "owner": "libucrt:getmodulefilenamea.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 539,
+          "owner": "libucrt:mbtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 538,
+          "owner": "libvcruntime:riscchandler.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 527,
+          "owner": "libucrt:strnicmp.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 517,
+          "owner": "libucrt:close.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 508,
+          "owner": "libucrt:mbrtowc.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 482,
+          "owner": "libcmt:gshandler.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 480,
+          "owner": "libucrt:_fptostr.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 463,
+          "owner": "libucrt:fclose.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 458,
+          "owner": "libvcruntime:ehhelpers.obj",
+          "runtime_functions": 7
+        },
+        {
+          "linked_code_bytes": 445,
+          "owner": "libucrt:mbrtoc32.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 432,
+          "owner": "libucrt:wctomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 415,
+          "owner": "libucrt:setenvironmentvariablea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 399,
+          "owner": "libucrt:getstringtypea.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 379,
+          "owner": "libucrt:_file.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 363,
+          "owner": "libucrt:exception_filter.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 362,
+          "owner": "libucrt:_filbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 351,
+          "owner": "libucrt:libm_error.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 348,
+          "owner": "libucrt:errno.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 346,
+          "owner": "libvcruntime:per_thread_data.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 337,
+          "owner": "libvcruntime:ehstate.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 333,
+          "owner": "libucrt:_sftbuf.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 320,
+          "owner": "libucrt:initialization.obj",
+          "runtime_functions": 6
+        },
+        {
+          "linked_code_bytes": 314,
+          "owner": "libucrt:inittime.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 300,
+          "owner": "libucrt:initcon.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 298,
+          "owner": "libucrt:strncpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 287,
+          "owner": "libucrt:wsetlocale.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 286,
+          "owner": "libucrt:ungetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 284,
+          "owner": "libucrt:commit.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 270,
+          "owner": "libucrt:get_environment_from_os.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 266,
+          "owner": "libucrt:initmon.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 264,
+          "owner": "libucrt:isctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 239,
+          "owner": "libucrt:new_handler.obj",
+          "runtime_functions": 5
+        },
+        {
+          "linked_code_bytes": 222,
+          "owner": "libucrt:widechartomultibyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 204,
+          "owner": "libucrt:locale_update.obj",
+          "runtime_functions": 4
+        },
+        {
+          "linked_code_bytes": 203,
+          "owner": "libucrt:closeall.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 191,
+          "owner": "libcmt:gs_support.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:log_special.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 185,
+          "owner": "libucrt:shared_initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 179,
+          "owner": "libucrt:strtox.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 178,
+          "owner": "libucrt:fma3_available.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 176,
+          "owner": "libcmt:utility_desktop.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 169,
+          "owner": "libvcruntime:throw.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 167,
+          "owner": "libucrt:lcidtoname_downlevel.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 166,
+          "owner": "libucrt:_ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 165,
+          "owner": "libucrt:fpctrl.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 163,
+          "owner": "libucrt:c16rtomb.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 151,
+          "owner": "libvcruntime:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 149,
+          "owner": "libucrt:recalloc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 148,
+          "owner": "libucrt:mbsdec.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 146,
+          "owner": "libucrt:qsort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 132,
+          "owner": "libcmt:initsect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 127,
+          "owner": "libucrt:locks.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 126,
+          "owner": "libucrt:strcpy_s.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 125,
+          "owner": "libucrt:strncmp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 122,
+          "owner": "libucrt:realloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 117,
+          "owner": "libucrt:calloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 115,
+          "owner": "libucrt:ismbbyte.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 114,
+          "owner": "libucrt:initterm.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 111,
+          "owner": "libucrt:contrlfp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 108,
+          "owner": "libucrt:initnum.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 107,
+          "owner": "libucrt:_getbuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 106,
+          "owner": "libcmt:pesect.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 104,
+          "owner": "libcmt:gshandlereh.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 97,
+          "owner": "libucrt:fesetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 95,
+          "owner": "libucrt:isatty.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 94,
+          "owner": "libucrt:malloc_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 87,
+          "owner": "libvcruntime:std_exception.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 86,
+          "owner": "libucrt:abort.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 81,
+          "owner": "libucrt:feholdexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 78,
+          "owner": "libcmt:chkstk.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 75,
+          "owner": "libvcruntime:chandler_noexcept.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 67,
+          "owner": "libucrt:fgetc.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libucrt:_freebuf.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 66,
+          "owner": "libvcruntime:initialization.obj",
+          "runtime_functions": 2
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libucrt:putwch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 64,
+          "owner": "libvcruntime:handlers.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 61,
+          "owner": "libucrt:setmode.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 60,
+          "owner": "libucrt:free_base.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 57,
+          "owner": "libucrt:msize.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 51,
+          "owner": "libucrt:strnicol.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:ctype.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 47,
+          "owner": "libucrt:win_policies.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libcmt:std_type_info_static.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 43,
+          "owner": "libucrt:new_mode.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 39,
+          "owner": "libucrt:fileno.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 37,
+          "owner": "libucrt:argv_data.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 32,
+          "owner": "libucrt:fegetenv.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 31,
+          "owner": "libucrt:terminate.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 30,
+          "owner": "libcmt:amdsecgs.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 29,
+          "owner": "libvcruntime:notify.obj",
+          "runtime_functions": 3
+        },
+        {
+          "linked_code_bytes": 28,
+          "owner": "libucrt:heap_handle.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 27,
+          "owner": "libcmt:default_local_stdio_options.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 22,
+          "owner": "libucrt:checkcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:fegetround.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 20,
+          "owner": "libucrt:multibyte_initializer.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 11,
+          "owner": "libcmt:cpu_disp.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 8,
+          "owner": "libucrt:_fenvutils.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libcmt:guard_xfg_dispatch.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 6,
+          "owner": "libucrt:dispatchcfg.obj",
+          "runtime_functions": 1
+        },
+        {
+          "linked_code_bytes": 2,
+          "owner": "libcmt:guard_dispatch.obj",
+          "runtime_functions": 1
+        }
+      ],
+      "public_map_rows": 2470,
+      "runtime_function_count": 589,
+      "unmatched_code_bytes": 25196,
+      "unwind_covered_code_bytes": 135509
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-unwind-owners/v1"
+}

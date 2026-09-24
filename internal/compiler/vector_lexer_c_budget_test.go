@@ -44,7 +44,8 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	}
 	bothStorage := storageMode == "1"
 	unwindSizes := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_UNWIND_SIZES") == "1"
-	captureMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_LINK_MAP") == "1" || unwindSizes
+	unwindOwners := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_UNWIND_OWNERS") == "1"
+	captureMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_LINK_MAP") == "1" || unwindSizes || unwindOwners
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Fatal("requires Windows AMD64 MSVC")
 	}
@@ -187,6 +188,78 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 			t.Fatal(marshalErr)
 		}
 		t.Log("VECTOR_LEXER_C_BUDGET_UNWIND_SIZES " + string(unwindReport))
+	}
+	if unwindOwners {
+		imageRows := make([]map[string]any, 0, len(images))
+		for _, image := range images {
+			pe, inspectErr := pecoff.InspectExecutable(image.artifact.Bytes)
+			if inspectErr != nil {
+				t.Fatalf("%s PE inspection: %v", image.name, inspectErr)
+			}
+			unwind, inspectErr := pecoff.InspectAMD64Unwind(image.artifact.Bytes)
+			if inspectErr != nil {
+				t.Fatalf("%s unwind inspection: %v", image.name, inspectErr)
+			}
+			starts := make(map[uint32]map[string]struct{}, len(unwind.Functions))
+			for _, function := range unwind.Functions {
+				starts[function.BeginRVA] = make(map[string]struct{})
+			}
+			publicRows := scannerBudgetAllMapSymbols(image.artifact.LinkMap, image.functions)
+			for _, symbol := range publicRows {
+				if symbol.PreferredAddress < pe.ImageBase || symbol.PreferredAddress-pe.ImageBase > uint64(^uint32(0)) {
+					continue
+				}
+				if owners, found := starts[uint32(symbol.PreferredAddress-pe.ImageBase)]; found {
+					owners[strings.ToLower(symbol.Owner)] = struct{}{}
+				}
+			}
+			ownerBytes := make(map[string]uint64)
+			ownerFunctions := make(map[string]int)
+			var knownBytes, unmatchedBytes, ambiguousBytes uint64
+			for _, function := range unwind.Functions {
+				bytes := uint64(function.EndRVA - function.BeginRVA)
+				owners := starts[function.BeginRVA]
+				switch len(owners) {
+				case 0:
+					unmatchedBytes += bytes
+				case 1:
+					for owner := range owners {
+						knownBytes += bytes
+						ownerBytes[owner] += bytes
+						ownerFunctions[owner]++
+					}
+				default:
+					ambiguousBytes += bytes
+				}
+			}
+			owners := make([]map[string]any, 0, len(ownerBytes))
+			for owner, bytes := range ownerBytes {
+				owners = append(owners, map[string]any{
+					"owner": owner, "linked_code_bytes": bytes, "runtime_functions": ownerFunctions[owner],
+				})
+			}
+			sort.Slice(owners, func(i, j int) bool {
+				left, right := owners[i]["linked_code_bytes"].(uint64), owners[j]["linked_code_bytes"].(uint64)
+				if left != right {
+					return left > right
+				}
+				return owners[i]["owner"].(string) < owners[j]["owner"].(string)
+			})
+			imageRows = append(imageRows, map[string]any{
+				"lane": image.name, "exe_bytes": len(image.artifact.Bytes),
+				"runtime_function_count": len(unwind.Functions), "public_map_rows": len(publicRows),
+				"unwind_covered_code_bytes": knownBytes + unmatchedBytes + ambiguousBytes,
+				"known_code_bytes":          knownBytes, "unmatched_code_bytes": unmatchedBytes,
+				"ambiguous_code_bytes": ambiguousBytes, "owners": owners,
+			})
+		}
+		ownerReport, marshalErr := json.Marshal(map[string]any{
+			"schema": "fairyc.vector-lexer-c-budget-unwind-owners/v1", "images": imageRows,
+		})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		t.Log("VECTOR_LEXER_C_BUDGET_UNWIND_OWNERS " + string(ownerReport))
 	}
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SECTIONS") == "1" {
 		sectionRows := make([]map[string]any, 0, len(images))
@@ -391,6 +464,14 @@ type scannerBudgetMapSymbol struct {
 // Keep only scanner or generated-function rows; the MSVC map itself may
 // contain local temporary paths and unrelated CRT symbols.
 func scannerBudgetMapSymbols(linkMap []byte, functions []string) []scannerBudgetMapSymbol {
+	return scannerBudgetMapRows(linkMap, functions, false)
+}
+
+func scannerBudgetAllMapSymbols(linkMap []byte, functions []string) []scannerBudgetMapSymbol {
+	return scannerBudgetMapRows(linkMap, functions, true)
+}
+
+func scannerBudgetMapRows(linkMap []byte, functions []string, all bool) []scannerBudgetMapSymbol {
 	rows := make([]scannerBudgetMapSymbol, 0)
 	for _, line := range strings.Split(strings.ReplaceAll(string(linkMap), "\r\n", "\n"), "\n") {
 		fields := strings.Fields(line)
@@ -398,7 +479,7 @@ func scannerBudgetMapSymbols(linkMap []byte, functions []string) []scannerBudget
 			continue
 		}
 		name := fields[1]
-		if !strings.HasPrefix(name, "fy_fn_") && !strings.HasPrefix(name, "fc_") {
+		if !all && !strings.HasPrefix(name, "fy_fn_") && !strings.HasPrefix(name, "fc_") {
 			continue
 		}
 		sectionText, offsetText, ok := strings.Cut(fields[0], ":")
