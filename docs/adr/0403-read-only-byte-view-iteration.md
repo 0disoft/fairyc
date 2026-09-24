@@ -99,6 +99,12 @@ confirms matching output and identical EXE size for the three adopted loops
 against their former explicit-index spelling in both Windows profiles. Its
 process roundtrip samples are too unstable for a runtime verdict and are not
 C-relative. The full-application C budget and broader release evidence remain open.
+A [quoted-page C comparison](../ops/quoted-page-c-budget-20260924.md)
+now checks exact output from the real `pages::run` path against an independent
+C11 reference for quoted ASCII strings. Its optimized EXE is smaller than the
+C image, but the paired process timings fail the predeclared stability rule;
+eleven of twelve ratios above 2.77 still point to output cost that needs
+investigation. This restricted input class does not close the full-lexer gate.
 Generated-C inspection points to retained safe checks under `/Od`; this is
 not yet a measured attribution to an individual check.
 The Fairy-written parser candidate now retains this form as statement kind 18

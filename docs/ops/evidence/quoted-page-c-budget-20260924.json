@@ -1,0 +1,148 @@
+{
+  "schema": "fairyc.quoted-page-c-budget/v1",
+  "profile": "optimized",
+  "msvc": "14.51.36231",
+  "input_bytes": 10011,
+  "output_bytes": 12290,
+  "warmup_pairs": 3,
+  "measured_pairs": 12,
+  "c_source_sha256": "aaddf66b47239a5eeedfd12a1655c2b9e9e0be7c426beea6567610e293b3a12f",
+  "pages_source_sha256": "a1e7d798f35047202976e196bbc77d5e4c66452aef6d6aa19c88157bea4bd094",
+  "input_sha256": "7230fec9821acf13b815d39c201cd9a1b1f64f40cd741d89db6ef1346e0910f2",
+  "c_exe_sha256": "a1cf72598a4c212e9aa54966825704bb78a93c12f4a64186770f60a070e784f8",
+  "fairy_exe_sha256": "2caf759a0a764fb5c8dbbbcc565542ca3af0f61dd28a2d11de1e7c250488ba1e",
+  "c_exe_bytes": 146944,
+  "fairy_exe_bytes": 142848,
+  "c_single_build_ns": 302278200,
+  "fairy_single_build_ns": 2485386400,
+  "samples": [
+    {
+      "pair": 0,
+      "c_wall_ns": 37784800,
+      "fairy_wall_ns": 38397100,
+      "c_cpu_ns": 15625000,
+      "fairy_cpu_ns": 15625000
+    },
+    {
+      "pair": 1,
+      "c_wall_ns": 12914400,
+      "fairy_wall_ns": 39354300,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 2,
+      "c_wall_ns": 11799400,
+      "fairy_wall_ns": 36953500,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 3,
+      "c_wall_ns": 12398300,
+      "fairy_wall_ns": 38080800,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 4,
+      "c_wall_ns": 11485300,
+      "fairy_wall_ns": 36174700,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 5,
+      "c_wall_ns": 12692100,
+      "fairy_wall_ns": 35199200,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 6,
+      "c_wall_ns": 12799400,
+      "fairy_wall_ns": 37955700,
+      "c_cpu_ns": 15625000,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 7,
+      "c_wall_ns": 11944700,
+      "fairy_wall_ns": 38479600,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 8,
+      "c_wall_ns": 11904900,
+      "fairy_wall_ns": 35788500,
+      "c_cpu_ns": 15625000,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 9,
+      "c_wall_ns": 12443100,
+      "fairy_wall_ns": 36864400,
+      "c_cpu_ns": 15625000,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 10,
+      "c_wall_ns": 11929000,
+      "fairy_wall_ns": 36304500,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 31250000
+    },
+    {
+      "pair": 11,
+      "c_wall_ns": 11290700,
+      "fairy_wall_ns": 39071500,
+      "c_cpu_ns": 0,
+      "fairy_cpu_ns": 15625000
+    }
+  ],
+  "summary": {
+    "c_ns": {
+      "median": 12171500,
+      "min": 11290700,
+      "max": 37784800,
+      "median_absolute_deviation": 446350,
+      "relative_full_span": 2.176732530912377
+    },
+    "fairy_ns": {
+      "median": 37454600,
+      "min": 35199200,
+      "max": 39354300,
+      "median_absolute_deviation": 1087550,
+      "relative_full_span": 0.11093697436362956
+    },
+    "paired_ratio": {
+      "median": 3.0453504732103776,
+      "min": 1.0162049289661452,
+      "max": 3.4605028917604757,
+      "median_absolute_deviation": 0.08458692959622827,
+      "relative_full_span": 0.8026327295648097
+    },
+    "paired_ratios_in_order": [
+      1.0162049289661452,
+      3.0473192715108715,
+      3.131811787040019,
+      3.071453344410121,
+      3.1496521640705946,
+      2.773315684559687,
+      2.9654280669406377,
+      3.221478982310146,
+      3.006199128090114,
+      2.9626379278475623,
+      3.0433816749098836,
+      3.4605028917604757
+    ],
+    "ratio_of_medians": 3.0772378096372672,
+    "c_first_ratio_median": 3.059386307960496,
+    "fairy_first_ratio_median": 3.024790401499999,
+    "status": "inconclusive",
+    "reasons": [
+      "relative full span exceeds predeclared 10% stability limit"
+    ]
+  }
+}
