@@ -79,6 +79,12 @@ independent Go lexer observation, and the allocator probe finds no live SDK
 allocation after the scanner calls and owned stream return. The C-relative
 cost gate remains open.
 
+A [one-run size comparison](../ops/evidence/vector-lexer-size-20260924.md)
+found unchanged function, foreign-symbol and specialization counts and EXE
+size for all three rewritten loops together. Generated C grew by 711 bytes;
+optimized `unit.obj` grew by 24 bytes against the indexed Fairy source. This
+does not establish check/build time, runtime or the independent-C budget.
+
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
 computed vector expression as the iterable. The latter cannot acquire an

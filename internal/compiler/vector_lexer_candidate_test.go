@@ -1,6 +1,7 @@
 package compiler_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -80,7 +81,7 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 	diagnosticScanner := strings.Replace(scanner, diagnosticBefore, diagnosticAfter, 1)
 	allScanner := strings.Replace(strings.Replace(tokenScanner, cookedBefore, cookedAfter, 1),
 		diagnosticBefore, diagnosticAfter, 1)
-	outputs := make(map[string]map[string]string)
+	outputs := make(map[string]map[string]realScannerVectorEvidence)
 	for _, variant := range []struct {
 		name      string
 		candidate bool
@@ -179,11 +180,13 @@ import std::io as io;
 			if err != nil {
 				t.Fatal(err)
 			}
-			outputs[variant.name] = make(map[string]string)
+			outputs[variant.name] = make(map[string]realScannerVectorEvidence)
 			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 				t.Run(profile.Name, func(t *testing.T) {
-					outputs[variant.name][profile.Name] = runRealScannerVectorNative(t, result.MIR,
+					measured := runRealScannerVectorNative(t, result.MIR,
 						hir.QualifiedModulePath(rootID, "main")+"::main", profile)
+					measured.Specializations = len(analysis.Plan.Specializations)
+					outputs[variant.name][profile.Name] = measured
 				})
 			}
 		})
@@ -191,19 +194,42 @@ import std::io as io;
 	if runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
 		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 			baseline := outputs["explicit index"][profile.Name]
-			if baseline == "" || !strings.HasSuffix(baseline, wantStorage) {
-				t.Fatalf("%s scanner storage oracle differs: got=%q want suffix=%q", profile.Name, baseline, wantStorage)
+			if baseline.Stdout == "" || !strings.HasSuffix(baseline.Stdout, wantStorage) {
+				t.Fatalf("%s scanner storage oracle differs: got=%q want suffix=%q", profile.Name, baseline.Stdout, wantStorage)
 			}
 			for _, name := range []string{"token vector for", "cooked vector for", "diagnostic vector for", "all vector for"} {
-				if candidate := outputs[name][profile.Name]; candidate != baseline {
-					t.Fatalf("%s %s output differs: explicit=%q candidate=%q", profile.Name, name, baseline, candidate)
+				if candidate := outputs[name][profile.Name]; candidate.Stdout != baseline.Stdout {
+					t.Fatalf("%s %s output differs: explicit=%q candidate=%q", profile.Name, name, baseline.Stdout, candidate.Stdout)
 				}
+			}
+			for _, name := range []string{"explicit index", "token vector for", "cooked vector for", "diagnostic vector for", "all vector for"} {
+				measured := outputs[name][profile.Name]
+				report, err := json.Marshal(struct {
+					Variant string `json:"variant"`
+					Profile string `json:"profile"`
+					realScannerVectorEvidence
+				}{name, profile.Name, measured})
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Logf("VECTOR_LEXER_SIZE %s", report)
 			}
 		}
 	}
 }
 
-func runRealScannerVectorNative(t *testing.T, program mir.Program, entry string, profile cdriver.Profile) string {
+type realScannerVectorEvidence struct {
+	Stdout          string `json:"-"`
+	CBytes          int    `json:"c_bytes"`
+	Functions       int    `json:"functions"`
+	ForeignSymbols  int    `json:"foreign_symbols"`
+	Specializations int    `json:"specializations"`
+	UnitObjectBytes int    `json:"unit_object_bytes"`
+	EXEBytes        int    `json:"exe_bytes"`
+	MSVC            string `json:"msvc"`
+}
+
+func runRealScannerVectorNative(t *testing.T, program mir.Program, entry string, profile cdriver.Profile) realScannerVectorEvidence {
 	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
@@ -244,5 +270,18 @@ func runRealScannerVectorNative(t *testing.T, program mir.Program, entry string,
 	if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
 		t.Fatalf("native scanner: %+v %v", outcome, err)
 	}
-	return outcome.Stdout
+	unitBytes := 0
+	for _, object := range artifact.Objects {
+		if object.Name == "unit.obj" {
+			unitBytes = len(object.Bytes)
+		}
+	}
+	if unitBytes == 0 {
+		t.Fatal("native scanner is missing its generated unit object")
+	}
+	return realScannerVectorEvidence{
+		Stdout: outcome.Stdout, CBytes: len(unit.Source), Functions: len(unit.Functions),
+		ForeignSymbols: len(unit.ForeignSymbols), UnitObjectBytes: unitBytes,
+		EXEBytes: len(artifact.Bytes), MSVC: artifact.Toolchain.Version,
+	}
 }
