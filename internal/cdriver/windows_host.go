@@ -161,6 +161,20 @@ func BuildWindowsHostWithMap(toolchain WindowsHostToolchain, profile Profile, un
 	return buildWindowsHostWithMap(toolchain, profile, unitSource, runtimeSource, true)
 }
 
+// BuildWindowsHostWithDebugMap retains a PDB and map for private native size attribution.
+func BuildWindowsHostWithDebugMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if unitSource == "" || runtimeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
+	}
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
+		{Name: "unit.c", Contents: unitSource},
+		{Name: "runtime.c", Contents: runtimeSource},
+	}, windowsMSVCBuildOptions{CaptureMap: true, CaptureProgramDatabase: true, EmbeddedCodeView: true, PreserveOptimizedLinking: true})
+}
+
 func buildWindowsHostWithMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, captureMap bool) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
@@ -197,6 +211,19 @@ func BuildWindowsMSVCProbe(toolchain WindowsHostToolchain, profile Profile, prob
 // BuildWindowsMSVCProbeWithMap retains the MSVC link map for local C comparison.
 func BuildWindowsMSVCProbeWithMap(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
 	return buildWindowsMSVCProbeWithMap(toolchain, profile, probeSource, true)
+}
+
+// BuildWindowsMSVCProbeWithDebugMap retains private C symbols for a local size comparison.
+func BuildWindowsMSVCProbeWithDebugMap(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if probeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
+	}
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode,
+		[]windowsMSVCSource{{Name: "probe.c", Contents: probeSource}},
+		windowsMSVCBuildOptions{CaptureMap: true, CaptureProgramDatabase: true, EmbeddedCodeView: true, PreserveOptimizedLinking: true})
 }
 
 func buildWindowsMSVCProbeWithMap(toolchain WindowsHostToolchain, profile Profile, probeSource string, captureMap bool) (WindowsHostArtifact, error) {
@@ -533,11 +560,12 @@ type windowsMSVCSource struct {
 }
 
 type windowsMSVCBuildOptions struct {
-	CaptureMap             bool
-	CaptureProgramDatabase bool
-	DisableICF             bool
-	EmbeddedCodeView       bool
-	PrebuiltObjects        []WindowsHostObject
+	CaptureMap               bool
+	CaptureProgramDatabase   bool
+	DisableICF               bool
+	EmbeddedCodeView         bool
+	PreserveOptimizedLinking bool
+	PrebuiltObjects          []WindowsHostObject
 }
 
 func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
@@ -629,6 +657,9 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	if options.CaptureMap {
 		mapPath = filepath.Join(temporaryRoot, "program.map")
 		arguments = append(arguments, "/MAP:"+mapPath)
+	}
+	if options.PreserveOptimizedLinking && profile == OptimizedProfile {
+		arguments = append(arguments, "/OPT:REF", "/OPT:ICF")
 	}
 	if options.DisableICF {
 		arguments = append(arguments, "/OPT:NOICF")
