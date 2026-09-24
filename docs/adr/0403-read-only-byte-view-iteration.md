@@ -70,10 +70,12 @@ The nested return also executes in the verified-MIR interpreter. The backend
 omits unreachable MIR blocks when emitting C, avoiding unreferenced labels
 after an early return.
 
-The remaining release evidence includes resource and `defer` cleanup on loop
-exits and representative real-workload execution. Negative fixtures cover
-wrong or mutable iterable types, effectful expressions, binding escape and
-owner mutation while iterating.
+An executable proof now checks `defer` before resource cleanup, exactly once
+per body, on byte-loop `continue`, `break`, and early `return`. It compares the
+verified-MIR interpreter trace with low and optimized Windows native execution.
+Result `?` and Region cleanup exits and representative real-workload execution
+remain open. Negative fixtures cover wrong or mutable iterable types,
+effectful expressions, binding escape and owner mutation while iterating.
 The [paired C comparison](../ops/evidence/byte-view-c-budget-20260924.md)
 measured the new form, the equivalent explicit-index Fairy form and independent
 C in both MSVC profiles. Optimized runtime and EXE size are within the 8% limit
