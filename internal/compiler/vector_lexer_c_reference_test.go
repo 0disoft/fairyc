@@ -277,6 +277,42 @@ func TestPrivateVectorSDKCandidateIndependentCScannerGeometricDiagnostics(t *tes
 	if err != nil {
 		t.Fatal(err)
 	}
+	variants := realScannerVectorVariants(t)
+	if len(variants) != 5 || variants[0].name != "explicit index" {
+		t.Fatal("real scanner source changed")
+	}
+	fairyMain := fmt.Sprintf(`module main;
+import scanner as scanner;
+import diagnostics as diagnostics;
+import std::bytes as bytes;
+fn i32 check(ref u8[] input, usize wanted_tokens, usize wanted_diagnostics, bool over) {
+    let bytes::Buffer owned = switch (bytes::copy(input)) {
+        case .ok(value): { value }
+        case .err(_): { return 3; }
+    };
+    let scanner::Stream stream = switch (scanner::collect(owned, false, 32768, 1048576, 256, 16777216)) {
+        case .ok(value): { value }
+        case .err(code): { return code; }
+    };
+    if (scanner::token_count(ref stream) != wanted_tokens) { return 10; }
+    if (scanner::diagnostic_count(ref stream) != wanted_diagnostics) { return 11; }
+    let scanner::TokenInfo eof = scanner::token_info(ref stream, wanted_tokens - 1);
+    if (eof.kind != 1 || eof.start != input.len || eof.end != input.len) { return 12; }
+    if (over) {
+        let diagnostics::Info last = scanner::diagnostic_info(ref stream, wanted_diagnostics - 1);
+        if (last.code != 10 || last.start != 257 || last.end != 257) { return 13; }
+        let scanner::TokenInfo tail = scanner::token_info(ref stream, wanted_tokens - 2);
+        if (tail.kind != 0 || tail.start != wanted_tokens - 2 || tail.end != input.len) { return 14; }
+    }
+    return 0;
+}
+fn i32 main() {
+    if (check(b"%s"[..], 257, 256, false) != 0) { return 21; }
+    if (check(b"%s"[..], 258, 257, true) != 0) { return 22; }
+    if (check(b"%s"[..], 259, 257, true) != 0) { return 23; }
+    return 0;
+}`, strings.Repeat("#", 256), strings.Repeat("#", 257), strings.Repeat("#", 258))
+	program, entry, _ := scannerBudgetFairyProgramWithMain(t, variants[0], fairyMain)
 	const probe = `
 int main(void) {
 #ifdef _WIN32
@@ -315,6 +351,41 @@ int main(void) {
 					t.Fatalf("diagnostics=%d: %+v %v\nwant %q", count, outcome, err, want)
 				}
 			}
+			t.Run("diagnostic limit", func(t *testing.T) {
+				if !strings.Contains(scannerCBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n") ||
+					!strings.Contains(scannerCGeometricBenchmarkSource(t), "#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n") {
+					t.Fatal("C budget images omitted the diagnostic limit")
+				}
+				for _, storage := range []struct {
+					name    string
+					defines string
+				}{
+					{"preallocated", ""},
+					{"geometric", "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"},
+				} {
+					t.Run(storage.name, func(t *testing.T) {
+						code := "#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n" + storage.defines + string(core)
+						image, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+						if err != nil {
+							t.Fatal(err)
+						}
+						for _, count := range []int{256, 257, 258} {
+							data := []byte(strings.Repeat("#", count))
+							outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(image, scannerCInput(data))
+							want := scannerGoObservation(data)
+							if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" ||
+								outcome.TrapControl != "" || outcome.Stdout != want {
+								t.Fatalf("diagnostic limit %d: %+v %v\nwant %q", count, outcome, err, want)
+							}
+						}
+					})
+				}
+				fairyImage, _ := buildRealScannerVectorNative(t, program, entry, profile, "")
+				fairyOutcome, err := cdriver.ExecuteWindowsHost(fairyImage)
+				if err != nil || fairyOutcome.ExitCode != 0 || fairyOutcome.Stdout != "" || fairyOutcome.Stderr != "" {
+					t.Fatalf("Fairy diagnostic limit: %+v %v", fairyOutcome, err)
+				}
+			})
 		})
 	}
 }
@@ -395,7 +466,7 @@ func scannerCGeometricBenchmarkSource(t *testing.T) string {
 
 func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n"
+	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n"
 	if geometric {
 		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
 	}

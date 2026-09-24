@@ -24,6 +24,9 @@ enum { FC_CANDIDATE_COOKED = 65536, FC_CANDIDATE_COOKED_SIZE = 4 };
 #ifdef FC_CANDIDATE_WORK_LIMIT
 enum { FC_CANDIDATE_WORK = 16 << 20 };
 #endif
+#ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
+enum { FC_CANDIDATE_DIAGNOSTICS = 256 };
+#endif
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
 enum { FC_NO_TRIVIA, FC_PREAMBLE, FC_WHITESPACE, FC_LINE_COMMENT,
@@ -57,6 +60,9 @@ struct fc_scanner {
 #endif
 #ifdef FC_CANDIDATE_WORK_LIMIT
     size_t expansion_work, work_limit;
+#endif
+#ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
+    int diagnostic_limit_exhausted;
 #endif
 };
 
@@ -136,6 +142,14 @@ static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
 static void fc_diagnostic(struct fc_scanner *s, const char *code,
                           size_t start, size_t end, const char *repair,
                           const char *token) {
+#ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
+    // The one terminal E0010 is outside the ordinary diagnostic budget.
+    if (s->diagnostic_count >= FC_CANDIDATE_DIAGNOSTICS &&
+        strcmp(code, "E0010") != 0) {
+        s->diagnostic_limit_exhausted = 1;
+        return;
+    }
+#endif
 #ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
     if (s->diagnostic_allocation_failed || !fc_reserve_diagnostic_slot(s)) {
         s->diagnostic_allocation_failed = 1;
@@ -680,6 +694,18 @@ static int fc_scan(struct fc_scanner *s) {
     while (s->position < s->length) {
         int status = fc_scan_one(s);
         if (status != 0) return status;
+#ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
+        if (s->diagnostic_limit_exhausted) {
+            fc_diagnostic(s, "E0010", s->position, s->position, "none", "");
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+            if (s->diagnostic_allocation_failed) return 3;
+#endif
+            if (s->position < s->length)
+                fc_token(s, FC_INVALID, FC_NO_TRIVIA, s->position,
+                         s->length, NULL, 0);
+            s->position = s->length;
+        }
+#endif
 #ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
         if (s->token_allocation_failed) return 3;
 #endif

@@ -52,3 +52,12 @@ The full scanner 8% gate remains open.
 The [paired C storage A/B](c-scanner-storage-ab-20260925.md) found a 512-byte
 smaller geometric C executable, but all runtime series failed the predeclared
 stability rule. It identifies no faster C lane and does not change the 8% gate.
+
+The candidate C budget images subsequently gained the Go/Fairy diagnostic
+count boundary: 256 ordinary diagnostics are retained, and the next attempted
+diagnostic produces one terminal `E0010` plus lossless remaining input and EOF.
+The 256/257/258-invalid-byte probe matches Go output for both C storage modes
+under low and optimized MSVC; the actual Fairy scanner checks matching counts,
+terminal location and EOF. This does not establish parity for every diagnostic
+path or diagnostic payload allocation. The earlier executable hashes and QPC
+samples do not describe these revised C images.

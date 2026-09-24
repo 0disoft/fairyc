@@ -221,8 +221,14 @@ consumed source bytes plus prior and current decimal expansion before
 materialization. At work limits 6 and 7, `1e3` respectively yields lossless
 `E0010` exhaustion and a normal token in C and Go; the actual Fairy scanner
 follows the same boundary. A default-budget large exponent also yields
-`E0010` before allocating its expansion. Other low-budget recognition paths
-and token/diagnostic storage remain different or unproven, so this is not a
+`E0010` before allocating its expansion. The candidate C budget images now
+also stop after 256 ordinary diagnostics and retain one terminal `E0010`.
+Runs with 256, 257 and 258 invalid bytes match the Go lexer exactly in both
+C storage modes under low and optimized MSVC. The actual Fairy scanner checks
+the same boundary's token count, diagnostic count, terminal span and EOF.
+This establishes the diagnostic-count boundary for those inputs, not all
+multi-diagnostic lexical paths. Other low-budget recognition paths and
+diagnostic payload ownership remain different or unproven, so this is not a
 complete C-relative baseline.
 The measured short sample is inside all three supported ranges; a broader
 budget comparison needs the same accepted input and limit behavior in both
