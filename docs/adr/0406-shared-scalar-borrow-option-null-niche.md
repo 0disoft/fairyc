@@ -1,6 +1,6 @@
-# ADR 0406: Null niche for shared scalar, structure and resource borrow options
+# ADR 0406: Null niche for shared scalar, aggregate and resource borrow options
 
-- Status: Implemented private C transport (shared scalars, structures and resources)
+- Status: Implemented private C transport (shared scalars, structures, fixed arrays and resources)
 - Date: 2026-09-24
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
 
@@ -20,9 +20,13 @@ unchanged; only the surrounding Option record loses its redundant tag.
 `Option<ref R>` now uses the same representation for a resolved resource `R`.
 The borrowed pointer remains tied to the resource owner; the resource itself
 is neither moved nor dropped by constructing or switching the Option.
+An exact fixed scalar array borrow `ref T[N]` also uses one pointer; this does
+not apply to a length-bearing `ref u8[]` view. This transport change does not
+admit direct indexing of a fixed-array borrow; the native proof explicitly
+dereferences its payload before using the existing value-array index operation.
 
 The whitelist excludes mutable borrows, byte and string views, raw pointers,
-fixed-array borrows, and nested tagged values. A raw pointer can itself
+and nested tagged values. A raw pointer can itself
 be null; a view may use null data for an empty value. Neither representation
 provides this spare value. Included safe borrows are non-null by contract; unsafe
 code that fabricates an invalid borrow does not create an additional safe value.
@@ -51,7 +55,7 @@ The `ref bool` case uses the same non-null borrow representation; its private C
 transport was added after the initial four-integer whitelist without changing
 the language or SDK pin.
 
-The structure and resource cases check `Some` and `None` through the
+The structure, resource and fixed-array cases check `Some` and `None` through the
 interpreter, assert the one-word C record and null test, and execute both
 Windows MSVC profiles.
 

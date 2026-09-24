@@ -23,7 +23,7 @@ type taggedCType struct {
 	needsDrop bool
 }
 
-func sharedBorrowOptionNiche(value hir.Type, structByType, resourceByType map[hir.Type]int) bool {
+func sharedBorrowOptionNiche(value hir.Type, structByType, resourceByType, arrayByType map[hir.Type]int) bool {
 	element, option := hir.OptionElement(value)
 	if !option {
 		return false
@@ -39,7 +39,8 @@ func sharedBorrowOptionNiche(value hir.Type, structByType, resourceByType map[hi
 		borrowed = canonicalCValueType(borrowed)
 		_, structure := structByType[borrowed]
 		_, resource := resourceByType[borrowed]
-		return structure || resource
+		_, array := arrayByType[borrowed]
+		return structure || resource || array
 	}
 }
 
@@ -164,7 +165,7 @@ func prepareTaggedTypes(
 		}
 		layoutState[value] = 1
 		fields := make([]layout.Field, 0, len(candidate.payloads)+1)
-		if !sharedBorrowOptionNiche(value, structByType, resourceByType) {
+		if !sharedBorrowOptionNiche(value, structByType, resourceByType, arrayByType) {
 			fields = append(fields, layout.Field{
 				Name: "tag",
 				Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"},
@@ -441,7 +442,7 @@ func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
 func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
 	tagged := e.taggedTypes[index]
 	output.WriteString("typedef struct {\n")
-	if !sharedBorrowOptionNiche(tagged.typ, e.structByType, e.resourceByType) {
+	if !sharedBorrowOptionNiche(tagged.typ, e.structByType, e.resourceByType, e.arrayByType) {
 		output.WriteString("    uint32_t tag;\n")
 	}
 	for payloadIndex, payload := range tagged.payloads {
@@ -456,7 +457,7 @@ func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
 	fmt.Fprintf(output, "_Static_assert(_Alignof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d alignment\");\n", index, tagged.layout.AlignmentBytes, index)
 	for fieldIndex, field := range tagged.layout.Fields {
 		fieldName := "tag"
-		if sharedBorrowOptionNiche(tagged.typ, e.structByType, e.resourceByType) {
+		if sharedBorrowOptionNiche(tagged.typ, e.structByType, e.resourceByType, e.arrayByType) {
 			fieldName = fmt.Sprintf("p_%d", fieldIndex)
 		} else if fieldIndex > 0 {
 			fieldName = fmt.Sprintf("p_%d", fieldIndex-1)

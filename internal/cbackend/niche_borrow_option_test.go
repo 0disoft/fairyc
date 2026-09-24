@@ -62,15 +62,33 @@ fn i32 main() {
 }
 `
 
+const sharedArrayBorrowOptionSource = `module main;
+fn Option<ref u8[3]> choose(ref u8[3] value, bool include) {
+    return if (include) { .some(value) } else { .none };
+}
+fn i32 main() {
+    let u8[3] source = [40, 41, 42];
+    let Option<ref u8[3]> present = choose(ref source, true);
+    let Option<ref u8[3]> absent = choose(ref source, false);
+    let i32 first = switch (present) { case .some(view): { let u8[3] copied = *view; if (copied[2] == 42) { 42 } else { 1 } } case .none: { 1 } };
+    let i32 second = switch (absent) { case .some(_): { 2 } case .none: { 0 } };
+    return first + second;
+}
+`
+
 func TestSharedStructBorrowOptionUsesNullNiche(t *testing.T) {
-	checkSharedNamedBorrowOptionNiche(t, sharedStructBorrowOptionSource)
+	checkSharedBorrowOptionNiche(t, sharedStructBorrowOptionSource)
 }
 
 func TestSharedResourceBorrowOptionUsesNullNiche(t *testing.T) {
-	checkSharedNamedBorrowOptionNiche(t, sharedResourceBorrowOptionSource)
+	checkSharedBorrowOptionNiche(t, sharedResourceBorrowOptionSource)
 }
 
-func checkSharedNamedBorrowOptionNiche(t *testing.T, source string) {
+func TestSharedArrayBorrowOptionUsesNullNiche(t *testing.T) {
+	checkSharedBorrowOptionNiche(t, sharedArrayBorrowOptionSource)
+}
+
+func checkSharedBorrowOptionNiche(t *testing.T, source string) {
 	t.Helper()
 	program := lowerSource(t, source)
 	outcome, err := interpreter.Execute(program, "main::main")
