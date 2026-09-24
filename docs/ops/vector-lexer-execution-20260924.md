@@ -36,5 +36,28 @@ for candidate; native build intervals were 1,752.86 ms and 2,033.65 ms.
 Their sequential order, caches and ambient host load were uncontrolled, so
 these are diagnostic observations, not a check/build regression comparison.
 This experiment has no independent C full-scanner lane and does not close the
-cumulative 8% C-relative budget. A predeclared longer timed workload is needed
-to reduce measurement noise before revisiting candidate/indexed runtime cost.
+cumulative 8% C-relative budget.
+
+## Predeclared longer window
+
+The [second raw report](evidence/vector-lexer-execution-long-20260924.json)
+uses source `c86b3b061ec7f9852d86da985f21a4ee1ae3b487` and increases each
+timed run to 250,000 scans, 25 times the first window. It keeps one warmup
+pair, twelve alternating measured pairs, the same input and Go checksum, and
+the same two real-scanner source variants. Both optimized EXEs remain 205,824
+bytes. No pair was retried, dropped or added after seeing the first result.
+
+| Lane | Median QPC time | Relative full span |
+| --- | ---: | ---: |
+| Explicit index | 861.80065 ms | 49.18% |
+| Private vector candidate | 777.03640 ms | 80.89% |
+
+The paired candidate/index median is 0.97072, whereas the ratio of lane
+medians is 0.90164. Individual paired ratios range from 0.77959 to 1.30119;
+their relative full span is 53.73%. The longer window also fails the 10%
+stability heuristic, and its point estimates reverse the first window's
+ordering. These observations cannot establish which Fairy form is faster or
+whether either meets the C-relative 8% budget. Further local reruns under the
+same uncontrolled host conditions would not settle the admission decision;
+the next timing gate needs controlled machine load and frequency or another
+measurement method with the same output and ownership checks.

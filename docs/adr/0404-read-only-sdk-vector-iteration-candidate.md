@@ -137,6 +137,9 @@ storage loops over 10,000 scans. Both EXEs are the same size, but the runtime
 samples exceed the predeclared stability span; they support no speed verdict.
 The token reporter runs outside the timed section, and the independent-C
 full-scanner budget remains unmeasured.
+A predeclared 25-times-longer window also exceeded the stability limit and
+reversed the point-estimate ordering. Runtime cost remains inconclusive; more
+repetitions under the same uncontrolled host are not an admission substitute.
 
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
