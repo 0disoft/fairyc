@@ -82,7 +82,11 @@ C in both MSVC profiles. Optimized runtime and EXE size are within the 8% limit
 for this microkernel. The `/Od` runtime is about 21% above C, similar to the
 existing explicit-index form; it is a diagnostic profile, not the optimized
 C-relative budget gate established by the [baseline](../ops/c-performance-budget-baseline.md).
-The real lexer/parser workload and broader release evidence remain open.
+The [real lexer-candidate comparison](../ops/evidence/byte-view-real-workload-20260924.md)
+confirms matching output and identical EXE size for the three adopted loops
+against their former explicit-index spelling in both Windows profiles. Its
+process roundtrip samples are too unstable for a runtime verdict and are not
+C-relative. The full-application C budget and broader release evidence remain open.
 Generated-C inspection points to retained safe checks under `/Od`; this is
 not yet a measured attribution to an individual check.
 The Fairy-written parser candidate now retains this form as statement kind 18
