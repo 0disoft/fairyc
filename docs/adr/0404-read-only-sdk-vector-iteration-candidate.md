@@ -200,6 +200,16 @@ still return an unsupported status in C. This remains insufficient for an 8% C b
 remaining lexical forms,
 limits, storage and output must be implemented and checked before timing or
 comparing executable sizes.
+This large-decimal check is against the Go lexer, not the Fairy-written
+candidate scanner. The latter still returns candidate-size status 4 above
+16,384 materialized decimal bytes, caps cumulative cooked bytes at 65,536,
+and rejects source longer than 32,768 bytes. The C reference shares the
+32,768-byte source cap but now admits larger decimal payloads; the Go lexer's
+default source limit is 8 MiB and its 16 MiB work budget also charges scanning.
+The 70,000-digit digest check therefore cannot prove Fairy/C equivalence.
+The measured short sample is inside all three supported ranges; a broader
+budget comparison needs the same accepted input and limit behavior in both
+implementations before using executable-size or runtime ratios as a gate.
 An independent-C workload entry now copies the real scanner sample on every
 round, scans it, releases its token and cooked storage, and checks the exact
 first-round observations plus source/cooked/diagnostic byte and item totals
