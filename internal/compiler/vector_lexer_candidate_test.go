@@ -271,6 +271,14 @@ func buildRealScannerVectorNativeWithStorage(t *testing.T, program mir.Program, 
 }
 
 func buildRealScannerVectorNativeWithStorageAndMap(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap bool) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+	return buildRealScannerVectorNativeWithStorageAndSymbols(t, program, entry, profile, extraSupport, storageOverride, captureMap, false)
+}
+
+func buildRealScannerVectorNativeWithDebugMap(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport string) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+	return buildRealScannerVectorNativeWithStorageAndSymbols(t, program, entry, profile, extraSupport, "", true, true)
+}
+
+func buildRealScannerVectorNativeWithStorageAndSymbols(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap, captureDebug bool) (cdriver.WindowsHostArtifact, cbackend.Unit) {
 	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
@@ -307,7 +315,9 @@ func buildRealScannerVectorNativeWithStorageAndMap(t *testing.T, program mir.Pro
 	}
 	runtimeSource := scalar + vectorStorageAllocator + sdk + strings.TrimPrefix(storage, heap) + vectorForNativeProbe + extraSupport
 	var artifact cdriver.WindowsHostArtifact
-	if captureMap {
+	if captureDebug {
+		artifact, err = cdriver.BuildWindowsHostWithDebugMap(toolchain, profile, unit.Source, runtimeSource)
+	} else if captureMap {
 		artifact, err = cdriver.BuildWindowsHostWithMap(toolchain, profile, unit.Source, runtimeSource)
 	} else {
 		artifact, err = cdriver.BuildWindowsHost(toolchain, profile, unit.Source, runtimeSource)

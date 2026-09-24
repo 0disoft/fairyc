@@ -411,6 +411,10 @@ only 7,775 bytes of the 20,122-byte unwind-interval gap to uniquely named
 owners. The other 12,370-byte difference has no matching public symbol
 start; optimizing `unit.obj` or the runtime on this partial map alone
 would be unsupported.
+An [optimized PDB layout comparison](../ops/scanner-debug-layout-20260925.md)
+matches all 526 C and 589 Fairy release-image unwind intervals with their
+respective symbol-bearing builds. It enables a private-symbol attribution
+attempt, but has not yet assigned the unmatched intervals or changed the gate.
 
 ## Proposed first boundary
 
