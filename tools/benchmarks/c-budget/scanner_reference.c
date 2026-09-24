@@ -13,6 +13,9 @@
 
 enum { FC_MAX_SOURCE = 32768, FC_MAX_COOKED = 16 << 20,
        FC_UNSUPPORTED = 7, FC_BAD_INPUT = 8 };
+#ifdef FC_CANDIDATE_SOURCE_LIMIT
+enum { FC_CANDIDATE_SOURCE_SIZE = 4 };
+#endif
 #ifdef FC_CANDIDATE_DECIMAL_LIMIT
 // The Fairy-written scanner materializes at most 16,384 decimal bytes.
 // Keep the broader Go-oracle reference available without this build switch.
@@ -983,6 +986,9 @@ static int fc_scan_one(struct fc_scanner *s) {
 }
 
 static int fc_scan(struct fc_scanner *s) {
+#ifdef FC_CANDIDATE_SOURCE_LIMIT
+    if (s->length > FC_MAX_SOURCE) return FC_CANDIDATE_SOURCE_SIZE;
+#endif
     if (s->length >= 3 && s->source[0] == 0xef && s->source[1] == 0xbb &&
         s->source[2] == 0xbf) {
 #ifdef FC_CANDIDATE_WORK_LIMIT
@@ -1143,7 +1149,13 @@ int main(void) {
     if (fread(header, 1, 4, stdin) != 4) return FC_BAD_INPUT;
     uint32_t length = (uint32_t)header[0] | ((uint32_t)header[1] << 8) |
                       ((uint32_t)header[2] << 16) | ((uint32_t)header[3] << 24);
-    if (length > FC_MAX_SOURCE) return FC_BAD_INPUT;
+    if (length > FC_MAX_SOURCE) {
+#ifdef FC_CANDIDATE_SOURCE_LIMIT
+        return FC_CANDIDATE_SOURCE_SIZE;
+#else
+        return FC_BAD_INPUT;
+#endif
+    }
     unsigned char *source = (unsigned char *)malloc(length == 0 ? 1u : (size_t)length);
     struct fc_token *tokens = NULL;
 #ifndef FC_CANDIDATE_GEOMETRIC_TOKENS

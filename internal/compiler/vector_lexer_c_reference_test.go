@@ -729,7 +729,7 @@ func scannerCGeometricBenchmarkSource(t *testing.T) string {
 
 func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT\n"
+	defines := "#define FC_CANDIDATE_SOURCE_LIMIT\n#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_PAYLOAD\n#define FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT\n"
 	if geometric {
 		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
 	}

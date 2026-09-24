@@ -203,9 +203,15 @@ comparing executable sizes.
 This large-decimal check is against the Go lexer, not the Fairy-written
 candidate scanner. The latter still returns candidate-size status 4 above
 16,384 materialized decimal bytes, caps cumulative cooked bytes at 65,536,
-and rejects source longer than 32,768 bytes. The C reference shares the
-32,768-byte source cap but now admits larger decimal payloads; the Go lexer's
-default source limit is 8 MiB and its 16 MiB work budget also charges scanning.
+and rejects source longer than 32,768 bytes. The C candidate budget images and
+library mode now return candidate-size status 4 before scanning a longer source;
+the standalone Go-oracle C build still returns bad-input status 8 for a frame
+above its 32,768-byte input cap. A low/optimized MSVC probe accepts exactly
+32,768 bytes and rejects 32,769 bytes in both modes, while checking that both
+C budget storage lanes enable the candidate cap. This checks the C boundary
+against the Fairy scanner's declared source limit, not full C/Fairy lexical
+parity at that size. The C reference now admits larger decimal payloads; the Go
+lexer's default source limit is 8 MiB and its 16 MiB work budget also charges scanning.
 The 70,000-digit digest check therefore cannot prove Fairy/C equivalence.
 The standalone C Go-oracle build retains that wider range. The C budget image
 now enables a candidate decimal-materialization limit of 16,384 bytes.
