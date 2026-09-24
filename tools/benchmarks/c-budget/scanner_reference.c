@@ -587,6 +587,7 @@ static void fc_release_cooked(const struct fc_scanner *s) {
     }
 }
 
+#ifndef FC_SCANNER_LIBRARY
 int main(void) {
 #ifdef _WIN32
     if (_setmode(_fileno(stdin), _O_BINARY) == -1 ||
@@ -617,3 +618,4 @@ int main(void) {
     free(source); free(tokens); free(diagnostics);
     return status;
 }
+#endif

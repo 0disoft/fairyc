@@ -197,6 +197,12 @@ status. This remains insufficient for an 8% C budget baseline:
 remaining lexical forms,
 limits, storage and output must be implemented and checked before timing or
 comparing executable sizes.
+An independent-C workload entry now copies the real scanner sample on every
+round, scans it, releases its token and cooked storage, and checks the exact
+first-round observations plus source/cooked/diagnostic byte and item totals
+against the Go lexer under both MSVC profiles. One- and two-round runs verify
+repeatability. This is an untimed parity gate, not the whole-scanner runtime
+or executable-size comparison.
 
 ## Proposed first boundary
 

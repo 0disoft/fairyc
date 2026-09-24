@@ -88,6 +88,63 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 	}
 }
 
+func TestPrivateVectorSDKCandidateIndependentCScannerWorkload(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	core, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "scanner_reference.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workload, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "scanner_workload_reference.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	code := "#define FC_SCANNER_LIBRARY\n" + string(core) + "\n" + string(workload)
+	data := []byte("let n=12345; /*open")
+	lexed := lexer.Lex(source.NewFile("input.fy", data), source.NewBudget(source.DefaultLimits(), len(data)))
+	perRound := len(data) + len(lexed.Tokens) + len(lexed.Diagnostics)
+	for _, token := range lexed.Tokens {
+		perRound += len(token.Cooked)
+	}
+	for _, diagnostic := range lexed.Diagnostics {
+		perRound += len(diagnostic.Token)
+	}
+	if len(lexed.Tokens) == 0 || len(lexed.Diagnostics) == 0 || perRound <= len(data) {
+		t.Fatal("workload lost token, cooked or diagnostic coverage")
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, rounds := range []uint32{1, 2} {
+				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCWorkloadInput(rounds, data))
+				if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
+					t.Fatalf("C workload rounds=%d: %+v %v", rounds, outcome, err)
+				}
+				want := fmt.Sprintf("%sS %d\n", scannerGoObservation(data), perRound*int(rounds))
+				if outcome.Stdout != want {
+					t.Fatalf("C workload rounds=%d differs\n got: %q\nwant: %q", rounds, outcome.Stdout, want)
+				}
+			}
+		})
+	}
+}
+
+func scannerCWorkloadInput(rounds uint32, data []byte) *bytes.Reader {
+	encoded := make([]byte, 8+len(data))
+	binary.LittleEndian.PutUint32(encoded, rounds)
+	binary.LittleEndian.PutUint32(encoded[4:], uint32(len(data)))
+	copy(encoded[8:], data)
+	return bytes.NewReader(encoded)
+}
+
 func scannerCInput(data []byte) *bytes.Reader {
 	encoded := make([]byte, 4+len(data))
 	binary.LittleEndian.PutUint32(encoded, uint32(len(data)))
