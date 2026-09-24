@@ -1,5 +1,5 @@
-// Independent C11 lexical reference. Unicode escapes and large decimal
-// expansions remain unsupported; this is not yet a full-scanner budget lane.
+// Independent C11 lexical reference. Large decimal expansions remain
+// unsupported; this is not yet a full-scanner budget lane.
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -357,7 +357,52 @@ static int fc_scan_string(struct fc_scanner *s, unsigned kind, size_t opener) {
                     fc_diagnostic(s, "E0006", escape, s->position, "none", "");
                 break;
             }
-            case 'u': free(bytes); return FC_UNSUPPORTED;
+            case 'u': {
+                if (kind != FC_STRING || s->position == s->length ||
+                    s->source[s->position] != '{') {
+                    fc_diagnostic(s, "E0005", escape, s->position, "none", "");
+                    break;
+                }
+                s->position++;
+                size_t digits_start = s->position;
+                while (s->position < s->length &&
+                       fc_digit_value(s->source[s->position]) >= 0 &&
+                       s->position - digits_start < 6u)
+                    s->position++;
+                if (digits_start == s->position || s->position == s->length ||
+                    s->source[s->position] != '}') {
+                    while (s->position < s->length && s->source[s->position] != '}' &&
+                           s->source[s->position] != '"')
+                        s->position++;
+                    if (s->position < s->length && s->source[s->position] == '}')
+                        s->position++;
+                    fc_diagnostic(s, "E0005", escape, s->position, "none", "");
+                    break;
+                }
+                unsigned value = 0;
+                for (size_t i = digits_start; i < s->position; i++)
+                    value = value * 16u + (unsigned)fc_digit_value(s->source[i]);
+                s->position++;
+                if (value > 0x10ffffu || (value >= 0xd800u && value <= 0xdfffu)) {
+                    fc_diagnostic(s, "E0005", escape, s->position, "none", "");
+                    break;
+                }
+                if (value < 0x80u) bytes[used++] = (unsigned char)value;
+                else if (value < 0x800u) {
+                    bytes[used++] = (unsigned char)(0xc0u | (value >> 6));
+                    bytes[used++] = (unsigned char)(0x80u | (value & 0x3fu));
+                } else if (value < 0x10000u) {
+                    bytes[used++] = (unsigned char)(0xe0u | (value >> 12));
+                    bytes[used++] = (unsigned char)(0x80u | ((value >> 6) & 0x3fu));
+                    bytes[used++] = (unsigned char)(0x80u | (value & 0x3fu));
+                } else {
+                    bytes[used++] = (unsigned char)(0xf0u | (value >> 18));
+                    bytes[used++] = (unsigned char)(0x80u | ((value >> 12) & 0x3fu));
+                    bytes[used++] = (unsigned char)(0x80u | ((value >> 6) & 0x3fu));
+                    bytes[used++] = (unsigned char)(0x80u | (value & 0x3fu));
+                }
+                break;
+            }
             default: fc_diagnostic(s, "E0005", escape, s->position, "none", ""); break;
             }
             continue;

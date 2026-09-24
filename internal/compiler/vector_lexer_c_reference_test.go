@@ -16,8 +16,8 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// This C source is independently authored and still rejects Unicode escapes
-// and large decimal expansions until it can match the full scanner.
+// This C source is independently authored and still rejects large decimal
+// expansions until it can match the full scanner.
 func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
@@ -49,6 +49,9 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 		{"plain strings", []byte(`"text" b"bytes" c"cstr" "" b"" c""`)},
 		{"simple escapes", []byte(`"a\n\\\"" b"\x00A" c"\0" c"\x00"`)},
 		{"raw Unicode", []byte(`"한" b"한" c"한"`)},
+		{"Unicode escapes", []byte(`"\u{41}\u{03bb}\u{1F600}\u{10ffff}\u{0}"`)},
+		{"invalid Unicode scalars", []byte(`"\u{d800}\u{110000}\u{}\u{1234567}"`)},
+		{"invalid Unicode recovery", []byte(`"\u{12g}x" "\u{12" b"\u{41}" c"\u{41}"`)},
 		{"invalid string bytes", []byte{'"', 'a', 0xff, 'b', '"'}},
 		{"invalid escaped UTF-8", []byte(`"\xff"`)},
 		{"invalid escapes", []byte(`"\q" "\xG" "\xF"`)},
@@ -75,7 +78,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 					}
 				})
 			}
-			for _, unsupported := range []string{"1e70000", "1e-70000", `"\u{03BB}"`, `b"\u{03BB}"`} {
+			for _, unsupported := range []string{"1e70000", "1e-70000"} {
 				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput([]byte(unsupported)))
 				if err != nil || outcome.ExitCode != 7 || outcome.Stdout != "" || outcome.Stderr != "" {
 					t.Fatalf("unsupported %q: %+v %v", unsupported, outcome, err)

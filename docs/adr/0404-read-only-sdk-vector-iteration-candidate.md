@@ -190,10 +190,10 @@ integer-cooking step covers decimal, binary and hexadecimal values beyond 64
 bits, invalid spellings and the representative cooked-number/unclosed-comment
 input. A bounded decimal-float step now checks exponent normalization and
 malformed spellings against the same oracle. The C reference now also checks
-plain string, byte-string and C-string values, simple and hex escapes, raw
-UTF-8, invalid bytes, NUL diagnostics and unterminated strings. Unicode
-escapes and decimal expansions larger than 65,536 cooked bytes still return an
-unsupported status. This remains insufficient for an 8% C budget baseline:
+plain string, byte-string and C-string values, simple, hex and Unicode
+escapes, raw UTF-8, invalid bytes, NUL diagnostics and unterminated strings.
+Decimal expansions larger than 65,536 cooked bytes still return an unsupported
+status. This remains insufficient for an 8% C budget baseline:
 remaining lexical forms,
 limits, storage and output must be implemented and checked before timing or
 comparing executable sizes.
