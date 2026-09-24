@@ -218,12 +218,15 @@ budget also charges scanning.
 The 70,000-digit digest check therefore cannot prove Fairy/C equivalence.
 The standalone C Go-oracle build retains that wider range. The C budget image
 now enables a candidate decimal-materialization limit of 16,384 bytes.
-The checked-in 27-case lexical corpus now runs through both C budget storage
+The checked-in 38-case lexical corpus now runs through both C budget storage
 lanes and the explicit-index and private vector-loop Fairy scanners under low
 and optimized Windows MSVC. Each lane matches the Go lexer's token and
 diagnostic observations in its output encoding. The cases include BOM and
 comments, number and string spellings, Unicode, invalid bytes, recovery and
-unterminated input. This establishes parity for those inputs, not every limit,
+unterminated input. Eleven added cases cover overlong UTF-8, surrogate and
+out-of-range encodings, invalid leading bytes, truncated sequences, the
+largest valid scalar, and malformed bytes inside strings. This establishes
+parity for those inputs, not every limit,
 allocation failure or source shape; it is an untimed correctness comparison.
 Low and optimized MSVC runs check positive and negative exponent forms at
 16,384 bytes (accepted) and 16,385 bytes (candidate-size status 4) against
