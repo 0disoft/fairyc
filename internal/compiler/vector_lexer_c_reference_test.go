@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -132,6 +133,67 @@ func TestPrivateVectorSDKCandidateIndependentCScannerWorkload(t *testing.T) {
 				if outcome.Stdout != want {
 					t.Fatalf("C workload rounds=%d differs\n got: %q\nwant: %q", rounds, outcome.Stdout, want)
 				}
+			}
+		})
+	}
+}
+
+func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	parts := []string{
+		"#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n",
+	}
+	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
+		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		parts = append(parts, string(data), "\n")
+	}
+	code := strings.Join(parts, "")
+	const sample = "let n=12345; /*open"
+	lexed := lexer.Lex(source.NewFile("input.fy", []byte(sample)), source.NewBudget(source.DefaultLimits(), len(sample)))
+	perRound := len(sample) + len(lexed.Tokens) + len(lexed.Diagnostics)
+	for _, token := range lexed.Tokens {
+		perRound += len(token.Cooked)
+	}
+	for _, diagnostic := range lexed.Diagnostics {
+		perRound += len(diagnostic.Token)
+	}
+	if perRound <= len(sample) || len(lexed.Diagnostics) == 0 {
+		t.Fatal("benchmark sample lost cooked or diagnostic coverage")
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, strings.NewReader("12345 1000\n"))
+			if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
+				t.Fatalf("C benchmark smoke: %+v %v", outcome, err)
+			}
+			prefix := scannerGoObservation([]byte(sample))
+			if !strings.HasPrefix(outcome.Stdout, prefix) {
+				t.Fatalf("C benchmark reporter differs: %q", outcome.Stdout)
+			}
+			fields := strings.Fields(strings.TrimPrefix(outcome.Stdout, prefix))
+			if len(fields) != 4 {
+				t.Fatalf("C benchmark fields=%d: %q", len(fields), outcome.Stdout)
+			}
+			completed, completedErr := strconv.ParseUint(fields[0], 10, 32)
+			ticks, ticksErr := strconv.ParseUint(fields[1], 10, 64)
+			frequency, frequencyErr := strconv.ParseUint(fields[2], 10, 64)
+			total, totalErr := strconv.ParseUint(fields[3], 10, 64)
+			if completedErr != nil || ticksErr != nil || frequencyErr != nil || totalErr != nil ||
+				completed != 1000 || ticks == 0 || frequency == 0 || total != uint64(perRound*1000) {
+				t.Fatalf("C benchmark values=%v errors=%v,%v,%v,%v", fields, completedErr, ticksErr, frequencyErr, totalErr)
 			}
 		})
 	}

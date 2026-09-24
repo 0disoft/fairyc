@@ -203,6 +203,11 @@ first-round observations plus source/cooked/diagnostic byte and item totals
 against the Go lexer under both MSVC profiles. One- and two-round runs verify
 repeatability. This is an untimed parity gate, not the whole-scanner runtime
 or executable-size comparison.
+The matching C benchmark entry runs that same source-copy, scan, storage and
+cleanup loop between QPC calls, with its reporter flushed beforehand. Its
+one-thousand-round smoke checks the independent lexical output, completed
+rounds and checksum under low and optimized MSVC; it does not compare Fairy
+runtime or executable size yet.
 
 ## Proposed first boundary
 

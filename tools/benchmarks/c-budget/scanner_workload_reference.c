@@ -31,6 +31,7 @@ static int fc_workload_round(const unsigned char *input, size_t length,
     return status;
 }
 
+#ifndef FC_SCANNER_WORKLOAD_LIBRARY
 int main(void) {
 #ifdef _WIN32
     if (_setmode(_fileno(stdin), _O_BINARY) == -1 ||
@@ -60,3 +61,4 @@ int main(void) {
     printf("S %llu\n", (unsigned long long)total);
     return 0;
 }
+#endif
