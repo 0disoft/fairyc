@@ -48,3 +48,7 @@ equivalent C lane for runtime and the smaller equivalent C image for EXE size;
 Fairy diagnostic payload ownership remains different.
 The old executable hashes, sizes and timings describe neither current C image.
 The full scanner 8% gate remains open.
+
+The [paired C storage A/B](c-scanner-storage-ab-20260925.md) found a 512-byte
+smaller geometric C executable, but all runtime series failed the predeclared
+stability rule. It identifies no faster C lane and does not change the 8% gate.

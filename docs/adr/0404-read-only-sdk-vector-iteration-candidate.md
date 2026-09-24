@@ -306,6 +306,8 @@ access is not equivalent to the current source loop.
    remains available. Use the faster equivalent C lane for runtime and the
    smaller equivalent C image for size when applying the gate.
    Diagnostic payload ownership and remaining scanner limits still need parity.
+   The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
+   a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
    formatter and release pin only after the proof. A failed gate keeps this
    feature a candidate; it does not authorize relaxing checks.

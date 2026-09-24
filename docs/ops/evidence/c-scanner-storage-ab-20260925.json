@@ -1,0 +1,348 @@
+{
+  "arch": "amd64",
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "images": [
+    {
+      "exe_bytes": 181760,
+      "exe_sha256": "9cf04674fa751057b3ca58f63732c8d939371c57235efc2178519af20a4e98b8",
+      "lane": "preallocated",
+      "source_bytes": 37959,
+      "source_sha256": "21a7c00cb33fc82656293ef963e1fe4703bae8576204e012958d507c08c71d44"
+    },
+    {
+      "exe_bytes": 181248,
+      "exe_sha256": "761833626dcfcb08b68a4ded6fc8d971589cb305e3efd82671a89738cc24a620",
+      "lane": "geometric",
+      "source_bytes": 38040,
+      "source_sha256": "83202c82385e9b14b28043b9c7e5d16eadb4372fb7ef855e3a9ace0da853e959"
+    }
+  ],
+  "measured_pairs": 12,
+  "mode": "measure",
+  "msvc": "14.51.36231",
+  "os": "windows",
+  "per_round_result": 36,
+  "profile": "optimized",
+  "rounds": 250000,
+  "sample_sha256": "27270bb224790aca7d077b8f03b6092e4ab29b7a12bf6756265e7aaf7a2a2133",
+  "samples": [
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4802454,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5374529,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "preallocated",
+        "geometric"
+      ],
+      "pair": 0,
+      "warmup": true
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6652741,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5622203,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric",
+        "preallocated"
+      ],
+      "pair": 1,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6293913,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6506047,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "preallocated",
+        "geometric"
+      ],
+      "pair": 2,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5746777,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4762701,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric",
+        "preallocated"
+      ],
+      "pair": 3,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4763443,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5743073,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "preallocated",
+        "geometric"
+      ],
+      "pair": 4,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5704344,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6707598,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric",
+        "preallocated"
+      ],
+      "pair": 5,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6801842,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7456255,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "preallocated",
+        "geometric"
+      ],
+      "pair": 6,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8391552,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7046591,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric",
+        "preallocated"
+      ],
+      "pair": 7,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6010640,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7169235,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "preallocated",
+        "geometric"
+      ],
+      "pair": 8,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5676245,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4946068,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric",
+        "preallocated"
+      ],
+      "pair": 9,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5163775,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4589645,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "preallocated",
+        "geometric"
+      ],
+      "pair": 10,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5422339,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5648502,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric",
+        "preallocated"
+      ],
+      "pair": 11,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "lane": "preallocated",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5553910,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "lane": "geometric",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6123124,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "preallocated",
+        "geometric"
+      ],
+      "pair": 12,
+      "warmup": false
+    }
+  ],
+  "schema": "fairyc.c-scanner-storage-ab/v1",
+  "scope": "Independent C scanner storage A/B only; QPC excludes process startup and final output. No retries or exclusions. No Fairy/C 8% verdict.",
+  "seed": 12345,
+  "stability_rule": "(max-min)/median <= 0.10 for both lane times and paired geometric/preallocated ratios",
+  "warmup_pairs": 1
+}
