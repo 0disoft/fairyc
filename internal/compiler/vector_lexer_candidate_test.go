@@ -271,14 +271,18 @@ func buildRealScannerVectorNativeWithStorage(t *testing.T, program mir.Program, 
 }
 
 func buildRealScannerVectorNativeWithStorageAndMap(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap bool) (cdriver.WindowsHostArtifact, cbackend.Unit) {
-	return buildRealScannerVectorNativeWithStorageAndSymbols(t, program, entry, profile, extraSupport, storageOverride, captureMap, false)
+	return buildRealScannerVectorNativeWithStorageAndSymbols(t, program, entry, profile, extraSupport, storageOverride, captureMap, false, false)
 }
 
 func buildRealScannerVectorNativeWithDebugMap(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport string) (cdriver.WindowsHostArtifact, cbackend.Unit) {
-	return buildRealScannerVectorNativeWithStorageAndSymbols(t, program, entry, profile, extraSupport, "", true, true)
+	return buildRealScannerVectorNativeWithStorageAndSymbols(t, program, entry, profile, extraSupport, "", true, true, false)
 }
 
-func buildRealScannerVectorNativeWithStorageAndSymbols(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap, captureDebug bool) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+func buildRealScannerVectorNativeWithLibraryLog(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport string) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+	return buildRealScannerVectorNativeWithStorageAndSymbols(t, program, entry, profile, extraSupport, "", true, false, true)
+}
+
+func buildRealScannerVectorNativeWithStorageAndSymbols(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap, captureDebug, captureLibrary bool) (cdriver.WindowsHostArtifact, cbackend.Unit) {
 	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
@@ -317,6 +321,8 @@ func buildRealScannerVectorNativeWithStorageAndSymbols(t *testing.T, program mir
 	var artifact cdriver.WindowsHostArtifact
 	if captureDebug {
 		artifact, err = cdriver.BuildWindowsHostWithDebugMap(toolchain, profile, unit.Source, runtimeSource)
+	} else if captureLibrary {
+		artifact, err = cdriver.BuildWindowsHostWithLibraryLog(toolchain, profile, unit.Source, runtimeSource)
 	} else if captureMap {
 		artifact, err = cdriver.BuildWindowsHostWithMap(toolchain, profile, unit.Source, runtimeSource)
 	} else {

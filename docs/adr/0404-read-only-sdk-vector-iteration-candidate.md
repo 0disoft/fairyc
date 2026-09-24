@@ -416,6 +416,11 @@ matches all 526 C and 589 Fairy release-image unwind intervals with their
 respective symbol-bearing builds. It enables a private-symbol attribution
 attempt, but that attempt finds no exact PDB symbol for the map-unmatched
 intervals. Their owner and the 8% gate remain unresolved.
+The [linker library-member comparison](../ops/scanner-library-members-20260925.md)
+finds identical selected archive members for both Fairy images and just one
+additional C member, `libucrt.lib(strlen.obj)`. It rules out extra Fairy
+archive-member extraction as the size explanation, but does not measure
+retained COMDAT or generated function bytes.
 
 ## Proposed first boundary
 
