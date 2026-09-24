@@ -278,9 +278,13 @@ heap allocation, matching `bytes::copy` and the underlying system-heap
 zero-size behavior used by the Fairy scanner. A low/optimized MSVC probe
 checks that changing the caller's token bytes cannot change the retained
 diagnostic in either C storage mode. The optimized three-image scanner smoke
-still matches output and 1,000-round checksums. This covers payload ownership
-on the current lexical paths, not identical diagnostic record layout,
-allocation-failure behavior or a new runtime/EXE measurement.
+still matches output and 1,000-round checksums. The C budget image now copies
+the payload before reserving a geometric diagnostic slot, matching Fairy's
+`bytes::copy` then `v::push<Entry>` order. Fault-injected low/optimized MSVC
+probes cover failure of each allocation and success: both failures return
+storage status 3, publish no diagnostic and leave no allocation live after
+caller cleanup. This covers one nonempty diagnostic path, not identical record
+layout, all allocation failures or a new runtime/EXE measurement.
 The measured short sample is inside all three supported ranges; a broader
 budget comparison needs the same accepted input and limit behavior in both
 implementations before using executable-size or runtime ratios as a gate.

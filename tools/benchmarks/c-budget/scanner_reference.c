@@ -185,21 +185,28 @@ static void fc_diagnostic(struct fc_scanner *s, const char *code,
     }
 #endif
 #ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
-    if (s->diagnostic_allocation_failed || !fc_reserve_diagnostic_slot(s)) {
-        s->diagnostic_allocation_failed = 1;
-        return;
-    }
+    if (s->diagnostic_allocation_failed) return;
 #endif
 #ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
     size_t token_length = strlen(token);
+    char *owned = NULL;
     if (token_length != 0) {
-        char *owned = (char *)malloc(token_length);
+        owned = (char *)malloc(token_length);
         if (owned == NULL) {
             s->diagnostic_payload_failed = 1;
             return;
         }
         memcpy(owned, token, token_length);
         token = owned;
+    }
+#endif
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    if (!fc_reserve_diagnostic_slot(s)) {
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+        free(owned);
+#endif
+        s->diagnostic_allocation_failed = 1;
+        return;
     }
 #endif
     struct fc_diagnostic value = {code, repair, token, start, end};
