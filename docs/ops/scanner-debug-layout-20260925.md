@@ -20,3 +20,12 @@ permits a bounded attempt to use PDB-private function starts to classify the
 previously unmatched release intervals. It does not itself assign a function
 owner, prove equal instructions or leaf-code layout, or satisfy the 8% runtime
 and EXE gate. The C reference still needs complete scanner parity.
+
+The next probe resolves each PDB-build unwind start through system DbgHelp.
+Its small test finds a deliberately non-leaf private C function, so the
+lookup can expose private symbols when they exist. On the scanner images,
+none of the intervals without a public map start has an exact PDB symbol:
+12,823 C bytes and 25,193 / 25,196 Fairy bytes remain unattributed. Those
+totals agree with the earlier map-only accounting. This does not prove all
+unmatched code belongs to the CRT; library or object contribution evidence
+is needed before selecting a size optimization.

@@ -1,16 +1,19 @@
+//go:build windows
+
 package cdriver
 
 import (
 	"bytes"
 	"crypto/sha256"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
 
 func TestWindowsDebugMapProbeEvidence(t *testing.T) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+	if runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
 	}
 	toolchain, err := ResolveWindowsHostMSVC()
@@ -18,7 +21,11 @@ func TestWindowsDebugMapProbeEvidence(t *testing.T) {
 		t.Fatal(err)
 	}
 	const source = `
-static __declspec(noinline) int triple(int value) { return value * 3; }
+static __declspec(noinline) int triple(int value) {
+    volatile int values[64];
+    values[0] = value;
+    return values[0] * 3;
+}
 int main(void) { return triple(7) != 21; }
 `
 	release, err := BuildWindowsMSVCProbeWithMap(toolchain, OptimizedProfile, source)
@@ -79,5 +86,26 @@ int main(void) { return triple(7) != 21; }
 		len(releaseUnwind.Functions), len(debugUnwind.Functions), matchingIntervals)
 	if len(releaseUnwind.Functions) != len(debugUnwind.Functions) || matchingIntervals != len(releaseUnwind.Functions) {
 		t.Fatal("debug symbols cannot be transferred to release unwind intervals")
+	}
+	rvas := make([]uint32, 0, len(debugUnwind.Functions))
+	for _, function := range debugUnwind.Functions {
+		rvas = append(rvas, function.BeginRVA)
+	}
+	symbols, err := ResolveWindowsDebugSymbols(debug, rvas)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exact, privateTriple := 0, false
+	for _, symbol := range symbols {
+		if symbol.Found && symbol.Displacement == 0 {
+			exact++
+			if strings.Contains(symbol.Name, "triple") {
+				privateTriple = true
+			}
+		}
+	}
+	t.Logf("PDB exact function starts=%d/%d private triple=%t", exact, len(symbols), privateTriple)
+	if !privateTriple {
+		t.Fatal("PDB lookup omitted the private C function")
 	}
 }

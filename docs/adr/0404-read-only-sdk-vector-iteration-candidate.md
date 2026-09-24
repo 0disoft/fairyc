@@ -414,7 +414,8 @@ would be unsupported.
 An [optimized PDB layout comparison](../ops/scanner-debug-layout-20260925.md)
 matches all 526 C and 589 Fairy release-image unwind intervals with their
 respective symbol-bearing builds. It enables a private-symbol attribution
-attempt, but has not yet assigned the unmatched intervals or changed the gate.
+attempt, but that attempt finds no exact PDB symbol for the map-unmatched
+intervals. Their owner and the 8% gate remain unresolved.
 
 ## Proposed first boundary
 

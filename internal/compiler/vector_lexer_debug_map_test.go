@@ -1,9 +1,12 @@
+//go:build windows
+
 package compiler_test
 
 import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 
@@ -14,7 +17,7 @@ import (
 // A PDB can name release-image intervals only when the optimized debug build
 // retains every validated function boundary at the same RVA.
 func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+	if runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
 	}
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
@@ -91,7 +94,59 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 					left.BeginRVA, left.EndRVA, right.BeginRVA, right.EndRVA)
 			}
 		}
-		t.Logf("release EXE=%d debug EXE=%d PDB=%d matching unwind intervals=%d",
-			len(release.Bytes), len(debug.Bytes), len(debug.ProgramDatabase), len(releaseUnwind.Functions))
+		starts := make([]uint32, 0, len(debugUnwind.Functions))
+		for _, function := range debugUnwind.Functions {
+			starts = append(starts, function.BeginRVA)
+		}
+		symbols, err := cdriver.ResolveWindowsDebugSymbols(debug, starts)
+		if err != nil {
+			t.Fatal(err)
+		}
+		pe, err := pecoff.InspectExecutable(release.Bytes)
+		if err != nil {
+			t.Fatal(err)
+		}
+		publicStarts := make(map[uint32]struct{})
+		for _, symbol := range scannerBudgetAllMapSymbols(release.LinkMap, nil) {
+			if symbol.PreferredAddress >= pe.ImageBase && symbol.PreferredAddress-pe.ImageBase <= uint64(^uint32(0)) {
+				publicStarts[uint32(symbol.PreferredAddress-pe.ImageBase)] = struct{}{}
+			}
+		}
+		type privateInterval struct {
+			name  string
+			bytes uint32
+		}
+		private := make([]privateInterval, 0)
+		var privateBytes, unresolvedBytes uint64
+		for i, function := range releaseUnwind.Functions {
+			if _, public := publicStarts[function.BeginRVA]; public {
+				continue
+			}
+			width := function.EndRVA - function.BeginRVA
+			symbol := symbols[i]
+			if !symbol.Found || symbol.Displacement != 0 || symbol.RVA != function.BeginRVA {
+				unresolvedBytes += uint64(width)
+				continue
+			}
+			privateBytes += uint64(width)
+			name := symbol.Name
+			if len(name) > 128 || strings.ContainsAny(name, "\\/") {
+				name = "<nonportable>"
+			}
+			private = append(private, privateInterval{name: name, bytes: width})
+		}
+		privateCount := len(private)
+		sort.Slice(private, func(i, j int) bool {
+			if private[i].bytes != private[j].bytes {
+				return private[i].bytes > private[j].bytes
+			}
+			return private[i].name < private[j].name
+		})
+		if len(private) > 10 {
+			private = private[:10]
+		}
+		t.Logf("release EXE=%d debug EXE=%d PDB=%d intervals=%d private exact=%d/%d bytes unresolved=%d bytes top private=%v",
+			len(release.Bytes), len(debug.Bytes), len(debug.ProgramDatabase), len(releaseUnwind.Functions),
+			privateCount, privateBytes, unresolvedBytes, private)
 	})
 }
