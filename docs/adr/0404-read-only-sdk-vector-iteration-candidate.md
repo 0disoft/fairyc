@@ -421,6 +421,11 @@ access is not equivalent to the current source loop.
    allocation after release under low and optimized MSVC; the successful path
    stores all nine symbols and EOF. This covers a later C token allocation,
    not the corresponding later Fairy allocation or every failure point.
+   A matching generated-Fairy probe schedules failure on the second vector
+   allocation while scanning nine symbols. Both explicit-index and private
+   vector-loop forms return status 3 without a report under low and optimized
+   MSVC; the one successful token block is released on exit. This covers token
+   growth, not every later allocation or diagnostic failure in Fairy.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
