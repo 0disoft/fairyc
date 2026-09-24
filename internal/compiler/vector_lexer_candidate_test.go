@@ -3,16 +3,23 @@ package compiler_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/genericplan"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-func TestPrivateVectorSDKCandidateRealScannerFlow(t *testing.T) {
+func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 	const before = `    var usize index = 0;
     var usize position = 0;
     while (index < v::len<Token>(ref tokens)) {
@@ -36,6 +43,7 @@ func TestPrivateVectorSDKCandidateRealScannerFlow(t *testing.T) {
 	if strings.Count(scanner, before) != 1 || strings.Count(scanner, endBefore) != 1 {
 		t.Fatal("real scanner loop changed; refresh the private candidate comparison")
 	}
+	outputs := make(map[string]map[string]string)
 	for _, variant := range []struct {
 		name      string
 		candidate bool
@@ -56,8 +64,13 @@ func TestPrivateVectorSDKCandidateRealScannerFlow(t *testing.T) {
 			writeVectorCacheFile(t, root, "src/scanner.fy", variant.scanner)
 			writeVectorCacheFile(t, root, "src/main.fy", `module main;
 import scanner as scanner;
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
 @effects(console) fn i32 main() {
-    return scanner::report_work(b"let n=12345; /*open"[..], false, 32768, 1048576, 256, 16777216);
+    let i32 empty = scanner::report_work(b""[..], false, 32768, 1048576, 256, 16777216);
+    if (empty != 0) { return empty; }
+    let i32 sample = scanner::report_work(b"let n=12345; /*open"[..], false, 32768, 1048576, 256, 16777216);
+    assert(unsafe { clean() } == 1);
+    return sample;
 }`)
 			workspace, err := workspaceloader.LoadVectorCandidate(root)
 			if err != nil {
@@ -96,6 +109,72 @@ import scanner as scanner;
 			if err != nil || !result.Verified {
 				t.Fatalf("real scanner verified MIR: %v %+v", err, result.Semantic.Diagnostics)
 			}
+			if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+				return
+			}
+			rootID, err := workspace.RootPackageID()
+			if err != nil {
+				t.Fatal(err)
+			}
+			outputs[variant.name] = make(map[string]string)
+			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+				t.Run(profile.Name, func(t *testing.T) {
+					outputs[variant.name][profile.Name] = runRealScannerVectorNative(t, result.MIR,
+						hir.QualifiedModulePath(rootID, "main")+"::main", profile)
+				})
+			}
 		})
 	}
+	if runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
+		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+			baseline, candidate := outputs["explicit index"][profile.Name], outputs["vector for"][profile.Name]
+			if baseline == "" || candidate != baseline {
+				t.Fatalf("%s scanner output differs: explicit=%q candidate=%q", profile.Name, baseline, candidate)
+			}
+		}
+	}
+}
+
+func runRealScannerVectorNative(t *testing.T, program mir.Program, entry string, profile cdriver.Profile) string {
+	t.Helper()
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	unit, err := cbackend.EmitStorageTransfers(program, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	scalar, err := cruntime.ScalarSource(192)
+	if err != nil {
+		t.Fatal(err)
+	}
+	storage, err := cstdlib.WindowsMSVCVectorStorageSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	symbols := []string{"fy_std_system_heap_allocate_v0"}
+	for _, symbol := range unit.ForeignSymbols {
+		if strings.HasPrefix(symbol, "fy_std_") {
+			symbols = append(symbols, symbol)
+		}
+	}
+	sdk, err := cstdlib.WindowsMSVCSourceForSymbols(symbols)
+	if err != nil {
+		t.Fatal(err)
+	}
+	heap, err := cstdlib.WindowsMSVCSourceForSymbols(symbols[:1])
+	if err != nil || !strings.HasPrefix(storage, heap) {
+		t.Fatalf("private scanner storage heap boundary: %v", err)
+	}
+	artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source,
+		scalar+vectorStorageAllocator+sdk+strings.TrimPrefix(storage, heap)+vectorForNativeProbe)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := cdriver.ExecuteWindowsHost(artifact)
+	if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
+		t.Fatalf("native scanner: %+v %v", outcome, err)
+	}
+	return outcome.Stdout
 }

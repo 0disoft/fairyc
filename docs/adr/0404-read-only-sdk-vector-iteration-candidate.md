@@ -72,8 +72,11 @@ The first real lexer source comparison now loads the checked-in
 `scanner::report_work` package graph with the authenticated private SDK. Its
 unchanged explicit-index loop and a copy with only that loop rewritten both
 pass source analysis, Flow and verified MIR. The stable source lane rejects
-the rewritten copy. Native output parity and allocation behavior for this
-real scanner loop remain unverified.
+the rewritten copy. A following native probe runs both versions on empty input
+and on a cooked-number plus unterminated-comment input. Exact console output
+matches under low and optimized Windows AMD64 MSVC profiles; the allocator
+probe finds no live SDK allocation after both calls return. This covers one
+real lexer loop, not the other two loops or the C-relative cost gate.
 
 ## Proposed first boundary
 
