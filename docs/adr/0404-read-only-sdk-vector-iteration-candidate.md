@@ -242,7 +242,10 @@ Fifteen further C/Fairy cases cover identifier and keyword continuation,
 one- through three-byte symbols, and valid or invalid UTF-8 rejected as a
 source token. They check atomic multibyte work exhaustion, `E0010` or `E0001`
 spans, retained tails and EOF under both profiles. Numeric source scanning,
-BOM exhaustion, combined limits and whole-scanner runtime remain unproven.
+combined limits and whole-scanner runtime remain unproven. Six more C/Fairy
+native cases cover a three-byte BOM alone and followed by an identifier.
+They check atomic BOM rejection below three work units, exact acceptance,
+next-token exhaustion, retained input and EOF in both MSVC profiles.
 The candidate C budget images also stop after 256 ordinary diagnostics and
 retain one terminal `E0010`.
 Runs with 256, 257 and 258 invalid bytes match the Go lexer exactly in both

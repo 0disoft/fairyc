@@ -878,11 +878,18 @@ static int fc_scan_one(struct fc_scanner *s) {
 static int fc_scan(struct fc_scanner *s) {
     if (s->length >= 3 && s->source[0] == 0xef && s->source[1] == 0xbb &&
         s->source[2] == 0xbf) {
-        fc_token(s, FC_TRIVIA, FC_PREAMBLE, 0, 3, NULL, 0);
-#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
-        if (s->token_allocation_failed) return 3;
+#ifdef FC_CANDIDATE_WORK_LIMIT
+        if (!fc_work_available(s, 3u)) {
+            fc_work_exhausted(s, 0, 0);
+        } else
 #endif
-        s->position = 3;
+        {
+            fc_token(s, FC_TRIVIA, FC_PREAMBLE, 0, 3, NULL, 0);
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+            if (s->token_allocation_failed) return 3;
+#endif
+            s->position = 3;
+        }
     }
     while (s->position < s->length
 #ifdef FC_CANDIDATE_TOKEN_LIMIT
