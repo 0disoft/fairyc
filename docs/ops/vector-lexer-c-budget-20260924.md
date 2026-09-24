@@ -40,8 +40,11 @@ open, so the 8% gate remains undecided.
 The next C budget image now grows token storage from 8 slots by doubling,
 matching the private `Vec<Token>` capacity sequence; low and optimized C
 probes check the 8/16/32-slot boundaries and exact Go-lexer output. The broad
-standalone C reference retains its original up-front token allocation. C
-diagnostics still allocate `length + 1` slots up front, while Fairy uses
-`Vec<diagnostics::Entry>`. This is another new image: the earlier hashes,
-sizes and timing samples do not measure it. Storage parity and the full
-scanner 8% gate remain open.
+standalone C reference retains its original up-front token allocation. A
+further C budget image also grows diagnostic entries from 8 slots by doubling;
+low and optimized probes cover 0/8/16/32-slot boundaries and compare malformed
+source output with Go. The broad standalone reference still uses up-front
+diagnostic storage. Fairy diagnostic entries own payloads differently from the
+C reference, so equal capacity steps do not prove identical allocation cost.
+Neither new image is represented by the earlier hashes or timing samples.
+The full scanner 8% gate remains open.

@@ -265,6 +265,60 @@ int main(void) {
 	}
 }
 
+func TestPrivateVectorSDKCandidateIndependentCScannerGeometricDiagnostics(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	core, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "scanner_reference.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const probe = `
+int main(void) {
+#ifdef _WIN32
+    if (_setmode(_fileno(stdin), _O_BINARY) == -1 ||
+        _setmode(_fileno(stdout), _O_BINARY) == -1) return FC_BAD_INPUT;
+#endif
+    int count = getchar();
+    if (count < 0 || count > 17 || getchar() != EOF) return FC_BAD_INPUT;
+    unsigned char source[17];
+    memset(source, '#', (size_t)count);
+    struct fc_scanner scanner = {source, (size_t)count, 0, 0, 0, NULL, NULL};
+    int status = fc_scan(&scanner);
+    size_t expected = count == 0 ? 0u : count <= 8 ? 8u :
+                      count <= 16 ? 16u : 32u;
+    if (status == 0 && (scanner.diagnostic_count != (size_t)count ||
+                        scanner.diagnostic_capacity != expected ||
+                        scanner.token_count != (size_t)count + 1u)) status = 9;
+    if (status == 0) fc_print(&scanner);
+    fc_release_cooked(&scanner);
+    free(scanner.tokens);
+    free(scanner.diagnostics);
+    return status;
+}`
+	code := "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n#define FC_SCANNER_LIBRARY\n" + string(core) + probe
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, count := range []byte{0, 1, 8, 9, 16, 17} {
+				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, bytes.NewReader([]byte{count}))
+				want := scannerGoObservation([]byte(strings.Repeat("#", int(count))))
+				if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" ||
+					outcome.TrapControl != "" || outcome.Stdout != want {
+					t.Fatalf("diagnostics=%d: %+v %v\nwant %q", count, outcome, err, want)
+				}
+			}
+		})
+	}
+}
+
 func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
@@ -318,7 +372,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T
 
 func scannerCBenchmarkSource(t *testing.T) string {
 	t.Helper()
-	parts := []string{"#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
+	parts := []string{"#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
 	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
 		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))
 		if err != nil {

@@ -48,6 +48,10 @@ struct fc_scanner {
     size_t token_capacity;
     int token_allocation_failed;
 #endif
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    size_t diagnostic_capacity;
+    int diagnostic_allocation_failed;
+#endif
 #ifdef FC_CANDIDATE_COOKED_LIMIT
     size_t cooked_total;
 #endif
@@ -79,6 +83,33 @@ static int fc_reserve_token_slot(struct fc_scanner *s) {
 }
 #endif
 
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+// The candidate C image follows Vec<Entry>'s empty, 8, 16, ... capacities.
+// Diagnostic token payload ownership remains a separate parity question.
+static int fc_reserve_diagnostic_slot(struct fc_scanner *s) {
+    if (s->diagnostic_count > s->diagnostic_capacity) return 0;
+    if (s->diagnostic_capacity > s->diagnostic_count)
+        return s->diagnostics != NULL;
+    size_t maximum = SIZE_MAX / sizeof(*s->diagnostics);
+    if ((s->diagnostics != NULL && s->diagnostic_capacity == 0) ||
+        s->diagnostic_capacity >= maximum) return 0;
+    size_t next = s->diagnostic_capacity == 0 ? (maximum < 8u ? maximum : 8u) :
+                  s->diagnostic_capacity > maximum / 2u ? maximum :
+                  s->diagnostic_capacity * 2u;
+    if (next <= s->diagnostic_count) return 0;
+    struct fc_diagnostic *replacement =
+        (struct fc_diagnostic *)malloc(next * sizeof(*replacement));
+    if (replacement == NULL) return 0;
+    if (s->diagnostic_count != 0)
+        memcpy(replacement, s->diagnostics,
+               s->diagnostic_count * sizeof(*replacement));
+    free(s->diagnostics);
+    s->diagnostics = replacement;
+    s->diagnostic_capacity = next;
+    return 1;
+}
+#endif
+
 #ifdef FC_CANDIDATE_COOKED_LIMIT
 static int fc_accept_cooked(struct fc_scanner *s, size_t length) {
     if (length > FC_CANDIDATE_COOKED - s->cooked_total) return 0;
@@ -105,6 +136,12 @@ static void fc_token(struct fc_scanner *s, unsigned kind, unsigned trivia,
 static void fc_diagnostic(struct fc_scanner *s, const char *code,
                           size_t start, size_t end, const char *repair,
                           const char *token) {
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    if (s->diagnostic_allocation_failed || !fc_reserve_diagnostic_slot(s)) {
+        s->diagnostic_allocation_failed = 1;
+        return;
+    }
+#endif
     s->diagnostics[s->diagnostic_count++] =
         (struct fc_diagnostic){code, repair, token, start, end};
 }
@@ -646,6 +683,9 @@ static int fc_scan(struct fc_scanner *s) {
 #ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
         if (s->token_allocation_failed) return 3;
 #endif
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+        if (s->diagnostic_allocation_failed) return 3;
+#endif
     }
     fc_token(s, FC_EOF, FC_NO_TRIVIA, s->length, s->length, NULL, 0);
 #ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
@@ -715,8 +755,14 @@ int main(void) {
 #ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
     tokens = (struct fc_token *)calloc((size_t)length + 1u, sizeof(*tokens));
 #endif
-    struct fc_diagnostic *diagnostics = (struct fc_diagnostic *)calloc((size_t)length + 1u, sizeof(*diagnostics));
-    if (source == NULL || diagnostics == NULL
+    struct fc_diagnostic *diagnostics = NULL;
+#ifndef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+    diagnostics = (struct fc_diagnostic *)calloc((size_t)length + 1u, sizeof(*diagnostics));
+#endif
+    if (source == NULL
+#ifndef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+        || diagnostics == NULL
+#endif
 #ifndef FC_CANDIDATE_GEOMETRIC_TOKENS
         || tokens == NULL
 #endif
@@ -732,6 +778,7 @@ int main(void) {
 #endif
     int status = fc_scan(&scanner);
     tokens = scanner.tokens;
+    diagnostics = scanner.diagnostics;
     if (status == 0) {
         qsort(scanner.diagnostics, scanner.diagnostic_count,
               sizeof(*scanner.diagnostics), fc_compare_diagnostic);
