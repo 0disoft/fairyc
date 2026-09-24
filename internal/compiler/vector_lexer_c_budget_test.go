@@ -29,12 +29,17 @@ type scannerBudgetImage struct {
 	specializations int
 }
 
-// One execution per lane proves the three independent images can be compared.
+// One execution per lane proves the independent images can be compared.
 // Timing from this smoke is diagnostic only; it cannot decide the 8% budget.
 func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SMOKE") != "1" {
 		t.Skip("opt-in three-way scanner budget smoke")
 	}
+	storageMode := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_BOTH_STORAGE")
+	if storageMode != "" && storageMode != "1" {
+		t.Fatalf("unknown C scanner storage mode %q", storageMode)
+	}
+	bothStorage := storageMode == "1"
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Fatal("requires Windows AMD64 MSVC")
 	}
@@ -61,6 +66,16 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		t.Fatal(err)
 	}
 	images := []scannerBudgetImage{{name: "independent C", artifact: cArtifact, sourceBytes: len(cSource)}}
+	if bothStorage {
+		geometricSource := scannerCGeometricBenchmarkSource(t)
+		geometricArtifact, buildErr := cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile, geometricSource)
+		if buildErr != nil {
+			t.Fatal(buildErr)
+		}
+		images = append(images, scannerBudgetImage{
+			name: "geometric C", artifact: geometricArtifact, sourceBytes: len(geometricSource),
+		})
+	}
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
 		t.Fatal("real scanner variants changed")
@@ -89,7 +104,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 			t.Fatalf("%s missing timing fields: %q", image.name, outcome.Stdout)
 		}
 		prefix := strings.Join(fields[:len(fields)-4], " ")
-		if image.name == "independent C" {
+		if image.name == "independent C" || image.name == "geometric C" {
 			if !strings.HasPrefix(outcome.Stdout, scannerGoObservation([]byte(sample))) {
 				t.Fatalf("independent C reporter differs: %q", outcome.Stdout)
 			}
@@ -114,35 +129,41 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 			"exe_sha256": fmt.Sprintf("%x", sha256.Sum256(image.artifact.Bytes)),
 		})
 	}
+	smokeSchema := "fairyc.vector-lexer-c-budget-smoke/v1"
+	scope := "Three standalone images, one diagnostic execution per lane; no 8% runtime verdict or timing-stability claim."
+	if bothStorage {
+		smokeSchema = "fairyc.vector-lexer-c-budget-smoke/v2"
+		scope = "Four standalone images including both C storage modes; one diagnostic execution per lane, no 8% verdict."
+	}
 	report, err := json.Marshal(map[string]any{
-		"schema": "fairyc.vector-lexer-c-budget-smoke/v1", "sample_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(sample))),
+		"schema": smokeSchema, "sample_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(sample))),
 		"msvc": toolchain.Version, "profile": cdriver.OptimizedProfile.Name,
 		"rounds": rounds, "per_round_result": perRound, "lanes": rows,
-		"scope": "Three standalone images, one diagnostic execution per lane; no 8% runtime verdict or timing-stability claim.",
+		"scope": scope,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log("VECTOR_LEXER_C_BUDGET_SMOKE " + string(report))
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_MEASURE") == "1" {
-		measureScannerBudgetTriplets(t, images, sample, uint64(perRound))
+		measureScannerBudgetRotations(t, images, sample, uint64(perRound))
 	}
 }
 
-// Twelve fixed, rotating triplets follow one warmup. Raw QPC samples are
+// Twelve fixed, rotating image sets follow one warmup. Raw QPC samples are
 // evidence for a later stability and 8% assessment, not an automatic verdict.
-func measureScannerBudgetTriplets(t *testing.T, images []scannerBudgetImage, sample string, perRound uint64) {
+func measureScannerBudgetRotations(t *testing.T, images []scannerBudgetImage, sample string, perRound uint64) {
 	t.Helper()
-	if len(images) != 3 {
+	if len(images) != 3 && len(images) != 4 {
 		t.Fatalf("budget lane count=%d", len(images))
 	}
 	const rounds = 250000
 	const measured = 12
 	const seed = 12345
-	prefixes := [3]string{}
+	prefixes := make([]string, len(images))
 	rows := make([]map[string]any, 0, measured+1)
 	for triplet := 0; triplet <= measured; triplet++ {
-		order := [3]string{}
+		order := make([]string, len(images))
 		lanes := make([]map[string]any, 0, len(images))
 		for position := range images {
 			index := (triplet + position) % len(images)
@@ -178,9 +199,13 @@ func measureScannerBudgetTriplets(t *testing.T, images []scannerBudgetImage, sam
 				"total": total, "completed": completed,
 			})
 		}
-		rows = append(rows, map[string]any{
-			"triplet": triplet, "warmup": triplet == 0, "order": order, "lanes": lanes,
-		})
+		row := map[string]any{"warmup": triplet == 0, "order": order, "lanes": lanes}
+		if len(images) == 4 {
+			row["rotation"] = triplet
+		} else {
+			row["triplet"] = triplet
+		}
+		rows = append(rows, row)
 	}
 	imageRows := make([]map[string]any, 0, len(images))
 	for _, image := range images {
@@ -190,20 +215,34 @@ func measureScannerBudgetTriplets(t *testing.T, images []scannerBudgetImage, sam
 			"source_bytes": image.sourceBytes, "specializations": image.specializations,
 		})
 	}
-	report, err := json.Marshal(map[string]any{
-		"schema":        "fairyc.vector-lexer-c-budget-triplets/v1",
+	reportValues := map[string]any{
 		"sample_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(sample))),
 		"go":            runtime.Version(), "msvc": images[0].artifact.Toolchain.Version,
 		"gomaxprocs": runtime.GOMAXPROCS(0), "seed": seed,
-		"profile": cdriver.OptimizedProfile.Name,
-		"rounds":  rounds, "warmup_triplets": 1, "measured_triplets": measured,
+		"profile":          cdriver.OptimizedProfile.Name,
+		"rounds":           rounds,
 		"per_round_result": perRound, "images": imageRows, "samples": rows,
-		"scope": "Three standalone optimized images, one fixed warmup and twelve rotating measured triplets; each execution verifies reporter, completed rounds and checksum. QPC excludes process startup and final output. No retries, exclusions or adaptive stopping. Token reporting is outside the timed loop; this sample does not prove a full-language 8% budget.",
-	})
+		"scope": "Standalone optimized images, one fixed warmup and twelve rotating measured sets; each execution verifies reporter, completed rounds and checksum. QPC excludes process startup and final output. No retries, exclusions or adaptive stopping. Token reporting is outside the timed loop; this sample does not prove a full-language 8% budget.",
+	}
+	if len(images) == 4 {
+		reportValues["schema"] = "fairyc.vector-lexer-c-budget-rotations/v2"
+		reportValues["warmup_rotations"] = 1
+		reportValues["measured_rotations"] = measured
+	} else {
+		reportValues["schema"] = "fairyc.vector-lexer-c-budget-triplets/v1"
+		reportValues["warmup_triplets"] = 1
+		reportValues["measured_triplets"] = measured
+		reportValues["scope"] = "Three standalone optimized images, one fixed warmup and twelve rotating measured triplets; each execution verifies reporter, completed rounds and checksum. QPC excludes process startup and final output. No retries, exclusions or adaptive stopping. Token reporting is outside the timed loop; this sample does not prove a full-language 8% budget."
+	}
+	report, err := json.Marshal(reportValues)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("VECTOR_LEXER_C_BUDGET_TRIPLETS " + string(report))
+	if len(images) == 4 {
+		t.Log("VECTOR_LEXER_C_BUDGET_ROTATIONS " + string(report))
+	} else {
+		t.Log("VECTOR_LEXER_C_BUDGET_TRIPLETS " + string(report))
+	}
 }
 
 func scannerBudgetFairyProgram(t *testing.T, variant realScannerVectorVariant) (mir.Program, string, int) {
