@@ -232,16 +232,23 @@ charge string source bytes before consuming them, including prefixes, UTF-8
 sequences and escape components. Thirteen low-budget cases compare the first
 invalid token, remaining-input token, `E0010` position, EOF and accepted cooked
 length with the actual Fairy scanner under low and optimized Windows MSVC.
-This does not establish work-budget parity for other lexical forms or a
-whole-scanner runtime result. The candidate C budget images now
-also stop after 256 ordinary diagnostics and retain one terminal `E0010`.
+The candidate C image also checks one work unit at every token start and
+charges each whitespace or comment segment before consuming it. Seventeen
+additional C/Fairy native cases cover spaces, CRLF, line and documentation
+comments, and nested block comments, including two-byte segments rejected
+without partial consumption. They compare the first invalid token, retained
+tail, `E0010` position, EOF and successful trivia kind in both MSVC profiles.
+Continuation work for identifiers, numbers and symbols, BOM exhaustion,
+combined limits and whole-scanner runtime remain unproven. The candidate C
+budget images also stop after 256 ordinary diagnostics and retain one terminal
+`E0010`.
 Runs with 256, 257 and 258 invalid bytes match the Go lexer exactly in both
 C storage modes under low and optimized MSVC. The actual Fairy scanner checks
 the same boundary's token count, diagnostic count, terminal span and EOF.
 This establishes the diagnostic-count boundary for those inputs, not all
-multi-diagnostic lexical paths. Other low-budget recognition paths and
-diagnostic payload ownership remain different or unproven, so this is not a
-complete C-relative baseline.
+multi-diagnostic lexical paths. Other low-budget recognition paths, combined
+limits and diagnostic record layout remain unproven, so this is not a complete
+C-relative baseline.
 The C budget images also apply the candidate's 1,048,576-token default limit.
 A separate probe sets limits 0 through 3 and compares both C storage modes
 against the Go lexer under low and optimized MSVC. Empty input, exact-limit
