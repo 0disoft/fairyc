@@ -13,18 +13,16 @@ import (
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/lexer"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-// Prove that the indexed and private vector-loop scanner sources can coexist
-// in one verified program before timing either form inside one process.
-func TestPrivateVectorSDKCandidateDualScannerNativeParity(t *testing.T) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		t.Skip("requires Windows AMD64 MSVC")
-	}
-	const sample = "let n=12345; /*open"
+// The two source spellings share one package graph but retain distinct
+// scanner modules. The stable source gate must still reject the candidate.
+func dualScannerCheckedProgram(t *testing.T, mainSource string) (mir.Program, string) {
+	t.Helper()
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
 		t.Fatal("real scanner variants changed")
@@ -47,7 +45,7 @@ func TestPrivateVectorSDKCandidateDualScannerNativeParity(t *testing.T) {
 	}
 	writeVectorCacheFile(t, root, "src/indexed.fy", module(variants[0].scanner, "indexed"))
 	writeVectorCacheFile(t, root, "src/candidate.fy", module(variants[4].scanner, "candidate"))
-	writeVectorCacheFile(t, root, "src/main.fy", dualScannerNativeMain)
+	writeVectorCacheFile(t, root, "src/main.fy", mainSource)
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
 		t.Fatal(err)
@@ -70,6 +68,21 @@ func TestPrivateVectorSDKCandidateDualScannerNativeParity(t *testing.T) {
 	if err != nil || !checked.Verified {
 		t.Fatalf("combined scanner MIR: %v diagnostics=%+v", err, checked.Semantic.Diagnostics)
 	}
+	rootID, err := workspace.RootPackageID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return checked.MIR, hir.QualifiedModulePath(rootID, "main") + "::main"
+}
+
+// Prove that the indexed and private vector-loop scanner sources can coexist
+// in one verified program before timing either form inside one process.
+func TestPrivateVectorSDKCandidateDualScannerNativeParity(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	const sample = "let n=12345; /*open"
+	program, entry := dualScannerCheckedProgram(t, dualScannerNativeMain)
 	lexed := lexer.Lex(source.NewFile("input.fy", []byte(sample)), source.NewBudget(source.DefaultLimits(), len(sample)))
 	cooked, diagnostic := 0, 0
 	for _, token := range lexed.Tokens {
@@ -82,13 +95,9 @@ func TestPrivateVectorSDKCandidateDualScannerNativeParity(t *testing.T) {
 		t.Fatal("sample no longer covers cooked and diagnostic buffers")
 	}
 	wantStorage := fmt.Sprintf("%d %d %d %d %d ", len(sample), cooked, diagnostic, len(lexed.Tokens), len(lexed.Diagnostics))
-	rootID, err := workspace.RootPackageID()
-	if err != nil {
-		t.Fatal(err)
-	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
-			native := runRealScannerVectorNative(t, checked.MIR, hir.QualifiedModulePath(rootID, "main")+"::main", profile)
+			native := runRealScannerVectorNative(t, program, entry, profile)
 			parts := strings.Split(native.Stdout, "|")
 			if len(parts) != 4 || parts[0] == "" || parts[0] != parts[1] || parts[2] != wantStorage || parts[3] != wantStorage {
 				t.Fatalf("combined scanner output: parts=%q want storage=%q", parts, wantStorage)
