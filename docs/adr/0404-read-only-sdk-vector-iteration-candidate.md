@@ -86,9 +86,13 @@ optimized `unit.obj` grew by 24 bytes against the indexed Fairy source. This
 does not establish check/build time, runtime or the independent-C budget.
 
 An independently written checked C vector-read kernel and the indexed Fairy
-SDK equivalent now pass one paired smoke run plus ten shared boundary
-executions. The candidate source form is not in that stable harness yet, and
-this smoke run is not an 8% budget measurement.
+SDK equivalent passed ten shared boundary executions and a
+[five-pair optimized comparison](../ops/c-budget-vector-read-index-20260924.md).
+The indexed Fairy kernel's paired runtime median was 1.38544 relative to C,
+above the cumulative 1.08 limit, while its EXE ratio was 1.01824. The
+candidate source form was not measured in that stable harness, so this result
+cannot isolate the syntax cost. It keeps source admission open and points to
+the existing vector access path as a performance investigation target.
 
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
