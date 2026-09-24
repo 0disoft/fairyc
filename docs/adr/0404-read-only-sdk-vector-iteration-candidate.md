@@ -100,8 +100,16 @@ Its five-pair runtime median is 1.37255 relative to C, still above 1.08;
 EXE ratio is 1.01824. Ten boundary executions and the stable source rejection
 preflight pass. The candidate and earlier indexed Fairy reports come from
 separate runs, so their difference cannot yet be attributed to iteration
-syntax. A directly paired index/candidate measurement and access-path
-inspection remain open before any source admission decision.
+syntax. A directly paired index/candidate measurement remains open before
+any source admission decision.
+
+[Generated-access inspection](../ops/vector-read-access-inspection-20260924.md)
+finds identical optimized disassembly for the indexed and candidate Fairy
+units after excluding the dump-file path header. Both retain an inner-loop
+call to the private vector slot lookup in `std::vec::at<T>`. That common access
+path is the next optimization experiment; preserving safe bounds and the
+owner-bound shared borrow is required. This evidence does not admit the source
+form or explain the entire C-relative runtime gap.
 
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
