@@ -105,6 +105,13 @@ C11 reference for quoted ASCII strings. Its optimized EXE is smaller than the
 C image, but the paired process timings fail the predeclared stability rule;
 eleven of twelve ratios above 2.77 still point to output cost that needs
 investigation. This restricted input class does not close the full-lexer gate.
+The follow-up [buffered page comparison](../ops/quoted-page-buffered-c-budget-20260924.md)
+keeps the C source and input fixed while changing the Fairy application to
+write its accumulated observations once. Its median paired Fairy/C ratio is
+1.7245 versus the original 3.0454, and the Fairy EXE is 512 bytes smaller;
+the predeclared timing-stability rule still returns `inconclusive`. Buffering
+is an application optimization, not another language feature or evidence that
+the cumulative 8% full-lexer C budget has passed.
 Generated-C inspection points to retained safe checks under `/Od`; this is
 not yet a measured attribution to an individual check.
 The Fairy-written parser candidate now retains this form as statement kind 18
