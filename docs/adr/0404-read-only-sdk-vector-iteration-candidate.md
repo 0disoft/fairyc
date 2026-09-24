@@ -115,8 +115,14 @@ form or explain the entire C-relative runtime gap.
 typed element address for shared `Vec.at<T>` in SDK `0.0.0-stage0.67` while
 retaining the owner-bound borrow. A preliminary diagnostic measurement removes
 the helper call and brings both indexed and candidate kernels close to, but
-slightly above, the 1.08 paired runtime limit. Stable source admission still
-requires post-commit C-relative and real-workload evidence.
+slightly above, the 1.08 paired runtime limit in that pre-commit diagnostic.
+Stable source admission still requires the representative real-workload and
+remaining cost evidence.
+
+The [post-commit shared-access comparison](../ops/c-budget-vector-read-address-20260924.md)
+observed both indexed and private-candidate four-element kernels below 1.08
+on paired runtime medians and EXE size. Individual pairs cross the runtime
+limit, and the representative lexer and unused-feature gates remain open.
 
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a

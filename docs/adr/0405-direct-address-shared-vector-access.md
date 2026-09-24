@@ -45,6 +45,10 @@ paired runtime medians of 1.08341 (indexed) and 1.08135 (private candidate)
 relative to the unchanged C workload; optimized EXE ratios were 1.01824.
 Those preliminary results are improvements but still above 1.08 on the paired
 median criterion. The diagnostic disassembly no longer contains a call to the
-old slot helper. Full post-commit cost evidence, timing stability, the real
-lexer workload and unused-feature overhead remain separate gates. No stable
-source admission follows from this SDK improvement.
+old slot helper. The [exact post-commit comparison](../ops/c-budget-vector-read-address-20260924.md)
+records paired runtime medians of 1.05726 (indexed) and 1.04905 (private
+candidate), with EXE ratio 1.01824 in both lanes. Each lane has one pair
+above 1.08, so this is an observed microkernel pass on the paired median,
+not a stable, full-lexer or language-wide certification. Timing stability,
+the real lexer workload and unused-feature overhead remain separate gates.
+No stable source admission follows from this SDK improvement.

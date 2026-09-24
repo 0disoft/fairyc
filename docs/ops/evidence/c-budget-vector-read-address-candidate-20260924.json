@@ -1,0 +1,307 @@
+{
+  "boundary_cases": [
+    [
+      0,
+      0
+    ],
+    [
+      65520,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      65520,
+      1
+    ],
+    [
+      12345,
+      257
+    ]
+  ],
+  "boundary_checks": 10,
+  "budget": {
+    "build_ratio_observation": 1.08,
+    "exe_ratio": 1.08,
+    "runtime_ratio": 1.08,
+    "scope": "cumulative against equivalent C per workload; never a per-feature allowance; metadata tracked separately"
+  },
+  "compiler_source": "604329ef2d28a8dc64bdcaede25c85538525002b",
+  "flags": [
+    "/std:c11",
+    "/TC",
+    "/W4",
+    "/WX",
+    "/MT",
+    "/O2",
+    "/INCREMENTAL:NO"
+  ],
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "method": "Independently authored scalar kernels; optional deref, vector_slot, vector_read_index, vector_read_candidate, result_return and byte-loop pairs each compare the same algorithm with C. Vector_read_candidate uses the compiler-private authenticated SDK and source/Flow/MIR proof lane, not stable source admission. Byte_view and byte_index share one independent C loop and differ only in the Fairy inner-loop spelling; vector_read_index and vector_read_candidate likewise share one independent C workload. Same stdin input and QPC/output support. All workloads guard seed<65521 and rounds<=50000000; arithmetic is proven in-range over admitted inputs. Fairy retains ordinary checked arithmetic and full required product support; C does not link Fairy support. 5 alternating paired samples after one build/run warmup per workload/lane. Kernel time excludes input parsing, process startup and printing; result is consumed and independently checked in Go. Build time covers source read/load, frontend analysis/verified MIR, C emission, C compile/link, artifact reads and final EXE write; common warmed toolchain discovery, harness process startup, workspace setup and execution excluded. No persistent package cache; ambient OS caches uncontrolled. No PDB, runtime-speed generalization, Linux, real parser/container workload or cold CLI startup claim.",
+  "msvc": "14.51.36231",
+  "one_translation_unit": false,
+  "profile": "optimized",
+  "rounds": 50000000,
+  "samples": [
+    {
+      "build_ns": 759826000,
+      "exe_bytes": 171520,
+      "kernel_ns": 1364948700,
+      "lane": "fairy",
+      "object_bytes": {
+        "runtime.obj": 21604,
+        "unit.obj": 8090
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5784,
+        ".rdata": 44400,
+        ".reloc": 1668,
+        ".text": 113808
+      },
+      "repetition": 0,
+      "result": 59181,
+      "support_sha256": "032b8a8f7b2077fa3fff042687157862dc89ab5ba2c0b316c92072b995adb1bc",
+      "translation_ns": 129028400,
+      "unit_bytes": 29125,
+      "unit_sha256": "c776645c0d52b0a4ed855e159b568d1e9abcdfad460877f21d0d8b7c44c05345",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 858265100,
+      "exe_bytes": 168448,
+      "kernel_ns": 1301131100,
+      "lane": "c",
+      "object_bytes": {
+        "runtime.obj": 5605,
+        "unit.obj": 2715
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5616,
+        ".rdata": 44256,
+        ".reloc": 1660,
+        ".text": 111168
+      },
+      "repetition": 0,
+      "result": 59181,
+      "support_sha256": "962709f9f447611e0e9e3149dbce6baddde287ac6c1e84317ac2868a3bf305be",
+      "translation_ns": 0,
+      "unit_bytes": 1983,
+      "unit_sha256": "3d5c26f36d9a76a5fe6499fc01864ca0ee6c8cd001ff3f7b96f1c24e34ef390d",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 1255440800,
+      "exe_bytes": 168448,
+      "kernel_ns": 1406303700,
+      "lane": "c",
+      "object_bytes": {
+        "runtime.obj": 5601,
+        "unit.obj": 2715
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5616,
+        ".rdata": 44256,
+        ".reloc": 1660,
+        ".text": 111168
+      },
+      "repetition": 1,
+      "result": 59181,
+      "support_sha256": "962709f9f447611e0e9e3149dbce6baddde287ac6c1e84317ac2868a3bf305be",
+      "translation_ns": 1661000,
+      "unit_bytes": 1983,
+      "unit_sha256": "3d5c26f36d9a76a5fe6499fc01864ca0ee6c8cd001ff3f7b96f1c24e34ef390d",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 1529296200,
+      "exe_bytes": 171520,
+      "kernel_ns": 1455640600,
+      "lane": "fairy",
+      "object_bytes": {
+        "runtime.obj": 21604,
+        "unit.obj": 8090
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5784,
+        ".rdata": 44400,
+        ".reloc": 1668,
+        ".text": 113808
+      },
+      "repetition": 1,
+      "result": 59181,
+      "support_sha256": "032b8a8f7b2077fa3fff042687157862dc89ab5ba2c0b316c92072b995adb1bc",
+      "translation_ns": 250103700,
+      "unit_bytes": 29125,
+      "unit_sha256": "c776645c0d52b0a4ed855e159b568d1e9abcdfad460877f21d0d8b7c44c05345",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 1174454200,
+      "exe_bytes": 171520,
+      "kernel_ns": 1326514900,
+      "lane": "fairy",
+      "object_bytes": {
+        "runtime.obj": 21604,
+        "unit.obj": 8090
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5784,
+        ".rdata": 44400,
+        ".reloc": 1668,
+        ".text": 113808
+      },
+      "repetition": 2,
+      "result": 59181,
+      "support_sha256": "032b8a8f7b2077fa3fff042687157862dc89ab5ba2c0b316c92072b995adb1bc",
+      "translation_ns": 290813900,
+      "unit_bytes": 29125,
+      "unit_sha256": "c776645c0d52b0a4ed855e159b568d1e9abcdfad460877f21d0d8b7c44c05345",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 566517500,
+      "exe_bytes": 168448,
+      "kernel_ns": 1217540300,
+      "lane": "c",
+      "object_bytes": {
+        "runtime.obj": 5605,
+        "unit.obj": 2715
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5616,
+        ".rdata": 44256,
+        ".reloc": 1660,
+        ".text": 111168
+      },
+      "repetition": 2,
+      "result": 59181,
+      "support_sha256": "962709f9f447611e0e9e3149dbce6baddde287ac6c1e84317ac2868a3bf305be",
+      "translation_ns": 0,
+      "unit_bytes": 1983,
+      "unit_sha256": "3d5c26f36d9a76a5fe6499fc01864ca0ee6c8cd001ff3f7b96f1c24e34ef390d",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 735773200,
+      "exe_bytes": 168448,
+      "kernel_ns": 1308022500,
+      "lane": "c",
+      "object_bytes": {
+        "runtime.obj": 5605,
+        "unit.obj": 2715
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5616,
+        ".rdata": 44256,
+        ".reloc": 1660,
+        ".text": 111168
+      },
+      "repetition": 3,
+      "result": 59181,
+      "support_sha256": "962709f9f447611e0e9e3149dbce6baddde287ac6c1e84317ac2868a3bf305be",
+      "translation_ns": 0,
+      "unit_bytes": 1983,
+      "unit_sha256": "3d5c26f36d9a76a5fe6499fc01864ca0ee6c8cd001ff3f7b96f1c24e34ef390d",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 1162124300,
+      "exe_bytes": 171520,
+      "kernel_ns": 1305463100,
+      "lane": "fairy",
+      "object_bytes": {
+        "runtime.obj": 21604,
+        "unit.obj": 8090
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5784,
+        ".rdata": 44400,
+        ".reloc": 1668,
+        ".text": 113808
+      },
+      "repetition": 3,
+      "result": 59181,
+      "support_sha256": "032b8a8f7b2077fa3fff042687157862dc89ab5ba2c0b316c92072b995adb1bc",
+      "translation_ns": 233604500,
+      "unit_bytes": 29125,
+      "unit_sha256": "c776645c0d52b0a4ed855e159b568d1e9abcdfad460877f21d0d8b7c44c05345",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 767256000,
+      "exe_bytes": 171520,
+      "kernel_ns": 1316506400,
+      "lane": "fairy",
+      "object_bytes": {
+        "runtime.obj": 21604,
+        "unit.obj": 8090
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5784,
+        ".rdata": 44400,
+        ".reloc": 1668,
+        ".text": 113808
+      },
+      "repetition": 4,
+      "result": 59181,
+      "support_sha256": "032b8a8f7b2077fa3fff042687157862dc89ab5ba2c0b316c92072b995adb1bc",
+      "translation_ns": 137410200,
+      "unit_bytes": 29125,
+      "unit_sha256": "c776645c0d52b0a4ed855e159b568d1e9abcdfad460877f21d0d8b7c44c05345",
+      "workload": "vector_read_candidate"
+    },
+    {
+      "build_ns": 597260900,
+      "exe_bytes": 168448,
+      "kernel_ns": 1234661700,
+      "lane": "c",
+      "object_bytes": {
+        "runtime.obj": 5605,
+        "unit.obj": 2715
+      },
+      "pe_virtual_section_bytes": {
+        ".data": 5704,
+        ".fptable": 256,
+        ".pdata": 5616,
+        ".rdata": 44256,
+        ".reloc": 1660,
+        ".text": 111168
+      },
+      "repetition": 4,
+      "result": 59181,
+      "support_sha256": "962709f9f447611e0e9e3149dbce6baddde287ac6c1e84317ac2868a3bf305be",
+      "translation_ns": 0,
+      "unit_bytes": 1983,
+      "unit_sha256": "3d5c26f36d9a76a5fe6499fc01864ca0ee6c8cd001ff3f7b96f1c24e34ef390d",
+      "workload": "vector_read_candidate"
+    }
+  ],
+  "schema": "fairyc.c-budget-baseline/v1",
+  "seed": 12345,
+  "source_sha256": {
+    "support.c": "962709f9f447611e0e9e3149dbce6baddde287ac6c1e84317ac2868a3bf305be",
+    "vector_read.c": "3d5c26f36d9a76a5fe6499fc01864ca0ee6c8cd001ff3f7b96f1c24e34ef390d",
+    "vector_read_candidate.fy": "fd6bb95ace254e914babac6c9efb19d05a918f161157d097ff20806cbc9a3154"
+  }
+}
