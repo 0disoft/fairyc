@@ -22,12 +22,17 @@ fn i32 integer(ref u8[] raw, ref mut bytes::Buffer output) {
         else if (raw[1] == 98) { base = 2; first = 2; }
     }
     if (first == raw.len) { return 1; }
+    var bool plain_decimal = base == 10 && (raw.len == 1 || raw[0] != 48);
     var usize i = first;
     while (i < raw.len) {
         if (raw[i] == 95) {
+            plain_decimal = false;
             if (i == first || i + 1 == raw.len || value(raw[i-1]) >= base || value(raw[i+1]) >= base) { return 1; }
         } else if (value(raw[i]) >= base) { return 1; }
         i += 1;
+    }
+    if (plain_decimal) {
+        return switch (bytes::append(output, raw)) { case .ok(_): { 0 } case .err(_): { 3 } };
     }
     // Little-endian decimal digits avoid restricting literals to machine integers.
     var bytes::Buffer digits = bytes::empty();

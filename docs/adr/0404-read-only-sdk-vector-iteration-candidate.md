@@ -354,6 +354,12 @@ has a stable 1.79340 runtime ratio and an 11.67% EXE excess; the explicit-index
 form is similarly over budget. This common-input screen fails the 8% limit,
 but the C reference's incomplete behavior still prevents a representative
 whole-scanner admission verdict or any relaxation of the gate.
+The [plain-decimal scanner fast path](../ops/decimal-fastpath-four-image-20260925.md)
+preserves existing integer spellings while avoiding the digit accumulator for
+validated ordinary decimal input. In a new fixed four-image run, the stable
+private-vector/up-front-C paired median falls from 1.79340 to 1.57821; both
+Fairy EXE byte counts stay at 205,824. Generated C grows by about 0.9%,
+check/build cost is unmeasured, and the 8% C-relative gate remains open.
 
 ## Proposed first boundary
 
