@@ -1,6 +1,7 @@
 package compiler_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,8 +15,10 @@ import (
 	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
+	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -33,6 +36,20 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 	const endAfter = `        position = token.end;
     }
     assert(position == input.len);`
+	const cookedBefore = `    while (index < v::len<bytes::Buffer>(ref stream.cooked)) {
+        cooked += bytes::view(v::at<bytes::Buffer>(ref stream.cooked, index)).len; index += 1;
+    }`
+	const cookedAfter = `    for (let ref bytes::Buffer item in ref stream.cooked) {
+        cooked += bytes::view(item).len;
+    }`
+	const diagnosticBefore = `    while (index < v::len<diagnostics::Entry>(ref stream.errors)) {
+        diagnostic += diagnostics::token_view(v::at<diagnostics::Entry>(ref stream.errors, index)).len;
+        index += 1;
+    }`
+	const diagnosticAfter = `    for (let ref diagnostics::Entry item in ref stream.errors) {
+        diagnostic += diagnostics::token_view(item).len;
+    }`
+	const scannerInput = "let n=12345; /*open"
 
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
 	scannerBytes, err := os.ReadFile(filepath.Join(example, "src", "scanner.fy"))
@@ -40,9 +57,29 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 		t.Fatal(err)
 	}
 	scanner := string(scannerBytes)
-	if strings.Count(scanner, before) != 1 || strings.Count(scanner, endBefore) != 1 {
+	if strings.Count(scanner, before) != 1 || strings.Count(scanner, endBefore) != 1 ||
+		strings.Count(scanner, cookedBefore) != 1 || strings.Count(scanner, diagnosticBefore) != 1 {
 		t.Fatal("real scanner loop changed; refresh the private candidate comparison")
 	}
+	lexed := lexer.Lex(source.NewFile("input.fy", []byte(scannerInput)),
+		source.NewBudget(source.DefaultLimits(), len(scannerInput)))
+	cookedBytes, diagnosticBytes := 0, 0
+	for _, token := range lexed.Tokens {
+		cookedBytes += len(token.Cooked)
+	}
+	for _, diagnostic := range lexed.Diagnostics {
+		diagnosticBytes += len(diagnostic.Token)
+	}
+	if cookedBytes == 0 || diagnosticBytes == 0 {
+		t.Fatal("real scanner sample no longer covers cooked and diagnostic storage")
+	}
+	wantStorage := fmt.Sprintf("%d %d %d %d %d ", len(scannerInput), cookedBytes,
+		diagnosticBytes, len(lexed.Tokens), len(lexed.Diagnostics))
+	tokenScanner := strings.Replace(strings.Replace(scanner, before, after, 1), endBefore, endAfter, 1)
+	cookedScanner := strings.Replace(scanner, cookedBefore, cookedAfter, 1)
+	diagnosticScanner := strings.Replace(scanner, diagnosticBefore, diagnosticAfter, 1)
+	allScanner := strings.Replace(strings.Replace(tokenScanner, cookedBefore, cookedAfter, 1),
+		diagnosticBefore, diagnosticAfter, 1)
 	outputs := make(map[string]map[string]string)
 	for _, variant := range []struct {
 		name      string
@@ -50,7 +87,10 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 		scanner   string
 	}{
 		{name: "explicit index", scanner: scanner},
-		{name: "vector for", candidate: true, scanner: strings.Replace(strings.Replace(scanner, before, after, 1), endBefore, endAfter, 1)},
+		{name: "token vector for", candidate: true, scanner: tokenScanner},
+		{name: "cooked vector for", candidate: true, scanner: cookedScanner},
+		{name: "diagnostic vector for", candidate: true, scanner: diagnosticScanner},
+		{name: "all vector for", candidate: true, scanner: allScanner},
 	} {
 		t.Run(variant.name, func(t *testing.T) {
 			root := t.TempDir()
@@ -64,13 +104,36 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 			writeVectorCacheFile(t, root, "src/scanner.fy", variant.scanner)
 			writeVectorCacheFile(t, root, "src/main.fy", `module main;
 import scanner as scanner;
+import std::bytes as bytes;
+import std::io as io;
 @link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
-@effects(console) fn i32 main() {
+@effects(console) fn void number(usize value) {
+    assert(switch (io::write_usize(value)) { case .ok(_) : { true } case .err(_) : { false } });
+    assert(switch (io::write(" ")) { case .ok(_) : { true } case .err(_) : { false } });
+}
+@effects(console) fn i32 exercise() {
     let i32 empty = scanner::report_work(b""[..], false, 32768, 1048576, 256, 16777216);
     if (empty != 0) { return empty; }
     let i32 sample = scanner::report_work(b"let n=12345; /*open"[..], false, 32768, 1048576, 256, 16777216);
+    if (sample != 0) { return sample; }
+    let bytes::Buffer owned = switch (bytes::copy(b"let n=12345; /*open")) {
+        case .ok(value) : { value }
+        case .err(_) : { assert(false); bytes::empty() }
+    };
+    return switch (scanner::collect(owned, false, 32768, 1048576, 256, 16777216)) {
+        case .ok(stream) : {
+            let scanner::Storage usage = scanner::storage(ref stream);
+            number(usage.source_bytes); number(usage.cooked_bytes); number(usage.diagnostic_bytes);
+            number(usage.tokens); number(usage.diagnostics);
+            0
+        }
+        case .err(status) : { status }
+    };
+}
+@effects(console) fn i32 main() {
+    let i32 status = exercise();
     assert(unsafe { clean() } == 1);
-    return sample;
+    return status;
 }`)
 			workspace, err := workspaceloader.LoadVectorCandidate(root)
 			if err != nil {
@@ -127,9 +190,14 @@ import scanner as scanner;
 	}
 	if runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
 		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-			baseline, candidate := outputs["explicit index"][profile.Name], outputs["vector for"][profile.Name]
-			if baseline == "" || candidate != baseline {
-				t.Fatalf("%s scanner output differs: explicit=%q candidate=%q", profile.Name, baseline, candidate)
+			baseline := outputs["explicit index"][profile.Name]
+			if baseline == "" || !strings.HasSuffix(baseline, wantStorage) {
+				t.Fatalf("%s scanner storage oracle differs: got=%q want suffix=%q", profile.Name, baseline, wantStorage)
+			}
+			for _, name := range []string{"token vector for", "cooked vector for", "diagnostic vector for", "all vector for"} {
+				if candidate := outputs[name][profile.Name]; candidate != baseline {
+					t.Fatalf("%s %s output differs: explicit=%q candidate=%q", profile.Name, name, baseline, candidate)
+				}
 			}
 		}
 	}

@@ -65,18 +65,19 @@ index forms both sum the nine five-byte views to 45, then complete the same
 pop, move and resource-cleanup checks under low and optimized Windows AMD64
 MSVC profiles. This covers resource elements and borrowed byte views without
 admitting the syntax in stable workspace commands. It still does not compare
-the actual lexer output, generated C size or the cumulative 8% C-relative
-budget.
+the actual lexer output or generated C size. The cumulative 8% C-relative
+budget also remains unmeasured.
 
-The first real lexer source comparison now loads the checked-in
-`scanner::report_work` package graph with the authenticated private SDK. Its
-unchanged explicit-index loop and a copy with only that loop rewritten both
-pass source analysis, Flow and verified MIR. The stable source lane rejects
-the rewritten copy. A following native probe runs both versions on empty input
-and on a cooked-number plus unterminated-comment input. Exact console output
-matches under low and optimized Windows AMD64 MSVC profiles; the allocator
-probe finds no live SDK allocation after both calls return. This covers one
-real lexer loop, not the other two loops or the C-relative cost gate.
+The real lexer source comparison loads the checked-in scanner package graph
+with the authenticated private SDK. It tests the original explicit-index
+source, each of the three loop rewrites separately, and all three together.
+All five forms pass source analysis, Flow and verified MIR; the stable source
+lane rejects every rewritten form. Native runs cover empty input and a
+cooked-number plus unterminated-comment input. Exact console output matches
+under low and optimized Windows AMD64 MSVC profiles. Storage counts match the
+independent Go lexer observation, and the allocator probe finds no live SDK
+allocation after the scanner calls and owned stream return. The C-relative
+cost gate remains open.
 
 ## Proposed first boundary
 
