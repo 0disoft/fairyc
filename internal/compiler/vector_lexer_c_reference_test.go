@@ -71,6 +71,7 @@ func scannerCReferenceInputs() []struct {
 	}{
 		{"empty", nil},
 		{"identifier and keyword", []byte("module fairy; true false null defer")},
+		{"all keyword spellings", []byte("as assert break case cleanup const continue discard else enum extern false fn for if import in let module mut null pub ptr ref region resource return struct switch true unsafe var while defer")},
 		{"BOM CRLF and nested comment", append([]byte{0xef, 0xbb, 0xbf}, []byte("module main;\r\n/// doc\r\n/* outer /* inner */ done */\r\n")...)},
 		{"symbols and whitespace", []byte("a <<= b::c -> d..e += f\t\n")},
 		{"all symbol spellings", []byte("<<= >>= += -= *= /= %= &= ^= |= :: -> => == != <= >= << >> && || .. @ ( ) { } [ ] , ; : . ? = + - * / % ! ~ & | ^ < >")},

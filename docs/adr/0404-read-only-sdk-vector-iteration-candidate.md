@@ -218,7 +218,7 @@ budget also charges scanning.
 The 70,000-digit digest check therefore cannot prove Fairy/C equivalence.
 The standalone C Go-oracle build retains that wider range. The C budget image
 now enables a candidate decimal-materialization limit of 16,384 bytes.
-The checked-in 26-case lexical corpus now runs through both C budget storage
+The checked-in 27-case lexical corpus now runs through both C budget storage
 lanes and the explicit-index and private vector-loop Fairy scanners under low
 and optimized Windows MSVC. Each lane matches the Go lexer's token and
 diagnostic observations in its output encoding. The cases include BOM and
@@ -367,6 +367,13 @@ On the same fixed scanner input, the stable private-vector/up-front-C median
 falls to 1.29292, while both Fairy EXEs remain 205,824 bytes. Generated C
 grows about 2.84% from the previous image. This still fails the cumulative
 8% runtime and EXE screen; check/build time and general-workload cost are open.
+The [keyword-length grouping comparison](../ops/keyword-length-four-image-20260925.md)
+reduces the reserved-word candidates visited for each identifier and expands
+the cross-language lexical corpus to 27 cases. Its fixed-sample timing spans
+exceed the predeclared stability limit, so the lower point estimates do not
+establish a runtime improvement or 8% admission. Both Fairy EXEs grow to
+206,336 bytes and remain 11.94% above the up-front C image; generated C grows
+another 2,486 bytes per Fairy image. The source form stays private.
 
 ## Proposed first boundary
 

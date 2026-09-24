@@ -75,14 +75,20 @@ fn bool digit(u8 value) { return value >= 48 && value <= 57; }
 fn bool space(u8 value) { return value == 32 || value == 9 || value == 10; }
 
 fn bool keyword(ref u8[] input, usize start, usize end, bool previous) {
-    if (previous && end - start == 5 && matches(input, start, b"defer")) { return false; }
-    let ref u8[] words = b"as assert break case cleanup const continue discard else enum extern false fn for if import in let module mut null pub ptr ref region resource return struct switch true unsafe var while defer";
+    let usize width = end - start;
+    if (previous && width == 5 && matches(input, start, b"defer")) { return false; }
+    let ref u8[] words = if (width == 2) { b"as fn if in" }
+        else if (width == 3) { b"for let mut pub ptr ref var" }
+        else if (width == 4) { b"case else enum null true" }
+        else if (width == 5) { b"break const false while defer" }
+        else if (width == 6) { b"assert extern import module region return struct switch unsafe" }
+        else if (width == 7) { b"cleanup discard" }
+        else if (width == 8) { b"continue resource" }
+        else { b"" };
     var usize first = 0;
     while (first < words.len) {
-        var usize last = first;
-        while (last < words.len && words[last] != 32) { last += 1; }
-        if (last - first == end - start && matches(input, start, words[first..last])) { return true; }
-        first = last + 1;
+        if (matches(input, start, words[first..first + width])) { return true; }
+        first += width + 1;
     }
     return false;
 }
