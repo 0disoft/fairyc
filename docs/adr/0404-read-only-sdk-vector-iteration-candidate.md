@@ -59,6 +59,15 @@ result. The C probe observes no live vector allocation after function return.
 This proves these control and cleanup cases, not the representative lexer
 workload or the cumulative C-relative cost gate.
 
+A second private native probe now inserts a shared `Vec<bytes::Buffer>` loop
+into the existing nine-buffer ownership workload. The candidate and explicit
+index forms both sum the nine five-byte views to 45, then complete the same
+pop, move and resource-cleanup checks under low and optimized Windows AMD64
+MSVC profiles. This covers resource elements and borrowed byte views without
+admitting the syntax in stable workspace commands. It still does not compare
+the actual lexer output, generated C size or the cumulative 8% C-relative
+budget.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

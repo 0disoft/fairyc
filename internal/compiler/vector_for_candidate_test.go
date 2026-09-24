@@ -1,6 +1,7 @@
 package compiler_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -205,6 +206,61 @@ fn i32 main() {
 						hir.QualifiedModulePath(1, "main")+"::main", vectorForNativeProbe, true, sample.expected)
 				})
 			}
+		})
+	}
+}
+
+func TestPrivateVectorSDKCandidateBufferLoopNativeParity(t *testing.T) {
+	const anchor = "    let bytes::Buffer last ="
+	for _, form := range []struct {
+		name      string
+		candidate bool
+		loop      string
+	}{
+		{name: "vector for", candidate: true, loop: `    var usize total = 0;
+    for (let ref bytes::Buffer item in ref storage) {
+        let ref u8[] view = bytes::view(item);
+        total += view.len;
+    }
+    assert(total == 45);
+`},
+		{name: "explicit index", loop: `    var usize total = 0;
+    let usize bound = v::len<bytes::Buffer>(ref storage);
+    for (var usize index = 0; index < bound; index += 1) {
+        let ref bytes::Buffer item = v::at<bytes::Buffer>(ref storage, index);
+        let ref u8[] view = bytes::view(item);
+        total += view.len;
+    }
+    assert(total == 45);
+`},
+	} {
+		t.Run(form.name, func(t *testing.T) {
+			client := strings.Replace(vectorCandidateProgram(), anchor, form.loop+anchor, 1)
+			if client == vectorCandidateProgram() {
+				t.Fatal("vector candidate fixture anchor missing")
+			}
+			input, coordinates := vectorSDKInputWithCandidate(t, client, true)
+			owners := []hir.PackageID{3}
+			var analysis compiler.GenericAnalysis
+			var err error
+			if form.candidate {
+				analysis, err = compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), owners)
+			} else {
+				analysis, err = compiler.AnalyzeSDKStoragePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), owners)
+			}
+			if err != nil || analysis.Analysis.Semantic.CompletedThrough != semantic.PhaseFlow ||
+				len(analysis.Analysis.Semantic.Diagnostics) != 0 || len(analysis.Analysis.Semantic.Unsupported) != 0 {
+				t.Fatalf("buffer loop source and Flow: %v diagnostics=%+v unsupported=%+v", err,
+					analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+			}
+			result, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+			if err != nil || !result.Verified {
+				t.Fatalf("buffer loop verified MIR: %v %+v", err, result.Semantic.Diagnostics)
+			}
+			runVectorStorageMIRNativeLane(t, result.MIR,
+				hir.QualifiedModulePath(1, "main")+"::main", vectorCandidateProbe, true)
 		})
 	}
 }
