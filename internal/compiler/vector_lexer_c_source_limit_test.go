@@ -50,10 +50,43 @@ int main(void) {
     return 0;
 }
 `
+	const fairyMain = `module main;
+import scanner as scanner;
+import std::bytes as bytes;
+
+@effects(console)
+fn i32 main() {
+    var bytes::Buffer input = bytes::empty();
+    var usize index = 0;
+    while (index < 32768) {
+        if (!switch (bytes::append_byte(ref mut input, 97)) {
+            case .ok(_): { true }
+            case .err(_): { false }
+        }) { return 1; }
+        index += 1;
+    }
+    if (scanner::report_work(bytes::view(ref input), false, 32768, 1048576, 256, 16777216) != 0) {
+        return 2;
+    }
+    if (!switch (bytes::append_byte(ref mut input, 97)) {
+        case .ok(_): { true }
+        case .err(_): { false }
+    }) { return 3; }
+    if (scanner::report_work(bytes::view(ref input), false, 32768, 1048576, 256, 16777216) != 4) {
+        return 4;
+    }
+    return 0;
+}
+`
 	exact := []byte(strings.Repeat("a", 32768))
 	over := []byte(strings.Repeat("a", 32769))
+	variants := realScannerVectorVariants(t)
+	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
+		t.Fatal("real scanner variants changed")
+	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
+			var candidateOutput string
 			for _, lane := range []struct {
 				name, prefix string
 				overStatus   int32
@@ -71,10 +104,33 @@ int main(void) {
 						exactOutcome.TrapControl != "" || exactOutcome.Stdout != scannerGoObservation(exact) {
 						t.Fatalf("exact source limit: %+v %v", exactOutcome, err)
 					}
+					if lane.name == "candidate" {
+						candidateOutput = exactOutcome.Stdout
+					}
 					overOutcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(image, scannerCInput(over))
 					if err != nil || overOutcome.ExitCode != lane.overStatus ||
 						overOutcome.Stdout != "" || overOutcome.Stderr != "" || overOutcome.TrapControl != "" {
 						t.Fatalf("over source limit: %+v %v", overOutcome, err)
+					}
+				})
+			}
+			fields := strings.Fields(candidateOutput)
+			if len(fields) != 12 || fields[0] != "T" || fields[5] != "-" ||
+				fields[6] != "T" || fields[11] != "-" {
+				t.Fatalf("unexpected C token record: %q", candidateOutput)
+			}
+			wantFairy := strings.Join([]string{
+				fields[1], fields[2], fields[3], fields[4], "0",
+				fields[7], fields[8], fields[9], fields[10], "0", "0",
+			}, " ") + " "
+			for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
+				t.Run(variant.name, func(t *testing.T) {
+					program, entry, _ := scannerBudgetFairyProgramWithMain(t, variant, fairyMain)
+					image, _ := buildRealScannerVectorNative(t, program, entry, profile, "")
+					outcome, err := cdriver.ExecuteWindowsHost(image)
+					if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" ||
+						outcome.TrapControl != "" || outcome.Stdout != wantFairy {
+						t.Fatalf("Fairy/C source-cap parity: %+v %v\nwant %q", outcome, err, wantFairy)
 					}
 				})
 			}
