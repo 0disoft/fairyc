@@ -392,7 +392,10 @@ access is not equivalent to the current source loop.
    A low/optimized MSVC fault-injection probe now covers both decimal-cooking
    allocations and the first geometric token-slot allocation in the C lane.
    Each injected failure returns status 3 with no retained allocation or
-   published token; this is C cleanup evidence, not Fairy/C failure parity.
+   published token. The explicit-index and private-vector Fairy scanners also
+   return status 3 with no output or retained allocation when their first
+   allocation fails, under both MSVC profiles. This matches observable
+   first-failure behavior, not the distinct allocation order or later failures.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,

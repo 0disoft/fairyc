@@ -84,3 +84,45 @@ int main(void) {
 		})
 	}
 }
+
+func TestPrivateVectorSDKCandidateFairyFirstAllocationFailure(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	variants := realScannerVectorVariants(t)
+	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
+		t.Fatal("real scanner variants changed")
+	}
+	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
+		t.Run(variant.name, func(t *testing.T) {
+			program, entry, _ := scannerBudgetFairyProgramWithMain(t, variant, scannerFirstAllocationFailureMain)
+			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+				t.Run(profile.Name, func(t *testing.T) {
+					image, _ := buildRealScannerVectorNative(t, program, entry, profile, scannerFirstAllocationFailureSupport)
+					outcome, err := cdriver.ExecuteWindowsHost(image)
+					if err != nil || outcome.ExitCode != 3 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
+						t.Fatalf("Fairy scanner first allocation failure: %+v %v", outcome, err)
+					}
+				})
+			}
+		})
+	}
+}
+
+const scannerFirstAllocationFailureSupport = `
+void fairyc_fixture_vector_fail_next(void) { vector_fail = 1; }
+int32_t fairyc_fixture_vector_failure_seen(void) { return vector_failures == 1 ? 1 : 0; }
+`
+
+const scannerFirstAllocationFailureMain = `module main;
+import scanner as scanner;
+@link_name("fairyc_fixture_vector_fail_next") unsafe extern C fn void fail_next();
+@link_name("fairyc_fixture_vector_failure_seen") unsafe extern C fn i32 failure_seen();
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+@effects(console) fn i32 main() {
+    unsafe { fail_next(); }
+    let i32 status = scanner::report_work(b"12"[..], false, 32768, 1048576, 256, 16777216);
+    assert(unsafe { failure_seen() } == 1);
+    assert(unsafe { clean() } == 1);
+    return status;
+}`
