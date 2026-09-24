@@ -185,14 +185,12 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
             kind = if (current == 34) { 7 } else if (current == 98) { 8 } else { 9 };
             let usize opener = if (current == 34) { 1 } else { 2 };
             var bytes::Buffer cooked = bytes::empty();
-            let strings::Step step = strings::scan(input, start, kind, opener, ref mut cooked, errors, diagnostic_count, max_diagnostics, work);
-            work = step.work;
+            let strings::Step step = strings::scan(input, start, kind, opener, ref mut cooked, errors, ref mut diagnostic_count, max_diagnostics, ref mut work);
             if (step.status == 5) {
                 if (!append(tokens, 0, 0, start, step.end)) { return 3; }
                 return exhausted(input, step.end, tokens, errors);
             }
             if (step.status != 0) { return step.status; }
-            diagnostic_count = step.diagnostics;
             position = step.end;
             let usize length = bytes::len(ref cooked);
             let usize cooked_limit = 65536;

@@ -438,6 +438,10 @@ A [numeric work-borrow experiment](../ops/scanner-numeric-work-borrow-20260925.m
 removes 512 more bytes from each Fairy EXE and 3,774 bytes from each generated
 C source by leaving work state in the caller. The EXE ratio remains 1.10;
 neither check/build time nor stable runtime has been established.
+A [string state-borrow experiment](../ops/scanner-string-state-borrow-20260925.md)
+removes another 512 bytes from each Fairy EXE while preserving checked
+lexical and limit behavior. The C-relative EXE ratio remains 1.09722;
+compile-time and stable runtime evidence remain open.
 
 ## Proposed first boundary
 
