@@ -65,7 +65,15 @@ vector loop and, separately, `?` propagation while a vector owns two
 Both forms pass Flow and verified MIR, then run under low and optimized Windows
 MSVC. The propagation probe observes at least three allocations (both buffers
 and vector storage) and no live allocation after the caller handles the error.
-This does not yet prove Region reset or exact resource-drop order on these exits.
+
+A further native comparison runs both source forms with a Region inside the
+vector loop and exits through `return` and `?`. A C observer checks that the
+inner resource cleanup precedes the outer resource cleanup on both exits.
+The allocator records the vector and Region allocations, then requires all of
+them to be freed after the owning Arena drops. The Arena refuses to drop with
+an active Region, so this also checks native Region reset under low and
+optimized Windows MSVC. Exact interpreter Region/drop traces and cleanup of
+resource-bearing vector elements across Region exits remain separate gates.
 
 A second private native probe now inserts a shared `Vec<bytes::Buffer>` loop
 into the existing nine-buffer ownership workload. The candidate and explicit
