@@ -238,10 +238,13 @@ additional C/Fairy native cases cover spaces, CRLF, line and documentation
 comments, and nested block comments, including two-byte segments rejected
 without partial consumption. They compare the first invalid token, retained
 tail, `E0010` position, EOF and successful trivia kind in both MSVC profiles.
-Continuation work for identifiers, numbers and symbols, BOM exhaustion,
-combined limits and whole-scanner runtime remain unproven. The candidate C
-budget images also stop after 256 ordinary diagnostics and retain one terminal
-`E0010`.
+Fifteen further C/Fairy cases cover identifier and keyword continuation,
+one- through three-byte symbols, and valid or invalid UTF-8 rejected as a
+source token. They check atomic multibyte work exhaustion, `E0010` or `E0001`
+spans, retained tails and EOF under both profiles. Numeric source scanning,
+BOM exhaustion, combined limits and whole-scanner runtime remain unproven.
+The candidate C budget images also stop after 256 ordinary diagnostics and
+retain one terminal `E0010`.
 Runs with 256, 257 and 258 invalid bytes match the Go lexer exactly in both
 C storage modes under low and optimized MSVC. The actual Fairy scanner checks
 the same boundary's token count, diagnostic count, terminal span and EOF.

@@ -840,8 +840,13 @@ static int fc_scan_one(struct fc_scanner *s) {
     if (fc_decimal_digit(current)) return fc_scan_number(s);
     if (fc_identifier_start(current)) {
         s->position++;
-        while (s->position < s->length && fc_identifier_continue(s->source[s->position]))
+        while (s->position < s->length && fc_identifier_continue(s->source[s->position])) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+            if (!fc_work_available(s, 1u))
+                return fc_work_exhausted(s, start, s->position);
+#endif
             s->position++;
+        }
         size_t length = s->position - start;
         int keyword = fc_keyword(s->source + start, length);
         int literal = keyword && fc_literal_keyword(s->source + start, length);
@@ -851,11 +856,19 @@ static int fc_scan_one(struct fc_scanner *s) {
     }
     size_t width = fc_symbol_width(s);
     if (width != 0) {
+#ifdef FC_CANDIDATE_WORK_LIMIT
+        if (!fc_work_available(s, width))
+            return fc_work_exhausted(s, start, start + 1u);
+#endif
         s->position += width;
         fc_token(s, FC_SYMBOL, FC_NO_TRIVIA, start, s->position, NULL, 0);
         return 0;
     }
     width = current >= 0x80 ? fc_utf8_width(s->source + start, s->length - start) : 1;
+#ifdef FC_CANDIDATE_WORK_LIMIT
+    if (!fc_work_available(s, width))
+        return fc_work_exhausted(s, start, start + 1u);
+#endif
     s->position += width;
     fc_token(s, FC_INVALID, FC_NO_TRIVIA, start, s->position, NULL, 0);
     fc_diagnostic(s, "E0001", start, s->position, "none", "");
