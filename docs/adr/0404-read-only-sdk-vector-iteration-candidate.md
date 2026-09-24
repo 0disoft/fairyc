@@ -346,6 +346,14 @@ Fairy images again have equal EXE size, 11.67% above the still restricted C
 image. The private-vector/index paired median is 0.98705 with an 8.88% full
 span; the C lane and both C-relative ratios exceed the 10% stability limit.
 This remains diagnostic evidence, not an 8% admission result.
+The [four-image rotation](../ops/vector-lexer-four-image-c-budget-20260925.md)
+then pairs both C storage modes with both Fairy forms in one run. For the fixed
+sample, up-front C is both faster and smaller than geometric C with stable
+lane and storage-ratio series. Against that C lane, the private vector form
+has a stable 1.79340 runtime ratio and an 11.67% EXE excess; the explicit-index
+form is similarly over budget. This common-input screen fails the 8% limit,
+but the C reference's incomplete behavior still prevents a representative
+whole-scanner admission verdict or any relaxation of the gate.
 
 ## Proposed first boundary
 
