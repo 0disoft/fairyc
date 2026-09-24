@@ -1,5 +1,5 @@
-// Independent C11 lexical reference. Large decimal expansions remain
-// unsupported; this is not yet a full-scanner budget lane.
+// Independent C11 lexical reference. Decimal expansions beyond the Go lexer's
+// default 16 MiB work budget remain unsupported; this is not a full scanner.
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -10,7 +10,7 @@
 #include <io.h>
 #endif
 
-enum { FC_MAX_SOURCE = 32768, FC_MAX_COOKED = 65536,
+enum { FC_MAX_SOURCE = 32768, FC_MAX_COOKED = 16 << 20,
        FC_UNSUPPORTED = 7, FC_BAD_INPUT = 8 };
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };

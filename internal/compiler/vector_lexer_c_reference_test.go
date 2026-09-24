@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"hash/fnv"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -17,8 +18,8 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// This C source is independently authored and still rejects large decimal
-// expansions until it can match the full scanner.
+// This C source is independently authored and still rejects decimal
+// expansions beyond the default work budget until it can match the full scanner.
 func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
@@ -79,11 +80,84 @@ func TestPrivateVectorSDKCandidateIndependentCScannerCore(t *testing.T) {
 					}
 				})
 			}
-			for _, unsupported := range []string{"1e70000", "1e-70000"} {
+			for _, unsupported := range []string{"1e17000000", "1e-17000000"} {
 				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, scannerCInput([]byte(unsupported)))
 				if err != nil || outcome.ExitCode != 7 || outcome.Stdout != "" || outcome.Stderr != "" {
 					t.Fatalf("unsupported %q: %+v %v", unsupported, outcome, err)
 				}
+			}
+		})
+	}
+}
+
+// A compact digest keeps large cooked tokens below the native driver's output
+// cap while checking their full-payload digest against the independent Go lexer.
+func TestPrivateVectorSDKCandidateIndependentCScannerLargeDecimal(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	core, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "scanner_reference.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const cMain = `
+int main(void) {
+#ifdef _WIN32
+    if (_setmode(_fileno(stdout), _O_BINARY) == -1) return FC_BAD_INPUT;
+#endif
+    static const char *const inputs[] = {"1e70000", "1e-70000"};
+    for (size_t i = 0; i < sizeof(inputs) / sizeof(inputs[0]); i++) {
+        const char *raw = inputs[i];
+        struct fc_token tokens[4] = {0};
+        struct fc_diagnostic diagnostics[4] = {0};
+        struct fc_scanner scanner = {(const unsigned char *)raw, strlen(raw),
+                                     0, 0, 0, tokens, diagnostics};
+        int status = fc_scan(&scanner);
+        if (status != 0 || scanner.token_count != 2 ||
+            scanner.diagnostic_count != 0 || tokens[0].kind != FC_FLOAT) {
+            fc_release_cooked(&scanner);
+            return status != 0 ? status : 9;
+        }
+        uint64_t digest = UINT64_C(14695981039346656037);
+        for (size_t j = 0; j < tokens[0].cooked_length; j++) {
+            digest ^= (uint64_t)tokens[0].cooked[j];
+            digest *= UINT64_C(1099511628211);
+        }
+        printf("%zu %llu\n", tokens[0].cooked_length,
+               (unsigned long long)digest);
+        fc_release_cooked(&scanner);
+    }
+    return 0;
+}
+`
+	code := "#define FC_SCANNER_LIBRARY\n" + string(core) + "\n" + cMain
+	var want strings.Builder
+	for _, raw := range []string{"1e70000", "1e-70000"} {
+		lexed := lexer.Lex(source.NewFile("input.fy", []byte(raw)),
+			source.NewBudget(source.DefaultLimits(), len(raw)))
+		if len(lexed.Tokens) != 2 || len(lexed.Diagnostics) != 0 || lexed.Tokens[0].Kind != lexer.Float {
+			t.Fatalf("Go lexer did not accept %q: %+v", raw, lexed.Diagnostics)
+		}
+		digest := fnv.New64a()
+		if _, err := digest.Write([]byte(lexed.Tokens[0].Cooked)); err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintf(&want, "%d %d\n", len(lexed.Tokens[0].Cooked), digest.Sum64())
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			outcome, err := cdriver.ExecuteWindowsHost(artifact)
+			if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" ||
+				outcome.Stdout != want.String() {
+				t.Fatalf("large decimal parity: %+v %v\nwant %q", outcome, err, want.String())
 			}
 		})
 	}

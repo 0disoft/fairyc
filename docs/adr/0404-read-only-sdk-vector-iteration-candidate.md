@@ -192,8 +192,11 @@ input. A bounded decimal-float step now checks exponent normalization and
 malformed spellings against the same oracle. The C reference now also checks
 plain string, byte-string and C-string values, simple, hex and Unicode
 escapes, raw UTF-8, invalid bytes, NUL diagnostics and unterminated strings.
-Decimal expansions larger than 65,536 cooked bytes still return an unsupported
-status. This remains insufficient for an 8% C budget baseline:
+The C reference now admits the 70,000-digit positive and negative exponent
+cases. A compact length and full-payload FNV-1a digest probe compares them
+with the Go lexer under low and optimized MSVC without exceeding the
+native output cap. Expansions beyond the 16 MiB default Go work-unit ceiling
+still return an unsupported status in C. This remains insufficient for an 8% C budget baseline:
 remaining lexical forms,
 limits, storage and output must be implemented and checked before timing or
 comparing executable sizes.
