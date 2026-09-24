@@ -37,14 +37,14 @@ sizes or QPC samples above describe the current image. Other recognition work
 paths, remaining lexical forms and the C/Fairy storage difference are still
 open, so the 8% gate remains undecided.
 
-The next C budget image now grows token storage from 8 slots by doubling,
-matching the private `Vec<Token>` capacity sequence; low and optimized C
-probes check the 8/16/32-slot boundaries and exact Go-lexer output. The broad
-standalone C reference retains its original up-front token allocation. A
-further C budget image also grows diagnostic entries from 8 slots by doubling;
-low and optimized probes cover 0/8/16/32-slot boundaries and compare malformed
-source output with Go. The broad standalone reference still uses up-front
-diagnostic storage. Fairy diagnostic entries own payloads differently from the
-C reference, so equal capacity steps do not prove identical allocation cost.
-Neither new image is represented by the earlier hashes or timing samples.
+An alternate C image now grows token and diagnostic storage from 8 slots by
+doubling. Low and optimized probes check the 8/16/32-slot token and
+0/8/16/32-slot diagnostic boundaries against Go output. The three-image C
+budget lane keeps its original up-front arrays; an optimized smoke separately
+checks the geometric C workload's reporter and 1000-round checksum. Preserving
+both C strategies prevents the storage experiment from silently replacing the
+C-relative baseline. A future budget verdict must compare against the faster
+equivalent C lane for runtime and the smaller equivalent C image for EXE size;
+Fairy diagnostic payload ownership remains different.
+The old executable hashes, sizes and timings describe neither current C image.
 The full scanner 8% gate remains open.

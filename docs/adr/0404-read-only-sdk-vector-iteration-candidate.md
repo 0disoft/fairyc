@@ -301,9 +301,11 @@ access is not equivalent to the current source loop.
    under the optimized profile against the cumulative 8% runtime and EXE
    budget. A new source form cannot claim a zero-cost result from syntax or
    interpreter parity alone. Separately measure unused-feature overhead.
-   The C budget reference now matches the geometric capacity steps of
-   `Vec<Token>` and `Vec<diagnostics::Entry>`. Diagnostic payload ownership
-   and remaining scanner limits still need parity.
+   A separate C budget variant matches the geometric capacity steps of
+   `Vec<Token>` and `Vec<diagnostics::Entry>`; the up-front C storage lane
+   remains available. Use the faster equivalent C lane for runtime and the
+   smaller equivalent C image for size when applying the gate.
+   Diagnostic payload ownership and remaining scanner limits still need parity.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
    formatter and release pin only after the proof. A failed gate keeps this
    feature a candidate; it does not authorize relaxing checks.

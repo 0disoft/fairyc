@@ -368,11 +368,38 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T
 			}
 		})
 	}
+	geometric, err := cdriver.BuildWindowsMSVCProbe(toolchain, cdriver.OptimizedProfile,
+		scannerCGeometricBenchmarkSource(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(geometric, strings.NewReader("12345 1000\n"))
+	if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
+		t.Fatalf("geometric C benchmark smoke: %+v %v", outcome, err)
+	}
+	prefix := scannerGoObservation([]byte(sample))
+	fields := strings.Fields(strings.TrimPrefix(outcome.Stdout, prefix))
+	if !strings.HasPrefix(outcome.Stdout, prefix) || len(fields) != 4 || fields[0] != "1000" ||
+		fields[3] != strconv.Itoa(perRound*1000) {
+		t.Fatalf("geometric C benchmark reporter or checksum differs: %q", outcome.Stdout)
+	}
 }
 
 func scannerCBenchmarkSource(t *testing.T) string {
+	return scannerCBenchmarkSourceWithStorage(t, false)
+}
+
+func scannerCGeometricBenchmarkSource(t *testing.T) string {
+	return scannerCBenchmarkSourceWithStorage(t, true)
+}
+
+func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	parts := []string{"#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
+	defines := "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n"
+	if geometric {
+		defines += "#define FC_CANDIDATE_GEOMETRIC_TOKENS\n#define FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS\n"
+	}
+	parts := []string{defines + "#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
 	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
 		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))
 		if err != nil {
