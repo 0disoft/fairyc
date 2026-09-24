@@ -8,9 +8,11 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/source"
 )
 
-// The benchmark C image narrows decimal materialization and total cooked bytes.
+// The benchmark C image narrows decimal materialization, total cooked bytes,
+// and numeric expansion work. Other work paths still need parity evidence.
 // Its Go-oracle reference retains the broader range without these defines.
 func TestPrivateVectorSDKCandidateDecimalLimitCParity(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
@@ -24,7 +26,7 @@ func TestPrivateVectorSDKCandidateDecimalLimitCParity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const define = "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n"
+	const define = "#define FC_CANDIDATE_DECIMAL_LIMIT\n#define FC_CANDIDATE_COOKED_LIMIT\n#define FC_CANDIDATE_WORK_LIMIT\n"
 	if !strings.Contains(scannerCBenchmarkSource(t), define) {
 		t.Fatal("C budget image omitted the candidate decimal limit")
 	}
@@ -52,6 +54,13 @@ func TestPrivateVectorSDKCandidateDecimalLimitCParity(t *testing.T) {
 					t.Fatalf("C rejected boundary %q: %+v %v", spelling, outcome, err)
 				}
 			}
+			for _, spelling := range []string{"1e16777206", "1e17000000"} {
+				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(cImage, scannerCInput([]byte(spelling)))
+				if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" ||
+					outcome.Stdout != scannerGoObservation([]byte(spelling)) {
+					t.Fatalf("C exhausted expansion %q: %+v %v", spelling, outcome, err)
+				}
+			}
 			cumulative, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile,
 				"#define FC_SCANNER_LIBRARY\n"+define+string(core)+candidateCumulativeProbe)
 			if err != nil {
@@ -60,6 +69,21 @@ func TestPrivateVectorSDKCandidateDecimalLimitCParity(t *testing.T) {
 			cumulativeOutcome, err := cdriver.ExecuteWindowsMSVCProbe(cumulative)
 			if err != nil || cumulativeOutcome.ExitCode != 0 || cumulativeOutcome.Stdout != "" || cumulativeOutcome.Stderr != "" {
 				t.Fatalf("C cumulative cooked boundary: %+v %v", cumulativeOutcome, err)
+			}
+			workImage, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile,
+				"#define FC_SCANNER_LIBRARY\n"+define+string(core)+candidateWorkProbe)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, work := range []int{6, 7} {
+				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(workImage,
+					strings.NewReader(string(rune('0'+work))))
+				limits := source.DefaultLimits()
+				limits.MaxWorkUnits = work
+				if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" ||
+					outcome.Stdout != scannerGoObservationWithLimits([]byte("1e3"), limits) {
+					t.Fatalf("C work boundary %d: %+v %v", work, outcome, err)
+				}
 			}
 			fairyImage, _ := buildRealScannerVectorNative(t, program, entry, profile, "")
 			outcome, err := cdriver.ExecuteWindowsHost(fairyImage)
@@ -73,26 +97,31 @@ func TestPrivateVectorSDKCandidateDecimalLimitCParity(t *testing.T) {
 const candidateDecimalLimitMain = `module main;
 import scanner as scanner;
 import std::bytes as bytes;
-fn i32 scan_status(ref u8[] input) {
+fn i32 scan_status(ref u8[] input, usize work_limit) {
     let bytes::Buffer owned = switch (bytes::copy(input)) {
         case .ok(value): { value }
         case .err(_): { return 3; }
     };
-    return switch (scanner::collect(owned, false, 32768, 1048576, 256, 16777216)) {
+    return switch (scanner::collect(owned, false, 32768, 1048576, 256, work_limit)) {
         case .ok(stream): {
             let scanner::Storage usage = scanner::storage(ref stream);
-            if (usage.source_bytes == input.len) { 0 } else { 9 }
+            if (usage.source_bytes != input.len) { 9 }
+            else if (usage.diagnostics == 1 && usage.cooked_bytes == 0 && usage.tokens == 2) { 10 }
+            else { 0 }
         }
         case .err(code): { code }
     };
 }
 fn i32 main() {
-    if (scan_status(b"1e16383"[..]) != 0) { return 11; }
-    if (scan_status(b"1e-16382"[..]) != 0) { return 12; }
-    if (scan_status(b"1e16384"[..]) != 4) { return 13; }
-    if (scan_status(b"1e-16383"[..]) != 4) { return 14; }
-    if (scan_status(b"1e16383 1e16383 1e16383 1e16383"[..]) != 0) { return 15; }
-    if (scan_status(b"1e16383 1e16383 1e16383 1e16383 1e16383"[..]) != 4) { return 16; }
+    if (scan_status(b"1e16383"[..], 16777216) != 0) { return 11; }
+    if (scan_status(b"1e-16382"[..], 16777216) != 0) { return 12; }
+    if (scan_status(b"1e16384"[..], 16777216) != 4) { return 13; }
+    if (scan_status(b"1e-16383"[..], 16777216) != 4) { return 14; }
+    if (scan_status(b"1e16383 1e16383 1e16383 1e16383"[..], 16777216) != 0) { return 15; }
+    if (scan_status(b"1e16383 1e16383 1e16383 1e16383 1e16383"[..], 16777216) != 4) { return 16; }
+    if (scan_status(b"1e3"[..], 6) != 10) { return 17; }
+    if (scan_status(b"1e3"[..], 7) != 0) { return 18; }
+    if (scan_status(b"1e16777206"[..], 16777216) != 10) { return 19; }
     return 0;
 }`
 
@@ -103,6 +132,7 @@ static int fc_probe(const unsigned char *input, size_t length, int expected) {
     struct fc_token tokens[64] = {0};
     struct fc_diagnostic diagnostics[64] = {0};
     struct fc_scanner scanner = {input, length, 0, 0, 0, tokens, diagnostics, 0};
+    scanner.work_limit = FC_CANDIDATE_WORK;
     int status = fc_scan(&scanner);
     int bad = status != expected || scanner.cooked_total != 65536u;
     fc_release_cooked(&scanner);
@@ -114,4 +144,30 @@ int main(void) {
     if (fc_probe(four, sizeof(four) - 1u, 0)) return 1;
     if (fc_probe(five, sizeof(five) - 1u, 4)) return 2;
     return 0;
+}`
+
+const candidateWorkProbe = `
+int main(void) {
+#ifdef _WIN32
+    if (_setmode(_fileno(stdout), _O_BINARY) == -1) return FC_BAD_INPUT;
+#endif
+    int choice = getchar();
+    if (choice != '6' && choice != '7') return FC_BAD_INPUT;
+    static const unsigned char input[] = "1e3";
+    struct fc_token tokens[8] = {0};
+    struct fc_diagnostic diagnostics[8] = {0};
+    struct fc_scanner scanner = {0};
+    scanner.source = input;
+    scanner.length = sizeof(input) - 1u;
+    scanner.tokens = tokens;
+    scanner.diagnostics = diagnostics;
+    scanner.work_limit = (size_t)(choice - '0');
+    int status = fc_scan(&scanner);
+    if (status == 0) {
+        qsort(scanner.diagnostics, scanner.diagnostic_count,
+              sizeof(*scanner.diagnostics), fc_compare_diagnostic);
+        fc_print(&scanner);
+    }
+    fc_release_cooked(&scanner);
+    return status;
 }`

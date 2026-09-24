@@ -13,6 +13,9 @@ static int fc_workload_round(const unsigned char *input, size_t length,
     }
     if (length != 0) memcpy(owned, input, length);
     struct fc_scanner scanner = {owned, length, 0, 0, 0, tokens, diagnostics};
+#ifdef FC_CANDIDATE_WORK_LIMIT
+    scanner.work_limit = FC_CANDIDATE_WORK;
+#endif
     int status = fc_scan(&scanner);
     if (status == 0) {
         *work = (uint64_t)length + scanner.token_count + scanner.diagnostic_count;

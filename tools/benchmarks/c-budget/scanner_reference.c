@@ -1,5 +1,6 @@
-// Independent C11 lexical reference. Decimal expansions beyond the Go lexer's
-// default 16 MiB work budget remain unsupported; this is not a full scanner.
+// Independent C11 lexical reference. The broad Go-oracle build leaves decimal
+// expansions beyond 16 MiB unsupported. The candidate C budget build models
+// numeric expansion work, but other work paths still need parity evidence.
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,6 +20,9 @@ enum { FC_CANDIDATE_DECIMAL = 16384, FC_CANDIDATE_SIZE = 4 };
 #endif
 #ifdef FC_CANDIDATE_COOKED_LIMIT
 enum { FC_CANDIDATE_COOKED = 65536, FC_CANDIDATE_COOKED_SIZE = 4 };
+#endif
+#ifdef FC_CANDIDATE_WORK_LIMIT
+enum { FC_CANDIDATE_WORK = 16 << 20 };
 #endif
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
@@ -42,6 +46,9 @@ struct fc_scanner {
     struct fc_diagnostic *diagnostics;
 #ifdef FC_CANDIDATE_COOKED_LIMIT
     size_t cooked_total;
+#endif
+#ifdef FC_CANDIDATE_WORK_LIMIT
+    size_t expansion_work, work_limit;
 #endif
 };
 
@@ -143,10 +150,14 @@ static int fc_cook_integer(const unsigned char *raw, size_t length,
     return 1;
 }
 
-// Return 1 for cooked decimal, 0 for an invalid spelling, -1 on OOM and
-// -2 when its expansion exceeds this still-partial reference's limit.
-static int fc_cook_float(const unsigned char *raw, size_t length,
+// Return 1 for cooked decimal, 0 for an invalid spelling, -1 on OOM,
+// -2 for the broad reference's unsupported size, -3 for candidate size,
+// and -4 for candidate work exhaustion before allocation.
+static int fc_cook_float(struct fc_scanner *s, const unsigned char *raw, size_t length,
                           unsigned char **cooked, size_t *cooked_length) {
+#ifndef FC_CANDIDATE_WORK_LIMIT
+    (void)s;
+#endif
     unsigned char *clean = (unsigned char *)malloc(length + 1u);
     if (clean == NULL) return -1;
     size_t clean_length = 0;
@@ -199,12 +210,27 @@ static int fc_cook_float(const unsigned char *raw, size_t length,
     size_t significant = digit_count - first;
     if (exponent < -(long long)FC_MAX_COOKED ||
         exponent > (long long)FC_MAX_COOKED) {
-        free(digits); return -2;
+        free(digits);
+#ifdef FC_CANDIDATE_WORK_LIMIT
+        return -4;
+#else
+        return -2;
+#endif
     }
     long long places = (long long)fraction_length - exponent;
     size_t output_length = places <= 0 ? significant + (size_t)-places :
                            places >= (long long)significant ? 2u + (size_t)places :
                            significant + 1u;
+#ifdef FC_CANDIDATE_WORK_LIMIT
+    // Numeric scanning charges one unit per consumed source byte. Other
+    // scanner work paths need their own parity proof before full admission.
+    size_t scanned = s->position;
+    if (scanned > s->work_limit || s->expansion_work > s->work_limit - scanned ||
+        output_length > s->work_limit - scanned - s->expansion_work) {
+        free(digits); return -4;
+    }
+    s->expansion_work += output_length;
+#endif
     if (output_length > FC_MAX_COOKED) { free(digits); return -2; }
 #ifdef FC_CANDIDATE_DECIMAL_LIMIT
     if (output_length > FC_CANDIDATE_DECIMAL) { free(digits); return -3; }
@@ -269,10 +295,21 @@ static int fc_scan_number(struct fc_scanner *s) {
     }
     unsigned char *cooked = NULL;
     size_t cooked_length = 0;
-    int valid = is_float ? fc_cook_float(s->source + start, s->position - start,
-                                        &cooked, &cooked_length) :
+    int valid = is_float ? fc_cook_float(s, s->source + start, s->position - start,
+                                         &cooked, &cooked_length) :
                            fc_cook_integer(s->source + start, s->position - start,
                                            &cooked, &cooked_length);
+#ifdef FC_CANDIDATE_WORK_LIMIT
+    if (valid == -4) {
+        size_t end = s->position;
+        fc_token(s, FC_INVALID, FC_NO_TRIVIA, start, end, NULL, 0);
+        fc_diagnostic(s, "E0010", end, end, "none", "");
+        if (end < s->length)
+            fc_token(s, FC_INVALID, FC_NO_TRIVIA, end, s->length, NULL, 0);
+        s->position = s->length;
+        return 0;
+    }
+#endif
     if (valid == -2) return FC_UNSUPPORTED;
 #ifdef FC_CANDIDATE_DECIMAL_LIMIT
     if (valid == -3) return FC_CANDIDATE_SIZE;
@@ -639,6 +676,9 @@ int main(void) {
         free(source); free(tokens); free(diagnostics); return FC_BAD_INPUT;
     }
     struct fc_scanner scanner = {source, (size_t)length, 0, 0, 0, tokens, diagnostics};
+#ifdef FC_CANDIDATE_WORK_LIMIT
+    scanner.work_limit = FC_CANDIDATE_WORK;
+#endif
     int status = fc_scan(&scanner);
     if (status == 0) {
         qsort(scanner.diagnostics, scanner.diagnostic_count,

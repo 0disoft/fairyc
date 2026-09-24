@@ -28,8 +28,11 @@ decimal materialization limit matching the Fairy candidate at four
 positive/negative exponent boundary cases. It now also caps total cooked
 bytes at 65,536: four 16,384-byte decimals succeed and a fifth returns
 candidate-size status 4 in both C and Fairy under low and optimized MSVC.
-The standalone C Go-oracle build still accepts the 70,000-digit cases. These
-changes produce a new C image; none of the earlier executable hashes, sizes
-or QPC samples above describe that image. Work-budget charging, remaining
-lexical forms and the C/Fairy storage difference are still open, so the 8%
-gate remains undecided.
+The C budget build now also charges numeric expansion work before allocation:
+`1e3` at work limits 6/7 matches C, Go and Fairy exhaustion/success, and a
+default-budget large exponent produces lossless `E0010` recovery. The broad
+standalone C Go-oracle build still accepts the 70,000-digit cases. Each of
+these changes produces a new C image; none of the earlier executable hashes,
+sizes or QPC samples above describe the current image. Other recognition work
+paths, remaining lexical forms and the C/Fairy storage difference are still
+open, so the 8% gate remains undecided.
