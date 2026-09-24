@@ -68,6 +68,13 @@ admitting the syntax in stable workspace commands. It still does not compare
 the actual lexer output, generated C size or the cumulative 8% C-relative
 budget.
 
+The first real lexer source comparison now loads the checked-in
+`scanner::report_work` package graph with the authenticated private SDK. Its
+unchanged explicit-index loop and a copy with only that loop rewritten both
+pass source analysis, Flow and verified MIR. The stable source lane rejects
+the rewritten copy. Native output parity and allocation behavior for this
+real scanner loop remain unverified.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
