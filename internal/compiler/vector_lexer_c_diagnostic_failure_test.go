@@ -1,6 +1,7 @@
 package compiler_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -8,6 +9,61 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 )
+
+// Compare the C reference's late diagnostic allocation failures with the
+// full Fairy scanner, including cleanup of its earlier token allocation.
+func TestPrivateVectorSDKCandidateFairyDiagnosticAllocationFailure(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	variants := realScannerVectorVariants(t)
+	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
+		t.Fatal("real scanner variants changed")
+	}
+	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
+		t.Run(variant.name, func(t *testing.T) {
+			for _, failedCall := range []int{2, 3} {
+				t.Run(fmt.Sprintf("call-%d", failedCall), func(t *testing.T) {
+					main := fmt.Sprintf(scannerDiagnosticFailureMain, failedCall, failedCall)
+					program, entry, _ := scannerBudgetFairyProgramWithMain(t, variant, main)
+					for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+						t.Run(profile.Name, func(t *testing.T) {
+							image, _ := buildRealScannerVectorNative(t, program, entry, profile, scannerDiagnosticFailureSupport)
+							outcome, err := cdriver.ExecuteWindowsHost(image)
+							if err != nil || outcome.ExitCode != 3 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
+								t.Fatalf("Fairy diagnostic allocation failure: %+v %v", outcome, err)
+							}
+						})
+					}
+				})
+			}
+		})
+	}
+}
+
+const scannerDiagnosticFailureSupport = `
+void fairyc_fixture_fail_diagnostic_call(int32_t offset) {
+    vector_fail_at = vector_calls + (size_t)offset;
+}
+int32_t fairyc_fixture_diagnostic_failure_seen(int32_t expected_calls) {
+    return vector_calls == (size_t)expected_calls && vector_failures == 1 &&
+           vector_allocations == (size_t)(expected_calls - 1) &&
+           vector_allocations == vector_frees && vector_live == 0 ? 1 : 0;
+}
+`
+
+const scannerDiagnosticFailureMain = `module main;
+import scanner as scanner;
+@link_name("fairyc_fixture_fail_diagnostic_call") unsafe extern C fn void fail_call(i32 offset);
+@link_name("fairyc_fixture_diagnostic_failure_seen") unsafe extern C fn i32 failure_seen(i32 calls);
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+@effects(console) fn i32 main() {
+    unsafe { fail_call(%d); }
+    let i32 status = scanner::report_work(b"/*"[..], false, 32768, 1048576, 256, 16777216);
+    assert(unsafe { failure_seen(%d) } == 1);
+    assert(unsafe { clean() } == 1);
+    return status;
+}`
 
 func TestPrivateVectorSDKCandidateCDiagnosticAllocationOrder(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {

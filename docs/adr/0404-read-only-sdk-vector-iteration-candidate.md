@@ -464,6 +464,15 @@ access is not equivalent to the current source loop.
    return status 3 with no output or retained allocation when their first
    allocation fails, under both MSVC profiles. This matches observable
    first-failure behavior, not the distinct allocation order or later failures.
+   A full-scanner Fairy diagnostic probe now fails the second and third
+   allocator calls on the unterminated `/*` input, after the first token
+   allocation. Both source forms return status 3 with no report, exactly one
+   injected failure and zero live allocations under low and optimized MSVC.
+   The C reference's separate diagnostic-payload and diagnostic-storage
+   failure probe passes in the same profiles. Their call numbers differ
+   because the C probe supplies token storage while Fairy grows its vector;
+   this checks the observable failure and cleanup boundary, not identical
+   allocation order or all diagnostic paths.
    A second C token probe fails the 8-to-16-slot growth after eight symbol
    tokens. It requires status 3, the intact initialized prefix and zero live
    allocation after release under low and optimized MSVC; the successful path
