@@ -111,6 +111,13 @@ path is the next optimization experiment; preserving safe bounds and the
 owner-bound shared borrow is required. This evidence does not admit the source
 form or explain the entire C-relative runtime gap.
 
+[ADR 0405](0405-direct-address-shared-vector-access.md) now uses a checked
+typed element address for shared `Vec.at<T>` in SDK `0.0.0-stage0.67` while
+retaining the owner-bound borrow. A preliminary diagnostic measurement removes
+the helper call and brings both indexed and candidate kernels close to, but
+slightly above, the 1.08 paired runtime limit. Stable source admission still
+requires post-commit C-relative and real-workload evidence.
+
 The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
 computed vector expression as the iterable. The latter cannot acquire an

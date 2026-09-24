@@ -534,6 +534,7 @@ ADR 0400 adds checked mutable `Vec.at_mut` access in SDK `0.0.0-stage0.63` witho
 SDK `0.0.0-stage0.64` preserves that API and lowers its checked slot address directly in generated C.
 ADR 0402 advances language to `fairyc-language/18` and SDK to `0.0.0-stage0.65` so a Result switch case ending in a direct `return` can coexist with a value-producing case.
 ADR 0403 advances language to `fairyc-language/19` and SDK to `0.0.0-stage0.66` for narrow read-only `ref u8[]` iteration; its C-relative cost gate is still pending.
+ADR 0405 advances only the SDK to `0.0.0-stage0.67`, lowering checked shared `Vec.at<T>` access through a typed element address while retaining owner-bound borrowing.
 An owned Result now supports `value.is_ok` as the existing two-arm success test,
 including active-payload cleanup and its ability/effect checks. Existing workspaces
 must update the language pin and refresh locks.
