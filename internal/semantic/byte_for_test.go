@@ -72,6 +72,17 @@ func TestByteViewForRejectsNonAdmittedSourceShapes(t *testing.T) {
 	}
 }
 
+func TestPreparedVectorForDoesNotAdmitSourceBeforeSemanticGate(t *testing.T) {
+	result := analyzeText(t, map[string]string{
+		"main.fy":    "module main; import std::vec as items; fn void show(ref u8[] view) { for (let ref i32 item in view) {} }",
+		"std/vec.fy": "module std::vec; pub struct Placeholder { i32 value; }",
+	})
+	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 ||
+		result.Unsupported[0].Feature != "byte-view iteration requires an exact u8 item binding" {
+		t.Fatalf("candidate source admission changed: diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
+	}
+}
+
 func TestByteViewForAcceptsImmutableLocal(t *testing.T) {
 	result := analyzeText(t, map[string]string{
 		"main.fy": "module main; fn void show(ref u8[] view) { let ref u8[] local = view; for (let u8 byte in local) { assert(byte == 7); } }",

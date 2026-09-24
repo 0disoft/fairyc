@@ -216,15 +216,16 @@ type Statement struct {
 	ByteFor    *ByteForLoop
 }
 
-// ByteForLoop retains the proposed read-only byte-view form until semantic
-// admission; the parser must not silently turn it into a classic counter loop.
+// ByteForLoop retains the written for-in form. Only the byte-view form is
+// currently admitted; vector preparation is inert until semantic admission.
 type ByteForLoop struct {
-	Span     diagnostic.Span
-	Name     string
-	NameSpan diagnostic.Span
-	Type     TypeReference
-	View     *Expression
-	Body     *Block
+	Span           diagnostic.Span
+	Name           string
+	NameSpan       diagnostic.Span
+	Type           TypeReference
+	View           *Expression
+	Body           *Block
+	PreparedVector *Expression `json:",omitempty"`
 }
 
 // ForLoop preserves the four source regions of one classic C-shaped loop.
@@ -348,6 +349,7 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		}
 	}
 	walk(tree.Root)
+	prepareVectorForModule(module)
 	return module, nil
 }
 

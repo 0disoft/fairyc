@@ -1,6 +1,6 @@
 # ADR 0404: Candidate for read-only SDK vector iteration
 
-- Status: Candidate; no source admission or implementation
+- Status: Candidate; inert AST preparation only, no source admission
 - Date: 2026-09-24
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
 - Related boundaries: [byte-view iteration](0403-read-only-byte-view-iteration.md), [public vector](0390-public-windows-sdk-vector.md), [owner-bound storage borrows](0389-owner-bound-storage-borrows.md)
@@ -33,6 +33,15 @@ for (let ref Token token in ref tokens) {
 The existing parser's `for (let type name in expression)` shape can retain this
 source; semantic analysis currently admits only an immutable `ref u8[]` byte
 view with a copied `u8` item. Parsing a shape is not language admission.
+
+The first experimental implementation step now prepares a separate, inert AST
+block for eligible shared-reference item loops. It finds the actual
+`std::vec` import alias, captures a named borrowed view or explicit borrow of
+a path/field place once, and sketches calls to that alias's `len<T>` and
+`at<T>`. The original loop remains intact. Semantic analysis still rejects
+the vector form before that block is resolved or lowered, so there is no new
+source behavior, generated C or SDK dependency yet. Authentication, type
+checking, Flow and verified-MIR execution remain future gates.
 
 ## Proposed first boundary
 
@@ -81,5 +90,5 @@ access is not equivalent to the current source loop.
    feature a candidate; it does not authorize relaxing checks.
 
 No grammar, product spec, language revision, SDK, runtime ABI, MIR, cache or
-target contract changes in this decision. Other collection types, mutable
+target contract changes in this preparation. Other collection types, mutable
 iteration and user-defined iterators remain outside this candidate.

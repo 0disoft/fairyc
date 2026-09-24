@@ -11,7 +11,8 @@ const byteForIndexName = "\x00fairyc_byte_for_index"
 // written AST node. Semantic admission still checks the source form and may
 // reject it before the generated expression reaches executable MIR.
 func byteForAsBlock(loop *ByteForLoop) *Expression {
-	if loop == nil || loop.Body == nil || loop.View == nil || loop.View.Kind != syntax.KindPath {
+	if loop == nil || loop.Body == nil || loop.View == nil || loop.View.Kind != syntax.KindPath ||
+		loop.Type.Kind != TypeKindNamed || loop.Type.Path != "u8" {
 		return nil
 	}
 	view := func() *Expression {
