@@ -416,6 +416,11 @@ access is not equivalent to the current source loop.
    return status 3 with no output or retained allocation when their first
    allocation fails, under both MSVC profiles. This matches observable
    first-failure behavior, not the distinct allocation order or later failures.
+   A second C token probe fails the 8-to-16-slot growth after eight symbol
+   tokens. It requires status 3, the intact initialized prefix and zero live
+   allocation after release under low and optimized MSVC; the successful path
+   stores all nine symbols and EOF. This covers a later C token allocation,
+   not the corresponding later Fairy allocation or every failure point.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,

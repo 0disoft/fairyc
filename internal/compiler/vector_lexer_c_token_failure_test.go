@@ -62,11 +62,40 @@ static int check(size_t fail_at, size_t wanted_calls) {
     probe_free(scanner.tokens);
     return bad || probe_live != 0;
 }
+static int check_growth(size_t fail_at) {
+    struct fc_scanner scanner = {0};
+    scanner.source = (const unsigned char *)";;;;;;;;;";
+    scanner.length = 9;
+    probe_calls = 0;
+    probe_live = 0;
+    probe_fail_at = fail_at;
+    int status = fc_scan(&scanner);
+    int failing = fail_at != 0;
+    int bad = status != (failing ? 3 : 0) || probe_calls != 2u ||
+              scanner.token_count != (failing ? 8u : 10u) ||
+              scanner.token_capacity != (failing ? 8u : 16u) ||
+              scanner.token_allocation_failed != failing ||
+              scanner.tokens == NULL;
+    if (!bad) {
+        for (size_t i = 0; i < 8u; i++) {
+            if (scanner.tokens[i].kind != FC_SYMBOL ||
+                scanner.tokens[i].start != i ||
+                scanner.tokens[i].end != i + 1u) bad = 1;
+        }
+        if (!failing && (scanner.tokens[8].kind != FC_SYMBOL ||
+                         scanner.tokens[9].kind != FC_EOF)) bad = 1;
+    }
+    fc_release_cooked(&scanner);
+    probe_free(scanner.tokens);
+    return bad || probe_live != 0;
+}
 int main(void) {
     if (check(1u, 1u)) return 1;
     if (check(2u, 2u)) return 2;
     if (check(3u, 3u)) return 3;
     if (check(0u, 3u)) return 4;
+    if (check_growth(2u)) return 5;
+    if (check_growth(0u)) return 6;
     return 0;
 }
 `
