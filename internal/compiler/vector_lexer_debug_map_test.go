@@ -146,6 +146,62 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 		t.Logf("PDB unwind owner coverage attributed=%d unmatched=%d ambiguous=%d total=%d intervals=%d; .text code contribution sum=%d top modules=%v",
 			ownership.Attributed, ownership.Unmatched, ownership.Ambiguous, ownership.TotalBytes,
 			ownership.MatchedEntries, codeContributionBytes, modules)
+		procedureModules := map[string]bool{"probe.obj": name == "independent C", "unit.obj": name != "independent C", "runtime.obj": name != "independent C"}
+		for _, module := range contributions.Modules {
+			if !procedureModules[module.Name] {
+				continue
+			}
+			procedures, err := pecoff.InspectPDBModuleProcedureRecords(debug.Bytes, debug.ProgramDatabase, module.Index)
+			if err != nil {
+				t.Fatalf("PDB procedures for %s: %v", module.Name, err)
+			}
+			var matched, unmatched, codeBytes uint64
+			seen := make(map[[3]uint32]struct{})
+			linked := make([]pecoff.PDBProcedureRecord, 0, len(procedures))
+			for _, procedure := range procedures {
+				if int(procedure.Section) > len(debugPE.Sections) ||
+					debugPE.Sections[procedure.Section-1].Name != ".text" {
+					unmatched++
+					continue
+				}
+				key := [3]uint32{uint32(procedure.Section), procedure.Offset, procedure.Size}
+				if _, duplicate := seen[key]; duplicate {
+					continue
+				}
+				seen[key] = struct{}{}
+				owned := false
+				for _, contribution := range contributions.Contributions {
+					if contribution.ModuleIndex == module.Index && contribution.Section == procedure.Section &&
+						contribution.Characteristics&0x20 != 0 && contribution.Offset <= procedure.Offset &&
+						uint64(procedure.Offset)+uint64(procedure.Size) <= uint64(contribution.Offset)+uint64(contribution.Size) {
+						matched++
+						owned = true
+						codeBytes += uint64(procedure.Size)
+						linked = append(linked, procedure)
+						break
+					}
+				}
+				if !owned {
+					unmatched++
+				}
+			}
+			sort.Slice(linked, func(i, j int) bool { return linked[i].Offset < linked[j].Offset })
+			for i := 1; i < len(linked); i++ {
+				if uint64(linked[i-1].Offset)+uint64(linked[i-1].Size) > uint64(linked[i].Offset) {
+					t.Fatalf("PDB module %s has overlapping procedure records: %+v and %+v", module.Name, linked[i-1], linked[i])
+				}
+			}
+			if unmatched != 0 || matched != uint64(len(procedures)) || codeBytes != codeContributions[module.Index] {
+				t.Fatalf("PDB module %s procedures do not partition linked .text: matched=%d unmatched=%d bytes=%d contribution=%d",
+					module.Name, matched, unmatched, codeBytes, codeContributions[module.Index])
+			}
+			sort.Slice(linked, func(i, j int) bool { return linked[i].Size > linked[j].Size })
+			if len(linked) > 8 {
+				linked = linked[:8]
+			}
+			t.Logf("PDB module %s procedure records=%d linked functions=%d code bytes=%d top=%v",
+				module.Name, len(procedures), matched, codeBytes, linked)
+		}
 		starts := make([]uint32, 0, len(debugUnwind.Functions))
 		for _, function := range debugUnwind.Functions {
 			starts = append(starts, function.BeginRVA)

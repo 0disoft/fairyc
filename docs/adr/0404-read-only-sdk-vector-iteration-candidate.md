@@ -531,6 +531,22 @@ function sizes or a reconciliation of all EXE sections and file alignment.
 They identify the Fairy unit and runtime as the next size-analysis targets;
 the cumulative gate still fails.
 
+A later bounded CodeView module-stream check joins procedure records to the
+current optimized debug PE's `.text` contributions. Each selected module's
+nonoverlapping procedure ranges partition its complete code contribution:
+the independent C `probe.obj` has 19 linked functions totaling 11,984 bytes;
+the explicit-index Fairy `unit.obj` has 37 totaling 24,845 bytes and
+`runtime.obj` has 27 totaling 4,138 bytes. The private vector form changes
+only one `unit.obj` byte. The largest Fairy unit records are `fy_fn_29`
+(4,083 bytes), `fy_fn_28` (2,397 bytes) and `fy_fn_10` (2,313 bytes); the
+largest C record is `fc_scan_string` (3,291 bytes). The current C `.text`
+contribution sum is 122,240 bytes after the previous-revision mode change;
+the earlier 122,180-byte observation above belongs to the preceding source.
+These exact selected-module spans narrow source attribution but do not explain
+PE file alignment, establish equivalent per-function work, or close the
+2,110-byte EXE excess over the 8% ceiling. The `fy_fn_*` records still need
+a source-function join before any source-level size change is chosen.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
