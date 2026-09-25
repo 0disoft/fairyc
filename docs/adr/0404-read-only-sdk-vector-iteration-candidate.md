@@ -183,8 +183,12 @@ artifact check for this workload. A subsequent
 [unused-source check-cost comparison](../ops/vector-scanner-unused-check-cost-20260925.md)
 uses eight balanced pairs of the same indexed source. Its lane and paired-ratio
 spans exceed the predeclared stability rule, so analysis overhead remains
-inconclusive. Neither check measures native object/EXE size or overhead in a
-future integrated stable compiler path.
+inconclusive. A separate native unused-mode check compiles that exact indexed
+source with the private parser path off and on. Generated C is byte-equal at
+395,860 bytes, and both modes have equal PE sections and EXE sizes in low
+(278,528 bytes) and optimized (201,728 bytes) MSVC profiles. This proves no
+unused-mode native image growth for this workload; it does not measure object
+file sizes, analysis overhead or a future integrated stable compiler path.
 
 An independently authored C11 scanner reference now starts the full-scanner
 comparison lane. Its first checked slice covers source token boundaries,
