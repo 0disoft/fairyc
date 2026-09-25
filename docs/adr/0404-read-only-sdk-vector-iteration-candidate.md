@@ -544,8 +544,12 @@ contribution sum is 122,240 bytes after the previous-revision mode change;
 the earlier 122,180-byte observation above belongs to the preceding source.
 These exact selected-module spans narrow source attribution but do not explain
 PE file alignment, establish equivalent per-function work, or close the
-2,110-byte EXE excess over the 8% ceiling. The `fy_fn_*` records still need
-a source-function join before any source-level size change is chosen.
+2,110-byte EXE excess over the 8% ceiling. The current C emitter's ordered
+function list joins these retained PDB records to source names: `fy_fn_29` is
+`scanner::scan` (4,083 bytes), `fy_fn_28` is `scanner::report_work` (2,397
+indexed / 2,398 vector bytes), and `fy_fn_10` is `numbers::decimal` (2,313
+bytes). Their individual sizes do not establish that any one source rewrite
+will reduce the final EXE by 2,110 bytes or preserve runtime and compile cost.
 
 ## Proposed first boundary
 

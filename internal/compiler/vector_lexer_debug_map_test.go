@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -38,7 +39,7 @@ func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkScannerDebugPair(t, "independent C", cRelease, cDebug)
+	checkScannerDebugPair(t, "independent C", cRelease, cDebug, nil)
 	variants := realScannerVectorVariants(t)
 	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
 		program, entry, _ := scannerBudgetFairyProgram(t, variant)
@@ -49,11 +50,11 @@ func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
 		if releaseUnit.Source != debugUnit.Source {
 			t.Fatalf("%s generated C changed between optimized builds", variant.name)
 		}
-		checkScannerDebugPair(t, variant.name, release, debug)
+		checkScannerDebugPair(t, variant.name, release, debug, debugUnit.Functions)
 	}
 }
 
-func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.WindowsHostArtifact) {
+func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.WindowsHostArtifact, sourceFunctions []string) {
 	t.Helper()
 	t.Run(name, func(t *testing.T) {
 		if len(debug.ProgramDatabase) == 0 || len(debug.LinkMap) == 0 {
@@ -199,8 +200,26 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 			if len(linked) > 8 {
 				linked = linked[:8]
 			}
+			type sourceProcedure struct {
+				Name   string
+				Source string
+				Bytes  uint32
+			}
+			top := make([]sourceProcedure, 0, len(linked))
+			for _, procedure := range linked {
+				row := sourceProcedure{Name: procedure.Name, Bytes: procedure.Size}
+				if module.Name == "unit.obj" {
+					indexText, ok := strings.CutPrefix(procedure.Name, "fy_fn_")
+					index, parseErr := strconv.Atoi(indexText)
+					if !ok || parseErr != nil || index < 0 || index >= len(sourceFunctions) {
+						t.Fatalf("PDB procedure %q has no emitted Fairy source function", procedure.Name)
+					}
+					row.Source = sourceFunctions[index]
+				}
+				top = append(top, row)
+			}
 			t.Logf("PDB module %s procedure records=%d linked functions=%d code bytes=%d top=%v",
-				module.Name, len(procedures), matched, codeBytes, linked)
+				module.Name, len(procedures), matched, codeBytes, top)
 		}
 		starts := make([]uint32, 0, len(debugUnwind.Functions))
 		for _, function := range debugUnwind.Functions {
