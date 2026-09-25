@@ -465,8 +465,14 @@ unmeasured.
 An [indexed/vector check-phase comparison](../ops/vector-scanner-check-cost-20260925.md)
 times fresh source loading through verified MIR in eight alternating measured
 pairs. Both lanes retain 21 specializations. Their check-time medians are
-close, but lane and paired-ratio spans are too wide for a speed verdict; C
-emission, native build and unused-feature overhead are still unmeasured.
+close, but lane and paired-ratio spans are too wide for a speed verdict.
+A [paired build-phase comparison](../ops/vector-scanner-build-cost-20260925.md)
+then includes C emission, support assembly and optimized MSVC build. Its five
+measured indexed/vector pairs have a stable phased-total median ratio of
+0.97548, with identical 201,728-byte EXEs. C emission and vector check phase
+spans remain too wide for individual speed verdicts. This compares the two
+Fairy forms, not independent-C build cost; unused-feature overhead remains
+unmeasured.
 The [configured C source-byte limit](../ops/scanner-configured-byte-limit-20260925.md)
 now models Fairy callers that set `max_bytes` below the hard 32,768-byte
 candidate cap. Thirteen boundary inputs pass against the Go lexer in both C
