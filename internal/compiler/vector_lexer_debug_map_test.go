@@ -99,6 +99,33 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 					left.BeginRVA, left.EndRVA, right.BeginRVA, right.EndRVA)
 			}
 		}
+		debugPE, err := pecoff.InspectExecutable(debug.Bytes)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ownership := scannerPDBUnwindOwners(debugPE, debugUnwind.Functions, contributions.Contributions)
+		if ownership.TotalBytes != ownership.Attributed+ownership.Unmatched+ownership.Ambiguous {
+			t.Fatalf("PDB unwind ownership does not partition validated code: %+v", ownership)
+		}
+		type moduleSize struct {
+			index uint16
+			bytes uint64
+		}
+		modules := make([]moduleSize, 0, len(ownership.ByModule))
+		for index, bytes := range ownership.ByModule {
+			modules = append(modules, moduleSize{index: index, bytes: bytes})
+		}
+		sort.Slice(modules, func(i, j int) bool {
+			if modules[i].bytes != modules[j].bytes {
+				return modules[i].bytes > modules[j].bytes
+			}
+			return modules[i].index < modules[j].index
+		})
+		if len(modules) > 8 {
+			modules = modules[:8]
+		}
+		t.Logf("PDB unwind owner coverage attributed=%d unmatched=%d ambiguous=%d total=%d intervals=%d top modules=%v",
+			ownership.Attributed, ownership.Unmatched, ownership.Ambiguous, ownership.TotalBytes, ownership.MatchedEntries, modules)
 		starts := make([]uint32, 0, len(debugUnwind.Functions))
 		for _, function := range debugUnwind.Functions {
 			starts = append(starts, function.BeginRVA)
