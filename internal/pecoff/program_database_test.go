@@ -68,6 +68,42 @@ func TestInspectProgramDatabaseAssociationRejectsIdentityAndContainerMutations(t
 	}
 }
 
+func TestReadPDBStreamSelectsBoundedDBI(t *testing.T) {
+	const blockSize = 512
+	pdb := make([]byte, 6*blockSize)
+	copy(pdb, testProgramDatabase())
+	binary.LittleEndian.PutUint32(pdb[40:], 6)
+	binary.LittleEndian.PutUint32(pdb[44:], 28)
+	directory := 3 * blockSize
+	binary.LittleEndian.PutUint32(pdb[directory:], 4)
+	binary.LittleEndian.PutUint32(pdb[directory+12:], pdbNilStreamSize)
+	binary.LittleEndian.PutUint32(pdb[directory+16:], 64)
+	binary.LittleEndian.PutUint32(pdb[directory+20:], 4)
+	binary.LittleEndian.PutUint32(pdb[directory+24:], 5)
+	for index := 0; index < 64; index++ {
+		pdb[5*blockSize+index] = byte(index)
+	}
+	stream, size, err := readPDBStream(pdb, 3)
+	if err != nil || size != blockSize || len(stream) != 64 {
+		t.Fatalf("DBI stream = %d bytes, block size %d, err %v", len(stream), size, err)
+	}
+	for index, value := range stream {
+		if value != byte(index) {
+			t.Fatalf("DBI byte %d = %d", index, value)
+		}
+	}
+	if _, err := InspectProgramDatabaseAssociation(testPDBImage(), pdb); err != nil {
+		t.Fatalf("association after DBI extraction: %v", err)
+	}
+	if _, _, err := readPDBStream(pdb, 4); err == nil || !strings.Contains(err.Error(), "is missing") {
+		t.Fatalf("missing stream error = %v", err)
+	}
+	binary.LittleEndian.PutUint32(pdb[directory+24:], 4)
+	if _, _, err := readPDBStream(pdb, 3); err == nil || !strings.Contains(err.Error(), "reuses stream 1") {
+		t.Fatalf("duplicate DBI block error = %v", err)
+	}
+}
+
 func testPDBImage() []byte {
 	image := testREL32Image()
 	debugSection := testSectionHeaderOffset + coffSectionHeaderBytes

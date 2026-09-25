@@ -112,8 +112,27 @@ type pdbInformationIdentity struct {
 }
 
 func inspectPDBInformationStream(pdb []byte) (pdbInformationIdentity, error) {
+	information, blockSize, err := readPDBStream(pdb, 1)
+	if err != nil {
+		return pdbInformationIdentity{}, err
+	}
+	if len(information) < 28 {
+		return pdbInformationIdentity{}, fmt.Errorf("program database has an invalid information stream")
+	}
+	var guid [16]byte
+	copy(guid[:], information[12:28])
+	return pdbInformationIdentity{
+		Version: binary.LittleEndian.Uint32(information), Signature: binary.LittleEndian.Uint32(information[4:]),
+		Age: binary.LittleEndian.Uint32(information[8:]), GUID: guid,
+		BlockSize: blockSize, StreamSize: uint32(len(information)),
+	}, nil
+}
+
+// readPDBStream validates the whole MSF directory and materializes only the
+// selected stream. The bounded reader also serves DBI attribution probes.
+func readPDBStream(pdb []byte, requestedIndex uint32) ([]byte, uint32, error) {
 	if len(pdb) < 56 || len(pdb) > maxExecutableBytes || !bytes.Equal(pdb[:len(msf7Magic)], msf7Magic) {
-		return pdbInformationIdentity{}, fmt.Errorf("program database is not a bounded MSF 7 file")
+		return nil, 0, fmt.Errorf("program database is not a bounded MSF 7 file")
 	}
 	blockSize := binary.LittleEndian.Uint32(pdb[32:])
 	numBlocks := binary.LittleEndian.Uint32(pdb[40:])
@@ -121,11 +140,11 @@ func inspectPDBInformationStream(pdb []byte) (pdbInformationIdentity, error) {
 	blockMap := binary.LittleEndian.Uint32(pdb[52:])
 	if blockSize < 512 || blockSize > 64*1024 || blockSize&(blockSize-1) != 0 || numBlocks == 0 ||
 		uint64(numBlocks)*uint64(blockSize) != uint64(len(pdb)) || directoryBytes < 12 || directoryBytes > uint32(len(pdb)) || blockMap >= numBlocks {
-		return pdbInformationIdentity{}, fmt.Errorf("program database has an invalid MSF 7 superblock")
+		return nil, 0, fmt.Errorf("program database has an invalid MSF 7 superblock")
 	}
 	directoryBlockCount64 := (uint64(directoryBytes) + uint64(blockSize) - 1) / uint64(blockSize)
 	if directoryBlockCount64 > math.MaxUint32 || directoryBlockCount64*4 > uint64(blockSize) {
-		return pdbInformationIdentity{}, fmt.Errorf("program database uses an unsupported multi-block directory map")
+		return nil, 0, fmt.Errorf("program database uses an unsupported multi-block directory map")
 	}
 	directoryBlockCount := uint32(directoryBlockCount64)
 	blockMapOffset := uint64(blockMap) * uint64(blockSize)
@@ -135,10 +154,10 @@ func inspectPDBInformationStream(pdb []byte) (pdbInformationIdentity, error) {
 		entry := blockMapOffset + uint64(index)*4
 		block := binary.LittleEndian.Uint32(pdb[entry:])
 		if block >= numBlocks {
-			return pdbInformationIdentity{}, fmt.Errorf("program database directory references block %d outside the file", block)
+			return nil, 0, fmt.Errorf("program database directory references block %d outside the file", block)
 		}
 		if owner, duplicate := usedBlocks[block]; duplicate {
-			return pdbInformationIdentity{}, fmt.Errorf("program database directory reuses %s block %d", owner, block)
+			return nil, 0, fmt.Errorf("program database directory reuses %s block %d", owner, block)
 		}
 		usedBlocks[block] = "stream directory"
 		start := uint64(block) * uint64(blockSize)
@@ -146,11 +165,11 @@ func inspectPDBInformationStream(pdb []byte) (pdbInformationIdentity, error) {
 	}
 	directory = directory[:directoryBytes]
 	if len(directory) < 4 {
-		return pdbInformationIdentity{}, fmt.Errorf("program database stream directory is truncated")
+		return nil, 0, fmt.Errorf("program database stream directory is truncated")
 	}
 	streamCount := binary.LittleEndian.Uint32(directory)
 	if streamCount < 2 || streamCount > 1<<16 || uint64(4+streamCount*4) > uint64(len(directory)) {
-		return pdbInformationIdentity{}, fmt.Errorf("program database has an invalid stream count %d", streamCount)
+		return nil, 0, fmt.Errorf("program database has an invalid stream count %d", streamCount)
 	}
 	sizes := make([]uint32, streamCount)
 	position := uint64(4)
@@ -158,50 +177,47 @@ func inspectPDBInformationStream(pdb []byte) (pdbInformationIdentity, error) {
 		sizes[index] = binary.LittleEndian.Uint32(directory[position:])
 		position += 4
 	}
-	var information []byte
+	var selected []byte
 	for streamIndex, size := range sizes {
 		if size == pdbNilStreamSize || size == 0 {
 			continue
 		}
 		blocks64 := (uint64(size) + uint64(blockSize) - 1) / uint64(blockSize)
 		if streamIndex == 1 && size > maxPDBInformationBytes {
-			return pdbInformationIdentity{}, fmt.Errorf("program database information stream exceeds %d bytes", maxPDBInformationBytes)
+			return nil, 0, fmt.Errorf("program database information stream exceeds %d bytes", maxPDBInformationBytes)
 		}
-		if blocks64 > math.MaxUint32 || position+blocks64*4 > uint64(len(directory)) {
-			return pdbInformationIdentity{}, fmt.Errorf("program database stream %d block list is truncated", streamIndex)
+		if size > uint32(len(pdb)) || blocks64 > math.MaxUint32 || position+blocks64*4 > uint64(len(directory)) {
+			return nil, 0, fmt.Errorf("program database stream %d block list is truncated", streamIndex)
 		}
 		blocks := uint32(blocks64)
-		var stream []byte
-		if streamIndex == 1 {
-			stream = make([]byte, 0, uint64(blocks)*uint64(blockSize))
+		if uint32(streamIndex) == requestedIndex {
+			selected = make([]byte, 0, size)
 		}
 		for blockIndex := uint32(0); blockIndex < blocks; blockIndex++ {
 			block := binary.LittleEndian.Uint32(directory[position:])
 			position += 4
 			if block >= numBlocks {
-				return pdbInformationIdentity{}, fmt.Errorf("program database stream %d references block %d outside the file", streamIndex, block)
+				return nil, 0, fmt.Errorf("program database stream %d references block %d outside the file", streamIndex, block)
 			}
 			if owner, duplicate := usedBlocks[block]; duplicate {
-				return pdbInformationIdentity{}, fmt.Errorf("program database stream %d reuses %s block %d", streamIndex, owner, block)
+				return nil, 0, fmt.Errorf("program database stream %d reuses %s block %d", streamIndex, owner, block)
 			}
 			usedBlocks[block] = fmt.Sprintf("stream %d", streamIndex)
-			if streamIndex == 1 {
+			if uint32(streamIndex) == requestedIndex {
 				start := uint64(block) * uint64(blockSize)
-				stream = append(stream, pdb[start:start+uint64(blockSize)]...)
+				remaining := uint64(size) - uint64(len(selected))
+				if remaining > uint64(blockSize) {
+					remaining = uint64(blockSize)
+				}
+				selected = append(selected, pdb[start:start+remaining]...)
 			}
 		}
-		if streamIndex == 1 {
-			information = stream[:size]
-		}
 	}
-	if position != uint64(len(directory)) || len(information) < 28 {
-		return pdbInformationIdentity{}, fmt.Errorf("program database has an invalid information stream")
+	if position != uint64(len(directory)) {
+		return nil, 0, fmt.Errorf("program database has an invalid stream directory")
 	}
-	var guid [16]byte
-	copy(guid[:], information[12:28])
-	return pdbInformationIdentity{
-		Version: binary.LittleEndian.Uint32(information), Signature: binary.LittleEndian.Uint32(information[4:]),
-		Age: binary.LittleEndian.Uint32(information[8:]), GUID: guid,
-		BlockSize: blockSize, StreamSize: sizes[1],
-	}, nil
+	if requestedIndex >= streamCount || len(selected) == 0 {
+		return nil, 0, fmt.Errorf("program database stream %d is missing", requestedIndex)
+	}
+	return selected, blockSize, nil
 }
