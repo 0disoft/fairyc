@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -666,7 +667,23 @@ func scannerBudgetFairyProgram(t *testing.T, variant realScannerVectorVariant) (
 }
 
 func scannerBudgetFairyProgramWithMain(t *testing.T, variant realScannerVectorVariant, mainSource string) (mir.Program, string, int) {
+	return scannerBudgetFairyProgramWithMainTiming(t, variant, mainSource, nil)
+}
+
+type scannerBudgetCheckPhases struct {
+	PrepareNS  int64 `json:"prepare_ns"`
+	LoadNS     int64 `json:"load_ns"`
+	MetadataNS int64 `json:"metadata_ns"`
+	AnalyzeNS  int64 `json:"analyze_ns"`
+	LowerNS    int64 `json:"lower_ns"`
+}
+
+func scannerBudgetFairyProgramWithMainTiming(t *testing.T, variant realScannerVectorVariant, mainSource string, phases *scannerBudgetCheckPhases) (mir.Program, string, int) {
 	t.Helper()
+	var mark time.Time
+	if phases != nil {
+		mark = time.Now()
+	}
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
 	for _, name := range []string{"fairy.toml", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
@@ -678,15 +695,27 @@ func scannerBudgetFairyProgramWithMain(t *testing.T, variant realScannerVectorVa
 	}
 	writeVectorCacheFile(t, root, "src/scanner.fy", variant.scanner)
 	writeVectorCacheFile(t, root, "src/main.fy", mainSource)
+	if phases != nil {
+		phases.PrepareNS = time.Since(mark).Nanoseconds()
+		mark = time.Now()
+	}
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if phases != nil {
+		phases.LoadNS = time.Since(mark).Nanoseconds()
+		mark = time.Now()
 	}
 	input, inputErr := workspace.SemanticInput()
 	coordinates, coordinateErr := workspace.PackageCoordinates()
 	owners, ownerErr := workspace.VectorCandidateStorageOwners()
 	if inputErr != nil || coordinateErr != nil || ownerErr != nil || len(owners) != 1 {
 		t.Fatalf("scanner package authority: %v %v %v owners=%v", inputErr, coordinateErr, ownerErr, owners)
+	}
+	if phases != nil {
+		phases.MetadataNS = time.Since(mark).Nanoseconds()
+		mark = time.Now()
 	}
 	var analysis compiler.GenericAnalysis
 	if variant.candidate {
@@ -699,6 +728,10 @@ func scannerBudgetFairyProgramWithMain(t *testing.T, variant realScannerVectorVa
 		t.Fatalf("%s scanner Flow: %v diagnostics=%+v unsupported=%+v", variant.name, err,
 			analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
 	}
+	if phases != nil {
+		phases.AnalyzeNS = time.Since(mark).Nanoseconds()
+		mark = time.Now()
+	}
 	checked, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
 	if err != nil || !checked.Verified {
 		t.Fatalf("%s verified MIR: %v diagnostics=%+v", variant.name, err, checked.Semantic.Diagnostics)
@@ -706,6 +739,9 @@ func scannerBudgetFairyProgramWithMain(t *testing.T, variant realScannerVectorVa
 	rootID, err := workspace.RootPackageID()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if phases != nil {
+		phases.LowerNS = time.Since(mark).Nanoseconds()
 	}
 	return checked.MIR, hir.QualifiedModulePath(rootID, "main") + "::main", len(analysis.Plan.Specializations)
 }

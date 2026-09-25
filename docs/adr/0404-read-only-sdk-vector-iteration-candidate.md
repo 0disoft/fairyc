@@ -462,6 +462,11 @@ Checked scanner behavior passes the focused corpus, and both Fairy EXEs
 shrink by 512 bytes to 201,728. The C-relative size ratio remains 1.09444,
 still 3,072 bytes above the 8% ceiling; stable runtime and build cost are
 unmeasured.
+An [indexed/vector check-phase comparison](../ops/vector-scanner-check-cost-20260925.md)
+times fresh source loading through verified MIR in eight alternating measured
+pairs. Both lanes retain 21 specializations. Their check-time medians are
+close, but lane and paired-ratio spans are too wide for a speed verdict; C
+emission, native build and unused-feature overhead are still unmeasured.
 
 ## Proposed first boundary
 

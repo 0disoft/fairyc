@@ -1,0 +1,283 @@
+{
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "indexed_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "main_sha256": "1d6eff023ea07a6ab91e420ef9eb8a752c43fd4061b36aab763a95e616d692a1",
+  "measured_pairs": 8,
+  "rows": [
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 10419500,
+        "load_ns": 39193300,
+        "metadata_ns": 21983900,
+        "analyze_ns": 121919800,
+        "lower_ns": 216324700
+      },
+      "check_ns": 399421700,
+      "specializations": 21
+    },
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 1,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 12523700,
+        "load_ns": 39373600,
+        "metadata_ns": 3998900,
+        "analyze_ns": 131548400,
+        "lower_ns": 195613100
+      },
+      "check_ns": 370534000,
+      "specializations": 21
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 0,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 14279200,
+        "load_ns": 41982700,
+        "metadata_ns": 6616300,
+        "analyze_ns": 110993600,
+        "lower_ns": 194906700
+      },
+      "check_ns": 354499300,
+      "specializations": 21
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 10287800,
+        "load_ns": 37291700,
+        "metadata_ns": 4275800,
+        "analyze_ns": 116381500,
+        "lower_ns": 210869600
+      },
+      "check_ns": 368818600,
+      "specializations": 21
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 13073800,
+        "load_ns": 36278300,
+        "metadata_ns": 6805300,
+        "analyze_ns": 133055300,
+        "lower_ns": 196954500
+      },
+      "check_ns": 373093400,
+      "specializations": 21
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 1,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 10607800,
+        "load_ns": 31815400,
+        "metadata_ns": 3774000,
+        "analyze_ns": 114135600,
+        "lower_ns": 194461100
+      },
+      "check_ns": 344186100,
+      "specializations": 21
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 0,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 13796900,
+        "load_ns": 33852800,
+        "metadata_ns": 5377100,
+        "analyze_ns": 113927400,
+        "lower_ns": 216512300
+      },
+      "check_ns": 369669600,
+      "specializations": 21
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 14948700,
+        "load_ns": 38711100,
+        "metadata_ns": 4523100,
+        "analyze_ns": 117710900,
+        "lower_ns": 238109900
+      },
+      "check_ns": 399055000,
+      "specializations": 21
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 23376300,
+        "load_ns": 48001600,
+        "metadata_ns": 7521300,
+        "analyze_ns": 156760400,
+        "lower_ns": 276174200
+      },
+      "check_ns": 488457500,
+      "specializations": 21
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 1,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 16552300,
+        "load_ns": 46135100,
+        "metadata_ns": 7674700,
+        "analyze_ns": 151204700,
+        "lower_ns": 263790300
+      },
+      "check_ns": 468804800,
+      "specializations": 21
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 0,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 15501500,
+        "load_ns": 46496200,
+        "metadata_ns": 4998900,
+        "analyze_ns": 131397200,
+        "lower_ns": 235105400
+      },
+      "check_ns": 417997700,
+      "specializations": 21
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 14892300,
+        "load_ns": 54746200,
+        "metadata_ns": 5519100,
+        "analyze_ns": 163679400,
+        "lower_ns": 262106500
+      },
+      "check_ns": 486051200,
+      "specializations": 21
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 19275900,
+        "load_ns": 49346800,
+        "metadata_ns": 6930300,
+        "analyze_ns": 150727600,
+        "lower_ns": 273391900
+      },
+      "check_ns": 480396600,
+      "specializations": 21
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 1,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 11172200,
+        "load_ns": 53989000,
+        "metadata_ns": 7688200,
+        "analyze_ns": 153759100,
+        "lower_ns": 260013100
+      },
+      "check_ns": 475449400,
+      "specializations": 21
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 0,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 16423000,
+        "load_ns": 59374500,
+        "metadata_ns": 4571200,
+        "analyze_ns": 171835100,
+        "lower_ns": 272252900
+      },
+      "check_ns": 508033700,
+      "specializations": 21
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 20166400,
+        "load_ns": 44865300,
+        "metadata_ns": 3997900,
+        "analyze_ns": 149153200,
+        "lower_ns": 264333900
+      },
+      "check_ns": 462350300,
+      "specializations": 21
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 11426800,
+        "load_ns": 43448300,
+        "metadata_ns": 9517500,
+        "analyze_ns": 138339200,
+        "lower_ns": 238591200
+      },
+      "check_ns": 429896200,
+      "specializations": 21
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 1,
+      "lane": "all vector for",
+      "phases": {
+        "prepare_ns": 19494700,
+        "load_ns": 47753600,
+        "metadata_ns": 7535000,
+        "analyze_ns": 162327200,
+        "lower_ns": 273585600
+      },
+      "check_ns": 491201400,
+      "specializations": 21
+    }
+  ],
+  "schema": "fairyc.vector-lexer-check-cost/v1",
+  "scope": "In-process fresh temporary packages. check_ns is load plus metadata plus analysis plus verified MIR lowering. Source preparation, C emission, MSVC build/link, process startup and stable workspace commands are excluded. No persistent cache is requested; ambient filesystem cache and GC remain uncontrolled.",
+  "vector_sha256": "17552d176bc171ef73bbf2995c7744b86ff328f15863577cb0288398049cde55",
+  "warmup_pairs": 1
+}
