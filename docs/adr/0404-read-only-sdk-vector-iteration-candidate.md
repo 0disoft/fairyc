@@ -606,6 +606,13 @@ the predeclared 10% stability limit. The instrumented images cannot decide
 the uninstrumented EXE budget; the QPC-only smoke remains above its 8% size
 ceiling. The private vector source form remains unadmitted.
 
+A same-image optimized native parity probe now links the independent C
+scanner workload beside each Fairy scanner form. On the fixed cooked-number
+and unterminated-comment sample, the C work result, Fairy work result and
+independent Go checksum agree; the Fairy vector allocator has no live block
+after return. This establishes coexistence for a future adjacent timing probe,
+not full lexical equivalence, timing stability or an executable-size result.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
