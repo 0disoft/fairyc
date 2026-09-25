@@ -506,6 +506,17 @@ The private vector form's 1.07110 point estimate has a 12.34% paired span,
 exceeding the 10% stability rule. Both Fairy EXEs remain 2,110 bytes above
 the cumulative 8% size ceiling. This does not admit the private source form.
 
+The bounded PE-associated PDB probe now resolves every validated unwind
+interval to a DBI module index and privacy-reduced object or archive basename.
+In the current optimized scanner debug-map builds, the C `probe.obj` owns
+11,924 bytes of `.text` code contributions; Fairy `unit.obj` owns 24,845 and
+`runtime.obj` owns 4,138. Across all modules, the contribution sums are
+122,180 C bytes and 137,552 Fairy bytes. The private vector form changes the
+Fairy sum by one byte. These are PDB contribution sizes, not exact retained
+function sizes or a reconciliation of all EXE sections and file alignment.
+They identify the Fairy unit and runtime as the next size-analysis targets;
+the cumulative gate still fails.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

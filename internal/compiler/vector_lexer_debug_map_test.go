@@ -107,31 +107,45 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 		if ownership.TotalBytes != ownership.Attributed+ownership.Unmatched+ownership.Ambiguous {
 			t.Fatalf("PDB unwind ownership does not partition validated code: %+v", ownership)
 		}
-		type moduleSize struct {
-			index  uint16
-			name   string
-			object string
-			bytes  uint64
+		// DBI contributions include leaf code and padding omitted by .pdata.
+		// Report them separately: a contribution is not an exact function span.
+		codeContributions := make(map[uint16]uint64)
+		var codeContributionBytes uint64
+		for _, contribution := range contributions.Contributions {
+			if debugPE.Sections[contribution.Section-1].Name != ".text" || contribution.Characteristics&0x20 == 0 {
+				continue
+			}
+			codeContributions[contribution.ModuleIndex] += uint64(contribution.Size)
+			codeContributionBytes += uint64(contribution.Size)
 		}
-		modules := make([]moduleSize, 0, len(ownership.ByModule))
-		for index, bytes := range ownership.ByModule {
+		type moduleSize struct {
+			index       uint16
+			name        string
+			object      string
+			unwindBytes uint64
+			codeBytes   uint64
+		}
+		modules := make([]moduleSize, 0, len(contributions.Modules))
+		for index, bytes := range codeContributions {
 			if int(index) >= len(contributions.Modules) {
 				t.Fatalf("PDB module %d has no validated module record", index)
 			}
 			module := contributions.Modules[index]
-			modules = append(modules, moduleSize{index: index, name: module.Name, object: module.ObjectName, bytes: bytes})
+			modules = append(modules, moduleSize{index: index, name: module.Name, object: module.ObjectName,
+				unwindBytes: ownership.ByModule[index], codeBytes: bytes})
 		}
 		sort.Slice(modules, func(i, j int) bool {
-			if modules[i].bytes != modules[j].bytes {
-				return modules[i].bytes > modules[j].bytes
+			if modules[i].codeBytes != modules[j].codeBytes {
+				return modules[i].codeBytes > modules[j].codeBytes
 			}
 			return modules[i].index < modules[j].index
 		})
 		if len(modules) > 8 {
 			modules = modules[:8]
 		}
-		t.Logf("PDB unwind owner coverage attributed=%d unmatched=%d ambiguous=%d total=%d intervals=%d top modules=%v",
-			ownership.Attributed, ownership.Unmatched, ownership.Ambiguous, ownership.TotalBytes, ownership.MatchedEntries, modules)
+		t.Logf("PDB unwind owner coverage attributed=%d unmatched=%d ambiguous=%d total=%d intervals=%d; .text code contribution sum=%d top modules=%v",
+			ownership.Attributed, ownership.Unmatched, ownership.Ambiguous, ownership.TotalBytes,
+			ownership.MatchedEntries, codeContributionBytes, modules)
 		starts := make([]uint32, 0, len(debugUnwind.Functions))
 		for _, function := range debugUnwind.Functions {
 			starts = append(starts, function.BeginRVA)
