@@ -575,6 +575,16 @@ safe byte-view equality operation would need its own SDK and C ABI contract,
 with explicit empty-view and pointer-validity handling and a measured
 incremental and C-relative cost.
 
+The next compiler-private candidate adds a separate, symbol-selected C byte
+matcher with explicit input length, position and word length. It checks bounds
+before pointer arithmetic, accepts an empty word at the end, and rejects null
+pointers for nonempty reads. `scanner::matches` calls it through an explicit
+unsafe FFI boundary while its public SDK surface stays unchanged. The
+independent-C lexical-parity test and four-image smoke pass; the indexed and
+private-vector Fairy EXEs remain 201,728 bytes. This proves no size increase in this
+scanner shape, not runtime parity, Linux native behavior, or the cumulative
+8% C-relative admission gate. The public `std::bytes` API remains unadmitted.
+
 The benchmark-only C reporter now emits the same numeric value sequence as
 `scanner::report_work`; the broad C lexical oracle keeps its separate `T`/`D`
 format. The optimized four-image smoke checks one C/Fairy reporter sequence

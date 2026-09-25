@@ -41,9 +41,9 @@ func TestComponentsForSymbolsIgnoresNonStandardForeignSymbols(t *testing.T) {
 	}
 }
 
-func TestByteCompareIsSelectedOnlyByItsOwnSymbol(t *testing.T) {
+func TestByteMatchIsSelectedOnlyByItsOwnSymbol(t *testing.T) {
 	t.Parallel()
-	const symbol = "fy_std_bytes_equal_v0"
+	const symbol = "fy_std_bytes_match_at_v0"
 	for _, target := range []struct {
 		name             string
 		selectComponents func([]string) ([]Component, error)
