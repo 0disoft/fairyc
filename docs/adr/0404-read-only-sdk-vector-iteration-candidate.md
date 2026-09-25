@@ -450,6 +450,12 @@ A [unified payload reporter](../ops/scanner-unified-payload-reporter-20260925.md
 uses one immutable byte-view loop for source literal and cooked payload
 output. Generated C shrinks slightly, but the optimized EXEs do not; this
 does not reduce the remaining 3,584-byte size gap.
+The [full COFF function-source map](../ops/scanner-full-function-source-map-20260925.md)
+now covers all 81 Fairy unit-function starts and 59 runtime-function starts
+per image. Both Fairy source forms have 21 `std::vec` spans totaling 1,654
+raw object bytes; their unit code differs by only one raw byte. COFF spans
+do not establish retained linked size or a stable runtime result, so this
+does not close the 8% gate.
 
 ## Proposed first boundary
 
