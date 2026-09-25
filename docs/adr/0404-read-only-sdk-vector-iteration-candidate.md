@@ -456,6 +456,12 @@ per image. Both Fairy source forms have 21 `std::vec` spans totaling 1,654
 raw object bytes; their unit code differs by only one raw byte. COFF spans
 do not establish retained linked size or a stable runtime result, so this
 does not close the 8% gate.
+A [decimal Buffer-reuse experiment](../ops/scanner-decimal-buffer-reuse-20260925.md)
+compacts validated mantissa digits into the existing normalization Buffer.
+Checked scanner behavior passes the focused corpus, and both Fairy EXEs
+shrink by 512 bytes to 201,728. The C-relative size ratio remains 1.09444,
+still 3,072 bytes above the 8% ceiling; stable runtime and build cost are
+unmeasured.
 
 ## Proposed first boundary
 

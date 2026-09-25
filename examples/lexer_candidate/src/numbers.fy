@@ -66,46 +66,55 @@ fn i32 decimal(ref u8[] raw, ref mut bytes::Buffer output, ref mut budget::Work 
     var bytes::Buffer clean = bytes::empty();
     var usize i = 0;
     while (i < raw.len) { if (raw[i] != 95 && !put(ref mut clean, raw[i])) { return 3; } i += 1; }
-    let ref u8[] text = bytes::view(ref clean);
-    var usize mantissa_end = text.len;
-    i = 0;
-    while (i < text.len) { if (text[i] == 101 || text[i] == 69) { mantissa_end = i; break; } i += 1; }
+    var usize mantissa_end = 0;
     let usize max_int = 9223372036854775807;
     var usize exponent = 0;
     var bool negative = false;
     var bool overflow = false;
-    if (mantissa_end < text.len) {
-        i = mantissa_end + 1;
-        if (i < text.len && (text[i] == 43 || text[i] == 45)) { negative = text[i] == 45; i += 1; }
-        if (i == text.len) { return 1; }
-        let usize maximum = if (negative) { max_int + 1 } else { max_int };
-        while (i < text.len) {
-            if (!digit(text[i])) { return 1; }
-            let usize next = (text[i] - 48) as usize;
-            if (!overflow) {
-                if (exponent > maximum / 10 || (exponent == maximum / 10 && next > maximum % 10)) { overflow = true; }
-                else { exponent = exponent * 10 + next; }
+    {
+        let ref u8[] text = bytes::view(ref clean);
+        mantissa_end = text.len;
+        i = 0;
+        while (i < text.len) { if (text[i] == 101 || text[i] == 69) { mantissa_end = i; break; } i += 1; }
+        if (mantissa_end < text.len) {
+            i = mantissa_end + 1;
+            if (i < text.len && (text[i] == 43 || text[i] == 45)) { negative = text[i] == 45; i += 1; }
+            if (i == text.len) { return 1; }
+            let usize maximum = if (negative) { max_int + 1 } else { max_int };
+            while (i < text.len) {
+                if (!digit(text[i])) { return 1; }
+                let usize next = (text[i] - 48) as usize;
+                if (!overflow) {
+                    if (exponent > maximum / 10 || (exponent == maximum / 10 && next > maximum % 10)) { overflow = true; }
+                    else { exponent = exponent * 10 + next; }
+                }
+                i += 1;
+            }
+        }
+    }
+    if (overflow || mantissa_end == 0) { return 1; }
+    var bool dot = false;
+    var usize fraction = 0;
+    var usize digit_count = 0;
+    i = 0;
+    {
+        let ref mut u8[] compact = bytes::view_mut(ref mut clean);
+        while (i < mantissa_end) {
+            let u8 current = compact[i];
+            if (current == 46) {
+                if (dot || i == 0 || i + 1 == mantissa_end) { return 1; }
+                dot = true;
+            } else {
+                if (!digit(current)) { return 1; }
+                compact[digit_count] = current;
+                digit_count += 1;
+                if (dot) { fraction += 1; }
             }
             i += 1;
         }
     }
-    if (overflow || mantissa_end == 0) { return 1; }
-    var bytes::Buffer significant = bytes::empty();
-    var bool dot = false;
-    var usize fraction = 0;
-    i = 0;
-    while (i < mantissa_end) {
-        if (text[i] == 46) {
-            if (dot || i == 0 || i + 1 == mantissa_end) { return 1; }
-            dot = true;
-        } else {
-            if (!digit(text[i])) { return 1; }
-            if (!put(ref mut significant, text[i])) { return 3; }
-            if (dot) { fraction += 1; }
-        }
-        i += 1;
-    }
-    let ref u8[] data = bytes::view(ref significant);
+    let ref u8[] all = bytes::view(ref clean);
+    let ref u8[] data = all[0..digit_count];
     var usize first = 0;
     while (first + 1 < data.len && data[first] == 48) { first += 1; }
     let usize width = data.len - first;
