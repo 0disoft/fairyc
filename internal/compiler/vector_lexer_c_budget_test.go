@@ -44,6 +44,11 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		t.Fatalf("unknown C scanner storage mode %q", storageMode)
 	}
 	bothStorage := storageMode == "1"
+	cpuMode := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_CPU_TIME")
+	if cpuMode != "" && cpuMode != "1" {
+		t.Fatalf("unknown scanner CPU timing mode %q", cpuMode)
+	}
+	cpuTime := cpuMode == "1"
 	unwindSizes := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_UNWIND_SIZES") == "1"
 	unwindOwners := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_UNWIND_OWNERS") == "1"
 	captureMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_LINK_MAP") == "1" || unwindSizes || unwindOwners
@@ -67,7 +72,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	if perRound <= len(sample) || len(lexed.Diagnostics) == 0 {
 		t.Fatal("scanner sample lost cooked or diagnostic coverage")
 	}
-	cSource := scannerCBenchmarkSource(t)
+	cSource := scannerCBenchmarkSourceWithStorageAndTiming(t, false, cpuTime)
 	var cArtifact cdriver.WindowsHostArtifact
 	if captureMap {
 		cArtifact, err = cdriver.BuildWindowsMSVCProbeWithMap(toolchain, cdriver.OptimizedProfile, cSource)
@@ -79,7 +84,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	}
 	images := []scannerBudgetImage{{name: "independent C", artifact: cArtifact, sourceBytes: len(cSource)}}
 	if bothStorage {
-		geometricSource := scannerCGeometricBenchmarkSource(t)
+		geometricSource := scannerCBenchmarkSourceWithStorageAndTiming(t, true, cpuTime)
 		var geometricArtifact cdriver.WindowsHostArtifact
 		var buildErr error
 		if captureMap {
@@ -101,6 +106,9 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	support, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "support.c"))
 	if err != nil {
 		t.Fatal(err)
+	}
+	if cpuTime {
+		support = append([]byte("#define FC_SCANNER_CPU_TIME\n"), support...)
 	}
 	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
 		program, entry, specializations := scannerBudgetFairyProgram(t, variant)
@@ -397,42 +405,58 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	}
 	reporter := ""
 	rows := make([]map[string]any, 0, len(images))
+	timingFields := 4
+	if cpuTime {
+		timingFields++
+	}
 	for _, image := range images {
 		outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(image.artifact, strings.NewReader("12345 1000\n"))
 		if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
 			t.Fatalf("%s execution: %+v %v", image.name, outcome, err)
 		}
 		fields := strings.Fields(outcome.Stdout)
-		if len(fields) < 5 {
+		if len(fields) < timingFields+1 {
 			t.Fatalf("%s missing timing fields: %q", image.name, outcome.Stdout)
 		}
-		prefix := strings.Join(fields[:len(fields)-4], " ")
+		prefix := strings.Join(fields[:len(fields)-timingFields], " ")
 		if reporter == "" {
 			reporter = prefix
 		} else if prefix != reporter {
 			t.Fatalf("%s reporter differs from independent C", image.name)
 		}
-		last := fields[len(fields)-4:]
+		last := fields[len(fields)-timingFields:]
 		completed, completedErr := strconv.ParseUint(last[0], 10, 32)
 		ticks, ticksErr := strconv.ParseUint(last[1], 10, 64)
 		frequency, frequencyErr := strconv.ParseUint(last[2], 10, 64)
-		total, totalErr := strconv.ParseUint(last[3], 10, 64)
+		total, totalErr := strconv.ParseUint(last[timingFields-1], 10, 64)
 		if completedErr != nil || ticksErr != nil || frequencyErr != nil || totalErr != nil ||
 			completed != rounds || ticks == 0 || frequency == 0 || total != uint64(perRound*rounds) {
 			t.Fatalf("%s timing fields=%v errors=%v,%v,%v,%v", image.name, last,
 				completedErr, ticksErr, frequencyErr, totalErr)
 		}
-		rows = append(rows, map[string]any{
+		row := map[string]any{
 			"lane": image.name, "exe_bytes": len(image.artifact.Bytes), "source_bytes": image.sourceBytes,
 			"specializations": image.specializations, "qpc_ticks": ticks, "qpc_frequency": frequency,
 			"exe_sha256": fmt.Sprintf("%x", sha256.Sum256(image.artifact.Bytes)),
-		})
+		}
+		if cpuTime {
+			cpuTicks, cpuErr := strconv.ParseUint(last[3], 10, 64)
+			if cpuErr != nil {
+				t.Fatalf("%s CPU ticks %q: %v", image.name, last[3], cpuErr)
+			}
+			row["cpu_100ns"] = cpuTicks
+		}
+		rows = append(rows, row)
 	}
 	smokeSchema := "fairyc.vector-lexer-c-budget-smoke/v1"
 	scope := "Three standalone images, one diagnostic execution per lane; no 8% runtime verdict or timing-stability claim."
 	if bothStorage {
 		smokeSchema = "fairyc.vector-lexer-c-budget-smoke/v2"
 		scope = "Four standalone images including both C storage modes; one diagnostic execution per lane, no 8% verdict."
+	}
+	if cpuTime {
+		smokeSchema = "fairyc.vector-lexer-c-budget-smoke/v3"
+		scope += " GetThreadTimes records current-thread CPU time in 100ns units; the instrumented image sizes are not the uninstrumented size budget."
 	}
 	report, err := json.Marshal(map[string]any{
 		"schema": smokeSchema, "sample_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(sample))),
@@ -445,7 +469,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 	}
 	t.Log("VECTOR_LEXER_C_BUDGET_SMOKE " + string(report))
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_MEASURE") == "1" {
-		measureScannerBudgetRotations(t, images, sample, uint64(perRound))
+		measureScannerBudgetRotations(t, images, sample, uint64(perRound), cpuTime)
 	}
 }
 
@@ -563,9 +587,9 @@ func scannerCOFFFunctionSpans(coff pecoff.ObjectReport) ([]scannerCOFFFunctionSp
 	return spans, codeBytes, attributedBytes
 }
 
-// Twelve fixed, rotating image sets follow one warmup. Raw QPC samples are
-// evidence for a later stability and 8% assessment, not an automatic verdict.
-func measureScannerBudgetRotations(t *testing.T, images []scannerBudgetImage, sample string, perRound uint64) {
+// Twelve fixed, rotating image sets follow one warmup. Raw QPC and optional
+// thread CPU samples inform later stability assessment, not an automatic verdict.
+func measureScannerBudgetRotations(t *testing.T, images []scannerBudgetImage, sample string, perRound uint64, cpuTime bool) {
 	t.Helper()
 	if len(images) != 3 && len(images) != 4 {
 		t.Fatalf("budget lane count=%d", len(images))
@@ -575,6 +599,10 @@ func measureScannerBudgetRotations(t *testing.T, images []scannerBudgetImage, sa
 	const seed = 12345
 	prefixes := make([]string, len(images))
 	rows := make([]map[string]any, 0, measured+1)
+	timingFields := 4
+	if cpuTime {
+		timingFields++
+	}
 	for triplet := 0; triplet <= measured; triplet++ {
 		order := make([]string, len(images))
 		lanes := make([]map[string]any, 0, len(images))
@@ -588,29 +616,37 @@ func measureScannerBudgetRotations(t *testing.T, images []scannerBudgetImage, sa
 				t.Fatalf("triplet %d lane %s: %+v %v", triplet, image.name, outcome, err)
 			}
 			fields := strings.Fields(outcome.Stdout)
-			if len(fields) < 5 {
+			if len(fields) < timingFields+1 {
 				t.Fatalf("triplet %d lane %s missing timing: %q", triplet, image.name, outcome.Stdout)
 			}
-			prefix := strings.Join(fields[:len(fields)-4], " ")
+			prefix := strings.Join(fields[:len(fields)-timingFields], " ")
 			if prefixes[index] == "" {
 				prefixes[index] = prefix
 			} else if prefixes[index] != prefix {
 				t.Fatalf("triplet %d lane %s reporter changed", triplet, image.name)
 			}
-			last := fields[len(fields)-4:]
+			last := fields[len(fields)-timingFields:]
 			completed, completedErr := strconv.ParseUint(last[0], 10, 32)
 			ticks, ticksErr := strconv.ParseUint(last[1], 10, 64)
 			frequency, frequencyErr := strconv.ParseUint(last[2], 10, 64)
-			total, totalErr := strconv.ParseUint(last[3], 10, 64)
+			total, totalErr := strconv.ParseUint(last[timingFields-1], 10, 64)
 			if completedErr != nil || ticksErr != nil || frequencyErr != nil || totalErr != nil ||
 				completed != rounds || ticks == 0 || frequency == 0 || total != perRound*rounds {
 				t.Fatalf("triplet %d lane %s timing=%v errors=%v,%v,%v,%v", triplet, image.name,
 					last, completedErr, ticksErr, frequencyErr, totalErr)
 			}
-			lanes = append(lanes, map[string]any{
+			lane := map[string]any{
 				"lane": image.name, "qpc_ticks": ticks, "qpc_frequency": frequency,
 				"total": total, "completed": completed,
-			})
+			}
+			if cpuTime {
+				cpuTicks, cpuErr := strconv.ParseUint(last[3], 10, 64)
+				if cpuErr != nil {
+					t.Fatalf("triplet %d lane %s CPU ticks %q: %v", triplet, image.name, last[3], cpuErr)
+				}
+				lane["cpu_100ns"] = cpuTicks
+			}
+			lanes = append(lanes, lane)
 		}
 		row := map[string]any{"warmup": triplet == 0, "order": order, "lanes": lanes}
 		if len(images) == 4 {
@@ -651,6 +687,11 @@ func measureScannerBudgetRotations(t *testing.T, images []scannerBudgetImage, sa
 		reportValues["warmup_triplets"] = 1
 		reportValues["measured_triplets"] = measured
 		reportValues["scope"] = "Three standalone optimized images, one fixed warmup and twelve rotating measured triplets; each execution verifies reporter, completed rounds and checksum. QPC excludes process startup and final output. No retries, exclusions or adaptive stopping. Token reporting is outside the timed loop; this sample does not prove a full-language 8% budget."
+	}
+	if cpuTime {
+		reportValues["schema"] = "fairyc.vector-lexer-c-budget-rotations/v3"
+		reportValues["cpu_unit_ns"] = 100
+		reportValues["scope"] = reportValues["scope"].(string) + " GetThreadTimes observes current-thread CPU time around each QPC interval; CPU samples exclude descheduling but may be quantized. The instrumented image sizes cannot decide the uninstrumented size budget."
 	}
 	report, err := json.Marshal(reportValues)
 	if err != nil {

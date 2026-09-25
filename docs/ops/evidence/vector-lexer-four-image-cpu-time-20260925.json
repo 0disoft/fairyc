@@ -1,0 +1,619 @@
+{
+  "cpu_unit_ns": 100,
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "images": [
+    {
+      "exe_bytes": 184832,
+      "exe_sha256": "6893ed85b6d93179dc0e5d02b2ead4beb562951a2580182ea41dd5cb01868ae6",
+      "lane": "independent C",
+      "source_bytes": 56527,
+      "specializations": 0
+    },
+    {
+      "exe_bytes": 185856,
+      "exe_sha256": "e39bfc3a4ecd89049d55fed7a8f00feb52095ff4525ccaf07b373a16615509d2",
+      "lane": "geometric C",
+      "source_bytes": 56608,
+      "specializations": 0
+    },
+    {
+      "exe_bytes": 201728,
+      "exe_sha256": "9066bea18286bbf54f38c6f17722bfc0394976c41281233135ff6dc460334df0",
+      "lane": "explicit index",
+      "source_bytes": 395860,
+      "specializations": 21
+    },
+    {
+      "exe_bytes": 201728,
+      "exe_sha256": "6361ac66eb4b5d84a78cdbeeedda4a69434e7895180ffd9be1597238873dd4cc",
+      "lane": "all vector for",
+      "source_bytes": 396700,
+      "specializations": 21
+    }
+  ],
+  "measured_rotations": 12,
+  "msvc": "14.51.36231",
+  "per_round_result": 36,
+  "profile": "optimized",
+  "rounds": 250000,
+  "sample_sha256": "27270bb224790aca7d077b8f03b6092e4ab29b7a12bf6756265e7aaf7a2a2133",
+  "samples": [
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 3906250,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 3968295,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4375000,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4294650,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4132953,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4038093,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "geometric C",
+        "explicit index",
+        "all vector for"
+      ],
+      "rotation": 0,
+      "warmup": true
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4081338,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 3906250,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 3890993,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4084273,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 5625000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6128933,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric C",
+        "explicit index",
+        "all vector for",
+        "independent C"
+      ],
+      "rotation": 1,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 5468750,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5564054,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 6250000,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6906673,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 5937500,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 6161001,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 7812500,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8840161,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "explicit index",
+        "all vector for",
+        "independent C",
+        "geometric C"
+      ],
+      "rotation": 2,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 6093750,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7012526,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 5312500,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5254386,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4687500,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4723162,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 5000000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4913001,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "all vector for",
+        "independent C",
+        "geometric C",
+        "explicit index"
+      ],
+      "rotation": 3,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4084610,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4218750,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4272218,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 5000000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 5011938,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4218750,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4331165,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "geometric C",
+        "explicit index",
+        "all vector for"
+      ],
+      "rotation": 4,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4531250,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4624407,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4004749,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4687500,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4780601,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4375000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4432287,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric C",
+        "explicit index",
+        "all vector for",
+        "independent C"
+      ],
+      "rotation": 5,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4025795,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4113068,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 3750000,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4024346,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4218750,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4296641,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "explicit index",
+        "all vector for",
+        "independent C",
+        "geometric C"
+      ],
+      "rotation": 6,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 3971704,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4099043,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4531250,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4821039,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 3750000,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4000885,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "all vector for",
+        "independent C",
+        "geometric C",
+        "explicit index"
+      ],
+      "rotation": 7,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4236743,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4375000,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4363090,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4098927,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 3906250,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4046202,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "geometric C",
+        "explicit index",
+        "all vector for"
+      ],
+      "rotation": 8,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4128798,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 3906250,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4429233,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 3953286,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 3906250,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4013576,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "geometric C",
+        "explicit index",
+        "all vector for",
+        "independent C"
+      ],
+      "rotation": 9,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4092252,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4531250,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4464079,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 4062500,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 4158208,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 6718750,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7437838,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "explicit index",
+        "all vector for",
+        "independent C",
+        "geometric C"
+      ],
+      "rotation": 10,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 6406250,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7684341,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 6718750,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8268267,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 7031250,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8202694,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 6406250,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7464921,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "all vector for",
+        "independent C",
+        "geometric C",
+        "explicit index"
+      ],
+      "rotation": 11,
+      "warmup": false
+    },
+    {
+      "lanes": [
+        {
+          "completed": 250000,
+          "cpu_100ns": 6406250,
+          "lane": "independent C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7562189,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 6875000,
+          "lane": "geometric C",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 8519786,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 6093750,
+          "lane": "explicit index",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7313571,
+          "total": 9000000
+        },
+        {
+          "completed": 250000,
+          "cpu_100ns": 6406250,
+          "lane": "all vector for",
+          "qpc_frequency": 10000000,
+          "qpc_ticks": 7580582,
+          "total": 9000000
+        }
+      ],
+      "order": [
+        "independent C",
+        "geometric C",
+        "explicit index",
+        "all vector for"
+      ],
+      "rotation": 12,
+      "warmup": false
+    }
+  ],
+  "schema": "fairyc.vector-lexer-c-budget-rotations/v3",
+  "scope": "Standalone optimized images, one fixed warmup and twelve rotating measured sets; each execution verifies reporter, completed rounds and checksum. QPC excludes process startup and final output. No retries, exclusions or adaptive stopping. Token reporting is outside the timed loop; this sample does not prove a full-language 8% budget. GetThreadTimes observes current-thread CPU time around each QPC interval; CPU samples exclude descheduling but may be quantized. The instrumented image sizes cannot decide the uninstrumented size budget.",
+  "seed": 12345,
+  "warmup_rotations": 1
+}

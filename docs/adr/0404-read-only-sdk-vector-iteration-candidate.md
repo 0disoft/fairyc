@@ -598,6 +598,14 @@ rotated runtime pairs failed the predeclared stability rule, and build cost
 was not measured. The driver flags were reverted; this is not stable source
 or build-profile admission.
 
+A later [thread CPU-time probe](../ops/scanner-thread-cpu-time-20260925.md)
+records QPC and `GetThreadTimes` observations for the same four scanner lanes
+under the unchanged `/O2` profile. The fixed twelve measured rotations have
+nonzero CPU samples, but all paired C-relative QPC and CPU ratio spans exceed
+the predeclared 10% stability limit. The instrumented images cannot decide
+the uninstrumented EXE budget; the QPC-only smoke remains above its 8% size
+ceiling. The private vector source form remains unadmitted.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
