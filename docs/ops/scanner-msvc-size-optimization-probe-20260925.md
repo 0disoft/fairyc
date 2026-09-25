@@ -50,6 +50,22 @@ checksums passed. These runs did not measure time, so they establish only that
 function packaging and explicit linker collection did not reduce this image's
 size in this configuration. The temporary driver changes were reverted.
 
+A later `/O2 /Os` run at source HEAD
+`1b8acc58f0053340181c537e1e7740ceac99347c` retained its
+[thirteen raw rotations](evidence/scanner-os-four-image-20260925.json).
+The first was warmup; twelve measured rotations alternated all four standalone
+images. MSVC 14.51.36231 and Go 1.26.4 produced the same EXE sizes as the
+earlier `/O2 /Os` row. Every rotation checked the reporter and 250,000-round
+checksum. Against the faster of the two equivalent C lanes within each
+rotation, the explicit-index Fairy QPC ratio had median 1.12949 and relative
+span 83.37%; the private vector-loop ratio had median 1.08526 and span
+46.55%. Both exceed the predeclared 10% stability span, and their point
+estimates do not establish an 8% runtime result. Instrumentation, process
+scheduling and host frequency remain uncontrolled. This run did not measure
+check time, C compilation time or general-workload performance. The temporary
+`/Os` driver flag was reverted, and the size-optimized profile remains
+unadmitted.
+
 A separate source-only experiment hoisted the previous diagnostic reference
 out of the inner selection loop. The existing lexical parity test passed, but
 the `/O2` four-image smoke left both Fairy EXEs at 201,728 bytes. That source
