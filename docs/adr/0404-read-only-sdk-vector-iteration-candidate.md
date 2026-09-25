@@ -487,6 +487,13 @@ source and terminates at position one. The C reference and both Fairy loop
 forms agree on token counts, retained tail and terminal diagnostic under low
 and optimized MSVC. This checks those competing-limit orders only; it does not
 complete the remaining limit or runtime gates.
+The [configured C diagnostic limit](../ops/scanner-configured-diagnostic-limit-20260925.md)
+now models caller-selected limits below the default 256. Nine boundary inputs
+match the Go lexer in both C storage modes and both Fairy source forms under
+low and optimized MSVC. The optimized EXE sizes do not change: the smaller C
+image remains 184,832 bytes and both Fairy images remain 201,728 bytes, still
+2,110 bytes above the cumulative 8% ceiling. Other limit interactions and
+later allocation failures remain open.
 
 ## Proposed first boundary
 

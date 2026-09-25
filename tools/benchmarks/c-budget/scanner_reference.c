@@ -96,6 +96,8 @@ struct fc_scanner {
     int byte_limit_set;
 #endif
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
+    size_t diagnostic_limit;
+    int diagnostic_limit_set;
     int diagnostic_limit_exhausted;
 #endif
 #ifdef FC_CANDIDATE_TOKEN_LIMIT
@@ -236,7 +238,8 @@ static void fc_diagnostic(struct fc_scanner *s, const char *code,
 #endif
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
     // The one terminal E0010 is outside the ordinary diagnostic budget.
-    if (s->diagnostic_count >= FC_CANDIDATE_DIAGNOSTICS &&
+    size_t limit = s->diagnostic_limit_set ? s->diagnostic_limit : FC_CANDIDATE_DIAGNOSTICS;
+    if (s->diagnostic_count >= limit &&
         strcmp(code, "E0010") != 0) {
         s->diagnostic_limit_exhausted = 1;
         return;
