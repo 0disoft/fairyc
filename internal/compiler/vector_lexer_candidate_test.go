@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -283,14 +284,32 @@ func buildRealScannerVectorNativeWithLibraryLog(t *testing.T, program mir.Progra
 }
 
 func buildRealScannerVectorNativeWithStorageAndSymbols(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap, captureDebug, captureLibrary bool) (cdriver.WindowsHostArtifact, cbackend.Unit) {
+	return buildRealScannerVectorNativeWithStorageAndSymbolsTimed(t, program, entry, profile, extraSupport, storageOverride, captureMap, captureDebug, captureLibrary, nil)
+}
+
+type scannerNativeBuildPhases struct {
+	EmitNS    int64 `json:"emit_ns"`
+	SupportNS int64 `json:"support_ns"`
+	NativeNS  int64 `json:"native_ns"`
+}
+
+func buildRealScannerVectorNativeWithStorageAndSymbolsTimed(t *testing.T, program mir.Program, entry string, profile cdriver.Profile, extraSupport, storageOverride string, captureMap, captureDebug, captureLibrary bool, phases *scannerNativeBuildPhases) (cdriver.WindowsHostArtifact, cbackend.Unit) {
 	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		t.Fatal(err)
 	}
+	var mark time.Time
+	if phases != nil {
+		mark = time.Now()
+	}
 	unit, err := cbackend.EmitStorageTransfers(program, entry, cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
 		t.Fatal(err)
+	}
+	if phases != nil {
+		phases.EmitNS = time.Since(mark).Nanoseconds()
+		mark = time.Now()
 	}
 	scalar, err := cruntime.ScalarSource(192)
 	if err != nil {
@@ -318,6 +337,10 @@ func buildRealScannerVectorNativeWithStorageAndSymbols(t *testing.T, program mir
 		t.Fatalf("private scanner storage heap boundary: %v", err)
 	}
 	runtimeSource := scalar + vectorStorageAllocator + sdk + strings.TrimPrefix(storage, heap) + vectorForNativeProbe + extraSupport
+	if phases != nil {
+		phases.SupportNS = time.Since(mark).Nanoseconds()
+		mark = time.Now()
+	}
 	var artifact cdriver.WindowsHostArtifact
 	if captureDebug {
 		artifact, err = cdriver.BuildWindowsHostWithDebugMap(toolchain, profile, unit.Source, runtimeSource)
@@ -330,6 +353,9 @@ func buildRealScannerVectorNativeWithStorageAndSymbols(t *testing.T, program mir
 	}
 	if err != nil {
 		t.Fatal(err)
+	}
+	if phases != nil {
+		phases.NativeNS = time.Since(mark).Nanoseconds()
 	}
 	return artifact, unit
 }
