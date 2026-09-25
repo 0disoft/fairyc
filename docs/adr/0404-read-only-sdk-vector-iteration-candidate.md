@@ -179,8 +179,12 @@ compiler test analyzes the same checked-in package graph through the stable
 and private candidate lanes, verifies both MIR programs, and compares their
 canonical private MIR serialization, generated C bytes, function count,
 foreign-symbol list and specialization count. Equality here is an executable
-artifact check for this workload; it does not measure analysis time, native
-object/EXE size, or overhead in a future integrated stable compiler path.
+artifact check for this workload. A subsequent
+[unused-source check-cost comparison](../ops/vector-scanner-unused-check-cost-20260925.md)
+uses eight balanced pairs of the same indexed source. Its lane and paired-ratio
+spans exceed the predeclared stability rule, so analysis overhead remains
+inconclusive. Neither check measures native object/EXE size or overhead in a
+future integrated stable compiler path.
 
 An independently authored C11 scanner reference now starts the full-scanner
 comparison lane. Its first checked slice covers source token boundaries,

@@ -1,0 +1,282 @@
+{
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "main_sha256": "1d6eff023ea07a6ab91e420ef9eb8a752c43fd4061b36aab763a95e616d692a1",
+  "measured_pairs": 8,
+  "rows": [
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 11526800,
+        "load_ns": 38374000,
+        "metadata_ns": 21081500,
+        "analyze_ns": 120642500,
+        "lower_ns": 197637800
+      },
+      "check_ns": 377735800,
+      "specializations": 21
+    },
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 1,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 14272200,
+        "load_ns": 34659900,
+        "metadata_ns": 3013200,
+        "analyze_ns": 113920000,
+        "lower_ns": 201862200
+      },
+      "check_ns": 353455300,
+      "specializations": 21
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 0,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 15380300,
+        "load_ns": 36479600,
+        "metadata_ns": 4960600,
+        "analyze_ns": 111523500,
+        "lower_ns": 187334500
+      },
+      "check_ns": 340298200,
+      "specializations": 21
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 14608300,
+        "load_ns": 41464300,
+        "metadata_ns": 3997600,
+        "analyze_ns": 111169000,
+        "lower_ns": 192603600
+      },
+      "check_ns": 349234500,
+      "specializations": 21
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 15806100,
+        "load_ns": 43425700,
+        "metadata_ns": 4935900,
+        "analyze_ns": 117105600,
+        "lower_ns": 209737300
+      },
+      "check_ns": 375204500,
+      "specializations": 21
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 1,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 15176000,
+        "load_ns": 44759600,
+        "metadata_ns": 3833800,
+        "analyze_ns": 115583000,
+        "lower_ns": 195799100
+      },
+      "check_ns": 359975500,
+      "specializations": 21
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 0,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 9040300,
+        "load_ns": 37352200,
+        "metadata_ns": 8602500,
+        "analyze_ns": 117083500,
+        "lower_ns": 203717400
+      },
+      "check_ns": 366755600,
+      "specializations": 21
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 14437000,
+        "load_ns": 47235900,
+        "metadata_ns": 5495800,
+        "analyze_ns": 126206900,
+        "lower_ns": 215335600
+      },
+      "check_ns": 394274200,
+      "specializations": 21
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 15607000,
+        "load_ns": 47431600,
+        "metadata_ns": 4513400,
+        "analyze_ns": 149372300,
+        "lower_ns": 238121600
+      },
+      "check_ns": 439438900,
+      "specializations": 21
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 1,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 15185800,
+        "load_ns": 48057600,
+        "metadata_ns": 7748200,
+        "analyze_ns": 155000000,
+        "lower_ns": 271512900
+      },
+      "check_ns": 482318700,
+      "specializations": 21
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 0,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 16668700,
+        "load_ns": 45892600,
+        "metadata_ns": 8515900,
+        "analyze_ns": 161610800,
+        "lower_ns": 247124300
+      },
+      "check_ns": 463143600,
+      "specializations": 21
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 25975000,
+        "load_ns": 46775000,
+        "metadata_ns": 6023600,
+        "analyze_ns": 150216500,
+        "lower_ns": 253500200
+      },
+      "check_ns": 456515300,
+      "specializations": 21
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 20193100,
+        "load_ns": 51787400,
+        "metadata_ns": 8642900,
+        "analyze_ns": 156746400,
+        "lower_ns": 255282400
+      },
+      "check_ns": 472459100,
+      "specializations": 21
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 1,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 15962800,
+        "load_ns": 57675200,
+        "metadata_ns": 3820400,
+        "analyze_ns": 144120700,
+        "lower_ns": 253193100
+      },
+      "check_ns": 458809400,
+      "specializations": 21
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 0,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 10115000,
+        "load_ns": 47349200,
+        "metadata_ns": 4897500,
+        "analyze_ns": 146354300,
+        "lower_ns": 250094600
+      },
+      "check_ns": 448695600,
+      "specializations": 21
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 15708700,
+        "load_ns": 56973700,
+        "metadata_ns": 7149900,
+        "analyze_ns": 158387000,
+        "lower_ns": 276128500
+      },
+      "check_ns": 498639100,
+      "specializations": 21
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "phases": {
+        "prepare_ns": 17015600,
+        "load_ns": 48486400,
+        "metadata_ns": 7204100,
+        "analyze_ns": 158701200,
+        "lower_ns": 266831200
+      },
+      "check_ns": 481222900,
+      "specializations": 21
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 1,
+      "lane": "candidate mode, indexed source",
+      "phases": {
+        "prepare_ns": 11721400,
+        "load_ns": 45737900,
+        "metadata_ns": 11528200,
+        "analyze_ns": 163404600,
+        "lower_ns": 253226000
+      },
+      "check_ns": 473896700,
+      "specializations": 21
+    }
+  ],
+  "scanner_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "schema": "fairyc.vector-lexer-unused-check-cost/v1",
+  "scope": "The exact same indexed scanner source and benchmark main enter stable SDK storage analysis or private vector-for candidate analysis. Each invocation uses fresh temporary package files. check_ns sums loading, metadata, semantic analysis and verified-MIR lowering. Preparation, C emission, native build, process startup and persistent-cache hits are excluded. Ambient filesystem cache, process load and Go GC remain uncontrolled.",
+  "warmup_pairs": 1
+}
