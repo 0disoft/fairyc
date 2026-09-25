@@ -499,6 +499,13 @@ image remains 184,832 bytes and both Fairy images remain 201,728 bytes, still
 2,110 bytes above the cumulative 8% ceiling. Other limit interactions and
 later allocation failures remain open.
 
+The [current four-image rotation](../ops/scanner-current-four-image-20260925.md)
+measures that source after the limit changes. On the fixed input, explicit-index
+Fairy has a stable 1.06282 paired runtime ratio to the smaller, faster C lane.
+The private vector form's 1.07110 point estimate has a 12.34% paired span,
+exceeding the 10% stability rule. Both Fairy EXEs remain 2,110 bytes above
+the cumulative 8% size ceiling. This does not admit the private source form.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
