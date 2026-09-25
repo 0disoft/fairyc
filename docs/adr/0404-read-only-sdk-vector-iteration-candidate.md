@@ -643,6 +643,15 @@ forms produce the checked Go-oracle work checksum, but every C-relative ratio
 span exceeds the predeclared 10% stability limit. The combined-image sizes
 cannot decide the standalone EXE gate; stable source admission remains open.
 
+A later [paired byte matcher probe](../ops/scanner-byte-match-pairs-20260925.md)
+puts the prior checked per-byte `matches` loop and the bounded native matcher
+in the same optimized private-vector scanner image. Its twelve adjacent pairs
+return the same Go-oracle checksum. The current/previous QPC median is 1.00283
+with 38.39% relative span; thread CPU median is 1.01250 with 35.53% span.
+Both exceed the 10% stability limit, so the native matcher has no established
+runtime advantage. The combined image cannot decide the standalone 8% size
+gate, and Linux native execution remains unverified.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

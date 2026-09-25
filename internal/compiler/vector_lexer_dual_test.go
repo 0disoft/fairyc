@@ -27,6 +27,11 @@ func dualScannerCheckedProgram(t *testing.T, mainSource string) (mir.Program, st
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
 		t.Fatal("real scanner variants changed")
 	}
+	return dualScannerCheckedProgramWithSources(t, mainSource, variants[0].scanner, variants[4].scanner)
+}
+
+func dualScannerCheckedProgramWithSources(t *testing.T, mainSource, indexedSource, candidateSource string) (mir.Program, string) {
+	t.Helper()
 	module := func(src, name string) string {
 		const declaration = "module scanner;"
 		if !strings.HasPrefix(src, declaration) || strings.Count(src, declaration) != 1 {
@@ -43,8 +48,8 @@ func dualScannerCheckedProgram(t *testing.T, mainSource string) (mir.Program, st
 		}
 		writeVectorCacheFile(t, root, name, string(data))
 	}
-	writeVectorCacheFile(t, root, "src/indexed.fy", module(variants[0].scanner, "indexed"))
-	writeVectorCacheFile(t, root, "src/candidate.fy", module(variants[4].scanner, "candidate"))
+	writeVectorCacheFile(t, root, "src/indexed.fy", module(indexedSource, "indexed"))
+	writeVectorCacheFile(t, root, "src/candidate.fy", module(candidateSource, "candidate"))
 	writeVectorCacheFile(t, root, "src/main.fy", mainSource)
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {

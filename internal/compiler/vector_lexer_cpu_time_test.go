@@ -28,6 +28,18 @@ func TestPrivateVectorSDKCandidateDualScannerCPUTime(t *testing.T) {
 	if revision == "" {
 		t.Fatal("source revision required")
 	}
+	matcherMode := os.Getenv("FAIRYC_VECTOR_LEXER_MATCH_COMPARE")
+	if matcherMode != "" && matcherMode != "1" {
+		t.Fatalf("unknown byte matcher comparison mode %q", matcherMode)
+	}
+	variants := realScannerVectorVariants(t)
+	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
+		t.Fatal("real scanner variants changed")
+	}
+	indexedScanner, candidateScanner := variants[0].scanner, variants[4].scanner
+	if matcherMode == "1" {
+		indexedScanner = scannerWithPreviousByteMatcher(t, candidateScanner)
+	}
 	pairs, rounds := 12, 250000
 	if os.Getenv("FAIRYC_VECTOR_LEXER_CPU_TIME_SMOKE") == "1" {
 		pairs, rounds = 1, 1000
@@ -39,7 +51,7 @@ func TestPrivateVectorSDKCandidateDualScannerCPUTime(t *testing.T) {
 		}
 		mainSource = strings.ReplaceAll(mainSource, replacement[0], replacement[1])
 	}
-	program, entry := dualScannerCheckedProgram(t, mainSource)
+	program, entry := dualScannerCheckedProgramWithSources(t, mainSource, indexedScanner, candidateScanner)
 	support := dualScannerTimingSupport + dualScannerCPUTimeSupport
 	artifact, unit := buildRealScannerVectorNative(t, program, entry, cdriver.OptimizedProfile, support)
 	imageHash := fmt.Sprintf("%x", sha256.Sum256(artifact.Bytes))
@@ -93,7 +105,6 @@ func TestPrivateVectorSDKCandidateDualScannerCPUTime(t *testing.T) {
 			"result":           values[4],
 		})
 	}
-	variants := realScannerVectorVariants(t)
 	harness, err := os.ReadFile("vector_lexer_cpu_time_test.go")
 	if err != nil {
 		t.Fatal(err)
@@ -108,19 +119,54 @@ func TestPrivateVectorSDKCandidateDualScannerCPUTime(t *testing.T) {
 		"exe_sha256":  imageHash, "exe_bytes": len(artifact.Bytes),
 		"generated_c_bytes": len(unit.Source), "functions": len(unit.Functions),
 		"foreign_symbols":          len(unit.ForeignSymbols),
-		"indexed_scanner_sha256":   fmt.Sprintf("%x", sha256.Sum256([]byte(variants[0].scanner))),
-		"candidate_scanner_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(variants[4].scanner))),
+		"indexed_scanner_sha256":   fmt.Sprintf("%x", sha256.Sum256([]byte(indexedScanner))),
+		"candidate_scanner_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(candidateScanner))),
 		"main_sha256":              fmt.Sprintf("%x", sha256.Sum256([]byte(mainSource))),
 		"support_sha256":           fmt.Sprintf("%x", sha256.Sum256([]byte(support))),
 		"harness_sha256":           fmt.Sprintf("%x", sha256.Sum256(harness)),
 		"samples":                  rows,
 		"scope":                    "The actual indexed and compiler-private candidate scanner modules coexist in one optimized image. Each pair times the same collect/storage work with QPC and GetThreadTimes for the calling thread. CPU units are 100ns of user plus kernel time; they exclude descheduling but retain frequency and core-migration effects. Output and cleanup are outside timed calls. The token reporter is not timed. This combined image is not a standalone-image size or independent-C budget result. No retries, exclusions or adaptive stopping.",
 	}
+	marker := "DUAL_SCANNER_CPU_TIME_REPORT "
+	if matcherMode == "1" {
+		report["schema"] = "fairyc.byte-match-scanner-pairs/v1"
+		report["indexed_role"] = "previous checked per-byte matcher with private vector loops"
+		report["candidate_role"] = "bounded native byte matcher with private vector loops"
+		report["scope"] = "The same optimized image contains two current scanner variants differing only in the private matches implementation and its foreign declaration. Adjacent QPC and current-thread CPU pairs exclude process startup and output. This measures incremental matcher cost, not standalone image size or the C-relative 8% gate; no retries, exclusions or adaptive stopping."
+		marker = "BYTE_MATCH_SCANNER_PAIRS "
+	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("DUAL_SCANNER_CPU_TIME_REPORT " + string(encoded))
+	t.Log(marker + string(encoded))
+}
+
+func scannerWithPreviousByteMatcher(t *testing.T, scanner string) string {
+	t.Helper()
+	const declaration = `// Candidate-only bounded comparison; the target C helper checks both lengths before reading.
+@link_name("fy_std_bytes_match_at_v0")
+unsafe extern C fn u32 byte_match_raw(ptr u8 input, usize input_length, usize position, ptr u8 word, usize word_length);
+
+`
+	const current = `fn bool matches(ref u8[] input, usize position, ref u8[] word) {
+    return unsafe {
+        byte_match_raw(input as ptr u8, input.len, position, word as ptr u8, word.len) == 1
+    };
+}`
+	const previous = `fn bool matches(ref u8[] input, usize position, ref u8[] word) {
+    if (position > input.len || word.len > input.len - position) { return false; }
+    var usize index = 0;
+    while (index < word.len) {
+        if (input[position + index] != word[index]) { return false; }
+        index += 1;
+    }
+    return true;
+}`
+	if strings.Count(scanner, declaration) != 1 || strings.Count(scanner, current) != 1 {
+		t.Fatal("current scanner byte matcher changed; refresh paired comparison")
+	}
+	return strings.Replace(strings.Replace(scanner, declaration, "", 1), current, previous, 1)
 }
 
 func dualScannerCPUMainSource(t *testing.T) string {
