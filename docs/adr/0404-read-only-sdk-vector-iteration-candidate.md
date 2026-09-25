@@ -551,6 +551,17 @@ indexed / 2,398 vector bytes), and `fy_fn_10` is `numbers::decimal` (2,313
 bytes). Their individual sizes do not establish that any one source rewrite
 will reduce the final EXE by 2,110 bytes or preserve runtime and compile cost.
 
+Three bounded `scanner::scan` source refactors failed to reduce the optimized
+image: a shared cooked-value limit/storage helper, direct two-byte dispatch
+tests in place of selected `matches` calls, and a shared diagnostic-limit
+helper. The lexical parity check passed for each completed form, and the
+four-image smoke kept both Fairy EXEs at 201,728 bytes against the 184,832-byte
+smaller C image. All three source changes were reverted. Inspection of the
+generated C found repeated checked arithmetic and bounds branches in the
+retained scanner function; their source counts alone do not establish native
+instruction cost. Further size work should measure a proof-preserving backend
+change rather than assume another spelling or helper extraction saves space.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
