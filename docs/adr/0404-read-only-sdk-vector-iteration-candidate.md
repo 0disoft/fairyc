@@ -467,6 +467,13 @@ times fresh source loading through verified MIR in eight alternating measured
 pairs. Both lanes retain 21 specializations. Their check-time medians are
 close, but lane and paired-ratio spans are too wide for a speed verdict; C
 emission, native build and unused-feature overhead are still unmeasured.
+The [configured C source-byte limit](../ops/scanner-configured-byte-limit-20260925.md)
+now models Fairy callers that set `max_bytes` below the hard 32,768-byte
+candidate cap. Thirteen boundary inputs pass against the Go lexer in both C
+storage modes and both Fairy source forms. The optimized independent C EXE
+grows by 512 bytes while the Fairy images stay at 201,728, leaving a 1.09141
+size ratio and 2,110 bytes above the 8% ceiling. Other limits, failures and
+stable runtime remain open.
 
 ## Proposed first boundary
 

@@ -36,6 +36,9 @@ enum { FC_CANDIDATE_TOKENS = 1 << 20 };
 #if defined(FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT) && !defined(FC_CANDIDATE_DIAGNOSTIC_PAYLOAD)
 #error FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT requires owned diagnostic payloads
 #endif
+#if defined(FC_CANDIDATE_BYTE_LIMIT) && !defined(FC_CANDIDATE_WORK_LIMIT)
+#error FC_CANDIDATE_BYTE_LIMIT requires the candidate terminal diagnostic path
+#endif
 enum { FC_INVALID, FC_EOF, FC_TRIVIA, FC_IDENTIFIER, FC_KEYWORD, FC_INTEGER,
        FC_FLOAT, FC_STRING, FC_BYTE_STRING, FC_C_STRING, FC_SYMBOL };
 enum { FC_NO_TRIVIA, FC_PREAMBLE, FC_WHITESPACE, FC_LINE_COMMENT,
@@ -87,6 +90,10 @@ struct fc_scanner {
 #endif
 #ifdef FC_CANDIDATE_WORK_LIMIT
     size_t expansion_work, work_limit;
+#endif
+#ifdef FC_CANDIDATE_BYTE_LIMIT
+    size_t byte_limit;
+    int byte_limit_set;
 #endif
 #ifdef FC_CANDIDATE_DIAGNOSTIC_LIMIT
     int diagnostic_limit_exhausted;
@@ -989,6 +996,21 @@ static int fc_scan(struct fc_scanner *s) {
 #ifdef FC_CANDIDATE_SOURCE_LIMIT
     if (s->length > FC_MAX_SOURCE) return FC_CANDIDATE_SOURCE_SIZE;
 #endif
+#ifdef FC_CANDIDATE_BYTE_LIMIT
+    if (s->byte_limit_set && s->length > s->byte_limit) {
+        fc_work_exhausted(s, 0, 0);
+#ifdef FC_CANDIDATE_DIAGNOSTIC_PAYLOAD
+        if (s->diagnostic_payload_failed) return 3;
+#endif
+#ifdef FC_CANDIDATE_GEOMETRIC_DIAGNOSTICS
+        if (s->diagnostic_allocation_failed) return 3;
+#endif
+#ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
+        if (s->token_allocation_failed) return 3;
+#endif
+        goto fc_source_byte_limit_finished;
+    }
+#endif
     if (s->length >= 3 && s->source[0] == 0xef && s->source[1] == 0xbb &&
         s->source[2] == 0xbf) {
 #ifdef FC_CANDIDATE_WORK_LIMIT
@@ -1053,6 +1075,9 @@ static int fc_scan(struct fc_scanner *s) {
 #endif
         s->position = s->length;
     }
+#endif
+#ifdef FC_CANDIDATE_BYTE_LIMIT
+fc_source_byte_limit_finished:
 #endif
     fc_token_unlimited(s, FC_EOF, FC_NO_TRIVIA, s->length, s->length, NULL, 0);
 #ifdef FC_CANDIDATE_GEOMETRIC_TOKENS

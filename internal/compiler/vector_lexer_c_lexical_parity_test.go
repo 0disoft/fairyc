@@ -117,7 +117,11 @@ func scannerFairyByteLiteral(data []byte) string {
 }
 
 func scannerFairyNumericObservation(data []byte) string {
-	result := lexer.Lex(source.NewFile("input.fy", data), source.NewBudget(source.DefaultLimits(), len(data)))
+	return scannerFairyNumericObservationWithLimits(data, source.DefaultLimits())
+}
+
+func scannerFairyNumericObservationWithLimits(data []byte, limits source.Limits) string {
+	result := lexer.Lex(source.NewFile("input.fy", data), source.NewBudget(limits, len(data)))
 	var output strings.Builder
 	writeBytes := func(value []byte) {
 		fmt.Fprintf(&output, "%d ", len(value))
