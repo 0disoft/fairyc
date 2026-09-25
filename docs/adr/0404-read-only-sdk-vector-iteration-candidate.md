@@ -572,6 +572,16 @@ smaller-C size ratio is now 1.09444, still above the cumulative 1.08 limit.
 Earlier size and runtime receipts used the former benchmark reporter and remain
 historical; no fresh paired runtime result or output-failure parity is claimed.
 
+The benchmark-only reporter also passed a separate 38-input differential
+corpus under low and optimized Windows MSVC. Each of the two C storage modes
+and two Fairy loop forms was built once per profile; every reporter line was
+compared with the independent Go lexer observation. Inputs cover empty source,
+keywords, strings and escapes, cooked numbers, comments, BOM, malformed and
+truncated UTF-8, and diagnostic recovery. The C harness uses binary stdout so
+Windows newline translation cannot obscure byte-level differences. This check
+does not exercise altered scanner limits, allocation failures, process timing,
+or the cumulative 8% executable-size gate; those remain separate evidence.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
