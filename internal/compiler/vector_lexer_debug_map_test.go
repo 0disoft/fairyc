@@ -62,6 +62,11 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 		if _, err := pecoff.InspectProgramDatabaseAssociation(debug.Bytes, debug.ProgramDatabase); err != nil {
 			t.Fatal(err)
 		}
+		contributions, err := pecoff.InspectPDBSectionContributions(debug.Bytes, debug.ProgramDatabase)
+		if err != nil || len(contributions.Contributions) == 0 {
+			t.Fatalf("scanner PDB section contributions: %d records, %v", len(contributions.Contributions), err)
+		}
+		t.Logf("PDB section contributions=%d version=%#x", len(contributions.Contributions), contributions.Version)
 		execute := func(artifact cdriver.WindowsHostArtifact) string {
 			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, strings.NewReader("12345 1000\n"))
 			if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
