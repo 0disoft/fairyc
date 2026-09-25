@@ -591,6 +591,13 @@ the benchmark scanner before using its reporter; it does not modify the timed
 benchmark image. Allocation-failure behavior, every possible limit combination,
 runtime, build cost and the cumulative 8% size gate remain open.
 
+An [MSVC size-optimization probe](../ops/scanner-msvc-size-optimization-probe-20260925.md)
+reduced the same four-image scanner's Fairy EXE to 193,536 bytes under
+temporary `/O2 /Os` flags, within 8% of the 181,248-byte C image. Its
+rotated runtime pairs failed the predeclared stability rule, and build cost
+was not measured. The driver flags were reverted; this is not stable source
+or build-profile admission.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
