@@ -108,12 +108,18 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 			t.Fatalf("PDB unwind ownership does not partition validated code: %+v", ownership)
 		}
 		type moduleSize struct {
-			index uint16
-			bytes uint64
+			index  uint16
+			name   string
+			object string
+			bytes  uint64
 		}
 		modules := make([]moduleSize, 0, len(ownership.ByModule))
 		for index, bytes := range ownership.ByModule {
-			modules = append(modules, moduleSize{index: index, bytes: bytes})
+			if int(index) >= len(contributions.Modules) {
+				t.Fatalf("PDB module %d has no validated module record", index)
+			}
+			module := contributions.Modules[index]
+			modules = append(modules, moduleSize{index: index, name: module.Name, object: module.ObjectName, bytes: bytes})
 		}
 		sort.Slice(modules, func(i, j int) bool {
 			if modules[i].bytes != modules[j].bytes {

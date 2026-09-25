@@ -1,8 +1,11 @@
 package pecoff
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strings"
+	"unicode/utf8"
 )
 
 const (
@@ -11,7 +14,67 @@ const (
 	pdbSectionContribVersion2     = 0xf13151e4
 	pdbSectionContribRecordBytes  = 28
 	pdbSectionContrib2RecordBytes = 32
+	pdbModuleFixedBytes           = 64
 )
+
+// PDBModule identifies one DBI compiland. Names are reduced to their final
+// path component so diagnostics cannot disclose temporary build directories.
+type PDBModule struct {
+	Index      uint16
+	Name       string
+	ObjectName string
+}
+
+func inspectPDBModules(data []byte) ([]PDBModule, error) {
+	modules := make([]PDBModule, 0)
+	for offset := 0; offset < len(data); {
+		if len(data)-offset < pdbModuleFixedBytes || len(modules) >= 1<<16 {
+			return nil, fmt.Errorf("PDB module information is truncated or exceeds the module index range")
+		}
+		cursor := offset + pdbModuleFixedBytes
+		readName := func() (string, error) {
+			end := bytes.IndexByte(data[cursor:], 0)
+			if end < 0 {
+				return "", fmt.Errorf("PDB module name is unterminated")
+			}
+			if end == 0 {
+				cursor++
+				return "<unnamed>", nil
+			}
+			name := data[cursor : cursor+end]
+			cursor += end + 1
+			base := string(name)
+			if separator := strings.LastIndexAny(base, `/\`); separator >= 0 {
+				base = base[separator+1:]
+			}
+			if base == "" || base == "." || base == ".." || !utf8.ValidString(base) ||
+				strings.IndexFunc(base, func(r rune) bool { return r < 0x20 || r == 0x7f }) >= 0 {
+				return "", fmt.Errorf("PDB module name has an invalid final component")
+			}
+			return base, nil
+		}
+		name, err := readName()
+		if err != nil {
+			return nil, fmt.Errorf("PDB module %d at byte %d: %w", len(modules), offset, err)
+		}
+		objectName, err := readName()
+		if err != nil {
+			return nil, fmt.Errorf("PDB module %d at byte %d: %w", len(modules), offset, err)
+		}
+		next := (cursor + 3) &^ 3
+		if next > len(data) {
+			return nil, fmt.Errorf("PDB module record is truncated at alignment padding")
+		}
+		for _, padding := range data[cursor:next] {
+			if padding != 0 {
+				return nil, fmt.Errorf("PDB module record has nonzero alignment padding")
+			}
+		}
+		modules = append(modules, PDBModule{Index: uint16(len(modules)), Name: name, ObjectName: objectName})
+		offset = next
+	}
+	return modules, nil
+}
 
 // PDBSectionContribution is one DBI record for a final-image section range.
 // ModuleIndex is a zero-based compiland index, not a function identity.
@@ -27,6 +90,7 @@ type PDBSectionContribution struct {
 // final-image ownership analysis. It does not assign source function names.
 type PDBSectionContributionReport struct {
 	Version       uint32
+	Modules       []PDBModule
 	Contributions []PDBSectionContribution
 }
 
@@ -66,6 +130,10 @@ func InspectPDBSectionContributions(image, pdb []byte) (PDBSectionContributionRe
 		return PDBSectionContributionReport{}, fmt.Errorf("PDB DBI substream sizes are inconsistent")
 	}
 	begin := pdbDBIHeaderBytes + uint64(sizes[0])
+	modules, err := inspectPDBModules(dbi[pdbDBIHeaderBytes:begin])
+	if err != nil {
+		return PDBSectionContributionReport{}, err
+	}
 	data := dbi[begin : begin+uint64(sizes[1])]
 	version := binary.LittleEndian.Uint32(data)
 	recordBytes := pdbSectionContribRecordBytes
@@ -80,7 +148,8 @@ func InspectPDBSectionContributions(image, pdb []byte) (PDBSectionContributionRe
 		return PDBSectionContributionReport{}, fmt.Errorf("PDB section-contribution records are truncated")
 	}
 	report := PDBSectionContributionReport{
-		Version: version, Contributions: make([]PDBSectionContribution, 0, (len(data)-4)/recordBytes),
+		Version: version, Modules: modules,
+		Contributions: make([]PDBSectionContribution, 0, (len(data)-4)/recordBytes),
 	}
 	for offset := 4; offset < len(data); offset += recordBytes {
 		record := data[offset : offset+recordBytes]
@@ -88,7 +157,7 @@ func InspectPDBSectionContributions(image, pdb []byte) (PDBSectionContributionRe
 		start := int32(binary.LittleEndian.Uint32(record[4:]))
 		size := int32(binary.LittleEndian.Uint32(record[8:]))
 		module := binary.LittleEndian.Uint16(record[16:])
-		if section == 0 || int(section) > len(pe.Sections) || start < 0 || size <= 0 || module == 0xffff ||
+		if section == 0 || int(section) > len(pe.Sections) || start < 0 || size <= 0 || int(module) >= len(modules) ||
 			uint64(start)+uint64(size) > uint64(pe.Sections[section-1].VirtualSize) {
 			return PDBSectionContributionReport{}, fmt.Errorf("PDB section contribution has an invalid image range or module index")
 		}
