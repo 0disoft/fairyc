@@ -582,6 +582,15 @@ Windows newline translation cannot obscure byte-level differences. This check
 does not exercise altered scanner limits, allocation failures, process timing,
 or the cumulative 8% executable-size gate; those remain separate evidence.
 
+A second reporter check covers 32 caller-limit cases: thirteen byte-limit
+boundaries, nine diagnostic-limit boundaries, and ten work/token/byte-limit
+interactions including BOM, decimal and string paths. Both C storage modes and
+both Fairy loop forms produced the Go lexer's full numeric observation under
+low and optimized Windows MSVC. The C probe sets the same per-case limits on
+the benchmark scanner before using its reporter; it does not modify the timed
+benchmark image. Allocation-failure behavior, every possible limit combination,
+runtime, build cost and the cumulative 8% size gate remain open.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
