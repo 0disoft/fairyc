@@ -495,6 +495,12 @@ Five more low/optimized cases cover UTF-8 BOM handling when work, token and
 caller byte limits compete. The independent C scanner and both Fairy loop
 forms agree on the retained invalid tail, first token, EOF and terminal E0010
 position. These cases do not establish every limit combination.
+The C candidate now also accepts the previous-revision setting used by the
+Fairy and Go lexers: `defer` is an identifier in that mode and a keyword in
+the current revision. Low and optimized native probes pass for both C storage
+modes and both Fairy loop forms. The current optimized four-image smoke keeps
+the smaller up-front C EXE at 184,832 bytes and both Fairy EXEs at 201,728;
+the 2,110-byte excess over the cumulative 8% ceiling is unchanged.
 The [configured C diagnostic limit](../ops/scanner-configured-diagnostic-limit-20260925.md)
 now models caller-selected limits below the default 256. Nine boundary inputs
 match the Go lexer in both C storage modes and both Fairy source forms under

@@ -77,6 +77,7 @@ struct fc_scanner {
     size_t length, position, token_count, diagnostic_count;
     struct fc_token *tokens;
     struct fc_diagnostic *diagnostics;
+    int previous_revision;
 #ifdef FC_CANDIDATE_GEOMETRIC_TOKENS
     size_t token_capacity;
     int token_allocation_failed;
@@ -587,7 +588,9 @@ static int fc_scan_number(struct fc_scanner *s) {
     return 0;
 }
 
-static int fc_keyword(const unsigned char *bytes, size_t length) {
+static int fc_keyword(const struct fc_scanner *s, const unsigned char *bytes, size_t length) {
+    if (s->previous_revision && length == 5u && memcmp(bytes, "defer", 5u) == 0)
+        return 0;
     static const char *const words[] = {
         "as", "assert", "break", "case", "cleanup", "const", "continue",
         "defer", "discard", "else", "enum", "extern", "false", "fn", "for",
@@ -968,7 +971,7 @@ static int fc_scan_one(struct fc_scanner *s) {
             s->position++;
         }
         size_t length = s->position - start;
-        int keyword = fc_keyword(s->source + start, length);
+        int keyword = fc_keyword(s, s->source + start, length);
         int literal = keyword && fc_literal_keyword(s->source + start, length);
         fc_token(s, keyword ? FC_KEYWORD : FC_IDENTIFIER, FC_NO_TRIVIA, start,
                  s->position, literal ? s->source + start : NULL, literal ? length : 0);
