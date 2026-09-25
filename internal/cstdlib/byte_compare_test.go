@@ -5,23 +5,13 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
-func TestByteMatchWindowsNative(t *testing.T) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		t.Skip("requires Windows AMD64 MSVC")
-	}
-	implementation, err := WindowsMSVCSourceForSymbols([]string{"fy_std_bytes_match_at_v0"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	toolchain, err := cdriver.ResolveWindowsHostMSVC()
-	if err != nil {
-		t.Fatal(err)
-	}
-	const probe = `
+const byteMatchProbe = `
 #include <stddef.h>
 #include <stdint.h>
+uint32_t fy_std_bytes_match_at_v0(const uint8_t *, size_t, size_t, const uint8_t *, size_t);
 int main(void) {
     const uint8_t input[] = {0, 1, 0, 255};
     const uint8_t same[] = {1, 0};
@@ -39,14 +29,53 @@ int main(void) {
     return 0;
 }
 `
+
+func TestByteMatchWindowsNative(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	implementation, err := WindowsMSVCSourceForSymbols([]string{"fy_std_bytes_match_at_v0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
-			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, implementation+probe)
+			artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, implementation+byteMatchProbe)
 			if err != nil {
 				t.Fatal(err)
 			}
 			outcome, err := cdriver.ExecuteWindowsMSVCTarget(artifact)
 			if err != nil || outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
+				t.Fatalf("byte comparison = %+v, %v", outcome, err)
+			}
+		})
+	}
+}
+
+func TestByteMatchLinuxNative(t *testing.T) {
+	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Linux amd64 glibc and GCC")
+	}
+	implementation, err := SourceForSymbols([]string{"fy_std_bytes_match_at_v0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	toolchain, err := cdriver.Resolve(target.X8664LinuxGNU, "gcc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := cdriver.Build(toolchain, profile, byteMatchProbe, implementation)
+			if err != nil {
+				t.Fatal(err)
+			}
+			outcome, err := cdriver.ExecuteLinuxTarget(artifact)
+			if err != nil || outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapCategory != 0 {
 				t.Fatalf("byte comparison = %+v, %v", outcome, err)
 			}
 		})
