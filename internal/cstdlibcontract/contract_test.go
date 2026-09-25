@@ -41,6 +41,29 @@ func TestComponentsForSymbolsIgnoresNonStandardForeignSymbols(t *testing.T) {
 	}
 }
 
+func TestByteCompareIsSelectedOnlyByItsOwnSymbol(t *testing.T) {
+	t.Parallel()
+	const symbol = "fy_std_bytes_equal_v0"
+	for _, target := range []struct {
+		name             string
+		selectComponents func([]string) ([]Component, error)
+	}{
+		{name: "linux", selectComponents: ComponentsForSymbols},
+		{name: "windows", selectComponents: WindowsMSVCComponentsForSymbols},
+	} {
+		t.Run(target.name, func(t *testing.T) {
+			selected, err := target.selectComponents([]string{symbol})
+			if err != nil || !slices.Equal(selected, []Component{ComponentByteCompare}) {
+				t.Fatalf("byte comparison components = %v, %v", selected, err)
+			}
+			unrelated, err := target.selectComponents([]string{"fy_std_buffer_initialize_v0"})
+			if err != nil || slices.Contains(unrelated, ComponentByteCompare) {
+				t.Fatalf("unrelated buffer components include byte comparison: %v, %v", unrelated, err)
+			}
+		})
+	}
+}
+
 func TestComponentsForSymbolsRejectsUnknownStandardLibraryNamespaceMember(t *testing.T) {
 	t.Parallel()
 	if _, err := ComponentsForSymbols([]string{"fy_std_missing_v0"}); err == nil {

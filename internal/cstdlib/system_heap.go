@@ -18,6 +18,9 @@ var stage0SystemHeapProbe string
 //go:embed stage0_buffer.c
 var stage0Buffer string
 
+//go:embed stage0_byte_compare.c
+var stage0ByteCompare string
+
 //go:embed stage0_buffer_probe.c
 var stage0BufferProbe string
 
@@ -452,6 +455,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 		return "Windows process args", stage0WindowsProcessArgs, nil
 	case cstdlibcontract.ComponentSystemHeap:
 		return "SystemHeap", stage0SystemHeap, nil
+	case cstdlibcontract.ComponentByteCompare:
+		return "byte compare", stage0ByteCompare, nil
 	case cstdlibcontract.ComponentBuffer:
 		return "Buffer", stage0Buffer, nil
 	case cstdlibcontract.ComponentArena:

@@ -19,6 +19,7 @@ const (
 	ComponentWindowsFileBuffer  Component = "windows-file-buffer"
 	ComponentWindowsProcessArgs Component = "windows-process-args"
 	ComponentSystemHeap         Component = "system-heap"
+	ComponentByteCompare        Component = "byte-compare"
 	ComponentBuffer             Component = "buffer"
 	ComponentArena              Component = "arena"
 	ComponentTextView           Component = "text-view"
@@ -37,6 +38,7 @@ var symbolComponents = map[string]Component{
 	"fy_std_stdin_read_v0":                 ComponentLinuxConsole,
 	"fy_std_system_heap_allocate_v0":       ComponentSystemHeap,
 	"fy_std_system_heap_deallocate_v0":     ComponentSystemHeap,
+	"fy_std_bytes_equal_v0":                ComponentByteCompare,
 	"fy_std_buffer_initialize_v0":          ComponentBuffer,
 	"fy_std_buffer_reserve_v0":             ComponentBuffer,
 	"fy_std_buffer_append_v0":              ComponentBuffer,
@@ -183,6 +185,7 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_process_arg_v0":                ComponentWindowsProcessArgs,
 	"fy_std_system_heap_allocate_v0":       ComponentSystemHeap,
 	"fy_std_system_heap_deallocate_v0":     ComponentSystemHeap,
+	"fy_std_bytes_equal_v0":                ComponentByteCompare,
 	"fy_std_buffer_initialize_v0":          ComponentBuffer,
 	"fy_std_buffer_reserve_v0":             ComponentBuffer,
 	"fy_std_buffer_append_v0":              ComponentBuffer,
@@ -221,6 +224,7 @@ var componentLinkOrder = []Component{
 	ComponentWindowsFile,
 	ComponentWindowsProcessArgs,
 	ComponentSystemHeap,
+	ComponentByteCompare,
 	ComponentBuffer,
 	ComponentWindowsFileBuffer,
 	ComponentArena,
