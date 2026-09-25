@@ -446,6 +446,10 @@ A [current COFF function comparison](../ops/scanner-current-function-source-map-
 finds `unit.obj` raw code reduced by 4,470 bytes from the earlier scanner
 image, with the five largest function spans now smaller or unchanged. This
 does not attribute the remaining final-image gap to any one function.
+A [unified payload reporter](../ops/scanner-unified-payload-reporter-20260925.md)
+uses one immutable byte-view loop for source literal and cooked payload
+output. Generated C shrinks slightly, but the optimized EXEs do not; this
+does not reduce the remaining 3,584-byte size gap.
 
 ## Proposed first boundary
 

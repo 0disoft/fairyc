@@ -1,0 +1,47 @@
+{
+  "lanes": [
+    {
+      "exe_bytes": 184320,
+      "exe_sha256": "1ff5053159a29086b77925da054adbbdced84a1f82932725b6aeb1c4ec73965f",
+      "lane": "independent C",
+      "qpc_frequency": 10000000,
+      "qpc_ticks": 19528,
+      "source_bytes": 52164,
+      "specializations": 0
+    },
+    {
+      "exe_bytes": 185344,
+      "exe_sha256": "580708923d28ef888134769d1824366e1a7e4dc7e0ca40f1df62576e698f80df",
+      "lane": "geometric C",
+      "qpc_frequency": 10000000,
+      "qpc_ticks": 22137,
+      "source_bytes": 52245,
+      "specializations": 0
+    },
+    {
+      "exe_bytes": 202240,
+      "exe_sha256": "d8d99e625cdc4d5d9372c738c61ee9e2329b57dc5094a4a2be0f4c0626f2066d",
+      "lane": "explicit index",
+      "qpc_frequency": 10000000,
+      "qpc_ticks": 19306,
+      "source_bytes": 395987,
+      "specializations": 21
+    },
+    {
+      "exe_bytes": 202240,
+      "exe_sha256": "499fa843118896ee4a7c431ac0c55bd6a335b7368cb2469b1c47f71515e8f0e1",
+      "lane": "all vector for",
+      "qpc_frequency": 10000000,
+      "qpc_ticks": 18788,
+      "source_bytes": 396778,
+      "specializations": 21
+    }
+  ],
+  "msvc": "14.51.36231",
+  "per_round_result": 36,
+  "profile": "optimized",
+  "rounds": 1000,
+  "sample_sha256": "27270bb224790aca7d077b8f03b6092e4ab29b7a12bf6756265e7aaf7a2a2133",
+  "schema": "fairyc.vector-lexer-c-budget-smoke/v2",
+  "scope": "Four standalone images including both C storage modes; one diagnostic execution per lane, no 8% verdict."
+}

@@ -298,13 +298,11 @@ pub fn i32 report_work(ref u8[] input, bool previous, usize max_bytes, usize max
         number(token.start); number(token.end);
         let usize width = token.end - token.start;
         let bool cooked = token.kind == 4 && ((width == 4 && (matches(input, token.start, b"true") || matches(input, token.start, b"null"))) || (width == 5 && matches(input, token.start, b"false")));
-        let ref u8[] numeric = if (token.cooked_index == 0) { input[0..0] } else { bytes::view(v::at<bytes::Buffer>(ref cooked_values, token.cooked_index - 1)) };
-        number(if (cooked) { width } else { numeric.len });
-        if (cooked) {
-            var usize byte_index = token.start;
-            while (byte_index < token.end) { number(input[byte_index] as usize); byte_index += 1; }
-        }
-        for (let u8 byte in numeric) { number(byte as usize); }
+        let ref u8[] payload = if (cooked) { input[token.start..token.end] }
+            else if (token.cooked_index == 0) { input[0..0] }
+            else { bytes::view(v::at<bytes::Buffer>(ref cooked_values, token.cooked_index - 1)) };
+        number(payload.len);
+        for (let u8 byte in payload) { number(byte as usize); }
         position = token.end;
         index += 1;
     }
