@@ -20,9 +20,13 @@ const (
 // PDBModule identifies one DBI compiland. Names are reduced to their final
 // path component so diagnostics cannot disclose temporary build directories.
 type PDBModule struct {
-	Index      uint16
-	Name       string
-	ObjectName string
+	Index        uint16
+	Name         string
+	ObjectName   string
+	SymbolStream uint16
+	SymbolBytes  uint32
+	C11Bytes     uint32
+	C13Bytes     uint32
 }
 
 func inspectPDBModules(data []byte) ([]PDBModule, error) {
@@ -70,7 +74,13 @@ func inspectPDBModules(data []byte) ([]PDBModule, error) {
 				return nil, fmt.Errorf("PDB module record has nonzero alignment padding")
 			}
 		}
-		modules = append(modules, PDBModule{Index: uint16(len(modules)), Name: name, ObjectName: objectName})
+		modules = append(modules, PDBModule{
+			Index: uint16(len(modules)), Name: name, ObjectName: objectName,
+			SymbolStream: binary.LittleEndian.Uint16(data[offset+34:]),
+			SymbolBytes:  binary.LittleEndian.Uint32(data[offset+36:]),
+			C11Bytes:     binary.LittleEndian.Uint32(data[offset+40:]),
+			C13Bytes:     binary.LittleEndian.Uint32(data[offset+44:]),
+		})
 		offset = next
 	}
 	return modules, nil
