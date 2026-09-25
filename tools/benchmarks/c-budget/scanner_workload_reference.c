@@ -1,6 +1,58 @@
 // Concatenate after scanner_reference.c with FC_SCANNER_LIBRARY defined.
 // The first scan reports exact lexical observations; each round owns and
 // releases a source copy, token storage, diagnostics, and cooked values.
+#ifdef FC_BUDGET_FAIRY_REPORT
+#ifndef FC_CANDIDATE_DIAGNOSTIC_ENTRY_LAYOUT
+#error FC_BUDGET_FAIRY_REPORT requires the candidate diagnostic layout
+#endif
+static void fc_report_number(size_t value) {
+    if (printf("%zu ", value) < 0) abort();
+}
+
+static void fc_report_bytes(const unsigned char *bytes, size_t length) {
+    fc_report_number(length);
+    if (length != 0 && bytes == NULL) abort();
+    for (size_t i = 0; i < length; i++) fc_report_number(bytes[i]);
+}
+
+static void fc_report_fairy(const struct fc_scanner *s) {
+    size_t position = 0;
+    for (size_t i = 0; i < s->token_count; i++) {
+        const struct fc_token *token = &s->tokens[i];
+        if (token->start != position || token->end < token->start ||
+            token->end > s->length) abort();
+        fc_report_number(token->kind);
+        fc_report_number(token->trivia);
+        fc_report_number(token->start);
+        fc_report_number(token->end);
+        const unsigned char *payload = token->cooked;
+        size_t length = token->cooked_length;
+        size_t width = token->end - token->start;
+        if (token->kind == FC_KEYWORD &&
+            ((width == 4 && (memcmp(s->source + token->start, "true", 4) == 0 ||
+                             memcmp(s->source + token->start, "null", 4) == 0)) ||
+             (width == 5 && memcmp(s->source + token->start, "false", 5) == 0))) {
+            payload = s->source + token->start;
+            length = width;
+        }
+        fc_report_bytes(payload, length);
+        position = token->end;
+    }
+    if (position != s->length) abort();
+    fc_report_number(s->diagnostic_count);
+    for (size_t i = 0; i < s->diagnostic_count; i++) {
+        const struct fc_diagnostic *d = &s->diagnostics[i];
+        const char *code = fc_diagnostic_code_text(d);
+        const char *repair = d->exit_repair ? "exit" : "none";
+        fc_report_bytes((const unsigned char *)code, strlen(code));
+        fc_report_bytes((const unsigned char *)repair, strlen(repair));
+        fc_report_bytes(fc_diagnostic_token_data(d), fc_diagnostic_token_length(d));
+        fc_report_number(d->start);
+        fc_report_number(d->end);
+    }
+}
+#endif
+
 static int fc_workload_round(const unsigned char *input, size_t length,
                              int report, uint64_t *work) {
     unsigned char *owned = (unsigned char *)malloc(length == 0 ? 1u : length);
@@ -43,7 +95,11 @@ static int fc_workload_round(const unsigned char *input, size_t length,
         if (report) {
             qsort(scanner.diagnostics, scanner.diagnostic_count,
                   sizeof(*scanner.diagnostics), fc_compare_diagnostic);
+#ifdef FC_BUDGET_FAIRY_REPORT
+            fc_report_fairy(&scanner);
+#else
             fc_print(&scanner);
+#endif
         }
     }
     fc_release_cooked(&scanner);

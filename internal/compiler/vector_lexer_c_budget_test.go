@@ -407,14 +407,10 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 			t.Fatalf("%s missing timing fields: %q", image.name, outcome.Stdout)
 		}
 		prefix := strings.Join(fields[:len(fields)-4], " ")
-		if image.name == "independent C" || image.name == "geometric C" {
-			if !strings.HasPrefix(outcome.Stdout, scannerGoObservation([]byte(sample))) {
-				t.Fatalf("independent C reporter differs: %q", outcome.Stdout)
-			}
-		} else if reporter == "" {
+		if reporter == "" {
 			reporter = prefix
 		} else if prefix != reporter {
-			t.Fatalf("%s reporter differs from explicit-index Fairy", image.name)
+			t.Fatalf("%s reporter differs from independent C", image.name)
 		}
 		last := fields[len(fields)-4:]
 		completed, completedErr := strconv.ParseUint(last[0], 10, 32)
@@ -623,6 +619,11 @@ func measureScannerBudgetRotations(t *testing.T, images []scannerBudgetImage, sa
 			row["triplet"] = triplet
 		}
 		rows = append(rows, row)
+	}
+	for index := 1; index < len(prefixes); index++ {
+		if prefixes[index] != prefixes[0] {
+			t.Fatalf("%s reporter differs from independent C", images[index].name)
+		}
 	}
 	imageRows := make([]map[string]any, 0, len(images))
 	for _, image := range images {

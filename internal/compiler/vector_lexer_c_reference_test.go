@@ -749,7 +749,7 @@ func scannerCGeometricBenchmarkSource(t *testing.T) string {
 
 func scannerCBenchmarkSourceWithStorage(t *testing.T, geometric bool) string {
 	t.Helper()
-	defines := scannerCBudgetDefines(geometric)
+	defines := scannerCBudgetDefines(geometric) + "#define FC_BUDGET_FAIRY_REPORT\n"
 	parts := []string{defines + "#define FC_SCANNER_LIBRARY\n#define FC_SCANNER_WORKLOAD_LIBRARY\n"}
 	for _, name := range []string{"scanner_reference.c", "scanner_workload_reference.c", "support.c", "scanner_workload_benchmark.c"} {
 		data, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", name))

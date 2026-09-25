@@ -562,6 +562,16 @@ retained scanner function; their source counts alone do not establish native
 instruction cost. Further size work should measure a proof-preserving backend
 change rather than assume another spelling or helper extraction saves space.
 
+The benchmark-only C reporter now emits the same numeric value sequence as
+`scanner::report_work`; the broad C lexical oracle keeps its separate `T`/`D`
+format. The optimized four-image smoke checks one C/Fairy reporter sequence
+and 1,000-round checksums across both C storage modes and both Fairy loop
+forms. The up-front C EXE shrank from 184,832 to 184,320 bytes, the geometric
+C EXE is 185,344 bytes, and both Fairy EXEs remain 201,728 bytes. Thus the
+smaller-C size ratio is now 1.09444, still above the cumulative 1.08 limit.
+Earlier size and runtime receipts used the former benchmark reporter and remain
+historical; no fresh paired runtime result or output-failure parity is claimed.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
