@@ -29,6 +29,8 @@ func TestPrivateVectorSDKCandidateCCombinedLimits(t *testing.T) {
 int main(void) {
     unsigned char invalid[257];
     memset(invalid, 0xff, sizeof(invalid));
+    static const unsigned char bom[] = {0xef, 0xbb, 0xbf};
+    static const unsigned char bom_identifier[] = {0xef, 0xbb, 0xbf, 'a'};
     struct sample {
         const unsigned char *input;
         size_t length, work, token_limit, tokens, diagnostics, terminal;
@@ -45,6 +47,11 @@ int main(void) {
         {invalid, 257, 257, 257, 258, 257, 257, FC_INVALID, 1, 256},
         {(const unsigned char *)"a@", 2, 1, 0, 2, 1, 0, FC_INVALID, 2, 0, 1},
         {(const unsigned char *)"a@", 2, 1, 0, 3, 1, 1, FC_INVALID, 1, 1, 2},
+        {bom, 3, 2, 1, 2, 1, 0, FC_INVALID, 3, 0, 3},
+        {bom, 3, 3, 0, 2, 1, 3, FC_INVALID, 3, 0, 3},
+        {bom_identifier, 4, 3, 1, 3, 1, 3, FC_TRIVIA, 3, 3, 4},
+        {bom_identifier, 4, 4, 1, 3, 1, 4, FC_TRIVIA, 3, 3, 4},
+        {bom, 3, 0, 0, 2, 1, 0, FC_INVALID, 3, 0, 2},
     };
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
         const struct sample *item = &cases[i];
@@ -156,5 +163,10 @@ fn i32 main() {
     if (check(b"%s"[..], 32768, 257, 257, 258, 257, 257, 0, 1, 256) != 0) { return 17; }
     if (check(b"a@"[..], 1, 1, 0, 2, 1, 0, 0, 2, 0) != 0) { return 18; }
     if (check(b"a@"[..], 2, 1, 0, 3, 1, 1, 0, 1, 1) != 0) { return 19; }
+    if (check(b"\xEF\xBB\xBF"[..], 3, 2, 1, 2, 1, 0, 0, 3, 0) != 0) { return 20; }
+    if (check(b"\xEF\xBB\xBF"[..], 3, 3, 0, 2, 1, 3, 0, 3, 0) != 0) { return 21; }
+    if (check(b"\xEF\xBB\xBFa"[..], 4, 3, 1, 3, 1, 3, 2, 3, 3) != 0) { return 22; }
+    if (check(b"\xEF\xBB\xBFa"[..], 4, 4, 1, 3, 1, 4, 2, 3, 3) != 0) { return 23; }
+    if (check(b"\xEF\xBB\xBF"[..], 2, 0, 0, 2, 1, 0, 0, 3, 0) != 0) { return 24; }
     return 0;
 }`

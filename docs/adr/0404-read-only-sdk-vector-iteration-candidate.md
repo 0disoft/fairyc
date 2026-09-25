@@ -491,6 +491,10 @@ source and terminates at position one. The C reference and both Fairy loop
 forms agree on token counts, retained tail and terminal diagnostic under low
 and optimized MSVC. This checks those competing-limit orders only; it does not
 complete the remaining limit or runtime gates.
+Five more low/optimized cases cover UTF-8 BOM handling when work, token and
+caller byte limits compete. The independent C scanner and both Fairy loop
+forms agree on the retained invalid tail, first token, EOF and terminal E0010
+position. These cases do not establish every limit combination.
 The [configured C diagnostic limit](../ops/scanner-configured-diagnostic-limit-20260925.md)
 now models caller-selected limits below the default 256. Nine boundary inputs
 match the Go lexer in both C storage modes and both Fairy source forms under
