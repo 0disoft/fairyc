@@ -1,0 +1,326 @@
+{
+  "cpu_unit_ns": 100,
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "images": [
+    {
+      "exe_bytes": 152576,
+      "exe_sha256": "3b8cf63c90beb0c6f19cd0ff4f1dc20f8dd7d069e3f89d404c5aeaa89256c3c9",
+      "generated_c_bytes": 369694,
+      "lane": "explicit index",
+      "qpc_frequency": 10000000,
+      "samples": [
+        {
+          "c_cpu_100ns": 4218750,
+          "c_qpc_ticks": 4109394,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4295304,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": -1,
+          "warmup": true
+        },
+        {
+          "c_cpu_100ns": 4375000,
+          "c_qpc_ticks": 4317103,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4375000,
+          "fairy_qpc_ticks": 4518268,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 0,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 3906250,
+          "c_qpc_ticks": 4576692,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4380180,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 1,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4687500,
+          "c_qpc_ticks": 4696087,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4687500,
+          "fairy_qpc_ticks": 4681074,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 2,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4687500,
+          "c_qpc_ticks": 4720726,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4062500,
+          "fairy_qpc_ticks": 4273950,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 3,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4375000,
+          "c_qpc_ticks": 4613972,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4375000,
+          "fairy_qpc_ticks": 4466364,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 4,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4062500,
+          "c_qpc_ticks": 4561971,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4321512,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 5,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4531250,
+          "c_qpc_ticks": 4589245,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4843750,
+          "fairy_qpc_ticks": 4714723,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 6,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4218750,
+          "c_qpc_ticks": 4675368,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4600972,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 7,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 5156250,
+          "c_qpc_ticks": 5577724,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4687500,
+          "fairy_qpc_ticks": 4922659,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 8,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 5937500,
+          "c_qpc_ticks": 5980004,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 5000000,
+          "fairy_qpc_ticks": 5235883,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 9,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 5000000,
+          "c_qpc_ticks": 5338838,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 5468750,
+          "fairy_qpc_ticks": 5393861,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 10,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 6093750,
+          "c_qpc_ticks": 6041871,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 5781250,
+          "fairy_qpc_ticks": 5767183,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 11,
+          "warmup": false
+        }
+      ],
+      "scanner_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+      "specializations": 21
+    },
+    {
+      "exe_bytes": 152576,
+      "exe_sha256": "7320a258662a30fe5470a672833e523e3b4beb65c80f88aed9527f0e5606d734",
+      "generated_c_bytes": 370236,
+      "lane": "all vector for",
+      "qpc_frequency": 10000000,
+      "samples": [
+        {
+          "c_cpu_100ns": 5312500,
+          "c_qpc_ticks": 5271627,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4531250,
+          "fairy_qpc_ticks": 4683400,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": -1,
+          "warmup": true
+        },
+        {
+          "c_cpu_100ns": 4531250,
+          "c_qpc_ticks": 4602047,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4687500,
+          "fairy_qpc_ticks": 4731841,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 0,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4062500,
+          "c_qpc_ticks": 4315568,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4375000,
+          "fairy_qpc_ticks": 4237085,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 1,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4375000,
+          "c_qpc_ticks": 4530816,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4314932,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 2,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4843750,
+          "c_qpc_ticks": 4746831,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4687500,
+          "fairy_qpc_ticks": 4703573,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 3,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 3906250,
+          "c_qpc_ticks": 4021732,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4531250,
+          "fairy_qpc_ticks": 4524837,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 4,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4375000,
+          "c_qpc_ticks": 4323191,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4237789,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 5,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 3906250,
+          "c_qpc_ticks": 4092676,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4375000,
+          "fairy_qpc_ticks": 4372996,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 6,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4062500,
+          "c_qpc_ticks": 4016218,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4375000,
+          "fairy_qpc_ticks": 4431332,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 7,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4375000,
+          "c_qpc_ticks": 4708767,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4150860,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 8,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4062500,
+          "c_qpc_ticks": 3995615,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4218750,
+          "fairy_qpc_ticks": 4306701,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 9,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 3906250,
+          "c_qpc_ticks": 4063260,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4375000,
+          "fairy_qpc_ticks": 4401066,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 10,
+          "warmup": false
+        },
+        {
+          "c_cpu_100ns": 4375000,
+          "c_qpc_ticks": 4372163,
+          "c_result": 9000000,
+          "fairy_cpu_100ns": 4375000,
+          "fairy_qpc_ticks": 4279829,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 11,
+          "warmup": false
+        }
+      ],
+      "scanner_sha256": "17552d176bc171ef73bbf2995c7744b86ff328f15863577cb0288398049cde55",
+      "specializations": 21
+    }
+  ],
+  "main_sha256": "4efc23ca6401a6a73f1a2d24cb5373a75d03174c2188827cae359e33a44013ef",
+  "measured_pairs": 12,
+  "msvc": "14.51.36231",
+  "per_round_result": 36,
+  "profile": "optimized",
+  "rounds": 250000,
+  "sample_sha256": "27270bb224790aca7d077b8f03b6092e4ab29b7a12bf6756265e7aaf7a2a2133",
+  "schema": "fairyc.same-image-c-scanner-pairs/v1",
+  "scope": "Independent C and one Fairy scanner form share each instrumented optimized image. One fixed warmup and alternating adjacent calls follow per image; QPC and current-thread GetThreadTimes samples retain every pair. Each call verifies the same Go-oracle work checksum, with no retry or exclusion. This is a timing probe only: the combined EXEs cannot decide standalone size, whole-application runtime or stable source admission.",
+  "support_sha256": "cadd991b63b083f61e6f12c6a2c367296debf9cc0538f4d36d2bfb2ebc38b601",
+  "warmup_pairs": 1
+}

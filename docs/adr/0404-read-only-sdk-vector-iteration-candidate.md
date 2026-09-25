@@ -613,6 +613,13 @@ independent Go checksum agree; the Fairy vector allocator has no live block
 after return. This establishes coexistence for a future adjacent timing probe,
 not full lexical equivalence, timing stability or an executable-size result.
 
+The subsequent [same-image timing probe](../ops/scanner-same-image-c-pairs-20260925.md)
+alternates adjacent C and Fairy scanner calls in each combined image and
+retains twelve measured QPC and thread-CPU pairs after one warmup. Both Fairy
+forms produce the checked Go-oracle work checksum, but every C-relative ratio
+span exceeds the predeclared 10% stability limit. The combined-image sizes
+cannot decide the standalone EXE gate; stable source admission remains open.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
