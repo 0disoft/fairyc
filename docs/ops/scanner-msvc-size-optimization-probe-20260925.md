@@ -13,6 +13,8 @@ used the same compile flags within each row. The driver changes were reverted.
 | Current `/O2` | 184,320 | 201,728 | 1.09444 | 199,065 | 2,663 over |
 | Experimental `/O1` | 181,248 | 194,048 | 1.07062 | 195,747 | 1,699 under |
 | Experimental `/O2 /Os` | 181,248 | 193,536 | 1.06780 | 195,747 | 2,211 under |
+| Experimental `/O2 /Gy` | 184,320 | 201,728 | 1.09444 | 199,065 | 2,663 over |
+| Experimental `/O2 /Gy /OPT:REF /OPT:ICF` | 184,320 | 201,728 | 1.09444 | 199,065 | 2,663 over |
 
 The geometric C images were 181,760 bytes in both experiments. The current
 `/O2` geometric C image is 185,344 bytes. The ceiling is the largest integer
@@ -39,6 +41,14 @@ rotation samples were not retained by the diagnostic command, so these
 summaries are not a release receipt. A separate size-optimized profile would
 need retained samples, stable C-relative runtime, build-cost evidence and
 other-workload validation before product adoption.
+
+At source HEAD `2b52884e5bce31ddce08010fcc15fa49fadf56d0`, a later
+four-image smoke repeated the current `/O2` build with `/Gy`, then with both
+`/Gy` and explicit linker `/OPT:REF /OPT:ICF`. In each run, all four EXE sizes
+matched the current `/O2` row exactly, and the reporter and 1,000-round
+checksums passed. These runs did not measure time, so they establish only that
+function packaging and explicit linker collection did not reduce this image's
+size in this configuration. The temporary driver changes were reverted.
 
 A separate source-only experiment hoisted the previous diagnostic reference
 out of the inner selection loop. The existing lexical parity test passed, but
