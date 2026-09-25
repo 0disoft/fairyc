@@ -474,6 +474,13 @@ storage modes and both Fairy source forms. The optimized independent C EXE
 grows by 512 bytes while the Fairy images stay at 201,728, leaving a 1.09141
 size ratio and 2,110 bytes above the 8% ceiling. Other limits, failures and
 stable runtime remain open.
+Two additional combined-limit cases use `a@` with a source-byte limit of one
+or two, a work limit of one and a token limit of zero. The first terminates at
+source position zero before token or work exhaustion; the second admits the
+source and terminates at position one. The C reference and both Fairy loop
+forms agree on token counts, retained tail and terminal diagnostic under low
+and optimized MSVC. This checks those competing-limit orders only; it does not
+complete the remaining limit or runtime gates.
 
 ## Proposed first boundary
 

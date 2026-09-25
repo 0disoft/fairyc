@@ -33,7 +33,7 @@ int main(void) {
         const unsigned char *input;
         size_t length, work, token_limit, tokens, diagnostics, terminal;
         unsigned first_kind;
-        size_t first_end, last_start;
+        size_t first_end, last_start, byte_limit;
     };
     const struct sample cases[] = {
         {(const unsigned char *)"@x", 2, 0, 0, 2, 1, 0, FC_INVALID, 2, 0},
@@ -43,6 +43,8 @@ int main(void) {
         {invalid, 257, 256, 256, 258, 257, 256, FC_INVALID, 1, 256},
         {invalid, 257, 257, 256, 258, 257, 257, FC_INVALID, 1, 256},
         {invalid, 257, 257, 257, 258, 257, 257, FC_INVALID, 1, 256},
+        {(const unsigned char *)"a@", 2, 1, 0, 2, 1, 0, FC_INVALID, 2, 0, 1},
+        {(const unsigned char *)"a@", 2, 1, 0, 3, 1, 1, FC_INVALID, 1, 1, 2},
     };
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
         const struct sample *item = &cases[i];
@@ -55,6 +57,8 @@ int main(void) {
         scanner.diagnostics = diagnostics;
         scanner.work_limit = item->work;
         scanner.token_limit = item->token_limit;
+        scanner.byte_limit_set = item->byte_limit != 0u;
+        scanner.byte_limit = item->byte_limit;
         int status = fc_scan(&scanner);
         int bad = status != 0 || scanner.token_count != item->tokens ||
                   scanner.diagnostic_count != item->diagnostics ||
@@ -78,14 +82,13 @@ int main(void) {
     return 0;
 }
 `
-	code := "#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_SCANNER_LIBRARY\n" + string(core) + probe
+	code := "#define FC_CANDIDATE_WORK_LIMIT\n#define FC_CANDIDATE_TOKEN_LIMIT\n#define FC_CANDIDATE_DIAGNOSTIC_LIMIT\n#define FC_CANDIDATE_BYTE_LIMIT\n#define FC_SCANNER_LIBRARY\n" + string(core) + probe
 	variants := realScannerVectorVariants(t)
-	if len(variants) != 5 || variants[0].name != "explicit index" {
+	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
 		t.Fatal("real scanner source changed")
 	}
 	invalid := strings.Repeat(`\xFF`, 257)
 	fairyMain := fmt.Sprintf(candidateCCombinedLimitMain, invalid, invalid, invalid)
-	program, entry, _ := scannerBudgetFairyProgramWithMain(t, variants[0], fairyMain)
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
 			cImage, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, code)
@@ -96,10 +99,15 @@ int main(void) {
 			if err != nil || cOutcome.ExitCode != 0 || cOutcome.Stdout != "" || cOutcome.Stderr != "" || cOutcome.TrapControl != "" {
 				t.Fatalf("C combined limits: %+v %v", cOutcome, err)
 			}
-			fairyImage, _ := buildRealScannerVectorNative(t, program, entry, profile, "")
-			fairyOutcome, err := cdriver.ExecuteWindowsHost(fairyImage)
-			if err != nil || fairyOutcome.ExitCode != 0 || fairyOutcome.Stdout != "" || fairyOutcome.Stderr != "" || fairyOutcome.TrapControl != "" {
-				t.Fatalf("Fairy combined limits: %+v %v", fairyOutcome, err)
+			for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
+				t.Run(variant.name, func(t *testing.T) {
+					program, entry, _ := scannerBudgetFairyProgramWithMain(t, variant, fairyMain)
+					fairyImage, _ := buildRealScannerVectorNative(t, program, entry, profile, "")
+					fairyOutcome, runErr := cdriver.ExecuteWindowsHost(fairyImage)
+					if runErr != nil || fairyOutcome.ExitCode != 0 || fairyOutcome.Stdout != "" || fairyOutcome.Stderr != "" || fairyOutcome.TrapControl != "" {
+						t.Fatalf("Fairy combined limits: %+v %v", fairyOutcome, runErr)
+					}
+				})
 			}
 		})
 	}
@@ -110,14 +118,14 @@ import scanner as scanner;
 import std::bytes as bytes;
 import diagnostics as diagnostics;
 
-fn i32 check(ref u8[] input, usize work_limit, usize token_limit, usize wanted_tokens,
+fn i32 check(ref u8[] input, usize byte_limit, usize work_limit, usize token_limit, usize wanted_tokens,
              usize wanted_diagnostics, usize terminal, u32 first_kind, usize first_end,
              usize last_start) {
     let bytes::Buffer owned = switch (bytes::copy(input)) {
         case .ok(value): { value }
         case .err(_): { return 1; }
     };
-    let scanner::Stream stream = switch (scanner::collect(owned, false, 32768, token_limit, 256, work_limit)) {
+    let scanner::Stream stream = switch (scanner::collect(owned, false, byte_limit, token_limit, 256, work_limit)) {
         case .ok(value): { value }
         case .err(_): { return 2; }
     };
@@ -139,12 +147,14 @@ fn i32 check(ref u8[] input, usize work_limit, usize token_limit, usize wanted_t
 }
 
 fn i32 main() {
-    if (check(b"@x"[..], 0, 0, 2, 1, 0, 0, 2, 0) != 0) { return 11; }
-    if (check(b"@x"[..], 1, 0, 3, 1, 1, 0, 1, 1) != 0) { return 12; }
-    if (check(b"a@"[..], 1, 1, 3, 1, 1, 3, 1, 1) != 0) { return 13; }
-    if (check(b"a@"[..], 2, 1, 3, 1, 2, 3, 1, 1) != 0) { return 14; }
-    if (check(b"%s"[..], 256, 256, 258, 257, 256, 0, 1, 256) != 0) { return 15; }
-    if (check(b"%s"[..], 257, 256, 258, 257, 257, 0, 1, 256) != 0) { return 16; }
-    if (check(b"%s"[..], 257, 257, 258, 257, 257, 0, 1, 256) != 0) { return 17; }
+    if (check(b"@x"[..], 32768, 0, 0, 2, 1, 0, 0, 2, 0) != 0) { return 11; }
+    if (check(b"@x"[..], 32768, 1, 0, 3, 1, 1, 0, 1, 1) != 0) { return 12; }
+    if (check(b"a@"[..], 32768, 1, 1, 3, 1, 1, 3, 1, 1) != 0) { return 13; }
+    if (check(b"a@"[..], 32768, 2, 1, 3, 1, 2, 3, 1, 1) != 0) { return 14; }
+    if (check(b"%s"[..], 32768, 256, 256, 258, 257, 256, 0, 1, 256) != 0) { return 15; }
+    if (check(b"%s"[..], 32768, 257, 256, 258, 257, 257, 0, 1, 256) != 0) { return 16; }
+    if (check(b"%s"[..], 32768, 257, 257, 258, 257, 257, 0, 1, 256) != 0) { return 17; }
+    if (check(b"a@"[..], 1, 1, 0, 2, 1, 0, 0, 2, 0) != 0) { return 18; }
+    if (check(b"a@"[..], 2, 1, 0, 3, 1, 1, 0, 1, 1) != 0) { return 19; }
     return 0;
 }`
