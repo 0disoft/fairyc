@@ -562,6 +562,19 @@ retained scanner function; their source counts alone do not establish native
 instruction cost. Further size work should measure a proof-preserving backend
 change rather than assume another spelling or helper extraction saves space.
 
+A later `matches` experiment replaced per-byte `input[position + index]`
+access with one checked subview and `candidate[index]`. The independent-C
+lexical-parity test passed, but both optimized Fairy scanner images grew from
+201,728 to 202,240 bytes while the smaller C image stayed at 184,320 bytes;
+the source edit was reverted. A direct `memcmp` experiment did not reach native
+execution: casting a byte view to `ptr void` is unsupported by the C backend,
+while declaring `memcmp` with `ptr u8` conflicts with the standard C header's
+pointer parameters under `/WX`. Both attempts were reverted. They neither
+justify removing checked indexing nor admit a raw-pointer conversion. A future
+safe byte-view equality operation would need its own SDK and C ABI contract,
+with explicit empty-view and pointer-validity handling and a measured
+incremental and C-relative cost.
+
 The benchmark-only C reporter now emits the same numeric value sequence as
 `scanner::report_work`; the broad C lexical oracle keeps its separate `T`/`D`
 format. The optimized four-image smoke checks one C/Fairy reporter sequence
