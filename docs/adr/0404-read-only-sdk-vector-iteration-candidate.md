@@ -600,10 +600,15 @@ access is not equivalent to the current source loop.
    native execution.
 3. Compare normalized executable MIR, generated C, specialization and helper
    counts, object and EXE sizes, check/build time and process runtime against
-   the explicit-index variant. Compare an equivalent independent C workload
-   under the optimized profile against the cumulative 8% runtime and EXE
-   budget. A new source form cannot claim a zero-cost result from syntax or
-   interpreter parity alone. Separately measure unused-feature overhead.
+   the explicit-index variant. Record this same-program difference as the
+   incremental cost attributable to the source form. Separately compare an
+   equivalent independent C workload under the optimized profile against the
+   cumulative 8% runtime and EXE budget. That absolute C-relative gate remains
+   required for stable admission; an unchanged Fairy EXE does not pass it when
+   the indexed baseline already exceeds it. Conversely, the indexed baseline's
+   excess must not be described as a cost introduced by vector iteration.
+   A new source form cannot claim a zero-cost result from syntax or interpreter
+   parity alone. Separately measure unused-feature overhead.
    A separate C budget variant matches the geometric capacity steps of
    `Vec<Token>` and `Vec<diagnostics::Entry>`; the up-front C storage lane
    remains available. Use the faster equivalent C lane for runtime and the
