@@ -332,7 +332,8 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		}
 		t.Log("VECTOR_LEXER_C_BUDGET_OBJECT_SECTIONS " + string(objectReport))
 	}
-	sourceMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SOURCE_MAP") == "1"
+	fullSourceMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_FULL_SOURCE_MAP") == "1"
+	sourceMap := os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_SOURCE_MAP") == "1" || fullSourceMap
 	if os.Getenv("FAIRYC_VECTOR_LEXER_C_BUDGET_FUNCTIONS") == "1" || sourceMap {
 		imageRows := make([]map[string]any, 0, len(images))
 		for _, image := range images {
@@ -357,7 +358,10 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 						spans[i].SourceName = image.functions[index]
 					}
 				}
-				const top = 20
+				top := 20
+				if fullSourceMap {
+					top = len(spans)
+				}
 				if len(spans) > top {
 					spans = spans[:top]
 				}
@@ -379,6 +383,10 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke(t *testing.T) {
 		if sourceMap {
 			schema = "fairyc.vector-lexer-c-budget-function-source-map/v1"
 			marker = "VECTOR_LEXER_C_BUDGET_SOURCE_MAP "
+		}
+		if fullSourceMap {
+			schema = "fairyc.vector-lexer-c-budget-full-function-source-map/v1"
+			marker = "VECTOR_LEXER_C_BUDGET_FULL_SOURCE_MAP "
 		}
 		functionReport, marshalErr := json.Marshal(map[string]any{"schema": schema, "images": imageRows})
 		if marshalErr != nil {
