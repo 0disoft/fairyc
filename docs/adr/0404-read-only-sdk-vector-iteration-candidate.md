@@ -816,6 +816,12 @@ A later C/Fairy/C implementation must meet its own stability gate before
 the cumulative 8% runtime limit can be judged. Neither this protocol nor
 its null-control implementation admits the source form.
 
+The [first complete C–C–C triad control](../ops/scanner-identical-c-triad-result-20260927.md)
+failed its predeclared 10% stability rule in both sessions, with 14.27% and
+13.22% relative spans. The middle-slot median bias stayed below 2%, but that
+does not rescue the failed spread. No C–Fairy–C runtime inference follows;
+stable source admission remains open pending a controlled environment.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

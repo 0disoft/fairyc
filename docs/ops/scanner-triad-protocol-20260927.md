@@ -36,3 +36,7 @@ standalone C and Fairy images remain the size gate. The null control alone
 does not execute Fairy, establish runtime parity or admit the `Vec<T>` source
 form. This protocol changes no source syntax, compiler optimization or
 runtime safety check.
+
+The first [complete C-only control](scanner-identical-c-triad-result-20260927.md)
+failed the predeclared full-span rule in both sessions. The protocol and its
+thresholds remain unchanged; no C–Fairy–C result was collected from that run.
