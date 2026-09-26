@@ -3320,6 +3320,19 @@ func TestAnalyzeTypesAlwaysCheckedAssertCondition(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTerminalFalseAssertSatisfiesNonVoidExit(t *testing.T) {
+	t.Parallel()
+	assertCleanTypeResult(t, analyzeText(t, map[string]string{
+		"main.fy": "module main; fn i32 main() { assert(false); }",
+	}))
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main; fn i32 main() { let bool ready = true; assert(ready); }",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "non-void function without a checked return value" {
+		t.Fatalf("nonliteral assert result = %+v", result)
+	}
+}
+
 func TestAnalyzeRejectsNonBooleanAssertCondition(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

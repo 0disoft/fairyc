@@ -7,5 +7,4 @@ fn i32 passes() {
 
 fn i32 fails() {
     assert(false);
-    return 42;
 }

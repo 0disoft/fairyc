@@ -478,7 +478,7 @@ func TestExecuteAlwaysCheckedAssert(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 fn i32 passes() { assert(true); return 42; }
-fn i32 fails() { assert(false); return 42; }
+fn i32 fails() { assert(false); }
 `)
 	passed, err := interpreter.Execute(program, "main::passes")
 	if err != nil || passed.Kind != interpreter.OutcomeReturn || passed.Value != 42 {

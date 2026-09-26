@@ -1892,7 +1892,7 @@ func TestLowerPreservesAlwaysCheckedAssert(t *testing.T) {
 
 func TestLowerLiteralFalseAssertHasNoContinuation(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\nfn void main() { assert(false); }\n")
+	program := lowerTestSource(t, "module main;\nfn i32 main() { assert(false); }\n")
 	function := &program.Functions[0]
 	if len(function.Blocks) != 1 {
 		t.Fatalf("literal false assertion blocks = %+v", function.Blocks)

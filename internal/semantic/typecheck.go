@@ -331,26 +331,28 @@ func (c *typeChecker) checkFunction() hir.Function {
 			resultType,
 			span(c.module.file.Path, c.function.ResultType.Span),
 		)
-	} else if resultType != hir.TypeVoid && !blockAlwaysReturns(c.function.Body) {
+	} else if resultType != hir.TypeVoid && !blockAlwaysTerminates(c.function.Body) {
 		c.analyzer.addUnsupported(c.module.file.Path, c.function.Body.Span, "non-void function without a checked return value")
 	}
 	return result
 }
 
-func blockAlwaysReturns(block *ast.Block) bool {
+func blockAlwaysTerminates(block *ast.Block) bool {
 	if block == nil {
 		return false
 	}
 	for index := range block.Statements {
 		statement := &block.Statements[index]
-		if statement.Kind == syntax.KindReturn || expressionAlwaysReturns(statement.Expression) {
+		if statement.Kind == syntax.KindReturn ||
+			statement.Kind == syntax.KindAssert && statement.Expression != nil && statement.Expression.Kind == syntax.KindLiteral && statement.Expression.Text == "false" ||
+			expressionAlwaysTerminates(statement.Expression) {
 			return true
 		}
 	}
 	return block.Tail != nil
 }
 
-func expressionAlwaysReturns(expression *ast.Expression) bool {
+func expressionAlwaysTerminates(expression *ast.Expression) bool {
 	if expression == nil {
 		return false
 	}
@@ -361,11 +363,11 @@ func expressionAlwaysReturns(expression *ast.Expression) bool {
 		}
 		thenBranch := expression.Children[1]
 		elseBranch := expression.Children[2]
-		return thenBranch != nil && elseBranch != nil && blockAlwaysReturns(thenBranch.Block) &&
-			(elseBranch.Kind == syntax.KindIf && expressionAlwaysReturns(elseBranch) || blockAlwaysReturns(elseBranch.Block))
+		return thenBranch != nil && elseBranch != nil && blockAlwaysTerminates(thenBranch.Block) &&
+			(elseBranch.Kind == syntax.KindIf && expressionAlwaysTerminates(elseBranch) || blockAlwaysTerminates(elseBranch.Block))
 	case syntax.KindUnsafe, syntax.KindRegion:
 		for _, child := range expression.Children {
-			if child != nil && blockAlwaysReturns(child.Block) {
+			if child != nil && blockAlwaysTerminates(child.Block) {
 				return true
 			}
 		}
