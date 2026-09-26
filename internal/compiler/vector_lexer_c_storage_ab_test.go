@@ -46,7 +46,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerStorageAB(t *testing.T) {
 	if len(lexed.Tokens) < 9 || len(lexed.Diagnostics) == 0 {
 		t.Fatal("storage sample no longer crosses the first token capacity")
 	}
-	wantPrefix := scannerGoObservation(data)
+	wantPrefix := scannerFairyNumericObservation(data)
 	type image struct {
 		name     string
 		artifact cdriver.WindowsHostArtifact

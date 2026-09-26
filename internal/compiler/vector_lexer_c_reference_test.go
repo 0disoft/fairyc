@@ -704,7 +704,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T
 			if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
 				t.Fatalf("C benchmark smoke: %+v %v", outcome, err)
 			}
-			prefix := scannerGoObservation([]byte(sample))
+			prefix := scannerFairyNumericObservation([]byte(sample))
 			if !strings.HasPrefix(outcome.Stdout, prefix) {
 				t.Fatalf("C benchmark reporter differs: %q", outcome.Stdout)
 			}
@@ -731,7 +731,7 @@ func TestPrivateVectorSDKCandidateIndependentCScannerBenchmarkSmoke(t *testing.T
 	if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
 		t.Fatalf("geometric C benchmark smoke: %+v %v", outcome, err)
 	}
-	prefix := scannerGoObservation([]byte(sample))
+	prefix := scannerFairyNumericObservation([]byte(sample))
 	fields := strings.Fields(strings.TrimPrefix(outcome.Stdout, prefix))
 	if !strings.HasPrefix(outcome.Stdout, prefix) || len(fields) != 4 || fields[0] != "1000" ||
 		fields[3] != strconv.Itoa(perRound*1000) {
