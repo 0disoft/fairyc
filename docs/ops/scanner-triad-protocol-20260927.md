@@ -67,6 +67,15 @@ Only a passing pinned null control can gate the pinned C/Fairy/C harness;
 the old unpinned result cannot do so. A passing null result alone still
 cannot establish the Fairy/C runtime or standalone image-size budget.
 
+Each process pins to its own current logical processor, so pinning alone does
+not ensure that the C-only control and both C/Fairy/C images use the same
+processor. The configured gated intent requires all three recorded processor
+numbers to match before marking a stable comparison eligible for the runtime
+budget. It also checks the profile, toolchain, Go version, rounds, expected
+checksum and QPC frequency. A processor mismatch is retained with reason
+`processor_mismatch` and `runtime_gate_eligible = false`; it is not a
+passing runtime result.
+
 The [first complete fixed-affinity control](scanner-pinned-identical-c-triad-result-20260927.md)
 failed the same 10% full-span rule in both sessions. No full pinned C/Fairy/C
 result was collected.
