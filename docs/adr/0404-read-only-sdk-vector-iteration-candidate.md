@@ -562,6 +562,17 @@ retained scanner function; their source counts alone do not establish native
 instruction cost. Further size work should measure a proof-preserving backend
 change rather than assume another spelling or helper extraction saves space.
 
+Two further source-only trials also left this `/O2` size gate unchanged.
+Making the identical scanner and diagnostics numeric-output bodies share one
+function, and replacing the string scanner's per-byte append of a validated
+UTF-8 sequence with one `bytes::append`, each passed the configured 38-input
+C/Fairy lexical-parity check. Each separate four-image smoke verified the
+reporter and 1,000-round checksum; the smaller C image remained 184,320
+bytes and both Fairy images remained 201,728 bytes. Both source edits were
+reverted. These runs did not measure stable runtime, build cost, or every
+allocation-failure point, and do not justify a general claim that source
+deduplication has no value.
+
 A later `matches` experiment replaced per-byte `input[position + index]`
 access with one checked subview and `candidate[index]`. The independent-C
 lexical-parity test passed, but both optimized Fairy scanner images grew from
