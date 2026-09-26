@@ -706,6 +706,15 @@ to 200,192 bytes. The 8% integer ceiling is 199,065 bytes, so 1,127 bytes
 remain over budget. This is a scanner-size observation, not a runtime or
 compile-time result, and does not admit read-only vector iteration.
 
+Two further compiler-private C-emission trials at source HEAD `f0b5968e`
+left the optimized four-image sizes at 184,320, 185,344, 200,192 and 200,192
+bytes. One routed invalid Option/Result/enum tags through a single function-local
+unreachable trap; the other emitted C11 `switch` for binary Option and Result
+tags instead of two comparisons. Each passed the C-backend package tests and
+the reporter/1,000-round checksum smoke, then was reverted. Neither changes
+the remaining 1,127-byte size gap, and no runtime or compile-time effect was
+measured for either form.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
