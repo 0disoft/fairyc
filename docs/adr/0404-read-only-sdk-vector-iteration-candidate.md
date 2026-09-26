@@ -715,6 +715,16 @@ the reporter/1,000-round checksum smoke, then was reverted. Neither changes
 the remaining 1,127-byte size gap, and no runtime or compile-time effect was
 measured for either form.
 
+The current optimized PDB procedure check at source HEAD `b7f9a0d8` attributes
+23,611/23,612 `.text` bytes to the indexed/vector Fairy `unit.obj` and 4,138
+bytes to `runtime.obj` in both forms. The largest vector-form unit procedures
+are `scanner::scan` (3,850 bytes), `scanner::report_work` (2,156 bytes), and
+`numbers::decimal` (2,130 bytes). The four-image check also confirms the
+200,192-byte Fairy EXEs. These are linked module/procedure contributions, not
+a decomposition of PE file alignment or proof that one source rewrite will
+recover the remaining 1,127 bytes. They direct the next size investigation
+to the generated unit rather than the unchanged runtime module.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
