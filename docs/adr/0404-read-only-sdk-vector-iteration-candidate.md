@@ -767,6 +767,15 @@ unresolved. The vector/indexed total-build paired median is 0.98489 with a
 5.19% span. This does not compare Fairy build time with independent C or
 isolate the backend change's compiler-time cost.
 
+The [fixed-work host-noise control](../ops/scanner-host-noise-control-20260927.md)
+alternated 24 adjacent calls to the same optimized C arithmetic function at
+roughly the scanner call duration. Its QPC paired-ratio span was 2.96%, below
+the predeclared 10% stability limit. This narrows the question: a generic QPC
+failure on this host does not by itself explain the scanner's wide spans.
+The control has no scanner allocation or Fairy/C interaction, so scanner
+runtime admission remains unresolved; identical C scanner calls are the next
+workload-specific control.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
