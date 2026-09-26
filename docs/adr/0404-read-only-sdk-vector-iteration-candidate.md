@@ -784,6 +784,18 @@ calls. This prevents attributing the earlier wide Fairy/C spans to vector
 iteration; runtime admission remains open pending a controlled environment or
 a new predeclared scanner timing protocol.
 
+The identical-C control is now retained as an opt-in compiler test rather
+than a temporary probe. Its full mode fixes two consecutive 24-pair runs of
+250,000 scanner rounds per call, alternating the order of adjacent identical
+C calls and retaining every QPC tick. Each run has one untimed warmup; every
+call must return the Go-oracle checksum. The reported stability rule is
+`(max paired B/A ratio - min paired B/A ratio) / median paired ratio <= 0.10`
+for **both** complete runs. A one-pair smoke mode checks the harness only and
+cannot pass the timing gate. A future Fairy/C receipt must name the host and
+control run alongside its own complete timing data; the control alone neither
+proves Fairy/C parity nor admits the vector-loop source form. The retained
+control has not yet produced new full-run evidence on a controlled host.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
