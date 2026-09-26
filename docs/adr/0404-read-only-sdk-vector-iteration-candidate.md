@@ -773,8 +773,16 @@ roughly the scanner call duration. Its QPC paired-ratio span was 2.96%, below
 the predeclared 10% stability limit. This narrows the question: a generic QPC
 failure on this host does not by itself explain the scanner's wide spans.
 The control has no scanner allocation or Fairy/C interaction, so scanner
-runtime admission remains unresolved; identical C scanner calls are the next
+runtime admission remains unresolved; it motivates the following
 workload-specific control.
+
+The [identical-C scanner control](../ops/scanner-identical-c-control-20260927.md)
+ran that independent C workload twice per adjacent pair in one optimized
+image. Its two retained 24-pair runs had 7.65% and 14.22% QPC ratio spans.
+The second fails the 10% stability limit without any Fairy code in the timed
+calls. This prevents attributing the earlier wide Fairy/C spans to vector
+iteration; runtime admission remains open pending a controlled environment or
+a new predeclared scanner timing protocol.
 
 ## Proposed first boundary
 
