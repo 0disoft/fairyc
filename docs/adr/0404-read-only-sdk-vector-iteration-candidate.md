@@ -573,6 +573,14 @@ reverted. These runs did not measure stable runtime, build cost, or every
 allocation-failure point, and do not justify a general claim that source
 deduplication has no value.
 
+A compiler-private C-emission trial replaced dynamic bounds-trap category
+assignment with fixed-category trap blocks only when the target was empty and
+had one checked predecessor. It retained each bounds condition and passed a
+Go build plus the four-image reporter/checksum smoke. All four optimized EXE
+sizes stayed at 184,320, 185,344, 201,728 and 201,728 bytes respectively.
+The emitter trial was reverted; it did not run the full backend fixture suite
+or establish a runtime change.
+
 A later `matches` experiment replaced per-byte `input[position + index]`
 access with one checked subview and `candidate[index]`. The independent-C
 lexical-parity test passed, but both optimized Fairy scanner images grew from
@@ -586,15 +594,19 @@ safe byte-view equality operation would need its own SDK and C ABI contract,
 with explicit empty-view and pointer-validity handling and a measured
 incremental and C-relative cost.
 
-The next compiler-private candidate adds a separate, symbol-selected C byte
+Another compiler-private candidate adds a separate, symbol-selected C byte
 matcher with explicit input length, position and word length. It checks bounds
 before pointer arithmetic, accepts an empty word at the end, and rejects null
-pointers for nonempty reads. `scanner::matches` calls it through an explicit
-unsafe FFI boundary while its public SDK surface stays unchanged. The
-independent-C lexical-parity test and four-image smoke pass; the indexed and
-private-vector Fairy EXEs remain 201,728 bytes. This proves no size increase in this
-scanner shape, not runtime parity, Linux native behavior, or the cumulative
-8% C-relative admission gate. The public `std::bytes` API remains unadmitted.
+pointers for nonempty reads. A temporary `scanner::matches` implementation
+called it through an explicit unsafe FFI boundary while the public SDK surface
+stayed unchanged. The independent-C lexical-parity test and four-image smoke
+passed; the indexed and private-vector Fairy EXEs remained 201,728 bytes.
+After the paired timing probe failed its stability rule, the checked-in
+scanner returned to its prior safe per-byte loop. The native helper remains
+isolated for comparison but is no longer called by the default scanner. This
+does not establish runtime superiority, Linux native behavior or the
+cumulative 8% C-relative admission gate. The public `std::bytes` API remains
+unadmitted.
 
 The benchmark-only C reporter now emits the same numeric value sequence as
 `scanner::report_work`; the broad C lexical oracle keeps its separate `T`/`D`

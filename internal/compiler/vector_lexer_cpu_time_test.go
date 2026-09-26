@@ -38,7 +38,8 @@ func TestPrivateVectorSDKCandidateDualScannerCPUTime(t *testing.T) {
 	}
 	indexedScanner, candidateScanner := variants[0].scanner, variants[4].scanner
 	if matcherMode == "1" {
-		indexedScanner = scannerWithPreviousByteMatcher(t, candidateScanner)
+		indexedScanner = candidateScanner
+		candidateScanner = scannerWithNativeByteMatcher(t, candidateScanner)
 	}
 	pairs, rounds := 12, 250000
 	if os.Getenv("FAIRYC_VECTOR_LEXER_CPU_TIME_SMOKE") == "1" {
@@ -130,7 +131,7 @@ func TestPrivateVectorSDKCandidateDualScannerCPUTime(t *testing.T) {
 	marker := "DUAL_SCANNER_CPU_TIME_REPORT "
 	if matcherMode == "1" {
 		report["schema"] = "fairyc.byte-match-scanner-pairs/v1"
-		report["indexed_role"] = "previous checked per-byte matcher with private vector loops"
+		report["indexed_role"] = "current checked per-byte matcher with private vector loops"
 		report["candidate_role"] = "bounded native byte matcher with private vector loops"
 		report["scope"] = "The same optimized image contains two current scanner variants differing only in the private matches implementation and its foreign declaration. Adjacent QPC and current-thread CPU pairs exclude process startup and output. This measures incremental matcher cost, not standalone image size or the C-relative 8% gate; no retries, exclusions or adaptive stopping."
 		marker = "BYTE_MATCH_SCANNER_PAIRS "
@@ -142,19 +143,20 @@ func TestPrivateVectorSDKCandidateDualScannerCPUTime(t *testing.T) {
 	t.Log(marker + string(encoded))
 }
 
-func scannerWithPreviousByteMatcher(t *testing.T, scanner string) string {
+func scannerWithNativeByteMatcher(t *testing.T, scanner string) string {
 	t.Helper()
+	const imports = "import budget as budget;\n\n"
 	const declaration = `// Candidate-only bounded comparison; the target C helper checks both lengths before reading.
 @link_name("fy_std_bytes_match_at_v0")
 unsafe extern C fn u32 byte_match_raw(ptr u8 input, usize input_length, usize position, ptr u8 word, usize word_length);
 
 `
-	const current = `fn bool matches(ref u8[] input, usize position, ref u8[] word) {
+	const native = `fn bool matches(ref u8[] input, usize position, ref u8[] word) {
     return unsafe {
         byte_match_raw(input as ptr u8, input.len, position, word as ptr u8, word.len) == 1
     };
 }`
-	const previous = `fn bool matches(ref u8[] input, usize position, ref u8[] word) {
+	const checked = `fn bool matches(ref u8[] input, usize position, ref u8[] word) {
     if (position > input.len || word.len > input.len - position) { return false; }
     var usize index = 0;
     while (index < word.len) {
@@ -163,10 +165,11 @@ unsafe extern C fn u32 byte_match_raw(ptr u8 input, usize input_length, usize po
     }
     return true;
 }`
-	if strings.Count(scanner, declaration) != 1 || strings.Count(scanner, current) != 1 {
-		t.Fatal("current scanner byte matcher changed; refresh paired comparison")
+	if strings.Count(scanner, imports) != 1 || strings.Count(scanner, checked) != 1 ||
+		strings.Contains(scanner, declaration) || strings.Contains(scanner, native) {
+		t.Fatal("current checked scanner matcher changed; refresh paired comparison")
 	}
-	return strings.Replace(strings.Replace(scanner, declaration, "", 1), current, previous, 1)
+	return strings.Replace(strings.Replace(scanner, imports, imports+declaration, 1), checked, native, 1)
 }
 
 func dualScannerCPUMainSource(t *testing.T) string {

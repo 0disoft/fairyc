@@ -34,3 +34,9 @@ and current-matcher Fairy images or establish a stable runtime result.
 The native matcher is still candidate-only. This paired probe does not measure
 full lexical output, all scanner limits, Linux execution, check/build cost,
 or the performance of an independently written C scanner.
+
+Follow-up on 2026-09-26: the checked-in scanner again uses the safe per-byte
+loop. The opt-in harness constructs the native-matcher variant from that
+source, so the comparison remains runnable. The raw receipt above records
+the original 2026-09-25 source and harness hashes; this follow-up does not
+reinterpret its unstable timing as a regression or gain.

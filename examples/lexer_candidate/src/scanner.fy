@@ -8,10 +8,6 @@ import utf8 as utf8;
 import strings as strings;
 import budget as budget;
 
-// Candidate-only bounded comparison; the target C helper checks both lengths before reading.
-@link_name("fy_std_bytes_match_at_v0")
-unsafe extern C fn u32 byte_match_raw(ptr u8 input, usize input_length, usize position, ptr u8 word, usize word_length);
-
 // Private numeric observations mirror internal/lexer/token.go, not a stable ABI.
 struct Token {
     u32 kind; u32 trivia; usize start; usize end;
@@ -61,9 +57,13 @@ fn bool append_cooked(ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer
 }
 
 fn bool matches(ref u8[] input, usize position, ref u8[] word) {
-    return unsafe {
-        byte_match_raw(input as ptr u8, input.len, position, word as ptr u8, word.len) == 1
-    };
+    if (position > input.len || word.len > input.len - position) { return false; }
+    var usize index = 0;
+    while (index < word.len) {
+        if (input[position + index] != word[index]) { return false; }
+        index += 1;
+    }
+    return true;
 }
 
 fn bool letter(u8 value) {
