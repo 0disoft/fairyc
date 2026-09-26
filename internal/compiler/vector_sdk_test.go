@@ -93,7 +93,7 @@ import std::bytes as bytes;
 fn bytes::Buffer make() {
     return switch (bytes::copy(b"Fairy")) {
         case .ok(value) : { value }
-        case .err(_) : { assert(false); bytes::empty() }
+        case .err(_) : { assert(false); }
     };
 }
 fn bool valid(ref bytes::Buffer value) {
@@ -122,7 +122,7 @@ fn i32 exercise() {
     assert(retry(ref mut storage, make()));
     let bytes::Buffer last = switch (v::pop<bytes::Buffer>(ref mut storage)) {
         case .some(value) : { value }
-        case .none : { assert(false); bytes::empty() }
+        case .none : { assert(false); }
     };
     assert(valid(ref last));
     assert(v::length<bytes::Buffer>(ref storage) == 8);
