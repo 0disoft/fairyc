@@ -796,6 +796,12 @@ control run alongside its own complete timing data; the control alone neither
 proves Fairy/C parity nor admits the vector-loop source form. The retained
 control has not yet produced new full-run evidence on a controlled host.
 
+A [retained full control run](../ops/scanner-identical-c-retained-control-20260927.md)
+now passes the two-session rule with 5.80% and 8.56% spans. The earlier
+same-host run still contains a 14.22% failing span. The new run cannot be
+selected as proof of a stable host or of Fairy/C runtime parity; the private
+source form remains unadmitted.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
