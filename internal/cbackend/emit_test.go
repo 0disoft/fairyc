@@ -3,6 +3,7 @@ package cbackend_test
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -3135,6 +3136,37 @@ func TestEmitAlwaysCheckedAssert(t *testing.T) {
 	}
 	if strings.Contains(unit.Source, "fy_pending_trap") {
 		t.Fatalf("single-category assertion retains dynamic trap state:\n%s", unit.Source)
+	}
+}
+
+func TestEmitSharesEmptyFixedCategoryTrapBlocks(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 main() {
+    let ref u8[] data = b"ab";
+    let u8 first = data[0];
+    let u8 second = data[1];
+    assert(first == 97);
+    assert(second == 98);
+    return 42;
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, category := range []string{"FY_TRAP_BOUNDS", "FY_TRAP_ASSERTION_FAILED"} {
+		call := "fy_runtime_trap(" + category + ");"
+		if count := strings.Count(unit.Source, call); count != 1 {
+			t.Errorf("generated C has %d %s calls, want one shared call:\n%s", count, category, unit.Source)
+		}
+		sharedLabels := regexp.MustCompile(`(?:fy_b_\d+:\n){2,}    fy_runtime_trap\(` + category + `\);`)
+		if !sharedLabels.MatchString(unit.Source) {
+			t.Errorf("generated C did not merge two %s trap labels:\n%s", category, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, "fy_pending_trap") {
+		t.Fatalf("fixed-category traps retain dynamic trap state:\n%s", unit.Source)
 	}
 }
 

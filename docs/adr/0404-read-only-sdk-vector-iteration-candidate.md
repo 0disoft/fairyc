@@ -742,6 +742,22 @@ The rewrite was reverted. A separate stale numeric-reporter expectation in the
 C benchmark tests was repaired at `76079a50`; that test fix is not a scanner
 size improvement.
 
+The constrained-C emitter now places reachable, empty, fixed-category trap
+blocks at one function-local call per category, while retaining each block
+label and leaving dynamic-category targets separate. The existing checked
+conditions, MIR trap categories and cleanup operations are unchanged. Backend
+tests cover two independent bounds and assertion labels plus the dynamic
+left-shift path; low and optimized MSVC runs trigger each of the first and
+second bounds/assertion failures with the expected category. The 38-input
+lexical comparison, four-image reporter/1,000-round checksums, PDB association
+and Windows host correctness smoke pass. Optimized Fairy scanner images fall
+from 200,192 to 197,120 bytes in both source forms; independent C remains
+184,320 bytes. This is 1,945 bytes below the 199,065-byte integer 8% size
+ceiling for this workload. The linked Fairy `unit.obj` `.text` contribution
+falls to 22,022/22,023 bytes for indexed/vector source; `runtime.obj` remains
+4,138 bytes. Check/build time and stable runtime impact are not yet measured,
+so this size result alone does not admit read-only SDK vector iteration.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

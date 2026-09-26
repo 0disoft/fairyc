@@ -3170,9 +3170,39 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	blocks := slices.Clone(function.Blocks)
 	slices.SortFunc(blocks, func(left, right mir.Block) int { return int(left.ID - right.ID) })
 	reachable := reachableBlocksForC(*function)
+	fixedTrapGroups := make(map[string][]mir.BlockID)
+	for _, block := range blocks {
+		// Empty, non-returning traps with the same category have identical C behavior.
+		// Keep dynamic-category targets separate because their incoming edges set state.
+		if !reachable[int(block.ID)] || len(block.Operations) != 0 ||
+			block.Terminator.Kind != mir.TerminatorTrap || len(block.Terminator.TrapCategories) != 1 ||
+			len(block.Terminator.Successors) != 0 || block.Terminator.UnwindSuccessor != mir.NoBlock {
+			continue
+		}
+		if _, dynamic := dynamicTargets[block.ID]; dynamic {
+			continue
+		}
+		category := block.Terminator.TrapCategories[0]
+		fixedTrapGroups[category] = append(fixedTrapGroups[category], block.ID)
+	}
+	groupedTrapBlocks := make(map[mir.BlockID]struct{})
+	var groupedCategories []string
+	for category, ids := range fixedTrapGroups {
+		if len(ids) < 2 {
+			continue
+		}
+		groupedCategories = append(groupedCategories, category)
+		for _, id := range ids {
+			groupedTrapBlocks[id] = struct{}{}
+		}
+	}
+	slices.Sort(groupedCategories)
 	for blockIndex := range blocks {
 		block := &blocks[blockIndex]
 		if !reachable[int(block.ID)] {
+			continue
+		}
+		if _, grouped := groupedTrapBlocks[block.ID]; grouped {
 			continue
 		}
 		fmt.Fprintf(output, "fy_b_%d:\n", block.ID)
@@ -3184,6 +3214,16 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		if err := e.emitTerminator(output, functionIndex, block.ID, block.Terminator); err != nil {
 			return err
 		}
+	}
+	for _, category := range groupedCategories {
+		name, _, ok := cTrapSpec(category)
+		if !ok {
+			return CapabilityError{Function: function.Name, Feature: "trap category " + strconv.Quote(category)}
+		}
+		for _, id := range fixedTrapGroups[category] {
+			fmt.Fprintf(output, "fy_b_%d:\n", id)
+		}
+		fmt.Fprintf(output, "    fy_runtime_trap(%s);\n", name)
 	}
 	output.WriteString("}\n\n")
 	return nil
