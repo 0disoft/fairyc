@@ -833,6 +833,11 @@ the same full-sample stability and bias gates. Its result is separate from the
 failed unpinned control; the source form remains compiler-private until a
 passing matched control and candidate measurement exist.
 
+The [first complete pinned C-only control](../ops/scanner-pinned-identical-c-triad-result-20260927.md)
+also failed, with 10.13% and 14.95% full spans. The matched C/Fairy/C full
+measurement was not run. Processor pinning alone does not close the runtime
+gate on this host.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

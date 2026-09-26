@@ -66,3 +66,7 @@ The follow-up C-only result must be retained whether it passes or fails.
 Only a passing pinned null control can gate the pinned C/Fairy/C harness;
 the old unpinned result cannot do so. A passing null result alone still
 cannot establish the Fairy/C runtime or standalone image-size budget.
+
+The [first complete fixed-affinity control](scanner-pinned-identical-c-triad-result-20260927.md)
+failed the same 10% full-span rule in both sessions. No full pinned C/Fairy/C
+result was collected.
