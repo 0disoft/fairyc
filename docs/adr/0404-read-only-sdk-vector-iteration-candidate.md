@@ -809,6 +809,13 @@ thread-CPU spans also exceeded 10%. Thus the passing C-only control did not
 stabilize the C/Fairy workload, and none of its median ratios establishes the
 8% runtime gate. The source form stays compiler-private.
 
+The [predeclared three-call protocol](../ops/scanner-triad-protocol-20260927.md)
+first measures a C-only middle-call null ratio against two surrounding C
+calls, with complete two-session stability and position-bias requirements.
+A later C/Fairy/C implementation must meet its own stability gate before
+the cumulative 8% runtime limit can be judged. Neither this protocol nor
+its null-control implementation admits the source form.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
