@@ -1232,6 +1232,14 @@ func (e *emitter) structCTypeName(index int) string {
 
 func (e *emitter) inspectFunction(functionIndex int) error {
 	function := &e.functions[functionIndex]
+	predecessors := make([]uint32, len(function.Blocks))
+	for _, block := range function.Blocks {
+		for _, successor := range block.Terminator.Successors {
+			if successor >= 0 && int(successor) < len(predecessors) {
+				predecessors[successor]++
+			}
+		}
+	}
 	if function.ResultType != hir.TypeVoid && !e.supportedCValueType(function.ResultType) {
 		return CapabilityError{Function: function.Name, Feature: "result type " + strconv.Quote(string(function.ResultType))}
 	}
@@ -1565,7 +1573,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			}
 		case mir.TerminatorSwitch:
 			e.features["scalar-control-flow"] = struct{}{}
-			if err := e.inspectSwitch(functionIndex, terminator); err != nil {
+			if err := e.inspectSwitch(functionIndex, terminator, predecessors); err != nil {
 				return err
 			}
 		case mir.TerminatorReturn:
@@ -2673,7 +2681,7 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 	return nil
 }
 
-func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) error {
+func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, predecessors []uint32) error {
 	function := &e.functions[functionIndex]
 	if terminator.SwitchKind == "enum" {
 		index, found := e.enumByType[terminator.SwitchType]
@@ -2872,13 +2880,21 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 	if err := e.recordTrapCategories(function.Name, categories); err != nil {
 		return err
 	}
+	e.trapCategories["unreachable"] = struct{}{}
+	failure := terminator.Successors[1]
+	if len(categories) == 1 && failure >= 0 && int(failure) < len(function.Blocks) && predecessors[failure] == 1 {
+		trap := function.Blocks[failure]
+		if len(trap.Operations) == 0 && trap.Terminator.Kind == mir.TerminatorTrap &&
+			slices.Equal(trap.Terminator.TrapCategories, categories) {
+			return nil
+		}
+	}
 	targets := e.dynamicTrapTargets[functionIndex]
 	if targets == nil {
 		targets = make(map[mir.BlockID]struct{})
 		e.dynamicTrapTargets[functionIndex] = targets
 	}
-	targets[terminator.Successors[1]] = struct{}{}
-	e.trapCategories["unreachable"] = struct{}{}
+	targets[failure] = struct{}{}
 	return nil
 }
 
@@ -3936,7 +3952,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("assert condition in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s == INT32_C(0)) { fy_pending_trap = FY_TRAP_ASSERTION_FAILED; goto fy_b_%d; }\n", value, failure)
+		fmt.Fprintf(output, "    if (%s == INT32_C(0)) { %sgoto fy_b_%d; }\n", value, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_ASSERTION_FAILED"), failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "option":
 		operand, err := oneOperand(terminator.SwitchOperands)
@@ -3983,7 +3999,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked unary in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s == INT32_MIN) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", value, failure)
+		fmt.Fprintf(output, "    if (%s == INT32_MIN) { %sgoto fy_b_%d; }\n", value, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-arithmetic":
 		left, right, err := twoOperands(terminator.SwitchOperands)
@@ -4003,7 +4019,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		}
 		if terminator.SwitchType == hir.TypeI32 {
 			expression := fmt.Sprintf("((int64_t)(%s) %s (int64_t)(%s))", leftValue, terminator.Operator, rightValue)
-			fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", expression, expression, failure)
+			fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { %sgoto fy_b_%d; }\n", expression, expression, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 		} else {
 			maximum, err := unsignedCMaximum(terminator.SwitchType)
 			if err != nil {
@@ -4011,11 +4027,11 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			}
 			switch terminator.Operator {
 			case "+":
-				fmt.Fprintf(output, "    if ((%s) > %s - (%s)) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", leftValue, maximum, rightValue, failure)
+				fmt.Fprintf(output, "    if ((%s) > %s - (%s)) { %sgoto fy_b_%d; }\n", leftValue, maximum, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 			case "-":
-				fmt.Fprintf(output, "    if ((%s) < (%s)) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", leftValue, rightValue, failure)
+				fmt.Fprintf(output, "    if ((%s) < (%s)) { %sgoto fy_b_%d; }\n", leftValue, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 			case "*":
-				fmt.Fprintf(output, "    if ((%s) != 0 && (%s) > %s / (%s)) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", rightValue, leftValue, maximum, rightValue, failure)
+				fmt.Fprintf(output, "    if ((%s) != 0 && (%s) > %s / (%s)) { %sgoto fy_b_%d; }\n", rightValue, leftValue, maximum, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 			}
 		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
@@ -4032,9 +4048,9 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked division in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s == 0) { fy_pending_trap = FY_TRAP_DIVISION_BY_ZERO; goto fy_b_%d; }\n", rightValue, failure)
+		fmt.Fprintf(output, "    if (%s == 0) { %sgoto fy_b_%d; }\n", rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_DIVISION_BY_ZERO"), failure)
 		if terminator.SwitchType == hir.TypeI32 {
-			fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { fy_pending_trap = FY_TRAP_SIGNED_DIVISION_OVERFLOW; goto fy_b_%d; }\n", leftValue, rightValue, failure)
+			fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { %sgoto fy_b_%d; }\n", leftValue, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW"), failure)
 		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-view-index":
@@ -4050,7 +4066,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked byte-view index offset in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s >= (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", indexValue, receiverValue, failure)
+		fmt.Fprintf(output, "    if (%s >= (%s).length) { %sgoto fy_b_%d; }\n", indexValue, receiverValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_BOUNDS"), failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-array-index":
 		receiver, index, err := twoOperands(terminator.SwitchOperands)
@@ -4069,7 +4085,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked fixed-array index offset in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s >= ((uintptr_t)UINT64_C(%d))) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", indexValue, length, failure)
+		fmt.Fprintf(output, "    if (%s >= ((uintptr_t)UINT64_C(%d))) { %sgoto fy_b_%d; }\n", indexValue, length, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_BOUNDS"), failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-view-slice":
 		receiver, start, end, err := threeOperands(terminator.SwitchOperands)
@@ -4089,9 +4105,9 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			return fmt.Errorf("checked byte-view slice end in %s: %w", function.Name, err)
 		}
 		if start.Kind == mir.OperandUSize && start.U64 == 0 {
-			fmt.Fprintf(output, "    if ((%s) > (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", endValue, receiverValue, failure)
+			fmt.Fprintf(output, "    if ((%s) > (%s).length) { %sgoto fy_b_%d; }\n", endValue, receiverValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_BOUNDS"), failure)
 		} else {
-			fmt.Fprintf(output, "    if ((%s) > (%s) || (%s) > (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", startValue, endValue, endValue, receiverValue, failure)
+			fmt.Fprintf(output, "    if ((%s) > (%s) || (%s) > (%s).length) { %sgoto fy_b_%d; }\n", startValue, endValue, endValue, receiverValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_BOUNDS"), failure)
 		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-shift":
@@ -4108,9 +4124,9 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			return fmt.Errorf("checked shift in %s: %w", function.Name, err)
 		}
 		if terminator.SwitchType == hir.TypeI32 {
-			fmt.Fprintf(output, "    if (%s < INT32_C(0) || %s >= %s) { fy_pending_trap = FY_TRAP_INVALID_SHIFT; goto fy_b_%d; }\n", amountValue, amountValue, width, failure)
+			fmt.Fprintf(output, "    if (%s < INT32_C(0) || %s >= %s) { %sgoto fy_b_%d; }\n", amountValue, amountValue, width, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INVALID_SHIFT"), failure)
 		} else {
-			fmt.Fprintf(output, "    if (%s >= %s) { fy_pending_trap = FY_TRAP_INVALID_SHIFT; goto fy_b_%d; }\n", amountValue, width, failure)
+			fmt.Fprintf(output, "    if (%s >= %s) { %sgoto fy_b_%d; }\n", amountValue, width, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INVALID_SHIFT"), failure)
 		}
 		if terminator.Operator == "<<" {
 			value, _, err := twoOperands(terminator.SwitchOperands)
@@ -4123,13 +4139,13 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			}
 			if terminator.SwitchType == hir.TypeI32 {
 				expression := fmt.Sprintf("((int64_t)(%s) * (INT64_C(1) << (uint32_t)(%s)))", valueText, amountValue)
-				fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", expression, expression, failure)
+				fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { %sgoto fy_b_%d; }\n", expression, expression, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 			} else {
 				maximum, err := unsignedCMaximum(terminator.SwitchType)
 				if err != nil {
 					return fmt.Errorf("checked left shift in %s: %w", function.Name, err)
 				}
-				fmt.Fprintf(output, "    if ((%s) > (%s >> (%s))) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", valueText, maximum, amountValue, failure)
+				fmt.Fprintf(output, "    if ((%s) > (%s >> (%s))) { %sgoto fy_b_%d; }\n", valueText, maximum, amountValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 			}
 		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
@@ -4137,6 +4153,13 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		return CapabilityError{Function: function.Name, Feature: "MIR switch " + strconv.Quote(terminator.SwitchKind)}
 	}
 	return nil
+}
+
+func (e *emitter) pendingTrapAssignment(functionIndex int, failure mir.BlockID, category string) string {
+	if _, dynamic := e.dynamicTrapTargets[functionIndex][failure]; !dynamic {
+		return ""
+	}
+	return "fy_pending_trap = " + category + "; "
 }
 
 func (e *emitter) emitParameters(output *strings.Builder, parameters []mir.LocalID, parameterTypes []hir.Type) error {

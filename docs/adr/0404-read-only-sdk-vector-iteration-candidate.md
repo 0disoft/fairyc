@@ -695,6 +695,17 @@ the cumulative size gate. The driver flags were reverted. No runtime or build
 cost was measured under these temporary settings; this does not isolate which
 retained functions account for the remaining bytes.
 
+A constrained-C emitter change now omits the dynamic trap-category variable
+and assignment when a checked failure edge is the sole predecessor of an empty
+trap block with exactly one matching category. The condition and fixed-category
+trap remain; signed division and left shift retain their dynamic category path.
+Backend tests cover both forms, the independent-C lexical-parity test passes,
+and the optimized four-image reporter and 1,000-round checksums still agree.
+The smaller C image remains 184,320 bytes; both Fairy images fall from 201,728
+to 200,192 bytes. The 8% integer ceiling is 199,065 bytes, so 1,127 bytes
+remain over budget. This is a scanner-size observation, not a runtime or
+compile-time result, and does not admit read-only vector iteration.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

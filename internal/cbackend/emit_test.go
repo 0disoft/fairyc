@@ -407,7 +407,8 @@ fn i32 main() {
 	}
 	for _, required := range []string{
 		"FY_TRAP_BOUNDS",
-		".length) { fy_pending_trap = FY_TRAP_BOUNDS;",
+		".length) { goto fy_b_",
+		"fy_runtime_trap(FY_TRAP_BOUNDS);",
 		".data[",
 	} {
 		if !strings.Contains(unit.Source, required) {
@@ -644,7 +645,8 @@ fn i32 main() {
 		"FY_TRAP_BOUNDS",
 		" || ",
 		" > (",
-		").length) { fy_pending_trap = FY_TRAP_BOUNDS;",
+		").length) { goto fy_b_",
+		"fy_runtime_trap(FY_TRAP_BOUNDS);",
 		"(fy_byte_slice){ .data = ",
 		".data + (",
 		".length = (",
@@ -690,7 +692,8 @@ fn i32 main() {
 		t.Fatalf("Emit() error = %v", err)
 	}
 	for _, required := range []string{
-		").length) { fy_pending_trap = FY_TRAP_BOUNDS;",
+		").length) { goto fy_b_",
+		"fy_runtime_trap(FY_TRAP_BOUNDS);",
 		"(fy_byte_slice){ .data = ",
 		".length = (",
 	} {
@@ -933,6 +936,9 @@ fn i32 main() {
 	for _, required := range []string{
 		"FY_TRAP_INVALID_SHIFT",
 		"FY_TRAP_INTEGER_OVERFLOW",
+		"fy_pending_trap = FY_TRAP_INVALID_SHIFT;",
+		"fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW;",
+		"fy_runtime_trap(fy_pending_trap);",
 		"(int64_t)INT32_MIN",
 		"(int64_t)INT32_MAX",
 		"UINT8_MAX >> (",
@@ -3120,11 +3126,15 @@ func TestEmitAlwaysCheckedAssert(t *testing.T) {
 	}
 	for _, required := range []string{
 		"FY_TRAP_ASSERTION_FAILED",
-		"== INT32_C(0)) { fy_pending_trap = FY_TRAP_ASSERTION_FAILED;",
+		"== INT32_C(0)) { goto fy_b_",
+		"fy_runtime_trap(FY_TRAP_ASSERTION_FAILED);",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
 		}
+	}
+	if strings.Contains(unit.Source, "fy_pending_trap") {
+		t.Fatalf("single-category assertion retains dynamic trap state:\n%s", unit.Source)
 	}
 }
 
