@@ -86,7 +86,7 @@ func TestWorkspaceCallV2RejectsMissingDependencyImplementation(t *testing.T) {
 func genericCallPartitions(t *testing.T) ([]Partition, map[string]LoadExpectation) {
 	t.Helper()
 	root := t.TempDir()
-	manifest := "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.join.PACKAGE\"\nname = \"PACKAGE\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/19\"\nsource = \"src\"\n"
+	manifest := "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.join.PACKAGE\"\nname = \"PACKAGE\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/20\"\nsource = \"src\"\n"
 	files := map[string]string{
 		"fairy.toml":     strings.ReplaceAll(manifest, "PACKAGE", "app") + "[workspace]\nmembers = [\"lib\"]\n[dependencies.lib]\npath = \"lib\"\nversion = \"1.0.0\"\nfeatures = []\n",
 		"lib/fairy.toml": strings.ReplaceAll(manifest, "PACKAGE", "lib"),

@@ -71,7 +71,7 @@ func TestWindowsVectorLexerRoundTrip(t *testing.T) {
 uid = "test.cli.vector-lexer-roundtrip"
 name = "roundtrip"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", program.String())

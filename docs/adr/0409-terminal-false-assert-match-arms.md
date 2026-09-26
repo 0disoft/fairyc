@@ -1,6 +1,6 @@
 # ADR 0409: Terminal false assertions in Result and Option switch arms
 
-- Status: Accepted; implementation pending
+- Status: Implemented; cumulative runtime budget remains open
 - Date: 2026-09-27
 - Product source: [product specification](../product/02-spec.md)
 - Admission source: [ADR 0218](0218-modern-language-concept-admission-boundary.md)
@@ -37,12 +37,18 @@ helper, type metadata, generic instance, ABI representation, or backend
 operation is added. The check is local to two-arm built-in switches; unrelated
 source does not enter a new global inference pass.
 
-Implementation must prove the success branch's result and ownership, the
-failure branch's trap category with live resources, preserved rejection of a
-nonliteral assertion or empty arm, and native low/optimized behavior. Compare
-the same program with and without the unreachable fabricated value to inspect
-generated C and linked size. The cumulative independent-C runtime and image
-budget remains 8%; this ADR alone makes no performance claim.
+Semantic tests cover both arm families and preserve `E1006` for nonliteral,
+empty, and Option direct-return void arms. Verified-MIR interpreter execution
+covers success values and `assertion-failed` on failure. The private nested
+resource/vector program removes fabricated values from one Result and one
+Option arm and passes low and optimized MSVC native execution with ownership
+and cleanup checks. A same-program generated-C and linked-size comparison
+with the previous fabricated-value form remains pending. The cumulative
+independent-C runtime and image budget remains 8%. The unchanged four-image
+scanner smoke still reports 197,120-byte optimized Fairy images against a
+184,320-byte independent C image, below the 199,065-byte integer size ceiling;
+the scanner source does not use the new arm form. No runtime or build-time
+performance claim follows from this semantic acceptance alone.
 
 ## Compatibility
 
@@ -52,5 +58,4 @@ from `0.0.0-stage0.69` to `.70`, with matching manifests, locks, cache inputs,
 fixtures, and examples updated in the same implementation cutover. The source
 bytes of existing valid programs need no rewrite. Runtime ABI, MIR version,
 public-interface schema, and C transport remain unchanged. This accepted
-design does not activate the form or change a pin until implementation passes
-its tests and compatibility update.
+design is implemented only with the exact pin and SDK cutover described above.

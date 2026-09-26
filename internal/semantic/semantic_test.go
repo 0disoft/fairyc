@@ -501,6 +501,59 @@ fn i32 unwrap(Option<i32> input) {
 	}
 }
 
+func TestAnalyzeTerminalFalseAssertMatchArms(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct{ name, source string }{
+		{"result", `module main;
+fn i32 main() {
+    let Result<i32, i32> value = .ok(42);
+    return switch (value) { case .ok(number): { number } case .err(_): { assert(false); } };
+}`},
+		{"option", `module main;
+fn i32 main() {
+    let Option<i32> value = .some(42);
+    return switch (value) { case .none: { assert(false); } case .some(number): { number } };
+}`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			assertCleanTypeResult(t, analyzeText(t, map[string]string{"main.fy": test.source}))
+		})
+	}
+}
+
+func TestAnalyzeTerminalFalseAssertMatchArmStaysNarrow(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct{ name, source string }{
+		{"result nonliteral", `module main; fn i32 main() {
+    let Result<i32, i32> value = .ok(42);
+    return switch (value) { case .ok(number): { number } case .err(_): { assert(1 == 2); } };
+}`},
+		{"option empty", `module main; fn i32 main() {
+    let Option<i32> value = .some(42);
+    return switch (value) { case .some(number): { number } case .none: {} };
+}`},
+		{"option return", `module main; fn i32 main() {
+    let Option<i32> value = .some(42);
+    let i32 number = switch (value) { case .some(number): { number } case .none: { return 0; } };
+    return number;
+}`},
+		{"result both terminal", `module main; fn i32 main() {
+    let Result<i32, i32> value = .ok(42);
+    let i32 number = switch (value) { case .ok(_): { assert(false); } case .err(_): { assert(false); } };
+    return number;
+}`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": test.source})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" {
+				t.Fatalf("result = %+v", result)
+			}
+		})
+	}
+}
+
 func TestAnalyzeRejectsPreviousRevisionQualifiedVariants(t *testing.T) {
 	t.Parallel()
 	tests := map[string]string{

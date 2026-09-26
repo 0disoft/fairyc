@@ -76,7 +76,7 @@ resource Token {
 fn Token make(i32 index) {
     let bytes::Buffer cooked = switch (bytes::copy(b"Fairy")) {
         case .ok(value) : { value }
-        case .err(_) : { assert(false); bytes::empty() }
+        case .err(_) : { assert(false); }
     };
     return Token { .index = index, .cooked = cooked };
 }
@@ -102,7 +102,7 @@ fn i32 exercise() {
     assert(valid(v::at<Token>(ref tokens, 8), 8));
     let Token popped = switch (v::pop<Token>(ref mut tokens)) {
         case .some(value) : { value }
-        case .none : { assert(false); make(-1) }
+        case .none : { assert(false); }
     };
     assert(valid(ref popped, 8));
     let usize capacity = v::capacity<Token>(ref tokens);

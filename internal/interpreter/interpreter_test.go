@@ -490,6 +490,49 @@ fn i32 fails() { assert(false); }
 	}
 }
 
+func TestExecuteTerminalFalseMatchArm(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token { i32 value; cleanup {} }
+fn i32 result_ok() {
+    let Token owned = Token { .value = 1 };
+    let Result<i32, i32> value = .ok(42);
+    return switch (value) { case .ok(number): { number } case .err(_): { assert(false); } };
+}
+fn i32 result_fail() {
+    let Token owned = Token { .value = 1 };
+    let Result<i32, i32> value = .err(7);
+    return switch (value) { case .ok(number): { number } case .err(_): { assert(false); } };
+}
+fn i32 option_some() {
+    let Option<i32> value = .some(42);
+    return switch (value) { case .some(number): { number } case .none: { assert(false); } };
+}
+fn i32 option_none() {
+    let Option<i32> value = .none;
+    return switch (value) { case .some(number): { number } case .none: { assert(false); } };
+}
+`)
+	for _, test := range []struct {
+		entry string
+		kind  string
+		drops int
+	}{
+		{"main::result_ok", interpreter.OutcomeReturn, 1},
+		{"main::result_fail", interpreter.OutcomeTrap, 0},
+		{"main::option_some", interpreter.OutcomeReturn, 0},
+		{"main::option_none", interpreter.OutcomeTrap, 0},
+	} {
+		outcome, err := interpreter.Execute(program, test.entry)
+		if err != nil || outcome.Kind != test.kind ||
+			len(outcome.DropTrace) != test.drops ||
+			(test.kind == interpreter.OutcomeReturn && outcome.Value != 42) ||
+			(test.kind == interpreter.OutcomeTrap && outcome.TrapCategory != "assertion-failed") {
+			t.Fatalf("Execute(%s) = %+v, %v", test.entry, outcome, err)
+		}
+	}
+}
+
 func TestExecuteCheckedCompoundAssignments(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

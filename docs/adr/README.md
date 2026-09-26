@@ -373,7 +373,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0406-shared-scalar-borrow-option-null-niche.md`: stores immutable scalar-, structure-, fixed-array- and resource-borrow Options in one pointer-sized private C record while preserving Option and borrow semantics.
 - `0407-windows-file-utf8-paths.md`: accepts bounded strict UTF-8 paths in Windows File operations while retaining the existing CStr transport and ASCII fast path.
 - `0408-target-neutral-utf8-file-open.md`: adds allocation-free UTF-8 text path factories on both File targets without replacing the CStr byte-path API.
-- `0409-terminal-false-assert-match-arms.md`: accepts a terminal literal-false assertion as a non-continuing Result or Option switch arm; implementation and language pin update are pending.
+- `0409-terminal-false-assert-match-arms.md`: admits a terminal literal-false assertion as a non-continuing Result or Option switch arm in language `/20`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

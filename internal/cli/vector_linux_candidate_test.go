@@ -57,7 +57,7 @@ func TestVectorWorkspaceEmitTargets(t *testing.T) {
 uid = "test.cli.vector-emit"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", nativeVectorClient)
@@ -90,7 +90,7 @@ func TestLinuxVectorCandidateNativeBuild(t *testing.T) {
 uid = "test.cli.linux-vector"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", nativeVectorClient)

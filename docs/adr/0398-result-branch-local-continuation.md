@@ -16,6 +16,8 @@ Refactor `add` in [diagnostics.fy](../../examples/lexer_candidate/src/diagnostic
 
  1. Branch-local continuation (selected): each arm yields an i32 tail value; the enclosing return exits the function (no new return-arm semantics); fits this case with no grammar change.
 2. Diverging-arm typing (deferred): admit diverging arms producing an outer value; revisit only when a real consumer needs the value outside and cannot reasonably restructure.
+   [ADR 0409](0409-terminal-false-assert-match-arms.md) later admits only a direct terminal
+   literal `assert(false);` in shallow Result and Option arms; general divergence remains deferred.
 3. `let-else` (deferred): adds grammar, scope, and ownership coverage; not justified for this single refactor.
 
 ## Preserved behavior

@@ -16,7 +16,7 @@ func TestWindowsFieldStoreStableCLI(t *testing.T) {
 uid = "test.cli.field-store"
 name = "fields"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", `module main;

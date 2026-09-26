@@ -48,6 +48,8 @@ Both forms require one contextual `Option<T>` type. `.some` carries exactly one 
 `case .some(binding)` and one bare `case .none`. The `.none` case creates no binding and no
 payload extraction. Wildcards, guards, nested patterns, and reference-style payload bindings remain
 outside this slice. Scalar, inert, and resource-bearing active payloads execute through verified MIR.
+A case block with no tail whose final statement is literal `assert(false);` does not
+contribute a value to an Option switch join; one other case must continue with a value.
 
 Stage 0 constructs Result variants with contextual leading-dot forms:
 
@@ -61,7 +63,9 @@ lookup. A shallow switch uses exactly one `case .ok(binding)` and one
 `case .err(binding)`. The binding is local to its case, the scrutinee is evaluated once, and
 both continuing cases have one compatible result type. A case block with no tail and a final
 direct `return` contributes no value to the join; its return value must still match the
-enclosing function's result type. This does not add a general `never` type. Wildcard Result cases, guards, nested patterns, and
+enclosing function's result type. A case block with no tail whose final statement
+is literal `assert(false);` also contributes no value, and one other case must
+continue with a value. Neither form adds a general `never` type. Wildcard Result cases, guards, nested patterns, and
 ref-style payload bindings are outside this slice.
 
 ## Propagation

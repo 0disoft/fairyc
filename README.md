@@ -537,6 +537,7 @@ ADR 0403 advances language to `fairyc-language/19` and SDK to `0.0.0-stage0.66` 
 ADR 0405 advances only the SDK to `0.0.0-stage0.67`, lowering checked shared `Vec.at<T>` access through a typed element address while retaining owner-bound borrowing.
 ADR 0407 advances only the SDK to `0.0.0-stage0.68` for strict UTF-8 Windows file paths; a portable path type remains future work.
 ADR 0408 advances the SDK to `0.0.0-stage0.69` with stack-only UTF-8 text paths for cross-target file creation and reading.
+ADR 0409 advances language to `fairyc-language/20` and SDK to `0.0.0-stage0.70` so a terminal `assert(false);` Result or Option case needs no fabricated value.
 An owned Result now supports `value.is_ok` as the existing two-arm success test,
 including active-payload cleanup and its ability/effect checks. Existing workspaces
 must update the language pin and refresh locks.

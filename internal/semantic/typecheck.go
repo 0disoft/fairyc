@@ -1832,7 +1832,7 @@ func (c *typeChecker) checkResultMatch(expression *ast.Expression, result *hir.E
 		c.addType(bindingSpan, bindingType)
 		armExpected := actual
 		body, bodyType := c.checkExpression(armExpression.Children[1], armExpected)
-		if !returnOnlyMatchArm(armExpression.Children[1]) {
+		if !returnOnlyMatchArm(armExpression.Children[1]) && !terminalFalseAssertMatchArm(armExpression.Children[1]) {
 			continuing++
 			if actual == hir.TypeInvalid {
 				actual = bodyType
@@ -1860,9 +1860,23 @@ func returnOnlyMatchArm(expression *ast.Expression) bool {
 	return len(statements) > 0 && statements[len(statements)-1].Kind == syntax.KindReturn
 }
 
+func terminalFalseAssertMatchArm(expression *ast.Expression) bool {
+	if expression == nil || expression.Kind != syntax.KindBlock || expression.Block == nil || expression.Block.Tail != nil {
+		return false
+	}
+	statements := expression.Block.Statements
+	if len(statements) == 0 {
+		return false
+	}
+	last := &statements[len(statements)-1]
+	return last.Kind == syntax.KindAssert && last.Expression != nil &&
+		last.Expression.Kind == syntax.KindLiteral && last.Expression.Text == "false"
+}
+
 func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.Expression, expected, payloadType hir.Type) hir.Type {
 	seen := make(map[string]struct{}, 2)
 	actual := expected
+	continuing := 0
 	for _, armExpression := range expression.Children[1:] {
 		if armExpression == nil || armExpression.Kind != syntax.KindPattern || armExpression.Text != "arm" || len(armExpression.Children) != 2 {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed Option match arm")
@@ -1908,10 +1922,13 @@ func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.E
 			}
 		}
 		body, bodyType := c.checkExpression(armExpression.Children[1], actual)
-		if actual == hir.TypeInvalid {
-			actual = bodyType
-		} else {
-			c.requireType("E1006", span(c.module.file.Path, armExpression.Children[1].Span), bodyType, actual, span(c.module.file.Path, expression.Span))
+		if !terminalFalseAssertMatchArm(armExpression.Children[1]) {
+			continuing++
+			if actual == hir.TypeInvalid {
+				actual = bodyType
+			} else {
+				c.requireType("E1006", span(c.module.file.Path, armExpression.Children[1].Span), bodyType, actual, span(c.module.file.Path, expression.Span))
+			}
 		}
 		arm.Expression = *body
 		result.Arms = append(result.Arms, arm)
@@ -1919,6 +1936,9 @@ func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.E
 	if len(seen) != 2 {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "non-exhaustive Option match")
 		return hir.TypeInvalid
+	}
+	if continuing == 0 {
+		return hir.TypeVoid
 	}
 	return actual
 }

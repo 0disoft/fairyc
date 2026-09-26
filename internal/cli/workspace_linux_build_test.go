@@ -24,7 +24,7 @@ func TestExperimentalLinuxVectorWorkspaceBuild(t *testing.T) {
 uid = "test.cli.linux-workspace-build"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", nativeVectorClient)
@@ -68,7 +68,7 @@ func TestExperimentalLinuxWorkspaceBuildFailsClosedOutsideLinux(t *testing.T) {
 uid = "test.cli.linux-workspace-host-boundary"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", nativeVectorClient)
@@ -94,7 +94,7 @@ func TestExperimentalLinuxWorkspaceRunFailsClosedOutsideLinux(t *testing.T) {
 uid = "test.cli.linux-workspace-run-host-boundary"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", nativeVectorClient)
@@ -132,7 +132,7 @@ func TestExperimentalLinuxVectorWorkspaceRun(t *testing.T) {
 uid = "test.cli.linux-workspace-run"
 name = "client"
 version = "1.0.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"
 `)
 			writeTestSource(t, root, "src/main.fy", scenario.source)

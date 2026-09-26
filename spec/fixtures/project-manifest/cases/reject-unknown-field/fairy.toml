@@ -5,5 +5,5 @@ mystery = true
 uid = "example.app"
 name = "app"
 version = "0.1.0"
-language = "fairyc-language/19"
+language = "fairyc-language/20"
 source = "src"

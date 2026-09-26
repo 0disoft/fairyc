@@ -334,9 +334,11 @@ not external effects. Full rules are in `docs/language/0008-effects-and-capabili
 - A shallow Result switch contains exactly one `case .ok(binding): { ... }` and one
   `case .err(binding): { ... }`; continuing cases produce one compatible type.
   A case ending in a direct `return` without a tail does not contribute a value to the join.
+  A case ending in literal `assert(false);` without a tail also does not contribute a value.
 - Stage 0 constructs Option with contextual `.some(expression)` or bare `.none`. A shallow Option
   switch contains exactly one `case .some(binding): { ... }` and one bare
-  `case .none: { ... }`; both cases produce one compatible type.
+  `case .none: { ... }`; continuing cases produce one compatible type. A case ending in
+  literal `assert(false);` without a tail does not contribute a value to the join.
 - Exceptions and stack unwinding are not part of the language.
 - `break` and `continue` target only the nearest enclosing loop; labelled or value-producing loop
   control is not part of Stage 0.
