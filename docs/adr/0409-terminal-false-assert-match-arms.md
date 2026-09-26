@@ -42,8 +42,9 @@ empty, and Option direct-return void arms. Verified-MIR interpreter execution
 covers success values and `assertion-failed` on failure. The private nested
 resource/vector program removes fabricated values from one Result and one
 Option arm and passes low and optimized MSVC native execution with ownership
-and cleanup checks. A same-program generated-C and linked-size comparison
-with the previous fabricated-value form remains pending. The cumulative
+and cleanup checks. The [same-program size comparison](../ops/terminal-match-arm-cost-20260927.md)
+finds equal generated-C length, `unit.obj` size and linked EXE size in low and
+optimized MSVC builds; the generated C bytes differ. The cumulative
 independent-C runtime and image budget remains 8%. The unchanged four-image
 scanner smoke still reports 197,120-byte optimized Fairy images against a
 184,320-byte independent C image, below the 199,065-byte integer size ceiling;
