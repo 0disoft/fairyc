@@ -62,15 +62,14 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	program.WriteString("module main;\nimport scanner as scanner;\nimport diagnostics as diagnostics;\nimport budget as budget;\nimport std::vec as v;\nimport std::bytes as bytes;\nfn void budget_checks() {\n")
 	for _, limit := range []int{0, 1, 3, 16} {
 		for _, charges := range [][]int{{0, 1, 0}, {1, 1, 1, 1}, {3, 0, 1}, {16, 1}, {17, 0}} {
-			oracle := source.NewBudget(source.Limits{MaxBytes: 0, MaxWorkUnits: limit}, 0)
 			fmt.Fprintf(&program, "{ var budget::Work work = budget::create(%d);\n", limit)
 			used := 0
 			for _, charge := range charges {
-				accepted := oracle.ChargeWork(charge)
+				accepted := charge <= limit-used
 				if accepted {
 					used += charge
 				}
-				fmt.Fprintf(&program, "work = budget::charge(work, %d); assert(work.exhausted == %t); assert(work.used == %d); assert(work.limit == %d);\n", charge, !accepted, used, limit)
+				fmt.Fprintf(&program, "assert(budget::charge(ref mut work, %d) == %t); assert(work.remaining == %d);\n", charge, accepted, limit-used)
 			}
 			program.WriteString("}\n")
 		}
@@ -79,15 +78,12 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	program.WriteString(`{
     let usize maximum = 18446744073709551615;
     var budget::Work work = budget::create(maximum);
-    work = budget::charge(work, maximum);
-    assert(!work.exhausted && work.used == maximum);
-    work = budget::charge(work, 1);
-    assert(work.exhausted && work.used == maximum);
-    work = budget::charge(work, 0);
-    assert(work.exhausted && work.used == maximum);
-    let budget::Work invalid = budget::Work { .used = 2, .limit = 1, .exhausted = false };
-    work = budget::charge(invalid, 0);
-    assert(work.exhausted && work.used == 2);
+    assert(budget::charge(ref mut work, maximum));
+    assert(work.remaining == 0);
+    assert(!budget::charge(ref mut work, 1));
+    assert(work.remaining == 0);
+    assert(budget::charge(ref mut work, 0));
+    assert(work.remaining == 0);
 }
 `)
 	program.WriteString("}\n@effects(console)\nfn i32 main() { budget_checks();\n")
@@ -97,7 +93,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		for _, b := range []byte(input) {
 			fmt.Fprintf(&program, "\\x%02X", b)
 		}
-		program.WriteString("\")) { case .ok(value) : { value } case .err(_) : { assert(false); bytes::empty() } };\n")
+		program.WriteString("\")) { case .ok(value) : { value } case .err(_) : { assert(false); } };\n")
 		fmt.Fprintf(&program, "assert(scanner::report(bytes::view(ref %s)) == %d); }\n", name, status)
 	}
 	for i, input := range inputs {
