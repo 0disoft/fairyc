@@ -17,8 +17,9 @@ is at most 10% **and** its median lies within 2% of 1. Both complete sessions
 must pass. The 2% null-bias rule is fixed before measurement and leaves a
 separate margin beneath the product's 8% Fairy/C limit; it is not an
 allowance added to that limit. A one-triad smoke checks the harness but has
-no timing verdict. All raw QPC ticks, ratios, checksums and unfavorable
-sessions are retained without retry or exclusion.
+no timing verdict. A complete run retains all raw QPC ticks, calculated
+ratios and unfavorable sessions; every call's checksum is verified without
+retry or exclusion.
 
 Only after the null control is checked should a separate candidate compare
 `C, Fairy, C` in a combined image, once each for explicit-index and private
@@ -40,3 +41,9 @@ runtime safety check.
 The first [complete C-only control](scanner-identical-c-triad-result-20260927.md)
 failed the predeclared full-span rule in both sessions. The protocol and its
 thresholds remain unchanged; no C–Fairy–C result was collected from that run.
+A private C–Fairy–C harness now builds both Fairy source forms and has passed
+a 1,000-round smoke with one warmup and one measured triad per image. Each of
+its six calls per image returned the Go-oracle checksum, and the vector
+allocator was clean at exit. The smoke has no timing verdict. Full
+24-triad measurements remain gated by a passing C-only null control in a
+controlled environment.

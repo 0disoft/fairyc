@@ -822,6 +822,11 @@ failed its predeclared 10% stability rule in both sessions, with 14.27% and
 does not rescue the failed spread. No C–Fairy–C runtime inference follows;
 stable source admission remains open pending a controlled environment.
 
+The corresponding private C–Fairy–C harness now passes a one-triad smoke for
+both indexed and vector-loop scanner forms, including exact work checksums
+and allocator cleanup. This checks the measurement path only. The failed
+C-only null control still prevents a full runtime verdict on this host.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
