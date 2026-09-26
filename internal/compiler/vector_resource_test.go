@@ -181,7 +181,7 @@ fn i32 exercise() {
     assert(unsafe { pop_slot_raw(ref mut storage as ptr mut void, storage.element_size + 1) } == null && storage.length == 9);
     let Item last = switch (pop<Item>(ref mut storage)) {
         case .some(value) : { value }
-        case .none : { assert(false); make(9) }
+        case .none : { assert(false); }
     };
     assert(item_id(ref last) == 9);
     let i32 discarded = discard_item(last);

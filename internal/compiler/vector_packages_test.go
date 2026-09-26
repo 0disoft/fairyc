@@ -150,7 +150,7 @@ fn i32 exercise() {
     assert(recover_and_retry(ref mut storage, make(9), 9) == 1);
     let Item last = switch (v::pop<Item>(ref mut storage)) {
         case .some(value) : { value }
-        case .none : { assert(false); make(9) }
+        case .none : { assert(false); }
     };
     assert(item_id(ref last) == 9);
     let i32 discarded = discard_item(last);
