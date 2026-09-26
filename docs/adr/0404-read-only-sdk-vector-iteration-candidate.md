@@ -734,6 +734,14 @@ but their relative full spans are 37.63%, 25.41% and 24.22%. Each exceeds the
 predeclared 10% stability limit. The runtime effect of the trap-edge change
 therefore remains unresolved, while the 1,127-byte size excess is confirmed.
 
+An experimental `numbers::decimal` output rewrite replaced per-byte digit
+appends with `bytes::append` for contiguous digit spans. The decimal-boundary
+cases, lexical corpus and four-image reporter/1,000-round checksum passed, but
+the optimized image sizes remained 184,320/185,344/200,192/200,192 bytes.
+The rewrite was reverted. A separate stale numeric-reporter expectation in the
+C benchmark tests was repaired at `76079a50`; that test fix is not a scanner
+size improvement.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
