@@ -227,7 +227,7 @@ import std::bytes as bytes;
 fn bytes::Buffer make(ref u8[] text) {
     return switch (bytes::copy(text)) {
         case .ok(value): { value }
-        case .err(_): { assert(false); bytes::empty() }
+        case .err(_): { assert(false); }
     };
 }
 fn Result<i32, i32> step(u8 byte) {

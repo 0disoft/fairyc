@@ -130,7 +130,7 @@ import std::io as io;
     if (sample != 0) { return sample; }
     let bytes::Buffer owned = switch (bytes::copy(b"let n=12345; /*open")) {
         case .ok(value) : { value }
-        case .err(_) : { assert(false); bytes::empty() }
+        case .err(_) : { assert(false); }
     };
     return switch (scanner::collect(owned, false, 32768, 1048576, 256, 16777216)) {
         case .ok(stream) : {
