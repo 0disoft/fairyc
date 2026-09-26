@@ -684,6 +684,17 @@ instrumented images do not decide the standalone size gate. Further timing on
 this host needs a new control or environment; the private vector form remains
 unadmitted.
 
+An isolated MSVC inlining probe appended `/Ob1` or `/Ob0` after the normal
+`/O2` flag for both C and Fairy source in the four-image scanner smoke. Each
+setting preserved the reporter and 1,000-round checksums. With `/Ob1`, the
+smaller C image was 183,296 bytes and indexed/vector Fairy images were
+199,680/199,168 bytes; the 8% integer ceiling was 197,959 bytes. With `/Ob0`,
+C was 183,808 bytes and both Fairy images were 199,680 bytes against a
+198,512-byte ceiling. Thus restricting automatic inlining alone did not pass
+the cumulative size gate. The driver flags were reverted. No runtime or build
+cost was measured under these temporary settings; this does not isolate which
+retained functions account for the remaining bytes.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
