@@ -758,6 +758,15 @@ falls to 22,022/22,023 bytes for indexed/vector source; `runtime.obj` remains
 4,138 bytes. Check/build time and stable runtime impact are not yet measured,
 so this size result alone does not admit read-only SDK vector iteration.
 
+The [post-sharing cost check](../ops/scanner-shared-traps-cost-20260927.md)
+retains twelve four-image runtime rotations and five balanced indexed/vector
+build pairs. The 197,120-byte Fairy images remain within the fixed-workload
+size ceiling. C-relative runtime medians are below 1.08, but both paired
+spans exceed the predeclared 10% stability limit; runtime admission remains
+unresolved. The vector/indexed total-build paired median is 0.98489 with a
+5.19% span. This does not compare Fairy build time with independent C or
+isolate the backend change's compiler-time cost.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

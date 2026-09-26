@@ -1,0 +1,196 @@
+{
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "indexed_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "main_sha256": "1d6eff023ea07a6ab91e420ef9eb8a752c43fd4061b36aab763a95e616d692a1",
+  "measured_pairs": 5,
+  "msvc": "14.51.36231",
+  "profile": "optimized",
+  "rows": [
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 374497300,
+      "build": {
+        "emit_ns": 184367000,
+        "support_ns": 0,
+        "native_ns": 1415534300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 1,
+      "lane": "all vector for",
+      "check_ns": 350948000,
+      "build": {
+        "emit_ns": 191495000,
+        "support_ns": 0,
+        "native_ns": 1379528800
+      },
+      "specializations": 21,
+      "c_source_bytes": 370559,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 0,
+      "lane": "all vector for",
+      "check_ns": 341242900,
+      "build": {
+        "emit_ns": 190559200,
+        "support_ns": 0,
+        "native_ns": 1397866600
+      },
+      "specializations": 21,
+      "c_source_bytes": 370559,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 351107100,
+      "build": {
+        "emit_ns": 178128500,
+        "support_ns": 0,
+        "native_ns": 1387250100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 348305100,
+      "build": {
+        "emit_ns": 182602100,
+        "support_ns": 0,
+        "native_ns": 1390394500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 1,
+      "lane": "all vector for",
+      "check_ns": 344493500,
+      "build": {
+        "emit_ns": 187796600,
+        "support_ns": 0,
+        "native_ns": 1386490800
+      },
+      "specializations": 21,
+      "c_source_bytes": 370559,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 0,
+      "lane": "all vector for",
+      "check_ns": 347404600,
+      "build": {
+        "emit_ns": 184023100,
+        "support_ns": 1517100,
+        "native_ns": 1385462700
+      },
+      "specializations": 21,
+      "c_source_bytes": 370559,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 343870100,
+      "build": {
+        "emit_ns": 186862900,
+        "support_ns": 0,
+        "native_ns": 1476520400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 364401400,
+      "build": {
+        "emit_ns": 194759200,
+        "support_ns": 0,
+        "native_ns": 1543484400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 1,
+      "lane": "all vector for",
+      "check_ns": 374856200,
+      "build": {
+        "emit_ns": 190313300,
+        "support_ns": 0,
+        "native_ns": 1491231200
+      },
+      "specializations": 21,
+      "c_source_bytes": 370559,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 0,
+      "lane": "all vector for",
+      "check_ns": 368334700,
+      "build": {
+        "emit_ns": 184072900,
+        "support_ns": 0,
+        "native_ns": 1432672700
+      },
+      "specializations": 21,
+      "c_source_bytes": 370559,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 351748000,
+      "build": {
+        "emit_ns": 175513500,
+        "support_ns": 1001300,
+        "native_ns": 1487270000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    }
+  ],
+  "schema": "fairyc.vector-lexer-build-cost/v1",
+  "scope": "One Go test process builds fresh temporary packages in alternating order. check_ns covers load, metadata, analysis and verified MIR lowering; prepare and toolchain resolution are excluded. emit_ns is generated C emission, support_ns assembles runtime C source and may read zero below clock resolution, and native_ns includes MSVC compile/link plus artifact validation and reads. No persistent cache is requested. Ambient filesystem cache, process load and Go GC remain uncontrolled. This compares Fairy source forms, not independent C build cost or cold stable CLI startup.",
+  "support_sha256": "fa75a6179fd3cc7f79dd427cf91d11b9e5c25ed7cff955a537011c89b89f8f09",
+  "vector_sha256": "17552d176bc171ef73bbf2995c7744b86ff328f15863577cb0288398049cde55",
+  "warmup_pairs": 1
+}
