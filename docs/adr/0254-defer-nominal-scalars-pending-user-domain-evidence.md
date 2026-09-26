@@ -83,3 +83,12 @@ keeps the deferral, including the experimental source frontend. The real
 proposal. Call-site wrapping alone does not establish the raw value's domain,
 and a source usability advantage over ordinary structs remains unproven.
 This is not a permanent rejection; the review records bounded reopening criteria.
+
+## Follow-up evidence (2026-09-27)
+
+The [real record-parser cursor experiment](../architecture/nominal-scalar-source-usability-v0.md#실제-레코드-파서-커서-실험-2026-09-27)
+types `records::Cursor.index` with an ordinary struct in a copied workspace.
+The wrong-domain assignment fails with `E1006`, but valid replacement of the
+aggregate field is not executable under the current scalar-only MIR field-store
+contract. This blocks a native and size comparison for that variant; it does
+not establish a source-usability advantage for nominal scalars or admit syntax.
