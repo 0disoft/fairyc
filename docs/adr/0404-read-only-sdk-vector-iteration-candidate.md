@@ -725,6 +725,15 @@ a decomposition of PE file alignment or proof that one source rewrite will
 recover the remaining 1,127 bytes. They direct the next size investigation
 to the generated unit rather than the unchanged runtime module.
 
+The [post-trap-edge four-image rotation](../ops/scanner-post-trap-edge-four-image-20260927.md)
+repeats the fixed scanner workload at source HEAD `b09adf19`. All twelve
+measured rotations pass reporter and checksum checks, and the optimized image
+sizes remain 184,320/185,344/200,192/200,192 bytes. Paired runtime medians
+for indexed/C, vector/C and vector/indexed are 1.07026, 1.08193 and 1.01742,
+but their relative full spans are 37.63%, 25.41% and 24.22%. Each exceeds the
+predeclared 10% stability limit. The runtime effect of the trap-edge change
+therefore remains unresolved, while the 1,127-byte size excess is confirmed.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
