@@ -1,0 +1,328 @@
+{
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "images": [
+    {
+      "exe_bytes": 152576,
+      "exe_sha256": "6eb3d062be0c676e791e8ee0feedc871d1ced22c16b9511eb32689a8bec4349c",
+      "generated_c_bytes": 370062,
+      "lane": "explicit index",
+      "pinned_processor_group_index": 3,
+      "qpc_frequency": 10000000,
+      "samples": [
+        {
+          "c_cycles": 1369358035,
+          "c_qpc_ticks": 9363734,
+          "c_result": 9000000,
+          "fairy_cycles": 924969542,
+          "fairy_qpc_ticks": 4383792,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": -1,
+          "warmup": true
+        },
+        {
+          "c_cycles": 1041340728,
+          "c_qpc_ticks": 5316944,
+          "c_result": 9000000,
+          "fairy_cycles": 917395048,
+          "fairy_qpc_ticks": 4320111,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 0,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1053323530,
+          "c_qpc_ticks": 6761657,
+          "c_result": 9000000,
+          "fairy_cycles": 1042015727,
+          "fairy_qpc_ticks": 5538281,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 1,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1370125129,
+          "c_qpc_ticks": 6263448,
+          "c_result": 9000000,
+          "fairy_cycles": 1102228803,
+          "fairy_qpc_ticks": 5273016,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 2,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1373856129,
+          "c_qpc_ticks": 6374609,
+          "c_result": 9000000,
+          "fairy_cycles": 1329470345,
+          "fairy_qpc_ticks": 6004991,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 3,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1012941701,
+          "c_qpc_ticks": 4508358,
+          "c_result": 9000000,
+          "fairy_cycles": 1292031301,
+          "fairy_qpc_ticks": 5767149,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 4,
+          "warmup": false
+        },
+        {
+          "c_cycles": 929683005,
+          "c_qpc_ticks": 4142188,
+          "c_result": 9000000,
+          "fairy_cycles": 962985561,
+          "fairy_qpc_ticks": 4276976,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 5,
+          "warmup": false
+        },
+        {
+          "c_cycles": 967540610,
+          "c_qpc_ticks": 4325184,
+          "c_result": 9000000,
+          "fairy_cycles": 922887298,
+          "fairy_qpc_ticks": 4083190,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 6,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1105698258,
+          "c_qpc_ticks": 5036648,
+          "c_result": 9000000,
+          "fairy_cycles": 900837891,
+          "fairy_qpc_ticks": 4002711,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 7,
+          "warmup": false
+        },
+        {
+          "c_cycles": 880413851,
+          "c_qpc_ticks": 3881915,
+          "c_result": 9000000,
+          "fairy_cycles": 929002932,
+          "fairy_qpc_ticks": 4123117,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 8,
+          "warmup": false
+        },
+        {
+          "c_cycles": 871943178,
+          "c_qpc_ticks": 3875582,
+          "c_result": 9000000,
+          "fairy_cycles": 939405860,
+          "fairy_qpc_ticks": 4146150,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 9,
+          "warmup": false
+        },
+        {
+          "c_cycles": 940000077,
+          "c_qpc_ticks": 4175072,
+          "c_result": 9000000,
+          "fairy_cycles": 910375012,
+          "fairy_qpc_ticks": 4027236,
+          "fairy_result": 9000000,
+          "first": "explicit index",
+          "pair": 10,
+          "warmup": false
+        },
+        {
+          "c_cycles": 880414514,
+          "c_qpc_ticks": 3911550,
+          "c_result": 9000000,
+          "fairy_cycles": 961719091,
+          "fairy_qpc_ticks": 4275773,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 11,
+          "warmup": false
+        }
+      ],
+      "scanner_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+      "specializations": 21
+    },
+    {
+      "exe_bytes": 152576,
+      "exe_sha256": "2989a2e46af8460977eb0d95a26f4c0674859482a062f70ff126565b0e593976",
+      "generated_c_bytes": 370589,
+      "lane": "all vector for",
+      "pinned_processor_group_index": 4,
+      "qpc_frequency": 10000000,
+      "samples": [
+        {
+          "c_cycles": 1352376836,
+          "c_qpc_ticks": 7796564,
+          "c_result": 9000000,
+          "fairy_cycles": 1180942775,
+          "fairy_qpc_ticks": 8206463,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": -1,
+          "warmup": true
+        },
+        {
+          "c_cycles": 1120926467,
+          "c_qpc_ticks": 5542297,
+          "c_result": 9000000,
+          "fairy_cycles": 1359495118,
+          "fairy_qpc_ticks": 9568369,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 0,
+          "warmup": false
+        },
+        {
+          "c_cycles": 928138486,
+          "c_qpc_ticks": 4309878,
+          "c_result": 9000000,
+          "fairy_cycles": 964911449,
+          "fairy_qpc_ticks": 4404422,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 1,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1170806636,
+          "c_qpc_ticks": 6028860,
+          "c_result": 9000000,
+          "fairy_cycles": 938265677,
+          "fairy_qpc_ticks": 4433495,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 2,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1116459637,
+          "c_qpc_ticks": 5001381,
+          "c_result": 9000000,
+          "fairy_cycles": 1053492518,
+          "fairy_qpc_ticks": 4741414,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 3,
+          "warmup": false
+        },
+        {
+          "c_cycles": 893928775,
+          "c_qpc_ticks": 3964558,
+          "c_result": 9000000,
+          "fairy_cycles": 985187887,
+          "fairy_qpc_ticks": 4387863,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 4,
+          "warmup": false
+        },
+        {
+          "c_cycles": 994881383,
+          "c_qpc_ticks": 6088592,
+          "c_result": 9000000,
+          "fairy_cycles": 932601220,
+          "fairy_qpc_ticks": 4165848,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 5,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1041681671,
+          "c_qpc_ticks": 5527088,
+          "c_result": 9000000,
+          "fairy_cycles": 950055406,
+          "fairy_qpc_ticks": 4215113,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 6,
+          "warmup": false
+        },
+        {
+          "c_cycles": 1004982156,
+          "c_qpc_ticks": 5891678,
+          "c_result": 9000000,
+          "fairy_cycles": 925004900,
+          "fairy_qpc_ticks": 4129307,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 7,
+          "warmup": false
+        },
+        {
+          "c_cycles": 998061319,
+          "c_qpc_ticks": 6300380,
+          "c_result": 9000000,
+          "fairy_cycles": 1063019524,
+          "fairy_qpc_ticks": 5823842,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 8,
+          "warmup": false
+        },
+        {
+          "c_cycles": 948579779,
+          "c_qpc_ticks": 4696752,
+          "c_result": 9000000,
+          "fairy_cycles": 1003177727,
+          "fairy_qpc_ticks": 4496506,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 9,
+          "warmup": false
+        },
+        {
+          "c_cycles": 926235323,
+          "c_qpc_ticks": 4147242,
+          "c_result": 9000000,
+          "fairy_cycles": 974030479,
+          "fairy_qpc_ticks": 4334232,
+          "fairy_result": 9000000,
+          "first": "all vector for",
+          "pair": 10,
+          "warmup": false
+        },
+        {
+          "c_cycles": 879847861,
+          "c_qpc_ticks": 3919725,
+          "c_result": 9000000,
+          "fairy_cycles": 933963892,
+          "fairy_qpc_ticks": 4166123,
+          "fairy_result": 9000000,
+          "first": "independent C",
+          "pair": 11,
+          "warmup": false
+        }
+      ],
+      "scanner_sha256": "17552d176bc171ef73bbf2995c7744b86ff328f15863577cb0288398049cde55",
+      "specializations": 21
+    }
+  ],
+  "main_sha256": "3583f27bfc8ed79f5c14a9408202ca33fe4405e1b09e367c5de2380d1a10d2fa",
+  "measured_pairs": 12,
+  "msvc": "14.51.36231",
+  "per_round_result": 36,
+  "profile": "optimized",
+  "rounds": 250000,
+  "sample_sha256": "27270bb224790aca7d077b8f03b6092e4ab29b7a12bf6756265e7aaf7a2a2133",
+  "schema": "fairyc.same-image-c-scanner-cycles/v1",
+  "scope": "Independent C and one Fairy scanner form share each instrumented optimized image. Each image pins its calling thread to its current logical processor before one fixed warmup and alternating adjacent calls. QPC and QueryThreadCycleTime retain every pair and each call checks the Go-oracle checksum, without retry or exclusion. Cycles are not elapsed time and processor frequency may vary; the images cannot decide standalone size, whole-application runtime or stable source admission.",
+  "support_sha256": "48f44446c92eeed7cc53365b45c960f27fe1e2f130c7dbda4e8ce2cdbb611ecf",
+  "warmup_pairs": 1,
+  "source_head": "beb6b15f7979ca8fa4f42d6e33d1584fd0cda126"
+}

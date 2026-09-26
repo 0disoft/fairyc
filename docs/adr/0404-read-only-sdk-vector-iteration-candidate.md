@@ -675,6 +675,15 @@ Both exceed the 10% stability limit, so the native matcher has no established
 runtime advantage. The combined image cannot decide the standalone 8% size
 gate, and Linux native execution remains unverified.
 
+A [pinned-thread same-image comparison](../ops/scanner-same-image-cycles-20260926.md)
+records twelve adjacent C/Fairy pairs per source form with QPC and
+`QueryThreadCycleTime`. Both images return the Go-oracle checksum, but all four
+paired-ratio spans exceed the predeclared 10% stability limit (39.35% to
+109.40%). The cycle medians do not establish elapsed-time parity, and the
+instrumented images do not decide the standalone size gate. Further timing on
+this host needs a new control or environment; the private vector form remains
+unadmitted.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
