@@ -1890,6 +1890,22 @@ func TestLowerPreservesAlwaysCheckedAssert(t *testing.T) {
 	}
 }
 
+func TestLowerLiteralFalseAssertHasNoContinuation(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, "module main;\nfn void main() { assert(false); }\n")
+	function := &program.Functions[0]
+	if len(function.Blocks) != 1 {
+		t.Fatalf("literal false assertion blocks = %+v", function.Blocks)
+	}
+	terminator := function.Blocks[0].Terminator
+	if terminator.Kind != TerminatorTrap || !slices.Equal(terminator.TrapCategories, []string{"assertion-failed"}) || len(terminator.Successors) != 0 {
+		t.Fatalf("literal false assertion terminator = %+v", terminator)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesCheckedScalarFixedArrayIndex(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

@@ -655,6 +655,13 @@ func (l *functionLowerer) lowerAssert(expression *hir.Expression, statementSpan 
 	if expression == nil || expression.Type != hir.TypeBool {
 		return fmt.Errorf("malformed assert statement")
 	}
+	if expression.Kind == "literal" && expression.Value == "false" {
+		l.terminate(Terminator{Kind: TerminatorTrap, Span: statementSpan, UnwindSuccessor: NoBlock, TrapCategories: []string{"assertion-failed"}})
+		l.result.TrapPaths = append(l.result.TrapPaths, TrapPathFact{
+			Operation: statementSpan, Categories: []string{"assertion-failed"}, CleanupActions: []CleanupAction{}, HasSuccessor: false,
+		})
+		return nil
+	}
 	condition, err := l.lowerExpression(expression)
 	if err != nil {
 		return err
