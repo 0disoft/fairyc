@@ -61,7 +61,8 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	if strings.Contains(mainSource, "@@") {
 		t.Fatal("unsubstituted triad source placeholder")
 	}
-	support := sameImageCScannerSupport(t) + sameImageCRoundsSupport + dualScannerTimingSupport
+	support := sameImageCScannerSupport(t) + sameImageCRoundsSupport +
+		dualScannerTimingSupport + sameImageCycleAffinitySupport
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
 		t.Fatal("scanner variants changed")
@@ -81,17 +82,21 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 			t.Fatalf("%s C/Fairy/C triads: %+v %v", variant.name, outcome, err)
 		}
 		fields := strings.Fields(outcome.Stdout)
-		if len(fields) != 1+(measuredTriads+1)*6 {
-			t.Fatalf("%s triad fields=%d want=%d: %q", variant.name, len(fields), 1+(measuredTriads+1)*6, outcome.Stdout)
+		if len(fields) != 2+(measuredTriads+1)*6 {
+			t.Fatalf("%s triad fields=%d want=%d: %q", variant.name, len(fields), 2+(measuredTriads+1)*6, outcome.Stdout)
 		}
-		frequency, err := strconv.ParseUint(fields[0], 10, 64)
+		pinnedProcessor, err := strconv.ParseUint(fields[0], 10, 64)
+		if err != nil {
+			t.Fatalf("%s invalid pinned processor %q: %v", variant.name, fields[0], err)
+		}
+		frequency, err := strconv.ParseUint(fields[1], 10, 64)
 		if err != nil || frequency == 0 {
-			t.Fatalf("%s invalid QPC frequency %q: %v", variant.name, fields[0], err)
+			t.Fatalf("%s invalid QPC frequency %q: %v", variant.name, fields[1], err)
 		}
 		rows := make([]map[string]any, 0, measuredTriads+1)
 		ratios := make([]float64, 0, measuredTriads)
 		for triad := 0; triad <= measuredTriads; triad++ {
-			base := 1 + triad*6
+			base := 2 + triad*6
 			values := [6]uint64{}
 			for i := range values {
 				values[i], err = strconv.ParseUint(fields[base+i], 10, 64)
@@ -118,6 +123,7 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 		span := (ratios[measuredTriads-1] - ratios[0]) / median
 		image := map[string]any{
 			"lane": variant.name, "qpc_frequency": frequency,
+			"affinity": "current-logical-processor", "pinned_logical_processor": pinnedProcessor,
 			"median_fairy_over_c": median, "relative_full_span": span,
 			"exe_sha256": fmt.Sprintf("%x", sha256.Sum256(artifact.Bytes)),
 			"exe_bytes":  len(artifact.Bytes), "generated_c_bytes": len(unit.Source),
@@ -141,7 +147,7 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 		"main_sha256":               fmt.Sprintf("%x", sha256.Sum256([]byte(mainSource))),
 		"support_sha256":            fmt.Sprintf("%x", sha256.Sum256([]byte(support))),
 		"images":                    images,
-		"scope":                     "Each combined image runs C-Fairy-C triads with separately checked QPC calls and Go-oracle work checksums. The immediately preceding complete C-C-C null control must pass before any ratio is interpreted. No retry or exclusion; combined EXE size is not the standalone budget.",
+		"scope":                     "Each combined image pins its calling thread to one logical processor, then runs C-Fairy-C triads with separately checked QPC calls and Go-oracle work checksums. The immediately preceding complete pinned C-C-C null control must pass before any ratio is interpreted. No retry or exclusion; combined EXE size is not the standalone budget.",
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
@@ -156,6 +162,7 @@ import std::bytes as bytes;
 import std::io as io;
 @link_name("fc_pair_ticks") unsafe extern C fn usize pair_ticks();
 @link_name("fc_pair_frequency") unsafe extern C fn usize pair_frequency();
+@link_name("fc_pair_pin_thread") unsafe extern C fn usize pair_pin_thread();
 @link_name("fc_same_image_work_rounds") unsafe extern C fn usize c_work_rounds(usize rounds);
 @link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
 fn usize run_c(usize rounds) { return unsafe { c_work_rounds(rounds) }; }
@@ -183,6 +190,8 @@ fn usize run_fairy(usize rounds) {
     assert(switch (io::write(" ")) { case .ok(_): { true } case .err(_): { false } });
 }
 @effects(console) fn i32 main() {
+    let usize pinned = unsafe { pair_pin_thread() };
+    number(pinned);
     let usize frequency = unsafe { pair_frequency() };
     assert(frequency > 0);
     number(frequency);

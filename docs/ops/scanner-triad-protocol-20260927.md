@@ -47,3 +47,22 @@ its six calls per image returned the Go-oracle checksum, and the vector
 allocator was clean at exit. The smoke has no timing verdict. Full
 24-triad measurements remain gated by a passing C-only null control in a
 controlled environment.
+
+## Fixed-affinity follow-up
+
+The first complete C-only control above ran without processor affinity and
+failed in both sessions. Before collecting another full result, the retained
+control and the C/Fairy/C harness now pin their calling thread to its current
+allowed Windows logical processor, using the same checked
+`SetThreadGroupAffinity` helper already used by the scanner cycle probe.
+The selected processor number is recorded in each result. Pinning occurs
+before warmup and is the only measurement-condition change: input, optimized
+MSVC profile, one warmup, two consecutive 24-triad C-only sessions, 250,000
+rounds per call, checksum checks, complete-sample retention, and the 10%
+full-span plus 2% bias criteria remain fixed. A failed affinity call aborts
+the probe.
+
+The follow-up C-only result must be retained whether it passes or fails.
+Only a passing pinned null control can gate the pinned C/Fairy/C harness;
+the old unpinned result cannot do so. A passing null result alone still
+cannot establish the Fairy/C runtime or standalone image-size budget.

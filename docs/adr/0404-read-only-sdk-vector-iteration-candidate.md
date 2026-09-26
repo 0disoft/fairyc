@@ -827,6 +827,12 @@ both indexed and vector-loop scanner forms, including exact work checksums
 and allocator cleanup. This checks the measurement path only. The failed
 C-only null control still prevents a full runtime verdict on this host.
 
+The [fixed-affinity follow-up](../ops/scanner-triad-protocol-20260927.md#fixed-affinity-follow-up)
+pins both the C-only control and the C/Fairy/C harness before warmup, retaining
+the same full-sample stability and bias gates. Its result is separate from the
+failed unpinned control; the source form remains compiler-private until a
+passing matched control and candidate measurement exist.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

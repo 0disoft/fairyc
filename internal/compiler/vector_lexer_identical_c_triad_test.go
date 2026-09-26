@@ -48,7 +48,8 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		t.Fatal("triad scanner sample lost cooked or diagnostic coverage")
 	}
 	expected := perRound * rounds
-	cSource := sameImageCScannerSupport(t) + sameImageCRoundsSupport + identicalCScannerTriadMain
+	cSource := "#include <windows.h>\n" + sameImageCScannerSupport(t) +
+		sameImageCRoundsSupport + sameImageCycleAffinitySupport + identicalCScannerTriadMain
 	for _, replacement := range [][2]string{
 		{"@@TRIADS@@", strconv.Itoa(triads)},
 		{"@@ROUNDS@@", strconv.Itoa(rounds)},
@@ -75,19 +76,23 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		t.Fatalf("identical-C scanner triads: %+v %v", outcome, err)
 	}
 	fields := strings.Fields(outcome.Stdout)
-	if len(fields) != 1+2*triads*5 {
-		t.Fatalf("triad fields=%d want=%d: %q", len(fields), 1+2*triads*5, outcome.Stdout)
+	if len(fields) != 2+2*triads*5 {
+		t.Fatalf("triad fields=%d want=%d: %q", len(fields), 2+2*triads*5, outcome.Stdout)
 	}
 	frequency, err := strconv.ParseUint(fields[0], 10, 64)
 	if err != nil || frequency == 0 {
 		t.Fatalf("invalid QPC frequency %q: %v", fields[0], err)
+	}
+	pinnedProcessor, err := strconv.ParseUint(fields[1], 10, 64)
+	if err != nil {
+		t.Fatalf("invalid pinned processor %q: %v", fields[1], err)
 	}
 	runs := make([]map[string]any, 0, 2)
 	for run := 0; run < 2; run++ {
 		rows := make([]map[string]any, 0, triads)
 		ratios := make([]float64, 0, triads)
 		for triad := 0; triad < triads; triad++ {
-			base := 1 + (run*triads+triad)*5
+			base := 2 + (run*triads+triad)*5
 			values := [5]uint64{}
 			for i := range values {
 				values[i], err = strconv.ParseUint(fields[base+i], 10, 64)
@@ -120,12 +125,13 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		"schema": "fairyc.identical-c-scanner-triads/v1",
 		"go":     runtime.Version(), "msvc": artifact.Toolchain.Version,
 		"profile": cdriver.OptimizedProfile.Name, "qpc_frequency": frequency,
+		"affinity": "current-logical-processor", "pinned_logical_processor": pinnedProcessor,
 		"triads_per_run": triads, "rounds_per_call": rounds,
 		"timing_gate_eligible": !smoke, "expected_result_per_call": expected,
 		"source_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(cSource))),
 		"exe_sha256":    fmt.Sprintf("%x", sha256.Sum256(artifact.Bytes)),
 		"runs":          runs,
-		"scope":         "Two complete C-C-C runs; one untimed warmup triad per run. The middle/geo-mean(outer calls) null ratio uses every triad; each call checks the Go-oracle work checksum. No retry or exclusion. This does not measure Fairy/C runtime or executable size.",
+		"scope":         "Two complete C-C-C runs on one pinned logical processor; one untimed warmup triad per run. The middle/geo-mean(outer calls) null ratio uses every triad; each call checks the Go-oracle work checksum. No retry or exclusion. This does not measure Fairy/C runtime or executable size.",
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
@@ -151,7 +157,8 @@ static uint64_t fc_triad_timed_call(void) {
 int main(void) {
     LARGE_INTEGER frequency;
     if (!QueryPerformanceFrequency(&frequency) || frequency.QuadPart <= 0) return 1;
-    printf("%llu\n", (unsigned long long)frequency.QuadPart);
+    size_t pinned = fc_pair_pin_thread();
+    printf("%llu %zu\n", (unsigned long long)frequency.QuadPart, pinned);
     for (int run = 0; run < 2; ++run) {
         if (fc_same_image_work_rounds(@@ROUNDS@@) != @@EXPECTED@@ ||
             fc_same_image_work_rounds(@@ROUNDS@@) != @@EXPECTED@@ ||
