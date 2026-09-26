@@ -802,6 +802,13 @@ same-host run still contains a 14.22% failing span. The new run cannot be
 selected as proof of a stable host or of Fairy/C runtime parity; the private
 source form remains unadmitted.
 
+A [current-HEAD same-image C/Fairy comparison](../ops/scanner-current-same-image-c-20260927.md)
+ran once after that passing identical-C control. The explicit-index image's
+QPC ratio span was 5.43%, but the private vector-loop image's was 32.66%; both
+thread-CPU spans also exceeded 10%. Thus the passing C-only control did not
+stabilize the C/Fairy workload, and none of its median ratios establishes the
+8% runtime gate. The source form stays compiler-private.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
