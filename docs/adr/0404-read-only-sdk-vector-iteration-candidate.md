@@ -72,8 +72,17 @@ inner resource cleanup precedes the outer resource cleanup on both exits.
 The allocator records the vector and Region allocations, then requires all of
 them to be freed after the owning Arena drops. The Arena refuses to drop with
 an active Region, so this also checks native Region reset under low and
-optimized Windows MSVC. Exact interpreter Region/drop traces and cleanup of
-resource-bearing vector elements across Region exits remain separate gates.
+optimized Windows MSVC. Exact interpreter Region/drop traces remain a separate
+gate.
+
+The resource-element follow-up now runs both forms with a `Vec<Mark>` that owns
+two cleanup-bearing elements. The loop reads the first item and continues,
+then enters a Region on the second item and exits once by `return` and once by
+`?`. Both forms pass Flow and verified MIR. Under low and optimized Windows
+MSVC, a C observer sees the Region-local resource drop before vector elements
+2 and 1 on each exit, and no vector allocation remains live. This covers that
+native cleanup boundary; exact interpreter Region/drop traces and other
+resource-element exit shapes remain open. Stable source admission is unchanged.
 
 A second private native probe now inserts a shared `Vec<bytes::Buffer>` loop
 into the existing nine-buffer ownership workload. The candidate and explicit
