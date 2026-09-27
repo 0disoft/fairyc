@@ -10,9 +10,25 @@ import (
 	"syscall"
 	"testing"
 	"time"
+	"unsafe"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 )
+
+var scannerQueryProcessCycleTime = syscall.NewLazyDLL("kernel32.dll").NewProc("QueryProcessCycleTime")
+
+func scannerProcessCycles() (uint64, error) {
+	handle, err := syscall.GetCurrentProcess()
+	if err != nil {
+		return 0, err
+	}
+	var cycles uint64
+	ok, _, callErr := scannerQueryProcessCycleTime.Call(uintptr(handle), uintptr(unsafe.Pointer(&cycles)))
+	if ok == 0 {
+		return 0, fmt.Errorf("QueryProcessCycleTime: %v", callErr)
+	}
+	return cycles, nil
+}
 
 func scannerProcessCPUNS() (int64, error) {
 	handle, err := syscall.GetCurrentProcess()
@@ -35,6 +51,7 @@ type scannerProcessCPURow struct {
 	Order           int    `json:"order"`
 	Lane            string `json:"lane"`
 	ProcessCPUNS    int64  `json:"process_cpu_ns"`
+	ProcessCycles   uint64 `json:"process_cycles,omitempty"`
 	WallNS          int64  `json:"wall_ns"`
 	CheckNS         int64  `json:"check_ns"`
 	EmitNS          int64  `json:"emit_ns"`
@@ -51,8 +68,10 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 	ordinaryCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_COST") == "1"
 	gcNull := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_GC_NULL") == "1"
 	gcCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_GC_COST") == "1"
+	cycleNull := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CYCLES_NULL") == "1"
+	cycleCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CYCLES_COST") == "1"
 	selected := 0
-	for _, mode := range []bool{ordinaryNull, ordinaryCandidate, gcNull, gcCandidate} {
+	for _, mode := range []bool{ordinaryNull, ordinaryCandidate, gcNull, gcCandidate, cycleNull, cycleCandidate} {
 		if mode {
 			selected++
 		}
@@ -63,8 +82,9 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 		}
 		t.Skip("opt-in scanner process-CPU cost measurement")
 	}
-	null := ordinaryNull || gcNull
-	gcControlled := gcNull || gcCandidate
+	null := ordinaryNull || gcNull || cycleNull
+	cycleControlled := cycleNull || cycleCandidate
+	gcControlled := gcNull || gcCandidate || cycleControlled
 	if runtime.GOMAXPROCS(0) != 1 {
 		t.Fatal("scanner process-CPU measurement requires GOMAXPROCS=1")
 	}
@@ -108,6 +128,13 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			var startCycles uint64
+			if cycleControlled {
+				startCycles, err = scannerProcessCycles()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
 			startWall := time.Now()
 			var check scannerBudgetCheckPhases
 			program, entry, specializations := scannerBudgetFairyProgramWithMainTiming(t, variant, realScannerExecutionMain, &check)
@@ -116,6 +143,11 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 			emitNS := time.Since(emitStart).Nanoseconds()
 			wallNS := time.Since(startWall).Nanoseconds()
 			endCPU, cpuErr := scannerProcessCPUNS()
+			var endCycles uint64
+			var cycleErr error
+			if cycleControlled {
+				endCycles, cycleErr = scannerProcessCycles()
+			}
 			if gcControlled {
 				var gcAfter runtime.MemStats
 				runtime.ReadMemStats(&gcAfter)
@@ -123,10 +155,13 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 					t.Fatalf("unexpected GC during timed scanner build: %d to %d", gcBefore.NumGC, gcAfter.NumGC)
 				}
 			}
-			if err != nil || cpuErr != nil {
-				t.Fatalf("%s C emission or CPU timer: %v %v", variant.name, err, cpuErr)
+			if err != nil || cpuErr != nil || cycleErr != nil {
+				t.Fatalf("%s C emission or process timer: %v %v %v", variant.name, err, cpuErr, cycleErr)
 			}
 			cpuNS := endCPU - startCPU
+			if cycleControlled && endCycles <= startCycles {
+				t.Fatalf("%s process cycles did not advance: %d to %d", variant.name, startCycles, endCycles)
+			}
 			checkNS := check.LoadNS + check.MetadataNS + check.AnalyzeNS + check.LowerNS
 			if cpuNS <= 0 || wallNS <= 0 || checkNS <= 0 || emitNS <= 0 ||
 				specializations != 21 || len(unit.Functions) != 80 || len(unit.Source) == 0 {
@@ -136,6 +171,7 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 			rows = append(rows, scannerProcessCPURow{
 				Pair: pair, Warmup: pair == 0, Order: order, Lane: variant.name,
 				ProcessCPUNS: cpuNS, WallNS: wallNS, CheckNS: checkNS, EmitNS: emitNS,
+				ProcessCycles:   endCycles - startCycles,
 				Specializations: specializations, FunctionCount: len(unit.Functions),
 				CSourceBytes: len(unit.Source), CSourceSHA256: fmt.Sprintf("%x", sha256.Sum256([]byte(unit.Source))),
 			})
@@ -160,6 +196,12 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 			schema, prefix = "fairyc.vector-lexer-process-cpu-gc-null/v1", "VECTOR_LEXER_PROCESS_CPU_GC_NULL "
 		}
 	}
+	if cycleControlled {
+		schema, prefix = "fairyc.vector-lexer-process-cycles-cost/v1", "VECTOR_LEXER_PROCESS_CYCLES_COST "
+		if null {
+			schema, prefix = "fairyc.vector-lexer-process-cycles-null/v1", "VECTOR_LEXER_PROCESS_CYCLES_NULL "
+		}
+	}
 	report := map[string]any{
 		"schema": schema, "go": runtime.Version(), "gomaxprocs": runtime.GOMAXPROCS(0),
 		"target":       string(cbackend.Stage0WindowsMSVCProfile().Target),
@@ -176,6 +218,9 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 		report["forced_gc_before_each_build"] = true
 		report["automatic_gc_disabled_during_build"] = true
 		report["scope"] = "Fresh real-scanner preparation, load, analysis, verified-MIR lowering and C emission in one Go process. GetProcessTimes user+kernel CPU covers all process threads. Explicit Go GC runs before every timed build and automatic GC is disabled throughout this test; GC outside the intervals and native MSVC work are excluded. Four builds per lane per pair reduce but do not eliminate the observed 15.625 ms clock quantization. This is a GC-excluded compiler-work screen, not complete build time, normal-GC check latency or an independent-C verdict."
+	}
+	if cycleControlled {
+		report["scope"] = "The GC-controlled 200-build scanner schedule also brackets each build with QueryProcessCycleTime. Process cycles sum all process threads and include kernel work, but are not elapsed time; CPU frequency, thread migration and ambient load may vary. Process CPU, wall, check and emit durations remain diagnostic. A cycle null must pass before a separate candidate cycle screen. Neither result alone establishes normal-GC check latency, complete native build time or the C-relative runtime gate."
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {

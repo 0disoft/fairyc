@@ -1015,6 +1015,13 @@ sorted ratios were 0.97273 and 1.00952. All recorded CPU times remain
 15.625 ms multiples. No candidate run followed; compiler-cost parity stays
 unproven.
 
+A [separately predeclared process-cycle control](../ops/scanner-process-cycles-protocol-20260927.md)
+uses the same GC-controlled build schedule with a process-wide cycle counter
+to avoid the observed 15.625 ms CPU-clock quantization. It first requires an
+identical-source null; no cycle result or vector cost claim exists yet. Cycles
+are not elapsed time, so even a passing comparison would leave ordinary check
+and complete native build latency as separate gates.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
