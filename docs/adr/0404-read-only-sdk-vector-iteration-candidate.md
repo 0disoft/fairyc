@@ -917,6 +917,14 @@ exceeds the 10% stability heuristic. The outlying last pair is retained;
 current compiler-time parity is therefore still unproven. This test compares
 two Fairy source forms, not independent-C build cost or unused-feature overhead.
 
+An [identical-source build control](../ops/scanner-build-null-result-20260927.md)
+then compiled the indexed scanner in both lanes under the same phased harness.
+Its five-pair median clone/index ratio was 1.00975, but the full paired-ratio
+span was 14.33%, above the predeclared 10% limit. Both lanes produced equal
+C-source lengths, specialization counts and optimized EXE sizes. The control
+fails, so this host/run cannot adjudicate the candidate's total-build cost;
+the earlier indexed/vector point estimates remain diagnostic only.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
