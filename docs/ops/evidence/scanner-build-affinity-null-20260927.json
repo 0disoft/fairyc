@@ -1,0 +1,198 @@
+{
+  "affinity_mask": "0x1",
+  "affinity_mode": "lowest-allowed-logical-processor",
+  "clone_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "indexed_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "main_sha256": "e1a93b92594fa00e7e42a51ac183b8c4a8d851efe223a2ab1d2441c750e856b4",
+  "measured_pairs": 5,
+  "msvc": "14.51.36231",
+  "profile": "optimized",
+  "rows": [
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 384662700,
+      "build": {
+        "emit_ns": 201061800,
+        "support_ns": 0,
+        "native_ns": 2145198300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 359491200,
+      "build": {
+        "emit_ns": 180203600,
+        "support_ns": 0,
+        "native_ns": 2272663000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 402150300,
+      "build": {
+        "emit_ns": 221582100,
+        "support_ns": 0,
+        "native_ns": 2494223000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 360316500,
+      "build": {
+        "emit_ns": 198688700,
+        "support_ns": 0,
+        "native_ns": 2163646300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 348986100,
+      "build": {
+        "emit_ns": 186304000,
+        "support_ns": 0,
+        "native_ns": 2163851700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 351976600,
+      "build": {
+        "emit_ns": 180517000,
+        "support_ns": 0,
+        "native_ns": 2137928900
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 344050700,
+      "build": {
+        "emit_ns": 179925900,
+        "support_ns": 1000100,
+        "native_ns": 2170205500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 350131800,
+      "build": {
+        "emit_ns": 176808200,
+        "support_ns": 0,
+        "native_ns": 2163419600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 366108800,
+      "build": {
+        "emit_ns": 179109200,
+        "support_ns": 0,
+        "native_ns": 2318658400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 412709300,
+      "build": {
+        "emit_ns": 204524800,
+        "support_ns": 0,
+        "native_ns": 2471288200
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 367258400,
+      "build": {
+        "emit_ns": 183566300,
+        "support_ns": 0,
+        "native_ns": 2114256400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 341271700,
+      "build": {
+        "emit_ns": 181225700,
+        "support_ns": 0,
+        "native_ns": 2109768100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    }
+  ],
+  "schema": "fairyc.vector-lexer-build-affinity-null/v1",
+  "scope": "Identical explicit-index Fairy source is compiled in both lanes with the same fresh-package and optimized MSVC phases as the candidate build comparison. Alternating lane labels and one warmup pair precede five measured pairs. Pairwise C-source length, specialization count and EXE size must match. Ambient filesystem cache, process load and Go GC remain uncontrolled. This calibrates host and harness variation; it cannot establish candidate compiler cost. The Go test process is pinned to one allowed logical processor before source preparation; Windows child processes inherit its affinity. The original mask is restored after the test. Priority class is unchanged.",
+  "support_sha256": "fa75a6179fd3cc7f79dd427cf91d11b9e5c25ed7cff955a537011c89b89f8f09",
+  "warmup_pairs": 1
+}

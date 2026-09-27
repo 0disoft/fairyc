@@ -925,6 +925,13 @@ C-source lengths, specialization counts and optimized EXE sizes. The control
 fails, so this host/run cannot adjudicate the candidate's total-build cost;
 the earlier indexed/vector point estimates remain diagnostic only.
 
+A [lowest-allowed-processor null](../ops/scanner-build-affinity-null-result-20260927.md)
+used the same source and build phases with inherited process affinity. Its
+median clone/index ratio was 1.01247, but its five-pair full span was 15.39%,
+again above 10%. CPU affinity alone did not yield a valid build-cost control;
+no candidate comparison follows from either failed null. A controlled host or
+separately calibrated process-CPU/phase measurement is still required.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
