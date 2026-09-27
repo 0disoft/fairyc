@@ -1003,6 +1003,11 @@ each timed build and automatic GC disabled during it. The opt-in harness is
 ready, but no result is claimed here. A passing null would permit a separate
 candidate screen for GC-excluded compiler work only; it cannot substitute for
 complete build-time, normal check-latency or controlled-runtime evidence.
+Its [first identical-source result](../ops/scanner-process-cpu-gc-null-result-20260927.md)
+retained all 200 builds but failed the unchanged 2% null: the 7th and 18th
+sorted ratios were 0.97273 and 1.00952. All recorded CPU times remain
+15.625 ms multiples. No candidate run followed; compiler-cost parity stays
+unproven.
 
 ## Proposed first boundary
 
