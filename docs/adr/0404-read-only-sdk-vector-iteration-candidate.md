@@ -200,9 +200,16 @@ authenticate the SDK or admit the source form in stable workspace commands.
 
 A separate client fixture imports the authenticated SDK alongside a different
 package that exports a concrete resource named `Vec`. Iteration over that
-lookalike shared view is rejected by the private source/view gate. This covers
-the checked fixture, not a forged second generic `std::vec` provider or all
-cross-package identity cases.
+lookalike shared view is rejected by the private source/view gate. A distinct
+support package also accepts an authentic `ref Vec<i32>` from the client and
+iterates it in the private lane; Flow, verified MIR and low/optimized MSVC
+execution preserve the sum and vector cleanup, while stable source admission
+still rejects the loop. A second-provider fixture duplicates the embedded
+generic `std::vec` source into another package and reroutes the client import
+there without changing the authenticated SDK owner. Generic preparation rejects
+that declaration before semantic loop checking because aggregates outside the
+embedded SDK remain closed. These fixtures cover their exact package graphs,
+not every possible forged provider or cross-package identity shape.
 
 The indexed real scanner also serves as an unused-source-form control. A
 compiler test analyzes the same checked-in package graph through the stable

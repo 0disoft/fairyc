@@ -7,6 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
@@ -186,6 +187,54 @@ fn i32 visit(ref fake::Vec values) {
 			"read-only SDK Vec iteration requires a shared ref item") {
 		t.Fatalf("lookalike did not reach the source/view rejection gate: diagnostics=%+v unsupported=%+v",
 			result.Analysis.Semantic.Diagnostics, result.Analysis.Semantic.Unsupported)
+	}
+}
+
+func TestPrivateVectorSDKCandidateLoopRejectsSecondGenericVecProvider(t *testing.T) {
+	const source = `module main;
+import std::vec as v;
+import std::bytes as bytes;
+fn i32 visit(ref v::Vec<i32> values) {
+    for (let ref i32 item in values) { assert(*item == 0); }
+    return 0;
+}`
+	input, coordinates := vectorSDKInputWithCandidate(t, source, true)
+	definition, err := sdkstdlib.LoadVectorCandidate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, file := range definition.Sources {
+		if file.Module.Path == "std::vec" {
+			input.Files = append(input.Files, parseCompilerFile(t, 2, file.Path, string(file.Bytes)))
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("candidate SDK has no Vec template")
+	}
+	var rerouted bool
+	for index := range input.Imports {
+		imported := &input.Imports[index]
+		if imported.FromPackage == 1 && imported.ImportPath == "std::vec" {
+			imported.ToPackage = 2
+			rerouted = true
+		}
+	}
+	if !rerouted {
+		t.Fatal("client has no Vec import to reroute")
+	}
+	foreignCoordinate := coordinates[1]
+	foreignCoordinate[0] ^= 4
+	coordinates[2] = foreignCoordinate
+
+	result, err := compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+		genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+	if err == nil || err.Error() != "generic aggregate declarations are not admitted outside the embedded SDK" ||
+		len(result.Analysis.Semantic.Diagnostics) != 0 || len(result.Analysis.Semantic.Unsupported) != 0 {
+		t.Fatalf("second generic std::vec provider passed the SDK template boundary: %v diagnostics=%+v unsupported=%+v",
+			err, result.Analysis.Semantic.Diagnostics, result.Analysis.Semantic.Unsupported)
 	}
 }
 
