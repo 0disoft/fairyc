@@ -1147,6 +1147,15 @@ access is not equivalent to the current source loop.
    retain nine cooked bytes, nine diagnostics and at least 19 tokens. Both
    forms use the same 16-call sequence. This covers every allocation reached
    by this input, not paths requiring other input shapes or C allocation order.
+   An independent C sweep extends that input with an unterminated comment so
+   the diagnostic payload path is reached. The caller-owned and geometric C
+   storage lanes make 19 and 24 internal allocation calls respectively. In
+   low and optimized MSVC builds, failing each reached call once returns
+   status 3 and leaves no live allocation after cooked values, diagnostics and
+   dynamic storage are released. The successful scan retains 29 tokens and 10
+   diagnostics. Caller-owned token and diagnostic arrays are outside the
+   injected allocation boundary. These are input-specific cleanup results;
+   neither C lane shares the Fairy scanner's allocation order.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
