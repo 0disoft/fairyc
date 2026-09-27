@@ -31,6 +31,7 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 		t.Fatalf("unknown same-image triad smoke mode %q", smokeMode)
 	}
 	smoke := smokeMode == "1"
+	highPriority := scannerTriadHighPriority(t)
 	measuredTriads, rounds := 24, 250000
 	if smoke {
 		measuredTriads, rounds = 1, 1000
@@ -49,6 +50,13 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	}
 	expected := perRound * rounds
 	mainSource := sameImageCScannerTriadMain
+	if highPriority {
+		const pinLink = `@link_name("fc_pair_pin_thread")`
+		if strings.Count(mainSource, pinLink) != 1 {
+			t.Fatal("C/Fairy/C triad pin call changed")
+		}
+		mainSource = strings.Replace(mainSource, pinLink, `@link_name("fc_pair_pin_thread_priority")`, 1)
+	}
 	for _, replacement := range [][2]string{
 		{"@@TRIADS@@", strconv.Itoa(measuredTriads + 1)},
 		{"@@ROUNDS@@", strconv.Itoa(rounds)},
@@ -63,6 +71,9 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	}
 	support := sameImageCScannerSupport(t) + sameImageCRoundsSupport +
 		dualScannerTimingSupport + sameImageCycleAffinitySupport
+	if highPriority {
+		support += scannerTriadHighPrioritySupport
+	}
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
 		t.Fatal("scanner variants changed")
@@ -148,6 +159,9 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 		"support_sha256":            fmt.Sprintf("%x", sha256.Sum256([]byte(support))),
 		"images":                    images,
 		"scope":                     "Each combined image pins its calling thread to one logical processor, then runs C-Fairy-C triads with separately checked QPC calls and Go-oracle work checksums. The immediately preceding complete pinned C-C-C null control must pass before any ratio is interpreted. No retry or exclusion; combined EXE size is not the standalone budget.",
+	}
+	if highPriority {
+		report["thread_priority"] = "highest"
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {

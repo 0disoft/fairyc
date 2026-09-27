@@ -79,3 +79,20 @@ passing runtime result.
 The [first complete fixed-affinity control](scanner-pinned-identical-c-triad-result-20260927.md)
 failed the same 10% full-span rule in both sessions. No full pinned C/Fairy/C
 result was collected.
+
+## Highest-priority follow-up
+
+The failed pinned control still shows short bursts within otherwise similar
+adjacent C calls. A separate opt-in condition sets the pinned calling thread to
+Windows `THREAD_PRIORITY_HIGHEST` before warmup in both the C-only control and
+the C/Fairy/C harness. Failure to set or read back that priority aborts the
+probe. The normal-priority mode remains unchanged; each receipt identifies the
+priority condition and hashes its generated source.
+
+The next run retains the same source input, optimized MSVC profile, 250,000
+rounds, two complete 24-triad C-only sessions, checksum requirements, processor
+matching, 10% full-span and 2% bias limits. No sample is retried or discarded.
+Run the matching high-priority C/Fairy/C comparison only if the complete
+high-priority C-only control passes. A passing control at a different priority
+does not qualify. This is an environment experiment, not a change to Fairy
+source semantics or an automatic admission of vector iteration.

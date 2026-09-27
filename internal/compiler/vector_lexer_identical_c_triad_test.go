@@ -31,6 +31,7 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		t.Fatalf("unknown identical-C triad smoke mode %q", smokeMode)
 	}
 	smoke := smokeMode == "1"
+	highPriority := scannerTriadHighPriority(t)
 	triads, rounds := 24, 250000
 	if smoke {
 		triads, rounds = 1, 1000
@@ -48,8 +49,17 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		t.Fatal("triad scanner sample lost cooked or diagnostic coverage")
 	}
 	expected := perRound * rounds
+	support := sameImageCycleAffinitySupport
+	mainSource := identicalCScannerTriadMain
+	if highPriority {
+		if strings.Count(mainSource, "fc_pair_pin_thread()") != 1 {
+			t.Fatal("C-only triad pin call changed")
+		}
+		support += scannerTriadHighPrioritySupport
+		mainSource = strings.Replace(mainSource, "fc_pair_pin_thread()", "fc_pair_pin_thread_priority()", 1)
+	}
 	cSource := "#include <windows.h>\n" + sameImageCScannerSupport(t) +
-		sameImageCRoundsSupport + sameImageCycleAffinitySupport + identicalCScannerTriadMain
+		sameImageCRoundsSupport + support + mainSource
 	for _, replacement := range [][2]string{
 		{"@@TRIADS@@", strconv.Itoa(triads)},
 		{"@@ROUNDS@@", strconv.Itoa(rounds)},
@@ -133,12 +143,33 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		"runs":          runs,
 		"scope":         "Two complete C-C-C runs on one pinned logical processor; one untimed warmup triad per run. The middle/geo-mean(outer calls) null ratio uses every triad; each call checks the Go-oracle work checksum. No retry or exclusion. This does not measure Fairy/C runtime or executable size.",
 	}
+	if highPriority {
+		report["thread_priority"] = "highest"
+	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log("IDENTICAL_C_SCANNER_TRIADS " + string(encoded))
 }
+
+func scannerTriadHighPriority(t *testing.T) bool {
+	t.Helper()
+	mode := os.Getenv("FAIRYC_SCANNER_TRIAD_PRIORITY")
+	if mode != "" && mode != "highest" {
+		t.Fatalf("unknown scanner triad priority %q", mode)
+	}
+	return mode == "highest"
+}
+
+const scannerTriadHighPrioritySupport = `
+size_t fc_pair_pin_thread_priority(void) {
+    size_t pinned = fc_pair_pin_thread();
+    if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST) ||
+        GetThreadPriority(GetCurrentThread()) != THREAD_PRIORITY_HIGHEST) abort();
+    return pinned;
+}
+`
 
 const identicalCScannerTriadMain = `
 #include <windows.h>
