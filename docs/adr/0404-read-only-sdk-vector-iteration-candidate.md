@@ -943,6 +943,11 @@ again above 10%. CPU affinity alone did not yield a valid build-cost control;
 no candidate comparison follows from either failed null. A controlled host or
 separately calibrated process-CPU/phase measurement is still required.
 
+A [balanced four-build-pair protocol](../ops/scanner-balanced-build-protocol-20260927.md)
+now predeclares alternating `A-B-B-A` and `B-A-A-B` order with two builds per
+lane per pair. Its identical-source null must pass before a separately recorded
+candidate comparison. No balanced run or build-cost verdict exists yet.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
