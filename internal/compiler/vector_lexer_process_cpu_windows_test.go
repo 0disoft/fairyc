@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"syscall"
 	"testing"
 	"time"
@@ -46,16 +47,30 @@ type scannerProcessCPURow struct {
 // The same-source control must be recorded and accepted before the candidate
 // mode is used. CPU time covers the Go test process, not MSVC child processes.
 func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
-	null := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_NULL") == "1"
-	candidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_COST") == "1"
-	if null == candidate {
-		if null {
+	ordinaryNull := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_NULL") == "1"
+	ordinaryCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_COST") == "1"
+	gcNull := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_GC_NULL") == "1"
+	gcCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_GC_COST") == "1"
+	selected := 0
+	for _, mode := range []bool{ordinaryNull, ordinaryCandidate, gcNull, gcCandidate} {
+		if mode {
+			selected++
+		}
+	}
+	if selected != 1 {
+		if selected != 0 {
 			t.Fatal("choose exactly one scanner process-CPU mode")
 		}
 		t.Skip("opt-in scanner process-CPU cost measurement")
 	}
+	null := ordinaryNull || gcNull
+	gcControlled := gcNull || gcCandidate
 	if runtime.GOMAXPROCS(0) != 1 {
 		t.Fatal("scanner process-CPU measurement requires GOMAXPROCS=1")
+	}
+	if gcControlled {
+		previousGCPercent := debug.SetGCPercent(-1)
+		defer debug.SetGCPercent(previousGCPercent)
 	}
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
@@ -68,11 +83,27 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 		if lanes[0].scanner != lanes[1].scanner || lanes[0].candidate != lanes[1].candidate {
 			t.Fatal("null control changed source or compiler lane")
 		}
+	} else if lanes[0].scanner == lanes[1].scanner {
+		t.Fatal("candidate scanner source matches indexed source")
 	}
-	rows := make([]scannerProcessCPURow, 0, 100)
+	buildsPerLanePerPair := 2
+	if gcControlled {
+		buildsPerLanePerPair = 4
+	}
+	rows := make([]scannerProcessCPURow, 0, 25*buildsPerLanePerPair*2)
 	for pair := 0; pair < 25; pair++ {
-		for order, index := range scannerBuildLaneOrder(pair, true) {
+		laneOrder := scannerBuildLaneOrder(pair, true)
+		if gcControlled {
+			laneOrder = append(laneOrder, laneOrder...)
+		}
+		for order, index := range laneOrder {
 			variant := lanes[index]
+			var gcBefore runtime.MemStats
+			if gcControlled {
+				// Keep explicit collection outside every timed CPU interval.
+				runtime.GC()
+				runtime.ReadMemStats(&gcBefore)
+			}
 			startCPU, err := scannerProcessCPUNS()
 			if err != nil {
 				t.Fatal(err)
@@ -85,6 +116,13 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 			emitNS := time.Since(emitStart).Nanoseconds()
 			wallNS := time.Since(startWall).Nanoseconds()
 			endCPU, cpuErr := scannerProcessCPUNS()
+			if gcControlled {
+				var gcAfter runtime.MemStats
+				runtime.ReadMemStats(&gcAfter)
+				if gcAfter.NumGC != gcBefore.NumGC {
+					t.Fatalf("unexpected GC during timed scanner build: %d to %d", gcBefore.NumGC, gcAfter.NumGC)
+				}
+			}
 			if err != nil || cpuErr != nil {
 				t.Fatalf("%s C emission or CPU timer: %v %v", variant.name, err, cpuErr)
 			}
@@ -116,16 +154,28 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 	if null {
 		schema, prefix = "fairyc.vector-lexer-process-cpu-null/v1", "VECTOR_LEXER_PROCESS_CPU_NULL "
 	}
+	if gcControlled {
+		schema, prefix = "fairyc.vector-lexer-process-cpu-gc-cost/v1", "VECTOR_LEXER_PROCESS_CPU_GC_COST "
+		if null {
+			schema, prefix = "fairyc.vector-lexer-process-cpu-gc-null/v1", "VECTOR_LEXER_PROCESS_CPU_GC_NULL "
+		}
+	}
 	report := map[string]any{
 		"schema": schema, "go": runtime.Version(), "gomaxprocs": runtime.GOMAXPROCS(0),
 		"target":       string(cbackend.Stage0WindowsMSVCProfile().Target),
-		"warmup_pairs": 1, "measured_pairs": 24, "builds_per_lane_per_pair": 2,
+		"warmup_pairs": 1, "measured_pairs": 24, "builds_per_lane_per_pair": buildsPerLanePerPair,
 		"pair_order":     "A-B-B-A / B-A-A-B alternating",
 		"indexed_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(lanes[0].scanner))),
 		"second_sha256":  fmt.Sprintf("%x", sha256.Sum256([]byte(lanes[1].scanner))),
 		"main_sha256":    fmt.Sprintf("%x", sha256.Sum256([]byte(realScannerExecutionMain))),
 		"rows":           rows,
 		"scope":          "Fresh real-scanner package preparation, load, analysis, verified-MIR lowering and C emission in one Go process. GetProcessTimes user+kernel CPU counts all process threads and excludes off-CPU waits, native compiler/linker children and persistent-cache hits. Wall and phase times are diagnostics. Go GC and host CPU accounting remain uncontrolled; no total-build or C-relative verdict follows from this CPU-only report.",
+	}
+	if gcControlled {
+		report["pair_order"] = "A-B-B-A twice / B-A-A-B twice alternating"
+		report["forced_gc_before_each_build"] = true
+		report["automatic_gc_disabled_during_build"] = true
+		report["scope"] = "Fresh real-scanner preparation, load, analysis, verified-MIR lowering and C emission in one Go process. GetProcessTimes user+kernel CPU covers all process threads. Explicit Go GC runs before every timed build and automatic GC is disabled throughout this test; GC outside the intervals and native MSVC work are excluded. Four builds per lane per pair reduce but do not eliminate the observed 15.625 ms clock quantization. This is a GC-excluded compiler-work screen, not complete build time, normal-GC check latency or an independent-C verdict."
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {

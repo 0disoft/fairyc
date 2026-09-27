@@ -997,6 +997,13 @@ the fixed `[0.98, 1.02]` band. Every recorded CPU duration was quantized to
 15.625 ms on this host. No candidate run followed, and compiler-cost parity
 remains unproven.
 
+A separate [GC-controlled, four-build-per-lane process-CPU protocol](../ops/scanner-process-cpu-gc-protocol-20260927.md)
+predeclares a longer identical-source null with explicit collection outside
+each timed build and automatic GC disabled during it. The opt-in harness is
+ready, but no result is claimed here. A passing null would permit a separate
+candidate screen for GC-excluded compiler work only; it cannot substitute for
+complete build-time, normal check-latency or controlled-runtime evidence.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
