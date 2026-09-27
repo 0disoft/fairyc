@@ -1062,6 +1062,11 @@ parity remains unproven.
 
 ## Proposed first boundary
 
+Classic `for` headers are outside this candidate. ADR 0213 admits only plain
+scalar header expressions and rejects blocks, calls and borrows before MIR.
+An eligible vector loop may appear in a classic `for` body, but a parsed loop
+inside its initializer, condition or post clause does not gain an exception.
+
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
 `Vec<T>` place, or a named immutable `ref Vec<T>` local or parameter. The item
 would have exact type `ref T`, with its binding scoped to one loop-body entry.
