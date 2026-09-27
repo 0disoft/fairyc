@@ -151,14 +151,14 @@ fn usize run_indexed(usize rounds) {
     while (iteration < rounds) {
         let bytes::Buffer owned = switch (bytes::copy(b"let n=12345; /*open")) {
             case .ok(value) : { value }
-            case .err(_) : { assert(false); bytes::empty() }
+            case .err(_) : { assert(false); }
         };
         total += switch (indexed::collect(owned, false, 32768, 1048576, 256, 16777216)) {
             case .ok(stream) : {
                 let indexed::Storage usage = indexed::storage(ref stream);
                 usage.source_bytes + usage.cooked_bytes + usage.diagnostic_bytes + usage.tokens + usage.diagnostics
             }
-            case .err(_) : { assert(false); 0 }
+            case .err(_) : { assert(false); }
         };
         iteration += 1;
     }
@@ -170,14 +170,14 @@ fn usize run_candidate(usize rounds) {
     while (iteration < rounds) {
         let bytes::Buffer owned = switch (bytes::copy(b"let n=12345; /*open")) {
             case .ok(value) : { value }
-            case .err(_) : { assert(false); bytes::empty() }
+            case .err(_) : { assert(false); }
         };
         total += switch (candidate::collect(owned, false, 32768, 1048576, 256, 16777216)) {
             case .ok(stream) : {
                 let candidate::Storage usage = candidate::storage(ref stream);
                 usage.source_bytes + usage.cooked_bytes + usage.diagnostic_bytes + usage.tokens + usage.diagnostics
             }
-            case .err(_) : { assert(false); 0 }
+            case .err(_) : { assert(false); }
         };
         iteration += 1;
     }

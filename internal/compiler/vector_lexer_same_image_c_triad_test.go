@@ -172,14 +172,14 @@ fn usize run_fairy(usize rounds) {
     while (iteration < rounds) {
         let bytes::Buffer owned = switch (bytes::copy(b"let n=12345; /*open")) {
             case .ok(value): { value }
-            case .err(_): { assert(false); bytes::empty() }
+            case .err(_): { assert(false); }
         };
         total += switch (scanner::collect(owned, false, 32768, 1048576, 256, 16777216)) {
             case .ok(stream): {
                 let scanner::Storage usage = scanner::storage(ref stream);
                 usage.source_bytes + usage.cooked_bytes + usage.diagnostic_bytes + usage.tokens + usage.diagnostics
             }
-            case .err(_): { assert(false); 0 }
+            case .err(_): { assert(false); }
         };
         iteration += 1;
     }
