@@ -1139,6 +1139,14 @@ access is not equivalent to the current source loop.
    the one or two earlier allocations are freed under low and optimized MSVC.
    The independent C scanner has a different cooked-storage layout, so this
    establishes Fairy ownership cleanup rather than identical allocation order.
+   A full-scanner fault sweep now uses nine cooked decimal tokens and nine
+   invalid carriage returns, crossing the cooked, token and diagnostic vector
+   growth boundaries. A successful owned-stream scan reaches 16 internal
+   allocator calls. Failing each call once, in each source form and both MSVC
+   profiles, returns status 3 with no live allocation; the successful runs
+   retain nine cooked bytes, nine diagnostics and at least 19 tokens. Both
+   forms use the same 16-call sequence. This covers every allocation reached
+   by this input, not paths requiring other input shapes or C allocation order.
    The [paired storage A/B](../ops/c-scanner-storage-ab-20260925.md) measured
    a smaller geometric C image but did not stably identify a faster C lane.
 4. Decide the exact source eligibility, diagnostic, cross-package identity,
