@@ -1,10 +1,34 @@
 # Open issue release triage — 2026-09-16
 
-## Owner-approved action update
+## Current tracker state — 2026-09-27
+
+A connected GitHub issue search for `0disoft/fairyc` returned **zero open
+issues**. The September 16 table and proposed follow-ups below are historical
+snapshots, not current assignments. Issue closure does not promote an
+unimplemented language, target, ABI, or distribution capability.
+
+[#27](https://github.com/0disoft/fairyc/issues/27) closed as completed after
+the [retained generic growth evidence](generic-growth-evidence.md) covered the
+stable scalar-generic workspace path separately from private probes.
+[#31](https://github.com/0disoft/fairyc/issues/31),
+[#36](https://github.com/0disoft/fairyc/issues/36),
+[#37](https://github.com/0disoft/fairyc/issues/37),
+[#45](https://github.com/0disoft/fairyc/issues/45),
+[#46](https://github.com/0disoft/fairyc/issues/46),
+[#47](https://github.com/0disoft/fairyc/issues/47), and
+[#49](https://github.com/0disoft/fairyc/issues/49) closed as **not planned** for
+the Windows/AMD64 experimental source preview, with their missing proofs
+recorded in the issue bodies. The umbrella [#18](https://github.com/0disoft/fairyc/issues/18)
+and maintenance [#1](https://github.com/0disoft/fairyc/issues/1) are also
+closed as **not planned**. The nine earlier pruned proposals are also closed;
+their original **not planned** dispositions are recorded below. No issue or
+pull request was created or changed in this verification.
+
+## Historical owner-approved action update
 
 The owner subsequently authorized pruning low-value issues and resolving concrete
-remaining work. The historical 19-issue snapshot below is retained as the review
-basis; the current open count after this action is **10**, not 19.
+remaining work. At that checkpoint the open count fell from 19 to 10; the
+current state is recorded above.
 
 - Closed as **not planned**, never as implemented: #28, #29, #30, #32, #33,
   #34, #41, #42 and #43. Their bodies preserve original proposals and now explain
@@ -23,9 +47,8 @@ basis; the current open count after this action is **10**, not 19.
 
 GitHub states and `not_planned` closure reasons were reread after mutation. No
 compiler changes, issue deletion, push, release or visibility change occurred.
-Next implementation/evidence unit is #27: reuse the existing growth probes, but
-verify public scalar-workspace coverage before treating retained private-probe
-measurements as satisfying the entire issue. That work was not executed in this unit.
+At that checkpoint #27 was the next evidence unit. Its later retained result
+and closure are recorded above.
 
 ## Historical review snapshot
 
@@ -118,7 +141,7 @@ generated executables and their UCRT/VCRuntime closure run without development
 tools. Do not mark clean-machine portability or complete distribution maturity
 proven, and do not promote target flags from that report.
 
-## Actual next public-launch decisions
+## Historical proposed public-launch decisions
 
 1. Reconcile #18 and the completed matrix item in #49 without closing their
    unfinished parent scopes; the proposals above are ready for a separate tracker update.
