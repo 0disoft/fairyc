@@ -868,6 +868,14 @@ public admission: compiler check/build cost and the remaining source,
 ownership, failure and unused-feature gates require separate decisions. The
 standalone 8% EXE-size result remains independent of the combined probe image.
 
+A [current-HEAD five-pair build comparison](../ops/scanner-current-build-cost-20260927.md)
+uses the same indexed/vector scanner sources as that runtime probe. Both
+optimized EXEs remain 197,120 bytes and both forms retain 21 specializations.
+The paired total-build ratio median is 0.99896, but its 16.26% full span
+exceeds the 10% stability heuristic. The outlying last pair is retained;
+current compiler-time parity is therefore still unproven. This test compares
+two Fairy source forms, not independent-C build cost or unused-feature overhead.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
