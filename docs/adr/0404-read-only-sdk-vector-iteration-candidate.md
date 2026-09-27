@@ -190,6 +190,12 @@ CRLF, then reparses with the same syntax shape and produces identical bytes on
 a second pass. This is syntax preservation only; the formatter does not
 authenticate the SDK or admit the source form in stable workspace commands.
 
+A separate client fixture imports the authenticated SDK alongside a different
+package that exports a concrete resource named `Vec`. Iteration over that
+lookalike shared view is rejected by the private source/view gate. This covers
+the checked fixture, not a forged second generic `std::vec` provider or all
+cross-package identity cases.
+
 The indexed real scanner also serves as an unused-source-form control. A
 compiler test analyzes the same checked-in package graph through the stable
 and private candidate lanes, verifies both MIR programs, and compares their

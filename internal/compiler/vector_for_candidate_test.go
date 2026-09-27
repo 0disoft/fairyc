@@ -103,6 +103,37 @@ fn i32 main() {
 	}
 }
 
+func TestPrivateVectorSDKCandidateLoopRejectsForeignVectorOwner(t *testing.T) {
+	const source = `module main;
+import std::vec as v;
+import std::bytes as bytes;
+import lookalike as fake;
+fn i32 visit(ref fake::Vec values) {
+    for (let ref i32 item in values) { assert(*item == 0); }
+    return 0;
+}`
+	input, coordinates := vectorSDKInputWithCandidate(t, source, true)
+	input.Files = append(input.Files, parseCompilerFile(t, 2, "lookalike.fy",
+		"module lookalike; pub resource Vec { i32 value; cleanup {} }"))
+	input.Imports = append(input.Imports, semantic.PackageImport{
+		FromPackage: 1, ImportPath: "lookalike", ToPackage: 2,
+	})
+	foreignCoordinate := coordinates[1]
+	foreignCoordinate[0] ^= 4
+	coordinates[2] = foreignCoordinate
+	result, err := compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+		genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+	if err != nil {
+		t.Fatalf("lookalike escaped source analysis: %v", err)
+	}
+	if len(result.Analysis.Semantic.Diagnostics) != 0 || len(result.Analysis.Semantic.Unsupported) != 1 ||
+		!strings.Contains(result.Analysis.Semantic.Unsupported[0].Feature,
+			"read-only SDK Vec iteration requires a shared ref item") {
+		t.Fatalf("lookalike did not reach the source/view rejection gate: diagnostics=%+v unsupported=%+v",
+			result.Analysis.Semantic.Diagnostics, result.Analysis.Semantic.Unsupported)
+	}
+}
+
 func TestPrivateVectorSDKCandidateLoopRejectsLocalItemEscape(t *testing.T) {
 	const source = `module main;
 import std::vec as v;
