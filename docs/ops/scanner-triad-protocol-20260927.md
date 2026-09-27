@@ -158,3 +158,8 @@ ordinary native execution keeps its existing 60-second default. This changes
 only the outer execution deadline, not the scanner calls, warmup count, sample
 selection, or admission limits. The first complete run under this condition
 will still be retained whether it passes or fails.
+
+The [first complete eight-warmup C-only result](scanner-eight-warmup-triad-result-20260927.md)
+failed both sessions at 12.48% and 26.02% full spans. No full C/Fairy/C
+comparison was run under this condition. Longer startup warmup did not close
+the 8% runtime gate on this host.

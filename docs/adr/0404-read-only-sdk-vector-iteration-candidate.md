@@ -852,6 +852,12 @@ failed the unchanged 10% stability limit, so no matching C/Fairy/C full
 measurement was run. The 8% runtime and build-cost gates remain open; the
 source form stays compiler-private.
 
+The [eight-warmup C-only follow-up](../ops/scanner-eight-warmup-triad-result-20260927.md)
+also failed its two unchanged 10% stability checks, at 12.48% and 26.02%
+full spans. Its gated C/Fairy/C measurement was not run. More startup warmup
+does not supply the missing 8% runtime verdict; the private source form
+remains closed pending a stable environment or a different predeclared control.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
