@@ -1,0 +1,34 @@
+{
+  "schema": "fairyc.vector-lexer-generated-c-attribution/v1",
+  "target": "x86_64-windows-msvc",
+  "indexed_scanner_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "candidate_scanner_sha256": "17552d176bc171ef73bbf2995c7744b86ff328f15863577cb0288398049cde55",
+  "main_sha256": "e1a93b92594fa00e7e42a51ac183b8c4a8d851efe223a2ab1d2441c750e856b4",
+  "indexed_c_sha256": "c58d7f228f40459918d43584e7d48cba12d9e6eee7036569318d45708f49880d",
+  "candidate_c_sha256": "46018942e71465a32cfc91926b9a49079e5e124cd3a0e12b35a6f28807590305",
+  "indexed_c_bytes": 369719,
+  "candidate_c_bytes": 370559,
+  "function_count": 80,
+  "common_function_prefix": 59,
+  "unmatched_function_count": 21,
+  "specialization_count": 21,
+  "changed_functions": [
+    {
+      "index": 28,
+      "name": "$p1::scanner::report_work",
+      "indexed_bytes": 12043,
+      "candidate_bytes": 12139,
+      "delta_bytes": 96
+    },
+    {
+      "index": 31,
+      "name": "$p1::scanner::storage",
+      "indexed_bytes": 4185,
+      "candidate_bytes": 4695,
+      "delta_bytes": 510
+    }
+  ],
+  "unmatched_function_delta_bytes": 227,
+  "nonfunction_delta_bytes": 7,
+  "scope": "Generated C source spans include each function header through the next header, or main for the last function. Only the identical function-name prefix is attributed by source name; generic identities differ between forms and the remaining suffix is grouped. The nonfunction span includes the preamble, prototypes and main. These are C text bytes, not linked machine-code size or a build-time verdict."
+}

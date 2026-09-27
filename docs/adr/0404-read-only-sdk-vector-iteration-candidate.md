@@ -936,6 +936,14 @@ exceeds the 10% stability heuristic. The outlying last pair is retained;
 current compiler-time parity is therefore still unproven. This test compares
 two Fairy source forms, not independent-C build cost or unused-feature overhead.
 
+A [generated-C source attribution](../ops/scanner-generated-c-source-delta-20260927.md)
+accounts for the candidate's 840 extra C text bytes on the same scanner and
+benchmark-main source hashes. The two rewritten scanner functions account for
+606 bytes, the SDK generic-function suffix for 227, and nonfunction C text for
+7. Both forms still emit 80 functions and 21 specializations. The generic
+names differ, so their bodies are compared only as a group; these source-byte
+figures neither measure linked code nor resolve the unstable build-time gate.
+
 An [identical-source build control](../ops/scanner-build-null-result-20260927.md)
 then compiled the indexed scanner in both lanes under the same phased harness.
 Its five-pair median clone/index ratio was 1.00975, but the full paired-ratio
