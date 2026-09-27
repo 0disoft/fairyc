@@ -284,13 +284,14 @@ func TestPrivateVectorSDKCandidateLoopRejectsUnsafeSource(t *testing.T) {
 		loop            string
 		wantCode        string
 		wantUnsupported bool
+		wantSpan        string
 	}{
 		{name: "wrong element", loop: "for (let ref u8 item in ref values) { assert(*item == 0); }", wantCode: "E1006"},
-		{name: "mutable item", loop: "for (let ref mut i32 item in ref values) { assert(*item == 0); }", wantUnsupported: true},
+		{name: "mutable item", loop: "for (let ref mut i32 item in ref values) { assert(*item == 0); }", wantUnsupported: true, wantSpan: "ref mut i32"},
 		{name: "owner mutation", loop: "for (let ref i32 item in ref values) { values = v::empty<i32>(); assert(*item == 0); }", wantCode: "E2101"},
 		{name: "owner move", loop: "for (let ref i32 item in ref values) { let v::Vec<i32> moved = values; assert(*item == 0); }", wantCode: "E2105"},
 		{name: "scalar owner", loop: "var i32 scalar = 0; for (let ref i32 item in ref scalar) { assert(*item == 0); }", wantCode: "E1006"},
-		{name: "computed iterable", loop: "for (let ref i32 item in v::empty<i32>()) { assert(*item == 0); }", wantUnsupported: true},
+		{name: "computed iterable", loop: "for (let ref i32 item in v::empty<i32>()) { assert(*item == 0); }", wantUnsupported: true, wantSpan: "v::empty<i32>()"},
 	} {
 		t.Run(sample.name, func(t *testing.T) {
 			client := `module main;
@@ -311,6 +312,25 @@ fn i32 main() {
 			if sample.wantUnsupported {
 				if len(semanticResult.Unsupported) == 0 {
 					t.Fatalf("unsafe vector source was accepted: %+v", semanticResult)
+				}
+				if sample.wantSpan != "" {
+					loopStart := strings.Index(client, sample.loop)
+					partStart := strings.Index(sample.loop, sample.wantSpan)
+					if loopStart < 0 || partStart < 0 {
+						t.Fatal("fixture span is missing")
+					}
+					wantStart := loopStart + partStart
+					found := false
+					for _, issue := range semanticResult.Unsupported {
+						if strings.Contains(issue.Feature, "read-only SDK Vec iteration") &&
+							issue.Span.StartByte == wantStart && issue.Span.EndByte == wantStart+len(sample.wantSpan) {
+							found = true
+						}
+					}
+					if !found {
+						t.Fatalf("missing source-accurate vector rejection at %d..%d: %+v", wantStart,
+							wantStart+len(sample.wantSpan), semanticResult.Unsupported)
+					}
 				}
 				return
 			}
@@ -353,6 +373,11 @@ fn i32 visit(ref fake::Vec values) {
 			"read-only SDK Vec iteration requires a shared ref item") {
 		t.Fatalf("lookalike did not reach the source/view rejection gate: diagnostics=%+v unsupported=%+v",
 			result.Analysis.Semantic.Diagnostics, result.Analysis.Semantic.Unsupported)
+	}
+	viewStart := strings.Index(source, "in values)") + len("in ")
+	issue := result.Analysis.Semantic.Unsupported[0]
+	if viewStart < len("in ") || issue.Span.StartByte != viewStart || issue.Span.EndByte != viewStart+len("values") {
+		t.Fatalf("lookalike rejection did not point to its vector view: %+v", issue)
 	}
 }
 

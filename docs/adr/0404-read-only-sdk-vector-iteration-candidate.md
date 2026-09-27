@@ -226,6 +226,10 @@ The formatter also preserves the `ref holder.values` loop header, its adjacent
 comment and parser shape across repeated formatting, alongside the existing
 named-view and explicit local-owner checks. This is a source-formatting check;
 it does not extend the private loop's semantic eligibility or admit it publicly.
+Private source rejection now points at the written item type for a mutable
+item and at the iterable expression for a computed view, rather than marking
+the entire loop. Stable workspace source rejection and runtime behavior are
+unchanged.
 
 The indexed real scanner also serves as an unused-source-form control. A
 compiler test analyzes the same checked-in package graph through the stable
