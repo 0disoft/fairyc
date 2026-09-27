@@ -1,0 +1,192 @@
+{
+  "rows": [
+    {
+      "scanner_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+      "shape": {
+        "name": "$p1::scanner::report_work",
+        "blocks": 74,
+        "operations": 100,
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 33,
+          "binary": 15,
+          "drop": 6,
+          "field-read": 19,
+          "initialize": 3,
+          "scalar-cast": 3,
+          "unary": 7,
+          "view-index": 1,
+          "view-index-check": 1,
+          "view-length": 4,
+          "view-slice": 2,
+          "view-slice-check": 2
+        },
+        "terminators": {
+          "call": 18,
+          "goto": 24,
+          "return": 2,
+          "switch": 21,
+          "trap": 9
+        },
+        "calls": {
+          "$p1::diagnostics::report": 1,
+          "$p1::scanner::matches": 3,
+          "$p1::scanner::number": 6,
+          "$p1::scanner::scan": 1,
+          "$p2::std::bytes::view": 1,
+          "$p2::std::vec::_fy_generic_g0_2ec7ca4be1aad2e416a199042274d5dfe0a3351dec0f546cef1b3f81f36e0bf2": 1,
+          "$p2::std::vec::_fy_generic_g0_656916332b7d8478973fd87ec3d3f2aa5f99b73c5f9793e5450d3f7edb34b5a3": 1,
+          "$p2::std::vec::_fy_generic_g0_8a7c3389fb8c604f3123e8dbd55fe5262af91ece1cce98b1b054585d39574319": 1,
+          "$p2::std::vec::_fy_generic_g0_a686e7eee29746c5ea95d490e6fd492ec0969000008941afef91017f02d0b8a1": 1,
+          "$p2::std::vec::_fy_generic_g0_adee326e4226a3a9cf69e95e0d2de83f495a5bede51cf29d67287e495ee9d70e": 1,
+          "$p2::std::vec::_fy_generic_g0_d13345d57b3cf3bceb80e55fb1d73fbf078a30c2f497a501147583bff4931ab3": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 2
+        },
+        "cleanup_actions": {
+          "drop": 6
+        },
+        "trap_paths": 9
+      },
+      "variant": "explicit index"
+    },
+    {
+      "scanner_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+      "shape": {
+        "name": "$p1::scanner::storage",
+        "blocks": 24,
+        "operations": 33,
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 12,
+          "binary": 6,
+          "field-borrow": 7,
+          "struct-construct": 1,
+          "view-length": 3
+        },
+        "terminators": {
+          "call": 9,
+          "goto": 4,
+          "return": 1,
+          "switch": 6,
+          "trap": 4
+        },
+        "calls": {
+          "$p1::diagnostics::token_view": 1,
+          "$p2::std::bytes::view": 2,
+          "$p2::std::vec::_fy_generic_g0_46ac9063991a9ae231eb80b740506329731731d6ccb34cd110c5fdff187a0c21": 1,
+          "$p2::std::vec::_fy_generic_g0_4b6497974494e3fcc68ca16c3312bb135966a568b15535b30f359201252912cf": 2,
+          "$p2::std::vec::_fy_generic_g0_8a7c3389fb8c604f3123e8dbd55fe5262af91ece1cce98b1b054585d39574319": 1,
+          "$p2::std::vec::_fy_generic_g0_d13345d57b3cf3bceb80e55fb1d73fbf078a30c2f497a501147583bff4931ab3": 1,
+          "$p2::std::vec::_fy_generic_g0_fe211a11b11be90b2721d4da7e52416f04a073f2948b98ba0e47c968d614d271": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 1
+        },
+        "cleanup_actions": {},
+        "trap_paths": 4
+      },
+      "variant": "explicit index"
+    },
+    {
+      "scanner_sha256": "17552d176bc171ef73bbf2995c7744b86ff328f15863577cb0288398049cde55",
+      "shape": {
+        "name": "$p1::scanner::report_work",
+        "blocks": 75,
+        "operations": 101,
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 35,
+          "binary": 15,
+          "drop": 6,
+          "field-read": 19,
+          "initialize": 3,
+          "scalar-cast": 3,
+          "unary": 6,
+          "view-index": 1,
+          "view-index-check": 1,
+          "view-length": 4,
+          "view-slice": 2,
+          "view-slice-check": 2
+        },
+        "terminators": {
+          "call": 18,
+          "goto": 25,
+          "return": 2,
+          "switch": 21,
+          "trap": 9
+        },
+        "calls": {
+          "$p1::diagnostics::report": 1,
+          "$p1::scanner::matches": 3,
+          "$p1::scanner::number": 6,
+          "$p1::scanner::scan": 1,
+          "$p2::std::bytes::view": 1,
+          "$p2::std::vec::_fy_generic_g0_36c7d5ad8af2dc1feb82e7f14e052a1b245b31465d4ba3f0613224a23f872aa1": 1,
+          "$p2::std::vec::_fy_generic_g0_8ae3340e4c38d6a200a6883d5ef2ab97d583e4717e9c8fc19f5e9b9147c400b8": 1,
+          "$p2::std::vec::_fy_generic_g0_c7499bb66fa5be4df7ba37b90901daa6fcc7a94e52307411c02b75f222ab7450": 1,
+          "$p2::std::vec::_fy_generic_g0_e84f976570d69824ebd606bddb019d5f1dbbd26d0553d6e82b28c350d44ca20e": 1,
+          "$p2::std::vec::_fy_generic_g0_eb5f643cbd4dbd29f442e6f11ff012cadd9685585852f0bed1b187c1841524fe": 1,
+          "$p2::std::vec::_fy_generic_g0_f09571fc47888a4c2ab45935a39af6d846aba5e5a5aff767ab17b7d2b23c3add": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 2
+        },
+        "cleanup_actions": {
+          "drop": 6
+        },
+        "trap_paths": 9
+      },
+      "variant": "all vector for"
+    },
+    {
+      "scanner_sha256": "17552d176bc171ef73bbf2995c7744b86ff328f15863577cb0288398049cde55",
+      "shape": {
+        "name": "$p1::scanner::storage",
+        "blocks": 26,
+        "operations": 39,
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 20,
+          "binary": 6,
+          "field-borrow": 5,
+          "struct-construct": 1,
+          "view-length": 3
+        },
+        "terminators": {
+          "call": 9,
+          "goto": 6,
+          "return": 1,
+          "switch": 6,
+          "trap": 4
+        },
+        "calls": {
+          "$p1::diagnostics::token_view": 1,
+          "$p2::std::bytes::view": 2,
+          "$p2::std::vec::_fy_generic_g0_38c6df0cce7e071116c1303a2596bd75a8ff7674d2ee2786d8a5cc8bc03c7e09": 2,
+          "$p2::std::vec::_fy_generic_g0_a047008a7df67055c0763ea53081b44efaba9633791523cd1e39736b639821d4": 1,
+          "$p2::std::vec::_fy_generic_g0_b2a4c87d21aca45d1de5f0d4f377d6a6b52768a5848df0b3d5cda3996696927c": 1,
+          "$p2::std::vec::_fy_generic_g0_eb5f643cbd4dbd29f442e6f11ff012cadd9685585852f0bed1b187c1841524fe": 1,
+          "$p2::std::vec::_fy_generic_g0_f09571fc47888a4c2ab45935a39af6d846aba5e5a5aff767ab17b7d2b23c3add": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 1
+        },
+        "cleanup_actions": {},
+        "trap_paths": 4
+      },
+      "variant": "all vector for"
+    }
+  ],
+  "schema": "fairyc.vector-lexer-mir-shape/v1",
+  "scope": "Verified executable MIR for two scanner functions. Counts omit source spans, entities and numeric local IDs; they do not prove CFG, dataflow or full semantic equivalence. Native output and ownership parity have separate tests."
+}

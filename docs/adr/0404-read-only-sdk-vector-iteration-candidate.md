@@ -952,6 +952,12 @@ benchmark-main source hashes. The two rewritten scanner functions account for
 names differ, so their bodies are compared only as a group; these source-byte
 figures neither measure linked code nor resolve the unstable build-time gate.
 
+A [verified-MIR shape projection](../ops/scanner-mir-shape-20260927.md) for
+those two scanner functions finds unchanged call-site, cleanup-action and trap
+path counts, with one extra block and operation in `report_work` and two extra
+blocks and six operations in `storage`. It omits operands and CFG edges and
+does not establish full normalized-MIR equivalence or compiler-cost parity.
+
 An [identical-source build control](../ops/scanner-build-null-result-20260927.md)
 then compiled the indexed scanner in both lanes under the same phased harness.
 Its five-pair median clone/index ratio was 1.00975, but the full paired-ratio
