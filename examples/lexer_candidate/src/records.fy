@@ -68,7 +68,7 @@ fn bool body(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<t
         advance(stream,cursor);
         if (cursor.fields >= 1024) { cursor.status = 4; return false; }
         let Field field = Field { .kind, .start, .end = cursor.end, .name_start = name.start, .name_end = name.end, .type_root = value_type, .key_type, .public, .public_start = if (public) { start } else { 0 }, .public_end = if (public) { start + 3 } else { 0 }, .payload_start, .payload_count, .payload_open, .payload_end };
-        if (!switch(v::push<Field>(fields,field)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return false; }
+        if (!v::push<Field>(fields,field).is_ok) { cursor.status = 3; return false; }
         cursor.fields = cursor.fields + 1;
     }
     if (is_resource && (types::word(stream,cursor.index,b"cleanup") || types::word(stream,cursor.index,b"@"))) {

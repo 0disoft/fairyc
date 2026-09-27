@@ -235,7 +235,7 @@ pub fn bool entry(ref scanner::Stream stream, ref mut state::Cursor cursor, ref 
         if (!state::expect(stream, cursor, b";", 8)) { return false; }
     }
     let Entry value = Entry { .kind, .start, .end = cursor.previous_end, .name_start, .name_end, .type_start, .type_end, .type_root, .expression = root, .id };
-    if (!switch (v::push<Entry>(entries, value)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return false; }
+    if (!v::push<Entry>(entries, value).is_ok) { cursor.status = 3; return false; }
     cursor.last_entry = id;
     cursor.expression = root;
     return true;

@@ -28,7 +28,7 @@ fn i32 identity(ref scanner::Stream input, ref u8[] path) {
             count -= 1; discard v::truncate<Segment>(ref mut segments,count); continue;
         }
         if (count >= 1024) { return 4; }
-        if (!switch(v::push<Segment>(ref mut segments,Segment { .start = start, .end = end })) { case .ok(_): { true } case .err(_): { false } }) { return 3; }
+        if (!v::push<Segment>(ref mut segments,Segment { .start = start, .end = end }).is_ok) { return 3; }
         count += 1;
     }
     if (count == 0) { return 6; }

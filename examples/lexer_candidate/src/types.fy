@@ -49,7 +49,7 @@ fn bool named(ref scanner::Stream stream, usize index) {
 fn usize append(ref mut v::Vec<Node> nodes, ref mut Cursor cursor, u32 kind, usize start, usize left, usize right) {
     if (cursor.count >= 4096) { cursor.status = 4; return 0; }
     let Node node = Node { .kind, .start, .end = cursor.end, .left, .right };
-    if (!switch(v::push<Node>(nodes,node)) { case .ok(_): { true } case .err(_): { false } }) { cursor.status = 3; return 0; }
+    if (!v::push<Node>(nodes,node).is_ok) { cursor.status = 3; return 0; }
     cursor.count = cursor.count + 1; return cursor.count;
 }
 fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<Node> nodes, usize depth) {

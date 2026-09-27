@@ -246,7 +246,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
             var Declaration value = attempt.value;
             value.attribute_start = attribute_start; value.attribute_count = attribute_count;
             if (attribute_count > 0) { value.start = scanner::token_info(ref input,start).start; }
-            if (!switch (v::push<Declaration>(ref mut declarations, value)) { case .ok(_): { true } case .err(_): { false } }) { return .err(3); }
+            if (!v::push<Declaration>(ref mut declarations, value).is_ok) { return .err(3); }
             items += 1;
         } else {
             discard v::truncate<attributes::Attribute>(ref mut attribute_nodes,attribute_start);
@@ -262,7 +262,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
             discard v::truncate<records::Field>(ref mut fields, field_start);
             cursor.fields = field_start;
             if (errors >= 32) { return .err(4); }
-            if (!switch (v::push<Problem>(ref mut problems, attempt.problem)) { case .ok(_): { true } case .err(_): { false } }) { return .err(3); }
+            if (!v::push<Problem>(ref mut problems, attempt.problem).is_ok) { return .err(3); }
             errors += 1;
             if (!first || state::word(ref input, start, b"module")) { recover(ref input, ref mut cursor, if (attributes_ok) { item_start } else { start }); }
         }
