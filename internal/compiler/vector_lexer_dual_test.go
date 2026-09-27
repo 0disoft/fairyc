@@ -131,7 +131,7 @@ import std::io as io;
     separator();
     let bytes::Buffer indexed_input = switch (bytes::copy(b"let n=12345; /*open")) {
         case .ok(value) : { value }
-        case .err(_) : { assert(false); bytes::empty() }
+        case .err(_) : { assert(false); }
     };
     let i32 indexed_status = switch (indexed::collect(indexed_input, false, 32768, 1048576, 256, 16777216)) {
         case .ok(stream) : {
@@ -146,7 +146,7 @@ import std::io as io;
     separator();
     let bytes::Buffer candidate_input = switch (bytes::copy(b"let n=12345; /*open")) {
         case .ok(value) : { value }
-        case .err(_) : { assert(false); bytes::empty() }
+        case .err(_) : { assert(false); }
     };
     let i32 candidate_status = switch (candidate::collect(candidate_input, false, 32768, 1048576, 256, 16777216)) {
         case .ok(stream) : {
