@@ -977,6 +977,13 @@ ratios were 0.95499 and 1.04519, outside `[0.98, 1.02]`. The full span was
 54.39%. No candidate comparison followed, the earlier failed controls are
 not retroactively accepted, and build-cost parity remains unproven.
 
+A [separately predeclared Go-process CPU control](../ops/scanner-process-cpu-cost-protocol-20260927.md)
+will measure fresh scanner preparation, analysis, verified-MIR lowering and C
+emission without the off-CPU waits or MSVC child processes in the failed
+wall-time controls. It must pass an identical-source null before any vector
+candidate comparison. Even a passing CPU screen would not settle complete
+build time, native compilation, or the independent-C runtime gate.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
