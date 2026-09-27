@@ -112,6 +112,66 @@ pub fn i32 sum(ref v::Vec<i32> values) {
 		hir.QualifiedModulePath(1, "main")+"::main", vectorForNativeProbe, true, 7)
 }
 
+func TestPrivateVectorSDKCandidateFieldPlaceNativeParity(t *testing.T) {
+	const header = `module main;
+import std::vec as v;
+import std::bytes as bytes;
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+resource Holder { v::Vec<i32> values; cleanup {} }
+fn i32 exercise() {
+    var v::Vec<i32> values = v::empty<i32>();
+    assert(switch (v::push<i32>(ref mut values, 3)) { case .ok(_): { true } case .err(_): { false } });
+    assert(switch (v::push<i32>(ref mut values, 4)) { case .ok(_): { true } case .err(_): { false } });
+    let Holder holder = Holder { .values = values };
+    var i32 total = 0;
+`
+	const footer = `
+    return total;
+}
+fn i32 main() {
+    let i32 result = exercise();
+    assert(unsafe { clean() } == 1);
+    return result;
+}`
+	for _, form := range []struct {
+		name      string
+		candidate bool
+		loop      string
+	}{
+		{name: "field-place vector for", candidate: true,
+			loop: `for (let ref i32 item in ref holder.values) { total += *item; }`},
+		{name: "field-place explicit index", loop: `let usize bound = v::len<i32>(ref holder.values);
+for (var usize index = 0; index < bound; index += 1) {
+    let ref i32 item = v::at<i32>(ref holder.values, index);
+    total += *item;
+}`},
+	} {
+		t.Run(form.name, func(t *testing.T) {
+			input, coordinates := vectorSDKInputWithCandidate(t, header+form.loop+footer, true)
+			owners := []hir.PackageID{3}
+			var analysis compiler.GenericAnalysis
+			var err error
+			if form.candidate {
+				analysis, err = compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), owners)
+			} else {
+				analysis, err = compiler.AnalyzeSDKStoragePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), owners)
+			}
+			if err != nil || analysis.Analysis.Semantic.CompletedThrough != semantic.PhaseFlow {
+				t.Fatalf("field-place source and Flow: %v diagnostics=%+v unsupported=%+v", err,
+					analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+			}
+			result, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+			if err != nil || !result.Verified {
+				t.Fatalf("field-place verified MIR: %v %+v", err, result.Semantic.Diagnostics)
+			}
+			runVectorStorageMIRNativeExit(t, result.MIR,
+				hir.QualifiedModulePath(1, "main")+"::main", vectorForNativeProbe, true, 7)
+		})
+	}
+}
+
 func TestPrivateVectorSDKCandidateLoopRejectsUnsafeSource(t *testing.T) {
 	for _, sample := range []struct {
 		name            string

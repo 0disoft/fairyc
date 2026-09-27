@@ -210,6 +210,10 @@ there without changing the authenticated SDK owner. Generic preparation rejects
 that declaration before semantic loop checking because aggregates outside the
 embedded SDK remain closed. These fixtures cover their exact package graphs,
 not every possible forged provider or cross-package identity shape.
+An explicit `ref holder.values` place borrow over a resource field also matches
+the indexed form: both pass Flow and verified MIR and return the same result
+with vector cleanup under low and optimized MSVC. The test fills the vector
+before moving it into the holder; mutable field access is not part of this proof.
 
 The indexed real scanner also serves as an unused-source-form control. A
 compiler test analyzes the same checked-in package graph through the stable
