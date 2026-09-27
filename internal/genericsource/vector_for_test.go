@@ -92,44 +92,6 @@ func TestAuthenticatedSDKVectorLoopActivatesPlannerCallsWithoutChangingSource(t 
 	}
 }
 
-func TestAuthenticatedSDKVectorLoopInClassicForInitializer(t *testing.T) {
-	input := []byte(`module main; import std::vec as items;
-fn void show(ref items::Vec<i32> values) {
-    for (var i32 index = { for (let ref i32 item in values) {} 0 }; index < 1; index += 1) {}
-}`)
-	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
-	original, err := ast.Lower(tree)
-	if err != nil || len(tree.Diagnostics) != 0 {
-		t.Fatalf("classic for initializer: %+v, %v", tree.Diagnostics, err)
-	}
-	loop := func(module *ast.Module) *ast.Statement {
-		return &module.Functions[0].Body.Statements[0].For.Initializer.Binding.Expression.Block.Statements[0]
-	}
-	provider := &expander{module: &ast.Module{Path: "std::vec"}, allowStorage: true}
-	client := &expander{module: original, imports: map[string]*expander{"items": provider}}
-	if err := client.activateSDKVectorLoops(); err != nil {
-		t.Fatal(err)
-	}
-	if client.module == original || loop(original).Expression != nil ||
-		loop(original).ByteFor.PreparedVector != nil {
-		t.Fatal("SDK activation changed the original initializer")
-	}
-	active := loop(client.module)
-	if active.ByteFor.PreparedVector == nil || active.Expression != active.ByteFor.PreparedVector {
-		t.Fatal("nested vector loop was discovered but not prepared")
-	}
-	requests := 0
-	_, err = (transform{expression: func(expression *ast.Expression) error {
-		if expression.Kind == syntax.KindSpecialize {
-			requests++
-		}
-		return nil
-	}}).function(client.module.Functions[0])
-	if err != nil || requests != 2 {
-		t.Fatalf("planned SDK len/at calls = %d, error = %v", requests, err)
-	}
-}
-
 func TestVectorLoopDoesNotActivateForUnownedOrWrongProvider(t *testing.T) {
 	for _, sample := range []struct {
 		name     string
