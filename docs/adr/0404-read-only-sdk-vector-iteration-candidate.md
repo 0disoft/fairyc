@@ -845,6 +845,13 @@ Its one C/Fairy/C comparison failed stability in both images at 21.86% and
 Neither median can decide the 8% runtime gate. This does not undo the separate
 standalone EXE-size pass or admit the private vector-loop source form.
 
+The [deterministic-processor C-only follow-up](../ops/scanner-lowest-allowed-triad-result-20260927.md)
+pinned the highest-priority calling thread to logical processor 0 before
+warmup. Its two complete sessions had 17.35% and 8.93% full spans. The first
+failed the unchanged 10% stability limit, so no matching C/Fairy/C full
+measurement was run. The 8% runtime and build-cost gates remain open; the
+source form stays compiler-private.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

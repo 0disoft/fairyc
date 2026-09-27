@@ -119,3 +119,8 @@ exact checksums, 10% full-span and 2% null-bias limits remain unchanged.
 Run a complete comparison only after its matching C-only null control passes.
 Retain failures and mismatches without retry or exclusion. The normal and
 current-processor modes remain separate historical conditions.
+
+The [first complete deterministic-processor C-only control](scanner-lowest-allowed-triad-result-20260927.md)
+failed: its first session had a 17.35% full span, above the unchanged 10%
+limit. The second session passed at 8.93%, but both are required. The matching
+C/Fairy/C full comparison was not run, and the 8% runtime gate remains open.
