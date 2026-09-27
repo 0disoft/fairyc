@@ -291,12 +291,13 @@ fn i32 tree(syntax::Parsed parsed) {
 			limit, declarations, problems, offset, status int
 		}{input, 512, decls, 0, 0, status})
 	}
+	// One versus two prefix operators straddle the 4160-node expression ceiling.
 	for _, prefix := range []string{"+", "+ +"} {
 		decls, status := 2, 0
 		if prefix == "+ +" {
 			decls, status = 0, 4
 		}
-		fmt.Fprintf(&program, "assert(repeated(b%s, b\"1+\", 2047, b\"1; }\", %d, %d) == 0);\n", strconv.Quote("module main; fn i32 f() { return "+prefix), decls, status)
+		fmt.Fprintf(&program, "assert(repeated(b%s, b\"1+\", 2079, b\"1; }\", %d, %d) == 0);\n", strconv.Quote("module main; fn i32 f() { return "+prefix), decls, status)
 	}
 	for _, input := range []string{"module", "module main", "module main; import x as", "module main; fn void f(", "module main; fn i32 f() { return"} {
 		declarations := 0
