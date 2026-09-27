@@ -1018,9 +1018,13 @@ unproven.
 A [separately predeclared process-cycle control](../ops/scanner-process-cycles-protocol-20260927.md)
 uses the same GC-controlled build schedule with a process-wide cycle counter
 to avoid the observed 15.625 ms CPU-clock quantization. It first requires an
-identical-source null; no cycle result or vector cost claim exists yet. Cycles
-are not elapsed time, so even a passing comparison would leave ordinary check
-and complete native build latency as separate gates.
+identical-source null. Cycles are not elapsed time, so even a passing comparison
+would leave ordinary check and complete native build latency as separate gates.
+Its [first null result](../ops/scanner-process-cycles-null-result-20260927.md)
+retained all 200 identical-source builds and failed the predeclared band: the
+7th and 18th sorted clone/index ratios were 0.97556 and 1.01725. The full
+relative span was 14.89%. No vector candidate cycle comparison followed;
+compiler-cost parity remains unproven.
 
 ## Proposed first boundary
 
