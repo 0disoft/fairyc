@@ -957,6 +957,12 @@ clone/index median missed the predeclared `[0.98, 1.02]` null band. The null
 fails and no balanced candidate comparison was run. Build-cost parity remains
 unproven.
 
+A [24-pair robust build protocol](../ops/scanner-robust-build-protocol-20260927.md)
+predeclares a longer balanced identical-source control with every build
+retained and central order-statistic limits. It is a new, separately judged
+screen; the failed five-pair null is not retroactively accepted. No result
+has yet been collected under this protocol.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

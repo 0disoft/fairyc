@@ -39,7 +39,7 @@ func scannerBuildLaneOrder(pair int, balanced bool) []int {
 }
 
 func TestScannerBalancedBuildLaneOrder(t *testing.T) {
-	for pair := 0; pair < 6; pair++ {
+	for pair := 0; pair < 25; pair++ {
 		want := []int{0, 1, 1, 0}
 		if pair%2 != 0 {
 			want = []int{1, 0, 0, 1}
@@ -64,12 +64,15 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 	affinityNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_AFFINITY_NULL") == "1"
 	balancedNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_BALANCED_NULL") == "1"
 	balancedCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_BALANCED_COST") == "1"
+	robustNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_ROBUST_NULL") == "1"
+	robustCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_ROBUST_COST") == "1"
 	plainCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_COST") == "1"
-	nullControl := plainNull || affinityNull || balancedNull
-	candidateComparison := plainCandidate || balancedCandidate
-	balanced := balancedNull || balancedCandidate
+	nullControl := plainNull || affinityNull || balancedNull || robustNull
+	candidateComparison := plainCandidate || balancedCandidate || robustCandidate
+	robust := robustNull || robustCandidate
+	balanced := balancedNull || balancedCandidate || robust
 	modes := 0
-	for _, active := range []bool{plainNull, affinityNull, balancedNull, plainCandidate, balancedCandidate} {
+	for _, active := range []bool{plainNull, affinityNull, balancedNull, robustNull, plainCandidate, balancedCandidate, robustCandidate} {
 		if active {
 			modes++
 		}
@@ -117,9 +120,13 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 	if balanced {
 		buildsPerPair = 4
 	}
-	rows := make([]scannerBuildCostRow, 0, 6*buildsPerPair)
+	pairCount := 6
+	if robust {
+		pairCount = 25
+	}
+	rows := make([]scannerBuildCostRow, 0, pairCount*buildsPerPair)
 	var toolchainVersion string
-	for pair := 0; pair < 6; pair++ {
+	for pair := 0; pair < pairCount; pair++ {
 		order := scannerBuildLaneOrder(pair, balanced)
 		for position, index := range order {
 			variant := lanes[index]
@@ -145,7 +152,7 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 		}
 	}
 	if nullControl {
-		for pair := 0; pair < 6; pair++ {
+		for pair := 0; pair < pairCount; pair++ {
 			first := rows[pair*buildsPerPair]
 			for _, next := range rows[pair*buildsPerPair+1 : (pair+1)*buildsPerPair] {
 				if first.CSourceBytes != next.CSourceBytes || first.EXEBytes != next.EXEBytes ||
@@ -168,7 +175,7 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 		"msvc":           toolchainVersion,
 		"profile":        cdriver.OptimizedProfile.Name,
 		"warmup_pairs":   1,
-		"measured_pairs": 5,
+		"measured_pairs": pairCount - 1,
 		"indexed_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(lanes[0].scanner))),
 		"vector_sha256":  fmt.Sprintf("%x", sha256.Sum256([]byte(lanes[1].scanner))),
 		"main_sha256":    fmt.Sprintf("%x", sha256.Sum256([]byte(realScannerExecutionMain))),
@@ -198,6 +205,16 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 			report["schema"] = "fairyc.vector-lexer-build-balanced-cost/v1"
 			report["scope"] = "Explicit-index and private vector-loop scanner sources occupy A and B in one warmup and five measured four-build pairs. ABBA/BAAB order alternates, and the two complete builds per lane are summed before forming each pair ratio. All phase times and observations are retained. This compares steady-state Fairy build cost, not independent-C cost or cold CLI startup. No affinity or priority override."
 			prefix = "VECTOR_LEXER_BUILD_BALANCED_COST "
+		}
+	}
+	if robust {
+		report["schema"] = "fairyc.vector-lexer-build-robust-cost/v1"
+		report["scope"] = "Explicit-index and private vector-loop scanner sources occupy A and B in one warmup and 24 measured ABBA/BAAB pairs. All 100 fresh builds retain check, emit, support, native and artifact observations. Sort the 24 measured pair ratios and use the predeclared 18th ratio at most 1.02 as the candidate screen; report the full span without excluding any pair. This is steady-state Fairy build cost, not independent-C cost or cold CLI startup. No affinity or priority override."
+		prefix = "VECTOR_LEXER_BUILD_ROBUST_COST "
+		if robustNull {
+			report["schema"] = "fairyc.vector-lexer-build-robust-null/v1"
+			report["scope"] = "Identical explicit-index scanner sources occupy A and B in one warmup and 24 measured ABBA/BAAB pairs. All 100 fresh builds retain check, emit, support, native and artifact observations. Sort the 24 measured pair ratios and require both the 7th and 18th ratios inside [0.98, 1.02] before a separately recorded candidate comparison. Report the full span without excluding any pair. No affinity or priority override."
+			prefix = "VECTOR_LEXER_BUILD_ROBUST_NULL "
 		}
 	}
 	encoded, err := json.Marshal(report)
