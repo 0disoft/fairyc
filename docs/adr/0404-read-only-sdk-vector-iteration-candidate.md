@@ -222,6 +222,10 @@ An explicit `ref holder.values` place borrow over a resource field also matches
 the indexed form: both pass Flow and verified MIR and return the same result
 with vector cleanup under low and optimized MSVC. The test fills the vector
 before moving it into the holder; mutable field access is not part of this proof.
+The formatter also preserves the `ref holder.values` loop header, its adjacent
+comment and parser shape across repeated formatting, alongside the existing
+named-view and explicit local-owner checks. This is a source-formatting check;
+it does not extend the private loop's semantic eligibility or admit it publicly.
 
 The indexed real scanner also serves as an unused-source-form control. A
 compiler test analyzes the same checked-in package graph through the stable
