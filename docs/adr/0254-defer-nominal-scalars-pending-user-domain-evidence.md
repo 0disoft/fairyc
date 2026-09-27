@@ -90,6 +90,7 @@ The [real record-parser cursor experiment](../architecture/nominal-scalar-source
 types `records::Cursor.index` with an ordinary struct in a copied workspace.
 The wrong-domain assignment fails with `E1006`. A subsequent bounded MIR
 extension makes valid replacement of this one-`usize`-field struct executable;
-the real parser copy now passes `check`. Full native and size comparisons for
-this parser variant remain open. This does not establish a source-usability
+the real parser copy now passes `check`. A subsequent Windows native test runs
+the real record parser and records paired basic/optimized EXE and object sizes;
+timing and the independent-C-relative gate remain open. This does not establish a source-usability
 advantage for nominal scalars or admit syntax.

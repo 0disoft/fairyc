@@ -3,8 +3,12 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 // Keep the experiment on the real record parser: only its private cursor index
@@ -69,6 +73,66 @@ func TestParserCursorStructBoundary(t *testing.T) {
 			}
 		} else if code != ExitSuccess || !strings.HasPrefix(stdout, "check ok: ") || stderr != "" {
 			t.Fatalf("raw index rejected: %d %q %s", code, stdout, stderr)
+		}
+	}
+}
+
+func TestWindowsParserCursorStructFieldStoreNative(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	type sizes struct{ exe, unit, runtime int }
+	baseline := map[string]sizes{}
+	for _, wrapped := range []bool{false, true} {
+		root := parserCursorStructWorkspace(t, wrapped)
+		for _, name := range []string{"syntax.fy", "integrity.fy", "file_syntax.fy"} {
+			data, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "src", name))
+			if err != nil {
+				t.Fatal(err)
+			}
+			writeTestSource(t, root, "src/"+name, string(data))
+		}
+		writeTestSource(t, root, "src/main.fy", parserProbePrelude+`fn i32 main() {
+    return switch (make(b"module main; struct R { u32 x; }")) {
+        case .ok(parsed): {
+            assert(syntax::problem_count(ref parsed) == 0);
+            assert(syntax::field_count(ref parsed) == 1);
+            0
+        }
+        case .err(_): { 1 }
+    };
+}`)
+		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+			var diagnostics strings.Builder
+			compiled, code := compileWindowsWorkspace(root,
+				workspaceTargetOptions{targetID: target.X8664WindowsMSVC, profile: profile, locked: profile == cdriver.OptimizedProfile},
+				workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, &diagnostics)
+			if code != ExitSuccess {
+				t.Fatalf("parser cursor wrapped=%v profile=%s: %d %s", wrapped, profile.Name, code, diagnostics.String())
+			}
+			outcome, err := cdriver.ExecuteWindowsMSVCTarget(compiled.artifact)
+			if err != nil || outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
+				t.Fatalf("parser cursor wrapped=%v profile=%s: %+v %v", wrapped, profile.Name, outcome, err)
+			}
+			current := sizes{exe: len(compiled.artifact.Bytes)}
+			for _, object := range compiled.artifact.Objects {
+				switch object.Name {
+				case "unit.obj":
+					current.unit = len(object.Bytes)
+				case "runtime.obj":
+					current.runtime = len(object.Bytes)
+				}
+			}
+			if current.exe == 0 || current.unit == 0 || current.runtime == 0 {
+				t.Fatalf("incomplete parser cursor artifacts: %+v", current)
+			}
+			if !wrapped {
+				baseline[profile.Name] = current
+			} else {
+				previous := baseline[profile.Name]
+				t.Logf("parser cursor %s: baseline=%+v wrapped=%+v delta=%+v", profile.Name, previous, current,
+					sizes{exe: current.exe - previous.exe, unit: current.unit - previous.unit, runtime: current.runtime - previous.runtime})
+			}
 		}
 	}
 }
