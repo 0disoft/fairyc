@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/lexer"
@@ -102,7 +103,7 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	outcome, err := cdriver.ExecuteWindowsHost(artifact)
+	outcome, err := cdriver.ExecuteWindowsHostWithTimeout(artifact, 2*time.Minute)
 	if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
 		t.Fatalf("identical-C scanner triads: %+v %v", outcome, err)
 	}

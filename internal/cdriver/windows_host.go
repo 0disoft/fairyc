@@ -763,6 +763,18 @@ func ExecuteWindowsHost(artifact WindowsHostArtifact) (WindowsHostOutcome, error
 	return executeWindowsMSVCArtifact(artifact, "MSVC host")
 }
 
+// ExecuteWindowsHostWithTimeout gives bounded long-running host probes more time
+// without changing the 60-second default for ordinary target execution.
+func ExecuteWindowsHostWithTimeout(artifact WindowsHostArtifact, timeout time.Duration) (WindowsHostOutcome, error) {
+	if timeout <= 0 || timeout > 2*time.Minute {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC host probe timeout must be greater than zero and at most %s", 2*time.Minute)
+	}
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC host execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact, "MSVC host", nil, nil, timeout)
+}
+
 // ExecuteWindowsMSVCTarget runs one temporary PE built for the declared
 // x86_64-windows-msvc target and returns its exact i32 exit bits and bounded output.
 func ExecuteWindowsMSVCTarget(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {

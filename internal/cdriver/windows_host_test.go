@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+func TestExecuteWindowsHostWithTimeoutBounds(t *testing.T) {
+	t.Parallel()
+	for _, timeout := range []time.Duration{0, -time.Second, 2*time.Minute + time.Nanosecond} {
+		if _, err := ExecuteWindowsHostWithTimeout(WindowsHostArtifact{}, timeout); err == nil ||
+			!strings.Contains(err.Error(), "greater than zero and at most 2m0s") {
+			t.Fatalf("timeout %s: %v", timeout, err)
+		}
+	}
+}
+
 func TestExecuteWindowsMSVCTargetWithInputRejectsNilInput(t *testing.T) {
 	t.Parallel()
 	if _, err := ExecuteWindowsMSVCTargetWithInput(WindowsHostArtifact{}, nil); err == nil ||

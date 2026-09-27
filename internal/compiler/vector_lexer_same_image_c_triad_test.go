@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/lexer"
@@ -114,7 +115,7 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 		} else if artifact.Toolchain.Version != toolchainVersion {
 			t.Fatal("triad toolchain changed between images")
 		}
-		outcome, err := cdriver.ExecuteWindowsHost(artifact)
+		outcome, err := cdriver.ExecuteWindowsHostWithTimeout(artifact, 2*time.Minute)
 		if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" {
 			t.Fatalf("%s C/Fairy/C triads: %+v %v", variant.name, outcome, err)
 		}

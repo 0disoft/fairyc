@@ -150,3 +150,11 @@ or fails, without retry or exclusion. Run one matching C/Fairy/C comparison
 only if both C-only sessions pass. Longer warmup tests one environmental
 hypothesis; it does not itself admit vector iteration or decide standalone
 EXE size.
+
+The first full eight-warmup C-only execution hit the probe driver's 60-second
+process timeout before returning a receipt. No timing samples or verdict were
+retained. The harness now requests a bounded two-minute host-probe timeout;
+ordinary native execution keeps its existing 60-second default. This changes
+only the outer execution deadline, not the scanner calls, warmup count, sample
+selection, or admission limits. The first complete run under this condition
+will still be retained whether it passes or fails.
