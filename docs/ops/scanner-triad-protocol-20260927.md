@@ -193,3 +193,9 @@ statistic is a nominal 96.80% one-sided upper bound. Adjacent scanner calls
 may be correlated, so these percentages are **not** a guarantee of coverage
 on this host. A passing result would be a robust local runtime screen, not
 automatic public admission or a reason to erase earlier failed controls.
+
+The [first complete robust result](scanner-robust-triad-result-20260927.md)
+passed both new C-only central intervals and both Fairy/C upper bounds in one
+matched execution. The vector image still failed the historical 10% full-span
+stability rule. The raw receipts and both verdicts are retained separately;
+compiler-time and remaining feature-admission gates are not decided here.

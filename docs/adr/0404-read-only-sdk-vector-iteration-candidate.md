@@ -858,6 +858,16 @@ full spans. Its gated C/Fairy/C measurement was not run. More startup warmup
 does not supply the missing 8% runtime verdict; the private source form
 remains closed pending a stable environment or a different predeclared control.
 
+The [first separately predeclared robust triad result](../ops/scanner-robust-triad-result-20260927.md)
+passed both C-only central null intervals and the unchanged 1.08 Fairy/C
+upper-bound screen in a matched optimized MSVC run. The indexed and vector
+upper ratios were 0.99522 and 1.00908. The vector image's 13.41% full span
+still fails the historical 10% stability rule, and correlated adjacent calls
+limit the statistical interpretation. This is a local runtime screen, not
+public admission: compiler check/build cost and the remaining source,
+ownership, failure and unused-feature gates require separate decisions. The
+standalone 8% EXE-size result remains independent of the combined probe image.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
