@@ -27,9 +27,11 @@ type scannerBuildCostRow struct {
 // Compares fresh indexed and private vector-loop source through optimized
 // Windows native image construction. Warmup and lane order are fixed in advance.
 func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
-	nullControl := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_NULL") == "1"
+	plainNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_NULL") == "1"
+	affinityNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_AFFINITY_NULL") == "1"
+	nullControl := plainNull || affinityNull
 	candidateComparison := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_COST") == "1"
-	if nullControl && candidateComparison {
+	if plainNull && affinityNull || nullControl && candidateComparison {
 		t.Fatal("choose exactly one scanner build-cost mode")
 	}
 	if !nullControl && !candidateComparison {
@@ -37,6 +39,19 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
+	}
+	affinityMask := ""
+	if affinityNull {
+		mask, restore, err := pinScannerBuildLowestAllowedCPU()
+		if err != nil {
+			t.Fatal(err)
+		}
+		affinityMask = mask
+		t.Cleanup(func() {
+			if err := restore(); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
@@ -118,6 +133,13 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 	if nullControl {
 		report["clone_sha256"] = report["vector_sha256"]
 		delete(report, "vector_sha256")
+	}
+	if affinityNull {
+		report["schema"] = "fairyc.vector-lexer-build-affinity-null/v1"
+		report["affinity_mode"] = "lowest-allowed-logical-processor"
+		report["affinity_mask"] = affinityMask
+		report["scope"] = scope + " The Go test process is pinned to one allowed logical processor before source preparation; Windows child processes inherit its affinity. The original mask is restored after the test. Priority class is unchanged."
+		prefix = "VECTOR_LEXER_BUILD_AFFINITY_NULL "
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
