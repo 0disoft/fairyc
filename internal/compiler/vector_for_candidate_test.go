@@ -56,6 +56,61 @@ fn i32 main() {
 	}
 }
 
+func TestPrivateVectorSDKCandidateLoopAcrossPackageBoundary(t *testing.T) {
+	const client = `module main;
+import std::vec as v;
+import std::bytes as bytes;
+import support as s;
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+fn i32 exercise() {
+    var v::Vec<i32> values = v::empty<i32>();
+    assert(switch (v::push<i32>(ref mut values, 3)) { case .ok(_): { true } case .err(_): { false } });
+    assert(switch (v::push<i32>(ref mut values, 4)) { case .ok(_): { true } case .err(_): { false } });
+    return s::sum(ref values);
+}
+fn i32 main() {
+    let i32 result = exercise();
+    assert(unsafe { clean() } == 1);
+    return result;
+}`
+	const support = `module support;
+import std::vec as v;
+import std::bytes as bytes;
+pub fn i32 sum(ref v::Vec<i32> values) {
+    var i32 total = 0;
+    for (let ref i32 item in values) { total += *item; }
+    return total;
+}`
+	input, coordinates := vectorSDKInputWithCandidate(t, client, true)
+	input.Files = append(input.Files, parseCompilerFile(t, 2, "support.fy", support))
+	input.Imports = append(input.Imports,
+		semantic.PackageImport{FromPackage: 1, ImportPath: "support", ToPackage: 2},
+		semantic.PackageImport{FromPackage: 2, ImportPath: "std::vec", ToPackage: 3},
+		semantic.PackageImport{FromPackage: 2, ImportPath: "std::bytes", ToPackage: 3},
+	)
+	supportCoordinate := coordinates[1]
+	supportCoordinate[0] ^= 4
+	coordinates[2] = supportCoordinate
+
+	stable, err := compiler.AnalyzeSDKStoragePackages(input, coordinates,
+		genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+	if err != nil || len(stable.Analysis.Semantic.Unsupported) == 0 {
+		t.Fatalf("stable source gate changed: %v %+v", err, stable.Analysis.Semantic)
+	}
+	candidate, err := compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+		genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+	if err != nil || candidate.Analysis.Semantic.CompletedThrough != semantic.PhaseFlow {
+		t.Fatalf("cross-package candidate: %v diagnostics=%+v unsupported=%+v", err,
+			candidate.Analysis.Semantic.Diagnostics, candidate.Analysis.Semantic.Unsupported)
+	}
+	result, err := compiler.LowerAnalyzedStorageTransfers(candidate.Analysis)
+	if err != nil || !result.Verified {
+		t.Fatalf("cross-package verified MIR: %v %+v", err, result.Semantic.Diagnostics)
+	}
+	runVectorStorageMIRNativeExit(t, result.MIR,
+		hir.QualifiedModulePath(1, "main")+"::main", vectorForNativeProbe, true, 7)
+}
+
 func TestPrivateVectorSDKCandidateLoopRejectsUnsafeSource(t *testing.T) {
 	for _, sample := range []struct {
 		name            string
