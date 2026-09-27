@@ -983,6 +983,11 @@ emission without the off-CPU waits or MSVC child processes in the failed
 wall-time controls. It must pass an identical-source null before any vector
 candidate comparison. Even a passing CPU screen would not settle complete
 build time, native compilation, or the independent-C runtime gate.
+Its [first identical-source result](../ops/scanner-process-cpu-null-result-20260927.md)
+failed: the 7th and 18th clone/index ratios were 0.95946 and 1.03488, outside
+the fixed `[0.98, 1.02]` band. Every recorded CPU duration was quantized to
+15.625 ms on this host. No candidate run followed, and compiler-cost parity
+remains unproven.
 
 ## Proposed first boundary
 
