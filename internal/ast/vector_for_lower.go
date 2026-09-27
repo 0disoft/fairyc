@@ -23,31 +23,33 @@ func prepareVectorForBlock(block *Block, alias string) {
 		return
 	}
 	for index := range block.Statements {
-		statement := &block.Statements[index]
-		if statement.ByteFor != nil {
-			prepareVectorForBlock(statement.ByteFor.Body, alias)
-			if statement.ByteFor.Type.Kind == TypeKindReference && !statement.ByteFor.Type.Mutable {
-				statement.ByteFor.PreparedVector = vectorForAsBlock(statement.ByteFor, alias)
-			}
-			continue
-		}
-		if statement.For != nil {
-			prepareVectorForBlock(statement.For.Body, alias)
-			if statement.For.Initializer != nil {
-				prepareVectorForExpression(statement.For.Initializer.Expression, alias)
-			}
-			prepareVectorForExpression(statement.For.Condition, alias)
-			if statement.For.Post != nil {
-				prepareVectorForExpression(statement.For.Post.Expression, alias)
-			}
-		}
-		if statement.Binding != nil {
-			prepareVectorForExpression(statement.Binding.Expression, alias)
-		}
-		prepareVectorForExpression(statement.Target, alias)
-		prepareVectorForExpression(statement.Expression, alias)
+		prepareVectorForStatement(&block.Statements[index], alias)
 	}
 	prepareVectorForExpression(block.Tail, alias)
+}
+
+func prepareVectorForStatement(statement *Statement, alias string) {
+	if statement == nil {
+		return
+	}
+	if statement.ByteFor != nil {
+		prepareVectorForBlock(statement.ByteFor.Body, alias)
+		if statement.ByteFor.Type.Kind == TypeKindReference && !statement.ByteFor.Type.Mutable {
+			statement.ByteFor.PreparedVector = vectorForAsBlock(statement.ByteFor, alias)
+		}
+		return
+	}
+	if statement.For != nil {
+		prepareVectorForStatement(statement.For.Initializer, alias)
+		prepareVectorForExpression(statement.For.Condition, alias)
+		prepareVectorForStatement(statement.For.Post, alias)
+		prepareVectorForBlock(statement.For.Body, alias)
+	}
+	if statement.Binding != nil {
+		prepareVectorForExpression(statement.Binding.Expression, alias)
+	}
+	prepareVectorForExpression(statement.Target, alias)
+	prepareVectorForExpression(statement.Expression, alias)
 }
 
 func prepareVectorForExpression(expression *Expression, alias string) {
