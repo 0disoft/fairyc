@@ -35,6 +35,7 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	highPriority := scannerTriadHighPriority(t)
 	lowestAllowed := scannerTriadLowestAllowed(t, highPriority)
 	extendedWarmup := scannerTriadExtendedWarmup(t, lowestAllowed)
+	robustControl := scannerTriadRobustControl(t, extendedWarmup)
 	measuredTriads, rounds := 24, 250000
 	if smoke {
 		measuredTriads, rounds = 1, 1000
@@ -173,6 +174,11 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 		}
 		if !smoke {
 			image["passes_10_percent_stability"] = span <= 0.10
+			if robustControl {
+				upper := scannerTriadRobustRuntimeUpper(ratios)
+				image["robust_median_upper"] = upper
+				image["passes_robust_runtime"] = upper <= 1.08
+			}
 		}
 		images = append(images, image)
 	}
@@ -199,6 +205,9 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	if extendedWarmup {
 		report["warmup_triads"] = 8
 		report["scope"] = "Each combined image pins to the lowest allowed logical processor at checked highest thread priority; seven untimed and one retained timed warmup C-Fairy-C triads precede all 24 measured triads. Every call checks the Go-oracle checksum. Run only after the matching eight-warmup C-only control passes; no retry or exclusion. Combined EXE size is not the standalone budget."
+	}
+	if robustControl {
+		report["robust_method"] = "ordered-median-bounds-24/v1"
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {

@@ -35,6 +35,7 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 	highPriority := scannerTriadHighPriority(t)
 	lowestAllowed := scannerTriadLowestAllowed(t, highPriority)
 	extendedWarmup := scannerTriadExtendedWarmup(t, lowestAllowed)
+	robustControl := scannerTriadRobustControl(t, extendedWarmup)
 	triads, rounds := 24, 250000
 	if smoke {
 		triads, rounds = 1, 1000
@@ -150,6 +151,12 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		}
 		if !smoke {
 			runReport["passes_null_control"] = span <= 0.10 && math.Abs(median-1) <= 0.02
+			if robustControl {
+				lower, upper := scannerTriadRobustNullBounds(ratios)
+				runReport["robust_median_lower"] = lower
+				runReport["robust_median_upper"] = upper
+				runReport["passes_robust_null_control"] = lower >= 0.98 && upper <= 1.02
+			}
 		}
 		runs = append(runs, runReport)
 	}
@@ -174,6 +181,9 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 	if extendedWarmup {
 		report["warmup_triads"] = 8
 		report["scope"] = "Two complete C-C-C runs on the lowest allowed logical processor at checked highest thread priority; eight untimed warmup triads per run. Every measured triad and checksum is retained without retry or exclusion. This does not measure Fairy/C runtime or executable size."
+	}
+	if robustControl {
+		report["robust_method"] = "ordered-median-bounds-24/v1"
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
@@ -213,6 +223,32 @@ func scannerTriadExtendedWarmup(t *testing.T, lowestAllowed bool) bool {
 		t.Fatal("eight-triad warmup requires lowest-allowed affinity and checked high priority")
 	}
 	return mode == "8"
+}
+
+func scannerTriadRobustControl(t *testing.T, extendedWarmup bool) bool {
+	t.Helper()
+	mode := os.Getenv("FAIRYC_SCANNER_TRIAD_ROBUST")
+	if mode != "" && mode != "1" {
+		t.Fatalf("unknown scanner triad robust mode %q", mode)
+	}
+	if mode == "1" && !extendedWarmup {
+		t.Fatal("robust triads require the separate eight-warmup condition")
+	}
+	return mode == "1"
+}
+
+func scannerTriadRobustNullBounds(sortedRatios []float64) (float64, float64) {
+	if len(sortedRatios) != 24 {
+		panic("robust scanner null control requires 24 sorted triads")
+	}
+	return sortedRatios[6], sortedRatios[17]
+}
+
+func scannerTriadRobustRuntimeUpper(sortedRatios []float64) float64 {
+	if len(sortedRatios) != 24 {
+		panic("robust scanner runtime control requires 24 sorted triads")
+	}
+	return sortedRatios[16]
 }
 
 const scannerTriadHighPrioritySupport = `

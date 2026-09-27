@@ -163,3 +163,33 @@ The [first complete eight-warmup C-only result](scanner-eight-warmup-triad-resul
 failed both sessions at 12.48% and 26.02% full spans. No full C/Fairy/C
 comparison was run under this condition. Longer startup warmup did not close
 the 8% runtime gate on this host.
+
+## Central-ratio order-statistic follow-up
+
+The original full-span rule fails when one C/C/C call is interrupted even if
+the central position bias remains close to one. The eight-warmup receipt is
+exploratory evidence for this failure mode; it is **not** rescored as a pass.
+This separate opt-in experiment keeps the eight-warmup source, fixed input,
+250,000 rounds, optimized MSVC profile, lowest-allowed processor, checked
+highest thread priority, exact checksums, two 24-triad C-only sessions and
+24 measured C/Fairy/C triads per Fairy image. It retains every sample and the
+historical full-span verdict. Only new receipts marked
+`ordered-median-bounds-24/v1` use the rule below.
+
+Sort each session's 24 middle/outer geometric-mean ratios. The C-only null
+control passes only if its **7th through 18th** order-statistic interval lies
+entirely inside `[0.98, 1.02]` in **both** complete sessions. Only then run
+the C/Fairy/C comparison once under the same condition. For each image, the
+**17th** sorted Fairy/C ratio must be at most `1.08`; this does not add a
+margin to the cumulative 8% runtime limit. Processor, QPC frequency, Go/MSVC
+identities, source input, rounds, checksum and profile must match the control.
+The independent standalone EXE-size and remaining build/behavior gates stay
+separate. A failed interval or environment match is retained, not retried or
+filtered.
+
+For 24 independent, identically distributed observations, the null interval
+has nominal 97.73% coverage for the population median and the 17th order
+statistic is a nominal 96.80% one-sided upper bound. Adjacent scanner calls
+may be correlated, so these percentages are **not** a guarantee of coverage
+on this host. A passing result would be a robust local runtime screen, not
+automatic public admission or a reason to erase earlier failed controls.
