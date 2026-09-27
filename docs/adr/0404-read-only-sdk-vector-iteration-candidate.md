@@ -61,6 +61,13 @@ result. The C probe observes no live vector allocation after function return.
 This proves these control and cleanup cases, not the representative lexer
 workload or the cumulative C-relative cost gate.
 
+A target-independent compiler preflight now lowers a private `Vec<i32>` loop
+and its explicit-index equivalent to verified MIR, then emits both for the
+Linux GNU C11 profile on the current host. Both forms emit the same number of
+functions and the same foreign-symbol set. This checks the Linux C emission
+boundary for one scalar loop; it does not compile, link or execute a Linux
+binary, and Linux native behavior remains unverified.
+
 The private native parity test also compares an early `return` from a scalar
 vector loop and, separately, `?` propagation while a vector owns two
 `bytes::Buffer` elements.
