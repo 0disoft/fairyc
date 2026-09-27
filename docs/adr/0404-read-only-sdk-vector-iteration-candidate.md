@@ -210,6 +210,11 @@ there without changing the authenticated SDK owner. Generic preparation rejects
 that declaration before semantic loop checking because aggregates outside the
 embedded SDK remain closed. These fixtures cover their exact package graphs,
 not every possible forged provider or cross-package identity shape.
+A separate resource case creates `Vec<support::Mark>` in the client and
+iterates it in the support package. The private loop and explicit-index form
+both pass Flow, verified MIR and low/optimized MSVC with the same sum, reverse
+element cleanup order and no retained vector allocation. This covers that
+resource-bearing package graph, not arbitrary public resource types.
 An explicit `ref holder.values` place borrow over a resource field also matches
 the indexed form: both pass Flow and verified MIR and return the same result
 with vector cleanup under low and optimized MSVC. The test fills the vector

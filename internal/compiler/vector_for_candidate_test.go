@@ -112,6 +112,97 @@ pub fn i32 sum(ref v::Vec<i32> values) {
 		hir.QualifiedModulePath(1, "main")+"::main", vectorForNativeProbe, true, 7)
 }
 
+func TestPrivateVectorSDKCandidateResourceLoopAcrossPackageBoundary(t *testing.T) {
+	const probe = `
+static const int32_t expected_drops[] = {2, 1};
+static size_t drop_position = 0;
+static int drop_mismatch = 0;
+int32_t fairyc_fixture_vector_record(int32_t id) {
+    if (drop_position >= 2 || expected_drops[drop_position] != id) drop_mismatch = 1;
+    drop_position++;
+    return id;
+}
+int32_t fairyc_fixture_vector_clean(void) {
+    return !drop_mismatch && drop_position == 2 && vector_live == 0 &&
+        vector_allocations == vector_frees ? 1 : 0;
+}
+`
+	const client = `module main;
+import std::vec as v;
+import std::bytes as bytes;
+import support as s;
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+fn i32 exercise() {
+    var v::Vec<s::Mark> values = v::empty<s::Mark>();
+    assert(switch (v::push<s::Mark>(ref mut values, s::make(1))) { case .ok(_): { true } case .err(_): { false } });
+    assert(switch (v::push<s::Mark>(ref mut values, s::make(2))) { case .ok(_): { true } case .err(_): { false } });
+    return s::sum(ref values);
+}
+fn i32 main() {
+    let i32 result = exercise();
+    assert(unsafe { clean() } == 1);
+    return result;
+}`
+	const supportHead = `module support;
+import std::vec as v;
+import std::bytes as bytes;
+@link_name("fairyc_fixture_vector_record") unsafe extern C fn i32 record(i32 id);
+pub resource Mark { i32 id; cleanup { let i32 logged = unsafe { record(this.id) }; } }
+pub fn Mark make(i32 id) { return Mark { .id = id }; }
+pub fn i32 sum(ref v::Vec<Mark> values) {
+    var i32 total = 0;
+`
+	const supportTail = `
+    return total;
+}`
+	for _, form := range []struct {
+		name      string
+		candidate bool
+		loop      string
+	}{
+		{name: "vector for", candidate: true,
+			loop: `    for (let ref Mark item in values) { total += item.id; }`},
+		{name: "explicit index", loop: `    let usize bound = v::len<Mark>(values);
+    for (var usize index = 0; index < bound; index += 1) {
+        let ref Mark item = v::at<Mark>(values, index);
+        total += item.id;
+    }`},
+	} {
+		t.Run(form.name, func(t *testing.T) {
+			input, coordinates := vectorSDKInputWithCandidate(t, client, true)
+			input.Files = append(input.Files, parseCompilerFile(t, 2, "support.fy", supportHead+form.loop+supportTail))
+			input.Imports = append(input.Imports,
+				semantic.PackageImport{FromPackage: 1, ImportPath: "support", ToPackage: 2},
+				semantic.PackageImport{FromPackage: 2, ImportPath: "std::vec", ToPackage: 3},
+				semantic.PackageImport{FromPackage: 2, ImportPath: "std::bytes", ToPackage: 3},
+			)
+			supportCoordinate := coordinates[1]
+			supportCoordinate[0] ^= 4
+			coordinates[2] = supportCoordinate
+			var analysis compiler.GenericAnalysis
+			var err error
+			if form.candidate {
+				analysis, err = compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+			} else {
+				analysis, err = compiler.AnalyzeSDKStoragePackages(input, coordinates,
+					genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+			}
+			if err != nil || analysis.Analysis.Semantic.CompletedThrough != semantic.PhaseFlow ||
+				len(analysis.Analysis.Semantic.Diagnostics) != 0 || len(analysis.Analysis.Semantic.Unsupported) != 0 {
+				t.Fatalf("cross-package resource source and Flow: %v diagnostics=%+v unsupported=%+v", err,
+					analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+			}
+			result, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+			if err != nil || !result.Verified {
+				t.Fatalf("cross-package resource verified MIR: %v diagnostics=%+v", err, result.Semantic.Diagnostics)
+			}
+			runVectorStorageMIRNativeExit(t, result.MIR,
+				hir.QualifiedModulePath(1, "main")+"::main", probe, true, 3)
+		})
+	}
+}
+
 func TestPrivateVectorSDKCandidateFieldPlaceNativeParity(t *testing.T) {
 	const header = `module main;
 import std::vec as v;
