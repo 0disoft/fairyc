@@ -321,7 +321,6 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	}
 
 	visited := make(map[syntax.NodeID]struct{}, len(tree.Nodes))
-	hasByteFor := false
 	var walk func(syntax.NodeID)
 	walk = func(id syntax.NodeID) {
 		if id == syntax.NoNode {
@@ -334,9 +333,6 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		node, ok := tree.Node(id)
 		if !ok {
 			return
-		}
-		if node.Kind == syntax.KindByteFor {
-			hasByteFor = true
 		}
 		if node.Kind == syntax.KindBinding {
 			module.Bindings = append(module.Bindings, lowerBinding(tree, node))
@@ -353,9 +349,7 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		}
 	}
 	walk(tree.Root)
-	if hasByteFor {
-		prepareVectorForModule(module)
-	}
+	prepareVectorForModule(module, tree.Nodes)
 	return module, nil
 }
 

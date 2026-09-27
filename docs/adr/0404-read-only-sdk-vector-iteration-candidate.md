@@ -199,8 +199,9 @@ source with the private parser path off and on. Generated C is byte-equal at
 unused-mode native image growth for this workload; it does not measure object
 file sizes, analysis overhead or a future integrated stable compiler path.
 
-AST lowering now notices `byte-for` nodes during its existing CST walk and
-skips the vector-candidate preparation traversal when a file has none. This
+After resolving an actual `std::vec` import alias, AST lowering scans the
+compact CST for `byte-for` and skips the vector-candidate AST traversal when
+none exists. Files without that import avoid the extra scan entirely. This
 removes an unused candidate-only walk from the indexed scanner source without
 changing source eligibility. The current indexed scanner still produces equal
 stable/candidate generated C and low/optimized MSVC PE footprints: 369,719

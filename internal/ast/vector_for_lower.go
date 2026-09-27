@@ -8,7 +8,7 @@ const vectorForOwnerName = "\x00fairyc_vector_for_owner"
 const vectorForBoundName = "\x00fairyc_vector_for_bound"
 const vectorForIndexName = "\x00fairyc_vector_for_index"
 
-func prepareVectorForModule(module *Module) {
+func prepareVectorForModule(module *Module, nodes []syntax.Node) {
 	if module == nil {
 		return
 	}
@@ -20,6 +20,16 @@ func prepareVectorForModule(module *Module) {
 		}
 	}
 	if alias == "" {
+		return
+	}
+	hasByteFor := false
+	for _, node := range nodes {
+		if node.Kind == syntax.KindByteFor {
+			hasByteFor = true
+			break
+		}
+	}
+	if !hasByteFor {
 		return
 	}
 	for index := range module.Functions {
