@@ -11,16 +11,16 @@ import (
 
 func TestPrivateVectorSDKCandidateResourceLoopRegionExits(t *testing.T) {
 	const probe = `
-static const int32_t expected_drops[] = {3, 2, 1, 3, 2, 1};
-static size_t drop_position = 0;
-static int drop_mismatch = 0;
+static const int32_t expected_events[] = {4, 3, 2, 1, 4, 3, 2, 1};
+static size_t event_position = 0;
+static int event_mismatch = 0;
 int32_t fairyc_fixture_region_record(int32_t id) {
-    if (drop_position >= 6 || expected_drops[drop_position] != id) drop_mismatch = 1;
-    drop_position++;
+    if (event_position >= 8 || expected_events[event_position] != id) event_mismatch = 1;
+    event_position++;
     return id;
 }
 int32_t fairyc_fixture_vector_clean(void) {
-    return !drop_mismatch && drop_position == 6 && vector_live == 0 &&
+    return !event_mismatch && event_position == 8 && vector_live == 0 &&
         vector_allocations >= 4 && vector_allocations == vector_frees ? 1 : 0;
 }
 `
@@ -31,6 +31,7 @@ import std::alloc as alloc;
 @link_name("fairyc_fixture_region_record") unsafe extern C fn i32 record(i32 id);
 @link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
 fn i32 observe(i32 id) { return unsafe { record(id) }; }
+fn void emit(i32 id) { discard observe(id); }
 resource Mark { i32 id; cleanup { let i32 logged = observe(this.id); } }
 fn i32 number(ref Mark item) { return item.id; }
 fn Result<i32, i32> step(i32 value) { return .err(value - 61); }
@@ -47,6 +48,7 @@ fn Result<i32, i32> route(alloc::Arena owned, bool propagate) {
         region scratch in ref mut arena {
             let Mark inner = Mark { .id = 3 };
             discard scratch.place(7);
+            defer emit(4);
             if (propagate) { let i32 value = step(66)?; }
             return .ok(42);
         }
