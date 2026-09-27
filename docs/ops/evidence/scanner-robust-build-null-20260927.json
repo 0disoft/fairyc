@@ -1,0 +1,1518 @@
+{
+  "builds_per_lane_per_pair": 2,
+  "clone_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "go": "go1.26.4",
+  "gomaxprocs": 1,
+  "indexed_sha256": "2a61a99092b59c1c30cacd1503945f32c9f09ff0467a5f8436f180089fb9ef95",
+  "main_sha256": "e1a93b92594fa00e7e42a51ac183b8c4a8d851efe223a2ab1d2441c750e856b4",
+  "measured_pairs": 24,
+  "msvc": "14.51.36231",
+  "pair_order": "A-B-B-A / B-A-A-B alternating",
+  "profile": "optimized",
+  "rows": [
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 449521400,
+      "build": {
+        "emit_ns": 263621800,
+        "support_ns": 543000,
+        "native_ns": 2321018700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 404649800,
+      "build": {
+        "emit_ns": 200552700,
+        "support_ns": 999300,
+        "native_ns": 1411948400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 410237300,
+      "build": {
+        "emit_ns": 201276200,
+        "support_ns": 0,
+        "native_ns": 1360547800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 0,
+      "warmup": true,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 363948400,
+      "build": {
+        "emit_ns": 205962800,
+        "support_ns": 0,
+        "native_ns": 1336508100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 403426500,
+      "build": {
+        "emit_ns": 192880400,
+        "support_ns": 0,
+        "native_ns": 1422668200
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 364964800,
+      "build": {
+        "emit_ns": 189798900,
+        "support_ns": 0,
+        "native_ns": 1392383200
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 381917000,
+      "build": {
+        "emit_ns": 207696300,
+        "support_ns": 548400,
+        "native_ns": 1394617700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 1,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 390258400,
+      "build": {
+        "emit_ns": 195262400,
+        "support_ns": 0,
+        "native_ns": 1401314000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 405988300,
+      "build": {
+        "emit_ns": 233300400,
+        "support_ns": 548200,
+        "native_ns": 1677188500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 460323900,
+      "build": {
+        "emit_ns": 241051500,
+        "support_ns": 0,
+        "native_ns": 1469292600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 367161800,
+      "build": {
+        "emit_ns": 198091000,
+        "support_ns": 0,
+        "native_ns": 1354914500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 2,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 372101800,
+      "build": {
+        "emit_ns": 182927900,
+        "support_ns": 0,
+        "native_ns": 1364476000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 361699500,
+      "build": {
+        "emit_ns": 181547700,
+        "support_ns": 546300,
+        "native_ns": 2149730000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 522613100,
+      "build": {
+        "emit_ns": 349497000,
+        "support_ns": 0,
+        "native_ns": 1592711000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 391898700,
+      "build": {
+        "emit_ns": 230864400,
+        "support_ns": 0,
+        "native_ns": 1461395100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 3,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 409268900,
+      "build": {
+        "emit_ns": 187355200,
+        "support_ns": 0,
+        "native_ns": 1424274700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 394384400,
+      "build": {
+        "emit_ns": 182804500,
+        "support_ns": 0,
+        "native_ns": 1367724300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 363957300,
+      "build": {
+        "emit_ns": 179657800,
+        "support_ns": 0,
+        "native_ns": 1451788100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 385359500,
+      "build": {
+        "emit_ns": 231975900,
+        "support_ns": 0,
+        "native_ns": 1483132800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 4,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 419334300,
+      "build": {
+        "emit_ns": 195644700,
+        "support_ns": 0,
+        "native_ns": 1429997000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 397423800,
+      "build": {
+        "emit_ns": 196421300,
+        "support_ns": 0,
+        "native_ns": 1507379400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 409715000,
+      "build": {
+        "emit_ns": 193401000,
+        "support_ns": 0,
+        "native_ns": 1490885400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 431742200,
+      "build": {
+        "emit_ns": 199703000,
+        "support_ns": 0,
+        "native_ns": 1402207800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 5,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 366883000,
+      "build": {
+        "emit_ns": 189475600,
+        "support_ns": 0,
+        "native_ns": 1455637400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 457126500,
+      "build": {
+        "emit_ns": 226865500,
+        "support_ns": 1001600,
+        "native_ns": 1675355800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 455524600,
+      "build": {
+        "emit_ns": 266322900,
+        "support_ns": 0,
+        "native_ns": 1670941600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 423629400,
+      "build": {
+        "emit_ns": 223040700,
+        "support_ns": 0,
+        "native_ns": 1446044900
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 6,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 427607900,
+      "build": {
+        "emit_ns": 187429500,
+        "support_ns": 537800,
+        "native_ns": 1393053000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 760238400,
+      "build": {
+        "emit_ns": 471998200,
+        "support_ns": 558400,
+        "native_ns": 2567526800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 556048500,
+      "build": {
+        "emit_ns": 233666800,
+        "support_ns": 0,
+        "native_ns": 1492638800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 366858500,
+      "build": {
+        "emit_ns": 188484600,
+        "support_ns": 0,
+        "native_ns": 1430495200
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 7,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 373477200,
+      "build": {
+        "emit_ns": 197371500,
+        "support_ns": 0,
+        "native_ns": 1419578700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 367804900,
+      "build": {
+        "emit_ns": 192720700,
+        "support_ns": 0,
+        "native_ns": 1487338100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 385392200,
+      "build": {
+        "emit_ns": 205569400,
+        "support_ns": 0,
+        "native_ns": 1466573700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 385543400,
+      "build": {
+        "emit_ns": 208060700,
+        "support_ns": 0,
+        "native_ns": 1497424000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 8,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 357609500,
+      "build": {
+        "emit_ns": 214251300,
+        "support_ns": 0,
+        "native_ns": 1437211500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 9,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 439729400,
+      "build": {
+        "emit_ns": 216303500,
+        "support_ns": 0,
+        "native_ns": 1423330500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 9,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 455219500,
+      "build": {
+        "emit_ns": 186472500,
+        "support_ns": 0,
+        "native_ns": 1422751800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 9,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 371879400,
+      "build": {
+        "emit_ns": 182862100,
+        "support_ns": 0,
+        "native_ns": 1382649300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 9,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 379255600,
+      "build": {
+        "emit_ns": 203557900,
+        "support_ns": 0,
+        "native_ns": 1348828600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 10,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 371606800,
+      "build": {
+        "emit_ns": 178812000,
+        "support_ns": 0,
+        "native_ns": 1383128100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 10,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 386151900,
+      "build": {
+        "emit_ns": 173076600,
+        "support_ns": 0,
+        "native_ns": 1457777100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 10,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 388294700,
+      "build": {
+        "emit_ns": 186308400,
+        "support_ns": 0,
+        "native_ns": 1745789600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 10,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 432619900,
+      "build": {
+        "emit_ns": 243940700,
+        "support_ns": 0,
+        "native_ns": 2019593900
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 11,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 462263300,
+      "build": {
+        "emit_ns": 257018400,
+        "support_ns": 0,
+        "native_ns": 1478228200
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 11,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 401096300,
+      "build": {
+        "emit_ns": 263795300,
+        "support_ns": 1000100,
+        "native_ns": 1427639300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 11,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 386005000,
+      "build": {
+        "emit_ns": 190401600,
+        "support_ns": 0,
+        "native_ns": 1358315800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 11,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 369502200,
+      "build": {
+        "emit_ns": 236144400,
+        "support_ns": 0,
+        "native_ns": 1407127600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 12,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 367939400,
+      "build": {
+        "emit_ns": 186274300,
+        "support_ns": 0,
+        "native_ns": 1341317600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 12,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 353855800,
+      "build": {
+        "emit_ns": 193288900,
+        "support_ns": 0,
+        "native_ns": 1403873900
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 12,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 404342900,
+      "build": {
+        "emit_ns": 226956500,
+        "support_ns": 0,
+        "native_ns": 1511186200
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 12,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 390003700,
+      "build": {
+        "emit_ns": 211395400,
+        "support_ns": 0,
+        "native_ns": 1521465800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 13,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 452563300,
+      "build": {
+        "emit_ns": 206311800,
+        "support_ns": 0,
+        "native_ns": 1661182000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 13,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 500103500,
+      "build": {
+        "emit_ns": 233102200,
+        "support_ns": 0,
+        "native_ns": 2016048400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 13,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 563818000,
+      "build": {
+        "emit_ns": 292243300,
+        "support_ns": 0,
+        "native_ns": 2152456400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 13,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 610540600,
+      "build": {
+        "emit_ns": 266237500,
+        "support_ns": 0,
+        "native_ns": 2321680000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 14,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 662960700,
+      "build": {
+        "emit_ns": 453491300,
+        "support_ns": 545300,
+        "native_ns": 2509540300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 14,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 665804500,
+      "build": {
+        "emit_ns": 812075600,
+        "support_ns": 512100,
+        "native_ns": 2879664600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 14,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 948615500,
+      "build": {
+        "emit_ns": 354871400,
+        "support_ns": 547300,
+        "native_ns": 2263387600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 14,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 531894100,
+      "build": {
+        "emit_ns": 267663900,
+        "support_ns": 0,
+        "native_ns": 1733944600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 15,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 513881000,
+      "build": {
+        "emit_ns": 250507700,
+        "support_ns": 0,
+        "native_ns": 1681805500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 15,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 467805500,
+      "build": {
+        "emit_ns": 239112700,
+        "support_ns": 0,
+        "native_ns": 1544622300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 15,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 474727900,
+      "build": {
+        "emit_ns": 256768900,
+        "support_ns": 0,
+        "native_ns": 1480895800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 15,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 473316500,
+      "build": {
+        "emit_ns": 274049000,
+        "support_ns": 0,
+        "native_ns": 1767429500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 16,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 489347400,
+      "build": {
+        "emit_ns": 258877700,
+        "support_ns": 540400,
+        "native_ns": 1662690400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 16,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 496949300,
+      "build": {
+        "emit_ns": 243111000,
+        "support_ns": 0,
+        "native_ns": 1822662100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 16,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 477995200,
+      "build": {
+        "emit_ns": 271805100,
+        "support_ns": 993300,
+        "native_ns": 1749462000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 16,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 459517300,
+      "build": {
+        "emit_ns": 258475400,
+        "support_ns": 6012800,
+        "native_ns": 1576269800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 17,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 463359500,
+      "build": {
+        "emit_ns": 242023000,
+        "support_ns": 998600,
+        "native_ns": 1504572500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 17,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 1257989300,
+      "build": {
+        "emit_ns": 1037727900,
+        "support_ns": 0,
+        "native_ns": 3434542100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 17,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 5840419800,
+      "build": {
+        "emit_ns": 3783854800,
+        "support_ns": 673900,
+        "native_ns": 3774279200
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 17,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 2209159900,
+      "build": {
+        "emit_ns": 7876568800,
+        "support_ns": 0,
+        "native_ns": 4364885600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 18,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 2672412000,
+      "build": {
+        "emit_ns": 1255981400,
+        "support_ns": 0,
+        "native_ns": 2695805100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 18,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 1133755700,
+      "build": {
+        "emit_ns": 699627900,
+        "support_ns": 0,
+        "native_ns": 2537898800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 18,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 1023990900,
+      "build": {
+        "emit_ns": 519770000,
+        "support_ns": 0,
+        "native_ns": 2631197000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 18,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 1173739200,
+      "build": {
+        "emit_ns": 474583800,
+        "support_ns": 0,
+        "native_ns": 2374794500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 19,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 764885200,
+      "build": {
+        "emit_ns": 504929900,
+        "support_ns": 5051800,
+        "native_ns": 2598699500
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 19,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 1157283400,
+      "build": {
+        "emit_ns": 963811300,
+        "support_ns": 0,
+        "native_ns": 2712009000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 19,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 882519400,
+      "build": {
+        "emit_ns": 501454400,
+        "support_ns": 0,
+        "native_ns": 2433465000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 19,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 719395200,
+      "build": {
+        "emit_ns": 513627800,
+        "support_ns": 0,
+        "native_ns": 2642252700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 20,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 917381000,
+      "build": {
+        "emit_ns": 432634600,
+        "support_ns": 0,
+        "native_ns": 2483008700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 20,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 776422200,
+      "build": {
+        "emit_ns": 493920100,
+        "support_ns": 0,
+        "native_ns": 2637656900
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 20,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 756799800,
+      "build": {
+        "emit_ns": 336329700,
+        "support_ns": 0,
+        "native_ns": 2251784400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 20,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 537383900,
+      "build": {
+        "emit_ns": 312319900,
+        "support_ns": 0,
+        "native_ns": 2136411100
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 21,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 471456300,
+      "build": {
+        "emit_ns": 253805200,
+        "support_ns": 0,
+        "native_ns": 1809966800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 21,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 437898900,
+      "build": {
+        "emit_ns": 240723000,
+        "support_ns": 0,
+        "native_ns": 1811359900
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 21,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 476643500,
+      "build": {
+        "emit_ns": 209643700,
+        "support_ns": 0,
+        "native_ns": 1594291600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 21,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 402519600,
+      "build": {
+        "emit_ns": 212011700,
+        "support_ns": 0,
+        "native_ns": 1406076700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 22,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 365210400,
+      "build": {
+        "emit_ns": 207125000,
+        "support_ns": 0,
+        "native_ns": 1528856600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 22,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 531028100,
+      "build": {
+        "emit_ns": 226148400,
+        "support_ns": 0,
+        "native_ns": 1826649700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 22,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 453327900,
+      "build": {
+        "emit_ns": 240527600,
+        "support_ns": 0,
+        "native_ns": 1853999000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 22,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 507964500,
+      "build": {
+        "emit_ns": 242872600,
+        "support_ns": 0,
+        "native_ns": 1582750300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 23,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index clone",
+      "check_ns": 396404700,
+      "build": {
+        "emit_ns": 209935800,
+        "support_ns": 0,
+        "native_ns": 1529440000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 23,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index",
+      "check_ns": 412566900,
+      "build": {
+        "emit_ns": 192145500,
+        "support_ns": 0,
+        "native_ns": 1614763700
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 23,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index",
+      "check_ns": 487535800,
+      "build": {
+        "emit_ns": 242067900,
+        "support_ns": 0,
+        "native_ns": 1956443300
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 23,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index clone",
+      "check_ns": 479839500,
+      "build": {
+        "emit_ns": 243134900,
+        "support_ns": 0,
+        "native_ns": 1733070600
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 24,
+      "warmup": false,
+      "order": 0,
+      "lane": "explicit index",
+      "check_ns": 402998400,
+      "build": {
+        "emit_ns": 237715300,
+        "support_ns": 0,
+        "native_ns": 1533180900
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 24,
+      "warmup": false,
+      "order": 1,
+      "lane": "explicit index clone",
+      "check_ns": 460110100,
+      "build": {
+        "emit_ns": 192710800,
+        "support_ns": 0,
+        "native_ns": 1528719400
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 24,
+      "warmup": false,
+      "order": 2,
+      "lane": "explicit index clone",
+      "check_ns": 499118900,
+      "build": {
+        "emit_ns": 239014900,
+        "support_ns": 0,
+        "native_ns": 1744344000
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    },
+    {
+      "pair": 24,
+      "warmup": false,
+      "order": 3,
+      "lane": "explicit index",
+      "check_ns": 480703900,
+      "build": {
+        "emit_ns": 226496900,
+        "support_ns": 0,
+        "native_ns": 2566670800
+      },
+      "specializations": 21,
+      "c_source_bytes": 369719,
+      "exe_bytes": 197120
+    }
+  ],
+  "schema": "fairyc.vector-lexer-build-robust-null/v1",
+  "scope": "Identical explicit-index scanner sources occupy A and B in one warmup and 24 measured ABBA/BAAB pairs. All 100 fresh builds retain check, emit, support, native and artifact observations. Sort the 24 measured pair ratios and require both the 7th and 18th ratios inside [0.98, 1.02] before a separately recorded candidate comparison. Report the full span without excluding any pair. No affinity or priority override.",
+  "support_sha256": "fa75a6179fd3cc7f79dd427cf91d11b9e5c25ed7cff955a537011c89b89f8f09",
+  "warmup_pairs": 1
+}
