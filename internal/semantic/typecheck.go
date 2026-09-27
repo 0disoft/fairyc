@@ -451,13 +451,14 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 				c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, statement.Target.Span))
 			}
 			if statement.Expression != nil {
-				c.requireType(
-					"E1006",
-					span(c.module.file.Path, statement.Expression.Span),
-					actual,
-					targetType,
-					span(c.module.file.Path, statement.Target.Span),
-				)
+				primary := span(c.module.file.Path, statement.Expression.Span)
+				expectedSpan := span(c.module.file.Path, statement.Target.Span)
+				if target != nil && target.Kind == "field-expression" &&
+					(c.analyzer.structTypes[targetType] != nil || c.analyzer.structTypes[actual] != nil) {
+					c.requireDetailedType(primary, actual, targetType, expectedSpan)
+				} else {
+					c.requireType("E1006", primary, actual, targetType, expectedSpan)
+				}
 			}
 			if hirStatement.Operator != "=" {
 				validPlace := target != nil && (target.Kind == "path" || target.Kind == "array-index" || target.Kind == "view-index")
@@ -1441,7 +1442,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		child, actual := c.checkExpression(argument, expected)
 		result.Children = appendExpression(result.Children, child)
 		if expected != hir.TypeInvalid {
-			c.requireCallArgumentType(
+			c.requireDetailedType(
 				span(c.module.file.Path, argument.Span),
 				actual,
 				expected,

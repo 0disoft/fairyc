@@ -2,7 +2,7 @@ package semantic
 
 import "github.com/0disoft/fairyc/internal/hir"
 
-func (c *typeChecker) requireCallArgumentType(primary hir.Span, actual, expected hir.Type, expectedSpan hir.Span) {
+func (c *typeChecker) requireDetailedType(primary hir.Span, actual, expected hir.Type, expectedSpan hir.Span) {
 	if actual == hir.TypeInvalid || expected == hir.TypeInvalid || actual == expected {
 		return
 	}

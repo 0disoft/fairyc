@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -65,11 +66,23 @@ func TestParserCursorStructBoundary(t *testing.T) {
 		if wrapped {
 			wrong = "cursor.index = ByteOffset { .raw = 7 };"
 		}
-		writeTestSource(t, root, "src/records.fy", strings.Replace(source, needle, needle+"\n    "+wrong, 1))
+		mutated := strings.Replace(source, needle, needle+"\n    "+wrong, 1)
+		writeTestSource(t, root, "src/records.fy", mutated)
 		code, stdout, stderr = runForTest([]string{"check"}, root)
 		if wrapped {
-			if code != 3 || stdout != "" || !strings.Contains(stderr, "E1006") {
+			if code != 3 || stdout != "" || !strings.Contains(stderr, `expected "records::TokenIndex", got "records::ByteOffset"`) {
 				t.Fatalf("wrong domain admitted or misdiagnosed: %d %q %s", code, stdout, stderr)
+			}
+			for _, item := range []struct{ role, name string }{
+				{"expected-type-declaration", "TokenIndex"},
+				{"actual-type-declaration", "ByteOffset"},
+			} {
+				start := strings.Index(mutated, "struct "+item.name) + len("struct ")
+				line, column := bytePosition([]byte(mutated), start)
+				want := fmt.Sprintf("%s: records.fy:%d:%d [bytes %d..%d]", item.role, line, column, start, start+len(item.name))
+				if !strings.Contains(stderr, want) {
+					t.Fatalf("missing %q in %s", want, stderr)
+				}
 			}
 		} else if code != ExitSuccess || !strings.HasPrefix(stdout, "check ok: ") || stderr != "" {
 			t.Fatalf("raw index rejected: %d %q %s", code, stdout, stderr)

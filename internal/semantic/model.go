@@ -85,7 +85,7 @@ type Diagnostic struct {
 	Code    string
 	Primary hir.Span
 	Related []RelatedSpan
-	// ExpectedType and ActualType describe ordinary direct-call mismatches only.
+	// ExpectedType and ActualType describe direct-call and named-struct field-store mismatches.
 	// Canonical package qualifiers are build-local, not compatibility identities.
 	ExpectedType hir.Type
 	ActualType   hir.Type
