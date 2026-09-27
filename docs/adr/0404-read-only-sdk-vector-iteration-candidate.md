@@ -1031,6 +1031,11 @@ is predeclared after the failed process-wide null. It pins the measuring Go
 thread and aggregates eight builds per lane in balanced pairs. Its identical-
 source null must pass before any private vector comparison; neither result
 would replace the ordinary check/build-time or independent-C runtime gates.
+Its [first identical-source result](../ops/scanner-thread-cycles-null-result-20260927.md)
+retained all 208 builds with one C hash, 80 functions and 21 specializations,
+but failed the predeclared upper null statistic: the 9th of 12 sorted ratios
+was 1.03861, above 1.02. No vector candidate run followed; compiler-cost
+parity remains unproven.
 
 ## Proposed first boundary
 
