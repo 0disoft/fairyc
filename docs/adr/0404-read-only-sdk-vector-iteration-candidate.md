@@ -85,7 +85,15 @@ remains live. This covers that native cleanup boundary; exact interpreter
 Region/drop traces and other resource-element exit shapes remain open. Stable
 source admission is unchanged.
 
-A second private native probe now inserts a shared `Vec<bytes::Buffer>` loop
+A second `Vec<Mark>` Region probe keeps the item borrow live while the first
+iteration exits by `continue` and the second by `break`. The private candidate
+and explicit-index forms both pass Flow, verified MIR, and low and optimized
+Windows MSVC execution. The native observer sees each Region's deferred call
+before its local resource drop, followed by vector element drops in reverse
+order after the loop, with no live vector allocation. This closes those two
+native loop-control shapes, not every failure path or the timing gates.
+
+Another private native probe inserts a shared `Vec<bytes::Buffer>` loop
 into the existing nine-buffer ownership workload. The candidate and explicit
 index forms both sum the nine five-byte views to 45, then complete the same
 pop, move and resource-cleanup checks under low and optimized Windows AMD64
