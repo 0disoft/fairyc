@@ -42,7 +42,7 @@ fn i32 work_exhausted(ref u8[] input, usize start, usize position, ref mut v::Ve
 
 fn bool append(ref mut v::Vec<Token> tokens, u32 kind, u32 trivia, usize start, usize end) {
     let Token value = Token { .kind, .trivia, .start, .end, .cooked_index = 0 };
-    return switch (v::push<Token>(tokens, value)) { case .ok(_): { true } case .err(_): { false } };
+    return v::push<Token>(tokens, value).is_ok;
 }
 
 fn bool append_cooked(ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, u32 kind, u32 trivia, usize start, usize end, bytes::Buffer cooked) {
@@ -50,10 +50,7 @@ fn bool append_cooked(ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer
     let usize cooked_index = switch (v::push<bytes::Buffer>(cooked_values, cooked)) { case .ok(length): { length } case .err(_): { 0 } };
     if (cooked_index == 0) { return false; }
     let Token value = Token { .kind, .trivia, .start, .end, .cooked_index };
-    return switch (v::push<Token>(tokens, value)) {
-        case .ok(_) : { true }
-        case .err(_) : { false }
-    };
+    return v::push<Token>(tokens, value).is_ok;
 }
 
 fn bool matches(ref u8[] input, usize position, ref u8[] word) {
