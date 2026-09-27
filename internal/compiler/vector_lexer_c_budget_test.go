@@ -721,6 +721,10 @@ type scannerBudgetCheckPhases struct {
 }
 
 func scannerBudgetFairyProgramWithMainTiming(t *testing.T, variant realScannerVectorVariant, mainSource string, phases *scannerBudgetCheckPhases) (mir.Program, string, int) {
+	return scannerBudgetFairyProgramWithMainTimingPlan(t, variant, mainSource, phases, nil)
+}
+
+func scannerBudgetFairyProgramWithMainTimingPlan(t *testing.T, variant realScannerVectorVariant, mainSource string, phases *scannerBudgetCheckPhases, plan *genericplan.Plan) (mir.Program, string, int) {
 	t.Helper()
 	var mark time.Time
 	if phases != nil {
@@ -769,6 +773,9 @@ func scannerBudgetFairyProgramWithMainTiming(t *testing.T, variant realScannerVe
 		len(analysis.Analysis.Semantic.Diagnostics) != 0 || len(analysis.Analysis.Semantic.Unsupported) != 0 {
 		t.Fatalf("%s scanner Flow: %v diagnostics=%+v unsupported=%+v", variant.name, err,
 			analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+	}
+	if plan != nil {
+		*plan = analysis.Plan
 	}
 	if phases != nil {
 		phases.AnalyzeNS = time.Since(mark).Nanoseconds()

@@ -974,6 +974,12 @@ those two scanner functions finds unchanged call-site, cleanup-action and trap
 path counts, with one extra block and operation in `report_work` and two extra
 blocks and six operations in `storage`. It omits operands and CFG edges and
 does not establish full normalized-MIR equivalence or compiler-cost parity.
+A follow-up resolves each generated SDK function name through its exact
+specialization declaration and type bindings. The indexed and private vector
+forms have identical normalized call-target multisets in both real scanner
+functions, with 21 specializations in each program. This establishes which
+helpers those call sites reach; it still does not prove CFG, operand, dataflow
+or complete MIR equivalence.
 
 An [identical-source build control](../ops/scanner-build-null-result-20260927.md)
 then compiled the indexed scanner in both lanes under the same phased harness.
