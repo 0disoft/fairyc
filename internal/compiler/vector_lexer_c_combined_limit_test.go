@@ -42,6 +42,7 @@ int main(void) {
         {(const unsigned char *)"@x", 2, 1, 0, 3, 1, 1, FC_INVALID, 1, 1},
         {(const unsigned char *)"a@", 2, 1, 1, 3, 1, 1, FC_IDENTIFIER, 1, 1},
         {(const unsigned char *)"a@", 2, 2, 1, 3, 1, 2, FC_IDENTIFIER, 1, 1},
+        {(const unsigned char *)"a@", 2, 2, 0, 3, 1, 1, FC_INVALID, 1, 1},
         {invalid, 257, 256, 256, 258, 257, 256, FC_INVALID, 1, 256},
         {invalid, 257, 257, 256, 258, 257, 257, FC_INVALID, 1, 256},
         {invalid, 257, 257, 257, 258, 257, 257, FC_INVALID, 1, 256},
@@ -158,6 +159,7 @@ fn i32 main() {
     if (check(b"@x"[..], 32768, 1, 0, 3, 1, 1, 0, 1, 1) != 0) { return 12; }
     if (check(b"a@"[..], 32768, 1, 1, 3, 1, 1, 3, 1, 1) != 0) { return 13; }
     if (check(b"a@"[..], 32768, 2, 1, 3, 1, 2, 3, 1, 1) != 0) { return 14; }
+    if (check(b"a@"[..], 32768, 2, 0, 3, 1, 1, 0, 1, 1) != 0) { return 25; }
     if (check(b"%s"[..], 32768, 256, 256, 258, 257, 256, 0, 1, 256) != 0) { return 15; }
     if (check(b"%s"[..], 32768, 257, 256, 258, 257, 257, 0, 1, 256) != 0) { return 16; }
     if (check(b"%s"[..], 32768, 257, 257, 258, 257, 257, 0, 1, 256) != 0) { return 17; }
