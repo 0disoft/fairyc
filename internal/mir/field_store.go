@@ -37,16 +37,26 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	return nil
 }
 
-// ValidFieldStoreShape excludes ownership transfer and all non-scalar stores.
-// The verifier checks declared fields, operand liveness and concrete types;
-// the native consumer independently checks the field and operand types.
-func ValidFieldStoreShape(op Operation) bool {
+func validFieldStoreCommonShape(op Operation) bool {
 	_, mutable, borrowed := hir.BorrowElement(op.OwnerType)
 	return op.OwnerType != "" && op.OwnerType != hir.TypeInvalid && (!borrowed || mutable) &&
-		fieldStoreScalar(op.Type) && op.Field != "" && op.DestinationLocal == NoLocal && op.Symbol == hir.NoSymbol &&
+		op.Field != "" && op.DestinationLocal == NoLocal && op.Symbol == hir.NoSymbol &&
 		len(op.Operands) == 2 && op.Operands[0].Kind == OperandLocal && op.Operands[0].Local >= 0 &&
-		scalarOperandMatches(op.Operands[1], op.Type) &&
 		len(op.Fields) == 0 && len(op.TrapCategories) == 0 && op.Operator == "" && op.Destination == "" &&
 		op.ProjectionEntity == "" && op.DropFlagEntity == "" && op.IndexType == "" && op.Variant == "" &&
 		!op.MovePayload && !op.FlagClearedFirst && op.UnsafeScope == (hir.Span{}) && op.SourceForm == "" && op.ExitKind == ""
+}
+
+// ValidFieldStoreShape keeps ordinary scalar stores within their existing shape.
+func ValidFieldStoreShape(op Operation) bool {
+	return fieldStoreScalar(op.Type) && validFieldStoreCommonShape(op) && scalarOperandMatches(op.Operands[1], op.Type)
+}
+
+// ValidOneWordStructFieldStoreShape admits only an inert, non-FFI usize wrapper
+// supplied by a typed local. The verifier still checks the owner field and both
+// local types against program declarations before executable use.
+func ValidOneWordStructFieldStoreShape(op Operation, definition *StructType) bool {
+	return definition != nil && definition.Type == op.Type && !definition.ReprC &&
+		len(definition.Fields) == 1 && definition.Fields[0].Type == hir.TypeUSize &&
+		validFieldStoreCommonShape(op) && op.Operands[1].Kind == OperandLocal && op.Operands[1].Local >= 0
 }

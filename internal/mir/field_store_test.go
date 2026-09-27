@@ -62,3 +62,46 @@ func TestVerifyFieldStore(t *testing.T) {
 		})
 	}
 }
+
+func TestVerifyOneWordStructFieldStore(t *testing.T) {
+	const token = hir.Type("main::TokenIndex")
+	const cursor = hir.Type("main::Cursor")
+	makeProgram := func() Program {
+		return Program{
+			StructTypes: []StructType{
+				{Type: token, Name: "TokenIndex", Fields: []StructField{{Name: "raw", Type: hir.TypeUSize}}},
+				{Type: cursor, Name: "Cursor", Fields: []StructField{{Name: "index", Type: token}}},
+			},
+			Functions: []Function{{Symbol: 1, Name: "main::set", Parameters: []LocalID{2, 4},
+				ParameterTypes: []hir.Type{hir.MutableBorrow(cursor), token}, ResultType: hir.TypeVoid, Entry: 0,
+				Blocks: []Block{{ID: 0, Operations: []Operation{{Kind: OperationFieldStore,
+					Symbol: hir.NoSymbol, DestinationLocal: NoLocal, OwnerType: hir.MutableBorrow(cursor), Type: token,
+					Field: "index", Operands: []Operand{{Kind: OperandLocal, Local: 2}, {Kind: OperandLocal, Local: 4}}}},
+					Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock}}}}},
+		}
+	}
+	if failures := Verify(makeProgram()); len(failures) != 0 {
+		t.Fatalf("valid inert wrapper store: %+v", failures)
+	}
+	for name, mutate := range map[string]func(*Program){
+		"raw value": func(p *Program) { p.Functions[0].ParameterTypes[1] = hir.TypeUSize },
+		"two fields": func(p *Program) {
+			p.StructTypes[0].Fields = append(p.StructTypes[0].Fields, StructField{Name: "extra", Type: hir.TypeUSize})
+		},
+		"repr C": func(p *Program) { p.StructTypes[0].ReprC = true },
+		"shared owner": func(p *Program) {
+			p.Functions[0].ParameterTypes[0] = hir.SharedBorrow(cursor)
+			p.Functions[0].Blocks[0].Operations[0].OwnerType = hir.SharedBorrow(cursor)
+		},
+		"wrong field": func(p *Program) { p.Functions[0].Blocks[0].Operations[0].Field = "missing" },
+		"transfer":    func(p *Program) { p.Functions[0].Blocks[0].Operations[0].MovePayload = true },
+	} {
+		t.Run(name, func(t *testing.T) {
+			program := makeProgram()
+			mutate(&program)
+			if failures := Verify(program); len(failures) == 0 {
+				t.Fatal("invalid wrapper store admitted")
+			}
+		})
+	}
+}
