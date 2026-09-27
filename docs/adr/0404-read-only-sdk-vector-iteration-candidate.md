@@ -946,7 +946,11 @@ separately calibrated process-CPU/phase measurement is still required.
 A [balanced four-build-pair protocol](../ops/scanner-balanced-build-protocol-20260927.md)
 now predeclares alternating `A-B-B-A` and `B-A-A-B` order with two builds per
 lane per pair. Its identical-source null must pass before a separately recorded
-candidate comparison. No balanced run or build-cost verdict exists yet.
+candidate comparison. The [first balanced identical-source control](../ops/scanner-balanced-build-null-result-20260927.md)
+retained all 24 builds and narrowed the ratio span to 5.05%, but its 0.97489
+clone/index median missed the predeclared `[0.98, 1.02]` null band. The null
+fails and no balanced candidate comparison was run. Build-cost parity remains
+unproven.
 
 ## Proposed first boundary
 
