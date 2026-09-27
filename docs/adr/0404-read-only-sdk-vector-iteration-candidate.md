@@ -199,6 +199,16 @@ source with the private parser path off and on. Generated C is byte-equal at
 unused-mode native image growth for this workload; it does not measure object
 file sizes, analysis overhead or a future integrated stable compiler path.
 
+AST lowering now notices `byte-for` nodes during its existing CST walk and
+skips the vector-candidate preparation traversal when a file has none. This
+removes an unused candidate-only walk from the indexed scanner source without
+changing source eligibility. The current indexed scanner still produces equal
+stable/candidate generated C and low/optimized MSVC PE footprints: 369,719
+generated-C bytes, 272,896 low-profile EXE bytes and 197,120 optimized EXE
+bytes in each mode. Canonical MIR equality is checked separately. This is a
+structural compile-work reduction, not a measured check-time speed verdict;
+the earlier noisy timing receipt remains inconclusive.
+
 An independently authored C11 scanner reference now starts the full-scanner
 comparison lane. Its first checked slice covers source token boundaries,
 keywords, trivia, comments, punctuation, UTF-8 recovery and diagnostics under
