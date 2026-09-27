@@ -41,6 +41,54 @@ func TestPrivateVectorSDKCandidateFairyDiagnosticAllocationFailure(t *testing.T)
 	}
 }
 
+// The ninth standalone CR grows both token and diagnostic vectors. Fail the
+// latter allocation after the eight completed diagnostic entries are owned.
+func TestPrivateVectorSDKCandidateFairyDiagnosticGrowthFailure(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	variants := realScannerVectorVariants(t)
+	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
+		t.Fatal("real scanner variants changed")
+	}
+	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
+		t.Run(variant.name, func(t *testing.T) {
+			program, entry, _ := scannerBudgetFairyProgramWithMain(t, variant, scannerDiagnosticGrowthFailureMain)
+			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+				t.Run(profile.Name, func(t *testing.T) {
+					image, _ := buildRealScannerVectorNative(t, program, entry, profile, scannerDiagnosticGrowthFailureSupport)
+					outcome, err := cdriver.ExecuteWindowsHost(image)
+					if err != nil || outcome.ExitCode != 3 || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
+						t.Fatalf("Fairy diagnostic growth failure: %+v %v", outcome, err)
+					}
+				})
+			}
+		})
+	}
+}
+
+const scannerDiagnosticGrowthFailureSupport = `
+void fairyc_fixture_fail_diagnostic_growth(void) { vector_fail_at = vector_calls + 4; }
+int32_t fairyc_fixture_diagnostic_growth_failure_seen(void) {
+    return vector_calls == 4 && vector_failures == 1 &&
+           vector_allocations == 3 && vector_allocations == vector_frees &&
+           vector_live == 0 ? 1 : 0;
+}
+`
+
+const scannerDiagnosticGrowthFailureMain = `module main;
+import scanner as scanner;
+@link_name("fairyc_fixture_fail_diagnostic_growth") unsafe extern C fn void fail_growth();
+@link_name("fairyc_fixture_diagnostic_growth_failure_seen") unsafe extern C fn i32 failure_seen();
+@link_name("fairyc_fixture_vector_clean") unsafe extern C fn i32 clean();
+@effects(console) fn i32 main() {
+    unsafe { fail_growth(); }
+    let i32 status = scanner::report_work(b"\r\r\r\r\r\r\r\r\r"[..], false, 32768, 1048576, 256, 16777216);
+    assert(unsafe { failure_seen() } == 1);
+    assert(unsafe { clean() } == 1);
+    return status;
+}`
+
 const scannerDiagnosticFailureSupport = `
 void fairyc_fixture_fail_diagnostic_call(int32_t offset) {
     vector_fail_at = vector_calls + (size_t)offset;
@@ -125,10 +173,44 @@ static int check(size_t fail_at, int wanted_payload_failure,
     probe_free(scanner.diagnostics);
     return bad || probe_live != 0;
 }
+static int check_growth(size_t fail_at) {
+    struct fc_token tokens[10] = {0};
+    struct fc_scanner scanner = {0};
+    scanner.source = (const unsigned char *)"\r\r\r\r\r\r\r\r\r";
+    scanner.length = 9;
+    scanner.tokens = tokens;
+    probe_calls = 0;
+    probe_live = 0;
+    probe_fail_at = fail_at;
+    int status = fc_scan(&scanner);
+    int failing = fail_at != 0;
+    int bad = status != (failing ? 3 : 0) || probe_calls != 2u ||
+              scanner.token_count != (failing ? 9u : 10u) ||
+              scanner.diagnostic_count != (failing ? 8u : 9u) ||
+              scanner.diagnostic_capacity != (failing ? 8u : 16u) ||
+              scanner.diagnostic_allocation_failed != failing;
+    if (!bad) {
+        for (size_t i = 0; i < 8u; i++) {
+            if (tokens[i].kind != FC_INVALID ||
+                tokens[i].start != i || tokens[i].end != i + 1u ||
+                strcmp(scanner.diagnostics[i].code, "E0001") != 0 ||
+                scanner.diagnostics[i].start != i ||
+                scanner.diagnostics[i].end != i + 1u) bad = 1;
+        }
+        if (!failing && (tokens[9].kind != FC_EOF ||
+                         strcmp(scanner.diagnostics[8].code, "E0001") != 0)) bad = 1;
+    }
+    fc_release_cooked(&scanner);
+    fc_release_diagnostics(&scanner);
+    probe_free(scanner.diagnostics);
+    return bad || probe_live != 0;
+}
 int main(void) {
     if (check(1u, 1, 0, 1u)) return 1;
     if (check(2u, 0, 1, 2u)) return 2;
     if (check(0u, 0, 0, 2u)) return 3;
+    if (check_growth(2u)) return 4;
+    if (check_growth(0u)) return 5;
     return 0;
 }
 `

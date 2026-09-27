@@ -1069,6 +1069,14 @@ access is not equivalent to the current source loop.
    because the C probe supplies token storage while Fairy grows its vector;
    this checks the observable failure and cleanup boundary, not identical
    allocation order or all diagnostic paths.
+   A later diagnostic-growth probe scans nine standalone carriage returns.
+   With caller-owned C token storage, failure of the second diagnostic
+   allocation preserves eight completed diagnostics and releases their storage;
+   the successful path retains nine diagnostics. In both Fairy source forms,
+   failure of the fourth vector allocation returns status 3 without a report
+   and frees the three earlier vector blocks. Low and optimized MSVC runs pass.
+   The allocation-call numbers differ across these storage models, and other
+   later failure paths remain open.
    A second C token probe fails the 8-to-16-slot growth after eight symbol
    tokens. It requires status 3, the intact initialized prefix and zero live
    allocation after release under low and optimized MSVC; the successful path
