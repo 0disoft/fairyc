@@ -1026,6 +1026,12 @@ retained all 200 identical-source builds and failed the predeclared band: the
 relative span was 14.89%. No vector candidate cycle comparison followed;
 compiler-cost parity remains unproven.
 
+A [locked-thread cycle protocol](../ops/scanner-thread-cycles-protocol-20260927.md)
+is predeclared after the failed process-wide null. It pins the measuring Go
+thread and aggregates eight builds per lane in balanced pairs. Its identical-
+source null must pass before any private vector comparison; neither result
+would replace the ordinary check/build-time or independent-C runtime gates.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

@@ -16,6 +16,8 @@ import (
 )
 
 var scannerQueryProcessCycleTime = syscall.NewLazyDLL("kernel32.dll").NewProc("QueryProcessCycleTime")
+var scannerQueryThreadCycleTime = syscall.NewLazyDLL("kernel32.dll").NewProc("QueryThreadCycleTime")
+var scannerGetCurrentThread = syscall.NewLazyDLL("kernel32.dll").NewProc("GetCurrentThread")
 
 func scannerProcessCycles() (uint64, error) {
 	handle, err := syscall.GetCurrentProcess()
@@ -26,6 +28,19 @@ func scannerProcessCycles() (uint64, error) {
 	ok, _, callErr := scannerQueryProcessCycleTime.Call(uintptr(handle), uintptr(unsafe.Pointer(&cycles)))
 	if ok == 0 {
 		return 0, fmt.Errorf("QueryProcessCycleTime: %v", callErr)
+	}
+	return cycles, nil
+}
+
+func scannerThreadCycles() (uint64, error) {
+	handle, _, _ := scannerGetCurrentThread.Call()
+	if handle == 0 {
+		return 0, fmt.Errorf("GetCurrentThread returned a null handle")
+	}
+	var cycles uint64
+	ok, _, callErr := scannerQueryThreadCycleTime.Call(handle, uintptr(unsafe.Pointer(&cycles)))
+	if ok == 0 {
+		return 0, fmt.Errorf("QueryThreadCycleTime: %v", callErr)
 	}
 	return cycles, nil
 }
@@ -52,6 +67,7 @@ type scannerProcessCPURow struct {
 	Lane            string `json:"lane"`
 	ProcessCPUNS    int64  `json:"process_cpu_ns"`
 	ProcessCycles   uint64 `json:"process_cycles,omitempty"`
+	ThreadCycles    uint64 `json:"thread_cycles,omitempty"`
 	WallNS          int64  `json:"wall_ns"`
 	CheckNS         int64  `json:"check_ns"`
 	EmitNS          int64  `json:"emit_ns"`
@@ -70,8 +86,10 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 	gcCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CPU_GC_COST") == "1"
 	cycleNull := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CYCLES_NULL") == "1"
 	cycleCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_PROCESS_CYCLES_COST") == "1"
+	threadNull := os.Getenv("FAIRYC_VECTOR_LEXER_THREAD_CYCLES_NULL") == "1"
+	threadCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_THREAD_CYCLES_COST") == "1"
 	selected := 0
-	for _, mode := range []bool{ordinaryNull, ordinaryCandidate, gcNull, gcCandidate, cycleNull, cycleCandidate} {
+	for _, mode := range []bool{ordinaryNull, ordinaryCandidate, gcNull, gcCandidate, cycleNull, cycleCandidate, threadNull, threadCandidate} {
 		if mode {
 			selected++
 		}
@@ -82,11 +100,28 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 		}
 		t.Skip("opt-in scanner process-CPU cost measurement")
 	}
-	null := ordinaryNull || gcNull || cycleNull
+	null := ordinaryNull || gcNull || cycleNull || threadNull
 	cycleControlled := cycleNull || cycleCandidate
-	gcControlled := gcNull || gcCandidate || cycleControlled
+	threadControlled := threadNull || threadCandidate
+	gcControlled := gcNull || gcCandidate || cycleControlled || threadControlled
 	if runtime.GOMAXPROCS(0) != 1 {
 		t.Fatal("scanner process-CPU measurement requires GOMAXPROCS=1")
+	}
+	var affinityMask string
+	if threadControlled {
+		runtime.LockOSThread()
+		defer runtime.UnlockOSThread()
+		var restore func() error
+		var err error
+		affinityMask, restore, err = pinScannerBuildLowestAllowedCPU()
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() {
+			if err := restore(); err != nil {
+				t.Error(err)
+			}
+		}()
 	}
 	if gcControlled {
 		previousGCPercent := debug.SetGCPercent(-1)
@@ -110,10 +145,20 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 	if gcControlled {
 		buildsPerLanePerPair = 4
 	}
-	rows := make([]scannerProcessCPURow, 0, 25*buildsPerLanePerPair*2)
-	for pair := 0; pair < 25; pair++ {
+	pairs := 25
+	if threadControlled {
+		buildsPerLanePerPair, pairs = 8, 13
+	}
+	rows := make([]scannerProcessCPURow, 0, pairs*buildsPerLanePerPair*2)
+	for pair := 0; pair < pairs; pair++ {
 		laneOrder := scannerBuildLaneOrder(pair, true)
-		if gcControlled {
+		if threadControlled {
+			base := laneOrder
+			laneOrder = make([]int, 0, 4*len(base))
+			for repeat := 0; repeat < 4; repeat++ {
+				laneOrder = append(laneOrder, base...)
+			}
+		} else if gcControlled {
 			laneOrder = append(laneOrder, laneOrder...)
 		}
 		for order, index := range laneOrder {
@@ -135,6 +180,13 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
+			var startThreadCycles uint64
+			if threadControlled {
+				startThreadCycles, err = scannerThreadCycles()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
 			startWall := time.Now()
 			var check scannerBudgetCheckPhases
 			program, entry, specializations := scannerBudgetFairyProgramWithMainTiming(t, variant, realScannerExecutionMain, &check)
@@ -148,6 +200,11 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 			if cycleControlled {
 				endCycles, cycleErr = scannerProcessCycles()
 			}
+			var endThreadCycles uint64
+			var threadErr error
+			if threadControlled {
+				endThreadCycles, threadErr = scannerThreadCycles()
+			}
 			if gcControlled {
 				var gcAfter runtime.MemStats
 				runtime.ReadMemStats(&gcAfter)
@@ -155,12 +212,15 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 					t.Fatalf("unexpected GC during timed scanner build: %d to %d", gcBefore.NumGC, gcAfter.NumGC)
 				}
 			}
-			if err != nil || cpuErr != nil || cycleErr != nil {
-				t.Fatalf("%s C emission or process timer: %v %v %v", variant.name, err, cpuErr, cycleErr)
+			if err != nil || cpuErr != nil || cycleErr != nil || threadErr != nil {
+				t.Fatalf("%s C emission or process timer: %v %v %v %v", variant.name, err, cpuErr, cycleErr, threadErr)
 			}
 			cpuNS := endCPU - startCPU
 			if cycleControlled && endCycles <= startCycles {
 				t.Fatalf("%s process cycles did not advance: %d to %d", variant.name, startCycles, endCycles)
+			}
+			if threadControlled && endThreadCycles <= startThreadCycles {
+				t.Fatalf("%s thread cycles did not advance: %d to %d", variant.name, startThreadCycles, endThreadCycles)
 			}
 			checkNS := check.LoadNS + check.MetadataNS + check.AnalyzeNS + check.LowerNS
 			if cpuNS <= 0 || wallNS <= 0 || checkNS <= 0 || emitNS <= 0 ||
@@ -172,6 +232,7 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 				Pair: pair, Warmup: pair == 0, Order: order, Lane: variant.name,
 				ProcessCPUNS: cpuNS, WallNS: wallNS, CheckNS: checkNS, EmitNS: emitNS,
 				ProcessCycles:   endCycles - startCycles,
+				ThreadCycles:    endThreadCycles - startThreadCycles,
 				Specializations: specializations, FunctionCount: len(unit.Functions),
 				CSourceBytes: len(unit.Source), CSourceSHA256: fmt.Sprintf("%x", sha256.Sum256([]byte(unit.Source))),
 			})
@@ -202,10 +263,16 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 			schema, prefix = "fairyc.vector-lexer-process-cycles-null/v1", "VECTOR_LEXER_PROCESS_CYCLES_NULL "
 		}
 	}
+	if threadControlled {
+		schema, prefix = "fairyc.vector-lexer-thread-cycles-cost/v1", "VECTOR_LEXER_THREAD_CYCLES_COST "
+		if null {
+			schema, prefix = "fairyc.vector-lexer-thread-cycles-null/v1", "VECTOR_LEXER_THREAD_CYCLES_NULL "
+		}
+	}
 	report := map[string]any{
 		"schema": schema, "go": runtime.Version(), "gomaxprocs": runtime.GOMAXPROCS(0),
 		"target":       string(cbackend.Stage0WindowsMSVCProfile().Target),
-		"warmup_pairs": 1, "measured_pairs": 24, "builds_per_lane_per_pair": buildsPerLanePerPair,
+		"warmup_pairs": 1, "measured_pairs": pairs - 1, "builds_per_lane_per_pair": buildsPerLanePerPair,
 		"pair_order":     "A-B-B-A / B-A-A-B alternating",
 		"indexed_sha256": fmt.Sprintf("%x", sha256.Sum256([]byte(lanes[0].scanner))),
 		"second_sha256":  fmt.Sprintf("%x", sha256.Sum256([]byte(lanes[1].scanner))),
@@ -221,6 +288,12 @@ func TestPrivateVectorSDKCandidateScannerProcessCPUCost(t *testing.T) {
 	}
 	if cycleControlled {
 		report["scope"] = "The GC-controlled 200-build scanner schedule also brackets each build with QueryProcessCycleTime. Process cycles sum all process threads and include kernel work, but are not elapsed time; CPU frequency, thread migration and ambient load may vary. Process CPU, wall, check and emit durations remain diagnostic. A cycle null must pass before a separate candidate cycle screen. Neither result alone establishes normal-GC check latency, complete native build time or the C-relative runtime gate."
+	}
+	if threadControlled {
+		report["pair_order"] = "A-B-B-A x4 / B-A-A-B x4 alternating"
+		report["affinity_mask"] = affinityMask
+		report["osthread_locked"] = true
+		report["scope"] = "A locked Go OS thread pinned with the process to the lowest permitted logical processor brackets each fresh scanner preparation, load, analysis, verified-MIR lowering and C emission with QueryThreadCycleTime. Eight builds per lane per pair reduce per-build variation; GC runs outside each interval and automatic GC is disabled. Thread cycles are not elapsed time and omit work on other threads, off-CPU waits, native MSVC children and ordinary GC. Source/C hashes and counts remain checked. An identical-source null must pass before the candidate screen; neither result alone establishes normal check/build latency or the C-relative runtime gate."
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
