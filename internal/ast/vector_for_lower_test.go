@@ -29,6 +29,10 @@ func TestVectorForPreparationUsesActualSDKImportAlias(t *testing.T) {
 			if statement.Expression != nil {
 				t.Fatalf("candidate preparation changed executable statement: %+v", statement.Expression)
 			}
+			if statement.ByteFor.PreparedVector != nil {
+				t.Fatal("ordinary AST lowering prepared a private SDK vector loop")
+			}
+			PrepareSDKVectorLoopBody(module.Functions[0].Body, alias)
 			prepared := statement.ByteFor.PreparedVector
 			if prepared == nil || prepared.Block == nil || len(prepared.Block.Statements) != 3 {
 				t.Fatalf("prepared loop = %+v", prepared)
@@ -82,7 +86,13 @@ func TestVectorForPreparationRetainsExplicitBorrowAndRejectsOtherImports(t *test
 				!strings.Contains(input[loop.ByteFor.View.Span.StartByte:loop.ByteFor.View.Span.EndByte], "ref values") {
 				t.Fatalf("source borrow = %+v", loop.ByteFor)
 			}
-			if loop.Expression != nil || (loop.ByteFor.PreparedVector != nil) != sample.prepared {
+			if loop.Expression != nil || loop.ByteFor.PreparedVector != nil {
+				t.Fatalf("ordinary AST lowering prepared %s: %+v / %+v", sample.importPath, loop.Expression, loop.ByteFor.PreparedVector)
+			}
+			if sample.prepared {
+				PrepareSDKVectorLoopBody(module.Functions[0].Body, "v")
+			}
+			if (loop.ByteFor.PreparedVector != nil) != sample.prepared {
 				t.Fatalf("unexpected prepared loop for %s: %+v / %+v", sample.importPath, loop.Expression, loop.ByteFor.PreparedVector)
 			}
 		})
@@ -101,6 +111,10 @@ func TestVectorForPreparationAcceptsBorrowedFieldPlace(t *testing.T) {
 		t.Fatalf("lowered module = %+v, %v", module, err)
 	}
 	loop := module.Functions[0].Body.Statements[0].ByteFor
+	if loop == nil || loop.PreparedVector != nil {
+		t.Fatalf("ordinary AST lowering prepared field loop: %+v", loop)
+	}
+	PrepareSDKVectorLoopBody(module.Functions[0].Body, "v")
 	if loop == nil || loop.PreparedVector == nil || loop.PreparedVector.Block == nil ||
 		len(loop.PreparedVector.Block.Statements) != 3 ||
 		loop.PreparedVector.Block.Statements[0].Binding.Expression != loop.View {

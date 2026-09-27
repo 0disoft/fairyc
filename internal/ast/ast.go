@@ -349,7 +349,6 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		}
 	}
 	walk(tree.Root)
-	prepareVectorForModule(module, tree.Nodes)
 	return module, nil
 }
 

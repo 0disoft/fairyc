@@ -2,38 +2,19 @@ package ast
 
 import "github.com/0disoft/fairyc/internal/syntax"
 
-// Vector loops are prepared after imports are known. Source ByteForLoop nodes
-// remain intact, and semantic analysis still decides whether to admit them.
+// Vector loops are prepared only in the authenticated SDK expansion lane.
+// Source ByteForLoop nodes remain intact, and semantic analysis still decides
+// whether to admit them.
 const vectorForOwnerName = "\x00fairyc_vector_for_owner"
 const vectorForBoundName = "\x00fairyc_vector_for_bound"
 const vectorForIndexName = "\x00fairyc_vector_for_index"
 
-func prepareVectorForModule(module *Module, nodes []syntax.Node) {
-	if module == nil {
-		return
-	}
-	alias := ""
-	for _, imported := range module.Imports {
-		if imported.Path == "std::vec" {
-			alias = imported.Alias
-			break
-		}
-	}
-	if alias == "" {
-		return
-	}
-	hasByteFor := false
-	for _, node := range nodes {
-		if node.Kind == syntax.KindByteFor {
-			hasByteFor = true
-			break
-		}
-	}
-	if !hasByteFor {
-		return
-	}
-	for index := range module.Functions {
-		prepareVectorForBlock(module.Functions[index].Body, alias)
+// PrepareSDKVectorLoopBody attaches candidate lowering to a detached function
+// body after its std::vec provider has been authenticated. Ordinary AST
+// lowering never builds these unused blocks.
+func PrepareSDKVectorLoopBody(block *Block, alias string) {
+	if alias != "" {
+		prepareVectorForBlock(block, alias)
 	}
 }
 

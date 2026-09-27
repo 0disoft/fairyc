@@ -19,6 +19,7 @@ func TestVectorForCandidateCloneSubstitutesWithoutPlanningCalls(t *testing.T) {
 	if err != nil || len(module.Functions) != 1 {
 		t.Fatalf("source AST = %+v, %v", module, err)
 	}
+	ast.PrepareSDKVectorLoopBody(module.Functions[0].Body, "items")
 	original := module.Functions[0].Body.Statements[0].ByteFor
 	if original == nil || original.PreparedVector == nil {
 		t.Fatalf("missing original candidate = %+v", original)
@@ -69,6 +70,7 @@ func TestVectorForCandidateCloneRejectsDetachedOwner(t *testing.T) {
 	if err != nil || len(tree.Diagnostics) != 0 {
 		t.Fatalf("source AST = %+v, %v", tree.Diagnostics, err)
 	}
+	ast.PrepareSDKVectorLoopBody(module.Functions[0].Body, "items")
 	loop := module.Functions[0].Body.Statements[0].ByteFor
 	loop.PreparedVector.Block.Statements[0].Binding.Expression = &ast.Expression{
 		Kind: syntax.KindPath, Text: "other", Span: loop.View.Span,

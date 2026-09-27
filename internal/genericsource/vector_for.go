@@ -36,6 +36,7 @@ func (x *expander) activateSDKVectorLoops() error {
 			if err != nil {
 				return err
 			}
+			ast.PrepareSDKVectorLoopBody(clone.Body, imported.Alias)
 			activateVectorForBlock(clone.Body)
 			detached.Functions[i] = clone
 		}
@@ -63,7 +64,9 @@ func hasVectorForStatement(statement *ast.Statement) bool {
 	if statement == nil {
 		return false
 	}
-	if statement.ByteFor != nil && (statement.ByteFor.PreparedVector != nil ||
+	if statement.ByteFor != nil && (statement.ByteFor.Type.Kind == ast.TypeKindReference &&
+		!statement.ByteFor.Type.Mutable && statement.ByteFor.Type.Element != nil &&
+		statement.ByteFor.Body != nil && ast.VectorForEligibleView(statement.ByteFor.View) ||
 		hasVectorForCandidate(statement.ByteFor.Body)) {
 		return true
 	}

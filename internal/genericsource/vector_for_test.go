@@ -46,6 +46,7 @@ pub fn ref T at<T>(ref Vec<T> value, usize index) { return null; }`)
 		t.Fatal(err)
 	}
 	if vectorForNestedStatement(client).Expression != nil ||
+		vectorForNestedStatement(client).ByteFor.PreparedVector != nil ||
 		vectorForNestedStatement(expansion.Modules[0]).Expression == nil {
 		t.Fatal("SDK source mutated or vector loop not prepared")
 	}
@@ -71,7 +72,8 @@ func TestAuthenticatedSDKVectorLoopActivatesPlannerCallsWithoutChangingSource(t 
 	if err := client.activateSDKVectorLoops(); err != nil {
 		t.Fatal(err)
 	}
-	if client.module == original || vectorForNestedStatement(original).Expression != nil {
+	if client.module == original || vectorForNestedStatement(original).Expression != nil ||
+		vectorForNestedStatement(original).ByteFor.PreparedVector != nil {
 		t.Fatal("SDK activation changed the original source")
 	}
 	active := vectorForNestedStatement(client.module)
