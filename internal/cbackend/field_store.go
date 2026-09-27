@@ -9,8 +9,12 @@ import (
 )
 
 func (e *emitter) inspectFieldStore(functionIndex int, operation mir.Operation) error {
-	if !mir.ValidFieldStoreShape(operation) {
-		return fmt.Errorf("invalid scalar field store shape")
+	valid := mir.ValidFieldStoreShape(operation)
+	if index, found := e.structByType[operation.Type]; found {
+		valid = valid || mir.ValidOneWordStructFieldStoreShape(operation, &e.structTypes[index].definition)
+	}
+	if !valid {
+		return fmt.Errorf("invalid field store shape")
 	}
 	valueType, err := e.operandType(functionIndex, operation.Operands[1])
 	if err != nil || valueType != operation.Type {

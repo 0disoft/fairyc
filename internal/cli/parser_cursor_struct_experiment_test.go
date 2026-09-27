@@ -44,11 +44,7 @@ func TestParserCursorStructBoundary(t *testing.T) {
 	for _, wrapped := range []bool{false, true} {
 		root := parserCursorStructWorkspace(t, wrapped)
 		code, stdout, stderr := runForTest([]string{"check"}, root)
-		if wrapped {
-			if code != 3 || stdout != "" || !strings.Contains(stderr, "field assignment without executable field storage") {
-				t.Fatalf("aggregate cursor field unexpectedly executable: %d %q %s", code, stdout, stderr)
-			}
-		} else if code != ExitSuccess || !strings.HasPrefix(stdout, "check ok: ") || stderr != "" {
+		if code != ExitSuccess || !strings.HasPrefix(stdout, "check ok: ") || stderr != "" {
 			t.Fatalf("valid wrapped=%v: %d %q %s", wrapped, code, stdout, stderr)
 		}
 		file := filepath.Join(root, "src", "records.fy")

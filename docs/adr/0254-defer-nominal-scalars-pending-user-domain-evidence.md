@@ -88,7 +88,8 @@ This is not a permanent rejection; the review records bounded reopening criteria
 
 The [real record-parser cursor experiment](../architecture/nominal-scalar-source-usability-v0.md#실제-레코드-파서-커서-실험-2026-09-27)
 types `records::Cursor.index` with an ordinary struct in a copied workspace.
-The wrong-domain assignment fails with `E1006`, but valid replacement of the
-aggregate field is not executable under the current scalar-only MIR field-store
-contract. This blocks a native and size comparison for that variant; it does
-not establish a source-usability advantage for nominal scalars or admit syntax.
+The wrong-domain assignment fails with `E1006`. A subsequent bounded MIR
+extension makes valid replacement of this one-`usize`-field struct executable;
+the real parser copy now passes `check`. Full native and size comparisons for
+this parser variant remain open. This does not establish a source-usability
+advantage for nominal scalars or admit syntax.

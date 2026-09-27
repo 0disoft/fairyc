@@ -18,7 +18,7 @@ const NoBlock BlockID = -1
 // typeProperties provides the compiler-known type facts needed during lowering.
 type typeProperties struct {
 	resources map[hir.Type]struct{}
-	structs   map[hir.Type]struct{}
+	structs   map[hir.Type]*StructType
 	enums     map[hir.Type]*EnumType
 }
 
@@ -27,9 +27,9 @@ func newTypeProperties(resources []ResourceType, structs []StructType, enums []E
 	for _, value := range resources {
 		resourceValues[value.Type] = struct{}{}
 	}
-	structValues := make(map[hir.Type]struct{}, len(structs))
-	for _, value := range structs {
-		structValues[value.Type] = struct{}{}
+	structValues := make(map[hir.Type]*StructType, len(structs))
+	for index := range structs {
+		structValues[structs[index].Type] = &structs[index]
 	}
 	enumValues := make(map[hir.Type]*EnumType, len(enums))
 	for index := range enums {
@@ -50,6 +50,10 @@ func (p typeProperties) IsResource(value hir.Type) bool {
 func (p typeProperties) IsStruct(value hir.Type) bool {
 	_, found := p.structs[value]
 	return found
+}
+
+func (p typeProperties) Struct(value hir.Type) *StructType {
+	return p.structs[value]
 }
 
 func (p typeProperties) Enum(value hir.Type) *EnumType {

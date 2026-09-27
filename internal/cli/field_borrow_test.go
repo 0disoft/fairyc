@@ -55,15 +55,52 @@ language = "fairyc-language/20"
 source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", `module main;
-struct Value { i32 number; }
+struct Value { i32 number; usize extra; }
 struct State { Value count; }
-fn void edit(ref mut State state) { state.count = Value { .number = 1 }; }
-fn i32 main() { var State state = State { .count = Value { .number = 0 } }; edit(ref mut state); return 0; }
+fn void edit(ref mut State state) { state.count = Value { .number = 1, .extra = 2 }; }
+fn i32 main() { var State state = State { .count = Value { .number = 0, .extra = 0 } }; edit(ref mut state); return 0; }
 `)
 	for _, command := range []string{"check", "build", "run"} {
 		code, stdout, stderr := runForTest([]string{command}, root)
 		if code == ExitSuccess || stdout != "" || !strings.Contains(stderr, "field assignment without executable field storage") {
 			t.Fatalf("%s accepted field assignment: code=%d stdout=%q stderr=%q", command, code, stdout, stderr)
+		}
+	}
+}
+
+func TestWindowsOneWordStructFieldStore(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "test.cli.one-word-field-store"
+name = "fields"
+version = "1.0.0"
+language = "fairyc-language/20"
+source = "src"
+`)
+	writeTestSource(t, root, "src/main.fy", `module main;
+struct TokenIndex { usize raw; }
+struct Cursor { TokenIndex index; }
+fn void advance(ref mut Cursor cursor) { cursor.index = TokenIndex { .raw = cursor.index.raw + 1 }; }
+fn i32 main() {
+    var Cursor cursor = Cursor { .index = TokenIndex { .raw = 4 } };
+    var Cursor copy = cursor;
+    advance(ref mut copy);
+    assert(cursor.index.raw == 4 && copy.index.raw == 5);
+    return 0;
+}
+`)
+	for _, release := range []bool{false, true} {
+		args := []string{"run"}
+		if release {
+			args = append(args, "--release", "--locked")
+		}
+		code, stdout, stderr := runForTest(args, root)
+		if code != ExitSuccess || stdout != "" || stderr != "" {
+			t.Fatalf("one-word struct store release=%v: %d %q %s", release, code, stdout, stderr)
 		}
 	}
 }

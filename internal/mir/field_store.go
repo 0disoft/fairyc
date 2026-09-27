@@ -9,7 +9,7 @@ func fieldStoreScalar(typ hir.Type) bool {
 func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	target := statement.Target
 	unsupported := &Unsupported{Feature: "field assignment without executable field storage", Span: target.Span}
-	if len(target.Children) != 1 || target.Operator == "" || !fieldStoreScalar(target.Type) ||
+	if len(target.Children) != 1 || target.Operator == "" ||
 		statement.Expression == nil || statement.Expression.Type != target.Type || statement.Operator != "" && statement.Operator != "=" {
 		return unsupported
 	}
@@ -31,9 +31,13 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	if err != nil {
 		return err
 	}
-	l.appendOperation(Operation{Kind: OperationFieldStore, Span: target.Span, Symbol: hir.NoSymbol,
+	op := Operation{Kind: OperationFieldStore, Span: target.Span, Symbol: hir.NoSymbol,
 		DestinationLocal: NoLocal, OwnerType: owner.Type, Type: target.Type, Field: target.Operator,
-		Operands: []Operand{receiver, value}})
+		Operands: []Operand{receiver, value}}
+	if !ValidFieldStoreShape(op) && !ValidOneWordStructFieldStoreShape(op, l.properties.Struct(target.Type)) {
+		return unsupported
+	}
+	l.appendOperation(op)
 	return nil
 }
 

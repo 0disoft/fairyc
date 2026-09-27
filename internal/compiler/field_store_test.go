@@ -34,6 +34,36 @@ b.x = next(ref mut a); assert(a.x == 41); assert(b.x == 41); b.x = b.x + 1; retu
 	}
 }
 
+func TestOneWordStructFieldStoreArtifactRoundTrip(t *testing.T) {
+	const source = `module main;
+struct TokenIndex { usize raw; }
+struct Cursor { TokenIndex index; }
+fn void advance(ref mut Cursor cursor) { cursor.index = TokenIndex { .raw = cursor.index.raw + 1 }; }
+fn i32 main() {
+    var Cursor cursor = Cursor { .index = TokenIndex { .raw = 4 } };
+    var Cursor copy = cursor;
+    advance(ref mut copy);
+    assert(cursor.index.raw == 4 && copy.index.raw == 5);
+    return 42;
+}`
+	result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", source)})
+	if err != nil || !result.Verified {
+		t.Fatalf("compile: %+v %v", result, err)
+	}
+	encoded, err := mircodec.Encode(result.MIR, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := mircodec.Decode(encoded, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := interpreter.Execute(decoded, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("one-word struct store round trip: %+v %v", outcome, err)
+	}
+}
+
 func TestFieldStoreScalarDerefLowersWithoutTargetRead(t *testing.T) {
 	const source = `module main;
 fn void set(ref mut i32 slot) { *slot = 42; }

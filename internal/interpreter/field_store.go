@@ -8,8 +8,8 @@ import (
 )
 
 func storeScalarField(locals map[mir.LocalID]runtimeValue, op mir.Operation) error {
-	if !mir.ValidFieldStoreShape(op) {
-		return fmt.Errorf("invalid scalar field store shape")
+	if len(op.Operands) != 2 {
+		return fmt.Errorf("invalid field store operand count")
 	}
 	receiver, err := evaluate(locals, op.Operands[0])
 	if err != nil {
@@ -22,21 +22,32 @@ func storeScalarField(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 	if receiver.typ != op.OwnerType {
 		return fmt.Errorf("field store receiver type mismatch")
 	}
-	if !scalarStoreValueMatches(value, op.Type) {
-		return fmt.Errorf("field store scalar type mismatch")
+	if mir.ValidFieldStoreShape(op) {
+		if !scalarStoreValueMatches(value, op.Type) {
+			return fmt.Errorf("field store scalar type mismatch")
+		}
+	} else {
+		if value.kind != valueStruct || value.typ != op.Type || value.structure == nil ||
+			!mir.ValidOneWordStructFieldStoreShape(op, value.structure.definition) {
+			return fmt.Errorf("invalid one-word struct field store")
+		}
+		field := value.structure.definition.Fields[0]
+		if raw, found := value.structure.fields[field.Name]; !found || !scalarStoreValueMatches(raw, hir.TypeUSize) {
+			return fmt.Errorf("invalid one-word struct field value")
+		}
 	}
 	aggregate := fieldAggregateType(op.OwnerType)
 	if receiver.structure != nil && receiver.structure.definition != nil && receiver.structure.definition.Type == aggregate {
 		for _, field := range receiver.structure.definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.structure.fields[op.Field] = value
+				receiver.structure.fields[op.Field] = value.cloneForValueCopy()
 				return nil
 			}
 		}
 	} else if receiver.resource != nil && receiver.resource.definition != nil && receiver.resource.definition.Type == aggregate && !receiver.resource.dropped {
 		for _, field := range receiver.resource.definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.resource.fields[op.Field] = value
+				receiver.resource.fields[op.Field] = value.cloneForValueCopy()
 				return nil
 			}
 		}
