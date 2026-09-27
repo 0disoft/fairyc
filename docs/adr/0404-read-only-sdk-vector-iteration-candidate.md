@@ -838,6 +838,13 @@ also failed, with 10.13% and 14.95% full spans. The matched C/Fairy/C full
 measurement was not run. Processor pinning alone does not close the runtime
 gate on this host.
 
+The [high-priority triad follow-up](../ops/scanner-high-priority-triad-result-20260927.md)
+passed both complete C-only null sessions at 7.47% and 4.84% full spans.
+Its one C/Fairy/C comparison failed stability in both images at 21.86% and
+32.62%, with the control and two images pinned to different logical processors.
+Neither median can decide the 8% runtime gate. This does not undo the separate
+standalone EXE-size pass or admit the private vector-loop source form.
+
 ## Proposed first boundary
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned

@@ -96,3 +96,8 @@ Run the matching high-priority C/Fairy/C comparison only if the complete
 high-priority C-only control passes. A passing control at a different priority
 does not qualify. This is an environment experiment, not a change to Fairy
 source semantics or an automatic admission of vector iteration.
+
+The [first complete high-priority result](scanner-high-priority-triad-result-20260927.md)
+passed both C-only null sessions but failed the C/Fairy/C stability condition
+in both images. The three processes also selected different logical processors.
+The retained medians are not an 8% runtime verdict.
