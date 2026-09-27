@@ -33,6 +33,7 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	smoke := smokeMode == "1"
 	highPriority := scannerTriadHighPriority(t)
 	lowestAllowed := scannerTriadLowestAllowed(t, highPriority)
+	extendedWarmup := scannerTriadExtendedWarmup(t, lowestAllowed)
 	measuredTriads, rounds := 24, 250000
 	if smoke {
 		measuredTriads, rounds = 1, 1000
@@ -61,6 +62,22 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 			pin = `@link_name("fc_pair_pin_lowest_allowed_priority")`
 		}
 		mainSource = strings.Replace(mainSource, pinLink, pin, 1)
+	}
+	if extendedWarmup {
+		const anchor = "    var usize triad = 0;"
+		if strings.Count(mainSource, anchor) != 1 {
+			t.Fatal("C/Fairy/C triad warmup anchor changed")
+		}
+		const extra = `    var usize warmup = 0;
+    while (warmup < 7) {
+        assert(run_c(@@ROUNDS@@) == @@EXPECTED@@);
+        assert(run_fairy(@@ROUNDS@@) == @@EXPECTED@@);
+        assert(run_c(@@ROUNDS@@) == @@EXPECTED@@);
+        warmup += 1;
+    }
+`
+		mainSource = strings.Replace(mainSource, anchor, extra+anchor, 1)
+		mainSource = strings.ReplaceAll(mainSource, "@@EXPECTED@@", strconv.Itoa(expected))
 	}
 	for _, replacement := range [][2]string{
 		{"@@TRIADS@@", strconv.Itoa(measuredTriads + 1)},
@@ -177,6 +194,10 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	}
 	if lowestAllowed {
 		report["affinity"] = "lowest-allowed-logical-processor"
+	}
+	if extendedWarmup {
+		report["warmup_triads"] = 8
+		report["scope"] = "Each combined image pins to the lowest allowed logical processor at checked highest thread priority; seven untimed and one retained timed warmup C-Fairy-C triads precede all 24 measured triads. Every call checks the Go-oracle checksum. Run only after the matching eight-warmup C-only control passes; no retry or exclusion. Combined EXE size is not the standalone budget."
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {

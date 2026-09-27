@@ -33,6 +33,7 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 	smoke := smokeMode == "1"
 	highPriority := scannerTriadHighPriority(t)
 	lowestAllowed := scannerTriadLowestAllowed(t, highPriority)
+	extendedWarmup := scannerTriadExtendedWarmup(t, lowestAllowed)
 	triads, rounds := 24, 250000
 	if smoke {
 		triads, rounds = 1, 1000
@@ -64,6 +65,19 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 			support += scannerTriadHighPrioritySupport
 		}
 		mainSource = strings.Replace(mainSource, "fc_pair_pin_thread()", pin, 1)
+	}
+	if extendedWarmup {
+		const anchor = "        if (fc_same_image_work_rounds(@@ROUNDS@@) != @@EXPECTED@@ ||\n"
+		if strings.Count(mainSource, anchor) != 1 {
+			t.Fatal("C-only triad warmup anchor changed")
+		}
+		const extra = `        for (int warmup = 0; warmup < 7; ++warmup) {
+            if (fc_same_image_work_rounds(@@ROUNDS@@) != @@EXPECTED@@ ||
+                fc_same_image_work_rounds(@@ROUNDS@@) != @@EXPECTED@@ ||
+                fc_same_image_work_rounds(@@ROUNDS@@) != @@EXPECTED@@) abort();
+        }
+`
+		mainSource = strings.Replace(mainSource, anchor, extra+anchor, 1)
 	}
 	cSource := "#include <windows.h>\n" + sameImageCScannerSupport(t) +
 		sameImageCRoundsSupport + support + mainSource
@@ -156,6 +170,10 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 	if lowestAllowed {
 		report["affinity"] = "lowest-allowed-logical-processor"
 	}
+	if extendedWarmup {
+		report["warmup_triads"] = 8
+		report["scope"] = "Two complete C-C-C runs on the lowest allowed logical processor at checked highest thread priority; eight untimed warmup triads per run. Every measured triad and checksum is retained without retry or exclusion. This does not measure Fairy/C runtime or executable size."
+	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)
@@ -182,6 +200,18 @@ func scannerTriadLowestAllowed(t *testing.T, highPriority bool) bool {
 		t.Fatal("lowest-allowed affinity requires checked high priority")
 	}
 	return mode == "lowest-allowed"
+}
+
+func scannerTriadExtendedWarmup(t *testing.T, lowestAllowed bool) bool {
+	t.Helper()
+	mode := os.Getenv("FAIRYC_SCANNER_TRIAD_WARMUP")
+	if mode != "" && mode != "8" {
+		t.Fatalf("unknown scanner triad warmup mode %q", mode)
+	}
+	if mode == "8" && !lowestAllowed {
+		t.Fatal("eight-triad warmup requires lowest-allowed affinity and checked high priority")
+	}
+	return mode == "8"
 }
 
 const scannerTriadHighPrioritySupport = `

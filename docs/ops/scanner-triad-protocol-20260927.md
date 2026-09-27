@@ -124,3 +124,29 @@ The [first complete deterministic-processor C-only control](scanner-lowest-allow
 failed: its first session had a 17.35% full span, above the unchanged 10%
 limit. The second session passed at 8.93%, but both are required. The matching
 C/Fairy/C full comparison was not run, and the 8% runtime gate remains open.
+
+## Eight-triad startup follow-up
+
+The failed deterministic control's first session had unusually long calls in
+its first three measured triads (for example, the first surrounding C calls
+took 7,683,925 and 4,111,218 QPC ticks; later calls were near 3.7 million).
+This suggests, but does not establish, an insufficient startup warmup. The
+second session alone cannot be selected as a passing control.
+
+Before another full run, a separate opt-in condition fixes **eight total
+warmup triads** per session or image. The C-only control runs eight untimed
+`C, C, C` triads before each of its two 24-triad sessions. Each C/Fairy/C image
+runs seven untimed `C, Fairy, C` triads and retains its existing timed warmup
+triad before 24 measured triads. Every warmup and measured call must return the
+same Go-oracle checksum. The default one-warmup mode and all historical
+receipts remain separate.
+
+This changes no sample selection or admission limit: input, 250,000 rounds per
+call, optimized MSVC profile, lowest-allowed processor, checked highest thread
+priority, two complete C-only sessions, 10% full-span and 2% null-bias limits,
+matched processor and toolchain, and the cumulative 8% Fairy/C runtime limit
+remain fixed. Retain the first complete eight-warmup control whether it passes
+or fails, without retry or exclusion. Run one matching C/Fairy/C comparison
+only if both C-only sessions pass. Longer warmup tests one environmental
+hypothesis; it does not itself admit vector iteration or decide standalone
+EXE size.
