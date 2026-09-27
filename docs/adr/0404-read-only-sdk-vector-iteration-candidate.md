@@ -67,6 +67,10 @@ Linux GNU C11 profile on the current host. Both forms emit the same number of
 functions and the same foreign-symbol set. This checks the Linux C emission
 boundary for one scalar loop; it does not compile, link or execute a Linux
 binary, and Linux native behavior remains unverified.
+A Linux-only continuation of that fixture builds both source forms with GCC
+under low and optimized profiles, then checks result 7 and zero live vector
+allocations after function return. It is present but has not run on this
+Windows host, so its native result is still an admission gate.
 
 The private native parity test also compares an early `return` from a scalar
 vector loop and, separately, `?` propagation while a vector owns two
