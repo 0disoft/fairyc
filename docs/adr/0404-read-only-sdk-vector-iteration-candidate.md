@@ -184,6 +184,12 @@ The private rejection matrix also rejects moving a borrowed vector owner
 computed vector expression as the iterable. The latter cannot acquire an
 implicit temporary owner or hide evaluation in this source form.
 
+The existing full-file formatter preserves both private candidate headers:
+an explicit `ref values` owner borrow and a named shared view. It normalizes
+CRLF, then reparses with the same syntax shape and produces identical bytes on
+a second pass. This is syntax preservation only; the formatter does not
+authenticate the SDK or admit the source form in stable workspace commands.
+
 The indexed real scanner also serves as an unused-source-form control. A
 compiler test analyzes the same checked-in package graph through the stable
 and private candidate lanes, verifies both MIR programs, and compares their
