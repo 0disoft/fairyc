@@ -359,11 +359,15 @@ fn i32 main() {
 		name     string
 		setup    string
 		body     string
+		after    string
 		returned string
 		expected int32
 	}{
 		{name: "empty", body: "        assert(false);", returned: "    return 42;", expected: 42},
-		{name: "ordered control", setup: pushes, body: body, returned: "    return 40 + sum;", expected: 44},
+		{name: "ordered control", setup: pushes, body: body,
+			after: `    assert(switch (v::push<i32>(ref mut values, 9)) { case .ok(_): { true } case .err(_): { false } });
+    assert(*v::at<i32>(ref values, 4) == 9);`,
+			returned: "    return 40 + sum;", expected: 44},
 		{name: "early return cleanup", setup: pushes, body: "        if (*item == 3) { return 43; }", returned: "    return 9;", expected: 43},
 	} {
 		t.Run(sample.name, func(t *testing.T) {
@@ -381,7 +385,7 @@ fn i32 main() {
     }`},
 			} {
 				t.Run(form.name, func(t *testing.T) {
-					client := header + sample.setup + form.loop + "\n" + sample.returned + footer
+					client := header + sample.setup + form.loop + "\n" + sample.after + "\n" + sample.returned + footer
 					input, coordinates := vectorSDKInputWithCandidate(t, client, true)
 					owners := []hir.PackageID{3}
 					var analysis compiler.GenericAnalysis
