@@ -27,8 +27,13 @@ type scannerBuildCostRow struct {
 // Compares fresh indexed and private vector-loop source through optimized
 // Windows native image construction. Warmup and lane order are fixed in advance.
 func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
-	if os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_COST") != "1" {
-		t.Skip("opt-in private scanner build-cost measurement")
+	nullControl := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_NULL") == "1"
+	candidateComparison := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_COST") == "1"
+	if nullControl && candidateComparison {
+		t.Fatal("choose exactly one scanner build-cost mode")
+	}
+	if !nullControl && !candidateComparison {
+		t.Skip("opt-in private scanner build-cost or identical-source null measurement")
 	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
@@ -38,6 +43,13 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 		t.Fatal("real scanner variants changed")
 	}
 	lanes := []realScannerVectorVariant{variants[0], variants[4]}
+	if nullControl {
+		lanes[1] = variants[0]
+		lanes[1].name = "explicit index clone"
+		if lanes[0].scanner != lanes[1].scanner || lanes[0].candidate != lanes[1].candidate {
+			t.Fatal("null control changed scanner source or compiler lane")
+		}
+	}
 	support, err := os.ReadFile(filepath.Join("..", "..", "tools", "benchmarks", "c-budget", "support.c"))
 	if err != nil {
 		t.Fatal(err)
@@ -73,8 +85,23 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 			})
 		}
 	}
-	report, err := json.Marshal(map[string]any{
-		"schema":         "fairyc.vector-lexer-build-cost/v1",
+	if nullControl {
+		for pair := 0; pair < 6; pair++ {
+			first, second := rows[pair*2], rows[pair*2+1]
+			if first.CSourceBytes != second.CSourceBytes || first.EXEBytes != second.EXEBytes ||
+				first.Specializations != second.Specializations {
+				t.Fatalf("identical-source pair %d changed artifacts: %+v %+v", pair, first, second)
+			}
+		}
+	}
+	schema, prefix := "fairyc.vector-lexer-build-cost/v1", "VECTOR_LEXER_BUILD_COST "
+	scope := "One Go test process builds fresh temporary packages in alternating order. check_ns covers load, metadata, analysis and verified MIR lowering; prepare and toolchain resolution are excluded. emit_ns is generated C emission, support_ns assembles runtime C source and may read zero below clock resolution, and native_ns includes MSVC compile/link plus artifact validation and reads. No persistent cache is requested. Ambient filesystem cache, process load and Go GC remain uncontrolled. This compares Fairy source forms, not independent C build cost or cold stable CLI startup."
+	if nullControl {
+		schema, prefix = "fairyc.vector-lexer-build-null/v1", "VECTOR_LEXER_BUILD_NULL "
+		scope = "Identical explicit-index Fairy source is compiled in both lanes with the same fresh-package and optimized MSVC phases as the candidate build comparison. Alternating lane labels and one warmup pair precede five measured pairs. Pairwise C-source length, specialization count and EXE size must match. Ambient filesystem cache, process load and Go GC remain uncontrolled. This calibrates host and harness variation; it cannot establish candidate compiler cost."
+	}
+	report := map[string]any{
+		"schema":         schema,
 		"go":             runtime.Version(),
 		"gomaxprocs":     runtime.GOMAXPROCS(0),
 		"msvc":           toolchainVersion,
@@ -86,10 +113,15 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 		"main_sha256":    fmt.Sprintf("%x", sha256.Sum256([]byte(realScannerExecutionMain))),
 		"support_sha256": fmt.Sprintf("%x", sha256.Sum256(support)),
 		"rows":           rows,
-		"scope":          "One Go test process builds fresh temporary packages in alternating order. check_ns covers load, metadata, analysis and verified MIR lowering; prepare and toolchain resolution are excluded. emit_ns is generated C emission, support_ns assembles runtime C source and may read zero below clock resolution, and native_ns includes MSVC compile/link plus artifact validation and reads. No persistent cache is requested. Ambient filesystem cache, process load and Go GC remain uncontrolled. This compares Fairy source forms, not independent C build cost or cold stable CLI startup.",
-	})
+		"scope":          scope,
+	}
+	if nullControl {
+		report["clone_sha256"] = report["vector_sha256"]
+		delete(report, "vector_sha256")
+	}
+	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("VECTOR_LEXER_BUILD_COST " + string(report))
+	t.Log(prefix + string(encoded))
 }
