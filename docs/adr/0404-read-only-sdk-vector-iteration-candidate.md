@@ -191,6 +191,10 @@ The private rejection matrix also rejects moving a borrowed vector owner
 (`E2105`), treating a scalar as the vector owner (`E1006`), and using a
 computed vector expression as the iterable. The latter cannot acquire an
 implicit temporary owner or hide evaluation in this source form.
+The Flow rejection check also covers an exclusive alias created inside the
+shared loop and returning a local vector item through a second shared binding.
+Both are rejected before MIR lowering; these cases do not change stable source
+admission.
 
 The existing full-file formatter preserves both private candidate headers:
 an explicit `ref values` owner borrow and a named shared view. It normalizes

@@ -289,6 +289,7 @@ func TestPrivateVectorSDKCandidateLoopRejectsUnsafeSource(t *testing.T) {
 		{name: "wrong element", loop: "for (let ref u8 item in ref values) { assert(*item == 0); }", wantCode: "E1006"},
 		{name: "mutable item", loop: "for (let ref mut i32 item in ref values) { assert(*item == 0); }", wantUnsupported: true, wantSpan: "ref mut i32"},
 		{name: "owner mutation", loop: "for (let ref i32 item in ref values) { values = v::empty<i32>(); assert(*item == 0); }", wantCode: "E2101"},
+		{name: "owner exclusive alias", loop: "for (let ref i32 item in ref values) { let ref mut v::Vec<i32> edit = ref mut values; assert(v::push<i32>(edit, 9).is_ok); assert(*item == 0); }", wantCode: "E2101"},
 		{name: "owner move", loop: "for (let ref i32 item in ref values) { let v::Vec<i32> moved = values; assert(*item == 0); }", wantCode: "E2105"},
 		{name: "scalar owner", loop: "var i32 scalar = 0; for (let ref i32 item in ref scalar) { assert(*item == 0); }", wantCode: "E1006"},
 		{name: "computed iterable", loop: "for (let ref i32 item in v::empty<i32>()) { assert(*item == 0); }", wantUnsupported: true, wantSpan: "v::empty<i32>()"},
@@ -430,27 +431,34 @@ fn i32 visit(ref v::Vec<i32> values) {
 }
 
 func TestPrivateVectorSDKCandidateLoopRejectsLocalItemEscape(t *testing.T) {
-	const source = `module main;
+	const template = `module main;
 import std::vec as v;
 import std::bytes as bytes;
 fn ref i32 leak(ref i32 fallback) {
     var v::Vec<i32> values = v::empty<i32>();
-    for (let ref i32 item in ref values) { return item; }
+    for (let ref i32 item in ref values) { ESCAPE }
     return fallback;
 }`
-	input, coordinates := vectorSDKInputWithCandidate(t, source, true)
-	result, err := compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
-		genericplan.DefaultPlanLimits(), []hir.PackageID{3})
-	if err != nil {
-		t.Fatal(err)
+	for _, sample := range []struct{ name, escape string }{
+		{"direct", "return item;"},
+		{"alias", "let ref i32 alias = item; return alias;"},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			input, coordinates := vectorSDKInputWithCandidate(t, strings.Replace(template, "ESCAPE", sample.escape, 1), true)
+			result, err := compiler.AnalyzeSDKVectorCandidatePackages(input, coordinates,
+				genericplan.DefaultPlanLimits(), []hir.PackageID{3})
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, diagnostic := range result.Analysis.Semantic.Diagnostics {
+				if diagnostic.Code == "E2102" && len(diagnostic.Related) != 0 {
+					return
+				}
+			}
+			t.Fatalf("local vector item escaped without a borrow error: %+v %+v",
+				result.Analysis.Semantic.Diagnostics, result.Analysis.Semantic.Unsupported)
+		})
 	}
-	for _, diagnostic := range result.Analysis.Semantic.Diagnostics {
-		if diagnostic.Code == "E2102" && len(diagnostic.Related) != 0 {
-			return
-		}
-	}
-	t.Fatalf("local vector item escaped without a borrow error: %+v %+v",
-		result.Analysis.Semantic.Diagnostics, result.Analysis.Semantic.Unsupported)
 }
 
 const vectorForNativeProbe = `
