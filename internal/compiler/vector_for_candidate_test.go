@@ -136,6 +136,8 @@ fn i32 exercise() {
     var v::Vec<s::Mark> values = v::empty<s::Mark>();
     assert(switch (v::push<s::Mark>(ref mut values, s::make(1))) { case .ok(_): { true } case .err(_): { false } });
     assert(switch (v::push<s::Mark>(ref mut values, s::make(2))) { case .ok(_): { true } case .err(_): { false } });
+    let ref s::Mark first = s::first(ref values);
+    assert(s::number(first) == 1);
     return s::sum(ref values);
 }
 fn i32 main() {
@@ -154,23 +156,36 @@ pub fn i32 sum(ref v::Vec<Mark> values) {
 `
 	const supportTail = `
     return total;
+}
+pub fn i32 number(ref Mark item) { return item.id; }
+pub fn ref Mark first(ref v::Vec<Mark> values) {
+`
+	const firstTail = `
+    return v::at<Mark>(values, 1);
 }`
 	for _, form := range []struct {
 		name      string
 		candidate bool
 		loop      string
+		firstLoop string
 	}{
 		{name: "vector for", candidate: true,
-			loop: `    for (let ref Mark item in values) { total += item.id; }`},
+			loop:      `    for (let ref Mark item in values) { total += item.id; }`,
+			firstLoop: `    for (let ref Mark item in values) { return item; }`},
 		{name: "explicit index", loop: `    let usize bound = v::len<Mark>(values);
     for (var usize index = 0; index < bound; index += 1) {
         let ref Mark item = v::at<Mark>(values, index);
         total += item.id;
+    }`, firstLoop: `    let usize bound = v::len<Mark>(values);
+    for (var usize index = 0; index < bound; index += 1) {
+        let ref Mark item = v::at<Mark>(values, index);
+        return item;
     }`},
 	} {
 		t.Run(form.name, func(t *testing.T) {
 			input, coordinates := vectorSDKInputWithCandidate(t, client, true)
-			input.Files = append(input.Files, parseCompilerFile(t, 2, "support.fy", supportHead+form.loop+supportTail))
+			input.Files = append(input.Files, parseCompilerFile(t, 2, "support.fy",
+				supportHead+form.loop+supportTail+form.firstLoop+firstTail))
 			input.Imports = append(input.Imports,
 				semantic.PackageImport{FromPackage: 1, ImportPath: "support", ToPackage: 2},
 				semantic.PackageImport{FromPackage: 2, ImportPath: "std::vec", ToPackage: 3},

@@ -214,7 +214,10 @@ A separate resource case creates `Vec<support::Mark>` in the client and
 iterates it in the support package. The private loop and explicit-index form
 both pass Flow, verified MIR and low/optimized MSVC with the same sum, reverse
 element cleanup order and no retained vector allocation. This covers that
-resource-bearing package graph, not arbitrary public resource types.
+resource-bearing package graph, not arbitrary public resource types. The same
+case returns the first borrowed item from a support-package function to the
+client; its fallback returns the second item, so native execution proves the
+loop-body return was taken. Both forms preserve the borrow origin and cleanup.
 An explicit `ref holder.values` place borrow over a resource field also matches
 the indexed form: both pass Flow and verified MIR and return the same result
 with vector cleanup under low and optimized MSVC. The test fills the vector
@@ -970,7 +973,10 @@ not retroactively accepted, and build-cost parity remains unproven.
 
 The iterable would have to be an explicit shared borrow of an exact SDK-owned
 `Vec<T>` place, or a named immutable `ref Vec<T>` local or parameter. The item
-would have exact type `ref T` and be valid only within one loop-body entry.
+would have exact type `ref T`, with its binding scoped to one loop-body entry.
+Returning the borrowed item from a declared `ref Vec<T>` parameter follows
+the existing single-origin return rule; a local vector owner still cannot
+escape through that return.
 `T` would follow the already admitted SDK vector element set, including named
 resource elements by shared reference. No element move, mutable element view,
 user-defined iterator, other generic collection, implicit borrow, or hidden
