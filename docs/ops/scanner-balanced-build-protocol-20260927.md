@@ -17,8 +17,9 @@ Neither mode requests a persistent compiler cache.
 
 Pair zero is a warmup excluded from decisions. Five measured pairs follow,
 with 24 complete builds per mode. Every build records its pair, position,
-lane, check and native phase times, specialization count, generated-C length,
-EXE length, source hashes and toolchain version. For each measured pair, sum
+lane, check and native phase times, specialization count, generated-C length
+and EXE length; the receipt records lane source hashes and toolchain version
+once. For each measured pair, sum
 the two total build times per lane, where one total is `check_ns + emit_ns +
 support_ns + native_ns`, then divide B's sum by A's sum. All observations,
 including outliers, remain in the receipt. The null also requires equal

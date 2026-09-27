@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -24,14 +25,56 @@ type scannerBuildCostRow struct {
 	EXEBytes        int                      `json:"exe_bytes"`
 }
 
+func scannerBuildLaneOrder(pair int, balanced bool) []int {
+	if balanced {
+		if pair%2 == 0 {
+			return []int{0, 1, 1, 0}
+		}
+		return []int{1, 0, 0, 1}
+	}
+	if pair%2 == 0 {
+		return []int{0, 1}
+	}
+	return []int{1, 0}
+}
+
+func TestScannerBalancedBuildLaneOrder(t *testing.T) {
+	for pair := 0; pair < 6; pair++ {
+		want := []int{0, 1, 1, 0}
+		if pair%2 != 0 {
+			want = []int{1, 0, 0, 1}
+		}
+		if got := scannerBuildLaneOrder(pair, true); !slices.Equal(got, want) {
+			t.Fatalf("pair %d order = %v, want %v", pair, got, want)
+		}
+		legacy := []int{0, 1}
+		if pair%2 != 0 {
+			legacy = []int{1, 0}
+		}
+		if got := scannerBuildLaneOrder(pair, false); !slices.Equal(got, legacy) {
+			t.Fatalf("legacy pair %d order = %v, want %v", pair, got, legacy)
+		}
+	}
+}
+
 // Compares fresh indexed and private vector-loop source through optimized
 // Windows native image construction. Warmup and lane order are fixed in advance.
 func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 	plainNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_NULL") == "1"
 	affinityNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_AFFINITY_NULL") == "1"
-	nullControl := plainNull || affinityNull
-	candidateComparison := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_COST") == "1"
-	if plainNull && affinityNull || nullControl && candidateComparison {
+	balancedNull := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_BALANCED_NULL") == "1"
+	balancedCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_BALANCED_COST") == "1"
+	plainCandidate := os.Getenv("FAIRYC_VECTOR_LEXER_BUILD_COST") == "1"
+	nullControl := plainNull || affinityNull || balancedNull
+	candidateComparison := plainCandidate || balancedCandidate
+	balanced := balancedNull || balancedCandidate
+	modes := 0
+	for _, active := range []bool{plainNull, affinityNull, balancedNull, plainCandidate, balancedCandidate} {
+		if active {
+			modes++
+		}
+	}
+	if modes > 1 {
 		t.Fatal("choose exactly one scanner build-cost mode")
 	}
 	if !nullControl && !candidateComparison {
@@ -70,13 +113,14 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 		t.Fatal(err)
 	}
 	extraSupport := "\n" + string(support) + "\nvoid fc_budget_flush(void) { fflush(stdout); }\n"
-	rows := make([]scannerBuildCostRow, 0, 12)
+	buildsPerPair := 2
+	if balanced {
+		buildsPerPair = 4
+	}
+	rows := make([]scannerBuildCostRow, 0, 6*buildsPerPair)
 	var toolchainVersion string
 	for pair := 0; pair < 6; pair++ {
-		order := []int{0, 1}
-		if pair%2 != 0 {
-			order[0], order[1] = order[1], order[0]
-		}
+		order := scannerBuildLaneOrder(pair, balanced)
 		for position, index := range order {
 			variant := lanes[index]
 			var check scannerBudgetCheckPhases
@@ -102,10 +146,12 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 	}
 	if nullControl {
 		for pair := 0; pair < 6; pair++ {
-			first, second := rows[pair*2], rows[pair*2+1]
-			if first.CSourceBytes != second.CSourceBytes || first.EXEBytes != second.EXEBytes ||
-				first.Specializations != second.Specializations {
-				t.Fatalf("identical-source pair %d changed artifacts: %+v %+v", pair, first, second)
+			first := rows[pair*buildsPerPair]
+			for _, next := range rows[pair*buildsPerPair+1 : (pair+1)*buildsPerPair] {
+				if first.CSourceBytes != next.CSourceBytes || first.EXEBytes != next.EXEBytes ||
+					first.Specializations != next.Specializations {
+					t.Fatalf("identical-source pair %d changed artifacts: %+v %+v", pair, first, next)
+				}
 			}
 		}
 	}
@@ -140,6 +186,19 @@ func TestPrivateVectorSDKCandidateScannerBuildCost(t *testing.T) {
 		report["affinity_mask"] = affinityMask
 		report["scope"] = scope + " The Go test process is pinned to one allowed logical processor before source preparation; Windows child processes inherit its affinity. The original mask is restored after the test. Priority class is unchanged."
 		prefix = "VECTOR_LEXER_BUILD_AFFINITY_NULL "
+	}
+	if balanced {
+		report["builds_per_lane_per_pair"] = 2
+		report["pair_order"] = "A-B-B-A / B-A-A-B alternating"
+		if balancedNull {
+			report["schema"] = "fairyc.vector-lexer-build-balanced-null/v1"
+			report["scope"] = "Identical explicit-index scanner sources occupy A and B in one warmup and five measured four-build pairs. ABBA/BAAB order alternates, and the two complete builds per lane are summed before forming each pair ratio. All phase times and observations are retained; this calibrates build noise, not candidate cost. No affinity or priority override."
+			prefix = "VECTOR_LEXER_BUILD_BALANCED_NULL "
+		} else {
+			report["schema"] = "fairyc.vector-lexer-build-balanced-cost/v1"
+			report["scope"] = "Explicit-index and private vector-loop scanner sources occupy A and B in one warmup and five measured four-build pairs. ABBA/BAAB order alternates, and the two complete builds per lane are summed before forming each pair ratio. All phase times and observations are retained. This compares steady-state Fairy build cost, not independent-C cost or cold CLI startup. No affinity or priority override."
+			prefix = "VECTOR_LEXER_BUILD_BALANCED_COST "
+		}
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
