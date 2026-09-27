@@ -32,6 +32,7 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	}
 	smoke := smokeMode == "1"
 	highPriority := scannerTriadHighPriority(t)
+	lowestAllowed := scannerTriadLowestAllowed(t, highPriority)
 	measuredTriads, rounds := 24, 250000
 	if smoke {
 		measuredTriads, rounds = 1, 1000
@@ -55,7 +56,11 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 		if strings.Count(mainSource, pinLink) != 1 {
 			t.Fatal("C/Fairy/C triad pin call changed")
 		}
-		mainSource = strings.Replace(mainSource, pinLink, `@link_name("fc_pair_pin_thread_priority")`, 1)
+		pin := `@link_name("fc_pair_pin_thread_priority")`
+		if lowestAllowed {
+			pin = `@link_name("fc_pair_pin_lowest_allowed_priority")`
+		}
+		mainSource = strings.Replace(mainSource, pinLink, pin, 1)
 	}
 	for _, replacement := range [][2]string{
 		{"@@TRIADS@@", strconv.Itoa(measuredTriads + 1)},
@@ -72,7 +77,11 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	support := sameImageCScannerSupport(t) + sameImageCRoundsSupport +
 		dualScannerTimingSupport + sameImageCycleAffinitySupport
 	if highPriority {
-		support += scannerTriadHighPrioritySupport
+		if lowestAllowed {
+			support += scannerTriadLowestAllowedSupport
+		} else {
+			support += scannerTriadHighPrioritySupport
+		}
 	}
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
@@ -141,6 +150,9 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 			"scanner_sha256":  fmt.Sprintf("%x", sha256.Sum256([]byte(variant.scanner))),
 			"specializations": specializations, "samples": rows,
 		}
+		if lowestAllowed {
+			image["affinity"] = "lowest-allowed-logical-processor"
+		}
 		if !smoke {
 			image["passes_10_percent_stability"] = span <= 0.10
 		}
@@ -162,6 +174,9 @@ func TestPrivateVectorSDKCandidateSameImageCScannerTriads(t *testing.T) {
 	}
 	if highPriority {
 		report["thread_priority"] = "highest"
+	}
+	if lowestAllowed {
+		report["affinity"] = "lowest-allowed-logical-processor"
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {

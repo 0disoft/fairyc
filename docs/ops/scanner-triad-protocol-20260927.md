@@ -101,3 +101,21 @@ The [first complete high-priority result](scanner-high-priority-triad-result-202
 passed both C-only null sessions but failed the C/Fairy/C stability condition
 in both images. The three processes also selected different logical processors.
 The retained medians are not an 8% runtime verdict.
+
+## Deterministic processor follow-up
+
+The high-priority control and two comparison images above pinned themselves
+to their own current processors (1, 8, and 0), leaving the required matching
+condition unmet. A new opt-in mode chooses the lowest numbered processor in
+each process's allowed Windows group mask before warmup, then checks
+`THREAD_PRIORITY_HIGHEST`. Selection or priority failure aborts the probe.
+Each receipt records the resulting processor; matching is still checked across
+all three processes, since their allowed masks or groups could differ.
+
+This deterministic rule is fixed before the next complete run and does not
+choose a processor using a favorable timing result. The 250,000 rounds, two
+complete 24-triad C-only sessions, one warmup and 24 C/Fairy/C triads per image,
+exact checksums, 10% full-span and 2% null-bias limits remain unchanged.
+Run a complete comparison only after its matching C-only null control passes.
+Retain failures and mismatches without retry or exclusion. The normal and
+current-processor modes remain separate historical conditions.

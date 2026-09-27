@@ -32,6 +32,7 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 	}
 	smoke := smokeMode == "1"
 	highPriority := scannerTriadHighPriority(t)
+	lowestAllowed := scannerTriadLowestAllowed(t, highPriority)
 	triads, rounds := 24, 250000
 	if smoke {
 		triads, rounds = 1, 1000
@@ -55,8 +56,14 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 		if strings.Count(mainSource, "fc_pair_pin_thread()") != 1 {
 			t.Fatal("C-only triad pin call changed")
 		}
-		support += scannerTriadHighPrioritySupport
-		mainSource = strings.Replace(mainSource, "fc_pair_pin_thread()", "fc_pair_pin_thread_priority()", 1)
+		pin := "fc_pair_pin_thread_priority()"
+		if lowestAllowed {
+			support += scannerTriadLowestAllowedSupport
+			pin = "fc_pair_pin_lowest_allowed_priority()"
+		} else {
+			support += scannerTriadHighPrioritySupport
+		}
+		mainSource = strings.Replace(mainSource, "fc_pair_pin_thread()", pin, 1)
 	}
 	cSource := "#include <windows.h>\n" + sameImageCScannerSupport(t) +
 		sameImageCRoundsSupport + support + mainSource
@@ -146,6 +153,9 @@ func TestPrivateVectorSDKCandidateIdenticalCScannerTriads(t *testing.T) {
 	if highPriority {
 		report["thread_priority"] = "highest"
 	}
+	if lowestAllowed {
+		report["affinity"] = "lowest-allowed-logical-processor"
+	}
 	encoded, err := json.Marshal(report)
 	if err != nil {
 		t.Fatal(err)
@@ -162,12 +172,42 @@ func scannerTriadHighPriority(t *testing.T) bool {
 	return mode == "highest"
 }
 
+func scannerTriadLowestAllowed(t *testing.T, highPriority bool) bool {
+	t.Helper()
+	mode := os.Getenv("FAIRYC_SCANNER_TRIAD_AFFINITY")
+	if mode != "" && mode != "lowest-allowed" {
+		t.Fatalf("unknown scanner triad affinity %q", mode)
+	}
+	if mode == "lowest-allowed" && !highPriority {
+		t.Fatal("lowest-allowed affinity requires checked high priority")
+	}
+	return mode == "lowest-allowed"
+}
+
 const scannerTriadHighPrioritySupport = `
 size_t fc_pair_pin_thread_priority(void) {
     size_t pinned = fc_pair_pin_thread();
     if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST) ||
         GetThreadPriority(GetCurrentThread()) != THREAD_PRIORITY_HIGHEST) abort();
     return pinned;
+}
+`
+
+const scannerTriadLowestAllowedSupport = `
+size_t fc_pair_pin_lowest_allowed_priority(void) {
+    GROUP_AFFINITY allowed, selected;
+    if (!GetThreadGroupAffinity(GetCurrentThread(), &allowed)) abort();
+    unsigned number = 0;
+    for (; number < 64u; ++number) {
+        if ((allowed.Mask & (((KAFFINITY)1) << number)) != 0) break;
+    }
+    if (number == 64u) abort();
+    selected = allowed;
+    selected.Mask = ((KAFFINITY)1) << number;
+    if (!SetThreadGroupAffinity(GetCurrentThread(), &selected, NULL) ||
+        !SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST) ||
+        GetThreadPriority(GetCurrentThread()) != THREAD_PRIORITY_HIGHEST) abort();
+    return (size_t)allowed.Group * 64u + number;
 }
 `
 
