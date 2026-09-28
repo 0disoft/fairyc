@@ -916,8 +916,10 @@ stable source admission remains open pending a controlled environment.
 
 A separate [Linux null protocol](../ops/scanner-linux-null-protocol-20260928.md)
 predeclares fresh-process C-only triads and a session-wise median interval
-before any new scanner timing. It has no result yet and does not reinterpret
-the failed controls or the Linux Vec fixture's correctness result.
+before any new scanner timing. Its [first completed full control](../ops/scanner-linux-null-result-20260928.md)
+failed the predeclared interval in the second session. No C–Fairy–C runtime
+comparison followed; the earlier failed controls and the Linux Vec fixture's
+correctness result remain separate.
 
 The corresponding private C–Fairy–C harness now passes a one-triad smoke for
 both indexed and vector-loop scanner forms, including exact work checksums

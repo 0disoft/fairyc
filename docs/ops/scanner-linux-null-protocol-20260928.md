@@ -1,6 +1,7 @@
 # Linux scanner timing null protocol
 
-Date: 2026-09-28. Status: predeclared, no measurement result. This is a new
+Date: 2026-09-28. Status: predeclared before measurement; the first completed
+full control [failed](scanner-linux-null-result-20260928.md). This is a new
 Linux x86_64/glibc/GCC experiment on the scanner sources at `deec6377`. It
 does not rescore any earlier failed Windows or Linux null control. Its first
 deliverable is a C-only control; Fairy/C timing is prohibited until that
@@ -15,7 +16,8 @@ ignored `.cache/linux-scanner-null-*` directory retains the concatenated C
 source, ELF, GCC output and `receipt.json`; the receipt is updated after every
 measured triad. The Go test's PASS means execution and evidence capture
 completed. Only `receipt.json`'s `verdict` decides whether the null control
-passed. No Linux measurement has been run for this implementation yet.
+passed. The first full Linux run completed with Go PASS and receipt FAIL; this
+result does not change the predeclared thresholds below.
 
 ## Fixed workload and build
 
