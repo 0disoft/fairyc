@@ -1004,6 +1004,15 @@ claiming equivalent operands, CFG targets or native instructions. Its source
 hashes differ from the earlier shape receipt, so only its own paired rows are
 compared. Full normalized-MIR equivalence remains unproven.
 
+A [five-variant MIR delta](../ops/scanner-mir-loop-delta-20260929.md) then
+attributes the seven net additional operations to the token loop (+1),
+cooked-buffer loop (+3) and diagnostic loop (+3). Generic-name-normalized
+operand shapes show added local assignments and `usize` zero initializations
+alongside removed shared or field borrows. The isolated deltas add exactly to
+the combined delta, including successor kinds. Numeric local definition/use
+chains and CFG targets remain unpaired, so this is not a full executable-MIR
+equivalence or a native zero-cost proof.
+
 An [identical-source build control](../ops/scanner-build-null-result-20260927.md)
 then compiled the indexed scanner in both lanes under the same phased harness.
 Its five-pair median clone/index ratio was 1.00975, but the full paired-ratio

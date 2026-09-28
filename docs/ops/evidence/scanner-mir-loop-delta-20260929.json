@@ -1,0 +1,131 @@
+{
+  "baseline_scanner_sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f",
+  "rows": [
+    {
+      "variant": "token vector for",
+      "function": "$p1::scanner::report_work",
+      "scanner_sha256": "d12a895185ed2b5237636ef38a88718f7f6ccaa3e14b28014e4389abddf4c398",
+      "blocks": 1,
+      "operations": 1,
+      "operation_kinds": {
+        "assign": 2,
+        "unary": -1
+      },
+      "operand_shapes": {
+        "assign type= operator= field= input=local:": 2,
+        "unary type=&$p2::std::vec::generic<package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token> operator=& field= input=local:": -1
+      },
+      "successor_edges": {
+        "goto": 1
+      }
+    },
+    {
+      "variant": "token vector for",
+      "function": "$p1::scanner::storage",
+      "scanner_sha256": "d12a895185ed2b5237636ef38a88718f7f6ccaa3e14b28014e4389abddf4c398",
+      "blocks": 0,
+      "operations": 0,
+      "operation_kinds": {},
+      "operand_shapes": {},
+      "successor_edges": {}
+    },
+    {
+      "variant": "cooked vector for",
+      "function": "$p1::scanner::report_work",
+      "scanner_sha256": "2f717b132743dad6e2504ee9a6b974de04964011d21943e8e0daffdaf6443c7d",
+      "blocks": 0,
+      "operations": 0,
+      "operation_kinds": {},
+      "operand_shapes": {},
+      "successor_edges": {}
+    },
+    {
+      "variant": "cooked vector for",
+      "function": "$p1::scanner::storage",
+      "scanner_sha256": "2f717b132743dad6e2504ee9a6b974de04964011d21943e8e0daffdaf6443c7d",
+      "blocks": 1,
+      "operations": 3,
+      "operation_kinds": {
+        "assign": 4,
+        "field-borrow": -1
+      },
+      "operand_shapes": {
+        "assign type= operator= field= input=local:": 3,
+        "assign type= operator= field= input=usize::0:0": 1,
+        "field-borrow type=&$p2::std::vec::generic<package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::bytes::Buffer> operator= field=cooked input=local:": -1
+      },
+      "successor_edges": {
+        "goto": 1
+      }
+    },
+    {
+      "variant": "diagnostic vector for",
+      "function": "$p1::scanner::report_work",
+      "scanner_sha256": "114549423cdd6a4a0428a401e5dc3543d95ae2044e850116dadefbe9e774de99",
+      "blocks": 0,
+      "operations": 0,
+      "operation_kinds": {},
+      "operand_shapes": {},
+      "successor_edges": {}
+    },
+    {
+      "variant": "diagnostic vector for",
+      "function": "$p1::scanner::storage",
+      "scanner_sha256": "114549423cdd6a4a0428a401e5dc3543d95ae2044e850116dadefbe9e774de99",
+      "blocks": 1,
+      "operations": 3,
+      "operation_kinds": {
+        "assign": 4,
+        "field-borrow": -1
+      },
+      "operand_shapes": {
+        "assign type= operator= field= input=local:": 3,
+        "assign type= operator= field= input=usize::0:0": 1,
+        "field-borrow type=&$p2::std::vec::generic<package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry> operator= field=errors input=local:": -1
+      },
+      "successor_edges": {
+        "goto": 1
+      }
+    },
+    {
+      "variant": "all vector for",
+      "function": "$p1::scanner::report_work",
+      "scanner_sha256": "eb80e698382fbb8277d5ccd78294bbbf9aaaffe4c339714e7284a148d71e2581",
+      "blocks": 1,
+      "operations": 1,
+      "operation_kinds": {
+        "assign": 2,
+        "unary": -1
+      },
+      "operand_shapes": {
+        "assign type= operator= field= input=local:": 2,
+        "unary type=&$p2::std::vec::generic<package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token> operator=& field= input=local:": -1
+      },
+      "successor_edges": {
+        "goto": 1
+      }
+    },
+    {
+      "variant": "all vector for",
+      "function": "$p1::scanner::storage",
+      "scanner_sha256": "eb80e698382fbb8277d5ccd78294bbbf9aaaffe4c339714e7284a148d71e2581",
+      "blocks": 2,
+      "operations": 6,
+      "operation_kinds": {
+        "assign": 8,
+        "field-borrow": -2
+      },
+      "operand_shapes": {
+        "assign type= operator= field= input=local:": 6,
+        "assign type= operator= field= input=usize::0:0": 2,
+        "field-borrow type=&$p2::std::vec::generic<package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry> operator= field=errors input=local:": -1,
+        "field-borrow type=&$p2::std::vec::generic<package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_e99676392c237cb3feb90c4e31c83e25f1bc9c8c904b72d94303c3f4771b247b::std::bytes::Buffer> operator= field=cooked input=local:": -1
+      },
+      "successor_edges": {
+        "goto": 2
+      }
+    }
+  ],
+  "schema": "fairyc.vector-lexer-mir-loop-delta/v2",
+  "scope": "Five independently analyzed scanner variants. Operation and successor counts are reachable MIR counts. Operand shapes normalize SDK generic names to declaration and bindings but omit local identities and source positions. Additivity covers operation kinds, operand shapes, successor kinds, blocks and operations, not CFG target or dataflow equivalence."
+}
