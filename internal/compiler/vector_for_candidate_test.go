@@ -292,6 +292,7 @@ func TestPrivateVectorSDKCandidateLoopRejectsUnsafeSource(t *testing.T) {
 		{name: "owner exclusive alias", loop: "for (let ref i32 item in ref values) { let ref mut v::Vec<i32> edit = ref mut values; assert(v::push<i32>(edit, 9).is_ok); assert(*item == 0); }", wantCode: "E2101"},
 		{name: "owner move", loop: "for (let ref i32 item in ref values) { let v::Vec<i32> moved = values; assert(*item == 0); }", wantCode: "E2105"},
 		{name: "scalar owner", loop: "var i32 scalar = 0; for (let ref i32 item in ref scalar) { assert(*item == 0); }", wantCode: "E1006"},
+		{name: "mutable named view", loop: "var ref v::Vec<i32> view = ref values; for (let ref i32 item in view) { assert(*item == 0); }", wantUnsupported: true, wantSpan: "view"},
 		{name: "computed iterable", loop: "for (let ref i32 item in v::empty<i32>()) { assert(*item == 0); }", wantUnsupported: true, wantSpan: "v::empty<i32>()"},
 	} {
 		t.Run(sample.name, func(t *testing.T) {
@@ -316,7 +317,7 @@ fn i32 main() {
 				}
 				if sample.wantSpan != "" {
 					loopStart := strings.Index(client, sample.loop)
-					partStart := strings.Index(sample.loop, sample.wantSpan)
+					partStart := strings.LastIndex(sample.loop, sample.wantSpan)
 					if loopStart < 0 || partStart < 0 {
 						t.Fatal("fixture span is missing")
 					}
