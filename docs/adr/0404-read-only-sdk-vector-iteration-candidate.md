@@ -65,12 +65,19 @@ A target-independent compiler preflight now lowers a private `Vec<i32>` loop
 and its explicit-index equivalent to verified MIR, then emits both for the
 Linux GNU C11 profile on the current host. Both forms emit the same number of
 functions and the same foreign-symbol set. This checks the Linux C emission
-boundary for one scalar loop; it does not compile, link or execute a Linux
-binary, and Linux native behavior remains unverified.
-A Linux-only continuation of that fixture builds both source forms with GCC
-under low and optimized profiles, then checks result 7 and zero live vector
-allocations after function return. It is present but has not run on this
-Windows host, so its native result is still an admission gate.
+boundary for one scalar loop on any host. An external
+[Linux revalidation](../ops/linux-vector-native-revalidation-20260928.md) ran
+the continuation for commit `f939b390` on Debian 13.3 x86_64 with GCC 14.2.0
+and glibc 2.41.
+Both source forms built under `-O0` and `-O2` with `-std=c11 -pedantic-errors
+-Wall -Wextra -Werror -fno-common`. All four native runs exited 7 with no
+stdout or stderr, and the fixture confirmed zero live vector allocations after
+function return. The two optimized ELF files were byte-identical in this run.
+This closes native correctness for this Linux fixture only; it does not prove
+the representative lexer workload, general zero-cost lowering, or the
+cumulative C-relative 8% runtime and executable-size gates. No performance
+samples or C-relative size comparison were collected in that revalidation;
+the earlier failed null control and indeterminate 8% verdict remain unchanged.
 
 The private native parity test also compares an early `return` from a scalar
 vector loop and, separately, `?` propagation while a vector owns two
@@ -689,8 +696,8 @@ passed; the indexed and private-vector Fairy EXEs remained 201,728 bytes.
 After the paired timing probe failed its stability rule, the checked-in
 scanner returned to its prior safe per-byte loop. The native helper remains
 isolated for comparison but is no longer called by the default scanner. This
-does not establish runtime superiority, Linux native behavior or the
-cumulative 8% C-relative admission gate. The public `std::bytes` API remains
+does not establish runtime superiority, Linux native behavior for this matcher,
+or the cumulative 8% C-relative admission gate. The public `std::bytes` API remains
 unadmitted.
 
 The benchmark-only C reporter now emits the same numeric value sequence as
@@ -758,7 +765,7 @@ return the same Go-oracle checksum. The current/previous QPC median is 1.00283
 with 38.39% relative span; thread CPU median is 1.01250 with 35.53% span.
 Both exceed the 10% stability limit, so the native matcher has no established
 runtime advantage. The combined image cannot decide the standalone 8% size
-gate, and Linux native execution remains unverified.
+gate, and Linux native execution of this matcher remains unverified.
 
 A [pinned-thread same-image comparison](../ops/scanner-same-image-cycles-20260926.md)
 records twelve adjacent C/Fairy pairs per source form with QPC and
