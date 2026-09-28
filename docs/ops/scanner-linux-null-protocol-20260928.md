@@ -6,6 +6,17 @@ does not rescore any earlier failed Windows or Linux null control. Its first
 deliverable is a C-only control; Fairy/C timing is prohibited until that
 control passes under the same host, CPU, toolchain and source condition.
 
+The opt-in `TestPrivateVectorSDKCandidateLinuxScannerNull` in
+`internal/compiler/vector_lexer_linux_null_test.go` now implements the C-only
+schedule. Set `FAIRYC_SCANNER_LINUX_NULL_MODE=smoke` for one non-admission
+triad or `FAIRYC_SCANNER_LINUX_NULL_MODE=full` for the two complete sessions.
+It builds one GCC executable, then runs each triad in a fresh process. A unique
+ignored `.cache/linux-scanner-null-*` directory retains the concatenated C
+source, ELF, GCC output and `receipt.json`; the receipt is updated after every
+measured triad. The Go test's PASS means execution and evidence capture
+completed. Only `receipt.json`'s `verdict` decides whether the null control
+passed. No Linux measurement has been run for this implementation yet.
+
 ## Fixed workload and build
 
 Use the independent C scanner in `tools/benchmarks/c-budget/scanner_reference.c`
