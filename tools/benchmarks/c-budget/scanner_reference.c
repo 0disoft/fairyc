@@ -1209,7 +1209,11 @@ int main(void) {
     if (fread(source, 1, length, stdin) != length || getchar() != EOF) {
         free(source); free(tokens); free(diagnostics); return FC_BAD_INPUT;
     }
-    struct fc_scanner scanner = {source, (size_t)length, 0, 0, 0, tokens, diagnostics};
+    struct fc_scanner scanner = {0};
+    scanner.source = source;
+    scanner.length = (size_t)length;
+    scanner.tokens = tokens;
+    scanner.diagnostics = diagnostics;
 #ifdef FC_CANDIDATE_WORK_LIMIT
     scanner.work_limit = FC_CANDIDATE_WORK;
 #endif

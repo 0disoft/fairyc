@@ -76,7 +76,11 @@ static int fc_workload_round(const unsigned char *input, size_t length,
         return 3;
     }
     if (length != 0) memcpy(owned, input, length);
-    struct fc_scanner scanner = {owned, length, 0, 0, 0, tokens, diagnostics};
+    struct fc_scanner scanner = {0};
+    scanner.source = owned;
+    scanner.length = length;
+    scanner.tokens = tokens;
+    scanner.diagnostics = diagnostics;
 #ifdef FC_CANDIDATE_WORK_LIMIT
     scanner.work_limit = FC_CANDIDATE_WORK;
 #endif
