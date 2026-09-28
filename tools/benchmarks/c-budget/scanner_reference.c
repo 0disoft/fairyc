@@ -1220,8 +1220,9 @@ int main(void) {
     tokens = scanner.tokens;
     diagnostics = scanner.diagnostics;
     if (status == 0) {
-        qsort(scanner.diagnostics, scanner.diagnostic_count,
-              sizeof(*scanner.diagnostics), fc_compare_diagnostic);
+        if (scanner.diagnostic_count != 0)
+            qsort(scanner.diagnostics, scanner.diagnostic_count,
+                  sizeof(*scanner.diagnostics), fc_compare_diagnostic);
         fc_print(&scanner);
     }
     fc_release_cooked(&scanner);

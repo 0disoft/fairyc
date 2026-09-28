@@ -93,8 +93,9 @@ static int fc_workload_round(const unsigned char *input, size_t length,
         for (size_t i = 0; i < scanner.diagnostic_count; i++)
             *work += fc_diagnostic_token_length(&scanner.diagnostics[i]);
         if (report) {
-            qsort(scanner.diagnostics, scanner.diagnostic_count,
-                  sizeof(*scanner.diagnostics), fc_compare_diagnostic);
+            if (scanner.diagnostic_count != 0)
+                qsort(scanner.diagnostics, scanner.diagnostic_count,
+                      sizeof(*scanner.diagnostics), fc_compare_diagnostic);
 #ifdef FC_BUDGET_FAIRY_REPORT
             fc_report_fairy(&scanner);
 #else
