@@ -204,8 +204,6 @@ static size_t vector_live = 0;
 static size_t vector_allocations = 0, vector_frees = 0, vector_failures = 0;
 static size_t vector_calls = 0, vector_fail_at = 0;
 static int vector_fail = 0;
-static int vector_drop_calls = 0;
-static uint32_t vector_drop_status = 99;
 static void *vector_malloc(size_t size) {
     vector_calls++;
     if (vector_calls == vector_fail_at) { vector_failures++; return NULL; }
@@ -220,6 +218,8 @@ static void vector_free(void *data) { if (data != NULL) { vector_live--; vector_
 `
 
 const vectorStorageProbe = `
+static int vector_drop_calls = 0;
+static uint32_t vector_drop_status = 99;
 _Static_assert(sizeof(struct fy_private_vector_storage_v0) == 48, "x86_64 descriptor size");
 _Static_assert(offsetof(struct fy_private_vector_storage_v0, length) == 24, "x86_64 length offset");
 _Static_assert(sizeof(int32_t) == 4 && _Alignof(int32_t) == 4, "fixture i32 layout");
