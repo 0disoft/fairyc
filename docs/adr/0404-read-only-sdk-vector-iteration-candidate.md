@@ -914,6 +914,11 @@ failed its predeclared 10% stability rule in both sessions, with 14.27% and
 does not rescue the failed spread. No C–Fairy–C runtime inference follows;
 stable source admission remains open pending a controlled environment.
 
+A separate [Linux null protocol](../ops/scanner-linux-null-protocol-20260928.md)
+predeclares fresh-process C-only triads and a session-wise median interval
+before any new scanner timing. It has no result yet and does not reinterpret
+the failed controls or the Linux Vec fixture's correctness result.
+
 The corresponding private C–Fairy–C harness now passes a one-triad smoke for
 both indexed and vector-loop scanner forms, including exact work checksums
 and allocator cleanup. This checks the measurement path only. The failed
