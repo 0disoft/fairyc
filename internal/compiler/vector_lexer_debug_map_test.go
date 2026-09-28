@@ -41,6 +41,7 @@ func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
 	}
 	checkScannerDebugPair(t, "independent C", cRelease, cDebug, nil)
 	variants := realScannerVectorVariants(t)
+	var indexed map[string]uint32
 	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
 		program, entry, _ := scannerBudgetFairyProgram(t, variant)
 		release, releaseUnit := buildRealScannerVectorNativeWithStorageAndMap(t, program, entry,
@@ -50,12 +51,26 @@ func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
 		if releaseUnit.Source != debugUnit.Source {
 			t.Fatalf("%s generated C changed between optimized builds", variant.name)
 		}
-		checkScannerDebugPair(t, variant.name, release, debug, debugUnit.Functions)
+		functions := checkScannerDebugPair(t, variant.name, release, debug, debugUnit.Functions)
+		if indexed == nil {
+			indexed = functions
+			continue
+		}
+		for _, name := range []string{"scanner::report_work", "scanner::storage"} {
+			left, leftOK := indexed[name]
+			right, rightOK := functions[name]
+			if !leftOK || !rightOK {
+				t.Fatalf("missing linked scanner procedure %s: indexed=%v vector=%v", name, leftOK, rightOK)
+			}
+			t.Logf("linked .text %s: indexed=%d vector=%d delta=%+d bytes", name,
+				left, right, int64(right)-int64(left))
+		}
 	}
 }
 
-func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.WindowsHostArtifact, sourceFunctions []string) {
+func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.WindowsHostArtifact, sourceFunctions []string) map[string]uint32 {
 	t.Helper()
+	scannerFunctions := make(map[string]uint32)
 	t.Run(name, func(t *testing.T) {
 		if len(debug.ProgramDatabase) == 0 || len(debug.LinkMap) == 0 {
 			t.Fatal("debug image omitted PDB or map")
@@ -196,6 +211,33 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 				t.Fatalf("PDB module %s procedures do not partition linked .text: matched=%d unmatched=%d bytes=%d contribution=%d",
 					module.Name, matched, unmatched, codeBytes, codeContributions[module.Index])
 			}
+			if module.Name == "unit.obj" {
+				for _, procedure := range linked {
+					if procedure.Name == "main" {
+						continue
+					}
+					indexText, ok := strings.CutPrefix(procedure.Name, "fy_fn_")
+					index, parseErr := strconv.Atoi(indexText)
+					if !ok || parseErr != nil || index < 0 || index >= len(sourceFunctions) {
+						t.Fatalf("PDB procedure %q has no emitted Fairy source function", procedure.Name)
+					}
+					source := sourceFunctions[index]
+					var target string
+					for _, name := range []string{"scanner::report_work", "scanner::storage"} {
+						if strings.HasSuffix(source, "::"+name) {
+							target = name
+							break
+						}
+					}
+					if target == "" {
+						continue
+					}
+					if _, duplicate := scannerFunctions[target]; duplicate {
+						t.Fatalf("duplicate linked scanner procedure %s", target)
+					}
+					scannerFunctions[target] = procedure.Size
+				}
+			}
 			sort.Slice(linked, func(i, j int) bool { return linked[i].Size > linked[j].Size })
 			if len(linked) > 8 {
 				linked = linked[:8]
@@ -276,4 +318,5 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 			len(release.Bytes), len(debug.Bytes), len(debug.ProgramDatabase), len(releaseUnwind.Functions),
 			privateCount, privateBytes, unresolvedBytes, private)
 	})
+	return scannerFunctions
 }

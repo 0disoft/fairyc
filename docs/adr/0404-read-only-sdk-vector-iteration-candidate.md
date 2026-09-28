@@ -1013,6 +1013,14 @@ the combined delta, including successor kinds. Numeric local definition/use
 chains and CFG targets remain unpaired, so this is not a full executable-MIR
 equivalence or a native zero-cost proof.
 
+A [linked-code comparison](../ops/scanner-native-loop-delta-20260929.md)
+on the same optimized Windows MSVC scanner finds `report_work` larger by one
+byte (2,278 to 2,279) and `storage` unchanged at 275 bytes. The linked Fairy
+unit's `.text` contribution also grows by one byte, while the runtime
+contribution and whole executable file sizes stay equal. This rules out a
+literal zero-added-code claim for this build, but does not measure execution
+time or decide the independent-C 8% gate. The candidate stays private.
+
 An [identical-source build control](../ops/scanner-build-null-result-20260927.md)
 then compiled the indexed scanner in both lanes under the same phased harness.
 Its five-pair median clone/index ratio was 1.00975, but the full paired-ratio
