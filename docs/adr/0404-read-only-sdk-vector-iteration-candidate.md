@@ -995,6 +995,15 @@ functions, with 21 specializations in each program. This establishes which
 helpers those call sites reach; it still does not prove CFG, operand, dataflow
 or complete MIR equivalence.
 
+A [current-checkout MIR reachability comparison](../ops/scanner-mir-reachability-20260929.md)
+finds that all three additional blocks and seven additional operations in the
+two rewritten scanner functions are reachable. Their extra successor edges
+are three unconditional `goto` edges; `call` and `switch` edge counts remain
+equal between source forms. This accounts for reachable MIR work without
+claiming equivalent operands, CFG targets or native instructions. Its source
+hashes differ from the earlier shape receipt, so only its own paired rows are
+compared. Full normalized-MIR equivalence remains unproven.
+
 An [identical-source build control](../ops/scanner-build-null-result-20260927.md)
 then compiled the indexed scanner in both lanes under the same phased harness.
 Its five-pair median clone/index ratio was 1.00975, but the full paired-ratio

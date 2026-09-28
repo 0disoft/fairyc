@@ -14,17 +14,20 @@ import (
 // This projection omits source spans, entities and numeric local IDs. It is
 // structural evidence, not an equivalence proof for the two source forms.
 type scannerMIRShape struct {
-	Name           string         `json:"name"`
-	Blocks         int            `json:"blocks"`
-	Operations     int            `json:"operations"`
-	OperationKinds map[string]int `json:"operation_kinds"`
-	Terminators    map[string]int `json:"terminators"`
-	Calls          map[string]int `json:"calls"`
-	DropFlags      int            `json:"drop_flags"`
-	Loans          int            `json:"loans"`
-	CleanupPaths   map[string]int `json:"cleanup_paths"`
-	CleanupActions map[string]int `json:"cleanup_actions"`
-	TrapPaths      int            `json:"trap_paths"`
+	Name                string         `json:"name"`
+	Blocks              int            `json:"blocks"`
+	Operations          int            `json:"operations"`
+	ReachableBlocks     int            `json:"reachable_blocks"`
+	ReachableOperations int            `json:"reachable_operations"`
+	ReachableEdges      map[string]int `json:"reachable_edges"`
+	OperationKinds      map[string]int `json:"operation_kinds"`
+	Terminators         map[string]int `json:"terminators"`
+	Calls               map[string]int `json:"calls"`
+	DropFlags           int            `json:"drop_flags"`
+	Loans               int            `json:"loans"`
+	CleanupPaths        map[string]int `json:"cleanup_paths"`
+	CleanupActions      map[string]int `json:"cleanup_actions"`
+	TrapPaths           int            `json:"trap_paths"`
 }
 
 func scannerMIRFunctionShape(program mir.Program, name string) (scannerMIRShape, error) {
@@ -52,7 +55,30 @@ func scannerMIRFunctionShape(program mir.Program, name string) (scannerMIRShape,
 		Loans: len(function.Loans), TrapPaths: len(function.TrapPaths),
 		OperationKinds: make(map[string]int), Terminators: make(map[string]int),
 		Calls: make(map[string]int), CleanupPaths: make(map[string]int),
-		CleanupActions: make(map[string]int),
+		CleanupActions: make(map[string]int), ReachableEdges: make(map[string]int),
+	}
+	blocks := make(map[mir.BlockID]*mir.Block, len(function.Blocks))
+	for index := range function.Blocks {
+		block := &function.Blocks[index]
+		blocks[block.ID] = block
+	}
+	seen := make(map[mir.BlockID]bool, len(blocks))
+	queue := []mir.BlockID{function.Entry}
+	for len(queue) != 0 {
+		id := queue[0]
+		queue = queue[1:]
+		if seen[id] {
+			continue
+		}
+		block := blocks[id]
+		if block == nil {
+			return scannerMIRShape{}, fmt.Errorf("%s has missing reachable block %d", name, id)
+		}
+		seen[id] = true
+		shape.ReachableBlocks++
+		shape.ReachableOperations += len(block.Operations)
+		shape.ReachableEdges[string(block.Terminator.Kind)] += len(block.Terminator.Successors)
+		queue = append(queue, block.Terminator.Successors...)
 	}
 	for _, block := range function.Blocks {
 		for _, operation := range block.Operations {
@@ -116,8 +142,8 @@ func TestPrivateVectorSDKCandidateScannerMIRShape(t *testing.T) {
 		}
 	}
 	report := map[string]any{
-		"schema": "fairyc.vector-lexer-mir-shape/v1", "rows": rows,
-		"scope": "Verified executable MIR for two scanner functions. Counts omit source spans, entities and numeric local IDs; they do not prove CFG, dataflow or full semantic equivalence. Native output and ownership parity have separate tests.",
+		"schema": "fairyc.vector-lexer-mir-shape/v2", "rows": rows,
+		"scope": "Verified executable MIR for two scanner functions. Reachability follows terminator successors from each entry; edge totals do not identify targets. Counts omit source spans, entities and numeric local IDs; they do not prove CFG, dataflow or full semantic equivalence. Native output and ownership parity have separate tests.",
 	}
 	encoded, err := json.Marshal(report)
 	if err != nil {

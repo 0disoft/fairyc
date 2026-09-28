@@ -1,0 +1,228 @@
+{
+  "rows": [
+    {
+      "scanner_sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f",
+      "shape": {
+        "name": "$p1::scanner::report_work",
+        "blocks": 74,
+        "operations": 100,
+        "reachable_blocks": 74,
+        "reachable_operations": 100,
+        "reachable_edges": {
+          "call": 18,
+          "goto": 24,
+          "return": 0,
+          "switch": 42,
+          "trap": 0
+        },
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 33,
+          "binary": 15,
+          "drop": 6,
+          "field-read": 19,
+          "initialize": 3,
+          "scalar-cast": 3,
+          "unary": 7,
+          "view-index": 1,
+          "view-index-check": 1,
+          "view-length": 4,
+          "view-slice": 2,
+          "view-slice-check": 2
+        },
+        "terminators": {
+          "call": 18,
+          "goto": 24,
+          "return": 2,
+          "switch": 21,
+          "trap": 9
+        },
+        "calls": {
+          "$p1::diagnostics::report": 1,
+          "$p1::scanner::matches": 3,
+          "$p1::scanner::number": 6,
+          "$p1::scanner::scan": 1,
+          "$p2::std::bytes::view": 1,
+          "$p2::std::vec::_fy_generic_g0_187cc81baae6c4dd05cc954186e159356a82db5c72eedc9cfd18b1db9ff664c9": 1,
+          "$p2::std::vec::_fy_generic_g0_21c15fec31a51a90d3e85d750be79def2aa532acd50322fed06ee1fb339aaf38": 1,
+          "$p2::std::vec::_fy_generic_g0_3510ed1ae41ac65c48a6ec3c071c92bffc047f6805d73cc69e6019a35666189d": 1,
+          "$p2::std::vec::_fy_generic_g0_3aaa0a829e423a514417293515daecaa46990c4c470a571e8aee28601c6a81cb": 1,
+          "$p2::std::vec::_fy_generic_g0_974b27c5d3d02186df5d91c9edb55abeabe0f8219ca6c5f6a002812e0d42bd6c": 1,
+          "$p2::std::vec::_fy_generic_g0_b2ec8d08c9f073d6382cef710e7a698e2c04c86f5faa1e8145f57f2c92ec4243": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 2
+        },
+        "cleanup_actions": {
+          "drop": 6
+        },
+        "trap_paths": 9
+      },
+      "variant": "explicit index"
+    },
+    {
+      "scanner_sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f",
+      "shape": {
+        "name": "$p1::scanner::storage",
+        "blocks": 24,
+        "operations": 33,
+        "reachable_blocks": 24,
+        "reachable_operations": 33,
+        "reachable_edges": {
+          "call": 9,
+          "goto": 4,
+          "return": 0,
+          "switch": 12,
+          "trap": 0
+        },
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 12,
+          "binary": 6,
+          "field-borrow": 7,
+          "struct-construct": 1,
+          "view-length": 3
+        },
+        "terminators": {
+          "call": 9,
+          "goto": 4,
+          "return": 1,
+          "switch": 6,
+          "trap": 4
+        },
+        "calls": {
+          "$p1::diagnostics::token_view": 1,
+          "$p2::std::bytes::view": 2,
+          "$p2::std::vec::_fy_generic_g0_1c3bb4d56a7650d8a5900d422dd69b1dabf1c5786c394423614373676b26bdc4": 2,
+          "$p2::std::vec::_fy_generic_g0_3aaa0a829e423a514417293515daecaa46990c4c470a571e8aee28601c6a81cb": 1,
+          "$p2::std::vec::_fy_generic_g0_4c22b8b603c5380331249b4e0915d31b21896ea093781e69c887c3376a461b26": 1,
+          "$p2::std::vec::_fy_generic_g0_7a81eb5f4aa4c5aafdefd22c14e4438c4f790621e2b321be6119ef58e788d9e0": 1,
+          "$p2::std::vec::_fy_generic_g0_974b27c5d3d02186df5d91c9edb55abeabe0f8219ca6c5f6a002812e0d42bd6c": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 1
+        },
+        "cleanup_actions": {},
+        "trap_paths": 4
+      },
+      "variant": "explicit index"
+    },
+    {
+      "scanner_sha256": "eb80e698382fbb8277d5ccd78294bbbf9aaaffe4c339714e7284a148d71e2581",
+      "shape": {
+        "name": "$p1::scanner::report_work",
+        "blocks": 75,
+        "operations": 101,
+        "reachable_blocks": 75,
+        "reachable_operations": 101,
+        "reachable_edges": {
+          "call": 18,
+          "goto": 25,
+          "return": 0,
+          "switch": 42,
+          "trap": 0
+        },
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 35,
+          "binary": 15,
+          "drop": 6,
+          "field-read": 19,
+          "initialize": 3,
+          "scalar-cast": 3,
+          "unary": 6,
+          "view-index": 1,
+          "view-index-check": 1,
+          "view-length": 4,
+          "view-slice": 2,
+          "view-slice-check": 2
+        },
+        "terminators": {
+          "call": 18,
+          "goto": 25,
+          "return": 2,
+          "switch": 21,
+          "trap": 9
+        },
+        "calls": {
+          "$p1::diagnostics::report": 1,
+          "$p1::scanner::matches": 3,
+          "$p1::scanner::number": 6,
+          "$p1::scanner::scan": 1,
+          "$p2::std::bytes::view": 1,
+          "$p2::std::vec::_fy_generic_g0_023e636bfbf4afa16fef15268a8d8346f9cc398aa2bd49610abdf9ad12a364e2": 1,
+          "$p2::std::vec::_fy_generic_g0_4fe12bb9f10714d6038c3e3884c4768ce651105a9305084f1d2b7a1cbee0fa49": 1,
+          "$p2::std::vec::_fy_generic_g0_5a91a7fd5e8424f401a8a7fddec8af77373685c5335843d25dc99529eba52b4d": 1,
+          "$p2::std::vec::_fy_generic_g0_70e0ee934bba9fe701d551f05054a80a7b1ec7c6317c690346e93d35cf178c61": 1,
+          "$p2::std::vec::_fy_generic_g0_be64547299e36a5d241751e385743a5d78d91fc61fe9c9bc7421b73f540dceb8": 1,
+          "$p2::std::vec::_fy_generic_g0_f75f1c3235d8b4861698f85824401f35164456a62d1e8b9023e9df41c3ae2438": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 2
+        },
+        "cleanup_actions": {
+          "drop": 6
+        },
+        "trap_paths": 9
+      },
+      "variant": "all vector for"
+    },
+    {
+      "scanner_sha256": "eb80e698382fbb8277d5ccd78294bbbf9aaaffe4c339714e7284a148d71e2581",
+      "shape": {
+        "name": "$p1::scanner::storage",
+        "blocks": 26,
+        "operations": 39,
+        "reachable_blocks": 26,
+        "reachable_operations": 39,
+        "reachable_edges": {
+          "call": 9,
+          "goto": 6,
+          "return": 0,
+          "switch": 12,
+          "trap": 0
+        },
+        "operation_kinds": {
+          "arithmetic-check": 4,
+          "assign": 20,
+          "binary": 6,
+          "field-borrow": 5,
+          "struct-construct": 1,
+          "view-length": 3
+        },
+        "terminators": {
+          "call": 9,
+          "goto": 6,
+          "return": 1,
+          "switch": 6,
+          "trap": 4
+        },
+        "calls": {
+          "$p1::diagnostics::token_view": 1,
+          "$p2::std::bytes::view": 2,
+          "$p2::std::vec::_fy_generic_g0_1a3f2516c78ac08f5804d4c7344ee4db3f30e25d6dd3ff1317bad477c8c86408": 1,
+          "$p2::std::vec::_fy_generic_g0_20cdb329fa094c640e591395bf8f6c03c5e83bacc0afc65f4fe65fa49debaa48": 2,
+          "$p2::std::vec::_fy_generic_g0_5a91a7fd5e8424f401a8a7fddec8af77373685c5335843d25dc99529eba52b4d": 1,
+          "$p2::std::vec::_fy_generic_g0_78ea364021602db09b3bcae59c4173e84d219d7b386d0bd5ff6edffc345bfe46": 1,
+          "$p2::std::vec::_fy_generic_g0_f75f1c3235d8b4861698f85824401f35164456a62d1e8b9023e9df41c3ae2438": 1
+        },
+        "drop_flags": 0,
+        "loans": 0,
+        "cleanup_paths": {
+          "return": 1
+        },
+        "cleanup_actions": {},
+        "trap_paths": 4
+      },
+      "variant": "all vector for"
+    }
+  ],
+  "schema": "fairyc.vector-lexer-mir-shape/v2",
+  "scope": "Verified executable MIR for two scanner functions. Reachability follows terminator successors from each entry; edge totals do not identify targets. Counts omit source spans, entities and numeric local IDs; they do not prove CFG, dataflow or full semantic equivalence. Native output and ownership parity have separate tests."
+}
