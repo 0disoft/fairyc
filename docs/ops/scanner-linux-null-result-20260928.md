@@ -48,3 +48,39 @@ No C–Fairy–C samples or 8% runtime verdict were produced. The private Vec
 iteration candidate and its cumulative C-relative cost gate remain open;
 this result does not rescore earlier controls or the Linux native-correctness
 fixture.
+
+## Exploratory timing diagnosis (2026-09-29)
+
+The following calculations reuse the same 48 raw triads. They were made after
+the FAIL verdict and are **diagnostics only**: they do not change the interval,
+discard samples, or create another null-control result. Each timed call is one
+250,000-round C scan; values in the first three columns are medians of the
+individual position durations, not a replacement for paired ratios.
+
+| Session | First C, ms | Middle C, ms | Last C, ms | Ratios below 0.98 | Ratios above 1.02 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1 | 160.846 | 163.544 | 163.632 | 6 / 24 | 5 / 24 |
+| 2 | 160.316 | 158.222 | 159.300 | 12 / 24 | 6 / 24 |
+
+The second session's lower-bound failure is not caused by one isolated low
+ratio: 12 of its 24 ratios are below 0.98. Its minimum and maximum, 0.83232
+and 1.20470, show large deviations in both directions. The first and last 12
+triads have diagnostic ratio medians of 1.00771 then 0.99642 in session one,
+and 0.98313 then 0.99150 in session two. These opposite within-session
+directions do not establish a consistent monotonic time trend. The middle call
+was fastest in 8 and 10 triads and slowest in 8 and 6 triads, respectively;
+those counts do not identify a fixed middle-position penalty or advantage.
+
+The evidence ZIP's aggregate cgroup counters show a four-CPU quota per
+100 ms and one additional throttled period totaling 10,473 microseconds
+between the before/after snapshots. Those snapshots cover smoke and full
+together, so the throttling cannot be assigned to a particular triad. They
+also do not measure hypervisor steal time, frequency changes, or per-call
+scheduler delays. None of those mechanisms can be named as the cause from
+this receipt.
+
+Keep the original FAIL and the Fairy/C runtime gate open. Do not rerun the
+same condition in search of a pass. A follow-up on a more controlled host or
+with additional timing diagnostics needs its own predeclared condition and
+fresh receipts; deterministic generated-code and size checks can continue
+without treating them as runtime evidence.
