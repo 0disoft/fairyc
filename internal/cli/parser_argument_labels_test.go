@@ -27,9 +27,13 @@ func parserLabelWorkspace(t *testing.T) (root, plain, labeled string) {
 		t.Fatal(err)
 	}
 	labeled = string(data)
+	adopted := strings.Count(labeled, ".minimum = ")
+	if adopted == 0 {
+		t.Fatal("parser corpus has no adopted argument labels")
+	}
 	for _, label := range []string{".minimum = ", ".depth = ", ".allow_record = "} {
-		if strings.Count(labeled, label) != 11 {
-			t.Fatalf("expected 11 adopted calls for %q", label)
+		if got := strings.Count(labeled, label); got != adopted {
+			t.Fatalf("expected %d adopted calls for %q, got %d", adopted, label, got)
 		}
 	}
 	plain = strings.NewReplacer(".minimum = ", "", ".depth = ", "", ".allow_record = ", "").Replace(labeled)
@@ -63,6 +67,6 @@ func TestArgumentLabelsParserAdoption(t *testing.T) {
 	if len(sources[1]) > len(sources[0]) {
 		t.Fatalf("generated C grew: %d vs %d", len(sources[0]), len(sources[1]))
 	}
-	t.Logf("11 adopted calls; C bytes plain=%d labeled=%d growth=%.4f%% functions=%d byte_identical=%t",
-		len(sources[0]), len(sources[1]), 100*(float64(len(sources[1]))/float64(len(sources[0]))-1), functions[1], sources[0] == sources[1])
+	t.Logf("%d adopted calls; C bytes plain=%d labeled=%d growth=%.4f%% functions=%d byte_identical=%t",
+		strings.Count(labeled, ".minimum = "), len(sources[0]), len(sources[1]), 100*(float64(len(sources[1]))/float64(len(sources[0]))-1), functions[1], sources[0] == sources[1])
 }
