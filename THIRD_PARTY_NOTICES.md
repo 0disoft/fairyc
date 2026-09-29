@@ -4,7 +4,7 @@ Third-party licenses are not replaced by Fairy C's Apache-2.0 license.
 
 ## Go runtime and standard library
 
-- Toolchain inspected: Go 1.26.4 (Windows AMD64, CGO disabled)
+- Toolchain inspected: Go 1.27.1 (Windows AMD64, CGO disabled)
 - License text: [GO-LICENSE.txt](GO-LICENSE.txt), copied from the installed Go
   toolchain LICENSE; upstream: https://go.dev/LICENSE
 - Binary distributions include the full copyright, conditions and disclaimer.

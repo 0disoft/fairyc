@@ -48,6 +48,12 @@ const vcsModified = buildMetadata.match(/\bvcs\.modified=(true|false)\b/u)?.[1];
 assert.ok(goVersion && vcsRevision && vcsModified, 'missing Go build identity');
 let archive;
 if (packageLocal) {
+  const notice = readFileSync(join(repo, 'THIRD_PARTY_NOTICES.md'), 'utf8');
+  assert.ok(notice.includes(`- Toolchain inspected: Go ${goVersion.slice(2)} (Windows AMD64, CGO disabled)`),
+    'Go notice does not match the compiler build');
+  const goRoot = command('go-root', 'bun', ['tools/run-go.ts', 'env', 'GOROOT'], repo).trim();
+  assert.equal(sha(join(goRoot, 'LICENSE')), sha(join(repo, 'GO-LICENSE.txt')),
+    'bundled Go license differs from the build toolchain');
   const stage = join(root, 'stage');
   const extracted = join(root, 'extracted');
   mkdirSync(stage);
