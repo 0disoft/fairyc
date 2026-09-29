@@ -923,9 +923,10 @@ correctness result remain separate.
 
 A [predeclared Linux v2 diagnostic control](../ops/scanner-linux-null-diagnostic-protocol-20260929.md)
 keeps the same session interval and pass threshold while recording process
-CPU time and context switches around every C call. It does not reinterpret
-the failed v1 receipt or admit a Fairy/C timing comparison. No v2 Linux
-measurement has yet been reported.
+CPU time and context switches around every C call. Its [first completed
+v2 control](../ops/scanner-linux-null-v2-result-20260929.md) also failed
+both session bounds. The new diagnostics do not identify a cause. Neither
+failed receipt admits a Fairy/C timing comparison.
 
 The corresponding private C–Fairy–C harness now passes a one-triad smoke for
 both indexed and vector-loop scanner forms, including exact work checksums

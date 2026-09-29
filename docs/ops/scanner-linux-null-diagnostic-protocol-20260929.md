@@ -1,7 +1,8 @@
 # Linux scanner null control with per-call diagnostics
 
-Date: 2026-09-29. Status: predeclared; no v2 smoke or full run has been
-reported. Source baseline: `a5f4df55`. This protocol supersedes the
+Date: 2026-09-29. Status: predeclared before the first v2 run, which
+[failed](scanner-linux-null-v2-result-20260929.md). Source baseline:
+`a5f4df55`. This protocol supersedes the
 [v1 schedule](scanner-linux-null-protocol-20260928.md) **for new runs only**.
 The [v1 full verdict](scanner-linux-null-result-20260928.md) remains `FAIL`.
 Its second session had 12 of 24 ratios below 0.98; changing its 97.734%
