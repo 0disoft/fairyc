@@ -426,13 +426,13 @@ func TestExperimentalEmitCEmitsInertStructResourceFields(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 struct Marker {
-    u32 value;
+    i32 value;
 }
 resource Holder {
     Marker marker;
     cleanup {}
 }
-fn i32 main() { return 0; }
+fn i32 main() { let Holder value = Holder { .marker = Marker { .value = 42 } }; return value.marker.value; }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
 	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "fy_struct_0 f_0;") ||
