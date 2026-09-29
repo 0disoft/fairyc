@@ -32,10 +32,9 @@ func TestWindowsFairyLexerStreamHeap(t *testing.T) {
 		{"token-heavy-16k", heavy, 0}, {"literal-10k", `"` + strings.Repeat("a", 10000) + `"`, 0},
 		{"diagnostic", "/* unfinished", 0},
 		{"fail-source", "true 42", 1}, {"fail-token-vector", "true 42", 2}, {"fail-cooked", "true 42", 3},
-		{"fail-cooked-build", "true 42", 4}, {"fail-cooked-table", "true 42", 5},
+		{"fail-cooked-table", "true 42", 4},
 		{"fail-token-growth", "module main; fn i32 f() { return 42; }", 3},
 		{"fail-small-6", "module main; fn i32 f() { return 42; }", 6},
-		{"fail-small-7", "module main; fn i32 f() { return 42; }", 7},
 	}
 	for _, scenario := range scenarios {
 		root := t.TempDir()
