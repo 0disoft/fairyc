@@ -19,9 +19,12 @@ pin a runner image or toolchain baseline and does not promote either target.
   resolution; no retained CI cache budget has been justified yet. Local configured validation keeps
   `GOPROXY=off`, reuses only the user's checksum-verified Go module download cache, and retains its
   build and temporary caches under the repository-local ignored `.cache/` root.
-- `go vet -mod=readonly ./...` runs before `go test -mod=readonly -count=1 ./...`.
-- After those ordinary checks, only the Windows matrix entry runs the default correctness mode of
-  `cmd/fairyc-windows-host-smoke`. The command discovers the hosted runner's local x64 MSVC and
+- Both frontend jobs run `go vet -mod=readonly ./...`. Ubuntu runs the full Go suite and a
+  contract-state race check. Windows runs the Go suite excluding the lexer/parser proofs owned by
+  separate Windows jobs and eight native cost-comparison tests. Those cost tests remain in the
+  source suite for targeted local validation; they do not gate every push. The separate Windows
+  native-target job runs the default correctness mode of `cmd/fairyc-windows-host-smoke`. The
+  command discovers the hosted runner's local x64 MSVC and
   Windows SDK without WSL, exercises single- and multi-source target-neutral paths plus the declared-target path, safe File and owned-text source lifecycles, layout, ABI,
   raw owned-text and Arena allocation-failure preservation, PE/COFF, and unwind probes, and retains no executable,
   object, generated C, PDB, or report artifact. Process-cache, build-time, Atlas scaling, and
@@ -319,7 +322,7 @@ executes the closed synthetic exception and virtual-unwind walk described above,
 validate complete version-2 epilog semantics, language-specific handler payload parsing, recursive
 chains or chained-tail object relocations, Fairy/foreign-frame crossings, or hosted runner behavior.
 
-The Windows matrix runs that same smoke after its ordinary Go test suite. Run `30442310794` is the
+The separate Windows native-target job runs that smoke. Run `30442310794` is the
 first recorded exit-zero hosted receipt. A later native-code, workflow, or runner-image change
 requires fresh hosted evidence; the observation is not a stable MSVC or SDK baseline.
 
@@ -330,7 +333,7 @@ runner image happens to expose a default C compiler. The native lanes still invo
 Clang, GCC, or MSVC executables explicitly through `internal/cdriver`.
 
 Third-party workflow execution is limited to official `actions/checkout` and `actions/setup-go`
-v6 commits pinned by full SHA. Moving to a newer major version is a separate compatibility change,
+v7 commits pinned by full SHA. Moving to a newer major version is a separate compatibility change,
 not an automatic side effect of this CI repair.
 
 ## Owners

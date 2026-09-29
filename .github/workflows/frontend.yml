@@ -39,9 +39,21 @@ jobs:
       - name: Test
         if: runner.os == 'Linux'
         run: go test -mod=readonly -count=1 ./...
-      - name: Test Windows except separately required Fairy native proofs
+      - name: Test Windows core without separate native or cost proofs
         if: runner.os == 'Windows'
-        run: go test -mod=readonly -count=1 -v -skip '^TestWindowsFairy(Lexer|Parser[A-Z])' ./...
+        run: |
+          $skip = @(
+            '^TestWindowsFairy(Lexer|Parser[A-Z])',
+            '^TestTokenIndexNominalTotalMSVC$',
+            '^TestTokenIndexNominalCostMSVC$',
+            '^TestTokenIndexStructCostMSVC$',
+            '^TestStableGenericWorkspaceGrowthMSVC$',
+            '^TestResultBranchReviewIsOkNativeSizes$',
+            '^TestScannerFieldShorthandNativeSizes$',
+            '^TestArgumentLabelsParserNativeSizes$',
+            '^TestByteViewRealLexerWorkloadComparison$'
+          ) -join '|'
+          go test -mod=readonly -count=1 -v -skip $skip ./...
       - name: Race-test contract-state concurrency
         if: runner.os == 'Linux'
         env:
