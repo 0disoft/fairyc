@@ -21,16 +21,19 @@ import (
 )
 
 type linuxScannerNullTriad struct {
-	Mode    string    `json:"mode"`
-	PID     int       `json:"pid"`
-	CPU     int       `json:"cpu"`
-	Rounds  uint32    `json:"rounds"`
-	Warmup  [3]uint64 `json:"warmup"`
-	Work    [3]uint64 `json:"work"`
-	Nanos   [3]uint64 `json:"nanos"`
-	Session int       `json:"session,omitempty"`
-	Index   int       `json:"index,omitempty"`
-	Ratio   float64   `json:"ratio,omitempty"`
+	Mode                string    `json:"mode"`
+	PID                 int       `json:"pid"`
+	CPU                 int       `json:"cpu"`
+	Rounds              uint32    `json:"rounds"`
+	Warmup              [3]uint64 `json:"warmup"`
+	Work                [3]uint64 `json:"work"`
+	Nanos               [3]uint64 `json:"nanos"`
+	CPUNanos            [3]uint64 `json:"cpu_nanos"`
+	VoluntarySwitches   [3]uint64 `json:"voluntary_switches"`
+	InvoluntarySwitches [3]uint64 `json:"involuntary_switches"`
+	Session             int       `json:"session,omitempty"`
+	Index               int       `json:"index,omitempty"`
+	Ratio               float64   `json:"ratio,omitempty"`
 }
 
 type linuxScannerNullSession struct {
@@ -108,7 +111,7 @@ func TestPrivateVectorSDKCandidateLinuxScannerNull(t *testing.T) {
 		t.Fatal(err)
 	}
 	receipt := linuxScannerNullReceipt{
-		Schema: "fairyc.scanner-linux-null/v1", Mode: mode,
+		Schema: "fairyc.scanner-linux-null/v2", Mode: mode,
 		SourceSHA256: fmt.Sprintf("%x", sha256.Sum256([]byte(source))),
 		GCC:          toolchain.Version, GCCArgv: append([]string{toolchain.Path}, args...),
 		Glibc: toolchain.Libc, Kernel: strings.TrimSpace(string(kernelOutput)),
@@ -239,6 +242,16 @@ func linuxScannerNullMeasure(program, mode string, cpu int) (linuxScannerNullTri
 	if err := json.Unmarshal(output, &result); err != nil {
 		return result, fmt.Errorf("decode null triad %q: %w", output, err)
 	}
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(output, &raw); err != nil {
+		return result, fmt.Errorf("decode null triad fields: %w", err)
+	}
+	for _, field := range []string{"cpu_nanos", "voluntary_switches", "involuntary_switches"} {
+		var values []uint64
+		if err := json.Unmarshal(raw[field], &values); err != nil || len(values) != 3 {
+			return result, fmt.Errorf("invalid null triad %s: %v, count=%d", field, err, len(values))
+		}
+	}
 	expectedRounds := uint32(250000)
 	if mode == "smoke" {
 		expectedRounds = 1000
@@ -248,7 +261,8 @@ func linuxScannerNullMeasure(program, mode string, cpu int) (linuxScannerNullTri
 		return result, fmt.Errorf("triad identity drift: %+v", result)
 	}
 	for index := range result.Nanos {
-		if result.Warmup[index] != expectedWork || result.Work[index] != expectedWork || result.Nanos[index] == 0 {
+		if result.Warmup[index] != expectedWork || result.Work[index] != expectedWork ||
+			result.Nanos[index] == 0 || result.CPUNanos[index] == 0 {
 			return result, fmt.Errorf("invalid null triad call %d: %+v", index, result)
 		}
 	}
@@ -263,6 +277,7 @@ const linuxScannerNullMain = `
 #include <errno.h>
 #include <inttypes.h>
 #include <sched.h>
+#include <sys/resource.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -305,29 +320,49 @@ int main(int argc, char **argv) {
     if (sched_setaffinity(0, sizeof(only), &only) != 0 || sched_getcpu() != allowed) return 2;
     uint32_t rounds = smoke ? 1000u : 250000u;
     uint64_t expected = (uint64_t)rounds * 36u;
-    uint64_t warmup[3], work[3], nanos[3];
+    uint64_t warmup[3], work[3], nanos[3], cpu_nanos[3];
+    uint64_t voluntary_switches[3], involuntary_switches[3];
     for (int index = 0; index < 3; ++index) {
         warmup[index] = fc_null_work(rounds);
         if (warmup[index] != expected || sched_getcpu() != allowed) return 3;
     }
     for (int index = 0; index < 3; ++index) {
-        struct timespec before, after;
-        if (sched_getcpu() != allowed || clock_gettime(CLOCK_MONOTONIC_RAW, &before) != 0) return 4;
+        struct timespec before, after, cpu_before, cpu_after;
+        struct rusage usage_before, usage_after;
+        if (sched_getcpu() != allowed || getrusage(RUSAGE_SELF, &usage_before) != 0 ||
+            clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu_before) != 0 ||
+            clock_gettime(CLOCK_MONOTONIC_RAW, &before) != 0) return 4;
         work[index] = fc_null_work(rounds);
-        if (clock_gettime(CLOCK_MONOTONIC_RAW, &after) != 0 || sched_getcpu() != allowed) return 4;
+        if (clock_gettime(CLOCK_MONOTONIC_RAW, &after) != 0 ||
+            clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu_after) != 0 ||
+            getrusage(RUSAGE_SELF, &usage_after) != 0 || sched_getcpu() != allowed) return 4;
         int64_t elapsed = (int64_t)(after.tv_sec - before.tv_sec) * 1000000000LL +
                           (int64_t)(after.tv_nsec - before.tv_nsec);
-        if (elapsed <= 0 || work[index] != expected) return 5;
+        int64_t cpu_elapsed = (int64_t)(cpu_after.tv_sec - cpu_before.tv_sec) * 1000000000LL +
+                              (int64_t)(cpu_after.tv_nsec - cpu_before.tv_nsec);
+        if (elapsed <= 0 || cpu_elapsed <= 0 || work[index] != expected ||
+            usage_after.ru_nvcsw < usage_before.ru_nvcsw ||
+            usage_after.ru_nivcsw < usage_before.ru_nivcsw) return 5;
         nanos[index] = (uint64_t)elapsed;
+        cpu_nanos[index] = (uint64_t)cpu_elapsed;
+        voluntary_switches[index] = (uint64_t)(usage_after.ru_nvcsw - usage_before.ru_nvcsw);
+        involuntary_switches[index] = (uint64_t)(usage_after.ru_nivcsw - usage_before.ru_nivcsw);
     }
     if (printf("{\"mode\":\"%s\",\"pid\":%ld,\"cpu\":%d,\"rounds\":%" PRIu32
            ",\"warmup\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64
            "],\"work\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64
-           "],\"nanos\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]}\n",
+           "],\"nanos\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64
+           "],\"cpu_nanos\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64
+           "],\"voluntary_switches\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64
+           "],\"involuntary_switches\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]}\n",
            argv[1], (long)getpid(), allowed, rounds,
            warmup[0], warmup[1], warmup[2],
            work[0], work[1], work[2],
-           nanos[0], nanos[1], nanos[2]) < 0 || fflush(stdout) != 0) return 6;
+           nanos[0], nanos[1], nanos[2],
+           cpu_nanos[0], cpu_nanos[1], cpu_nanos[2],
+           voluntary_switches[0], voluntary_switches[1], voluntary_switches[2],
+           involuntary_switches[0], involuntary_switches[1], involuntary_switches[2]) < 0 ||
+        fflush(stdout) != 0) return 6;
     return 0;
 }
 `

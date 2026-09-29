@@ -921,6 +921,12 @@ failed the predeclared interval in the second session. No C–Fairy–C runtime
 comparison followed; the earlier failed controls and the Linux Vec fixture's
 correctness result remain separate.
 
+A [predeclared Linux v2 diagnostic control](../ops/scanner-linux-null-diagnostic-protocol-20260929.md)
+keeps the same session interval and pass threshold while recording process
+CPU time and context switches around every C call. It does not reinterpret
+the failed v1 receipt or admit a Fairy/C timing comparison. No v2 Linux
+measurement has yet been reported.
+
 The corresponding private C–Fairy–C harness now passes a one-triad smoke for
 both indexed and vector-loop scanner forms, including exact work checksums
 and allocator cleanup. This checks the measurement path only. The failed
