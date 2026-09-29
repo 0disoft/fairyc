@@ -54,7 +54,8 @@ if (packageLocal) {
   const hashes = entries.map(name => sha(join(stage, name)));
   writeFileSync(join(stage, 'SHA256SUMS.txt'), entries.map((name, i) => `${hashes[i]}  ${name}`).join('\n') + '\n', { flag: 'wx' });
   const checksumHash = sha(join(stage, 'SHA256SUMS.txt'));
-  archive = join(root, 'fairyc-windows-amd64-LOCAL-ONLY.zip');
+  const archiveName = 'fairyc-windows-amd64-preview-candidate.zip';
+  archive = join(root, archiveName);
   // Paths originate exclusively from this run's unique cache directory. Avoid
   // interpolated shell paths, overwrites, deletion and external archive inputs.
   process.env.FAIRYC_PREVIEW_STAGE = stage;
@@ -68,7 +69,7 @@ if (packageLocal) {
   assert.deepEqual(readdirSync(extracted).sort(), [...entries, 'SHA256SUMS.txt'].sort());
   assert.deepEqual(entries.map(name => sha(join(extracted, name))), hashes, 'ZIP changed contents');
   assert.equal(sha(join(extracted, 'SHA256SUMS.txt')), checksumHash);
-  writeFileSync(archive + '.sha256', `${sha(archive)}  fairyc-windows-amd64-LOCAL-ONLY.zip\n`, { flag: 'wx' });
+  writeFileSync(archive + '.sha256', `${sha(archive)}  ${archiveName}\n`, { flag: 'wx' });
   exe = join(extracted, 'fairyc.exe');
 }
 assert.match(command('new', exe, ['new', 'hello-fairy', '--uid', 'example.hello-fairy'], scratch), /created Fairy C package/);
@@ -102,6 +103,6 @@ unchanged();
 assert.equal(sha(exe), executableHash, 'compiler executable changed');
 const receipt = { schema: 'fairyc.local-starter-smoke/v1', executable_sha256: executableHash,
   lock_sha256: lockHash, node: process.version, platform: `${process.platform}/${process.arch}`, steps,
-  ...(archive ? { local_only_archive: relative(repo, archive), archive_sha256: sha(archive) } : {}) };
+  ...(archive ? { preview_candidate_archive: relative(repo, archive), archive_sha256: sha(archive) } : {}) };
 writeFileSync(join(root, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
 console.log(JSON.stringify({ receipt: relative(repo, join(root, 'receipt.json')), executable_sha256: executableHash }));

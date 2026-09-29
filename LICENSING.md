@@ -31,8 +31,9 @@ described as dependencies of every generated program.
 
 ## Release status
 
-License adoption is separate from release approval. Current local preview ZIPs
-are packaging rehearsals, not project-approved public releases. Their LOCAL-ONLY
-labels describe release status and do not add restrictions to the rights granted
-by LICENSE or third-party licenses. Clean-build identity, supported-target tests,
-provenance/notice completeness and release ownership still require verification.
+License adoption is separate from release approval. Locally produced preview
+candidate ZIPs are packaging rehearsals until the maintainer publishes an exact
+artifact. Candidate naming does not add restrictions to the rights granted by
+LICENSE or third-party licenses. Release identity, supported-target checks,
+provenance/notice completeness and release ownership must be recorded before
+publication.
