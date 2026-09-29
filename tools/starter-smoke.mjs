@@ -41,6 +41,11 @@ function command(name, binary, args, cwd, timeout = 45_000) {
 const sha = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 command('build', 'bun', ['tools/run-go.ts', 'build', '-mod=readonly', '-o', exe, './cmd/fairyc'], repo, 60_000);
 const executableHash = sha(exe);
+const buildMetadata = command('build-metadata', 'bun', ['tools/run-go.ts', 'version', '-m', exe], repo);
+const goVersion = buildMetadata.match(/\bgo1\.\d+(?:\.\d+)?\b/u)?.[0];
+const vcsRevision = buildMetadata.match(/\bvcs\.revision=([0-9a-f]{40})\b/u)?.[1];
+const vcsModified = buildMetadata.match(/\bvcs\.modified=(true|false)\b/u)?.[1];
+assert.ok(goVersion && vcsRevision && vcsModified, 'missing Go build identity');
 let archive;
 if (packageLocal) {
   const stage = join(root, 'stage');
@@ -102,7 +107,9 @@ assert.equal(command('run-release', exe, ['run', '--release', '--locked'], works
 unchanged();
 assert.equal(sha(exe), executableHash, 'compiler executable changed');
 const receipt = { schema: 'fairyc.local-starter-smoke/v1', executable_sha256: executableHash,
-  lock_sha256: lockHash, node: process.version, platform: `${process.platform}/${process.arch}`, steps,
+  lock_sha256: lockHash, node: process.version, go_version: goVersion,
+  vcs_revision: vcsRevision, vcs_modified: vcsModified === 'true',
+  platform: `${process.platform}/${process.arch}`, steps,
   ...(archive ? { preview_candidate_archive: relative(repo, archive), archive_sha256: sha(archive) } : {}) };
 writeFileSync(join(root, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
 console.log(JSON.stringify({ receipt: relative(repo, join(root, 'receipt.json')), executable_sha256: executableHash }));
