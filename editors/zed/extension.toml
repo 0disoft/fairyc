@@ -8,5 +8,9 @@ repository = "https://github.com/0disoft/fairyc"
 
 [grammars.fairyc]
 repository = "https://github.com/0disoft/fairyc"
-rev = "57e3610e"
+rev = "75511f7d"
 path = "editors/tree-sitter-fairyc"
+
+[language_servers.fairyc-lsp]
+name = "Fairy C Language Server"
+languages = ["Fairy C"]

@@ -52,11 +52,12 @@ const (
 
 // LoadError provides stable internal failure categories without freezing public diagnostics.
 type LoadError struct {
-	Reason      string
-	Path        string
-	Detail      string
-	Source      []byte
-	Diagnostics []diagnostic.Diagnostic
+	Reason             string
+	Path               string
+	Detail             string
+	Source             []byte
+	Diagnostics        []diagnostic.Diagnostic
+	AbsoluteSourcePath string
 }
 
 func (e *LoadError) Error() string {
@@ -128,6 +129,10 @@ func Load(root string) (Workspace, error) {
 }
 
 func loadWorkspace(root string, vectorCandidate bool) (Workspace, error) {
+	return loadWorkspaceOverlays(root, vectorCandidate, nil)
+}
+
+func loadWorkspaceOverlays(root string, vectorCandidate bool, overlays map[string][]byte) (Workspace, error) {
 	workspaceRoot, err := resolveRoot(root)
 	if err != nil {
 		return Workspace{}, err
@@ -174,7 +179,7 @@ func loadWorkspace(root string, vectorCandidate bool) (Workspace, error) {
 		if err != nil {
 			return Workspace{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath + "/" + manifest.Package.Source, Detail: err.Error()}
 		}
-		loaded, err := loadPackage(packagePath, directory, sourceRoot, manifest, &budget)
+		loaded, err := loadPackageOverlays(packagePath, directory, sourceRoot, manifest, &budget, overlays)
 		if err != nil {
 			return Workspace{}, err
 		}
@@ -278,6 +283,10 @@ func rejectOverlappingMembers(members []string) error {
 }
 
 func loadPackage(packagePath, directory, sourceRoot string, manifest projectmanifest.Manifest, budget *limits) (Package, error) {
+	return loadPackageOverlays(packagePath, directory, sourceRoot, manifest, budget, nil)
+}
+
+func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest projectmanifest.Manifest, budget *limits, overlays map[string][]byte) (Package, error) {
 	var relativePaths []string
 	foldedPaths := make(map[string]string)
 	err := filepath.WalkDir(sourceRoot, func(path string, entry fs.DirEntry, walkErr error) error {
@@ -314,6 +323,26 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 	if err != nil {
 		return Package{}, normalizeLoadError(ReasonSourceRoot, packagePath, err)
 	}
+	for absolute := range overlays {
+		relative, err := filepath.Rel(sourceRoot, absolute)
+		if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) || filepath.IsAbs(relative) {
+			continue
+		}
+		relative = filepath.ToSlash(relative)
+		folded := strings.ToLower(relative)
+		if previous, exists := foldedPaths[folded]; exists {
+			if previous != relative {
+				return Package{}, &LoadError{Reason: ReasonSourceCaseCollision, Path: relative, Detail: "overlay case collision"}
+			}
+			continue
+		}
+		foldedPaths[folded] = relative
+		relativePaths = append(relativePaths, relative)
+		budget.files++
+		if budget.files > MaxSourceFiles {
+			return Package{}, &LoadError{Reason: ReasonSourceLimit, Detail: "overlay source limit"}
+		}
+	}
 	if len(relativePaths) == 0 {
 		return Package{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath, Detail: "source root contains no .fy files"}
 	}
@@ -324,7 +353,14 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 	modulePaths := make(map[string]string, len(relativePaths))
 	for _, relative := range relativePaths {
 		absolute := filepath.Join(sourceRoot, filepath.FromSlash(relative))
-		contents, err := readBoundedRegularFile(absolute, source.DefaultLimits().MaxBytes)
+		contents, overlaid := overlays[absolute]
+		var err error
+		if !overlaid {
+			contents, err = readBoundedRegularFile(absolute, source.DefaultLimits().MaxBytes)
+		}
+		if len(contents) > source.DefaultLimits().MaxBytes {
+			err = fmt.Errorf("overlay exceeds source byte limit")
+		}
 		if err != nil {
 			return Package{}, &LoadError{Reason: ReasonSourceRoot, Path: portablePath(packagePath, sourceRoot, absolute), Detail: err.Error()}
 		}
@@ -340,7 +376,7 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 			return Package{}, &LoadError{
 				Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute),
 				Detail: fmt.Sprintf("parser diagnostics: %+v", analysis.Tree.Diagnostics),
-				Source: slices.Clone(contents), Diagnostics: slices.Clone(analysis.Tree.Diagnostics),
+				Source: slices.Clone(contents), Diagnostics: slices.Clone(analysis.Tree.Diagnostics), AbsoluteSourcePath: absolute,
 			}
 		}
 		if previous, duplicate := modulePaths[analysis.AST.Path]; duplicate {

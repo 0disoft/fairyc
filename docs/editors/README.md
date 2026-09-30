@@ -14,7 +14,9 @@ to that absolute directory. Syntax highlighting, nested block comments, comment
 toggling, bracket pairs, indentation and snippets work without a compiler.
 The extension is not yet published to the Marketplace.
 
-## Maintaining syntax assets
+The shared `fairyc-lsp` server adds diagnostics, definition navigation and
+completion. See [the LSP preview contract](lsp-preview.md) for build/setup,
+supported capabilities and explicit limitations.
 
 ## Tree-sitter and Zed
 

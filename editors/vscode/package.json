@@ -4,6 +4,10 @@
   "description": "Fairy C syntax and language tools",
   "version": "0.1.0",
   "publisher": "0disoft",
+
+  "main": "./extension.js",
+  "activationEvents": ["onLanguage:fairyc"],
+  "capabilities": {"untrustedWorkspaces": {"supported": "limited", "description": "Syntax support works; the language server runs only in a trusted workspace."}},
   "license": "MIT",
   "engines": {
     "vscode": "^1.90.0"
@@ -16,6 +20,12 @@
     "url": "https://github.com/0disoft/fairyc"
   },
   "contributes": {
+    "configuration": {
+      "title": "Fairy C",
+      "properties": {
+        "fairyc.server.path": {"type": "string", "default": "fairyc-lsp", "scope": "machine", "description": "Path to the Fairy C language server executable."}
+      }
+    },
     "languages": [
       {
         "id": "fairyc",
@@ -43,6 +53,7 @@
       }
     ]
   },
+  "dependencies": {"vscode-languageclient": "^9"},
   "devDependencies": {
     "vscode-textmate": "^9",
     "vscode-oniguruma": "^2"
