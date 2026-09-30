@@ -312,6 +312,7 @@ const (
 	OperandInvalid OperandKind = ""
 	OperandLocal   OperandKind = "local"
 	OperandI32     OperandKind = "i32"
+	OperandI64     OperandKind = "i64"
 	OperandU8      OperandKind = "u8"
 	OperandU32     OperandKind = "u32"
 	OperandUSize   OperandKind = "usize"
@@ -328,6 +329,7 @@ type Operand struct {
 	Kind  OperandKind
 	Local LocalID
 	I32   int32
+	I64   int64 `json:",omitempty"`
 	U64   uint64
 	Type  hir.Type
 	// StaticData stores exact compiler-owned bytes in a comparable form. Byte strings retain

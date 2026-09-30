@@ -13,7 +13,7 @@ import (
 
 const (
 	Schema     = "fairyc.mir-artifact/v0"
-	MIRVersion = "fairyc-mir/0"
+	MIRVersion = "fairyc-mir/1"
 )
 
 var (

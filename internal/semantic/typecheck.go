@@ -1222,13 +1222,23 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 	if len(expression.Children) != 1 {
 		return hir.TypeInvalid
 	}
-	if expression.Text == "-" && directI32MinimumLiteral(expression.Children[0]) {
+	if expression.Text == "-" && expected == hir.TypeI64 && directSignedMinimumLiteral(expression.Children[0], 64) {
+		result.Kind = "literal"
+		result.Value = "-9223372036854775808"
+		result.Operator = ""
+		return hir.TypeI64
+	}
+	if expression.Text == "-" && expected != hir.TypeI64 && directI32MinimumLiteral(expression.Children[0]) {
 		result.Kind = "literal"
 		result.Value = "-2147483648"
 		result.Operator = ""
 		return hir.TypeI32
 	}
-	child, childType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+	childExpected := hir.TypeInvalid
+	if (expression.Text == "+" || expression.Text == "-" || expression.Text == "~") && expected == hir.TypeI64 {
+		childExpected = expected
+	}
+	child, childType := c.checkExpression(expression.Children[0], childExpected)
 	result.Children = appendExpression(result.Children, child)
 	switch expression.Text {
 	case "!":
@@ -1237,6 +1247,9 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return hir.TypeBool
 	case "+", "-":
+		if childType == hir.TypeI64 {
+			return childType
+		}
 		c.requireType(
 			"E1006",
 			span(c.module.file.Path, expression.Children[0].Span),
@@ -2016,7 +2029,7 @@ func literalType(raw string, expected hir.Type) (hir.Type, bool) {
 	}
 	if isIntegerLiteral(raw) {
 		switch expected {
-		case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+		case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 			return expected, true
 		}
 		return hir.TypeI32, true
@@ -2039,6 +2052,8 @@ func integerLiteralFits(raw string, selected hir.Type) bool {
 	switch selected {
 	case hir.TypeI32:
 		maximum = 1<<31 - 1
+	case hir.TypeI64:
+		maximum = 1<<63 - 1
 	case hir.TypeU8:
 		maximum = 1<<8 - 1
 	case hir.TypeU32:
@@ -2053,10 +2068,14 @@ func integerLiteralFits(raw string, selected hir.Type) bool {
 }
 
 func directI32MinimumLiteral(expression *ast.Expression) bool {
+	return directSignedMinimumLiteral(expression, 32)
+}
+
+func directSignedMinimumLiteral(expression *ast.Expression, width uint) bool {
 	if expression == nil || expression.Kind != syntax.KindLiteral || !isIntegerLiteral(expression.Text) {
 		return false
 	}
-	comparison, valid := compareIntegerLiteralMagnitude(expression.Text, 1<<31)
+	comparison, valid := compareIntegerLiteralMagnitude(expression.Text, uint64(1)<<(width-1))
 	return valid && comparison == 0
 }
 

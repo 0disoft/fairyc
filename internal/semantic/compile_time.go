@@ -27,14 +27,14 @@ func (v compileTimeValue) canonical() string {
 	if v.typ == hir.TypeBool {
 		return strconv.FormatBool(v.b)
 	}
-	if v.typ == hir.TypeI32 {
+	if v.typ == hir.TypeI32 || v.typ == hir.TypeI64 {
 		return strconv.FormatInt(v.i, 10)
 	}
 	return strconv.FormatUint(v.u, 10)
 }
 
 func compileTimeScalar(value hir.Type) bool {
-	return value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32
+	return value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32
 }
 
 type compileTimeEvaluator struct {
@@ -432,7 +432,7 @@ func (e *compileTimeEvaluator) literal(module *moduleScope, expression *ast.Expr
 		e.analyzer.addDiagnostic("E4303", span(module.file.Path, expression.Span))
 		return compileTimeValue{}, false
 	}
-	if typ == hir.TypeI32 {
+	if typ == hir.TypeI32 || typ == hir.TypeI64 {
 		return compileTimeValue{typ: typ, i: int64(value)}, true
 	}
 	return compileTimeValue{typ: typ, u: value}, true
@@ -443,7 +443,12 @@ func (e *compileTimeEvaluator) prefix(module *moduleScope, expression *ast.Expre
 		e.rejectExpression(module, expression)
 		return compileTimeValue{}, false
 	}
-	if expression.Text == "-" && expected == hir.TypeI32 && directI32MinimumLiteral(expression.Children[0]) {
+	width := uint(32)
+	minimum := int64(math.MinInt32)
+	if expected == hir.TypeI64 {
+		width, minimum = 64, math.MinInt64
+	}
+	if expression.Text == "-" && (expected == hir.TypeI32 || expected == hir.TypeI64) && directSignedMinimumLiteral(expression.Children[0], width) {
 		if e.exhausted[module.key.packageID] {
 			return compileTimeValue{}, false
 		}
@@ -453,7 +458,7 @@ func (e *compileTimeEvaluator) prefix(module *moduleScope, expression *ast.Expre
 			e.exhausted[module.key.packageID] = true
 			return compileTimeValue{}, false
 		}
-		return compileTimeValue{typ: hir.TypeI32, i: math.MinInt32}, true
+		return compileTimeValue{typ: expected, i: minimum}, true
 	}
 	value, ok := e.eval(module, expression.Children[0], expected, environment, depth)
 	if !ok {
@@ -465,12 +470,12 @@ func (e *compileTimeEvaluator) prefix(module *moduleScope, expression *ast.Expre
 			return compileTimeValue{typ: hir.TypeBool, b: !value.b}, true
 		}
 	case "+":
-		if value.typ == hir.TypeI32 {
+		if value.typ == hir.TypeI32 || value.typ == hir.TypeI64 {
 			return value, true
 		}
 	case "-":
-		if value.typ == hir.TypeI32 && value.i != math.MinInt32 {
-			return compileTimeValue{typ: hir.TypeI32, i: -value.i}, true
+		if value.typ == hir.TypeI32 && value.i != math.MinInt32 || value.typ == hir.TypeI64 && value.i != math.MinInt64 {
+			return compileTimeValue{typ: value.typ, i: -value.i}, true
 		}
 	case "~":
 		switch value.typ {
@@ -480,6 +485,8 @@ func (e *compileTimeEvaluator) prefix(module *moduleScope, expression *ast.Expre
 			return compileTimeValue{typ: value.typ, u: uint64(^uint32(value.u))}, true
 		case hir.TypeI32:
 			return compileTimeValue{typ: value.typ, i: int64(^int32(value.i))}, true
+		case hir.TypeI64:
+			return compileTimeValue{typ: value.typ, i: ^value.i}, true
 		}
 	}
 	e.analyzer.addDiagnostic("E4303", span(module.file.Path, expression.Span))
@@ -533,7 +540,7 @@ func (e *compileTimeEvaluator) applyBinary(module *moduleScope, expression *ast.
 	}
 	if op == "==" || op == "!=" || op == "<" || op == "<=" || op == ">" || op == ">=" {
 		comparison := 0
-		if left.typ == hir.TypeI32 {
+		if left.typ == hir.TypeI32 || left.typ == hir.TypeI64 {
 			if left.i < right.i {
 				comparison = -1
 			} else if left.i > right.i {
@@ -550,6 +557,9 @@ func (e *compileTimeEvaluator) applyBinary(module *moduleScope, expression *ast.
 	var signed int64
 	var unsigned uint64
 	trap := false
+	if left.typ == hir.TypeI64 {
+		return e.applyI64Binary(module, expression, left.i, right.i)
+	}
 	if left.typ == hir.TypeI32 {
 		l, r := left.i, right.i
 		switch op {
@@ -651,6 +661,9 @@ func (e *compileTimeEvaluator) applyBinary(module *moduleScope, expression *ast.
 }
 
 func bitWidth(value hir.Type) int {
+	if value == hir.TypeI64 {
+		return 64
+	}
 	if value == hir.TypeU8 {
 		return 8
 	}
@@ -666,6 +679,13 @@ func (e *compileTimeEvaluator) cast(module *moduleScope, expression *ast.Express
 	value, ok := e.eval(module, expression.Children[0], hir.TypeInvalid, environment, depth)
 	if !ok {
 		return compileTimeValue{}, false
+	}
+	if target == hir.TypeI64 && (value.typ == hir.TypeI32 || value.typ == hir.TypeU8 || value.typ == hir.TypeU32) {
+		signed := value.i
+		if value.typ != hir.TypeI32 {
+			signed = int64(value.u)
+		}
+		return compileTimeValue{typ: target, i: signed}, true
 	}
 	if value.typ == hir.TypeU8 && target == hir.TypeI32 {
 		return compileTimeValue{typ: target, i: int64(value.u)}, true

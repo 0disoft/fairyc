@@ -8,7 +8,7 @@ import (
 
 const (
 	StorageStableArtifactSchema  = "fairyc.stable-package-storage-mir/v0"
-	StorageStableArtifactVersion = "fairyc-stable-package-storage-mir/0"
+	StorageStableArtifactVersion = "fairyc-stable-package-storage-mir/1"
 )
 
 func stableArtifactContract(transfers bool) (string, string) {

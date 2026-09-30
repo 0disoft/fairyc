@@ -409,6 +409,8 @@ func (a *analyzer) canonicalNamedType(module *moduleScope, reference ast.TypeRef
 		return hir.TypeU8, true
 	case "i32":
 		return hir.TypeI32, true
+	case "i64":
+		return hir.TypeI64, true
 	case "u32":
 		return hir.TypeU32, true
 	case "usize":

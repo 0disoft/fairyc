@@ -86,6 +86,8 @@ func fieldStoreOperandType(operand Operand, locals map[LocalID]hir.Type) hir.Typ
 			return hir.TypeInvalid
 		}
 		return hir.TypeI32
+	case OperandI64:
+		return hir.TypeI64
 	case OperandU8:
 		return hir.TypeU8
 	case OperandU32:

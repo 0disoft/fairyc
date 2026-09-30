@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	BodySchema  = "fairyc.package-function-body/v2"
-	BodyVersion = "fairyc-package-function-body/2"
+	BodySchema  = "fairyc.package-function-body/v3"
+	BodyVersion = "fairyc-package-function-body/3"
 )
 
 const (

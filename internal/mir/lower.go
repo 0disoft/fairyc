@@ -755,6 +755,12 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			}
 		}
 		switch expression.Type {
+		case hir.TypeI64:
+			value, err := parseSigned(expression.Value, 64)
+			if err != nil {
+				return Operand{}, err
+			}
+			return Operand{Kind: OperandI64, I64: value}, nil
 		case hir.TypeI32:
 			value, err := parseI32(expression.Value)
 			if err != nil {
@@ -2712,6 +2718,11 @@ func containsCall(expression *hir.Expression) bool {
 }
 
 func parseI32(text string) (int32, error) {
+	value, err := parseSigned(text, 32)
+	return int32(value), err
+}
+
+func parseSigned(text string, width int) (int64, error) {
 	clean := strings.ReplaceAll(text, "_", "")
 	base := 10
 	digits := clean
@@ -2720,11 +2731,11 @@ func parseI32(text string) (int32, error) {
 	} else if strings.HasPrefix(clean, "0b") || strings.HasPrefix(clean, "0B") {
 		base, digits = 2, clean[2:]
 	}
-	value, err := strconv.ParseInt(digits, base, 32)
+	value, err := strconv.ParseInt(digits, base, width)
 	if err != nil {
-		return 0, fmt.Errorf("lower i32 literal %q: %w", text, err)
+		return 0, fmt.Errorf("lower i%d literal %q: %w", width, text, err)
 	}
-	return int32(value), nil
+	return value, nil
 }
 
 func parseUnsigned(text string, bitSize int, typeName string) (uint64, error) {

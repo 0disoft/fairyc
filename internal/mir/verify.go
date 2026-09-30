@@ -1377,6 +1377,8 @@ func scalarOperandMatches(operand Operand, ownerType hir.Type) bool {
 		return operand.Kind == OperandNull && operand.Type == ownerType
 	}
 	switch ownerType {
+	case hir.TypeI64:
+		return operand.Kind == OperandI64
 	case hir.TypeBool, hir.TypeI32:
 		return operand.Kind == OperandI32
 	case hir.TypeU8:
@@ -1601,6 +1603,10 @@ func verifyOperands(state verificationState, operands []Operand, entity string) 
 			if operand.Type != "" && operand.Type != hir.TypeI32 && operand.Type != hir.TypeBool ||
 				operand.Type == hir.TypeBool && operand.I32 != 0 && operand.I32 != 1 {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "i32 operand has invalid scalar type metadata"})
+			}
+		case OperandI64:
+			if operand.Type != "" && operand.Type != hir.TypeI64 || operand.I32 != 0 || operand.U64 != 0 || operand.StaticData != "" {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "i64 operand has invalid scalar metadata"})
 			}
 		case OperandU8:
 			if operand.U64 > 255 {

@@ -32,7 +32,7 @@ func TestVerifiedMIRArtifactRoundTripIsDeterministic(t *testing.T) {
 	if !bytes.Equal(first, second) {
 		t.Fatal("the same verified MIR program produced different artifact bytes")
 	}
-	wantPrefix := `{"schema":"fairyc.mir-artifact/v0","mirVersion":"fairyc-mir/0","program":`
+	wantPrefix := `{"schema":"fairyc.mir-artifact/v0","mirVersion":"fairyc-mir/1","program":`
 	if !bytes.HasPrefix(first, []byte(wantPrefix)) {
 		t.Fatalf("artifact prefix = %q", first[:min(len(first), len(wantPrefix))])
 	}
