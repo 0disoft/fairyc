@@ -1,0 +1,357 @@
+{
+  "cases": [
+    {
+      "case": "wide-total",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=2 sum=4294967294 min=2147483647 max=2147483647\n",
+      "inputSHA256": "cc35da4f20306068c9a46d4ae39420485685802e1d400cdd7a285d47e331f7de",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "count=2 sum=4294967294 min=2147483647 max=2147483647\n"
+    },
+    {
+      "case": "wide-values",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=3 sum=10000000000 min=-5000000000 max=10000000000\n",
+      "inputSHA256": "9fe82f7cbbf77779453ef580c4ba53f5bfba040d78f941fcd033c7c425967d14",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "count=3 sum=10000000000 min=-5000000000 max=10000000000\n"
+    },
+    {
+      "case": "minimum",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=1 sum=-9223372036854775808 min=-9223372036854775808 max=-9223372036854775808\n",
+      "inputSHA256": "edaefd6e6596358a79dcb1ae0b86b2cbba85adad11936a800d69d4d8788d18bc",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "count=1 sum=-9223372036854775808 min=-9223372036854775808 max=-9223372036854775808\n"
+    },
+    {
+      "case": "maximum",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=1 sum=9223372036854775807 min=9223372036854775807 max=9223372036854775807\n",
+      "inputSHA256": "e57d4fb19d2929db84bcd2e0ad39ea3097299680e93bdbf64158d073586d6452",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "count=1 sum=9223372036854775807 min=9223372036854775807 max=9223372036854775807\n"
+    },
+    {
+      "case": "edges",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=2 sum=-1 min=-9223372036854775808 max=9223372036854775807\n",
+      "inputSHA256": "e58d4cec7341d8d809afca047f356c3b7e7ec2586ffb622a9ebbc8d9ba22af7f",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "count=2 sum=-1 min=-9223372036854775808 max=9223372036854775807\n"
+    },
+    {
+      "case": "signed-zero",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=3 sum=0 min=0 max=0\n",
+      "inputSHA256": "2cd6cc3010ca117c938a1829065175ff2c4e8e8200a549891d79c0452470b7ac",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "count=3 sum=0 min=0 max=0\n"
+    },
+    {
+      "case": "quoted",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=2 sum=0 min=-5000000000 max=5000000000\n",
+      "inputSHA256": "211699e84a717305828f070c4b8ca21afb5fecd57d8c643abc42e598caff59dd",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "count=2 sum=0 min=-5000000000 max=5000000000\n"
+    },
+    {
+      "case": "above-maximum",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\above-maximum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "f827525c188c0095ca9e512d18d77ec24dcfb557a7ed98bdb67433f1022e7455",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\above-maximum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "below-minimum",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\below-minimum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "bac63425e9817be27eef16a6de58f892c4df956ca2a7d1f1ff8c8263b776be23",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\below-minimum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "too-many-digits",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\too-many-digits.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "06a84a8db9323b712d7f8f8f77e3efbd37769a6a43a79c808a521f71b07a0f99",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\too-many-digits.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "positive-overflow",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\positive-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "f88adfbbb628b0c97d076d0f0def102a92a4038d152ef3154b29ebd619728938",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\positive-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "negative-overflow",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\negative-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "2fe48255d8ef3765eecb05a156d1f00be14e603cfe78b3eedfd6f72c655bcbdc",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\negative-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "late-overflow",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\late-overflow.csv:record=4:line=4: error: sum exceeds i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "67b2db4a32384d2f4ee41f52d067b6537db531d153719b7fbd5ab9cea453725b",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\late-overflow.csv:record=4:line=4: error: sum exceeds i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "syntax",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\syntax.csv:record=2:line=2: error: selected value must be a signed decimal integer\n",
+      "expectedStdout": "",
+      "inputSHA256": "58ed87b92f8ad7f4c8dbdf87698e181333f09fe91c99820e4dddc7d0b2ce80b9",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\syntax.csv:record=2:line=2: error: selected value must be a signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "case": "empty-number",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\empty-number.csv:record=2:line=2: error: empty numeric value\n",
+      "expectedStdout": "",
+      "inputSHA256": "c693bd5bb17fb0a9d2a31a0d0f0438f69256513cf5b22883e5b230466741aeb0",
+      "profile": "low",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\empty-number.csv:record=2:line=2: error: empty numeric value\n",
+      "stdout": ""
+    },
+    {
+      "case": "wide-total",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=2 sum=4294967294 min=2147483647 max=2147483647\n",
+      "inputSHA256": "cc35da4f20306068c9a46d4ae39420485685802e1d400cdd7a285d47e331f7de",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "count=2 sum=4294967294 min=2147483647 max=2147483647\n"
+    },
+    {
+      "case": "wide-values",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=3 sum=10000000000 min=-5000000000 max=10000000000\n",
+      "inputSHA256": "9fe82f7cbbf77779453ef580c4ba53f5bfba040d78f941fcd033c7c425967d14",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "count=3 sum=10000000000 min=-5000000000 max=10000000000\n"
+    },
+    {
+      "case": "minimum",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=1 sum=-9223372036854775808 min=-9223372036854775808 max=-9223372036854775808\n",
+      "inputSHA256": "edaefd6e6596358a79dcb1ae0b86b2cbba85adad11936a800d69d4d8788d18bc",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "count=1 sum=-9223372036854775808 min=-9223372036854775808 max=-9223372036854775808\n"
+    },
+    {
+      "case": "maximum",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=1 sum=9223372036854775807 min=9223372036854775807 max=9223372036854775807\n",
+      "inputSHA256": "e57d4fb19d2929db84bcd2e0ad39ea3097299680e93bdbf64158d073586d6452",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "count=1 sum=9223372036854775807 min=9223372036854775807 max=9223372036854775807\n"
+    },
+    {
+      "case": "edges",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=2 sum=-1 min=-9223372036854775808 max=9223372036854775807\n",
+      "inputSHA256": "e58d4cec7341d8d809afca047f356c3b7e7ec2586ffb622a9ebbc8d9ba22af7f",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "count=2 sum=-1 min=-9223372036854775808 max=9223372036854775807\n"
+    },
+    {
+      "case": "signed-zero",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=3 sum=0 min=0 max=0\n",
+      "inputSHA256": "2cd6cc3010ca117c938a1829065175ff2c4e8e8200a549891d79c0452470b7ac",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "count=3 sum=0 min=0 max=0\n"
+    },
+    {
+      "case": "quoted",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "count=2 sum=0 min=-5000000000 max=5000000000\n",
+      "inputSHA256": "211699e84a717305828f070c4b8ca21afb5fecd57d8c643abc42e598caff59dd",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "count=2 sum=0 min=-5000000000 max=5000000000\n"
+    },
+    {
+      "case": "above-maximum",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\above-maximum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "f827525c188c0095ca9e512d18d77ec24dcfb557a7ed98bdb67433f1022e7455",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\above-maximum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "below-minimum",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\below-minimum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "bac63425e9817be27eef16a6de58f892c4df956ca2a7d1f1ff8c8263b776be23",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\below-minimum.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "too-many-digits",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\too-many-digits.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "06a84a8db9323b712d7f8f8f77e3efbd37769a6a43a79c808a521f71b07a0f99",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\too-many-digits.csv:record=2:line=2: error: selected integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "positive-overflow",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\positive-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "f88adfbbb628b0c97d076d0f0def102a92a4038d152ef3154b29ebd619728938",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\positive-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "negative-overflow",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\negative-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "2fe48255d8ef3765eecb05a156d1f00be14e603cfe78b3eedfd6f72c655bcbdc",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\negative-overflow.csv:record=3:line=3: error: sum exceeds i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "late-overflow",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\late-overflow.csv:record=4:line=4: error: sum exceeds i64 range\n",
+      "expectedStdout": "",
+      "inputSHA256": "67b2db4a32384d2f4ee41f52d067b6537db531d153719b7fbd5ab9cea453725b",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\late-overflow.csv:record=4:line=4: error: sum exceeds i64 range\n",
+      "stdout": ""
+    },
+    {
+      "case": "syntax",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\syntax.csv:record=2:line=2: error: selected value must be a signed decimal integer\n",
+      "expectedStdout": "",
+      "inputSHA256": "58ed87b92f8ad7f4c8dbdf87698e181333f09fe91c99820e4dddc7d0b2ce80b9",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\syntax.csv:record=2:line=2: error: selected value must be a signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "case": "empty-number",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\empty-number.csv:record=2:line=2: error: empty numeric value\n",
+      "expectedStdout": "",
+      "inputSHA256": "c693bd5bb17fb0a9d2a31a0d0f0438f69256513cf5b22883e5b230466741aeb0",
+      "profile": "optimized",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\practical-worktree\\examples\\csv_aggregator_i64\\samples\\empty-number.csv:record=2:line=2: error: empty numeric value\n",
+      "stdout": ""
+    }
+  ],
+  "images": [
+    {
+      "exeBytes": 188416,
+      "exeSHA256": "d7dafebac38ed12c2d3dc47fdb6354ff37899a671bc5967487b9cd9fe379c521",
+      "profile": "low",
+      "toolchain": "msvc 14.51.36231"
+    },
+    {
+      "exeBytes": 129536,
+      "exeSHA256": "1715b523b5215b204ad2a9fc6099a8521d3b7d09f5f6d38fcbd0c0ad87a47363",
+      "profile": "optimized",
+      "toolchain": "msvc 14.51.36231"
+    }
+  ],
+  "schema": "fairyc.i64-csv/v1",
+  "sdk": "0.0.0-stage0.73",
+  "sourcesSHA256": {
+    "fairy.toml": "263329399993935c7fa1a33600692e3c15a307161ffa8186e4620e7fedc8b837",
+    "src/csv.fy": "158a100e61c1dce6158a691bfe4239f7eacd698546a20989e5d6cc75940e4d6d",
+    "src/diagnostics.fy": "4a30010db72170757055e4312289c3d50220a3f2d1f2c1e0bbe9b2e0b56ef3f4",
+    "src/main.fy": "820dfd2711eb0273f97a64c95bc7f1072e5a6d71e23c95bf9dac5f4d09ca65aa",
+    "src/numbers.fy": "5602d588e8e58a5d35b4e9ca07d6cc50b9d8cb6ff484c3ab6e6302bef815bbf7"
+  }
+}
