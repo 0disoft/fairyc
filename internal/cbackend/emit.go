@@ -1900,8 +1900,8 @@ func (e *emitter) inspectViewSlice(functionIndex int, operation mir.Operation, d
 	if err != nil {
 		return fmt.Errorf("immutable byte-view slice in %s: %w", function.Name, err)
 	}
-	wantView := hir.SharedBorrow(hir.TypeByteSlice)
-	if operation.OwnerType != wantView || operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." ||
+	wantView := operation.OwnerType
+	if !isCByteViewType(wantView) || operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." ||
 		destination != (operation.DestinationLocal != mir.NoLocal) {
 		return fmt.Errorf("immutable byte-view slice in %s has incompatible owner, result, operator, or destination", function.Name)
 	}
@@ -3630,13 +3630,17 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return fmt.Errorf("immutable byte-view slice end in %s: %w", function, err)
 		}
+		viewType := "fy_byte_slice"
+		if operation.Type == hir.MutableBorrow(hir.TypeByteSlice) {
+			viewType = "fy_mut_byte_slice"
+		}
 		switch {
 		case start.Kind == mir.OperandUSize && start.U64 == 0:
-			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s) };\n", operation.DestinationLocal, receiverValue, endValue)
+			fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s).data, .length = (%s) };\n", operation.DestinationLocal, viewType, receiverValue, endValue)
 		case start.Kind == mir.OperandUSize:
-			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data + (%s), .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, startValue, endValue, startValue)
+			fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s).data + (%s), .length = (%s) - (%s) };\n", operation.DestinationLocal, viewType, receiverValue, startValue, endValue, startValue)
 		default:
-			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, endValue, startValue)
+			fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s).data, .length = (%s) - (%s) };\n", operation.DestinationLocal, viewType, receiverValue, endValue, startValue)
 			fmt.Fprintf(output, "    if ((%s) != ((uintptr_t)UINT64_C(0))) { fy_l_%d.data += (%s); }\n", startValue, operation.DestinationLocal, startValue)
 		}
 	case mir.OperationSharedReborrow:

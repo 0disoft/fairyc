@@ -1517,9 +1517,9 @@ func isByteViewType(value hir.Type) bool {
 }
 
 func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, error) {
-	wantView := hir.SharedBorrow(hir.TypeByteSlice)
-	if len(expression.Children) != 3 || expression.Operator != ".." || expression.Type != wantView ||
-		expression.Children[0].Type != wantView || expression.Children[1].Type != hir.TypeUSize || expression.Children[2].Type != hir.TypeUSize {
+	wantView := expression.Type
+	if len(expression.Children) != 3 || expression.Operator != ".." ||
+		!isByteViewType(wantView) || expression.Children[0].Type != wantView || expression.Children[1].Type != hir.TypeUSize || expression.Children[2].Type != hir.TypeUSize {
 		return Operand{}, fmt.Errorf("malformed immutable byte-view slice")
 	}
 	receiver, err := l.lowerExpression(&expression.Children[0])

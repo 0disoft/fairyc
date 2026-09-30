@@ -496,7 +496,8 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 			case OperationViewSliceCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if !validViewSliceShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
+				if !validViewSliceShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) ||
+					operation.OwnerType == hir.MutableBorrow(hir.TypeByteSlice) && fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view slice is missing its bounds check"})
 				}
 			case OperationAssign:
@@ -914,7 +915,8 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 			case OperationViewSlice:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if !validViewSliceShape(operation, true) || len(operation.TrapCategories) != 0 {
+				if !validViewSliceShape(operation, true) || len(operation.TrapCategories) != 0 ||
+					operation.OwnerType == hir.MutableBorrow(hir.TypeByteSlice) && fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "immutable byte-view slice shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -1297,8 +1299,8 @@ func validArrayIndexStoreShape(operation Operation) bool {
 }
 
 func validViewSliceShape(operation Operation, destination bool) bool {
-	wantView := hir.SharedBorrow(hir.TypeByteSlice)
-	if len(operation.Operands) != 3 || operation.OwnerType != wantView ||
+	wantView := operation.OwnerType
+	if len(operation.Operands) != 3 || !isByteViewType(wantView) ||
 		operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
 		return false
 	}

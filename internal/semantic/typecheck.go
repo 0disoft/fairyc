@@ -924,7 +924,7 @@ func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Express
 	end, endType := c.checkSliceBound(expression.Children[2], "end")
 	result.Children = appendExpression(result.Children, receiver, start, end)
 	wantReceiver := hir.SharedBorrow(hir.TypeByteSlice)
-	if receiverType != wantReceiver {
+	if receiverType != wantReceiver && receiverType != hir.MutableBorrow(hir.TypeByteSlice) {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "slicing outside immutable byte views")
 		return hir.TypeInvalid
 	}
@@ -935,7 +935,7 @@ func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Express
 	}
 	result.Kind = "view-slice"
 	result.Operator = ".."
-	return wantReceiver
+	return receiverType
 }
 
 func (c *typeChecker) checkSliceBound(expression *ast.Expression, position string) (*hir.Expression, hir.Type) {

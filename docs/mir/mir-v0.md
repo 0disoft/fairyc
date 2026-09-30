@@ -75,8 +75,9 @@ the frozen place operands and rejects any path, type, mutability, operator, valu
 The mutable byte view has metadata, checked read/store, and internal-call semantics. Inside verified
 unsafe provenance, `byte-slice-data-address` may produce internal `*mut u8` from source `ref mut u8[]`; the shared
 owner produces only internal immutable `*u8`. The verifier rejects a mismatched owner, element type, pointer
-mutability, static mutable storage request, or missing source operand as `V1001`. Mutable slicing and
-general projections still have no MIR operation.
+mutability, static mutable storage request, or missing source operand as `V1001`.
+ADR 0415 admits exclusive byte slicing through the existing checked slice
+operations with matching mutable owner/result types; general projections remain unsupported.
 
 A direct unary-minus `i32` minimum source form is normalized in typed HIR to one literal before MIR.
 MIR carries exact value `-2147483648`; it does not retain an out-of-range positive child or a unary
@@ -184,6 +185,10 @@ Immutable byte-view slicing uses the parallel `view-slice-check`, `checked-view-
 `bounds` trap, and `view-slice` continuation shape. Marker, switch, and continuation carry the same
 already-evaluated `&[u8]` receiver, `usize` start, and `usize` exclusive end in source order. The
 continuation produces `&[u8]` only after the checked edge proves `start <= end && end <= len`.
+ADR 0415 admits the same shape with `&mut [u8]` owner and result. Mutable
+receiver types must match their local definitions, and owner/result mutability
+must agree. Semantic Flow retains the child's generation and ancestor freeze;
+backends preserve its backing storage and offset. MIR version 1 is unchanged.
 `V1001` rejects malformed view or bound metadata; `V1501` rejects a missing marker, reordered
 operands, wrong trap edge, or non-dominating check.
 

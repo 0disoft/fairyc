@@ -373,10 +373,10 @@ func (v runtimeValue) storeByte(index uint64, value runtimeValue) error {
 }
 
 func (v runtimeValue) sliceByteView(start, end uint64) (runtimeValue, error) {
-	if v.kind != valueView || v.view == nil || v.typ != hir.SharedBorrow(hir.TypeByteSlice) || start > end || end > v.view.length {
+	if v.kind != valueView || v.view == nil || !isRuntimeByteViewType(v.typ) || start > end || end > v.view.length {
 		return runtimeValue{}, capabilityError("byte-view slice received an invalid runtime value")
 	}
-	view := &byteViewState{array: v.view.array, offset: v.view.offset + start, length: end - start}
+	view := &byteViewState{array: v.view.array, offset: v.view.offset + start, length: end - start, mutable: v.view.mutable}
 	if v.view.array == nil {
 		view.staticData = v.view.staticData
 	}
@@ -783,9 +783,9 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q: %w", function.Name, err)
 				}
-				wantView := hir.SharedBorrow(hir.TypeByteSlice)
+				wantView := operation.OwnerType
 				if receiver.typ != operation.OwnerType || operation.OwnerType != wantView ||
-					operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
+					!isRuntimeByteViewType(wantView) || operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
 					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q has incompatible runtime value", function.Name)
 				}
 				sliced, err := receiver.sliceByteView(start.u64, end.u64)
@@ -1915,8 +1915,7 @@ func evaluateViewSliceOperands(locals map[mir.LocalID]runtimeValue, operands []m
 	if err != nil {
 		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
 	}
-	wantView := hir.SharedBorrow(hir.TypeByteSlice)
-	if receiver.kind != valueView || receiver.typ != wantView ||
+	if receiver.kind != valueView || !isRuntimeByteViewType(receiver.typ) ||
 		start.kind != valueUSize || start.typ != hir.TypeUSize || end.kind != valueUSize || end.typ != hir.TypeUSize {
 		return runtimeValue{}, runtimeValue{}, runtimeValue{}, capabilityError("byte-view slice received incompatible operands")
 	}

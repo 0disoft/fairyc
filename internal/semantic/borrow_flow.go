@@ -23,19 +23,22 @@ type borrowValueState struct {
 }
 
 type pendingBorrowLoan struct {
-	owner  *symbol
-	borrow hir.Span
-	kind   string
-	origin flowOrigin
+	subview bool
+	owner   *symbol
+	borrow  hir.Span
+	kind    string
+	origin  flowOrigin
 }
 
 type borrowLoanRecord struct {
+	subview bool
 	owner   *symbol
 	binding *symbol
 	fact    BorrowFact
 }
 
 type borrowLoanKey struct {
+	subview     bool
 	owner       *symbol
 	binding     *symbol
 	borrow      hir.Span
@@ -78,6 +81,7 @@ type borrowReturnSource struct {
 }
 
 type borrowReturnSummary struct {
+	subview bool
 	known   bool
 	sources []borrowReturnSource
 }
@@ -107,6 +111,7 @@ type borrowFlowAnalyzer struct {
 	summarizing   bool
 	returnSeen    bool
 	returnKnown   bool
+	returnSubview bool
 	returnSources []borrowReturnSource
 }
 
@@ -202,6 +207,7 @@ func (a *analyzer) inferBorrowReturnSummary(module *moduleScope, function *ast.F
 		return borrowReturnSummary{}
 	}
 	return borrowReturnSummary{
+		subview: flow.returnSubview,
 		known:   true,
 		sources: compactBorrowReturnSources(flow.returnSources),
 	}
@@ -349,17 +355,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 			return true
 		}
 		if indexedAssignmentTarget(statement.Target) {
-			if _, reachable := f.evaluateExpression(statement.Target, environment); !reachable {
-				return false
-			}
-			_, reachable := f.evaluateExpression(statement.Expression, environment)
-			if !reachable {
-				return false
-			}
-			if owner := indexedArrayOwner(f.analyzer, statement.Target); owner != nil {
-				f.checkOwnerAssignment(statement, owner, environment)
-			}
-			return true
+			return f.evaluateSubviewIndexStore(statement, environment)
 		}
 		value, reachable := f.evaluateExpression(statement.Expression, environment)
 		if !reachable {
@@ -449,6 +445,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		}
 		value := f.analyzer.resolved[expression]
 		f.checkAssignmentOwnerRead(expression, value)
+		f.checkSubviewPathAccess(expression, value, environment)
 		if !isSafeBorrowSymbol(value) {
 			return borrowValueState{}, true
 		}
@@ -487,19 +484,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		}
 		return f.evaluateChildren(expression.Children, environment)
 	case syntax.KindSlice:
-		if len(expression.Children) != 3 {
-			return borrowValueState{known: false}, true
-		}
-		receiver, reachable := f.evaluateExpression(expression.Children[0], environment)
-		if !reachable {
-			return receiver, false
-		}
-		for _, bound := range expression.Children[1:] {
-			if _, reachable = f.evaluateExpression(bound, environment); !reachable {
-				return borrowValueState{}, false
-			}
-		}
-		return receiver, true
+		return f.evaluateSubview(expression, environment)
 	case syntax.KindBlock:
 		return f.evaluateBlock(expression.Block, environment, false)
 	case syntax.KindIf:
@@ -627,7 +612,15 @@ func (f *borrowFlowAnalyzer) callBorrowValue(call *ast.Expression, arguments []*
 				!f.expressionReturnsBorrow(arguments[source.parameter]) {
 				return borrowValueState{known: false}
 			}
-			selected = append(selected, cloneBorrowValue(values[source.parameter]))
+			value := cloneBorrowValue(values[source.parameter])
+			if summary.subview {
+				for _, origin := range value.origins {
+					value.pending = append(value.pending, pendingBorrowLoan{subview: true,
+						owner:  f.analyzer.resolved[assignmentRootPath(arguments[source.parameter])],
+						borrow: span(f.module.file.Path, call.Span), kind: "mutable", origin: origin})
+				}
+			}
+			selected = append(selected, value)
 		case borrowReturnRegionParameter:
 			if source.parameter < 0 || source.parameter >= len(arguments) {
 				return borrowValueState{known: false}
@@ -940,7 +933,8 @@ func (f *borrowFlowAnalyzer) materialize(value borrowValueState, binding *symbol
 	value = cloneBorrowValue(value)
 	for _, pending := range value.pending {
 		key := borrowLoanKey{
-			owner: pending.owner, binding: binding, borrow: pending.borrow, kind: pending.kind,
+			subview: pending.subview,
+			owner:   pending.owner, binding: binding, borrow: pending.borrow, kind: pending.kind,
 			originName: pending.origin.name, originPlace: pending.origin.declaration,
 		}
 		loanID, found := f.loanByKey[key]
@@ -948,7 +942,8 @@ func (f *borrowFlowAnalyzer) materialize(value borrowValueState, binding *symbol
 			loanID = len(f.loans)
 			f.loanByKey[key] = loanID
 			f.loans = append(f.loans, borrowLoanRecord{
-				owner: pending.owner, binding: binding,
+				subview: pending.subview,
+				owner:   pending.owner, binding: binding,
 				fact: BorrowFact{Borrow: pending.borrow, Kind: pending.kind, Origin: pending.origin.name},
 			})
 		}
@@ -1159,6 +1154,14 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 
 func (f *borrowFlowAnalyzer) recordSummaryReturn(value borrowValueState) {
 	f.returnSeen = true
+	for _, id := range value.loans {
+		if id >= 0 && id < len(f.loans) && f.loans[id].subview {
+			f.returnSubview = true
+		}
+	}
+	for _, pending := range value.pending {
+		f.returnSubview = f.returnSubview || pending.subview
+	}
 	if !value.known {
 		f.returnKnown = false
 		return
@@ -1229,7 +1232,7 @@ func compareBorrowReturnSource(left, right borrowReturnSource) int {
 }
 
 func sameBorrowReturnSummary(left, right borrowReturnSummary) bool {
-	return left.known == right.known && slices.EqualFunc(left.sources, right.sources, func(left, right borrowReturnSource) bool {
+	return left.subview == right.subview && left.known == right.known && slices.EqualFunc(left.sources, right.sources, func(left, right borrowReturnSource) bool {
 		return compareBorrowReturnSource(left, right) == 0
 	})
 }
@@ -1288,7 +1291,7 @@ func sameBorrowValue(left, right borrowValueState) bool {
 		slices.EqualFunc(left.origins, right.origins, sameFlowOrigin) &&
 		slices.Equal(left.loans, right.loans) &&
 		slices.EqualFunc(left.pending, right.pending, func(left, right pendingBorrowLoan) bool {
-			return left.owner == right.owner && compareSpan(left.borrow, right.borrow) == 0 &&
+			return left.subview == right.subview && left.owner == right.owner && compareSpan(left.borrow, right.borrow) == 0 &&
 				left.kind == right.kind && sameFlowOrigin(left.origin, right.origin)
 		})
 }
@@ -1329,7 +1332,7 @@ func mergeBorrowValues(values []borrowValueState) borrowValueState {
 		return strings.Compare(left.origin.name, right.origin.name)
 	})
 	result.pending = slices.CompactFunc(result.pending, func(left, right pendingBorrowLoan) bool {
-		return left.owner == right.owner && compareSpan(left.borrow, right.borrow) == 0 && left.kind == right.kind && sameFlowOrigin(left.origin, right.origin)
+		return left.subview == right.subview && left.owner == right.owner && compareSpan(left.borrow, right.borrow) == 0 && left.kind == right.kind && sameFlowOrigin(left.origin, right.origin)
 	})
 	return result
 }

@@ -81,6 +81,16 @@ payload keep the original origin and freeze the parent and whole owner until
 their last use. Afterwards the parent may be edited again. This call-only
 conversion does not relax direct binding, assignment, return or escape rules.
 
+ADR 0415 admits `view[start..end]` for an existing `ref mut u8[]`, producing
+another `ref mut u8[]` with the same owner and origin. Bounds may be omitted;
+the receiver and explicit bounds evaluate once in source order and trap unless
+`start <= end <= len`. The child retains a distinct exclusive loan generation.
+Its parent, parent aliases and original owner cannot be accessed before the
+child's last use; the child and its descendants retain access. Returned and
+tagged children preserve that restriction. Disjoint sibling intervals are not
+proven, so retained siblings remain rejected even for numerically disjoint
+ranges. Shared byte slicing keeps its existing result and lifetime behavior.
+
 The first executable array-view bridge permits a direct shared borrow of an admitted `u8[N]`
 place where `ref u8[]` is already expected. It retains the place's origin and loans the whole array.
 
