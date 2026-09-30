@@ -258,6 +258,7 @@ const (
 	OperationUnary                    OperationKind = "unary"
 	OperationBinary                   OperationKind = "binary"
 	OperationScalarCast               OperationKind = "scalar-cast"
+	OperationSharedReborrow           OperationKind = "shared-reborrow"
 	OperationArrayConstruct           OperationKind = "array-construct"
 	OperationArrayBorrowView          OperationKind = "array-borrow-view"
 	OperationArrayLength              OperationKind = "array-length"

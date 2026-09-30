@@ -73,6 +73,14 @@ Passing an existing mutable borrow to a call creates a call-bounded reborrow whe
 or assigning the borrow to a longer-lived destination is not a call-bounded reborrow and must
 satisfy the ordinary origin and escape rules.
 
+ADR 0414 additionally permits an existing `ref mut T` as an internal `ref T`
+call argument or shared method receiver for the exact same referent. Earlier
+arguments remain held through later argument evaluation; overlapping mutation
+is E2101 in either order. A returned shared reference, its aliases and tagged
+payload keep the original origin and freeze the parent and whole owner until
+their last use. Afterwards the parent may be edited again. This call-only
+conversion does not relax direct binding, assignment, return or escape rules.
+
 The first executable array-view bridge permits a direct shared borrow of an admitted `u8[N]`
 place where `ref u8[]` is already expected. It retains the place's origin and loans the whole array.
 

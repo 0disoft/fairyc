@@ -832,6 +832,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerViewSlice(expression)
 	case "scalar-cast":
 		return l.lowerScalarCast(expression)
+	case "shared-reborrow":
+		return l.lowerSharedReborrow(expression)
 	case "cast":
 		return l.lowerRawAddressCast(expression)
 	case "borrowed-view-from-raw-parts":

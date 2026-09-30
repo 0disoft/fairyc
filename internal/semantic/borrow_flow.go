@@ -96,6 +96,7 @@ type borrowFlowAnalyzer struct {
 	liveAfter           map[*ast.Statement]borrowLiveMap
 	liveAfterExpression map[*ast.Expression]borrowLiveMap
 	callBorrows         []borrowValueState
+	callAccesses        []borrowCallAccess
 	assignmentBorrow    *borrowValueState
 	assignmentLastUse   hir.Span
 	loanByKey           map[borrowLoanKey]int
@@ -308,6 +309,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		f.checkReturn(statement.Expression, value)
 		return false
 	case syntax.KindAssignment:
+		f.checkReferenceStore(statement.Target, environment)
 		if scalarDerefAssignmentTarget(statement.Target) {
 			previous := f.liveAfter[statement]
 			receiver := assignmentRootPath(statement.Target.Children[0])
@@ -412,6 +414,9 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return borrowValueState{}, true
 	}
 	switch expression.Kind {
+	case ast.PrivateSharedReborrow:
+		value, reachable := f.evaluateExpression(expression.Children[0], environment)
+		return f.sharedReborrowValue(expression, value), reachable
 	case ast.PrivateStorageBorrow:
 		if len(expression.Children) != 2 {
 			return borrowValueState{known: false}, true
@@ -507,7 +512,8 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return f.evaluatePropagate(expression, environment)
 	case syntax.KindCall:
 		base := len(f.callBorrows)
-		defer func() { f.callBorrows = f.callBorrows[:base] }()
+		accessBase := len(f.callAccesses)
+		defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
 		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
 			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}
 			return borrowValueState{
@@ -556,14 +562,20 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 			return borrowValueState{}, false
 		}
 		f.callBorrows = append(f.callBorrows, calleeValue)
+		offset := 0
+		if f.analyzer.methodCalls[expression] != nil {
+			offset = 1
+			f.checkCallReferenceArgument(expression, 0, expression.Children[0].Children[0], calleeValue, environment)
+		}
 		arguments := expression.Children[1:]
 		argumentValues := make([]borrowValueState, 0, len(arguments))
-		for _, argument := range arguments {
+		for index, argument := range arguments {
 			value, reachable := f.evaluateExpression(argument, environment)
 			if !reachable {
 				return borrowValueState{}, false
 			}
 			argumentValues = append(argumentValues, value)
+			f.checkCallReferenceArgument(expression, index+offset, argument, value, environment)
 			f.callBorrows = append(f.callBorrows, value)
 		}
 		if f.analyzer.methodCalls[expression] != nil {
@@ -966,6 +978,7 @@ func (f *borrowFlowAnalyzer) checkOwnerAssignment(statement *ast.Statement, owne
 		return
 	}
 	live := f.liveAfter[statement]
+	f.checkHeldOwnerWrite(statement, owner)
 	seen := make(map[int]struct{})
 	for binding, lastUse := range live {
 		value, found := environment[binding]
@@ -980,10 +993,7 @@ func (f *borrowFlowAnalyzer) checkOwnerAssignment(statement *ast.Statement, owne
 				continue
 			}
 			seen[loanID] = struct{}{}
-			f.analyzer.addDiagnostic("E2101", span(f.module.file.Path, statement.Target.Span),
-				RelatedSpan{Role: "loan", Span: f.loans[loanID].fact.Borrow},
-				RelatedSpan{Role: "last-use", Span: lastUse},
-			)
+			f.reportOwnerWrite(statement, f.loans[loanID].fact.Borrow, lastUse)
 		}
 	}
 }
@@ -1446,7 +1456,7 @@ func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut 
 	if expression == nil {
 		return cloneBorrowLive(liveOut)
 	}
-	if f.liveAfterExpression != nil && isBorrowExpression(expression) {
+	if f.liveAfterExpression != nil && (isBorrowExpression(expression) || expression.Kind == syntax.KindPath || expression.Kind == ast.PrivateSharedReborrow) {
 		f.liveAfterExpression[expression] = cloneBorrowLive(liveOut)
 	}
 	switch expression.Kind {

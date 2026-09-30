@@ -7,7 +7,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 	needed := false
 	for _, block := range function.Blocks {
 		for _, op := range block.Operations {
-			needed = needed || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress
+			needed = needed || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress || op.Kind == OperationSharedReborrow
 		}
 	}
 	if !needed {
@@ -47,7 +47,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 					if len(op.Operands) == 1 {
 						typ = fieldStoreOperandType(op.Operands[0], types)
 					}
-				case OperationUnary, OperationBinary, OperationScalarCast,
+				case OperationUnary, OperationBinary, OperationScalarCast, OperationSharedReborrow,
 					OperationResultConstruct, OperationResultPayload, OperationOptionConstruct, OperationOptionPayload,
 					OperationEnumConstruct, OperationEnumPayload, OperationStructConstruct, OperationResourceConstruct,
 					OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,

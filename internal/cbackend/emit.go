@@ -814,7 +814,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-					mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+					mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 					mir.OperationRegionPlace:
 					inferred = operation.Type
 				}
@@ -1412,6 +1412,15 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["view-slice"] = struct{}{}
+			case mir.OperationSharedReborrow:
+				if !mir.ValidSharedReborrowShape(*operation) {
+					return fmt.Errorf("invalid shared reborrow in %s", e.functions[functionIndex].Name)
+				}
+				operandType, err := e.operandType(functionIndex, operation.Operands[0])
+				if err != nil || operandType != operation.OwnerType {
+					return fmt.Errorf("shared reborrow source type mismatch")
+				}
+				e.features["shared-reborrow"] = struct{}{}
 			case mir.OperationScalarCast:
 				if err := e.inspectScalarCast(functionIndex, *operation); err != nil {
 					return err
@@ -1668,7 +1677,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast, mir.OperationSharedReborrow,
 		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 		mir.OperationRegionPlace:
 		if operation.DestinationLocal < 0 {
@@ -3630,6 +3639,16 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, endValue, startValue)
 			fmt.Fprintf(output, "    if ((%s) != ((uintptr_t)UINT64_C(0))) { fy_l_%d.data += (%s); }\n", startValue, operation.DestinationLocal, startValue)
 		}
+	case mir.OperationSharedReborrow:
+		value, err := cOperand(operation.Operands[0])
+		if err != nil {
+			return err
+		}
+		if operation.Type == hir.SharedBorrow(hir.TypeByteSlice) {
+			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, value, value)
+		} else {
+			fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
+		}
 	case mir.OperationScalarCast:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -4361,7 +4380,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
+		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "exeBytes": 110080,
+      "exeSHA256": "472ca554c79b4b0c0691d5df390a15ddc35b70a45ab9474f60bb849323b60ba3",
+      "exitCode": 0,
+      "profile": "low",
+      "sourceSHA256": "a621fc13118a130e4205f40518c058b9b391159c2e1346e8e2cc585cf805c737",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231"
+    },
+    {
+      "exeBytes": 107520,
+      "exeSHA256": "60a14accafbf37fb9e40b0491a57e09329d1a08fcd5cd02a4da935ade0910ca3",
+      "exitCode": 0,
+      "profile": "optimized",
+      "sourceSHA256": "a621fc13118a130e4205f40518c058b9b391159c2e1346e8e2cc585cf805c737",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231"
+    }
+  ],
+  "schema": "fairyc.shared-reborrow-native/v1",
+  "sdk": "0.0.0-stage0.73",
+  "baseCommit": "3d919b9026a4e06ad3cd98a691f1566af83d4263",
+  "language": "fairyc-language/20",
+  "runtimeABI": "fairyc-runtime/0",
+  "validation": [
+    {
+      "intent": "fairyc_reborrow_check",
+      "coverage": "semantic, MIR, codec, interpreter and C backend package tests; selected compiler reborrow/field-store/scalar-deref tests",
+      "receipt": ".mustflow/state/runs/run-2026-09-30T17-31-13-429Z-17052-99f751e27aab/receipt.json",
+      "status": "passed"
+    },
+    {
+      "intent": "fairyc_reborrow_native",
+      "coverage": "low and optimized Windows MSVC example execution; later source changes only refine conflict diagnostics",
+      "receipt": ".mustflow/state/runs/run-2026-09-30T17-26-30-190Z-26204-faee5cafcab4/receipt.json",
+      "status": "passed"
+    }
+  ],
+  "skipped": [
+    "Full compiler/all-repository suite: bounded related tests used; nine original workloads await remaining planned capabilities",
+    "Physical power-loss experiment: deferred by user"
+  ]
+}

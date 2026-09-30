@@ -648,6 +648,15 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	}
 	var actual hir.Type
 	switch expression.Kind {
+	case ast.PrivateSharedReborrow:
+		child, sourceType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+		result.Children = appendExpression(result.Children, child)
+		element, mutable, borrowed := hir.BorrowElement(sourceType)
+		if !borrowed || !mutable {
+			actual = hir.TypeInvalid
+		} else {
+			actual = hir.SharedBorrow(element)
+		}
 	case ast.PrivateStorageLayout:
 		actual = c.checkStorageLayout(expression, result)
 	case ast.PrivateStorageTake:
@@ -1454,6 +1463,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 			expectedSpan = callee.function.Parameters[index].Type.Span
 		}
 		child, actual := c.checkExpression(argument, expected)
+		child, actual = c.sharedCallArgument(&arguments[index], child, actual, expected)
 		result.Children = appendExpression(result.Children, child)
 		if expected != hir.TypeInvalid {
 			c.requireDetailedType(
@@ -1543,6 +1553,7 @@ func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Ex
 		}
 		receiverType = expectedReceiver
 	}
+	receiver, receiverType = c.sharedCallArgument(&calleeExpression.Children[0], receiver, receiverType, expectedReceiver)
 	c.requireType("E1006", span(c.module.file.Path, receiverExpression.Span), receiverType, expectedReceiver, span(callee.source, callee.function.Parameters[0].Type.Span))
 	c.analyzer.methodCalls[expression] = callee
 	result.Symbol = callee.id
@@ -1566,6 +1577,7 @@ func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Ex
 			expectedSpan = callee.function.Parameters[parameterIndex].Type.Span
 		}
 		child, actual := c.checkExpression(argument, expectedType)
+		child, actual = c.sharedCallArgument(&arguments[index], child, actual, expectedType)
 		result.Children = appendExpression(result.Children, child)
 		if expectedType != hir.TypeInvalid {
 			c.requireType("E1006", span(c.module.file.Path, argument.Span), actual, expectedType, span(callee.source, expectedSpan))

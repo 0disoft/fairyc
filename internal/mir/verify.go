@@ -514,6 +514,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "typed scalar binary operation shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationSharedReborrow:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !ValidSharedReborrowShape(operation) || fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "shared reborrow must shorten the same exclusive referent"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationScalarCast:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if operation.DestinationLocal == NoLocal || len(operation.Operands) != 1 || operation.Operator != "as" ||

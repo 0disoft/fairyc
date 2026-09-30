@@ -635,6 +635,18 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{trapCategory: trap}, nil
 				}
 				locals[operation.DestinationLocal] = result
+			case mir.OperationSharedReborrow:
+				value, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				value.typ = operation.Type
+				if value.view != nil {
+					shared := *value.view
+					shared.mutable = false
+					value.view = &shared
+				}
+				locals[operation.DestinationLocal] = value
 			case mir.OperationScalarCast:
 				value, err := evaluateOne(locals, operation.Operands)
 				if err != nil {

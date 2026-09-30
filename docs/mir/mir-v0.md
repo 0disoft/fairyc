@@ -6,6 +6,13 @@
 
 ## Role
 
+ADR 0414 adds `shared-reborrow`: one local of exact `ref mut T` OwnerType
+produces `ref T` with operator `share`, preserving referent identity. The
+verifier derives the operand type from definitions and rejects mismatched
+mutability/referents or missing operands. Byte views copy their descriptor with
+shared access. Semantic Flow owns call/result loan liveness. MIR version 1
+retains its existing envelope and fields; unknown opcodes fail verification.
+
 MIR is the only executable semantic contract consumed by backends. It records evaluation order, control flow, moves, cleanup, checks, traps, calls, and unsafe provenance explicitly. C, a future fast backend, a future LLVM backend, and the MIR interpreter must not reconstruct source semantics independently.
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
