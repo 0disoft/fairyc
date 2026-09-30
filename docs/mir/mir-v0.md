@@ -115,6 +115,13 @@ representation from how a local happens to be used.
 
 ### Rvalues
 
+ADR 0413 extends the scalar integer sets in this document with `i64`. Its
+immediate family stores a signed int64 payload instead of truncating through I32
+or recovering a signed value from U64. Unary plus/minus retain i64, ordinary
+arithmetic uses the same typed check/switch/continuation structure, and division
+or remainder includes signed-division-overflow. Exact-version MIR payloads now
+use `fairyc-mir/1`; older persisted compiler-private artifacts are rejected.
+
 MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, borrowed-view length and emptiness, safe borrow, raw address, region allocation, and explicit unsafe operations.
 
 A scalar `binary` operation records its exact common operand type in `OwnerType` and exact result in

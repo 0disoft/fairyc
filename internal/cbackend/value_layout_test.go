@@ -23,6 +23,7 @@ fn i32 main() { return 0; }
 			{hir.TypeBool, hir.TypeI32, 4, 4},
 			{hir.TypeU8, hir.TypeU8, 1, 1},
 			{hir.TypeI32, hir.TypeI32, 4, 4},
+			{hir.TypeI64, hir.TypeI64, 8, 8},
 			{hir.TypeU32, hir.TypeU32, 4, 4},
 			{hir.TypeUSize, hir.TypeUSize, 8, 8},
 			{"main::Padded", "main::Padded", 8, 4},
@@ -41,7 +42,7 @@ func TestStorageLayoutRejectsUnsupportedOrUnverifiedInputs(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main; fn i32 main() { return 0; }")
 	profile := cbackend.Stage0WindowsMSVCProfile()
-	for _, typ := range []hir.Type{hir.TypeVoid, "i64", hir.TypeStr, "main::Missing", hir.SharedBorrow(hir.TypeI32), hir.Option(hir.TypeI32), hir.RawPointer(hir.TypeVoid, false)} {
+	for _, typ := range []hir.Type{hir.TypeVoid, "i128", hir.TypeStr, "main::Missing", hir.SharedBorrow(hir.TypeI32), hir.Option(hir.TypeI32), hir.RawPointer(hir.TypeVoid, false)} {
 		if got, err := cbackend.StorageLayout(program, typ, profile); err == nil || got != (cbackend.ValueStorageLayout{}) {
 			t.Fatalf("unsupported %s: %+v %v", typ, got, err)
 		}

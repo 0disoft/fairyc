@@ -13,7 +13,7 @@ const OperationStorageLayout OperationKind = "storage-layout"
 
 func storageQueryType(value hir.Type, properties typeProperties) bool {
 	switch value {
-	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return true
 	default:
 		return properties.IsStruct(value) || properties.IsResource(value) || properties.Enum(value) != nil

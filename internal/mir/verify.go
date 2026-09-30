@@ -1109,7 +1109,7 @@ func validSwitchShape(terminator Terminator) bool {
 		if terminator.SwitchKind == "checked-shift" {
 			return hir.CheckedShiftType(terminator.SwitchType)
 		}
-		return terminator.SwitchType == hir.TypeI32
+		return signedIntegerType(terminator.SwitchType)
 	default:
 		return false
 	}
@@ -1179,10 +1179,10 @@ func validCheckedArithmeticShape(operation Operation) bool {
 		}
 	}
 	if len(operation.Operands) == 1 && operation.Operator == "-" {
-		if operation.OwnerType != hir.TypeI32 || operation.Type != hir.TypeI32 {
+		if !signedIntegerType(operation.OwnerType) || operation.Type != operation.OwnerType {
 			return false
 		}
-		return scalarOperandMatches(operation.Operands[0], hir.TypeI32)
+		return scalarOperandMatches(operation.Operands[0], operation.OwnerType)
 	}
 	if len(operation.Operands) == 2 && (operation.Operator == ">>" || operation.Operator == "<<") {
 		return hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType &&
@@ -1204,7 +1204,7 @@ func divisionTrapCategories(ownerType hir.Type) ([]string, bool) {
 		return nil, false
 	}
 	categories := []string{"division-by-zero"}
-	if ownerType == hir.TypeI32 {
+	if signedIntegerType(ownerType) {
 		categories = append(categories, "signed-division-overflow")
 	}
 	return categories, true
@@ -1316,6 +1316,7 @@ func scalarCastOperandMatches(operand Operand, sourceType hir.Type) bool {
 		return true
 	}
 	return sourceType == hir.TypeI32 && operand.Kind == OperandI32 ||
+		sourceType == hir.TypeI64 && operand.Kind == OperandI64 ||
 		sourceType == hir.TypeU8 && operand.Kind == OperandU8 ||
 		sourceType == hir.TypeU32 && operand.Kind == OperandU32
 }
@@ -1361,7 +1362,7 @@ func validUnaryShape(operation Operation) bool {
 	case "!":
 		return operation.OwnerType == hir.TypeBool && operation.Type == hir.TypeBool
 	case "+", "-":
-		return operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+		return signedIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "~":
 		return hir.BitwiseNotType(operation.OwnerType) && operation.Type == operation.OwnerType
 	default:
@@ -1539,7 +1540,7 @@ func trappingOperationSpec(operation Operation) (string, OperationKind, []string
 	}
 	if operation.Kind == OperationUnary {
 		switchKind, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))
-		return switchKind, OperationArithmeticCheck, categories, valid && operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+		return switchKind, OperationArithmeticCheck, categories, valid && signedIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType
 	}
 	if operation.Kind != OperationBinary {
 		return "", "", nil, false

@@ -1,6 +1,6 @@
 # ADR 0413: Executable signed 64-bit integers
 
-- Status: implementation in progress
+- Status: implemented
 - Motivation: the CSV aggregation workload needs signed totals beyond the i32 range.
 
 The source type `i64` uses the range -9223372036854775808 through
@@ -15,10 +15,21 @@ division by zero, minimum divided or remaindered by -1, and shift counts outside
 optimization profiles. No wrapping arithmetic or implicit mixed-width operations
 are introduced. Explicit widening from u8, i32 and u32 is value preserving.
 
-The first implementation unit owns HIR identity, source literals and constants,
-signed MIR immediates and cache identity. Runtime arithmetic, interpreter values,
-C transport and SDK decimal formatting are the next unit; this first unit does
-not claim complete executable support.
+HIR identity, source literals and constants, signed MIR immediates, interpreter
+values and native C transport now support i64. Internal calls, scalar references,
+fixed arrays, aggregate fields, and Option/Result payloads retain the full width.
+Ordinary arithmetic, comparison, bitwise operators and checked shifts use the
+same source contract in the interpreter and C backend. The C transport checks
+bounds before arithmetic and uses unsigned bit patterns for signed bitwise and
+shift results, avoiding signed C overflow and implementation-defined right shifts.
+
+SDK 0.0.0-stage0.73 adds `std::bytes::append_i64`. It retains negative digits while
+formatting the minimum value and publishes once through the existing Buffer
+append. Language pin /20 and runtime ABI /0 remain unchanged: this additive
+admission changes no previously admitted source or external runtime symbol.
+Interpreter/codec tests and low/optimized MSVC execution cover normal containers,
+decimal extrema, arithmetic overflow, division by zero, minimum/-1 and bad shifts.
+The CSV workload is the separate application unit.
 
 MIR version 1, stable function-body version 3 and stable package-MIR version 4
 reject older exact-version cache payloads. Storage-transfer artifacts use

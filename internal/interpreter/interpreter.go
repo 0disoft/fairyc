@@ -263,6 +263,7 @@ type valueKind uint8
 
 const (
 	valueI32 valueKind = iota + 1
+	valueI64
 	valueU8
 	valueU32
 	valueUSize
@@ -321,6 +322,7 @@ type scalarReference struct {
 type runtimeValue struct {
 	kind      valueKind
 	i32       int32
+	i64       int64
 	u64       uint64
 	typ       hir.Type
 	tagged    *taggedState
@@ -1056,7 +1058,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 
 func (r *runtime) dropValue(value runtimeValue, binding hir.Span, depth int) (string, error) {
 	switch value.kind {
-	case valueI32, valueU8, valueU32, valueUSize, valueNull:
+	case valueI32, valueI64, valueU8, valueU32, valueUSize, valueNull:
 		return "", nil
 	case valueStruct:
 		if !inertDropValue(value, 0) {
@@ -1125,6 +1127,8 @@ func taggedFamily(kind valueKind) string {
 
 func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtimeValue, error) {
 	switch operand.Kind {
+	case mir.OperandI64:
+		return i64Value(operand.I64), nil
 	case mir.OperandI32:
 		if operand.Type == hir.TypeBool {
 			if operand.I32 != 0 && operand.I32 != 1 {
@@ -1165,6 +1169,9 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 	rightValue, err := evaluate(locals, operation.Operands[1])
 	if err != nil {
 		return runtimeValue{}, "", err
+	}
+	if operation.OwnerType == hir.TypeI64 && operation.Type == hir.TypeI64 {
+		return checkedI64Operation(operation.Operator, leftValue, rightValue)
 	}
 	switch operation.Operator {
 	case "==", "!=":
@@ -1260,6 +1267,9 @@ func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation)
 		}
 		value.typ = element
 		return value, "", nil
+	}
+	if operation.OwnerType == hir.TypeI64 && operation.Type == hir.TypeI64 {
+		return unaryI64(operation.Operator, value)
 	}
 	if operation.Operator == "~" && operation.OwnerType != hir.TypeI32 {
 		if !hir.BitwiseNotType(operation.OwnerType) || operation.Type != operation.OwnerType ||
@@ -1394,6 +1404,8 @@ func equalScalarValues(left, right runtimeValue, ownerType hir.Type) (bool, erro
 		return false, capabilityError("comparison operands have different runtime scalar types")
 	}
 	switch ownerType {
+	case hir.TypeI64:
+		return left.i64 == right.i64, nil
 	case hir.TypeBool, hir.TypeI32:
 		return left.i32 == right.i32, nil
 	case hir.TypeU8, hir.TypeU32, hir.TypeUSize:
@@ -1409,6 +1421,18 @@ func equalScalarValues(left, right runtimeValue, ownerType hir.Type) (bool, erro
 func orderedScalarValues(operator string, left, right runtimeValue, ownerType hir.Type) (bool, error) {
 	if !comparisonRuntimeMatches(left, ownerType) || !comparisonRuntimeMatches(right, ownerType) {
 		return false, capabilityError("ordered comparison operands have incompatible runtime scalar types")
+	}
+	if ownerType == hir.TypeI64 {
+		switch operator {
+		case "<":
+			return left.i64 < right.i64, nil
+		case "<=":
+			return left.i64 <= right.i64, nil
+		case ">":
+			return left.i64 > right.i64, nil
+		case ">=":
+			return left.i64 >= right.i64, nil
+		}
 	}
 	if ownerType == hir.TypeI32 {
 		switch operator {
@@ -1438,6 +1462,8 @@ func orderedScalarValues(operator string, left, right runtimeValue, ownerType hi
 
 func comparisonRuntimeMatches(value runtimeValue, ownerType hir.Type) bool {
 	switch ownerType {
+	case hir.TypeI64:
+		return value.kind == valueI64 && value.typ == hir.TypeI64
 	case hir.TypeBool, hir.TypeI32:
 		return value.kind == valueI32
 	case hir.TypeU8:
@@ -1456,6 +1482,19 @@ func valuePreservingIntegerCast(value runtimeValue, sourceType, targetType hir.T
 	sourceMatches := value.typ == sourceType || sourceType == hir.TypeI32 && value.kind == valueI32 && value.typ == ""
 	if !hir.ValuePreservingIntegerCast(sourceType, targetType) || !sourceMatches {
 		return runtimeValue{}, capabilityError("integer cast has incompatible source or target type")
+	}
+	if targetType == hir.TypeI64 {
+		switch sourceType {
+		case hir.TypeI32:
+			if value.kind == valueI32 {
+				return i64Value(int64(value.i32)), nil
+			}
+		case hir.TypeU8, hir.TypeU32:
+			if comparisonRuntimeMatches(value, sourceType) {
+				return i64Value(int64(value.u64)), nil
+			}
+		}
+		return runtimeValue{}, capabilityError("invalid i64 widening operand")
 	}
 	switch sourceType {
 	case hir.TypeI32:
@@ -1620,7 +1659,12 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 		if err != nil {
 			return mir.NoBlock, "", err
 		}
-		if terminator.SwitchType == hir.TypeI32 {
+		if terminator.SwitchType == hir.TypeI64 {
+			_, trap, err := checkedI64Operation(terminator.Operator, left, right)
+			if err != nil || trap != "" {
+				return mir.NoBlock, trap, err
+			}
+		} else if terminator.SwitchType == hir.TypeI32 {
 			leftI32, leftErr := left.asI32()
 			rightI32, rightErr := right.asI32()
 			if leftErr != nil || rightErr != nil {
@@ -1683,6 +1727,17 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 		}
 		return terminator.Successors[0], "", nil
 	case "checked-unary":
+		if terminator.SwitchType == hir.TypeI64 {
+			value, err := evaluateOne(locals, terminator.SwitchOperands)
+			if err != nil {
+				return mir.NoBlock, "", err
+			}
+			_, trap, err := unaryI64(terminator.Operator, value)
+			if err != nil || trap != "" {
+				return mir.NoBlock, trap, err
+			}
+			return terminator.Successors[0], "", nil
+		}
 		value, err := evaluateOneI32(locals, terminator.SwitchOperands)
 		if err != nil {
 			return mir.NoBlock, "", err
@@ -1701,7 +1756,9 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return mir.NoBlock, "", err
 		}
 		var trap string
-		if terminator.SwitchType == hir.TypeI32 {
+		if terminator.SwitchType == hir.TypeI64 {
+			_, trap, err = checkedI64Operation(terminator.Operator, left, right)
+		} else if terminator.SwitchType == hir.TypeI32 {
 			leftI32, leftErr := left.asI32()
 			rightI32, rightErr := right.asI32()
 			if leftErr != nil || rightErr != nil {
@@ -1724,7 +1781,9 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return mir.NoBlock, "", err
 		}
 		var trap string
-		if terminator.SwitchType == hir.TypeI32 {
+		if terminator.SwitchType == hir.TypeI64 {
+			_, trap, err = checkedI64Operation(terminator.Operator, left, right)
+		} else if terminator.SwitchType == hir.TypeI32 {
 			leftI32, leftErr := left.asI32()
 			rightI32, rightErr := right.asI32()
 			if leftErr != nil || rightErr != nil {

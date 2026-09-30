@@ -1451,3 +1451,10 @@ ADR 0408 advances only the SDK to `0.0.0-stage0.69`. Two target-neutral `std::fs
 ADR 0409 advances the exact language pin to `fairyc-language/20` and bundled SDK to `0.0.0-stage0.70`. A shallow Result or Option switch may have a no-tail case ending in literal `assert(false);` beside a continuing value-producing case. Existing source bytes remain valid, but manifests and locks need exact pin and SDK refresh. Runtime ABI, MIR version, target schema and public-interface schemas remain unchanged.
 
 Language 1.0 compatibility, stable native ABI and mangling, stable MIR exchange, binary package ABI, stable `SymbolId`, stable anchors, exact diagnostic-span guarantees, stable debugger formats, and cross-version `.fymap` migration are not Stage 0 promises.
+
+ADR 0413 adds executable i64 and SDK 0.0.0-stage0.73 Buffer formatting. Language
+/20 and external runtime ABI /0 remain unchanged. MIR version /1, function-body
+version /3, stable package-MIR /4, storage-transfer /1 and compilation /2 reject
+older exact-version payloads. Existing manifests remain valid; locks using SDK
+0.0.0-stage0.72 must be refreshed with the new compiler. Original experiment
+toolchains, reports and immutable identity fixtures are not migrated in place.

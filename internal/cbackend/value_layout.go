@@ -54,7 +54,7 @@ func preparedStorageLayout(value hir.Type, targetID target.ID, engine *layout.En
 	var computed layout.Result
 	var err error
 	switch canonical {
-	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		computed, err = engine.Of(layout.Type{Kind: layout.KindLanguageScalar, Name: string(canonical)})
 	default:
 		if index, found := structByType[value]; found {

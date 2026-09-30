@@ -420,7 +420,7 @@ func userTypeParts(value hir.Type, current hir.PackageID) (hir.PackageID, string
 }
 
 func builtinType(value hir.Type) bool {
-	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 ||
+	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 ||
 		value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeByteSlice || value == hir.TypeStr ||
 		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)
 }

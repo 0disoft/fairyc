@@ -13,7 +13,7 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 		return hir.TypeInvalid
 	}
 	typ := c.analyzer.canonicalType(c.module, *expression.Type)
-	admitted := typ == hir.TypeBool || typ == hir.TypeU8 || typ == hir.TypeI32 || typ == hir.TypeU32 || typ == hir.TypeUSize ||
+	admitted := typ == hir.TypeBool || typ == hir.TypeU8 || typ == hir.TypeI32 || typ == hir.TypeI64 || typ == hir.TypeU32 || typ == hir.TypeUSize ||
 		c.analyzer.structTypes[typ] != nil || c.analyzer.resourceTypes[typ] != nil || c.analyzer.enumTypes[typ] != nil
 	if !admitted {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unsupported private storage borrow type")

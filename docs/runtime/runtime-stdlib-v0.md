@@ -799,6 +799,10 @@ The checked-in quickstart executes the generated-Fairy success path, while low a
 failure probes force growth allocation failure and require unchanged zero length/capacity plus zero
 live allocations after automatic cleanup.
 
+ADR 0413 adds `std::bytes::append_i64(ref mut Buffer, i64)` in SDK 0.0.0-stage0.73.
+It appends canonical decimal ASCII through one Buffer append, including the exact
+signed minimum without negating its magnitude. It introduces no new C runtime symbol.
+
 ADR 0373 extends the SDK to `0.0.0-stage0.55` with `std::bytes::append_i32`, `append_u32`,
 `append_usize`, and `append_bool`. Each operation appends canonical locale-independent ASCII to a
 caller-owned Buffer; integer paths use bounded stack storage and commit through one existing bulk

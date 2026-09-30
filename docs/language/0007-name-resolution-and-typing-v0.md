@@ -60,6 +60,16 @@ Nominal `struct`, `resource`, and `enum` declarations are not structurally inter
 
 ## Literal and expression typing
 
+ADR 0413 adds executable `i64` to the scalar sets below. Its contextual literals,
+constants, internal parameters/results, aggregate fields, fixed arrays,
+references and Option/Result payloads retain all 64 signed bits. Unconstrained
+integer literals still default to i32. A direct unary minus in an i64 context
+admits magnitude 9223372036854775808 as its minimum value. Widening casts from
+u8, i32 and u32 to i64 are explicit and value preserving; usize to i64 is rejected.
+Arithmetic is checked, right shift is arithmetic, and shift counts must be
+0 through 63. Minimum divided or remaindered by -1 traps. Unary minus of the
+minimum traps. Mixed-width binary operations are rejected.
+
 Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Decimal, hexadecimal, and binary integer values are range-checked after type selection and do not wrap; an out-of-range implemented integer literal is `E1013` before MIR lowering. Direct unary minus may fold the exact magnitude `2147483648` to `i32` minimum in any admitted radix. The positive token is not separately representable, and parentheses or unary plus do not receive that exception. Semantic magnitude comparison is digit-bounded and does not allocate a second input-sized arbitrary-precision integer.
 
 A nonempty fixed-array list receives its element type from an expected `T[N]` when present;

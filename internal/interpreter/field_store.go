@@ -56,6 +56,9 @@ func storeScalarField(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 }
 
 func scalarStoreValueMatches(value runtimeValue, typ hir.Type) bool {
+	if typ == hir.TypeI64 {
+		return comparisonRuntimeMatches(value, typ)
+	}
 	return typ == hir.TypeI32 && value.kind == valueI32 && (value.typ == "" || value.typ == hir.TypeI32) ||
 		typ == hir.TypeBool && value.kind == valueI32 && value.typ == hir.TypeBool && (value.i32 == 0 || value.i32 == 1) ||
 		typ == hir.TypeUSize && value.kind == valueUSize && value.typ == hir.TypeUSize ||

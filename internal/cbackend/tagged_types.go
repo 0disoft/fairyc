@@ -33,7 +33,7 @@ func sharedBorrowOptionNiche(value hir.Type, structByType, resourceByType, array
 		return false
 	}
 	switch borrowed {
-	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return true
 	default:
 		borrowed = canonicalCValueType(borrowed)
@@ -253,7 +253,7 @@ func copyScalarTaggedAggregateLayout(value hir.Type) (layout.Type, bool) {
 func copyScalarTaggedPayloadLayout(value hir.Type) (layout.Type, bool) {
 	value = canonicalCValueType(value)
 	switch value {
-	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
 	default:
 		return layout.Type{}, false
@@ -270,7 +270,7 @@ func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {
 		element = canonicalCValueType(element)
-		if (element == hir.TypeBool && !mutable) || element == hir.TypeU8 || element == hir.TypeI32 || element == hir.TypeU32 || element == hir.TypeUSize {
+		if (element == hir.TypeBool && !mutable) || element == hir.TypeU8 || element == hir.TypeI32 || element == hir.TypeI64 || element == hir.TypeU32 || element == hir.TypeUSize {
 			return true
 		}
 		if _, structure := structByType[element]; structure {
@@ -282,7 +282,7 @@ func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir
 		_, resource := resourceByType[element]
 		return resource
 	}
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize {
 		return true
 	}
 	if _, structure := structByType[value]; structure {
@@ -324,7 +324,7 @@ func taggedPayloadLayout(
 	if _, _, borrow := hir.BorrowElement(value); borrow {
 		return layout.Type{Kind: layout.KindPointer}, true
 	}
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize {
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
 	}
 	if index, found := structByType[value]; found {
@@ -432,7 +432,7 @@ func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
 			foundAggregate = true
 			continue
 		}
-		if payload != hir.TypeU8 && payload != hir.TypeI32 && payload != hir.TypeU32 && payload != hir.TypeUSize {
+		if payload != hir.TypeU8 && payload != hir.TypeI32 && payload != hir.TypeI64 && payload != hir.TypeU32 && payload != hir.TypeUSize {
 			return false
 		}
 	}

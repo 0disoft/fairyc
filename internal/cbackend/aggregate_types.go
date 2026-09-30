@@ -195,7 +195,7 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		}
 	}
 	switch value {
-	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
 	default:
 		if transport, found := cScalarTransportForType(value); found && reprC {
@@ -251,7 +251,7 @@ func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type,
 		return r.resolve(value)
 	}
 	switch value {
-	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
 	default:
 		if _, _, pointer := hir.RawPointerElement(value); pointer {
@@ -312,7 +312,7 @@ func (r *aggregateLayoutResolver) resolveAggregateTaggedPayload(value hir.Type) 
 		return resolved, true, err
 	}
 	switch value {
-	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true, nil
 	}
 	if _, found := r.structures[value]; found {

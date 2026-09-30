@@ -28,7 +28,7 @@ func TestBufferScalarFormattingSurfaceIsSDKOwned(t *testing.T) {
 	public := make([]string, 0, 4)
 	for _, function := range bytesSource.Module.Functions {
 		switch function.Name {
-		case "append_i32", "append_u32", "append_usize", "append_bool":
+		case "append_i32", "append_i64", "append_u32", "append_usize", "append_bool":
 			if !function.Public {
 				t.Errorf("std::bytes::%s is not public", function.Name)
 			}
@@ -36,7 +36,7 @@ func TestBufferScalarFormattingSurfaceIsSDKOwned(t *testing.T) {
 		}
 	}
 	slices.Sort(public)
-	if want := []string{"append_bool", "append_i32", "append_u32", "append_usize"}; !slices.Equal(public, want) {
+	if want := []string{"append_bool", "append_i32", "append_i64", "append_u32", "append_usize"}; !slices.Equal(public, want) {
 		t.Fatalf("public formatting functions = %v, want %v", public, want)
 	}
 
@@ -54,7 +54,7 @@ func TestBufferScalarFormattingSurfaceIsSDKOwned(t *testing.T) {
 			t.Errorf("std::bytes scalar formatting introduced forbidden runtime or syntax surface %q", forbidden)
 		}
 	}
-	if strings.Count(sourceText, "return append(buffer, encoded[position..]);") != 3 {
+	if strings.Count(sourceText, "return append(buffer, encoded[position..]);") != 4 {
 		t.Fatal("integer formatting must commit through one existing Buffer append per value")
 	}
 }

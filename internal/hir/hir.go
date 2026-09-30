@@ -119,7 +119,7 @@ func FixedArrayParts(value Type) (element Type, length uint64, ok bool) {
 // FixedArrayScalarElement reports the closed copy-scalar element set admitted by the first
 // executable fixed-array slice.
 func FixedArrayScalarElement(value Type) bool {
-	return value == TypeBool || value == TypeU8 || value == TypeI32 || value == TypeU32 || value == TypeUSize
+	return value == TypeBool || value == TypeU8 || value == TypeI32 || value == TypeI64 || value == TypeU32 || value == TypeUSize
 }
 
 // ExecutableFixedArrayShape reports whether one array shape belongs to the bounded first
@@ -157,11 +157,11 @@ func Option(element Type) Type {
 func ValuePreservingIntegerCast(sourceType, targetType Type) bool {
 	switch sourceType {
 	case TypeU8:
-		return targetType == TypeI32 || targetType == TypeU32 || targetType == TypeUSize
+		return targetType == TypeI32 || targetType == TypeI64 || targetType == TypeU32 || targetType == TypeUSize
 	case TypeI32:
-		return targetType == TypeCInt
+		return targetType == TypeCInt || targetType == TypeI64
 	case TypeU32:
-		return targetType == TypeUSize
+		return targetType == TypeUSize || targetType == TypeI64
 	case TypeCInt:
 		return targetType == TypeI32
 	default:
@@ -176,12 +176,12 @@ func ScalarEqualityType(value Type) bool {
 
 // ScalarOrderedType reports the closed Stage 0 ordered-comparison subset.
 func ScalarOrderedType(value Type) bool {
-	return value == TypeI32 || value == TypeU8 || value == TypeU32 || value == TypeUSize
+	return value == TypeI32 || value == TypeI64 || value == TypeU8 || value == TypeU32 || value == TypeUSize
 }
 
 // CheckedArithmeticType reports the closed Stage 0 ordinary +, -, and * subset.
 func CheckedArithmeticType(value Type) bool {
-	return value == TypeI32 || value == TypeU8 || value == TypeU32 || value == TypeUSize
+	return value == TypeI32 || value == TypeI64 || value == TypeU8 || value == TypeU32 || value == TypeUSize
 }
 
 // CheckedDivisionType reports the closed Stage 0 ordinary / and % subset.

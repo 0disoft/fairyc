@@ -2340,7 +2340,7 @@ func sourceEntity(kind string, span hir.Span) string {
 
 func (l *functionLowerer) lowerCheckedDivision(expression *hir.Expression, left, right Operand) error {
 	categories := []string{"division-by-zero"}
-	if expression.Type == hir.TypeI32 {
+	if expression.Type == hir.TypeI32 || expression.Type == hir.TypeI64 {
 		categories = append(categories, "signed-division-overflow")
 	}
 	l.appendOperation(Operation{

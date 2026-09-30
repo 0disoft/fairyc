@@ -144,7 +144,7 @@ func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) bool 
 		return true
 	}
 	switch value {
-	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return true
 	case hir.TypeInvalid, hir.TypeVoid, hir.TypeRegion:
 		return false

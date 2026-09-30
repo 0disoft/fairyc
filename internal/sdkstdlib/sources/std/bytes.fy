@@ -57,7 +57,7 @@ fn i32 discard_buffer(Buffer value) {
     return 0;
 }
 
-fn u8 i32_decimal_digit(i32 value) {
+fn u8 signed_decimal_digit(i64 value) {
     return if (value == -9 || value == 9) {
         57
     } else if (value == -8 || value == 8) {
@@ -194,11 +194,34 @@ pub fn Result<usize, BufferError> append_i32(ref mut Buffer buffer, i32 value) {
     var i32 remaining = value;
     while (remaining <= -10 || remaining >= 10) {
         position -= 1;
-        digits[position] = i32_decimal_digit(remaining % 10);
+        digits[position] = signed_decimal_digit((remaining % 10) as i64);
         remaining /= 10;
     }
     position -= 1;
-    digits[position] = i32_decimal_digit(remaining);
+    digits[position] = signed_decimal_digit(remaining as i64);
+    if (value < 0) {
+        position -= 1;
+        digits[position] = 45;
+    }
+    let ref u8[] encoded = ref digits;
+    return append(buffer, encoded[position..]);
+}
+
+/// Appends canonical locale-independent decimal ASCII for value.
+pub fn Result<usize, BufferError> append_i64(ref mut Buffer buffer, i64 value) {
+    var u8[20] digits = [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ];
+    var usize position = 20;
+    var i64 remaining = value;
+    while (remaining <= -10 || remaining >= 10) {
+        position -= 1;
+        digits[position] = signed_decimal_digit(remaining % 10);
+        remaining /= 10;
+    }
+    position -= 1;
+    digits[position] = signed_decimal_digit(remaining);
     if (value < 0) {
         position -= 1;
         digits[position] = 45;

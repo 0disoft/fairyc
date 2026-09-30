@@ -85,7 +85,7 @@ func scalarArrayLayoutType(value hir.Type) (layout.Type, bool) {
 		return layout.Type{}, false
 	}
 	element = canonicalCValueType(element)
-	if element != hir.TypeU8 && element != hir.TypeI32 && element != hir.TypeU32 && element != hir.TypeUSize {
+	if element != hir.TypeU8 && element != hir.TypeI32 && element != hir.TypeI64 && element != hir.TypeU32 && element != hir.TypeUSize {
 		return layout.Type{}, false
 	}
 	elementLayout := layout.Type{Kind: layout.KindLanguageScalar, Name: string(element)}

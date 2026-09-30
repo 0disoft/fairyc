@@ -15,7 +15,7 @@ func (c *typeChecker) checkStorageElementAddress(expression *ast.Expression, res
 		return hir.TypeInvalid
 	}
 	typ := c.analyzer.canonicalType(c.module, *expression.Type)
-	admitted := typ == hir.TypeBool || typ == hir.TypeU8 || typ == hir.TypeI32 || typ == hir.TypeU32 || typ == hir.TypeUSize ||
+	admitted := typ == hir.TypeBool || typ == hir.TypeU8 || typ == hir.TypeI32 || typ == hir.TypeI64 || typ == hir.TypeU32 || typ == hir.TypeUSize ||
 		c.analyzer.structTypes[typ] != nil || c.analyzer.resourceTypes[typ] != nil || c.analyzer.enumTypes[typ] != nil
 	if !admitted {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unsupported private storage element address type")

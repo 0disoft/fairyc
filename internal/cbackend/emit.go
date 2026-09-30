@@ -123,6 +123,7 @@ type emitter struct {
 	needsStringView    bool
 	needsBitcast       bool
 	needsShift         bool
+	needsI64           bool
 	cScalars           map[hir.Type]target.Scalar
 	instrumentation    string
 	dropSites          []DropSite
@@ -766,7 +767,7 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 
 func resourceFieldLayoutType(value hir.Type) (layout.Type, bool) {
 	canonical := canonicalCValueType(value)
-	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeU32 || canonical == hir.TypeUSize {
+	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeI64 || canonical == hir.TypeU32 || canonical == hir.TypeUSize {
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(canonical)}, true
 	}
 	if _, _, pointer := hir.RawPointerElement(value); pointer {
@@ -924,7 +925,7 @@ func (e *emitter) inspectEnumTypes() error {
 
 func (e *emitter) enumPayloadCType(value hir.Type) (string, error) {
 	canonical := canonicalCValueType(value)
-	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeU32 || canonical == hir.TypeUSize ||
+	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeI64 || canonical == hir.TypeU32 || canonical == hir.TypeUSize ||
 		isRawPointer(canonical) || isOptionI32(canonical) || isResultI32I32(canonical) {
 		return e.cValueType(canonical)
 	}
@@ -956,6 +957,8 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 	switch value {
 	case hir.TypeU8:
 		return "uint8_t", nil
+	case hir.TypeI64:
+		return "int64_t", nil
 	case hir.TypeI32:
 		return "int32_t", nil
 	case hir.TypeU32:
@@ -1001,6 +1004,8 @@ func (e *emitter) foreignPointerElementCType(value hir.Type) (string, error) {
 		return "void", nil
 	case hir.TypeU8:
 		return "uint8_t", nil
+	case hir.TypeI64:
+		return "int64_t", nil
 	case hir.TypeI32:
 		return "int32_t", nil
 	case hir.TypeU32:
@@ -1038,6 +1043,8 @@ func assignLocalType(localTypes map[mir.LocalID]hir.Type, local mir.LocalID, val
 
 func inferredOperandType(localTypes map[mir.LocalID]hir.Type, operand mir.Operand) (hir.Type, bool) {
 	switch operand.Kind {
+	case mir.OperandI64:
+		return hir.TypeI64, true
 	case mir.OperandI32:
 		if operand.Type == hir.TypeBool {
 			return hir.TypeBool, operand.I32 == 0 || operand.I32 == 1
@@ -1110,7 +1117,7 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 	if _, borrow := e.safeBorrowCType(value); borrow {
 		return true
 	}
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if _, array := e.arrayByType[value]; array {
@@ -1156,6 +1163,8 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		return "const uint8_t *", nil
 	case value == hir.TypeU8:
 		return "uint8_t", nil
+	case value == hir.TypeI64:
+		return "int64_t", nil
 	case value == hir.TypeI32:
 		return "int32_t", nil
 	case value == hir.TypeU32:
@@ -1205,6 +1214,8 @@ func (e *emitter) safeBorrowCType(value hir.Type) (string, bool) {
 		switch canonical {
 		case hir.TypeU8:
 			pointee = "uint8_t"
+		case hir.TypeI64:
+			pointee = "int64_t"
 		case hir.TypeI32:
 			pointee = "int32_t"
 		case hir.TypeU32:
@@ -1488,6 +1499,9 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				if err := e.inspectUnary(functionIndex, *operation); err != nil {
 					return err
 				}
+				if operation.OwnerType == hir.TypeI64 {
+					e.needsI64 = true
+				}
 				if operation.Operator == "-" || operation.Operator == "~" && operation.OwnerType == hir.TypeI32 {
 					e.needsBitcast = true
 				}
@@ -1497,6 +1511,9 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			case mir.OperationBinary:
 				if err := e.inspectBinary(functionIndex, *operation); err != nil {
 					return err
+				}
+				if operation.OwnerType == hir.TypeI64 {
+					e.needsI64 = true
 				}
 				switch operation.Operator {
 				case "==", "!=", "<", "<=", ">", ">=":
@@ -2009,7 +2026,7 @@ func (e *emitter) inspectUnary(functionIndex int, operation mir.Operation) error
 	case "!":
 		validShape = operation.OwnerType == hir.TypeBool && operation.Type == hir.TypeBool
 	case "+", "-":
-		validShape = operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+		validShape = (operation.OwnerType == hir.TypeI32 || operation.OwnerType == hir.TypeI64) && operation.Type == operation.OwnerType
 	case "~":
 		validShape = hir.BitwiseNotType(operation.OwnerType) && operation.Type == operation.OwnerType
 	}
@@ -2091,6 +2108,8 @@ func unsignedCMaximum(value hir.Type) (string, error) {
 
 func shiftCWidth(value hir.Type) (string, error) {
 	switch value {
+	case hir.TypeI64:
+		return "INT64_C(64)", nil
 	case hir.TypeI32:
 		return "INT32_C(32)", nil
 	case hir.TypeU8:
@@ -2106,6 +2125,8 @@ func shiftCWidth(value hir.Type) (string, error) {
 
 func checkedDivisorName(value hir.Type) (string, error) {
 	switch value {
+	case hir.TypeI64:
+		return "fy_checked_divisor_i64", nil
 	case hir.TypeI32:
 		return "fy_checked_divisor_i32", nil
 	case hir.TypeU8:
@@ -2415,6 +2436,8 @@ func (e *emitter) inspectEnumOperation(functionIndex int, operation mir.Operatio
 
 func (e *emitter) operandType(functionIndex int, operand mir.Operand) (hir.Type, error) {
 	switch operand.Kind {
+	case mir.OperandI64:
+		return hir.TypeI64, nil
 	case mir.OperandI32:
 		if operand.Type == hir.TypeBool {
 			if operand.I32 == 0 || operand.I32 == 1 {
@@ -2782,7 +2805,7 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 		}
 		e.features["checked-division"] = struct{}{}
 		categories = []string{"division-by-zero"}
-		if terminator.SwitchType == hir.TypeI32 {
+		if terminator.SwitchType == hir.TypeI32 || terminator.SwitchType == hir.TypeI64 {
 			categories = append(categories, "signed-division-overflow")
 		}
 	case "checked-view-index":
@@ -2836,7 +2859,7 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 			return fmt.Errorf("checked unary in %s: %w", function.Name, err)
 		}
 		operandType, err := e.operandType(functionIndex, operand)
-		if err != nil || terminator.SwitchType != hir.TypeI32 || operandType != hir.TypeI32 {
+		if err != nil || (terminator.SwitchType != hir.TypeI32 && terminator.SwitchType != hir.TypeI64) || operandType != terminator.SwitchType {
 			return fmt.Errorf("checked unary in %s has incompatible type metadata", function.Name)
 		}
 		e.features["checked-arithmetic"] = struct{}{}
@@ -2932,7 +2955,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	}
 	_, usesStorageTake := e.features["private-storage-take"]
 	_, usesStoragePut := e.features["private-storage-put"]
-	if e.needsBitcast || usesStorageTake || usesStoragePut {
+	if e.needsBitcast || e.needsI64 || usesStorageTake || usesStoragePut {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
@@ -3060,6 +3083,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("    uint32_t bits = (uint32_t)value;\n")
 		output.WriteString("    if (amount == 0 || value >= 0) {\n        return fy_bits_to_i32(bits >> (uint32_t)amount);\n    }\n")
 		output.WriteString("    return fy_bits_to_i32((bits >> (uint32_t)amount) | (UINT32_MAX << (32u - (uint32_t)amount)));\n}\n\n")
+	}
+	if e.needsI64 {
+		output.WriteString(i64CSource)
 	}
 	return nil
 }
@@ -3685,10 +3711,18 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		case "+":
 			fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
 		case "-":
+			if operation.OwnerType == hir.TypeI64 {
+				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i64(UINT64_C(0) - (uint64_t)(%s));\n", operation.DestinationLocal, value)
+				break
+			}
 			fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32(UINT32_C(0) - (uint32_t)(%s));\n", operation.DestinationLocal, value)
 		case "!":
 			fmt.Fprintf(output, "    fy_l_%d = (%s == INT32_C(0)) ? INT32_C(1) : INT32_C(0);\n", operation.DestinationLocal, value)
 		case "~":
+			if operation.OwnerType == hir.TypeI64 {
+				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i64(~(uint64_t)(%s));\n", operation.DestinationLocal, value)
+				break
+			}
 			if operation.OwnerType == hir.TypeI32 {
 				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32(~(uint32_t)(%s));\n", operation.DestinationLocal, value)
 			} else {
@@ -3718,6 +3752,10 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		rightValue, err := cOperand(right)
 		if err != nil {
 			return fmt.Errorf("binary in %s: %w", function, err)
+		}
+		if operation.OwnerType == hir.TypeI64 {
+			emitI64Binary(output, operation, leftValue, rightValue)
+			break
 		}
 		switch operation.Operator {
 		case "+", "-", "*":
@@ -4039,7 +4077,11 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked unary in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s == INT32_MIN) { %sgoto fy_b_%d; }\n", value, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
+		minimum := "INT32_MIN"
+		if terminator.SwitchType == hir.TypeI64 {
+			minimum = "INT64_MIN"
+		}
+		fmt.Fprintf(output, "    if (%s == %s) { %sgoto fy_b_%d; }\n", value, minimum, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-arithmetic":
 		left, right, err := twoOperands(terminator.SwitchOperands)
@@ -4057,7 +4099,10 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked arithmetic in %s: %w", function.Name, err)
 		}
-		if terminator.SwitchType == hir.TypeI32 {
+		if terminator.SwitchType == hir.TypeI64 {
+			check := map[string]string{"+": "add", "-": "sub", "*": "mul"}[terminator.Operator]
+			fmt.Fprintf(output, "    if (fy_i64_%s_overflow(%s, %s)) { %sgoto fy_b_%d; }\n", check, leftValue, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
+		} else if terminator.SwitchType == hir.TypeI32 {
 			expression := fmt.Sprintf("((int64_t)(%s) %s (int64_t)(%s))", leftValue, terminator.Operator, rightValue)
 			fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { %sgoto fy_b_%d; }\n", expression, expression, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 		} else {
@@ -4089,6 +4134,9 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			return fmt.Errorf("checked division in %s: %w", function.Name, err)
 		}
 		fmt.Fprintf(output, "    if (%s == 0) { %sgoto fy_b_%d; }\n", rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_DIVISION_BY_ZERO"), failure)
+		if terminator.SwitchType == hir.TypeI64 {
+			fmt.Fprintf(output, "    if (%s == INT64_MIN && %s == -INT64_C(1)) { %sgoto fy_b_%d; }\n", leftValue, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW"), failure)
+		}
 		if terminator.SwitchType == hir.TypeI32 {
 			fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { %sgoto fy_b_%d; }\n", leftValue, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW"), failure)
 		}
@@ -4163,7 +4211,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked shift in %s: %w", function.Name, err)
 		}
-		if terminator.SwitchType == hir.TypeI32 {
+		if terminator.SwitchType == hir.TypeI32 || terminator.SwitchType == hir.TypeI64 {
 			fmt.Fprintf(output, "    if (%s < INT32_C(0) || %s >= %s) { %sgoto fy_b_%d; }\n", amountValue, amountValue, width, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INVALID_SHIFT"), failure)
 		} else {
 			fmt.Fprintf(output, "    if (%s >= %s) { %sgoto fy_b_%d; }\n", amountValue, width, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INVALID_SHIFT"), failure)
@@ -4177,7 +4225,9 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			if err != nil {
 				return fmt.Errorf("checked left shift in %s: %w", function.Name, err)
 			}
-			if terminator.SwitchType == hir.TypeI32 {
+			if terminator.SwitchType == hir.TypeI64 {
+				fmt.Fprintf(output, "    if ((%s) > (INT64_MAX >> (uint64_t)(%s)) || (%s) < fy_sar_i64(INT64_MIN, %s)) { %sgoto fy_b_%d; }\n", valueText, amountValue, valueText, amountValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
+			} else if terminator.SwitchType == hir.TypeI32 {
 				expression := fmt.Sprintf("((int64_t)(%s) * (INT64_C(1) << (uint32_t)(%s)))", valueText, amountValue)
 				fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { %sgoto fy_b_%d; }\n", expression, expression, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 			} else {
@@ -4293,7 +4343,7 @@ func functionCheckedDivisorTypes(function mir.Function) []hir.Type {
 		}
 	}
 	result := make([]hir.Type, 0, len(found))
-	for _, candidate := range []hir.Type{hir.TypeI32, hir.TypeU8, hir.TypeU32, hir.TypeUSize} {
+	for _, candidate := range []hir.Type{hir.TypeI32, hir.TypeI64, hir.TypeU8, hir.TypeU32, hir.TypeUSize} {
 		if found[candidate] {
 			result = append(result, candidate)
 		}
@@ -4334,6 +4384,8 @@ func cOperand(operand mir.Operand) (string, error) {
 		return fmt.Sprintf("fy_l_%d", operand.Local), nil
 	case mir.OperandI32:
 		return cI32(operand.I32), nil
+	case mir.OperandI64:
+		return cI64(operand.I64), nil
 	case mir.OperandU8:
 		return fmt.Sprintf("UINT8_C(%d)", operand.U64), nil
 	case mir.OperandU32:
