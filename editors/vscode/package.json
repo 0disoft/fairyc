@@ -1,0 +1,50 @@
+{
+  "name": "fairyc",
+  "displayName": "Fairy C",
+  "description": "Fairy C syntax and language tools",
+  "version": "0.1.0",
+  "publisher": "0disoft",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0disoft/fairyc"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "fairyc",
+        "aliases": [
+          "Fairy C",
+          "fairyc"
+        ],
+        "extensions": [
+          ".fy"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fairyc",
+        "scopeName": "source.fairyc",
+        "path": "./syntaxes/fairyc.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "fairyc",
+        "path": "./snippets/fairyc.json"
+      }
+    ]
+  },
+  "devDependencies": {
+    "vscode-textmate": "^9",
+    "vscode-oniguruma": "^2"
+  }
+}

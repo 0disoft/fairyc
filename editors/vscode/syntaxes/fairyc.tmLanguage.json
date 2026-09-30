@@ -1,0 +1,77 @@
+{
+  "name": "Fairy C",
+  "patterns": [
+    {
+      "include": "#block-comment"
+    },
+    {
+      "begin": "///",
+      "end": "$",
+      "name": "comment.line.documentation.fairyc"
+    },
+    {
+      "begin": "//",
+      "end": "$",
+      "name": "comment.line.double-slash.fairyc"
+    },
+    {
+      "include": "#string"
+    },
+    {
+      "match": "\\b(?:true|false|null)\\b",
+      "name": "constant.language.fairyc"
+    },
+    {
+      "match": "\\b(?:as|assert|break|case|cleanup|const|continue|defer|discard|else|enum|extern|false|fn|for|if|import|in|let|module|mut|null|ptr|pub|ref|region|resource|return|struct|switch|true|unsafe|var|while)\\b",
+      "name": "keyword.control.fairyc"
+    },
+    {
+      "match": "\\bstatic_assert(?=\\s*\\()|\\bstate(?=\\s*\\{)|\\b(?:cell|map|burn)(?=\\s)",
+      "name": "keyword.other.contextual.fairyc"
+    },
+    {
+      "match": "\\b(?:void|bool|u8|i32|u32|usize|str|CStr)\\b",
+      "name": "storage.type.fairyc"
+    },
+    {
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*(?:\u003c[^;{}\\n]*\u003e)?\\()",
+      "name": "entity.name.function.fairyc"
+    },
+    {
+      "match": "\\b(?:0x[0-9a-fA-F](?:_?[0-9a-fA-F])*|0b[01](?:_?[01])*|[0-9](?:_?[0-9])*(?:\\.[0-9](?:_?[0-9])*)?(?:[eE][+-]?[0-9](?:_?[0-9])*)?)\\b",
+      "name": "constant.numeric.fairyc"
+    },
+    {
+      "match": "\u003c\u003c=|\u003e\u003e=|\\+=|-=|\\*=|/=|%=|\u0026=|\\^=|\\|=|::|-\u003e|=\u003e|==|!=|\u003c=|\u003e=|\u003c\u003c|\u003e\u003e|\u0026\u0026|\\|\\||\\.\\.|@|\\(|\\)|\\{|\\}|\\[|\\]|,|;|:|\\.|\\?|=|\\+|-|\\*|/|%|!|~|\u0026|\\||\\^|\u003c|\u003e",
+      "name": "keyword.operator.fairyc"
+    }
+  ],
+  "repository": {
+    "block-comment": {
+      "begin": "/\\*",
+      "end": "\\*/",
+      "name": "comment.block.fairyc",
+      "patterns": [
+        {
+          "include": "#block-comment"
+        }
+      ]
+    },
+    "string": {
+      "begin": "\\b[bc]\"|\"",
+      "end": "\"",
+      "name": "string.quoted.double.fairyc",
+      "patterns": [
+        {
+          "match": "\\\\(?:[\\\\\"nrt0]|x[0-9a-fA-F]{2}|u\\{[0-9a-fA-F]{1,6}\\})",
+          "name": "constant.character.escape.fairyc"
+        },
+        {
+          "match": "\\\\.",
+          "name": "invalid.illegal.escape.fairyc"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.fairyc"
+}
