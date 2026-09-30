@@ -66,6 +66,9 @@ var stage0WindowsConsole string
 //go:embed stage0_windows_file.c
 var stage0WindowsFile string
 
+//go:embed stage0_windows_directory.c
+var stage0WindowsDirectory string
+
 //go:embed stage0_windows_file_portable.c
 var stage0WindowsFilePortable string
 
@@ -451,6 +454,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 		return "Windows File", source, err
 	case cstdlibcontract.ComponentWindowsFileBuffer:
 		return "Windows File Buffer adapter", stage0WindowsFileBuffer, nil
+	case cstdlibcontract.ComponentWindowsDirectory:
+		return "Windows read-only directory enumeration", stage0WindowsDirectory, nil
 	case cstdlibcontract.ComponentWindowsProcessArgs:
 		return "Windows process args", stage0WindowsProcessArgs, nil
 	case cstdlibcontract.ComponentSystemHeap:

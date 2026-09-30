@@ -16,6 +16,7 @@ const (
 	ComponentLinuxFile          Component = "linux-file"
 	ComponentWindowsConsole     Component = "windows-console"
 	ComponentWindowsFile        Component = "windows-file"
+	ComponentWindowsDirectory   Component = "windows-directory"
 	ComponentWindowsFileBuffer  Component = "windows-file-buffer"
 	ComponentWindowsProcessArgs Component = "windows-process-args"
 	ComponentSystemHeap         Component = "system-heap"
@@ -90,6 +91,10 @@ var symbolComponents = map[string]Component{
 }
 
 var windowsOnlySymbolComponents = map[string]Component{
+	"fy_std_windows_read_dir_open_v0":     ComponentWindowsDirectory,
+	"fy_std_windows_read_dir_next_v0":     ComponentWindowsDirectory,
+	"fy_std_windows_read_dir_close_v0":    ComponentWindowsDirectory,
+	"fy_std_windows_read_dir_drop_v0":     ComponentWindowsDirectory,
 	"fy_std_windows_stdout_write_all_v0":  ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_remove_v0":       ComponentWindowsFile,
@@ -127,6 +132,10 @@ var windowsOnlySymbolComponents = map[string]Component{
 }
 
 var windowsMSVCSymbolComponents = map[string]Component{
+	"fy_std_windows_read_dir_open_v0":      ComponentWindowsDirectory,
+	"fy_std_windows_read_dir_next_v0":      ComponentWindowsDirectory,
+	"fy_std_windows_read_dir_close_v0":     ComponentWindowsDirectory,
+	"fy_std_windows_read_dir_drop_v0":      ComponentWindowsDirectory,
 	"fy_std_stdout_write_all_v0":           ComponentWindowsConsole,
 	"fy_std_stdout_write_i32_v0":           ComponentWindowsConsole,
 	"fy_std_stdout_write_u32_v0":           ComponentWindowsConsole,
@@ -222,6 +231,7 @@ var componentLinkOrder = []Component{
 	ComponentLinuxFile,
 	ComponentWindowsConsole,
 	ComponentWindowsFile,
+	ComponentWindowsDirectory,
 	ComponentWindowsProcessArgs,
 	ComponentSystemHeap,
 	ComponentByteCompare,

@@ -939,6 +939,15 @@ arguments to user generic functions. See ADRs 0390/0393 and `examples/std_vec_qu
 
 Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.
 
+## Windows read-only directory enumeration
+
+SDK `0.0.0-stage0.71` adds `std::fs::ReadDir`, `DirEntry`, `read_dir_utf8`,
+`next_dir` and consuming `close_dir`. Names are UTF-8 bytes copied into the
+caller-owned buffer; EOF, retryable buffer shortage, file kind, logical size and
+reparse status are explicit. The directory runtime is selected only by its own
+symbols. See [ADR 0410](../adr/0410-public-windows-directory-enumeration.md) for
+allocation, cleanup, path bounds, ordering and concurrent-replacement limits.
+
 ## External references
 
 - Microsoft x64 `malloc` alignment:

@@ -65,7 +65,7 @@ struct raw_open_options {
     u8 append;
 }
 
-/// Reports a stable file status, the target OS code, and bytes completed before failure.
+/// Reports a stable status, OS code and operation-specific progress or required count.
 pub struct FileError {
     u32 status;
     u32 os_code;
@@ -987,9 +987,110 @@ pub fn u32 error_os_code(FileError error) {
     return error.os_code;
 }
 
-/// Returns the bytes completed before error.
+/// Returns operation progress; next_dir buffer shortage reports required name bytes.
 pub fn usize error_completed(FileError error) {
     return error.completed;
+}
+
+@repr(C)
+struct raw_directory_entry_result {
+    u32 status;
+    u32 os_code;
+    usize name_length;
+    u32 kind;
+    usize size;
+    u32 reparse;
+}
+
+/// Owns one Windows directory search and its bounded native state allocation.
+@effects(filesystem)
+pub resource ReadDir {
+    usize state;
+    u8 open;
+
+    cleanup {
+        let u32 dropped = unsafe {
+            read_dir_drop_raw(ref mut this as ptr mut void)
+        };
+    }
+}
+
+/// Describes one observed entry; its name was copied to the caller's buffer.
+/// has_entry=false means EOF. size is a logical byte count for ordinary files.
+pub struct DirEntry {
+    bool has_entry;
+    usize name_length;
+    PathKind kind;
+    usize size;
+    bool is_reparse;
+}
+
+@effects(filesystem)
+@link_name("fy_std_windows_read_dir_open_v0")
+unsafe extern C fn raw_file_result read_dir_open_raw(ptr u8 path, usize length, ptr mut void output) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_read_dir_next_v0")
+unsafe extern C fn raw_directory_entry_result read_dir_next_raw(ptr mut void directory, ptr mut u8 name, usize capacity) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_read_dir_close_v0")
+unsafe extern C fn raw_file_result read_dir_close_raw(ptr mut void directory) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_read_dir_drop_v0")
+unsafe extern C fn u32 read_dir_drop_raw(ptr mut void directory) ;
+
+@effects(filesystem)
+fn i32 discard_closed_dir(ReadDir directory) {
+    return 0;
+}
+
+/// Opens a UTF-8 directory path with one bounded allocation, on Windows AMD64.
+/// Rejects observed root/prefix reparse points, wildcard paths and device namespaces.
+/// Concurrent path replacement can race with observation; this is not a sandbox.
+@effects(filesystem)
+pub fn Result<ReadDir, FileError> read_dir_utf8(ref str path) {
+    var ReadDir directory = ReadDir { .state = 0, .open = 0 };
+    let raw_file_result result = unsafe {
+        read_dir_open_raw(path as ptr u8, path.len, ref mut directory as ptr mut void)
+    };
+    return if (result.status == 0) { .ok(directory) } else {
+        let i32 discarded = discard_closed_dir(directory);
+        .err(file_error(result))
+    };
+}
+
+/// Copies the next entry name as UTF-8, without a NUL terminator; skips dot entries.
+/// EOF is stable. A short buffer reports required bytes in FileError.completed and
+/// leaves the entry pending for retry. Order is filesystem-defined; no snapshot.
+@effects(filesystem)
+pub fn Result<DirEntry, FileError> next_dir(ref mut ReadDir directory, ref mut u8[] name) {
+    let raw_directory_entry_result result = unsafe {
+        read_dir_next_raw(directory as ptr mut void, name as ptr mut u8, name.len)
+    };
+    if (result.status != 0) {
+        return .err(FileError {
+            .status = result.status, .os_code = result.os_code, .completed = result.name_length,
+        });
+    }
+    let PathKind kind = if (result.kind == 1) { .File } else if (result.kind == 2) {
+        .Directory
+    } else { .Other };
+    return .ok(DirEntry {
+        .has_entry = result.kind != 0, .name_length = result.name_length,
+        .kind = kind, .size = result.size, .is_reparse = result.reparse != 0,
+    });
+}
+
+/// Consumes the search and attempts one close; automatic cleanup does not retry.
+@effects(filesystem)
+pub fn Result<i32, FileError> close_dir(ReadDir input) {
+    var ReadDir directory = input;
+    let raw_file_result result = unsafe {
+        read_dir_close_raw(ref mut directory as ptr mut void)
+    };
+    return if (result.status == 0) { .ok(0) } else { .err(file_error(result)) };
 }
 
 /// Returns the stable file status from an owned-buffer read failure, or zero otherwise.
