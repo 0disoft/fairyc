@@ -2857,7 +2857,7 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 		startType, startErr := e.operandType(functionIndex, start)
 		endType, endErr := e.operandType(functionIndex, end)
 		if receiverErr != nil || startErr != nil || endErr != nil || terminator.Operator != ".." ||
-			receiverType != hir.SharedBorrow(hir.TypeByteSlice) || startType != hir.TypeUSize || endType != hir.TypeUSize {
+			!isCByteViewType(receiverType) || startType != hir.TypeUSize || endType != hir.TypeUSize {
 			return fmt.Errorf("checked byte-view slice in %s has incompatible operands", function.Name)
 		}
 		e.features["view-slice"] = struct{}{}
@@ -3612,7 +3612,14 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if receiverErr != nil || indexErr != nil || valueErr != nil {
 			return fmt.Errorf("mutable byte-view index store in %s has an invalid operand", function)
 		}
-		fmt.Fprintf(output, "    (%s).data[%s] = %s;\n", receiverValue, indexValue, storedValue)
+		if e.targetID == target.X8664WindowsMSVC {
+			// MSVC 14.51 /O2 loses an inlined byte-view store through a
+			// copied subview descriptor. Keep this store observable without
+			// changing descriptor layout or disabling function optimization.
+			fmt.Fprintf(output, "    ((volatile uint8_t *)(%s).data)[%s] = %s;\n", receiverValue, indexValue, storedValue)
+		} else {
+			fmt.Fprintf(output, "    (%s).data[%s] = %s;\n", receiverValue, indexValue, storedValue)
+		}
 	case mir.OperationViewSlice:
 		receiver, start, end, err := threeOperands(operation.Operands)
 		if err != nil {

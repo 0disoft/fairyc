@@ -48,6 +48,18 @@ spelling, MIR fields, public SDK symbols or runtime representations. Language
 /20, MIR version 1, SDK stage0.73 and runtime ABI /0 remain unchanged.
 
 Semantic regressions, artifact round-trip execution, MIR mutations, ordered
-bound side effects and interpreter bounds traps pass. Low/optimized Windows
-native acceptance and the executable example are the next delivery unit.
+bound side effects and interpreter bounds traps pass. The executable
+[example](../../examples/exclusive_subview/README.md) passes Windows MSVC
+low/optimized execution together with reversed, past-end and omitted-bound
+failure cases. See the [native evidence](../ops/evidence/exclusive-subview-20261001.json).
+
+MSVC 14.51.36231 `/O2` execution initially lost an inlined write through a
+copied nested subview: the parent read retained 7 after `fill` wrote 9.
+The same generated source passed at `/Od` and with the writer marked
+`noinline`. Windows C transport now emits byte-view index stores through a
+volatile-qualified byte access. This preserves the observable write without
+changing descriptor layout or disabling general optimization. Shared reads,
+fixed-array stores and Linux transport are unchanged. This workaround is not
+a public atomicity, concurrency or volatile contract; its optimization cost
+has not been measured. The exact upstream optimizer mechanism is not proven.
 Physical power-loss experiments remain deferred and unrelated to this change.

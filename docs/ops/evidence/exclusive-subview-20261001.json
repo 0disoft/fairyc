@@ -1,0 +1,178 @@
+{
+  "cases": [
+    {
+      "case": "normal",
+      "exeBytes": 110592,
+      "exeSHA256": "3e156d6359e94e57112df3149e53042301dfedf02df8f2efeb2daeb04ea15001",
+      "exitCode": 0,
+      "expectedTrap": "",
+      "profile": "low",
+      "sourceSHA256": "209c5876b468b0e95146d98545d279e93cd0f4205413fcfc8f0ae30352464c10",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": ""
+    },
+    {
+      "case": "normal",
+      "exeBytes": 108544,
+      "exeSHA256": "9be7c2ed12cbc48b5dac69eade8cf4056f14401520016c4f85cfab9aa18f5846",
+      "exitCode": 0,
+      "expectedTrap": "",
+      "profile": "optimized",
+      "sourceSHA256": "209c5876b468b0e95146d98545d279e93cd0f4205413fcfc8f0ae30352464c10",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": ""
+    },
+    {
+      "case": "reversed",
+      "exeBytes": 110592,
+      "exeSHA256": "7627a9445d8e7898715ded5af1a9b3575d42d604b3280e35b3eee99507bf32ec",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "low",
+      "sourceSHA256": "76894739a371c7c9d6ea7707033e2d2bb3022bd44d23e0efc9b2bda7f262b767",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    },
+    {
+      "case": "reversed",
+      "exeBytes": 108544,
+      "exeSHA256": "14e314b7f6ea14ad2a1ef04450c28196ee291ecb909f44829db6e4fc6234e125",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "optimized",
+      "sourceSHA256": "76894739a371c7c9d6ea7707033e2d2bb3022bd44d23e0efc9b2bda7f262b767",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    },
+    {
+      "case": "past-end",
+      "exeBytes": 110592,
+      "exeSHA256": "e1811399a8e52354b8d5b92a3dfd337f08b90b2e4d065aa8b124ac51bfd4df01",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "low",
+      "sourceSHA256": "5e5c100e0874a949998eda93bc20a4c3402f0373879bc0d3b71b6e1a81e7eda4",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    },
+    {
+      "case": "past-end",
+      "exeBytes": 108544,
+      "exeSHA256": "aa4bc4a55e52a8f1cee8185dda3fb5b32ccf1046a457fe685e892aa532d96077",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "optimized",
+      "sourceSHA256": "5e5c100e0874a949998eda93bc20a4c3402f0373879bc0d3b71b6e1a81e7eda4",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    },
+    {
+      "case": "omitted-end",
+      "exeBytes": 110592,
+      "exeSHA256": "6be8b4ae1403f7465303c39f73114d8541388bef487e71465a0b1495f41ae4fb",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "low",
+      "sourceSHA256": "bf2e7539333b4195cebf167679a154023692e11e7864e351d73f6a8de9a15795",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    },
+    {
+      "case": "omitted-end",
+      "exeBytes": 108544,
+      "exeSHA256": "f075e3fd97b9cc16b061f96222e926772e3320128fcc10eefaa02bd2915e6e1e",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "optimized",
+      "sourceSHA256": "bf2e7539333b4195cebf167679a154023692e11e7864e351d73f6a8de9a15795",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    },
+    {
+      "case": "omitted-start",
+      "exeBytes": 110592,
+      "exeSHA256": "731b471fb6571fd0d0f0a8b50de97bb7cf2ca667a141d9b2d106c5306172d234",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "low",
+      "sourceSHA256": "60a659999fdfe610c9a2d3e23f9be69361e10a642fae02490e453c20bc30ef2d",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    },
+    {
+      "case": "omitted-start",
+      "exeBytes": 108544,
+      "exeSHA256": "ef9c0e1afb028c5ae50cce523eafa53a6640aa387fcab9a3b6766548775bf8e2",
+      "exitCode": 129,
+      "expectedTrap": "bounds",
+      "profile": "optimized",
+      "sourceSHA256": "60a659999fdfe610c9a2d3e23f9be69361e10a642fae02490e453c20bc30ef2d",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "bounds"
+    }
+  ],
+  "schema": "fairyc.exclusive-subview-native/v1",
+  "sdk": "0.0.0-stage0.73",
+  "baseCommit": "6ca51011377142341076b263718395100d86bca3",
+  "language": "fairyc-language/20",
+  "runtimeABI": "fairyc-runtime/0",
+  "validation": [
+    {
+      "status": "passed",
+      "coverage": "semantic, MIR, codec, interpreter, C backend; selected compiler subview/reborrow/field-store/scalar-deref regressions",
+      "receipt": ".mustflow/state/runs/run-2026-09-30T18-27-19-341Z-6672-43db53d2f536/receipt.json",
+      "intent": "fairyc_subview_check"
+    },
+    {
+      "status": "passed",
+      "coverage": "normal, reversed, past-end, omitted-end and omitted-start ranges on low and optimized Windows MSVC",
+      "receipt": ".mustflow/state/runs/run-2026-09-30T18-24-06-532Z-8272-694b86862fe0/receipt.json",
+      "intent": "fairyc_subview_native"
+    }
+  ],
+  "storeWorkaround": {
+    "unprotectedCSHA256": "0fa7ae5cfa097f78f4ec76ae73c242d9a9285d88bf6db4d155759daa4a976261",
+    "target": "x86_64-windows-msvc",
+    "codeGeneration": "volatile-qualified byte-view index writes only; descriptor ABI, shared reads, fixed-array writes and Linux emission unchanged",
+    "before": {
+      "trap": "assertion-failed",
+      "observedByte": 7,
+      "normalOptimizedExitCode": 134,
+      "expectedByte": 9,
+      "receipt": ".mustflow/state/runs/run-2026-09-30T18-07-21-928Z-18656-67691e87a4dd/receipt.json"
+    },
+    "toolchain": "msvc 14.51.36231",
+    "performanceCost": "not measured",
+    "unprotectedC": "exclusive-subview-msvc-unprotected-20261001.c",
+    "diagnosticControl": {
+      "noinlineWriterExitCode": 0,
+      "volatileByteStoreExitCode": 0,
+      "upstreamOptimizerMechanism": "unproven"
+    }
+  },
+  "skipped": [
+    "Full compiler suite and nine original workloads: bounded related checks used; remaining planned capabilities precede workload revalidation",
+    "Physical power-loss experiment: deferred by user",
+    "Performance benchmarks: out of scope"
+  ]
+}

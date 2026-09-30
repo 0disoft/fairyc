@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
@@ -59,6 +60,9 @@ func TestExclusiveSubviewArtifactAndInterpreter(t *testing.T) {
 	outcome, err := interpreter.Execute(decoded, "main::main")
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 0 {
 		t.Fatalf("execute: %v %+v", err, outcome)
+	}
+	if _, err := cbackend.Emit(decoded, "main::main", cbackend.Stage0WindowsMSVCProfile()); err != nil {
+		t.Fatalf("C emission after artifact round trip: %v", err)
 	}
 	for name, mutate := range map[string]func(*mir.Operation){
 		"shared result":   func(op *mir.Operation) { op.Type = hir.SharedBorrow(hir.TypeByteSlice) },

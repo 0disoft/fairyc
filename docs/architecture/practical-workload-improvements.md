@@ -15,6 +15,7 @@ are historical evidence and are not silently migrated to a new SDK.
 | Calculator could not use `state.position += 1` | Direct integer field compound assignment, ADR 0412 | Existing checked operations, loan checks, interpreter/artifact round trips and low/optimized Windows execution |
 | CSV signed totals exceeded i32 | Executable i64 and SDK stage0.73 formatting, ADR 0413 | Checked extrema/arithmetic, artifact transport and low/optimized execution; migrated example retains original workload evidence |
 | Existing mutable references could not be passed to shared readers | Call shared reborrows, ADR 0414 | Original origins, retained aliases, tagged results, whole-root conflicts, artifact/interpreter and low/optimized execution |
+| Existing mutable byte views could not be sliced | Exclusive byte subviews, ADR 0415 | Parent/owner freeze and last use, returned origins, checked bounds, artifact/interpreter and low/optimized execution; retained siblings remain rejected |
 
 The task-manager application now consumes the prepared replacement API in
 `examples/task_manager_cli` version 0.1.1. Its 118 CLI regression cases and 20
@@ -28,7 +29,6 @@ Each item needs its own bounded design and implementation commit sequence.
 
 | Item | Required implementation and acceptance |
 | --- | --- |
-| Slicing an exclusive byte view | Define exclusive subview reborrowing and last-use behavior, bounds traps and return origins. A copied slice descriptor must not permit overlapping mutable access. Test both omitted bounds and existing owner loans. |
 | Repeated array initialization | Define initializer evaluation count and zero-length behavior; admit only an explicitly supported copy-value subset initially. Do not duplicate resource owners or effects. |
 | An integer literal on the left of `1048576 / rows` | Define contextual literal selection without implicit variable-to-variable conversions. Preserve range diagnostics and checked arithmetic, including grouped literals and comparisons. |
 
