@@ -742,6 +742,13 @@ operation reuses the bounded ASCII path contract, returns exact Win32 failures, 
 as an error, and never closes or mutates a live File owner. The current non-delete-sharing open
 policy makes a live-handle removal fail until the caller explicitly closes that owner.
 ADR 0292 extends it to `0.0.0-stage0.30` with
+`replace_file(ref CStr replacement, ref CStr replaced)` publishes a prepared file
+with replace-existing/write-through flags and no cross-volume copy fallback.
+Callers must check write, sync and close before publication. It does not imply
+power-loss durability or automatic recovery; see ADR 0411 for failure and restart
+policy and the distinction between injected failures, process kills and physical
+power loss. `rename_file` retains its no-replace contract.
+
 `rename_file(ref CStr, ref CStr)`. The Windows target first admits only an existing non-directory
 source and then calls `MoveFileExW` with flags `0`: an existing destination is never replaced and a
 cross-volume copy/delete fallback is never requested. It returns exact Win32 failures, performs no

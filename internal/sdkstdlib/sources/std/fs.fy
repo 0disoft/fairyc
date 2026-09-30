@@ -164,6 +164,10 @@ unsafe extern C fn raw_file_result directory_rename_raw(ptr u8 source, ptr u8 de
 unsafe extern C fn raw_file_result file_rename_raw(ptr u8 source, ptr u8 destination) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_replace_v0")
+unsafe extern C fn raw_file_result file_replace_raw(ptr u8 replacement, ptr u8 replaced) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_hard_link_v0")
 unsafe extern C fn raw_file_result file_hard_link_raw(ptr u8 source, ptr u8 destination) ;
 
@@ -535,6 +539,21 @@ pub fn Result<i32, FileError> rename_dir(ref CStr source, ref CStr destination) 
 pub fn Result<i32, FileError> rename_file(ref CStr source, ref CStr destination) {
     let raw_file_result result = unsafe {
         file_rename_raw(source as ptr u8, destination as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Publishes a prepared file by replacing one destination name on the same volume.
+/// Write, sync and close the replacement first; this operation does not flush file data.
+/// Power-loss durability and recovery policy remain the caller's responsibility.
+@effects(filesystem)
+pub fn Result<i32, FileError> replace_file(ref CStr replacement, ref CStr replaced) {
+    let raw_file_result result = unsafe {
+        file_replace_raw(replacement as ptr u8, replaced as ptr u8)
     };
     return if (result.status == 0) {
         .ok(0)

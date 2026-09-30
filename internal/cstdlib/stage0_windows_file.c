@@ -500,6 +500,34 @@ struct fy_std_windows_file_result_v0 fy_std_windows_directory_rename_v0(
     return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
 }
 
+struct fy_std_windows_file_result_v0 fy_std_windows_file_replace_v0(
+    const uint8_t *replacement,
+    const uint8_t *replaced
+) {
+    WCHAR wide_replacement[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t status = fy_std_windows_path_v0(replacement, wide_replacement);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    WCHAR wide_replaced[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    status = fy_std_windows_path_v0(replaced, wide_replaced);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    DWORD attributes = GetFileAttributesW(wide_replacement);
+    if (attributes == INVALID_FILE_ATTRIBUTES) {
+        return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_IO_ERROR_V0, GetLastError(), 0);
+    }
+    if ((attributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+        return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0, ERROR_SUCCESS, 0);
+    }
+    /* Never emulate a cross-volume move with copy/delete or remove the destination first. */
+    if (!MoveFileExW(wide_replacement, wide_replaced, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+        return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_IO_ERROR_V0, GetLastError(), 0);
+    }
+    return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
+}
+
 struct fy_std_windows_file_result_v0 fy_std_windows_file_rename_v0(
     const uint8_t *source,
     const uint8_t *destination
