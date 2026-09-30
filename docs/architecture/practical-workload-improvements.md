@@ -14,6 +14,12 @@ are historical evidence and are not silently migrated to a new SDK.
 | Running compiler could not identify itself | `fairyc --version` | Embedded compiler/SDK/language/ABI/VCS metadata; absent build metadata stays unknown |
 | Calculator could not use `state.position += 1` | Direct integer field compound assignment, ADR 0412 | Existing checked operations, loan checks, interpreter/artifact round trips and low/optimized Windows execution |
 
+The task-manager application now consumes the prepared replacement API in
+`examples/task_manager_cli` version 0.1.1. Its 118 CLI regression cases and 20
+generated-Fairy storage-fault/termination scenarios pass. See
+[task-manager prepared-save evidence](task-manager-prepared-save.md) for restart,
+manual orphan disposition and the unchanged power-loss recovery boundary.
+
 ## Remaining capability work
 
 Each item needs its own bounded design and implementation commit sequence.
