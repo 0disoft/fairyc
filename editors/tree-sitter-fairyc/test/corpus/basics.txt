@@ -1,0 +1,38 @@
+==================
+Main and nested comment
+==================
+module main;
+/* outer /* inner */ tail */
+fn i32 main() {
+  let i32 value = 1 + 2 * 3;
+  return value;
+}
+---
+
+(source_file
+  (module_declaration
+    (path
+      (identifier)))
+  (block_comment)
+  (function_declaration
+    (type_path
+      (path
+        (identifier)))
+    (function_name
+      (identifier))
+    (parameters)
+    (block
+      (binding_statement
+        (binding
+          (type_path
+            (path
+              (identifier)))
+          (identifier)
+          (binary_expression
+            (number)
+            (binary_expression
+              (number)
+              (number)))))
+      (return_statement
+        (path
+          (identifier))))))

@@ -1,0 +1,30 @@
+{
+  "grammars": [
+    {
+      "name": "fairyc",
+      "camelcase": "FairyC",
+      "scope": "source.fairyc",
+      "path": ".",
+      "file-types": [
+        "fy"
+      ],
+      "highlights": "queries/highlights.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Fairy C editor grammar",
+    "authors": [
+      {
+        "name": "Rodisoft"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/0disoft/fairyc"
+    }
+  },
+  "bindings": {
+    "c": true
+  }
+}

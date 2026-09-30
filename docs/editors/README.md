@@ -16,6 +16,16 @@ The extension is not yet published to the Marketplace.
 
 ## Maintaining syntax assets
 
+## Tree-sitter and Zed
+
+`editors/tree-sitter-fairyc` supplies the grammar, nested-comment scanner,
+generated ABI-14 parser, node types and shared queries. `editors/zed` supplies
+the language adapter. See its README for local development installation before
+these commits are published. Native parser/query tests do not establish a
+successful Zed/WASM installation.
+
+## Maintaining syntax assets
+
 Run `go run ./cmd/fairyc-editor-assets` from the compiler repository to regenerate
 `editors/language.json` and the TextMate grammar. Reserved words are obtained
 directly from the compiler lexer. Contextual words remain distinct; the EBNF hash

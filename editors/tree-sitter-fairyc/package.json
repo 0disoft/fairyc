@@ -1,0 +1,7 @@
+{
+  "name": "tree-sitter-fairyc",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Fairy C Tree-sitter grammar",
+  "main": "grammar.js"
+}
