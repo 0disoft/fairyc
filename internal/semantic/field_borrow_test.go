@@ -10,12 +10,6 @@ func TestAnalyzeFieldBorrowAssignmentPreservesTypedForm(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			result := analyzeText(t, map[string]string{"main.fy": "module main; struct State { i32 count; } " + body})
-			if name == "compound" {
-				if len(result.Unsupported) == 0 {
-					t.Fatal("compound field assignment admitted")
-				}
-				return
-			}
 			assertCleanTypeResult(t, result)
 			found := false
 			for _, function := range result.HIR.Modules[0].Functions {

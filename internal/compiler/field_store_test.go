@@ -126,7 +126,7 @@ func TestFieldStoreAdmissionBoundaries(t *testing.T) {
 		"moved owner":          `resource R { i32 x; cleanup {} } fn void consume(R r) {} fn void edit() { var R r = R { .x = 0 }; consume(r); r.x = 1; }`,
 		"resource replacement": `resource R { i32 x; cleanup {} } resource H { R r; cleanup {} } fn void edit() { var H h = H { .r = R { .x = 0 } }; h.r = R { .x = 1 }; }`,
 		"nested path":          `struct S { i32 x; } struct H { S s; } fn void edit() { var H h = H { .s = S { .x = 0 } }; h.s.x = 1; }`,
-		"compound":             `struct S { i32 x; } fn void edit(ref mut S s) { s.x += 1; }`,
+		"boolean compound":     `struct S { bool x; } fn void edit(ref mut S s) { s.x += true; }`,
 		"u8 overflow":          `struct S { u8 x; } fn void edit(ref mut S s) { s.x = 256; }`,
 		"u32 overflow":         `struct S { u32 x; } fn void edit(ref mut S s) { s.x = 4294967296; }`,
 		"unsigned mismatch":    `struct S { u8 x; } fn void edit(ref mut S s, u32 value) { s.x = value; }`,

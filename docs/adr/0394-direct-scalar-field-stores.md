@@ -31,8 +31,9 @@ negation retains its boolean runtime type when used as a stored or asserted valu
 
 ## Boundaries
 
-Nested field paths, compound field assignments and general aggregate-field
-replacement remain unsupported. A later bounded extension admits direct plain
+Nested field paths and general aggregate-field replacement remain unsupported.
+ADR 0412 later admits checked direct integer field compound assignments using
+the existing read/arithmetic/store operations. A later bounded extension admits direct plain
 replacement of a non-`repr(C)` struct containing exactly one `usize` field from
 a typed local. The interpreter detaches the copied value; MIR verification and
 the C backend require the same shape. Multi-field structs, resources and

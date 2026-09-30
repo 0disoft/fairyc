@@ -50,7 +50,11 @@ The right-hand side evaluates once and must have the exact field type. Resource
 privacy, moved-owner checks and whole-root loan conflicts remain enforced.
 Copying an inert aggregate retains value semantics, including when that value is
 stored inside another aggregate; assigning through a borrow changes its referent.
-Nested field paths, compound field assignment and general aggregate-field
+ADR 0412 also admits checked compound assignment to these direct integer fields.
+The receiver and its old field value are selected before the RHS runs once;
+arithmetic failure traps before the field store. Exact types and whole-root loans
+remain enforced. Boolean arithmetic and nested field paths are not admitted.
+Nested field paths and general aggregate-field
 replacement remain source-located unsupported lowering results without publishing
 executable MIR. Direct plain replacement of a non-`repr(C)` one-`usize`-field
 inert struct from a typed local is the bounded exception. Shared field reads and borrows retain the

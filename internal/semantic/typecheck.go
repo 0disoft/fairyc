@@ -461,7 +461,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 				}
 			}
 			if hirStatement.Operator != "=" {
-				validPlace := target != nil && (target.Kind == "path" || target.Kind == "array-index" || target.Kind == "view-index")
+				validPlace := target != nil && (target.Kind == "path" || target.Kind == "array-index" || target.Kind == "view-index" || target.Kind == "field-expression")
 				if !validPlace || !hir.CompoundAssignmentType(hirStatement.Operator, targetType) {
 					c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "compound assignment "+hirStatement.Operator+" on "+string(targetType))
 				}

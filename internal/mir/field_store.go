@@ -10,7 +10,7 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	target := statement.Target
 	unsupported := &Unsupported{Feature: "field assignment without executable field storage", Span: target.Span}
 	if len(target.Children) != 1 || target.Operator == "" ||
-		statement.Expression == nil || statement.Expression.Type != target.Type || statement.Operator != "" && statement.Operator != "=" {
+		statement.Expression == nil || statement.Expression.Type != target.Type {
 		return unsupported
 	}
 	owner := &target.Children[0]
@@ -27,9 +27,31 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	if err != nil {
 		return err
 	}
+	operator := statement.Operator
+	var prior Operand
+	if operator != "" && operator != "=" {
+		if !hir.CompoundAssignmentType(operator, target.Type) {
+			return unsupported
+		}
+		// Capture the original field before RHS effects, using the already selected receiver.
+		destination := l.newTemporary()
+		l.appendOperation(Operation{Kind: OperationFieldRead, Span: target.Span,
+			DestinationLocal: destination, Operands: []Operand{receiver}, OwnerType: owner.Type,
+			Type: target.Type, Field: target.Operator})
+		prior = Operand{Kind: OperandLocal, Local: destination}
+	}
 	value, err := l.lowerExpression(statement.Expression)
 	if err != nil {
 		return err
+	}
+	if operator != "" && operator != "=" {
+		binary, _ := hir.CompoundAssignmentBinary(operator)
+		combined := &hir.Expression{Kind: "binary", Type: target.Type, Span: statement.Span,
+			Operator: binary, Children: []hir.Expression{*target, *statement.Expression}}
+		value, err = l.lowerBinaryOperands(combined, prior, value)
+		if err != nil {
+			return err
+		}
 	}
 	op := Operation{Kind: OperationFieldStore, Span: target.Span, Symbol: hir.NoSymbol,
 		DestinationLocal: NoLocal, OwnerType: owner.Type, Type: target.Type, Field: target.Operator,
