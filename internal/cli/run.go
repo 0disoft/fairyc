@@ -70,6 +70,7 @@ Usage:
   fairyc experimental run-host <entry.fy> [--source <file.fy>]... --profile <low|optimized>
   fairyc experimental run <entry.fy> [--source <file.fy>]...
   fairyc --help
+  fairyc --version
 
 The experimental commands are unstable. "fairyc new" creates one no-overwrite child starter with
 an explicit package UID. "fairyc check" verifies the local workspace. "fairyc build"
@@ -110,6 +111,12 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 	}
 	if len(args) == 0 {
 		return invocationError(stderr, "a command is required")
+	}
+	if args[0] == "--version" {
+		if len(args) != 1 {
+			return invocationError(stderr, "--version does not accept arguments")
+		}
+		return runVersion(stdout, stderr)
 	}
 	if args[0] == "new" {
 		if len(args) == 2 && isHelp(args[1]) {

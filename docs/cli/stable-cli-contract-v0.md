@@ -10,7 +10,7 @@ Accepted pre-1 command contract for the implemented stable `fairyc` surface. Exp
 
 The exact command and flag inventory is the compiler-owned `usage` value in `internal/cli/run.go`. A command or flag not present there is not admitted. `docs/cli/command-contract.md` owns human semantics and `docs/cli/output-and-exit-codes.md` owns byte/status semantics. Experimental subcommands are inventory-visible but do not gain compatibility merely by appearing in help.
 
-The stable top-level commands are `new`, `check`, `build`, `run`, `test`, `explain`, and `targets`. The removed `emit` spelling is a stable rejection/migration surface. Every command below `experimental` is owned by `internal/cli` but remains explicitly unstable.
+The stable top-level commands are `new`, `check`, `build`, `run`, `test`, `explain`, and `targets`, with source-independent `--help` and `--version` inspection. The removed `emit` spelling is a stable rejection/migration surface. Every command below `experimental` is owned by `internal/cli` but remains explicitly unstable.
 
 ## Exit taxonomy
 

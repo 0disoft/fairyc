@@ -26,6 +26,7 @@ README distinguishes fast `fairyc test --locked` from isolated Windows `fairyc t
 ## Current prototype
 
 The Go frontend currently exposes stable starter creation
+and source-independent `fairyc --version` build/SDK identity inspection,
 `fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, the stable semantic-by-default or Windows-native

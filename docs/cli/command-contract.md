@@ -10,6 +10,16 @@ This document owns planned `fairyc` command semantics. It does not claim that a 
 machine-report, and hosted-runtime rules for the currently implemented stable surface. The sections
 below retain each command's exact behavior and historical admission evidence.
 
+## Stable version inspection v1
+
+`fairyc --version` reports compiler module version, SDK identity/version, language
+revision, runtime ABI and embedded VCS revision/modified state. It is independent
+of the current workspace and does not read manifests, refresh locks, or infer a
+revision from the current directory. Unversioned local builds say `development`;
+missing embedded VCS metadata says `unknown`. The report is bounded plain text
+with a trailing newline. Extra arguments return exit 2 without a success report;
+output failure returns exit 4. No JSON mode is admitted in v1.
+
 ## Stable starter project creation v4
 
 `fairyc new <package-name> --uid <package-uid>` creates one starter project as a direct child of the
