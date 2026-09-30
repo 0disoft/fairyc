@@ -676,6 +676,7 @@ closed target contract
 admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_remove_v0`,
 `fy_std_windows_directory_create_v0`, `fy_std_windows_directory_remove_v0`,
 `fy_std_windows_directory_rename_v0`, `fy_std_windows_file_rename_v0`,
+`fy_std_windows_file_replace_v0`,
 `fy_std_windows_file_read_v0`,
 `fy_std_windows_file_read_exact_v0`, `fy_std_windows_file_write_v0`,
 `fy_std_windows_file_write_all_v0`, `fy_std_windows_file_sync_v0`,
@@ -742,7 +743,7 @@ operation reuses the bounded ASCII path contract, returns exact Win32 failures, 
 as an error, and never closes or mutates a live File owner. The current non-delete-sharing open
 policy makes a live-handle removal fail until the caller explicitly closes that owner.
 ADR 0292 extends it to `0.0.0-stage0.30` with
-`replace_file(ref CStr replacement, ref CStr replaced)` publishes a prepared file
+SDK `0.0.0-stage0.72` adds `replace_file(ref CStr replacement, ref CStr replaced)`, which publishes a prepared file
 with replace-existing/write-through flags and no cross-volume copy fallback.
 Callers must check write, sync and close before publication. It does not imply
 power-loss durability or automatic recovery; see ADR 0411 for failure and restart
