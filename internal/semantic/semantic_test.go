@@ -3036,9 +3036,9 @@ func TestAnalyzeRejectsFixedArrayLengthAndElementMismatch(t *testing.T) {
 	}
 }
 
-func TestAnalyzeKeepsAmplifyingFixedArrayFormsClosed(t *testing.T) {
+func TestAnalyzeKeepsEmptyFixedArrayFormsClosed(t *testing.T) {
 	t.Parallel()
-	for _, literal := range []string{"[]", "[1; 3]"} {
+	for _, literal := range []string{"[]", "[1; 0]"} {
 		text := "module main;\nfn i32 main() { let i32[3] values = " + literal + "; return 0; }\n"
 		result := analyzeText(t, map[string]string{"main.fy": text})
 		if len(result.Unsupported) != 1 {

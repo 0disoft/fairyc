@@ -75,9 +75,15 @@ Integer and floating literal text remains exact until an expected type is availa
 A nonempty fixed-array list receives its element type from an expected `T[N]` when present;
 otherwise its first element selects `T` and later elements must match exactly. The resulting length
 is the written element count, so an annotation with another `N` is `E1006`. The executable subset
-admits only the five copy-scalar element types named by ADR 0110 and currently rejects `N` outside
+admits only the copy-scalar element types from ADR 0110 plus `i64` from ADR 0413, and currently rejects `N` outside
 `1..=4096` as unsupported. That ceiling guards the provisional by-value implementation rather than
-defining a stable language or ABI limit. An array index is contextually `usize` and returns the
+defining a stable language or ABI limit. A repeated array `[value; count]` takes its element type
+from an expected array or from `value`, and its length from a positive integer literal or evaluated
+global integer constant. `value` is evaluated once; count is compile-time-only. Runtime counts,
+zero, non-scalar initializers and counts beyond the same guard are unsupported. Annotation length
+and element mismatches remain E1006; out-of-range element literals remain E1013. See
+[ADR 0416](../adr/0416-repeated-scalar-array-initialization.md).
+An array index is contextually `usize` and returns the
 array element type. The exact `.len` property returns `usize`; no other fixed-array property is in
 the executable subset. When `ref u8[]` is the expected type, a direct `ref` of an admitted `u8[N]`
 place contextually produces that immutable view. When `ref mut u8[]` is expected, a direct `ref mut`

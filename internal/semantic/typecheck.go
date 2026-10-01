@@ -763,6 +763,9 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 }
 
 func (c *typeChecker) checkArray(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
+	if expression.Text == "repeat" {
+		return c.checkRepeatedArray(expression, result, expected)
+	}
 	if expression.Text != "list" || len(expression.Children) == 0 {
 		feature := "empty fixed-array literal"
 		if expression.Text == "repeat" {

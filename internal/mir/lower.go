@@ -938,7 +938,9 @@ func (l *functionLowerer) lowerBinaryOperands(expression *hir.Expression, left, 
 
 func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Operand, error) {
 	elementType, length, array := hir.FixedArrayParts(expression.Type)
-	if !array || expression.Operator != "list" || uint64(len(expression.Children)) != length || !hir.FixedArrayScalarElement(elementType) {
+	validForm := expression.Operator == "list" && uint64(len(expression.Children)) == length ||
+		expression.Operator == "repeat" && len(expression.Children) == 1
+	if !array || !validForm || !hir.ExecutableFixedArrayShape(elementType, length) {
 		return Operand{}, fmt.Errorf("malformed fixed-array construction")
 	}
 	operands := make([]Operand, 0, len(expression.Children))
@@ -957,10 +959,17 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 		operands = append(operands, operand)
 		sequence = append(sequence, expression.Children[index].Span)
 	}
+	if expression.Operator == "repeat" {
+		value := operands[0]
+		operands = make([]Operand, int(length))
+		for index := range operands {
+			operands[index] = value
+		}
+	}
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationArrayConstruct, Span: expression.Span, DestinationLocal: destination,
-		Operands: operands, Type: expression.Type, OwnerType: elementType, Operator: expression.Operator,
+		Operands: operands, Type: expression.Type, OwnerType: elementType, Operator: "list",
 	})
 	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
 		Expression: expression.Span, Sequence: sequence, MaterializedBeforeParent: true,

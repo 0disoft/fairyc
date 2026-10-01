@@ -187,14 +187,17 @@ origin when `start <= end && end <= bytes.len`; otherwise evaluation traps with 
 deriving a pointer. This does not admit inclusive bounds, `str` indexing or slicing, indexed
 assignment, mutable-view indexing or slicing, or unchecked access.
 
-The first executable fixed-array subset accepts `T[N]` only when `T` is `bool`, `i32`, `u8`,
+The executable fixed-array subset accepts `T[N]` only when `T` is `bool`, `i32`, `i64`, `u8`,
 `u32`, or `usize` and `1 <= N <= 4096`. The ceiling is a provisional Stage 0 implementation guard
 for the initial by-value representation, not a stable language or ABI limit. A nonempty list
 `[a, b, ...]` constructs an inert copy value and evaluates its elements exactly once from left to
 right. `array[index]` requires `usize`, returns `T`, and traps with `bounds` when the index is at
 least `N`. `array.len` evaluates the receiver once and returns exact canonical `N` as `usize`
-without a scan, allocation, runtime call, memory read, or trap. Empty and repeated literals remain parser-valid but unsupported until zero-size
-representation and expansion-budget contracts exist. Array fields, nesting, resource elements,
+without a scan, allocation, runtime call, memory read, or trap. `[value; count]` evaluates `value`
+once and copies that scalar into each element; the count is an integer literal or evaluated global
+integer constant in `1..=4096`. Empty and zero-count arrays remain unsupported until zero-size
+representation is defined. See [ADR 0416](../adr/0416-repeated-scalar-array-initialization.md).
+Array fields, nesting, resource elements,
 mutable indexing, slicing, properties other than `.len`, broad array coercions, and foreign
 signatures remain closed. One direct shared borrow of an admitted `u8[N]` place contextually
 becomes `ref u8[]` when that view type is already expected, as in
