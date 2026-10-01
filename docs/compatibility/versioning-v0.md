@@ -1458,3 +1458,10 @@ version /3, stable package-MIR /4, storage-transfer /1 and compilation /2 reject
 older exact-version payloads. Existing manifests remain valid; locks using SDK
 0.0.0-stage0.72 must be refreshed with the new compiler. Original experiment
 toolchains, reports and immutable identity fixtures are not migrated in place.
+
+ADR 0418 advances only the bundled SDK to `0.0.0-stage0.74` for pure x64
+`std::num` checked usize/i64 conversions. Language `/20`, runtime ABI `/0`,
+MIR and artifact schemas remain unchanged. Existing source remains valid;
+importing workspaces refresh their SDK lock version and source digest.
+The additional module enters existing package-source, interface and cache
+identities. Historical round4 compiler pins and receipts remain unchanged.

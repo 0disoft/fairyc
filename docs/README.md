@@ -8,6 +8,7 @@
 - Architecture decisions source: docs/adr/*.md
 - Self-hosting start and promotion gate: docs/architecture/self-hosting-readiness-v0.md
 - Stage 0 language details: docs/language/*.md
+- Checked x64 integer conversions: [ADR 0418](adr/0418-sdk-checked-integer-conversions.md), `internal/sdkstdlib/sources/std/num.fy`
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser fixture manifest: spec/fixtures/parser/manifest-v0.json
 - Editor-internal immutable green tree and full-file formatter: internal/formatter/, docs/adr/0375-immutable-green-tree-and-first-formatter.md

@@ -90,7 +90,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Files) != 7 || len(input.Imports) != 2 {
+	if len(input.Files) != 8 || len(input.Imports) != 2 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
 	result, err := compiler.CheckPackages(input)
@@ -128,7 +128,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SemanticFiles() error = %v", err)
 	}
-	if len(files) != 7 {
+	if len(files) != 8 {
 		t.Fatalf("SemanticFiles() = %+v", files)
 	}
 	for index, file := range files {
@@ -219,7 +219,7 @@ fn i32 main() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Files) != 7 || len(input.Imports) != 2 {
+	if len(input.Files) != 8 || len(input.Imports) != 2 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
 	result, err := compiler.CheckPackages(input)

@@ -3,6 +3,10 @@
 Status: Candidate assessment; no API admission or implementation claim.
 Date: 2026-10-02 (Asia/Seoul).
 
+This assessment records the pre-implementation reasoning. The subsequent
+accepted SDK contract and current implementation status are owned by
+[ADR 0418](../adr/0418-sdk-checked-integer-conversions.md).
+
 ## Recommendation
 
 Prioritize two explicit fallible SDK functions for `usize -> i64` and

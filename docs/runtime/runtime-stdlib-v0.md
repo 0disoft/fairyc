@@ -947,6 +947,23 @@ scalars or directly named non-generic structs/resources with an admitted nonzero
 native layout. This does not admit user generic aggregate declarations or nominal
 arguments to user generic functions. See ADRs 0390/0393 and `examples/std_vec_quickstart`.
 
+## Checked integer conversions
+
+SDK `0.0.0-stage0.74` adds the pure Fairy module `std::num`:
+`i64_from_usize(usize)` returns `Result<i64, ConversionError>` and
+`usize_from_i64(i64)` returns `Result<usize, ConversionError>`.
+`ConversionError` has the inert variants `Negative` and `OutOfRange`.
+The first function rejects values above i64 maximum with `OutOfRange`; the
+second rejects negative inputs with `Negative`. Success preserves the exact
+value. All nonnegative i64 values fit the current eight-byte x64 usize.
+
+The functions allocate nothing, perform no I/O, use no foreign/runtime symbols,
+and preserve ordinary mandatory Result handling and error propagation. They
+make no new `as` cast or target-maturity admission. Representation success
+does not establish an in-bounds file offset or allocation size. Current scope,
+arithmetic bounds, exclusions and validation are owned by
+[ADR 0418](../adr/0418-sdk-checked-integer-conversions.md).
+
 ## Explicit exclusions
 
 Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.

@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.73" {
+	if Version != "0.0.0-stage0.74" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/20" {
@@ -18,19 +18,19 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(definition.Sources) != 6 || len(definition.Modules) != 6 {
+	if len(definition.Sources) != 7 || len(definition.Modules) != 7 {
 		t.Fatalf("definition = %+v", definition)
 	}
 	paths := []string{
 		definition.Sources[0].Path, definition.Sources[1].Path, definition.Sources[2].Path,
-		definition.Sources[3].Path, definition.Sources[4].Path, definition.Sources[5].Path,
+		definition.Sources[3].Path, definition.Sources[4].Path, definition.Sources[5].Path, definition.Sources[6].Path,
 	}
 	modules := []string{
 		definition.Modules[0].Path, definition.Modules[1].Path, definition.Modules[2].Path,
-		definition.Modules[3].Path, definition.Modules[4].Path, definition.Modules[5].Path,
+		definition.Modules[3].Path, definition.Modules[4].Path, definition.Modules[5].Path, definition.Modules[6].Path,
 	}
-	if !slices.Equal(paths, []string{"std/alloc.fy", "std/bytes.fy", "std/fs.fy", "std/io.fy", "std/process.fy", "std/text.fy"}) ||
-		!slices.Equal(modules, []string{"std::alloc", "std::bytes", "std::fs", "std::io", "std::process", "std::text"}) {
+	if !slices.Equal(paths, []string{"std/alloc.fy", "std/bytes.fy", "std/fs.fy", "std/io.fy", "std/num.fy", "std/process.fy", "std/text.fy"}) ||
+		!slices.Equal(modules, []string{"std::alloc", "std::bytes", "std::fs", "std::io", "std::num", "std::process", "std::text"}) {
 		t.Fatalf("source paths = %v, modules = %v", paths, modules)
 	}
 	if !strings.HasPrefix(definition.SourceIdentity, SDKIdentity+";"+RuntimeABI+";fysrc1-sha256-") {

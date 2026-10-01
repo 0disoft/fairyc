@@ -1,6 +1,6 @@
 # ADR 0418: SDK checked integer conversions
 
-- Status: Accepted; implementation evidence pending
+- Status: Implemented in SDK 0.0.0-stage0.74
 - Date: 2026-10-02
 - Depends on: ADR 0218, ADR 0413
 - Workload evidence: [round4 assessment](../architecture/checked-integer-conversion-assessment.md)
@@ -74,3 +74,26 @@ and retained cast/unhandled-Result rejection. Verify SDK discovery and workspace
 loading, interpreter and artifact round trip, generated C and actual Windows
 MSVC development/release execution. Do not claim Linux native execution from
 source or C-emission checks alone.
+
+## Implementation evidence
+
+`internal/sdkstdlib/sources/std/num.fy` implements both functions using only
+the admitted Fairy arithmetic and Result/enum surface. The existing compiler
+scalar-cast allowlist and external runtime symbols are unchanged.
+
+The [retained receipt](../ops/evidence/checked-integer-conversion-20261002.json)
+records 187 distinct success values and four exact error values. The owning
+`internal/cli/checked_integer_conversion_test.go` generates its expected
+mathematical values independently in Go, verifies both directions and successful
+round trips, and observes `?` propagation for success and `OutOfRange`.
+It executes the verified MIR after codec round trip and emits C for both current
+x64 target descriptions. Actual Windows MSVC low and optimized images each
+return zero with empty stdout/stderr. Source/SDK identities, toolchain identity
+and EXE SHA256 values are retained; large numeric values are decimal strings in
+JSON to preserve all bits in downstream readers.
+
+Separate source checks retain rejection of usize-to-i64 `as`, i64-to-usize `as`
+inside unsafe, and unhandled conversion Results. SDK, workspace-loader,
+workspace-compiler and package-cache suites pass with the additional module.
+Linux native execution, narrower targets and performance measurements were not
+run or claimed. Application offset/length adoption remains a separate unit.

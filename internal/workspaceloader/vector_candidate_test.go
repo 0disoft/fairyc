@@ -33,7 +33,7 @@ func TestLoadVectorCandidateIdentityAndOverlay(t *testing.T) {
 			}
 			sdk, exists := withTests.Package(sdkstdlib.PackagePath)
 			definition, err := sdkstdlib.LoadVectorCandidate()
-			if err != nil || !exists || sdk.SDKIdentity != sdkstdlib.VectorCandidateIdentity || sdk.Digest != definition.Digest || len(sdk.Sources) != 7 {
+			if err != nil || !exists || sdk.SDKIdentity != sdkstdlib.VectorCandidateIdentity || sdk.Digest != definition.Digest || len(sdk.Sources) != len(definition.Sources) {
 				t.Fatal("test overlay lost candidate identity")
 			}
 			if len(workspace.Packages[0].Sources) != 1 {
