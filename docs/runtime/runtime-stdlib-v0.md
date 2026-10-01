@@ -964,6 +964,21 @@ does not establish an in-bounds file offset or allocation size. Current scope,
 arithmetic bounds, exclusions and validation are owned by
 [ADR 0418](../adr/0418-sdk-checked-integer-conversions.md).
 
+## Checked i64-to-byte conversion
+
+SDK `0.0.0-stage0.75` adds the pure Fairy
+`std::num::u8_from_i64(i64) -> Result<u8, ConversionError>`. Inputs 0 through
+255 return the exact byte; negative inputs, including i64 minimum, return
+`Negative`, and values above 255 return `OutOfRange`. The existing error enum,
+ordinary mandatory Result handling, `?` propagation and exhaustive switching
+are unchanged. The function has no allocation, I/O or foreign/runtime symbols.
+
+No wrapping, truncation, saturation, implicit conversion, unsigned wrapper or
+additional `as` admission is introduced. Numeric byte representability is
+separate from intentional digit extraction and caller-owned encoding width,
+high-bit, signed and endian policies. [ADR 0419](../adr/0419-sdk-checked-byte-conversion.md)
+owns the contract and validation evidence.
+
 ## Explicit exclusions
 
 Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.

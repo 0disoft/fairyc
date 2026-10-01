@@ -1465,3 +1465,11 @@ MIR and artifact schemas remain unchanged. Existing source remains valid;
 importing workspaces refresh their SDK lock version and source digest.
 The additional module enters existing package-source, interface and cache
 identities. Historical round4 compiler pins and receipts remain unchanged.
+
+ADR 0419 advances only the bundled SDK from `0.0.0-stage0.74` to
+`0.0.0-stage0.75` for `std::num::u8_from_i64`. The added public function changes
+the existing module source/interface and dependent cache identities; workspaces
+refresh their SDK lock version and source digest. Language `/20`, runtime ABI
+`/0`, module count, MIR and artifact schemas are unchanged. Existing source stays
+valid, and historical round4 toolchains, receipts and identity fixtures are
+preserved. The `as` allowlist and deferred unsigned wrapper are unchanged.

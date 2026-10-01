@@ -1,6 +1,6 @@
 # ADR 0419: SDK checked i64-to-byte conversion
 
-- Status: Accepted; implementation pending
+- Status: Implemented in SDK 0.0.0-stage0.75
 - Date: 2026-10-02
 - Depends on: ADR 0218, ADR 0413, ADR 0418
 - Workload evidence: [checked byte conversion assessment](../architecture/checked-byte-conversion-assessment.md)
@@ -9,8 +9,8 @@
 
 Round4 pack and KV encoders reconstruct bytes from an i64 using the same nested
 eight-bit loop. The assessment identifies repeated application code, not a
-compiler defect. Current SDK `0.0.0-stage0.74` has only the two size conversions
-in `std::num`; byte narrowing is not available. The existing `as` allowlist
+compiler defect. At decision time SDK `0.0.0-stage0.74` had only the two size
+conversions in `std::num`; byte narrowing was not available. The existing `as` allowlist
 rejects i64-to-u8 and u32-to-u8 casts, including in unsafe blocks.
 
 The binary patch program already decodes hex nibbles using u8 arithmetic. Its
@@ -48,8 +48,8 @@ only for a set bit, divide the remainder, and double the power only while more
 input remains. There are at most eight rounds, power is at most 128 and every
 partial sum is at most 255. Zero skips the loop. Never construct 256 in u8.
 
-These bounds describe the accepted implementation approach, not a completed
-runtime proof. Fixed-width operands avoid a usize-width assumption, but admit
+The implementation below follows these arithmetic bounds. Fixed-width operands
+avoid a usize-width assumption, but admit
 no target, narrower architecture or Linux native execution. No speed, image-size
 or constant-time claim accompanies the decision.
 
@@ -69,15 +69,14 @@ as part of accepting the API.
 
 ## Compatibility and activation
 
-Acceptance does not expose the function in the current SDK. Implementation is
-a separate commit. If SDK `0.0.0-stage0.74` is still the base at activation,
-advance it to `0.0.0-stage0.75` after the acceptance evidence below passes;
-otherwise follow the then-current additive SDK versioning rules.
+The accepted decision was recorded before implementation. Implementation
+advances the bundled SDK from `0.0.0-stage0.74` to `0.0.0-stage0.75` after
+the acceptance evidence below passes.
 Language `/20`, runtime ABI `/0`, MIR and artifact/cache schemas remain unchanged
 for this ordinary-library addition. Source/module digest and current SDK
 interface/cache identities change normally; workspace SDK locks refresh.
 Existing source remains valid. Preserve historical identity fixtures and round4
-receipts. This documentation commit does not bump a version.
+receipts. The earlier acceptance-only commit did not bump a version.
 
 ## Implementation acceptance evidence
 
@@ -99,12 +98,38 @@ A small maintained codec fixture/example must distinguish full-value 256
 rejection from little-endian extraction of `0x0100` as `00 01`. An eight-byte
 i64-maximum encoding must yield `ff ff ff ff ff ff ff 7f`. Validate caller
 negative-input, width and excess-high-bit policies separately. No example or
-acceptance test is claimed as implemented by this decision.
+acceptance test was claimed as implemented by the earlier acceptance decision.
+
+## Implementation evidence
+
+`internal/sdkstdlib/sources/std/num.fy` implements the function using guarded
+pure Fairy bit accumulation. The [retained receipt](../ops/evidence/checked-byte-conversion-20261002.json)
+records all 256 exact success inputs and four exact errors. The maintained
+`internal/cli/checked_byte_conversion_test.go` fixture uses independent literal
+byte expectations and Go `encoding/binary` for the maximum-value byte sequence.
+It checks widening round trips and successful/error `?` propagation.
+
+Nine caller codec cases cover two successful encodings and seven failures:
+negative -1/i64 minimum, width zero/nine, output capacity and excess high bits
+for 256 in one byte and i64 maximum in seven bytes. Each failed encoding leaves
+every sentinel byte unchanged. This fixture defines its own field policy and is
+not a new public codec API or migration of the external round4 programs.
+
+The verified MIR executes after artifact-codec round trip. C generation passes
+for both current x64 target descriptions; actual Windows MSVC low and optimized
+images each execute the full fixture once with exit zero and empty stdout/stderr.
+Source and SDK identities, EXE SHA256 and MSVC identity are retained. The
+compiler identity is the in-process CLI compiler's actual Go test executable
+SHA256 and Go build information, plus the modified source base and source hashes;
+it does not claim a standalone `fairyc.exe` build. Narrowing cast rejection in
+ordinary/unsafe source, unhandled Result rejection and non-exhaustive enum match
+rejection pass. SDK discovery, loader, package-cache and targeted workspace
+session checks pass. Linux native execution and performance were not tested.
 
 ## Rollout and deferred scope
 
-Update this ADR to implemented only after the implementation and its acceptance
-evidence are complete. The unsigned wrapper, other integer pairs, generic casts,
+The implementation and acceptance evidence are complete for the stated scope.
+The unsigned wrapper, other integer pairs, generic casts,
 wrapping/saturating conversions, intrinsics, FFI, new codec/parser APIs and
 performance experiments remain outside this decision. Product source, runtime
 and storage behavior are unchanged in this acceptance commit.
