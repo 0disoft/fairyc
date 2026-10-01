@@ -978,6 +978,8 @@ additional `as` admission is introduced. Numeric byte representability is
 separate from intentional digit extraction and caller-owned encoding width,
 high-bit, signed and endian policies. [ADR 0419](../adr/0419-sdk-checked-byte-conversion.md)
 owns the contract and validation evidence.
+The [checked byte codec example](../../examples/checked_byte_codec_quickstart/README.md)
+contrasts full-value conversion with caller-validated little-endian digit extraction.
 
 ## Explicit exclusions
 
