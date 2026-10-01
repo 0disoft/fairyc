@@ -11,6 +11,37 @@ const pass=manifest.cases.filter(c=>c.expect.status==='pass').map(c=>path.join(r
 const failures=[];
 for(const file of pass){const r=run(['parse','--quiet',file]);if(r.status!==0)failures.push(file+'\n'+r.stdout);}
 assert.deepEqual(failures,[]);
+const showcase=path.join(root,'editors/zed/examples/highlighting.fy');
+const parsed=run(['parse','--quiet',showcase]);
+assert.equal(parsed.status,0,parsed.stdout+'\n'+parsed.stderr);
+const highlights=run(['query','--captures',path.join(grammar,'queries/highlights.scm'),showcase]);
+assert.equal(highlights.status,0,highlights.stderr);
+const captures=[...highlights.stdout.matchAll(/capture: \d+ - ([\w.]+),[^\n]*text: `([^`]*)`/g)].map(m=>({scope:m[1],text:m[2]}));
+const has=(scope,text)=>assert(captures.some(c=>c.scope===scope&&c.text===text),`${scope}: ${text}\n${highlights.stdout}`);
+has('type.builtin','i64');
+has('type.builtin','u8');
+has('function','identity');
+assert.equal(captures.filter(c=>c.scope==='function'&&c.text==='identity').length,2,'declaration and call must both be functions');
+has('function','len');
+has('function','get');
+has('function','show');
+assert(!captures.some(c=>c.scope==='function'&&c.text==='bytes'),'module prefix must not be a function');
+has('constant','MAX_TOTAL');
+has('variant','Ready');
+has('operator','..');
+has('comment.doc','/// Preview syntax colors, outline, brackets and nested comments in Zed.');
+assert(!captures.some(c=>c.scope==='comment'&&c.text.includes('string, not a comment')));
+assert(captures.some(c=>c.scope==='comment'&&c.text.startsWith('/* outer comment')),'nested block comment capture');
+has('string.escape','\\n');
+const bundle=path.join(root,'.cache/zed-syntax-dev');
+const manifestText=fs.readFileSync(path.join(bundle,'extension.toml'),'utf8');
+assert.match(manifestText,/repository = "file:\/\/\//);
+assert.match(manifestText,/rev = "[a-f0-9]{40}"/);
+assert(!manifestText.includes('[language_servers.'),'syntax preview must work without an LSP adapter');
+assert(!fs.existsSync(path.join(bundle,'Cargo.toml')),'syntax preview must not require a Rust WASM target');
+for(const name of ['config.toml','highlights.scm','brackets.scm','indents.scm','outline.scm']) {
+ assert.equal(fs.readFileSync(path.join(bundle,'languages/fairyc',name),'utf8'),fs.readFileSync(path.join(root,'editors/zed/languages/fairyc',name),'utf8'));
+}
 for(const name of ['highlights','brackets','indents','outline']){
  const r=run(['query',path.join(grammar,'queries',name+'.scm'),pass[0]]);
  assert.equal(r.status,0,name+'\n'+r.stderr);
@@ -21,4 +52,4 @@ fs.writeFileSync('.cache/editor-inputs/incomplete.fy','module main; fn i32 main(
 assert.notEqual(run(['parse','--quiet',path.join(root,'.cache/editor-inputs/incomplete.fy')]).status,0);
 fs.writeFileSync('.cache/editor-inputs/editing.fy','module main; /* unfinished');
 const editing=run(['parse','--quiet',path.join(root,'.cache/editor-inputs/editing.fy')]);assert.equal(editing.status,0,editing.stderr);
-console.log('Tree-sitter compiled parser: '+pass.length+' compiler parser pass fixtures, four query sets and editing recovery passed');
+console.log('Tree-sitter compiled parser: '+pass.length+' compiler parser pass fixtures, Zed showcase captures, four query sets and editing recovery passed');

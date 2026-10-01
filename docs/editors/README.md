@@ -23,8 +23,10 @@ supported capabilities and explicit limitations.
 `editors/tree-sitter-fairyc` supplies the grammar, nested-comment scanner,
 generated ABI-14 parser, node types and shared queries. `editors/zed` supplies
 the language adapter. See its README for local development installation before
-these commits are published. Native parser/query tests do not establish a
-successful Zed/WASM installation.
+these commits are published. The syntax preview includes `i64`, repeated arrays,
+shared and mutable partial views, function calls, constants and documentation
+comments. It uses theme token names instead of hardcoded colors. Native
+parser/query tests do not establish a successful Zed/WASM installation.
 
 ## Maintaining syntax assets
 
@@ -34,7 +36,7 @@ directly from the compiler lexer. Contextual words remain distinct; the EBNF has
 forces review whenever the grammar changes. Review Tree-sitter syntax separately
 rather than treating a regex highlighter as the compiler parser.
 
-The initial editor packages have their own preview version `0.1.0`. They do not
+The editor packages have their own preview version `0.1.1`. They do not
 change the Fairy C language, SDK, runtime ABI, or compiler release version.
 Atom is not a supported target. Extension publishing and automatic tool downloads
 are separate release work.

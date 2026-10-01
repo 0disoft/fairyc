@@ -30,7 +30,7 @@
       "name": "keyword.other.contextual.fairyc"
     },
     {
-      "match": "\\b(?:void|bool|u8|i32|u32|usize|str|CStr)\\b",
+      "match": "\\b(?:void|bool|u8|i32|i64|u32|usize|str|CStr)\\b",
       "name": "storage.type.fairyc"
     },
     {

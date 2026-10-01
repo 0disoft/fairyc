@@ -23,7 +23,7 @@ func Assets(root string) (map[string][]byte, error) {
 	}
 	keywords, operators := lexer.EditorVocabulary()
 	contextual := []string{"burn", "cell", "map", "state", "static_assert"}
-	types := []string{"void", "bool", "u8", "i32", "u32", "usize", "str", "CStr"}
+	types := []string{"void", "bool", "u8", "i32", "i64", "u32", "usize", "str", "CStr"}
 	metadata := rule{"schema": "fairyc.editor-language/v1", "languageId": "fairyc", "displayName": "Fairy C",
 		"extensions": []string{".fy"}, "scopeName": "source.fairyc", "reservedKeywords": keywords,
 		"contextualKeywords": contextual, "builtinTypes": types, "operators": operators,

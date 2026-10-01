@@ -12,6 +12,7 @@ let stack=null;
 function tokens(line){const r=grammar.tokenizeLine(line,stack);stack=r.ruleStack;return r.tokens.map(t=>({text:line.slice(t.startIndex,t.endIndex),scopes:t.scopes.join(' ')}));}
 const has=(ts,text,scope)=>assert(ts.some(t=>t.text.includes(text)&&t.scopes.includes(scope)),JSON.stringify(ts));
 has(tokens('fn i32 main() { return 0; }'),'fn','keyword');
+has(tokens('let i64 total = 9223372036854775807;'),'i64','storage.type');
 has(tokens('let message = "if // fake";'),'if','string');
 has(tokens('/* outer /* inner */'),'inner','comment');
 has(tokens('return still_comment; */ fn i32 next() {}'),'still_comment','comment');

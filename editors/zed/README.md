@@ -11,6 +11,36 @@ the Tree-sitter grammar; edit that single owner and regenerate adapters.
 The adapter is not registered in the Zed extension registry. Native grammar and
 query validation is distinct from a Zed/WASM installation smoke test.
 
+## Local syntax preview
+
+From the compiler repository root, run `node editors/zed/prepare-dev.mjs` to
+prepare `.cache/zed-syntax-dev`. Under the workspace command contract this helper
+is called by `fairyc_editors_generate`. It uses a local `file://` grammar URL and
+the current commit, with no edits to the tracked extension manifest. Commit
+grammar/parser edits first: Zed clones the pinned grammar, not uncommitted files.
+
+Select the generated directory with **Install Dev Extension** in Zed. The
+preview deliberately contains only language configuration and queries: no Rust
+adapter or language server is loaded, so it needs no Rust WASM target or LSP
+configuration. Zed may still download its WASI SDK to build the grammar. The
+helper itself does not download tools, install an extension, or change settings.
+
+Open `editors/zed/examples/highlighting.fy` and check that Zed selects **Fairy C**,
+then check types including `i64`, function declarations/calls, constants, enum
+variants, strings/escapes, nested comments, `///` documentation and `..` views.
+Check matching/autoclosing braces, brackets, parentheses and quotes, comment
+toggling, indentation and the outline. Exact colors come from the active theme.
+The file is a parser/highlighting showcase, not a runnable SDK program.
+
+The regular `editors/zed` adapter retains the LSP integration below. Both packages
+use extension ID `fairyc`; installing one replaces the other rather than providing
+two independent extensions. Native query/capture and Rust checks passed locally;
+in-editor installation, WASM compilation and interaction remain unverified.
+
+See [Zed's extension development guide](https://zed.dev/docs/extensions/developing-extensions)
+for toolchain and local installation requirements, and
+[language extensions](https://zed.dev/docs/extensions/languages) for token captures.
+
 The Rust adapter uses the released Zed extension API 0.7 and launches an existing
 `fairyc-lsp` executable. Set `lsp.fairyc-lsp.binary.path` in Zed settings to its
 absolute path, or make it available on the editor's PATH. No language-server
