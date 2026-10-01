@@ -96,4 +96,12 @@ Separate source checks retain rejection of usize-to-i64 `as`, i64-to-usize `as`
 inside unsafe, and unhandled conversion Results. SDK, workspace-loader,
 workspace-compiler and package-cache suites pass with the additional module.
 Linux native execution, narrower targets and performance measurements were not
-run or claimed. Application offset/length adoption remains a separate unit.
+run or claimed.
+
+The [checked offset example](../../examples/checked_offset_quickstart/README.md)
+parses signed decimal argv once, converts through `usize_from_i64`, and checks
+subtraction-based half-open bounds before constructing the end. Its
+[native receipt](../ops/evidence/checked-offset-example-20261002.json) records
+35 exact output/exit cases in each Windows development/release profile,
+including values beyond i32, i64 maximum, negative and malformed input,
+out-of-range sums and empty end ranges. It performs no physical file access.

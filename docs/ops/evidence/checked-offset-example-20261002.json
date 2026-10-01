@@ -1,0 +1,1075 @@
+{
+  "executions": [
+    {
+      "argv": [
+        "10",
+        "3",
+        "4"
+      ],
+      "case": "interior",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=4 end=7\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=4 end=7\n"
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "10"
+      ],
+      "case": "whole-range",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=10 end=10\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=10 end=10\n"
+    },
+    {
+      "argv": [
+        "10",
+        "3",
+        "0"
+      ],
+      "case": "empty-range",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=0 end=3\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=0 end=3\n"
+    },
+    {
+      "argv": [
+        "10",
+        "10",
+        "0"
+      ],
+      "case": "empty-at-end",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=10 count=0 end=10\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=10 count=0 end=10\n"
+    },
+    {
+      "argv": [
+        "0",
+        "0",
+        "0"
+      ],
+      "case": "zero-length",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": [
+        "10",
+        "9",
+        "1"
+      ],
+      "case": "last-byte",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=9 count=1 end=10\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=9 count=1 end=10\n"
+    },
+    {
+      "argv": [
+        "5000000000",
+        "3000000000",
+        "2000000000"
+      ],
+      "case": "wide-values",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n"
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "0",
+        "9223372036854775807"
+      ],
+      "case": "maximum-whole",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "9223372036854775807",
+        "0"
+      ],
+      "case": "maximum-end",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "9223372036854775806",
+        "1"
+      ],
+      "case": "maximum-last-byte",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "00010",
+        "-0",
+        "01"
+      ],
+      "case": "negative-zero-leading-zeros",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=1 end=1\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=1 end=1\n"
+    },
+    {
+      "argv": [
+        "-1",
+        "0",
+        "0"
+      ],
+      "case": "negative-length",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: negative value\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-1",
+        "0"
+      ],
+      "case": "negative-offset",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "-1"
+      ],
+      "case": "negative-count",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: negative value\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: COUNT: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-9223372036854775808",
+        "0"
+      ],
+      "case": "minimum-conversion-error",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "11",
+        "0"
+      ],
+      "case": "offset-after-end",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "10",
+        "1"
+      ],
+      "case": "end-with-data",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "3",
+        "8"
+      ],
+      "case": "count-after-end",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "0",
+        "1",
+        "0"
+      ],
+      "case": "empty-offset-after-end",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "0",
+        "0",
+        "1"
+      ],
+      "case": "empty-with-data",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "1",
+        "9223372036854775807"
+      ],
+      "case": "sum-beyond-i64",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "9223372036854775807",
+        "9223372036854775807"
+      ],
+      "case": "two-maxima",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "9223372036854775808",
+        "0",
+        "0"
+      ],
+      "case": "above-i64",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-9223372036854775809",
+        "0"
+      ],
+      "case": "below-i64",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "18446744073709551615"
+      ],
+      "case": "usize-max-parse-error",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "",
+        "0"
+      ],
+      "case": "empty-number",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: empty integer\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: empty integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-",
+        "0"
+      ],
+      "case": "bare-sign",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "+1",
+        "0"
+      ],
+      "case": "plus-sign",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        " 1",
+        "0"
+      ],
+      "case": "whitespace",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "1.0",
+        "0"
+      ],
+      "case": "decimal-point",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "한글",
+        "0"
+      ],
+      "case": "korean",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "000000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "too-long",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "00000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "max-argument-bytes",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": null,
+      "case": "missing",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "0",
+        "extra"
+      ],
+      "case": "extra",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "profile": "low",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "3",
+        "4"
+      ],
+      "case": "interior",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=4 end=7\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=4 end=7\n"
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "10"
+      ],
+      "case": "whole-range",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=10 end=10\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=10 end=10\n"
+    },
+    {
+      "argv": [
+        "10",
+        "3",
+        "0"
+      ],
+      "case": "empty-range",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=0 end=3\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=0 end=3\n"
+    },
+    {
+      "argv": [
+        "10",
+        "10",
+        "0"
+      ],
+      "case": "empty-at-end",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=10 count=0 end=10\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=10 count=0 end=10\n"
+    },
+    {
+      "argv": [
+        "0",
+        "0",
+        "0"
+      ],
+      "case": "zero-length",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": [
+        "10",
+        "9",
+        "1"
+      ],
+      "case": "last-byte",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=9 count=1 end=10\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=9 count=1 end=10\n"
+    },
+    {
+      "argv": [
+        "5000000000",
+        "3000000000",
+        "2000000000"
+      ],
+      "case": "wide-values",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n"
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "0",
+        "9223372036854775807"
+      ],
+      "case": "maximum-whole",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "9223372036854775807",
+        "0"
+      ],
+      "case": "maximum-end",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "9223372036854775806",
+        "1"
+      ],
+      "case": "maximum-last-byte",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "00010",
+        "-0",
+        "01"
+      ],
+      "case": "negative-zero-leading-zeros",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=1 end=1\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=1 end=1\n"
+    },
+    {
+      "argv": [
+        "-1",
+        "0",
+        "0"
+      ],
+      "case": "negative-length",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: negative value\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-1",
+        "0"
+      ],
+      "case": "negative-offset",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "-1"
+      ],
+      "case": "negative-count",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: negative value\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: COUNT: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-9223372036854775808",
+        "0"
+      ],
+      "case": "minimum-conversion-error",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "11",
+        "0"
+      ],
+      "case": "offset-after-end",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "10",
+        "1"
+      ],
+      "case": "end-with-data",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "3",
+        "8"
+      ],
+      "case": "count-after-end",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "0",
+        "1",
+        "0"
+      ],
+      "case": "empty-offset-after-end",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "0",
+        "0",
+        "1"
+      ],
+      "case": "empty-with-data",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "1",
+        "9223372036854775807"
+      ],
+      "case": "sum-beyond-i64",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "9223372036854775807",
+        "9223372036854775807",
+        "9223372036854775807"
+      ],
+      "case": "two-maxima",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "9223372036854775808",
+        "0",
+        "0"
+      ],
+      "case": "above-i64",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-9223372036854775809",
+        "0"
+      ],
+      "case": "below-i64",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "18446744073709551615"
+      ],
+      "case": "usize-max-parse-error",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "",
+        "0"
+      ],
+      "case": "empty-number",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: empty integer\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: empty integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "-",
+        "0"
+      ],
+      "case": "bare-sign",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "+1",
+        "0"
+      ],
+      "case": "plus-sign",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        " 1",
+        "0"
+      ],
+      "case": "whitespace",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "1.0",
+        "0"
+      ],
+      "case": "decimal-point",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "한글",
+        "0"
+      ],
+      "case": "korean",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "000000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "too-long",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "00000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "max-argument-bytes",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": null,
+      "case": "missing",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "10",
+        "0",
+        "0",
+        "extra"
+      ],
+      "case": "extra",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "profile": "optimized",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    }
+  ],
+  "images": [
+    {
+      "exeBytes": 136192,
+      "exeSHA256": "c4b6e4f735bcf662a4fd7bddf7dcb2531afab0cf8e958a8963f4b21e9d6a2812",
+      "profile": "low",
+      "toolchain": "msvc 14.51.36231"
+    },
+    {
+      "exeBytes": 118272,
+      "exeSHA256": "f04087e52c1eedca4e9c2d5e60608c776c5227b24621db36827aafb34d572374",
+      "profile": "optimized",
+      "toolchain": "msvc 14.51.36231"
+    }
+  ],
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0",
+  "schema": "fairyc.checked-offset-example/v1",
+  "sdk": "0.0.0-stage0.74",
+  "sdkSourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-3498bf8ef7582a3fd1cbec0c37fd0acee5852e2ae8d32fa645696d3e5212bf0d",
+  "sourceSHA256": {
+    "fairy.toml": "717815d1b7f40c9dc72bbcee4d1b6031a39eebc20759d04cfac2f7bbe9d45b78",
+    "src/main.fy": "5036be049a8aa58cc7c6bcd41f3e52a919d920c259fc465052366e4df5e3eee6",
+    "src/numbers.fy": "7c583edbc8726244cdb6041be4949066453514976aa34e6c0abe9fa3c97e8f0f"
+  },
+  "target": "x86_64-windows-msvc",
+  "baseRevision": "cacd5ec2a396742f7d90871e79845dfc2af34245",
+  "testSourceSHA256": "957864d46cf14455839b6500b5241d794647b22d082f94e1bbf57e066e4db1cb"
+}
