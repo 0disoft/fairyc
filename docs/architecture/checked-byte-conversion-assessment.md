@@ -4,6 +4,10 @@ Status: Candidate assessment; no API admission or implementation claim.
 Date: 2026-10-02 (Asia/Seoul).
 Inspected compiler repository revision: `71b6cdb63e1c0fc21cebf068cce0401f9a0c8c83`.
 
+This document preserves the pre-decision assessment. The subsequent accepted
+contract for `u8_from_i64`, with implementation pending and the unsigned wrapper
+deferred, is owned by [ADR 0419](../adr/0419-sdk-checked-byte-conversion.md).
+
 This assessment records pre-implementation reasoning for byte conversion. It is
 a sibling of the [checked integer conversion assessment](checked-integer-conversion-assessment.md),
 whose two directions were accepted by [ADR 0418](../adr/0418-sdk-checked-integer-conversions.md)
