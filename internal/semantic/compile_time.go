@@ -498,6 +498,23 @@ func (e *compileTimeEvaluator) binary(module *moduleScope, expression *ast.Expre
 		e.rejectExpression(module, expression)
 		return compileTimeValue{}, false
 	}
+	if contextualIntegerTree(expression.Children[0]) && !contextualIntegerTree(expression.Children[1]) && contextualIntegerOperator(expression.Text) {
+		// The flexible side has no names, calls or effects. Evaluate the fixed
+		// peer once to select its type without converting that peer's value.
+		right, ok := e.eval(module, expression.Children[1], integerBinaryContext(expression.Text, expected), environment, depth)
+		if !ok {
+			return compileTimeValue{}, false
+		}
+		left, ok := e.eval(module, expression.Children[0], integerPeerContext(right.typ, integerBinaryContext(expression.Text, expected)), environment, depth)
+		if !ok {
+			return compileTimeValue{}, false
+		}
+		if left.typ != right.typ {
+			e.analyzer.addDiagnostic("E1006", span(module.file.Path, expression.Children[1].Span))
+			return compileTimeValue{}, false
+		}
+		return e.applyBinary(module, expression, left, right)
+	}
 	left, ok := e.eval(module, expression.Children[0], expected, environment, depth)
 	if !ok {
 		return compileTimeValue{}, false

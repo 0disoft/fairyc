@@ -72,6 +72,16 @@ minimum traps. Mixed-width binary operations are rejected.
 
 Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Decimal, hexadecimal, and binary integer values are range-checked after type selection and do not wrap; an out-of-range implemented integer literal is `E1013` before MIR lowering. Direct unary minus may fold the exact magnitude `2147483648` to `i32` minimum in any admitted radix. The positive token is not separately representable, and parentheses or unary plus do not receive that exception. Semantic magnitude comparison is digit-bounded and does not allocate a second input-sized arbitrary-precision integer.
 
+ADR 0417 selects integer-literal-only operand trees from a fixed integer peer on either
+side of arithmetic, bitwise, shift or comparison operators. With no fixed peer,
+integer-valued operations receive an expected result type; otherwise literals default
+to i32. Groups preserve context. A comparison's bool result is not an integer context.
+Typed names (including constants), calls and casts retain their types; no implicit
+variable conversion or mixed-width arithmetic is admitted. Runtime source evaluation
+order and checked operations are unchanged. See
+[contextual operands](../adr/0417-contextual-integer-binary-operands.md) for the exact
+flexible-tree, signed-prefix and compile-time boundaries.
+
 A nonempty fixed-array list receives its element type from an expected `T[N]` when present;
 otherwise its first element selects `T` and later elements must match exactly. The resulting length
 is the written element count, so an annotation with another `N` is `E1006`. The executable subset

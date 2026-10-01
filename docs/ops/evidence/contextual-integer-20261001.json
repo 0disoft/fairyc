@@ -1,0 +1,132 @@
+{
+  "cases": [
+    {
+      "case": "normal",
+      "exeBytes": 111104,
+      "exeSHA256": "99232df33684a7cba070b4ec9d47d27ec85aa70921bc56f4d90c2598ce09b233",
+      "exitCode": 0,
+      "expectedTrap": "",
+      "profile": "low",
+      "sourceSHA256": "40f7a07dfb08cdd3894a64780ddcb39c178fc4d7271033ece3cc6679bb57cd22",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": ""
+    },
+    {
+      "case": "normal",
+      "exeBytes": 108544,
+      "exeSHA256": "0b11826d7f0af66edca66f3342fb5848cd02127e3587c0881387af7de23fedb3",
+      "exitCode": 0,
+      "expectedTrap": "",
+      "profile": "optimized",
+      "sourceSHA256": "40f7a07dfb08cdd3894a64780ddcb39c178fc4d7271033ece3cc6679bb57cd22",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": ""
+    },
+    {
+      "case": "division-trap",
+      "exeBytes": 111104,
+      "exeSHA256": "ad82434f372623de2f1c211f06025f90b97a90d403ed3088639263c8e4ef73c4",
+      "exitCode": 131,
+      "expectedTrap": "division-by-zero",
+      "profile": "low",
+      "sourceSHA256": "d5cf7b35c38b502a7c93ce24fcfdaa7d3bfa13b059158169b36ea0b6d5fde3c3",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "division-by-zero"
+    },
+    {
+      "case": "division-trap",
+      "exeBytes": 108544,
+      "exeSHA256": "0c009da353fd9fc216a2e4688345894e2ceed4437ab7de50dd429de12868079e",
+      "exitCode": 131,
+      "expectedTrap": "division-by-zero",
+      "profile": "optimized",
+      "sourceSHA256": "d5cf7b35c38b502a7c93ce24fcfdaa7d3bfa13b059158169b36ea0b6d5fde3c3",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "division-by-zero"
+    },
+    {
+      "case": "overflow",
+      "exeBytes": 111104,
+      "exeSHA256": "d60284aa31a9ca5ed4353c7702214306799270cb9a53fb378bf9eefb37ef400b",
+      "exitCode": 130,
+      "expectedTrap": "integer-overflow",
+      "profile": "low",
+      "sourceSHA256": "eeadf3bad2e0982ccfcb0afc8c88f6909ae6d4f1a0770498739d7c93c234d3df",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "integer-overflow"
+    },
+    {
+      "case": "overflow",
+      "exeBytes": 108544,
+      "exeSHA256": "2fda88bfca897f5179657c62ee3a964f1fd1a5d6ca1ee7b6376231014bd426ff",
+      "exitCode": 130,
+      "expectedTrap": "integer-overflow",
+      "profile": "optimized",
+      "sourceSHA256": "eeadf3bad2e0982ccfcb0afc8c88f6909ae6d4f1a0770498739d7c93c234d3df",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "integer-overflow"
+    },
+    {
+      "case": "shift-width",
+      "exeBytes": 111104,
+      "exeSHA256": "144dcf94a96745dbc586f003eeca45721d87f81900b28da9d7af756a2149f909",
+      "exitCode": 133,
+      "expectedTrap": "invalid-shift",
+      "profile": "low",
+      "sourceSHA256": "accc9e57712e97cc64d58a86ff443e7c556c05d3f27429c87bb9a6a564828e94",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "invalid-shift"
+    },
+    {
+      "case": "shift-width",
+      "exeBytes": 108544,
+      "exeSHA256": "7074a1bc1e3a3264efe72d62aab8ed35066d18f9b293da1be6766f4e8156eec7",
+      "exitCode": 133,
+      "expectedTrap": "invalid-shift",
+      "profile": "optimized",
+      "sourceSHA256": "accc9e57712e97cc64d58a86ff443e7c556c05d3f27429c87bb9a6a564828e94",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": "msvc 14.51.36231",
+      "trap": "invalid-shift"
+    }
+  ],
+  "schema": "fairyc.contextual-integer-native/v1",
+  "sdk": "0.0.0-stage0.73",
+  "baseCommit": "c7e0dde37078e99b773b7df39c25c34b7a1ab5ed",
+  "language": "fairyc-language/20",
+  "runtimeABI": "fairyc-runtime/0",
+  "validation": [
+    {
+      "intent": "fairyc_literal_check",
+      "receipt": ".mustflow/state/runs/run-2026-10-01T07-05-45-133Z-10628-d1933b81364f/receipt.json",
+      "status": "passed",
+      "coverage": "semantic, MIR, codec, interpreter and C backend packages plus contextual-integer artifact and selected compiler regression tests"
+    },
+    {
+      "intent": "fairyc_literal_native",
+      "receipt": ".mustflow/state/runs/run-2026-10-01T07-06-42-361Z-5796-6eb128a6a2ce/receipt.json",
+      "status": "passed",
+      "coverage": "normal, division-by-zero, integer overflow and invalid shift on low and optimized Windows MSVC, with evaluation count and source-order assertions"
+    }
+  ],
+  "skipped": [
+    "Full compiler suite and nine original workloads: bounded related checks used; nine-workload revalidation is the next separate step",
+    "Physical power-loss experiment: deferred by user",
+    "Performance benchmarks: outside approved scope"
+  ]
+}

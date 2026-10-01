@@ -17,6 +17,7 @@ are historical evidence and are not silently migrated to a new SDK.
 | Existing mutable references could not be passed to shared readers | Call shared reborrows, ADR 0414 | Original origins, retained aliases, tagged results, whole-root conflicts, artifact/interpreter and low/optimized execution |
 | Existing mutable byte views could not be sliced | Exclusive byte subviews, ADR 0415 | Parent/owner freeze and last use, returned origins, checked bounds, artifact/interpreter and low/optimized execution; retained siblings remain rejected |
 | Workloads expanded buffer initialization by hand | Repeated scalar arrays, ADR 0416 | One initializer evaluation, independent scalar elements, compile-time counts bounded to 1..=4096; empty arrays and ownership duplication remain rejected |
+| Literal-left buffer sizing required an extra typed temporary | Contextual integer operands, ADR 0417 | Literal-only trees receive peer/result context; typed values stay exact, ranges and checked operations remain, runtime order is preserved |
 
 The task-manager application now consumes the prepared replacement API in
 `examples/task_manager_cli` version 0.1.1. Its 118 CLI regression cases and 20
@@ -26,11 +27,9 @@ manual orphan disposition and the unchanged power-loss recovery boundary.
 
 ## Remaining capability work
 
-Each item needs its own bounded design and implementation commit sequence.
-
-| Item | Required implementation and acceptance |
-| --- | --- |
-| An integer literal on the left of `1048576 / rows` | Define contextual literal selection without implicit variable-to-variable conversions. Preserve range diagnostics and checked arithmetic, including grouped literals and comparisons. |
+The admitted capability work above is implemented. Revalidate the nine original
+workloads once against the resulting compiler, preserving their historical
+sources and evidence. This page does not claim that revalidation has run.
 
 ## Storage faults and restart recovery
 

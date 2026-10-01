@@ -711,7 +711,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	case syntax.KindPrefix:
 		actual = c.checkPrefix(expression, result, expected)
 	case syntax.KindBinary:
-		actual = c.checkBinary(expression, result)
+		actual = c.checkBinary(expression, result, expected)
 	case syntax.KindCast:
 		actual = c.checkCast(expression, result)
 	case syntax.KindCall:
@@ -1250,6 +1250,9 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 	if (expression.Text == "+" || expression.Text == "-" || expression.Text == "~") && expected == hir.TypeI64 {
 		childExpected = expected
 	}
+	if expression.Text == "~" && hir.BitwiseNotType(expected) {
+		childExpected = expected
+	}
 	child, childType := c.checkExpression(expression.Children[0], childExpected)
 	result.Children = appendExpression(result.Children, child)
 	switch expression.Text {
@@ -1318,13 +1321,23 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 	}
 }
 
-func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expression) hir.Type {
+func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
 	result.Operator = expression.Text
 	if len(expression.Children) != 2 {
 		return hir.TypeInvalid
 	}
-	left, leftType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
-	right, rightType := c.checkExpression(expression.Children[1], leftType)
+	context := integerBinaryContext(expression.Text, expected)
+	var left, right *hir.Expression
+	var leftType, rightType hir.Type
+	if contextualIntegerTree(expression.Children[0]) && !contextualIntegerTree(expression.Children[1]) && contextualIntegerOperator(expression.Text) {
+		// Select a fixed peer type before defaulting the literal tree. HIR children
+		// stay in source order, so lowering still evaluates left before right.
+		right, rightType = c.checkExpression(expression.Children[1], context)
+		left, leftType = c.checkExpression(expression.Children[0], integerPeerContext(rightType, context))
+	} else {
+		left, leftType = c.checkExpression(expression.Children[0], context)
+		right, rightType = c.checkExpression(expression.Children[1], leftType)
+	}
 	result.Children = appendExpression(result.Children, left, right)
 	switch expression.Text {
 	case "&&", "||":
