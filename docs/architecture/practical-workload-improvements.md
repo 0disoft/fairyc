@@ -25,11 +25,17 @@ generated-Fairy storage-fault/termination scenarios pass. See
 [task-manager prepared-save evidence](task-manager-prepared-save.md) for restart,
 manual orphan disposition and the unchanged power-loss recovery boundary.
 
-## Remaining capability work
+## Original-workload revalidation
 
-The admitted capability work above is implemented. Revalidate the nine original
-workloads once against the resulting compiler, preserving their historical
-sources and evidence. This page does not claim that revalidation has run.
+The admitted capability work above is implemented. The nine original workloads
+passed 754/754 baseline cases and 18 development/release native builds against
+clean compiler revision c34718bd and SDK stage0.73 on 2026-10-01. All 692 original
+file/reparse observations were unchanged. A copied verifier's CP949 decoding
+failure was resolved after independent raw UTF-8 byte verification; no product
+source or expected value changed. See the
+[revalidation evidence](../ops/practical-revalidation-c34718bd-20261001.md).
+This is compatibility evidence; it does not migrate historical sources to new
+features or replace the separate ADR 0413–0417 and prepared-save tests.
 
 ## Storage faults and restart recovery
 
