@@ -3,12 +3,6 @@ import std::bytes as bytes;
 import std::text as text;
 import output as output;
 
-pub fn bool equal(ref u8[] a, ref u8[] b) {
-    if (a.len != b.len) { return false; }
-    var usize i = 0;
-    while (i < a.len) { if (a[i] != b[i]) { return false; } i += 1; }
-    return true;
-}
 pub fn bool buffer_ok(Result<usize, bytes::BufferError> result) {
     return switch (result) { case .ok(_) : { true } case .err(_) : { false } };
 }
@@ -48,7 +42,7 @@ pub fn bool title(ref u8[] raw) {
 pub fn Result<i32, i32> validate(ref str path, ref u8[] data) {
     if (data.len > 262144) { return .err(output::error(path, "store exceeds 262144 bytes")); }
     let usize header_end = end(data, 0, 10);
-    if (header_end == data.len || header_end < 9 || !equal(data[..8], b"FYTASK1\t")) {
+    if (header_end == data.len || header_end < 9 || !bytes::equal(data[..8], b"FYTASK1\t")) {
         return .err(output::error(path, "invalid task store header"));
     }
     let i32 next = switch (id(data[8..header_end])) {

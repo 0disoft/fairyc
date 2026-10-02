@@ -12,10 +12,10 @@ fn i32 arguments(ref u8[] path, ref u8[] command, ref u8[] value, usize count) {
     var usize i = 0;
     while (i < path.len) { if (path[i] == 0) { return output::usage("store path contains NUL"); } i += 1; }
     var u32 operation = 0;
-    if (format::equal(command, b"list")) { operation = 0; }
-    else if (format::equal(command, b"add")) { operation = 1; }
-    else if (format::equal(command, b"done")) { operation = 2; }
-    else if (format::equal(command, b"delete")) { operation = 3; }
+    if (bytes::equal(command, b"list")) { operation = 0; }
+    else if (bytes::equal(command, b"add")) { operation = 1; }
+    else if (bytes::equal(command, b"done")) { operation = 2; }
+    else if (bytes::equal(command, b"delete")) { operation = 3; }
     else { return output::usage("unknown command; use list, add, done or delete"); }
     if ((operation == 0 && count != 3) || (operation != 0 && count != 4)) { return output::usage("wrong command argument count; use --help"); }
     var i32 requested = 0;
@@ -43,7 +43,7 @@ fn i32 main() {
     };
     let ref u8[] name = bytes::view(ref path)[..path_length];
     if (count == 2) {
-        if (format::equal(name, b"--help")) {
+        if (bytes::equal(name, b"--help")) {
             return output::text("Usage: task-manager-cli <store-path> list\n       task-manager-cli <store-path> add \"title\"\n       task-manager-cli <store-path> done <id>\n       task-manager-cli <store-path> delete <id>\n       task-manager-cli --help\nIDs: canonical decimal, assigned 1..2147483646; never reused after deletion\nList: ascending ID, tab-separated ID/open|done/title; empty prints empty\nStore: UTF-8 no BOM, LF TSV, FYTASK1<TAB>next<LF> then id<TAB>0|1<TAB>title<LF>\nTitles: spaces/Korean preserved; nonblank UTF-8, no ASCII controls\nSave: exclusive .lock, checked write/sync/close of .tmp, then replace_file; no backup gap\nPending .lock/.tmp/.bak needs manual inspection/recovery; no automatic deletion\nLimits: 256 tasks, title 512 bytes, store 262144 bytes, path 4000 UTF-8 bytes\nExit: 0 success, 1 store/data/allocation/cleanup error, 2 CLI usage, 3 stdout failure\n");
         }
         return output::usage("expected store path and command; use --help");

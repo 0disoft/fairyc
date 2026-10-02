@@ -1,12 +1,13 @@
 param(
-    [string]$Fairyc=(Join-Path $PSScriptRoot '../_toolchain/fairyc-0bafe327/fairyc.exe'),
+    [Parameter(Mandatory=$true)][string]$Fairyc,
+    [Parameter(Mandatory=$true)][ValidatePattern('^[0-9a-fA-F]{64}$')][string]$CompilerSha256,
     [switch]$ReuseDevelopment,
     [switch]$ReuseBothImages
 )
 $ErrorActionPreference='Stop'
 $Fairyc=(Resolve-Path -LiteralPath $Fairyc).Path
 $compilerHash=(Get-FileHash -LiteralPath $Fairyc).Hash.ToLowerInvariant()
-if ($compilerHash -ne 'd0ebc6dc9f807fc2118f816214b906bc22fa7f26759891c5a6adfcb5d7850648') { throw 'Compiler checksum mismatch' }
+if ($compilerHash -ne $CompilerSha256.ToLowerInvariant()) { throw 'Compiler checksum mismatch' }
 if ($ReuseDevelopment -and $ReuseBothImages) { throw 'Choose only one image reuse option' }
 $previousEvidence=$null; $previousEvidenceSha256=$null; $imageProvenance=@()
 if ($ReuseBothImages) {
@@ -96,7 +97,7 @@ function Assert-Case([string]$Name,[string[]]$Arguments,[int]$Code,[string]$Stdo
         foreach ($suffix in '.lock','.tmp','.bak') { if ([IO.File]::Exists((Local ($Store+$suffix)))) { throw "$Name unexpected sidecar $suffix" } }
     }
     Write-Host "PASS $script:profile/$Name exit=$($actual.exitCode)"
-    $item=@{profile=$script:profile;name=$Name;arguments=$Arguments;storePath=$Store;watchedPaths=$watch;watchPathsCheckedBeforeAfter=$true;expected=@{exitCode=$Code;stdout=$Stdout;stderr=$Stderr;store=$expectedStore;storeAbsent=[bool]$Absent;sidecars=$expectedSidecarStates};actual=$actual;before=$before;after=$after;preservedPaths=$Preserve;sidecarComparisons=$sidecarComparisons}
+    $item=@{profile=$script:profile;name=$Name;executable=$script:currentExe;cwd=$PSScriptRoot;arguments=$Arguments;storePath=$Store;watchedPaths=$watch;watchPathsCheckedBeforeAfter=$true;expected=@{exitCode=$Code;stdout=$Stdout;stderr=$Stderr;store=$expectedStore;storeAbsent=[bool]$Absent;sidecars=$expectedSidecarStates};actual=$actual;before=$before;after=$after;preservedPaths=$Preserve;sidecarComparisons=$sidecarComparisons}
     $script:results.Add($item)
 }
 [void](New-Item -ItemType Directory -Path (Local 'samples') -Force)
@@ -109,6 +110,8 @@ Write-Text 'samples/tasks.tsv' $valid
 $badStores=@(
     @{name='empty-file';data=$utf8.GetBytes('');message='invalid task store header'},
     @{name='header';data=$utf8.GetBytes("OTHER`t1`n");message='invalid task store header'},
+    @{name='header-first-byte';data=$utf8.GetBytes("ZYTASK1`t1`n");message='invalid task store header'},
+    @{name='header-last-byte';data=$utf8.GetBytes("FYTASK1X1`n");message='invalid task store header'},
     @{name='bom';data=([byte[]](239,187,191)+$utf8.GetBytes($header));message='invalid task store header'},
     @{name='next-zero';data=$utf8.GetBytes("FYTASK1`t0`n");message='invalid next task ID'},
     @{name='next-over';data=$utf8.GetBytes("FYTASK1`t2147483648`n");message='invalid next task ID'},
@@ -191,6 +194,8 @@ try {
         Assert-Case 'count-limit' @('samples/full.tsv','add','extra') 1 '' "samples/full.tsv: error: task count exceeds 256`n" 'samples/full.tsv' -Preserve 'samples/full.tsv'
         Assert-Case 'id-exhausted' @('samples/exhausted.tsv','add','extra') 1 '' "samples/exhausted.tsv: error: task ID space exhausted`n" 'samples/exhausted.tsv' -Preserve 'samples/exhausted.tsv'
         $usageCases=@(
+            @{name='command-prefix';args=@($store,'listing');message='unknown command; use list, add, done or delete'},
+            @{name='command-case';args=@($store,'Add','title');message='unknown command; use list, add, done or delete'},
             @{name='empty-title';args=@($store,'add','');message='title must be valid UTF-8, 1..512 bytes, nonblank, without ASCII controls'},
             @{name='blank-title';args=@($store,'add','   ');message='title must be valid UTF-8, 1..512 bytes, nonblank, without ASCII controls'},
             @{name='tab-title';args=@($store,'add',"a`tb");message='title must be valid UTF-8, 1..512 bytes, nonblank, without ASCII controls'},

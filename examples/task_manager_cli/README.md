@@ -1,9 +1,10 @@
 # Task manager with prepared-file replacement
 
-Windows AMD64 example, Fairy C language/20 and SDK stage0.72. All product logic
-uses Fairy C and public SDK APIs. `fairy.toml` version 0.1.1 preserves the historical
-FYTASK1 TSV format and CLI arguments; storage diagnostics and help describe the new
-publication protocol. The original nine downloaded workloads remain unchanged.
+Windows AMD64 example, Fairy C language/20 and SDK stage0.77 or later. All product
+logic uses Fairy C and public SDK APIs. `fairy.toml` version 0.1.2 uses
+`std::bytes::equal` for exact command and FYTASK1 header comparisons, preserving
+the TSV format, CLI arguments, validation order and storage diagnostics. The
+prepared-file publication protocol and original downloaded workloads are unchanged.
 
 Commands: `<store> list`, `<store> add "title"`, `<store> done <id>`,
 `<store> delete <id>`, and `--help`. Limits: 256 tasks, 512 UTF-8 bytes per title,
@@ -43,9 +44,15 @@ FYTASK1 has no checksum or retained validated generation. A checksum/versioned
 journal and physical power-cut validation remain separate work, not a claim made
 by this example. See [ADR 0411](../../docs/adr/0411-public-windows-file-replacement.md).
 
-`verify.ps1 -Fairyc <pinned stage0.72 compiler>` runs the preserved 118 development
-and release CLI cases. Only help and replacement failure expectations differ from
-the original oracle. Run in an isolated copy: fixtures and raw results are written
-there. Native storage-fault tests exercise compiler-emitted Fairy application
+`verify.ps1 -Fairyc <compiler-path> -CompilerSha256 <reviewed-sha256>` requires an
+explicit compiler and SHA256 pin, checked before fixture or build writes. Use SDK
+stage0.77 or later; the historical stage0.72 compiler lacks `bytes::equal`.
+Run `fairyc check` once in a fresh isolated copy to create its current lock, then
+run the script there: fixtures and raw results are written beside the copied
+sources. The 126 development/release CLI cases include the original 118 plus
+same-length header mismatches, command prefixes and case differences. Each case
+records executable, argv, cwd, UTF-8 stdout/stderr, exit code and file states;
+compiler/source/SDK and EXE digests identify the tested images. Historical
+stage0.72 receipts are not evidence for this adoption. Native storage-fault tests exercise compiler-emitted Fairy application
 logic with test-only interception of production Win32 I/O, not a C rewrite of the
 application. Evidence and limitations are recorded in the workload report.
