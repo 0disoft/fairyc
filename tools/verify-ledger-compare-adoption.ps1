@@ -10,27 +10,17 @@ $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 if ($AuditReceipt) { Invoke-AdoptionOrdinalAudit $AuditReceipt 'ledger' $Fairyc $PSCommandPath; return }
 $Original = (Resolve-Path -LiteralPath $Original).Path
 $Fairyc = (Resolve-Path -LiteralPath $Fairyc).Path
+. (Join-Path $PSScriptRoot 'adoption-process.ps1')
 $utf8 = [Text.UTF8Encoding]::new($false, $true)
 $run = Join-Path $repo ('.cache/ledger-compare-adoption/' + [Guid]::NewGuid().ToString('N'))
 [void][IO.Directory]::CreateDirectory($run)
+[IO.File]::Copy($PSCommandPath, (Join-Path $run 'harness-executed.ps1'))
+foreach ($helper in @('adoption-output-audit','adoption-process')) {
+    [IO.File]::Copy((Join-Path $PSScriptRoot ($helper+'.ps1')), (Join-Path $run ($helper+'-executed.ps1')))
+}
 function Hash([string]$Path) { (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
-function Execute([string]$Exe, [string[]]$Argv, [string]$Cwd, [string]$Kind) {
-    $start = [Diagnostics.ProcessStartInfo]::new()
-    $start.FileName = $Exe; $start.WorkingDirectory = $Cwd
-    $start.UseShellExecute = $false; $start.CreateNoWindow = $true
-    $start.RedirectStandardOutput = $true; $start.RedirectStandardError = $true
-    $start.StandardOutputEncoding = $utf8; $start.StandardErrorEncoding = $utf8
-    foreach ($argument in $Argv) { $start.ArgumentList.Add($argument) }
-    $process = [Diagnostics.Process]::new(); $process.StartInfo = $start
-    try {
-        [void]$process.Start()
-        $stdout = $process.StandardOutput.ReadToEndAsync(); $stderr = $process.StandardError.ReadToEndAsync()
-        if (!$process.WaitForExit(60000)) { $process.Kill($true); $process.WaitForExit(); throw 'Owned child exceeded 60 seconds' }
-        $result = [pscustomobject]@{exitCode=$process.ExitCode; stdout=$stdout.GetAwaiter().GetResult(); stderr=$stderr.GetAwaiter().GetResult()}
-        $raw = @{kind=$Kind; executable=$Exe; argv=@($Argv); cwd=$Cwd; actual=$result}
-        [IO.File]::AppendAllText((Join-Path $run 'raw-executions.jsonl'), ($raw | ConvertTo-Json -Depth 6 -Compress) + "`n", $utf8)
-        return $result
-    } finally { $process.Dispose() }
+function Execute([string]$Exe, [object[]]$Argv, [string]$Cwd, [string]$Kind) {
+    Invoke-AdoptionProcess -Exe $Exe -Argv $Argv -Cwd $Cwd -Kind $Kind -RawPath (Join-Path $run 'raw-executions.jsonl') -Layout nested
 }
 $pinned = Join-Path $Original '../_toolchain/fairyc-c34718bd/fairyc.exe'
 $pinnedHash = Hash $pinned
@@ -125,5 +115,6 @@ foreach ($variant in 'legacy', 'sdk') {
 foreach ($path in $protected.Keys) { if ((Hash $path) -ne $protected[$path]) { throw "Protected original changed: $path" } }
 $receipt = @{schema='fairyc.ledger-compare-adoption/v1'; harnessSha256=(Hash $PSCommandPath); compilerSha256=$compilerHash; compilerVersion=$version.stdout; pinnedCompilerSha256=$pinnedHash; variants=@('legacy','sdk'); profiles=@('development','release'); casesPerImage=$cases.Count; passed=$results.Count; failed=0; skipped=0; protectedFileCount=$protected.Count; protectedFiles=$protected; digests=$digests; images=$images; cases=$results; oracle='Historical independent expectations plus BigInteger/UTF-8 hex ordinal fixture'; scope='Same current compiler for both variants; not a historical-compiler rerun or full round4 revalidation'}
 $receipt.auditHelperSha256 = Hash (Join-Path $PSScriptRoot 'adoption-output-audit.ps1')
+$receipt.processHelperSha256 = Hash (Join-Path $PSScriptRoot 'adoption-process.ps1')
 [IO.File]::WriteAllText((Join-Path $run 'receipt.json'), ($receipt | ConvertTo-Json -Depth 10) + "`n", $utf8)
 Write-Output "PASS $($results.Count) exact-output executions; protected originals unchanged; receipt: $(Join-Path $run 'receipt.json')"

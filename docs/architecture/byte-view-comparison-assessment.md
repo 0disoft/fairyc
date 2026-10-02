@@ -456,6 +456,8 @@ the final receipt. `harness-executed.ps1` preserves the exact native-run driver;
 Future native runs apply the ordinal gate directly before recording results.
 The subsequent ledger/log/pack audit below addresses their cultural output
 assertions separately; they were not silently upgraded by this KV check.
+The consolidated audit at the end of this page now covers all four consumers
+through the same output gate and result schema.
 
 The run retains the identity log, both source/lock/helper copies, per-case raw logs,
 four EXEs, `receipt.json` and ordinal audit. Source/SDK digests, helper/compiler/EXE
@@ -529,3 +531,56 @@ but do not execute the compiler or product. The updated native branches were
 parsed and their shared gate tested; native check/build/fault/performance suites
 were intentionally not repeated. Product sources, SDK/API/version, external
 round4 projects and their original verification helpers remain unchanged.
+
+## Consolidated adoption audit, 2026-10-03
+
+The verification-tool cleanup is complete. All four consumers use
+[`adoption-output-audit.ps1`](../../tools/adoption-output-audit.ps1) for ordinal
+output checks and the same `fairyc.adoption-ordinal-audit/v1` result fields.
+KV retains its owned-child checkpoint and actual SDK/OS publication-failure
+checks. Receipt, raw-log, executed-harness, current audit-harness and helper
+hashes are recorded separately; missing historical helper hashes remain null.
+
+[`adoption-process.ps1`](../../tools/adoption-process.ps1) owns ordinary native
+argv validation, explicit UTF-8 readers, asynchronous stdout/stderr collection,
+closed stdin, the 60-second execution limit and bounded owned-child cleanup.
+It preserves the nested `actual` raw layout for ledger/log and the flat output
+fields for pack/KV. The external KV checkpoint driver remains unchanged.
+Future native runs archive their executing harness and both shared helpers;
+audits verify recorded helper hashes against those archives when available.
+
+Run the complete check from the Fairy C repository with one command:
+
+```powershell
+./tools/audit-adoption-evidence.ps1
+```
+
+[`audit-adoption-evidence.ps1`](../../tools/audit-adoption-evidence.ps1) defaults
+to the four preserved run IDs documented above. Its `LedgerReceipt`,
+`LogReceipt`, `PackReceipt`, `KvReceipt` and `Fairyc` parameters allow explicit
+artifact selection without searching for an ambiguous latest run. It runs the
+ten output-gate cases and
+[`test-adoption-process.ps1`](../../tools/test-adoption-process.ps1), then audits
+the four saved receipts sequentially. The five process-boundary cases exercise
+both raw layouts, literal empty/quoted/Unicode/metacharacter argv, simultaneous
+large stdout/stderr, invalid null/numeric argv and timeout termination. They
+start three bounded PowerShell fixture children; no Fairy program or compiler
+is executed.
+
+The consolidated run `fa6ea4ea8c92480281ae08dfb12e1712` passed **628 retained
+cases**: ledger 68, log 104, pack 128 and KV 328. Its
+`.cache/adoption-audit/<run-id>/summary.json` records `nativeExecutions=0`
+(Fairy/compiler), `helperHostExecutions=3`, the gate counts, current script
+hashes, preserved previous-audit hashes and all four uniform audit results.
+Each consumer also has its own JSON result in that new directory. Individual
+`-AuditReceipt` calls create a uniquely named `ordinal-audit-<id>.json`; they
+never overwrite the earlier `ordinal-audit.json`, receipt or raw logs.
+
+This closes the five requested tool-cleanup items. Native product check/build,
+full round4, controlled fault and performance runs were not repeated: their
+retained evidence is reused. The changed wrappers were parsed and their common
+execution boundary tested with host fixtures; full rebuilt Fairy programs were
+not tested through those wrappers again. Existing adoption limits still apply.
+No Fairy product source, public API, SDK version, snapshot format, database,
+external round4 project or original verification helper changed. No release or
+push was performed.

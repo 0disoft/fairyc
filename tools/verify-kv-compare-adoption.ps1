@@ -6,57 +6,18 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
-function Assert-OrdinalOutputs($Entries) {
-    foreach ($entry in $Entries) {
-        if ($entry.actual.exitCode -ne $entry.expected.exitCode -or
-            ![StringComparer]::Ordinal.Equals($entry.actual.stdout, $entry.expected.stdout) -or
-            ![StringComparer]::Ordinal.Equals($entry.actual.stderr, $entry.expected.stderr)) {
-            throw "Ordinal output mismatch: $($entry.variant)/$($entry.profile)/$($entry.name)"
-        }
-    }
-}
-if ($AuditReceipt) {
-    $receiptPath = (Resolve-Path -LiteralPath $AuditReceipt).Path
-    $cacheRoot = [IO.Path]::GetFullPath((Join-Path $repo '.cache/kv-compare-adoption')) + [IO.Path]::DirectorySeparatorChar
-    if (!$receiptPath.StartsWith($cacheRoot, [StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($receiptPath) -cne 'receipt.json') { throw 'Audit only this checkout KV adoption receipt' }
-    $receipt = Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
-    if ($receipt.schema -cne 'fairyc.kv-compare-adoption/v1' -or $receipt.passed -ne 328 -or $receipt.cases.Count -ne 328) { throw 'Unexpected KV adoption receipt' }
-    # Prove that the stricter gate rejects Unicode spellings the cultural operator merges.
-    $caught = $false
-    try { Assert-OrdinalOutputs @(@{actual=@{exitCode=0; stdout='é'; stderr=''}; expected=@{exitCode=0; stdout=('e'+[char]0x301); stderr=''}}) }
-    catch { if (!$_.Exception.Message.StartsWith('Ordinal output mismatch:', [StringComparison]::Ordinal)) { throw }; $caught=$true }
-    if (!$caught) { throw 'Ordinal mismatch guard failed' }
-    Assert-OrdinalOutputs $receipt.cases
-    foreach ($entry in $receipt.cases) {
-        $raw = [IO.File]::ReadAllLines($entry.rawEvidence.path)[$entry.rawEvidence.line-1] | ConvertFrom-Json
-        if ($raw.kind -cne 'program' -or $raw.exitCode -ne $entry.actual.exitCode -or
-            ![StringComparer]::Ordinal.Equals($raw.cwd, $entry.cwd) -or
-            ![StringComparer]::Ordinal.Equals($raw.stdout, $entry.actual.stdout) -or
-            ![StringComparer]::Ordinal.Equals($raw.stderr, $entry.actual.stderr) -or $raw.argv.Count -ne $entry.argv.Count) { throw 'Raw record mismatch' }
-        for ($i=0; $i -lt $raw.argv.Count; $i++) { if (![StringComparer]::Ordinal.Equals($raw.argv[$i], $entry.argv[$i])) { throw 'Raw argv mismatch' } }
-        if ($entry.evidence.kind -eq 'checkpoint-kill') {
-            $checkpoint = $raw.checkpoint
-            if ($checkpoint.startedPid -ne $checkpoint.checkpointPid -or $checkpoint.startedPid -ne $checkpoint.killedPid -or !$checkpoint.exited -or $checkpoint.startedPid -ne $entry.evidence.checkpoint.startedPid -or $entry.evidence.powerLossClaim) { throw 'Raw owned-child evidence mismatch' }
-        }
-        if ($entry.evidence.kind -eq 'actual-sdk-os-publication-failure' -and (!$raw.checkpoint.lockAcquiredAfterCheckpoint -or !$entry.evidence.isActualSdkFailure)) { throw 'Actual SDK failure evidence mismatch' }
-        foreach ($output in $entry.outputs) { if ((Get-FileHash -LiteralPath $output.path).Hash.ToLowerInvariant() -ne $output.actualSha256 -or $output.actualSha256 -ne $output.expectedSha256) { throw 'Retained snapshot bytes changed' } }
-    }
-    foreach ($image in $receipt.images) { if ((Get-FileHash -LiteralPath $image.executable).Hash.ToLowerInvariant() -ne $image.sha256) { throw 'Retained EXE changed' } }
-    if ((Get-FileHash -LiteralPath $Fairyc).Hash.ToLowerInvariant() -ne $receipt.compilerSha256) { throw 'Retained compiler changed' }
-    foreach ($property in $receipt.protectedFiles.PSObject.Properties) { if ((Get-FileHash -LiteralPath $property.Name).Hash.ToLowerInvariant() -ne $property.Value) { throw 'Protected original changed' } }
-    $executedHarness = Join-Path (Split-Path $receiptPath) 'harness-executed.ps1'
-    if (!(Test-Path -LiteralPath $executedHarness)) { $executedHarness=$PSCommandPath }
-    if ((Get-FileHash -LiteralPath $executedHarness).Hash.ToLowerInvariant() -ne $receipt.harnessSha256) { throw 'Executed harness hash mismatch' }
-    $audit = @{receiptSha256=(Get-FileHash -LiteralPath $receiptPath).Hash.ToLowerInvariant(); executedHarnessSha256=$receipt.harnessSha256; auditHarnessSha256=(Get-FileHash -LiteralPath $PSCommandPath).Hash.ToLowerInvariant(); ordinalCases=328; normalizationMismatchRejected=$caught; nativeExecutions=0}
-    [IO.File]::WriteAllText((Join-Path (Split-Path $receiptPath) 'ordinal-audit.json'), ($audit | ConvertTo-Json) + "`n", [Text.UTF8Encoding]::new($false))
-    Write-Output 'PASS 328 ordinal output/raw/state/EXE/original checks; Unicode mismatch guard rejected; no native executions'
-    return
-}
+. (Join-Path $PSScriptRoot 'adoption-output-audit.ps1')
+if ($AuditReceipt) { Invoke-AdoptionOrdinalAudit $AuditReceipt 'kv' $Fairyc $PSCommandPath; return }
 $Original = (Resolve-Path -LiteralPath $Original).Path
 $Fairyc = (Resolve-Path -LiteralPath $Fairyc).Path
+. (Join-Path $PSScriptRoot 'adoption-process.ps1')
 $utf8 = [Text.UTF8Encoding]::new($false, $true)
 $evidenceRoot = Join-Path $repo ('.cache/kv-compare-adoption/' + [Guid]::NewGuid().ToString('N'))
 [void][IO.Directory]::CreateDirectory($evidenceRoot)
+[IO.File]::Copy($PSCommandPath, (Join-Path $evidenceRoot 'harness-executed.ps1'))
+foreach ($helper in @('adoption-output-audit','adoption-process')) {
+    [IO.File]::Copy((Join-Path $PSScriptRoot ($helper+'.ps1')), (Join-Path $evidenceRoot ($helper+'-executed.ps1')))
+}
 $run = $evidenceRoot; $workspace = $repo
 function Hash([string]$Path) { (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
 function Full([string]$Path) {
@@ -64,25 +25,7 @@ function Full([string]$Path) {
     return [IO.Path]::GetFullPath((Join-Path $workspace $Path))
 }
 function Execute([string]$Exe, [object[]]$Arguments, [string]$Kind) {
-    $start = [Diagnostics.ProcessStartInfo]::new()
-    $start.FileName = $Exe; $start.WorkingDirectory = $workspace
-    $start.UseShellExecute = $false; $start.CreateNoWindow = $true
-    $start.RedirectStandardOutput = $true; $start.RedirectStandardError = $true
-    $start.StandardOutputEncoding = $utf8; $start.StandardErrorEncoding = $utf8
-    foreach ($argument in $Arguments) {
-        if ($null -eq $argument -or $argument -isnot [string]) { throw 'Arguments must be non-null strings' }
-        $start.ArgumentList.Add($argument)
-    }
-    $process = [Diagnostics.Process]::new(); $process.StartInfo = $start
-    try {
-        [void]$process.Start()
-        $stdout = $process.StandardOutput.ReadToEndAsync(); $stderr = $process.StandardError.ReadToEndAsync()
-        if (!$process.WaitForExit(60000)) { $process.Kill($true); $process.WaitForExit(); throw 'Owned child exceeded 60 seconds' }
-        $actual = [pscustomobject]@{exitCode=$process.ExitCode; stdout=$stdout.GetAwaiter().GetResult(); stderr=$stderr.GetAwaiter().GetResult()}
-        $raw = @{kind=$Kind; executable=$Exe; argv=@($Arguments); cwd=$workspace; exitCode=$actual.exitCode; stdout=$actual.stdout; stderr=$actual.stderr}
-        [IO.File]::AppendAllText((Join-Path $run 'raw-executions.jsonl'), ($raw | ConvertTo-Json -Depth 6 -Compress) + "`n", $utf8)
-        return $actual
-    } finally { $process.Dispose() }
+    Invoke-AdoptionProcess -Exe $Exe -Argv $Arguments -Cwd $workspace -Kind $Kind -RawPath (Join-Path $run 'raw-executions.jsonl') -Layout flat
 }
 $pinned = Join-Path $Original '../_toolchain/fairyc-c34718bd/fairyc.exe'
 $pinnedHash = Hash $pinned
@@ -176,7 +119,7 @@ foreach ($variant in 'legacy','sdk') {
         $composed = @($entries | Where-Object { [StringComparer]::Ordinal.Equals($_.key, 'é') })[0]
         Mutation 'byte-order-delete-decomposed' $profile $exe 'delete' $names[2] '' 2147483648 $entries $remaining 'é' $composed.value
         if ($results.Count -ne 82) { throw 'Per-image case count mismatch' }
-        Assert-OrdinalOutputs $results
+        Assert-AdoptionOutputs $results
         foreach ($entry in $results) {
             if ($entry.evidence.kind -eq 'checkpoint-kill') {
                 $checkpoint = $entry.evidence.checkpoint
@@ -189,5 +132,7 @@ foreach ($variant in 'legacy','sdk') {
 foreach ($path in $protected.Keys) { if ((Hash $path) -ne $protected[$path]) { throw "Protected original changed: $path" } }
 if ((Hash $Fairyc) -ne $compilerHash) { throw 'Compiler changed during verification' }
 $receipt = @{schema='fairyc.kv-compare-adoption/v1'; harnessSha256=(Hash $PSCommandPath); compilerSha256=$compilerHash; compilerVersion=$version.stdout; pinnedCompilerSha256=$pinnedHash; helpers=$helpers; variants=@('legacy','sdk'); profiles=@('development','release'); casesPerImage=82; passed=$allResults.Count; failed=0; skipped=0; protectedFileCount=$protected.Count; protectedFiles=$protected; digests=$digests; images=$images; cases=$allResults; selectedGroups=$Cases; oracle='Reviewed independent BinaryWriter/BigInteger/UTF-8 ordinal snapshot and checksum oracle, whole-byte state trees, fresh processes and checkpoint-controlled faults'; scope='Same current compiler for both variants; selected adoption cases, not full round4 revalidation or physical power-loss evidence'}
+$receipt.auditHelperSha256 = Hash (Join-Path $PSScriptRoot 'adoption-output-audit.ps1')
+$receipt.processHelperSha256 = Hash (Join-Path $PSScriptRoot 'adoption-process.ps1')
 [IO.File]::WriteAllText((Join-Path $evidenceRoot 'receipt.json'), ($receipt | ConvertTo-Json -Depth 16) + "`n", $utf8)
 Write-Output "PASS $($allResults.Count) executions and whole-state oracles; protected originals unchanged; receipt: $(Join-Path $evidenceRoot 'receipt.json')"

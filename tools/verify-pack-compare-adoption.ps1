@@ -10,32 +10,19 @@ $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 if ($AuditReceipt) { Invoke-AdoptionOrdinalAudit $AuditReceipt 'pack' $Fairyc $PSCommandPath; return }
 $Original = (Resolve-Path -LiteralPath $Original).Path
 $Fairyc = (Resolve-Path -LiteralPath $Fairyc).Path
+. (Join-Path $PSScriptRoot 'adoption-process.ps1')
 $utf8 = [Text.UTF8Encoding]::new($false, $true)
 $evidenceRoot = Join-Path $repo ('.cache/pack-compare-adoption/' + [Guid]::NewGuid().ToString('N'))
 [void][IO.Directory]::CreateDirectory($evidenceRoot)
+[IO.File]::Copy($PSCommandPath, (Join-Path $evidenceRoot 'harness-executed.ps1'))
+foreach ($helper in @('adoption-output-audit','adoption-process')) {
+    [IO.File]::Copy((Join-Path $PSScriptRoot ($helper+'.ps1')), (Join-Path $evidenceRoot ($helper+'-executed.ps1')))
+}
 $run = $evidenceRoot
 $workspace = $repo
 function Hash([string]$Path) { (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
 function Execute([string]$Exe, [object[]]$Arguments, [string]$Kind) {
-    $start = [Diagnostics.ProcessStartInfo]::new()
-    $start.FileName = $Exe; $start.WorkingDirectory = $workspace
-    $start.UseShellExecute = $false; $start.CreateNoWindow = $true
-    $start.RedirectStandardOutput = $true; $start.RedirectStandardError = $true
-    $start.StandardOutputEncoding = $utf8; $start.StandardErrorEncoding = $utf8
-    foreach ($argument in $Arguments) {
-        if ($null -eq $argument -or $argument -isnot [string]) { throw 'Arguments must be non-null strings' }
-        $start.ArgumentList.Add($argument)
-    }
-    $process = [Diagnostics.Process]::new(); $process.StartInfo = $start
-    try {
-        [void]$process.Start()
-        $stdout = $process.StandardOutput.ReadToEndAsync(); $stderr = $process.StandardError.ReadToEndAsync()
-        if (!$process.WaitForExit(60000)) { $process.Kill($true); $process.WaitForExit(); throw 'Owned child exceeded 60 seconds' }
-        $actual = [pscustomobject]@{exitCode=$process.ExitCode; stdout=$stdout.GetAwaiter().GetResult(); stderr=$stderr.GetAwaiter().GetResult()}
-        $raw = @{kind=$Kind; executable=$Exe; argv=@($Arguments); cwd=$workspace; exitCode=$actual.exitCode; stdout=$actual.stdout; stderr=$actual.stderr}
-        [IO.File]::AppendAllText((Join-Path $run 'raw-executions.jsonl'), ($raw | ConvertTo-Json -Depth 6 -Compress) + "`n", $utf8)
-        return $actual
-    } finally { $process.Dispose() }
+    Invoke-AdoptionProcess -Exe $Exe -Argv $Arguments -Cwd $workspace -Kind $Kind -RawPath (Join-Path $run 'raw-executions.jsonl') -Layout flat
 }
 function Diagnostic([string]$Path, [int]$Line, [string]$Message) {
     $where = if ($Line -eq 0) { $Path } else { "${Path}:line=$Line" }
@@ -136,5 +123,6 @@ foreach ($path in $protected.Keys) { if ((Hash $path) -ne $protected[$path]) { t
 if ((Hash $Fairyc) -ne $compilerHash) { throw 'Compiler changed during verification' }
 $receipt = @{schema='fairyc.pack-compare-adoption/v1'; harnessSha256=(Hash $PSCommandPath); compilerSha256=$compilerHash; compilerVersion=$version.stdout; pinnedCompilerSha256=$pinnedHash; helpers=$helpers; variants=@('legacy','sdk'); profiles=@('development','release'); casesPerImage=($historicalNames.Count+$newNames.Count); passed=$allResults.Count; failed=0; skipped=0; protectedFileCount=$protected.Count; protectedFiles=$protected; digests=$digests; images=$images; cases=$allResults; oracle='Reviewed independent BinaryWriter/BigInteger/UTF-8 hex ordinal helpers plus handwritten fixed pack; whole-byte, file-tree and exact output comparisons'; scope='Same current compiler for both variants; not full round4 revalidation, historical-compiler rerun or fault injection'}
 $receipt.auditHelperSha256 = Hash (Join-Path $PSScriptRoot 'adoption-output-audit.ps1')
+$receipt.processHelperSha256 = Hash (Join-Path $PSScriptRoot 'adoption-process.ps1')
 [IO.File]::WriteAllText((Join-Path $evidenceRoot 'receipt.json'), ($receipt | ConvertTo-Json -Depth 14) + "`n", $utf8)
 Write-Output "PASS $($allResults.Count) executions and whole-byte oracles; protected originals unchanged; receipt: $(Join-Path $evidenceRoot 'receipt.json')"
