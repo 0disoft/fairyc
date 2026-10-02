@@ -98,6 +98,7 @@ type emitter struct {
 	layoutEngine       *layout.Engine
 	functions          []mir.Function
 	bySymbol           map[hir.SymbolID]int
+	nonReturning       map[hir.SymbolID]bool
 	foreignFunctions   []mir.ForeignFunction
 	foreignBySymbol    map[hir.SymbolID]int
 	entryIndex         int
@@ -331,6 +332,7 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 		layoutEngine:       layoutEngine,
 		functions:          functions,
 		bySymbol:           make(map[hir.SymbolID]int, len(functions)),
+		nonReturning:       nonReturningFunctionsForC(functions),
 		foreignFunctions:   foreignFunctions,
 		foreignBySymbol:    foreignBySymbol,
 		entryIndex:         -1,
@@ -493,7 +495,11 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 			fmt.Fprintf(&output, "    (void)&fy_fn_%d;\n", index)
 		}
 	}
-	fmt.Fprintf(&output, "    return (int)fy_fn_%d();\n}\n", value.entryIndex)
+	if value.nonReturning[functions[value.entryIndex].Symbol] {
+		fmt.Fprintf(&output, "    fy_fn_%d();\n}\n", value.entryIndex)
+	} else {
+		fmt.Fprintf(&output, "    return (int)fy_fn_%d();\n}\n", value.entryIndex)
+	}
 
 	names := make([]string, len(functions))
 	for index := range functions {
@@ -3119,7 +3125,11 @@ func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) erro
 	if err != nil {
 		return fmt.Errorf("prototype for %s: %w", function.Name, err)
 	}
-	fmt.Fprintf(output, "static %s fy_fn_%d(", resultType, functionIndex)
+	output.WriteString("static ")
+	if e.nonReturning[function.Symbol] {
+		output.WriteString("_Noreturn ")
+	}
+	fmt.Fprintf(output, "%s fy_fn_%d(", resultType, functionIndex)
 	if err := e.emitParameters(output, function.Parameters, function.ParameterTypes); err != nil {
 		return fmt.Errorf("prototype for %s: %w", function.Name, err)
 	}
@@ -3163,7 +3173,11 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	if err != nil {
 		return fmt.Errorf("function %s: %w", function.Name, err)
 	}
-	fmt.Fprintf(output, "static %s fy_fn_%d(", resultType, functionIndex)
+	output.WriteString("static ")
+	if e.nonReturning[function.Symbol] {
+		output.WriteString("_Noreturn ")
+	}
+	fmt.Fprintf(output, "%s fy_fn_%d(", resultType, functionIndex)
 	if err := e.emitParameters(output, function.Parameters, function.ParameterTypes); err != nil {
 		return fmt.Errorf("function %s: %w", function.Name, err)
 	}
@@ -3210,7 +3224,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	fmt.Fprintf(output, "    goto fy_b_%d;\n", function.Entry)
 	blocks := slices.Clone(function.Blocks)
 	slices.SortFunc(blocks, func(left, right mir.Block) int { return int(left.ID - right.ID) })
-	reachable := reachableBlocksForC(*function)
+	reachable := reachableBlocksForC(*function, e.nonReturning)
 	fixedTrapGroups := make(map[string][]mir.BlockID)
 	for _, block := range blocks {
 		// Empty, non-returning traps with the same category have identical C behavior.
@@ -3955,7 +3969,7 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 			return fmt.Errorf("call in %s passes %d arguments, want %d", function.Name, len(terminator.Arguments), len(calleeParameters))
 		}
 		output.WriteString("    ")
-		if calleeResult != hir.TypeVoid {
+		if calleeResult != hir.TypeVoid && !e.nonReturning[terminator.Callee] {
 			fmt.Fprintf(output, "fy_l_%d = ", terminator.DestinationLocal)
 		}
 		if foreign {
@@ -3974,7 +3988,9 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 			output.WriteString(value)
 		}
 		output.WriteString(");\n")
-		fmt.Fprintf(output, "    goto fy_b_%d;\n", target)
+		if !e.nonReturning[terminator.Callee] {
+			fmt.Fprintf(output, "    goto fy_b_%d;\n", target)
+		}
 	case mir.TerminatorSwitch:
 		return e.emitSwitch(output, functionIndex, terminator)
 	case mir.TerminatorReturn:
@@ -4014,6 +4030,13 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 
 func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, terminator mir.Terminator) error {
 	function := &e.functions[functionIndex]
+	if selected, constant := constantBooleanSuccessor(terminator); constant {
+		if terminator.SwitchKind == "assert" && terminator.SwitchOperands[0].I32 == 0 {
+			output.WriteString("    " + e.pendingTrapAssignment(functionIndex, selected, "FY_TRAP_ASSERTION_FAILED"))
+		}
+		fmt.Fprintf(output, "    goto fy_b_%d;\n", selected)
+		return nil
+	}
 	if terminator.SwitchKind == "enum" {
 		enumIndex, found := e.enumByType[terminator.SwitchType]
 		if !found {

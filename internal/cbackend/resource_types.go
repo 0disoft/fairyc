@@ -68,6 +68,9 @@ func (e *emitter) resourceHasNestedFields(value hir.Type) bool {
 // drop caller. Child destruction must observe any changes the body made to this,
 // not a stale by-value copy. The source and MIR cleanup signatures remain void.
 func (e *emitter) emittedFunctionResultType(function *mir.Function) (string, error) {
+	if e.nonReturning[function.Symbol] {
+		return "void", nil
+	}
 	if e.resourceHasNestedFields(function.DropGlueFor) {
 		return e.cValueType(function.DropGlueFor)
 	}
