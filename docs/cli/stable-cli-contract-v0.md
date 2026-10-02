@@ -60,9 +60,9 @@ This precedence is fixed for the stable commands. Experimental commands may requ
 
 `new`, `check`, semantic `test`, `explain`, and `targets` require no native compiler or linker. Their supported hosted correctness lanes are Linux amd64 and Windows amd64 under the repository's Go frontend CI. The distributed `fairyc` executable itself embeds its Go runtime; users do not need a separate Go installation to run it.
 
-Stable `build` and `run` select `x86_64-windows-msvc` on Windows amd64 and `x86_64-linux-gnu` on Linux GNU amd64. Windows requires x64 MSVC and its SDK; Linux requires glibc and GCC or Clang on PATH (GCC is preferred). Native `test` remains Windows-only. Unsupported hosts fail closed. Linux build/run integration and save-failure tests are in the existing Ubuntu test job; their native results have not yet been observed for this change.
+Stable `build`, `run` and `test --native` select `x86_64-windows-msvc` on Windows amd64 and `x86_64-linux-gnu` on Linux GNU amd64. Windows requires x64 MSVC and its SDK; Linux requires glibc and GCC or Clang on PATH (GCC is preferred). Unsupported hosts fail closed. Linux CLI integration and save-failure tests are in the existing Ubuntu test job; their native results have not yet been observed for this change.
 
-Stable Linux command admission does not promote the target's independent conformance or distribution status. See [ADR 0425](../adr/0425-stable-linux-build-and-run.md).
+Stable Linux command admission does not promote the target's independent conformance or distribution status. See [ADR 0425](../adr/0425-stable-linux-build-and-run.md) and [ADR 0426](../adr/0426-linux-native-workspace-tests.md).
 
 The experimental `build-workspace --target x86_64-linux-gnu` path retains its explicit `--cc gcc` or `--cc clang`, Linux amd64 glibc host, and output-under-`build/` contract. It shares the private Linux storage transport with stable build/run.
 

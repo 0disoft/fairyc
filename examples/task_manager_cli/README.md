@@ -30,7 +30,7 @@ fairyc build --locked
 
 Use `fairyc build --release --locked` for the optimized image, or
 `fairyc run --locked -- ./tasks.tsv list` for temporary execution. GCC is
-preferred, with Clang used when GCC is absent. Native `test` remains Windows-only.
+preferred, with Clang used when GCC is absent. Native tests use the same host backend.
 
 Default listing selects all tasks in ascending numeric ID order. Title order is
 unsigned UTF-8 byte order, with ascending ID for equal titles; it does not apply

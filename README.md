@@ -34,8 +34,8 @@ without PowerShell, Bun or a maintainer's artifact cache; see
 [Contributing](CONTRIBUTING.md). SDK stage0.79 adds Linux companions for prepared
 file replacement, exact reads, removal and UTF-8 process arguments. The
 [task-manager example](examples/task_manager_cli/README.md) now uses ordinary
-`fairyc build/run` on Linux GNU amd64 with GCC or Clang. Native `fairyc test`
-remains Windows-only; Linux native execution for this change is still unverified.
+`fairyc build/run/test --native` on Linux GNU amd64 with GCC or Clang. Native
+Linux execution for these changes is still unverified on this Windows host.
 
 ### Create, test and run
 

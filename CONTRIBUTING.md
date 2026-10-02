@@ -37,10 +37,22 @@ Ubuntu's existing Go CI lane runs the Linux publication/argv probes; Windows's
 lane runs the existing prepared-save write/sync/close/publication fault and
 bounded-kill probes. No new CI job is needed.
 
-Stable native application build/run/test remains Windows-only. On Linux use
-`fairyc experimental build-workspace` as documented in
-[the task manager](examples/task_manager_cli/README.md). Do not infer stable target
-admission or observed Linux execution from a Go cross-build or a skipped test.
+Ordinary `fairyc build`, `fairyc run` and `fairyc test --native` select the current
+supported host backend. On Linux GNU amd64/glibc, GCC is preferred and Clang is
+used when GCC is absent; see [the task manager](examples/task_manager_cli/README.md).
+Do not infer observed Linux execution or target conformance from a Go cross-build
+or a skipped test.
+
+To check the Linux CLI and prepared-save path together without repeating every
+compiler experiment, use the existing Go tests:
+
+```sh
+FAIRYC_TEST_EVIDENCE_DIR="$PWD/.cache/linux-native-evidence" CGO_ENABLED=0 go test -mod=readonly -count=1 -v -run '^(TestStableNativePortableExecution|TestStableLinux.*|TestTaskManagerPortableNativeSmoke|TestTaskManagerLinuxPreparedSaveFaults|TestLinuxPreparedPublication|TestExecuteLinux.*)$' ./internal/cli ./internal/cstdlib ./internal/cdriver
+```
+
+This requires a real Linux host with GCC and Clang. Save probes retain their image
+hashes, source/SDK identities and exact process/file observations under the evidence
+directory. No test installs dependencies, fills disks or claims power-loss durability.
 
 The six remaining `.ps1` files under `tools/` reproduce historical Windows
 adoption experiments against explicitly supplied external projects/artifacts.

@@ -621,14 +621,14 @@ runs each test by canonical `<module>::<function>` order. Workspace mode uses th
 `<package-uid>::<module>::<function>` identity. Each semantic test receives a fresh deterministic
 interpreter state. `--native`
 instead clones the verified MIR per test, appends and verifies one private i32 harness that calls
-the selected void entry, emits only its reachable Windows closure, compiles and inspects a temporary
-PE, and runs it in a fresh process and temporary directory. Native stdin is EOF by default. Explicit
+the selected void entry, emits only its reachable host closure, compiles and inspects a temporary
+PE on Windows or ELF on Linux, and runs it in a fresh process and temporary directory. Native stdin is EOF by default. Explicit
 `--stdin` requires exactly one selected test after complete compiler admission, then attaches caller
-input directly only after compilation, linking, and PE/unwind inspection. It does not pre-read,
+input directly only after compilation, linking, and host image inspection. It does not pre-read,
 buffer, replay, retain, decode, or impose a separate byte limit. Zero or multiple selected tests fail
 as code 2 without consuming input or launching a process. Without a delimiter the program argument
 list is empty; native values after the first `--` are forwarded unchanged.
-Development uses low MSVC; `--native --release` uses optimized MSVC. A trap fails that test and later
+Development uses the low host profile; `--native --release` uses its optimized profile. A trap fails that test and later
 tests continue. Interpreter or backend capability rejection aborts as code 2 rather than becoming a
 false test failure.
 
@@ -680,7 +680,7 @@ passing, 2 for invocation/capability/default native-program-output rejection, 3 
 diagnostics, 4 for internal/output failure, 5 for one or more trapped tests, 6 for native
 toolchain/build/inspection/execution failure, and 7 for workspace/test-source/lock failure. Default
 mode invokes no target backend, toolchain, process, network, or host I/O. Native mode requires local
-Windows x64 MSVC but never WSL or network and retains no artifact. A report writer may accept a
+Windows x64 MSVC or Linux GNU amd64/glibc with GCC or Clang, performs no network access and retains no artifact. A report writer may accept a
 prefix before code 4; ordinary lock maintenance and earlier native test effects may precede later
 failure, while `--locked` writes nothing.
 
@@ -718,7 +718,7 @@ object. Default and `--package` use `fairyc.test-report/v1`; `--workspace` uses
 `fairyc.test-report/v2` for qualified identities. Both preserve canonical outcome order and process codes while adding
 the exact engine, nullable target/profile, per-test passed/failed outcome and nullable trap category,
 matching count/passed/failed totals, aggregate status, and lock state. Interpreter reports use null
-target/profile; native reports identify `x86_64-windows-msvc` and `development` or `release`.
+target/profile; native reports identify `x86_64-windows-msvc` or `x86_64-linux-gnu` and `development` or `release`.
 Compilation, capability, toolchain, inspection, execution-infrastructure, and package failures emit
 no JSON report. Timings, host inventory, toolchain versions, program streams in v1-v3, and temporary
 harness or artifact identities are absent. V4 adds only the two base64 stream fields defined above.
@@ -744,15 +744,15 @@ separators. Consumers must match both identities before treating a retained span
 | --- | --- | --- |
 | `fairyc new <package-name> --uid <package-uid>` | Create one exact no-overwrite starter project below the current directory | Fairy C source only |
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
-| `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
-| `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, direct caller stdin for exactly one selected native test or bounded stdin-file replay for every selected native test, an optional bounded process timeout, and opt-in exact binary output attachments in native JSON v4 | Optional temporary native images |
+| `fairyc build [--release] [--locked]` | Build or replace the current root package's one host executable | Yes |
+| `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary host image, forwarding arguments after `--` to the program | Yes |
+| `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary host image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, direct caller stdin for exactly one selected native test or bounded stdin-file replay for every selected native test, an optional bounded process timeout, and opt-in exact binary output attachments in native JSON v4 | Optional temporary native images |
 | `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` | Compile-admit the complete selected test overlay and list all or exact-directory/file canonical identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Catalog-unreachable or feature-instance-ambiguous workspace test aggregation, fuzzy/tag/glob test filtering, parallel scheduling, portable native-test targets, target triples beyond
-  the declared emit profiles and build/run's fixed local Windows path,
+Catalog-unreachable or feature-instance-ambiguous workspace test aggregation, fuzzy/tag/glob test filtering, parallel scheduling, cross-target native tests, target triples beyond
+  the declared emit profiles and build/run's selected local host path,
 additional program-input routing beyond stable run and explicit single-native-test stdin,
 feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.

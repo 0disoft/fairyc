@@ -141,10 +141,10 @@ are `<package-uid>::<module>::<function>`. Completed tests use `test <identity> 
 <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`. Zero tests emit
 only the successful final line. Without `--json`, the command writes no ANSI escape, absolute path,
 source text, artifact, JSON, or native program stream. Default mode uses the semantic interpreter. `--native`
-uses one inspected temporary Windows image per test but retains the same report; native program
+uses one inspected temporary Windows PE or Linux ELF per test but retains the same report; native program
 output is rejected instead of mixed into it. Arguments after the first `--` are forwarded only in
 native mode and do not appear in the report. Explicit native-only `--stdin` requires exactly one
-selected test after complete compiler admission and attaches caller input directly after PE
+selected test after complete compiler admission and attaches caller input directly after host image
 inspection; default input remains EOF, and stdin bytes do not appear in the report. Success uses code `0`; invocation, interpreter/backend
 capability, or native-program-output rejection uses `2`; source and `E9001` test-declaration
 diagnostics use `3`; internal and output failures use `4`; one or more language traps use `5`;
@@ -177,7 +177,7 @@ classified. Default and `--package` use `fairyc.test-report/v1`; `--workspace` u
 `fairyc.test-report/v2`. It contains the exact `engine`, nullable `target` and
 `profile`, canonical `tests` outcomes with nullable trap categories, matching `count`, `passed`, and
 `failed` totals, aggregate `status`, and `lock`. Interpreter target/profile are null; native target
-is `x86_64-windows-msvc` with `development` or `release`. All-passing still exits 0; one or more
+is `x86_64-windows-msvc` or `x86_64-linux-gnu` with `development` or `release`. All-passing still exits 0; one or more
 language traps writes the complete JSON and exits 5. Failures that previously produced no human
 report likewise produce no JSON report, and writer failure remains code 4 after a possible prefix.
 With `--locations`, JSON uses `fairyc.test-report/v3` and every outcome adds the exact-current

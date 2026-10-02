@@ -104,13 +104,14 @@ The generated starter returns zero after checking that ` + "`answer()`" + ` is 4
 With Linux GNU amd64, glibc and GCC or Clang on PATH:
 
 ` + "```sh" + `
+fairyc test --native --locked
 fairyc run --locked
 fairyc build --release --locked
 ` + "```" + `
 
 Run the executable under ` + "`build/`" + ` with this package's name and no extension.
 Linux process status preserves the low eight bits of ` + "`main`" + `'s return.
-Use the default semantic tests on Linux; ` + "`test --native`" + ` remains Windows-only.
+Use default semantic tests for fast checks or ` + "`test --native`" + ` for isolated ELF execution.
 
 ## Write to standard output
 
