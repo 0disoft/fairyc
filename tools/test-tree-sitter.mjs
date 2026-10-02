@@ -20,6 +20,14 @@ const captures=[...highlights.stdout.matchAll(/capture: \d+ - ([\w.]+),[^\n]*tex
 const has=(scope,text)=>assert(captures.some(c=>c.scope===scope&&c.text===text),`${scope}: ${text}\n${highlights.stdout}`);
 has('type.builtin','i64');
 has('type.builtin','u8');
+has('type','Buffer');
+assert.equal(captures.filter(c=>c.scope==='type'&&c.text==='Buffer').length,2,'qualified and generic types must capture the leaf identifier, excluding expression paths');
+has('type','BufferError');
+has('type','Result');
+has('attribute','effects');
+has('attribute','@');
+assert(!captures.some(c=>c.scope==='attribute'&&['filesystem','console'].includes(c.text)),'attribute arguments must not be captured as attribute names');
+assert(!captures.some(c=>c.scope==='type'&&c.text==='empty'),'call names must not be captured as types');
 has('function','identity');
 assert.equal(captures.filter(c=>c.scope==='function'&&c.text==='identity').length,2,'declaration and call must both be functions');
 has('function','len');

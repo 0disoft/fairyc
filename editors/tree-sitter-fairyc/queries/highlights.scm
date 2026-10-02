@@ -7,6 +7,7 @@
 (null) @constant.builtin
 (identifier) @variable
 (type_path) @type
+(type_path (path (identifier) @type))
 ((type_path (path . (identifier) @type.builtin .))
  (#match? @type.builtin "^(void|bool|u8|i32|i64|u32|usize|str|CStr)$"))
 (call_expression function: (path (identifier) @function .))
@@ -24,6 +25,7 @@
 (field_expression name: (identifier) @property)
 (record_field name: (identifier) @property)
 (attribute) @attribute
+(attribute . (path (identifier) @attribute))
 (variant_expression (identifier) @variant)
 (pattern (identifier) @variant)
 ((line_comment) @comment.doc (#match? @comment.doc "^///"))
@@ -35,3 +37,4 @@
  "<=" ">=" "&&" "||" "&" "|" "^" "~" "!" "<<" ">>" "<<=" ">>=" "&=" "|=" "^=" ".."] @operator
 ["(" ")" "[" "]" "{" "}"] @punctuation.bracket
 [";" "," "." "::" ":" "?" "@"] @punctuation.delimiter
+(attribute "@" @attribute)

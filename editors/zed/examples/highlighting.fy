@@ -18,7 +18,10 @@ fn i64 identity(ref i64 value) {
   return *value;
 }
 
+@effects(filesystem, console)
 fn void preview() {
+  var bytes::Buffer input = bytes::empty();
+  let Result<bytes::Buffer, bytes::BufferError> wrapped = .ok(input);
   var i64[4] totals = [0; 4];
   var u8[8] data = [0; 8];
   let ref mut u8[] part = ref mut data[1..4];
@@ -32,9 +35,11 @@ fn void preview() {
      /* nested comment */ still a comment */
   discard bytes::len(data);
   discard bytes::get<i64>(data);
+  discard bytes::Buffer;
   discard entry.show();
   discard shared;
   discard message;
   discard entry;
   discard status;
+  discard wrapped;
 }

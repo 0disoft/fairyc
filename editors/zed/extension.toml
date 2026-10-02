@@ -1,6 +1,6 @@
 id = "fairyc"
 name = "Fairy C"
-version = "0.1.1"
+version = "0.1.2"
 schema_version = 1
 authors = ["Rodisoft"]
 description = "Fairy C syntax support"

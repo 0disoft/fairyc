@@ -26,16 +26,25 @@ configuration. Zed may still download its WASI SDK to build the grammar. The
 helper itself does not download tools, install an extension, or change settings.
 
 Open `editors/zed/examples/highlighting.fy` and check that Zed selects **Fairy C**,
-then check types including `i64`, function declarations/calls, constants, enum
+then check `@effects`, qualified types such as `bytes::Buffer`, nested generic
+types, builtins including `i64`, function declarations/calls, constants, enum
 variants, strings/escapes, nested comments, `///` documentation and `..` views.
 Check matching/autoclosing braces, brackets, parentheses and quotes, comment
 toggling, indentation and the outline. Exact colors come from the active theme.
 The file is a parser/highlighting showcase, not a runnable SDK program.
 
+Version `0.1.2` captures each type identifier and the attribute name/`@` token
+directly. Capturing only their enclosing nodes lets the generic identifier
+capture win on the inner text. Expression paths and attribute arguments retain
+their own captures; a call such as `bytes::empty()` is not a type.
+
 The regular `editors/zed` adapter retains the LSP integration below. Both packages
 use extension ID `fairyc`; installing one replaces the other rather than providing
 two independent extensions. Native query/capture and Rust checks passed locally;
-in-editor installation, WASM compilation and interaction remain unverified.
+fresh installation, WASM compilation and LSP interaction are separate checks.
+For an existing syntax-only dev extension using the same grammar revision,
+refresh the language queries and use Zed's **Reload Extensions** command; a
+query-only correction does not require a new grammar or Rust adapter build.
 
 See [Zed's extension development guide](https://zed.dev/docs/extensions/developing-extensions)
 for toolchain and local installation requirements, and
