@@ -492,8 +492,8 @@ its external oracle helpers remain unchanged. All three expose `-AuditReceipt`
 before any compiler invocation or new native-run directory is created. Future
 native receipts also record the output helper's SHA256.
 
-[`test-adoption-output-audit.ps1`](../../tools/test-adoption-output-audit.ps1)
-passes ten focused gate cases. Two retain exact empty/Unicode/NUL observations;
+The historical `test-adoption-output-audit.ps1` passed ten focused gate cases
+(now replaced by `internal/adoptionaudit/observation_test.go`). Two retain exact empty/Unicode/NUL observations;
 eight reject composed/decomposed stdout in both directions, a stderr Unicode
 alias, case/newline/exit differences, null stdout and a missing exit code.
 The test explicitly reproduces the cultural-versus-ordinal Unicode distinction.
@@ -523,9 +523,10 @@ raw-log, executed-driver, updated-driver and shared-helper hashes. A first pack
 audit rejected a mixed-separator raw path; normalizing paths for file lookup
 fixed the audit without changing the source record or text comparison policy.
 
-Run the focused gate script directly. Audit an existing run with, for example,
-`./tools/verify-ledger-compare-adoption.ps1 -AuditReceipt .cache/ledger-compare-adoption/<run-id>/receipt.json`;
-use the corresponding log/pack script and cache directory for those consumers.
+The current gate tests run with `go test ./internal/adoptionaudit`. Audit a
+supplied retained run with `go run ./cmd/fairyc-evidence-audit -kind ledger
+-receipt <receipt.json> -compiler <retained-compiler>`; use `log`, `pack` or `kv`
+for the other consumers. Set `CGO_ENABLED=0` for repository Go commands.
 These checks require retained local artifacts and the matching compiler file,
 but do not execute the compiler or product. The updated native branches were
 parsed and their shared gate tested; native check/build/fault/performance suites
@@ -549,23 +550,18 @@ fields for pack/KV. The external KV checkpoint driver remains unchanged.
 Future native runs archive their executing harness and both shared helpers;
 audits verify recorded helper hashes against those archives when available.
 
-Run the complete check from the Fairy C repository with one command:
+The original consolidated runner `audit-adoption-evidence.ps1` and its two
+PowerShell-only helper tests have since been removed. Common gates now run with
+`CGO_ENABLED=0 go test ./internal/adoptionaudit ./internal/testprocess`. The Go
+process tests use their own test executable for exact empty/quoted/Unicode/
+metacharacter argv, simultaneous large pipes, UTF-8 rejection and bounded timeout.
+Typed Go argv does not admit null/numeric elements. No PowerShell child is needed.
 
-```powershell
-./tools/audit-adoption-evidence.ps1
-```
-
-[`audit-adoption-evidence.ps1`](../../tools/audit-adoption-evidence.ps1) defaults
-to the four preserved run IDs documented above. Its `LedgerReceipt`,
-`LogReceipt`, `PackReceipt`, `KvReceipt` and `Fairyc` parameters allow explicit
-artifact selection without searching for an ambiguous latest run. It runs the
-ten output-gate cases and
-[`test-adoption-process.ps1`](../../tools/test-adoption-process.ps1), then audits
-the four saved receipts sequentially. The five process-boundary cases exercise
-both raw layouts, literal empty/quoted/Unicode/metacharacter argv, simultaneous
-large stdout/stderr, invalid null/numeric argv and timeout termination. They
-start three bounded PowerShell fixture children; no Fairy program or compiler
-is executed.
+`go run ./cmd/fairyc-evidence-audit -kind <ledger|log|pack|kv>
+-receipt <receipt.json> -compiler <retained-compiler>` reads one explicit receipt
+and emits its audit JSON to stdout. There are no personal-cache defaults or
+implicit artifact searches. The six historical Windows harness/helper scripts
+remain opt-in; native reproduction requires explicit `Original` and `Fairyc`.
 
 The consolidated run `fa6ea4ea8c92480281ae08dfb12e1712` passed **628 retained
 cases**: ledger 68, log 104, pack 128 and KV 328. Its

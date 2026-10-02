@@ -1,28 +1,61 @@
 # Contributing
 
-- Status: Draft
-- Owner: UNASSIGNED
+Use the Go version declared in `go.mod`. Linux native tests require amd64/glibc
+and GCC plus Clang on PATH; Windows native tests require x64 MSVC and its SDK.
+Go downloads the dependencies declared in `go.mod`/`go.sum` through its normal
+module mechanism. There is no requirement for Bun, PowerShell, a maintainer's
+Downloads directory or an existing `.cache` tree for the commands below.
 
-## Purpose
+The C files in Go package directories are embedded compiler inputs. Set
+`CGO_ENABLED=0` for ordinary builds/tests so Go does not treat them as cgo sources.
 
-This document captures the durable design contract for Contributing.
-It is intentionally a scaffold and should be filled with project-specific decisions as they become known.
+```sh
+export CGO_ENABLED=0
+go build -mod=readonly -o ./build/fairyc ./cmd/fairyc
+go vet -mod=readonly ./...
+go test -mod=readonly ./...
+```
 
-## Source of Truth
+From PowerShell, use `$env:CGO_ENABLED='0'` instead of `export`; Go commands are
+otherwise identical (an explicit Windows compiler output can end in `.exe`).
+The optional `tools/run-go.ts` is a maintainer's offline/local-cache adapter,
+not the contributor entry point. A fresh fork does not need its caches.
 
-- Product decision: UNDECIDED
-- Technical owner: UNASSIGNED
-- Related ADR: UNDECIDED
+For a quick application/runtime change, run the related packages:
 
-## Required Decisions
+```sh
+go test -mod=readonly ./internal/cstdlibcontract ./internal/cstdlib ./internal/sdkstdlib
+go test -mod=readonly -run '^TestTaskManager' -v ./internal/cli
+go test -mod=readonly ./internal/adoptionaudit ./internal/testprocess
+```
 
-- Boundary: UNDECIDED
-- Data ownership: UNDECIDED
-- Failure and recovery behavior: UNDECIDED
-- Validation needed before merge: VALIDATION.md
+Task manager tests copy checked-in Fairy sources to `t.TempDir`, lower them with
+the current compiler and build native low/optimized images. Each CLI command
+starts a fresh bounded process and compares exact UTF-8 stdout/stderr, exit code
+and store/sidecar bytes. Platform-only tests explicitly skip on the other OS.
+Ubuntu's existing Go CI lane runs the Linux publication/argv probes; Windows's
+lane runs the existing prepared-save write/sync/close/publication fault and
+bounded-kill probes. No new CI job is needed.
 
-## Review Blockers
+Stable native application build/run/test remains Windows-only. On Linux use
+`fairyc experimental build-workspace` as documented in
+[the task manager](examples/task_manager_cli/README.md). Do not infer stable target
+admission or observed Linux execution from a Go cross-build or a skipped test.
 
-- The change invents a product domain without a source.
-- The change weakens validation or skips required evidence.
-- The change relies on generated, cache, or build output as source truth.
+The six remaining `.ps1` files under `tools/` reproduce historical Windows
+adoption experiments against explicitly supplied external projects/artifacts.
+They are optional, retain their historical SDK stage0.78 identity checks, and
+are not prerequisites for building or testing a fork. Generic process/output
+tests, task-manager CLI tests and retained-evidence auditing have moved to Go.
+Historical receipts remain unchanged. To audit one supplied artifact tree:
+
+```sh
+go run -mod=readonly ./cmd/fairyc-evidence-audit \
+  -kind ledger -receipt /path/to/run/receipt.json -compiler /path/to/retained/fairyc
+```
+
+The tool only reads files and emits JSON to stdout. It never executes the retained
+compiler or product. Use `-path-map-from <old-root> -path-map-to <new-root>` when
+relocating an evidence tree containing absolute paths; retain its archived
+harnesses, images, original protected files and raw logs. Normal development
+tests do not require these private historical artifacts.

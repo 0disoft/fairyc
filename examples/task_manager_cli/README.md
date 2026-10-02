@@ -1,6 +1,7 @@
 # Task manager with list filters and prepared-file replacement
 
-Windows AMD64 example, Fairy C language/20 and SDK stage0.78 or later. All product
+Windows AMD64 and experimental Linux GNU amd64 example, Fairy C language/20 and
+SDK stage0.79 or later. All product
 logic uses Fairy C and public SDK APIs. Package version 0.2.0 adds status filters
 and title sorting to `list`. `std::bytes::equal` matches commands/header/options;
 `std::bytes::compare` orders titles. The TSV format and prepared-file publication
@@ -16,6 +17,19 @@ fairyc build
 .\build\task-manager-cli.exe .\tasks.tsv list --status open --sort title
 .\build\task-manager-cli.exe .\tasks.tsv list --sort title --status done
 ```
+
+On Linux, build the compiler from this repository with Go (see
+[Contributing](../../CONTRIBUTING.md)), then run from this example directory:
+
+```sh
+fairyc check
+fairyc experimental build-workspace --target x86_64-linux-gnu --cc gcc --profile low --output build/task-manager-cli --locked
+./build/task-manager-cli ./tasks.tsv add "보고서 작성"
+./build/task-manager-cli ./tasks.tsv list --status open --sort title
+```
+
+Use `--profile optimized` for the optimized image. Linux execution remains
+experimental; stable `fairyc build/run/test --native` admission is unchanged.
 
 Default listing selects all tasks in ascending numeric ID order. Title order is
 unsigned UTF-8 byte order, with ascending ID for equal titles; it does not apply
@@ -61,22 +75,27 @@ replacement supplies a new file object; previous ACLs/metadata are not merged.
 `sync`/write-through does not guarantee hardware-independent power-loss durability.
 FYTASK1 has no checksum or retained validated generation. A checksum/versioned
 journal and physical power-cut validation remain separate work, not a claim made
-by this example. See [ADR 0411](../../docs/adr/0411-public-windows-file-replacement.md).
+by this example. Linux replacement uses one same-filesystem `rename`; open
+handles keep the old inode and do not emulate Windows sharing denial. File sync
+does not persist the parent directory entry. See
+[ADR 0411](../../docs/adr/0411-public-windows-file-replacement.md) and
+[ADR 0424](../../docs/adr/0424-linux-prepared-publication-and-process-arguments.md).
 
-`verify.ps1 -Fairyc <compiler-path> -CompilerSha256 <reviewed-sha256>` requires an
-explicit compiler and SHA256 pin, checked before fixture or build writes. Use SDK
-stage0.78 or later; earlier bundles lack the required byte comparison helper.
-Run `fairyc check` once in a fresh isolated copy to create its current lock, then
-run the script there: fixtures and raw results are written beside the copied
-sources. The 196 development/release CLI cases include 126 existing cases and
-70 filter/sort cases, including fixed byte-order expectations, duplicate titles,
-distinct Unicode spellings, a 512-byte title, 256 records, empty/no-match stores,
-invalid options, hidden corruption, sidecar refusal and source-file preservation. Each case
-records executable, argv, cwd, UTF-8 stdout/stderr, exit code and file states;
-compiler/source/SDK and EXE digests identify the tested images. Historical
-stage0.72 receipts are not evidence for this adoption. Native storage-fault tests exercise compiler-emitted Fairy application
-logic with test-only interception of production Win32 I/O, not a C rewrite of the
-application. The [list feature receipt](../../docs/ops/evidence/task-manager-list-options-20261003.json)
-records the tested source/SDK/compiler and image identities, retained raw evidence
-paths, and passed case counts. Storage fault injection, performance experiments
-and other platforms were not rerun for this display-only feature.
+Run `CGO_ENABLED=0 go test -mod=readonly -run '^TestTaskManager' -v ./internal/cli`
+from the repository root (PowerShell: set `$env:CGO_ENABLED='0'` first). Go builds
+the current checked-in Fairy sources in temporary directories and executes
+low/optimized CLI cases covering byte-order ties, distinct Unicode spellings,
+512-byte titles, 256 records, invalid input/options, hidden corruption, restart,
+ID reuse prevention, sidecar refusal and store preservation. There is no pinned
+maintainer compiler, external fixture download, Bun or PowerShell prerequisite.
+Windows storage-fault tests retain test-only interception of production Win32
+I/O and bounded child kills; application logic still comes from Fairy source.
+
+The [list feature receipt](../../docs/ops/evidence/task-manager-list-options-20261003.json)
+is the unchanged historical stage0.78/196-case PowerShell result. It identifies
+its original sources/compiler/images and is not a new SDK stage0.79 or Linux
+receipt. The replacement Go suite consolidates cases rather than maintaining
+that historical case count. Windows native Go tests have been executed locally;
+Linux native tests are configured in existing Ubuntu CI but have not been
+observed locally or remotely for this change. Physical power loss, hostile
+multiwriter aliases and performance remain outside these tests.

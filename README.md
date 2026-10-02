@@ -29,6 +29,13 @@ WSL2, Linux and a virtual machine are not required. Source checking and semantic
 tests do not require the C compiler. Other target mechanisms and CI probes are not
 a promise of equivalent end-user support.
 
+Contributors can build and test the compiler on Linux using Go and GCC/Clang,
+without PowerShell, Bun or a maintainer's artifact cache; see
+[Contributing](CONTRIBUTING.md). SDK stage0.79 adds Linux companions for prepared
+file replacement, exact reads, removal and UTF-8 process arguments. The
+[task-manager example](examples/task_manager_cli/README.md) uses the existing
+experimental Linux workspace-build command; stable target admission is unchanged.
+
 ### Create, test and run
 
 With a built `fairyc` executable, run these product commands manually from a scratch parent

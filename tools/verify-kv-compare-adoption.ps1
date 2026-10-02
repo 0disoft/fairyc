@@ -1,7 +1,7 @@
 #requires -Version 7.0
 param(
-    [string]$Original = 'C:\Users\cherr\Downloads\fairy_c_test_projects\round4\09-persistent-kv-store',
-    [string]$Fairyc = (Join-Path $PSScriptRoot '../.cache/ledger-compare-toolchain/fairyc.exe'),
+    [Parameter(Mandatory=$true)][string]$Original,
+    [Parameter(Mandatory=$true)][string]$Fairyc,
     [string]$AuditReceipt = ''
 )
 $ErrorActionPreference = 'Stop'
