@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.77" {
+	if Version != "0.0.0-stage0.78" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/20" {
@@ -54,6 +54,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	appendBytePublic := false
 	emptyBufferPublic := false
 	equalBytesPublic := false
+	compareBytesPublic := false
 	asBytesPublic := false
 	intoBufferPublic := false
 	stderrScalarFunctions := make(map[string]bool)
@@ -91,6 +92,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			for _, function := range source.Module.Functions {
 				if function.Name == "equal" {
 					equalBytesPublic = function.Public
+				}
+				if function.Name == "compare" {
+					compareBytesPublic = function.Public
 				}
 				if function.Name == "append_byte" {
 					appendBytePublic = function.Public
@@ -248,6 +252,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 		if !seekFunctions[name] {
 			t.Errorf("std::fs::%s is not public", name)
 		}
+	}
+	if !compareBytesPublic {
+		t.Fatal("byte comparison is not public")
 	}
 	if !equalBytesPublic {
 		t.Fatal("std::bytes::equal is not public")

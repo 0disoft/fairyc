@@ -1,14 +1,15 @@
 # Immutable byte-view comparison assessment
 
-Status: Assessment completed; contract accepted in ADR 0422; implementation pending.
+Status: Assessment completed; contract implemented in SDK stage0.78 under ADR 0422.
 Date: 2026-10-02 (Asia/Seoul).
 Inspected compiler repository revision: `4eb1748f23f6ad6ce938c24c54f394184e886be7`.
 Bundled SDK at assessment: `0.0.0-stage0.77`; language `/20`; runtime `/0`.
 
 Decision follow-up: [ADR 0422](../adr/0422-sdk-immutable-byte-view-comparison.md)
-accepts the exact contract below. This assessment retains the original inspected
-evidence and proposal rationale; the ADR owns the accepted contract. The export
-is not yet implemented or available in the inspected SDK.
+accepts and records implementation of the exact contract below. This assessment
+retains the original inspected evidence and proposal rationale; the ADR owns
+the contract and execution evidence. The export is available in SDK stage0.78,
+but was absent from the inspected stage0.77 bundle.
 
 ## Recommendation and observed need
 
@@ -42,7 +43,7 @@ speedup, constant-time behavior or a need for a native comparison intrinsic.
 pub fn i32 compare(ref u8[] left, ref u8[] right);
 ```
 
-The proposal below was accepted by ADR 0422; acceptance does not imply availability.
+The proposal below was accepted and implemented under ADR 0422 in SDK stage0.78.
 Return exactly `-1`, `0` or `1`, not an arbitrary difference whose sign must be
 interpreted. Scan corresponding bytes from index zero as unsigned `u8` values
 in the range 0..255. The first unequal pair determines the order. If all bytes
@@ -114,8 +115,9 @@ The existing SDK, equality contract and all application behavior remain unchange
 Follow [ADR 0218](../adr/0218-modern-language-concept-admission-boundary.md) and the
 [workload admission gates](../adr/0328-production-workload-capability-admission-gates.md).
 ADR 0422 accepts this exact contract and selects the three-value `i32` return.
-Its implementation gate remains pending; the documentation-only acceptance
-does not implement the export or change the SDK version.
+Its separate implementation unit activates SDK stage0.78 and records verification
+and a distinct MIR byte-literal limitation in the ADR. Historical source identities
+below remain the original assessment evidence, not current implementation hashes.
 
 Required implementation evidence includes:
 

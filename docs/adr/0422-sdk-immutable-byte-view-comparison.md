@@ -1,6 +1,6 @@
 # ADR 0422: SDK immutable byte-view comparison
 
-- Status: Accepted; implementation pending
+- Status: Implemented in SDK 0.0.0-stage0.78
 - Date: 2026-10-02
 - Depends on: ADR 0218, ADR 0414, ADR 0421
 - Workload evidence: [byte-view comparison assessment](../architecture/byte-view-comparison-assessment.md)
@@ -14,9 +14,9 @@ helpers. The shared need is byte ordering, not their application sorting policy.
 A local loop remains valid; no compiler defect or performance claim motivates
 this decision.
 
-Accept one ordinary safe Fairy library helper. The inspected SDK stage0.77 has
-`bytes::equal` but no public `bytes::compare`. Acceptance does not make the export
-available. Implementation and application adoption remain separate units.
+Accept one ordinary safe Fairy library helper. The inspected SDK stage0.77 had
+`bytes::equal` but no public `bytes::compare`. SDK stage0.78 implements the
+accepted contract; application adoption remains a separate unit.
 
 ## Decision and exact contract
 
@@ -78,8 +78,8 @@ sibling views excluded by [ADR 0415](0415-exclusive-byte-subviews.md).
 
 ## Implementation and verification
 
-Select the next appropriate SDK version during implementation; no version is
-reserved by this ADR. Synchronize SDK export discovery, source/public-interface
+The documentation-only acceptance reserved no SDK version. Implementation
+activates SDK stage0.78. Synchronize SDK export discovery, source/public-interface
 identity and relevant lock/cache fixtures. Older bundles must not resolve the
 new export accidentally. Grammar, language `/20`, runtime ABI `/0`, private
 view transport and target maturity remain unchanged.
@@ -109,6 +109,62 @@ only token-byte ordering; retain start/end/code/exit-repair priority and final
 cases. Preserve external round4 projects, pinned compilers and past receipts.
 
 No sorting API, callback protocol, generic collection comparator, text overload,
-numeric parser, binary codec or timing guarantee is admitted. This documentation
-unit provides no Fairy execution evidence and changes no SDK/product source,
-version, compiler behavior, database or runner configuration.
+numeric parser, binary codec or timing guarantee is admitted. No grammar,
+compiler behavior, database or runner configuration changes are required.
+
+## Implementation evidence
+
+Implemented on 2026-10-02 as a guarded safe loop in
+[`std::bytes`](../../internal/sdkstdlib/sources/std/bytes.fy). SDK discovery is
+stage0.78; language `/20`, runtime ABI `/0`, the seven-module bundle and artifact
+schemas are unchanged. `equal` retains its existing length-first source body.
+
+[`bytes_compare_test.go`](../../internal/cli/bytes_compare_test.go) checks 22
+oracle pairs in both directions, through direct calls and scalar-returning
+wrappers. Cases include long prefixes, first/interior/last differences, binary
+data, text spellings and proper prefixes. A separate array of all 256 byte
+values is compared against byte 128 using Go-derived expectations. All 56
+increasing triples from an independently ordered eight-sequence domain check
+transitivity. Equality consistency, shared overlap, zero/end empty views,
+different sentinels and complete owner preservation are checked.
+
+Source check, verified-MIR codec round trip, interpreter, Linux/Windows C
+generation and Windows MSVC low/optimized native execution pass for these
+byte-view inputs. `.cache/bytes-compare/receipt.json` and `main.fy` retain the
+oracle inputs, source/SDK identities, actual in-process compiler executable
+SHA256, toolchain identity, EXE SHA256 and raw UTF-8 execution records. Native
+exit is zero with empty stdout/stderr. Linux native execution was not run.
+
+Five negative cases retain `E2101` mutation/reborrow diagnostics and `E2105`
+resource-move rejection. The existing shared-reborrow/exclusive-subview semantic
+tests, equality checks and SDK discovery tests pass. Cold/warm cached comparison
+execution passes. Removing only `compare` in a modeled prior bundle changes
+source/interface/lock identities, misses both cached packages and rejects the
+export. This is a synthetic fixture, not a historical compiler execution.
+
+## Separate compiler limitation found during verification
+
+The current JSON MIR codec serializes raw byte-literal data as a Go string.
+An invalid UTF-8 literal byte is replaced during encoding: `80` becomes
+`EF BF BD`. This occurs independently of `compare`; the minimal source below
+passes direct checked-MIR interpretation but traps after encode/decode:
+
+```text
+module main;
+import std::bytes as bytes;
+fn i32 main() {
+    let u8[1] expected = [128];
+    assert(bytes::equal(b"\x80", ref expected));
+    return 0;
+}
+```
+
+The diagnostic source, encoded MIR, diagnostic Go test source and exact
+compiler/SDK/outcome evidence are retained under `.cache/bytes-compare/` as
+`codec-byte-literal-repro*`. The temporary diagnostic test is not installed as
+a passing regression for broken behavior. A codec fix is separate work.
+
+Comparison verification represents arbitrary raw bytes with numeric arrays
+and subviews, including malformed UTF-8. Thus the helper's byte-order contract
+is verified, but this unit does not establish preservation of invalid UTF-8
+byte literals across MIR serialization or claim that compiler defect is fixed.

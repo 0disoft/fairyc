@@ -139,7 +139,11 @@ fn i32 main() {
 
 func TestBytesEqualExecution(t *testing.T) {
 	cases := bytesEqualCases()
-	text := bytesEqualSource(cases)
+	runByteViewExecution(t, bytesEqualSource(cases), "equal", cases, "Go bytes.Equal")
+}
+
+func runByteViewExecution(t *testing.T, text, operation string, cases any, oracle string) {
+	t.Helper()
 	checked, err := workspacecompiler.Check(checkedIntegerConversionWorkspace(t, text))
 	if err != nil || !checked.Verified {
 		t.Fatalf("check: %v %+v %+v", err, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
@@ -162,11 +166,11 @@ func TestBytesEqualExecution(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	t.Logf("%d bytes.Equal oracle pairs, both orders, owner preservation, overlap and reborrows passed", len(cases))
+	t.Logf("%s oracle cases, both orders, owner preservation, overlap and reborrows passed", oracle)
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("Windows AMD64 native evidence; interpreter already checked")
 	}
-	evidenceRoot, err := filepath.Abs(filepath.Join("..", "..", ".cache", "bytes-equal"))
+	evidenceRoot, err := filepath.Abs(filepath.Join("..", "..", ".cache", "bytes-"+operation))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +227,7 @@ func TestBytesEqualExecution(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	receipt := map[string]any{"schema": "fairyc.bytes-equal/v1", "sdk": sdkstdlib.Version, "sdkSourceIdentity": definition.SourceIdentity, "language": sdkstdlib.LanguageRevision, "runtime": sdkstdlib.RuntimeABI, "sourceSHA256": hash([]byte(text)), "cases": cases, "oracle": "Go bytes.Equal", "interpreter": "passed after MIR codec round trip", "cEmission": []string{"x86_64-linux-gnu", "x86_64-windows-msvc"}, "compilerIdentity": map[string]any{"kind": "in-process CLI compiler in Go test executable", "executableSHA256": hash(compilerBytes), "goVersion": runtime.Version(), "buildInfo": buildInfo}, "images": images}
+	receipt := map[string]any{"schema": "fairyc.bytes-" + operation + "/v1", "sdk": sdkstdlib.Version, "sdkSourceIdentity": definition.SourceIdentity, "language": sdkstdlib.LanguageRevision, "runtime": sdkstdlib.RuntimeABI, "sourceSHA256": hash([]byte(text)), "cases": cases, "oracle": oracle, "interpreter": "passed after MIR codec round trip", "cEmission": []string{"x86_64-linux-gnu", "x86_64-windows-msvc"}, "compilerIdentity": map[string]any{"kind": "in-process CLI compiler in Go test executable", "executableSHA256": hash(compilerBytes), "goVersion": runtime.Version(), "buildInfo": buildInfo}, "images": images}
 	data, err := json.MarshalIndent(receipt, "", "  ")
 	if err != nil {
 		t.Fatal(err)
@@ -237,12 +241,22 @@ func TestBytesEqualExecution(t *testing.T) {
 }
 
 func TestBytesEqualBorrowConflicts(t *testing.T) {
+	testByteViewBorrowConflicts(t, "equal")
+}
+
+func testByteViewBorrowConflicts(t *testing.T, operation string) {
+	t.Helper()
+	call := "bytes::" + operation
+	equality := ""
+	if operation == "compare" {
+		equality = " == 0"
+	}
 	for name, body := range map[string]string{
-		"later argument view store":  "bytes::equal(view, { view[0] = 2; view });",
-		"later argument owner store": "bytes::equal(view, { data[0] = 2; view });",
-		"live child mutation":        "let ref u8[] child = retain(view); view[0] = 2; assert(bytes::equal(child, b\"\\x01\"));",
-		"live owner mutation":        "let ref u8[] child = ref data; data[0] = 2; assert(bytes::equal(child, b\"\\x01\"));",
-		"live resource move":         "var bytes::Buffer owner = bytes::empty(); let ref u8[] child = bytes::view(ref owner); let bytes::Buffer moved = owner; assert(bytes::equal(child, b\"\"));",
+		"later argument view store":  call + "(view, { view[0] = 2; view });",
+		"later argument owner store": call + "(view, { data[0] = 2; view });",
+		"live child mutation":        "let ref u8[] child = retain(view); view[0] = 2; assert(" + call + "(child, b\"\\x01\")" + equality + ");",
+		"live owner mutation":        "let ref u8[] child = ref data; data[0] = 2; assert(" + call + "(child, b\"\\x01\")" + equality + ");",
+		"live resource move":         "var bytes::Buffer owner = bytes::empty(); let ref u8[] child = bytes::view(ref owner); let bytes::Buffer moved = owner; assert(" + call + "(child, b\"\")" + equality + ");",
 	} {
 		t.Run(name, func(t *testing.T) {
 			text := "module main; import std::bytes as bytes; fn ref u8[] retain(ref u8[] view) { return view; } fn i32 main() { var u8[1] data = [1]; let ref mut u8[] view = ref mut data; " + body + " return 0; }"
@@ -268,9 +282,14 @@ func TestBytesEqualBorrowConflicts(t *testing.T) {
 
 func TestBytesEqualSDKCache(t *testing.T) {
 	text := "module main; import std::bytes as bytes; fn i32 main() { assert(bytes::equal(b\"abc\", b\"abc\")); return 0; }"
+	testByteViewSDKCache(t, text)
+}
+
+func testByteViewSDKCache(t *testing.T, text string) {
+	t.Helper()
 	workspace := checkedIntegerConversionWorkspace(t, text)
 	sdk, found := workspace.Package(sdkstdlib.PackagePath)
-	if !found || sdk.Manifest.Package.Version != "0.0.0-stage0.77" {
+	if !found || sdk.Manifest.Package.Version != sdkstdlib.Version {
 		t.Fatal("wrong SDK bundle")
 	}
 	session, err := workspacecompiler.NewSession(workspacecompiler.Configuration{
@@ -295,6 +314,11 @@ func TestBytesEqualSDKCache(t *testing.T) {
 }
 
 func TestBytesEqualSDKExportIdentity(t *testing.T) {
+	testByteViewSDKExportIdentity(t, "equal", "bool", "/// Compares exact logical bytes", "/// Orders unsigned logical bytes", "0.0.0-stage0.76", "assert(bytes::equal(b\"a\", b\"a\"));")
+}
+
+func testByteViewSDKExportIdentity(t *testing.T, operation, resultType, startMarker, endMarker, oldVersion, call string) {
+	t.Helper()
 	// Model an older source bundle by removing only the added function. Do not
 	// rewrite historical fixtures or depend on a locally installed old compiler.
 	workspace := checkedIntegerConversionWorkspace(t, "module main; import std::bytes as bytes; fn i32 main() { return 0; }")
@@ -330,11 +354,14 @@ func TestBytesEqualSDKExportIdentity(t *testing.T) {
 			continue
 		}
 		for i, item := range descriptor.Modules[m].Items {
-			if item.Name != "equal" {
+			if item.Name != operation {
 				continue
 			}
-			if item.Kind != "function" || item.ResultType != "bool" || len(item.Parameters) != 2 || item.Unsafe || item.ABI != "" || item.LinkName != "" {
-				t.Fatalf("unexpected public equality interface: %+v", item)
+			if item.Kind != "function" || item.ResultType != resultType || len(item.Parameters) != 2 || item.Unsafe || item.ABI != "" || item.LinkName != "" {
+				t.Fatalf("unexpected public %s interface: %+v", operation, item)
+			}
+			if item.Parameters[0] != "ref u8[]" || item.Parameters[1] != "ref u8[]" || len(item.Effects) != 0 || item.MustUse {
+				t.Fatalf("unexpected borrowing/effect contract for %s: %+v", operation, item)
 			}
 			descriptor.Modules[m].Items = append(descriptor.Modules[m].Items[:i], descriptor.Modules[m].Items[i+1:]...)
 			found = true
@@ -342,7 +369,7 @@ func TestBytesEqualSDKExportIdentity(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Fatal("public interface is missing equality")
+		t.Fatalf("public interface is missing %s", operation)
 	}
 	oldInterface, err := moduleinterface.Compute(descriptor)
 	if err != nil || oldInterface == newInterface {
@@ -362,8 +389,8 @@ func TestBytesEqualSDKExportIdentity(t *testing.T) {
 			file := &sdk.Sources[i]
 			if file.Path == "std/bytes.fy" {
 				raw := string(file.Bytes)
-				start := strings.Index(raw, "/// Compares exact logical bytes")
-				end := strings.Index(raw, "/// Borrows the initialized prefix for read-only access.")
+				start := strings.Index(raw, startMarker)
+				end := strings.Index(raw, endMarker)
 				if start < 0 || end <= start {
 					t.Fatal("missing added source range")
 				}
@@ -381,7 +408,7 @@ func TestBytesEqualSDKExportIdentity(t *testing.T) {
 			t.Fatal(err)
 		}
 		oldDigest = sdk.Digest
-		sdk.Manifest.Package.Version = "0.0.0-stage0.76"
+		sdk.Manifest.Package.Version = oldVersion
 	}
 	if oldDigest == newDigest {
 		t.Fatal("export did not change SDK source digest")
@@ -396,7 +423,7 @@ func TestBytesEqualSDKExportIdentity(t *testing.T) {
 			t.Fatal(err)
 		}
 		node.Identity.SourceIdentity = sdkstdlib.SourceIdentity(sdkstdlib.SDKIdentity, sdkstdlib.RuntimeABI, oldDigest)
-		node.Identity.VersionIdentity = "0.0.0-stage0.76"
+		node.Identity.VersionIdentity = oldVersion
 		oldID, err := packagegraph.ComputeInstanceID(node.Identity)
 		if err != nil || newID == oldID {
 			t.Fatal("SDK lock identity did not change")
@@ -434,7 +461,7 @@ func TestBytesEqualSDKExportIdentity(t *testing.T) {
 			continue
 		}
 		file := &workspace.Packages[p].Sources[0]
-		file.Bytes = []byte("module main; import std::bytes as bytes; fn i32 main() { assert(bytes::equal(b\"a\", b\"a\")); return 0; }")
+		file.Bytes = []byte("module main; import std::bytes as bytes; fn i32 main() { " + call + " return 0; }")
 		parsed, err := frontend.AnalyzeSyntax(source.NewFile(file.Path, file.Bytes), source.DefaultLimits())
 		if err != nil || parsed.AST == nil {
 			t.Fatal(err)
@@ -445,5 +472,5 @@ func TestBytesEqualSDKExportIdentity(t *testing.T) {
 	if err != nil || rejected.Verified || len(rejected.Semantic.Diagnostics) == 0 {
 		t.Fatalf("older bundle resolved new export: %v %+v", err, rejected.Semantic.Diagnostics)
 	}
-	t.Logf("public interface %s; modeled old interface %s; SDK source and lock/cache identities changed; old bundle rejects equal", newInterface, oldInterface)
+	t.Logf("public interface %s; modeled old interface %s; SDK source and lock/cache identities changed; old bundle rejects %s", newInterface, oldInterface, operation)
 }

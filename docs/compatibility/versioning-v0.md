@@ -1491,3 +1491,14 @@ Language `/20`, runtime ABI `/0`, module count, MIR and artifact schemas and
 target maturity remain unchanged. Existing source remains valid. Historical
 round4 compiler pins, reports, receipts and source files remain intact.
 No implicit slice operator, text overload or timing guarantee is added.
+
+ADR 0422 advances only the bundled SDK from `0.0.0-stage0.77` to
+`0.0.0-stage0.78` for pure `std::bytes::compare`, with an exact `i32` -1/0/1
+unsigned byte/prefix ordering result. Existing source/public-interface and
+dependent cache identities change; importing workspaces refresh their SDK lock
+version and source digest. Language `/20`, runtime ABI `/0`, module count, MIR
+and artifact schemas and target maturity are unchanged. Existing equality and
+source contracts remain valid; historical projects, compiler pins and receipts
+are preserved. No sorting API, text collation or timing guarantee is added.
+The separate pre-existing JSON MIR invalid-UTF-8 byte-literal limitation is
+documented in ADR 0422 and is not corrected by this SDK addition.

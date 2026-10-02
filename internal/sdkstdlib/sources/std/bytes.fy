@@ -152,6 +152,27 @@ pub fn bool equal(ref u8[] left, ref u8[] right) {
     return true;
 }
 
+/// Orders unsigned logical bytes lexicographically, returning exactly -1, 0 or 1; not constant-time.
+pub fn i32 compare(ref u8[] left, ref u8[] right) {
+    var usize at = 0;
+    while (at < left.len && at < right.len) {
+        if (left[at] < right[at]) {
+            return -1;
+        }
+        if (left[at] > right[at]) {
+            return 1;
+        }
+        at += 1;
+    }
+    if (left.len < right.len) {
+        return -1;
+    }
+    if (left.len > right.len) {
+        return 1;
+    }
+    return 0;
+}
+
 /// Borrows the initialized prefix for read-only access.
 pub fn ref u8[] view(ref Buffer buffer) {
     return unsafe {

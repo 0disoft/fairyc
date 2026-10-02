@@ -1022,6 +1022,26 @@ maturity are unchanged; there is no new foreign symbol or intrinsic.
 [ADR 0421](../adr/0421-sdk-immutable-byte-view-equality.md) owns the exact
 contract and retained execution evidence.
 
+## Immutable byte-view comparison
+
+SDK `0.0.0-stage0.78` adds the pure Fairy
+`std::bytes::compare(ref u8[] left, ref u8[] right) -> i32`.
+It returns exactly `-1`, `0` or `1` for unsigned lexicographic byte ordering:
+the first differing byte decides; after an equal prefix the shorter view sorts
+first. Equal viewed bytes and lengths, including two empty views, return zero.
+Zero agrees with `bytes::equal`. NUL and malformed UTF-8 are ordinary data.
+
+The helper permits identical and overlapping shared views, preserves owner
+bytes, retains no borrow and performs no allocation or I/O. Existing slicing
+bounds and shared-reborrow rules apply. Worst-case work is linear in the common
+prefix with constant auxiliary storage. No text collation, normalization,
+numeric ordering or constant-time guarantee is supplied. Language `/20`,
+runtime ABI `/0` and target maturity are unchanged.
+[ADR 0422](../adr/0422-sdk-immutable-byte-view-comparison.md) owns the contract,
+execution evidence and the separate existing MIR limitation for invalid UTF-8
+byte literals. Raw bytes represented by numeric arrays/subviews are verified;
+this addition does not fix byte-literal preservation during MIR serialization.
+
 ## Explicit exclusions
 
 Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.
