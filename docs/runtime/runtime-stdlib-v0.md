@@ -1000,6 +1000,28 @@ The immutable owner is preserved; normal mandatory Result handling applies.
 bounds and retained interpreter/native evidence. No new cast, foreign/runtime
 symbol, target admission or language revision is introduced.
 
+## Immutable byte-view equality
+
+SDK `0.0.0-stage0.77` adds the pure Fairy
+`std::bytes::equal(ref u8[] left, ref u8[] right) -> bool`.
+It compares logical lengths and exact corresponding bytes. Two empty views
+are equal; different lengths or any differing byte return false. NUL, BOM,
+high bytes and malformed UTF-8 have no special meaning. No text validation,
+normalization, case folding or terminator is involved.
+
+Separate owners, identical views and overlapping immutable subviews are valid.
+The function inspects only the logical extents, preserves owners, retains no
+borrow, allocates nothing and performs no I/O. Existing slicing bounds and
+call-bounded shared reborrowing rules remain in force; conflicting live loans
+still reject mutation or movement. There is no input-length cap.
+
+The source uses checked usize indexing and stops at the first mismatch.
+Worst-case work is linear with constant auxiliary storage, with no timing or
+constant-time security guarantee. Language `/20`, runtime ABI `/0` and target
+maturity are unchanged; there is no new foreign symbol or intrinsic.
+[ADR 0421](../adr/0421-sdk-immutable-byte-view-equality.md) owns the exact
+contract and retained execution evidence.
+
 ## Explicit exclusions
 
 Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.

@@ -1,6 +1,6 @@
 # ADR 0421: SDK immutable byte-view equality
 
-- Status: Accepted; not implemented
+- Status: Implemented in SDK 0.0.0-stage0.77
 - Date: 2026-10-02
 - Depends on: ADR 0218, ADR 0414
 - Workload evidence: [byte-view equality assessment](../architecture/byte-view-equality-assessment.md)
@@ -13,10 +13,9 @@ maintained task-manager example. This is repeated source code, not a compiler
 defect or a performance result. A local loop remains a valid alternative.
 
 Accept the small ordinary library helper below. No language feature is needed.
-SDK `0.0.0-stage0.76` does not currently provide it. Acceptance defines the future
-SDK contract; it does not make the function available, reserve a version, change
-the compiler or revalidate the historical applications. Implementation and
-application adoption remain separate units.
+SDK `0.0.0-stage0.76` did not provide it. SDK `0.0.0-stage0.77` implements the
+accepted contract as ordinary Fairy source in `std::bytes`. Application adoption
+remains a separate unit; historical applications are not revalidated here.
 
 ## Decision and exact contract
 
@@ -96,9 +95,10 @@ C ABI is added. Existing private view transport remains compiler-owned.
 
 ## Versioning and implementation gate
 
-This documentation-only acceptance leaves SDK stage0.76, language `/20`, runtime
-ABI `/0`, grammar and target maturity unchanged. It does not create an SDK source
-export or change the runtime/stdlib availability documentation.
+The initial documentation-only acceptance left SDK stage0.76 unchanged.
+Implementation activates SDK stage0.77 and updates the runtime/stdlib
+availability documentation. Language `/20`, runtime ABI `/0`, grammar and
+target maturity remain unchanged.
 
 Implementation must add the function in the owning `std::bytes` source, activate
 the appropriate next SDK version, and synchronize SDK discovery, public-interface
@@ -130,9 +130,54 @@ identities, argv/cwd/stdout/stderr/exit and EXE SHA256. Decode native streams
 explicitly as UTF-8. C generation alone is not Linux native execution. No
 performance experiment or timing guarantee is required by this contract.
 
-No new implementation or native execution is claimed by this ADR. The
-assessment's source hashes establish the inspected workload only. Implementation
-completion requires its own current evidence before changing this ADR's status.
+The assessment's source hashes establish the historical inspected workload only.
+Current implementation evidence is recorded below.
+
+## Implementation evidence
+
+Implemented on 2026-10-02 as a safe, ordinary Fairy loop in
+[`std::bytes`](../../internal/sdkstdlib/sources/std/bytes.fy).
+SDK version/discovery is synchronized at stage0.77; the seven-module bundle,
+language `/20`, runtime ABI `/0` and artifact schemas are unchanged.
+
+[`bytes_equal_test.go`](../../internal/cli/bytes_equal_test.go) checks 16 pairs
+against Go `bytes.Equal`, in both argument orders and through a bool-returning
+wrapper. The pairs cover all 256 byte values in one binary vector,
+first/interior/last mismatches, length/prefix differences, NUL, BOM, malformed
+UTF-8 and distinct Unicode spellings. Distinct owner subviews have different
+surrounding sentinels; every owner byte is checked after comparison. Additional
+fixed cases cover identical and overlapping same-owner views, empty views at
+zero/end offsets, literals, ordinary bool expressions, call-bounded shared
+reborrowing, mutation after last use and a bool result surviving mutation.
+
+Five negative cases retain exact `E2101` mutation/reborrow diagnostics and
+`E2105` resource-move rejection. Existing shared-reborrow and exclusive-subview
+semantic tests pass without compiler changes. SDK discovery and exact bundle
+loader checks pass. Cold/warm cache execution passes. A modeled older bundle
+with only this export removed changes source/interface/lock identity, misses
+both cached packages and rejects a new `equal` call. This is a synthetic
+compatibility fixture, not an execution of a historical compiler.
+
+Source check, verified-MIR codec round trip, interpreter, C generation for
+Linux GNU and Windows MSVC, and Windows MSVC low/optimized native execution pass.
+Both native images return 0 with empty stdout/stderr; byte pipes are explicitly
+validated/decoded as UTF-8. Toolchain: MSVC `14.51.36231`; compiler is the
+in-process CLI compiler in the Go `go1.27.1` test executable, not the preserved
+round4 compiler. Native argv/cwd/exit/output bytes and identities are retained in
+`.cache/bytes-equal/receipt.json`; generated source and both EXEs are alongside it.
+
+| Artifact | SHA256 |
+| --- | --- |
+| SDK `std/bytes.fy` | `2fdb25f2bc59de2bf9c9af150fe4cb81a9bd30fc2a18601616d8feb451df30f8` |
+| SDK package source digest (`fysrc1`) | `a58fda1cc53ded24238d05e5a96b45ece30fd8947841a3f4ca18647eb2dee03d` |
+| Generated Fairy input | `26ac096d3de441f29b2b7c56dc2876e9607fb79a85a0cbe376c7ecb68d7e8031` |
+| Go test executable containing compiler | `210b0d8092017f22668c968ed1b046f3a56b170c6fec798d0e185870b3eff3a1` |
+| Low EXE | `5eb826f7eafde6f6013081c8209e0b16f187c45dd356004a324d3ec5385718d2` |
+| Optimized EXE | `c4ecc65a608f9491d864353a23d29cdf814bdc07a4057e6c6f34adf6837cc9dc` |
+
+No Linux native execution, performance measurement, constant-time claim or
+application adoption is claimed. Historical round4 sources, toolchains,
+receipts and identity fixtures are preserved.
 
 ## Rollout and deferred scope
 

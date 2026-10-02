@@ -1482,3 +1482,12 @@ digest. Language `/20`, runtime ABI `/0`, module count, MIR and artifact schemas
 are unchanged. Existing source remains valid. Historical round4 compiler pins,
 reports, receipts and identity fixtures remain intact. No input-length limit,
 implicit parsing, cast or target admission is added.
+
+ADR 0421 advances only the bundled SDK from `0.0.0-stage0.76` to
+`0.0.0-stage0.77` for pure `std::bytes::equal`. The added export changes the
+existing byte module's source/public-interface and dependent cache identities;
+importing workspaces refresh their SDK lock version and source digest.
+Language `/20`, runtime ABI `/0`, module count, MIR and artifact schemas and
+target maturity remain unchanged. Existing source remains valid. Historical
+round4 compiler pins, reports, receipts and source files remain intact.
+No implicit slice operator, text overload or timing guarantee is added.

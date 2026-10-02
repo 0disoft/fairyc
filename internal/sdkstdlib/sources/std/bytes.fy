@@ -137,6 +137,21 @@ pub fn bool is_empty(ref Buffer buffer) {
     return buffer.length == 0;
 }
 
+/// Compares exact logical bytes without allocation or text interpretation; not constant-time.
+pub fn bool equal(ref u8[] left, ref u8[] right) {
+    if (left.len != right.len) {
+        return false;
+    }
+    var usize at = 0;
+    while (at < left.len) {
+        if (left[at] != right[at]) {
+            return false;
+        }
+        at += 1;
+    }
+    return true;
+}
+
 /// Borrows the initialized prefix for read-only access.
 pub fn ref u8[] view(ref Buffer buffer) {
     return unsafe {

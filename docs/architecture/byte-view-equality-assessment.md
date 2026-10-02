@@ -3,11 +3,12 @@
 Status: Historical pre-decision assessment; accepted contract linked below.
 Date: 2026-10-02 (Asia/Seoul).
 Inspected compiler repository revision: `3761e2e76d9017044811f1593669684b8919593f`.
-Current bundled SDK: `0.0.0-stage0.76`; language `/20`; runtime `/0`.
+Bundled SDK at assessment: `0.0.0-stage0.76`; language `/20`; runtime `/0`.
 
 This document preserves the pre-decision assessment. The subsequent contract is
-accepted by [ADR 0421](../adr/0421-sdk-immutable-byte-view-equality.md), but is not
-implemented. SDK stage0.76 still has no `bytes::equal` export. The candidate
+accepted and implemented in SDK stage0.77 by
+[ADR 0421](../adr/0421-sdk-immutable-byte-view-equality.md).
+The assessed SDK stage0.76 had no `bytes::equal` export. The candidate
 reasoning and inspected-source identities below remain historical evidence;
 ADR 0421 now owns the accepted semantics and implementation/adoption gates.
 
@@ -20,10 +21,11 @@ candidate. Its proposed home is `std::bytes` and its proposed shape is:
 pub fn bool equal(ref u8[] left, ref u8[] right);
 ```
 
-This spelling is a proposal, not available SDK code. It would replace repeated
+This spelling was the proposal at assessment time; it is now available in SDK
+stage0.77. It can replace repeated
 length-and-byte loops without introducing language syntax, an error enum, an
 allocation, I/O, a foreign comparison symbol or a generic collection API.
-The current `std::bytes` source has no public equality function.
+The assessed `std::bytes` source had no public equality function.
 
 The primary round4 `src` trees contain equality helpers in all nine projects;
 seven implement the length-and-byte loop directly, while the pack and KV codec
