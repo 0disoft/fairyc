@@ -31,6 +31,11 @@ func Assets(root string) (map[string][]byte, error) {
 		"lineComment":   "//", "blockComment": []string{"/*", "*/"}, "nestedBlockComments": true,
 		"identifierPattern": "[A-Za-z_][A-Za-z0-9_]*"}
 	words := func(values []string) string { return "\\b(?:" + strings.Join(values, "|") + ")\\b" }
+	identifier := `[A-Za-z_][A-Za-z0-9_]*`
+	typePath := `(?!(?:` + strings.Join(keywords, "|") + `)\b)` + identifier + `(?:\s*::\s*` + identifier + `)*`
+	// Only syntax positions identify nominal types; capitalization is not a type test.
+	typeExpression := `(?:(?:ref|ptr|mut)\s+)*` + typePath + `(?:\s*<[^;{}\n]*>)?(?:\s*\[[^\]\n]*\])*`
+	typeCapture := rule{"name": "meta.type.fairyc", "patterns": []rule{{"include": "#type"}}}
 	escape := rule{"name": "constant.character.escape.fairyc", "match": `\\(?:[\\"nrt0]|x[0-9a-fA-F]{2}|u\{[0-9a-fA-F]{1,6}\})`}
 	stringRule := rule{"name": "string.quoted.double.fairyc", "begin": `\b[bc]"|"`, "end": `"`,
 		"patterns": []rule{escape, {"name": "invalid.illegal.escape.fairyc", "match": `\\.`}}}
@@ -45,6 +50,12 @@ func Assets(root string) (map[string][]byte, error) {
 		{"name": "comment.line.documentation.fairyc", "begin": "///", "end": "$"},
 		{"name": "comment.line.double-slash.fairyc", "begin": "//", "end": "$"},
 		{"include": "#string"},
+		{"match": `(@)(` + identifier + `(?:::` + identifier + `)*)`,
+			"captures": rule{"1": rule{"name": "punctuation.definition.annotation.fairyc"}, "2": rule{"name": "entity.other.attribute-name.fairyc"}}},
+		{"match": `\b(var|let|const|fn|pub)\s+(` + typeExpression + `)(?=\s+` + identifier + `\b)`,
+			"captures": rule{"1": rule{"name": "keyword.control.fairyc"}, "2": typeCapture}},
+		{"match": `(?:^|(?<=[(,;{]))[ \t]*(` + typeExpression + `)(?=\s+` + identifier + `\b)`,
+			"captures": rule{"1": typeCapture}},
 		{"name": "constant.language.fairyc", "match": words([]string{"true", "false", "null"})},
 		{"name": "keyword.control.fairyc", "match": words(keywords)},
 		{"name": "keyword.other.contextual.fairyc", "match": `\bstatic_assert(?=\s*\()|\bstate(?=\s*\{)|\b(?:cell|map|burn)(?=\s)`},
@@ -54,7 +65,17 @@ func Assets(root string) (map[string][]byte, error) {
 		{"name": "keyword.operator.fairyc", "match": strings.Join(quoted, "|")},
 	}
 	tm := rule{"name": "Fairy C", "scopeName": "source.fairyc", "patterns": patterns,
-		"repository": rule{"block-comment": block, "string": stringRule}}
+		"repository": rule{"block-comment": block, "string": stringRule,
+			"type": rule{"patterns": []rule{
+				{"include": "#block-comment"},
+				{"include": "#string"},
+				{"name": "keyword.control.fairyc", "match": words([]string{"ref", "ptr", "mut"})},
+				{"name": "storage.type.fairyc", "match": words(types)},
+				{"name": "entity.name.namespace.fairyc", "match": `\b` + identifier + `(?=\s*::)`},
+				{"name": "entity.name.type.fairyc", "match": `\b` + identifier + `\b`},
+				{"name": "keyword.operator.fairyc", "match": `::|<|>|\[|\]|,`},
+				{"name": "constant.numeric.fairyc", "match": `\b[0-9](?:_?[0-9])*\b`},
+			}}}}
 	assets := map[string][]byte{}
 	for name, value := range map[string]any{"editors/language.json": metadata, "editors/vscode/syntaxes/fairyc.tmLanguage.json": tm} {
 		data, err := json.MarshalIndent(value, "", "  ")

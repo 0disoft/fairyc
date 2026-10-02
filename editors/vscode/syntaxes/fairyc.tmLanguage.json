@@ -18,6 +18,46 @@
       "include": "#string"
     },
     {
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.annotation.fairyc"
+        },
+        "2": {
+          "name": "entity.other.attribute-name.fairyc"
+        }
+      },
+      "match": "(@)([A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)*)"
+    },
+    {
+      "captures": {
+        "1": {
+          "name": "keyword.control.fairyc"
+        },
+        "2": {
+          "name": "meta.type.fairyc",
+          "patterns": [
+            {
+              "include": "#type"
+            }
+          ]
+        }
+      },
+      "match": "\\b(var|let|const|fn|pub)\\s+((?:(?:ref|ptr|mut)\\s+)*(?!(?:as|assert|break|case|cleanup|const|continue|defer|discard|else|enum|extern|false|fn|for|if|import|in|let|module|mut|null|ptr|pub|ref|region|resource|return|struct|switch|true|unsafe|var|while)\\b)[A-Za-z_][A-Za-z0-9_]*(?:\\s*::\\s*[A-Za-z_][A-Za-z0-9_]*)*(?:\\s*\u003c[^;{}\\n]*\u003e)?(?:\\s*\\[[^\\]\\n]*\\])*)(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\b)"
+    },
+    {
+      "captures": {
+        "1": {
+          "name": "meta.type.fairyc",
+          "patterns": [
+            {
+              "include": "#type"
+            }
+          ]
+        }
+      },
+      "match": "(?:^|(?\u003c=[(,;{]))[ \\t]*((?:(?:ref|ptr|mut)\\s+)*(?!(?:as|assert|break|case|cleanup|const|continue|defer|discard|else|enum|extern|false|fn|for|if|import|in|let|module|mut|null|ptr|pub|ref|region|resource|return|struct|switch|true|unsafe|var|while)\\b)[A-Za-z_][A-Za-z0-9_]*(?:\\s*::\\s*[A-Za-z_][A-Za-z0-9_]*)*(?:\\s*\u003c[^;{}\\n]*\u003e)?(?:\\s*\\[[^\\]\\n]*\\])*)(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\b)"
+    },
+    {
       "match": "\\b(?:true|false|null)\\b",
       "name": "constant.language.fairyc"
     },
@@ -69,6 +109,40 @@
         {
           "match": "\\\\.",
           "name": "invalid.illegal.escape.fairyc"
+        }
+      ]
+    },
+    "type": {
+      "patterns": [
+        {
+          "include": "#block-comment"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "match": "\\b(?:ref|ptr|mut)\\b",
+          "name": "keyword.control.fairyc"
+        },
+        {
+          "match": "\\b(?:void|bool|u8|i32|i64|u32|usize|str|CStr)\\b",
+          "name": "storage.type.fairyc"
+        },
+        {
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*::)",
+          "name": "entity.name.namespace.fairyc"
+        },
+        {
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
+          "name": "entity.name.type.fairyc"
+        },
+        {
+          "match": "::|\u003c|\u003e|\\[|\\]|,",
+          "name": "keyword.operator.fairyc"
+        },
+        {
+          "match": "\\b[0-9](?:_?[0-9])*\\b",
+          "name": "constant.numeric.fairyc"
         }
       ]
     }

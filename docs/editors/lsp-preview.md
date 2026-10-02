@@ -35,6 +35,16 @@ production npm dependencies, and set `fairyc.server.path` to the absolute
 language-server executable path. Language-server activation requires workspace
 trust. Syntax support works without the server.
 
+The VS Code development extension 0.1.2 assigns attribute scopes to
+`@effects`, `@must_use` and other attribute names. Nominal types such as
+`bytes::Buffer` are scoped as namespace/type in declarations, return types,
+parameters, fields and single-line generic/array types. Ordinary calls such as
+`bytes::empty()` remain functions. Comments and strings retain their own scopes.
+These TextMate rules use syntax positions, not capitalization or resolved SDK
+symbols; they are not semantic tokens or a complete multiline type parser.
+Theme settings choose the actual colors. Reload the editor after updating the
+development extension files to load the regenerated grammar.
+
 For Zed use `editors/zed`, with the local grammar-repository instructions in its
 README. Set `lsp.fairyc-lsp.binary.path` to the executable path. Its small Rust
 adapter launches the same server; it does not download tools.
