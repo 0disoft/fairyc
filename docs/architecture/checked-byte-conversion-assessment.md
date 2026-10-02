@@ -1,19 +1,27 @@
 # Checked byte conversion assessment after round4
 
-Status: Candidate assessment; no API admission or implementation claim.
+Status: Historical pre-decision assessment; current implementation is linked below.
 Date: 2026-10-02 (Asia/Seoul).
 Inspected compiler repository revision: `71b6cdb63e1c0fc21cebf068cce0401f9a0c8c83`.
 
 This document preserves the pre-decision assessment. The subsequent accepted
-contract for `u8_from_i64`, with implementation pending and the unsigned wrapper
-deferred, is owned by [ADR 0419](../adr/0419-sdk-checked-byte-conversion.md).
+contract for `u8_from_i64`, implemented in SDK `0.0.0-stage0.75`, is owned by
+[ADR 0419](../adr/0419-sdk-checked-byte-conversion.md). `u8_from_u32` remains deferred.
+The [implementation receipt](../ops/evidence/checked-byte-conversion-20261002.json)
+records the admitted API's verification. The maintained
+[checked byte codec example](../../examples/checked_byte_codec_quickstart/README.md)
+demonstrates full-value conversion and caller-validated little-endian encoding;
+its [native receipt](../ops/evidence/checked-byte-codec-example-20261002.json)
+records the example's validation. These later results do not revalidate or
+modify the external round4 sources and receipts inspected for this assessment.
 
 This assessment records pre-implementation reasoning for byte conversion. It is
 a sibling of the [checked integer conversion assessment](checked-integer-conversion-assessment.md),
 whose two directions were accepted by [ADR 0418](../adr/0418-sdk-checked-integer-conversions.md)
 and implemented in SDK `0.0.0-stage0.74`. That acceptance covers `usize <-> i64`
-only. The names below are design sketches, not available APIs, accepted spellings
-or reserved identifiers.
+only. The remaining sections retain the design sketches, implementation status
+and future acceptance plan as recorded at assessment time. They do not describe
+the current API availability; ADR 0419 owns that status.
 
 ## Recommendation
 
