@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/0disoft/fairyc/internal/target"
@@ -26,6 +27,27 @@ type LinuxHostOutcome struct {
 // ExecuteLinuxTarget runs one temporary Linux ELF with bounded time and output.
 // fd 3 is reserved for the compiler-private one-byte trap receipt.
 func ExecuteLinuxTarget(artifact Artifact) (LinuxHostOutcome, error) {
+	return ExecuteLinuxTargetWithOptions(artifact, LinuxExecutionOptions{Input: strings.NewReader(""), Timeout: commandTimeout})
+}
+
+// LinuxExecutionOptions keeps test isolation as the default working directory.
+// Stable run explicitly selects the invoking workspace and forwards input/argv.
+type LinuxExecutionOptions struct {
+	Input            io.Reader
+	Arguments        []string
+	WorkingDirectory string
+	Timeout          time.Duration
+}
+
+func ExecuteLinuxTargetWithOptions(artifact Artifact, options LinuxExecutionOptions) (LinuxHostOutcome, error) {
+	if options.Input == nil || options.Timeout <= 0 || options.Timeout > commandTimeout {
+		return LinuxHostOutcome{}, fmt.Errorf("Linux execution requires input and a timeout in (0, %s]", commandTimeout)
+	}
+	for _, argument := range options.Arguments {
+		if strings.ContainsRune(argument, '\x00') {
+			return LinuxHostOutcome{}, fmt.Errorf("Linux execution rejects NUL arguments")
+		}
+	}
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		return LinuxHostOutcome{}, fmt.Errorf("Linux target execution requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
@@ -48,11 +70,14 @@ func ExecuteLinuxTarget(artifact Artifact) (LinuxHostOutcome, error) {
 	}
 	defer receiptRead.Close()
 	defer receiptWrite.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), options.Timeout)
 	defer cancel()
-	command := exec.CommandContext(ctx, executablePath)
+	command := exec.CommandContext(ctx, executablePath, options.Arguments...)
 	command.Dir = temporaryRoot
-	command.Stdin = nil
+	if options.WorkingDirectory != "" {
+		command.Dir = options.WorkingDirectory
+	}
+	command.Stdin = options.Input
 	command.WaitDelay = time.Second
 	command.ExtraFiles = []*os.File{receiptWrite}
 	output := newBoundedProcessOutput(maxProcessOutput)
@@ -68,7 +93,7 @@ func ExecuteLinuxTarget(artifact Artifact) (LinuxHostOutcome, error) {
 	}
 	runErr := command.Wait()
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return LinuxHostOutcome{}, fmt.Errorf("Linux executable exceeded %s", commandTimeout)
+		return LinuxHostOutcome{}, fmt.Errorf("Linux executable exceeded %s", options.Timeout)
 	}
 	stdout, stderr, truncated := output.values()
 	if truncated {

@@ -2,11 +2,25 @@ package cdriver
 
 import (
 	"runtime"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/target"
 )
+
+func TestLinuxExecutionRejectsInvalidOptions(t *testing.T) {
+	for _, options := range []LinuxExecutionOptions{
+		{},
+		{Input: strings.NewReader(""), Timeout: time.Minute + time.Second},
+		{Input: strings.NewReader(""), Timeout: time.Second, Arguments: []string{"bad\x00argument"}},
+	} {
+		if _, err := ExecuteLinuxTargetWithOptions(Artifact{}, options); err == nil {
+			t.Fatal("invalid execution options accepted")
+		}
+	}
+}
 
 func TestExecuteLinuxTargetSeparatesNormalReturnFromSameTrapStatus(t *testing.T) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
