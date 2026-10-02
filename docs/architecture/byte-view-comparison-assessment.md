@@ -454,8 +454,8 @@ original files without starting another native process. The mode passed against
 the final receipt. `harness-executed.ps1` preserves the exact native-run driver;
 `ordinal-audit.json` links its hash, receipt hash and the updated audit-driver hash.
 Future native runs apply the ordinal gate directly before recording results.
-Earlier ledger/log/pack output assertions still warrant the same bounded audit;
-their retained evidence is not silently upgraded by this KV check.
+The subsequent ledger/log/pack audit below addresses their cultural output
+assertions separately; they were not silently upgraded by this KV check.
 
 The run retains the identity log, both source/lock/helper copies, per-case raw logs,
 four EXEs, `receipt.json` and ordinal audit. Source/SDK digests, helper/compiler/EXE
@@ -473,3 +473,59 @@ Actual allocation/read/write/sync/close/stdout failures, short reads, concurrent
 writers, reparse races, interruption inside OS replace, other platforms,
 performance and physical power loss remain outside this adoption evidence.
 No public API, snapshot format, SDK version or save policy changes are introduced.
+
+## Ordinal output audit for ledger, log and pack, 2026-10-03
+
+PowerShell `-ceq`/`-cne` are case-sensitive cultural comparisons. They can treat
+composed `é` and decomposed `e` + U+0301 as equal even though their UTF-8 bytes
+differ. The ledger/log native assertions used `-cne`; the pack's preserved helper
+used the same comparison. Such assertions do not establish exact text identity.
+
+The three adoption harnesses now share
+[`adoption-output-audit.ps1`](../../tools/adoption-output-audit.ps1).
+It compares exit codes and uses `StringComparer.Ordinal.Equals` for complete
+stdout/stderr, rejecting missing or non-string output observations. Ledger/log
+call the gate per execution. Pack calls it after each image's selected cases;
+its external oracle helpers remain unchanged. All three expose `-AuditReceipt`
+before any compiler invocation or new native-run directory is created. Future
+native receipts also record the output helper's SHA256.
+
+[`test-adoption-output-audit.ps1`](../../tools/test-adoption-output-audit.ps1)
+passes ten focused gate cases. Two retain exact empty/Unicode/NUL observations;
+eight reject composed/decomposed stdout in both directions, a stderr Unicode
+alias, case/newline/exit differences, null stdout and a missing exit code.
+The test explicitly reproduces the cultural-versus-ordinal Unicode distinction.
+
+All three preserved successful runs pass the stricter audit:
+
+| Consumer | Preserved run | Ordinal cases | Retained EXEs |
+| --- | --- | ---: | ---: |
+| Ledger | `2b8950a036a746b59de93bf02d842969` | 68 | 4 |
+| Log | `fda5f6e7f8d44122938d893b870e0416` | 104 | 4 |
+| Pack | `59910b3e53ea41e494f4b4a667255393` | 128 | 4 |
+
+The total is **300 audited prior executions and zero new native executions**.
+Receipt expectations match recorded outputs ordinally, and raw exit/stdout/stderr
+match the receipts. Ledger/log associate ordered raw program records with each
+variant/profile EXE and workspace, then verify retained inputs through their
+recorded argv and before/after hashes; their old receipts did not separately
+store argv/cwd. Pack additionally verifies explicit raw line pointers, argv/cwd
+and every retained oracle output hash. All 12 EXE hashes, the current compiler
+hash and original protected-file hashes match. Pack's recorded per-case tree
+and input-preservation checks are not reexecuted; fixture files deliberately
+rewritten by later cases are not presented as immutable final inputs.
+
+Each run retains its unchanged `receipt.json`, raw logs and hash-matched original
+driver as `harness-executed.ps1`. The new `ordinal-audit.json` links receipt,
+raw-log, executed-driver, updated-driver and shared-helper hashes. A first pack
+audit rejected a mixed-separator raw path; normalizing paths for file lookup
+fixed the audit without changing the source record or text comparison policy.
+
+Run the focused gate script directly. Audit an existing run with, for example,
+`./tools/verify-ledger-compare-adoption.ps1 -AuditReceipt .cache/ledger-compare-adoption/<run-id>/receipt.json`;
+use the corresponding log/pack script and cache directory for those consumers.
+These checks require retained local artifacts and the matching compiler file,
+but do not execute the compiler or product. The updated native branches were
+parsed and their shared gate tested; native check/build/fault/performance suites
+were intentionally not repeated. Product sources, SDK/API/version, external
+round4 projects and their original verification helpers remain unchanged.

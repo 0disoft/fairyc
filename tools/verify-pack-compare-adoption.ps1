@@ -1,10 +1,13 @@
 #requires -Version 7.0
 param(
     [string]$Original = 'C:\Users\cherr\Downloads\fairy_c_test_projects\round4\05-resource-pack-cli',
-    [string]$Fairyc = (Join-Path $PSScriptRoot '../.cache/ledger-compare-toolchain/fairyc.exe')
+    [string]$Fairyc = (Join-Path $PSScriptRoot '../.cache/ledger-compare-toolchain/fairyc.exe'),
+    [string]$AuditReceipt = ''
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
+. (Join-Path $PSScriptRoot 'adoption-output-audit.ps1')
+if ($AuditReceipt) { Invoke-AdoptionOrdinalAudit $AuditReceipt 'pack' $Fairyc $PSCommandPath; return }
 $Original = (Resolve-Path -LiteralPath $Original).Path
 $Fairyc = (Resolve-Path -LiteralPath $Fairyc).Path
 $utf8 = [Text.UTF8Encoding]::new($false, $true)
@@ -125,11 +128,13 @@ foreach ($variant in 'legacy','sdk') {
         Fixture-Entries $scope $reverse
         Run 'byte-order/create-reversed' $profile $exe @('create',($scope+'/entries.tsv'),($scope+'/reverse.frpk')) 0 '' $scope @{'reverse.frpk'=$expected} (ProtectedTree $scope)
         if ($results.Count -ne $historicalNames.Count + $newNames.Count) { throw 'Per-image case count mismatch' }
+        Assert-AdoptionOutputs $results
         foreach ($entry in $results) { $entry.variant=$variant; $allResults.Add($entry) }
     }
 }
 foreach ($path in $protected.Keys) { if ((Hash $path) -ne $protected[$path]) { throw "Protected original changed: $path" } }
 if ((Hash $Fairyc) -ne $compilerHash) { throw 'Compiler changed during verification' }
 $receipt = @{schema='fairyc.pack-compare-adoption/v1'; harnessSha256=(Hash $PSCommandPath); compilerSha256=$compilerHash; compilerVersion=$version.stdout; pinnedCompilerSha256=$pinnedHash; helpers=$helpers; variants=@('legacy','sdk'); profiles=@('development','release'); casesPerImage=($historicalNames.Count+$newNames.Count); passed=$allResults.Count; failed=0; skipped=0; protectedFileCount=$protected.Count; protectedFiles=$protected; digests=$digests; images=$images; cases=$allResults; oracle='Reviewed independent BinaryWriter/BigInteger/UTF-8 hex ordinal helpers plus handwritten fixed pack; whole-byte, file-tree and exact output comparisons'; scope='Same current compiler for both variants; not full round4 revalidation, historical-compiler rerun or fault injection'}
+$receipt.auditHelperSha256 = Hash (Join-Path $PSScriptRoot 'adoption-output-audit.ps1')
 [IO.File]::WriteAllText((Join-Path $evidenceRoot 'receipt.json'), ($receipt | ConvertTo-Json -Depth 14) + "`n", $utf8)
 Write-Output "PASS $($allResults.Count) executions and whole-byte oracles; protected originals unchanged; receipt: $(Join-Path $evidenceRoot 'receipt.json')"
