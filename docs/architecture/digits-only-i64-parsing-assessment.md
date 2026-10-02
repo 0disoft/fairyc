@@ -142,3 +142,23 @@ This task validates document links, whitespace, inspected source hashes and exac
 commit scope only. It does not execute the helper sketch, rerun external round4
 suites, repeat signed-parser acceptance, build native images or run performance
 experiments. All external sources, toolchains, reports and receipts are preserved.
+
+## Executed composition follow-up (2026-10-02)
+
+The separate [digits-only quickstart](../../examples/digits_only_quickstart/README.md)
+now executes the application-helper composition. Its
+[retained receipt](../ops/evidence/digits-only-example-20261002.json) records 31
+fixed inputs cross-checked with an arbitrary-precision oracle, direct and
+`?`-propagated Results on full and nonzero-offset subviews, unchanged padded
+owners, workspace check, MIR codec round trip, interpreter execution, and low
+plus optimized Windows MSVC native execution. Each input has four Result checks.
+The raw corpus includes invalid UTF-8, NUL, BOM and a Unicode digit. Both native
+images return 0 with empty UTF-8 stdout/stderr; their hashes and raw invocations
+are retained with source, SDK and in-process compiler identities.
+
+This follow-up verifies the proposed composition and resolves its earlier
+unexecuted-helper boundary. It does not demonstrate adoption in a maintained
+application, admit another SDK API, change stage0.76, impose the fixture's
+128-byte storage capacity on callers, or validate ledger/log envelope policies.
+The frozen round4 sources and receipts remain unchanged; a future application
+still needs its own line/field diagnostics and validation-order evidence.

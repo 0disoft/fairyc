@@ -1,0 +1,230 @@
+{
+  "cases": [
+    {
+      "inputHex": "",
+      "value": "0",
+      "error": "Empty"
+    },
+    {
+      "inputHex": "30",
+      "value": "0",
+      "error": ""
+    },
+    {
+      "inputHex": "303030323536",
+      "value": "256",
+      "error": ""
+    },
+    {
+      "inputHex": "32313437343833363438",
+      "value": "2147483648",
+      "error": ""
+    },
+    {
+      "inputHex": "39323233333732303336383534373735383037",
+      "value": "9223372036854775807",
+      "error": ""
+    },
+    {
+      "inputHex": "30303039323233333732303336383534373735383037",
+      "value": "9223372036854775807",
+      "error": ""
+    },
+    {
+      "inputHex": "3030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030313233",
+      "value": "123",
+      "error": ""
+    },
+    {
+      "inputHex": "2d",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d30303030",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d31",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d39323233333732303336383534373735383038",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d39323233333732303336383534373735383039",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d3932323333373230333638353437373538303978",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2b31",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "312d30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2031",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "3120",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "310930",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "310a",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "30783130",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "315f30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "312e30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "39323233333732303336383534373735383038",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "3932323333373230333638353437373538303878",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "3932323333373230333638353437373538307838",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "3939393939393939393939393939393939393939393939393939393939393939393939393939393939393939",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "ff30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "3100",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "efbbbf",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "efbc91",
+      "value": "0",
+      "error": "InvalidDecimal"
+    }
+  ],
+  "checkVerified": true,
+  "checksPerInput": 4,
+  "compilerIdentity": {
+    "buildInfo": "go\tgo1.27.1\npath\tgithub.com/0disoft/fairyc/internal/cli.test\nmod\tgithub.com/0disoft/fairyc\t(devel)\t\ndep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\nbuild\tCGO_ENABLED=0\nbuild\tGOARCH=amd64\nbuild\tGOOS=windows\nbuild\tGOAMD64=v1\n",
+    "executableSHA256": "85b45621752c658ca107b7660f0f449527968aa5effd80f893cc4b8a1aa5c2c4",
+    "goVersion": "go1.27.1",
+    "kind": "in-process CLI compiler in Go test executable"
+  },
+  "images": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\digits-only-example\\low.exe"
+      ],
+      "buildDiagnostics": "",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\digits-only-example",
+      "exeBytes": 118784,
+      "exeSHA256": "006b96285c4a95f0ddcd5c44df15de28bcceb553f6fa2abad8b1ad950b358fd5",
+      "exitCode": 0,
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stderrHex": "",
+      "stdin": "closed",
+      "stdout": "",
+      "stdoutHex": "",
+      "toolchain": "msvc 14.51.36231"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\digits-only-example\\optimized.exe"
+      ],
+      "buildDiagnostics": "",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\digits-only-example",
+      "exeBytes": 111616,
+      "exeSHA256": "9bf87518251bb767fc9677df860d50cf7b6b030beaf01eb8f5c25c29012d421e",
+      "exitCode": 0,
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stderrHex": "",
+      "stdin": "closed",
+      "stdout": "",
+      "stdoutHex": "",
+      "toolchain": "msvc 14.51.36231"
+    }
+  ],
+  "interpreterExit": 0,
+  "language": "fairyc-language/20",
+  "mirRoundTrip": true,
+  "runtime": "fairyc-runtime/0",
+  "schema": "fairyc.digits-only-example/v1",
+  "sdk": "0.0.0-stage0.76",
+  "sdkSourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-f616ee9a1519712c337ef8b5935c25cb2bc4cab08714d83d00ae59b999d68fe3",
+  "sourceSHA256": {
+    "README.md": "4d6f31f8a8c8399e7332a0a69dd97084a33280f0e81756ba524ff5a3a7d00653",
+    "fairy.toml": "43ba687b5bd879e5e580fd27d9edc21a320ac97f2dcd1b3a6188abf38eea3275",
+    "src/main.fy": "7c1cba5a57199540e091217c590de531cfb341418891809e3993f6c40c31ca9c",
+    "src/numbers.fy": "ee2e8fb5656c21d3bc3b34c1398542972f2ee46434f1ef23e08086c59beab423"
+  },
+  "target": "x86_64-windows-msvc",
+  "baseRevision": "fab51a67a37ac64d3230f9a1abe9264882f79e0a",
+  "modified": true,
+  "repositorySourceHashes": {
+    "examples/digits_only_quickstart/fairy.toml": "43ba687b5bd879e5e580fd27d9edc21a320ac97f2dcd1b3a6188abf38eea3275",
+    "examples/digits_only_quickstart/src/main.fy": "7c1cba5a57199540e091217c590de531cfb341418891809e3993f6c40c31ca9c",
+    "examples/digits_only_quickstart/src/numbers.fy": "ee2e8fb5656c21d3bc3b34c1398542972f2ee46434f1ef23e08086c59beab423",
+    "examples/digits_only_quickstart/README.md": "4d6f31f8a8c8399e7332a0a69dd97084a33280f0e81756ba524ff5a3a7d00653",
+    "internal/cli/digits_only_example_test.go": "8e31dc4309a80fe99aaa22c6f0ab6eb013b81ea059d96ebf6428e35ae4125951",
+    "internal/sdkstdlib/sources/std/num.fy": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3",
+    "internal/cli/checked_i64_decimal_test.go": "4756388523dae5c7d3f3589d612e63af23a9c2bdf64ab2b04e9fb048f5db594c"
+  }
+}
