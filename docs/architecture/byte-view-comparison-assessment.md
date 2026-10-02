@@ -1,14 +1,19 @@
 # Immutable byte-view comparison assessment
 
-Status: Candidate assessment; no accepted or implemented SDK API.
+Status: Assessment completed; contract accepted in ADR 0422; implementation pending.
 Date: 2026-10-02 (Asia/Seoul).
 Inspected compiler repository revision: `4eb1748f23f6ad6ce938c24c54f394184e886be7`.
 Bundled SDK at assessment: `0.0.0-stage0.77`; language `/20`; runtime `/0`.
 
+Decision follow-up: [ADR 0422](../adr/0422-sdk-immutable-byte-view-comparison.md)
+accepts the exact contract below. This assessment retains the original inspected
+evidence and proposal rationale; the ADR owns the accepted contract. The export
+is not yet implemented or available in the inspected SDK.
+
 ## Recommendation and observed need
 
-Advance one ordinary immutable byte-view comparison helper to a separate ADR
-candidate. SDK stage0.77 provides [equality](../adr/0421-sdk-immutable-byte-view-equality.md),
+The assessment recommended one ordinary immutable byte-view comparison helper;
+ADR 0422 now accepts it. SDK stage0.77 provides [equality](../adr/0421-sdk-immutable-byte-view-equality.md),
 but `std::bytes` has no public `compare` export. Equality alone cannot express
 ordering or distinguish duplicate keys from out-of-order keys.
 
@@ -37,7 +42,7 @@ speedup, constant-time behavior or a need for a native comparison intrinsic.
 pub fn i32 compare(ref u8[] left, ref u8[] right);
 ```
 
-The spelling and contract below are a proposal, not availability or acceptance.
+The proposal below was accepted by ADR 0422; acceptance does not imply availability.
 Return exactly `-1`, `0` or `1`, not an arbitrary difference whose sign must be
 interpreted. Scan corresponding bytes from index zero as unsigned `u8` values
 in the range 0..255. The first unequal pair determines the order. If all bytes
@@ -108,11 +113,11 @@ The existing SDK, equality contract and all application behavior remain unchange
 
 Follow [ADR 0218](../adr/0218-modern-language-concept-admission-boundary.md) and the
 [workload admission gates](../adr/0328-production-workload-capability-admission-gates.md).
-The next unit may write a separate ADR with this exact contract and resolve any
-remaining return-type objection. This assessment itself does not accept an ADR
-or authorize an SDK implementation or version bump.
+ADR 0422 accepts this exact contract and selects the three-value `i32` return.
+Its implementation gate remains pending; the documentation-only acceptance
+does not implement the export or change the SDK version.
 
-If accepted, future implementation evidence should include:
+Required implementation evidence includes:
 
 - An independent unsigned-byte oracle such as Go `bytes.Compare`, checked against
   the exact three-value result and current `bytes::equal`, not a second Fairy loop.
@@ -155,9 +160,9 @@ not executed correctness or performance.
 | Round4 `09-persistent-kv-store/src/codec.fy` | `0cd44acb5c24b04ee8eb0d211c0d631912137ae4b2c038b6f7ca9ea75f9270d7` |
 | Round4 `09-persistent-kv-store/src/snapshot.fy` | `78a429920f20997c238daab4917ceca2672ed65cb5e66474664a2024c4ba33d7` |
 
-This unit validates local document links, whitespace, nine source hashes,
+The original assessment validated local document links, whitespace, nine source hashes,
 comparison API absence, candidate boundaries and the eight proposed hex examples
 against a normalized independent byte-order oracle. That oracle checks document
 examples only; it does not execute Fairy or establish an SDK implementation.
 No new Fairy check/build/native test, external suite or performance experiment
-is run. No product source, SDK version, compiler behavior or historical file changes.
+was run. No product source, SDK version, compiler behavior or historical file changed.
