@@ -280,8 +280,8 @@ bun tools/run-go.ts build -mod=readonly -trimpath -o .cache/ledger-compare-toolc
 This opt-in harness requires the preserved external round4 ledger fixtures and
 SDK stage0.78. It is not a CI test, full 92-case rerun, historical-compiler rerun,
 fault-injection test or performance measurement. No SDK/API/version change or
-round4 migration was made. Pack and KV still have only the static review above;
-the log analyzer's subsequent experiment is recorded below.
+round4 migration was made. Subsequent log and pack experiments are recorded
+below; KV still has only the static review above.
 
 ## Isolated log analyzer adoption evidence, 2026-10-03
 
@@ -337,3 +337,61 @@ script requires the preserved external log fixtures and permits copied input
 paths only within their named `samples/` entries. This is an opt-in local
 adoption experiment, not a CI test, full 186-case rerun, fault experiment,
 performance measurement or migration of the preserved round4 project.
+
+## Isolated resource pack adoption evidence, 2026-10-03
+
+[`verify-pack-compare-adoption.ps1`](../../tools/verify-pack-compare-adoption.ps1)
+copies the pack manifest, seven product sources and two hash-checked independent
+oracle helpers into a unique `.cache/pack-compare-adoption/` directory. The legacy
+sources are copied unchanged. The SDK variant replaces only `codec.fy::compare`
+with the same-signature delegation:
+
+```text
+pub fn i32 compare(ref u8[] a, ref u8[] b) { return bytes::compare(a, b); }
+```
+
+The edited file uses LF. The equality wrapper, insertion sort, duplicate-versus-
+unsorted diagnostics, name validation, binary encoding/range checks, lookup,
+complete-validation-before-output and exclusive file creation remain unchanged.
+Both variants use the same stage0.78 compiler identified in the ledger experiment;
+compiler/SDK implementation sources have not changed since revision `27bc9d20`.
+The stage0.73 compiler is hashed without execution or replacement.
+
+Run `59910b3e53ea41e494f4b4a667255393` passed two checks, four native builds and
+**128 executions**: 32 cases per development/release image for each variant.
+Twenty-six cases reuse the reviewed original oracle helpers. They cover empty
+and single-entry packs, multi-entry sorting, case/prefix/space/Korean names,
+logical names resembling paths, reversed input producing the same pack,
+handwritten fixed-hex list/extraction, duplicate and unsorted indexes, late
+invalid UTF-8 during list/extract, duplicate creation, missing extraction names,
+existing output, source/TSV aliases and hardlinks.
+
+Six new cases use ten names with numeric-looking strings, proper prefixes,
+case/space differences, Korean, and distinct composed/decomposed Unicode
+spellings. Payloads include NUL/0xFF/0x80 and a distinct final byte per name.
+Creation, listing, three exact-name extractions and reversed-input creation
+match independent UTF-8 hex ordinal sorting, BinaryWriter little-endian encoding
+and BigInteger length/offset arithmetic. Every generated pack and extracted file
+matches the complete oracle bytes, not only its length or a successful exit.
+
+All exit/stdout/stderr expectations, protected input bytes and per-case file
+trees pass, with no unexpected residual files. Readers explicitly select strict
+UTF-8. Twenty-one protected original source, metadata, oracle, EXE and compiler
+files retain their SHA256. An initial pre-build attempt stopped at the helper
+identity gate because the harness transcribed one extra character in a hash;
+the corrected guard precedes the successful run above.
+
+The run retains `receipt.json`, the identity raw log, both workspaces' source,
+lockfiles, oracle helpers, per-case raw logs and four EXEs. The receipt records
+harness/helper/compiler/EXE SHA256, source/SDK digests, complete per-case
+expectations/results, oracle output hashes and protected-file before/after hashes.
+Legacy source digest matches the historical pack digest; SDK candidate digest is
+`fysrc1-sha256-a611851b278e785ab10c31eb38a949ce70662c4274c55085aab6960e4d377ec1`.
+
+With the separate stage0.78 compiler available, run
+`./tools/verify-pack-compare-adoption.ps1` from the compiler checkout. It requires
+the preserved external pack and its reviewed oracle helpers. This opt-in local
+experiment is not a CI test, full 218-case rerun, historical-compiler rerun,
+forced write/close fault experiment, performance measurement or migration of
+the preserved round4 project. No SDK/API/version or publication-policy change
+is introduced; KV adoption remains a separate follow-up.
