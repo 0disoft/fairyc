@@ -175,18 +175,48 @@ round4 compiler. Native argv/cwd/exit/output bytes and identities are retained i
 | Low EXE | `5eb826f7eafde6f6013081c8209e0b16f187c45dd356004a324d3ec5385718d2` |
 | Optimized EXE | `c4ecc65a608f9491d864353a23d29cdf814bdc07a4057e6c6f34adf6837cc9dc` |
 
-No Linux native execution, performance measurement, constant-time claim or
-application adoption is claimed. Historical round4 sources, toolchains,
+This SDK implementation evidence does not claim Linux native execution,
+performance measurement or constant-time behavior. The separate application
+adoption evidence follows below. Historical round4 sources, toolchains,
 receipts and identity fixtures are preserved.
 
 ## Rollout and deferred scope
 
-After implementation, consider the maintained task-manager example as the first
-separate adoption unit. Replace only its equality loop/calls and verify the
-existing command names, FYTASK1 header, field-validation ordering, diagnostics,
-limits and storage/publication/cleanup behavior with the then-current compiler.
-Its historical stage0.72 receipt is not current adoption proof. Preserve every
-external round4 source, compiler and receipt.
+The maintained [task-manager example](../../examples/task_manager_cli/README.md)
+completed the first separate adoption unit on 2026-10-02 in commit `cd2bee15`.
+Example version `0.1.2` removes its local equality loop and calls `bytes::equal`
+for the four command names, `--help` and FYTASK1 header. CLI arguments, field
+validation order, diagnostics, limits and storage/publication/cleanup code are
+preserved. Verification now requires an explicit compiler path and reviewed
+SHA256; its historical stage0.72 receipt is not current adoption proof.
+
+Fresh isolated-copy verification passed `check`, locked check, development and
+release Windows native builds, and 126 exact-output/file-state cases (118 existing
+cases plus eight observations of header first/last-byte mismatches, command
+prefixes and case differences). Cases include Korean titles, restart, malformed
+stores, limits, reserved sidecars and real OS replacement/read denial. An
+incorrect compiler pin is rejected before fixture/build writes. Native readers
+explicitly decode UTF-8; each case retains executable, argv, cwd, stdout, stderr,
+exit code and before/after file states. Separate injected-storage-fault tests were
+not repeated because storage code did not change; no new Linux, power-loss,
+performance or constant-time verification is claimed.
+
+The adoption compiler embeds revision `cd2d6a6e433ac3bcba3d55e21cf2597bcd26eac4`
+with `modified: true` (the adoption edits were present when it was built), SDK
+`0.0.0-stage0.77`, language `/20` and runtime `/0`. Exact source hashes and raw
+compiler/build execution records are retained under
+`.cache/task-byte-equality-20261002/`; the isolated project's
+`verification-results.json` contains SDK/source digests and all 126 cases.
+
+| Adoption artifact | SHA256 |
+| --- | --- |
+| Compiler EXE | `5c948d1c665b506cd10600db3f04ed11823e07bb2c7e97a1321dc4dc34bfa7e9` |
+| Development EXE | `5a012ea4f9aaacbace6068e3a912803f2fa2ddaa90f29f477925f17188ba114f` |
+| Release EXE | `651a6f04def6772778896f92f707b398f927db0cfcfec1542c8a9b779ee98d7e` |
+| Structured verification results | `c4f2b88d85a54a2f02142fc2bdebb0499079c179945e83b125f63498d949e8a8` |
+
+Every external round4 source, compiler and receipt remains preserved. This
+adoption does not revalidate or update those historical projects.
 
 Lexicographic comparison, stable sorting, full-range usize parsing, generic
 binary codecs, constant-time comparisons, text normalization and field/row
