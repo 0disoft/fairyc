@@ -29,7 +29,7 @@ Pack and KV contain identical comparison function bodies. They are two consumers
 not two independent comparison algorithms. The ledger and lexer expose the same
 byte/prefix ordering through boolean `less` functions. Only the byte-ordering
 portion is a prospective shared operation; their larger sorting policies are not.
-The maintained lexer is one concrete future adopter. External round4 projects
+At assessment time the maintained lexer was one concrete future adopter. External round4 projects
 remain preserved evidence, not migration targets or new execution results.
 
 A small local loop remains a valid alternative. The benefit is removing repeated
@@ -168,3 +168,59 @@ against a normalized independent byte-order oracle. That oracle checks document
 examples only; it does not execute Fairy or establish an SDK implementation.
 No new Fairy check/build/native test, external suite or performance experiment
 was run. No product source, SDK version, compiler behavior or historical file changed.
+
+## Round4 adoption review, 2026-10-03
+
+This read-only review uses compiler checkout
+`242ebd3c6834d21a757566e4b1c0bb4478c3a827` and bundled SDK stage0.78.
+The nine round4 `src/` directories were searched for byte-order helpers and
+their callers. Build backups and `repro/` files are excluded from adoption
+candidates. The original assessment identities above remain historical evidence.
+
+Four projects have byte-order loops compatible with the SDK contract. The log
+analyzer is an additional consumer absent from the original assessment table.
+
+| Project and source location | Candidate replacement | Policy to preserve |
+| --- | --- | --- |
+| 01 ledger `src/ledger.fy:30`, caller `:120` | Compare the two account subviews with `bytes::compare(...) < 0` | Group equal accounts before sorting; keep strict-less insertion sorting, account validation, checked i64 totals and complete-input-before-output behavior |
+| 02 log analyzer `src/analyzer.fy:17`, caller `:72` | Compare the two path-pool subviews with `bytes::compare(...) < 0` | Group identical paths; keep numeric status ordering, strict-less path insertion sorting, streaming boundaries, error lines and checked i64 aggregation |
+| 05 resource pack `src/codec.fy:8`, callers `src/create.fy:48` and `src/readpack.fy:38` | Keep the local comparator signature and delegate its body to `bytes::compare(a, b)` | Keep strict-less sorting, duplicate-name rejection and separate zero/positive reader diagnostics; preserve name validation, offsets, payload bytes and publication policy |
+| 09 KV `src/codec.fy:8`, callers `src/snapshot.fy:46` and `:65` | Keep the local comparator signature and delegate its body to `bytes::compare(a, b)` | Keep zero/positive corruption diagnostics and `<= 0` insertion/update placement; preserve generation, checksum, selected-key replacement and write/sync/close/replace_file protocol |
+
+For the ledger and log analyzer, form shared subviews from the existing start
+and length arrays; retain the surrounding range and lifetime assumptions.
+Equal views must return false from `less`. Do not add the lexer's index tie-break
+to these helpers: their equal-name grouping and strict-less insertion policy
+already belong to their applications. For pack and KV, exact -1/0/1 results
+match the local helper; changing only that body leaves call-site policy explicit.
+
+Projects 03, 04, 06 and 07 have byte equality helpers but no byte-order helper
+in their product sources. Project 08 sorts signed i64 interval endpoints; byte
+ordering would change its semantics. Equality-only callers, including command,
+magic and placeholder matching, remain a separate `bytes::equal` adoption
+question. No parsing, UTF-8 validation, checksum or numeric loop is a comparator
+migration target. Existing `codec::equal` wrappers can continue testing the local
+comparator result for zero; routing all equality through comparison is unnecessary.
+
+The maintained lexer has already adopted `bytes::compare` in commit `242ebd3c`,
+retaining preceding field priorities and `ai < bi`. That unit passed full
+diagnostic-output comparison and binary/prefix/duplicate cases in development
+and release, plus self-lexing of 18 source files and four boundary inputs.
+These are lexer results, not round4 migration or revalidation results.
+
+The freshly inspected log source SHA256 is
+`b62fdfbcff1b4f6c43724e61a58172970631f6944bad078270ff6ddff09111a4`.
+The seven round4 source hashes listed in the original table still match.
+The round4 compiler EXE SHA256 still matches
+`7d58dd9c8860f01723f55f2f289a609d0941fa3cd6b06699954ca46336eeb917`;
+its retained receipt/version record identifies revision `c34718bd`, unmodified,
+SDK stage0.73, language `/20` and runtime `/0`. The matching revision's SDK
+source contains neither `compare` nor `equal`; importing the new helper requires
+a separately selected SDK stage0.78 toolchain. Do not rewrite the pin or receipts.
+
+Review-time SHA256 checks cover 79 files: product sources, all nine reports and
+manifests, and the four pinned-toolchain files. They are unchanged across this
+review. No round4 check/build/native execution, benchmark, fault experiment or
+approval of project completion was performed. Any future application experiment
+should use a separate copy and compare complete outputs and, for pack/KV,
+serialized file bytes; it must retain the original error and preservation cases.
