@@ -19,7 +19,7 @@
   "properties": {
     "schemaVersion": { "const": "fairyc.test-report/v4" },
     "engine": { "const": "native" },
-    "target": { "const": "x86_64-windows-msvc" },
+    "target": { "enum": ["x86_64-windows-msvc", "x86_64-linux-gnu"] },
     "profile": { "enum": ["development", "release"] },
     "tests": {
       "type": "array",

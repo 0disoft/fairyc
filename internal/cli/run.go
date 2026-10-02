@@ -81,7 +81,7 @@ program's process arguments, preserves ordinary program status, and retains no a
 "fairyc test" checks the root package, one explicitly selected root-reachable local package, or every
 unambiguous root-reachable local package with --workspace plus their isolated tests/ sources. It lists
 canonical test identities or runs all, exact portable test directories, exact portable test files, or exact identities through the semantic interpreter or as
-isolated Windows images with --native; --json selects a stable machine report for listing or execution,
+isolated Windows or Linux images with --native; --json selects a stable machine report for listing or execution,
 --locations adds exact-current portable source anchors, and native tests receive any process arguments
 after "--" in every isolated execution. Explicit --stdin attaches caller input only when exactly one
 native test is selected; native tests otherwise receive EOF. Explicit --capture-output requires

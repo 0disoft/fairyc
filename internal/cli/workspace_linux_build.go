@@ -8,6 +8,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -29,20 +30,25 @@ func compileLinuxWorkspacePolicy(sourceRoot string, options workspaceTargetOptio
 	if code != ExitSuccess {
 		return compiledLinuxWorkspace{}, code
 	}
+	artifact, code := compileLinuxProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)
+	return compiledLinuxWorkspace{artifact: artifact, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName}, code
+}
+
+func compileLinuxProgram(program mir.Program, entry string, options workspaceTargetOptions, policy workspaceCompilePolicy, sdkStorage bool, stderr io.Writer) (cdriver.Artifact, int) {
 	emit := cbackend.Emit
-	if lowered.sdkStorage {
+	if sdkStorage {
 		emit = cbackend.EmitStorageTransfers
 	}
-	unit, err := emit(lowered.program, lowered.entryName, cbackend.Stage0Profile())
+	unit, err := emit(program, entry, cbackend.Stage0Profile())
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {
-			return compiledLinuxWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, "Linux workspace C-emission", capability)
+			return cdriver.Artifact{}, workspaceSubsetCapabilityError(policy, stderr, "Linux workspace C-emission", capability)
 		}
-		return compiledLinuxWorkspace{}, internalError(stderr)
+		return cdriver.Artifact{}, internalError(stderr)
 	}
 	if unit.Target != string(target.X8664LinuxGNU) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
-		return compiledLinuxWorkspace{}, internalError(stderr)
+		return cdriver.Artifact{}, internalError(stderr)
 	}
 	supportSource := linuxVectorSupportSource
 	if policy.runTrapReceipt {
@@ -50,7 +56,7 @@ func compileLinuxWorkspacePolicy(sourceRoot string, options workspaceTargetOptio
 	}
 	support, err := supportSource(unit.ForeignSymbols)
 	if err != nil {
-		return compiledLinuxWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, "Linux workspace support linkage", err)
+		return cdriver.Artifact{}, workspaceSubsetCapabilityError(policy, stderr, "Linux workspace support linkage", err)
 	}
 	compilerName := options.compilerName
 	if compilerName == "" {
@@ -61,16 +67,16 @@ func compileLinuxWorkspacePolicy(sourceRoot string, options workspaceTargetOptio
 			}
 		}
 		if compilerName == "" {
-			return compiledLinuxWorkspace{}, buildFailure(stderr, fmt.Errorf("Linux native commands require GCC or Clang on PATH"))
+			return cdriver.Artifact{}, buildFailure(stderr, fmt.Errorf("Linux native commands require GCC or Clang on PATH"))
 		}
 	}
 	toolchain, err := cdriver.Resolve(target.X8664LinuxGNU, compilerName)
 	if err != nil {
-		return compiledLinuxWorkspace{}, buildFailure(stderr, err)
+		return cdriver.Artifact{}, buildFailure(stderr, err)
 	}
 	artifact, err := cdriver.Build(toolchain, options.profile, unit.Source, support)
 	if err != nil {
-		return compiledLinuxWorkspace{}, buildFailure(stderr, err)
+		return cdriver.Artifact{}, buildFailure(stderr, err)
 	}
-	return compiledLinuxWorkspace{artifact: artifact, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName}, ExitSuccess
+	return artifact, ExitSuccess
 }

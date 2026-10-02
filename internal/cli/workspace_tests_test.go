@@ -626,6 +626,7 @@ func TestStableWorkspaceTestWritesCapturedNativeJSONExecutionReport(t *testing.T
 		&stderr,
 	)
 	want := `{"schemaVersion":"fairyc.test-report/v4","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::native::fails","outcome":"failed","trapCategory":"assertion-failed","stdoutBase64":"AP8=","stderrBase64":"gA=="},{"identity":"tests::native::passes","outcome":"passed","trapCategory":null,"stdoutBase64":"cGFzcw==","stderrBase64":"d2Fybg=="}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}` + "\n"
+	want = strings.ReplaceAll(want, "x86_64-windows-msvc", string(nativeWorkspaceTarget()))
 	if code != ExitProgramTrap || stdout.String() != want || stderr.String() != "" {
 		t.Fatalf("captured native JSON report = (%d, %q, %q), want stdout %q", code, stdout.String(), stderr.String(), want)
 	}
@@ -735,6 +736,7 @@ func TestStableWorkspaceTestWritesNativeJSONExecutionIdentity(t *testing.T) {
 		&stderr,
 	)
 	want := `{"schemaVersion":"fairyc.test-report/v1","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::native::fails","outcome":"failed","trapCategory":"assertion-failed"},{"identity":"tests::native::passes","outcome":"passed","trapCategory":null}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}` + "\n"
+	want = strings.ReplaceAll(want, "x86_64-windows-msvc", string(nativeWorkspaceTarget()))
 	if code != ExitProgramTrap || stdout.String() != want || stderr.String() != "" {
 		t.Fatalf("native JSON report = (%d, %q, %q), want stdout %q", code, stdout.String(), stderr.String(), want)
 	}

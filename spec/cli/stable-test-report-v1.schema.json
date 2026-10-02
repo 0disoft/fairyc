@@ -25,7 +25,7 @@
     },
     "target": {
       "type": ["string", "null"],
-      "enum": ["x86_64-windows-msvc", null]
+      "enum": ["x86_64-windows-msvc", "x86_64-linux-gnu", null]
     },
     "profile": {
       "type": ["string", "null"],
@@ -67,7 +67,7 @@
     {
       "properties": {
         "engine": { "const": "native" },
-        "target": { "const": "x86_64-windows-msvc" },
+        "target": { "enum": ["x86_64-windows-msvc", "x86_64-linux-gnu"] },
         "profile": { "enum": ["development", "release"] }
       }
     }

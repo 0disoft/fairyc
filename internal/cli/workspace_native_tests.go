@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"runtime"
 	"strings"
 	"time"
 
@@ -20,9 +21,20 @@ type nativeWorkspaceTestCompiler func(
 	entry string,
 	profile cdriver.Profile,
 	stderr io.Writer,
-) (cdriver.WindowsHostArtifact, int)
+) (nativeWorkspaceTestArtifact, int)
 
-type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact, io.Reader, []string, time.Duration) (cdriver.WindowsHostOutcome, error)
+type nativeWorkspaceTestArtifact struct {
+	windows cdriver.WindowsHostArtifact
+	linux   cdriver.Artifact
+}
+
+// OS adapters validate private trap control before returning this shared result.
+type nativeWorkspaceTestOutcome struct {
+	ExitCode                     int32
+	Stdout, Stderr, TrapCategory string
+}
+
+type nativeWorkspaceTestExecutor func(nativeWorkspaceTestArtifact, io.Reader, []string, time.Duration) (nativeWorkspaceTestOutcome, error)
 
 type nativeWorkspaceTestInput struct {
 	caller     io.Reader
@@ -51,11 +63,8 @@ func runNativeWorkspaceTests(
 	sdkStorage bool,
 	stderr io.Writer,
 ) ([]workspaceTestOutcome, int) {
-	compile := compileNativeWorkspaceTest
-	if sdkStorage {
-		compile = func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
-			return compileWindowsProgramPolicy(program, entry, target.X8664WindowsMSVC, profile, true, true, stderr)
-		}
+	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
+		return compileNativeWorkspaceTest(program, entry, profile, sdkStorage, stderr)
 	}
 	return runNativeWorkspaceTestsWith(
 		program,
@@ -99,10 +108,7 @@ func runNativeWorkspaceTestsWith(
 		if err != nil {
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}
-		programStderr, category, err := classifyStableRunOutcome(outcome)
-		if err != nil {
-			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
-		}
+		programStderr, category := outcome.Stderr, outcome.TrapCategory
 		if !captureOutput && (outcome.Stdout != "" || programStderr != "") {
 			return nil, workspaceSubsetCapabilityError(
 				workspaceCompilePolicy{stableDiagnostics: true},
@@ -129,20 +135,43 @@ func compileNativeWorkspaceTest(
 	program mir.Program,
 	entry string,
 	profile cdriver.Profile,
+	sdkStorage bool,
 	stderr io.Writer,
-) (cdriver.WindowsHostArtifact, int) {
-	return compileWindowsProgramWithRunReceipt(
-		program,
-		entry,
-		target.X8664WindowsMSVC,
-		profile,
-		true,
-		stderr,
-	)
+) (nativeWorkspaceTestArtifact, int) {
+	if runtime.GOOS == "linux" {
+		options, err := stableLinuxOptions(stableNativeOptions{}, profile)
+		if err != nil {
+			return nativeWorkspaceTestArtifact{}, buildFailure(stderr, err)
+		}
+		artifact, code := compileLinuxProgram(program, entry, options, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, sdkStorage, stderr)
+		return nativeWorkspaceTestArtifact{linux: artifact}, code
+	}
+	artifact, code := compileWindowsProgramPolicy(program, entry, target.X8664WindowsMSVC, profile, true, sdkStorage, stderr)
+	return nativeWorkspaceTestArtifact{windows: artifact}, code
 }
 
-func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact, stdin io.Reader, programArguments []string, timeout time.Duration) (cdriver.WindowsHostOutcome, error) {
-	return cdriver.ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(artifact, stdin, programArguments, timeout)
+func executeNativeWorkspaceTest(artifact nativeWorkspaceTestArtifact, stdin io.Reader, programArguments []string, timeout time.Duration) (nativeWorkspaceTestOutcome, error) {
+	if runtime.GOOS == "linux" {
+		outcome, err := cdriver.ExecuteLinuxTargetWithOptions(artifact.linux, cdriver.LinuxExecutionOptions{Input: stdin, Arguments: programArguments, Timeout: timeout})
+		if err != nil {
+			return nativeWorkspaceTestOutcome{}, err
+		}
+		category, err := linuxTrapCategory(outcome)
+		return nativeWorkspaceTestOutcome{ExitCode: outcome.ExitCode, Stdout: outcome.Stdout, Stderr: outcome.Stderr, TrapCategory: category}, err
+	}
+	outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(artifact.windows, stdin, programArguments, timeout)
+	if err != nil {
+		return nativeWorkspaceTestOutcome{}, err
+	}
+	programStderr, category, err := classifyStableRunOutcome(outcome)
+	return nativeWorkspaceTestOutcome{ExitCode: outcome.ExitCode, Stdout: outcome.Stdout, Stderr: programStderr, TrapCategory: category}, err
+}
+
+func nativeWorkspaceTarget() target.ID {
+	if runtime.GOOS == "linux" {
+		return target.X8664LinuxGNU
+	}
+	return target.X8664WindowsMSVC
 }
 
 func nativeWorkspaceTestProgram(input mir.Program, testEntry string, sdkStorage bool) (mir.Program, string, error) {
