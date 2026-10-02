@@ -1,19 +1,20 @@
 # Checked i64 decimal parsing assessment after round4
 
-Status: Candidate assessment; no accepted API or implementation claim.
+Status: Assessment concluded; API accepted by [ADR 0420](../adr/0420-sdk-checked-i64-decimal-parsing.md); implementation pending.
 Date: 2026-10-02 (Asia/Seoul).
 Inspected compiler repository revision: `3250a448`.
 Bundled SDK: `0.0.0-stage0.75`; language `/20`; runtime ABI `/0`.
 
 ## Recommendation and decision boundary
 
-Prioritize one pure, fallible signed decimal parser in `std::num` for a later
-feature-specific ADR. Two maintained quickstarts duplicate the same negative
-accumulator, and round4 interval parsing uses an equivalent guard. This is
+The assessment recommended one pure, fallible signed decimal parser in
+`std::num`; ADR 0420 now accepts that contract. Two maintained quickstarts
+duplicate the same negative accumulator, and round4 interval parsing uses an equivalent guard. This is
 repeated library work, not evidence of a compiler defect or a new language need.
 Keep grammar, runtime symbols, casts and external round4 projects unchanged.
 
-The following names are candidate sketches, not available APIs or reserved names:
+The following assessment sketch is now accepted by ADR 0420, but is not yet
+an available API:
 
 ```text
 pub enum ParseI64Error { Empty; InvalidDecimal; OutOfRange; }
@@ -103,8 +104,8 @@ scan a suffix after overflow solely to prefer a later syntax error.
 | `9223372036854775808x` | `OutOfRange` | Overflow is reached before the trailing invalid byte. |
 | `922337203685477580x8` | `InvalidDecimal` | Invalid byte is reached before any overflow. |
 
-These are proposed acceptance expectations, not executed test results. A later
-ADR must fix this order explicitly; syntax-first whole-input validation would
+These assessment expectations are now fixed by ADR 0420, not executed SDK
+test results. Syntax-first whole-input validation would
 be a different public policy and could change current callers' diagnostics.
 
 ## Arithmetic feasibility
@@ -141,9 +142,9 @@ Parsing establishes an i64 value, not application bounds or valid UTF-8 for othe
 
 [ADR 0218](../adr/0218-modern-language-concept-admission-boundary.md) and
 [ADR 0328](../adr/0328-production-workload-capability-admission-gates.md)
-keep admission evidence-based. A pure SDK function is the smallest candidate;
-this assessment accepts no API and changes no version. Use a separate accepted
-ADR before implementation. If later implemented, advance the SDK and its source
+keep admission evidence-based. This assessment itself accepts no API and changes
+no version; the separate ADR 0420 now supplies the accepted contract before
+implementation. If later implemented, advance the SDK and its source
 digest under [versioning](../compatibility/versioning-v0.md); language `/20`,
 runtime ABI `/0` and schemas need no change for an ordinary library addition.
 
