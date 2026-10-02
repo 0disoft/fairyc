@@ -35,7 +35,7 @@ without allocation or a preceding whole-input UTF-8 conversion.
 | --- | --- | --- |
 | One signed decimal SDK parser | Advance to an ADR candidate | Exact duplication in two maintained examples and a third signed workload. |
 | Keep all parsers local | Valid fallback | No SDK commitment, but repeats minimum-value and overflow reasoning. |
-| Add digits-only/nonnegative wrappers now | Defer | Unsigned field syntax is real, but one shared parser plus a caller syntax check can be assessed first. |
+| Add digits-only/nonnegative wrappers now | Defer | The [follow-up assessment](digits-only-i64-parsing-assessment.md) prefers a leading-minus caller guard plus the signed parser; no separate SDK API is admitted. |
 | Generic radix/options API, implicit parsing or intrinsic | Defer | No need established by the inspected workloads; increases the contract surface. |
 | Error byte offsets, text overload or prefix parsing | Defer | Current callers attach field/line context; a public offset or another entry point needs stronger evidence. |
 
