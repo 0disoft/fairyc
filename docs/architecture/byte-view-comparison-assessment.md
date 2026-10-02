@@ -224,3 +224,60 @@ review. No round4 check/build/native execution, benchmark, fault experiment or
 approval of project completion was performed. Any future application experiment
 should use a separate copy and compare complete outputs and, for pack/KV,
 serialized file bytes; it must retain the original error and preservation cases.
+
+## Isolated ledger adoption evidence, 2026-10-03
+
+[`verify-ledger-compare-adoption.ps1`](../../tools/verify-ledger-compare-adoption.ps1)
+copies only the ledger manifest, four product sources and selected fixtures into
+a unique compiler-checkout `.cache/ledger-compare-adoption/` directory. It keeps
+one unchanged source variant and changes only `less` in the other variant:
+
+```text
+let usize a = starts[left]; let usize b = starts[right];
+return bytes::compare(data[a..a + lengths[left]], data[b..b + lengths[right]]) < 0;
+```
+
+The edited source uses LF; the unedited files retain their original bytes.
+Equality, grouping, insertion sorting, validation, checked i64 arithmetic,
+file reads and output publication are unchanged. Both variants use the same
+newly built SDK stage0.78 compiler; this isolates helper adoption from a compiler
+upgrade. The old stage0.73 compiler is hashed but is not executed or replaced.
+
+Final run `2b8950a036a746b59de93bf02d842969` passed two checks, four native builds
+and **68 exact-output executions**: 17 cases in each development/release image
+of both variants. Sixteen selected historical cases use retained independent
+expectations and verify fixture hashes against the original receipt. They cover
+empty input, Korean/space/prefix account ordering, CRLF/final-line handling,
+i64 maximum and negative balance, sum/parse overflow, late invalid fields,
+invalid UTF-8, maximum name length, 128/129 accounts, help and CLI/file errors.
+The new fixture uses ten distinct names including `10`/`2`, case and space
+differences, proper prefixes, Korean, and distinct composed/decomposed `é`.
+Repeated rows aggregate values beyond i32; BigInteger totals and UTF-8 hex
+ordinal sorting independently determine the complete expected output.
+
+Every exit/stdout/stderr matches its expectation, establishing matching results
+between variants for these cases. Native readers explicitly select strict UTF-8.
+Copied inputs remain byte-identical; 22 protected original source, metadata,
+fixture and compiler files retain their SHA256. An initial trial accidentally
+split the decomposed name into two names in the PowerShell fixture; parenthesized
+construction and an inventory assertion correct it before the final run above.
+
+The final directory retains `receipt.json`, `raw-executions.jsonl`, both source
+copies, new lockfiles and all four EXEs. The receipt records harness/compiler/EXE
+SHA256, source/SDK digests, per-case expectations and results, input before/after
+hashes and protected-file hashes. Compiler revision is `27bc9d20`, modified=false,
+SHA256 `0922d0ca699abcf747cdb5a2604151e9a9353dc0d306cca4ac5996b94ff49a99`.
+Baseline source digest matches the historical ledger digest; candidate source
+digest is `fysrc1-sha256-2a8a7e700bbefa3bca2980a1c2b47f65d9d6468646d97f2e9d62b2a2b1db9059`.
+
+Reproduce locally after building that separate compiler:
+
+```powershell
+bun tools/run-go.ts build -mod=readonly -trimpath -o .cache/ledger-compare-toolchain/fairyc.exe ./cmd/fairyc
+./tools/verify-ledger-compare-adoption.ps1
+```
+
+This opt-in harness requires the preserved external round4 ledger fixtures and
+SDK stage0.78. It is not a CI test, full 92-case rerun, historical-compiler rerun,
+fault-injection test or performance measurement. No SDK/API/version change or
+round4 migration was made; other projects still have only the static review above.
