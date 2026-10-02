@@ -490,7 +490,13 @@ the caller buffer byte-for-byte unchanged because the C implementation computes 
 length and completes all validation before the second conversion pass writes. The private raw
 declarations, `@repr(C)` result transport, and
 `fy_std_process_arg_count_v0`/`fy_std_process_arg_v0` symbols remain inside the SDK and the
-Windows-only target support unit.
+target-owned support units (Windows and, since SDK stage0.79, Linux GNU amd64).
+
+The Linux adapter receives the original `argc`/`argv` from the generated entry
+and borrows that storage for the process lifetime. It validates the entire argument
+as UTF-8 before copying; invalid byte argv returns status 2 without writes.
+Index, capacity, empty-argument and exact `needed` semantics are the same as on
+Windows. Only units using process arguments change their C main signature.
 
 The Windows adapter reads the UCRT wide argv through `__p___argc()` and `__p___wargv()`; the narrow
 argv is ANSI-code-page encoded and is never used. Because the `mainCRTStartup` narrow policy under
@@ -749,6 +755,16 @@ Callers must check write, sync and close before publication. It does not imply
 power-loss durability or automatic recovery; see ADR 0411 for failure and restart
 policy and the distinction between injected failures, process kills and physical
 power loss. `rename_file` retains its no-replace contract.
+
+SDK `0.0.0-stage0.79` makes `read_exact`, `remove_file` and `replace_file`
+target-owned through `fy_std_file_read_exact_v0`, `fy_std_file_remove_v0` and
+`fy_std_file_replace_v0`. Windows delegates to the existing helpers. Linux
+reads the exact view through its existing descriptor primitive, removes a single
+name with `unlink`, and publishes a regular prepared file with one `rename` on
+the same mounted filesystem. Source symlinks/directories reject; errors retain
+`errno`. Open Linux handles can survive replacement and keep the old inode.
+There is no copy/delete fallback or directory-sync durability guarantee. See
+ADR 0424 for caller alias, exclusion, recovery and Linux validation boundaries.
 
 `rename_file(ref CStr, ref CStr)`. The Windows target first admits only an existing non-directory
 source and then calls `MoveFileExW` with flags `0`: an existing destination is never replaced and a

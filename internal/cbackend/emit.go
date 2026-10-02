@@ -481,7 +481,13 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 			return Unit{}, err
 		}
 	}
-	output.WriteString("int main(void) {\n")
+	_, usesArgCount := value.usedForeignSymbols["fy_std_process_arg_count_v0"]
+	_, usesArg := value.usedForeignSymbols["fy_std_process_arg_v0"]
+	if profile.Target == target.X8664LinuxGNU && (usesArgCount || usesArg) {
+		output.WriteString("extern void fy_std_process_set_args_v0(int, char **);\nint main(int argc, char **argv) {\n    fy_std_process_set_args_v0(argc, argv);\n")
+	} else {
+		output.WriteString("int main(void) {\n")
+	}
 	for index := range functions {
 		if index != value.entryIndex {
 			fmt.Fprintf(&output, "    (void)&fy_fn_%d;\n", index)

@@ -232,17 +232,17 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 	}
 }
 
-func TestAdmittedForTargetKeepsProcessArgsTargetBound(t *testing.T) {
+func TestProcessArgsSelectsTargetOwnedImplementation(t *testing.T) {
 	t.Parallel()
 	for _, symbol := range []string{"fy_std_process_arg_count_v0", "fy_std_process_arg_v0"} {
 		if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
 			t.Fatalf("%s is not admitted for Windows", symbol)
 		}
-		if AdmittedForTarget(symbol, target.X8664LinuxGNU) {
-			t.Fatalf("%s leaked into the Linux target contract", symbol)
+		if !AdmittedForTarget(symbol, target.X8664LinuxGNU) {
+			t.Fatalf("%s is not admitted for Linux", symbol)
 		}
-		if _, err := ComponentsForSymbols([]string{symbol}); err == nil || !strings.Contains(err.Error(), "no x86_64-linux-gnu source contract") {
-			t.Fatalf("ComponentsForSymbols(%q) error = %v", symbol, err)
+		if components, err := ComponentsForSymbols([]string{symbol}); err != nil || !slices.Equal(components, []Component{ComponentTextView, ComponentLinuxProcessArgs}) {
+			t.Fatalf("Linux process closure = %v, %v", components, err)
 		}
 	}
 	components, err := WindowsMSVCComponentsForSymbols([]string{"fy_std_process_arg_count_v0", "fy_std_process_arg_v0"})

@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 struct fy_std_file_storage_v0 {
@@ -377,4 +378,37 @@ uint32_t fy_std_file_drop_v0(void *file_storage) {
         fy_std_file_storage_from_linux_v0(file_storage, &file);
     }
     return UINT32_C(0);
+}
+
+struct fy_std_file_result_v0 fy_std_file_read_exact_v0(void *file_storage, uint8_t *buffer, size_t length) {
+    if (length != 0 && buffer == NULL) { return fy_std_file_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0); }
+    size_t total = 0;
+    /* Also validate a closed/invalid handle for an empty request. */
+    do {
+        struct fy_std_file_result_v0 result = fy_std_file_read_v0(file_storage, length == 0 ? buffer : buffer + total, length - total);
+        if (result.status != FY_STD_FILE_OK_V0) { result.count = total; return result; }
+        if (length != 0 && result.count == 0) { return fy_std_file_result_v0(UINT32_C(7), 0, total); }
+        total += result.count;
+    } while (total < length);
+    return fy_std_file_result_v0(FY_STD_FILE_OK_V0, 0, total);
+}
+
+struct fy_std_file_result_v0 fy_std_file_remove_v0(const uint8_t *path) {
+    size_t length;
+    if (!fy_std_file_path_storage_length_v0(path, &length)) { return fy_std_file_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0); }
+    if (unlink((const char *)path) != 0) { return fy_std_file_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0); }
+    return fy_std_file_result_v0(FY_STD_FILE_OK_V0, 0, 0);
+}
+
+struct fy_std_file_result_v0 fy_std_file_replace_v0(const uint8_t *replacement, const uint8_t *replaced) {
+    size_t length;
+    if (!fy_std_file_path_storage_length_v0(replacement, &length) || !fy_std_file_path_storage_length_v0(replaced, &length)) {
+        return fy_std_file_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0);
+    }
+    struct stat prepared;
+    if (lstat((const char *)replacement, &prepared) != 0) { return fy_std_file_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0); }
+    if (!S_ISREG(prepared.st_mode)) { return fy_std_file_result_v0(FY_STD_FILE_INVALID_ARGUMENT_V0, 0, 0); }
+    /* POSIX rename publishes one same-filesystem name; never copy/delete or unlink the destination. */
+    if (rename((const char *)replacement, (const char *)replaced) != 0) { return fy_std_file_result_v0(FY_STD_FILE_IO_ERROR_V0, errno, 0); }
+    return fy_std_file_result_v0(FY_STD_FILE_OK_V0, 0, 0);
 }

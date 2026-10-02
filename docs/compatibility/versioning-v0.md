@@ -1512,3 +1512,12 @@ The body schema advances to v4 and ordinary process schema to v3. Other schemas,
 SDK stage0.78, language `/20`, runtime ABI `/0`, source semantics and target
 maturity are unchanged. Historical fixtures, compiler pins and receipts remain
 preserved. See the ADR for the exact version identities and execution evidence.
+
+ADR 0424 advances only the SDK to `0.0.0-stage0.79`. Public `read_exact`,
+`remove_file`, `replace_file` and process arguments now select Linux GNU amd64
+companions as well as Windows MSVC. Neutral file symbols replace the SDK's
+Windows-only raw link names; historical Windows helpers remain available.
+Dependent SDK source/lock/cache identities refresh. Language `/20`, runtime `/0`,
+MIR schemas and stable target maturity are unchanged. Linux workspace builds use
+the existing experimental command. Old experimental compiler pins and evidence
+remain historical and are not rewritten as stage0.79 results.

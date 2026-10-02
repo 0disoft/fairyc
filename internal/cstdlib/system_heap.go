@@ -111,6 +111,9 @@ var stage0WindowsFileMetadataProbe string
 //go:embed stage0_windows_process_args.c
 var stage0WindowsProcessArgs string
 
+//go:embed stage0_linux_process_args.c
+var stage0LinuxProcessArgs string
+
 //go:embed stage0_contract_state.c
 var stage0ContractState string
 
@@ -456,6 +459,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 		return "Windows File Buffer adapter", stage0WindowsFileBuffer, nil
 	case cstdlibcontract.ComponentWindowsDirectory:
 		return "Windows read-only directory enumeration", stage0WindowsDirectory, nil
+	case cstdlibcontract.ComponentLinuxProcessArgs:
+		return "Linux process args", stage0LinuxProcessArgs, nil
 	case cstdlibcontract.ComponentWindowsProcessArgs:
 		return "Windows process args", stage0WindowsProcessArgs, nil
 	case cstdlibcontract.ComponentSystemHeap:

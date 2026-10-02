@@ -14,6 +14,7 @@ type Component string
 const (
 	ComponentLinuxConsole       Component = "linux-console"
 	ComponentLinuxFile          Component = "linux-file"
+	ComponentLinuxProcessArgs   Component = "linux-process-args"
 	ComponentWindowsConsole     Component = "windows-console"
 	ComponentWindowsFile        Component = "windows-file"
 	ComponentWindowsDirectory   Component = "windows-directory"
@@ -73,6 +74,11 @@ var symbolComponents = map[string]Component{
 	"fy_std_file_open_v0":                  ComponentLinuxFile,
 	"fy_std_file_open_utf8_v0":             ComponentLinuxFile,
 	"fy_std_file_read_v0":                  ComponentLinuxFile,
+	"fy_std_file_read_exact_v0":            ComponentLinuxFile,
+	"fy_std_file_remove_v0":                ComponentLinuxFile,
+	"fy_std_file_replace_v0":               ComponentLinuxFile,
+	"fy_std_process_arg_count_v0":          ComponentLinuxProcessArgs,
+	"fy_std_process_arg_v0":                ComponentLinuxProcessArgs,
 	"fy_std_file_position_v0":              ComponentLinuxFile,
 	"fy_std_file_size_v0":                  ComponentLinuxFile,
 	"fy_std_file_seek_start_v0":            ComponentLinuxFile,
@@ -150,6 +156,9 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_file_open_v0":                  ComponentWindowsFile,
 	"fy_std_file_open_utf8_v0":             ComponentWindowsFile,
 	"fy_std_file_read_v0":                  ComponentWindowsFile,
+	"fy_std_file_read_exact_v0":            ComponentWindowsFile,
+	"fy_std_file_remove_v0":                ComponentWindowsFile,
+	"fy_std_file_replace_v0":               ComponentWindowsFile,
 	"fy_std_file_position_v0":              ComponentWindowsFile,
 	"fy_std_file_size_v0":                  ComponentWindowsFile,
 	"fy_std_file_seek_start_v0":            ComponentWindowsFile,
@@ -241,6 +250,7 @@ var componentLinkOrder = []Component{
 	ComponentWindowsFileBuffer,
 	ComponentArena,
 	ComponentTextView,
+	ComponentLinuxProcessArgs,
 	ComponentOwnedText,
 }
 
@@ -326,6 +336,8 @@ func componentsInLinkOrder(required map[Component]struct{}) []Component {
 func addComponentClosure(required map[Component]struct{}, component Component) {
 	required[component] = struct{}{}
 	switch component {
+	case ComponentLinuxProcessArgs:
+		required[ComponentTextView] = struct{}{}
 	case ComponentBuffer:
 		required[ComponentSystemHeap] = struct{}{}
 	case ComponentWindowsFileBuffer:

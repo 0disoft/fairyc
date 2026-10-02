@@ -38,6 +38,16 @@ struct fy_std_windows_file_result_v0 fy_std_file_read_v0(
     return fy_std_windows_file_read_v0(file_storage, buffer, length);
 }
 
+struct fy_std_windows_file_result_v0 fy_std_file_read_exact_v0(void *file, uint8_t *buffer, size_t length) {
+    return fy_std_windows_file_read_exact_v0(file, buffer, length);
+}
+struct fy_std_windows_file_result_v0 fy_std_file_remove_v0(const uint8_t *path) {
+    return fy_std_windows_file_remove_v0(path);
+}
+struct fy_std_windows_file_result_v0 fy_std_file_replace_v0(const uint8_t *replacement, const uint8_t *replaced) {
+    return fy_std_windows_file_replace_v0(replacement, replaced);
+}
+
 struct fy_std_windows_file_position_result_v0 fy_std_file_position_v0(void *file_storage) {
     return fy_std_windows_file_position_v0(file_storage);
 }

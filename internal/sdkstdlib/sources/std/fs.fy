@@ -136,7 +136,7 @@ unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_optio
 unsafe extern C fn raw_file_result file_open_utf8_raw(ptr u8 path, usize length, ptr raw_open_options options, ptr mut void output) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_remove_v0")
+@link_name("fy_std_file_remove_v0")
 unsafe extern C fn raw_file_result file_remove_raw(ptr u8 path) ;
 
 @effects(filesystem)
@@ -164,7 +164,7 @@ unsafe extern C fn raw_file_result directory_rename_raw(ptr u8 source, ptr u8 de
 unsafe extern C fn raw_file_result file_rename_raw(ptr u8 source, ptr u8 destination) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_replace_v0")
+@link_name("fy_std_file_replace_v0")
 unsafe extern C fn raw_file_result file_replace_raw(ptr u8 replacement, ptr u8 replaced) ;
 
 @effects(filesystem)
@@ -180,7 +180,7 @@ unsafe extern C fn raw_file_result file_copy_bytes_raw(ptr u8 source, ptr u8 des
 unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_read_exact_v0")
+@link_name("fy_std_file_read_exact_v0")
 unsafe extern C fn raw_file_result file_read_exact_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
 @effects(filesystem)
@@ -547,7 +547,7 @@ pub fn Result<i32, FileError> rename_file(ref CStr source, ref CStr destination)
     };
 }
 
-/// Publishes a prepared file by replacing one destination name on the same volume.
+/// Publishes a prepared file by replacing one destination name on the same filesystem.
 /// Write, sync and close the replacement first; this operation does not flush file data.
 /// Power-loss durability and recovery policy remain the caller's responsibility.
 @effects(filesystem)

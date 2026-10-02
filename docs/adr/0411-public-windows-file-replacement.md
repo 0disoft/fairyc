@@ -66,7 +66,8 @@ copy is disabled by flags; execution on a second volume is not claimed.
 ## Consequences
 
 SDK source identity and dependent locks change. Language revision and runtime ABI
-stay unchanged. Linux replacement, hardware durability, automatic orphan cleanup,
+stay unchanged. Linux replacement was not admitted by this decision; ADR 0424
+subsequently adds it through target-owned neutral symbols. Hardware durability, automatic orphan cleanup,
 multiwriter transactions, and metadata-preserving replacement are not admitted.
 
 Sources: [MoveFileExW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw),

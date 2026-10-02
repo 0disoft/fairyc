@@ -37,7 +37,7 @@ pub fn usize arg_count() {
 }
 
 /// Copies the UTF-8 bytes of one process argument into buffer and returns their exact length.
-/// Status 1 is index out of range, status 2 is invalid or unavailable UTF-16 argv, and
+/// Status 1 is index out of range, status 2 is invalid or unavailable Unicode argv, and
 /// status 3 is buffer too small with `needed` carrying the full UTF-8 byte length.
 pub fn Result<usize, ProcessArgError> arg(usize index, ref mut u8[] buffer) {
     let raw_process_args_result result = unsafe {
