@@ -44,12 +44,8 @@ fn bool less(ref Entry a, ref Entry b, usize ai, usize bi) {
     if (a.exit_repair != b.exit_repair) { return a.exit_repair; }
     let ref u8[] at = bytes::view(ref a.token);
     let ref u8[] bt = bytes::view(ref b.token);
-    var usize i = 0;
-    while (i < at.len && i < bt.len) {
-        if (at[i] != bt[i]) { return at[i] < bt[i]; }
-        i += 1;
-    }
-    if (at.len != bt.len) { return at.len < bt.len; }
+    let i32 order = bytes::compare(at, bt);
+    if (order != 0) { return order < 0; }
     return ai < bi;
 }
 

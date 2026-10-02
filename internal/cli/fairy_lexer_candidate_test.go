@@ -202,6 +202,14 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	records := []diagnostic.Diagnostic{
 		{Code: "E0006", Span: diagnostic.Span{StartByte: 9, EndByte: 10}, Repair: diagnostic.RepairNone},
 		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "b"},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "\xff"},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "a\x00"},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "\x80"},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "\x7f"},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: ""},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "a\x00b"},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "a\x00"},
+		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "한"},
 		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone, Token: "a"},
 		{Code: "E0005", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairExit, Token: "a"},
 		{Code: "E0004", Span: diagnostic.Span{StartByte: 1, EndByte: 3}, Repair: diagnostic.RepairNone},
@@ -210,7 +218,11 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 	}
 	program.WriteString("var v::Vec<diagnostics::Entry> entries = v::empty<diagnostics::Entry>();\n")
 	for _, d := range records {
-		fmt.Fprintf(&program, "assert(diagnostics::add(ref mut entries, %d, %d, %d, %t, b%q) == 0);\n", d.Code[4]-'0', d.Span.StartByte, d.Span.EndByte, d.Repair == diagnostic.RepairExit, d.Token)
+		fmt.Fprintf(&program, "assert(diagnostics::add(ref mut entries, %d, %d, %d, %t, b\"", d.Code[4]-'0', d.Span.StartByte, d.Span.EndByte, d.Repair == diagnostic.RepairExit)
+		for _, b := range []byte(d.Token) {
+			fmt.Fprintf(&program, "\\x%02X", b)
+		}
+		program.WriteString("\") == 0);\n")
 	}
 	program.WriteString("diagnostics::report(ref entries);\n")
 	slices.SortFunc(records, diagnostic.Compare)
