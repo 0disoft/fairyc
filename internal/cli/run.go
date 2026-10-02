@@ -74,8 +74,9 @@ Usage:
 
 The experimental commands are unstable. "fairyc new" creates one no-overwrite child starter with
 an explicit package UID. "fairyc check" verifies the local workspace. "fairyc build"
-creates or replaces build/<package-name>.exe on Windows. "fairyc run" builds and executes a temporary
-Windows image, forwards caller stdin, bounded program output, and any arguments after "--" as the
+creates or replaces build/<package-name>.exe on Windows or build/<package-name> on Linux GNU amd64.
+Linux builds require GCC or Clang on PATH. "fairyc run" builds and executes a temporary native
+image, forwards caller stdin, bounded program output, and any arguments after "--" as the
 program's process arguments, preserves ordinary program status, and retains no artifact.
 "fairyc test" checks the root package, one explicitly selected root-reachable local package, or every
 unambiguous root-reachable local package with --workspace plus their isolated tests/ sources. It lists

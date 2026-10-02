@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -59,6 +60,9 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 		profile = cdriver.OptimizedProfile
 		profileName = "release"
 	}
+	if runtime.GOOS == "linux" {
+		return runStableLinuxBuild(sourceRoot, options, profile, profileName, stdout, stderr)
+	}
 	compiled, code := compileWindowsWorkspace(sourceRoot, workspaceTargetOptions{
 		targetID: target.X8664WindowsMSVC,
 		profile:  profile,
@@ -96,6 +100,9 @@ func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout
 	profile := cdriver.LowProfile
 	if options.release {
 		profile = cdriver.OptimizedProfile
+	}
+	if runtime.GOOS == "linux" {
+		return runStableLinuxRun(sourceRoot, options, profile, programArguments, stdin, stdout, stderr)
 	}
 	compiled, code := compileWindowsWorkspace(sourceRoot, workspaceTargetOptions{
 		targetID: target.X8664WindowsMSVC,

@@ -61,9 +61,9 @@ existing Ubuntu Go CI job; no extra runner is added. This Windows checkout passe
 Windows native execution and both target emissions. New Linux native execution
 has not been observed locally or in hosted CI at this commit.
 
-Stable Linux `build/run/test` admission is unchanged. Linux application builds use
-the existing `experimental build-workspace` command. This is an experimental
-application path, not a target-maturity promotion or a release-distribution claim.
+At this decision, Linux application builds used `experimental build-workspace`.
+[ADR 0425](0425-stable-linux-build-and-run.md) subsequently admits stable Linux
+`build/run`. Native `test`, target maturity and release distribution remain separate.
 
 Sources: [Linux rename(2)](https://man7.org/linux/man-pages/man2/rename.2.html),
 [Linux fsync(2)](https://man7.org/linux/man-pages/man2/fsync.2.html).

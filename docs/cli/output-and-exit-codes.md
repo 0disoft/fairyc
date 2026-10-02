@@ -46,7 +46,7 @@ positions on stderr instead of being collapsed into package failure text. No sta
 `fairyc build [--release] [--locked]` stabilizes codes `0`, `2`, `3`, `4`, `6`, and `7` for
 success, invalid invocation or unsupported admitted subset, source diagnostics, internal/output
 failure, toolchain/link/artifact failure, and package/manifest/lock failure. Success writes exactly
-`built: <path> (x86_64-windows-msvc, <development|release>, lock
+`built: <path> (<x86_64-windows-msvc|x86_64-linux-gnu>, <development|release>, lock
 <updated|unchanged|verified>)`. No success line is emitted before the inspected executable replaces
 the prior default artifact. An output-stream failure after replacement returns `4` but does not
 delete the successfully built artifact. No stable JSON mode exists.
@@ -55,7 +55,7 @@ delete the successfully built artifact. No stable JSON mode exists.
 successful compilation and image inspection it attaches caller stdin without pre-reading it and
 forwards arguments after `--` to the program's process arguments. After launch it forwards bounded
 program stdout and stderr to their matching streams, then preserves an ordinary
-`main` return as the complete 32-bit process status. A recognized language trap is identified by a
+`main` return as the complete 32-bit Windows process status or its low eight bits on Linux. A recognized language trap is identified by a
 matching byte on the separate private control pipe, preserves all program stderr, appends exactly `trap: <category>\n`, and returns
 `5`. Therefore codes `2`, `3`, `4`, `5`, `6`, and `7` mean compiler failures only before launch; the
 same ordinary post-launch values are program statuses. A forwarding failure after execution is code
@@ -313,7 +313,7 @@ entry or backend capability failures use code `2`; toolchain, compile, link, PE/
 unexpected-output, and execution failures use code `6`; canonical traps use code `5`. Neither
 command emits partial success output. Workspace run consumes a compiler-private trap token, so all
 normal `i32` results remain distinct from code-5 traps.
-The experimental Linux `run-workspace` command uses an explicit GCC or Clang selection and retains no ELF. It writes `native workspace status: <0..255> (x86_64-linux-gnu, <compiler> <version>, <profile>, lock <state>)` on normal completion. Linux process status retains only the low eight bits of `main`'s `i32` return; this command does not claim the full Windows result contract. Its separate one-byte trap channel preserves the distinction between an ordinary status in the reserved range and a canonical trap. Program stdout or stderr is currently a code-6 unexpected-output failure. The same package, source, capability, build, and trap failure classes apply; stable Linux native commands are not admitted.
+The experimental Linux `run-workspace` command uses an explicit GCC or Clang selection and retains no ELF. It writes `native workspace status: <0..255> (x86_64-linux-gnu, <compiler> <version>, <profile>, lock <state>)` on normal completion. Linux process status retains only the low eight bits of `main`'s `i32` return; this command does not claim the full Windows result contract. Its separate one-byte trap channel preserves the distinction between an ordinary status in the reserved range and a canonical trap. Program stdout or stderr remains a code-6 unexpected-output failure for this experimental command. Stable Linux `run` instead forwards program streams, stdin and arguments under its own contract.
 `experimental exec-target` instead writes the program's captured stdout and stderr bytes to their
 matching streams without a compiler receipt, then returns the program's full 32-bit Windows process
 status. A nonzero status in this command is a program result, not automatically a compiler failure.

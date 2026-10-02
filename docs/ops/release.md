@@ -10,6 +10,11 @@ compiler and its notices, not the Fairy-written parser candidate. Checking and
 semantic tests need no C toolchain; native tests and execution do. Linux target
 promotion, self-hosting and C-relative performance budgets are separate work.
 
+Source-built Linux GNU amd64 compilers also implement ordinary `build/run` with
+GCC or Clang and the production SDK. This does not add a Linux binary release
+or native `test` admission. Linux native results for this change are still pending;
+see [ADR 0425](../adr/0425-stable-linux-build-and-run.md).
+
 Build one candidate from a clean `main` commit with the configured
 `fairyc_local_preview_zip` intent. Record its commit, ZIP SHA-256, executable
 SHA-256, Go toolchain and smoke receipt. Choose a SemVer prerelease tag only

@@ -1,6 +1,6 @@
 # Task manager with list filters and prepared-file replacement
 
-Windows AMD64 and experimental Linux GNU amd64 example, Fairy C language/20 and
+Windows AMD64 and Linux GNU amd64 example, Fairy C language/20 and
 SDK stage0.79 or later. All product
 logic uses Fairy C and public SDK APIs. Package version 0.2.0 adds status filters
 and title sorting to `list`. `std::bytes::equal` matches commands/header/options;
@@ -23,13 +23,14 @@ On Linux, build the compiler from this repository with Go (see
 
 ```sh
 fairyc check
-fairyc experimental build-workspace --target x86_64-linux-gnu --cc gcc --profile low --output build/task-manager-cli --locked
+fairyc build --locked
 ./build/task-manager-cli ./tasks.tsv add "보고서 작성"
 ./build/task-manager-cli ./tasks.tsv list --status open --sort title
 ```
 
-Use `--profile optimized` for the optimized image. Linux execution remains
-experimental; stable `fairyc build/run/test --native` admission is unchanged.
+Use `fairyc build --release --locked` for the optimized image, or
+`fairyc run --locked -- ./tasks.tsv list` for temporary execution. GCC is
+preferred, with Clang used when GCC is absent. Native `test` remains Windows-only.
 
 Default listing selects all tasks in ascending numeric ID order. Title order is
 unsigned UTF-8 byte order, with ascending ID for equal titles; it does not apply

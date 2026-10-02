@@ -12,7 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
-func taskManagerUnit(t *testing.T, targetID target.ID) (cbackend.Unit, string) {
+func taskManagerWorkspace(t *testing.T) string {
 	t.Helper()
 	workspace := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "task_manager_cli")
@@ -33,6 +33,12 @@ func taskManagerUnit(t *testing.T, targetID target.ID) (cbackend.Unit, string) {
 			copySource(filepath.Join(example, "src", entry.Name()), filepath.Join("src", entry.Name()))
 		}
 	}
+	return workspace
+}
+
+func taskManagerUnit(t *testing.T, targetID target.ID) (cbackend.Unit, string) {
+	t.Helper()
+	workspace := taskManagerWorkspace(t)
 	var diagnostics strings.Builder
 	lowered, code := lowerWorkspaceExecutable(workspace, false, workspaceCompilePolicy{stableDiagnostics: true}, "portable task manager", &diagnostics)
 	if code != ExitSuccess {

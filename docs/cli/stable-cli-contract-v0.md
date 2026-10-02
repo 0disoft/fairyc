@@ -60,13 +60,13 @@ This precedence is fixed for the stable commands. Experimental commands may requ
 
 `new`, `check`, semantic `test`, `explain`, and `targets` require no native compiler or linker. Their supported hosted correctness lanes are Linux amd64 and Windows amd64 under the repository's Go frontend CI. The distributed `fairyc` executable itself embeds its Go runtime; users do not need a separate Go installation to run it.
 
-Stable `build` and `run`, and `test --native`, currently admit only `x86_64-windows-msvc`. They require the repository's supported Windows amd64 host/toolchain discovery contract and an x64 MSVC installation capable of compiling and linking the admitted C transport plus its declared UCRT/VCRuntime dependencies. Unsupported hosts fail closed rather than silently selecting another backend.
+Stable `build` and `run` select `x86_64-windows-msvc` on Windows amd64 and `x86_64-linux-gnu` on Linux GNU amd64. Windows requires x64 MSVC and its SDK; Linux requires glibc and GCC or Clang on PATH (GCC is preferred). Native `test` remains Windows-only. Unsupported hosts fail closed. Linux build/run integration and save-failure tests are in the existing Ubuntu test job; their native results have not yet been observed for this change.
 
-Experimental Linux C/native commands do not promote Linux to the stable native-command floor. Linux target promotion remains a separate target issue.
+Stable Linux command admission does not promote the target's independent conformance or distribution status. See [ADR 0425](../adr/0425-stable-linux-build-and-run.md).
 
-The experimental `build-workspace --target x86_64-linux-gnu` path requires an explicit `--cc gcc` or `--cc clang`, a Linux amd64 glibc host, and an output under `build/`. It links SDK-owned vectors through the private Linux storage transport; this does not change stable `build`, `run`, or native `test` target admission.
+The experimental `build-workspace --target x86_64-linux-gnu` path retains its explicit `--cc gcc` or `--cc clang`, Linux amd64 glibc host, and output-under-`build/` contract. It shares the private Linux storage transport with stable build/run.
 
-The experimental Linux `run-workspace` path uses the same explicit toolchain and private vector linkage, executes a temporary ELF, and reports the eight-bit process status. A dedicated one-byte trap channel distinguishes a trap from an ordinary return with the same status. It currently rejects program stdout and stderr, and does not change stable native target admission.
+The experimental Linux `run-workspace` path uses the same explicit toolchain and private vector linkage, executes a temporary ELF, and reports the eight-bit process status. A dedicated one-byte trap channel distinguishes a trap from an ordinary return with the same status. It retains its output rejection; stable `run` forwards program output, stdin and arguments.
 
 ## Compatibility rule
 

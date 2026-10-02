@@ -99,6 +99,19 @@ fairyc build --release --locked
 ` + "`fairyc run`" + ` forwards program output and returns ` + "`main`" + `'s ` + "`i32`" + ` as the process status.
 The generated starter returns zero after checking that ` + "`answer()`" + ` is 42.
 
+## Run on Linux
+
+With Linux GNU amd64, glibc and GCC or Clang on PATH:
+
+` + "```sh" + `
+fairyc run --locked
+fairyc build --release --locked
+` + "```" + `
+
+Run the executable under ` + "`build/`" + ` with this package's name and no extension.
+Linux process status preserves the low eight bits of ` + "`main`" + `'s return.
+Use the default semantic tests on Linux; ` + "`test --native`" + ` remains Windows-only.
+
 ## Write to standard output
 
 Replace ` + "`src/main.fy`" + ` with:

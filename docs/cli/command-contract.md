@@ -543,16 +543,16 @@ and configuration precedence remain outside v1.
 `fairyc build [--release] [--locked]` is the stable native build for the current workspace. It
 accepts no positional source, output path, target, compiler, linker, profile value, cache, JSON,
 configuration, network, or stdin input. The validated root package name selects
-`build/<package-name>.exe`. Default mode uses the low-optimization development profile;
+`build/<package-name>.exe` on Windows or `build/<package-name>` on Linux. Default mode uses the low-optimization development profile;
 `--release` selects the ordinary optimized profile without LTO.
 
 The command applies the stable check lock policy, requires root `main::main` with type
 `fn() -> i32`, and reuses the closed package-aware `x86_64-windows-msvc` C11, project-owned support,
-MSVC, PE, and unwind pipeline. The complete new image is compiled and inspected before a synced
+MSVC, PE, and unwind pipeline on Windows. Linux GNU amd64 with glibc uses the existing Linux C11 transport and GCC (preferred) or Clang from PATH. The complete new image is compiled and inspected before a synced
 staging file replaces the previous default artifact. Failures before successful replacement retain
 the previous artifact and remove staging state.
 
-Success is exactly `built: <path> (x86_64-windows-msvc, <development|release>, lock
+Success is exactly `built: <path> (<x86_64-windows-msvc|x86_64-linux-gnu>, <development|release>, lock
 <updated|unchanged|verified>)`. The command freezes codes 0, 2, 3, 4, 6, and 7. This command
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
 status and does not select persistent-cache defaults.
@@ -561,9 +561,9 @@ status and does not select persistent-cache defaults.
 
 `fairyc run [--release] [--locked] [-- <program-args...>]` compiles and executes the current
 workspace through the same manifest, lock, root `main::main`, development/release profile, and
-closed local Windows pipeline as stable build. The complete PE and unwind image is inspected before
+closed host pipeline as stable build. The Windows PE/unwind or Linux ELF image is inspected before
 execution, exists only in compiler-owned temporary storage, and is removed afterward. It does not
-create, replace, read, or execute the retained `build/<package-name>.exe` artifact.
+create, replace, read, or execute the retained build artifact. Linux runs in the invoking workspace and receives process arguments through `main(int argc, char **argv)` when the public process APIs are used.
 
 The command accepts no positional source, output, target, compiler, linker, profile value, cache,
 JSON, configuration, or network input. The first `--` separates compiler options from program
@@ -571,7 +571,7 @@ arguments: every argument after it becomes the temporary program's process argum
 delimiter itself is excluded, and `build` and other stable commands still reject the delimiter.
 `run -- --locked` passes `--locked` to the program, while `run --locked -- x` keeps the compiler
 option and passes `x`; an unknown flag before the delimiter is the existing invocation error, and a
-NUL byte in any program argument is rejected before compilation. The generated C entry remains
+NUL byte in any program argument is rejected before compilation. On Windows, the generated C entry remains
 `int main(void)`; the program reads its arguments through the effect-free `std::process` surface
 against the UCRT wide argv, which the stdlib adapter materializes once with
 `_configure_wide_argv(_crt_argv_unexpanded_arguments)` before strict UTF-8 conversion. After
@@ -583,7 +583,7 @@ their matching compiler streams without a success banner. Capture uses separate 
 shared 64 KiB ceiling, so stream identity is preserved but cross-stream order is unspecified.
 Input liveness remains bounded by the existing process timeout.
 
-A normal return across the full `i32` range becomes the `fairyc` process status. After launch, a
+A normal return becomes the `fairyc` process status (full `i32` on Windows, low eight bits on Linux). After launch, a
 status numerically equal to 2, 3, 4, 5, 6, or 7 is still program-owned. A compiler-private run-only
 trap-control pipe distinguishes reserved trap statuses from equal normal results: every program
 stderr byte is forwarded, `trap: <category>` is appended, and the command returns 5. The control
