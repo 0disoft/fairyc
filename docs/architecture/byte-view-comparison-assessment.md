@@ -280,4 +280,60 @@ bun tools/run-go.ts build -mod=readonly -trimpath -o .cache/ledger-compare-toolc
 This opt-in harness requires the preserved external round4 ledger fixtures and
 SDK stage0.78. It is not a CI test, full 92-case rerun, historical-compiler rerun,
 fault-injection test or performance measurement. No SDK/API/version change or
-round4 migration was made; other projects still have only the static review above.
+round4 migration was made. Pack and KV still have only the static review above;
+the log analyzer's subsequent experiment is recorded below.
+
+## Isolated log analyzer adoption evidence, 2026-10-03
+
+[`verify-log-compare-adoption.ps1`](../../tools/verify-log-compare-adoption.ps1)
+copies the log manifest, five product sources and selected fixtures into a unique
+`.cache/log-compare-adoption/` directory. The legacy variant is copied unchanged;
+the SDK variant replaces only the path-order loop in `analyzer.fy::less`:
+
+```text
+return bytes::compare(pool[starts[left]..starts[left] + lengths[left]], pool[starts[right]..starts[right] + lengths[right]]) < 0;
+```
+
+The edited file uses LF. The path pool, equality-based lookup/grouping, strict-less
+insertion sorting, numeric status ordering, streaming reader, i64 overflow checks,
+validation/error-line policy and complete-response-before-output behavior remain
+unchanged. Both variants reuse the exact stage0.78 compiler from the ledger
+experiment above. Compiler/SDK implementation sources have not changed since its
+revision `27bc9d20`; no compiler rebuild or historical stage0.73 execution is needed.
+
+Run `fda5f6e7f8d44122938d893b870e0416` passed two checks, four native builds and
+**104 exact-output executions**: 26 cases per development/release image for each
+variant. Twenty-five selected historical cases reuse independent expectations
+and match the original input hashes. They cover empty input, Korean/space/prefix
+paths, original URL/Unicode spellings, BOM/mixed newlines/final line, i64 maximum,
+overflow and invalid UTF-8, late status/UTF-8 errors, 128/129 paths and reuse after
+128 paths, all 500 numeric statuses, help and CLI/file errors.
+
+The boundary fixtures cover row lengths 4095/4096/4097, a UTF-8 character starting
+at byte offsets 4094/4095/4096, CR/LF at 4095/4096, and a row spanning multiple
+4096-byte read-request boundaries. Successful complete output matches in both
+variants and profiles. This is not forced short-read injection or proof that the
+OS returned exactly 4096 bytes on each read. Error cases retain complete stderr,
+1-based error-line reporting, exit status and empty stdout.
+
+The new fixture has ten distinct paths, including numeric-looking suffixes,
+case/space/prefix differences, Korean, and composed/decomposed Unicode spellings.
+Each path occurs under three unordered status codes. BigInteger totals, numeric
+status sorting and UTF-8 hex ordinal path sorting determine the expected response
+independently. Each path has three requests and 4294967303 bytes; each Unicode
+spelling remains a separate entry. Total is 30 requests and 42949673030 bytes.
+
+All per-case exit/stdout/stderr matches establish matching behavior between
+variants within this subset. Strict UTF-8 native readers, input before/after
+hashes and 32 protected-original hashes are checked. The final directory retains
+`receipt.json`, `raw-executions.jsonl`, source copies, new lockfiles and four EXEs;
+harness/compiler/EXE SHA256 and source/SDK digests are recorded and verified.
+The legacy source digest matches the historical log digest. Candidate source
+digest is `fysrc1-sha256-ef6328548673aeb57d5be2c277ea6208c4876ca184d60076450708178b99a8c8`.
+
+With the separate stage0.78 compiler available at the ledger toolchain path,
+run `./tools/verify-log-compare-adoption.ps1` from the compiler checkout. The
+script requires the preserved external log fixtures and permits copied input
+paths only within their named `samples/` entries. This is an opt-in local
+adoption experiment, not a CI test, full 186-case rerun, fault experiment,
+performance measurement or migration of the preserved round4 project.
