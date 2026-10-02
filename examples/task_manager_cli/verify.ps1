@@ -69,7 +69,7 @@ function Assert-Case([string]$Name,[string[]]$Arguments,[int]$Code,[string]$Stdo
     foreach ($path in $watch) { $before[$path]=Snapshot $path }
     Assert-SnapshotKeys $before $watch
     $actual=Run-Program $script:currentExe $Arguments
-    if ($actual.exitCode -ne $Code -or $actual.stdout -cne $Stdout -or $actual.stderr -cne $Stderr) {
+    if ($actual.exitCode -ne $Code -or ![StringComparer]::Ordinal.Equals($actual.stdout,$Stdout) -or ![StringComparer]::Ordinal.Equals($actual.stderr,$Stderr)) {
         throw "$script:profile/$Name expected $Code stdout [$Stdout] stderr [$Stderr]; got $($actual|ConvertTo-Json -Compress)"
     }
     foreach ($path in $watch) { $after[$path]=Snapshot $path }
@@ -130,7 +130,8 @@ foreach ($fixture in $badStores) { Write-Bytes ('samples/'+$fixture.name+'.tsv')
 $full="FYTASK1`t257`n"; for ($i=1;$i -le 256;$i++) { $full+="$i`t0`tx`n" }
 Write-Text 'samples/full.tsv' $full
 Write-Text 'samples/exhausted.tsv' "FYTASK1`t2147483647`n"
-$help="Usage: task-manager-cli <store-path> list`n       task-manager-cli <store-path> add `"title`"`n       task-manager-cli <store-path> done <id>`n       task-manager-cli <store-path> delete <id>`n       task-manager-cli --help`nIDs: canonical decimal, assigned 1..2147483646; never reused after deletion`nList: ascending ID, tab-separated ID/open|done/title; empty prints empty`nStore: UTF-8 no BOM, LF TSV, FYTASK1<TAB>next<LF> then id<TAB>0|1<TAB>title<LF>`nTitles: spaces/Korean preserved; nonblank UTF-8, no ASCII controls`nSave: exclusive .lock, checked write/sync/close of .tmp, then replace_file; no backup gap`nPending .lock/.tmp/.bak needs manual inspection/recovery; no automatic deletion`nLimits: 256 tasks, title 512 bytes, store 262144 bytes, path 4000 UTF-8 bytes`nExit: 0 success, 1 store/data/allocation/cleanup error, 2 CLI usage, 3 stdout failure`n"
+$help="Usage: task-manager-cli <store-path> list [--status open|done|all] [--sort id|title]`n       task-manager-cli <store-path> add `"title`"`n       task-manager-cli <store-path> done <id>`n       task-manager-cli <store-path> delete <id>`n       task-manager-cli --help`nIDs: canonical decimal, assigned 1..2147483646; never reused after deletion`nList: defaults all/ID; title uses UTF-8 byte order with ID ties; no matches prints empty`nList output: tab-separated ID/open|done/title; options may appear in either order`nStore: UTF-8 no BOM, LF TSV, FYTASK1<TAB>next<LF> then id<TAB>0|1<TAB>title<LF>`nTitles: spaces/Korean preserved; nonblank UTF-8, no ASCII controls`nSave: exclusive .lock, checked write/sync/close of .tmp, then replace_file; no backup gap`nPending .lock/.tmp/.bak needs manual inspection/recovery; no automatic deletion`nLimits: 256 tasks, title 512 bytes, store 262144 bytes, path 4000 UTF-8 bytes`nExit: 0 success, 1 store/data/allocation/cleanup error, 2 CLI usage, 3 stdout failure`n"
+. (Join-Path $PSScriptRoot 'verify-listing.ps1')
 $script:results=[Collections.Generic.List[object]]::new(); $images=@()
 Push-Location $PSScriptRoot
 try {
@@ -237,6 +238,7 @@ try {
         Assert-Case 'original-after-failed-save' @($store,'list') 0 "4`topen`tnew after empty`n" '' $store ($utf8.GetBytes($state)) -Preserve $store
         $boundary="$run/$script:profile-title-boundary.tsv"; $title='a'*512
         Assert-Case 'title-512' @($boundary,'add',$title) 0 "added id=1`n" '' $boundary ($utf8.GetBytes("FYTASK1`t2`n1`t0`t$title`n"))
+        Run-ListingCases "$run/$script:profile-list-options.tsv"
         $images+=@{profile=$script:profile;path="build/task-manager-cli-$script:profile.exe";sha256=(Get-FileHash -LiteralPath $script:currentExe).Hash.ToLowerInvariant();bytes=(Get-Item -LiteralPath $script:currentExe).Length}
     }
     $sdk=$lock.packages|Where-Object sourceKind -eq sdk

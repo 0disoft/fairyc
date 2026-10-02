@@ -5,11 +5,12 @@ import std::text as text;
 import files as files;
 import format as format;
 import output as output;
+import listing as listing;
 
 @effects(filesystem, console)
-fn i32 process(ref str path, ref str temporary, ref u8[] data, u32 command, ref u8[] argument, i32 requested, ref mut bytes::Buffer response) {
+fn i32 process(ref str path, ref str temporary, ref u8[] data, u32 command, ref u8[] argument, i32 requested, u32 status, bool by_title, ref mut bytes::Buffer response) {
     let i32 next = switch (format::validate(path, data)) { case .ok(n) : { n } case .err(code) : { return code; } };
-    if (command == 0) { return format::listing(path, data, response); }
+    if (command == 0) { return listing::render(path, data, status, by_title, response); }
     let bytes::Buffer changed = switch (format::change(path, data, next, command, argument, requested, response)) {
         case .ok(value) : { value } case .err(code) : { return code; }
     };
@@ -17,19 +18,19 @@ fn i32 process(ref str path, ref str temporary, ref u8[] data, u32 command, ref 
 }
 
 @effects(filesystem, console)
-fn i32 locked(ref str path, ref str temporary, ref str backup, u32 command, ref u8[] argument, i32 requested, ref mut bytes::Buffer response) {
+fn i32 locked(ref str path, ref str temporary, ref str backup, u32 command, ref u8[] argument, i32 requested, u32 status, bool by_title, ref mut bytes::Buffer response) {
     if (files::absent(temporary) != 0 || files::absent(backup) != 0) { return 1; }
     return switch (fs::open_read_utf8(path)) {
         case .ok(file) : {
             switch (files::read(path, file)) {
-                case .ok(data) : { process(path, temporary, bytes::view(ref data), command, argument, requested, response) }
+                case .ok(data) : { process(path, temporary, bytes::view(ref data), command, argument, requested, status, by_title, response) }
                 case .err(code) : { code }
             }
         }
         case .err(error) : {
             if (fs::error_os_code(error) == 2) {
                 switch (bytes::copy(b"FYTASK1\t1\n")) {
-                    case .ok(data) : { process(path, temporary, bytes::view(ref data), command, argument, requested, response) }
+                    case .ok(data) : { process(path, temporary, bytes::view(ref data), command, argument, requested, status, by_title, response) }
                     case .err(_) : { output::error(path, "cannot allocate store buffer") }
                 }
             } else { output::file_error(path, "open store failed", fs::error_status(error), fs::error_os_code(error)) }
@@ -38,7 +39,7 @@ fn i32 locked(ref str path, ref str temporary, ref str backup, u32 command, ref 
 }
 
 @effects(filesystem, console)
-pub fn i32 run(ref str path, u32 command, ref u8[] argument, i32 requested) {
+pub fn i32 run(ref str path, u32 command, ref u8[] argument, i32 requested, u32 status, bool by_title) {
     let text::String tmp = switch (files::suffix(path, ".tmp")) { case .ok(v) : { v } case .err(code) : { return code; } };
     let text::String bak = switch (files::suffix(path, ".bak")) { case .ok(v) : { v } case .err(code) : { return code; } };
     let text::String guard = switch (files::suffix(path, ".lock")) { case .ok(v) : { v } case .err(code) : { return code; } };
@@ -52,7 +53,7 @@ pub fn i32 run(ref str path, u32 command, ref u8[] argument, i32 requested) {
     var bytes::Buffer response = bytes::empty();
     var i32 result = 1;
     if (lock_closed == 0) {
-        result = locked(path, text::string_as_str(ref tmp), text::string_as_str(ref bak), command, argument, requested, ref mut response);
+        result = locked(path, text::string_as_str(ref tmp), text::string_as_str(ref bak), command, argument, requested, status, by_title, ref mut response);
     }
     let i32 released = switch (fs::remove_file(text::cstring_as_cstr(ref guard_name))) {
         case .ok(_) : { 0 }

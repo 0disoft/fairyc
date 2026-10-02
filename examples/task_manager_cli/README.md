@@ -1,14 +1,33 @@
-# Task manager with prepared-file replacement
+# Task manager with list filters and prepared-file replacement
 
-Windows AMD64 example, Fairy C language/20 and SDK stage0.77 or later. All product
-logic uses Fairy C and public SDK APIs. `fairy.toml` version 0.1.2 uses
-`std::bytes::equal` for exact command and FYTASK1 header comparisons, preserving
-the TSV format, CLI arguments, validation order and storage diagnostics. The
-prepared-file publication protocol and original downloaded workloads are unchanged.
+Windows AMD64 example, Fairy C language/20 and SDK stage0.78 or later. All product
+logic uses Fairy C and public SDK APIs. Package version 0.2.0 adds status filters
+and title sorting to `list`. `std::bytes::equal` matches commands/header/options;
+`std::bytes::compare` orders titles. The TSV format and prepared-file publication
+protocol remain unchanged.
 
-Commands: `<store> list`, `<store> add "title"`, `<store> done <id>`,
+Commands: `<store> list [--status open|done|all] [--sort id|title]`, `<store> add "title"`, `<store> done <id>`,
 `<store> delete <id>`, and `--help`. Limits: 256 tasks, 512 UTF-8 bytes per title,
 262144 store bytes, 4000 UTF-8 path bytes. IDs increase and are never reused.
+
+```powershell
+fairyc build
+.\build\task-manager-cli.exe .\tasks.tsv add "보고서 작성"
+.\build\task-manager-cli.exe .\tasks.tsv list --status open --sort title
+.\build\task-manager-cli.exe .\tasks.tsv list --sort title --status done
+```
+
+Default listing selects all tasks in ascending numeric ID order. Title order is
+unsigned UTF-8 byte order, with ascending ID for equal titles; it does not apply
+locale collation, case folding or Unicode normalization. Spaces and distinct
+Unicode spellings are preserved. Output remains `ID<TAB>open|done<TAB>title<LF>`;
+an empty store or filter with no matches prints `empty<LF>`. Both option orders
+are accepted; each option may appear once. Missing/unknown options or values,
+duplicates and options on mutation commands are usage errors (exit 2). Option
+tokens/values are limited to 15 UTF-8 bytes. CLI options are checked before
+opening the store. The entire store is validated before filtering/sorting, so a
+corrupt excluded row still fails with exit 1 and no stdout. Listing retains the
+existing cooperative lock/sidecar checks and leaves store bytes unchanged.
 
 Saving acquires the cooperative exclusive `<store>.lock`, rejects pre-existing
 `.tmp`/`.bak`, reads and validates the complete live TSV, prepares all new bytes,
@@ -46,13 +65,18 @@ by this example. See [ADR 0411](../../docs/adr/0411-public-windows-file-replacem
 
 `verify.ps1 -Fairyc <compiler-path> -CompilerSha256 <reviewed-sha256>` requires an
 explicit compiler and SHA256 pin, checked before fixture or build writes. Use SDK
-stage0.77 or later; the historical stage0.72 compiler lacks `bytes::equal`.
+stage0.78 or later; earlier bundles lack the required byte comparison helper.
 Run `fairyc check` once in a fresh isolated copy to create its current lock, then
 run the script there: fixtures and raw results are written beside the copied
-sources. The 126 development/release CLI cases include the original 118 plus
-same-length header mismatches, command prefixes and case differences. Each case
+sources. The 196 development/release CLI cases include 126 existing cases and
+70 filter/sort cases, including fixed byte-order expectations, duplicate titles,
+distinct Unicode spellings, a 512-byte title, 256 records, empty/no-match stores,
+invalid options, hidden corruption, sidecar refusal and source-file preservation. Each case
 records executable, argv, cwd, UTF-8 stdout/stderr, exit code and file states;
 compiler/source/SDK and EXE digests identify the tested images. Historical
 stage0.72 receipts are not evidence for this adoption. Native storage-fault tests exercise compiler-emitted Fairy application
 logic with test-only interception of production Win32 I/O, not a C rewrite of the
-application. Evidence and limitations are recorded in the workload report.
+application. The [list feature receipt](../../docs/ops/evidence/task-manager-list-options-20261003.json)
+records the tested source/SDK/compiler and image identities, retained raw evidence
+paths, and passed case counts. Storage fault injection, performance experiments
+and other platforms were not rerun for this display-only feature.

@@ -73,24 +73,6 @@ pub fn Result<i32, i32> validate(ref str path, ref u8[] data) {
 }
 
 @effects(console)
-pub fn i32 listing(ref str path, ref u8[] data, ref mut bytes::Buffer response) {
-    var usize start = end(data, 0, 10) + 1;
-    if (start == data.len) {
-        return if (buffer_ok(bytes::append(response, b"empty\n"))) { 0 } else { output::error(path, "cannot allocate response") };
-    }
-    while (start < data.len) {
-        let usize line_end = end(data, start, 10);
-        let usize tab = end(data, start, 9);
-        let bool a = buffer_ok(bytes::append(response, data[start..tab + 1]));
-        let bool b = buffer_ok(bytes::append(response, if (data[tab + 1] == 49) { b"done\t" } else { b"open\t" }));
-        let bool c = buffer_ok(bytes::append(response, data[tab + 3..line_end + 1]));
-        if (!a || !b || !c) { return output::error(path, "cannot allocate response"); }
-        start = line_end + 1;
-    }
-    return 0;
-}
-
-@effects(console)
 pub fn Result<bytes::Buffer, i32> change(ref str path, ref u8[] data, i32 next, u32 command, ref u8[] argument, i32 requested, ref mut bytes::Buffer response) {
     // command 1 add, 2 done, 3 delete. All source data has already passed validate.
     var usize start = end(data, 0, 10) + 1;

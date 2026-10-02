@@ -1,0 +1,84 @@
+{
+  "schema": "fairyc.task-manager-list-options/v1",
+  "verifiedAt": "2026-10-03T02:11:32.2337779+09:00",
+  "packageVersion": "0.2.0",
+  "compilerPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\ledger-compare-toolchain\\fairyc.exe",
+  "compilerSha256": "0922d0ca699abcf747cdb5a2604151e9a9353dc0d306cca4ac5996b94ff49a99",
+  "sourceDigest": "fysrc1-sha256-cde26052c4c4e5fb6bd9488f11001c16e2dc296e8151f77cdf5117a39b43bf61",
+  "sdkVersion": "0.0.0-stage0.78",
+  "sdkSourceDigest": "fysrc1-sha256-1868fdeabc3af9bd50b9fafb2c5f9d4b9b4aaaf686acfcde520459e35db71ca1",
+  "manifestSha256": "b74f923b8c068eaf197b8035d500f9d3399272864cdcf2a002915481d8a67a81",
+  "sourceFiles": [
+    {
+      "sha256": "5c094b1c0c5967a5778342a46c5fd19fd37458559b5ebb22d46f09a0cd24467c",
+      "path": "examples/task_manager_cli/src/files.fy"
+    },
+    {
+      "sha256": "109e0226f1dffc7db130cb26e0925daad167caddb69d77ec5df42d933c9913de",
+      "path": "examples/task_manager_cli/src/format.fy"
+    },
+    {
+      "sha256": "f1713e56bf6de0227d03425414480a2100444d7a5d6b1cf409bff7b8f26944e3",
+      "path": "examples/task_manager_cli/src/list_options.fy"
+    },
+    {
+      "sha256": "9a403b42b59f914f2488e0944abf51be4ab84ebc698915876e859bf2a66b2b1b",
+      "path": "examples/task_manager_cli/src/listing.fy"
+    },
+    {
+      "sha256": "64ee3a282532e35ac2743607c10adb6331125b53186d56a6afaf4bdd8de7f2ab",
+      "path": "examples/task_manager_cli/src/main.fy"
+    },
+    {
+      "sha256": "013a7fc4c73c4d14e0475c79232a324d6c962d365fd2092af3afb45db8ea9e67",
+      "path": "examples/task_manager_cli/src/output.fy"
+    },
+    {
+      "sha256": "e7a861272b0e4d178ab6a48ccd6d717dd5d667c71659cb7b3c79973c377e0e61",
+      "path": "examples/task_manager_cli/src/tasks.fy"
+    }
+  ],
+  "harnessSha256": {
+    "verify.ps1": "bbf603715395c2d28f3f1809afb933c4c41953425a79a282e89d9fd1d7082abf",
+    "verify-listing.ps1": "370ab69f51ed297d9e5dfd06f6013a4b1d949fdd68caf0105fabc2364997ef66"
+  },
+  "passed": 196,
+  "failed": 0,
+  "skipped": 0,
+  "existingCases": 126,
+  "listFeatureCases": 70,
+  "casesPerProfile": 98,
+  "nativeBuilds": 2,
+  "images": [
+    {
+      "profile": "development",
+      "bytes": 240128,
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\task-list-options\\331af7ffb718428eac06cb29593eadf3\\build\\task-manager-cli-development.exe",
+      "sha256": "189e29323d6cb76cdb333cfdd0c5110076026ed53d171f336b8bdbcdb13f9c6f"
+    },
+    {
+      "profile": "release",
+      "bytes": 150528,
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\task-list-options\\331af7ffb718428eac06cb29593eadf3\\build\\task-manager-cli-release.exe",
+      "sha256": "a8cb65914ddc1cf2763d30bb7eff76e8fa179daabeed92a39e5ff006e827fad2"
+    }
+  ],
+  "verificationReceipt": {
+    "sha256": "c9afcf6235ed75f34aea742694d0a494dc896400c34b8836dcd85bce61a355e4",
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\task-list-options\\331af7ffb718428eac06cb29593eadf3\\verification-results.json"
+  },
+  "rawExecutions": {
+    "sha256": "40a722c2477c389566a2b369a06da3282b66c60a047e1393385ca1bda2f28ea2",
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\task-list-options\\331af7ffb718428eac06cb29593eadf3\\build\\verification-49bcd61b995f40d4b0356f54647f833d\\raw-executions.json"
+  },
+  "compilerCheck": {
+    "sha256": "407127d2a6ad3804120b699b3b93948fbb1721910d1d518afc91ea45f787bdc2",
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\task-list-options\\331af7ffb718428eac06cb29593eadf3\\compiler-executions.jsonl"
+  },
+  "oracle": "Fixed expected ID order independent of Fairy sorting; ordinal stdout/stderr and full-file byte preservation",
+  "unverified": [
+    "Storage fault-injection suite not repeated; save logic unchanged",
+    "Linux, other CPU targets and clean-PC deployment",
+    "Performance and physical power-loss testing"
+  ]
+}
