@@ -981,6 +981,25 @@ owns the contract and validation evidence.
 The [checked byte codec example](../../examples/checked_byte_codec_quickstart/README.md)
 contrasts full-value conversion with caller-validated little-endian digit extraction.
 
+## Checked i64 decimal parsing
+
+SDK `0.0.0-stage0.76` adds the pure Fairy
+`std::num::parse_i64_decimal(ref u8[]) -> Result<i64, ParseI64Error>`.
+It accepts the whole ASCII spelling `-?[0-9]+`, including leading zeros and
+`-0`, without allocation or a library input-length cap. `ParseI64Error` is a
+separate inert enum: `Empty`, `InvalidDecimal`, `OutOfRange`. Errors return at
+the first left-to-right byte classification or digit range failure; an overflow
+before a later invalid byte remains `OutOfRange`. MIN and MAX are exact values.
+
+There is no trimming, plus sign, Unicode digit, radix or partial-value parsing.
+Invalid UTF-8 bytes are decimal syntax errors, not separate text diagnostics.
+Caller-owned field/argv budgets, digits-only policies (including rejecting
+`-0`), line context, UTF-8 validation and application bounds remain separate.
+The immutable owner is preserved; normal mandatory Result handling applies.
+[ADR 0420](../adr/0420-sdk-checked-i64-decimal-parsing.md) owns the arithmetic
+bounds and retained interpreter/native evidence. No new cast, foreign/runtime
+symbol, target admission or language revision is introduced.
+
 ## Explicit exclusions
 
 Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.

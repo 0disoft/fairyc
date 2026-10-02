@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.75" {
+	if Version != "0.0.0-stage0.76" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/20" {
@@ -57,6 +57,35 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	intoBufferPublic := false
 	stderrScalarFunctions := make(map[string]bool)
 	for _, source := range definition.Sources {
+		if source.Path == "std/num.fy" {
+			parsePublic := false
+			for _, function := range source.Module.Functions {
+				if function.Name == "parse_i64_decimal" {
+					parsePublic = function.Public
+				}
+			}
+			if !parsePublic {
+				t.Fatal("decimal parser is not public")
+			}
+			var parseVariants []string
+			for _, enumeration := range source.Module.Enums {
+				if enumeration.Name != "ParseI64Error" {
+					continue
+				}
+				if !enumeration.Public {
+					t.Fatal("parse error is not public")
+				}
+				for _, variant := range enumeration.Variants {
+					if len(variant.Fields) != 0 {
+						t.Fatal("parse error has a payload")
+					}
+					parseVariants = append(parseVariants, variant.Name)
+				}
+			}
+			if !slices.Equal(parseVariants, []string{"Empty", "InvalidDecimal", "OutOfRange"}) {
+				t.Fatalf("parse error variants = %v", parseVariants)
+			}
+		}
 		if source.Path == "std/bytes.fy" {
 			for _, function := range source.Module.Functions {
 				if function.Name == "append_byte" {

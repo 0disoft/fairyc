@@ -1,6 +1,6 @@
 # Checked i64 decimal parsing assessment after round4
 
-Status: Assessment concluded; API accepted by [ADR 0420](../adr/0420-sdk-checked-i64-decimal-parsing.md); implementation pending.
+Status: Assessment concluded; API implemented in SDK 0.0.0-stage0.76 under [ADR 0420](../adr/0420-sdk-checked-i64-decimal-parsing.md).
 Date: 2026-10-02 (Asia/Seoul).
 Inspected compiler repository revision: `3250a448`.
 Bundled SDK: `0.0.0-stage0.75`; language `/20`; runtime ABI `/0`.
@@ -13,8 +13,8 @@ duplicate the same negative accumulator, and round4 interval parsing uses an equ
 repeated library work, not evidence of a compiler defect or a new language need.
 Keep grammar, runtime symbols, casts and external round4 projects unchanged.
 
-The following assessment sketch is now accepted by ADR 0420, but is not yet
-an available API:
+The following assessment sketch is now implemented under ADR 0420 and available
+since SDK `0.0.0-stage0.76`:
 
 ```text
 pub enum ParseI64Error { Empty; InvalidDecimal; OutOfRange; }

@@ -1,5 +1,34 @@
 module std::num;
 
+/// Reports empty input, invalid ASCII decimal syntax, or an exceeded i64 bound.
+pub enum ParseI64Error {
+    Empty;
+    InvalidDecimal;
+    OutOfRange;
+}
+
+/// Parses all bytes as -?[0-9]+, returning the first syntax or range failure.
+pub fn Result<i64, ParseI64Error> parse_i64_decimal(ref u8[] raw) {
+    if (raw.len == 0) { return .err(.Empty); }
+    let bool negative = raw[0] == 45;
+    var usize at = if (negative) { 1 } else { 0 };
+    if (at == raw.len) { return .err(.InvalidDecimal); }
+    let i64 limit = if (negative) { -9223372036854775808 } else { -9223372036854775807 };
+    var i64 value = 0;
+    while (at < raw.len) {
+        let u8 byte = raw[at];
+        if (byte < 48 || byte > 57) { return .err(.InvalidDecimal); }
+        let i64 digit = (byte - 48) as i64;
+        // Preflight both arithmetic intermediates; never form positive MIN.
+        if (value < limit / 10 || (value == limit / 10 && digit > -(limit % 10))) {
+            return .err(.OutOfRange);
+        }
+        value = value * 10 - digit;
+        at += 1;
+    }
+    return .ok(if (negative) { value } else { -value });
+}
+
 /// Reports a value that cannot be represented by the requested integer type.
 pub enum ConversionError {
     Negative;

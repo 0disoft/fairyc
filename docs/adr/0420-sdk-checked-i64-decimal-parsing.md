@@ -1,6 +1,6 @@
 # ADR 0420: SDK checked i64 decimal parsing
 
-- Status: Accepted; implementation pending
+- Status: Implemented in SDK 0.0.0-stage0.76
 - Date: 2026-10-02
 - Depends on: ADR 0218, ADR 0328, ADR 0413, ADR 0418
 - Workload evidence: [checked i64 decimal parsing assessment](../architecture/checked-i64-decimal-parsing-assessment.md)
@@ -70,7 +70,7 @@ a suffix after overflow solely to prefer a later syntax error.
 | `922337203685477580x8` | `InvalidDecimal` |
 | `-9223372036854775809x` | `OutOfRange` |
 
-These are normative expectations, not executed SDK results. Syntax-first
+These normative expectations are covered by the implementation evidence below. Syntax-first
 whole-input validation would be a different policy and is not admitted.
 
 ## Purity, limits and arithmetic bounds
@@ -98,8 +98,8 @@ whose accumulator is bounded below by -MAX. Never form positive MIN magnitude
 or negate MIN. Digit acquisition must use admitted value-preserving widening,
 without adding a new narrowing cast.
 
-This arithmetic argument is not compiled SDK proof. Use this single guard in
-the implementation and compare it with an independent mathematical oracle.
+The implementation uses this single guard; the arithmetic argument is
+supplemented by the independent mathematical oracle and execution evidence below.
 No performance, constant-time, narrower-architecture or target-promotion claim
 accompanies this decision.
 
@@ -121,16 +121,15 @@ rewrite external round4 programs or historical evidence.
 
 ## Compatibility and activation
 
-This acceptance-only change adds no executable API and bumps no version.
-Implementation must advance the bundled SDK from `0.0.0-stage0.75` after the
-acceptance gates below pass. Language `/20`, runtime ABI `/0`, MIR and artifact
+The earlier acceptance-only change added no executable API and bumped no version.
+Implementation advances the bundled SDK from `0.0.0-stage0.75` to
+`0.0.0-stage0.76` with the acceptance evidence below. Language `/20`, runtime ABI `/0`, MIR and artifact
 schemas stay unchanged for an ordinary-library addition. Source/module digest,
 SDK interface and cache identities change normally; workspace SDK locks refresh
 under the [versioning contract](../compatibility/versioning-v0.md).
 
-Existing source stays valid. Keep historical identity fixtures and receipts
-intact. Do not advertise the function as available before implementation and
-its acceptance evidence land together.
+Existing source stays valid. Historical identity fixtures and receipts remain
+intact. Implementation and acceptance evidence land together.
 
 ## Implementation acceptance evidence
 
@@ -152,14 +151,41 @@ use UTF-8. C generation alone is not Linux native execution.
 
 Run targeted SDK discovery, workspace loading/compilation and cache-identity
 checks appropriate to the addition. Do not repeat unrelated workload suites or
-performance experiments. Implementation and all SDK/native acceptance evidence
-remain pending in this commit.
+performance experiments. The implementation evidence below records completion
+for the stated scope.
+
+## Implementation evidence
+
+`internal/sdkstdlib/sources/std/num.fy` implements the parser with the admitted
+negative accumulator and preflight guard. The maintained
+`internal/cli/checked_i64_decimal_test.go` computes expectations from positive
+arbitrary-precision Go `math/big` prefix magnitudes, independently of that guard.
+Its 157 inputs cover signed power-of-ten neighbors through 10^19, MIN/MAX and
+adjacent failures, signed zero, 96 leading zeros, empty/sign-only input,
+whitespace, separators, NUL/BOM/non-ASCII/malformed UTF-8 and competing
+syntax/range errors. These are bounded fixtures, not a parser length limit.
+
+Each input checks direct and `?`-propagated results through immutable full views
+and bounded subviews; empty input uses an empty subview of a real owner. Every
+owner byte is compared with its saved bytes afterward. Exhaustive error matching
+executes; unhandled Results and incomplete error matches are rejected.
+
+The verified MIR executes after artifact-codec round trip, and C emission passes
+for both current x64 target descriptions. Actual Windows MSVC low and optimized
+images execute the entire fixture with exit zero and empty stdout/stderr.
+The [retained receipt](../ops/evidence/checked-i64-decimal-20261002.json) records
+the fixture hash, exact byte inputs/results, native argv/cwd/exit, streams decoded
+explicitly as UTF-8, SDK source identity, compiler/toolchain identities and EXE
+SHA256. The in-process CLI compiler identity is the actual Go test executable
+hash/build information plus source-base and source hashes, not a standalone
+`fairyc.exe` build. SDK discovery, loader, package-cache and targeted workspace
+identity regressions pass. Linux native execution and performance were not tested.
 
 ## Rollout and deferred scope
 
-Next implement and validate the admitted SDK function in a separate commit,
-then migrate the two maintained quickstarts in a bounded follow-up. Other
+Implementation and acceptance evidence are complete for this scope. Next
+migrate the two maintained quickstarts in a bounded follow-up. Other
 integer types, digits-only wrappers, radix/options, byte offsets, text overloads,
 prefix parsing, streaming parser state, FFI, intrinsics and performance
-experiments are deferred. No compiler, runtime, product source or storage
-behavior changes in this decision.
+experiments are deferred. Compiler grammar, runtime symbols, external round4
+product source and storage behavior remain unchanged.

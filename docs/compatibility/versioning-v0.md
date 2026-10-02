@@ -1473,3 +1473,12 @@ refresh their SDK lock version and source digest. Language `/20`, runtime ABI
 `/0`, module count, MIR and artifact schemas are unchanged. Existing source stays
 valid, and historical round4 toolchains, receipts and identity fixtures are
 preserved. The `as` allowlist and deferred unsigned wrapper are unchanged.
+
+ADR 0420 advances only the bundled SDK from `0.0.0-stage0.75` to
+`0.0.0-stage0.76` for pure signed decimal byte-view parsing and its separate
+`ParseI64Error` enum. Existing module source/interface and dependent cache
+identities change; importing workspaces refresh SDK lock version and source
+digest. Language `/20`, runtime ABI `/0`, module count, MIR and artifact schemas
+are unchanged. Existing source remains valid. Historical round4 compiler pins,
+reports, receipts and identity fixtures remain intact. No input-length limit,
+implicit parsing, cast or target admission is added.

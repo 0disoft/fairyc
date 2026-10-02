@@ -1,0 +1,863 @@
+{
+  "cEmission": [
+    "x86_64-linux-gnu",
+    "x86_64-windows-msvc"
+  ],
+  "cases": [
+    {
+      "inputHex": "",
+      "value": "0",
+      "error": "Empty"
+    },
+    {
+      "inputHex": "2d",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "30",
+      "value": "0",
+      "error": ""
+    },
+    {
+      "inputHex": "2d30",
+      "value": "0",
+      "error": ""
+    },
+    {
+      "inputHex": "303030323536",
+      "value": "256",
+      "error": ""
+    },
+    {
+      "inputHex": "2d30303031",
+      "value": "-1",
+      "error": ""
+    },
+    {
+      "inputHex": "2b31",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d2d31",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d2b31",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "312d",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2031",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "3120",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "310930",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "310a",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "310d",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "30783130",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "315f30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "312e30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "312c30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "3100",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "7f",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "80",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "c0af",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "ff",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "efbbbf30",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "efbc91efbc92",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "ed959ceab880",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "39323233333732303336383534373735383037",
+      "value": "9223372036854775807",
+      "error": ""
+    },
+    {
+      "inputHex": "2d39323233333732303336383534373735383038",
+      "value": "-9223372036854775808",
+      "error": ""
+    },
+    {
+      "inputHex": "39323233333732303336383534373735383038",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "2d39323233333732303336383534373735383039",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "3932323333373230333638353437373538303878",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "3932323333373230333638353437373538307838",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "2d3932323333373230333638353437373538303978",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "2d3932323333373230333638353437373538307839",
+      "value": "0",
+      "error": "InvalidDecimal"
+    },
+    {
+      "inputHex": "303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030313233",
+      "value": "123",
+      "error": ""
+    },
+    {
+      "inputHex": "2d30303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303039323233333732303336383534373735383038",
+      "value": "-9223372036854775808",
+      "error": ""
+    },
+    {
+      "inputHex": "3939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "3130303030303030303030303030303030303030303030303030303030303030303030303030303030",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "31",
+      "value": "1",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31",
+      "value": "-1",
+      "error": ""
+    },
+    {
+      "inputHex": "32",
+      "value": "2",
+      "error": ""
+    },
+    {
+      "inputHex": "2d32",
+      "value": "-2",
+      "error": ""
+    },
+    {
+      "inputHex": "39",
+      "value": "9",
+      "error": ""
+    },
+    {
+      "inputHex": "2d39",
+      "value": "-9",
+      "error": ""
+    },
+    {
+      "inputHex": "3130",
+      "value": "10",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130",
+      "value": "-10",
+      "error": ""
+    },
+    {
+      "inputHex": "3131",
+      "value": "11",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3131",
+      "value": "-11",
+      "error": ""
+    },
+    {
+      "inputHex": "3939",
+      "value": "99",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3939",
+      "value": "-99",
+      "error": ""
+    },
+    {
+      "inputHex": "313030",
+      "value": "100",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030",
+      "value": "-100",
+      "error": ""
+    },
+    {
+      "inputHex": "313031",
+      "value": "101",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313031",
+      "value": "-101",
+      "error": ""
+    },
+    {
+      "inputHex": "393939",
+      "value": "999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d393939",
+      "value": "-999",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030",
+      "value": "1000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030",
+      "value": "-1000",
+      "error": ""
+    },
+    {
+      "inputHex": "31303031",
+      "value": "1001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303031",
+      "value": "-1001",
+      "error": ""
+    },
+    {
+      "inputHex": "39393939",
+      "value": "9999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d39393939",
+      "value": "-9999",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030",
+      "value": "10000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030",
+      "value": "-10000",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303031",
+      "value": "10001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303031",
+      "value": "-10001",
+      "error": ""
+    },
+    {
+      "inputHex": "3939393939",
+      "value": "99999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3939393939",
+      "value": "-99999",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030",
+      "value": "100000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030",
+      "value": "-100000",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303031",
+      "value": "100001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303031",
+      "value": "-100001",
+      "error": ""
+    },
+    {
+      "inputHex": "393939393939",
+      "value": "999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d393939393939",
+      "value": "-999999",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030",
+      "value": "1000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030",
+      "value": "-1000000",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303031",
+      "value": "1000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303031",
+      "value": "-1000001",
+      "error": ""
+    },
+    {
+      "inputHex": "39393939393939",
+      "value": "9999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d39393939393939",
+      "value": "-9999999",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303030",
+      "value": "10000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303030",
+      "value": "-10000000",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303031",
+      "value": "10000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303031",
+      "value": "-10000001",
+      "error": ""
+    },
+    {
+      "inputHex": "3939393939393939",
+      "value": "99999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3939393939393939",
+      "value": "-99999999",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303030",
+      "value": "100000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303030",
+      "value": "-100000000",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303031",
+      "value": "100000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303031",
+      "value": "-100000001",
+      "error": ""
+    },
+    {
+      "inputHex": "393939393939393939",
+      "value": "999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d393939393939393939",
+      "value": "-999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303030",
+      "value": "1000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303030",
+      "value": "-1000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303031",
+      "value": "1000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303031",
+      "value": "-1000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "39393939393939393939",
+      "value": "9999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d39393939393939393939",
+      "value": "-9999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303030303030",
+      "value": "10000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303030303030",
+      "value": "-10000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303030303031",
+      "value": "10000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303030303031",
+      "value": "-10000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "3939393939393939393939",
+      "value": "99999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3939393939393939393939",
+      "value": "-99999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303030303030",
+      "value": "100000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303030303030",
+      "value": "-100000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303030303031",
+      "value": "100000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303030303031",
+      "value": "-100000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "393939393939393939393939",
+      "value": "999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d393939393939393939393939",
+      "value": "-999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303030303030",
+      "value": "1000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303030303030",
+      "value": "-1000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303030303031",
+      "value": "1000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303030303031",
+      "value": "-1000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "39393939393939393939393939",
+      "value": "9999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d39393939393939393939393939",
+      "value": "-9999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303030303030303030",
+      "value": "10000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303030303030303030",
+      "value": "-10000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303030303030303031",
+      "value": "10000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303030303030303031",
+      "value": "-10000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "3939393939393939393939393939",
+      "value": "99999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3939393939393939393939393939",
+      "value": "-99999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303030303030303030",
+      "value": "100000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303030303030303030",
+      "value": "-100000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303030303030303031",
+      "value": "100000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303030303030303031",
+      "value": "-100000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "393939393939393939393939393939",
+      "value": "999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d393939393939393939393939393939",
+      "value": "-999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303030303030303030",
+      "value": "1000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303030303030303030",
+      "value": "-1000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303030303030303031",
+      "value": "1000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303030303030303031",
+      "value": "-1000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "39393939393939393939393939393939",
+      "value": "9999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d39393939393939393939393939393939",
+      "value": "-9999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303030303030303030303030",
+      "value": "10000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303030303030303030303030",
+      "value": "-10000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "3130303030303030303030303030303031",
+      "value": "10000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3130303030303030303030303030303031",
+      "value": "-10000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "3939393939393939393939393939393939",
+      "value": "99999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d3939393939393939393939393939393939",
+      "value": "-99999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303030303030303030303030",
+      "value": "100000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303030303030303030303030",
+      "value": "-100000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "313030303030303030303030303030303031",
+      "value": "100000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d313030303030303030303030303030303031",
+      "value": "-100000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "393939393939393939393939393939393939",
+      "value": "999999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "2d393939393939393939393939393939393939",
+      "value": "-999999999999999999",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303030303030303030303030",
+      "value": "1000000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303030303030303030303030",
+      "value": "-1000000000000000000",
+      "error": ""
+    },
+    {
+      "inputHex": "31303030303030303030303030303030303031",
+      "value": "1000000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "2d31303030303030303030303030303030303031",
+      "value": "-1000000000000000001",
+      "error": ""
+    },
+    {
+      "inputHex": "39393939393939393939393939393939393939",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "2d39393939393939393939393939393939393939",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "3130303030303030303030303030303030303030",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "2d3130303030303030303030303030303030303030",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "3130303030303030303030303030303030303031",
+      "value": "0",
+      "error": "OutOfRange"
+    },
+    {
+      "inputHex": "2d3130303030303030303030303030303030303031",
+      "value": "0",
+      "error": "OutOfRange"
+    }
+  ],
+  "compilerIdentity": {
+    "buildInfo": "go\tgo1.27.1\npath\tgithub.com/0disoft/fairyc/internal/cli.test\nmod\tgithub.com/0disoft/fairyc\t(devel)\t\ndep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\nbuild\tCGO_ENABLED=0\nbuild\tGOARCH=amd64\nbuild\tGOOS=windows\nbuild\tGOAMD64=v1\n",
+    "executableSHA256": "b2c00614ea0e461469e80b5f5032b4ae3d690b2e53a7f11a6efa3c9e53cd0480",
+    "goVersion": "go1.27.1",
+    "kind": "in-process CLI compiler in Go test executable"
+  },
+  "images": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-decimal-worktree\\.cache\\checked-i64-decimal\\low.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-decimal-worktree\\.cache\\checked-i64-decimal",
+      "exeBytes": 316928,
+      "exeSHA256": "0b190860974ac9350e1453243a9b7689c10bcb20bd5652c532bec8b152bba4b0",
+      "exitCode": 0,
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stderrHex": "",
+      "stdin": "closed",
+      "stdout": "",
+      "stdoutHex": "",
+      "toolchain": "msvc 14.51.36231"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-decimal-worktree\\.cache\\checked-i64-decimal\\optimized.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-decimal-worktree\\.cache\\checked-i64-decimal",
+      "exeBytes": 163328,
+      "exeSHA256": "92a86ea947ff6d527d45386b3de3f5a9e193581e89414b42d4bfbc7f65f7ba7c",
+      "exitCode": 0,
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stderrHex": "",
+      "stdin": "closed",
+      "stdout": "",
+      "stdoutHex": "",
+      "toolchain": "msvc 14.51.36231"
+    }
+  ],
+  "interpreter": "passed after MIR codec round trip",
+  "language": "fairyc-language/20",
+  "oracle": "positive arbitrary-precision math/big prefix magnitudes",
+  "ownerPreservation": "all bytes compared after direct and propagated calls",
+  "runtime": "fairyc-runtime/0",
+  "schema": "fairyc.checked-i64-decimal/v1",
+  "sdk": "0.0.0-stage0.76",
+  "sdkSourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-f616ee9a1519712c337ef8b5935c25cb2bc4cab08714d83d00ae59b999d68fe3",
+  "sourceSHA256": "1a71f3f885660ca4805c517ba389c915f3e8acde6b4c7aa6713e66ea4f5cfd52",
+  "views": "full and bounded subviews; empty uses empty subview",
+  "baseRevision": "8c1130596cf417c72fc9241fab10d026b077b30b",
+  "modified": true,
+  "sourceHashes": {
+    "docs/adr/0420-sdk-checked-i64-decimal-parsing.md": "2f76984fc87e63ae10243ba8261e09beadd7c36fe2f5d3df31af768d3befb96a",
+    "docs/architecture/checked-i64-decimal-parsing-assessment.md": "28388f05b6fbd0f03d8cc5401cfe4600907688b37692d0e4bab6c391d2252c70",
+    "docs/compatibility/versioning-v0.md": "127ee8f002c8ff086fbec0b66bf9474c6929f63fdfb92876f5c873ffd72f59a3",
+    "docs/runtime/runtime-stdlib-v0.md": "04531eb7cdc4fd39e6ea52cf9d23fe64a6fb31e2b5ad350af1450e752ece9b9b",
+    "internal/cli/checked_i64_decimal_test.go": "4756388523dae5c7d3f3589d612e63af23a9c2bdf64ab2b04e9fb048f5db594c",
+    "internal/sdkstdlib/sources/std/num.fy": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3",
+    "internal/sdkstdlib/stdlib.go": "a1d0f3bccc501c54043dbe1130f1c87973bdf1b953c7b5d663dd675182fdc570",
+    "internal/sdkstdlib/stdlib_test.go": "c999feb7e0bb4a359b74051f6ce7fd93fa2055937a25b3d15eb23e9f4ef300fb"
+  },
+  "compilerSourceHashes": {
+    "internal/hir/hir.go": "d4363ad36c2087b41361d44b1f6494225015032144431966f1b6ace3c1ed3e84",
+    "internal/semantic/typecheck.go": "024ee418b912589d7e2d8fbb553c32f941d4c36ab421d82b7ff4eda9b62edbde",
+    "internal/cbackend/emit.go": "cbfc7562f8efba383b0ae37f8c72c88a42fd36abf34f6912fb02f89d83d1f1cb",
+    "internal/cli/checked_integer_conversion_test.go": "3f8f51c3cea7826aa55fa97c0bc8499079d75b84589dd695be0390731438a8c3"
+  }
+}
