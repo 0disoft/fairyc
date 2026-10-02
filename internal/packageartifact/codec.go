@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	ProcessCodecSchema    = "fairyc.package-mir-process/v2"
-	ProcessCodecVersion   = "fairyc-package-mir-process/2"
+	ProcessCodecSchema    = "fairyc.package-mir-process/v3"
+	ProcessCodecVersion   = "fairyc-package-mir-process/3"
 	processIdentityPrefix = "fyproc0-"
 )
 

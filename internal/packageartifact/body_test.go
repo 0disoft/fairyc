@@ -105,6 +105,10 @@ func TestStableLeafBodyCodecRejectsBoundsUnknownFieldsAndNoncanonicalBytes(t *te
 	if _, err := DecodeStableBody(withWhitespace, stableBodyLimit); !errors.Is(err, ErrBodyArtifactEncoding) {
 		t.Fatalf("noncanonical error = %v", err)
 	}
+	old := bytes.Replace(encoded, []byte(BodyVersion), []byte("fairyc-package-function-body/3"), 1)
+	if _, err := DecodeStableBody(old, stableBodyLimit); err == nil {
+		t.Fatal("accepted previous lossy function-body version")
+	}
 	corrupt := body
 	corrupt.Function.Symbol = 7
 	if _, err := EncodeStableBody(corrupt, stableBodyLimit); err == nil || !strings.Contains(err.Error(), "build-local function identity") {

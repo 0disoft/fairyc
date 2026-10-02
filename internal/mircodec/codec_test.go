@@ -32,7 +32,7 @@ func TestVerifiedMIRArtifactRoundTripIsDeterministic(t *testing.T) {
 	if !bytes.Equal(first, second) {
 		t.Fatal("the same verified MIR program produced different artifact bytes")
 	}
-	wantPrefix := `{"schema":"fairyc.mir-artifact/v0","mirVersion":"fairyc-mir/1","program":`
+	wantPrefix := `{"schema":"fairyc.mir-artifact/v0","mirVersion":"fairyc-mir/2","program":`
 	if !bytes.HasPrefix(first, []byte(wantPrefix)) {
 		t.Fatalf("artifact prefix = %q", first[:min(len(first), len(wantPrefix))])
 	}
@@ -108,8 +108,13 @@ func TestMIRArtifactRejectsIncompatibleAndUnverifiedPrograms(t *testing.T) {
 
 func verifiedProgram(t *testing.T) mir.Program {
 	t.Helper()
+	return verifiedSourceProgram(t, "module main;\nfn i32 main() { return 42; }\n")
+}
+
+func verifiedSourceProgram(t *testing.T, text string) mir.Program {
+	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(
-		source.NewFile("main.fy", []byte("module main;\nfn i32 main() { return 42; }\n")),
+		source.NewFile("main.fy", []byte(text)),
 		source.DefaultLimits(),
 	)
 	if err != nil {

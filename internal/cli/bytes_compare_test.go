@@ -98,10 +98,9 @@ fn i32 main() {
         var u8[256] all = %s;
         let u8[256] saved = %s;
         let i32[256] wants = [%s];
-        let u8[1] pivot = [128];
         let ref u8[] view = ref all;
         var usize i = 0;
-        while (i < view.len) { check(view[i..i+1], ref pivot, wants[i]); i += 1; }
+        while (i < view.len) { check(view[i..i+1], b"\x80", wants[i]); i += 1; }
         preserved(view, ref saved);
     }
 `, literal(all), literal(all), strings.Join(wants, ", "))
@@ -114,12 +113,7 @@ fn i32 main() {
 	for i := 0; i < len(domain); i++ {
 		for j := i + 1; j < len(domain); j++ {
 			for k := j + 1; k < len(domain); k++ {
-				// Numeric arrays preserve raw bytes through the current MIR codec;
-				// its separate invalid-UTF-8 byte-literal limitation is documented.
-				a := append([]byte{85}, domain[i]...)
-				b := append([]byte{17}, domain[j]...)
-				c := append([]byte{238}, domain[k]...)
-				fmt.Fprintf(&source, "    { let u8[%d] a = %s; let u8[%d] b = %s; let u8[%d] c = %s; let ref u8[] av = ref a; let ref u8[] bv = ref b; let ref u8[] cv = ref c; ordered(av[1..], bv[1..], cv[1..]); }\n", len(a), literal(a), len(b), literal(b), len(c), literal(c))
+				fmt.Fprintf(&source, "    ordered(b%q, b%q, b%q);\n", string(domain[i]), string(domain[j]), string(domain[k]))
 				triples = append(triples, [3]string{hex.EncodeToString(domain[i]), hex.EncodeToString(domain[j]), hex.EncodeToString(domain[k])})
 			}
 		}

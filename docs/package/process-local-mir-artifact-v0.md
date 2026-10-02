@@ -9,6 +9,10 @@
 
 ## Scope
 
+[ADR 0423](../adr/0423-lossless-mir-static-bytes.md) defines the current lossless
+`StaticDataBase64` operand representation and exact process/stable/body versions.
+Previous payloads are rejected; in-memory raw bytes and source semantics are unchanged.
+
 This boundary splits one already verified whole-program MIR value into package-owned function
 slices. Each slice carries:
 
@@ -54,7 +58,7 @@ context.
 
 ## Explicit exclusions
 
-Artifact v0 has a bounded canonical v1 process codec solely so `packagecache.MemoryStore` can own and
+Artifact v0 has a bounded canonical v3 process codec solely so `packagecache.MemoryStore` can own and
 account for the complete payload. Every codec instance embeds a random process identity. Bytes from
 another codec fail closed, so this is not a disk or cross-process format. There is still no disk
 path, cross-process lock, default size limit, cache lifetime, CLI surface, remote transport, or

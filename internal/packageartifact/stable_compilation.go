@@ -12,7 +12,7 @@ import (
 
 const (
 	StableCompilationSchema  = "fairyc.stable-package-compilation/v1"
-	StableCompilationVersion = "fairyc-stable-package-compilation/2"
+	StableCompilationVersion = "fairyc-stable-package-compilation/3"
 )
 
 var (

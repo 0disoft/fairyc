@@ -4,7 +4,7 @@ import "github.com/0disoft/fairyc/internal/packagecache"
 
 const (
 	StorageProcessCodecSchema    = "fairyc.package-mir-storage-process/v0"
-	StorageProcessCodecVersion   = "fairyc-package-mir-storage-process/0"
+	StorageProcessCodecVersion   = "fairyc-package-mir-storage-process/1"
 	storageProcessIdentityPrefix = "fyproc-storage0-"
 )
 

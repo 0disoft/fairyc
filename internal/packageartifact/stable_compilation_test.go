@@ -74,7 +74,7 @@ func TestStableCompilationArtifactRoundTripsAcrossStatePackageRenumbering(t *tes
 	}
 
 	digest := sha256.Sum256(encoded)
-	const wantDigest = "6c00664f3f794b411c50d07620e77ce3010d6dd61448c810ea5a44b4bd92dbb9"
+	const wantDigest = "b4c1f2f8cd965b11ae8d1e3552913ca79a783b8a926fb4b6ab3184894fed1dea"
 	if got := hex.EncodeToString(digest[:]); got != wantDigest {
 		t.Fatalf("stable compilation digest = %s, want %s", got, wantDigest)
 	}
@@ -125,9 +125,11 @@ func TestStableCompilationArtifactRejectsBoundsEncodingAndOwnershipDrift(t *test
 	if _, err := DecodeStableCompilationArtifact(append(append([]byte(nil), encoded...), []byte(`{}`)...), stablePackageArtifactLimit); err == nil || !strings.Contains(err.Error(), "trailing JSON value") {
 		t.Fatalf("trailing-value error = %v", err)
 	}
-	wrongVersion := bytes.Replace(encoded, []byte(StableCompilationVersion), []byte("fairyc-stable-package-compilation/99"), 1)
-	if _, err := DecodeStableCompilationArtifact(wrongVersion, stablePackageArtifactLimit); err == nil || !strings.Contains(err.Error(), "incompatible") {
-		t.Fatalf("wrong-version error = %v", err)
+	for _, version := range []string{"fairyc-stable-package-compilation/2", "fairyc-stable-package-compilation/99"} {
+		wrongVersion := bytes.Replace(encoded, []byte(StableCompilationVersion), []byte(version), 1)
+		if _, err := DecodeStableCompilationArtifact(wrongVersion, stablePackageArtifactLimit); err == nil || !strings.Contains(err.Error(), "incompatible") {
+			t.Fatalf("wrong-version error for %s = %v", version, err)
+		}
 	}
 
 	otherPackage := process.PackageID + 1000

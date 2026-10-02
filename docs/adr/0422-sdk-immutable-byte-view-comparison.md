@@ -142,12 +142,17 @@ execution passes. Removing only `compare` in a modeled prior bundle changes
 source/interface/lock identities, misses both cached packages and rejects the
 export. This is a synthetic fixture, not a historical compiler execution.
 
-## Separate compiler limitation found during verification
+## Historical compiler limitation found during verification
 
-The current JSON MIR codec serializes raw byte-literal data as a Go string.
+Fixed on 2026-10-03 by [ADR 0423](0423-lossless-mir-static-bytes.md). The minimal
+source below now passes codec round trip and native execution; comparison
+verification also includes high-byte literals. The following records the
+original diagnosis and preserved evidence.
+
+The previous JSON MIR codec serialized raw byte-literal data as a Go string.
 An invalid UTF-8 literal byte is replaced during encoding: `80` becomes
 `EF BF BD`. This occurs independently of `compare`; the minimal source below
-passes direct checked-MIR interpretation but traps after encode/decode:
+passed direct checked-MIR interpretation but trapped after encode/decode:
 
 ```text
 module main;
@@ -162,9 +167,10 @@ fn i32 main() {
 The diagnostic source, encoded MIR, diagnostic Go test source and exact
 compiler/SDK/outcome evidence are retained under `.cache/bytes-compare/` as
 `codec-byte-literal-repro*`. The temporary diagnostic test is not installed as
-a passing regression for broken behavior. A codec fix is separate work.
+a passing regression for broken behavior. The subsequent fix and regression
+tests are recorded in ADR 0423.
 
-Comparison verification represents arbitrary raw bytes with numeric arrays
+The original comparison verification represented arbitrary raw bytes with numeric arrays
 and subviews, including malformed UTF-8. Thus the helper's byte-order contract
-is verified, but this unit does not establish preservation of invalid UTF-8
-byte literals across MIR serialization or claim that compiler defect is fixed.
+was verified, but that unit did not establish preservation of invalid UTF-8
+byte literals across MIR serialization. ADR 0423 supplies that separate evidence.

@@ -123,6 +123,10 @@ func TestStablePackageArtifactCodecRejectsBoundsUnknownFieldsAndImportCorruption
 	if _, err := DecodeStableArtifact(withWhitespace, stablePackageArtifactLimit); !errors.Is(err, ErrStableArtifactEncoding) {
 		t.Fatalf("noncanonical error = %v", err)
 	}
+	old := bytes.Replace(encoded, []byte(StableArtifactVersion), []byte("fairyc-stable-package-mir/4"), 1)
+	if _, err := DecodeStableArtifact(old, stablePackageArtifactLimit); err == nil {
+		t.Fatal("accepted previous lossy stable MIR version")
+	}
 	if len(stable.Imports) != 0 {
 		corrupt := stable
 		corrupt.Imports = slices.Clone(stable.Imports)

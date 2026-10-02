@@ -9,9 +9,14 @@
   `internal/packageartifact/stable_compilation.go`, `internal/packageartifact/stable_cache.go`,
   `internal/workspacecompiler/session.go`
 - Schema: `fairyc.stable-package-compilation/v1`
-- Version: `fairyc-stable-package-compilation/1`
+- Version: `fairyc-stable-package-compilation/3`
 
 ## Contents
+
+[ADR 0423](../adr/0423-lossless-mir-static-bytes.md) advances stable MIR to `/5`
+and function bodies to `/4` for lossless Base64 static bytes. Old payloads are
+rejected; the outer schema stays v1 and the nested contract-state
+representations are unchanged.
 
 One artifact contains exactly:
 

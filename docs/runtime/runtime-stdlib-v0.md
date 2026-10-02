@@ -1038,9 +1038,9 @@ prefix with constant auxiliary storage. No text collation, normalization,
 numeric ordering or constant-time guarantee is supplied. Language `/20`,
 runtime ABI `/0` and target maturity are unchanged.
 [ADR 0422](../adr/0422-sdk-immutable-byte-view-comparison.md) owns the contract,
-execution evidence and the separate existing MIR limitation for invalid UTF-8
-byte literals. Raw bytes represented by numeric arrays/subviews are verified;
-this addition does not fix byte-literal preservation during MIR serialization.
+execution evidence and the separately discovered MIR issue for invalid UTF-8
+byte literals. [ADR 0423](../adr/0423-lossless-mir-static-bytes.md) fixes the
+codec; both literal and numeric-array/subview byte inputs are now verified.
 
 ## Explicit exclusions
 

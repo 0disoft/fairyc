@@ -22,7 +22,7 @@ func TestProcessCodecRoundTripsVerifiedArtifact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.HasPrefix(encoded, []byte(`{"schema":"fairyc.package-mir-process/v2"`)) {
+	if !bytes.HasPrefix(encoded, []byte(`{"schema":"fairyc.package-mir-process/v3"`)) {
 		t.Fatalf("encoded prefix = %q", encoded[:min(len(encoded), 80)])
 	}
 	decoded, err := codec.Decode(encoded)
@@ -31,6 +31,10 @@ func TestProcessCodecRoundTripsVerifiedArtifact(t *testing.T) {
 	}
 	if !reflect.DeepEqual(decoded, artifacts[0]) {
 		t.Fatal("decoded process-local artifact differs from source")
+	}
+	old := bytes.Replace(encoded, []byte(ProcessCodecVersion), []byte("fairyc-package-mir-process/2"), 1)
+	if _, err := codec.Decode(old); err == nil {
+		t.Fatal("accepted previous lossy process artifact version")
 	}
 }
 

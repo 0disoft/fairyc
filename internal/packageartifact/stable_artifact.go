@@ -17,7 +17,7 @@ import (
 
 const (
 	StableArtifactSchema  = "fairyc.stable-package-mir/v1"
-	StableArtifactVersion = "fairyc-stable-package-mir/4"
+	StableArtifactVersion = "fairyc-stable-package-mir/5"
 )
 
 var (

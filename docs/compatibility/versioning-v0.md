@@ -1502,3 +1502,13 @@ source contracts remain valid; historical projects, compiler pins and receipts
 are preserved. No sorting API, text collation or timing guarantee is added.
 The separate pre-existing JSON MIR invalid-UTF-8 byte-literal limitation is
 documented in ADR 0422 and is not corrected by this SDK addition.
+
+ADR 0423 corrects that compiler issue with exact canonical Base64 static bytes.
+Whole-program MIR advances to `/2`, stable function bodies to `/4`, stable MIR
+to `/5`, stable storage MIR to `/2`, compilation to `/3`, process MIR to `/3`
+and storage process MIR to `/1`. Previous lossy payloads are rejected and
+disposable caches regenerate from source; previously lost bytes are not guessed.
+The body schema advances to v4 and ordinary process schema to v3. Other schemas,
+SDK stage0.78, language `/20`, runtime ABI `/0`, source semantics and target
+maturity are unchanged. Historical fixtures, compiler pins and receipts remain
+preserved. See the ADR for the exact version identities and execution evidence.

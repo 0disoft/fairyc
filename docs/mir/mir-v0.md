@@ -128,7 +128,10 @@ immediate family stores a signed int64 payload instead of truncating through I32
 or recovering a signed value from U64. Unary plus/minus retain i64, ordinary
 arithmetic uses the same typed check/switch/continuation structure, and division
 or remainder includes signed-division-overflow. Exact-version MIR payloads now
-use `fairyc-mir/1`; older persisted compiler-private artifacts are rejected.
+use `fairyc-mir/2`; older persisted compiler-private artifacts are rejected.
+[ADR 0423](../adr/0423-lossless-mir-static-bytes.md) preserves exact literal
+bytes with canonical `StaticDataBase64` operand fields, including invalid UTF-8.
+The in-memory `StaticData` string remains raw bytes, not a text value.
 
 MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, borrowed-view length and emptiness, safe borrow, raw address, region allocation, and explicit unsafe operations.
 
