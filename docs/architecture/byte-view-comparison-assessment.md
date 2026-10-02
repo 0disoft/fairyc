@@ -280,8 +280,8 @@ bun tools/run-go.ts build -mod=readonly -trimpath -o .cache/ledger-compare-toolc
 This opt-in harness requires the preserved external round4 ledger fixtures and
 SDK stage0.78. It is not a CI test, full 92-case rerun, historical-compiler rerun,
 fault-injection test or performance measurement. No SDK/API/version change or
-round4 migration was made. Subsequent log and pack experiments are recorded
-below; KV still has only the static review above.
+round4 migration was made. Subsequent log, pack and KV experiments are recorded
+below.
 
 ## Isolated log analyzer adoption evidence, 2026-10-03
 
@@ -394,4 +394,82 @@ the preserved external pack and its reviewed oracle helpers. This opt-in local
 experiment is not a CI test, full 218-case rerun, historical-compiler rerun,
 forced write/close fault experiment, performance measurement or migration of
 the preserved round4 project. No SDK/API/version or publication-policy change
-is introduced; KV adoption remains a separate follow-up.
+is introduced; the subsequent KV experiment is recorded below.
+
+## Isolated KV adoption evidence, 2026-10-03
+
+[`verify-kv-compare-adoption.ps1`](../../tools/verify-kv-compare-adoption.ps1)
+copies the manifest, ten product sources and seven hash-checked oracle/control
+helpers into a unique `.cache/kv-compare-adoption/` directory. Legacy sources
+remain byte-identical. The SDK variant replaces only `codec.fy::compare` with
+the same delegation used by the pack above; its edited file uses LF.
+
+The equality wrapper, zero/positive corruption branches, `<= 0` insertion and
+update placement, generation increment, additive checksum and selected-key
+replacement remain unchanged. Publication still uses exclusive pending creation,
+write_all, sync, close and replace_file; no rename/copy fallback or orphan
+promotion is added. Equality also selects test-fault stages and checkpoint names,
+so those consumers are included in the adoption subset.
+
+Run `f4fbe4e3d2694913905bbcbcc726171e` passed two checks, four native builds and
+**328 executions**: 82 per development/release image for each variant. Sixty-seven
+cases reuse the reviewed independent BinaryWriter snapshot encoding, BigInteger
+checksum and UTF-8 hex ordinal sorting helpers. They cover first-create, empty
+update, escape/insertion order, delete/last delete, 128/129 entries, generation
+MAX, pending/hardlink conflicts, a valid orphan with no live file, fixed empty
+snapshot, duplicate/unsorted keys, invalid UTF-8, checksum, truncation and trailing
+bytes. Corrupt live files refuse mutation before creating pending output.
+
+Fifteen new cases cover insertion at the first, middle and last positions,
+updating composed `é` and deleting its distinct decomposed spelling. Each mutation
+has fresh-process get/list checks. Ten keys include case/space/prefix differences,
+numeric-looking strings and Korean; distinct values include TAB/LF/CR/backslash.
+The initial generation is 2147483648. Snapshot bytes, checksum, generation,
+escaped output and complete live/pending/sentinel file trees match the oracle.
+
+Across the four images, fault groups include **16 app injections**, **four actual
+SDK/OS publication sharing failures** (`status=1`, `os_code=5`) and **20 checkpoint
+terminations**. App write/sync/publication/stdout failures retain their explicit
+`isActualSdkFailure=false` classification. Target sharing locks are acquired only
+after the before-publish marker; the child resumes with stdin `G`. Only owned
+children are terminated, with matching start/checkpoint/kill PIDs, exact markers,
+exit receipts and 10-second checkpoint/exit bounds. Checkpoints cover partial
+write, before sync, before publish, after publish and first-create before publish.
+Eighty-eight fresh-process get and 88 list executions verify authoritative live
+generations, pending retention and no automatic orphan promotion. Old, new and
+partial snapshots are compared as whole bytes, not inferred from process exit.
+
+The initial attempt stopped after 77 product executions (76 passing cases and
+one oracle mismatch). PowerShell `-ceq` treated composed/decomposed Unicode as
+equal while generating the expected update; the product correctly retained the
+other key. The corrected fixture uses `StringComparer.Ordinal`, and the final
+328-case run above passes. This is a harness error, not a Fairy compiler/SDK defect.
+
+The same cultural comparison issue also applies to stdout/stderr assertions.
+After the native run, the committed harness adds an ordinal output gate and an
+`-AuditReceipt` mode. This mode rejects a deliberately mismatched Unicode output,
+then checks all 328 retained expectations, raw argv/cwd/exit/stdout/stderr records,
+snapshot hashes, checkpoint ownership, EXE/compiler hashes and 32 protected
+original files without starting another native process. The mode passed against
+the final receipt. `harness-executed.ps1` preserves the exact native-run driver;
+`ordinal-audit.json` links its hash, receipt hash and the updated audit-driver hash.
+Future native runs apply the ordinal gate directly before recording results.
+Earlier ledger/log/pack output assertions still warrant the same bounded audit;
+their retained evidence is not silently upgraded by this KV check.
+
+The run retains the identity log, both source/lock/helper copies, per-case raw logs,
+four EXEs, `receipt.json` and ordinal audit. Source/SDK digests, helper/compiler/EXE
+SHA256 and before/after state proofs are recorded. Legacy source digest matches
+the historical KV digest; candidate digest is
+`fysrc1-sha256-756a225c8211e1bd25e87600af681d60d12a2924e9e6ceec739cbb2f0fd679bf`.
+Both variants reuse the ledger experiment's unchanged stage0.78 compiler;
+the original pinned stage0.73 toolchain is hashed and preserved without execution.
+
+Reproduce with `./tools/verify-kv-compare-adoption.ps1`. To audit the saved result,
+pass `-AuditReceipt .cache/kv-compare-adoption/<run-id>/receipt.json` with the same
+compiler available. The opt-in harness needs the preserved external KV project.
+It is not a full 278-case rerun or a migration of the original round4 store.
+Actual allocation/read/write/sync/close/stdout failures, short reads, concurrent
+writers, reparse races, interruption inside OS replace, other platforms,
+performance and physical power loss remain outside this adoption evidence.
+No public API, snapshot format, SDK version or save policy changes are introduced.
