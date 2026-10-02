@@ -183,8 +183,16 @@ identity regressions pass. Linux native execution and performance were not teste
 
 ## Rollout and deferred scope
 
-Implementation and acceptance evidence are complete for this scope. Next
-migrate the two maintained quickstarts in a bounded follow-up. Other
+Implementation and acceptance evidence are complete for this scope. The two
+maintained quickstarts now use `std::num::parse_i64_decimal` through exhaustive
+caller-error adapters. Their 20-byte argv budgets, diagnostics and application
+policy order remain unchanged. Example package versions advance to `1.0.1`;
+SDK/language/runtime versions do not change for adoption. The new
+[offset receipt](../ops/evidence/checked-parser-adoption-offset-20261002.json)
+and [codec receipt](../ops/evidence/checked-parser-adoption-codec-20261002.json)
+record 37 and 40 CLI cases, respectively, in both Windows native profiles.
+They add competing syntax/range cases to the original corpora. Historical
+receipts remain unchanged. Other
 integer types, digits-only wrappers, radix/options, byte offsets, text overloads,
 prefix parsing, streaming parser state, FFI, intrinsics and performance
 experiments are deferred. Compiler grammar, runtime symbols, external round4

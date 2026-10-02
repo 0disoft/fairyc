@@ -1,6 +1,7 @@
 # Checked byte encoding
 
-This example uses SDK `0.0.0-stage0.75` `std::num::u8_from_i64` to contrast
+This example uses SDK `0.0.0-stage0.76` decimal parsing and
+`std::num::u8_from_i64` to contrast
 exact byte conversion with unsigned little-endian field encoding.
 From this directory, with a compiler bundling that SDK:
 
@@ -28,8 +29,12 @@ only up to i64 maximum; it is not a general u64 or signed two's-complement codec
 
 Each numeric argument is at most 20 UTF-8 bytes and follows `-?[0-9]+`.
 Leading zeros and `-0` are accepted. Empty values, a bare minus, plus signs,
-whitespace, decimal points and values outside i64 are rejected. The parser
-accumulates negative digits so i64 minimum can be parsed without negating it.
+whitespace, decimal points and values outside i64 are rejected. `numbers::parse`
+delegates to `std::num::parse_i64_decimal` and maps its errors to the existing
+caller errors. The SDK handles i64 minimum without negating it. The 20-byte
+argv limit remains example policy. Competing failures retain first-failure
+ordering: `9223372036854775808x` reports range, while `922337203685477580x8`
+reports syntax.
 
 CLI validation order is mode/arity, VALUE parsing, then (for `le`) WIDTH parsing
 and range, then codec policy. Thus `le -1 0` reports the width error. The reusable
@@ -46,17 +51,21 @@ diagnostic to stderr and exit 1; usage errors exit 2. Output or internal failure
 exits 3. A short or failed console write may have emitted partial output;
 console output is not transactional. No files are read or written by the app.
 
-[ADR 0419](../../docs/adr/0419-sdk-checked-byte-conversion.md) owns the SDK API.
+[ADR 0419](../../docs/adr/0419-sdk-checked-byte-conversion.md) owns byte conversion;
+[ADR 0420](../../docs/adr/0420-sdk-checked-i64-decimal-parsing.md) owns decimal parsing.
 `src/codec.fy` owns this example's encoding policy. The
-[retained native receipt](../../docs/ops/evidence/checked-byte-codec-example-20261002.json)
+[adoption receipt](../../docs/ops/evidence/checked-parser-adoption-codec-20261002.json)
 records exact argv/cwd/stdout/stderr/exit and source/SDK/compiler/EXE identities.
-`internal/cli/checked_byte_codec_example_test.go` checks 38 CLI cases in each
+`internal/cli/checked_byte_codec_example_test.go` checks 40 CLI cases in each
 Windows MSVC low and optimized profile. A separate interpreter check exercises
 seven exact codec failures with sentinel buffers and successful suffix preservation.
+The [original receipt](../../docs/ops/evidence/checked-byte-codec-example-20261002.json)
+retains the earlier 38-case evidence and historical compiler identity.
 
 The compiler identity is the actual in-process CLI Go test executable, not a
 standalone `fairyc.exe`. Linux native execution, performance measurements,
 physical persistence, and console failure injection are outside this example's
-validation. SDK/language/runtime versions are unchanged by adding this example;
-the new example package starts at `1.0.0`. External round4 sources and receipts
+validation. SDK/language/runtime versions are unchanged by this adoption;
+example package `1.0.1` replaces the local accumulator without changing CLI behavior.
+External round4 sources and receipts
 are preserved.

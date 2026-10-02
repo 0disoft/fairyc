@@ -13,24 +13,16 @@ pub enum InputError {
     OutsideUsize;
 }
 
-// Accumulate negative digits so i64 minimum never needs an invalid positive magnitude.
+// Keep caller diagnostics while delegating decimal syntax and bounds to the SDK.
 pub fn Result<i64, InputError> parse(ref u8[] raw) {
-    if (raw.len == 0) { return .err(.Empty); }
-    let bool negative = raw[0] == 45;
-    var usize at = if (negative) { 1 } else { 0 };
-    if (at == raw.len) { return .err(.InvalidDecimal); }
-    let i64 limit = if (negative) { -9223372036854775808 } else { -9223372036854775807 };
-    var i64 value = 0;
-    while (at < raw.len) {
-        if (raw[at] < 48 || raw[at] > 57) { return .err(.InvalidDecimal); }
-        let i64 digit = (raw[at] - 48) as i64;
-        if (value < limit / 10 || (value == limit / 10 && digit > -(limit % 10))) {
-            return .err(.OutsideI64);
-        }
-        value = value * 10 - digit;
-        at += 1;
-    }
-    return .ok(if (negative) { value } else { -value });
+    return switch (num::parse_i64_decimal(raw)) {
+        case .ok(value): { .ok(value) }
+        case .err(error): { switch (error) {
+            case .Empty: { .err(.Empty) }
+            case .InvalidDecimal: { .err(.InvalidDecimal) }
+            case .OutOfRange: { .err(.OutsideI64) }
+        } }
+    };
 }
 
 pub fn Result<usize, InputError> argument(usize index) {

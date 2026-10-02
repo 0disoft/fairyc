@@ -21,6 +21,11 @@ pub enum ParseI64Error { Empty; InvalidDecimal; OutOfRange; }
 pub fn Result<i64, ParseI64Error> parse_i64_decimal(ref u8[] raw);
 ```
 
+The maintained quickstarts now delegate to this SDK parser through caller-error
+adapters. The inspected source hashes below describe the earlier local parsers;
+their historical receipts remain intact. Adoption evidence is linked from each
+quickstart README.
+
 Use a separate parse error rather than extending `ConversionError`: a negative
 number is valid signed input, while missing digits and invalid bytes are not
 conversion failures. `ref u8[]` accepts argv buffers and row-field subviews

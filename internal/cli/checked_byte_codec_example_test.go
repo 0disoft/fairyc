@@ -81,6 +81,8 @@ func TestCheckedByteCodecExampleNative(t *testing.T) {
 		{"error-order", []string{"le", "-1", "0"}, "", "WIDTH: expected 1..8", 1},
 		{"above-i64", []string{"byte", "9223372036854775808"}, "", "VALUE: integer is outside i64 range", 1},
 		{"below-i64", []string{"byte", "-9223372036854775809"}, "", "VALUE: integer is outside i64 range", 1},
+		{"overflow-before-syntax", []string{"byte", "9223372036854775808x"}, "", "VALUE: integer is outside i64 range", 1},
+		{"syntax-before-overflow", []string{"byte", "922337203685477580x8"}, "", "VALUE: expected signed decimal integer", 1},
 		{"leading-zeros", []string{"le", "00256", "02"}, "00 01\n", "", 0},
 		{"negative-zero", []string{"byte", "-0"}, "00\n", "", 0},
 		{"empty", []string{"byte", ""}, "", "VALUE: empty integer", 1},

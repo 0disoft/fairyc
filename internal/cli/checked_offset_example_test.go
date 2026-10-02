@@ -2,15 +2,20 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"testing"
+	"time"
+	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
@@ -78,6 +83,8 @@ func TestCheckedOffsetExampleNative(t *testing.T) {
 		{"above-i64", []string{"9223372036854775808", "0", "0"}, "", "LENGTH: integer is outside i64 range", 1},
 		{"below-i64", []string{"10", "-9223372036854775809", "0"}, "", "OFFSET: integer is outside i64 range", 1},
 		{"usize-max-parse-error", []string{"10", "0", "18446744073709551615"}, "", "COUNT: integer is outside i64 range", 1},
+		{"overflow-before-syntax", []string{"9223372036854775808x", "0", "0"}, "", "LENGTH: integer is outside i64 range", 1},
+		{"syntax-before-overflow", []string{"922337203685477580x8", "0", "0"}, "", "LENGTH: expected signed decimal integer", 1},
 		{"empty-number", []string{"10", "", "0"}, "", "OFFSET: empty integer", 1},
 		{"bare-sign", []string{"10", "-", "0"}, "", "OFFSET: expected signed decimal integer", 1},
 		{"plus-sign", []string{"10", "+1", "0"}, "", "OFFSET: expected signed decimal integer", 1},
@@ -93,6 +100,22 @@ func TestCheckedOffsetExampleNative(t *testing.T) {
 	if err := os.MkdirAll(evidenceRoot, 0700); err != nil {
 		t.Fatal(err)
 	}
+	evidenceCwd, err := filepath.Abs(evidenceRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	compilerPath, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	compilerBytes, err := os.ReadFile(compilerPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	buildInfo := "unavailable"
+	if info, ok := debug.ReadBuildInfo(); ok {
+		buildInfo = info.String()
+	}
 	var images, executions []map[string]any
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		var diagnostics bytes.Buffer
@@ -106,15 +129,32 @@ func TestCheckedOffsetExampleNative(t *testing.T) {
 		images = append(images, map[string]any{"profile": profile.Name, "exeSHA256": hash(artifact.Bytes), "exeBytes": len(artifact.Bytes), "toolchain": artifact.Toolchain.Name + " " + artifact.Toolchain.Version})
 		for _, tc := range cases {
 			t.Run(profile.Name+"/"+tc.name, func(t *testing.T) {
-				result, err := cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(artifact, strings.NewReader(""), tc.args)
-				if err != nil {
-					t.Fatal(err)
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				command := exec.CommandContext(ctx, filepath.Join(evidenceCwd, profile.Name+".exe"), tc.args...)
+				command.Dir = evidenceCwd
+				command.Stdin = strings.NewReader("")
+				var stdout, stderr bytes.Buffer
+				command.Stdout, command.Stderr = &stdout, &stderr
+				runErr := command.Run()
+				if ctx.Err() != nil {
+					t.Fatal(ctx.Err())
 				}
+				if runErr != nil {
+					if _, ok := runErr.(*exec.ExitError); !ok {
+						t.Fatal(runErr)
+					}
+				}
+				// Preserve raw native bytes; decode explicitly as UTF-8, without codepage fallback.
+				if !utf8.Valid(stdout.Bytes()) || !utf8.Valid(stderr.Bytes()) {
+					t.Fatal("invalid UTF-8 output")
+				}
+				result := cdriver.WindowsHostOutcome{ExitCode: int32(command.ProcessState.ExitCode()), Stdout: stdout.String(), Stderr: stderr.String()}
 				wantError := ""
 				if tc.message != "" {
 					wantError = fmt.Sprintf("checked-offset: %s\n", tc.message)
 				}
-				executions = append(executions, map[string]any{"case": tc.name, "profile": profile.Name, "argv": tc.args, "stdout": result.Stdout, "stderr": result.Stderr, "exitCode": result.ExitCode, "expectedStdout": tc.stdout, "expectedStderr": wantError, "expectedExitCode": tc.code})
+				executions = append(executions, map[string]any{"case": tc.name, "profile": profile.Name, "argv": command.Args, "cwd": command.Dir, "outputEncoding": "UTF-8", "stdout": result.Stdout, "stderr": result.Stderr, "exitCode": result.ExitCode, "expectedStdout": tc.stdout, "expectedStderr": wantError, "expectedExitCode": tc.code})
 				if result.ExitCode != tc.code || result.Stdout != tc.stdout || result.Stderr != wantError {
 					t.Fatalf("want code=%d stdout=%q stderr=%q; got %+v", tc.code, tc.stdout, wantError, result)
 				}
@@ -124,7 +164,7 @@ func TestCheckedOffsetExampleNative(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	data, err := json.MarshalIndent(map[string]any{"schema": "fairyc.checked-offset-example/v1", "sdk": sdkstdlib.Version, "sdkSourceIdentity": definition.SourceIdentity, "language": sdkstdlib.LanguageRevision, "runtime": sdkstdlib.RuntimeABI, "target": target.X8664WindowsMSVC, "sourceSHA256": sources, "images": images, "executions": executions}, "", "  ")
+	data, err := json.MarshalIndent(map[string]any{"schema": "fairyc.checked-offset-example/v1", "sdk": sdkstdlib.Version, "sdkSourceIdentity": definition.SourceIdentity, "language": sdkstdlib.LanguageRevision, "runtime": sdkstdlib.RuntimeABI, "target": target.X8664WindowsMSVC, "sourceSHA256": sources, "images": images, "executions": executions, "casesPerProfile": len(cases), "compilerIdentity": map[string]any{"kind": "in-process CLI compiler in Go test executable", "executableSHA256": hash(compilerBytes), "goVersion": runtime.Version(), "buildInfo": buildInfo}}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}

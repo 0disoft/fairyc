@@ -1,0 +1,1374 @@
+{
+  "casesPerProfile": 37,
+  "compilerIdentity": {
+    "buildInfo": "go\tgo1.27.1\npath\tgithub.com/0disoft/fairyc/internal/cli.test\nmod\tgithub.com/0disoft/fairyc\t(devel)\t\ndep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\nbuild\tCGO_ENABLED=0\nbuild\tGOARCH=amd64\nbuild\tGOOS=windows\nbuild\tGOAMD64=v1\n",
+    "executableSHA256": "0da112a59328bb44c190c6c791a4d7462d45a7768b7acb88ac6da74a01da73e1",
+    "goVersion": "go1.27.1",
+    "kind": "in-process CLI compiler in Go test executable"
+  },
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "3",
+        "4"
+      ],
+      "case": "interior",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=4 end=7\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=4 end=7\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "0",
+        "10"
+      ],
+      "case": "whole-range",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=10 end=10\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=10 end=10\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "3",
+        "0"
+      ],
+      "case": "empty-range",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=0 end=3\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=0 end=3\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "10",
+        "0"
+      ],
+      "case": "empty-at-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=10 count=0 end=10\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=10 count=0 end=10\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "0",
+        "0",
+        "0"
+      ],
+      "case": "zero-length",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "9",
+        "1"
+      ],
+      "case": "last-byte",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=9 count=1 end=10\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=9 count=1 end=10\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "5000000000",
+        "3000000000",
+        "2000000000"
+      ],
+      "case": "wide-values",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "9223372036854775807",
+        "0",
+        "9223372036854775807"
+      ],
+      "case": "maximum-whole",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "9223372036854775807",
+        "9223372036854775807",
+        "0"
+      ],
+      "case": "maximum-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "9223372036854775807",
+        "9223372036854775806",
+        "1"
+      ],
+      "case": "maximum-last-byte",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "00010",
+        "-0",
+        "01"
+      ],
+      "case": "negative-zero-leading-zeros",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=1 end=1\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=1 end=1\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "-1",
+        "0",
+        "0"
+      ],
+      "case": "negative-length",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "-1",
+        "0"
+      ],
+      "case": "negative-offset",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "0",
+        "-1"
+      ],
+      "case": "negative-count",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: COUNT: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "-9223372036854775808",
+        "0"
+      ],
+      "case": "minimum-conversion-error",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "11",
+        "0"
+      ],
+      "case": "offset-after-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "10",
+        "1"
+      ],
+      "case": "end-with-data",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "3",
+        "8"
+      ],
+      "case": "count-after-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "0",
+        "1",
+        "0"
+      ],
+      "case": "empty-offset-after-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "0",
+        "0",
+        "1"
+      ],
+      "case": "empty-with-data",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "9223372036854775807",
+        "1",
+        "9223372036854775807"
+      ],
+      "case": "sum-beyond-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "9223372036854775807",
+        "9223372036854775807",
+        "9223372036854775807"
+      ],
+      "case": "two-maxima",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "9223372036854775808",
+        "0",
+        "0"
+      ],
+      "case": "above-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "-9223372036854775809",
+        "0"
+      ],
+      "case": "below-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "0",
+        "18446744073709551615"
+      ],
+      "case": "usize-max-parse-error",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "9223372036854775808x",
+        "0",
+        "0"
+      ],
+      "case": "overflow-before-syntax",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "922337203685477580x8",
+        "0",
+        "0"
+      ],
+      "case": "syntax-before-overflow",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "",
+        "0"
+      ],
+      "case": "empty-number",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: empty integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: empty integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "-",
+        "0"
+      ],
+      "case": "bare-sign",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "+1",
+        "0"
+      ],
+      "case": "plus-sign",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        " 1",
+        "0"
+      ],
+      "case": "whitespace",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "1.0",
+        "0"
+      ],
+      "case": "decimal-point",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "한글",
+        "0"
+      ],
+      "case": "korean",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "000000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "too-long",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "00000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "max-argument-bytes",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe"
+      ],
+      "case": "missing",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\low.exe",
+        "10",
+        "0",
+        "0",
+        "extra"
+      ],
+      "case": "extra",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "3",
+        "4"
+      ],
+      "case": "interior",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=4 end=7\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=4 end=7\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "0",
+        "10"
+      ],
+      "case": "whole-range",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=10 end=10\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=10 end=10\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "3",
+        "0"
+      ],
+      "case": "empty-range",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=3 count=0 end=3\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=3 count=0 end=3\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "10",
+        "0"
+      ],
+      "case": "empty-at-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=10 count=0 end=10\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=10 count=0 end=10\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "0",
+        "0",
+        "0"
+      ],
+      "case": "zero-length",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "9",
+        "1"
+      ],
+      "case": "last-byte",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=9 count=1 end=10\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=9 count=1 end=10\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "5000000000",
+        "3000000000",
+        "2000000000"
+      ],
+      "case": "wide-values",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=5000000000 offset=3000000000 count=2000000000 end=5000000000\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "9223372036854775807",
+        "0",
+        "9223372036854775807"
+      ],
+      "case": "maximum-whole",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=0 count=9223372036854775807 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "9223372036854775807",
+        "9223372036854775807",
+        "0"
+      ],
+      "case": "maximum-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775807 count=0 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "9223372036854775807",
+        "9223372036854775806",
+        "1"
+      ],
+      "case": "maximum-last-byte",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=9223372036854775807 offset=9223372036854775806 count=1 end=9223372036854775807\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "00010",
+        "-0",
+        "01"
+      ],
+      "case": "negative-zero-leading-zeros",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=10 offset=0 count=1 end=1\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=10 offset=0 count=1 end=1\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "-1",
+        "0",
+        "0"
+      ],
+      "case": "negative-length",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "-1",
+        "0"
+      ],
+      "case": "negative-offset",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "0",
+        "-1"
+      ],
+      "case": "negative-count",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: COUNT: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "-9223372036854775808",
+        "0"
+      ],
+      "case": "minimum-conversion-error",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "11",
+        "0"
+      ],
+      "case": "offset-after-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "10",
+        "1"
+      ],
+      "case": "end-with-data",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "3",
+        "8"
+      ],
+      "case": "count-after-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "0",
+        "1",
+        "0"
+      ],
+      "case": "empty-offset-after-end",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: offset exceeds length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: offset exceeds length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "0",
+        "0",
+        "1"
+      ],
+      "case": "empty-with-data",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "9223372036854775807",
+        "1",
+        "9223372036854775807"
+      ],
+      "case": "sum-beyond-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "9223372036854775807",
+        "9223372036854775807",
+        "9223372036854775807"
+      ],
+      "case": "two-maxima",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: count exceeds remaining length\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: count exceeds remaining length\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "9223372036854775808",
+        "0",
+        "0"
+      ],
+      "case": "above-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "-9223372036854775809",
+        "0"
+      ],
+      "case": "below-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "0",
+        "18446744073709551615"
+      ],
+      "case": "usize-max-parse-error",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: COUNT: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "9223372036854775808x",
+        "0",
+        "0"
+      ],
+      "case": "overflow-before-syntax",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "922337203685477580x8",
+        "0",
+        "0"
+      ],
+      "case": "syntax-before-overflow",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "",
+        "0"
+      ],
+      "case": "empty-number",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: empty integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: empty integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "-",
+        "0"
+      ],
+      "case": "bare-sign",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "+1",
+        "0"
+      ],
+      "case": "plus-sign",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        " 1",
+        "0"
+      ],
+      "case": "whitespace",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "1.0",
+        "0"
+      ],
+      "case": "decimal-point",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "한글",
+        "0"
+      ],
+      "case": "korean",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: OFFSET: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "000000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "too-long",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: LENGTH: argument exceeds 20 UTF-8 bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "00000000000000000000",
+        "0",
+        "0"
+      ],
+      "case": "max-argument-bytes",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "length=0 offset=0 count=0 end=0\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "length=0 offset=0 count=0 end=0\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe"
+      ],
+      "case": "missing",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example\\optimized.exe",
+        "10",
+        "0",
+        "0",
+        "extra"
+      ],
+      "case": "extra",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-offset-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-offset: usage: checked-offset LENGTH OFFSET COUNT\n",
+      "stdout": ""
+    }
+  ],
+  "images": [
+    {
+      "exeBytes": 137216,
+      "exeSHA256": "f699b95d28f7bd5da77df357514ee33af16845e340ec1494998e337f6472329e",
+      "profile": "low",
+      "toolchain": "msvc 14.51.36231"
+    },
+    {
+      "exeBytes": 118272,
+      "exeSHA256": "0f4553485adea0c68c3057bc9b09324bd33b079fa6e87ab9e3556bd984129c3c",
+      "profile": "optimized",
+      "toolchain": "msvc 14.51.36231"
+    }
+  ],
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0",
+  "schema": "fairyc.checked-offset-example/v1",
+  "sdk": "0.0.0-stage0.76",
+  "sdkSourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-f616ee9a1519712c337ef8b5935c25cb2bc4cab08714d83d00ae59b999d68fe3",
+  "sourceSHA256": {
+    "fairy.toml": "20ad7b2f08d11f0ff7379562b40400afc508efeb1ba25946bfa60c8eba610118",
+    "src/main.fy": "5036be049a8aa58cc7c6bcd41f3e52a919d920c259fc465052366e4df5e3eee6",
+    "src/numbers.fy": "b8a847a6ab464ab11d809f5f11cd037b34da8f8720ded0c02fb16bba9a5d2546"
+  },
+  "target": "x86_64-windows-msvc",
+  "baseRevision": "11ba803ed9c4dd4aa551f19237d0ac59a3630638",
+  "testSourceSHA256": "e6076b96d09139fdab08539cda86c1c39731495ec7aa87151b3e9b077437ae9c",
+  "sdkSourceSHA256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3",
+  "compilerSourceIdentity": {
+    "revision": "11ba803ed9c4dd4aa551f19237d0ac59a3630638",
+    "modified": true,
+    "sdk": "0.0.0-stage0.76",
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0"
+  }
+}
