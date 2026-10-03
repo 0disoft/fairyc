@@ -144,6 +144,13 @@ loop hold itself is not a shared reborrow. Mutable descriptors, reference items
 and expression-valued iterables remain unadmitted. Both byte/i64 shared and
 exclusive loops hold owners until exit, including before return/propagation.
 
+ADR 0436 adds `std::vec::view_u8(ref Vec<u8>)` and
+`std::vec::view_mut_u8(ref mut Vec<u8>)` over the initialized byte prefix.
+Shared/exclusive owner holds, short reader reborrows, child/sibling generations,
+returned/tagged origins and post-release growth follow the same i64 view rules.
+The existing u8 for-in form applies to these named views. No generic vector
+slice conversion or reinterpretation of other Vec element types is admitted.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one

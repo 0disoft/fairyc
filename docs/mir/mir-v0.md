@@ -287,6 +287,16 @@ transfer-lane verification and ordinary/query-only rejection are unchanged.
 It creates a typed mutable descriptor without element copy or allocation.
 The interpreter does not emulate private host storage.
 
+ADR 0436 shares the three-operand private storage-view path with exact shared
+and exclusive u8 slices. Actual owner/address/count definitions, mutability,
+unsafe provenance and destination separation remain mandatory. A private
+view-producing callable's returned definition must also match its exact result
+type; operand annotations cannot relabel byte and i64 descriptors. The unsafe
+SDK producer still proves initialized extent and owner/address association.
+Ordinary/query-only rejection, codecs, schemas and existing runtime symbols
+remain unchanged. This adds no public raw-storage operation or generic slices.
+
+
 
 Source C-scalar transport preserves all sixteen TargetSpec C-scalar identities as distinct foreign
 result and parameter types. A producer call may initialize a local of any exact type and a later

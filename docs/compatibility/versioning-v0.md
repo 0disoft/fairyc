@@ -1572,3 +1572,12 @@ SDK source/export identity and MIR/artifact schemas remain unchanged. Exact
 compiler executable identity separates disposable cached generations. There is
 no released compiler version, public iterator/foreign ABI, Linux execution or
 performance claim.
+
+ADR 0436 advances the SDK to `0.0.0-stage0.82` for `std::vec::view_u8` and
+`view_mut_u8`. Vector source/public-interface and dependent lock identities
+refresh. The three-operand private shared/exclusive storage-view path now
+admits the existing u8 descriptors alongside i64, with actual operand and
+callable-result type checks. Language `/20`, runtime `/0`, grammar, MIR/artifact
+schemas, C runtime symbols and target maturity remain unchanged. Existing
+compiler-executable identities separate cached generations. Linux runtime
+execution remains deferred; no performance improvement is claimed.

@@ -45,6 +45,18 @@ pub fn Vec<T> empty<T>() {
 /// Returns the number of initialized elements.
 pub fn usize len<T>(ref Vec<T> value) { return value.length; }
 
+/// Borrows the initialized byte prefix without copying or allocating.
+/// The view and derived aliases keep the vector borrowed until their last use.
+pub fn ref u8[] view_u8(ref Vec<u8> value) {
+    return unsafe { storage_borrow<u8[]>(value, value.data, value.length) };
+}
+
+/// Borrows the initialized byte prefix exclusively without copying or allocating.
+/// Structural changes and other owner access wait until the last retained use.
+pub fn ref mut u8[] view_mut_u8(ref mut Vec<u8> value) {
+    return unsafe { storage_borrow_mut<u8[]>(value, value.data, value.length) };
+}
+
 /// Borrows the initialized i64 prefix without copying or allocating.
 /// Indices and slice bounds count elements. Mutation and move are forbidden
 /// until the last use of this view or any derived subview.

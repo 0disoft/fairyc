@@ -1,0 +1,816 @@
+{
+  "schema": "fairyc.byte-vector-views-evidence/v1",
+  "date": "2026-10-03",
+  "sourceBaseRevision": "2382369131004129736fc47a7225d28310d5d317",
+  "vcsModifiedAtBuild": true,
+  "compilerPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-compiler\\fairyc.exe",
+  "compilerSHA256": "254842478a20ab86f74e8bd64e62c2a35affde17bd03c0828b38864248dca043",
+  "sourceFilesSHA256": {
+    "internal/genericsource/calls.go": "ff2975e3430b5dead2745d18a34f1cefc2d61ccbaa1b1c14790ced368b41f63d",
+    "internal/genericsource/storage.go": "69ea0209854042442b6a2703c1f84414b6562a3827a77f9624a2fcf8c163b759",
+    "internal/semantic/storage_borrow.go": "ba2714b4136ad69c69e238f2332eb891e8469d0b05eb1cc52ace19c0a8d60a8d",
+    "internal/mir/storage_borrow.go": "cc5daa0b1fe38678052bc5c76b3bd72bdfd50305d832ebd0e3b7ec5dd4a92472",
+    "internal/mir/storage_view.go": "600135818d11b086a3bd70a94e2d6290df13cac39c4f2d22820bbe133075db0b",
+    "internal/mir/verify.go": "483337f2d78b109e4498bca7f86ed170190656fdb77dcb0ac63cac02f7fc0e0a",
+    "internal/cbackend/storage_borrow.go": "9e7b592a021476a8b7ee5c134d0380e0c79889f0cf4e42498944ec9fd4f50cfd",
+    "internal/cbackend/tagged_types.go": "1538a58a1e4235af5564d76585331586ce3b47792f5adfeb752bfc1ef0c78390",
+    "internal/sdkstdlib/stdlib.go": "2d2ebae9ffe591bf85fe64c627147aaf1386bf81d7513fb8b0a729ab165749ff",
+    "internal/sdkstdlib/sources/optional/std/vec.fy": "e4be7484c58a6132cdce9aa678d0f25c7f89f27127c1ce88b065203ba1c05f4c",
+    "internal/compiler/storage_i64_view_test.go": "1d71d93d80f1748c8cb5ec49674bcc8dea13a4998f570e83ca4e0833bea680b4",
+    "internal/cli/vec_u8_views_test.go": "b1b4354fa0a4574709f31f8b97a53aca0550c08a49ce0658c1e86ac4f25eec00",
+    "examples/vec_u8_view/src/main.fy": "73f8eaad7587a79f89fbdae0b67d555eb28a1956d8378d92da9ab4a7c0f144b5",
+    "examples/vec_u8_view/fairy.toml": "18cfe437504409b493eee03159185b3789d332969c0e07600f2dc1c78f82ba85"
+  },
+  "lock": {
+    "schema": "fairyc.lock/v1",
+    "packageInstanceAlgorithm": "fairyc.package-instance/v1",
+    "sourceDigestAlgorithm": "fairyc.package-source/v1",
+    "language": "fairyc-language/20",
+    "root": "fypi1-sha256-b432c6ad1878981103ead15b1c03d93221b6e6d793130f3084d53dd4e6c8285f",
+    "packages": [
+      {
+        "id": "fypi1-sha256-92ba97b7b25eea6527de198c6f0ea3b67242cf7a94eb468d3df5d245cee7d8a7",
+        "role": "standard-library",
+        "packageUid": "fairyc.std",
+        "sourceKind": "sdk",
+        "localPath": "",
+        "sdkIdentity": "fairyc-sdk-stdlib/0",
+        "runtimeAbi": "fairyc-runtime/0",
+        "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-05916fb52411ceff29fcf46f8169b09eafffd6b434be6c0d435c4028c17da1aa",
+        "sourceDigest": "fysrc1-sha256-05916fb52411ceff29fcf46f8169b09eafffd6b434be6c0d435c4028c17da1aa",
+        "version": "0.0.0-stage0.82",
+        "features": []
+      },
+      {
+        "id": "fypi1-sha256-b432c6ad1878981103ead15b1c03d93221b6e6d793130f3084d53dd4e6c8285f",
+        "role": "root",
+        "packageUid": "rodisoft.examples.vec-u8-view",
+        "sourceKind": "local",
+        "localPath": ".",
+        "sdkIdentity": "",
+        "runtimeAbi": "",
+        "sourceIdentity": "fysrc1-sha256-fa3d53bd44f444e4fe1270afede4c1495f0073c6daf3b7bc1f9ea9c9257b89fe",
+        "sourceDigest": "fysrc1-sha256-fa3d53bd44f444e4fe1270afede4c1495f0073c6daf3b7bc1f9ea9c9257b89fe",
+        "version": "0.1.0",
+        "features": []
+      }
+    ],
+    "dependencies": [
+      {
+        "owner": "fypi1-sha256-b432c6ad1878981103ead15b1c03d93221b6e6d793130f3084d53dd4e6c8285f",
+        "binding": "stdlib",
+        "target": "fypi1-sha256-92ba97b7b25eea6527de198c6f0ea3b67242cf7a94eb468d3df5d245cee7d8a7"
+      }
+    ]
+  },
+  "cli": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f",
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261003143045-238236913100+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.82\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 2382369131004129736fc47a7225d28310d5d317\nmodified: true\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f",
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 172 MIR function(s), lock updated\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-compiler\\fairyc.exe",
+        "build"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f",
+      "stdout": "built: build/vec-u8-view.exe (x86_64-windows-msvc, development, lock unchanged)\n",
+      "stderr": "",
+      "exit": 0,
+      "imageSHA256": "350b7b201688dbc910775e747aca218d41a7f986a71b0a239ae65d29ef5d5d5c",
+      "imageBytes": 124928,
+      "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f\\dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f",
+      "stdout": "",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f",
+      "stdout": "built: build/vec-u8-view.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "exit": 0,
+      "imageSHA256": "e070d78b1f5bc53afd3c4eb6a2927b91a148eed22bd82330eb5b1959f9e3c000",
+      "imageBytes": 112128,
+      "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f\\release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-cli-0e4b543f",
+      "stdout": "",
+      "stderr": "",
+      "exit": 0
+    }
+  ],
+  "native": {
+    "cases": [
+      {
+        "case": "example",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeexample4027680563\\001",
+        "imageSHA256": "62c41b62c595c73108c839db4173afb49cb57eace965b8375ddb0912d096a814",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "73f8eaad7587a79f89fbdae0b67d555eb28a1956d8378d92da9ab4a7c0f144b5",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "example",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeexample4027680563\\001",
+        "imageSHA256": "04ae9c75c2a20e11495087ee6d2f5248c19712a8beb8046775b67f9113c67cc4",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "73f8eaad7587a79f89fbdae0b67d555eb28a1956d8378d92da9ab4a7c0f144b5",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "i64-regression",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativei64-regression934344108\\001",
+        "imageSHA256": "749570a461d686fd98893121c527964eb2ba2d5db08447b89f6fd31599bb6f71",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "5f30ca5ccba386472d3cb46897f6dc967eb504dac7abfb7bab4e738223d89267",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "i64-regression",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativei64-regression934344108\\001",
+        "imageSHA256": "395939ea806c5cde7daa995c12f56356c1f5c6615e7f21621e1314a01da72da4",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "5f30ca5ccba386472d3cb46897f6dc967eb504dac7abfb7bab4e738223d89267",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "read-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeread-end399622073\\001",
+        "imageSHA256": "bae15ee890ba19dda55cd2c942cd710e71860dfc7d40fdcfc62929f577d2103f",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "5b901c334cf6052996077fdc049ba3a5cd951855ab424471fa9355aff90ce986",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "read-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeread-end399622073\\001",
+        "imageSHA256": "2c19ee49bd4c32962e5e7284173705af608227d69940478958fd5e8a5a416600",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "5b901c334cf6052996077fdc049ba3a5cd951855ab424471fa9355aff90ce986",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "read-empty",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeread-empty140416908\\001",
+        "imageSHA256": "c5e44e4d678e0c519b6a6ffebfd7d682bf4a7611f2aade4b18096fa5cbd19ce5",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "917a1a281cc4ccc32e01dc65fb35f06fee869cea1f14268dc265a79c488a1cbe",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "read-empty",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeread-empty140416908\\001",
+        "imageSHA256": "ab4dcc445022c112332b73ba7900bda1c4a6eba92e6dd8565a23c913f7eb714d",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "917a1a281cc4ccc32e01dc65fb35f06fee869cea1f14268dc265a79c488a1cbe",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "read-huge",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeread-huge3418946946\\001",
+        "imageSHA256": "48705db78c8b36a22328ebb62dac90041f66ec94d131753554fe988a37e05fbc",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "b38745624b3f7f8b6dd8767c57236de50ea82fd8e32bce2f8f93e7761a5f25e7",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "read-huge",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeread-huge3418946946\\001",
+        "imageSHA256": "76a9222f4ae7630addb833a5f676d41c9e5cd4e2de5c1d27e37f6309a68ed4f5",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "b38745624b3f7f8b6dd8767c57236de50ea82fd8e32bce2f8f93e7761a5f25e7",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "reversed",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativereversed744562772\\001",
+        "imageSHA256": "bee9c2543664349eae83a2c8204df0e61200fea2711390a7176425d264a88f71",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "5f7ec61d84df8fb79e4a0c5a89d043cf05685e2758e77f3159c98db0d2e0f4e4",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "reversed",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativereversed744562772\\001",
+        "imageSHA256": "2dffa0d4feddd6f3398bf3057922ead3eca6f49d12888e45a6d8740df420d6a3",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "5f7ec61d84df8fb79e4a0c5a89d043cf05685e2758e77f3159c98db0d2e0f4e4",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "past-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativepast-end1512586203\\001",
+        "imageSHA256": "c169441fa4b44a8f182107cf9576493c56443789797070f3e3c5dba3cc21b6c5",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "4f83b0155b7e9d69917f456030b2773208ce3f0be5100aeed09a9ceb83e657ed",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "past-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativepast-end1512586203\\001",
+        "imageSHA256": "94d72dfbf40a9664fcd8b86308e9ad11f05f428cecc3841f0310d90ec005d76e",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "4f83b0155b7e9d69917f456030b2773208ce3f0be5100aeed09a9ceb83e657ed",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "store-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativestore-end2019332344\\001",
+        "imageSHA256": "db5a6041f4e171c23f29e1b69fc373dd2796d58e56260359c741798dcb6cc748",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "13028cc8bbd8accf48b9431f2b94992647a26f3da187602f92e926436eec9bc1",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "store-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativestore-end2019332344\\001",
+        "imageSHA256": "ade6412dbcdd3d6bc3969dfba5345db4d12c8e2ac2c7529f2ea68e539c7becbb",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "13028cc8bbd8accf48b9431f2b94992647a26f3da187602f92e926436eec9bc1",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "store-empty",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativestore-empty4068841269\\001",
+        "imageSHA256": "184168cd0223ca91a9fbfed9f36db0f832a69231874c1db6ff152e38217b96be",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "e7aafce39ae0ca365d35186ca4e31b8c5db9c031ae7d4b2132dd325b548bc141",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "store-empty",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativestore-empty4068841269\\001",
+        "imageSHA256": "4fb3c497b85bf08502143dcd35ae681ddb295d8e85f1026c22927f104ce332ba",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "e7aafce39ae0ca365d35186ca4e31b8c5db9c031ae7d4b2132dd325b548bc141",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "overflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeoverflow1454040955\\001",
+        "imageSHA256": "4f81c32e8b408934368fb409cf0d2e77341e525daa39c36ceae5ace401df9822",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "5feb7cd28af21fd97a6b881dc10272e93506277ee65632e3418ef18d0973273e",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "overflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeoverflow1454040955\\001",
+        "imageSHA256": "2b8a5a28fbf2df6126f415e4ff4b1e022df8d16149b49e93247e151fd86f035f",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "5feb7cd28af21fd97a6b881dc10272e93506277ee65632e3418ef18d0973273e",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "underflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeunderflow908415465\\001",
+        "imageSHA256": "00777ae5994b157240a988211cafc59968d8b8cd11ea9d8a5f49fa66bf0434ae",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "3727a21630f624c3793ff82e99aea0bd4c4f579601c4e42eb026389bca3fda12",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "underflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecU8ViewNativeunderflow908415465\\001",
+        "imageSHA256": "ee38c6c6690ed24d161ef117925d89eee7db90e586e82f520dbc72bc07b4ecae",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "3727a21630f624c3793ff82e99aea0bd4c4f579601c4e42eb026389bca3fda12",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      }
+    ],
+    "schema": "fairyc.vec-u8-view-native/v1",
+    "sdk": "0.0.0-stage0.82"
+  },
+  "validations": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/hir",
+        "./internal/genericsource",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/mircodec",
+        "./internal/cbackend",
+        "./internal/sdkstdlib",
+        "-count=1",
+        "-json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-unit-tests.jsonl",
+      "rawLogSHA256": "e204516785de6cd2363f2688b470138dbada4226b8c4a0e49e535811dbd48758",
+      "exit": 0,
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "status": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/genericsource",
+          "status": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/mir",
+          "status": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/mircodec",
+          "status": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/sdkstdlib",
+          "status": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "status": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/cbackend",
+          "status": "pass"
+        }
+      ],
+      "note": "Run before the byte-view tagged backend adjustment; the affected C backend package was fully rerun after that adjustment."
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/compiler",
+        "./internal/cli",
+        "-run",
+        "Test((I64|U8)(Mutable)?StorageView|.*StorageBorrow|VecU8View|VecI64(Mutable)?View(Check|Borrow))",
+        "-count=1",
+        "-json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-pipeline-tests.jsonl",
+      "rawLogSHA256": "b9f25bdf1abc2ea6ef13ce2c5928ed503e1af0c828c201911ae1a3c617dedcb3",
+      "exit": 1,
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "status": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/cli",
+          "status": "fail"
+        }
+      ],
+      "note": "Compiler tests passed; first CLI native example failed because byte-view Option payload was not yet admitted in the C backend. Corrected and final CLI/backend tests rerun below.",
+      "failedTests": [
+        "TestVecU8ViewNative/example",
+        "TestVecU8ViewNative"
+      ]
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/cbackend",
+        "-count=1",
+        "-json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-backend-tests.jsonl",
+      "rawLogSHA256": "78ef4bccc20513069bde1d5365a39050fb83fac6580b8f30bdb1b5f0d43eaea1",
+      "exit": 0,
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/cbackend",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/cli",
+        "-run",
+        "TestVecU8View",
+        "-count=1",
+        "-json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-u8-view-native-final-tests.jsonl",
+      "rawLogSHA256": "b73ff29b25f52a4064b44f441e152fba242cb23432746fbdb2abcc77745a9722",
+      "exit": 0,
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/cli",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/genericsource",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/cbackend",
+        "./internal/sdkstdlib",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/vec-u8-view-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "limits": [
+    "Linux native execution deferred to user batch",
+    "No full-repository test suite",
+    "No performance benchmark; existing i64 MSVC workaround cost unmeasured",
+    "Private host-storage interpreter emulation not added"
+  ]
+}

@@ -978,6 +978,14 @@ other borrows, structural mutation, replacement and move are blocked.
 Checked stores/subviews reuse ADRs 0415/0433. Obtain a new view after growth.
 See ADR 0434 and `examples/vec_i64_mut_view`.
 
+SDK `0.0.0-stage0.82` adds `view_u8(ref Vec<u8>) -> ref u8[]` and
+`view_mut_u8(ref mut Vec<u8>) -> ref mut u8[]`. Each borrows only the initialized
+byte prefix without allocation or element copy. Empty views, checked indexing,
+subranges and shared/exclusive for-in reuse the existing byte-view operations.
+Owner holds, short reborrows, conservative sibling rejection and fresh views
+after growth follow ADRs 0415/0431/0434/0435. No generic vector slices or
+reinterpretation are admitted. See ADR 0436 and `examples/vec_u8_view`.
+
 ## Checked integer conversions
 
 SDK `0.0.0-stage0.74` adds the pure Fairy module `std::num`:

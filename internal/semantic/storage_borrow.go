@@ -13,13 +13,13 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 		return hir.TypeInvalid
 	}
 	typ := hir.TypeInvalid
-	if expression.Type.Kind == ast.TypeKindSlice && expression.Type.Element != nil && expression.Type.Element.Path == "i64" {
+	if expression.Type.Kind == ast.TypeKindSlice {
 		// Unsized slices are descriptors here, never by-value stored elements.
 		typ, _ = c.analyzer.canonicalTypeReference(c.module, *expression.Type, false)
 	} else {
 		typ = c.analyzer.canonicalType(c.module, *expression.Type)
 	}
-	view := typ == hir.TypeI64Slice
+	_, view := hir.IndexedViewElement(hir.SharedBorrow(typ))
 	if !view && len(expression.Children) != 2 || view && len(expression.Children) != 3 {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private storage borrow argument count")
 		return hir.TypeInvalid
@@ -43,7 +43,7 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 	if view {
 		length, lengthType := c.checkExpression(expression.Children[2], hir.TypeUSize)
 		if lengthType != hir.TypeUSize {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private i64 storage view requires a usize element count")
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private storage view requires a usize element count")
 			return hir.TypeInvalid
 		}
 		result.Children = appendExpression(result.Children, length)

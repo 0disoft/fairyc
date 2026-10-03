@@ -23,21 +23,31 @@ fn i32 main() {
 }
 `
 
-func TestI64StorageViewMIR(t *testing.T) { checkI64StorageViewMIR(t, i64StorageViewSource, false) }
+func TestI64StorageViewMIR(t *testing.T) {
+	checkStorageViewMIR(t, i64StorageViewSource, false, hir.TypeI64Slice)
+}
 
 func mutableI64StorageViewSource() string {
 	return strings.NewReplacer("fn ref i64[] view", "fn ref mut i64[] view", "ref Owner owner", "ref mut Owner owner", "storage_borrow<i64[]>", "storage_borrow_mut<i64[]>", "view(ref owner)", "view(ref mut owner)", "let ref i64[] values", "let ref mut i64[] values").Replace(i64StorageViewSource)
 }
 
 func TestI64MutableStorageViewMIR(t *testing.T) {
-	checkI64StorageViewMIR(t, mutableI64StorageViewSource(), true)
+	checkStorageViewMIR(t, mutableI64StorageViewSource(), true, hir.TypeI64Slice)
 }
 
-func checkI64StorageViewMIR(t *testing.T, source string, mutable bool) {
+func checkStorageViewMIR(t *testing.T, source string, mutable bool, slice hir.Type) {
 	t.Helper()
-	kind, viewType, cDescriptor := mir.OperationStorageBorrow, hir.SharedBorrow(hir.TypeI64Slice), "(fy_i64_slice){ .data = (const int64_t *)"
+	kind, viewType, cDescriptor := mir.OperationStorageBorrow, hir.SharedBorrow(slice), "(fy_i64_slice){ .data = (const int64_t *)"
 	if mutable {
-		kind, viewType, cDescriptor = mir.OperationStorageBorrowMut, hir.MutableBorrow(hir.TypeI64Slice), "(fy_mut_i64_slice){ .data = (int64_t *)"
+		kind, viewType, cDescriptor = mir.OperationStorageBorrowMut, hir.MutableBorrow(slice), "(fy_mut_i64_slice){ .data = (int64_t *)"
+	}
+	otherSlice := hir.TypeByteSlice
+	if slice == hir.TypeByteSlice {
+		otherSlice = hir.TypeI64Slice
+		cDescriptor = "(fy_byte_slice){ .data = (const uint8_t *)"
+		if mutable {
+			cDescriptor = "(fy_mut_byte_slice){ .data = (uint8_t *)"
+		}
 	}
 	analysis, err := analyzeStorageBorrow(t, source)
 	if err != nil {
@@ -70,11 +80,16 @@ func checkI64StorageViewMIR(t *testing.T, source string, mutable bool) {
 		"length-local-laundering":  func(op *mir.Operation) { op.Operands[2] = op.Operands[1]; op.Operands[2].Type = hir.TypeUSize },
 		"owner-local-laundering":   func(op *mir.Operation) { op.Operands[0] = op.Operands[1]; op.Operands[0].Type = op.OwnerType },
 		"address-local-laundering": func(op *mir.Operation) { op.Operands[1] = op.Operands[0]; op.Operands[1].Type = op.IndexType },
-		"byte-result":              func(op *mir.Operation) { op.Type = hir.SharedBorrow(hir.TypeByteSlice) },
-		"wrong-result-mutability": func(op *mir.Operation) {
-			op.Type = hir.MutableBorrow(hir.TypeI64Slice)
+		"wrong-element-result": func(op *mir.Operation) {
+			op.Type = hir.SharedBorrow(otherSlice)
 			if mutable {
-				op.Type = hir.SharedBorrow(hir.TypeI64Slice)
+				op.Type = hir.MutableBorrow(otherSlice)
+			}
+		},
+		"wrong-result-mutability": func(op *mir.Operation) {
+			op.Type = hir.MutableBorrow(slice)
+			if mutable {
+				op.Type = hir.SharedBorrow(slice)
 			}
 		},
 		"wrong-operation-kind": func(op *mir.Operation) {
@@ -112,7 +127,7 @@ func checkI64StorageViewMIR(t *testing.T, source string, mutable bool) {
 				}
 			}
 			if !found || len(mir.VerifyStorageTransfers(changed)) == 0 {
-				t.Fatal("malformed i64 view accepted")
+				t.Fatal("malformed storage view accepted")
 			}
 		})
 	}
@@ -174,5 +189,48 @@ func TestI64MutableStorageViewSourceRejections(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestU8StorageViewMIR(t *testing.T) {
+	checkStorageViewMIR(t, strings.ReplaceAll(i64StorageViewSource, "i64", "u8"), false, hir.TypeByteSlice)
+}
+func TestU8MutableStorageViewMIR(t *testing.T) {
+	checkStorageViewMIR(t, strings.ReplaceAll(mutableI64StorageViewSource(), "i64", "u8"), true, hir.TypeByteSlice)
+}
+func TestU8StorageViewSourceRejections(t *testing.T) {
+	for _, mutable := range []bool{false, true} {
+		source := strings.ReplaceAll(i64StorageViewSource, "i64", "u8")
+		selector := "storage_borrow<u8[]>"
+		invocation, ownerArg := "view(ref owner)", "ref owner"
+		if mutable {
+			source = strings.ReplaceAll(mutableI64StorageViewSource(), "i64", "u8")
+			selector = "storage_borrow_mut<u8[]>"
+			invocation, ownerArg = "view(ref mut owner)", "ref mut owner"
+		}
+		for name, replacement := range map[string][2]string{
+			"unsafe-missing":      {"unsafe { " + selector + "(owner, owner.data, owner.length) }", selector + "(owner, owner.data, owner.length)"},
+			"count-missing":       {"owner.data, owner.length", "owner.data"},
+			"count-wrong":         {"owner.data, owner.length", "owner.data, true"},
+			"unsupported-element": {selector, strings.Replace(selector, "u8", "i32", 1)},
+			"address-effect":      {invocation, "unsafe { " + selector + "(" + ownerArg + ", { mutate(ref mut owner); owner.data }, owner.length) }"},
+			"count-effect":        {invocation, "unsafe { " + selector + "(" + ownerArg + ", owner.data, { mutate(ref mut owner); 0 }) }"},
+		} {
+			t.Run(selector+"/"+name, func(t *testing.T) {
+				analysis, err := analyzeStorageBorrow(t, strings.Replace(source, replacement[0], replacement[1], 1))
+				if err == nil && len(analysis.Analysis.Semantic.Diagnostics) == 0 && len(analysis.Analysis.Semantic.Unsupported) == 0 {
+					t.Fatal("invalid u8 storage view accepted")
+				}
+				if name == "address-effect" || name == "count-effect" {
+					found := false
+					for _, d := range analysis.Analysis.Semantic.Diagnostics {
+						found = found || d.Code == "E2101"
+					}
+					if !found {
+						t.Fatalf("missing owner hold: %v %+v %+v", err, analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+					}
+				}
+			})
+		}
 	}
 }

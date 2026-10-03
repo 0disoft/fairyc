@@ -554,11 +554,11 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStorageTake, OperationStorageBorrow, OperationStorageBorrowMut:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if (operation.Kind == OperationStorageBorrow || operation.Kind == OperationStorageBorrowMut) && hir.I64View(operation.Type) &&
+				if (operation.Kind == OperationStorageBorrow || operation.Kind == OperationStorageBorrowMut) && isIndexedStorageView(operation.Type) &&
 					(len(operation.Operands) != 3 || fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType ||
 						fieldStoreOperandType(operation.Operands[1], storeTypes) != operation.IndexType ||
 						fieldStoreOperandType(operation.Operands[2], storeTypes) != hir.TypeUSize) {
-					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "private i64 storage view operand types are invalid"})
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "private storage view operand types are invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStorageElementAddress:
@@ -1034,6 +1034,9 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 			} else {
 				failures = append(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
+				if detail := verifyStorageViewReturn(function, terminator.ReturnValue, storeTypes); detail != "" {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: terminatorEntity(item.id, terminator), Detail: detail})
+				}
 			}
 			for symbol, resource := range resources {
 				if state.live[symbol] {
