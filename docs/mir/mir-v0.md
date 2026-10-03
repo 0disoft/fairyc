@@ -192,6 +192,13 @@ ADR 0415 admits the same shape with `&mut [u8]` owner and result. Mutable
 receiver types must match their local definitions, and owner/result mutability
 must agree. Semantic Flow retains the child's generation and ancestor freeze;
 backends preserve its backing storage and offset. MIR version 1 is unchanged.
+
+ADR 0430 also admits shared `&[i64]` owners for array-view borrowing, length,
+emptiness, checked indexing and checked slicing. An indexed load must produce
+exact `i64`; slice/metadata operations keep element counts rather than byte
+counts. Actual local definitions must match the selected array/view and usize
+bounds, so receiver annotations cannot launder i64 storage into byte access.
+No new operation or serialized field is introduced.
 `V1001` rejects malformed view or bound metadata; `V1501` rejects a missing marker, reordered
 operands, wrong trap edge, or non-dominating check.
 

@@ -3233,7 +3233,7 @@ func TestAnalyzeRejectsUnsupportedViewIndexShapes(t *testing.T) {
 		result := analyzeText(t, map[string]string{
 			"main.fy": "module main;\nfn i32 main() { let u8 value = \"fairy\"[0]; return 42; }\n",
 		})
-		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "indexing outside byte views" {
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "indexing outside executable array views" {
 			t.Fatalf("result = %+v", result)
 		}
 	})
@@ -3302,7 +3302,7 @@ func TestAnalyzeRejectsUnsupportedViewSliceShapes(t *testing.T) {
 		result := analyzeText(t, map[string]string{
 			"main.fy": "module main;\nfn i32 main() { let ref str value = \"fairy\"[0..1]; return 42; }\n",
 		})
-		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "slicing outside immutable byte views" {
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "slicing outside executable array views" {
 			t.Fatalf("result = %+v", result)
 		}
 	})

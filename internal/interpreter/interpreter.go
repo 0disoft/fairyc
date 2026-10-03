@@ -300,7 +300,7 @@ type arrayState struct {
 	elements []runtimeValue
 }
 
-type byteViewState struct {
+type indexedViewState struct {
 	staticData string
 	array      *arrayState
 	offset     uint64
@@ -330,12 +330,12 @@ type runtimeValue struct {
 	structure *structState
 	resource  *resourceState
 	array     *arrayState
-	view      *byteViewState
+	view      *indexedViewState
 	reference *scalarReference
 }
 
 func staticByteView(data string, typ hir.Type) runtimeValue {
-	return runtimeValue{kind: valueView, typ: typ, view: &byteViewState{staticData: data, length: uint64(len(data))}}
+	return runtimeValue{kind: valueView, typ: typ, view: &indexedViewState{staticData: data, length: uint64(len(data))}}
 }
 
 func (v runtimeValue) byteAt(index uint64) (byte, error) {
@@ -359,6 +359,22 @@ func (v runtimeValue) byteAt(index uint64) (byte, error) {
 	return v.view.staticData[absolute], nil
 }
 
+func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
+	if v.typ == hir.SharedBorrow(hir.TypeI64Slice) {
+		if v.kind != valueView || v.view == nil || v.view.array == nil || index >= v.view.length ||
+			v.view.offset+index >= uint64(len(v.view.array.elements)) {
+			return runtimeValue{}, capabilityError("i64-view read exceeds its array backing")
+		}
+		value := v.view.array.elements[v.view.offset+index]
+		if !comparisonRuntimeMatches(value, hir.TypeI64) {
+			return runtimeValue{}, capabilityError("i64-view backing contains a non-i64 value")
+		}
+		return value, nil
+	}
+	value, err := v.byteAt(index)
+	return runtimeValue{kind: valueU8, u64: uint64(value), typ: hir.TypeU8}, err
+}
+
 func (v runtimeValue) storeByte(index uint64, value runtimeValue) error {
 	if v.kind != valueView || v.view == nil || !v.view.mutable || v.typ != hir.MutableBorrow(hir.TypeByteSlice) ||
 		v.view.array == nil || index >= v.view.length || value.kind != valueU8 || value.typ != hir.TypeU8 || value.u64 > 255 {
@@ -372,11 +388,11 @@ func (v runtimeValue) storeByte(index uint64, value runtimeValue) error {
 	return nil
 }
 
-func (v runtimeValue) sliceByteView(start, end uint64) (runtimeValue, error) {
-	if v.kind != valueView || v.view == nil || !isRuntimeByteViewType(v.typ) || start > end || end > v.view.length {
+func (v runtimeValue) sliceIndexedView(start, end uint64) (runtimeValue, error) {
+	if v.kind != valueView || v.view == nil || !isRuntimeIndexedViewType(v.typ) || start > end || end > v.view.length {
 		return runtimeValue{}, capabilityError("byte-view slice received an invalid runtime value")
 	}
-	view := &byteViewState{array: v.view.array, offset: v.view.offset + start, length: end - start, mutable: v.view.mutable}
+	view := &indexedViewState{array: v.view.array, offset: v.view.offset + start, length: end - start, mutable: v.view.mutable}
 	if v.view.array == nil {
 		view.staticData = v.view.staticData
 	}
@@ -679,22 +695,19 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q: %w", function.Name, err)
 				}
-				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
-				wantView := hir.SharedBorrow(hir.TypeByteSlice)
-				if operation.Operator == "&mut" {
-					wantView = hir.MutableBorrow(hir.TypeByteSlice)
-				}
-				if !array || elementType != hir.TypeU8 || !hir.ExecutableFixedArrayShape(elementType, length) ||
+				elementType, length, _ := hir.FixedArrayParts(operation.OwnerType)
+				wantView := operation.Type
+				if !hir.ArrayViewBorrow(operation.OwnerType, wantView, operation.Operator) ||
 					receiver.kind != valueArray || receiver.typ != operation.OwnerType || receiver.array == nil || uint64(len(receiver.array.elements)) != length ||
 					operation.Type != wantView || (operation.Operator != "&" && operation.Operator != "&mut") {
 					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q has incompatible runtime value", function.Name)
 				}
 				for index, element := range receiver.array.elements {
-					if element.kind != valueU8 || element.typ != hir.TypeU8 || element.u64 > 255 {
-						return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow element %d in %q is not u8", index, function.Name)
+					if !comparisonRuntimeMatches(element, elementType) {
+						return callCompletion{}, fmt.Errorf("fixed-array view borrow element %d in %q has incompatible type", index, function.Name)
 					}
 				}
-				locals[operation.DestinationLocal] = runtimeValue{kind: valueView, typ: wantView, view: &byteViewState{
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueView, typ: wantView, view: &indexedViewState{
 					array: receiver.array, length: length, mutable: operation.Operator == "&mut",
 				}}
 			case mir.OperationArrayLength:
@@ -756,15 +769,16 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("byte-view index in %q: %w", function.Name, err)
 				}
-				if receiver.typ != operation.OwnerType || !isRuntimeByteViewType(operation.OwnerType) ||
-					operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" {
+				element, indexed := hir.IndexedViewElement(operation.OwnerType)
+				if receiver.typ != operation.OwnerType || !indexed ||
+					operation.IndexType != hir.TypeUSize || operation.Type != element || operation.Operator != "[]" {
 					return callCompletion{}, fmt.Errorf("byte-view index in %q has incompatible runtime value", function.Name)
 				}
-				byteValue, err := receiver.byteAt(index.u64)
+				value, err := receiver.indexedAt(index.u64)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("byte-view index in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
-				locals[operation.DestinationLocal] = runtimeValue{kind: valueU8, u64: uint64(byteValue), typ: hir.TypeU8}
+				locals[operation.DestinationLocal] = value
 			case mir.OperationViewIndexCheck:
 			case mir.OperationViewIndexStore:
 				receiver, index, value, err := evaluateViewIndexStoreOperands(locals, operation.Operands)
@@ -785,10 +799,10 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				wantView := operation.OwnerType
 				if receiver.typ != operation.OwnerType || operation.OwnerType != wantView ||
-					!isRuntimeByteViewType(wantView) || operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
+					!isRuntimeIndexedViewType(wantView) || operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
 					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q has incompatible runtime value", function.Name)
 				}
-				sliced, err := receiver.sliceByteView(start.u64, end.u64)
+				sliced, err := receiver.sliceIndexedView(start.u64, end.u64)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
@@ -1829,7 +1843,7 @@ func evaluateViewIndexOperands(locals map[mir.LocalID]runtimeValue, operands []m
 	if err != nil {
 		return runtimeValue{}, runtimeValue{}, err
 	}
-	if receiver.kind != valueView || receiver.view == nil || !isRuntimeByteViewType(receiver.typ) || index.kind != valueUSize || index.typ != hir.TypeUSize {
+	if receiver.kind != valueView || receiver.view == nil || !isRuntimeIndexedViewType(receiver.typ) || index.kind != valueUSize || index.typ != hir.TypeUSize {
 		return runtimeValue{}, runtimeValue{}, capabilityError("byte-view index received incompatible operands")
 	}
 	return receiver, index, nil
@@ -1895,8 +1909,9 @@ func evaluateThreeOperands(locals map[mir.LocalID]runtimeValue, operands []mir.O
 	return first, second, third, nil
 }
 
-func isRuntimeByteViewType(value hir.Type) bool {
-	return value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice)
+func isRuntimeIndexedViewType(value hir.Type) bool {
+	_, indexed := hir.IndexedViewElement(value)
+	return indexed
 }
 
 func evaluateViewSliceOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, runtimeValue, error) {
@@ -1915,7 +1930,7 @@ func evaluateViewSliceOperands(locals map[mir.LocalID]runtimeValue, operands []m
 	if err != nil {
 		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
 	}
-	if receiver.kind != valueView || !isRuntimeByteViewType(receiver.typ) ||
+	if receiver.kind != valueView || !isRuntimeIndexedViewType(receiver.typ) ||
 		start.kind != valueUSize || start.typ != hir.TypeUSize || end.kind != valueUSize || end.typ != hir.TypeUSize {
 		return runtimeValue{}, runtimeValue{}, runtimeValue{}, capabilityError("byte-view slice received incompatible operands")
 	}

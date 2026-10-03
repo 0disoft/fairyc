@@ -413,6 +413,9 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 		state := cloneVerificationState(item.state)
 		for operationIndex, operation := range block.Operations {
 			entity := operationEntity(item.id, operationIndex, operation)
+			if detail := verifyI64ViewOperands(operation, storeTypes); detail != "" {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: detail})
+			}
 			if operation.SourceForm != "" {
 				failures = append(failures, VerificationError{Code: "V1601", Entity: entity, Detail: "source-only form remains: " + operation.SourceForm})
 			}
@@ -881,7 +884,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewLength:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				ownerElement, _, ownerBorrow := hir.BorrowElement(operation.OwnerType)
-				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice)
+				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || operation.OwnerType == hir.SharedBorrow(hir.TypeI64Slice))
 				operandValid := len(operation.Operands) == 1 && (operation.Operands[0].Kind == OperandLocal ||
 					ownerElement == hir.TypeStr && operation.Operands[0].Kind == OperandString ||
 					ownerElement == hir.TypeByteSlice && operation.Operands[0].Kind == OperandByteString)
@@ -893,7 +896,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewEmpty:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				ownerElement, _, ownerBorrow := hir.BorrowElement(operation.OwnerType)
-				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice)
+				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || operation.OwnerType == hir.SharedBorrow(hir.TypeI64Slice))
 				operandValid := len(operation.Operands) == 1 && (operation.Operands[0].Kind == OperandLocal ||
 					ownerElement == hir.TypeStr && operation.Operands[0].Kind == OperandString ||
 					ownerElement == hir.TypeByteSlice && operation.Operands[0].Kind == OperandByteString)
@@ -1219,8 +1222,9 @@ func divisionTrapCategories(ownerType hir.Type) ([]string, bool) {
 }
 
 func validViewIndexShape(operation Operation, destination bool) bool {
-	if len(operation.Operands) != 2 || !isVerifiedByteViewType(operation.OwnerType) ||
-		operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" {
+	element, indexed := hir.IndexedViewElement(operation.OwnerType)
+	if len(operation.Operands) != 2 || !indexed ||
+		operation.IndexType != hir.TypeUSize || operation.Type != element || operation.Operator != "[]" {
 		return false
 	}
 	if destination != (operation.DestinationLocal != NoLocal) {
@@ -1244,8 +1248,9 @@ func validViewIndexStoreShape(operation Operation) bool {
 		scalarOperandMatches(operation.Operands[2], hir.TypeU8)
 }
 
-func isVerifiedByteViewType(value hir.Type) bool {
-	return value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice)
+func isVerifiedIndexedViewType(value hir.Type) bool {
+	_, indexed := hir.IndexedViewElement(value)
+	return indexed
 }
 
 func validArrayConstructShape(operation Operation) bool {
@@ -1263,11 +1268,8 @@ func validArrayConstructShape(operation Operation) bool {
 }
 
 func validArrayBorrowViewShape(operation Operation) bool {
-	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
-	viewValid := (operation.Type == hir.SharedBorrow(hir.TypeByteSlice) && operation.Operator == "&") ||
-		(operation.Type == hir.MutableBorrow(hir.TypeByteSlice) && operation.Operator == "&mut")
-	return array && elementType == hir.TypeU8 && hir.ExecutableFixedArrayShape(elementType, length) &&
-		operation.DestinationLocal != NoLocal && viewValid && len(operation.Operands) == 1 && operation.Operands[0].Kind == OperandLocal
+	return hir.ArrayViewBorrow(operation.OwnerType, operation.Type, operation.Operator) &&
+		operation.DestinationLocal != NoLocal && len(operation.Operands) == 1 && operation.Operands[0].Kind == OperandLocal
 }
 
 func validArrayLengthShape(operation Operation) bool {
@@ -1300,7 +1302,7 @@ func validArrayIndexStoreShape(operation Operation) bool {
 
 func validViewSliceShape(operation Operation, destination bool) bool {
 	wantView := operation.OwnerType
-	if len(operation.Operands) != 3 || !isByteViewType(wantView) ||
+	if len(operation.Operands) != 3 || !isIndexedViewType(wantView) ||
 		operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
 		return false
 	}

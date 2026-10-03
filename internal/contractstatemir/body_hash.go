@@ -481,7 +481,7 @@ func stateBodyNominalTypeParts(value hir.Type) (hir.PackageID, string, bool) {
 
 func stateBodyBuiltinType(value hir.Type) bool {
 	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 ||
-		value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeByteSlice || value == hir.TypeStr ||
+		value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeByteSlice || value == hir.TypeI64Slice || value == hir.TypeStr ||
 		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)
 }
 

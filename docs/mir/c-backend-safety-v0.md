@@ -78,6 +78,14 @@ byte length, routes failure to the canonical `FY_TRAP_BOUNDS` path, and only the
 before the check and reused unchanged by the load. The C backend rejects missing or mismatched MIR
 check, owner, index, result, operator, or trap facts instead of emitting unchecked access.
 
+ADR 0430 extends these checked operations to shared `ref i64[]` backed by a
+fixed i64 array. Its private descriptor contains `const int64_t *data` and a
+`uintptr_t` element count. A checked load produces `int64_t`; checked slicing
+adjusts a typed element pointer and count without allocation or array copying.
+Actual receiver definitions prevent byte/i64 reinterpretation. The descriptor
+may be passed or returned internally, including as an Option/Result payload;
+it adds no foreign ABI, mutable i64 access or general raw-parts constructor.
+
 Verified indexed assignment reuses the exact checked receiver and frozen `uintptr_t` index. The
 complete bounds edge is emitted before any right-hand-side blocks, and only its success region emits
 one typed fixed-array or mutable-view `data[index] = value`. Shared descriptors and immutable array

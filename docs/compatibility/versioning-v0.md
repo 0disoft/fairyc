@@ -1521,3 +1521,10 @@ Dependent SDK source/lock/cache identities refresh. Language `/20`, runtime `/0`
 MIR schemas and stable target maturity are unchanged. Linux workspace builds use
 the existing experimental command. Old experimental compiler pins and evidence
 remain historical and are not rewritten as stage0.79 results.
+
+ADR 0430 admits previously unsupported shared i64 array views using the existing
+type spelling and view operations. Language `/20`, SDK stage0.79, runtime `/0`,
+MIR and artifact schemas remain unchanged. Public signatures retain `ref i64[]`
+and private compiler/artifact/snapshot identities recognize `[i64]`.
+Executable-identity cache keys separate the revised compiler. There is no new
+foreign ABI, mutable i64 view, Vec view or Linux execution claim.

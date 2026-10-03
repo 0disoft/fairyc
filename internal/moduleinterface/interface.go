@@ -334,6 +334,9 @@ func stableType(value hir.Type, packageID hir.PackageID, coordinates map[hir.Pac
 	if value == hir.TypeByteSlice {
 		return "u8[]", nil
 	}
+	if value == hir.TypeI64Slice {
+		return "i64[]", nil
+	}
 	if builtinType(value) {
 		return string(value), nil
 	}
@@ -421,7 +424,7 @@ func userTypeParts(value hir.Type, current hir.PackageID) (hir.PackageID, string
 
 func builtinType(value hir.Type) bool {
 	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 ||
-		value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeByteSlice || value == hir.TypeStr ||
+		value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeByteSlice || value == hir.TypeI64Slice || value == hir.TypeStr ||
 		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)
 }
 

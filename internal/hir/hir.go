@@ -20,6 +20,7 @@ const (
 	TypeU32        Type = "u32"
 	TypeUSize      Type = "usize"
 	TypeByteSlice  Type = "[u8]"
+	TypeI64Slice   Type = "[i64]"
 	TypeStr        Type = "str"
 	TypeCStr       Type = "CStr"
 	TypeCBool      Type = "c::bool"

@@ -329,8 +329,11 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 			return hir.TypeInvalid, false
 		}
 		element, ok := a.canonicalTypeReference(module, *reference.Element, false)
-		if !ok || element != hir.TypeU8 {
+		if !ok || element != hir.TypeU8 && element != hir.TypeI64 {
 			return hir.TypeInvalid, false
+		}
+		if element == hir.TypeI64 {
+			return hir.TypeI64Slice, true
 		}
 		return hir.TypeByteSlice, true
 	case ast.TypeKindReference:
@@ -459,12 +462,15 @@ func parsePositiveArrayLength(raw string) (uint64, bool) {
 }
 
 func validUnsizedTypeUse(value hir.Type) bool {
-	if value == hir.TypeByteSlice || value == hir.TypeStr || value == hir.TypeCStr {
+	if value == hir.TypeByteSlice || value == hir.TypeI64Slice || value == hir.TypeStr || value == hir.TypeCStr {
 		return false
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {
 		if element == hir.TypeByteSlice {
 			return true
+		}
+		if element == hir.TypeI64Slice {
+			return !mutable
 		}
 		if element == hir.TypeStr || element == hir.TypeCStr {
 			return !mutable

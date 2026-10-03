@@ -830,10 +830,9 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	index, indexType := c.checkExpression(expression.Children[1], hir.TypeUSize)
 	result.Children = appendExpression(result.Children, receiver, index)
 	arrayElement, _, fixedArray := hir.FixedArrayParts(receiverType)
-	sharedBytes := hir.SharedBorrow(hir.TypeByteSlice)
-	mutableBytes := hir.MutableBorrow(hir.TypeByteSlice)
-	if receiverType != sharedBytes && receiverType != mutableBytes && !fixedArray {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "indexing outside byte views")
+	viewElement, indexedView := hir.IndexedViewElement(receiverType)
+	if !indexedView && !fixedArray {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "indexing outside executable array views")
 		return hir.TypeInvalid
 	}
 	c.requireType(
@@ -853,7 +852,7 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	}
 	result.Kind = "view-index"
 	result.Operator = "[]"
-	return hir.TypeU8
+	return viewElement
 }
 
 func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hir.Expression) bool {
@@ -926,9 +925,8 @@ func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Express
 	start, startType := c.checkSliceBound(expression.Children[1], "start")
 	end, endType := c.checkSliceBound(expression.Children[2], "end")
 	result.Children = appendExpression(result.Children, receiver, start, end)
-	wantReceiver := hir.SharedBorrow(hir.TypeByteSlice)
-	if receiverType != wantReceiver && receiverType != hir.MutableBorrow(hir.TypeByteSlice) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "slicing outside immutable byte views")
+	if _, indexed := hir.IndexedViewElement(receiverType); !indexed {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "slicing outside executable array views")
 		return hir.TypeInvalid
 	}
 	c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), startType, hir.TypeUSize, span(c.module.file.Path, expression.Span))
@@ -1176,7 +1174,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 		}
 		return hir.TypeBool
 	}
-	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice) {
+	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice || receiverType == hir.SharedBorrow(hir.TypeI64Slice)) {
 		switch expression.Text {
 		case "len":
 			result.Kind = "view-length"
@@ -1290,8 +1288,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "borrow of a non-place expression")
 			return hir.TypeInvalid
 		}
-		if element, length, array := hir.FixedArrayParts(childType); expected == hir.SharedBorrow(hir.TypeByteSlice) &&
-			array && element == hir.TypeU8 && hir.ExecutableFixedArrayShape(element, length) {
+		if hir.ArrayViewBorrow(childType, expected, "&") {
 			result.Kind = "array-view-borrow"
 			return expected
 		}

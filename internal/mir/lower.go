@@ -978,16 +978,8 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 }
 
 func (l *functionLowerer) lowerArrayBorrowView(expression *hir.Expression) (Operand, error) {
-	wantShared := hir.SharedBorrow(hir.TypeByteSlice)
-	wantMutable := hir.MutableBorrow(hir.TypeByteSlice)
-	validBorrow := (expression.Operator == "&" && expression.Type == wantShared) ||
-		(expression.Operator == "&mut" && expression.Type == wantMutable)
-	if len(expression.Children) != 1 || !validBorrow {
-		return Operand{}, fmt.Errorf("malformed fixed-array byte-view borrow")
-	}
-	elementType, length, array := hir.FixedArrayParts(expression.Children[0].Type)
-	if !array || elementType != hir.TypeU8 || !hir.ExecutableFixedArrayShape(elementType, length) {
-		return Operand{}, fmt.Errorf("fixed-array byte-view borrow has unsupported owner type %q", expression.Children[0].Type)
+	if len(expression.Children) != 1 || !hir.ArrayViewBorrow(expression.Children[0].Type, expression.Type, expression.Operator) {
+		return Operand{}, fmt.Errorf("malformed fixed-array view borrow")
 	}
 	receiver, err := l.lowerExpression(&expression.Children[0])
 	if err != nil {
@@ -1474,9 +1466,12 @@ func (l *functionLowerer) lowerViewEmpty(expression *hir.Expression) (Operand, e
 }
 
 func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, error) {
-	if len(expression.Children) != 2 || expression.Operator != "[]" || expression.Type != hir.TypeU8 ||
-		!isByteViewType(expression.Children[0].Type) || expression.Children[1].Type != hir.TypeUSize {
-		return Operand{}, fmt.Errorf("malformed byte-view index")
+	if len(expression.Children) != 2 {
+		return Operand{}, fmt.Errorf("malformed indexed-view operands")
+	}
+	element, indexed := hir.IndexedViewElement(expression.Children[0].Type)
+	if !indexed || expression.Operator != "[]" || expression.Type != element || expression.Children[1].Type != hir.TypeUSize {
+		return Operand{}, fmt.Errorf("malformed indexed-view read")
 	}
 	receiver, err := l.lowerExpression(&expression.Children[0])
 	if err != nil {
@@ -1521,14 +1516,15 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
-func isByteViewType(value hir.Type) bool {
-	return value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice)
+func isIndexedViewType(value hir.Type) bool {
+	_, indexed := hir.IndexedViewElement(value)
+	return indexed
 }
 
 func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, error) {
 	wantView := expression.Type
 	if len(expression.Children) != 3 || expression.Operator != ".." ||
-		!isByteViewType(wantView) || expression.Children[0].Type != wantView || expression.Children[1].Type != hir.TypeUSize || expression.Children[2].Type != hir.TypeUSize {
+		!isIndexedViewType(wantView) || expression.Children[0].Type != wantView || expression.Children[1].Type != hir.TypeUSize || expression.Children[2].Type != hir.TypeUSize {
 		return Operand{}, fmt.Errorf("malformed immutable byte-view slice")
 	}
 	receiver, err := l.lowerExpression(&expression.Children[0])

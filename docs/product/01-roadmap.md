@@ -1339,6 +1339,12 @@ non-authority to separate executable oracles and records what each still does no
 
 ## Later capability gates
 
+ADR 0430 implements shared `ref i64[]` views of named fixed arrays, with checked
+element indexing/slicing, retained owner loans, internal calls/returns and
+Windows low/optimized execution. Mutable i64 views, views of other element
+types and Vec views remain later admissions; Linux execution is deferred to
+batch validation.
+
 `docs/abi/windows-target-maturity-v0.md` owns the checkable Windows evidence rows below; hosted CI compatibility does not imply clean-machine distribution maturity.
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.

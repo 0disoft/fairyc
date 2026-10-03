@@ -211,10 +211,17 @@ func genericType(value ast.TypeReference, binders map[string]int, nominals map[s
 			return element, nil
 		}
 		if value.Kind == ast.TypeKindSlice {
-			if element.Kind != TypeBuiltin || element.Name != string(hir.TypeU8) {
-				return TypeRef{}, fmt.Errorf("generic slice element has no resolved byte-slice identity")
+			if element.Kind != TypeBuiltin {
+				return TypeRef{}, fmt.Errorf("generic slice element has no resolved slice identity")
 			}
-			return TypeRef{Kind: TypeBuiltin, Name: string(hir.TypeByteSlice)}, nil
+			switch element.Name {
+			case string(hir.TypeU8):
+				return TypeRef{Kind: TypeBuiltin, Name: string(hir.TypeByteSlice)}, nil
+			case string(hir.TypeI64):
+				return TypeRef{Kind: TypeBuiltin, Name: string(hir.TypeI64Slice)}, nil
+			default:
+				return TypeRef{}, fmt.Errorf("generic slice element has no resolved slice identity")
+			}
 		}
 		result := TypeRef{Kind: TypeBorrow, Mutable: value.Mutable, Arguments: []TypeRef{element}}
 		if value.Kind == ast.TypeKindRawPointer {

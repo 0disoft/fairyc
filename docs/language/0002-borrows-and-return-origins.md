@@ -94,6 +94,14 @@ ranges. Shared byte slicing keeps its existing result and lifetime behavior.
 The first executable array-view bridge permits a direct shared borrow of an admitted `u8[N]`
 place where `ref u8[]` is already expected. It retains the place's origin and loans the whole array.
 
+ADR 0430 adds the corresponding shared `i64[N]` to `ref i64[]` bridge. Length,
+indexing and half-open slicing count i64 elements and preserve the whole-owner
+loan, including shared aliases/siblings, nested slices and parameter-derived
+returns. Empty end slices are permitted. The receiver stays borrowed while
+explicit indices/bounds evaluate. Owner mutation waits until the last retained
+use; local/by-value-parameter escape remains E2102. Mutable i64 views and owned
+unsized slices are unsupported. No i64-to-byte reinterpretation is implied.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one

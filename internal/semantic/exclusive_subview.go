@@ -7,6 +7,18 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
+func (f *borrowFlowAnalyzer) evaluateBorrowedIndex(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
+	receiver, reachable := f.evaluateExpression(expression.Children[0], environment)
+	if !reachable {
+		return receiver, false
+	}
+	base, accessBase := len(f.callBorrows), len(f.callAccesses)
+	f.callBorrows = append(f.callBorrows, receiver)
+	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: receiver, mutable: false, span: span(f.module.file.Path, expression.Span)})
+	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+	return f.evaluateExpression(expression.Children[1], environment)
+}
+
 func (f *borrowFlowAnalyzer) evaluateSubview(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
 	if len(expression.Children) != 3 {
 		return borrowValueState{known: false}, true
@@ -20,11 +32,12 @@ func (f *borrowFlowAnalyzer) evaluateSubview(expression *ast.Expression, environ
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	if mutable {
 		f.checkReferenceAccess(receiverExpression, receiver, true, environment, span(f.module.file.Path, expression.Span))
-		// Hold the already selected receiver while effectful bounds run. Pure
-		// reads of its length are allowed; competing calls/stores are not.
-		f.callBorrows = append(f.callBorrows, receiver)
-		f.callAccesses = append(f.callAccesses, borrowCallAccess{value: receiver, mutable: true, span: span(f.module.file.Path, expression.Span)})
 	}
+	// Every selected receiver remains borrowed while effectful bounds run,
+	// including a shared view whose previous alias has reached its last use.
+	// Pure length reads are allowed; competing mutation is not.
+	f.callBorrows = append(f.callBorrows, receiver)
+	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: receiver, mutable: mutable, span: span(f.module.file.Path, expression.Span)})
 	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
 	for _, bound := range expression.Children[1:] {
 		if _, reachable = f.evaluateExpression(bound, environment); !reachable {

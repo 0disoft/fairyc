@@ -485,6 +485,13 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return f.evaluateChildren(expression.Children, environment)
 	case syntax.KindSlice:
 		return f.evaluateSubview(expression, environment)
+	case syntax.KindIndex:
+		if len(expression.Children) == 2 {
+			if _, indexed := hir.IndexedViewElement(f.analyzer.expressionTypes[expression.Children[0]]); indexed {
+				return f.evaluateBorrowedIndex(expression, environment)
+			}
+		}
+		return f.evaluateChildren(expression.Children, environment)
 	case syntax.KindBlock:
 		return f.evaluateBlock(expression.Block, environment, false)
 	case syntax.KindIf:
