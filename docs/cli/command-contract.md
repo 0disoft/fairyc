@@ -308,6 +308,15 @@ canonical positive decimals; the hard ceilings are 65,536 entries, 1,073,741,824
 class, and 31,536,000 seconds. Artifact bytes cannot exceed record bytes; record bytes cannot exceed
 retained bytes. The executable's complete SHA-256 bytes supply the compiler-build key member.
 
+The persistent entry/retained-byte allowance covers the combined published records
+in ordinary `v1`, `generic-v0/v1` and `storage-transfer-v0/v1` below the selected
+cache directory. Opening a store or publishing a record collects oldest records
+across those namespaces. Retained-entry/byte counters report that combined set;
+lookup and operation counters remain namespace-local. Unexpired temporary files,
+unknown formats and unrelated files are preserved and excluded. Concurrent writes
+may temporarily exceed the allowance until collection converges; this is not a
+peak-disk reservation. See [ADR 0427](../adr/0427-shared-persistent-cache-retention.md).
+
 Success writes exactly one object from
 `spec/cli/experimental-workspace-cache-check-v0.schema.json`. It includes the relative cache path,
 target, executable identity, lock/workspace/MIR counts, verified cache outcome, retained entries and

@@ -26,8 +26,9 @@ const (
 
 const diskLayoutDirectory = "v1"
 
-// DiskLimits are mandatory caller policy. MaxEntries counts immutable generation files, MaxBytes
-// counts their encoded bytes, MaxRecordBytes bounds every read and write, and TempMaxAge controls
+// DiskLimits are mandatory caller policy. MaxEntries counts immutable generations across all
+// supported namespaces, MaxBytes counts their combined encoded bytes, MaxRecordBytes bounds each
+// store's reads and writes, and TempMaxAge controls
 // recovery of abandoned unpublished files without guessing a universal cleanup interval.
 type DiskLimits struct {
 	MaxEntries     int
@@ -49,14 +50,15 @@ type DiskStats struct {
 // DiskStore persists immutable content-addressed record generations. It uses no lock file and no
 // mutable index; concurrent processes can only publish identical names or independent generations.
 type DiskStore struct {
-	root     *os.Root
-	rootName string
-	limits   DiskLimits
-	mu       sync.Mutex
-	hits     uint64
-	misses   uint64
-	rejected uint64
-	evicted  uint64
+	root          *os.Root
+	retentionRoot *os.Root
+	rootName      string
+	limits        DiskLimits
+	mu            sync.Mutex
+	hits          uint64
+	misses        uint64
+	rejected      uint64
+	evicted       uint64
 }
 
 type diskArtifact struct {
@@ -90,6 +92,12 @@ type diskPutHooks struct {
 
 // NewDiskStore creates the versioned root and rejects every missing bound.
 func NewDiskStore(root string, limits DiskLimits) (*DiskStore, error) {
+	return NewNamespacedDiskStore(root, ".", limits)
+}
+
+// NewNamespacedDiskStore isolates records while sharing retention bounds with
+// the ordinary, generic-v0 and storage-transfer-v0 stores beneath root.
+func NewNamespacedDiskStore(root, namespace string, limits DiskLimits) (*DiskStore, error) {
 	if err := validateDiskStoreInputs(root, limits); err != nil {
 		return nil, err
 	}
@@ -105,20 +113,38 @@ func NewDiskStore(root string, limits DiskLimits) (*DiskStore, error) {
 		return nil, fmt.Errorf("open package cache disk root: %w", err)
 	}
 	defer boundary.Close()
-	return NewDiskStoreInRoot(boundary, ".", limits)
+	return NewNamespacedDiskStoreInRoot(boundary, ".", namespace, limits)
 }
 
 // NewDiskStoreInRoot creates the versioned cache beneath an already-open filesystem boundary.
 // Every later operation stays relative to the returned opened root, so a symlink, junction, or
 // rename race cannot redirect cache I/O outside the caller's boundary.
 func NewDiskStoreInRoot(boundary *os.Root, root string, limits DiskLimits) (*DiskStore, error) {
+	return NewNamespacedDiskStoreInRoot(boundary, root, ".", limits)
+}
+
+// NewNamespacedDiskStoreInRoot retains the caller's filesystem boundary for
+// both namespace-local access and collection across the supported namespaces.
+func NewNamespacedDiskStoreInRoot(boundary *os.Root, root, namespace string, limits DiskLimits) (*DiskStore, error) {
 	if boundary == nil {
 		return nil, fmt.Errorf("package cache filesystem boundary must be initialized")
 	}
 	if err := validateDiskStoreInputs(root, limits); err != nil {
 		return nil, err
 	}
-	versionRoot := filepath.Join(root, diskLayoutDirectory)
+	if namespace != "." && namespace != "generic-v0" && namespace != "storage-transfer-v0" {
+		return nil, fmt.Errorf("unsupported package cache namespace %q", namespace)
+	}
+	for _, directory := range []string{filepath.Join(root, namespace), filepath.Join(root, namespace, diskLayoutDirectory)} {
+		info, err := boundary.Lstat(directory)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return nil, err
+		}
+		if err == nil && (!info.IsDir() || info.Mode()&os.ModeSymlink != 0) {
+			return nil, fmt.Errorf("package cache namespace must be a real directory")
+		}
+	}
+	versionRoot := filepath.Join(root, namespace, diskLayoutDirectory)
 	if err := boundary.MkdirAll(versionRoot, 0o700); err != nil {
 		return nil, fmt.Errorf("create package cache disk root in boundary: %w", err)
 	}
@@ -126,7 +152,17 @@ func NewDiskStoreInRoot(boundary *os.Root, root string, limits DiskLimits) (*Dis
 	if err != nil {
 		return nil, fmt.Errorf("open package cache disk root in boundary: %w", err)
 	}
-	return &DiskStore{root: opened, rootName: opened.Name(), limits: limits}, nil
+	retentionRoot, err := boundary.OpenRoot(root)
+	if err != nil {
+		opened.Close()
+		return nil, fmt.Errorf("open shared cache retention root: %w", err)
+	}
+	store := &DiskStore{root: opened, retentionRoot: retentionRoot, rootName: opened.Name(), limits: limits}
+	if err := store.Sweep(); err != nil {
+		store.Close()
+		return nil, fmt.Errorf("collect retained cache on open: %w", err)
+	}
+	return store, nil
 }
 
 func validateDiskStoreInputs(root string, limits DiskLimits) error {
@@ -147,7 +183,7 @@ func (store *DiskStore) Close() error {
 	if store == nil || store.root == nil {
 		return nil
 	}
-	return store.root.Close()
+	return errors.Join(store.root.Close(), store.retentionRoot.Close())
 }
 
 // Put validates and canonically encodes one record, durably publishes one immutable digest-named
@@ -328,7 +364,7 @@ func (store *DiskStore) Sweep() error {
 	for len(generations) > store.limits.MaxEntries || total > store.limits.MaxBytes {
 		oldest := generations[0]
 		generations = generations[1:]
-		if err := store.root.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := store.retentionRoot.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("evict package cache generation: %w", err)
 		}
 		if total >= oldest.size {
@@ -361,53 +397,6 @@ func (store *DiskStore) Stats() (DiskStats, error) {
 		}
 	}
 	return stats, nil
-}
-
-func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
-	keyDirectories, err := readCacheDirectory(store.root, ".")
-	if err != nil {
-		return nil, fmt.Errorf("scan package cache root: %w", err)
-	}
-	now := time.Now()
-	result := make([]diskGeneration, 0)
-	for _, keyDirectory := range keyDirectories {
-		if !keyDirectory.IsDir() || !validDigestDirectory(keyDirectory.Name()) {
-			continue
-		}
-		directoryPath := keyDirectory.Name()
-		entries, readErr := readCacheDirectory(store.root, directoryPath)
-		if readErr != nil {
-			continue
-		}
-		for _, entry := range entries {
-			if entry.IsDir() {
-				continue
-			}
-			path := filepath.Join(directoryPath, entry.Name())
-			info, infoErr := entry.Info()
-			if infoErr != nil {
-				continue
-			}
-			if strings.HasPrefix(entry.Name(), ".tmp-") {
-				if clean && now.Sub(info.ModTime()) >= store.limits.TempMaxAge {
-					_ = store.root.Remove(path)
-				}
-				continue
-			}
-			if !validGenerationName(entry.Name()) {
-				continue
-			}
-			if info.Size() <= 0 || uint64(info.Size()) > store.limits.MaxRecordBytes {
-				if clean {
-					_ = store.root.Remove(path)
-					store.rejected++
-				}
-				continue
-			}
-			result = append(result, diskGeneration{path: path, name: entry.Name(), size: uint64(info.Size()), modTime: info.ModTime()})
-		}
-	}
-	return result, nil
 }
 
 func (store *DiskStore) readGeneration(path, name string, expected Key) (Record, error) {

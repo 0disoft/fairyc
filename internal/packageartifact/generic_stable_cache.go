@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/0disoft/fairyc/internal/moduleinterface"
@@ -62,11 +61,10 @@ func newGenericStableCache(boundary *os.Root, root string, limits packagecache.D
 	if transfers {
 		directory = "storage-transfer-v0"
 	}
-	root = filepath.Join(root, directory)
 	if boundary == nil {
-		store, err = packagecache.NewDiskStore(root, limits)
+		store, err = packagecache.NewNamespacedDiskStore(root, directory, limits)
 	} else {
-		store, err = packagecache.NewDiskStoreInRoot(boundary, root, limits)
+		store, err = packagecache.NewNamespacedDiskStoreInRoot(boundary, root, directory, limits)
 	}
 	if err != nil {
 		return nil, err

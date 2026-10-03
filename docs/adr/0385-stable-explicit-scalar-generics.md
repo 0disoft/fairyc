@@ -55,6 +55,10 @@ Disk formats remain separate: ordinary records use the existing directory and ge
 not their combined on-disk footprint; switching formats does not delete historical cache data.
 Generic contract-state compilation still falls back to verified uncached lowering.
 
+The separate retention policy above is historical. [ADR 0427](0427-shared-persistent-cache-retention.md)
+now shares the selected entry/byte allowance across ordinary, generic and
+storage-transfer current-format records while preserving their lookup isolation.
+
 ## Explicit-file experimental commands
 
 `check-semantics`, verified `check`, interpreter `run`, C emission, and the native commands sharing
