@@ -49,12 +49,15 @@ func buildLinuxRuntimeCached(toolchain Toolchain, profile Profile, unitSource, r
 	if err != nil {
 		return uncached()
 	}
+	// The snapshot is preprocessed C, not another source translation unit.
+	sourcePath = filepath.Join(directory, "runtime.i")
 	if err := os.WriteFile(sourcePath, []byte(preprocessed), 0o600); err != nil {
 		return uncached()
 	}
+	snapshotFlags := linuxRuntimeSnapshotFlags(toolchain.Name, flags)
 	key := (runtimeObjectIdentity{CompilerPath: toolchain.Path, CompilerVersion: toolchain.Version,
 		CompilerDigest: sha256.Sum256(compiler), Target: string(toolchain.Target), Libc: toolchain.Libc,
-		Mode: C11ConsumerMode, Profile: profile, Flags: flags, Environment: environment,
+		Mode: C11ConsumerMode, Profile: profile, Flags: snapshotFlags, Environment: environment,
 		Source: sha256.Sum256([]byte(runtimeSource)), Preprocessed: sha256.Sum256([]byte(preprocessed))}).key()
 	store, _ := open()
 	if store != nil {
@@ -66,7 +69,7 @@ func buildLinuxRuntimeCached(toolchain Toolchain, profile Profile, unitSource, r
 	}
 	var contents []byte
 	status, err := useRuntimeObject(store, key, func() ([]byte, error) {
-		args := append(append([]string{}, flags...), "-c", sourcePath, "-o", objectPath)
+		args := append(append([]string{}, snapshotFlags...), "-c", sourcePath, "-o", objectPath)
 		if _, err := runBounded(toolchain.Path, args...); err != nil {
 			return nil, fmt.Errorf("compile runtime: %s", strings.ReplaceAll(err.Error(), directory, "<temporary>"))
 		}
@@ -84,6 +87,20 @@ func buildLinuxRuntimeCached(toolchain Toolchain, profile Profile, unitSource, r
 		return err
 	})
 	return Artifact{Bytes: contents, Toolchain: toolchain, Profile: profile, ConsumerMode: C11ConsumerMode, RuntimeCache: status}, err
+}
+
+func linuxRuntimeSnapshotFlags(compilerName string, flags []string) []string {
+	result := append([]string{}, flags...)
+	// Include the input kind in the exact-input cache identity as well.
+	result = append(result, "-x", "cpp-output")
+	if compilerName == "clang" {
+		// Clang diagnoses its own GNU line markers even in .i input. Preserve
+		// their system-header semantics and diagnostic, but allow this transport
+		// extension only. Original preprocessing and generated unit compilation
+		// retain the unmodified strict flags; all other warnings remain errors.
+		result = append(result, "-Wno-error=gnu-line-marker")
+	}
+	return result
 }
 
 func validateLinuxRuntimeObject(object []byte) error {

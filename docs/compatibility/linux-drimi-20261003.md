@@ -47,3 +47,35 @@ digests remain in the user-supplied return archive; build artifacts are not
 committed into the repository. POSIX failures were test injection, not physical
 disk/OS failure or power-loss durability. Ordinary Clang fallback, current-HEAD
 Linux execution and build-time performance remain unverified.
+
+## Follow-up baseline `37db73d4`
+
+Returned archive `fairyc-drimi-linux-followup-37db73d4-result-20261003.zip` has
+SHA-256 `d39e9213347c193c86755a30eda740606daf110fd7d78a5c7f74eb6eb1e3d0e7`.
+All 134 listed return files were hash-verified locally; Drimi reported checking
+all 2,755 source files against the input manifest. The same Linux tool versions
+were used. These results are separate from the older nine-test bundle:
+
+| Scope | Original follow-up | Drimi `.i`-only patch |
+| --- | --- | --- |
+| i64 helpers | Pass: 60 GCC/Clang low/optimized builds and executions | Not repeated |
+| Runtime object cache | Fail: GCC/Clang first cold compile | GCC pass; Clang fail |
+| Selected native CLI tests with GCC | Fail: first compile | Pass |
+| Selected native CLI tests with isolated Clang fallback | Fail: first compile | Fail |
+
+Original suite totals: 1 pass / 3 fail / 0 skip. GNU line markers emitted by the
+preprocessor were compiled as strict `.c` source. Changing the snapshot suffix
+to `.i` fixed GCC, including actual cold/warm hits, invalidation, corruption,
+linker recovery, lock/image preservation and CLI I/O/traps. Clang 19.1.7 still
+reported `-Wgnu-line-marker` even with preprocessed input, so this was a partial
+fix, not a complete Linux pass. The reported i64 pass closes the earlier helper
+failure for this exact baseline only.
+
+The local correction keeps `.i` and permits only Clang's snapshot marker
+diagnostic as a warning (not an error); it leaves original-source and generated
+unit strict flags intact. The reason, key identity and regression boundaries
+are recorded in ADR 0428. Linux regression tests also require unused-function
+and unrelated GNU-extension failures to remain failures with no published cache
+record. The corrected snapshot needs a new GCC/Clang execution receipt; neither
+the partial GCC evidence nor Windows validation establishes that result.
+SDK/language/runtime ABI, public API, DB, dependencies and CI runners are unchanged.

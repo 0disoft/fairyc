@@ -30,6 +30,22 @@ changing expansions invalidate reuse. No claim is made about caching arbitrary
 external C sources or mutable compiler installations during a build. MSVC
 `CL`/`_CL_` injection bypasses this closed path.
 
+Linux saves the unchanged preprocessed bytes as `runtime.i` and explicitly uses
+`-x cpp-output`, so the input kind is also represented in the cache flags.
+GCC recognizes this
+as preprocessed C; naming it `.c` instead reinterprets generated GNU line markers
+as strict-source extensions. Clang diagnoses those markers even with `.i` input,
+so only its snapshot-to-object invocation adds `-Wno-error=gnu-line-marker`.
+This allows the compiler's own transport metadata without removing its
+diagnostic or the system-header/enter/leave markers. Original preprocessing,
+generated-unit compilation and linking keep the original strict flags. Other
+warnings and GNU source extensions remain errors. The snapshot flags enter the
+object key, preventing reuse across this policy change. No marker stripping,
+warning-group suppression, original-source recompile or cache bypass is used.
+The option semantics are documented in the
+[Clang manual](https://clang.llvm.org/docs/UsersManual.html#options-to-control-error-and-warning-messages)
+and [diagnostic reference](https://clang.llvm.org/docs/DiagnosticsReference.html#wgnu-line-marker).
+
 ## Storage and failure behavior
 
 Objects use the existing digest-checked immutable `packagecache.DiskStore`
@@ -70,8 +86,14 @@ stdout/stderr and reserved normal status on cold/warm development/release builds
 then checks the warm CLI trap channel.
 
 Windows MSVC execution was observed locally. Linux adapter and portable tests are
-present with separate GCC and Clang subtests, but Linux native execution cannot
-be performed on this Windows host; both executions remain required externally.
+present with separate GCC and Clang subtests. Drimi's `37db73d4` follow-up exposed
+the snapshot marker failure in both compilers. Its `.i`-only patch passed the GCC
+cache/CLI cases but still failed Clang 19.1.7. The subsequent snapshot diagnostic
+policy has portable flag/key checks and Linux negative tests for runtime unused
+functions, other GNU extensions and generated-unit unused functions. Linux native
+execution cannot be performed on this Windows host; the full fix still requires
+both external compiler executions. See the
+[external evidence ledger](../compatibility/linux-drimi-20261003.md).
 Compiler-process counts alone
 do not establish faster builds: preprocessing, hashing and cache I/O add work,
 particularly on cold builds. No timing or performance improvement is claimed.
