@@ -48,19 +48,19 @@ func TestByteViewForRejectsNonAdmittedSourceShapes(t *testing.T) {
 			want: "view iteration requires an exact u8 or i64 item binding",
 		},
 		{
-			name: "mutable view",
-			text: "module main; fn void show(ref mut u8[] view) { for (let u8 byte in view) {} }",
-			want: "byte-view iteration requires a named immutable ref u8[] view",
+			name: "wrong view element",
+			text: "module main; fn void show(ref mut i64[] view) { for (let u8 byte in view) {} }",
+			want: "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view",
 		},
 		{
 			name: "nonpath view",
 			text: "module main; fn void show(ref u8[] view) { for (let u8 byte in view[0..1]) {} }",
-			want: "byte-view iteration requires a named immutable ref u8[] view",
+			want: "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view",
 		},
 		{
 			name: "mutable local view binding",
 			text: "module main; fn void show(ref u8[] view) { var ref u8[] local = view; for (let u8 byte in local) {} }",
-			want: "byte-view iteration requires a named immutable ref u8[] view",
+			want: "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view",
 		},
 	} {
 		t.Run(sample.name, func(t *testing.T) {

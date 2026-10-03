@@ -1561,3 +1561,14 @@ no new operation kind or field is added. Language `/20`, runtime `/0`, grammar,
 MIR/artifact schemas, C runtime symbols and target maturity remain unchanged.
 Exact compiler executable identity separates disposable cached generations.
 Linux native execution is deferred to the later batch.
+
+ADR 0435 admits named exclusive u8/i64 view for-in using existing scalar-loop
+and checked-index operations. Immutable descriptors snapshot length; scalar
+items are copied and body stores affect subsequent loads. Loop-held owner loans
+now cover byte and i64 views, including early-exit consuming moves. This fixes
+held-loan rejection gaps rather than introducing an independent borrow model.
+Following ADR 0430-0434, language `/20`, SDK stage0.81, runtime `/0`, grammar,
+SDK source/export identity and MIR/artifact schemas remain unchanged. Exact
+compiler executable identity separates disposable cached generations. There is
+no released compiler version, public iterator/foreign ABI, Linux execution or
+performance claim.

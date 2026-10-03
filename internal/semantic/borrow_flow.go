@@ -286,8 +286,8 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 	if statement == nil {
 		return true
 	}
-	if statement.ByteFor != nil && statement.ByteFor.Type.Path == "i64" {
-		return f.evaluateI64ViewFor(statement, environment)
+	if statement.ByteFor != nil && (statement.ByteFor.Type.Path == "u8" || statement.ByteFor.Type.Path == "i64") {
+		return f.evaluateViewFor(statement, environment)
 	}
 	if statement.Binding != nil {
 		f.checkDirectOwnerMove(statement, statement.Binding.Expression, environment)
@@ -1065,26 +1065,40 @@ func (f *borrowFlowAnalyzer) checkOwnerMove(statement *ast.Statement, owner *sym
 		return
 	}
 	live := f.liveAfter[statement]
-	seen := make(map[int]struct{})
-	for binding, lastUse := range live {
-		value, found := environment[binding]
-		if !found {
-			continue
+	seen := make(map[hir.Span]bool)
+	report := func(loan, lastUse hir.Span) {
+		if seen[loan] {
+			return
 		}
+		seen[loan] = true
+		f.analyzer.addDiagnostic("E2105", span(f.module.file.Path, expression.Span),
+			RelatedSpan{Role: "owner", Span: span(owner.source, owner.declaration)},
+			RelatedSpan{Role: "loan", Span: loan},
+			RelatedSpan{Role: "last-use", Span: lastUse},
+		)
+	}
+	check := func(value borrowValueState, lastUse hir.Span) {
 		for _, loanID := range value.loans {
 			if loanID < 0 || loanID >= len(f.loans) || f.loans[loanID].owner != owner {
 				continue
 			}
-			if _, duplicate := seen[loanID]; duplicate {
-				continue
-			}
-			seen[loanID] = struct{}{}
-			f.analyzer.addDiagnostic("E2105", span(f.module.file.Path, expression.Span),
-				RelatedSpan{Role: "owner", Span: span(owner.source, owner.declaration)},
-				RelatedSpan{Role: "loan", Span: f.loans[loanID].fact.Borrow},
-				RelatedSpan{Role: "last-use", Span: lastUse},
-			)
+			report(f.loans[loanID].fact.Borrow, lastUse)
 		}
+		for _, pending := range value.pending {
+			if pending.owner == owner {
+				report(pending.borrow, lastUse)
+			}
+		}
+	}
+	for binding, lastUse := range live {
+		if value, found := environment[binding]; found {
+			check(value, lastUse)
+		}
+	}
+	// Loop-held and call-bounded loans survive paths with no later lexical use,
+	// such as consuming the owner just before return or error propagation.
+	for _, held := range f.callBorrows {
+		check(held, span(f.module.file.Path, expression.Span))
 	}
 }
 

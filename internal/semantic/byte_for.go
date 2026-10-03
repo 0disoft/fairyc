@@ -6,9 +6,9 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// byteForSourceIssue checks a shared u8/i64 view before the hidden scalar loop is
-// admitted. In particular, a mutable view or a call cannot be made safe by
-// the ordinary index/length operations in the prepared loop.
+// byteForSourceIssue checks a named u8/i64 view before the hidden scalar loop is
+// admitted. The descriptor binding must be immutable so the length snapshot
+// and later indexed reads always use the same view, even for exclusive views.
 func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Expression) string {
 	if loop == nil || loop.Body == nil || loop.View == nil {
 		return "malformed byte-view iteration"
@@ -16,11 +16,11 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if loop.Type.Kind != ast.TypeKindNamed || loop.Type.Path != "u8" && loop.Type.Path != "i64" || len(loop.Type.Arguments) != 0 {
 		return "view iteration requires an exact u8 or i64 item binding"
 	}
-	wantType := hir.SharedBorrow(hir.TypeByteSlice)
-	shape := "byte-view iteration requires a named immutable ref u8[] view"
+	wantElement := hir.TypeU8
+	shape := "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"
 	if loop.Type.Path == "i64" {
-		wantType = hir.SharedBorrow(hir.TypeI64Slice)
-		shape = "i64-view iteration requires a named immutable ref i64[] view"
+		wantElement = hir.TypeI64
+		shape = "i64-view iteration requires a named immutable ref i64[] or ref mut i64[] view"
 	}
 	if prepared == nil || loop.View.Kind != syntax.KindPath || len(loop.View.Children) != 0 {
 		return shape
@@ -40,15 +40,20 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	// AST cloning may detach the source node from the prepared bound expression.
 	// Resolve the actual checked path instead of relying on shared pointers.
 	value := c.analyzer.resolved[view]
-	if value == nil || value.kind != "local" && value.kind != "parameter" || value.mutable || value.typ != wantType {
+	if value == nil || value.kind != "local" && value.kind != "parameter" || value.mutable {
+		return shape
+	}
+	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement {
 		return shape
 	}
 	return ""
 }
 
-// Hold the i64 view through every body exit, even when break/return means the
+// Hold the view through every body exit, even when break/return means the
 // hidden index will never read it again. Release it at the written loop exit.
-func (f *borrowFlowAnalyzer) evaluateI64ViewFor(statement *ast.Statement, environment borrowEnvironment) bool {
+// This retains the owner loan without creating a shared reborrow: exclusive
+// views may still perform element stores and short reborrows inside the body.
+func (f *borrowFlowAnalyzer) evaluateViewFor(statement *ast.Statement, environment borrowEnvironment) bool {
 	prepared := statement.Expression
 	if prepared == nil || prepared.Block == nil || len(prepared.Block.Statements) != 2 {
 		return true // Malformed source is rejected by the type-checking gate.

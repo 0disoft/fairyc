@@ -125,14 +125,24 @@ exclusive half-open subviews. Lengths and offsets count elements. It reuses
 ADR 0415's whole-parent freeze, alias generations, last-use release and
 parameter-derived return summaries. Retained siblings remain rejected even
 when disjoint; shared readers require a shortened shared reborrow. Vec mutable
-view conversion and mutable for-in iteration remain outside this admission.
+view conversion and mutable for-in iteration are covered separately by ADR 0434-0435.
 
 ADR 0434 adds `std::vec::view_mut_i64(ref mut Vec<i64>)` over the initialized
 prefix. The root loan freezes other vector access until the last retained
 view/subview/alias use, including structural changes that would not reallocate.
 Derived and tagged returns preserve owner origin. Growth requires releasing the
-old view and obtaining a fresh one. Generic mutable Vec slices and mutable
-for-in remain unsupported.
+old view and obtaining a fresh one. Generic mutable Vec slices remain unsupported;
+ADR 0435 admits mutable u8/i64 view iteration below.
+
+ADR 0435 extends the named-view for-in form to exact `ref mut u8[]` and
+`ref mut i64[]` immutable bindings and parameters. Items are immutable scalar
+copies; stores use explicit indices through the view. Length is snapshotted,
+but each indexed load observes earlier stores. Loop-held exclusive loans block
+owner mutation, reallocation, replacement and consuming moves through early
+exits. Ordinary child/shared reborrow rules still apply inside the body; the
+loop hold itself is not a shared reborrow. Mutable descriptors, reference items
+and expression-valued iterables remain unadmitted. Both byte/i64 shared and
+exclusive loops hold owners until exit, including before return/propagation.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
