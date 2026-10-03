@@ -271,6 +271,14 @@ not lower the argument to a raw address. The interpreter passes its private view
 native backend selects private storage transport only after verification. Foreign signatures still
 reject safe borrows.
 
+ADR 0431 extends SDK-only `storage-borrow` with three operands for exact
+`ref i64[]`: a shared owner, an opaque raw address and a usize element count.
+All three are evaluated and materialized in source order. The transfer verifier
+checks actual owner/address/count local definitions and unsafe provenance;
+ordinary and query-only verification reject this private form. Native lowering
+creates the existing typed i64 descriptor without allocation or element copy.
+The unsafe producer proves initialized extent, alignment and owner association.
+
 Source C-scalar transport preserves all sixteen TargetSpec C-scalar identities as distinct foreign
 result and parameter types. A producer call may initialize a local of any exact type and a later
 consumer call may use the local as its argument. MIR does not encode those values as Fairy

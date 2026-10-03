@@ -15,6 +15,9 @@ const OperationStorageBorrow OperationKind = "storage-borrow"
 const OperationStorageBorrowMut OperationKind = "storage-borrow-mut"
 
 func validStorageBorrowShape(op Operation, properties typeProperties) bool {
+	if op.Type == hir.SharedBorrow(hir.TypeI64Slice) {
+		return validI64StorageViewShape(op, properties)
+	}
 	if op.Kind != OperationStorageBorrow && op.Kind != OperationStorageBorrowMut {
 		return false
 	}
@@ -37,6 +40,9 @@ func validStorageBorrowShape(op Operation, properties typeProperties) bool {
 }
 
 func (l *functionLowerer) lowerStorageBorrow(expression *hir.Expression) (Operand, error) {
+	if expression.TargetType == hir.TypeI64Slice {
+		return l.lowerI64StorageView(expression)
+	}
 	mutable := expression.Kind == string(OperationStorageBorrowMut)
 	wantType := hir.SharedBorrow(expression.TargetType)
 	if mutable {

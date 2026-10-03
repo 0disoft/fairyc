@@ -6,15 +6,26 @@ import (
 )
 
 func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir.Expression) hir.Type {
-	if expression.Type == nil || len(expression.Children) != 2 || expression.Children[0] == nil || expression.Children[1] == nil ||
+	if expression.Type == nil || len(expression.Children) < 2 || expression.Children[0] == nil || expression.Children[1] == nil ||
 		expression.Block != nil || len(expression.TypeArguments) != 0 ||
 		(expression.Text != "borrow" && expression.Text != "borrow-mut") {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed private storage borrow")
 		return hir.TypeInvalid
 	}
-	typ := c.analyzer.canonicalType(c.module, *expression.Type)
+	typ := hir.TypeInvalid
+	if expression.Type.Kind == ast.TypeKindSlice && expression.Type.Element != nil && expression.Type.Element.Path == "i64" {
+		// Unsized slices are descriptors here, never by-value stored elements.
+		typ, _ = c.analyzer.canonicalTypeReference(c.module, *expression.Type, false)
+	} else {
+		typ = c.analyzer.canonicalType(c.module, *expression.Type)
+	}
+	view := typ == hir.TypeI64Slice && expression.Text == "borrow"
+	if !view && len(expression.Children) != 2 || view && len(expression.Children) != 3 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private storage borrow argument count")
+		return hir.TypeInvalid
+	}
 	admitted := typ == hir.TypeBool || typ == hir.TypeU8 || typ == hir.TypeI32 || typ == hir.TypeI64 || typ == hir.TypeU32 || typ == hir.TypeUSize ||
-		c.analyzer.structTypes[typ] != nil || c.analyzer.resourceTypes[typ] != nil || c.analyzer.enumTypes[typ] != nil
+		c.analyzer.structTypes[typ] != nil || c.analyzer.resourceTypes[typ] != nil || c.analyzer.enumTypes[typ] != nil || view
 	if !admitted {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unsupported private storage borrow type")
 		return hir.TypeInvalid
@@ -29,6 +40,14 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 		return hir.TypeInvalid
 	}
 	result.Children = appendExpression(result.Children, owner, pointer)
+	if view {
+		length, lengthType := c.checkExpression(expression.Children[2], hir.TypeUSize)
+		if lengthType != hir.TypeUSize {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private i64 storage view requires a usize element count")
+			return hir.TypeInvalid
+		}
+		result.Children = appendExpression(result.Children, length)
+	}
 	if len(c.unsafeScopes) == 0 {
 		c.analyzer.addDiagnostic("E5101", span(c.module.file.Path, expression.Span))
 	} else {

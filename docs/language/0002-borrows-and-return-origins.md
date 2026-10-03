@@ -102,6 +102,14 @@ explicit indices/bounds evaluate. Owner mutation waits until the last retained
 use; local/by-value-parameter escape remains E2102. Mutable i64 views and owned
 unsized slices are unsupported. No i64-to-byte reinterpretation is implied.
 
+ADR 0431 adds the SDK `std::vec::view_i64(ref Vec<i64>)` initialized-prefix
+view with the same whole-owner loan. All mutating vector operations, replacement
+and move are rejected until the last retained view/subview use, even when a
+reserve or truncate would leave the allocation unchanged. Obtain a new view
+after growth. Parameter-derived and tagged returns retain the vector origin;
+local-owner escape remains rejected. There is no generic or mutable vector
+slice conversion.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one

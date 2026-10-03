@@ -1528,3 +1528,11 @@ MIR and artifact schemas remain unchanged. Public signatures retain `ref i64[]`
 and private compiler/artifact/snapshot identities recognize `[i64]`.
 Executable-identity cache keys separate the revised compiler. There is no new
 foreign ABI, mutable i64 view, Vec view or Linux execution claim.
+
+ADR 0431 advances the SDK to `0.0.0-stage0.80` for `std::vec::view_i64`,
+an initialized-prefix shared `ref i64[]` view over `Vec<i64>`. SDK source,
+interface and dependent lock identities refresh. The SDK-only private
+`storage-borrow` operation carries an element-count operand for this result;
+ordinary raw-storage admission remains closed. Language `/20`, runtime `/0`,
+grammar, MIR/artifact schemas and runtime symbols remain unchanged. Windows
+native execution is verified; Linux execution remains deferred.

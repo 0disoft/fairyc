@@ -45,6 +45,13 @@ pub fn Vec<T> empty<T>() {
 /// Returns the number of initialized elements.
 pub fn usize len<T>(ref Vec<T> value) { return value.length; }
 
+/// Borrows the initialized i64 prefix without copying or allocating.
+/// Indices and slice bounds count elements. Mutation and move are forbidden
+/// until the last use of this view or any derived subview.
+pub fn ref i64[] view_i64(ref Vec<i64> value) {
+    return unsafe { storage_borrow<i64[]>(value, value.data, value.length) };
+}
+
 /// Borrows an initialized element without moving it. An out-of-range index traps.
 /// The vector cannot be mutated or moved while the returned reference is live.
 pub fn ref T at<T>(ref Vec<T> value, usize index) {

@@ -963,6 +963,14 @@ scalars or directly named non-generic structs/resources with an admitted nonzero
 native layout. This does not admit user generic aggregate declarations or nominal
 arguments to user generic functions. See ADRs 0390/0393 and `examples/std_vec_quickstart`.
 
+SDK `0.0.0-stage0.80` adds `view_i64(ref Vec<i64>) -> ref i64[]` over the
+initialized prefix. It allocates nothing and copies no elements. Empty vectors
+are permitted; indices and half-open slices count elements and trap with `bounds`
+when invalid. The view and all derived aliases/subviews keep the whole vector
+shared-borrowed, blocking mutation, replacement and move until the last use.
+After growth, obtain a new view. This is an i64-specific shared API; generic and
+mutable vector slices remain unsupported. See ADR 0431 and `examples/vec_i64_view`.
+
 ## Checked integer conversions
 
 SDK `0.0.0-stage0.74` adds the pure Fairy module `std::num`:

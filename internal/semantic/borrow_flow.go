@@ -414,7 +414,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		value, reachable := f.evaluateExpression(expression.Children[0], environment)
 		return f.sharedReborrowValue(expression, value), reachable
 	case ast.PrivateStorageBorrow:
-		if len(expression.Children) != 2 {
+		if len(expression.Children) != 2 && len(expression.Children) != 3 {
 			return borrowValueState{known: false}, true
 		}
 		owner, reachable := f.evaluateExpression(expression.Children[0], environment)
@@ -424,8 +424,10 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		base := len(f.callBorrows)
 		f.callBorrows = append(f.callBorrows, owner)
 		defer func() { f.callBorrows = f.callBorrows[:base] }()
-		if _, reachable := f.evaluateExpression(expression.Children[1], environment); !reachable {
-			return borrowValueState{}, false
+		for _, argument := range expression.Children[1:] {
+			if _, reachable := f.evaluateExpression(argument, environment); !reachable {
+				return borrowValueState{}, false
+			}
 		}
 		return cloneBorrowValue(owner), true
 	case syntax.KindLiteral:

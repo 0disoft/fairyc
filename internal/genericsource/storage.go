@@ -55,6 +55,11 @@ func (x *expander) storageSelector(name string) string {
 
 const storageType syntax.Kind = "private-storage-type"
 
+func isI64StorageViewType(typ *ast.TypeReference) bool {
+	return typ != nil && typ.Kind == ast.TypeKindSlice && typ.Element != nil &&
+		typ.Element.Kind == ast.TypeKindNamed && typ.Element.Path == "i64" && len(typ.Element.Arguments) == 0
+}
+
 func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
 	if e.Kind == syntax.KindSpecialize && len(e.Children) == 1 {
 		selector := x.storageSelector(e.Children[0].Text)
@@ -70,7 +75,12 @@ func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
 	if e.Kind == syntax.KindCall && len(e.Children) != 0 && e.Children[0].Kind == storageType {
 		callee := e.Children[0]
 		if callee.Text == "borrow" || callee.Text == "borrow-mut" {
-			if len(e.Children) != 3 {
+			view := callee.Text == "borrow" && isI64StorageViewType(callee.Type)
+			arity := 3
+			if view {
+				arity = 4 // SDK-owned shared i64 view also carries an element count.
+			}
+			if len(e.Children) != arity {
 				return true, fmt.Errorf("private storage borrow requires an owner borrow and a pointer")
 			}
 			*e = ast.Expression{Kind: ast.PrivateStorageBorrow, Span: e.Span, Text: callee.Text, Type: callee.Type, Children: e.Children[1:]}
