@@ -1552,3 +1552,12 @@ compiler generations. There is no new public SDK export or foreign ABI.
 The Windows C transport includes a narrowly selected volatile-access
 workaround for observed optimized mutable-i64-view execution; this is not a
 source volatile/atomic contract. Linux native execution remains deferred.
+
+ADR 0434 advances the bundled SDK to `0.0.0-stage0.81` for the additional
+`std::vec::view_mut_i64` export. Vector source/public-interface digests and
+dependent SDK lock identities refresh. The existing private
+`storage-borrow-mut` kind admits three operands for exact `ref mut i64[]`;
+no new operation kind or field is added. Language `/20`, runtime `/0`, grammar,
+MIR/artifact schemas, C runtime symbols and target maturity remain unchanged.
+Exact compiler executable identity separates disposable cached generations.
+Linux native execution is deferred to the later batch.

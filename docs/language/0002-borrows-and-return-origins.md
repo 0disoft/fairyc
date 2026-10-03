@@ -127,6 +127,13 @@ parameter-derived return summaries. Retained siblings remain rejected even
 when disjoint; shared readers require a shortened shared reborrow. Vec mutable
 view conversion and mutable for-in iteration remain outside this admission.
 
+ADR 0434 adds `std::vec::view_mut_i64(ref mut Vec<i64>)` over the initialized
+prefix. The root loan freezes other vector access until the last retained
+view/subview/alias use, including structural changes that would not reallocate.
+Derived and tagged returns preserve owner origin. Growth requires releasing the
+old view and obtaining a fresh one. Generic mutable Vec slices and mutable
+for-in remain unsupported.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one

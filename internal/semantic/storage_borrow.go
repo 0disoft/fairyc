@@ -19,7 +19,7 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 	} else {
 		typ = c.analyzer.canonicalType(c.module, *expression.Type)
 	}
-	view := typ == hir.TypeI64Slice && expression.Text == "borrow"
+	view := typ == hir.TypeI64Slice
 	if !view && len(expression.Children) != 2 || view && len(expression.Children) != 3 {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "private storage borrow argument count")
 		return hir.TypeInvalid

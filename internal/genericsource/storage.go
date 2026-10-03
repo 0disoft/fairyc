@@ -75,10 +75,10 @@ func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
 	if e.Kind == syntax.KindCall && len(e.Children) != 0 && e.Children[0].Kind == storageType {
 		callee := e.Children[0]
 		if callee.Text == "borrow" || callee.Text == "borrow-mut" {
-			view := callee.Text == "borrow" && isI64StorageViewType(callee.Type)
+			view := isI64StorageViewType(callee.Type)
 			arity := 3
 			if view {
-				arity = 4 // SDK-owned shared i64 view also carries an element count.
+				arity = 4 // SDK-owned i64 views also carry an element count.
 			}
 			if len(e.Children) != arity {
 				return true, fmt.Errorf("private storage borrow requires an owner borrow and a pointer")

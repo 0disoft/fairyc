@@ -279,6 +279,15 @@ ordinary and query-only verification reject this private form. Native lowering
 creates the existing typed i64 descriptor without allocation or element copy.
 The unsafe producer proves initialized extent, alignment and owner association.
 
+ADR 0434 adds three-operand `storage-borrow-mut` for exact `ref mut i64[]`:
+an exclusive safe owner, a mutable opaque address and usize count. Operation
+kind, result/owner/address mutability, actual operand types, unsafe scope and
+nonaliasing destination must agree. Argument materialization order, private
+transfer-lane verification and ordinary/query-only rejection are unchanged.
+It creates a typed mutable descriptor without element copy or allocation.
+The interpreter does not emulate private host storage.
+
+
 Source C-scalar transport preserves all sixteen TargetSpec C-scalar identities as distinct foreign
 result and parameter types. A producer call may initialize a local of any exact type and a later
 consumer call may use the local as its argument. MIR does not encode those values as Fairy

@@ -23,8 +23,23 @@ fn i32 main() {
 }
 `
 
-func TestI64StorageViewMIR(t *testing.T) {
-	analysis, err := analyzeStorageBorrow(t, i64StorageViewSource)
+func TestI64StorageViewMIR(t *testing.T) { checkI64StorageViewMIR(t, i64StorageViewSource, false) }
+
+func mutableI64StorageViewSource() string {
+	return strings.NewReplacer("fn ref i64[] view", "fn ref mut i64[] view", "ref Owner owner", "ref mut Owner owner", "storage_borrow<i64[]>", "storage_borrow_mut<i64[]>", "view(ref owner)", "view(ref mut owner)", "let ref i64[] values", "let ref mut i64[] values").Replace(i64StorageViewSource)
+}
+
+func TestI64MutableStorageViewMIR(t *testing.T) {
+	checkI64StorageViewMIR(t, mutableI64StorageViewSource(), true)
+}
+
+func checkI64StorageViewMIR(t *testing.T, source string, mutable bool) {
+	t.Helper()
+	kind, viewType, cDescriptor := mir.OperationStorageBorrow, hir.SharedBorrow(hir.TypeI64Slice), "(fy_i64_slice){ .data = (const int64_t *)"
+	if mutable {
+		kind, viewType, cDescriptor = mir.OperationStorageBorrowMut, hir.MutableBorrow(hir.TypeI64Slice), "(fy_mut_i64_slice){ .data = (int64_t *)"
+	}
+	analysis, err := analyzeStorageBorrow(t, source)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +60,7 @@ func TestI64StorageViewMIR(t *testing.T) {
 	}
 	for _, profile := range []cbackend.Profile{cbackend.Stage0Profile(), cbackend.Stage0WindowsMSVCProfile()} {
 		unit, err := cbackend.EmitStorageTransfers(program, hir.QualifiedModulePath(1, "main")+"::main", profile)
-		if err != nil || !strings.Contains(unit.Source, "(fy_i64_slice){ .data = (const int64_t *)") {
+		if err != nil || !strings.Contains(unit.Source, cDescriptor) {
 			t.Fatalf("typed view emission: %v", err)
 		}
 	}
@@ -56,10 +71,24 @@ func TestI64StorageViewMIR(t *testing.T) {
 		"owner-local-laundering":   func(op *mir.Operation) { op.Operands[0] = op.Operands[1]; op.Operands[0].Type = op.OwnerType },
 		"address-local-laundering": func(op *mir.Operation) { op.Operands[1] = op.Operands[0]; op.Operands[1].Type = op.IndexType },
 		"byte-result":              func(op *mir.Operation) { op.Type = hir.SharedBorrow(hir.TypeByteSlice) },
-		"mutable-result":           func(op *mir.Operation) { op.Type = hir.MutableBorrow(hir.TypeI64Slice) },
+		"wrong-result-mutability": func(op *mir.Operation) {
+			op.Type = hir.MutableBorrow(hir.TypeI64Slice)
+			if mutable {
+				op.Type = hir.SharedBorrow(hir.TypeI64Slice)
+			}
+		},
+		"wrong-operation-kind": func(op *mir.Operation) {
+			op.Kind = mir.OperationStorageBorrowMut
+			if mutable {
+				op.Kind = mir.OperationStorageBorrow
+			}
+		},
 		"mutable-owner": func(op *mir.Operation) {
 			owner, _, _ := hir.BorrowElement(op.OwnerType)
 			op.OwnerType = hir.MutableBorrow(owner)
+			if mutable {
+				op.OwnerType = hir.SharedBorrow(owner)
+			}
 		},
 		"typed-address":     func(op *mir.Operation) { op.IndexType = hir.RawPointer(hir.TypeI64, true) },
 		"missing-unsafe":    func(op *mir.Operation) { op.UnsafeScope = hir.Span{} },
@@ -75,7 +104,7 @@ func TestI64StorageViewMIR(t *testing.T) {
 				for bi := range changed.Functions[fi].Blocks {
 					for oi := range changed.Functions[fi].Blocks[bi].Operations {
 						op := &changed.Functions[fi].Blocks[bi].Operations[oi]
-						if op.Kind == mir.OperationStorageBorrow && op.Type == hir.SharedBorrow(hir.TypeI64Slice) {
+						if op.Kind == kind && op.Type == viewType {
 							mutate(op)
 							found = true
 						}
@@ -112,6 +141,36 @@ func TestI64StorageViewSourceRejections(t *testing.T) {
 				}
 				if !found {
 					t.Fatalf("owner hold missing: %v %+v %+v", err, analysis.Analysis.Semantic.Diagnostics, analysis.Analysis.Semantic.Unsupported)
+				}
+			}
+		})
+	}
+}
+
+func TestI64MutableStorageViewSourceRejections(t *testing.T) {
+	source := mutableI64StorageViewSource()
+	for name, replacement := range map[string][2]string{
+		"unsafe missing":   {"unsafe { storage_borrow_mut<i64[]>(owner, owner.data, owner.length) }", "storage_borrow_mut<i64[]>(owner, owner.data, owner.length)"},
+		"missing count":    {"owner.data, owner.length", "owner.data"},
+		"wrong count":      {"owner.data, owner.length", "owner.data, true"},
+		"wrong element":    {"storage_borrow_mut<i64[]>", "storage_borrow_mut<i32[]>"},
+		"shared owner":     {"ref mut Owner owner", "ref Owner owner"},
+		"shared address":   {"ptr mut void data", "ptr void data"},
+		"address mutation": {"view(ref mut owner)", "unsafe { storage_borrow_mut<i64[]>(ref mut owner, { mutate(ref mut owner); owner.data }, owner.length) }"},
+		"count mutation":   {"view(ref mut owner)", "unsafe { storage_borrow_mut<i64[]>(ref mut owner, owner.data, { mutate(ref mut owner); 0 }) }"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			analysis, err := analyzeStorageBorrow(t, strings.Replace(source, replacement[0], replacement[1], 1))
+			if err == nil && len(analysis.Analysis.Semantic.Diagnostics) == 0 && len(analysis.Analysis.Semantic.Unsupported) == 0 {
+				t.Fatal("invalid mutable private view accepted")
+			}
+			if name == "address mutation" || name == "count mutation" {
+				found := false
+				for _, d := range analysis.Analysis.Semantic.Diagnostics {
+					found = found || d.Code == "E2101"
+				}
+				if !found {
+					t.Fatalf("owner hold missing: %v %+v", err, analysis.Analysis.Semantic)
 				}
 			}
 		})

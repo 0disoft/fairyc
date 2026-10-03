@@ -968,8 +968,15 @@ initialized prefix. It allocates nothing and copies no elements. Empty vectors
 are permitted; indices and half-open slices count elements and trap with `bounds`
 when invalid. The view and all derived aliases/subviews keep the whole vector
 shared-borrowed, blocking mutation, replacement and move until the last use.
-After growth, obtain a new view. This is an i64-specific shared API; generic and
-mutable vector slices remain unsupported. See ADR 0431 and `examples/vec_i64_view`.
+After growth, obtain a new view. This is an i64-specific shared API; generic
+vector slices remain unsupported. See ADR 0431 and `examples/vec_i64_view`.
+
+SDK `0.0.0-stage0.81` adds `view_mut_i64(ref mut Vec<i64>) -> ref mut i64[]`
+over the same initialized prefix without allocation or element copy. The whole
+vector is borrowed exclusively until the last retained use: owner reads,
+other borrows, structural mutation, replacement and move are blocked.
+Checked stores/subviews reuse ADRs 0415/0433. Obtain a new view after growth.
+See ADR 0434 and `examples/vec_i64_mut_view`.
 
 ## Checked integer conversions
 

@@ -15,7 +15,7 @@ func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, 
 		return nil
 	}
 	if len(e.Children) == 1 && x.storageSelector(e.Children[0].Text) != "" {
-		if x.storageSelector(e.Children[0].Text) == "borrow" && len(e.TypeArguments) == 1 && isI64StorageViewType(&e.TypeArguments[0]) {
+		if (x.storageSelector(e.Children[0].Text) == "borrow" || x.storageSelector(e.Children[0].Text) == "borrow-mut") && len(e.TypeArguments) == 1 && isI64StorageViewType(&e.TypeArguments[0]) {
 			return nil
 		}
 		if len(e.TypeArguments) != 1 || e.TypeArguments[0].Kind != ast.TypeKindNamed || len(e.TypeArguments[0].Arguments) != 0 {

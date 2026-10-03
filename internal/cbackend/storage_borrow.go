@@ -9,7 +9,7 @@ import (
 )
 
 func (e *emitter) inspectStorageBorrow(functionIndex int, operation mir.Operation) error {
-	if operation.Type == hir.SharedBorrow(hir.TypeI64Slice) {
+	if hir.I64View(operation.Type) {
 		return e.inspectI64StorageView(functionIndex, operation)
 	}
 	owner, address, err := twoOperands(operation.Operands)
@@ -45,12 +45,16 @@ func (e *emitter) writeStorageBorrow(output *strings.Builder, operation mir.Oper
 	if err != nil {
 		return err
 	}
-	if operation.Type == hir.SharedBorrow(hir.TypeI64Slice) {
+	if hir.I64View(operation.Type) {
 		length, err := cOperand(operation.Operands[2])
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(output, "    fy_l_%d = (fy_i64_slice){ .data = (const int64_t *)(%s), .length = %s };\n", operation.DestinationLocal, address, length)
+		descriptor, pointer := "fy_i64_slice", "const int64_t *"
+		if hir.MutableIndexedView(operation.Type) {
+			descriptor, pointer = "fy_mut_i64_slice", "int64_t *"
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s)(%s), .length = %s };\n", operation.DestinationLocal, descriptor, pointer, address, length)
 		return nil
 	}
 	// The safe reference keeps the pointee in place; no representation is copied
@@ -60,12 +64,13 @@ func (e *emitter) writeStorageBorrow(output *strings.Builder, operation mir.Oper
 }
 
 func (e *emitter) inspectI64StorageView(functionIndex int, operation mir.Operation) error {
-	if operation.Kind != mir.OperationStorageBorrow || len(operation.Operands) != 3 {
+	wantsMutable := operation.Kind == mir.OperationStorageBorrowMut
+	if (operation.Kind != mir.OperationStorageBorrow && !wantsMutable) || len(operation.Operands) != 3 || !hir.I64View(operation.Type) || hir.MutableIndexedView(operation.Type) != wantsMutable {
 		return fmt.Errorf("private i64 storage view has invalid shape")
 	}
 	_, mutable, borrowed := hir.BorrowElement(operation.OwnerType)
-	element, _, pointer := hir.RawPointerElement(operation.IndexType)
-	if !borrowed || mutable || !pointer || element != hir.TypeVoid {
+	element, pointerMutable, pointer := hir.RawPointerElement(operation.IndexType)
+	if !borrowed || mutable != wantsMutable || !pointer || element != hir.TypeVoid || (wantsMutable && !pointerMutable) {
 		return fmt.Errorf("private i64 storage view has incompatible owner or address type")
 	}
 	for index, want := range []hir.Type{operation.OwnerType, operation.IndexType, hir.TypeUSize} {
@@ -74,6 +79,10 @@ func (e *emitter) inspectI64StorageView(functionIndex int, operation mir.Operati
 			return fmt.Errorf("private i64 storage view argument %d has type %q, want %q", index, actual, want)
 		}
 	}
-	e.needsI64Slice = true
+	if wantsMutable {
+		e.needsMutI64Slice = true
+	} else {
+		e.needsI64Slice = true
+	}
 	return nil
 }

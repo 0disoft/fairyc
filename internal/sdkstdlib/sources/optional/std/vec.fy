@@ -52,6 +52,12 @@ pub fn ref i64[] view_i64(ref Vec<i64> value) {
     return unsafe { storage_borrow<i64[]>(value, value.data, value.length) };
 }
 
+/// Borrows the initialized i64 prefix exclusively without allocating or copying.
+/// Structural changes and other owner access wait until the last retained use.
+pub fn ref mut i64[] view_mut_i64(ref mut Vec<i64> value) {
+    return unsafe { storage_borrow_mut<i64[]>(value, value.data, value.length) };
+}
+
 /// Borrows an initialized element without moving it. An out-of-range index traps.
 /// The vector cannot be mutated or moved while the returned reference is live.
 pub fn ref T at<T>(ref Vec<T> value, usize index) {

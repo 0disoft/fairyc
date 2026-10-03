@@ -554,7 +554,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStorageTake, OperationStorageBorrow, OperationStorageBorrowMut:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if operation.Kind == OperationStorageBorrow && operation.Type == hir.SharedBorrow(hir.TypeI64Slice) &&
+				if (operation.Kind == OperationStorageBorrow || operation.Kind == OperationStorageBorrowMut) && hir.I64View(operation.Type) &&
 					(len(operation.Operands) != 3 || fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType ||
 						fieldStoreOperandType(operation.Operands[1], storeTypes) != operation.IndexType ||
 						fieldStoreOperandType(operation.Operands[2], storeTypes) != hir.TypeUSize) {
