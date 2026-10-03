@@ -16,6 +16,9 @@ and `at_mut`. After the last use, mutation is allowed; obtain a new view after
 growth. A local vector's view cannot escape its owner. There is no mutable i64
 view or generic `Vec<T>` slice conversion.
 
+The sum helper uses `for (let i64 value in values)` over its named view. The
+loop holds the vector until exit and preserves checked i64 addition.
+
 From this directory, use `fairyc check`, `fairyc build`, `fairyc run --locked`
 and `fairyc run --release --locked`. The example checks signed extremes,
 values above i32, subrange sums, shared siblings, nested and tagged views,

@@ -111,15 +111,20 @@ func vecI64NativeCases(t *testing.T) []struct{ name, source, trap string } {
 }
 
 func TestVecI64ViewNative(t *testing.T) {
+	runI64ViewNativeCases(t, "vec-i64-view", vecI64NativeCases(t))
+}
+
+func runI64ViewNativeCases(t *testing.T, label string, cases []struct{ name, source, trap string }) {
+	t.Helper()
 	if runtime.GOARCH != "amd64" || runtime.GOOS != "windows" && runtime.GOOS != "linux" {
 		t.Skip("requires Windows MSVC or Linux GCC/Clang amd64")
 	}
-	evidenceRoot := filepath.Join("..", "..", ".cache", "vec-i64-view-native", runtime.GOOS)
+	evidenceRoot := filepath.Join("..", "..", ".cache", label+"-native", runtime.GOOS)
 	if err := os.MkdirAll(evidenceRoot, 0700); err != nil {
 		t.Fatal(err)
 	}
 	var evidence []map[string]any
-	for _, item := range vecI64NativeCases(t) {
+	for _, item := range cases {
 		t.Run(item.name, func(t *testing.T) {
 			root := t.TempDir()
 			writeVecI64ViewWorkspace(t, root, item.source)
@@ -130,6 +135,10 @@ func TestVecI64ViewNative(t *testing.T) {
 			checked, err := workspacecompiler.Check(workspace)
 			if err != nil || !checked.Verified {
 				t.Fatalf("check: %v %+v %+v", err, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+			}
+			storage, err := workspaceSDKStorage(workspace)
+			if err != nil {
+				t.Fatal(err)
 			}
 			for _, release := range []bool{false, true} {
 				args := []string{"run"}
@@ -147,7 +156,7 @@ func TestVecI64ViewNative(t *testing.T) {
 						profile = cdriver.OptimizedProfile
 					}
 					var diagnostics bytes.Buffer
-					artifact, buildCode := compileWindowsProgramPolicy(checked.MIR, tokenScannerEntry(t, checked), target.X8664WindowsMSVC, profile, true, true, &diagnostics)
+					artifact, buildCode := compileWindowsProgramPolicy(checked.MIR, tokenScannerEntry(t, checked), target.X8664WindowsMSVC, profile, true, storage, &diagnostics)
 					if buildCode != ExitSuccess {
 						t.Fatal(diagnostics.String())
 					}
@@ -193,7 +202,7 @@ func TestVecI64ViewNative(t *testing.T) {
 		})
 	}
 	if !t.Failed() {
-		data, err := json.MarshalIndent(map[string]any{"schema": "fairyc.vec-i64-view-native/v1", "sdk": sdkstdlib.Version, "cases": evidence}, "", "  ")
+		data, err := json.MarshalIndent(map[string]any{"schema": "fairyc." + label + "-native/v1", "sdk": sdkstdlib.Version, "cases": evidence}, "", "  ")
 		if err != nil {
 			t.Fatal(err)
 		}

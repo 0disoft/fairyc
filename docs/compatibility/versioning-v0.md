@@ -1536,3 +1536,10 @@ interface and dependent lock identities refresh. The SDK-only private
 ordinary raw-storage admission remains closed. Language `/20`, runtime `/0`,
 grammar, MIR/artifact schemas and runtime symbols remain unchanged. Windows
 native execution is verified; Linux execution remains deferred.
+
+ADR 0432 admits i64 items in the existing parsed for-in form over named
+immutable shared i64 views. The compiler uses existing scalar-loop and checked
+view operations and holds the owner through loop exit. Language `/20`, SDK
+stage0.80, runtime `/0`, tokens and MIR/artifact schemas remain unchanged;
+exact compiler-executable identity separates cached generations. SDK source
+bytes and public API are unchanged. Linux execution is deferred.

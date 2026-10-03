@@ -10,9 +10,8 @@ fn void append(ref mut vec::Vec<i64> values, i64 value) {
 
 fn i64 sum(ref i64[] values) {
     var i64 result = 0;
-    let usize count = values.len;
-    for (var usize index = 0; index < count; index += 1) {
-        result += values[index];
+    for (let i64 value in values) {
+        result += value;
     }
     return result;
 }

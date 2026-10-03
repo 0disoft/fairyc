@@ -286,6 +286,9 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 	if statement == nil {
 		return true
 	}
+	if statement.ByteFor != nil && statement.ByteFor.Type.Path == "i64" {
+		return f.evaluateI64ViewFor(statement, environment)
+	}
 	if statement.Binding != nil {
 		f.checkDirectOwnerMove(statement, statement.Binding.Expression, environment)
 		f.checkCallOwnerMoves(statement, statement.Binding.Expression, environment)

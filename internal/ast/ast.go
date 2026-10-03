@@ -216,8 +216,8 @@ type Statement struct {
 	ByteFor    *ByteForLoop
 }
 
-// ByteForLoop retains the written for-in form. Only the byte-view form is
-// currently admitted; vector preparation is inert until semantic admission.
+// ByteForLoop retains the written for-in form for shared u8/i64 views.
+// Its legacy node name is retained; vector preparation requires separate admission.
 type ByteForLoop struct {
 	Span           diagnostic.Span
 	Name           string

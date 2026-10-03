@@ -110,6 +110,14 @@ after growth. Parameter-derived and tagged returns retain the vector origin;
 local-owner escape remains rejected. There is no generic or mutable vector
 slice conversion.
 
+ADR 0432 admits `for (let i64 value in view)` for a named immutable `ref i64[]`
+local or parameter. It snapshots length, visits checked indices in order and
+copies an immutable item into body scope. The shared owner is held until loop
+exit, including bodies ending with break/return/propagation. Mutation or move
+inside the body is rejected; mutation after exit follows ordinary later-use
+rules. Named array/Vec subviews are eligible. Direct collection values, mutable
+items, mutable view bindings and expression-valued iterables are not admitted.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one
