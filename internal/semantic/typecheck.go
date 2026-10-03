@@ -1174,7 +1174,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 		}
 		return hir.TypeBool
 	}
-	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice || hir.I64View(receiverType)) {
+	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice || hir.NonByteIndexedView(receiverType)) {
 		switch expression.Text {
 		case "len":
 			result.Kind = "view-length"

@@ -1,13 +1,19 @@
 package hir
 
 // IndexedViewElement returns the element of an executable borrowed slice.
-// The closed set admits only byte and i64 element views.
+// The closed set admits the executable integer elements; bool and aggregates remain excluded.
 func IndexedViewElement(value Type) (Type, bool) {
 	switch value {
 	case SharedBorrow(TypeByteSlice), MutableBorrow(TypeByteSlice):
 		return TypeU8, true
 	case SharedBorrow(TypeI64Slice), MutableBorrow(TypeI64Slice):
 		return TypeI64, true
+	case SharedBorrow(TypeI32Slice), MutableBorrow(TypeI32Slice):
+		return TypeI32, true
+	case SharedBorrow(TypeU32Slice), MutableBorrow(TypeU32Slice):
+		return TypeU32, true
+	case SharedBorrow(TypeUsizeSlice), MutableBorrow(TypeUsizeSlice):
+		return TypeUSize, true
 	default:
 		return TypeInvalid, false
 	}
@@ -33,4 +39,15 @@ func MutableIndexedView(value Type) bool {
 func I64View(value Type) bool {
 	element, _, borrow := BorrowElement(value)
 	return borrow && element == TypeI64Slice
+}
+
+// IntegerViewElement recognizes unsized integer slices without admitting ownership.
+func IntegerViewElement(value Type) (Type, bool) {
+	return IndexedViewElement(SharedBorrow(value))
+}
+
+// NonByteIndexedView selects array-backed integer views rather than static byte data.
+func NonByteIndexedView(value Type) bool {
+	element, ok := IndexedViewElement(value)
+	return ok && element != TypeU8
 }

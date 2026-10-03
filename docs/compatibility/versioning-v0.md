@@ -1581,3 +1581,10 @@ callable-result type checks. Language `/20`, runtime `/0`, grammar, MIR/artifact
 schemas, C runtime symbols and target maturity remain unchanged. Existing
 compiler-executable identities separate cached generations. Linux runtime
 execution remains deferred; no performance improvement is claimed.
+
+ADR 0437 admits matching fixed-array shared/exclusive i32/u32/usize views in
+addition to u8/i64. The existing ref spelling and checked view operations are
+reused; language /20, SDK stage0.82, runtime /0 and MIR/artifact schemas stay
+unchanged, as for ADR 0430-0436. Actual-local verifier checks prevent element
+relabeling. Exact compiler identities separate cached generations. Linux native
+execution remains deferred; there is no new public SDK export in this unit.

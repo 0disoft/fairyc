@@ -120,6 +120,7 @@ type emitter struct {
 	dynamicTrapTargets map[int]map[mir.BlockID]struct{}
 	localTypes         []map[mir.LocalID]hir.Type
 	needsByteSlice     bool
+	integerViews       map[hir.Type]bool
 	needsI64Slice      bool
 	needsMutI64Slice   bool
 	needsMutByteSlice  bool
@@ -1124,7 +1125,7 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice) || hir.I64View(value) ||
+	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice) || hir.NonByteIndexedView(value) ||
 		value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeCStr) {
 		return true
 	}
@@ -1166,15 +1167,10 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 	if cType, borrow := e.safeBorrowCType(value); borrow {
 		return cType, nil
 	}
+	if descriptor, _, view := integerViewCType(value); view {
+		return descriptor, nil
+	}
 	switch {
-	case value == hir.SharedBorrow(hir.TypeByteSlice):
-		return "fy_byte_slice", nil
-	case value == hir.MutableBorrow(hir.TypeByteSlice):
-		return "fy_mut_byte_slice", nil
-	case value == hir.SharedBorrow(hir.TypeI64Slice):
-		return "fy_i64_slice", nil
-	case value == hir.MutableBorrow(hir.TypeI64Slice):
-		return "fy_mut_i64_slice", nil
 	case value == hir.SharedBorrow(hir.TypeStr):
 		return "fy_str", nil
 	case value == hir.SharedBorrow(hir.TypeCStr):
@@ -1458,6 +1454,8 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					e.features["mutable-array-byte-view-borrow"] = struct{}{}
 				} else if hir.I64View(operation.Type) {
 					e.features["array-i64-view-borrow"] = struct{}{}
+				} else if hir.NonByteIndexedView(operation.Type) {
+					e.features["array-integer-view-borrow"] = struct{}{}
 				} else {
 					e.features["array-byte-view-borrow"] = struct{}{}
 				}
@@ -1680,6 +1678,12 @@ func (e *emitter) recordCValueTypeRequirements(value hir.Type) {
 		e.recordCValueTypeRequirements(success)
 		e.recordCValueTypeRequirements(failure)
 	}
+	if hir.NonByteIndexedView(value) && !hir.I64View(value) {
+		if e.integerViews == nil {
+			e.integerViews = make(map[hir.Type]bool)
+		}
+		e.integerViews[value] = true
+	}
 	switch canonicalCValueType(value) {
 	case hir.SharedBorrow(hir.TypeByteSlice):
 		e.needsByteSlice = true
@@ -1738,7 +1742,7 @@ func (e *emitter) inspectViewLength(functionIndex int, operation mir.Operation) 
 		return fmt.Errorf("borrowed-view length in %s: %w", function.Name, err)
 	}
 	element, _, borrow := hir.BorrowElement(operation.OwnerType)
-	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && !hir.I64View(operation.OwnerType) || operation.Type != hir.TypeUSize || operation.Field != "len" {
+	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && !hir.NonByteIndexedView(operation.OwnerType) || operation.Type != hir.TypeUSize || operation.Field != "len" {
 		return fmt.Errorf("borrowed-view length in %s has incompatible owner, result, or field", function.Name)
 	}
 	receiverType, err := e.operandType(functionIndex, receiver)
@@ -1860,7 +1864,7 @@ func (e *emitter) inspectViewEmpty(functionIndex int, operation mir.Operation) e
 		return fmt.Errorf("borrowed-view emptiness in %s: %w", function.Name, err)
 	}
 	element, _, borrow := hir.BorrowElement(operation.OwnerType)
-	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && !hir.I64View(operation.OwnerType) || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
+	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && !hir.NonByteIndexedView(operation.OwnerType) || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
 		return fmt.Errorf("borrowed-view emptiness in %s has incompatible owner, result, or field", function.Name)
 	}
 	receiverType, err := e.operandType(functionIndex, receiver)
@@ -3025,6 +3029,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("extern uint32_t fy_std_region_reset_v0(void *region);\n\n")
 	}
 	_, usesStaticByteString := e.features["static-byte-string"]
+	e.emitIntegerViewTypes(output)
 	if e.needsI64Slice {
 		output.WriteString("typedef struct fy_i64_slice {\n    const int64_t *data;\n    uintptr_t length;\n} fy_i64_slice;\n\n")
 	}
@@ -3725,8 +3730,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return err
 		}
-		if operation.Type == hir.SharedBorrow(hir.TypeI64Slice) {
-			fmt.Fprintf(output, "    fy_l_%d = (fy_i64_slice){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, value, value)
+		if hir.NonByteIndexedView(operation.Type) {
+			descriptor, _, _ := integerViewCType(operation.Type)
+			fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, descriptor, value, value)
 		} else if operation.Type == hir.SharedBorrow(hir.TypeByteSlice) {
 			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, value, value)
 		} else {

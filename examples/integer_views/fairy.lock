@@ -1,0 +1,23 @@
+{
+  "schema": "fairyc.lock/v1",
+  "packageInstanceAlgorithm": "fairyc.package-instance/v1",
+  "sourceDigestAlgorithm": "fairyc.package-source/v1",
+  "language": "fairyc-language/20",
+  "root": "fypi1-sha256-9f63ebd3e7f78346bcdbebb0b295924c9d946efa832a05837ae830d475e923ab",
+  "packages": [
+    {
+      "id": "fypi1-sha256-9f63ebd3e7f78346bcdbebb0b295924c9d946efa832a05837ae830d475e923ab",
+      "role": "root",
+      "packageUid": "example.integer-views",
+      "sourceKind": "local",
+      "localPath": ".",
+      "sdkIdentity": "",
+      "runtimeAbi": "",
+      "sourceIdentity": "fysrc1-sha256-217b810891a628363d8591b5477aea69c7a8d2da5d96a3d47182e8daaf9d647a",
+      "sourceDigest": "fysrc1-sha256-217b810891a628363d8591b5477aea69c7a8d2da5d96a3d47182e8daaf9d647a",
+      "version": "0.1.0",
+      "features": []
+    }
+  ],
+  "dependencies": []
+}

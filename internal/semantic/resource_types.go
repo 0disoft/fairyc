@@ -329,13 +329,12 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 			return hir.TypeInvalid, false
 		}
 		element, ok := a.canonicalTypeReference(module, *reference.Element, false)
-		if !ok || element != hir.TypeU8 && element != hir.TypeI64 {
+		if !ok {
 			return hir.TypeInvalid, false
 		}
-		if element == hir.TypeI64 {
-			return hir.TypeI64Slice, true
-		}
-		return hir.TypeByteSlice, true
+		slice := hir.Type("[" + string(element) + "]")
+		_, admitted := hir.IntegerViewElement(slice)
+		return slice, admitted
 	case ast.TypeKindReference:
 		if reference.Element == nil {
 			return hir.TypeInvalid, false
@@ -462,14 +461,11 @@ func parsePositiveArrayLength(raw string) (uint64, bool) {
 }
 
 func validUnsizedTypeUse(value hir.Type) bool {
-	if value == hir.TypeByteSlice || value == hir.TypeI64Slice || value == hir.TypeStr || value == hir.TypeCStr {
+	if _, slice := hir.IntegerViewElement(value); slice || value == hir.TypeStr || value == hir.TypeCStr {
 		return false
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {
-		if element == hir.TypeByteSlice {
-			return true
-		}
-		if element == hir.TypeI64Slice {
+		if _, indexed := hir.IndexedViewElement(value); indexed {
 			return true
 		}
 		if element == hir.TypeStr || element == hir.TypeCStr {

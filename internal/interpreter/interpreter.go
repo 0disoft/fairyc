@@ -360,13 +360,14 @@ func (v runtimeValue) byteAt(index uint64) (byte, error) {
 }
 
 func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
-	if hir.I64View(v.typ) {
+	if hir.NonByteIndexedView(v.typ) {
 		if v.kind != valueView || v.view == nil || v.view.array == nil || index >= v.view.length ||
 			v.view.offset+index >= uint64(len(v.view.array.elements)) {
 			return runtimeValue{}, capabilityError("i64-view read exceeds its array backing")
 		}
 		value := v.view.array.elements[v.view.offset+index]
-		if !comparisonRuntimeMatches(value, hir.TypeI64) {
+		element, _ := hir.IndexedViewElement(v.typ)
+		if !comparisonRuntimeMatches(value, element) {
 			return runtimeValue{}, capabilityError("i64-view backing contains a non-i64 value")
 		}
 		return value, nil

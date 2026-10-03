@@ -75,7 +75,9 @@ source = "src"
 			for _, function := range warm.Compiler.MIR.Functions {
 				for _, block := range function.Blocks {
 					for _, operation := range block.Operations {
-						if operation.Kind == mir.OperationStorageBorrow {
+						// SDK view wrappers also contain three-operand descriptor borrows.
+						// Count the two-operand element borrow exercised by this client.
+						if operation.Kind == mir.OperationStorageBorrow && len(operation.Operands) == 2 {
 							borrowCount++
 						}
 					}

@@ -63,7 +63,7 @@ func reservedCImplementationIdentifier(value string, scope cIdentifierScope) boo
 
 func reservedBackendCRecordName(value string) bool {
 	switch value {
-	case "fy_region", "fy_byte_slice", "fy_mut_byte_slice", "fy_i64_slice", "fy_mut_i64_slice", "fy_str":
+	case "fy_region", "fy_byte_slice", "fy_mut_byte_slice", "fy_i64_slice", "fy_mut_i64_slice", "fy_i32_slice", "fy_mut_i32_slice", "fy_u32_slice", "fy_mut_u32_slice", "fy_usize_slice", "fy_mut_usize_slice", "fy_str":
 		return true
 	default:
 		return false

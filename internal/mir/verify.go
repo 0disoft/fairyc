@@ -413,7 +413,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 		state := cloneVerificationState(item.state)
 		for operationIndex, operation := range block.Operations {
 			entity := operationEntity(item.id, operationIndex, operation)
-			if detail := verifyI64ViewOperands(operation, storeTypes); detail != "" {
+			if detail := verifyIndexedViewOperands(operation, storeTypes); detail != "" {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: detail})
 			}
 			if operation.SourceForm != "" {
@@ -890,7 +890,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewLength:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				ownerElement, _, ownerBorrow := hir.BorrowElement(operation.OwnerType)
-				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || hir.I64View(operation.OwnerType))
+				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || hir.NonByteIndexedView(operation.OwnerType))
 				operandValid := len(operation.Operands) == 1 && (operation.Operands[0].Kind == OperandLocal ||
 					ownerElement == hir.TypeStr && operation.Operands[0].Kind == OperandString ||
 					ownerElement == hir.TypeByteSlice && operation.Operands[0].Kind == OperandByteString)
@@ -902,7 +902,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewEmpty:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				ownerElement, _, ownerBorrow := hir.BorrowElement(operation.OwnerType)
-				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || hir.I64View(operation.OwnerType))
+				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || hir.NonByteIndexedView(operation.OwnerType))
 				operandValid := len(operation.Operands) == 1 && (operation.Operands[0].Kind == OperandLocal ||
 					ownerElement == hir.TypeStr && operation.Operands[0].Kind == OperandString ||
 					ownerElement == hir.TypeByteSlice && operation.Operands[0].Kind == OperandByteString)
