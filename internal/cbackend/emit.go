@@ -124,7 +124,7 @@ type emitter struct {
 	needsStringView    bool
 	needsBitcast       bool
 	needsShift         bool
-	needsI64           bool
+	i64Helpers         i64Helpers
 	cScalars           map[hir.Type]target.Scalar
 	instrumentation    string
 	dropSites          []DropSite
@@ -1520,10 +1520,10 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				if err := e.inspectUnary(functionIndex, *operation); err != nil {
 					return err
 				}
-				if operation.OwnerType == hir.TypeI64 {
-					e.needsI64 = true
+				if operation.OwnerType == hir.TypeI64 && (operation.Operator == "-" || operation.Operator == "~") {
+					e.i64Helpers.bitcast = true
 				}
-				if operation.Operator == "-" || operation.Operator == "~" && operation.OwnerType == hir.TypeI32 {
+				if operation.OwnerType == hir.TypeI32 && (operation.Operator == "-" || operation.Operator == "~") {
 					e.needsBitcast = true
 				}
 				if operation.Operator == "~" {
@@ -1534,7 +1534,12 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				if operation.OwnerType == hir.TypeI64 {
-					e.needsI64 = true
+					switch operation.Operator {
+					case "+", "-", "*", "&", "^", "|", "<<":
+						e.i64Helpers.bitcast = true
+					case ">>":
+						e.i64Helpers.shift = true
+					}
 				}
 				switch operation.Operator {
 				case "==", "!=", "<", "<=", ">", ">=":
@@ -2896,6 +2901,16 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 			leftType != terminator.SwitchType || rightType != terminator.SwitchType {
 			return fmt.Errorf("checked arithmetic in %s has incompatible type metadata", function.Name)
 		}
+		if terminator.SwitchType == hir.TypeI64 {
+			switch terminator.Operator {
+			case "+":
+				e.i64Helpers.addOverflow = true
+			case "-":
+				e.i64Helpers.subOverflow = true
+			case "*":
+				e.i64Helpers.mulOverflow = true
+			}
+		}
 		e.features["checked-arithmetic"] = struct{}{}
 		categories = []string{"integer-overflow"}
 	case "checked-shift":
@@ -2912,6 +2927,9 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 		e.features["checked-shift"] = struct{}{}
 		switch terminator.Operator {
 		case "<<":
+			if terminator.SwitchType == hir.TypeI64 {
+				e.i64Helpers.shift = true
+			}
 			categories = []string{"invalid-shift", "integer-overflow"}
 		case ">>":
 			categories = []string{"invalid-shift"}
@@ -2976,7 +2994,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	}
 	_, usesStorageTake := e.features["private-storage-take"]
 	_, usesStoragePut := e.features["private-storage-put"]
-	if e.needsBitcast || e.needsI64 || usesStorageTake || usesStoragePut {
+	if e.needsBitcast || e.i64Helpers.needsBitcast() || usesStorageTake || usesStoragePut {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
@@ -3105,9 +3123,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("    if (amount == 0 || value >= 0) {\n        return fy_bits_to_i32(bits >> (uint32_t)amount);\n    }\n")
 		output.WriteString("    return fy_bits_to_i32((bits >> (uint32_t)amount) | (UINT32_MAX << (32u - (uint32_t)amount)));\n}\n\n")
 	}
-	if e.needsI64 {
-		output.WriteString(i64CSource)
-	}
+	e.i64Helpers.emit(output)
 	return nil
 }
 
