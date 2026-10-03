@@ -837,7 +837,10 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 						fieldStoreOperandType(operation.Operands[1], storeTypes) == operation.Type
 				}
 				aggregate := fieldAggregateType(operation.OwnerType)
-				if definition := structTypes[aggregate]; definition != nil {
+				if len(operation.Fields) > 0 {
+					_, found := ResolveNestedFieldStore(operation, func(typ hir.Type) *StructType { return structTypes[typ] })
+					valid = valid && found
+				} else if definition := structTypes[aggregate]; definition != nil {
 					field, found := structField(definition.Fields, operation.Field)
 					valid = valid && found && field.Type == operation.Type
 				} else if definition := resourceTypes[aggregate]; definition != nil {

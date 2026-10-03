@@ -53,10 +53,19 @@ stored inside another aggregate; assigning through a borrow changes its referent
 ADR 0412 also admits checked compound assignment to these direct integer fields.
 The receiver and its old field value are selected before the RHS runs once;
 arithmetic failure traps before the field store. Exact types and whole-root loans
-remain enforced. Boolean arithmetic and nested field paths are not admitted.
-Nested field paths and general aggregate-field
-replacement remain source-located unsupported lowering results without publishing
-executable MIR. Direct plain replacement of a non-`repr(C)` one-`usize`-field
+remain enforced. Boolean arithmetic is not admitted.
+ADR 0442 also admits nested scalar-field `=` and checked integer compound
+assignment through named mutable locals or existing `ref mut` receivers. The
+root and all nested records must form the nonempty acyclic scalar-leaf struct
+graph of ADR 0441. Each ancestor is a stored struct field; there is no traversal
+through a reference, pointer, array index, call result or resource root.
+Grouping a named place is allowed. A selected mutable-reference receiver keeps
+its original loan through the RHS and final store; rebinding a `var ref mut`
+on the RHS does not retarget the selected nested store. Compound assignment
+reads the old scalar before the RHS runs once and traps before writing on failure.
+Shared roots, immutable roots and active whole-root/sibling field loans forbid
+writes. General aggregate-field replacement remains source-located unsupported
+lowering without publishing executable MIR. Direct plain replacement of a non-`repr(C)` one-`usize`-field
 inert struct from a typed local is the bounded exception. Shared field reads and borrows retain the
 separate projection boundary above; field stores do not admit mutable field borrows.
 

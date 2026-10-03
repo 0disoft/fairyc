@@ -1,0 +1,845 @@
+{
+  "schema": "fairyc.nested-field-store-review/v1",
+  "date": "2026-10-04",
+  "baseCommit": "dd6c291388409e2271b145cd7981b60687e0443f",
+  "vcsModifiedAtBuild": true,
+  "sdk": "0.0.0-stage0.84",
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0",
+  "compilerSHA256": "81ef0d6485bb1c9360b7f60343106d080a26aed9e4b39c24970f8f740043099d",
+  "compilerIdentityInvocation": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261003174045-dd6c29138840+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: dd6c291388409e2271b145cd7981b60687e0443f\nmodified: true\n",
+    "stderr": "",
+    "exit": 0
+  },
+  "compilerSourceSet": {
+    "fileCount": 1284,
+    "SHA256": "de9aaaa863f17fe5ba039d3f66342b3b1d4c96d09306ba816b185d3d20c0a579",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "changedSourceFiles": {
+    "internal/cbackend/shift_count.go": "b588e11fce5a089d80ddee0a2c650aab2d715e1a5cc6644c0673d3e98c38a0ec",
+    "internal/cli/nested_field_store_test.go": "363d3cf6baaec3b20f2b406bb892fa2ff7da77063f8e227e65c88d6fabbbe4b8",
+    "internal/compiler/nested_field_store_test.go": "4344aec8adb818d903aa21e7d08c32ed4aa5e8328ebedff9928c16c3de08e554",
+    "internal/mir/nested_field_store.go": "4e5bad7883e5d20f158757b6ad86ee28a6419320ed767ea004dc25dd1b4f4e04",
+    "internal/mir/nested_field_store_test.go": "2236a04756d0c2d8738894b107bc4dcf259d672e5613ad772edb142ce5cbf98d",
+    "internal/semantic/field_store_flow.go": "4118f4ca100b74bde10f853313f110c4e9cde08a675aa261b66708c5d23fcb16",
+    "internal/cbackend/emit.go": "4d9f09cc8e2bbac06576a231cde0275a35171248cc3dd4565344b185449f01cb",
+    "internal/cbackend/field_store.go": "debd2cde16dd2a4e490170a30cca8dc760b0f9f6b0b481805d7caafe38bd4029",
+    "internal/compiler/field_store_test.go": "be406c92b511a24cff423ae3331b8cb399686ebc2df365c70986ecf0cca3c5df",
+    "internal/interpreter/field_store.go": "350b49adade3fc63bf597b94271aaf685fed56899e3b8f40aeb3a95eb9823b43",
+    "internal/mir/field_store.go": "51f6cb79df51113824375d653e2d6d157aa558247b96fab21136711e5e2efcf2",
+    "internal/mir/verify.go": "176cf2cd99a16b487b01d827903e1e0bd6754426a2d697280aefedb7bcc051e5",
+    "internal/semantic/borrow_flow.go": "e8ee45e53518c4a69dc5db8ae24145ff70db33ee80a8df381456cf6450dbc615",
+    "internal/semantic/field_borrow.go": "45ad3437f80cd9dd680bad21e7db51d8236b35ab136cf959145ec6b27fa7c3cd",
+    "internal/semantic/practical_field_compound_test.go": "77ba10d3da31442cd59130aa7fc9487537d68ba2de5beedc2640caf525093728",
+    "internal/semantic/typecheck.go": "e5f42f454d2cd2d633cea59525624e62e840b19c86b1faee80cb417eb1ed8280"
+  },
+  "sdkSourceSet": {
+    "fileCount": 8,
+    "SHA256": "a81b7b9e4beda6dcfc76bb2ceef7c6d6b31dd9bb20cadf5088a3678dbc0cb3ec",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "exampleSourceSet": {
+    "fileCount": 4,
+    "SHA256": "865923b195f1a5e008acc7e531dda4eae0b861396b3a5deb92ca7dd6a685b3ea",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "checks": [
+    {
+      "path": ".cache/nested-field-stages.jsonl",
+      "SHA256": "2c50ce68be1afe1e596efe3a7f28e9d0c71bc0065889a9046d9ecd1ab4af2b0d",
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/compiler",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/interpreter",
+        "-run",
+        "TestNestedField|TestVerifyNestedField|TestFieldStore|TestOneWordStructFieldStore|TestUnsignedFieldStore|TestPracticalField|TestAnalyzeField|TestAnalyzeSharedField|TestVerifyFieldStore|TestVerifyOneWordStructFieldStore|TestExecuteFieldStore",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "packageOutcomes": [
+        {
+          "Package": "github.com/0disoft/fairyc/internal/mir",
+          "Action": "pass",
+          "Elapsed": 0.157
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/interpreter",
+          "Action": "pass",
+          "Elapsed": 0.167
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/semantic",
+          "Action": "pass",
+          "Elapsed": 0.197
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/compiler",
+          "Action": "pass",
+          "Elapsed": 0.488
+        }
+      ],
+      "passedTestsAndSubtests": 110,
+      "failures": [],
+      "skips": []
+    },
+    {
+      "path": ".cache/nested-field-cli.jsonl",
+      "SHA256": "30da84f299ff19b80f7506bf50568973e0d9a449f19e902e0b9ebd007d63b345",
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^Test(NestedFieldStoreNative|PracticalFieldCompound|WindowsFieldStoreStableCLI|WindowsOneWordStructFieldStore|StructTokenExampleCheck|StructTokenAnalyzerNative|StructVecViewCache)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 1,
+      "packageOutcomes": [
+        {
+          "Package": "github.com/0disoft/fairyc/internal/cli",
+          "Action": "fail",
+          "Elapsed": 59.855
+        }
+      ],
+      "passedTestsAndSubtests": 43,
+      "failures": [
+        "TestNestedFieldStoreNative/signed-divide-overflow",
+        "TestNestedFieldStoreNative/bad-shift",
+        "TestNestedFieldStoreNative",
+        "github.com/0disoft/fairyc/internal/cli"
+      ],
+      "skips": []
+    },
+    {
+      "path": ".cache/nested-field-cli-final.jsonl",
+      "SHA256": "84e5c56e9d7224948b7f088088d98d405fe6ae43e4adaf2f5e6703d527375202",
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestNestedFieldStore(Native|Cache)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "packageOutcomes": [
+        {
+          "Package": "github.com/0disoft/fairyc/internal/cli",
+          "Action": "pass",
+          "Elapsed": 25.301
+        }
+      ],
+      "passedTestsAndSubtests": 13,
+      "failures": [],
+      "skips": []
+    },
+    {
+      "path": ".cache/nested-field-related.jsonl",
+      "SHA256": "a190696abbe39a7b52b84ca559e90483861b33ff6e61c796ba55902bb8ce2e63",
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "./internal/mircodec",
+        "./internal/packageartifact",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "packageOutcomes": [
+        {
+          "Package": "github.com/0disoft/fairyc/internal/semantic",
+          "Action": "pass",
+          "Elapsed": 1.4969999999999999
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/mir",
+          "Action": "pass",
+          "Elapsed": 0.121
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/interpreter",
+          "Action": "pass",
+          "Elapsed": 0.123
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/mircodec",
+          "Action": "pass",
+          "Elapsed": 0.114
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/packageartifact",
+          "Action": "pass",
+          "Elapsed": 0.692
+        },
+        {
+          "Package": "github.com/0disoft/fairyc/internal/cbackend",
+          "Action": "pass",
+          "Elapsed": 6.798
+        }
+      ],
+      "passedTestsAndSubtests": 1179,
+      "failures": [],
+      "skips": [
+        "TestI64HelpersStrictLinuxConsumers"
+      ]
+    },
+    {
+      "path": ".cache/nested-field-shared-view.jsonl",
+      "SHA256": "002d2cf4e47c0301c8069ce2c4248fe1e05ee125a21195cb4b0b50f9017b9e57",
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestStructNestedRejections$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "packageOutcomes": [
+        {
+          "Package": "github.com/0disoft/fairyc/internal/cli",
+          "Action": "pass",
+          "Elapsed": 3.277
+        }
+      ],
+      "passedTestsAndSubtests": 14,
+      "failures": [],
+      "skips": []
+    }
+  ],
+  "native": {
+    "path": ".cache/nested-field-store-native/windows/receipt.json",
+    "SHA256": "ccc9f3ca57519d0b9dc2d5092bee6d3d7e4d155a2a63954912fc4ec9572ef862",
+    "nativeOutcomes": 22,
+    "toolchain": {
+      "name": "msvc",
+      "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "version": "14.51.36231"
+    },
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "cases": [
+      {
+        "case": "scalar-types-order-copy",
+        "profile": "dev",
+        "exit": 0,
+        "expectedTrap": "",
+        "imageSHA256": "92fb62d7896f5f408a0f2b3e4ea414307324bab35748abc87ba5747a03e6d481",
+        "sourceSHA256": "206614c0a74362e489fe045df797f3f2d4b1ef10c9940b02016fcd7ac16b637d",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "case": "scalar-types-order-copy",
+        "profile": "release",
+        "exit": 0,
+        "expectedTrap": "",
+        "imageSHA256": "9eeac35c18c48e1a00d6c37540837107252735967f9e1c89554b014befbd09e7",
+        "sourceSHA256": "206614c0a74362e489fe045df797f3f2d4b1ef10c9940b02016fcd7ac16b637d",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "case": "reference-selection",
+        "profile": "dev",
+        "exit": 0,
+        "expectedTrap": "",
+        "imageSHA256": "138cdf2e405df84f005ad3c6c2eda8c969e0431d280e141b44f7164f63096993",
+        "sourceSHA256": "5e7fafd59c306c71f8f72064baddc53abf875b23d82fec7cf7719636f8e08e35",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "case": "reference-selection",
+        "profile": "release",
+        "exit": 0,
+        "expectedTrap": "",
+        "imageSHA256": "9b4cf9b9d2ee9cef5c6cab5ce89def263009322af805daf974dd20e059e0f4d9",
+        "sourceSHA256": "5e7fafd59c306c71f8f72064baddc53abf875b23d82fec7cf7719636f8e08e35",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "case": "owner-replacement",
+        "profile": "dev",
+        "exit": 0,
+        "expectedTrap": "",
+        "imageSHA256": "f17b24d971ff148d544ff6e0ee13dd1379c8d3cdc2ee6acb41982180492c4617",
+        "sourceSHA256": "829756f43eaf15c9d37a961fe91b283da43f90da3aaa40ebc6f5ca7eabc6a655",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "case": "owner-replacement",
+        "profile": "release",
+        "exit": 0,
+        "expectedTrap": "",
+        "imageSHA256": "77c9f8b5c91e4b6c8334c48af6fd945af76997d29e4bbee571ae3ca5d3819094",
+        "sourceSHA256": "829756f43eaf15c9d37a961fe91b283da43f90da3aaa40ebc6f5ca7eabc6a655",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "case": "i64-overflow",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "imageSHA256": "09eb813c9fe8e962f6d95eebc9f64f39038e371e31baf588bdeb71af195e32e1",
+        "sourceSHA256": "6e2cbb4b9f477775b9906054e02a2c775dd731d577e60bff65fe939af187c1af",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n"
+      },
+      {
+        "case": "i64-overflow",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "imageSHA256": "3e338e6923fedc7ce72d6c6dbde8d8fe39391b69961a2efc35af6275f0f8bbcd",
+        "sourceSHA256": "6e2cbb4b9f477775b9906054e02a2c775dd731d577e60bff65fe939af187c1af",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n"
+      },
+      {
+        "case": "u8-overflow",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "imageSHA256": "eb21169e4e0c9a58aafac94d14d53bf09f4bdc30e643fc2911f3516c0ca4d55a",
+        "sourceSHA256": "4cd47f09948b45e85f4a0563227ae91f5726ceb42e13220a8a4e6ba78bd5e5ad",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n"
+      },
+      {
+        "case": "u8-overflow",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "imageSHA256": "6fb2f7a2fc1ea87b192264b834c9f1701ea6d1283448d13d8599487c75a95c04",
+        "sourceSHA256": "4cd47f09948b45e85f4a0563227ae91f5726ceb42e13220a8a4e6ba78bd5e5ad",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n"
+      },
+      {
+        "case": "usize-underflow",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "imageSHA256": "74faeb616b7730bfb2df3dca2a5e2a4e6892caa43ecf6c35ea3005bdb20da863",
+        "sourceSHA256": "f3b366cb1a498b9ed84028bb70bcf12bc67d6f4de7f8ba28712feae02130dea7",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n"
+      },
+      {
+        "case": "usize-underflow",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "imageSHA256": "5a31dce5fdf84249fe74f5408789e22b605d061016f611881687cbe81d2ad77c",
+        "sourceSHA256": "f3b366cb1a498b9ed84028bb70bcf12bc67d6f4de7f8ba28712feae02130dea7",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n"
+      },
+      {
+        "case": "divide-zero",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "division-by-zero",
+        "imageSHA256": "bd3c84f1b13730401c46b74dd135262bacdf5b553d9d1dd1ab2892a4ab3ee2ec",
+        "sourceSHA256": "e22d64ced75bc54604633b06341371136589b7afce5a88090024392c92447c4f",
+        "rawOutcome": {
+          "ExitCode": 131,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0003"
+        },
+        "stdout": "",
+        "stderr": "trap: division-by-zero\n"
+      },
+      {
+        "case": "divide-zero",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "division-by-zero",
+        "imageSHA256": "c7ba4b4fd1e766b86452537c45a935fa0bebf1d029f7ec43b74698cd4d43a84a",
+        "sourceSHA256": "e22d64ced75bc54604633b06341371136589b7afce5a88090024392c92447c4f",
+        "rawOutcome": {
+          "ExitCode": 131,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0003"
+        },
+        "stdout": "",
+        "stderr": "trap: division-by-zero\n"
+      },
+      {
+        "case": "signed-divide-overflow",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "signed-division-overflow",
+        "imageSHA256": "38b55cdd8bad3233089b3bcf79e904c6927e4f108994f3b43db2b1a3c8b45e6c",
+        "sourceSHA256": "13fcfe1a377a1ba8c3df8129ea8968caf6f0f92c3ccf33c3e5a0a4aafb84637b",
+        "rawOutcome": {
+          "ExitCode": 132,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0004"
+        },
+        "stdout": "",
+        "stderr": "trap: signed-division-overflow\n"
+      },
+      {
+        "case": "signed-divide-overflow",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "signed-division-overflow",
+        "imageSHA256": "b84fb364c185571dcf6209c8e28fe8c9d03218aeeb6b7f069b6b1bbaed105c98",
+        "sourceSHA256": "13fcfe1a377a1ba8c3df8129ea8968caf6f0f92c3ccf33c3e5a0a4aafb84637b",
+        "rawOutcome": {
+          "ExitCode": 132,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0004"
+        },
+        "stdout": "",
+        "stderr": "trap: signed-division-overflow\n"
+      },
+      {
+        "case": "bad-shift",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "invalid-shift",
+        "imageSHA256": "6bc0cf168fe2b607ea58d21d8f64cc99c292c194f1ebcffb7377e1f2385ef192",
+        "sourceSHA256": "c4ca569b14f92ba7c7bfb0183788a0999b5482b59709e6a8fb6cfafde8a11307",
+        "rawOutcome": {
+          "ExitCode": 133,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0005"
+        },
+        "stdout": "",
+        "stderr": "trap: invalid-shift\n"
+      },
+      {
+        "case": "bad-shift",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "invalid-shift",
+        "imageSHA256": "aaa8911027880866e66e299074db9736dea8ac4f3a21f1c56595c47c0d694797",
+        "sourceSHA256": "c4ca569b14f92ba7c7bfb0183788a0999b5482b59709e6a8fb6cfafde8a11307",
+        "rawOutcome": {
+          "ExitCode": 133,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0005"
+        },
+        "stdout": "",
+        "stderr": "trap: invalid-shift\n"
+      },
+      {
+        "case": "negative-shift",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "invalid-shift",
+        "imageSHA256": "7d73051c31021ff300433d0e697cb87ef4c4d032ff2a1641384e6751df0df10e",
+        "sourceSHA256": "6e98d6200f21ead9a1e74f5485808dde89649d4ca100939688fb8e79b984bcb3",
+        "rawOutcome": {
+          "ExitCode": 133,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0005"
+        },
+        "stdout": "",
+        "stderr": "trap: invalid-shift\n"
+      },
+      {
+        "case": "negative-shift",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "invalid-shift",
+        "imageSHA256": "d9c25f5c613f005c4f07053fddb0ff099c20f8448e71fbed2fb6cf3f128fb25f",
+        "sourceSHA256": "6e98d6200f21ead9a1e74f5485808dde89649d4ca100939688fb8e79b984bcb3",
+        "rawOutcome": {
+          "ExitCode": 133,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0005"
+        },
+        "stdout": "",
+        "stderr": "trap: invalid-shift\n"
+      },
+      {
+        "case": "wide-shift",
+        "profile": "dev",
+        "exit": 5,
+        "expectedTrap": "invalid-shift",
+        "imageSHA256": "d949c4c353dc0b42c96b70c46c161f9487899752270cdbe787e04666aff65452",
+        "sourceSHA256": "f07507bc80bf92693ffeb831d1147c0f6a4b5b735f0eb00637b0bda091273435",
+        "rawOutcome": {
+          "ExitCode": 133,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0005"
+        },
+        "stdout": "",
+        "stderr": "trap: invalid-shift\n"
+      },
+      {
+        "case": "wide-shift",
+        "profile": "release",
+        "exit": 5,
+        "expectedTrap": "invalid-shift",
+        "imageSHA256": "1fa279a6604bcc30cb5c054074041172e77cfb45c38ff3a02cb97c3d21ac1e93",
+        "sourceSHA256": "f07507bc80bf92693ffeb831d1147c0f6a4b5b735f0eb00637b0bda091273435",
+        "rawOutcome": {
+          "ExitCode": 133,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0005"
+        },
+        "stdout": "",
+        "stderr": "trap: invalid-shift\n"
+      }
+    ]
+  },
+  "publicCLI": {
+    "schema": "fairyc.struct-view-portable-smoke/v1",
+    "compilerSHA256": "81ef0d6485bb1c9360b7f60343106d080a26aed9e4b39c24970f8f740043099d",
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "check ok: 2 instance(s), 10 source file(s), 186 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, development, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "imageSHA256": "c35b4df06725273baf957525a13cb424c53643cba14bc9f2d6fc53bb686396e1"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+          "run",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "dev",
+        "imageSHA256": "c35b4df06725273baf957525a13cb424c53643cba14bc9f2d6fc53bb686396e1"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          ""
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "dev",
+        "imageSHA256": "c35b4df06725273baf957525a13cb424c53643cba14bc9f2d6fc53bb686396e1"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "x=7;"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "dev",
+        "imageSHA256": "c35b4df06725273baf957525a13cb424c53643cba14bc9f2d6fc53bb686396e1"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "@"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "dev",
+        "imageSHA256": "c35b4df06725273baf957525a13cb424c53643cba14bc9f2d6fc53bb686396e1"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "9223372036854775808"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "dev",
+        "imageSHA256": "c35b4df06725273baf957525a13cb424c53643cba14bc9f2d6fc53bb686396e1"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "dev",
+        "imageSHA256": "c35b4df06725273baf957525a13cb424c53643cba14bc9f2d6fc53bb686396e1"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+          "build",
+          "--locked",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, release, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "imageSHA256": "40937ba13f5bb8a3d2723e15b4ec9aa3ac8ce0fbe1b976fa21d927e9799023b7"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+          "run",
+          "--locked",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "release",
+        "imageSHA256": "40937ba13f5bb8a3d2723e15b4ec9aa3ac8ce0fbe1b976fa21d927e9799023b7"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          ""
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "release",
+        "imageSHA256": "40937ba13f5bb8a3d2723e15b4ec9aa3ac8ce0fbe1b976fa21d927e9799023b7"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "x=7;"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "release",
+        "imageSHA256": "40937ba13f5bb8a3d2723e15b4ec9aa3ac8ce0fbe1b976fa21d927e9799023b7"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "@"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "release",
+        "imageSHA256": "40937ba13f5bb8a3d2723e15b4ec9aa3ac8ce0fbe1b976fa21d927e9799023b7"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "9223372036854775808"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "release",
+        "imageSHA256": "40937ba13f5bb8a3d2723e15b4ec9aa3ac8ce0fbe1b976fa21d927e9799023b7"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "release",
+        "imageSHA256": "40937ba13f5bb8a3d2723e15b4ec9aa3ac8ce0fbe1b976fa21d927e9799023b7"
+      }
+    ]
+  },
+  "resolvedInitialFailures": [
+    {
+      "test": "signed-divide-overflow",
+      "cause": "Fixture expected integer-overflow instead of the existing signed-division-overflow trap category.",
+      "correction": "Use the separate existing trap name.",
+      "verifiedBy": ".cache/nested-field-cli-final.jsonl"
+    },
+    {
+      "test": "bad-shift",
+      "cause": "Invalid immediate shift emitted unreachable C shifts rejected by MSVC C4293 under warnings-as-errors.",
+      "correction": "Retain the original range guard and replace only unreachable invalid-immediate shift expressions with a safe dummy count. No warning suppression.",
+      "verifiedBy": ".cache/nested-field-cli-final.jsonl"
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/semantic",
+      "./internal/mir",
+      "./internal/interpreter",
+      "./internal/cbackend",
+      "./internal/compiler",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "",
+    "stderr": "",
+    "exit": 0
+  },
+  "limits": [
+    "Linux execution deferred to the user batch; TestI64HelpersStrictLinuxConsumers requires Linux GNU amd64 GCC and Clang",
+    "Nested stores require scalar-leaf nonempty acyclic struct roots; no resource/borrow/pointer/index/call traversal or general aggregate-field replacement",
+    "No whole-repository suite, performance benchmark, SDK export/runtime symbol, DB, runner, PS1, installation, CI workflow or push changes"
+  ]
+}

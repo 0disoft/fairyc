@@ -85,3 +85,11 @@ ADR 0441 also exercises nested copies, repeated child types, empty views and
 bounds traps in `TestStructNestedNative`, plus forbidden nested fields, source
 loan checks, private MIR mutations/roundtrip and a nested warm-cache hit.
 The current review receipt is `docs/ops/evidence/struct-nested-20261004.json`.
+
+ADR 0442 allows `copy.position.start = ...` and checked integer compound stores
+on a mutable copied token or an existing `ref mut` token. The analyzer now rebases
+a copied token's span to its segment's first byte through `rebase(ref mut Token, usize)`;
+the borrowed vector and output format are unchanged. Whole-root loans still
+protect shared views. General aggregate-field replacement and mutable field
+borrows remain outside this extension. Evidence:
+`docs/ops/evidence/nested-field-store-20261004.json`.

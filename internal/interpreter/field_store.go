@@ -36,6 +36,29 @@ func storeScalarField(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 			return fmt.Errorf("invalid one-word struct field value")
 		}
 	}
+	if len(op.Fields) > 0 {
+		current := receiver
+		for _, name := range op.Fields {
+			if current.structure == nil || current.structure.definition == nil {
+				return fmt.Errorf("missing live nested field store owner")
+			}
+			child, found := current.structure.fields[name]
+			if !found || child.structure == nil {
+				return fmt.Errorf("invalid live nested field store path")
+			}
+			current = child
+		}
+		if current.structure == nil || current.structure.definition == nil {
+			return fmt.Errorf("missing nested leaf owner")
+		}
+		for _, field := range current.structure.definition.Fields {
+			if field.Name == op.Field && field.Type == op.Type {
+				current.structure.fields[op.Field] = value.cloneForValueCopy()
+				return nil
+			}
+		}
+		return fmt.Errorf("nested field store leaf type mismatch")
+	}
 	aggregate := fieldAggregateType(op.OwnerType)
 	if receiver.structure != nil && receiver.structure.definition != nil && receiver.structure.definition.Type == aggregate {
 		for _, field := range receiver.structure.definition.Fields {

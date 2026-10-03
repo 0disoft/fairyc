@@ -881,17 +881,35 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		element, mutable, borrowed := hir.BorrowElement(target.Children[0].Type)
 		return borrowed && mutable && element == target.Type
 	case "field-expression":
-		if len(target.Children) == 1 && target.Children[0].Kind == "view-index" {
-			return false
-		}
 		if len(source.Children) != 1 || len(target.Children) != 1 {
 			return false
 		}
-		if _, mutable, borrow := hir.BorrowElement(target.Children[0].Type); borrow {
+		root := target
+		depth := 0
+		for root.Kind == "field-expression" || root.Kind == "group" {
+			if len(root.Children) != 1 {
+				return false
+			}
+			if root.Kind == "field-expression" {
+				depth++
+			}
+			root = &root.Children[0]
+		}
+		if root.Kind != "path" {
+			return false
+		}
+		rootType := root.Type
+		_, mutable, borrowed := hir.BorrowElement(rootType)
+		if borrowed {
+			rootType, _, _ = hir.BorrowElement(rootType)
+		}
+		if depth > 1 && (!hir.FixedArrayScalarElement(target.Type) || !c.analyzer.plainViewStruct(rootType)) {
+			return false
+		}
+		if borrowed {
 			return mutable
 		}
-		receiver := assignmentRootPath(source.Children[0])
-		resolved := c.analyzer.resolved[receiver]
+		resolved := c.analyzer.resolved[fieldAssignmentRoot(source)]
 		return resolved != nil && resolved.mutable
 	default:
 		return false

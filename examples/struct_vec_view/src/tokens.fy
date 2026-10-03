@@ -39,11 +39,19 @@ pub fn bool scan(ref u8[] input, ref mut vec::Vec<Token> output) {
     return true;
 }
 
+fn void rebase(ref mut Token token, usize origin) {
+    token.position.start -= origin;
+    token.position.end -= origin;
+}
+
 /// Reads a borrowed token segment; only each selected token value is copied.
 pub fn Result<Stats, u32> analyze(ref Token[] segment) {
     var Stats stats = Stats { .identifiers = 0, .numbers = 0, .sum = 0 };
+    let usize origin = if (segment.is_empty) { 0 } else { segment[0].position.start };
     for (let Token token in segment) {
-        assert(token.position.start < token.position.end);
+        var Token local = token;
+        rebase(ref mut local, origin);
+        assert(local.position.start < local.position.end);
         if (token.kind == 1) { stats.identifiers += 1; }
         if (token.kind == 2) {
             if (token.value > 9223372036854775807 - stats.sum) { return .err(1); }

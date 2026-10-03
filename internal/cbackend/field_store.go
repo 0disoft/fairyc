@@ -20,6 +20,16 @@ func (e *emitter) inspectFieldStore(functionIndex int, operation mir.Operation) 
 	if err != nil || valueType != operation.Type {
 		return fmt.Errorf("field store value type %q does not match %q: %v", valueType, operation.Type, err)
 	}
+	if len(operation.Fields) > 0 {
+		receiverType, err := e.operandType(functionIndex, operation.Operands[0])
+		if err != nil || receiverType != operation.OwnerType {
+			return fmt.Errorf("nested field store receiver type mismatch")
+		}
+		if _, ok := mir.ResolveNestedFieldStore(operation, e.fieldStoreStruct); !ok {
+			return fmt.Errorf("invalid nested field store path")
+		}
+		return nil
+	}
 	// The read inspector owns the exact declared-field and receiver-type checks.
 	operation.Kind, operation.Operands = mir.OperationFieldRead, operation.Operands[:1]
 	if _, found := e.structByType[fieldAggregateType(operation.OwnerType)]; found {
@@ -36,6 +46,26 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 	value, err := cOperand(operation.Operands[1])
 	if err != nil {
 		return err
+	}
+	if len(operation.Fields) > 0 {
+		path, ok := mir.ResolveNestedFieldStore(operation, e.fieldStoreStruct)
+		if !ok {
+			return fmt.Errorf("invalid nested field store path")
+		}
+		typ := fieldAggregateType(operation.OwnerType)
+		place := "(" + receiver + ")"
+		access := "."
+		if _, _, borrowed := hir.BorrowElement(operation.OwnerType); borrowed {
+			access = "->"
+		}
+		for _, field := range path {
+			index := e.structByType[typ]
+			place += access + e.structCFieldName(index, e.structTypes[index].fieldIndex[field.Name])
+			access = "."
+			typ = field.Type
+		}
+		fmt.Fprintf(output, "    %s = %s;\n", place, value)
+		return nil
 	}
 	aggregate := fieldAggregateType(operation.OwnerType)
 	name := ""
@@ -59,5 +89,12 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 		access = "->"
 	}
 	fmt.Fprintf(output, "    (%s)%s%s = %s;\n", receiver, access, name, value)
+	return nil
+}
+
+func (e *emitter) fieldStoreStruct(typ hir.Type) *mir.StructType {
+	if index, ok := e.structByType[typ]; ok {
+		return &e.structTypes[index].definition
+	}
 	return nil
 }

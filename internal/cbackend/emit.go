@@ -3885,6 +3885,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return fmt.Errorf("binary in %s: %w", function, err)
 		}
+		if operation.Operator == "<<" || operation.Operator == ">>" {
+			rightValue = reachableShiftCount(operation.OwnerType, right, rightValue)
+		}
 		if operation.OwnerType == hir.TypeI64 {
 			emitI64Binary(output, operation, leftValue, rightValue)
 			break
@@ -4357,6 +4360,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		} else {
 			fmt.Fprintf(output, "    if (%s >= %s) { %sgoto fy_b_%d; }\n", amountValue, width, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INVALID_SHIFT"), failure)
 		}
+		amountValue = reachableShiftCount(terminator.SwitchType, amount, amountValue)
 		if terminator.Operator == "<<" {
 			value, _, err := twoOperands(terminator.SwitchOperands)
 			if err != nil {

@@ -44,3 +44,9 @@ func borrowPlaceRoot(expression *ast.Expression) *ast.Expression {
 	}
 	return expression
 }
+
+// fieldAssignmentRoot accepts only named places through field/group projections.
+// It does not promote calls, index expressions or pointer dereferences to places.
+func fieldAssignmentRoot(expression *ast.Expression) *ast.Expression {
+	return assignmentRootPath(borrowPlaceRoot(expression))
+}

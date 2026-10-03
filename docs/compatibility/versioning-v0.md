@@ -1624,3 +1624,15 @@ grammar, MIR/artifact/interface schemas and target maturity remain unchanged.
 Existing nominal field references preserve the nested graph in private artifacts;
 compiler executable identity separates cache generations. Linux execution remains
 deferred to the owner's batch.
+
+ADR 0442 admits nested scalar-field stores and integer compound stores in the
+ADR 0441 plain-struct graph. `field-store` uses its existing `Fields` array for
+ancestor names and `Field` for the leaf; direct stores retain an empty ancestor
+list. Actual local types and every declared path component are verified. The
+existing codec and package-body identity preserve this array, while older
+compilers reject the widened executable subset; executable compiler identity
+separates their cache generations. No SDK export, MIR opcode or wire shape,
+grammar, language /20 or runtime /0 change is made. SDK stage0.84 and target
+maturity are unchanged. Windows proofs also fix unreachable invalid-immediate
+C shift expressions without suppressing warnings or weakening source traps.
+Linux execution remains deferred to the owner's batch.

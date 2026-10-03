@@ -1,57 +1,59 @@
-# 중첩 구조체 공유 뷰 구현 결과
+# 중첩 구조체 스칼라 필드 대입 구현 결과
 
-2026-10-04, ADR 0441에 따라 중첩 구조체를 공유 뷰와 값 복사 for-in의 원소로
-허용했다. 토큰 예제는 다음 형태를 실제로 사용한다.
+2026-10-04, ADR 0442에 따라 가변 지역 구조체와 기존 `ref mut` 수신자의 중첩
+스칼라 필드를 직접 바꿀 수 있다. 앞선 ADR 0441의 공유 뷰/값 복사 반복도 유지한다.
 
 ```fairy
-pub struct Span { usize start; usize end; }
-pub struct Token { u32 kind; Span position; i64 value; }
+var Token copy = view[0];
+copy.position.start = 10;
+copy.position.end += 1;
 ```
 
-`src/tokens.fy`의 렉서가 토큰의 바이트 범위 `[start,end)`를 `Span`에 저장하고,
-`analyze`는 구조체 for-in에서 중첩 범위를 읽고 검사한다. 출력 형식은 유지했다.
+`src/tokens.fy`의 `rebase`가 복사한 토큰의 시작/끝 위치에서 구간 원점을 빼고,
+`analyze`가 그 지역 위치를 검사한다. 렉서가 저장한 원본 토큰과 출력은 보존된다.
+실제 로직은 Fairy C이며 Python은 기존 공개 CLI 검증에만 사용한다.
 
-semantic과 MIR의 구조체 판정은 `internal/hir/views.go`의 같은 그래프 검사를
-사용한다. 스칼라 또는 비어 있지 않은 구조체 필드만 허용하고, 반복되는 형제
-타입은 재사용한다. 순환·누락 정의·빈 중첩 구조체와 참조·포인터·resource·enum·
-배열·Option·Result 필드는 모든 깊이에서 거부한다. 명시적 스택을 써서 이 판정
-자체가 호스트의 재귀 스택에 의존하지 않는다.
+이름이 있는 가변 루트와 평범한 중첩 구조체의 스칼라 잎만 허용한다. 공유·불변
+루트와 살아 있는 루트/필드 대여는 변경을 막는다. 배열 원소·호출 결과·resource
+루트, 참조·포인터를 거치는 경로, 구조체 필드 전체 대입과 가변 필드 대여는
+이번 확장에 포함되지 않는다. 기존 직접 스칼라 필드/resource와 한-usize 래퍼
+대입의 별도 계약은 유지한다.
 
-인덱싱과 루프 항목은 중첩 필드를 포함한 원소 전체를 복사한다. 소유자 전체
-대여, 명목 타입 구분, 범위 검사와 루프 종료 규칙은 기존 계약을 따른다.
-구조체 필드에 구조체 값을 대입하는 기능은 현재 범위에 포함되지 않는다.
-복사 독립성 검증은 스칼라 필드를 바꾼 뒤 구조체 전체 값을 대입하는 방식이다.
+MIR은 루트와 조상 필드 목록 및 잎 이름을 보존하고 실제 정의·지역 타입을 검증한다.
+C는 중첩 lvalue를, 인터프리터는 살아 있는 중첩 셀을 수정한다. 중간 구조체를
+복사해 수정 결과를 잃는 하강을 하지 않는다. 복합 대입은 RHS 전에 원래 값을
+읽고 RHS를 한 번 실행한다. RHS가 `var ref mut`을 다시 묶어도 선택된 원래 대상에
+쓰며, 해당 대여도 최종 쓰기까지 유지한다. 산술 실패는 쓰기 전에 trap이다.
 
 ## 검증
 
-- Windows 일반·릴리스 각각 중첩 구조체 5건, 기존 구조체 반복 7건, 기존 스칼라
-  구조체 뷰 8건, 변경된 토큰 분석기 12건: 실제 실행 64회 통과.
-- 중첩 금지 필드·순환 및 루프 중 소유자 변경/이동·뷰 필드 쓰기 거부 13건 통과.
-  기존 구조체 뷰·반복 거부 검사도 유지했다.
-- 중첩 MIR 변조 11건 거부, 스칼라·중첩 반복문 MIR 저장/복원 및 캐시 all-hit 통과.
-- HIR 그래프 검사: 10,000단계 체인, 공유 자식 그래프, 순환·금지 필드 검증 통과.
-- 관련 HIR·의미 분석·compiler/MIR 검사, packageartifact·semanticsnapshot·atlasmap 및
-  Go vet 통과. C 동작은 위 네이티브 실행으로 검증했다.
-  `TestMapStoreCrashHelper`는 부모 프로세스에서 의도적으로 건너뛰는 자식 진입점이며,
-  제어된 자식 테스트들은 통과했다. mir·mircodec·cbackend·genericsource 패키지는
-  초기 이름 필터에 대응하는 unit test가 없어 해당 명령에서는 컴파일만 확인했다.
-- 공개 CLI check, 잠금 일반·릴리스 build/run와 portable verify의 native 12회 통과.
+- Windows 일반·릴리스: 중첩 대입 11사례씩, 네이티브 실행 22회 통과.
+  6종 스칼라, 정수 복합 연산, 복사 독립성, RHS 순서/횟수, 참조 재지정과 지역
+  소유자 교체, overflow/underflow·나눗셈·상수 시프트 오류를 확인했다.
+- source 거부 12건, 위조 경로/타입 MIR 변조 11건, 인터프리터/codec 저장·복원 및
+  중첩 store가 포함된 캐시 all-hit 통과.
+- 기존 직접 필드/래퍼/복합 대입과 토큰 예제의 Windows native 회귀 검사 통과.
+- 관련 semantic·MIR·interpreter·C backend·codec·packageartifact 검사와 Go vet 통과.
+- 공개 CLI check, 잠금 일반·릴리스 build/run 및 portable native 12회 통과.
 
-첫 native 실행에서 테스트가 미지원인 aggregate 필드 대입을 사용해 한 사례가
-실패했다. 제품 소스 변경 없이 테스트를 전체 값 대입으로 고친 뒤 해당 native
-묶음 5건을 두 프로필에서 재검증해 모두 통과했다. 최초 실패와 해결 결과를
-`docs/ops/evidence/struct-nested-20261004.json`에 구분해 남겼다.
-원시 실행·EXE·컴파일러·SDK·소스 해시도 같은 증거 파일에서 연결한다.
+초기 실행에서 signed 나눗셈 overflow 기대 이름이 기존 계약과 달랐던 테스트를
+수정했다. 또한 잘못된 상수 시프트가 MSVC C4293 빌드 오류를 내는 C 코드 생성
+결함을 수정했다. 범위 검사는 원래 값을 그대로 검사하고 trap을 유지한다.
+검사 뒤 도달 불가능한 C 시프트 식에만 안전한 더미 횟수를 사용한다. 경고 억제나
+캐시 우회는 하지 않았다. 최초 실패와 최종 통과를 증거에 구분해 남긴다.
 
-예제 디렉터리에서 `python verify.py /절대/경로/fairyc`를 사용한다. 관련 Go 검사:
+원시 로그와 compiler/SDK/소스/EXE 해시는
+`docs/ops/evidence/nested-field-store-20261004.json`에서 연결한다.
+
+## 실행과 한계
 
 ```sh
-bun tools/run-go.ts test ./internal/cli -run '^TestStruct(Nested|VecView|For|Token)' -count=1
+python verify.py /absolute/path/to/fairyc
+bun tools/run-go.ts test ./internal/cli -run '^TestNestedFieldStore(Native|Cache)$' -count=1
 ```
 
-## 한계
-
-Linux 실제 실행은 사용자의 이후 일괄 검증으로 미뤘다. 전체 저장소 스위트와
-성능 벤치마크는 실행하지 않았다. SDK stage0.84, 언어 `/20`, 런타임 `/0`,
-문법·MIR·인터페이스 스키마와 타깃 성숙도는 그대로다. SDK/API export나 런타임
-심볼, DB, 새 runner·PS1, 설치·CI·push 변경은 없다.
+Linux 실제 실행은 이후 일괄 검증으로 미뤘다. Windows 호스트에서
+`TestI64HelpersStrictLinuxConsumers`는 Linux/GCC/Clang 필요 조건으로 건너뛰었다.
+전체 저장소 스위트와 성능 벤치마크는 실행하지 않았다. SDK stage0.84, 언어 `/20`,
+런타임 `/0`, 문법·MIR opcode·wire schema·타깃 성숙도는 유지한다. SDK export나
+런타임 심볼, DB·설치·CI·새 runner/PS1·push 변경은 없다.

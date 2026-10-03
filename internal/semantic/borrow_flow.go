@@ -347,15 +347,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		f.checkDirectOwnerMove(statement, statement.Expression, environment)
 		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		if statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr && len(statement.Target.Children) == 1 {
-			if _, reachable := f.evaluateExpression(statement.Target, environment); !reachable {
-				return false
-			}
-			if _, reachable := f.evaluateExpression(statement.Expression, environment); !reachable {
-				return false
-			}
-			root := assignmentRootPath(statement.Target.Children[0])
-			f.checkOwnerAssignment(statement, f.analyzer.resolved[root], environment)
-			return true
+			return f.evaluateFieldAssignment(statement, environment)
 		}
 		if indexedAssignmentTarget(statement.Target) {
 			return f.evaluateSubviewIndexStore(statement, environment)

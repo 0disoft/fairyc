@@ -1,0 +1,41 @@
+package mir
+
+import "github.com/0disoft/fairyc/internal/hir"
+
+// ResolveNestedFieldStore validates a scalar leaf path through plain nested
+// structs. Fields holds ancestor names in order, Field holds the final leaf.
+// Definitions and the actual receiver/value locals remain verifier-owned facts.
+func ResolveNestedFieldStore(op Operation, lookup func(hir.Type) *StructType) ([]StructField, bool) {
+	if len(op.Fields) == 0 || !ValidFieldStoreShape(op) {
+		return nil, false
+	}
+	root := fieldAggregateType(op.OwnerType)
+	if !hir.PlainViewStruct(root, func(typ hir.Type) ([]hir.Type, bool) {
+		info := lookup(typ)
+		if info == nil {
+			return nil, false
+		}
+		fields := make([]hir.Type, len(info.Fields))
+		for i, field := range info.Fields {
+			fields[i] = field.Type
+		}
+		return fields, true
+	}) {
+		return nil, false
+	}
+	path := make([]StructField, 0, len(op.Fields)+1)
+	typ := root
+	for _, name := range append(append([]string(nil), op.Fields...), op.Field) {
+		info := lookup(typ)
+		if info == nil {
+			return nil, false
+		}
+		field, ok := structField(info.Fields, name)
+		if !ok {
+			return nil, false
+		}
+		path = append(path, field)
+		typ = field.Type
+	}
+	return path, typ == op.Type
+}
