@@ -7,7 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func storeScalarField(locals map[mir.LocalID]runtimeValue, op mir.Operation) error {
+func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs map[hir.Type]*mir.StructType) error {
 	if len(op.Operands) != 2 {
 		return fmt.Errorf("invalid field store operand count")
 	}
@@ -28,12 +28,15 @@ func storeScalarField(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 		}
 	} else {
 		if value.kind != valueStruct || value.typ != op.Type || value.structure == nil ||
-			!mir.ValidOneWordStructFieldStoreShape(op, value.structure.definition) {
-			return fmt.Errorf("invalid one-word struct field store")
+			(!mir.ValidOneWordStructFieldStoreShape(op, value.structure.definition) &&
+				!mir.ValidPlainStructFieldStoreShape(op, func(typ hir.Type) *mir.StructType { return structs[typ] })) {
+			return fmt.Errorf("invalid struct field store")
 		}
-		field := value.structure.definition.Fields[0]
-		if raw, found := value.structure.fields[field.Name]; !found || !scalarStoreValueMatches(raw, hir.TypeUSize) {
-			return fmt.Errorf("invalid one-word struct field value")
+		if mir.ValidOneWordStructFieldStoreShape(op, value.structure.definition) {
+			field := value.structure.definition.Fields[0]
+			if raw, found := value.structure.fields[field.Name]; !found || !scalarStoreValueMatches(raw, hir.TypeUSize) {
+				return fmt.Errorf("invalid one-word struct field value")
+			}
 		}
 	}
 	if len(op.Fields) > 0 {

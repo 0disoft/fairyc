@@ -64,10 +64,16 @@ its original loan through the RHS and final store; rebinding a `var ref mut`
 on the RHS does not retarget the selected nested store. Compound assignment
 reads the old scalar before the RHS runs once and traps before writing on failure.
 Shared roots, immutable roots and active whole-root/sibling field loans forbid
-writes. General aggregate-field replacement remains source-located unsupported
-lowering without publishing executable MIR. Direct plain replacement of a non-`repr(C)` one-`usize`-field
-inert struct from a typed local is the bounded exception. Shared field reads and borrows retain the
-separate projection boundary above; field stores do not admit mutable field borrows.
+writes. ADR 0443 admits exact-type whole-struct `=` replacement at direct or
+nested fields when both root and replacement belong to the ADR 0441 plain graph.
+The complete RHS evaluates once before storage; failure performs no final
+replacement, while any earlier RHS side effects remain. Reference
+selection and whole-root loans follow the rules above, including direct aggregate
+stores. Named-local root replacement during the RHS still stores to that local.
+Other aggregate-field replacements remain source-located unsupported lowering.
+The older direct non-`repr(C)` one-`usize`-field inert struct exception is retained.
+Shared field reads and borrows retain the separate projection boundary above;
+field stores do not admit mutable field borrows.
 
 ADR 0401 admits plain `*slot = value` for a named `ref mut` to `bool`, `u8`,
 `i32`, `u32`, or `usize`. The exclusive loan remains live while the right-hand

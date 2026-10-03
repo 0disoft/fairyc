@@ -831,7 +831,8 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationFieldStore:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				valid := ValidFieldStoreShape(operation) ||
-					ValidOneWordStructFieldStoreShape(operation, structTypes[operation.Type])
+					ValidOneWordStructFieldStoreShape(operation, structTypes[operation.Type]) ||
+					ValidPlainStructFieldStoreShape(operation, func(typ hir.Type) *StructType { return structTypes[typ] })
 				if valid {
 					valid = fieldStoreOperandType(operation.Operands[0], storeTypes) == operation.OwnerType &&
 						fieldStoreOperandType(operation.Operands[1], storeTypes) == operation.Type

@@ -1,0 +1,537 @@
+{
+  "schema": "fairyc.plain-struct-field-store-review/v1",
+  "date": "2026-10-04",
+  "baseCommit": "55691f9b1a5ded68c0a64d2a1582efc35b7a45ae",
+  "vcsModifiedAtBuild": true,
+  "sdk": "0.0.0-stage0.84",
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0",
+  "compilerSHA256": "494a6de0e2fafc5e009420537aec9b7d00e4a7223a218d3ca4338d5f94fb3740",
+  "compilerIdentityInvocation": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261003181422-55691f9b1a5d+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 55691f9b1a5ded68c0a64d2a1582efc35b7a45ae\nmodified: true\n",
+    "stderr": "",
+    "exit": 0
+  },
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/plain-struct-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "env": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0
+  },
+  "compilerSourceSet": {
+    "fileCount": 527,
+    "SHA256": "e0c0c44ff44031dd5c2e0c517b2a71ca811aa1b5b07cb3f12b9f3a1f2fb95961",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "sdkSourceSet": {
+    "fileCount": 8,
+    "SHA256": "a81b7b9e4beda6dcfc76bb2ceef7c6d6b31dd9bb20cadf5088a3678dbc0cb3ec",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "fixtureSHA256": "65d951dbe4edd86feb64a0a2e9e66ce588fe63d4ca6dd9f238d5cabaf0530b38",
+  "exampleSourceSet": {
+    "fileCount": 2,
+    "SHA256": "2188b18a92ec05fa4cd5d17dbecf6cd97bac5cd6bf9c62829c5fc029b3c03069",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "validationLogs": [
+    {
+      "path": ".cache/plain-struct-mir-final.jsonl",
+      "SHA256": "8181a475a40c4e37de849b6973124f55a86e56ea3562bb72fe2287fe364842e6",
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/mir",
+          "action": "pass"
+        }
+      ],
+      "passCount": 173,
+      "skipTests": []
+    },
+    {
+      "path": ".cache/plain-struct-compiler-final.jsonl",
+      "SHA256": "a4c6fa0debb63b87a2127091cb668d530fa480b121f287919d29982637921c65",
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "action": "pass"
+        }
+      ],
+      "passCount": 46,
+      "skipTests": []
+    },
+    {
+      "path": ".cache/plain-struct-native-final.jsonl",
+      "SHA256": "f22da1324236e364de5dfb1ac00ba31f43ba56e106c72247e592eb1770dcadd1",
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/cli",
+          "action": "pass"
+        }
+      ],
+      "passCount": 4,
+      "skipTests": []
+    },
+    {
+      "path": ".cache/plain-struct-related.jsonl",
+      "SHA256": "0c9f37a37318342fedd0982ae9428e7253764757e0b67e2af9365c0b1baa6749",
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/mir",
+          "action": "fail"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/mircodec",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/interpreter",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/packageartifact",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/cbackend",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "action": "fail"
+        }
+      ],
+      "passCount": 2239,
+      "skipTests": [
+        "TestI64HelpersStrictLinuxConsumers",
+        "TestGenericStableCacheChild",
+        "TestPrivateVectorSDKCandidateLinuxVectorLoopEmission/native",
+        "TestPrivateVectorSDKCandidateScannerBuildCost",
+        "TestPrivateVectorSDKCandidateIndependentCScannerBudgetSmoke"
+      ]
+    },
+    {
+      "path": ".cache/plain-struct-boundaries-final.jsonl",
+      "SHA256": "6c08333615b6f91351e12a2213ce703af3acd86ee1b3e99e8008f9cb85a4c936",
+      "packages": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/mir",
+          "action": "pass"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "action": "pass"
+        }
+      ],
+      "passCount": 145,
+      "skipTests": []
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/semantic",
+      "./internal/mir",
+      "./internal/interpreter",
+      "./internal/cbackend",
+      "./internal/compiler",
+      "./internal/cli"
+    ],
+    "exit": 0
+  },
+  "nativeReceipt": {
+    "path": ".cache/plain-struct-field-store-native/windows/receipt.json",
+    "SHA256": "2f8ec787d3725f7f21f30edcb20e942a132da9fbaee4b8bc186cca58ff9854da",
+    "cases": [
+      {
+        "case": "copy-order-selection",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestPlainStructFieldStoreNativecopy-order-selection2783844277\\001",
+        "imageSHA256": "b6e8080102007625fea829614fef26418fb85c1a09028a0dc0a4e62b93f84741",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "65d951dbe4edd86feb64a0a2e9e66ce588fe63d4ca6dd9f238d5cabaf0530b38",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "copy-order-selection",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestPlainStructFieldStoreNativecopy-order-selection2783844277\\001",
+        "imageSHA256": "fb5036081060b126129171b2ccccc47540a72036818ea3de8e229cbe7861f781",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "65d951dbe4edd86feb64a0a2e9e66ce588fe63d4ca6dd9f238d5cabaf0530b38",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "rhs-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestPlainStructFieldStoreNativerhs-trap1145161603\\001",
+        "imageSHA256": "5f555de78b744340b9dac488b1da59c657aadf56797e7dec357ccf6a66ec15d6",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "c3b3d5108e4587573dda654a899f13686f2a6aa1edadcfeeea3feb13607d4599",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "rhs-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestPlainStructFieldStoreNativerhs-trap1145161603\\001",
+        "imageSHA256": "58fa152f3d1310758a39169124289e790f02f5138b77aaea719d06b4cbf67d31",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "c3b3d5108e4587573dda654a899f13686f2a6aa1edadcfeeea3feb13607d4599",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      }
+    ]
+  },
+  "publicCLI": {
+    "path": "examples/struct_vec_view/build/verify-results.json",
+    "SHA256": "233838f464e9bfac988ebe95e25a043d5930330b4d3edac6eeb7da515e2e0d68",
+    "compilerSHA256": "494a6de0e2fafc5e009420537aec9b7d00e4a7223a218d3ca4338d5f94fb3740",
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "check ok: 2 instance(s), 10 source file(s), 186 MIR function(s), lock updated\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, development, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "imageSHA256": "e9525149bd0f6113ae99b75eee9bb6af062de35b1b099e219bc2b8156df7b42d"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+          "run",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "dev",
+        "imageSHA256": "e9525149bd0f6113ae99b75eee9bb6af062de35b1b099e219bc2b8156df7b42d"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          ""
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "dev",
+        "imageSHA256": "e9525149bd0f6113ae99b75eee9bb6af062de35b1b099e219bc2b8156df7b42d"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "x=7;"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "dev",
+        "imageSHA256": "e9525149bd0f6113ae99b75eee9bb6af062de35b1b099e219bc2b8156df7b42d"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "@"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "dev",
+        "imageSHA256": "e9525149bd0f6113ae99b75eee9bb6af062de35b1b099e219bc2b8156df7b42d"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "9223372036854775808"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "dev",
+        "imageSHA256": "e9525149bd0f6113ae99b75eee9bb6af062de35b1b099e219bc2b8156df7b42d"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "dev",
+        "imageSHA256": "e9525149bd0f6113ae99b75eee9bb6af062de35b1b099e219bc2b8156df7b42d"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+          "build",
+          "--locked",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, release, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "imageSHA256": "2136b59b3239782721fb63a7b15d138b8efb3887ac576e94808ac61566ab75a6"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+          "run",
+          "--locked",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "release",
+        "imageSHA256": "2136b59b3239782721fb63a7b15d138b8efb3887ac576e94808ac61566ab75a6"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          ""
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "release",
+        "imageSHA256": "2136b59b3239782721fb63a7b15d138b8efb3887ac576e94808ac61566ab75a6"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "x=7;"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+        "stderr": "",
+        "exit": 0,
+        "profile": "release",
+        "imageSHA256": "2136b59b3239782721fb63a7b15d138b8efb3887ac576e94808ac61566ab75a6"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "@"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "release",
+        "imageSHA256": "2136b59b3239782721fb63a7b15d138b8efb3887ac576e94808ac61566ab75a6"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "9223372036854775808"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "release",
+        "imageSHA256": "2136b59b3239782721fb63a7b15d138b8efb3887ac576e94808ac61566ab75a6"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+          "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+        "stdout": "",
+        "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+        "exit": 2,
+        "profile": "release",
+        "imageSHA256": "2136b59b3239782721fb63a7b15d138b8efb3887ac576e94808ac61566ab75a6"
+      }
+    ]
+  },
+  "remainingConstantTrap": {
+    "current": {
+      "source": "module main;struct Span{i64 start;i64 end;}struct Owner{Span position;}fn Span bad(){var i64 n=9223372036854775807;n+=1;return Span{.start=n,.end=0};}fn i32 main(){var Owner s=Owner{.position=Span{.start=3,.end=4}};s.position=bad();return 0;}\n",
+      "sourceSHA256": "c7f5d3752953216d0444a9a29def7acc535ffd8c9088ec38b11fec01342816dd",
+      "compilerSHA256": "494a6de0e2fafc5e009420537aec9b7d00e4a7223a218d3ca4338d5f94fb3740",
+      "runs": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+            "check"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-constant-repro",
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+          "stderr": "",
+          "exit": 0
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-compiler\\fairyc.exe",
+            "build",
+            "--locked",
+            "--release"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-constant-repro",
+          "stdout": "",
+          "stderr": "fairyc: build failed: MSVC host command failed: exit status 2: unit.c\n<temporary>\\unit.c(77) : error C2220: the following warning is treated as an error\n<temporary>\\unit.c(77) : warning C4702: unreachable code\n<temporary>\\unit.c(80) : warning C4702: unreachable code\n",
+          "exit": 6
+        }
+      ]
+    },
+    "baseline": {
+      "source": "module main;struct Span{i64 start;i64 end;}fn Span bad(){var i64 n=9223372036854775807;n+=1;return Span{.start=n,.end=0};}fn i32 main(){let Span s=bad();return 0;}\n",
+      "sourceSHA256": "5589e81c23d66f69edbb52e589aa0c57645310a22249111a46696c48ad4a10f1",
+      "compilerSHA256": "81ef0d6485bb1c9360b7f60343106d080a26aed9e4b39c24970f8f740043099d",
+      "runs": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+            "check"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-constant-repro\\baseline",
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+          "stderr": "",
+          "exit": 0
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nested-field-compiler\\fairyc.exe",
+            "build",
+            "--locked",
+            "--release"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\plain-struct-constant-repro\\baseline",
+          "stdout": "",
+          "stderr": "fairyc: build failed: MSVC host command failed: exit status 2: unit.c\n<temporary>\\unit.c(63) : error C2220: the following warning is treated as an error\n<temporary>\\unit.c(63) : warning C4702: unreachable code\n<temporary>\\unit.c(66) : warning C4702: unreachable code\n",
+          "exit": 6
+        }
+      ]
+    }
+  },
+  "supersededFailures": [
+    "Initial MIR test compile used a nonexistent ResourceType.Name field; corrected in final test.",
+    "Old aggregate rejection expectations were updated to the new contract; final focused compiler and full MIR tests pass.",
+    "Initial literal RHS overflow native build failed C4702; retained as an unresolved preexisting backend issue."
+  ],
+  "scopeLimits": [
+    "Linux actual execution deferred by owner.",
+    "Whole repository and performance tests not run.",
+    "Compiler package-wide test interrupted after unrelated allocation-failure native probes exceeded narrow scope; its old rejection failures are superseded by final focused pass.",
+    "No SDK/runtime/grammar/wire changes, new runner, installation, CI or push."
+  ]
+}

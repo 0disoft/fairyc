@@ -90,6 +90,13 @@ ADR 0442 allows `copy.position.start = ...` and checked integer compound stores
 on a mutable copied token or an existing `ref mut` token. The analyzer now rebases
 a copied token's span to its segment's first byte through `rebase(ref mut Token, usize)`;
 the borrowed vector and output format are unchanged. Whole-root loans still
-protect shared views. General aggregate-field replacement and mutable field
-borrows remain outside this extension. Evidence:
+protect shared views. At that revision aggregate-field replacement and mutable
+field borrows remained outside the extension. Evidence:
 `docs/ops/evidence/nested-field-store-20261004.json`.
+
+ADR 0443 now uses `token.position = Span { ... }` inside `rebase` to replace the
+whole copied span. Direct and nested aggregate stores support the same exact-type
+plain graph; mutable field borrows and struct-view element stores remain closed.
+Run the existing portable `verify.py` for actual CLI dev/release execution, or
+`bun tools/run-go.ts test ./internal/cli -run '^TestPlainStructFieldStore(Native|Cache)$' -count=1`.
+Current evidence: `docs/ops/evidence/plain-struct-field-store-20261004.json`.

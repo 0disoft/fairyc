@@ -40,14 +40,14 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	if _, mutable, borrowed := hir.BorrowElement(owner.Type); borrowed && !mutable {
 		return unsupported
 	}
-	if len(fields) > 0 && (!fieldStoreScalar(target.Type) || !l.properties.plainViewStruct(fieldAggregateType(owner.Type))) {
+	if len(fields) > 0 && ((!fieldStoreScalar(target.Type) && !l.properties.plainViewStruct(target.Type)) || !l.properties.plainViewStruct(fieldAggregateType(owner.Type))) {
 		return unsupported
 	}
 	receiver, err := l.lowerExpression(owner)
 	if err != nil {
 		return err
 	}
-	if len(fields) > 0 {
+	if len(fields) > 0 || l.properties.plainViewStruct(target.Type) {
 		if _, _, borrowed := hir.BorrowElement(owner.Type); borrowed {
 			saved := l.newTemporary()
 			l.appendOperation(Operation{Kind: OperationAssign, Span: target.Span, DestinationLocal: saved, Operands: []Operand{receiver}})
@@ -83,7 +83,8 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	op := Operation{Kind: OperationFieldStore, Span: target.Span, Symbol: hir.NoSymbol,
 		DestinationLocal: NoLocal, OwnerType: owner.Type, Type: target.Type, Field: target.Operator, Fields: fields,
 		Operands: []Operand{receiver, value}}
-	if !ValidFieldStoreShape(op) && !ValidOneWordStructFieldStoreShape(op, l.properties.Struct(target.Type)) {
+	if !ValidFieldStoreShape(op) && !ValidOneWordStructFieldStoreShape(op, l.properties.Struct(target.Type)) &&
+		!ValidPlainStructFieldStoreShape(op, l.properties.Struct) {
 		return unsupported
 	}
 	l.appendOperation(op)

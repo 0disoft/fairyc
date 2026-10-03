@@ -83,12 +83,24 @@ func TestVerifyOneWordStructFieldStore(t *testing.T) {
 	if failures := Verify(makeProgram()); len(failures) != 0 {
 		t.Fatalf("valid inert wrapper store: %+v", failures)
 	}
+	// These shapes leave the older one-word exception, but now qualify as
+	// whole plain-struct replacement under ADR 0443.
+	for _, wide := range []bool{false, true} {
+		program := makeProgram()
+		if wide {
+			program.StructTypes[0].Fields = append(program.StructTypes[0].Fields, StructField{Name: "extra", Type: hir.TypeUSize})
+		} else {
+			program.StructTypes[0].ReprC = true
+		}
+		if ValidOneWordStructFieldStoreShape(program.Functions[0].Blocks[0].Operations[0], &program.StructTypes[0]) {
+			t.Fatal("old wrapper exception widened")
+		}
+		if failures := Verify(program); len(failures) != 0 {
+			t.Fatalf("plain wrapper store: %+v", failures)
+		}
+	}
 	for name, mutate := range map[string]func(*Program){
 		"raw value": func(p *Program) { p.Functions[0].ParameterTypes[1] = hir.TypeUSize },
-		"two fields": func(p *Program) {
-			p.StructTypes[0].Fields = append(p.StructTypes[0].Fields, StructField{Name: "extra", Type: hir.TypeUSize})
-		},
-		"repr C": func(p *Program) { p.StructTypes[0].ReprC = true },
 		"shared owner": func(p *Program) {
 			p.Functions[0].ParameterTypes[0] = hir.SharedBorrow(cursor)
 			p.Functions[0].Blocks[0].Operations[0].OwnerType = hir.SharedBorrow(cursor)

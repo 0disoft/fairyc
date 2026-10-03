@@ -1636,3 +1636,11 @@ grammar, language /20 or runtime /0 change is made. SDK stage0.84 and target
 maturity are unchanged. Windows proofs also fix unreachable invalid-immediate
 C shift expressions without suppressing warnings or weakening source traps.
 Linux execution remains deferred to the owner's batch.
+
+ADR 0443 admits exact-type whole plain-struct field replacement, directly or
+nested in the ADR 0441 plain graph. Actual local types, declared paths and graph
+admission remain verifier-owned. The existing `field-store` opcode and wire
+shape are reused; executable compiler identity separates older restricted
+compilers and their caches. SDK source/exports and stage0.84, language /20,
+runtime /0, grammar and target maturity remain unchanged. Linux execution is
+deferred to the owner's batch.

@@ -12,7 +12,7 @@ import (
 func TestFieldBorrowAssignmentRejectsOnlyExecutableLowering(t *testing.T) {
 	const text = `module main;
 struct Value { i32 number; }
-struct Counter { Value value; }
+resource Counter { Value value; cleanup {} }
 fn void Counter::set(ref mut Counter this, Value value) { this.value = value; }
 fn i32 main() { var Counter counter = Counter { .value = Value { .number = 0 } }; counter.set(Value { .number = 42 }); return 0; }`
 	files := []semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)}

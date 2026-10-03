@@ -56,7 +56,7 @@ source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", `module main;
 struct Value { i32 number; usize extra; }
-struct State { Value count; }
+resource State { Value count; cleanup {} }
 fn void edit(ref mut State state) { state.count = Value { .number = 1, .extra = 2 }; }
 fn i32 main() { var State state = State { .count = Value { .number = 0, .extra = 0 } }; edit(ref mut state); return 0; }
 `)

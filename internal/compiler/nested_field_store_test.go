@@ -71,18 +71,18 @@ func TestNestedFieldStoreRejections(t *testing.T) {
  fn Token make(){return Token{.position=Span{.start=0,.end=7}};}
  `
 	for name, source := range map[string]string{
-		"immutable":       "fn i32 main(){let Token s=make();s.position.start=1;return 0;}",
-		"shared":          "fn void bad(ref Token s){s.position.start=1;}",
-		"loan":            "fn i32 main(){var Token s=make();let ref Token view=ref s;s.position.start=1;assert(view.position.start==0);return 0;}",
-		"field-loan":      "fn i32 main(){var Token s=make();let ref i64 view=ref s.position.end;s.position.start=1;assert(*view==7);return 0;}",
-		"mutable-loan":    "fn i32 main(){var Token s=make();let ref mut Token view=ref mut s;s.position.start=1;view.position.end=9;return 0;}",
-		"rhs-owner-write": "fn i32 main(){var Token s=make();let ref mut Token selected=ref mut s;selected.position.start+={s.position.start=9;2};return 0;}",
-		"rhs-owner-read":  "fn i32 main(){var Token s=make();let ref mut Token selected=ref mut s;selected.position.start+={s.position.start};return 0;}",
-		"temporary":       "fn i32 main(){make().position.start=1;return 0;}",
-		"aggregate":       "fn i32 main(){var Token s=make();s.position=Span{.start=1,.end=2};return 0;}",
-		"type-mismatch":   "fn i32 main(){var Token s=make();s.position.start=true;return 0;}",
-		"borrow-field":    "struct Holder{ref mut Token inner;} fn void bad(ref mut Holder h){h.inner.position.start=1;}",
-		"resource-root":   "resource Holder{Token inner;cleanup {}} fn void bad(ref mut Holder h){h.inner.position.start=1;}",
+		"immutable":          "fn i32 main(){let Token s=make();s.position.start=1;return 0;}",
+		"shared":             "fn void bad(ref Token s){s.position.start=1;}",
+		"loan":               "fn i32 main(){var Token s=make();let ref Token view=ref s;s.position.start=1;assert(view.position.start==0);return 0;}",
+		"field-loan":         "fn i32 main(){var Token s=make();let ref i64 view=ref s.position.end;s.position.start=1;assert(*view==7);return 0;}",
+		"mutable-loan":       "fn i32 main(){var Token s=make();let ref mut Token view=ref mut s;s.position.start=1;view.position.end=9;return 0;}",
+		"rhs-owner-write":    "fn i32 main(){var Token s=make();let ref mut Token selected=ref mut s;selected.position.start+={s.position.start=9;2};return 0;}",
+		"rhs-owner-read":     "fn i32 main(){var Token s=make();let ref mut Token selected=ref mut s;selected.position.start+={s.position.start};return 0;}",
+		"temporary":          "fn i32 main(){make().position.start=1;return 0;}",
+		"aggregate-compound": "fn i32 main(){var Token s=make();s.position+=Span{.start=1,.end=2};return 0;}",
+		"type-mismatch":      "fn i32 main(){var Token s=make();s.position.start=true;return 0;}",
+		"borrow-field":       "struct Holder{ref mut Token inner;} fn void bad(ref mut Holder h){h.inner.position.start=1;}",
+		"resource-root":      "resource Holder{Token inner;cleanup {}} fn void bad(ref mut Holder h){h.inner.position.start=1;}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", prelude+source)})

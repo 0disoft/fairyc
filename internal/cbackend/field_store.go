@@ -9,7 +9,7 @@ import (
 )
 
 func (e *emitter) inspectFieldStore(functionIndex int, operation mir.Operation) error {
-	valid := mir.ValidFieldStoreShape(operation)
+	valid := mir.ValidFieldStoreShape(operation) || mir.ValidPlainStructFieldStoreShape(operation, e.fieldStoreStruct)
 	if index, found := e.structByType[operation.Type]; found {
 		valid = valid || mir.ValidOneWordStructFieldStoreShape(operation, &e.structTypes[index].definition)
 	}
