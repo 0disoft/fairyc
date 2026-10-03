@@ -28,7 +28,6 @@ func TestAnalyzeI64ViewRejectedForms(t *testing.T) {
 	for name, source := range map[string]string{
 		"local escape":           "fn ref i64[] bad() { let i64[2] data = [1,2]; return ref data; }",
 		"value parameter escape": "fn ref i64[] bad(i64[2] data) { return ref data; }",
-		"mutable view":           "fn void bad(ref mut i64[] values) {}",
 		"owned slice":            "fn void bad(i64[] values) {}",
 		"wrong element":          "fn void read(ref i64[] values) {} fn void bad() { let u8[2] data = [1,2]; read(ref data); }",
 		"write through view":     "fn void bad(ref i64[] values) { values[0] = 3; }",

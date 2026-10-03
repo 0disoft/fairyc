@@ -79,7 +79,7 @@ func TestPrivateStorageQuerySourceRejections(t *testing.T) {
 		"value argument":    strings.Replace(storageSource, "storage_size<T>()", "storage_size<T>(1)", 1),
 		"type arity":        strings.Replace(storageSource, "storage_size<T>()", "storage_size<T, T>()", 1),
 		"unknown type":      strings.Replace(storageSource, "storage_size<T>()", "storage_size<Missing>()", 1),
-		"unsupported type":  strings.Replace(storageSource, "size<bool>()", "size<ref mut i64[]>()", 1),
+		"unsupported type":  strings.Replace(storageSource, "size<bool>()", "size<ref mut i32[]>()", 1),
 		"reserved function": strings.Replace(storageSource, "fn usize size<T>()", "fn usize storage_size<T>()", 1),
 		"reserved binding":  strings.Replace(storageSource, "return storage_size<T>();", "let usize storage_size = 1; return storage_size<T>();", 1),
 	} {

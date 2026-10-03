@@ -535,7 +535,8 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 	storeKind := OperationArrayIndexStore
 	switchKind := "checked-array-index"
 	if target.Kind == "view-index" {
-		if target.Children[0].Type != hir.MutableBorrow(hir.TypeByteSlice) || target.Type != hir.TypeU8 {
+		element, indexed := hir.IndexedViewElement(target.Children[0].Type)
+		if !indexed || !hir.MutableIndexedView(target.Children[0].Type) || target.Type != element {
 			return fmt.Errorf("mutable byte-view assignment has incompatible type metadata")
 		}
 		checkKind = OperationViewIndexCheck

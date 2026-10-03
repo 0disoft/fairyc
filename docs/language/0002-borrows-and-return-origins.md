@@ -99,8 +99,9 @@ indexing and half-open slicing count i64 elements and preserve the whole-owner
 loan, including shared aliases/siblings, nested slices and parameter-derived
 returns. Empty end slices are permitted. The receiver stays borrowed while
 explicit indices/bounds evaluate. Owner mutation waits until the last retained
-use; local/by-value-parameter escape remains E2102. Mutable i64 views and owned
-unsized slices are unsupported. No i64-to-byte reinterpretation is implied.
+use; local/by-value-parameter escape remains E2102. Owned unsized slices remain
+unsupported. ADR 0433 adds exclusive fixed-array i64 views below. No i64-to-byte
+reinterpretation is implied.
 
 ADR 0431 adds the SDK `std::vec::view_i64(ref Vec<i64>)` initialized-prefix
 view with the same whole-owner loan. All mutating vector operations, replacement
@@ -117,6 +118,14 @@ exit, including bodies ending with break/return/propagation. Mutation or move
 inside the body is rejected; mutation after exit follows ordinary later-use
 rules. Named array/Vec subviews are eligible. Direct collection values, mutable
 items, mutable view bindings and expression-valued iterables are not admitted.
+
+ADR 0433 admits `ref mut i64[]` from a mutable `i64[N]` place with explicit
+`ref mut data`, including checked element stores/compound assignment and
+exclusive half-open subviews. Lengths and offsets count elements. It reuses
+ADR 0415's whole-parent freeze, alias generations, last-use release and
+parameter-derived return summaries. Retained siblings remain rejected even
+when disjoint; shared readers require a shortened shared reborrow. Vec mutable
+view conversion and mutable for-in iteration remain outside this admission.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

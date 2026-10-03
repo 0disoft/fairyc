@@ -185,7 +185,7 @@ func runI64ViewNativeCases(t *testing.T, label string, cases []struct{ name, sou
 						t.Fatalf("trap: %d %q %q", code, out, diag)
 					}
 				} else if code != 0 || out != "" || diag != "" {
-					t.Fatalf("run: %d %q %q", code, out, diag)
+					t.Fatalf("%s run: %d %q %q", profile, code, out, diag)
 				}
 				if runtime.GOOS == "windows" {
 					if err := os.WriteFile(filepath.Join(evidenceRoot, item.name+"-"+profile+".exe"), data, 0700); err != nil {

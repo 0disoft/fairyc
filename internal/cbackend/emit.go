@@ -121,6 +121,7 @@ type emitter struct {
 	localTypes         []map[mir.LocalID]hir.Type
 	needsByteSlice     bool
 	needsI64Slice      bool
+	needsMutI64Slice   bool
 	needsMutByteSlice  bool
 	needsStringView    bool
 	needsBitcast       bool
@@ -1123,7 +1124,7 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice) || value == hir.SharedBorrow(hir.TypeI64Slice) ||
+	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice) || hir.I64View(value) ||
 		value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeCStr) {
 		return true
 	}
@@ -1172,6 +1173,8 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		return "fy_mut_byte_slice", nil
 	case value == hir.SharedBorrow(hir.TypeI64Slice):
 		return "fy_i64_slice", nil
+	case value == hir.MutableBorrow(hir.TypeI64Slice):
+		return "fy_mut_i64_slice", nil
 	case value == hir.SharedBorrow(hir.TypeStr):
 		return "fy_str", nil
 	case value == hir.SharedBorrow(hir.TypeCStr):
@@ -1453,7 +1456,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				}
 				if operation.Type == hir.MutableBorrow(hir.TypeByteSlice) {
 					e.features["mutable-array-byte-view-borrow"] = struct{}{}
-				} else if operation.Type == hir.SharedBorrow(hir.TypeI64Slice) {
+				} else if hir.I64View(operation.Type) {
 					e.features["array-i64-view-borrow"] = struct{}{}
 				} else {
 					e.features["array-byte-view-borrow"] = struct{}{}
@@ -1682,6 +1685,8 @@ func (e *emitter) recordCValueTypeRequirements(value hir.Type) {
 		e.needsByteSlice = true
 	case hir.SharedBorrow(hir.TypeI64Slice):
 		e.needsI64Slice = true
+	case hir.MutableBorrow(hir.TypeI64Slice):
+		e.needsMutI64Slice = true
 	case hir.MutableBorrow(hir.TypeByteSlice):
 		e.needsMutByteSlice = true
 	case hir.SharedBorrow(hir.TypeStr):
@@ -1733,7 +1738,7 @@ func (e *emitter) inspectViewLength(functionIndex int, operation mir.Operation) 
 		return fmt.Errorf("borrowed-view length in %s: %w", function.Name, err)
 	}
 	element, _, borrow := hir.BorrowElement(operation.OwnerType)
-	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && operation.OwnerType != hir.SharedBorrow(hir.TypeI64Slice) || operation.Type != hir.TypeUSize || operation.Field != "len" {
+	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && !hir.I64View(operation.OwnerType) || operation.Type != hir.TypeUSize || operation.Field != "len" {
 		return fmt.Errorf("borrowed-view length in %s has incompatible owner, result, or field", function.Name)
 	}
 	receiverType, err := e.operandType(functionIndex, receiver)
@@ -1855,7 +1860,7 @@ func (e *emitter) inspectViewEmpty(functionIndex int, operation mir.Operation) e
 		return fmt.Errorf("borrowed-view emptiness in %s: %w", function.Name, err)
 	}
 	element, _, borrow := hir.BorrowElement(operation.OwnerType)
-	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && operation.OwnerType != hir.SharedBorrow(hir.TypeI64Slice) || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
+	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice && !hir.I64View(operation.OwnerType) || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
 		return fmt.Errorf("borrowed-view emptiness in %s has incompatible owner, result, or field", function.Name)
 	}
 	receiverType, err := e.operandType(functionIndex, receiver)
@@ -1902,14 +1907,15 @@ func (e *emitter) inspectViewIndexStore(functionIndex int, operation mir.Operati
 	if err != nil {
 		return fmt.Errorf("mutable byte-view index store in %s: %w", function.Name, err)
 	}
-	if operation.OwnerType != hir.MutableBorrow(hir.TypeByteSlice) || operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 ||
+	element, indexed := hir.IndexedViewElement(operation.OwnerType)
+	if !indexed || !hir.MutableIndexedView(operation.OwnerType) || operation.IndexType != hir.TypeUSize || operation.Type != element ||
 		operation.Operator != "[]=" || operation.DestinationLocal != mir.NoLocal {
 		return fmt.Errorf("mutable byte-view index store in %s has incompatible owner, value, operator, or destination", function.Name)
 	}
 	receiverType, receiverErr := e.operandType(functionIndex, receiver)
 	indexType, indexErr := e.operandType(functionIndex, index)
 	valueType, valueErr := e.operandType(functionIndex, value)
-	if receiverErr != nil || indexErr != nil || valueErr != nil || receiverType != operation.OwnerType || indexType != hir.TypeUSize || valueType != hir.TypeU8 {
+	if receiverErr != nil || indexErr != nil || valueErr != nil || receiverType != operation.OwnerType || indexType != hir.TypeUSize || valueType != element {
 		return fmt.Errorf("mutable byte-view index store in %s has incompatible operand types", function.Name)
 	}
 	if len(operation.TrapCategories) != 0 {
@@ -3022,6 +3028,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if e.needsI64Slice {
 		output.WriteString("typedef struct fy_i64_slice {\n    const int64_t *data;\n    uintptr_t length;\n} fy_i64_slice;\n\n")
 	}
+	if e.needsMutI64Slice {
+		output.WriteString("typedef struct fy_mut_i64_slice {\n    int64_t *data;\n    uintptr_t length;\n} fy_mut_i64_slice;\n\n")
+	}
 	_, usesArrayByteView := e.features["array-byte-view-borrow"]
 	if usesStaticByteString || usesArrayByteView || e.needsByteSlice {
 		output.WriteString("typedef struct fy_byte_slice {\n")
@@ -3651,7 +3660,13 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return fmt.Errorf("byte-view index offset in %s: %w", function, err)
 		}
-		fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
+		// MSVC /O2 can retain stale reads after exclusive i64 stores (ADR 0433).
+		// Keep shared-only programs and other targets on ordinary loads.
+		if e.targetID == target.X8664WindowsMSVC && e.needsMutI64Slice && operation.Type == hir.TypeI64 {
+			fmt.Fprintf(output, "    fy_l_%d = ((const volatile int64_t *)(%s).data)[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
+		} else {
+			fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
+		}
 	case mir.OperationViewIndexStore:
 		receiver, index, value, err := threeOperands(operation.Operands)
 		if err != nil {
@@ -3664,10 +3679,14 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("mutable byte-view index store in %s has an invalid operand", function)
 		}
 		if e.targetID == target.X8664WindowsMSVC {
-			// MSVC 14.51 /O2 loses an inlined byte-view store through a
+			// MSVC 14.51 /O2 loses inlined stores through a
 			// copied subview descriptor. Keep this store observable without
 			// changing descriptor layout or disabling function optimization.
-			fmt.Fprintf(output, "    ((volatile uint8_t *)(%s).data)[%s] = %s;\n", receiverValue, indexValue, storedValue)
+			cType, err := e.cValueType(operation.Type)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(output, "    ((volatile %s *)(%s).data)[%s] = %s;\n", cType, receiverValue, indexValue, storedValue)
 		} else {
 			fmt.Fprintf(output, "    (%s).data[%s] = %s;\n", receiverValue, indexValue, storedValue)
 		}
@@ -3706,7 +3725,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return err
 		}
-		if operation.Type == hir.SharedBorrow(hir.TypeByteSlice) {
+		if operation.Type == hir.SharedBorrow(hir.TypeI64Slice) {
+			fmt.Fprintf(output, "    fy_l_%d = (fy_i64_slice){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, value, value)
+		} else if operation.Type == hir.SharedBorrow(hir.TypeByteSlice) {
 			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, value, value)
 		} else {
 			fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)

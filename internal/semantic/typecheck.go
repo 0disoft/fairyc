@@ -872,7 +872,7 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		_, _, fixedArray := hir.FixedArrayParts(target.Children[0].Type)
 		return fixedArray && resolved != nil && resolved.mutable
 	case "view-index":
-		return len(target.Children) == 2 && target.Children[0].Type == hir.MutableBorrow(hir.TypeByteSlice)
+		return len(target.Children) == 2 && hir.MutableIndexedView(target.Children[0].Type)
 	case "prefix":
 		if !scalarDerefAssignmentTarget(source) || target.Operator != "*" || len(target.Children) != 1 ||
 			!hir.FixedArrayScalarElement(target.Type) || !directDerefBorrowPath(source.Children[0]) {
@@ -1174,7 +1174,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 		}
 		return hir.TypeBool
 	}
-	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice || receiverType == hir.SharedBorrow(hir.TypeI64Slice)) {
+	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice || hir.I64View(receiverType)) {
 		switch expression.Text {
 		case "len":
 			result.Kind = "view-length"
@@ -1299,8 +1299,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, expression.Children[0].Span))
 			return hir.TypeInvalid
 		}
-		if element, length, array := hir.FixedArrayParts(childType); expected == hir.MutableBorrow(hir.TypeByteSlice) &&
-			array && element == hir.TypeU8 && hir.ExecutableFixedArrayShape(element, length) {
+		if hir.ArrayViewBorrow(childType, expected, "&mut") {
 			result.Kind = "array-view-borrow"
 			return expected
 		}

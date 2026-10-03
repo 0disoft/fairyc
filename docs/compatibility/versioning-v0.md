@@ -1543,3 +1543,12 @@ view operations and holds the owner through loop exit. Language `/20`, SDK
 stage0.80, runtime `/0`, tokens and MIR/artifact schemas remain unchanged;
 exact compiler-executable identity separates cached generations. SDK source
 bytes and public API are unchanged. Linux execution is deferred.
+
+ADR 0433 admits exclusive i64 fixed-array views using existing borrow/type
+spelling and view MIR operations. Language `/20`, SDK stage0.80, runtime `/0`,
+MIR and artifact schemas stay unchanged, following the additive admissions
+in ADR 0430-0432. Exact compiler-executable identities separate cached
+compiler generations. There is no new public SDK export or foreign ABI.
+The Windows C transport includes a narrowly selected volatile-access
+workaround for observed optimized mutable-i64-view execution; this is not a
+source volatile/atomic contract. Linux native execution remains deferred.

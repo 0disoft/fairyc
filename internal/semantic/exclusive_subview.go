@@ -28,7 +28,7 @@ func (f *borrowFlowAnalyzer) evaluateSubview(expression *ast.Expression, environ
 	if !reachable {
 		return receiver, false
 	}
-	mutable := f.analyzer.expressionTypes[expression] == hir.MutableBorrow(hir.TypeByteSlice)
+	mutable := hir.MutableIndexedView(f.analyzer.expressionTypes[expression])
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	if mutable {
 		f.checkReferenceAccess(receiverExpression, receiver, true, environment, span(f.module.file.Path, expression.Span))

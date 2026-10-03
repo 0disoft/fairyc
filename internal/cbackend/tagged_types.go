@@ -265,7 +265,7 @@ func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir
 	if isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
-	if value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeI64Slice) {
+	if value == hir.SharedBorrow(hir.TypeStr) || hir.I64View(value) {
 		return true
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {
@@ -312,7 +312,7 @@ func taggedPayloadLayout(
 	if tagged, found := copyScalarTaggedAggregateLayout(value); found {
 		return tagged, true
 	}
-	if value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeI64Slice) {
+	if value == hir.SharedBorrow(hir.TypeStr) || hir.I64View(value) {
 		return layout.Type{
 			Kind: layout.KindStruct,
 			Fields: []layout.Field{

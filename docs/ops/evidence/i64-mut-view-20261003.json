@@ -1,0 +1,594 @@
+{
+  "schema": "fairyc.exclusive-i64-array-views-evidence/v1",
+  "date": "2026-10-03",
+  "sourceBaseRevision": "d7c1f0d8594df91ee2ad795eb35b2aeacbd6cde8",
+  "vcsModifiedAtBuild": true,
+  "compilerSHA256": "924cfbc59549abeb9b5b9b2c17e6cbfd7813688d8fdfe38cc36c8c5026c69c36",
+  "sourceFilesSHA256": {
+    "examples/i64_mut_view/src/main.fy": "933b953368b3f81e2a41e9aa2021910a2adccc6870c2f252d0ff2953654a7074",
+    "internal/cbackend/c_identifiers.go": "ff56aaca9c6fb0344ccd71f2f62469af00d78cb965f9c01edb7bf03eefcf9a39",
+    "internal/cbackend/emit.go": "ce49349780931dff678bd60f74fc0c6c6c2450d86b5afb9dc70716178c50d85a",
+    "internal/cbackend/tagged_types.go": "9653ac3242ae5a78725d756df9e45ff6e1dfc5dd2ccc55c45b93975d88b42c8f",
+    "internal/hir/views.go": "820101db843c4d0e10c29d6dcdb8dbf49ac5eeabd96c000e999f43f0fe2d31b8",
+    "internal/interpreter/interpreter.go": "865dc9b4fe45e3912340b23e34f9dcf6ce00cf6f36ed839ce204fce2c3df1cf9",
+    "internal/mir/field_store_types.go": "3d4ca1cdd7180650d038dff76f31bb4c0b6496a57a3ef7b8f7b28cc09b52c55e",
+    "internal/mir/i64_views.go": "03ed6bdff675056f2821e3e4e65041b5098874ccf298c785e0fdf9eca1bb848c",
+    "internal/mir/lower.go": "76bd5746644fe151f99159295a181b4f51c23d95cd34939066e0df80807f32e4",
+    "internal/mir/verify.go": "4628be88310b0d04ee67e655cf1ca187beb689041d489e969f1cd34fdaaa993e",
+    "internal/semantic/exclusive_subview.go": "97370e2532758934c0d846889ef7f6374184e5824f67ba88eac8b6e0cbbf8374",
+    "internal/semantic/resource_types.go": "93234771870e36789ff62424a4b90d8b24c5e73c268ace532c2fbac4ed30c199",
+    "internal/semantic/typecheck.go": "e58c60af997cbc27ab3569f25439ff1534df15acd682d2fa5270788410c0be28"
+  },
+  "sdkVersion": "0.0.0-stage0.80",
+  "sdkSourceSHA256": "b7b2819b7194f52d1f4bdd6f0c457c8def27466e89c255e6a5b5e5ac8c58587a",
+  "sdkDigestEncoding": "sorted source-root-relative UTF-8 paths, NUL, raw SHA256(source bytes)",
+  "native": {
+    "cases": [
+      {
+        "case": "subview-reverse",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativesubview-reverse3218411838\\001",
+        "imageSHA256": "e9da32e780d966051cfd3a064be372faf75df127187764868c9992249c30949a",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "98ebe3aa97003310d9557c2863809d4b86c8974c36a29d466ce6bebe269da169",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "subview-reverse",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativesubview-reverse3218411838\\001",
+        "imageSHA256": "8c4ff310e343d81b00b9cefe7a35a6c5fcadb980965c77dc32cc0b681a4fff8d",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "98ebe3aa97003310d9557c2863809d4b86c8974c36a29d466ce6bebe269da169",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "local-reverse",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativelocal-reverse1225345323\\001",
+        "imageSHA256": "edee14ed740e6f2b73b6fde8902a1d5b2b73bc10c2577ce59015badf8204da16",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "ee467143d8e8e334a1a4d609935142388b00940b783add63315e89ab42f4682f",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "local-reverse",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativelocal-reverse1225345323\\001",
+        "imageSHA256": "ebd7e61fda3578bd0ac2606eda4f9806b57e7a402cdc2e4c614661240371d709",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "ee467143d8e8e334a1a4d609935142388b00940b783add63315e89ab42f4682f",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "example",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeexample2311820706\\001",
+        "imageSHA256": "cdb2d927494f75c8e18d15898c61ee7ead41b6cdc48ecd29a56aa74e01a62254",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "933b953368b3f81e2a41e9aa2021910a2adccc6870c2f252d0ff2953654a7074",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "example",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeexample2311820706\\001",
+        "imageSHA256": "05925413cbfd1a32c133575f8029e32f519a0541d7eb7614144636a9de8ed1de",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "933b953368b3f81e2a41e9aa2021910a2adccc6870c2f252d0ff2953654a7074",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "subview-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativesubview-store235399825\\001",
+        "imageSHA256": "c8e2bdb5bac8bde3118046ab54d77722ce8e9938176859f94ce646b71f2067c2",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "27ebb66354b8454ceaafdfbc842270f3a367f9926e9aefbcf8ca8ae677350f9f",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "subview-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativesubview-store235399825\\001",
+        "imageSHA256": "2c1eede9db805dca630c365e2ec73837509cc906eea580a35063b3a90cef4fb9",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "27ebb66354b8454ceaafdfbc842270f3a367f9926e9aefbcf8ca8ae677350f9f",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "index-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeindex-end1514913188\\001",
+        "imageSHA256": "dbb8f569c235c41e23b3436ce586881a574b7bacf9f4cbffc5c4d9bf3334485e",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "4a8583a9780f4d427e48d0c8b7f188943c7a6ccf7fe254b54daf3d927bac6d8e",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "index-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeindex-end1514913188\\001",
+        "imageSHA256": "73cc67c0e3eb0e5bd73ab2a72bba54155d24d7c7515656f8548c8dfcadce1f60",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "4a8583a9780f4d427e48d0c8b7f188943c7a6ccf7fe254b54daf3d927bac6d8e",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "index-huge",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeindex-huge2479691495\\001",
+        "imageSHA256": "19c9f89f6d635c2f1afa0d59f24a2d97321c46b8f9965b76089687897296bb3e",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "52957aab569a47787dc98e577aec2ca151d307f3f77ca7dbc42e9999311d6039",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "index-huge",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeindex-huge2479691495\\001",
+        "imageSHA256": "933079ffbaf7a2492a50f6940a85c844ff1cc5a7d22ce41c1e0652a29fdf9b5b",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "52957aab569a47787dc98e577aec2ca151d307f3f77ca7dbc42e9999311d6039",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "empty",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeempty2294865363\\001",
+        "imageSHA256": "85948cafeb32dd66ea783658484d890fbf7265e6b1a0742293be02fc1f7bc54f",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "0dbd3eb7a57cb74fccfbd4ea73833a60dc84dc76a15ae90c0d92e82ef8522269",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "empty",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeempty2294865363\\001",
+        "imageSHA256": "84f036de82c9d39ff668b0cebc0a602ebf6a4fa1ee28a5270b2da8c1f569bcb8",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "0dbd3eb7a57cb74fccfbd4ea73833a60dc84dc76a15ae90c0d92e82ef8522269",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "reversed",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativereversed552869921\\001",
+        "imageSHA256": "99d5f26935f16bbf6023b3e478a85bae1aed58e4d13535115437afb095080fdc",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "700e7b4430d4dce801114238664d37b49c716c1b59a97815c718db2906b97e01",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "reversed",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativereversed552869921\\001",
+        "imageSHA256": "cace8f1397d1142033c0320f2a9cec8397ea55abe837ab8f3596a99d5ede67ba",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "700e7b4430d4dce801114238664d37b49c716c1b59a97815c718db2906b97e01",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "past-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativepast-end218736610\\001",
+        "imageSHA256": "b9f27d20500aa6884f41ad243b5a60a9de3f0f3f38fe18d7941786115901ad7e",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "37ecb10474e6d9165368a6cdb2bdcaaabf843f9984babae0b5e05464821ee7a6",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "past-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativepast-end218736610\\001",
+        "imageSHA256": "7faa0a61487d354131177506b2c597c6caf36033e188777df20f3da5670ccdd3",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "37ecb10474e6d9165368a6cdb2bdcaaabf843f9984babae0b5e05464821ee7a6",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "overflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeoverflow36171125\\001",
+        "imageSHA256": "077bf1f97db458db8a0a636bd2733120e639022a9253f73b0eed1a61f02f1154",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "d109c2dadfab56005b960397112913e2787ed8129336c7b5e627c80b978c8a3a",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "overflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeoverflow36171125\\001",
+        "imageSHA256": "08397a3ebd61cea4a957cb0934ba388be2fdb107e0124ae073ff876f671dcf46",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "d109c2dadfab56005b960397112913e2787ed8129336c7b5e627c80b978c8a3a",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "underflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeunderflow1029025543\\001",
+        "imageSHA256": "bc0548ea96f8704acf97ade669e3cc1e3e5f32d0140a4e5a25a319c48dbbc538",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "91dce852e063074f67b591d102974a3bdf3a1a68fad85661dbcb70394f82760b",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "underflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestI64MutableViewNativeunderflow1029025543\\001",
+        "imageSHA256": "07f92bb90bfb16e8021d04a33123619596a1eb7303b9a26a43c0720cc879a23e",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "91dce852e063074f67b591d102974a3bdf3a1a68fad85661dbcb70394f82760b",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      }
+    ],
+    "schema": "fairyc.i64-mut-view-native/v1",
+    "sdk": "0.0.0-stage0.80"
+  },
+  "cli": [
+    {
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 6 MIR function(s), lock updated\n",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-mut-view-cli\\workspace",
+      "exit": 0,
+      "argv": [
+        "check"
+      ],
+      "stderr": ""
+    },
+    {
+      "stdout": "built: build/i64-mut-view.exe (x86_64-windows-msvc, development, lock unchanged)\n",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-mut-view-cli\\workspace",
+      "exit": 0,
+      "argv": [
+        "build"
+      ],
+      "stderr": ""
+    },
+    {
+      "stdout": "",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-mut-view-cli\\workspace",
+      "exit": 0,
+      "argv": [
+        "run",
+        "--locked"
+      ],
+      "stderr": ""
+    },
+    {
+      "stdout": "built: build/i64-mut-view.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-mut-view-cli\\workspace",
+      "exit": 0,
+      "argv": [
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "stderr": ""
+    },
+    {
+      "stdout": "",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\i64-mut-view-cli\\workspace",
+      "exit": 0,
+      "argv": [
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "stderr": ""
+    }
+  ],
+  "deferred": [
+    "Linux native execution",
+    "performance measurements",
+    "full repository suite"
+  ]
+}

@@ -360,7 +360,7 @@ func (v runtimeValue) byteAt(index uint64) (byte, error) {
 }
 
 func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
-	if v.typ == hir.SharedBorrow(hir.TypeI64Slice) {
+	if hir.I64View(v.typ) {
 		if v.kind != valueView || v.view == nil || v.view.array == nil || index >= v.view.length ||
 			v.view.offset+index >= uint64(len(v.view.array.elements)) {
 			return runtimeValue{}, capabilityError("i64-view read exceeds its array backing")
@@ -375,9 +375,10 @@ func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
 	return runtimeValue{kind: valueU8, u64: uint64(value), typ: hir.TypeU8}, err
 }
 
-func (v runtimeValue) storeByte(index uint64, value runtimeValue) error {
-	if v.kind != valueView || v.view == nil || !v.view.mutable || v.typ != hir.MutableBorrow(hir.TypeByteSlice) ||
-		v.view.array == nil || index >= v.view.length || value.kind != valueU8 || value.typ != hir.TypeU8 || value.u64 > 255 {
+func (v runtimeValue) storeIndexed(index uint64, value runtimeValue) error {
+	element, indexed := hir.IndexedViewElement(v.typ)
+	if !indexed || v.kind != valueView || v.view == nil || !v.view.mutable || !hir.MutableIndexedView(v.typ) ||
+		v.view.array == nil || index >= v.view.length || !comparisonRuntimeMatches(value, element) {
 		return capabilityError("mutable byte-view store received an invalid runtime value")
 	}
 	absolute := v.view.offset + index
@@ -785,11 +786,12 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q: %w", function.Name, err)
 				}
-				if receiver.typ != operation.OwnerType || operation.OwnerType != hir.MutableBorrow(hir.TypeByteSlice) || operation.IndexType != hir.TypeUSize ||
-					operation.Type != hir.TypeU8 || operation.Operator != "[]=" {
+				element, indexed := hir.IndexedViewElement(operation.OwnerType)
+				if !indexed || receiver.typ != operation.OwnerType || !hir.MutableIndexedView(operation.OwnerType) || operation.IndexType != hir.TypeUSize ||
+					operation.Type != element || operation.Operator != "[]=" {
 					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q has incompatible runtime metadata", function.Name)
 				}
-				if err := receiver.storeByte(index.u64, value); err != nil {
+				if err := receiver.storeIndexed(index.u64, value); err != nil {
 					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
 			case mir.OperationViewSlice:
@@ -1854,8 +1856,9 @@ func evaluateViewIndexStoreOperands(locals map[mir.LocalID]runtimeValue, operand
 	if err != nil {
 		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
 	}
-	if receiver.kind != valueView || receiver.view == nil || receiver.typ != hir.MutableBorrow(hir.TypeByteSlice) ||
-		index.kind != valueUSize || index.typ != hir.TypeUSize || value.kind != valueU8 || value.typ != hir.TypeU8 || value.u64 > 255 {
+	element, indexed := hir.IndexedViewElement(receiver.typ)
+	if !indexed || receiver.kind != valueView || receiver.view == nil || !hir.MutableIndexedView(receiver.typ) ||
+		index.kind != valueUSize || index.typ != hir.TypeUSize || !comparisonRuntimeMatches(value, element) {
 		return runtimeValue{}, runtimeValue{}, runtimeValue{}, capabilityError("mutable byte-view index store received incompatible operands")
 	}
 	return receiver, index, value, nil

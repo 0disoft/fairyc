@@ -44,13 +44,17 @@ func TestI64ViewArtifactExecution(t *testing.T) {
 		if !strings.Contains(unit.Source, "const int64_t *data;") || !strings.Contains(unit.Source, "fy_i64_slice") {
 			t.Fatal("missing typed non-owning i64 view")
 		}
+		if strings.Contains(unit.Source, "volatile int64_t") {
+			t.Fatal("mutable-view workaround leaked into shared-only program")
+		}
+
 	}
 	for name, test := range map[string]struct {
 		kind   mir.OperationKind
 		mutate func(*mir.Operation)
 	}{
 		"array element mismatch":   {mir.OperationArrayBorrowView, func(op *mir.Operation) { op.OwnerType = hir.FixedArray(hir.TypeU8, 4) }},
-		"mutable view":             {mir.OperationArrayBorrowView, func(op *mir.Operation) { op.Type = hir.MutableBorrow(hir.TypeI64Slice); op.Operator = "&mut" }},
+		"mismatched borrow kind":   {mir.OperationArrayBorrowView, func(op *mir.Operation) { op.Operator = "&mut" }},
 		"wrong load type":          {mir.OperationViewIndex, func(op *mir.Operation) { op.Type = hir.TypeU8 }},
 		"byte receiver laundering": {mir.OperationViewIndex, func(op *mir.Operation) { op.Type = hir.TypeU8; op.OwnerType = hir.SharedBorrow(hir.TypeByteSlice) }},
 		"byte slice laundering":    {mir.OperationViewSlice, func(op *mir.Operation) { op.Type = hir.SharedBorrow(hir.TypeByteSlice); op.OwnerType = op.Type }},

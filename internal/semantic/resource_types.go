@@ -470,7 +470,7 @@ func validUnsizedTypeUse(value hir.Type) bool {
 			return true
 		}
 		if element == hir.TypeI64Slice {
-			return !mutable
+			return true
 		}
 		if element == hir.TypeStr || element == hir.TypeCStr {
 			return !mutable

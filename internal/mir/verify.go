@@ -500,7 +500,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewSliceCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validViewSliceShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) ||
-					operation.OwnerType == hir.MutableBorrow(hir.TypeByteSlice) && fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
+					hir.MutableIndexedView(operation.OwnerType) && fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view slice is missing its bounds check"})
 				}
 			case OperationAssign:
@@ -890,7 +890,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewLength:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				ownerElement, _, ownerBorrow := hir.BorrowElement(operation.OwnerType)
-				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || operation.OwnerType == hir.SharedBorrow(hir.TypeI64Slice))
+				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || hir.I64View(operation.OwnerType))
 				operandValid := len(operation.Operands) == 1 && (operation.Operands[0].Kind == OperandLocal ||
 					ownerElement == hir.TypeStr && operation.Operands[0].Kind == OperandString ||
 					ownerElement == hir.TypeByteSlice && operation.Operands[0].Kind == OperandByteString)
@@ -902,7 +902,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewEmpty:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				ownerElement, _, ownerBorrow := hir.BorrowElement(operation.OwnerType)
-				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || operation.OwnerType == hir.SharedBorrow(hir.TypeI64Slice))
+				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice || hir.I64View(operation.OwnerType))
 				operandValid := len(operation.Operands) == 1 && (operation.Operands[0].Kind == OperandLocal ||
 					ownerElement == hir.TypeStr && operation.Operands[0].Kind == OperandString ||
 					ownerElement == hir.TypeByteSlice && operation.Operands[0].Kind == OperandByteString)
@@ -925,7 +925,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewSlice:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validViewSliceShape(operation, true) || len(operation.TrapCategories) != 0 ||
-					operation.OwnerType == hir.MutableBorrow(hir.TypeByteSlice) && fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
+					hir.MutableIndexedView(operation.OwnerType) && fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "immutable byte-view slice shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -1245,13 +1245,14 @@ func validViewIndexShape(operation Operation, destination bool) bool {
 }
 
 func validViewIndexStoreShape(operation Operation) bool {
-	if len(operation.Operands) != 3 || operation.OwnerType != hir.MutableBorrow(hir.TypeByteSlice) ||
-		operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]=" || operation.DestinationLocal != NoLocal {
+	element, indexed := hir.IndexedViewElement(operation.OwnerType)
+	if len(operation.Operands) != 3 || !indexed || !hir.MutableIndexedView(operation.OwnerType) ||
+		operation.IndexType != hir.TypeUSize || operation.Type != element || operation.Operator != "[]=" || operation.DestinationLocal != NoLocal {
 		return false
 	}
 	return operation.Operands[0].Kind == OperandLocal &&
 		(operation.Operands[1].Kind == OperandLocal || operation.Operands[1].Kind == OperandUSize) &&
-		scalarOperandMatches(operation.Operands[2], hir.TypeU8)
+		scalarOperandMatches(operation.Operands[2], element)
 }
 
 func isVerifiedIndexedViewType(value hir.Type) bool {
