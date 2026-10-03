@@ -12,7 +12,7 @@ const byteForIndexName = "\x00fairyc_byte_for_index"
 // reject it before the generated expression reaches executable MIR.
 func byteForAsBlock(loop *ByteForLoop) *Expression {
 	if loop == nil || loop.Body == nil || loop.View == nil || loop.View.Kind != syntax.KindPath ||
-		loop.Type.Kind != TypeKindNamed || loop.Type.Path != "u8" && loop.Type.Path != "i64" || len(loop.Type.Arguments) != 0 {
+		loop.Type.Kind != TypeKindNamed || loop.Type.Path != "u8" && loop.Type.Path != "i64" && loop.Type.Path != "i32" && loop.Type.Path != "u32" && loop.Type.Path != "usize" || len(loop.Type.Arguments) != 0 {
 		return nil
 	}
 	view := func() *Expression {

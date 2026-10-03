@@ -70,6 +70,42 @@ pub fn ref mut i64[] view_mut_i64(ref mut Vec<i64> value) {
     return unsafe { storage_borrow_mut<i64[]>(value, value.data, value.length) };
 }
 
+/// Borrows the initialized i32 prefix without copying or allocating.
+/// Derived views keep the vector borrowed through their last use.
+pub fn ref i32[] view_i32(ref Vec<i32> value) {
+    return unsafe { storage_borrow<i32[]>(value, value.data, value.length) };
+}
+
+/// Borrows the initialized i32 prefix exclusively; lengths count elements.
+/// Structural changes and other owner access wait for the last retained use.
+pub fn ref mut i32[] view_mut_i32(ref mut Vec<i32> value) {
+    return unsafe { storage_borrow_mut<i32[]>(value, value.data, value.length) };
+}
+
+/// Borrows the initialized u32 prefix without copying or allocating.
+/// Derived views keep the vector borrowed through their last use.
+pub fn ref u32[] view_u32(ref Vec<u32> value) {
+    return unsafe { storage_borrow<u32[]>(value, value.data, value.length) };
+}
+
+/// Borrows the initialized u32 prefix exclusively; lengths count elements.
+/// Structural changes and other owner access wait for the last retained use.
+pub fn ref mut u32[] view_mut_u32(ref mut Vec<u32> value) {
+    return unsafe { storage_borrow_mut<u32[]>(value, value.data, value.length) };
+}
+
+/// Borrows the initialized usize prefix without copying or allocating.
+/// Derived views keep the vector borrowed through their last use.
+pub fn ref usize[] view_usize(ref Vec<usize> value) {
+    return unsafe { storage_borrow<usize[]>(value, value.data, value.length) };
+}
+
+/// Borrows the initialized usize prefix exclusively; lengths count elements.
+/// Structural changes and other owner access wait for the last retained use.
+pub fn ref mut usize[] view_mut_usize(ref mut Vec<usize> value) {
+    return unsafe { storage_borrow_mut<usize[]>(value, value.data, value.length) };
+}
+
 /// Borrows an initialized element without moving it. An out-of-range index traps.
 /// The vector cannot be mutated or moved while the returned reference is live.
 pub fn ref T at<T>(ref Vec<T> value, usize index) {

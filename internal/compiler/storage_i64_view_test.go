@@ -37,17 +37,20 @@ func TestI64MutableStorageViewMIR(t *testing.T) {
 
 func checkStorageViewMIR(t *testing.T, source string, mutable bool, slice hir.Type) {
 	t.Helper()
-	kind, viewType, cDescriptor := mir.OperationStorageBorrow, hir.SharedBorrow(slice), "(fy_i64_slice){ .data = (const int64_t *)"
+	kind, viewType := mir.OperationStorageBorrow, hir.SharedBorrow(slice)
 	if mutable {
-		kind, viewType, cDescriptor = mir.OperationStorageBorrowMut, hir.MutableBorrow(slice), "(fy_mut_i64_slice){ .data = (int64_t *)"
+		kind, viewType = mir.OperationStorageBorrowMut, hir.MutableBorrow(slice)
+	}
+	element, _ := hir.IndexedViewElement(viewType)
+	name := map[hir.Type]string{hir.TypeU8: "byte", hir.TypeI64: "i64", hir.TypeI32: "i32", hir.TypeU32: "u32", hir.TypeUSize: "usize"}[element]
+	cType := map[hir.Type]string{hir.TypeU8: "uint8_t", hir.TypeI64: "int64_t", hir.TypeI32: "int32_t", hir.TypeU32: "uint32_t", hir.TypeUSize: "uintptr_t"}[element]
+	cDescriptor := "(fy_" + name + "_slice){ .data = (const " + cType + " *)"
+	if mutable {
+		cDescriptor = "(fy_mut_" + name + "_slice){ .data = (" + cType + " *)"
 	}
 	otherSlice := hir.TypeByteSlice
 	if slice == hir.TypeByteSlice {
 		otherSlice = hir.TypeI64Slice
-		cDescriptor = "(fy_byte_slice){ .data = (const uint8_t *)"
-		if mutable {
-			cDescriptor = "(fy_mut_byte_slice){ .data = (uint8_t *)"
-		}
 	}
 	analysis, err := analyzeStorageBorrow(t, source)
 	if err != nil {

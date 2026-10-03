@@ -45,7 +45,7 @@ func TestByteViewForRejectsNonAdmittedSourceShapes(t *testing.T) {
 		{
 			name: "wrong item type",
 			text: "module main; fn void show(ref u8[] view) { for (let i32 byte in view) {} }",
-			want: "view iteration requires an exact u8 or i64 item binding",
+			want: "i32-view iteration requires a named immutable ref i32[] or ref mut i32[] view",
 		},
 		{
 			name: "wrong view element",
@@ -78,7 +78,7 @@ func TestPreparedVectorForDoesNotAdmitSourceBeforeSemanticGate(t *testing.T) {
 		"std/vec.fy": "module std::vec; pub struct Placeholder { i32 value; }",
 	})
 	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 ||
-		result.Unsupported[0].Feature != "view iteration requires an exact u8 or i64 item binding" {
+		result.Unsupported[0].Feature != "view iteration requires an exact u8, i32, i64, u32 or usize item binding" {
 		t.Fatalf("candidate source admission changed: diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
 	}
 }

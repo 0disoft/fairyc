@@ -5,6 +5,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
@@ -56,8 +57,11 @@ func (x *expander) storageSelector(name string) string {
 const storageType syntax.Kind = "private-storage-type"
 
 func isStorageViewType(typ *ast.TypeReference) bool {
-	return typ != nil && typ.Kind == ast.TypeKindSlice && typ.Element != nil &&
-		typ.Element.Kind == ast.TypeKindNamed && (typ.Element.Path == "u8" || typ.Element.Path == "i64") && len(typ.Element.Arguments) == 0
+	if typ == nil || typ.Kind != ast.TypeKindSlice || typ.Element == nil || typ.Element.Kind != ast.TypeKindNamed || len(typ.Element.Arguments) != 0 {
+		return false
+	}
+	_, ok := hir.IntegerViewElement(hir.Type("[" + typ.Element.Path + "]"))
+	return ok
 }
 
 func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
@@ -78,7 +82,7 @@ func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {
 			view := isStorageViewType(callee.Type)
 			arity := 3
 			if view {
-				arity = 4 // SDK-owned u8/i64 views also carry an element count.
+				arity = 4 // SDK-owned integer views also carry an element count.
 			}
 			if len(e.Children) != arity {
 				return true, fmt.Errorf("private storage borrow requires an owner borrow and a pointer")

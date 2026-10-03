@@ -286,7 +286,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 	if statement == nil {
 		return true
 	}
-	if statement.ByteFor != nil && (statement.ByteFor.Type.Path == "u8" || statement.ByteFor.Type.Path == "i64") {
+	if statement.ByteFor != nil {
 		return f.evaluateViewFor(statement, environment)
 	}
 	if statement.Binding != nil {

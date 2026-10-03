@@ -1,0 +1,1184 @@
+{
+ "schema": "fairyc.vec-integer-views-review/v1",
+ "date": "2026-10-04",
+ "baseCommit": "e88cab9b02595b202f1951d819d81cfe505e2bdc",
+ "vcsModifiedAtBuild": true,
+ "sdk": "0.0.0-stage0.83",
+ "compilerSHA256": "6eeb308bcb56a5d540d2fb1d3fc3db7f99494c23e878564db844aa46e6e42db6",
+ "compilerSourceSet": {
+  "fileCount": 1242,
+  "SHA256": "1db13b6ec6c9f4e886c337ff810becde64d6f75c2542431a4b8730f9c4bc6dcd",
+  "selection": "git-tracked internal/, cmd/, go.mod, go.sum plus new test files"
+ },
+ "changedSourceFiles": {
+  "internal/ast/ast.go": "70ea73556336c51658100756447cb993b35573e6f6ae9904a69740e1ced098d3",
+  "internal/ast/byte_for_lower.go": "fbdf46847fad3804812d8e33b5bc495d292e64f35232a381518dde87a7a68876",
+  "internal/cbackend/storage_borrow.go": "ee63a9e923813617b3a4348b42c3710771d3962523318cbaec9a57178f0e11c6",
+  "internal/compiler/storage_i64_view_test.go": "db4f95e099e61a5dca8e0c7fc2aee3c4853baf45a61b5f2d64d04508e9ee0a18",
+  "internal/contractstatemir/body_hash.go": "8f3e06edbe913df238b8ca7a6eb949286bb5ff5933716f750f281f2a8fa05b3f",
+  "internal/genericsource/storage.go": "514c7895e70c81f7e2eaed9655684106ec6cbf5331d753cf30ef7fe0eb6f4051",
+  "internal/mir/storage_view.go": "05e258a3439a0e312d8d794c4021fbee01262585f6f9678e53f8f912ec594b33",
+  "internal/moduleinterface/interface.go": "20f906fc9b40c295c12ef970e38bf727f4ac4cb2b5bc47d0624ea15b9f2e14c6",
+  "internal/packageartifact/function_identity.go": "79e17e8b10d4e899dfbb932da5985e94ec29d44d465cae4016bd0bccdaf2e7ea",
+  "internal/sdkstdlib/sources/optional/std/vec.fy": "387c52b77b15c3f45972727aab28b12a5a1052aaa3df77449b99d776fe7cf39f",
+  "internal/sdkstdlib/stdlib.go": "e949dbcf123dd0e157d160c0eb67e4b51f1a883243d295c1fcf6bece326ee8a2",
+  "internal/sdkstdlib/stdlib_test.go": "69e393f335d16089fecec6ee02edea70a5a353ef4e3a0b2e785ac93e5d09c098",
+  "internal/semantic/borrow_flow.go": "1939f83385618a18ac27198565adf36d368de6261be35a06964cede6c0a9240e",
+  "internal/semantic/byte_for.go": "060e4eb8c10ed954f386a6f2815bcc962fa89f4706faa5550e49441c16cb0da4",
+  "internal/semantic/byte_for_test.go": "5de5f309265201fa27593880d670829ead0cea27af0516b635eb6be74e45c36e",
+  "internal/semanticsnapshot/build.go": "b9a02ae7e3333d204b015c329d36674a926d355e9b044ce0785c37496826dbd2",
+  "internal/semanticsnapshot/generic.go": "da82a77b572f48573f097abb777c7194895a40b66611f17612dcbc4a3ce9bb35"
+ },
+ "sdkSourceSetSHA256": "70c174bb8887f1181130b0a4f33f3f18e286acabf83fd57d5b81162cbd530297",
+ "sourceSHA256": "f8e39f999a1392a29525a3eb263de2c8633fa904e7ad692bb281bca03e7fc92a",
+ "lockSHA256": "5b79b297007a069b3bb56a08e4adbe51df8ccb7177f795c791cb39045df8fdf6",
+ "cli": [
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "check"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\vec_integer_views",
+   "stdout": "check ok: 2 instance(s), 9 source file(s), 217 MIR function(s), lock updated\n",
+   "stderr": "",
+   "exit": 0,
+   "images": {}
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "build"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\vec_integer_views",
+   "stdout": "built: build/vec-integer-views.exe (x86_64-windows-msvc, development, lock unchanged)\n",
+   "stderr": "",
+   "exit": 0,
+   "images": {
+    "build\\vec-integer-views.exe": "06e014ff7d0054796eac5e038a4bf15f7b8537adda53bc5a2e7d88478505dd8e"
+   }
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "run",
+    "--locked"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\vec_integer_views",
+   "stdout": "",
+   "stderr": "",
+   "exit": 0,
+   "images": {
+    "build\\vec-integer-views.exe": "06e014ff7d0054796eac5e038a4bf15f7b8537adda53bc5a2e7d88478505dd8e"
+   }
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "build",
+    "--release",
+    "--locked"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\vec_integer_views",
+   "stdout": "built: build/vec-integer-views.exe (x86_64-windows-msvc, release, lock verified)\n",
+   "stderr": "",
+   "exit": 0,
+   "images": {
+    "build\\vec-integer-views.exe": "74d6ab57a1cb24cb791b20322be17e791edd58dbe43d2be81635308e471643dd"
+   }
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "run",
+    "--release",
+    "--locked"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\vec_integer_views",
+   "stdout": "",
+   "stderr": "",
+   "exit": 0,
+   "images": {
+    "build\\vec-integer-views.exe": "74d6ab57a1cb24cb791b20322be17e791edd58dbe43d2be81635308e471643dd"
+   }
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "run"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-regressions\\vec_u8_view",
+   "stdout": "",
+   "stderr": "",
+   "exit": 0,
+   "images": {}
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "run",
+    "--release",
+    "--locked"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-regressions\\vec_u8_view",
+   "stdout": "",
+   "stderr": "",
+   "exit": 0,
+   "images": {}
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "run"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-regressions\\vec_i64_mut_view",
+   "stdout": "",
+   "stderr": "",
+   "exit": 0,
+   "images": {}
+  },
+  {
+   "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-views-compiler\\fairyc.exe",
+    "run",
+    "--release",
+    "--locked"
+   ],
+   "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\vec-integer-regressions\\vec_i64_mut_view",
+   "stdout": "",
+   "stderr": "",
+   "exit": 0,
+   "images": {}
+  }
+ ],
+ "native": {
+  "cases": [
+   {
+    "case": "example",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeexample1276712517\\001",
+    "imageSHA256": "867707ca9e9bb9cda814674aaba2bc417eff035793243200bc1fdd1e0282fce7",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "f8e39f999a1392a29525a3eb263de2c8633fa904e7ad692bb281bca03e7fc92a",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "example",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeexample1276712517\\001",
+    "imageSHA256": "99994ef9c6ba7e8597d0c73e214883eef2bb10a18dfb5924e1fb2361555a5f99",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "f8e39f999a1392a29525a3eb263de2c8633fa904e7ad692bb281bca03e7fc92a",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-end-read1655707111\\001",
+    "imageSHA256": "73c954214e9fdb616bc9003dd398f680b24c89e828766761b186461cd4f74e94",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "8e6ef0ccd3491ee9b7f59f176aca29dcb645c5672a67b0b7a2a6b3d78a5b50d7",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-end-read1655707111\\001",
+    "imageSHA256": "079989a2dbfc8144636209562f4cb81ce271e2c26545e184f50f053eeb9b3dfd",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "8e6ef0ccd3491ee9b7f59f176aca29dcb645c5672a67b0b7a2a6b3d78a5b50d7",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-huge-read3097168668\\001",
+    "imageSHA256": "f697bbf1ebc1a28558de1159b1dff1b79b2ea6068aa32aa56b436f96e8b54aee",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "950fdbfc8ae75dc4b81a263b51df57a6ee9e812b9e53dc1d14037059e0a153d8",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-huge-read3097168668\\001",
+    "imageSHA256": "7c15d8106b9786cc2754c0e3e3ae246f6c326943d1c3ba9999940ea9a3ff6917",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "950fdbfc8ae75dc4b81a263b51df57a6ee9e812b9e53dc1d14037059e0a153d8",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-empty-store",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-empty-store3267471846\\001",
+    "imageSHA256": "7f9e82858bca330e7be13f5cf95f2b567dc12478817ac2d59e794af6ffe5162a",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "07e0cdf95c95485f92d75b15d1a03013463991550a8ef95aae542795f40a4596",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-empty-store",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-empty-store3267471846\\001",
+    "imageSHA256": "8d51387c46c7d5f3dd84d014718ba54bfaeea1f2c9ab127a420bd73d5358a3ec",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "07e0cdf95c95485f92d75b15d1a03013463991550a8ef95aae542795f40a4596",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-past-end3256390110\\001",
+    "imageSHA256": "0e4f68c8681b72a46f6bae377bc01561a8e7ee22e40a4e96323a73227c7dceb6",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "920e97ff1d304448ff156ce6e0d3f597bc0a2534e16e578207793c8f19bc553d",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-past-end3256390110\\001",
+    "imageSHA256": "273d69a65d9b305721ed1767f28c586aa5e513901bf5777e83127b5007a5cf1a",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "920e97ff1d304448ff156ce6e0d3f597bc0a2534e16e578207793c8f19bc553d",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-reversed1862747295\\001",
+    "imageSHA256": "bc668ea09bbead692ac7b729a8362ec5250a7ba785068d07f417da62b252069d",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "376f5f48719b1845d4a505665a2e10109ec088a2e40b6e9047d9664a08d2a4c8",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-reversed1862747295\\001",
+    "imageSHA256": "1fe13a2c0c95d273ba161098ea1f08c38fe44476b2c6c4b741318658e96a5796",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "376f5f48719b1845d4a505665a2e10109ec088a2e40b6e9047d9664a08d2a4c8",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-overflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-overflow3103583142\\001",
+    "imageSHA256": "a5561fe1060f4996180833a25144724baa497746110a20fd7bcf09e806243845",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "e72112c0fce23bd9a05500764f74789dcae501ad297c1444a62e2f8755ec5ccc",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-overflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-overflow3103583142\\001",
+    "imageSHA256": "12de86e693de311cfb61ef6993797ea4a6870b39578908e09191e2906e927974",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "e72112c0fce23bd9a05500764f74789dcae501ad297c1444a62e2f8755ec5ccc",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-underflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-underflow355468039\\001",
+    "imageSHA256": "b44be923cd33dbbc384920d72cc8989e158843ad68b24b78ea407da9f1d6c814",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "02cb4c73ee21ff26527cd860d75e0b81389907599e4b42eece875b259884f009",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "i32-underflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativei32-underflow355468039\\001",
+    "imageSHA256": "a5618b5bc5ebb9f9e9d3c19cdd282afb4cec3f8c0fd54c9ac95ea39fb31aa902",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "02cb4c73ee21ff26527cd860d75e0b81389907599e4b42eece875b259884f009",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-end-read3168448846\\001",
+    "imageSHA256": "637f1c8d69e6fb25956e5b0fff82a46e22670e6f8ccbef4aa9baa04049ff0eee",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "e7d795cbde603735b1787556d138399389b039dcefa72278f93c9f99469a3d7c",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-end-read3168448846\\001",
+    "imageSHA256": "d821d4c9225c900a47eb6e3af08358207aa52363c60bb43db8eafa1972663dfa",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "e7d795cbde603735b1787556d138399389b039dcefa72278f93c9f99469a3d7c",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-huge-read2429172179\\001",
+    "imageSHA256": "2a88c57b796ea023a57888b10e12206401ddb5bc5e2709ac5f448020e722287e",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "7789cf8d321791d9c5afdf736d4203bc34090c5f4c636e5cc169a594d4d11377",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-huge-read2429172179\\001",
+    "imageSHA256": "9870791c240c871e2e3e70c0ff9c26f82162aa1cc47ed141b24bd04efae30e8b",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "7789cf8d321791d9c5afdf736d4203bc34090c5f4c636e5cc169a594d4d11377",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-empty-store",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-empty-store3778397476\\001",
+    "imageSHA256": "639c77117d4fc89c76db45b563b283bc66ae1274024a4e803795985c495ee54d",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "9c436e9ce01ceb0762e95cef1b68e543bdda067853877c481f8f09b2dd75ec0c",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-empty-store",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-empty-store3778397476\\001",
+    "imageSHA256": "3ce23199c72473d80f1bb44739894f649a2cfb19a474ed6c64731940c95df9f1",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "9c436e9ce01ceb0762e95cef1b68e543bdda067853877c481f8f09b2dd75ec0c",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-past-end143304445\\001",
+    "imageSHA256": "a2516952f5a22ebcbb4ffd39490e52f241aa6b7ad5b83d116ad72eec5548d4f7",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "2150c85d41405edaa5d9533f6c65f03cb655e5bc60cab5e032ed2d8a3a1c3ac3",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-past-end143304445\\001",
+    "imageSHA256": "f6c2d0a1b47e4c876f94d8d0ecaafc51d188ba77342344c8d5734dac874198b3",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "2150c85d41405edaa5d9533f6c65f03cb655e5bc60cab5e032ed2d8a3a1c3ac3",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-reversed1651118690\\001",
+    "imageSHA256": "f06c2338059b425f76ac4cff6b1890658b324eb9f3d67b83b98adf338a16e8bf",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "26496c4669bbc7fd237756e0c6068d304f97cb5529b5848336422e8f4d20d94f",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-reversed1651118690\\001",
+    "imageSHA256": "8795a59dcafb6d386fa36b2b711ffd73198e7566947204c9a7542a57504798a5",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "26496c4669bbc7fd237756e0c6068d304f97cb5529b5848336422e8f4d20d94f",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-overflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-overflow607738478\\001",
+    "imageSHA256": "1b2785757bd5cabc177289fe53628020a4989700a744a0ac42bd9d6a0828e8ed",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "91ff485cf80f0876a0ce2a2e06d99157eebbe22fecc1cafd362566d82333b844",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-overflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-overflow607738478\\001",
+    "imageSHA256": "2a565484c3a65427f6404d24fff0cf7950a6267ae2c433430b511fa8ddc4da94",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "91ff485cf80f0876a0ce2a2e06d99157eebbe22fecc1cafd362566d82333b844",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-underflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-underflow3059806580\\001",
+    "imageSHA256": "12bf796dbd640f505270d45e9f721a815ab2d08c4387230ee33fb3ab6ebe5e04",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "542b892849dab7816bea3a1898015ae0079e12802e13799ecdef86846c304f63",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "u32-underflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeu32-underflow3059806580\\001",
+    "imageSHA256": "930febe934ee1934b309b6159a1e0b7a2906c17436388acb59faa637b875a06e",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "542b892849dab7816bea3a1898015ae0079e12802e13799ecdef86846c304f63",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-end-read3678054047\\001",
+    "imageSHA256": "a6fa26443dd15406a55049708e55ab507739d4233d10c2cad4a0b74a95eb2619",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "430957b074c615f1d89fbb4e5d342d17c6442e8a9eaebce3819022f94eafd9fe",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-end-read3678054047\\001",
+    "imageSHA256": "9c59a48e1f02f498d2721f7dca42fdf94042314d8f9016478702079b52e5e7a0",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "430957b074c615f1d89fbb4e5d342d17c6442e8a9eaebce3819022f94eafd9fe",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-huge-read3264654819\\001",
+    "imageSHA256": "3025c09bbf73d64227722aaff83ea410e19f3eaaa8f289b271589c3ad6959b87",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "097290bd05d236fd3d1b22dbf8bcc4c85ce1aa5b6cef846ce0d69894f2eb2bf5",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-huge-read3264654819\\001",
+    "imageSHA256": "4a4719afc535b8a23d83c506f2beae97f30c25f84b30e9b7daa135f65d679112",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "097290bd05d236fd3d1b22dbf8bcc4c85ce1aa5b6cef846ce0d69894f2eb2bf5",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-empty-store",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-empty-store4284217537\\001",
+    "imageSHA256": "dd4a6244f5e2bb9cc6340a9aaf7832064d1a152ac8beb47f02ff78a6a5801354",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "055961b9484299aac6e75a0ad1f294cc29208309a95813b78f76274676f3e960",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-empty-store",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-empty-store4284217537\\001",
+    "imageSHA256": "b57df9c57671b99a363af30a1d7b27037de0c37035817f8531d6a36aa46bc723",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "055961b9484299aac6e75a0ad1f294cc29208309a95813b78f76274676f3e960",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-past-end634948783\\001",
+    "imageSHA256": "a538a29589bec8c59bab4b1e12b483a257442b66d91e9ee04c1058f65fe36858",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "44222ac0cf1122e8ea863b3fb109880177a3224ed2b9b449e854ed49631ceee0",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-past-end634948783\\001",
+    "imageSHA256": "90f715d6f41c1e58fbdfb678d27b9230b15ac874003978c6f291465b845d155f",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "44222ac0cf1122e8ea863b3fb109880177a3224ed2b9b449e854ed49631ceee0",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-reversed1563484767\\001",
+    "imageSHA256": "f736d68d64596e551af6e72d66493efed4e806c7bb6dde1a83bceb876906bceb",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "8b08e493bd336f9380bd1adc7b883c4790164b379a9e1ceff4041adc1ebcb5e3",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-reversed1563484767\\001",
+    "imageSHA256": "d8a0d861bd0d6aa1e7da73b0c5564ec235d4f03516d5fc6577d73313a7881204",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "8b08e493bd336f9380bd1adc7b883c4790164b379a9e1ceff4041adc1ebcb5e3",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-overflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-overflow313660156\\001",
+    "imageSHA256": "8c3e11a207edec9f16adf2eadc5085e7be1fee57ae95054ec8e29d2f35e59349",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "1df12d04a041d2b1e3b49822eb66210efb6bf7f826132e6f97d9f957317d03fd",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-overflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-overflow313660156\\001",
+    "imageSHA256": "74ba9ddd4b1af6f063034f024a8f891dbee98e9be4a9647ec8c53254ff11f72d",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "1df12d04a041d2b1e3b49822eb66210efb6bf7f826132e6f97d9f957317d03fd",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-underflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-underflow3139777045\\001",
+    "imageSHA256": "586e0e7e98907b386d6fc69f212c97cd55edaa23af0a5cfcfc83c005665c984a",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "256b88c4b8865a9754dec2797d7be4b3e313902893fb24ec19ea6107270dacf8",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "usize-underflow",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "integer-overflow",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestVecIntegerViewsNativeusize-underflow3139777045\\001",
+    "imageSHA256": "45fff1c5e76f3cc851a0dcb585fd6d224d931a9547512fc5d272cae84c321039",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 130,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0002"
+    },
+    "sourceSHA256": "256b88c4b8865a9754dec2797d7be4b3e313902893fb24ec19ea6107270dacf8",
+    "stderr": "trap: integer-overflow\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   }
+  ],
+  "schema": "fairyc.vec-integer-views-native/v1",
+  "sdk": "0.0.0-stage0.83"
+ },
+ "validation": [
+  "nine owning package suites PASS",
+  "focused compiler view/cache/storage suites PASS",
+  "fixed-array for-in interpreter and MIR codec PASS",
+  "102 source rejection cases PASS",
+  "44 Windows dev/release executions PASS",
+  "updated compiler byte/i64 dev/release regressions PASS",
+  "go vet modified owning packages PASS"
+ ],
+ "skipped": [
+  "Linux native execution: deferred by user",
+  "full repository suites and performance benchmarks: outside scope"
+ ]
+}

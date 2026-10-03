@@ -151,6 +151,15 @@ returned/tagged origins and post-release growth follow the same i64 view rules.
 The existing u8 for-in form applies to these named views. No generic vector
 slice conversion or reinterpretation of other Vec element types is admitted.
 
+ADRs 0437-0438 extend matching fixed-array and SDK initialized-prefix Vec views
+to i32/u32/usize. Shared/exclusive forms retain the same owner, return-origin,
+subrange and sibling rules. All five integer element types support named
+immutable-descriptor for-in with copied items; the owner stays held through every
+loop exit and indexed writes affect later loads. Owned unsized slices,
+bool/aggregate views, element reinterpretation and implicit Vec conversion remain
+unsupported. Indices count elements. SDK helpers are `view_i32`/`view_mut_i32`,
+`view_u32`/`view_mut_u32`, `view_usize`/`view_mut_usize`.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one

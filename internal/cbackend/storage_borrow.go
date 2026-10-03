@@ -50,16 +50,7 @@ func (e *emitter) writeStorageBorrow(output *strings.Builder, operation mir.Oper
 		if err != nil {
 			return err
 		}
-		descriptor, pointer := "fy_byte_slice", "const uint8_t *"
-		if hir.MutableIndexedView(operation.Type) {
-			descriptor, pointer = "fy_mut_byte_slice", "uint8_t *"
-		}
-		if hir.I64View(operation.Type) {
-			descriptor, pointer = "fy_i64_slice", "const int64_t *"
-			if hir.MutableIndexedView(operation.Type) {
-				descriptor, pointer = "fy_mut_i64_slice", "int64_t *"
-			}
-		}
+		descriptor, pointer, _ := integerViewCType(operation.Type)
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s)(%s), .length = %s };\n", operation.DestinationLocal, descriptor, pointer, address, length)
 		return nil
 	}
@@ -71,7 +62,7 @@ func (e *emitter) writeStorageBorrow(output *strings.Builder, operation mir.Oper
 
 func (e *emitter) inspectStorageView(functionIndex int, operation mir.Operation) error {
 	wantsMutable := operation.Kind == mir.OperationStorageBorrowMut
-	elementType, view := hir.IndexedViewElement(operation.Type)
+	_, view := hir.IndexedViewElement(operation.Type)
 	if (operation.Kind != mir.OperationStorageBorrow && !wantsMutable) || len(operation.Operands) != 3 || !view || hir.MutableIndexedView(operation.Type) != wantsMutable {
 		return fmt.Errorf("private storage view has invalid shape")
 	}
@@ -86,18 +77,6 @@ func (e *emitter) inspectStorageView(functionIndex int, operation mir.Operation)
 			return fmt.Errorf("private storage view argument %d has type %q, want %q", index, actual, want)
 		}
 	}
-	if elementType == hir.TypeI64 {
-		if wantsMutable {
-			e.needsMutI64Slice = true
-		} else {
-			e.needsI64Slice = true
-		}
-	} else {
-		if wantsMutable {
-			e.needsMutByteSlice = true
-		} else {
-			e.needsByteSlice = true
-		}
-	}
+	e.recordCValueTypeRequirements(operation.Type)
 	return nil
 }

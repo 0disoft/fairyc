@@ -1588,3 +1588,11 @@ reused; language /20, SDK stage0.82, runtime /0 and MIR/artifact schemas stay
 unchanged, as for ADR 0430-0436. Actual-local verifier checks prevent element
 relabeling. Exact compiler identities separate cached generations. Linux native
 execution remains deferred; there is no new public SDK export in this unit.
+
+ADR 0438 advances the SDK to `0.0.0-stage0.83` for six exact shared/exclusive
+Vec<i32/u32/usize> view exports and admits their named-view for-in forms.
+Slice identities are retained in SDK interfaces, snapshots and function/body
+hashes. Source/interface and dependent locks refresh. Language /20, runtime /0,
+grammar, MIR/artifact/interface schemas and target maturity remain unchanged.
+Actual-local private-transfer and return checks keep different element types
+separate. Linux execution remains deferred; there is no performance claim.

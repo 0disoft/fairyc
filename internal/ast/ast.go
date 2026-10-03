@@ -216,7 +216,7 @@ type Statement struct {
 	ByteFor    *ByteForLoop
 }
 
-// ByteForLoop retains the written for-in form for shared u8/i64 views.
+// ByteForLoop retains the written for-in form for integer views.
 // Its legacy node name is retained; vector preparation requires separate admission.
 type ByteForLoop struct {
 	Span           diagnostic.Span

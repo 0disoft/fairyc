@@ -1107,3 +1107,16 @@ allocation, cleanup, path bounds, ordering and concurrent-replacement limits.
 - Windows `CloseHandle`: <https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle>
 
 These references constrain the initial hosted implementation. Fairy wrappers intentionally normalize implementation-defined allocator and file-descriptor behavior.
+
+## Integer vector views (SDK stage0.83)
+
+ADR 0438 adds `std::vec::view_i32`/`view_mut_i32`, `view_u32`/`view_mut_u32`
+and `view_usize`/`view_mut_usize` for the exact corresponding Vec element.
+Descriptors borrow only the initialized prefix, without allocating/copying.
+Lengths and checked bounds count elements, and empty vectors/subranges are valid.
+Named shared/exclusive views support copied-value for-in. Structural mutations,
+replacement and move wait for the last retained use; exclusive views also block
+other owner access. Short reader/subview reborrows and conservative sibling
+rules match ADR 0415. No implicit conversion, generic slice API, reinterpretation,
+new runtime C symbol or host-storage interpreter is provided. See
+`examples/vec_integer_views`; Linux execution is deferred to the owner's batch.

@@ -78,7 +78,7 @@ func isIndexedStorageView(typ hir.Type) bool {
 	return view
 }
 
-// A private descriptor cannot be relabeled between u8 and i64 at return.
+// A private descriptor cannot be relabeled between element types at return.
 // The opaque address itself has no element type; the definition and callable
 // result must agree rather than trusting the return operand's annotation.
 func verifyStorageViewReturn(function *Function, value Operand, types map[LocalID]hir.Type) string {
