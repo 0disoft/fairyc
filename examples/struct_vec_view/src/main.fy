@@ -16,8 +16,7 @@ fn i32 analyze_source(ref u8[] source) {
     let ref tokens::Token[] view = vec::view<tokens::Token>(ref owned);
     let tokens::Stats all = switch(tokens::analyze(view)) {case .ok(s): {s} case .err(_): {return error();}};
     var usize first_end = 0;
-    while (first_end < view.len) {
-        let tokens::Token token = view[first_end];
+    for (let tokens::Token token in view) {
         first_end += 1;
         if (token.kind == 5) { break; }
     }

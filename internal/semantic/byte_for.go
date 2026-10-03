@@ -6,18 +6,26 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// byteForSourceIssue checks a named integer view before the hidden scalar loop is
+// byteForSourceIssue checks a named integer or shared struct view before the hidden scalar loop is
 // admitted. The descriptor binding must be immutable so the length snapshot
 // and later indexed reads always use the same view, even for exclusive views.
 func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Expression) string {
 	if loop == nil || loop.Body == nil || loop.View == nil {
 		return "malformed byte-view iteration"
 	}
-	wantElement, admitted := hir.IntegerViewElement(hir.Type("[" + loop.Type.Path + "]"))
-	if loop.Type.Kind != ast.TypeKindNamed || !admitted || len(loop.Type.Arguments) != 0 {
-		return "view iteration requires an exact u8, i32, i64, u32 or usize item binding"
+	if (loop.Type.Kind != ast.TypeKindNamed && loop.Type.Kind != ast.TypeKindBoundNominal) || len(loop.Type.Arguments) != 0 {
+		return "view iteration requires an exact integer or scalar-field struct item binding"
+	}
+	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, loop.Type, false)
+	_, integer := hir.IntegerViewElement(hir.Type("[" + string(wantElement) + "]"))
+	nominal := c.analyzer.plainViewStruct(wantElement)
+	if !resolved || !integer && !nominal {
+		return "view iteration requires an exact u8, i32, i64, u32, usize or scalar-field struct item binding"
 	}
 	shape := loop.Type.Path + "-view iteration requires a named immutable ref " + loop.Type.Path + "[] or ref mut " + loop.Type.Path + "[] view"
+	if nominal {
+		shape = "struct-view iteration requires an exact named immutable shared struct view"
+	}
 	if wantElement == hir.TypeU8 {
 		shape = "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"
 	}

@@ -101,3 +101,40 @@ func TestStructStorageViewMIR(t *testing.T) {
 		})
 	}
 }
+
+func TestStructForStorageMIRRoundTrip(t *testing.T) {
+	source := strings.Replace(structStorageViewSource, "if(values.len > 0) {let Token copy = values[0]; assert(copy.active);}", "for(let Token copy in values) {assert(copy.active); if(copy.kind==1){continue;} break;}", 1)
+	analysis, err := analyzeStorageBorrow(t, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checked, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+	if err != nil || !checked.Verified {
+		t.Fatalf("lower: %v %+v", err, checked.Semantic)
+	}
+	encoded, err := mircodec.EncodeStorageTransfers(checked.MIR, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := mircodec.DecodeStorageTransfers(encoded, 1<<20)
+	if err != nil || len(mir.VerifyStorageTransfers(decoded)) != 0 {
+		t.Fatalf("roundtrip: %v", err)
+	}
+	loads := 0
+	for _, fn := range decoded.Functions {
+		for _, block := range fn.Blocks {
+			for _, op := range block.Operations {
+				if op.Kind == mir.OperationViewIndex {
+					element, ok := hir.SharedStructViewElement(op.OwnerType)
+					if !ok || element != op.Type {
+						t.Fatalf("nominal item changed: %+v", op)
+					}
+					loads++
+				}
+			}
+		}
+	}
+	if loads == 0 {
+		t.Fatal("loop lost checked nominal load")
+	}
+}

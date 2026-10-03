@@ -1608,3 +1608,10 @@ existing builtin identity. Source/interface and dependent locks refresh. Languag
 target maturity remain unchanged. The private transfer verifier and eight MIR
 mutations keep different nominal types apart. Linux execution remains deferred;
 there is no released-compiler or performance claim.
+
+ADR 0440 admits copied-value iteration over named immutable shared scalar-field
+struct views, reusing the existing checked-index lowering and loop-held owner
+loans. SDK stage0.84, language /20, runtime /0, grammar and MIR/interface/artifact
+schemas stay unchanged; compiler executable identity separates cached generations.
+No mutable struct slice, arbitrary reference item or implicit Vec conversion is
+added. Linux execution remains deferred to the owner's batch.

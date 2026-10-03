@@ -41,15 +41,12 @@ pub fn bool scan(ref u8[] input, ref mut vec::Vec<Token> output) {
 /// Reads a borrowed token segment; only each selected token value is copied.
 pub fn Result<Stats, u32> analyze(ref Token[] segment) {
     var Stats stats = Stats { .identifiers = 0, .numbers = 0, .sum = 0 };
-    var usize i = 0;
-    while (i < segment.len) {
-        let Token token = segment[i];
+    for (let Token token in segment) {
         if (token.kind == 1) { stats.identifiers += 1; }
         if (token.kind == 2) {
             if (token.value > 9223372036854775807 - stats.sum) { return .err(1); }
             stats.numbers += 1; stats.sum += token.value;
         }
-        i += 1;
     }
     return .ok(stats);
 }

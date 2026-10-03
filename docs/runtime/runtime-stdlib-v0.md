@@ -1137,7 +1137,8 @@ are allowed, while element and field stores are rejected. A copied mutable local
 is independent of the owner and survives an owner clear. The view holds the whole
 owner shared-borrowed, so move, replacement, reallocation and structural mutation
 wait for the last retained use, and the conservative sibling rules of ADR 0415
-apply. There is no `ref mut` struct slice, fixed-array conversion or struct for-in,
-and no new runtime C symbol or host-storage interpreter. The descriptor is one
+apply. There is no `ref mut` struct slice or fixed-array conversion. ADR 0440
+adds copied-value for-in over named immutable shared struct views with loop-held
+owner loans. No new runtime C symbol or host-storage interpreter is introduced. The descriptor is one
 `const void *`/`uintptr_t` record. See `examples/struct_vec_view`; Linux
 execution is deferred to the owner's batch.

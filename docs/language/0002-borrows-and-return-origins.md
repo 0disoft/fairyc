@@ -173,7 +173,17 @@ owned slice is rejected. An index copies one struct value and `view[i].field`
 reads are allowed, while element and field stores are rejected; a copied mutable
 local survives an owner clear, and a `var ref Token[]` binding may still be
 reassigned to another view. Owner holds, returned/tagged origins, subrange and
-sibling rules reuse ADR 0415. Named struct views have no for-in form.
+sibling rules reuse ADR 0415.
+
+ADR 0440 admits copied-value `for (let Token item in view)` for a named immutable
+shared struct-view descriptor or parameter. The exact scalar-field nominal item
+must match the view; imported qualified names resolve normally. Length is
+snapshotted once and each iteration performs a checked struct-value read. The
+whole owner loan stays held through nested loops and break/continue/return/error
+propagation, and is released at the written loop exit. A body may make a mutable
+local copy of the item, but cannot modify the shared owner. Reference items,
+mutable descriptor iterables, call/slice-expression iterables and implicit Vec
+iteration remain outside this slice form; integer iteration rules are unchanged.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

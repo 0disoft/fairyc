@@ -41,7 +41,6 @@ func TestStructVecViewRejections(t *testing.T) {
 		{"store", "view[0] = Token {.kind=2,.offset=3,.value=0,.active=false};", ""},
 		{"field-store", "view[0].kind=2;", ""},
 		{"mutable-descriptor-store", "var ref Token[] alias=view;alias[0].kind=2;", ""},
-		{"iteration", "for(let Token item in view) {}", ""},
 	} {
 		t.Run(item.name, func(t *testing.T) {
 			root := t.TempDir()
@@ -109,7 +108,7 @@ func TestStructVecViewNative(t *testing.T) {
 
 func TestStructVecViewCache(t *testing.T) {
 	root := t.TempDir()
-	writeVecI64ViewWorkspace(t, root, strings.Replace(structVecViewBase, "ACTION", "let Token copy=view[0];assert(copy.value==4000000000);", 1))
+	writeVecI64ViewWorkspace(t, root, strings.Replace(structVecViewBase, "ACTION", "for(let Token copy in view){assert(copy.value==4000000000);}", 1))
 	configuration := workspacecompiler.Configuration{Target: target.X8664WindowsMSVC, Cache: packagecache.Limits{MaxEntries: 8, MaxBytes: 32 << 20}, MaxArtifactBytes: 8 << 20}
 	session, err := workspacecompiler.NewSourceSession(configuration)
 	if err != nil {

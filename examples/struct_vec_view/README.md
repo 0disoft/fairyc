@@ -11,7 +11,8 @@ struct whose every field is a plain language scalar (`bool`, `u8`, `i32`, `i64`,
 `u32`, `usize`). For a nominal element the view cannot reinterpret a `Token` view
 as a same-layout `Other` view, and nested struct, array, resource, borrow,
 raw-pointer and enum fields are rejected. The view is shared-only: there is no
-`ref mut` struct slice, no fixed-array conversion and no for-in over a struct view.
+`ref mut` struct slice or fixed-array conversion. Named immutable shared struct
+views support copied-value `for-in` under ADR 0440.
 
 An index copies one whole struct value out of the view, and `view[i].field` reads
 are allowed. Element and field stores are rejected, while a `var ref Token[]`
@@ -63,11 +64,18 @@ python verify.py C:\path\to\fairyc.exe
 Focused Go tests use the portable harness (actual Linux execution is deferred):
 
 ```sh
-bun tools/run-go.ts test ./internal/cli -run '^TestStruct(VecView|Token)' -count=1
+bun tools/run-go.ts test ./internal/cli -run '^TestStruct(For|VecView|Token)' -count=1
 ```
 
 Windows amd64 MSVC native development and release each run eight struct-view cases
 (three success, five checked `bounds` traps) and twelve token-analyzer cases.
+ADR 0440 adds seven struct-iteration cases per profile, including normal and
+error exits, nested/mixed loops and checked sum overflow.
+The analyzer and first-semicolon discovery use `for (let Token token in view)`
+(with a qualified item type in the main module). The owner stays borrowed through
+every loop exit; `break` and `continue` follow the usual C-shaped loop behavior.
+Mutable view bindings, reference items and expression-valued iterables are rejected.
+
 Raw receipts are under `.cache/struct-vec-view-native` and
 `.cache/struct-token-native`; the checked receipt is
 `docs/ops/evidence/struct-views-20261004.json`. See ADR 0439.

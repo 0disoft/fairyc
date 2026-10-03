@@ -78,7 +78,7 @@ func TestPreparedVectorForDoesNotAdmitSourceBeforeSemanticGate(t *testing.T) {
 		"std/vec.fy": "module std::vec; pub struct Placeholder { i32 value; }",
 	})
 	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 ||
-		result.Unsupported[0].Feature != "view iteration requires an exact u8, i32, i64, u32 or usize item binding" {
+		result.Unsupported[0].Feature != "view iteration requires an exact integer or scalar-field struct item binding" {
 		t.Fatalf("candidate source admission changed: diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
 	}
 }
