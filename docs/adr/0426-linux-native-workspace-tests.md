@@ -37,4 +37,7 @@ the same test runs in the existing Ubuntu Go job without adding a runner.
 
 This Windows host has no usable WSL distribution or container runtime. Windows
 execution and Linux cross-compilation can be checked here; actual Linux CLI and
-publication/save-failure execution remain pending a Linux host or CI result.
+publication/save-failure execution must come from a Linux host. Subsequent
+[Drimi Linux evidence](../compatibility/linux-drimi-20261003.md) records native
+test success and the exact original/patched save matrix boundaries; newer
+runtime-cache execution remains pending rather than inheriting those results.

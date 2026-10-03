@@ -34,4 +34,6 @@ the existing Ubuntu Go test job, with no additional runner.
 
 The current Windows checkout can type-check both host builds and execute Windows
 regressions, but cannot execute a Linux ELF. Linux-only tests explicitly skip
-here; no hosted Linux execution result has been observed for this change.
+here. Subsequent [Drimi Linux evidence](../compatibility/linux-drimi-20261003.md)
+records the exact tested snapshot, i64 compiler fix and remaining stale-lock
+test expectation failure. It is not a current-HEAD full-suite pass.

@@ -39,14 +39,7 @@ func TestStableLinuxBuildRun(t *testing.T) {
 		}
 		practicalFileEquals(t, image, string(before))
 	}
-	writeTestSource(t, root, "src/main.fy", "module main;\nfn i32 main() { return missing; }\n")
-	image := filepath.Join(root, "build", "app")
-	before, _ := os.ReadFile(image)
-	code, out, _ := runForTest([]string{"build", "--locked"}, root)
-	if code != ExitSourceDiagnostics || out != "" {
-		t.Fatalf("invalid source build: %d %q", code, out)
-	}
-	practicalFileEquals(t, image, string(before))
+	assertStableInvalidBuildPreservesImage(t, root, filepath.Join(root, "build", "app"))
 }
 
 const linuxStableStreams = `module main;
