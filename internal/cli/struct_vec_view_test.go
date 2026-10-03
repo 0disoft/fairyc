@@ -55,7 +55,6 @@ func TestStructVecViewRejections(t *testing.T) {
 		"empty":    "struct Token {}",
 		"pointer":  "struct Token {ptr mut i32 address;}",
 		"borrow":   "struct Token {ref i32 borrowed;}",
-		"nested":   "struct Child {i32 count;} struct Token {Child child;}",
 		"array":    "struct Token {i32[2] values;}",
 		"resource": "resource Token {cleanup {}}",
 		"enum":     "enum Token {one, two}",
@@ -107,8 +106,18 @@ func TestStructVecViewNative(t *testing.T) {
 }
 
 func TestStructVecViewCache(t *testing.T) {
+	for _, item := range []struct{ name, source string }{
+		{"scalar", strings.Replace(structVecViewBase, "ACTION", "for(let Token copy in view){assert(copy.value==4000000000);}", 1)},
+		{"nested", nestedStructSource("for(let Token copy in view){assert(copy.position.span.start==3 && copy.value==4000000000);}")},
+	} {
+		t.Run(item.name, func(t *testing.T) { checkStructVecViewCache(t, item.source) })
+	}
+}
+
+func checkStructVecViewCache(t *testing.T, source string) {
+	t.Helper()
 	root := t.TempDir()
-	writeVecI64ViewWorkspace(t, root, strings.Replace(structVecViewBase, "ACTION", "for(let Token copy in view){assert(copy.value==4000000000);}", 1))
+	writeVecI64ViewWorkspace(t, root, source)
 	configuration := workspacecompiler.Configuration{Target: target.X8664WindowsMSVC, Cache: packagecache.Limits{MaxEntries: 8, MaxBytes: 32 << 20}, MaxArtifactBytes: 8 << 20}
 	session, err := workspacecompiler.NewSourceSession(configuration)
 	if err != nil {

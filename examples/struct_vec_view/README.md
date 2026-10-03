@@ -7,10 +7,10 @@ vectors and empty subranges are valid.
 
 `T` may be one of the five existing integer elements (`u8`, `i32`, `i64`, `u32`,
 `usize`), which aliases the per-type integer view, or an actual nonempty nominal
-struct whose every field is a plain language scalar (`bool`, `u8`, `i32`, `i64`,
-`u32`, `usize`). For a nominal element the view cannot reinterpret a `Token` view
-as a same-layout `Other` view, and nested struct, array, resource, borrow,
-raw-pointer and enum fields are rejected. The view is shared-only: there is no
+struct with plain language scalar leaves (`bool`, `u8`, `i32`, `i64`,
+`u32`, `usize`), including acyclic nonempty nested structs under ADR 0441. For a nominal element the view cannot reinterpret a `Token` view
+as a same-layout `Other` view. Cycles, missing definitions and array, resource,
+borrow, raw-pointer, enum, Option and Result fields at any depth are rejected. The view is shared-only: there is no
 `ref mut` struct slice or fixed-array conversion. Named immutable shared struct
 views support copied-value `for-in` under ADR 0440.
 
@@ -25,7 +25,8 @@ slice bounds cannot mutate the owner. ADR 0415 sibling/ancestor rules still appl
 
 ## Example
 
-`src/tokens.fy` is a bounded ASCII lexer. It recognizes identifiers (letters,
+`src/tokens.fy` is a bounded ASCII lexer. Its `Token` contains a nested `Span`
+with byte offsets `[start,end)`, validated during copied-value iteration. It recognizes identifiers (letters,
 digits, underscore), decimal integers, `+`, `=` and `;`, and ignores ASCII
 whitespace. The nonnegative i64 literal and the running sum are checked for
 overflow. `src/main.fy` builds a `Vec<Token>`, takes a shared view and a
@@ -79,3 +80,8 @@ Mutable view bindings, reference items and expression-valued iterables are rejec
 Raw receipts are under `.cache/struct-vec-view-native` and
 `.cache/struct-token-native`; the checked receipt is
 `docs/ops/evidence/struct-views-20261004.json`. See ADR 0439.
+
+ADR 0441 also exercises nested copies, repeated child types, empty views and
+bounds traps in `TestStructNestedNative`, plus forbidden nested fields, source
+loan checks, private MIR mutations/roundtrip and a nested warm-cache hit.
+The current review receipt is `docs/ops/evidence/struct-nested-20261004.json`.

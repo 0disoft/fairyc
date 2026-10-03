@@ -166,10 +166,10 @@ helpers are `view_i32`/`view_mut_i32`, `view_u32`/`view_mut_u32`,
 ADR 0439 adds the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]` over the
 initialized prefix of `Vec<T>`. `T` may be one of the five existing integer
 elements (u8/i32/i64/u32/usize), which aliases the current per-type integer view,
-or an actual nonempty scalar-field nominal struct. For a nominal element the slice
-cannot reinterpret a `Token` view as a same-layout `Other` view; a nested
-aggregate/array/resource/borrow/pointer/enum field, a `ref mut` struct slice or an
-owned slice is rejected. An index copies one struct value and `view[i].field`
+or an actual nonempty nominal struct with scalar leaves, including nested structs
+under ADR 0441. For a nominal element the slice cannot reinterpret a `Token` view
+as a same-layout `Other` view; array/resource/borrow/pointer/enum/Option/Result
+fields at any depth, a `ref mut` struct slice or an owned slice are rejected. An index copies one struct value and `view[i].field`
 reads are allowed, while element and field stores are rejected; a copied mutable
 local survives an owner clear, and a `var ref Token[]` binding may still be
 reassigned to another view. Owner holds, returned/tagged origins, subrange and
@@ -184,6 +184,13 @@ propagation, and is released at the written loop exit. A body may make a mutable
 local copy of the item, but cannot modify the shared owner. Reference items,
 mutable descriptor iterables, call/slice-expression iterables and implicit Vec
 iteration remain outside this slice form; integer iteration rules are unchanged.
+
+ADR 0441 extends these shared views and copied-value loops to acyclic nested
+structs. Every reachable struct must be nonempty, and every leaf must be one of
+`bool`, `u8`, `i32`, `i64`, `u32`, `usize`. Repeated sibling types are allowed;
+self/indirect cycles and missing definitions are rejected. Indexing and iteration
+copy the entire element including nested fields; no nested loan is introduced.
+The owner loan, nominal identity, bounds and mutation rules above are unchanged.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

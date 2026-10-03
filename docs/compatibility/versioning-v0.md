@@ -1615,3 +1615,12 @@ loans. SDK stage0.84, language /20, runtime /0, grammar and MIR/interface/artifa
 schemas stay unchanged; compiler executable identity separates cached generations.
 No mutable struct slice, arbitrary reference item or implicit Vec conversion is
 added. Linux execution remains deferred to the owner's batch.
+
+ADR 0441 extends the same shared view and for-in element admission to nonempty
+acyclic nested structs with scalar leaves. Semantic and MIR checks share one
+iterative graph predicate, rejecting cycles and forbidden leaves at any depth.
+No SDK export or source changes: SDK stage0.84, language /20, runtime /0,
+grammar, MIR/artifact/interface schemas and target maturity remain unchanged.
+Existing nominal field references preserve the nested graph in private artifacts;
+compiler executable identity separates cache generations. Linux execution remains
+deferred to the owner's batch.

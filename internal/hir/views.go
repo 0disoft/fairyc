@@ -4,7 +4,7 @@ import "strings"
 
 // IndexedViewElement returns the element of an executable borrowed slice.
 // The closed set admits the executable integer elements and shared nominal shapes. Nominal elements require
-// stage-owned scalar-field struct validation before execution.
+// stage-owned scalar-leaf struct validation before execution.
 func IndexedViewElement(value Type) (Type, bool) {
 	switch value {
 	case SharedBorrow(TypeByteSlice), MutableBorrow(TypeByteSlice):
@@ -80,3 +80,47 @@ func SharedStructViewElement(value Type) (Type, bool) {
 
 // PlainViewField admits only language scalar fields with no ownership or loans.
 func PlainViewField(value Type) bool { return FixedArrayScalarElement(value) }
+
+// PlainViewStruct validates a nonempty, acyclic graph of structs with scalar
+// leaves. The lookup admits only actual struct definitions. An explicit DFS
+// stack and completed-node memoization bound work by the reachable type graph,
+// including deep chains and repeated sibling types in untrusted MIR.
+func PlainViewStruct(element Type, fields func(Type) ([]Type, bool)) bool {
+	type frame struct {
+		typ    Type
+		fields []Type
+		next   int
+	}
+	first, ok := fields(element)
+	if !ok || len(first) == 0 {
+		return false
+	}
+	stack := []frame{{typ: element, fields: first}}
+	state := map[Type]uint8{element: 1}
+	for len(stack) != 0 {
+		top := &stack[len(stack)-1]
+		if top.next == len(top.fields) {
+			state[top.typ] = 2
+			stack = stack[:len(stack)-1]
+			continue
+		}
+		child := top.fields[top.next]
+		top.next++
+		if PlainViewField(child) {
+			continue
+		}
+		switch state[child] {
+		case 1:
+			return false
+		case 2:
+			continue
+		}
+		nested, ok := fields(child)
+		if !ok || len(nested) == 0 {
+			return false
+		}
+		state[child] = 1
+		stack = append(stack, frame{typ: child, fields: nested})
+	}
+	return true
+}

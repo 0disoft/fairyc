@@ -3,16 +3,17 @@ package semantic
 import "github.com/0disoft/fairyc/internal/hir"
 
 func (a *analyzer) plainViewStruct(element hir.Type) bool {
-	info := a.structTypes[element]
-	if info == nil || len(info.orderedFields) == 0 {
-		return false
-	}
-	for _, field := range info.orderedFields {
-		if !hir.PlainViewField(field.typ) {
-			return false
+	return hir.PlainViewStruct(element, func(value hir.Type) ([]hir.Type, bool) {
+		info := a.structTypes[value]
+		if info == nil {
+			return nil, false
 		}
-	}
-	return true
+		fields := make([]hir.Type, len(info.orderedFields))
+		for i, field := range info.orderedFields {
+			fields[i] = field.typ
+		}
+		return fields, true
+	})
 }
 
 func (a *analyzer) validStructViewUse(value hir.Type) bool {

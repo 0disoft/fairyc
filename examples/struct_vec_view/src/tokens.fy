@@ -1,7 +1,8 @@
 module tokens;
 import std::vec as vec;
 
-pub struct Token { u32 kind; usize offset; usize length; i64 value; }
+pub struct Span { usize start; usize end; }
+pub struct Token { u32 kind; Span position; i64 value; }
 pub struct Stats { usize identifiers; usize numbers; i64 sum; }
 fn bool letter(u8 c) { return c >= 65 && c <= 90 || c >= 97 && c <= 122 || c == 95; }
 fn bool digit(u8 c) { return c >= 48 && c <= 57; }
@@ -32,7 +33,7 @@ pub fn bool scan(ref u8[] input, ref mut vec::Vec<Token> output) {
             if (kind == 0) { return false; }
             i += 1;
         }
-        let Token token = Token { .kind = kind, .offset = start, .length = i - start, .value = value };
+        let Token token = Token { .kind = kind, .position = Span { .start = start, .end = i }, .value = value };
         if (!switch(vec::push<Token>(output, token)) {case .ok(_): {true} case .err(_): {false}}) { return false; }
     }
     return true;
@@ -42,6 +43,7 @@ pub fn bool scan(ref u8[] input, ref mut vec::Vec<Token> output) {
 pub fn Result<Stats, u32> analyze(ref Token[] segment) {
     var Stats stats = Stats { .identifiers = 0, .numbers = 0, .sum = 0 };
     for (let Token token in segment) {
+        assert(token.position.start < token.position.end);
         if (token.kind == 1) { stats.identifiers += 1; }
         if (token.kind == 2) {
             if (token.value > 9223372036854775807 - stats.sum) { return .err(1); }

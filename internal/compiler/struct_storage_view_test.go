@@ -104,6 +104,19 @@ func TestStructStorageViewMIR(t *testing.T) {
 
 func TestStructForStorageMIRRoundTrip(t *testing.T) {
 	source := strings.Replace(structStorageViewSource, "if(values.len > 0) {let Token copy = values[0]; assert(copy.active);}", "for(let Token copy in values) {assert(copy.active); if(copy.kind==1){continue;} break;}", 1)
+	for _, nested := range []bool{false, true} {
+		t.Run(map[bool]string{false: "scalar", true: "nested"}[nested], func(t *testing.T) {
+			text := source
+			if nested {
+				text = nestedStorageViewSource(text)
+			}
+			checkStructForRoundTrip(t, text)
+		})
+	}
+}
+
+func checkStructForRoundTrip(t *testing.T, source string) {
+	t.Helper()
 	analysis, err := analyzeStorageBorrow(t, source)
 	if err != nil {
 		t.Fatal(err)

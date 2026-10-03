@@ -1,45 +1,57 @@
-# 공유 구조체 뷰 for-in 반복 구현 결과
+# 중첩 구조체 공유 뷰 구현 결과
 
-2026-10-04, ADR 0440에 따라 명목 구조체 공유 뷰를 `for`로 순회하는 문법을 구현했다.
-이터러블은 이름이 있는 불변 공유 참조 구조체 슬라이스 `ref Token[]`이고, `let`
-바인딩이나 함수 매개변수로 들어온다.
+2026-10-04, ADR 0441에 따라 중첩 구조체를 공유 뷰와 값 복사 for-in의 원소로
+허용했다. 토큰 예제는 다음 형태를 실제로 사용한다.
 
-    for (let Token item in view) { ... }
+```fairy
+pub struct Span { usize start; usize end; }
+pub struct Token { u32 kind; Span position; i64 value; }
+```
 
-항목 타입은 뷰의 명목 원소와 정확히 일치해야 한다. ADR 0439 그대로 필드가 전부
-평범한 스칼라인 비어있지 않은 실제 구조체만 원소가 되고, `tokens::Token` 같은 모듈
-한정 이름도 같은 명목 정체성으로 해석한다. `item`은 원소 값 하나를 통째로 복사한
-불변 `let`이며, 본문에서 가변 지역 변수로 한 번 더 복사해 쓸 수 있다.
+`src/tokens.fy`의 렉서가 토큰의 바이트 범위 `[start,end)`를 `Span`에 저장하고,
+`analyze`는 구조체 for-in에서 중첩 범위를 읽고 검사한다. 출력 형식은 유지했다.
 
-뷰 디스크립터의 길이는 루프 진입 시 한 번만 스냅샷하고, 각 원소는 검사된 인덱스
-읽기로 가져온다. 루프는 `break`·`continue`·`return`·오류 전파를 거치고 `item`을
-복사한 뒤에도 소유자 전체 공유 대여를 끝까지 유지하며, 루프를 벗어난 뒤에 해제한다.
-중첩·스칼라·혼합 루프도 같은 하강을 쓰고 정수 원소 규칙은 그대로다.
+semantic과 MIR의 구조체 판정은 `internal/hir/views.go`의 같은 그래프 검사를
+사용한다. 스칼라 또는 비어 있지 않은 구조체 필드만 허용하고, 반복되는 형제
+타입은 재사용한다. 순환·누락 정의·빈 중첩 구조체와 참조·포인터·resource·enum·
+배열·Option·Result 필드는 모든 깊이에서 거부한다. 명시적 스택을 써서 이 판정
+자체가 호스트의 재귀 스택에 의존하지 않는다.
 
-`ref`·`ref mut` 항목, 가변 디스크립터(`var ref Token[]`), 호출·슬라이스 식 이터러블,
-`Vec` 직접 순회 승격은 여전히 허용하지 않는다. SDK에는 이미 별도의 참조 항목 `Vec`
-경로가 있다.
-
-## 예제
-
-`src/tokens.fy`의 `analyze`와 `src/main.fy`의 첫 세미콜론 탐색이 구조체 for-in을 쓴다.
-렉서와 출력 형식은 그대로이고, 순회 부분만 공유 뷰 for-in으로 바뀌었다.
+인덱싱과 루프 항목은 중첩 필드를 포함한 원소 전체를 복사한다. 소유자 전체
+대여, 명목 타입 구분, 범위 검사와 루프 종료 규칙은 기존 계약을 따른다.
+구조체 필드에 구조체 값을 대입하는 기능은 현재 범위에 포함되지 않는다.
+복사 독립성 검증은 스칼라 필드를 바꾼 뒤 구조체 전체 값을 대입하는 방식이다.
 
 ## 검증
 
-Windows 일반·릴리스에서 반복문 7케이스씩(빈 구간·복사·중첩/혼합·조기 return·
-반환/태그된 하위 구간·오류 전파·합계 overflow)과 토큰 분석기 12케이스씩 통과했다.
-모듈 한정 항목 타입은 실제 토큰 예제에서 검증했다. 소유자 변경·이동(조기 종료와
-오류 전파 포함), 잘못된 항목 타입, 가변 디스크립터, 식 이터러블, 직접 Vec 순회,
-참조 항목을 포함한 거부 검사 20건도 통과했다. AST·의미 분석·제네릭 패키지,
-MIR 저장/복원, 캐시 재사용, 공개 CLI 및 Go vet 결과와 해시는
-`docs/ops/evidence/struct-for-20261004.json`에 남겼다.
+- Windows 일반·릴리스 각각 중첩 구조체 5건, 기존 구조체 반복 7건, 기존 스칼라
+  구조체 뷰 8건, 변경된 토큰 분석기 12건: 실제 실행 64회 통과.
+- 중첩 금지 필드·순환 및 루프 중 소유자 변경/이동·뷰 필드 쓰기 거부 13건 통과.
+  기존 구조체 뷰·반복 거부 검사도 유지했다.
+- 중첩 MIR 변조 11건 거부, 스칼라·중첩 반복문 MIR 저장/복원 및 캐시 all-hit 통과.
+- HIR 그래프 검사: 10,000단계 체인, 공유 자식 그래프, 순환·금지 필드 검증 통과.
+- 관련 HIR·의미 분석·compiler/MIR 검사, packageartifact·semanticsnapshot·atlasmap 및
+  Go vet 통과. C 동작은 위 네이티브 실행으로 검증했다.
+  `TestMapStoreCrashHelper`는 부모 프로세스에서 의도적으로 건너뛰는 자식 진입점이며,
+  제어된 자식 테스트들은 통과했다. mir·mircodec·cbackend·genericsource 패키지는
+  초기 이름 필터에 대응하는 unit test가 없어 해당 명령에서는 컴파일만 확인했다.
+- 공개 CLI check, 잠금 일반·릴리스 build/run와 portable verify의 native 12회 통과.
 
-예제 디렉터리에서 `python verify.py /절대/경로/fairyc`를 쓴다. Go 검증은 저장소
-루트에서 `bun tools/run-go.ts test ./internal/cli -run '^TestStruct(For|VecViewCache|Token)' -count=1`로 실행한다. Linux 실제 실행은 이후 일괄로 미룬다.
+첫 native 실행에서 테스트가 미지원인 aggregate 필드 대입을 사용해 한 사례가
+실패했다. 제품 소스 변경 없이 테스트를 전체 값 대입으로 고친 뒤 해당 native
+묶음 5건을 두 프로필에서 재검증해 모두 통과했다. 최초 실패와 해결 결과를
+`docs/ops/evidence/struct-nested-20261004.json`에 구분해 남겼다.
+원시 실행·EXE·컴파일러·SDK·소스 해시도 같은 증거 파일에서 연결한다.
+
+예제 디렉터리에서 `python verify.py /절대/경로/fairyc`를 사용한다. 관련 Go 검사:
+
+```sh
+bun tools/run-go.ts test ./internal/cli -run '^TestStruct(Nested|VecView|For|Token)' -count=1
+```
 
 ## 한계
 
-릴리스된 컴파일러나 타깃 성숙도·성능 주장이 아니다. SDK stage0.84, 언어 `/20`,
-런타임 ABI `/0`, 문법·MIR·인터페이스 스키마는 그대로다. 전체 스위트·벤치마크·push는
-건너뛰었고 PS1이나 새 runner는 추가하지 않았다.
+Linux 실제 실행은 사용자의 이후 일괄 검증으로 미뤘다. 전체 저장소 스위트와
+성능 벤치마크는 실행하지 않았다. SDK stage0.84, 언어 `/20`, 런타임 `/0`,
+문법·MIR·인터페이스 스키마와 타깃 성숙도는 그대로다. SDK/API export나 런타임
+심볼, DB, 새 runner·PS1, 설치·CI·push 변경은 없다.

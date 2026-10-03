@@ -1125,14 +1125,16 @@ new runtime C symbol or host-storage interpreter is provided. See
 
 ADR 0439 adds the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]`. `T` may be
 one of the five existing integer elements (u8/i32/i64/u32/usize), which aliases
-that per-type integer view, or an actual nonempty nominal struct whose every field
-is a plain scalar (`bool`, `u8`, `i32`, `i64`, `u32`, `usize`). The descriptor
+that per-type integer view, or an actual nonempty nominal struct whose leaves
+are plain scalars (`bool`, `u8`, `i32`, `i64`, `u32`, `usize`). ADR 0441 admits
+acyclic nested nonempty structs and repeated sibling types. The descriptor
 borrows only the initialized element prefix without allocating or copying; bounds
 count elements and empty vectors/subranges are valid. For a nominal element the
-view cannot reinterpret a `Token` view as a same-layout `Other` view, and nested
-struct/array/resource/borrow/raw-pointer/enum fields are rejected.
+view cannot reinterpret a `Token` view as a same-layout `Other` view. Cycles,
+missing definitions and array/resource/borrow/raw-pointer/enum/Option/Result
+fields at any depth are rejected.
 
-An index copy yields one whole scalar-field struct value; `view[i].field` reads
+An index copy yields one whole struct value including nested fields; `view[i].field` reads
 are allowed, while element and field stores are rejected. A copied mutable local
 is independent of the owner and survives an owner clear. The view holds the whole
 owner shared-borrowed, so move, replacement, reallocation and structural mutation
