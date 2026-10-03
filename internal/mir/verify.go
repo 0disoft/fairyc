@@ -107,6 +107,7 @@ func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []
 				}
 			}
 		}
+		failures = append(failures, verifyStructViewTypes(&program.Functions[index], properties)...)
 		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions)...)
 	}
 	slices.SortFunc(failures, func(left, right VerificationError) int {

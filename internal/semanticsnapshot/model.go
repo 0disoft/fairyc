@@ -49,6 +49,7 @@ const (
 	TypeBorrow     TypeKind = "borrow"
 	TypePointer    TypeKind = "pointer"
 	TypeFixedArray TypeKind = "fixed-array"
+	TypeSlice      TypeKind = "slice"
 	TypeOption     TypeKind = "option"
 	TypeResult     TypeKind = "result"
 	// TypeParameter uses Name as a canonical zero-based decimal binder index.

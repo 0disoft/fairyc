@@ -2,11 +2,15 @@ package cbackend
 
 import (
 	"fmt"
-	"github.com/0disoft/fairyc/internal/hir"
 	"strings"
+
+	"github.com/0disoft/fairyc/internal/hir"
 )
 
-func integerViewCType(value hir.Type) (descriptor, pointer string, ok bool) {
+func indexedViewCType(value hir.Type) (descriptor, pointer string, ok bool) {
+	if _, structView := hir.SharedStructViewElement(value); structView {
+		return "fy_struct_slice", "const void *", true
+	}
 	element, ok := hir.IndexedViewElement(value)
 	if !ok {
 		return "", "", false
@@ -25,7 +29,7 @@ func (e *emitter) emitIntegerViewTypes(output *strings.Builder) {
 			if !e.integerViews[value] {
 				continue
 			}
-			descriptor, pointer, _ := integerViewCType(value)
+			descriptor, pointer, _ := indexedViewCType(value)
 			fmt.Fprintf(output, "typedef struct %s {\n    %sdata;\n    uintptr_t length;\n} %s;\n\n", descriptor, pointer, descriptor)
 		}
 	}

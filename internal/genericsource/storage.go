@@ -57,11 +57,11 @@ func (x *expander) storageSelector(name string) string {
 const storageType syntax.Kind = "private-storage-type"
 
 func isStorageViewType(typ *ast.TypeReference) bool {
-	if typ == nil || typ.Kind != ast.TypeKindSlice || typ.Element == nil || typ.Element.Kind != ast.TypeKindNamed || len(typ.Element.Arguments) != 0 {
+	if typ == nil || typ.Kind != ast.TypeKindSlice || typ.Element == nil || len(typ.Element.Arguments) != 0 {
 		return false
 	}
 	_, ok := hir.IntegerViewElement(hir.Type("[" + typ.Element.Path + "]"))
-	return ok
+	return ok || typ.Element.Kind == ast.TypeKindBoundNominal || typ.Element.Kind == ast.TypeKindNamed && typ.Element.Path != "bool" && typ.Element.Path != "void"
 }
 
 func (x *expander) rewriteStorageQuery(e *ast.Expression) (bool, error) {

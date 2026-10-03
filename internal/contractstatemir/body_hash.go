@@ -388,6 +388,13 @@ func describeStateBodyFunction(module hir.Module, function hir.Function, coordin
 }
 
 func stableStateBodyType(value hir.Type, coordinates map[hir.PackageID]packagegraph.CoordinateID) (string, error) {
+	if element, nominal := hir.StructSliceElement(value); nominal {
+		stable, err := stableStateBodyType(element, coordinates)
+		if err != nil {
+			return "", err
+		}
+		return stable + "[]", nil
+	}
 	if stateBodyBuiltinType(value) {
 		return string(value), nil
 	}

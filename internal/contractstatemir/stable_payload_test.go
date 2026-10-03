@@ -218,3 +218,20 @@ func cloneStableStateBodyArtifact(value StableStateBodyArtifact) StableStateBody
 	}
 	return result
 }
+
+func TestStableStateBodyStructSliceIdentity(t *testing.T) {
+	coordinate := stateBodyCoordinate(t, "fypc1-sha256-e8756812ba7956f1f997a35a522b7f1735d8679c99c48b140570f4cd690c1a91")
+	stable, err := stableStateBodyType(hir.SharedBorrow("[$p2::tokens::Token]"), map[hir.PackageID]packagegraph.CoordinateID{2: coordinate})
+	want := "ref pkg[" + coordinate.String() + "]::tokens::Token[]"
+	if err != nil || stable != want {
+		t.Fatalf("struct view identity: %q %v", stable, err)
+	}
+	if got, valid := canonicalStableStateBodyType(stable); !valid || got != want {
+		t.Fatalf("canonical identity: %q %t", got, valid)
+	}
+	for _, bad := range []string{want + "[]", want[:len(want)-2] + "[2][]", "ref i32[]"} {
+		if _, valid := canonicalStableStateBodyType(bad); valid {
+			t.Fatalf("malformed slice accepted: %q", bad)
+		}
+	}
+}

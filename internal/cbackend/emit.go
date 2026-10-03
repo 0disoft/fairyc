@@ -120,6 +120,7 @@ type emitter struct {
 	dynamicTrapTargets map[int]map[mir.BlockID]struct{}
 	localTypes         []map[mir.LocalID]hir.Type
 	needsByteSlice     bool
+	needsStructSlice   bool
 	integerViews       map[hir.Type]bool
 	needsI64Slice      bool
 	needsMutI64Slice   bool
@@ -1167,7 +1168,7 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 	if cType, borrow := e.safeBorrowCType(value); borrow {
 		return cType, nil
 	}
-	if descriptor, _, view := integerViewCType(value); view {
+	if descriptor, _, view := indexedViewCType(value); view {
 		return descriptor, nil
 	}
 	switch {
@@ -1677,6 +1678,9 @@ func (e *emitter) recordCValueTypeRequirements(value hir.Type) {
 	} else if success, failure, result := hir.ResultElements(value); result {
 		e.recordCValueTypeRequirements(success)
 		e.recordCValueTypeRequirements(failure)
+	}
+	if _, structView := hir.SharedStructViewElement(value); structView {
+		e.needsStructSlice = true
 	}
 	if hir.NonByteIndexedView(value) && !hir.I64View(value) {
 		if e.integerViews == nil {
@@ -3029,6 +3033,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("extern uint32_t fy_std_region_reset_v0(void *region);\n\n")
 	}
 	_, usesStaticByteString := e.features["static-byte-string"]
+	if e.needsStructSlice {
+		output.WriteString("typedef struct fy_struct_slice { const void *data; uintptr_t length; } fy_struct_slice;\n\n")
+	}
 	e.emitIntegerViewTypes(output)
 	if e.needsI64Slice {
 		output.WriteString("typedef struct fy_i64_slice {\n    const int64_t *data;\n    uintptr_t length;\n} fy_i64_slice;\n\n")
@@ -3667,7 +3674,13 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		// MSVC /O2 can retain stale reads after exclusive i64 stores (ADR 0433).
 		// Keep shared-only programs and other targets on ordinary loads.
-		if e.targetID == target.X8664WindowsMSVC && e.needsMutI64Slice && operation.Type == hir.TypeI64 {
+		if element, structView := hir.SharedStructViewElement(operation.OwnerType); structView {
+			typ, err := e.cValueType(element)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(output, "    fy_l_%d = ((const %s *)(%s).data)[%s];\n", operation.DestinationLocal, typ, receiverValue, indexValue)
+		} else if e.targetID == target.X8664WindowsMSVC && e.needsMutI64Slice && operation.Type == hir.TypeI64 {
 			fmt.Fprintf(output, "    fy_l_%d = ((const volatile int64_t *)(%s).data)[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
 		} else {
 			fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
@@ -3716,6 +3729,17 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return err
 		}
+		if element, structView := hir.SharedStructViewElement(operation.OwnerType); structView {
+			typ, err := e.cValueType(element)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(output, "    fy_l_%d = (fy_struct_slice){ .data = (%s).data, .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, endValue, startValue)
+			if start.Kind != mir.OperandUSize || start.U64 != 0 {
+				fmt.Fprintf(output, "    if ((%s) != ((uintptr_t)UINT64_C(0))) { fy_l_%d.data = (const %s *)(%s).data + (%s); }\n", startValue, operation.DestinationLocal, typ, receiverValue, startValue)
+			}
+			return nil
+		}
 		switch {
 		case start.Kind == mir.OperandUSize && start.U64 == 0:
 			fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s).data, .length = (%s) };\n", operation.DestinationLocal, viewType, receiverValue, endValue)
@@ -3731,7 +3755,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return err
 		}
 		if hir.NonByteIndexedView(operation.Type) {
-			descriptor, _, _ := integerViewCType(operation.Type)
+			descriptor, _, _ := indexedViewCType(operation.Type)
 			fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, descriptor, value, value)
 		} else if operation.Type == hir.SharedBorrow(hir.TypeByteSlice) {
 			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s).length };\n", operation.DestinationLocal, value, value)

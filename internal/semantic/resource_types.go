@@ -303,7 +303,7 @@ func (a *analyzer) structType(value hir.Type) (*structInfo, bool) {
 
 func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReference) hir.Type {
 	value, ok := a.canonicalTypeReference(module, reference, true)
-	if ok && validUnsizedTypeUse(value) {
+	if ok && validUnsizedTypeUse(value) && a.validStructViewUse(value) {
 		return value
 	}
 	a.addUnsupported(module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
@@ -334,7 +334,8 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 		}
 		slice := hir.Type("[" + string(element) + "]")
 		_, admitted := hir.IntegerViewElement(slice)
-		return slice, admitted
+		_, nominal := hir.StructSliceElement(slice)
+		return slice, admitted || nominal && a.structTypes[element] != nil
 	case ast.TypeKindReference:
 		if reference.Element == nil {
 			return hir.TypeInvalid, false
@@ -461,7 +462,8 @@ func parsePositiveArrayLength(raw string) (uint64, bool) {
 }
 
 func validUnsizedTypeUse(value hir.Type) bool {
-	if _, slice := hir.IntegerViewElement(value); slice || value == hir.TypeStr || value == hir.TypeCStr {
+	_, structSlice := hir.StructSliceElement(value)
+	if _, slice := hir.IntegerViewElement(value); slice || structSlice || value == hir.TypeStr || value == hir.TypeCStr {
 		return false
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {

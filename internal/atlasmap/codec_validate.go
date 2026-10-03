@@ -561,6 +561,11 @@ func validateVersionTypeRef(value semanticsnapshot.TypeRef, depth, arity int, ag
 		if _, err := packagegraph.ParseCoordinateID(value.PackageCoordinate); err != nil {
 			return err
 		}
+	case semanticsnapshot.TypeSlice:
+		if value.Name != "" || value.PackageCoordinate != "" || len(value.Arguments) != 1 ||
+			(value.Arguments[0].Kind != semanticsnapshot.TypeNominal && value.Arguments[0].Kind != semanticsnapshot.TypeParameter) {
+			return fmt.Errorf("invalid nominal or parameter slice")
+		}
 	case semanticsnapshot.TypeBorrow, semanticsnapshot.TypePointer, semanticsnapshot.TypeFixedArray, semanticsnapshot.TypeOption:
 		if value.Name != "" || value.PackageCoordinate != "" || len(value.Arguments) != 1 {
 			return fmt.Errorf("invalid unary type kind %q", value.Kind)

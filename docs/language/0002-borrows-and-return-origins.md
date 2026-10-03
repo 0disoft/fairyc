@@ -155,10 +155,25 @@ ADRs 0437-0438 extend matching fixed-array and SDK initialized-prefix Vec views
 to i32/u32/usize. Shared/exclusive forms retain the same owner, return-origin,
 subrange and sibling rules. All five integer element types support named
 immutable-descriptor for-in with copied items; the owner stays held through every
-loop exit and indexed writes affect later loads. Owned unsized slices,
-bool/aggregate views, element reinterpretation and implicit Vec conversion remain
-unsupported. Indices count elements. SDK helpers are `view_i32`/`view_mut_i32`,
-`view_u32`/`view_mut_u32`, `view_usize`/`view_mut_usize`.
+loop exit and indexed writes affect later loads. Owned unsized slices, bool
+views, exclusive or owned aggregate slices, element reinterpretation and implicit
+Vec conversion remain unsupported. A shared `ref T[]` exists for an actual
+nonempty nominal struct whose fields are all plain scalars; a `bool` field is
+admitted, but a bare `ref bool[]` view is not. Indices count elements. SDK
+helpers are `view_i32`/`view_mut_i32`, `view_u32`/`view_mut_u32`,
+`view_usize`/`view_mut_usize`.
+
+ADR 0439 adds the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]` over the
+initialized prefix of `Vec<T>`. `T` may be one of the five existing integer
+elements (u8/i32/i64/u32/usize), which aliases the current per-type integer view,
+or an actual nonempty scalar-field nominal struct. For a nominal element the slice
+cannot reinterpret a `Token` view as a same-layout `Other` view; a nested
+aggregate/array/resource/borrow/pointer/enum field, a `ref mut` struct slice or an
+owned slice is rejected. An index copies one struct value and `view[i].field`
+reads are allowed, while element and field stores are rejected; a copied mutable
+local survives an owner clear, and a `var ref Token[]` binding may still be
+reassigned to another view. Owner holds, returned/tagged origins, subrange and
+sibling rules reuse ADR 0415. Named struct views have no for-in form.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

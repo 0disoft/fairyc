@@ -108,6 +108,8 @@ func TestStableTypeRebindsAcrossFreshPackageNumbers(t *testing.T) {
 	leftInstances := map[hir.PackageID]packagegraph.CoordinateID{1: owner, 2: dependency}
 	rightInstances := map[hir.PackageID]packagegraph.CoordinateID{7: owner, 9: dependency}
 	types := []hir.Type{
+		hir.SharedBorrow("[$p2::model::Packet]"),
+		hir.Option(hir.SharedBorrow("[$p1::api::Reader]")),
 		hir.TypeI32,
 		hir.SharedBorrow("$p1::api::Reader"),
 		hir.MutableBorrow(hir.Option("$p2::model::Packet")),
@@ -116,6 +118,8 @@ func TestStableTypeRebindsAcrossFreshPackageNumbers(t *testing.T) {
 		hir.Result(hir.Option("$p2::model::Packet"), hir.SharedBorrow("$p1::api::Reader")),
 	}
 	want := []hir.Type{
+		hir.SharedBorrow("[$p9::model::Packet]"),
+		hir.Option(hir.SharedBorrow("[$p7::api::Reader]")),
 		hir.TypeI32,
 		hir.SharedBorrow("$p7::api::Reader"),
 		hir.MutableBorrow(hir.Option("$p9::model::Packet")),
@@ -148,7 +152,7 @@ func TestStableTypeRebindRejectsUnknownAmbiguousAndMalformedIdentity(t *testing.
 	if _, err := rebindStableType(stable, map[hir.PackageID]packagegraph.CoordinateID{3: owner, 8: owner}); err == nil || !strings.Contains(err.Error(), "multiple local packages") {
 		t.Fatalf("ambiguous identity error = %v", err)
 	}
-	for _, value := range []string{"$p3::api::Reader", "pkg[broken]::api::Reader", "u8[0]", "Result<i32>"} {
+	for _, value := range []string{"$p3::api::Reader", "pkg[broken]::api::Reader", "u8[0]", "Result<i32>", "ref i32[]", stable + "[][]", stable + "[2][]"} {
 		if _, err := rebindStableType(value, map[hir.PackageID]packagegraph.CoordinateID{3: owner}); err == nil {
 			t.Fatalf("rebindStableType(%q) accepted malformed input", value)
 		}

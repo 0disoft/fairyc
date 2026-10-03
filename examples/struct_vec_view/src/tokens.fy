@@ -1,0 +1,58 @@
+module tokens;
+import std::vec as vec;
+
+pub struct Token { u32 kind; usize offset; usize length; i64 value; }
+pub struct Stats { usize identifiers; usize numbers; i64 sum; }
+fn bool letter(u8 c) { return c >= 65 && c <= 90 || c >= 97 && c <= 122 || c == 95; }
+fn bool digit(u8 c) { return c >= 48 && c <= 57; }
+
+/// A bounded ASCII lexer; token offsets refer to the caller's source bytes.
+/// 1 identifier, 2 decimal integer, 3 plus, 4 equal, 5 semicolon.
+pub fn bool scan(ref u8[] input, ref mut vec::Vec<Token> output) {
+    var usize i = 0;
+    while (i < input.len) {
+        let u8 c = input[i];
+        if (c == 32 || c == 9 || c == 10 || c == 13) { i += 1; continue; }
+        if (vec::len<Token>(output) >= 128) { return false; }
+        let usize start = i;
+        var u32 kind = 0;
+        var i64 value = 0;
+        if (letter(c)) {
+            kind = 1; i += 1;
+            while (i < input.len && (letter(input[i]) || digit(input[i]))) { i += 1; }
+        } else if (digit(c)) {
+            kind = 2;
+            while (i < input.len && digit(input[i])) {
+                let i64 next = (input[i] - 48) as i64;
+                if (value > 922337203685477580 || value == 922337203685477580 && next > 7) { return false; }
+                value = value * 10 + next; i += 1;
+            }
+        } else {
+            kind = if (c == 43) { 3 } else if (c == 61) { 4 } else if (c == 59) { 5 } else { 0 };
+            if (kind == 0) { return false; }
+            i += 1;
+        }
+        let Token token = Token { .kind = kind, .offset = start, .length = i - start, .value = value };
+        if (!switch(vec::push<Token>(output, token)) {case .ok(_): {true} case .err(_): {false}}) { return false; }
+    }
+    return true;
+}
+
+/// Reads a borrowed token segment; only each selected token value is copied.
+pub fn Result<Stats, u32> analyze(ref Token[] segment) {
+    var Stats stats = Stats { .identifiers = 0, .numbers = 0, .sum = 0 };
+    var usize i = 0;
+    while (i < segment.len) {
+        let Token token = segment[i];
+        if (token.kind == 1) { stats.identifiers += 1; }
+        if (token.kind == 2) {
+            if (token.value > 9223372036854775807 - stats.sum) { return .err(1); }
+            stats.numbers += 1; stats.sum += token.value;
+        }
+        i += 1;
+    }
+    return .ok(stats);
+}
+
+pub fn ref Token[] tail(ref vec::Vec<Token> owner, usize start) { return vec::view<Token>(owner)[start..]; }
+pub fn Option<ref Token[]> tagged(ref vec::Vec<Token> owner) { return .some(vec::view<Token>(owner)[..]); }

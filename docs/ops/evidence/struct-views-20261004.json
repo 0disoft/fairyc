@@ -1,0 +1,1130 @@
+{
+ "schema": "fairyc.struct-views-review/v1",
+ "date": "2026-10-04",
+ "baseCommit": "1aeb475b0ad24bcf34db65a6bced996a73760fb0",
+ "vcsModifiedAtBuild": true,
+ "sdk": "0.0.0-stage0.84",
+ "language": "fairyc-language/20",
+ "runtime": "fairyc-runtime/0",
+ "compilerSHA256": "f606a878acdb9883bf9ff634731366f1e80499a36fc514f2be23421085f609f4",
+ "compilerIdentityInvocation": {
+  "argv": [
+   "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-view-compiler\\fairyc.exe",
+   "--version"
+  ],
+  "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+  "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261003153342-1aeb475b0ad2+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 1aeb475b0ad24bcf34db65a6bced996a73760fb0\nmodified: true\n",
+  "stderr": "",
+  "exit": 0
+ },
+ "compilerSourceSet": {
+  "fileCount": 1249,
+  "SHA256": "bec8985024439530f290c91fef558b9e9eb214cab95b655bfaf96b53d15125b5",
+  "encoding": "sorted path<TAB>content-SHA256<LF>, UTF-8"
+ },
+ "changedSourceFiles": {
+  "internal/atlasmap/codec_struct_view_test.go": "9028e4769115b39b27e247c300c6b4fa8fe0d696674f518bcb2f1e4dd34133fa",
+  "internal/atlasmap/codec_validate.go": "c2eb0c5da8ee4d0932e1a4da0fc8d57290efd680c8620e3dcb126043829b76a9",
+  "internal/cbackend/c_identifiers.go": "ba469650b22db174c725129f902c390c67aae08c409fa014a43206b324dbe26b",
+  "internal/cbackend/emit.go": "a9620e4c5862063af3ae93b7852e7f5b1228e43d5a9c7522e5260298e03449b1",
+  "internal/cbackend/indexed_views.go": "e3cbaa6470a564b6aeacd6b589889d21c8f7a4ef0000a53db1292cef1e37c52b",
+  "internal/cbackend/storage_borrow.go": "66fb53a868135cd608e7c23d89108cf8fcce7225f3bf9b3a409e24bde3665778",
+  "internal/cli/struct_token_native_test.go": "4947074085dd359da7ea3403469299ee4d5299bfabb182026270b5f7b4a64d60",
+  "internal/cli/struct_vec_view_test.go": "1f3aa3055371c97bffdfd21c6d25ad2f7629a333a7d8991c4186d36180cd5bb3",
+  "internal/compiler/storage_i64_view_test.go": "2456a08ecd4b84b280f338a8d71364fb4f5c8a0bf6cc70f3ad174c6eea1c07c7",
+  "internal/compiler/struct_storage_view_test.go": "c0edfde90a02e8413ab5a0556b0ddab17598d7af21ab108d038524e86ffc6b00",
+  "internal/contractstatemir/body_hash.go": "5eeba21263955d4f22206f1405c7eaeb920491fc6fb372060f191ebdfff52858",
+  "internal/contractstatemir/stable_payload.go": "fb369c8e991761bce00d4ac4a1ca5c1fab768073e05c783530f0a2fb39585373",
+  "internal/contractstatemir/stable_payload_test.go": "6231ff5c86a833f5a7d9acd653f664f1d03cc857b0dc088c99ac2f5cf0e90c17",
+  "internal/genericsource/storage.go": "0d33de806452860df4150385b953ec6a7beac3c5d1cf78ad6db56a34666f2d30",
+  "internal/hir/views.go": "a90d114d0343b29b77fbf0b02d2bb6d5d9397695b37ef0663c368b23ca9eedc7",
+  "internal/mir/storage_view.go": "3e050453e8539d0d2982335d99ca68948a4099843fd7cc9e254ba62efe17eeba",
+  "internal/mir/struct_views.go": "0fe148d2fb2ddd84951737519e95ce19d7026b05ecfe7b1f4c4923d2606a541b",
+  "internal/mir/verify.go": "0be343ccc874baced73aa31f4bdf0808bc900efe99ef7c4b5a22491a894eb7c6",
+  "internal/moduleinterface/interface.go": "4b12330d5f44d6bd852c0dc6fedb10231fb1b2f43fd6744b9a7faa3af062375e",
+  "internal/packageartifact/function_identity.go": "f4eecf7a83c27230f4eea18b12597a1b6c163443acd6b749a6128b6a2ee220dc",
+  "internal/packageartifact/function_identity_test.go": "12c0cbf9d7f2807687a43d677a141d95e223fe355a91b005b009dadc6459dc2b",
+  "internal/sdkstdlib/sources/optional/std/vec.fy": "7511681d84955706cb4142de7319865f931a8ccbb4651bfbf2af6b687d168a72",
+  "internal/sdkstdlib/stdlib.go": "80746bfa1d09fa936a6653680a48e8feb5b55975d7e1a69d9cfd60f0344493a9",
+  "internal/sdkstdlib/stdlib_test.go": "6a418b91563e9352bc8243b5f04a37e3a246426eac9ea7ea90d38b57f684d5b8",
+  "internal/semantic/resource_types.go": "3d21fc5f43e80b0cb3f092e0923852fa29f5867e6a4dc41a9831f07e42dccf2c",
+  "internal/semantic/storage_borrow.go": "2127a6653bc4650a67de73222860859dbb6d7b87d7716ff6cd0384bbcf203a31",
+  "internal/semantic/struct_views.go": "24481efd93e520b3a56f7ac937a34edadbd02692b60d52c8366841eb3513c551",
+  "internal/semantic/typecheck.go": "613a7a5589bbbf0bd5512ce391fc5f0262203fa54b6875555db623d4fcb4b813",
+  "internal/semanticsnapshot/build.go": "05d7c51a2952929c5a34971fd00173bb4ca3d41eb7d61b2c78e4f580dd8e402d",
+  "internal/semanticsnapshot/generic.go": "7c3541b417ac07681ef24d0757ce38fef52d5add8470c6d36a8dcc2fe0ce7b64",
+  "internal/semanticsnapshot/model.go": "2a670ec490b8f955044dedf4008329f28dff954b72dedb21f33b6f89fd3fe56a",
+  "internal/semanticsnapshot/struct_views_test.go": "fba28e8b060ee0d41d66deb3032d1d9d48bf68bc1ebedee9ca09e6af11375f88"
+ },
+ "sdkSourceSet": {
+  "fileCount": 8,
+  "SHA256": "a81b7b9e4beda6dcfc76bb2ceef7c6d6b31dd9bb20cadf5088a3678dbc0cb3ec",
+  "encoding": "sorted path<TAB>content-SHA256<LF>, UTF-8"
+ },
+ "exampleSourceSet": {
+  "fileCount": 4,
+  "SHA256": "ab34c0108447b39bf5d840560b00afb9d39262acc30c8e871de53bd03766ff67",
+  "encoding": "sorted path<TAB>content-SHA256<LF>, UTF-8"
+ },
+ "publicCLI": {
+  "schema": "fairyc.struct-view-portable-smoke/v1",
+  "compilerSHA256": "f606a878acdb9883bf9ff634731366f1e80499a36fc514f2be23421085f609f4",
+  "runs": [
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-view-compiler\\fairyc.exe",
+     "check"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "check ok: 2 instance(s), 10 source file(s), 185 MIR function(s), lock updated\n",
+    "stderr": "",
+    "exit": 0
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-view-compiler\\fairyc.exe",
+     "build",
+     "--locked"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, development, lock verified)\n",
+    "stderr": "",
+    "exit": 0,
+    "imageSHA256": "77394173102ec9c2f92a0eede6b1e14cbb7eb45a4a3bf28e323de75e19076467"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-view-compiler\\fairyc.exe",
+     "run",
+     "--locked"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+    "stderr": "",
+    "exit": 0
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+    "stderr": "",
+    "exit": 0,
+    "profile": "dev",
+    "imageSHA256": "77394173102ec9c2f92a0eede6b1e14cbb7eb45a4a3bf28e323de75e19076467"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     ""
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+    "stderr": "",
+    "exit": 0,
+    "profile": "dev",
+    "imageSHA256": "77394173102ec9c2f92a0eede6b1e14cbb7eb45a4a3bf28e323de75e19076467"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "x=7;"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+    "stderr": "",
+    "exit": 0,
+    "profile": "dev",
+    "imageSHA256": "77394173102ec9c2f92a0eede6b1e14cbb7eb45a4a3bf28e323de75e19076467"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "@"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "exit": 2,
+    "profile": "dev",
+    "imageSHA256": "77394173102ec9c2f92a0eede6b1e14cbb7eb45a4a3bf28e323de75e19076467"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "9223372036854775808"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "exit": 2,
+    "profile": "dev",
+    "imageSHA256": "77394173102ec9c2f92a0eede6b1e14cbb7eb45a4a3bf28e323de75e19076467"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "exit": 2,
+    "profile": "dev",
+    "imageSHA256": "77394173102ec9c2f92a0eede6b1e14cbb7eb45a4a3bf28e323de75e19076467"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-view-compiler\\fairyc.exe",
+     "build",
+     "--locked",
+     "--release"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, release, lock verified)\n",
+    "stderr": "",
+    "exit": 0,
+    "imageSHA256": "ad40e09348021feaa6c9df14694cedea29023221db24522799405d311b03a80e"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-view-compiler\\fairyc.exe",
+     "run",
+     "--locked",
+     "--release"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+    "stderr": "",
+    "exit": 0
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+    "stderr": "",
+    "exit": 0,
+    "profile": "release",
+    "imageSHA256": "ad40e09348021feaa6c9df14694cedea29023221db24522799405d311b03a80e"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     ""
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+    "stderr": "",
+    "exit": 0,
+    "profile": "release",
+    "imageSHA256": "ad40e09348021feaa6c9df14694cedea29023221db24522799405d311b03a80e"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "x=7;"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+    "stderr": "",
+    "exit": 0,
+    "profile": "release",
+    "imageSHA256": "ad40e09348021feaa6c9df14694cedea29023221db24522799405d311b03a80e"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "@"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "exit": 2,
+    "profile": "release",
+    "imageSHA256": "ad40e09348021feaa6c9df14694cedea29023221db24522799405d311b03a80e"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "9223372036854775808"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "exit": 2,
+    "profile": "release",
+    "imageSHA256": "ad40e09348021feaa6c9df14694cedea29023221db24522799405d311b03a80e"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+     "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+    "stdout": "",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "exit": 2,
+    "profile": "release",
+    "imageSHA256": "ad40e09348021feaa6c9df14694cedea29023221db24522799405d311b03a80e"
+   }
+  ]
+ },
+ "checks": [
+  {
+   "path": ".cache/struct-view-packages.jsonl",
+   "SHA256": "d9342c17a6cc434ae5e17519fd5e6d376e52d6dab33304502bddfae2db711ef5",
+   "packageOutcomes": [
+    {
+     "Package": "github.com/0disoft/fairyc/internal/hir",
+     "Action": "pass",
+     "Elapsed": 0.29
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/genericsource",
+     "Action": "pass",
+     "Elapsed": 0.129
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/moduleinterface",
+     "Action": "pass",
+     "Elapsed": 0.16
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/contractstatemir",
+     "Action": "pass",
+     "Elapsed": 0.195
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/mir",
+     "Action": "pass",
+     "Elapsed": 0.197
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/semanticsnapshot",
+     "Action": "pass",
+     "Elapsed": 0.311
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/semantic",
+     "Action": "pass",
+     "Elapsed": 0.683
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/sdkstdlib",
+     "Action": "pass",
+     "Elapsed": 0.348
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/packageartifact",
+     "Action": "pass",
+     "Elapsed": 1.524
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/atlasmap",
+     "Action": "pass",
+     "Elapsed": 2.392
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/cbackend",
+     "Action": "pass",
+     "Elapsed": 8.874
+    }
+   ]
+  },
+  {
+   "path": ".cache/struct-view-compiler-go.jsonl",
+   "SHA256": "a07a5c4c1cea8f890d76f3acae9841e32f87082cc98e8ad244eaf46d72fedbcc",
+   "packageOutcomes": [
+    {
+     "Package": "github.com/0disoft/fairyc/internal/compiler",
+     "Action": "pass",
+     "Elapsed": 6.726
+    }
+   ]
+  },
+  {
+   "path": ".cache/struct-view-cache-go.jsonl",
+   "SHA256": "0f0a664a8811a9749df1eb0b9385dd01e2d68732d1bbf6fc3a0e298ae840f62c",
+   "packageOutcomes": [
+    {
+     "Package": "github.com/0disoft/fairyc/internal/cli",
+     "Action": "pass",
+     "Elapsed": 1.384
+    }
+   ]
+  },
+  {
+   "path": ".cache/struct-view-final-serialization.jsonl",
+   "SHA256": "c22dd46603dbd36e75188729ce4a1baf650eca9e787737aaa7ef0b88b87e7d53",
+   "packageOutcomes": [
+    {
+     "Package": "github.com/0disoft/fairyc/internal/packageartifact",
+     "Action": "pass",
+     "Elapsed": 1.013
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/contractstatemir",
+     "Action": "pass",
+     "Elapsed": 0.008
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/semanticsnapshot",
+     "Action": "pass",
+     "Elapsed": 0.155
+    },
+    {
+     "Package": "github.com/0disoft/fairyc/internal/atlasmap",
+     "Action": "pass",
+     "Elapsed": 1.073
+    }
+   ]
+  },
+  {
+   "path": ".cache/struct-view-final-cli.jsonl",
+   "SHA256": "45797d52967f7fce5742f5062c4b51556e84505f7c2caa39b8bc98ecdb923e20",
+   "packageOutcomes": [
+    {
+     "Package": "github.com/0disoft/fairyc/internal/cli",
+     "Action": "pass",
+     "Elapsed": 25.58
+    }
+   ]
+  }
+ ],
+ "vet": {
+  "argv": [
+   "bun",
+   "tools/run-go.ts",
+   "vet",
+   "./internal/hir",
+   "./internal/mir",
+   "./internal/semantic",
+   "./internal/cbackend",
+   "./internal/compiler",
+   "./internal/genericsource",
+   "./internal/moduleinterface",
+   "./internal/packageartifact",
+   "./internal/contractstatemir",
+   "./internal/semanticsnapshot",
+   "./internal/atlasmap",
+   "./internal/sdkstdlib",
+   "./internal/cli"
+  ],
+  "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ "nativeStructViews": {
+  "cases": [
+   {
+    "case": "copy-and-subviews",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativecopy-and-subviews3401704005\\001",
+    "imageSHA256": "a209b9aa7637925fc43f39e3f51e58737e0d30cc323c85c3f856a4c494ecb8a8",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "76a87ac3baa4773f7405c639fc8cc2a3328a0ac576020bcd655556f5a75f2fbe",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "copy-and-subviews",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativecopy-and-subviews3401704005\\001",
+    "imageSHA256": "35a5ccbcf48b5d4cb78001f037ae96aeafdb0ff839fff2f42624edbd0d72f7ce",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "76a87ac3baa4773f7405c639fc8cc2a3328a0ac576020bcd655556f5a75f2fbe",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "copy-after-owner-clear",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativecopy-after-owner-clear2853331069\\001",
+    "imageSHA256": "a37aa00c8cd984d44ff898dafc3cc6a517e5f2ff101822f1b463a661bc516c73",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "95364d3131df3c4cac6a53d78aa2232d588ca7b296384a4d4ddec24aca447bbf",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "copy-after-owner-clear",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativecopy-after-owner-clear2853331069\\001",
+    "imageSHA256": "da92398151f85af01ab55efc1d7506ad8548436adb820b58d0435cc3dc4ff4a7",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "95364d3131df3c4cac6a53d78aa2232d588ca7b296384a4d4ddec24aca447bbf",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "empty-and-growth",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativeempty-and-growth2029727506\\001",
+    "imageSHA256": "3fe2cc9d2dfa47e3b7cf34fcfbe1b89df59bab1bcae227adc94efea80c3c2a9b",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "57cb79e87b6d641802a09971408a3a39b25999a5819269441a22d007465fc3f9",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "empty-and-growth",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 0,
+    "expectedTrap": "",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativeempty-and-growth2029727506\\001",
+    "imageSHA256": "3229377242f033879d892a765971d44db54a31dee69a8b6d3c46680a98a653d2",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 0,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": ""
+    },
+    "sourceSHA256": "57cb79e87b6d641802a09971408a3a39b25999a5819269441a22d007465fc3f9",
+    "stderr": "",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativeend-read2149770731\\001",
+    "imageSHA256": "ba8a46e00fba4e04a1493d1782933dfcf59511c6559b085075a50801a5480b39",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "654aa5a990ecb031380af37cf478e0ca25871896620d98b8605f94f2c950f438",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "end-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativeend-read2149770731\\001",
+    "imageSHA256": "a49050d55bf7090effebb83ae6417e2047c5dc0de6fdf7d52b5415b85dcf9625",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "654aa5a990ecb031380af37cf478e0ca25871896620d98b8605f94f2c950f438",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "empty-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativeempty-read3012489380\\001",
+    "imageSHA256": "d05a36d969b518eba2743e58d61f2e0f166609eea980902fd561f9c68b54fbf6",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "0d0a2ccb4e6aaf81a62802bcf8553e985d7ddb6ff3a0dd4bcfb72ecb2fe2d583",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "empty-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativeempty-read3012489380\\001",
+    "imageSHA256": "c9dec06791f688ab3e7f0f5c84f9baccfa9a4671b6db9ab2f8cd09e035baa8d9",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "0d0a2ccb4e6aaf81a62802bcf8553e985d7ddb6ff3a0dd4bcfb72ecb2fe2d583",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativehuge-read4242587595\\001",
+    "imageSHA256": "f88c978b6d8042630fffd3e1027fed4d82be543d1a4aec2f7c6f52e713e2b534",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "87c97d73239aafa16eb82dc453b2fe02427c3795a894d298b095266da8c4c3c1",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "huge-read",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativehuge-read4242587595\\001",
+    "imageSHA256": "246844e9111d540020debadf09940a2361fd8a02b8bf1d1c92514950520b7933",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "87c97d73239aafa16eb82dc453b2fe02427c3795a894d298b095266da8c4c3c1",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativereversed1570469697\\001",
+    "imageSHA256": "5452fab4ff7f141ccc2d0809c4720730f66b31f7c6ed3684b1795d1cb3d8a7fc",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "d6ceb7b494b5fe44439d5bafb6f467951f1db9931e0f1dda3039fa9cfa078994",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "reversed",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativereversed1570469697\\001",
+    "imageSHA256": "e824f3ca1677741a2cae210fa511305096ad3c56172efb1598813e04efa4c5b5",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "d6ceb7b494b5fe44439d5bafb6f467951f1db9931e0f1dda3039fa9cfa078994",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativepast-end723870529\\001",
+    "imageSHA256": "6eab456e9e095ca36907ef8e4da740654f420807484c28bee2d0660e8c13a058",
+    "profile": "dev",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "c3a4fb9fa261a1e0723735be6794d9723b31db6ff0102d92bae675a5081f860c",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   },
+   {
+    "case": "past-end",
+    "executor": "cdriver.ExecuteWindowsMSVCTarget",
+    "exit": 5,
+    "expectedTrap": "bounds",
+    "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructVecViewNativepast-end723870529\\001",
+    "imageSHA256": "3fba856b101428124319c8827f8d4dea59f9fbd78b470dc903906ea8c78277f9",
+    "profile": "release",
+    "rawOutcome": {
+     "ExitCode": 129,
+     "Stdout": "",
+     "Stderr": "",
+     "TrapControl": "\u0001"
+    },
+    "sourceSHA256": "c3a4fb9fa261a1e0723735be6794d9723b31db6ff0102d92bae675a5081f860c",
+    "stderr": "trap: bounds\n",
+    "stdout": "",
+    "toolchain": {
+     "name": "msvc",
+     "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+     "version": "14.51.36231"
+    }
+   }
+  ],
+  "schema": "fairyc.struct-vec-view-native/v1",
+  "sdk": "0.0.0-stage0.84"
+ },
+ "nativeTokenAnalyzer": {
+  "cases": [
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe"
+    ],
+    "case": "default",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "",
+    "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     ""
+    ],
+    "case": "empty",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "",
+    "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "x=7;"
+    ],
+    "case": "single-statement",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "",
+    "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "alpha+2"
+    ],
+    "case": "no-semicolon",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "",
+    "stdout": "tokens\t3\nidentifiers\t1\nnumbers\t1\nsum\t2\nfirst_tokens\t3\nfirst_identifiers\t1\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "9223372036854775807;"
+    ],
+    "case": "i64-max",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "",
+    "stdout": "tokens\t2\nidentifiers\t0\nnumbers\t1\nsum\t9223372036854775807\nfirst_tokens\t2\nfirst_identifiers\t0\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "@"
+    ],
+    "case": "invalid-byte",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "한글"
+    ],
+    "case": "non-ascii",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "9223372036854775808"
+    ],
+    "case": "number-overflow",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "9223372036854775807 1"
+    ],
+    "case": "sum-overflow",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    ],
+    "case": "token-limit",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "case": "argument-limit",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "x",
+     "y"
+    ],
+    "case": "usage",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "9aa183a60dee2d631d9239dd96dd26d467d4eae2969abbd0edd70a0ee2df36c9",
+    "profile": "dev",
+    "stderr": "usage: struct-vec-view [ASCII-source]\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe"
+    ],
+    "case": "default",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "",
+    "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     ""
+    ],
+    "case": "empty",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "",
+    "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "x=7;"
+    ],
+    "case": "single-statement",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "",
+    "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "alpha+2"
+    ],
+    "case": "no-semicolon",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "",
+    "stdout": "tokens\t3\nidentifiers\t1\nnumbers\t1\nsum\t2\nfirst_tokens\t3\nfirst_identifiers\t1\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "9223372036854775807;"
+    ],
+    "case": "i64-max",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 0,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "",
+    "stdout": "tokens\t2\nidentifiers\t0\nnumbers\t1\nsum\t9223372036854775807\nfirst_tokens\t2\nfirst_identifiers\t0\nfirst_numbers\t1\n"
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "@"
+    ],
+    "case": "invalid-byte",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "한글"
+    ],
+    "case": "non-ascii",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "9223372036854775808"
+    ],
+    "case": "number-overflow",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "9223372036854775807 1"
+    ],
+    "case": "sum-overflow",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    ],
+    "case": "token-limit",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "case": "argument-limit",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+    "stdout": ""
+   },
+   {
+    "argv": [
+     "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001\\build\\struct-vec-view.exe",
+     "x",
+     "y"
+    ],
+    "case": "usage",
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestStructTokenAnalyzerNative2416127835\\001",
+    "exit": 2,
+    "imageSHA256": "02f2e8449f415e4c0e63c68ff5166d182c16a13f5f90a5539e55e1728920b801",
+    "profile": "release",
+    "stderr": "usage: struct-vec-view [ASCII-source]\n",
+    "stdout": ""
+   }
+  ],
+  "schema": "fairyc.struct-token-native/v1",
+  "sdk": "0.0.0-stage0.84"
+ },
+ "nativeReceipts": [
+  {
+   "path": ".cache\\struct-vec-view-native\\windows\\receipt.json",
+   "SHA256": "d10e81bfac462fd9946ddc3213fdd60dcb1b4a107086bf7848ebeef1a05c4b05"
+  },
+  {
+   "path": ".cache\\struct-token-native\\windows\\receipt.json",
+   "SHA256": "100d460d06113508877cffc561e7fbd654b4bdb120ffa5639f88503abf1a50f4"
+  }
+ ],
+ "limits": [
+  "Linux actual execution deferred by user to a later batch",
+  "No full repository tests, benchmarks, target-maturity promotion or release claim",
+  "Atlas roundtrip covers ordinary nominal slice and generic binder signature transport; SDK-private MIR execution is not an Atlas admission claim",
+  "No push, installation, CI workflow, DB or runtime C symbol changes"
+ ],
+ "testSelection": "Owning package/MIR checks reused where implementation is unchanged; final serialization and CLI suites include slice shape hardening and five generic integer aliases."
+}

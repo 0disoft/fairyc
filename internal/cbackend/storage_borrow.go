@@ -50,7 +50,7 @@ func (e *emitter) writeStorageBorrow(output *strings.Builder, operation mir.Oper
 		if err != nil {
 			return err
 		}
-		descriptor, pointer, _ := integerViewCType(operation.Type)
+		descriptor, pointer, _ := indexedViewCType(operation.Type)
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s)(%s), .length = %s };\n", operation.DestinationLocal, descriptor, pointer, address, length)
 		return nil
 	}

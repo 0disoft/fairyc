@@ -694,6 +694,14 @@ func canonicalStableStateBodyType(value string) (string, bool) {
 		}
 		return "Result<" + canonicalSuccess + ", " + canonicalFailure + ">", true
 	}
+	if strings.HasSuffix(value, "[]") {
+		element := strings.TrimSuffix(value, "[]")
+		if !strings.HasPrefix(element, "pkg[") || strings.HasSuffix(element, "]") {
+			return "", false
+		}
+		canonical, valid := canonicalStableStateBodyType(element)
+		return canonical + "[]", valid
+	}
 	if strings.HasSuffix(value, "]") {
 		separator := strings.LastIndexByte(value, '[')
 		if separator > 0 {

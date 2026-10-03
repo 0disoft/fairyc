@@ -881,6 +881,9 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		element, mutable, borrowed := hir.BorrowElement(target.Children[0].Type)
 		return borrowed && mutable && element == target.Type
 	case "field-expression":
+		if len(target.Children) == 1 && target.Children[0].Kind == "view-index" {
+			return false
+		}
 		if len(source.Children) != 1 || len(target.Children) != 1 {
 			return false
 		}

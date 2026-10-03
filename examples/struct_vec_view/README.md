@@ -1,0 +1,73 @@
+# Nominal struct vector views
+
+SDK stage0.84 exposes the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]` in
+`std::vec`. It borrows only the initialized element prefix of the vector without
+allocating or copying, and length/bounds count elements, so empty zero-backed
+vectors and empty subranges are valid.
+
+`T` may be one of the five existing integer elements (`u8`, `i32`, `i64`, `u32`,
+`usize`), which aliases the per-type integer view, or an actual nonempty nominal
+struct whose every field is a plain language scalar (`bool`, `u8`, `i32`, `i64`,
+`u32`, `usize`). For a nominal element the view cannot reinterpret a `Token` view
+as a same-layout `Other` view, and nested struct, array, resource, borrow,
+raw-pointer and enum fields are rejected. The view is shared-only: there is no
+`ref mut` struct slice, no fixed-array conversion and no for-in over a struct view.
+
+An index copies one whole struct value out of the view, and `view[i].field` reads
+are allowed. Element and field stores are rejected, while a `var ref Token[]`
+binding may still be reassigned to another view. A copied mutable local is
+independent of the owner; the native fixture holds one copy while the owner is
+cleared and reads it back unchanged. A live view keeps the whole owner
+shared-borrowed, so move, replacement, reallocation and structural mutation
+(including no-op `reserve`/`truncate`) wait for the last retained use, and index or
+slice bounds cannot mutate the owner. ADR 0415 sibling/ancestor rules still apply.
+
+## Example
+
+`src/tokens.fy` is a bounded ASCII lexer. It recognizes identifiers (letters,
+digits, underscore), decimal integers, `+`, `=` and `;`, and ignores ASCII
+whitespace. The nonnegative i64 literal and the running sum are checked for
+overflow. `src/main.fy` builds a `Vec<Token>`, takes a shared view and a
+prefix-through-first-semicolon subrange, and reports token/identifier/number counts
+and the summed numeric values. With no argument it analyzes the built-in source and
+prints sum `4000000007`.
+
+An optional first argument is the ASCII source to analyze. It is limited to 4095
+UTF-8 bytes and 128 tokens; other bytes, overflow, exceeding a limit or an
+allocation failure exit 2 with a diagnostic. The program performs lexing and
+arithmetic statistics only: it has no grammar and does not evaluate expressions.
+
+## Commands
+
+From this directory:
+
+```sh
+fairyc check
+fairyc build
+fairyc build --release --locked
+fairyc run --locked
+fairyc run --release --locked
+fairyc run --locked -- "price = 4000000000 + fee; other = 7;"
+```
+
+Portable verification (Python standard library only) takes the compiler
+executable path and runs `check`, locked development/release builds, and the
+native default/singleton/empty/invalid/overflow/limit checks; it writes the raw
+result to the ignored `build/verify-results.json`:
+
+```sh
+python verify.py /absolute/path/to/fairyc
+python verify.py C:\path\to\fairyc.exe
+```
+
+Focused Go tests use the portable harness (actual Linux execution is deferred):
+
+```sh
+bun tools/run-go.ts test ./internal/cli -run '^TestStruct(VecView|Token)' -count=1
+```
+
+Windows amd64 MSVC native development and release each run eight struct-view cases
+(three success, five checked `bounds` traps) and twelve token-analyzer cases.
+Raw receipts are under `.cache/struct-vec-view-native` and
+`.cache/struct-token-native`; the checked receipt is
+`docs/ops/evidence/struct-views-20261004.json`. See ADR 0439.

@@ -1,7 +1,10 @@
 package hir
 
+import "strings"
+
 // IndexedViewElement returns the element of an executable borrowed slice.
-// The closed set admits the executable integer elements; bool and aggregates remain excluded.
+// The closed set admits the executable integer elements and shared nominal shapes. Nominal elements require
+// stage-owned scalar-field struct validation before execution.
 func IndexedViewElement(value Type) (Type, bool) {
 	switch value {
 	case SharedBorrow(TypeByteSlice), MutableBorrow(TypeByteSlice):
@@ -15,7 +18,7 @@ func IndexedViewElement(value Type) (Type, bool) {
 	case SharedBorrow(TypeUsizeSlice), MutableBorrow(TypeUsizeSlice):
 		return TypeUSize, true
 	default:
-		return TypeInvalid, false
+		return SharedStructViewElement(value)
 	}
 }
 
@@ -43,7 +46,8 @@ func I64View(value Type) bool {
 
 // IntegerViewElement recognizes unsized integer slices without admitting ownership.
 func IntegerViewElement(value Type) (Type, bool) {
-	return IndexedViewElement(SharedBorrow(value))
+	element, ok := IndexedViewElement(SharedBorrow(value))
+	return element, ok && element != TypeBool && FixedArrayScalarElement(element)
 }
 
 // NonByteIndexedView selects array-backed integer views rather than static byte data.
@@ -51,3 +55,28 @@ func NonByteIndexedView(value Type) bool {
 	element, ok := IndexedViewElement(value)
 	return ok && element != TypeU8
 }
+
+// StructSliceElement recognizes only canonical unsized nominal shapes. It is
+// structural: semantic analysis and MIR must resolve the definition separately.
+func StructSliceElement(value Type) (Type, bool) {
+	text := string(value)
+	if len(text) < 5 || text[0] != '[' || text[len(text)-1] != ']' {
+		return TypeInvalid, false
+	}
+	element := text[1 : len(text)-1]
+	if !strings.Contains(element, "::") || strings.ContainsAny(element, "[];&<> *\t\r\n") {
+		return TypeInvalid, false
+	}
+	return Type(element), true
+}
+
+func SharedStructViewElement(value Type) (Type, bool) {
+	slice, mutable, borrowed := BorrowElement(value)
+	if !borrowed || mutable {
+		return TypeInvalid, false
+	}
+	return StructSliceElement(slice)
+}
+
+// PlainViewField admits only language scalar fields with no ownership or loans.
+func PlainViewField(value Type) bool { return FixedArrayScalarElement(value) }

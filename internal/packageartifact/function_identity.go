@@ -217,6 +217,10 @@ func validStableType(value string) bool {
 	if success, failure, ok := hir.ResultElements(hir.Type(value)); ok {
 		return validStableType(string(success)) && validStableType(string(failure))
 	}
+	if strings.HasSuffix(value, "[]") {
+		element := strings.TrimSuffix(value, "[]")
+		return strings.HasPrefix(element, "pkg[") && !strings.HasSuffix(element, "]") && validStableType(element)
+	}
 	if strings.HasSuffix(value, "]") {
 		if separator := strings.LastIndexByte(value, '['); separator > 0 {
 			length, err := strconv.ParseUint(value[separator+1:len(value)-1], 10, 64)
@@ -259,6 +263,13 @@ func logicalFunctionName(name string, owner hir.PackageID) (string, error) {
 }
 
 func stableType(value hir.Type, coordinates map[hir.PackageID]packagegraph.CoordinateID) (string, error) {
+	if element, nominal := hir.StructSliceElement(value); nominal {
+		stable, err := stableType(element, coordinates)
+		if err != nil {
+			return "", err
+		}
+		return stable + "[]", nil
+	}
 	if builtinType(value) {
 		return string(value), nil
 	}
@@ -374,6 +385,13 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 			return hir.TypeInvalid, err
 		}
 		return hir.Result(reboundSuccess, reboundFailure), nil
+	}
+	if strings.HasSuffix(value, "[]") {
+		element, err := rebindValidatedStableType(strings.TrimSuffix(value, "[]"), coordinates)
+		if err != nil {
+			return hir.TypeInvalid, err
+		}
+		return hir.Type("[" + string(element) + "]"), nil
 	}
 	if strings.HasSuffix(value, "]") {
 		separator := strings.LastIndexByte(value, '[')

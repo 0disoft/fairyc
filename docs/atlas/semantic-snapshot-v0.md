@@ -45,6 +45,17 @@ That declaration tuple is a join key inside one snapshot, not an Atlas `SymbolId
 `fairyc.symbol-id/v1-sha256-128+256` contract. `.fymap` transport is separately fixed by
 `docs/atlas/fymap-transport-v1.md` and cannot be inferred from this model.
 
+## Slice type references
+
+A `slice` type reference carries exactly one child for its element and is
+wrapped by a separate `borrow` reference. A nominal element keeps a `nominal`
+reference with its `PackageCoordinateId`; a generic element uses the binder-index
+`parameter` reference. Integer byte/i64/i32/u32/usize slices keep their existing
+builtin identity and are not represented as this slice kind. The ordinary
+`ref Token[]` and generic `ref T[]` declaration headers round-trip through the
+snapshot, generic headers and Atlas V3 transport; the SDK-private executable MIR
+is not an Atlas admission claim.
+
 ## Records
 
 The v0 snapshot contains detached, canonically sorted package, file, module, declaration,

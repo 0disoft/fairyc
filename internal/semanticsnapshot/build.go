@@ -670,6 +670,10 @@ func normalizeSpan(value hir.Span, metadata map[hir.PackageID]packageMetadata) (
 }
 
 func normalizeType(value hir.Type, metadata map[hir.PackageID]packageMetadata) (TypeRef, error) {
+	if element, nominal := hir.StructSliceElement(value); nominal {
+		argument, err := normalizeType(element, metadata)
+		return TypeRef{Kind: TypeSlice, Arguments: []TypeRef{argument}}, err
+	}
 	if builtinType(value) {
 		return TypeRef{Kind: TypeBuiltin, Name: string(value)}, nil
 	}

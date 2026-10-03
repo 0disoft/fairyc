@@ -11,6 +11,9 @@ import (
 func validStorageViewShape(op Operation, properties typeProperties) bool {
 	mutable := op.Kind == OperationStorageBorrowMut
 	elementType, view := hir.IndexedViewElement(op.Type)
+	if _, nominal := hir.SharedStructViewElement(op.Type); nominal && !properties.plainViewStruct(elementType) {
+		return false
+	}
 	_, resultMutable, _ := hir.BorrowElement(op.Type)
 	if (op.Kind != OperationStorageBorrow && !mutable) || !view || resultMutable != mutable || len(op.Operands) != 3 ||
 		op.Operands[2].Kind != OperandLocal && op.Operands[2].Kind != OperandUSize {

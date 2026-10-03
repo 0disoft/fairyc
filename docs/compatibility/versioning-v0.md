@@ -1596,3 +1596,15 @@ hashes. Source/interface and dependent locks refresh. Language /20, runtime /0,
 grammar, MIR/artifact/interface schemas and target maturity remain unchanged.
 Actual-local private-transfer and return checks keep different element types
 separate. Linux execution remains deferred; there is no performance claim.
+
+ADR 0439 advances the SDK to `0.0.0-stage0.84` for the shared
+`std::vec::view<T>(ref Vec<T>) -> ref T[]` export, which aliases the five
+existing integer views and adds actual nonempty scalar-field nominal structs.
+Slice identities stay in SDK interfaces, semantic
+snapshots and function/body hashes; a snapshot slice reference holds one nominal
+or parameter child inside a separate borrow, while integer slices keep their
+existing builtin identity. Source/interface and dependent locks refresh. Language
+/20, runtime /0, grammar, MIR/artifact/interface schemas, C runtime symbols and
+target maturity remain unchanged. The private transfer verifier and eight MIR
+mutations keep different nominal types apart. Linux execution remains deferred;
+there is no released-compiler or performance claim.

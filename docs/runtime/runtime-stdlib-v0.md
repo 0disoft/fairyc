@@ -1120,3 +1120,24 @@ other owner access. Short reader/subview reborrows and conservative sibling
 rules match ADR 0415. No implicit conversion, generic slice API, reinterpretation,
 new runtime C symbol or host-storage interpreter is provided. See
 `examples/vec_integer_views`; Linux execution is deferred to the owner's batch.
+
+## Nominal struct vector views (SDK stage0.84)
+
+ADR 0439 adds the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]`. `T` may be
+one of the five existing integer elements (u8/i32/i64/u32/usize), which aliases
+that per-type integer view, or an actual nonempty nominal struct whose every field
+is a plain scalar (`bool`, `u8`, `i32`, `i64`, `u32`, `usize`). The descriptor
+borrows only the initialized element prefix without allocating or copying; bounds
+count elements and empty vectors/subranges are valid. For a nominal element the
+view cannot reinterpret a `Token` view as a same-layout `Other` view, and nested
+struct/array/resource/borrow/raw-pointer/enum fields are rejected.
+
+An index copy yields one whole scalar-field struct value; `view[i].field` reads
+are allowed, while element and field stores are rejected. A copied mutable local
+is independent of the owner and survives an owner clear. The view holds the whole
+owner shared-borrowed, so move, replacement, reallocation and structural mutation
+wait for the last retained use, and the conservative sibling rules of ADR 0415
+apply. There is no `ref mut` struct slice, fixed-array conversion or struct for-in,
+and no new runtime C symbol or host-storage interpreter. The descriptor is one
+`const void *`/`uintptr_t` record. See `examples/struct_vec_view`; Linux
+execution is deferred to the owner's batch.

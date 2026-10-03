@@ -331,6 +331,13 @@ func stableStructFields(fields []hir.StructField, packageID hir.PackageID, coord
 }
 
 func stableType(value hir.Type, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, publicTypes map[hir.Type]bool) (string, error) {
+	if element, nominal := hir.StructSliceElement(value); nominal {
+		stable, err := stableType(element, packageID, coordinates, publicTypes)
+		if err != nil {
+			return "", err
+		}
+		return stable + "[]", nil
+	}
 	if element, slice := hir.IntegerViewElement(value); slice {
 		return string(element) + "[]", nil
 	}

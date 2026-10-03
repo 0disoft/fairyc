@@ -106,6 +106,12 @@ pub fn ref mut usize[] view_mut_usize(ref mut Vec<usize> value) {
     return unsafe { storage_borrow_mut<usize[]>(value, value.data, value.length) };
 }
 
+/// Borrows the initialized prefix of an integer or scalar-field struct vector without copying.
+/// The exact nominal type is preserved; structural mutation waits for last use.
+pub fn ref T[] view<T>(ref Vec<T> value) {
+    return unsafe { storage_borrow<T[]>(value, value.data, value.length) };
+}
+
 /// Borrows an initialized element without moving it. An out-of-range index traps.
 /// The vector cannot be mutated or moved while the returned reference is live.
 pub fn ref T at<T>(ref Vec<T> value, usize index) {
