@@ -66,6 +66,15 @@ Stable Linux command admission does not promote the target's independent conform
 
 The experimental `build-workspace --target x86_64-linux-gnu` path retains its explicit `--cc gcc` or `--cc clang`, Linux amd64 glibc host, and output-under-`build/` contract. It shares the private Linux storage transport with stable build/run.
 
+Native workspace compilation can reuse only the runtime/support object in the
+bounded OS user cache (`fairyc/native-runtime-v1`): 64 generations and 64 MiB
+encoded bytes. Source checks, generated-unit compilation, linking and image
+inspection stay fresh. Header preprocessing and compiler/profile/input identity
+gate reuse; cache failures fall back to compilation. `--locked` verifies the lock
+and does not disable this private cache. CLI arguments, stdout and exit codes
+are unchanged. See [ADR 0428](../adr/0428-native-runtime-object-reuse.md) for
+invalidation, recovery, exact bounds and the unverified Linux execution boundary.
+
 The experimental Linux `run-workspace` path uses the same explicit toolchain and private vector linkage, executes a temporary ELF, and reports the eight-bit process status. A dedicated one-byte trap channel distinguishes a trap from an ordinary return with the same status. It retains its output rejection; stable `run` forwards program output, stdin and arguments.
 
 ## Compatibility rule

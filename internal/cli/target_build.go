@@ -100,7 +100,7 @@ func compileWindowsProgramPolicy(program mir.Program, entryName string, targetID
 	if err != nil {
 		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, err)
 	}
-	artifact, err := cdriver.BuildWindowsMSVCTarget(toolchain, profile, unit.Source, supportSource)
+	artifact, err := cdriver.BuildWindowsMSVCTargetCached(toolchain, profile, unit.Source, supportSource)
 	if err != nil {
 		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, err)
 	}

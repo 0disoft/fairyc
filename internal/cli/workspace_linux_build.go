@@ -74,7 +74,7 @@ func compileLinuxProgram(program mir.Program, entry string, options workspaceTar
 	if err != nil {
 		return cdriver.Artifact{}, buildFailure(stderr, err)
 	}
-	artifact, err := cdriver.Build(toolchain, options.profile, unit.Source, support)
+	artifact, err := cdriver.BuildCached(toolchain, options.profile, unit.Source, support)
 	if err != nil {
 		return cdriver.Artifact{}, buildFailure(stderr, err)
 	}

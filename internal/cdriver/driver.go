@@ -62,6 +62,7 @@ type Toolchain struct {
 
 // Artifact is one bounded linked executable image and its build identity.
 type Artifact struct {
+	RuntimeCache RuntimeObjectCacheStatus
 	Bytes        []byte
 	Toolchain    Toolchain
 	Profile      Profile
@@ -225,10 +226,7 @@ func validateCrossToolchains(caller, callee Toolchain) error {
 }
 
 func objectArguments(profile Profile, sourcePath, objectPath string) []string {
-	return []string{
-		"-std=c11", "-pedantic-errors", "-Wall", "-Wextra", "-Werror", "-fno-common",
-		profile.optimizationFlag, "-c", sourcePath, "-o", objectPath,
-	}
+	return append(compilerArguments(profile, nil), "-c", sourcePath, "-o", objectPath)
 }
 
 func sanitizerInstrumentationFlags() []string {
@@ -279,6 +277,10 @@ func build(toolchain Toolchain, profile Profile, instrumentationFlags []string, 
 }
 
 func buildArguments(profile Profile, instrumentationFlags []string, unitPath, runtimePath, executablePath string) []string {
+	return append(compilerArguments(profile, instrumentationFlags), unitPath, runtimePath, "-o", executablePath)
+}
+
+func compilerArguments(profile Profile, instrumentationFlags []string) []string {
 	arguments := []string{
 		"-std=c11",
 		"-pedantic-errors",
@@ -288,8 +290,7 @@ func buildArguments(profile Profile, instrumentationFlags []string, unitPath, ru
 		"-fno-common",
 		profile.optimizationFlag,
 	}
-	arguments = append(arguments, instrumentationFlags...)
-	return append(arguments, unitPath, runtimePath, "-o", executablePath)
+	return append(arguments, instrumentationFlags...)
 }
 
 func readArtifact(path string) ([]byte, error) {

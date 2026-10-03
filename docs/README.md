@@ -20,6 +20,7 @@
 - MIR verifier mutation manifest: spec/fixtures/mir-verifier/manifest-v0.json
 - Constrained C emission manifest: spec/fixtures/c-emission/manifest-v0.json
 - Shared constrained-C driver: internal/cdriver/
+- Bounded native runtime object reuse, invalidation and fallback: docs/adr/0428-native-runtime-object-reuse.md, internal/cdriver/runtime_cache.go
 - Embedded scalar C runtime: internal/cruntime/
 - Provisional target standard-library C sources: internal/cstdlib/
 - Linux scalar C differential runner: internal/cbackendnative/

@@ -557,14 +557,19 @@ configuration, network, or stdin input. The validated root package name selects
 
 The command applies the stable check lock policy, requires root `main::main` with type
 `fn() -> i32`, and reuses the closed package-aware `x86_64-windows-msvc` C11, project-owned support,
-MSVC, PE, and unwind pipeline on Windows. Linux GNU amd64 with glibc uses the existing Linux C11 transport and GCC (preferred) or Clang from PATH. The complete new image is compiled and inspected before a synced
+MSVC, PE, and unwind pipeline on Windows. Linux GNU amd64 with glibc uses the existing Linux C11 transport and GCC (preferred) or Clang from PATH. The complete new image is linked and inspected before a synced
 staging file replaces the previous default artifact. Failures before successful replacement retain
 the previous artifact and remove staging state.
 
 Success is exactly `built: <path> (<x86_64-windows-msvc|x86_64-linux-gnu>, <development|release>, lock
 <updated|unchanged|verified>)`. The command freezes codes 0, 2, 3, 4, 6, and 7. This command
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
-status and does not select persistent-cache defaults.
+status. Native compilation uses only the bounded private runtime-object cache
+described in [ADR 0428](../adr/0428-native-runtime-object-reuse.md); package MIR
+and executables are not reused. Header preprocessing, generated-unit compilation,
+linking and image inspection remain current. The OS user cache is separate from
+workspace outputs and may be written with `--locked`. Cache failure falls back
+to runtime compilation without changing stable output or exit codes.
 
 ## Stable workspace run v4
 
@@ -598,7 +603,8 @@ trap-control pipe distinguishes reserved trap statuses from equal normal results
 stderr byte is forwarded, `trap: <category>` is appended, and the command returns 5. The control
 channel is not public runtime ABI, authentication, or hostile-code isolation.
 Pre-execution invocation, source, internal/output, build/execution, and package failures retain codes
-2, 3, 4, 6, and 7 respectively without promoting target maturity or persistent-cache defaults.
+2, 3, 4, 6, and 7 respectively without promoting target maturity. The same private
+runtime-object cache policy as stable build applies.
 An input transport failure after launch is an execution failure and cannot roll back program effects.
 The embedding helper `cli.Run` still supplies EOF; callers use `cli.RunWithInput` to provide a stream.
 

@@ -37,10 +37,10 @@ temporarily exceed the allowance; collection converges after publication/open
 or an explicit sweep once writes stop. Concurrent callers with different
 allowances apply their own policy, so shared roots should use one agreed budget.
 
-Stable `build/run/test` still do not use persistent compilation caches. This
-change does not reuse native executables or claim faster incremental builds.
-Native reuse needs exact dependency invalidation for generated C, runtime,
-compiler, linker, headers and libraries before it can bypass compilation.
+This decision does not add persistent caches to stable `build/run/test`, reuse
+native executables or claim faster incremental builds. The later
+[ADR 0428](0428-native-runtime-object-reuse.md) admits a separate bounded native
+runtime-object cache; generated C compilation and final linking stay fresh.
 SDK, language, MIR and cache record versions are unchanged. Existing cache paths
 need no migration; only retention policy and experimental aggregate counters
 change. No CI runner or dependency is added.

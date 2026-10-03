@@ -37,6 +37,7 @@ type WindowsHostObject struct {
 // private validation-only linker map and program database.
 // It is not a distributable target artifact or a target-conformance receipt.
 type WindowsHostArtifact struct {
+	RuntimeCache    RuntimeObjectCacheStatus
 	Bytes           []byte
 	Objects         []WindowsHostObject
 	LinkMap         []byte
