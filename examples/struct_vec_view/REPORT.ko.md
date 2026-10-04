@@ -83,3 +83,17 @@ Linux 실제 실행은 일괄 검증으로 미뤘다. 전체 저장소·성능 �
 않았고, 범위를 넘어선 컴파일러 전체 패키지 검사는 중단한 뒤 관련 검사로
 좁혔다. SDK stage0.84, 언어 /20, 런타임 /0 및 문법·wire schema를 유지한다.
 새 공개 SDK API, DB·설치·CI·runner·PS1 변경과 push는 없다.
+
+
+## ADR 0444 후속 수정
+
+이전 절의 상수 overflow RHS 관련 MSVC C4702 실패는 ADR 0444에서 수정했다.
+같은 입력 바이트의 공개 CLI `check`와 일반·릴리스 빌드가 통과하고,
+실행은 정상적으로 `integer-overflow` trap(종료 코드 5)을 반환한다.
+Windows 네이티브 10사례씩, 20회 결과를 확인했다. 상수 증명은 같은 블록의
+스칼라 단순 복사로 제한하고, 간접 쓰기·미지 연산·재지정을 만나면 필요한
+상수 정보를 폐기한다. 부수 효과 fixture는 trap 이전의 `before` 출력만
+남고 이후의 `after` 출력이 없음을 확인한다. 원래 MIR은 바꾸지 않는다.
+경고 억제·SDK/런타임/API·DB·CI·runner 변경은 없으며 Linux 실제 실행은
+이후 일괄 검증으로 남긴다. 증거는
+`docs/ops/evidence/constant-checked-c-20261004.json`이다.

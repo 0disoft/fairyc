@@ -454,6 +454,7 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 			return Unit{}, err
 		}
 	}
+	value.refreshIntegerHelperDemand()
 	if err := value.prepareDropTraceSites(); err != nil {
 		return Unit{}, err
 	}
@@ -4077,6 +4078,10 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 			fmt.Fprintf(output, "    goto fy_b_%d;\n", target)
 		}
 	case mir.TerminatorSwitch:
+		if failure, known := constantCheckedFailure(function.Blocks[int(blockID)]); known {
+			fmt.Fprintf(output, "    %sgoto fy_b_%d;\n", e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
+			return nil
+		}
 		return e.emitSwitch(output, functionIndex, terminator)
 	case mir.TerminatorReturn:
 		if e.resourceHasNestedFields(function.DropGlueFor) {

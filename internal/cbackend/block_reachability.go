@@ -21,6 +21,8 @@ func reachableBlocksForC(function mir.Function, nonReturning map[hir.SymbolID]bo
 		reachable[index] = true
 		if block.Terminator.Kind == mir.TerminatorCall && nonReturning[block.Terminator.Callee] {
 			// A trapping or infinite callee cannot reach the normal continuation.
+		} else if selected, failure := constantCheckedFailure(*block); failure {
+			queue = append(queue, selected)
 		} else if selected, constant := constantBooleanSuccessor(block.Terminator); constant {
 			queue = append(queue, selected)
 		} else {

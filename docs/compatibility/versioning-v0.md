@@ -1644,3 +1644,10 @@ shape are reused; executable compiler identity separates older restricted
 compilers and their caches. SDK source/exports and stage0.84, language /20,
 runtime /0, grammar and target maturity remain unchanged. Linux execution is
 deferred to the owner's batch.
+
+ADR 0444 corrects generated-C reachability for block-local provably failing
+checked integer arithmetic and signed negation. Verified MIR and its source
+trap semantics remain unchanged. Native output and static helper demand change;
+compiler revision/executable identity separates cache generations. No SDK export,
+stage0.84 version, language /20, runtime /0, grammar, ABI, wire schema or target
+maturity change is made. Linux actual execution remains deferred.

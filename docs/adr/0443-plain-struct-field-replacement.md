@@ -65,13 +65,14 @@ Review receipt: `docs/ops/evidence/plain-struct-field-store-20261004.json`.
 Linux actual execution is deferred to the owner's batch. No performance experiment,
 whole-repository test, installation, CI change, new runner or PS1 is introduced.
 
-## Remaining backend limitation
+## Historical backend limitation (resolved by ADR 0444)
 
 A RHS that deterministically overflows in its body before constructing a returned
 struct passes `check` but MSVC release build fails on C4702 unreachable-code
 warnings (CLI exit 6). The same aggregate-return function without any field store
 reproduces on the prior compiler from ADR 0442; this predates replacement admission.
-It is retained as an unresolved C-emission issue, without suppressing warnings.
+It was retained as an unresolved C-emission issue at ADR 0443. ADR 0444 resolves
+this reproduction through bounded C reachability, without suppressing warnings.
 The new native trap case uses a mutable local initialized from a function input
 and passes dev/release; it validates runtime failure before final replacement.
 Exact baseline/current sources, argv, output and hashes are retained in the review
