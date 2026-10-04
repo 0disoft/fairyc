@@ -288,6 +288,7 @@ const (
 	OperationViewEmpty                OperationKind = "view-empty"
 	OperationViewIndexCheck           OperationKind = "view-index-check"
 	OperationViewIndex                OperationKind = "view-index"
+	OperationViewElementBorrow        OperationKind = "view-element-borrow"
 	OperationViewIndexStore           OperationKind = "view-index-store"
 	OperationViewSliceCheck           OperationKind = "view-slice-check"
 	OperationViewSlice                OperationKind = "view-slice"

@@ -78,7 +78,7 @@ func TestMutableStructVecViewRejections(t *testing.T) {
 		{"bounds-effect", `let ref mut Token[] child=view[..{discard vec::clear<Token>(ref mut owner);0}];assert(child.len==0);`, "E2101"},
 		{"index-effect", `view[{discard vec::clear<Token>(ref mut owner);0}]=token(1);`, "E2101"},
 		{"rhs-effect", `view[0]={discard vec::clear<Token>(ref mut owner);token(1)};`, "E2101"},
-		{"field-store", `view[0].value=1;`, "E1008"},
+		{"shared-field-store", `let ref Token[] shared=vec::view<Token>(ref owner);shared[0].value=1;`, "E1008"},
 		{"element-borrow", `let ref mut Token item=ref mut view[0];`, ""},
 		{"for-in", `for(let Token item in view){assert(item.active);}`, ""},
 		{"wrong-value", `view[0]=1;`, "E1006"},

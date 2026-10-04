@@ -9,6 +9,12 @@ import (
 // sharedFieldBorrow projects an address, never a copied aggregate temporary.
 // Every projection retains the complete root owner; fields do not split loans.
 func (c *typeChecker) sharedFieldBorrow(source *ast.Expression, field hir.Expression) (hir.Expression, bool) {
+	if root := borrowPlaceRoot(source); root != nil && root.Kind == syntax.KindIndex {
+		if !c.indexedStructPlace(source) {
+			return hir.Expression{}, false
+		}
+		return projectFieldBorrow(field, false)
+	}
 	if result, ok := projectFieldBorrow(field, false); ok {
 		return result, true
 	}
@@ -53,7 +59,13 @@ func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, boo
 	if _, ownerMutable, borrowed := hir.BorrowElement(owner.Type); borrowed && ownerMutable != mutable {
 		return hir.Expression{}, false
 	} else if !borrowed {
-		if owner.Kind == "path" && owner.Symbol != hir.NoSymbol {
+		if owner.Kind == "view-index" {
+			var ok bool
+			owner, ok = indexedElementBorrow(owner, mutable)
+			if !ok {
+				return hir.Expression{}, false
+			}
+		} else if owner.Kind == "path" && owner.Symbol != hir.NoSymbol {
 			borrowType, operator := hir.SharedBorrow(owner.Type), "&"
 			if mutable {
 				borrowType, operator = hir.MutableBorrow(owner.Type), "&mut"
@@ -94,6 +106,9 @@ func fieldAssignmentRoot(expression *ast.Expression) *ast.Expression {
 func (c *typeChecker) mutableFieldBorrow(source *ast.Expression, child *hir.Expression) (hir.Expression, bool) {
 	if child == nil {
 		return hir.Expression{}, false
+	}
+	if c.indexedStructPlace(source) {
+		return projectFieldBorrow(*child, true)
 	}
 	root := fieldAssignmentRoot(source)
 	target := c.analyzer.resolved[root]

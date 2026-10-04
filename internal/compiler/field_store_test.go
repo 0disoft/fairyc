@@ -102,7 +102,7 @@ fn i32 main() { var i32 value = 1; set(ref mut value); return value; }`
 	}
 }
 
-func TestFieldStoreScalarDerefRejectsMutableFieldProjection(t *testing.T) {
+func TestFieldStoreScalarDerefMutableFieldProjection(t *testing.T) {
 	const source = `module main; struct State { i32 count; }
 fn i32 main() {
     var State state = State { .count = 1 };
@@ -114,8 +114,12 @@ fn i32 main() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Verified {
-		t.Fatal("mutable field projection must remain unsupported")
+	if !result.Verified {
+		t.Fatalf("mutable field projection: %+v", result.Semantic)
+	}
+	outcome, err := interpreter.Execute(result.MIR, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("field projection: %+v %v", outcome, err)
 	}
 }
 

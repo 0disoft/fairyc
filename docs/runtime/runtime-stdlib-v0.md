@@ -1158,3 +1158,5 @@ until last use. Subviews retain ADR 0415 parent/sibling rules. Indexed field
 stores/borrows, mutable struct-view for-in and fixed-array struct conversion
 remain closed. The C descriptor is a mutable void pointer and uintptr_t count;
 there is no new runtime C symbol or allocator behavior.
+
+ADR 0449 allows field updates and shared/mutable field address borrows through named nominal descriptors returned by `vec::view<T>` and `vec::view_mut<T>`. Shared descriptors cannot write. Whole-owner and conservative sibling loan rules stay in force; no SDK export or runtime C symbol is added.

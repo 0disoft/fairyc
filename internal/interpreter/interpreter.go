@@ -783,6 +783,16 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("byte-view index in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = value
+			case mir.OperationViewElementBorrow:
+				receiver, index, err := evaluateViewIndexOperands(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				value, err := receiver.borrowStructElement(index.u64, operation.Type)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				locals[operation.DestinationLocal] = value
 			case mir.OperationViewIndexCheck:
 			case mir.OperationViewIndexStore:
 				receiver, index, value, err := evaluateViewIndexStoreOperands(locals, operation.Operands)

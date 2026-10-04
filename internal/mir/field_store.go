@@ -34,7 +34,14 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 		owner = &owner.Children[0]
 	}
 	slices.Reverse(fields)
-	if owner.Kind != "path" {
+	indexed := owner.Kind == "view-index"
+	if indexed {
+		borrowed, ok := mutableIndexedOwner(*owner)
+		if !ok {
+			return unsupported
+		}
+		owner = &borrowed
+	} else if owner.Kind != "path" {
 		return unsupported
 	}
 	if _, mutable, borrowed := hir.BorrowElement(owner.Type); borrowed && !mutable {
@@ -46,6 +53,9 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	receiver, err := l.lowerExpression(owner)
 	if err != nil {
 		return err
+	}
+	if l.blockTerminated(l.current) {
+		return nil
 	}
 	if len(fields) > 0 || l.properties.plainViewStruct(target.Type) {
 		if _, _, borrowed := hir.BorrowElement(owner.Type); borrowed {
@@ -62,7 +72,11 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 		}
 		// Read the original scalar before RHS effects, without copying a place
 		// for the eventual store. Ordinary field reads keep their existing lowering.
-		prior, err = l.lowerExpression(target)
+		if indexed {
+			prior, err = l.lowerSelectedFieldRead(receiver, owner.Type, append(slices.Clone(fields), target.Operator), target.Span)
+		} else {
+			prior, err = l.lowerExpression(target)
+		}
 		if err != nil {
 			return err
 		}
@@ -70,6 +84,9 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	value, err := l.lowerExpression(statement.Expression)
 	if err != nil {
 		return err
+	}
+	if l.blockTerminated(l.current) {
+		return nil
 	}
 	if operator != "" && operator != "=" {
 		binary, _ := hir.CompoundAssignmentBinary(operator)
@@ -114,4 +131,35 @@ func ValidOneWordStructFieldStoreShape(op Operation, definition *StructType) boo
 	return len(op.Fields) == 0 && definition != nil && definition.Type == op.Type && !definition.ReprC &&
 		len(definition.Fields) == 1 && definition.Fields[0].Type == hir.TypeUSize &&
 		validFieldStoreCommonShape(op) && op.Operands[1].Kind == OperandLocal && op.Operands[1].Local >= 0
+}
+
+func mutableIndexedOwner(index hir.Expression) (hir.Expression, bool) {
+	if len(index.Children) != 2 {
+		return hir.Expression{}, false
+	}
+	element, nominal := hir.StructViewElement(index.Children[0].Type)
+	if !nominal || !hir.MutableIndexedView(index.Children[0].Type) || element != index.Type {
+		return hir.Expression{}, false
+	}
+	return hir.Expression{Kind: "view-element-borrow", Type: hir.MutableBorrow(element), Span: index.Span, Symbol: hir.NoSymbol, Operator: "[]", Children: index.Children}, true
+}
+
+// Compound assignment reads through the already selected receiver. Index
+// effects run once and the prior scalar is captured before RHS effects.
+func (l *functionLowerer) lowerSelectedFieldRead(receiver Operand, typ hir.Type, fields []string, at hir.Span) (Operand, error) {
+	for _, name := range fields {
+		definition := l.properties.Struct(fieldAggregateType(typ))
+		if definition == nil {
+			return Operand{}, &Unsupported{Feature: "indexed field owner", Span: at}
+		}
+		field, found := structField(definition.Fields, name)
+		if !found {
+			return Operand{}, &Unsupported{Feature: "indexed field name", Span: at}
+		}
+		local := l.newTemporary()
+		l.appendOperation(Operation{Kind: OperationFieldRead, Span: at, DestinationLocal: local, Operands: []Operand{receiver}, OwnerType: typ, Type: field.Type, Field: name})
+		receiver = Operand{Kind: OperandLocal, Local: local}
+		typ = field.Type
+	}
+	return receiver, nil
 }

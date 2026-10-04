@@ -7,7 +7,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 	needed := false
 	for _, block := range function.Blocks {
 		for _, op := range block.Operations {
-			needed = needed || op.Kind == OperationFieldBorrow || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress || op.Kind == OperationStorageBorrow || op.Kind == OperationStorageBorrowMut || op.Kind == OperationSharedReborrow || op.Kind == OperationViewSlice || op.Kind == OperationArrayBorrowView || op.Kind == OperationViewIndex || op.Kind == OperationViewIndexStore || op.Kind == OperationViewIndexCheck || op.Kind == OperationViewSliceCheck || op.Kind == OperationViewLength || op.Kind == OperationViewEmpty
+			needed = needed || op.Kind == OperationFieldBorrow || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress || op.Kind == OperationStorageBorrow || op.Kind == OperationStorageBorrowMut || op.Kind == OperationSharedReborrow || op.Kind == OperationViewSlice || op.Kind == OperationArrayBorrowView || op.Kind == OperationViewIndex || op.Kind == OperationViewElementBorrow || op.Kind == OperationViewIndexStore || op.Kind == OperationViewIndexCheck || op.Kind == OperationViewSliceCheck || op.Kind == OperationViewLength || op.Kind == OperationViewEmpty
 		}
 	}
 	if !needed {
@@ -52,7 +52,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 					OperationEnumConstruct, OperationEnumPayload, OperationStructConstruct, OperationResourceConstruct,
 					OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,
 					OperationArrayLength, OperationArrayIndex, OperationViewLength, OperationViewEmpty,
-					OperationViewIndex, OperationViewSlice, OperationStorageLayout, OperationStorageTake,
+					OperationViewIndex, OperationViewElementBorrow, OperationViewSlice, OperationStorageLayout, OperationStorageTake,
 					OperationStorageBorrow, OperationStorageBorrowMut, OperationStorageElementAddress, OperationRegionPlace:
 					typ = op.Type
 				}

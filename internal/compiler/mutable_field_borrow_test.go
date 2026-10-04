@@ -64,7 +64,7 @@ func TestMutableFieldBorrowRejections(t *testing.T) {
 		"tagged-parent":      `fn Option<ref mut Span> wrap(ref mut Token t){return .some(project(t));} fn void bad(ref mut Token t){let Option<ref mut Span> s=wrap(t);t.sibling=8;switch(s){case .some(v):{edit(v);}case .none:{}};}`,
 		"shared-held":        `fn void bad(ref mut Token t){let ref Token v=read(t);let ref mut Span s=ref mut t.position;edit(s);assert(v.sibling==7);} fn ref Token read(ref Token t){return t;}`,
 		"resource":           `resource Owner{Span position;cleanup{}}fn ref mut Span bad(ref mut Owner t){return ref mut t.position;}`,
-		"array-root":         `fn void bad(ref mut Token[] t){let ref mut Span s=ref mut t[0].position;edit(s);}`,
+		"copied-element":     `fn void bad(ref mut Token[] t){let ref mut Token s=ref mut t[0];}`,
 		"nonplain":           `struct Owner{Span position;u8[2] bytes;}fn ref mut Span bad(ref mut Owner t){return ref mut t.position;}`,
 	} {
 		t.Run(name, func(t *testing.T) {

@@ -323,3 +323,5 @@ The C backend must not emit `restrict`, LLVM `noalias`, or related alias promise
 ## Required diagnostics
 
 Diagnostics must identify the conflicting access, the active loan and its last use, an escaping local origin, a multiple-origin return, a stored safe borrow, and a borrow-returning function-value conversion. When possible, the explanation should recommend copying, splitting the API, returning an index, or using a region.
+
+ADR 0449 admits field stores and shared/exclusive field address projections through named plain nominal views. Indices are evaluated once and checked before address creation; fields and indices retain whole-owner loan rules. See `docs/adr/0449-indexed-plain-struct-fields.md`.

@@ -121,6 +121,9 @@ func (f *borrowFlowAnalyzer) checkReferenceStore(target *ast.Expression, environ
 		return
 	}
 	primary := span(f.module.file.Path, target.Span)
+	if index := indexedPlace(target); index != nil {
+		target = index.Children[0]
+	}
 	for len(target.Children) > 0 && (target.Kind == syntax.KindPrefix || target.Kind == syntax.KindFieldExpr || target.Kind == syntax.KindIndex || target.Kind == syntax.KindGroup) {
 		target = target.Children[0]
 	}

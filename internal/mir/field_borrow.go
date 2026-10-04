@@ -15,6 +15,9 @@ func (l *functionLowerer) lowerFieldBorrow(expression *hir.Expression) (Operand,
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	if _, _, borrowed := hir.BorrowElement(expression.Children[0].Type); !borrowed || owner.Kind != OperandLocal {
 		return Operand{}, fmt.Errorf("field borrow requires a materialized owner reference")
 	}

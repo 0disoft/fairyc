@@ -1679,3 +1679,5 @@ ADR 0448 advances SDK source/export/version identity to `0.0.0-stage0.85` for
 `std::vec::view_mut<T>` and exclusive plain nominal view whole-element stores.
 Language /20, runtime /0, grammar, foreign ABI and MIR/interface/artifact schemas
 stay unchanged. Compiler identity separates caches; Linux execution is deferred.
+
+ADR 0449 adds indexed nominal field places and the `view-element-borrow` operation vocabulary within existing MIR/2 fields. SDK stage0.85, language /20, runtime /0, grammar, ABI and codec envelope shapes stay unchanged. Exact compiler identity separates cached artifacts; Linux execution stays deferred.

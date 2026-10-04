@@ -430,3 +430,5 @@ must name an actual exact nominal value and actual exclusive receiver with a
 dominating matching bounds check. Local operand annotations cannot relabel them.
 A terminating indexed-assignment RHS ends the path without a store. Codec/wire
 schemas and ordinary/query-only private-transfer rejection remain unchanged.
+
+ADR 0449 adds `view-element-borrow`, producing an exact nominal reference from a nominal descriptor and usize index after a dominating `view-index-check`. Shared results may shorten mutable receivers; exclusive results require mutable receivers. Actual local types, graph validity and closed metadata are verified before codec/backend use. Existing field operations consume that reference.

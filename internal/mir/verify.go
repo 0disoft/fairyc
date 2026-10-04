@@ -924,6 +924,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "byte-view index shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationViewElementBorrow:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !ValidViewElementBorrowShape(operation) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "indexed nominal element borrow shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationViewIndexStore:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validViewIndexStoreShape(operation) || len(operation.TrapCategories) != 0 {
@@ -1555,6 +1561,9 @@ func trappingOperationSpec(operation Operation) (string, OperationKind, []string
 	}
 	if operation.Kind == OperationArrayIndexStore {
 		return "checked-array-index", OperationArrayIndexCheck, []string{"bounds"}, validArrayIndexStoreShape(operation)
+	}
+	if operation.Kind == OperationViewElementBorrow {
+		return "checked-view-index", OperationViewIndexCheck, []string{"bounds"}, ValidViewElementBorrowShape(operation)
 	}
 	if operation.Kind == OperationViewIndex {
 		return "checked-view-index", OperationViewIndexCheck, []string{"bounds"}, validViewIndexShape(operation, true)

@@ -126,7 +126,7 @@ func TestSharedMutableFieldBorrowConflicts(t *testing.T) {
 		"nonplain":               `struct Owner{Span position;u8[2] bytes;}fn ref Span bad(ref mut Owner t){return ref t.position;}`,
 		"temporary":              `fn ref mut Token identity(ref mut Token t){return t;}fn ref Span bad(ref mut Token t){return ref identity(t).position;}`,
 		"implicit-whole":         `fn ref Token bad(ref mut Token t){let ref Token shared=t;return shared;}`,
-		"index":                  `fn void bad(ref mut Token[] t){let ref Span s=ref t[0].position;use(s);}`,
+		"index":                  `fn void bad(ref mut Token[] t){let ref Span s=ref t[0..][0].position;use(s);}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			checked, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", prelude+body)})

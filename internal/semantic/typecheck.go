@@ -895,6 +895,9 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 			}
 			root = &root.Children[0]
 		}
+		if root.Kind == "view-index" {
+			return c.indexedStructPlace(source) && hir.MutableIndexedView(root.Children[0].Type) && (hir.FixedArrayScalarElement(target.Type) || c.analyzer.plainViewStruct(target.Type))
+		}
 		if root.Kind != "path" {
 			return false
 		}

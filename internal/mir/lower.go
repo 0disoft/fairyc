@@ -829,7 +829,7 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerViewLength(expression)
 	case "view-empty":
 		return l.lowerViewEmpty(expression)
-	case "view-index":
+	case "view-index", "view-element-borrow":
 		return l.lowerViewIndex(expression)
 	case "array-index":
 		return l.lowerArrayIndex(expression)
@@ -1475,16 +1475,37 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 		return Operand{}, fmt.Errorf("malformed indexed-view operands")
 	}
 	element, indexed := hir.IndexedViewElement(expression.Children[0].Type)
-	if !indexed || expression.Operator != "[]" || expression.Type != element || expression.Children[1].Type != hir.TypeUSize {
+	resultType := element
+	kind := OperationViewIndex
+	if expression.Kind == "view-element-borrow" {
+		referent, mutable, borrowed := hir.BorrowElement(expression.Type)
+		if !borrowed || referent != element || mutable && !hir.MutableIndexedView(expression.Children[0].Type) {
+			return Operand{}, fmt.Errorf("invalid indexed element reference")
+		}
+		resultType = expression.Type
+		kind = OperationViewElementBorrow
+	}
+	if !indexed || expression.Operator != "[]" || expression.Type != resultType || expression.Children[1].Type != hir.TypeUSize {
 		return Operand{}, fmt.Errorf("malformed indexed-view read")
 	}
 	receiver, err := l.lowerExpression(&expression.Children[0])
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
+	if kind == OperationViewElementBorrow {
+		saved := l.newTemporary()
+		l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[0].Span, DestinationLocal: saved, Operands: []Operand{receiver}})
+		receiver = Operand{Kind: OperandLocal, Local: saved}
+	}
 	index, err := l.lowerExpression(&expression.Children[1])
 	if err != nil {
 		return Operand{}, err
+	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
 	}
 	if receiver.Kind == OperandInvalid || index.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("byte-view index has an invalid operand")
@@ -1497,7 +1518,7 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 	})
 	l.appendOperation(Operation{
 		Kind: OperationViewIndexCheck, Span: expression.Span, DestinationLocal: NoLocal, Operands: slices.Clone(operands),
-		OwnerType: expression.Children[0].Type, IndexType: expression.Children[1].Type, Type: expression.Type, Operator: expression.Operator,
+		OwnerType: expression.Children[0].Type, IndexType: expression.Children[1].Type, Type: element, Operator: expression.Operator,
 		TrapCategories: []string{"bounds"},
 	})
 	continuation := l.newBlock()
@@ -1514,7 +1535,7 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 	l.current = continuation
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
-		Kind: OperationViewIndex, Span: expression.Span, DestinationLocal: destination,
+		Kind: kind, Symbol: hir.NoSymbol, Span: expression.Span, DestinationLocal: destination,
 		Operands: slices.Clone(operands), OwnerType: expression.Children[0].Type,
 		IndexType: expression.Children[1].Type, Type: expression.Type, Operator: expression.Operator,
 	})

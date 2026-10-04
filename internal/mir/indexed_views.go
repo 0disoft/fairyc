@@ -18,7 +18,7 @@ func verifyIndexedViewOperands(op Operation, types map[LocalID]hir.Type) string 
 				return "integer array-view borrow disagrees with its owner definition"
 			}
 		}
-	case OperationViewLength, OperationViewEmpty, OperationViewIndex, OperationViewIndexCheck, OperationViewSlice, OperationViewSliceCheck, OperationViewIndexStore:
+	case OperationViewLength, OperationViewEmpty, OperationViewIndex, OperationViewElementBorrow, OperationViewIndexCheck, OperationViewSlice, OperationViewSliceCheck, OperationViewIndexStore:
 		if hir.NonByteIndexedView(actual) || hir.NonByteIndexedView(op.OwnerType) || hir.NonByteIndexedView(op.Type) {
 			if !hir.NonByteIndexedView(actual) || actual != op.OwnerType {
 				return "integer view operation disagrees with its receiver definition"

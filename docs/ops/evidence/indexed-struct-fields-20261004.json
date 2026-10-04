@@ -1,0 +1,220 @@
+{
+  "schema": "fairyc.indexed-struct-fields-review/v1",
+  "date": "2026-10-04",
+  "baseRevision": "0e740a58f87ce188dc7c998556272bb24735e804",
+  "scope": "ADR 0449 indexed nominal field stores and borrowed addresses",
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/indexed-fields-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "image": {
+      "path": ".cache/indexed-fields-compiler/fairyc.exe",
+      "sha256": "81acc11001d2f58523d9559fe025d7b0fa39204a6842fa7e2c490319bf68db91"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004094404-0e740a58f87c+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0e740a58f87ce188dc7c998556272bb24735e804\nmodified: true\n",
+      "stderr": ""
+    },
+    "sourceDigest": {
+      "fileCount": 542,
+      "sha256": "02a4e2b975fdb6df3a5cb24fa482065fd9b6c14aebb88175b64aa63b02863973",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sourceManifest": {
+      "path": ".cache/indexed-fields-compiler/source-manifest.json",
+      "sha256": "6ae7e7e9359acaaecaca347614a67b49331729252fb66f1c467b5ebe690c8494"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    }
+  },
+  "publicCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/indexed-struct-fields-20261004.cli.json",
+      "sha256": "2c0da9ebcc2f2ddd92e23c4e8fcea749b89530abe16706088f17a0112efeba08"
+    },
+    "executions": 12
+  },
+  "native": {
+    "raw": {
+      "path": "docs/ops/evidence/indexed-struct-fields-20261004.native.json",
+      "sha256": "63041dbf9d86242540d617a803c30dc7e5055ef5deec22dcc872860dd1bfc15f"
+    },
+    "executions": 22
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cbackend",
+        "./internal/interpreter",
+        "./internal/mircodec",
+        "-run",
+        "IndexedStruct|FieldBorrow|FieldStore|Subview|MutableStruct|AssertChecked",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-fields-stage-final.jsonl",
+        "sha256": "bb12b348658997fc91604ba6660561e6e91cfb5db966258637044b4b607beafb"
+      },
+      "passedTestEvents": 318,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestIndexedStructFields",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-fields-cli-final.jsonl",
+        "sha256": "123856d336da932bf09edeca058cfc2075c19cf900eb03c6ad6bbd842e84ac3a"
+      },
+      "passedTestEvents": 25,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestIndexedStructFieldsSelectionNative$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-fields-selection-final.jsonl",
+        "sha256": "f8fb11ac57e85995bf4ab4ece36fa659197eca70092f3906d0b6b5db8b90e64c"
+      },
+      "passedTestEvents": 3,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestIndexedStructFieldsIndexTrapNative$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-fields-index-trap-final.jsonl",
+        "sha256": "cede8491e1acddc53fec01219fb74a986c9fca74ab9848f3f83356fa0b13c94a"
+      },
+      "passedTestEvents": 3,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^Test(IndexedStructFieldsRejections|MutableStructVecViewRejections|IndexedStructFieldsCache)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-fields-rejections-final.jsonl",
+        "sha256": "b7f14ebddedcf85cdd9fd4a26725b86b96d5ebfe0d93e18df83d8604764015fe"
+      },
+      "passedTestEvents": 47,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^Test(MutableFieldBorrowNative|SharedMutableFieldBorrowNative)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-fields-regressions-final.jsonl",
+        "sha256": "8b9d55dfa72c6a948e5696973fd0163a1b3b7fabdba4a7384081db7c35716db4"
+      },
+      "passedTestEvents": 6,
+      "skips": []
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/semantic",
+      "./internal/mir",
+      "./internal/compiler",
+      "./internal/cbackend",
+      "./internal/interpreter",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "raw": {
+      "path": ".cache/indexed-fields-vet-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  "limits": [
+    "Linux actual execution deferred by owner; Linux C emission covered by MIR stage test.",
+    "Direct element references, temporary view places, fixed-array struct views and mutable nominal for-in remain closed.",
+    "No SDK export, grammar, runtime symbol, wire field, CI, install, push or release change.",
+    "Compiler identity retained from modified tree; compiler source digest excludes Go test files.",
+    "Native records name in-process cdriver execution; raw public CLI contains actual argv/cwd/outcomes."
+  ]
+}

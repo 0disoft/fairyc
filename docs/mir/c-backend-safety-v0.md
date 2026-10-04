@@ -483,3 +483,5 @@ Windows nominal programs with mutable descriptors use the existing volatile
 store policy and volatile struct loads; Linux emission uses ordinary typed
 access. Bounds precede RHS evaluation; terminating RHS paths emit no store or
 normal continuation. No runtime C symbol, foreign ABI or host flag is added.
+
+ADR 0449 emits a typed indexed element address only after the matching successful bounds branch. The descriptor is saved before index effects and stores use the selected address across RHS effects. Ordinary nominal index reads remain value copies. No runtime helper or warning suppression is added.

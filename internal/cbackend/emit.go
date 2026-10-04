@@ -835,7 +835,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
 					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
+					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
 					mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 					mir.OperationRegionPlace:
 					inferred = operation.Type
@@ -1419,6 +1419,17 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["view-index"] = struct{}{}
+			case mir.OperationViewElementBorrow:
+				if !mir.ValidViewElementBorrowShape(*operation) {
+					return fmt.Errorf("invalid indexed element borrow")
+				}
+				check := *operation
+				check.Kind = mir.OperationViewIndex
+				check.Type, _, _ = hir.BorrowElement(operation.Type)
+				if err := e.inspectViewIndex(functionIndex, check, true); err != nil {
+					return err
+				}
+				e.features["view-element-borrow"] = struct{}{}
 			case mir.OperationViewIndexStore:
 				if err := e.inspectViewIndexStore(functionIndex, *operation); err != nil {
 					return err
@@ -1731,7 +1742,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast, mir.OperationSharedReborrow,
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice, mir.OperationScalarCast, mir.OperationSharedReborrow,
 		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 		mir.OperationRegionPlace:
 		if operation.DestinationLocal < 0 {
@@ -3702,6 +3713,26 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		} else {
 			fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
 		}
+	case mir.OperationViewElementBorrow:
+		receiver, err := cOperand(operation.Operands[0])
+		if err != nil {
+			return err
+		}
+		index, err := cOperand(operation.Operands[1])
+		if err != nil {
+			return err
+		}
+		element, mutable, _ := hir.BorrowElement(operation.Type)
+		typ, err := e.cValueType(element)
+		if err != nil {
+			return err
+		}
+		qualifier := "const "
+		if mutable {
+			qualifier = ""
+		}
+		fmt.Fprintf(output, "    fy_l_%d = &((%s%s *)(%s).data)[%s];\n", operation.DestinationLocal, qualifier, typ, receiver, index)
+
 	case mir.OperationViewIndexStore:
 		receiver, index, value, err := threeOperands(operation.Operands)
 		if err != nil {
@@ -4540,7 +4571,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
 		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:

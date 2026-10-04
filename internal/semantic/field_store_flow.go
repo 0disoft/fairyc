@@ -3,6 +3,26 @@ package semantic
 import "github.com/0disoft/fairyc/internal/ast"
 
 func (f *borrowFlowAnalyzer) evaluateFieldAssignment(statement *ast.Statement, environment borrowEnvironment) bool {
+	if index := indexedPlace(statement.Target); index != nil {
+		held, reachable := f.evaluateIndexedPlace(index, true, false, environment)
+		if !reachable {
+			return false
+		}
+		base, accessBase := len(f.callBorrows), len(f.callAccesses)
+		priorBorrow, priorLastUse := f.assignmentBorrow, f.assignmentLastUse
+		f.callBorrows = append(f.callBorrows, held)
+		f.callAccesses = append(f.callAccesses, borrowCallAccess{value: held, mutable: true, span: span(f.module.file.Path, statement.Target.Span)})
+		f.assignmentBorrow = &held
+		f.assignmentLastUse = span(f.module.file.Path, statement.Target.Span)
+		defer func() {
+			f.callBorrows = f.callBorrows[:base]
+			f.callAccesses = f.callAccesses[:accessBase]
+			f.assignmentBorrow = priorBorrow
+			f.assignmentLastUse = priorLastUse
+		}()
+		_, reachable = f.evaluateExpression(statement.Expression, environment)
+		return reachable
+	}
 	root := fieldAssignmentRoot(statement.Target)
 	binding := f.analyzer.resolved[root]
 	if _, reachable := f.evaluateExpression(statement.Target, environment); !reachable {

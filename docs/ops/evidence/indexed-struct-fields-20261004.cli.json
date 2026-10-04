@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.indexed-fields-cli/v1",
+  "compilerSHA256": "81acc11001d2f58523d9559fe025d7b0fa39204a6842fa7e2c490319bf68db91",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004094404-0e740a58f87c+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0e740a58f87ce188dc7c998556272bb24735e804\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "success",
+      "sourceSHA256": "bdbd9b2e46e758450590352d7bbac62e16ac1f8f0be35ac1184e14820632738e",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;bool active;}\nfn void edit(ref mut Span span){span.start+=2;}\nfn ref i64 number(ref Token[] view){return ref view[0].value;}\nfn ref mut i64 mutable_number(ref mut Token[] view){return ref mut view[0].value;}\nfn Option<ref mut i64> tagged(ref mut Token[] view){return .some(mutable_number(view));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=4000000000,.position=Span{.start=1,.end=4},.active=true});\n let ref mut Token[] view=vec::view_mut<Token>(ref mut owner);\n view[0].value=5000000000;\n view[0].value=view[0].value+1;\n assert(view[0].value==5000000001);\n view[0].active=false;assert(!view[0].active);\n view[0].position.start+=3;\n var Span replacement=Span{.start=4,.end=9};\n view[0].position=replacement;replacement.start=100;\n assert(view[0].position.start==4);\n let ref mut Span span=ref mut view[0].position;\n edit(span);assert(span.start==6);\n let ref mut i64 value=ref mut view[0].value;\n *value=6000000000;assert(*value==6000000000);\n let ref i64 shared=ref view[0].value;assert(*shared==6000000000);\n let ref i64 returned=number(view);assert(*returned==6000000000);\n let Option<ref mut i64> result=tagged(view);\n switch(result){case .some(item):{*item=7000000000;assert(*item==7000000000);}case .none:{assert(false);}};\n assert(view[0].value==7000000000 && view[0].position.start==6);\n var usize calls=0;\n view[{calls+=1;0}].value+=1;\n assert(calls==1 && view[0].value==7000000001);\n discard vec::clear<Token>(ref mut owner);\n return 0;\n}\n"
+    },
+    {
+      "name": "bounds",
+      "sourceSHA256": "3bc4ec66583d3cd3f43c89e47dc45e0f738d8f66320c4d61195bb3683f2e3ef6",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;bool active;}\nfn void edit(ref mut Span span){span.start+=2;}\nfn ref i64 number(ref Token[] view){return ref view[0].value;}\nfn ref mut i64 mutable_number(ref mut Token[] view){return ref mut view[0].value;}\nfn Option<ref mut i64> tagged(ref mut Token[] view){return .some(mutable_number(view));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=4000000000,.position=Span{.start=1,.end=4},.active=true});\n let ref mut Token[] view=vec::view_mut<Token>(ref mut owner);\n view[1].value=5000000000;\n view[0].value=view[0].value+1;\n assert(view[0].value==5000000001);\n view[0].active=false;assert(!view[0].active);\n view[0].position.start+=3;\n var Span replacement=Span{.start=4,.end=9};\n view[0].position=replacement;replacement.start=100;\n assert(view[0].position.start==4);\n let ref mut Span span=ref mut view[0].position;\n edit(span);assert(span.start==6);\n let ref mut i64 value=ref mut view[0].value;\n *value=6000000000;assert(*value==6000000000);\n let ref i64 shared=ref view[0].value;assert(*shared==6000000000);\n let ref i64 returned=number(view);assert(*returned==6000000000);\n let Option<ref mut i64> result=tagged(view);\n switch(result){case .some(item):{*item=7000000000;assert(*item==7000000000);}case .none:{assert(false);}};\n assert(view[0].value==7000000000 && view[0].position.start==6);\n var usize calls=0;\n view[{calls+=1;0}].value+=1;\n assert(calls==1 && view[0].value==7000000001);\n discard vec::clear<Token>(ref mut owner);\n return 0;\n}\n"
+    },
+    {
+      "name": "blocked-owner",
+      "sourceSHA256": "6878493c44e977f85bf4002ba553e609e110042c729ea5a001e7e0b15dc0dd54",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;bool active;}\nfn void edit(ref mut Span span){span.start+=2;}\nfn ref i64 number(ref Token[] view){return ref view[0].value;}\nfn ref mut i64 mutable_number(ref mut Token[] view){return ref mut view[0].value;}\nfn Option<ref mut i64> tagged(ref mut Token[] view){return .some(mutable_number(view));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=4000000000,.position=Span{.start=1,.end=4},.active=true});\n let ref mut Token[] view=vec::view_mut<Token>(ref mut owner);\n discard vec::clear<Token>(ref mut owner);\n view[0].value=5000000000;\n view[0].value=view[0].value+1;\n assert(view[0].value==5000000001);\n view[0].active=false;assert(!view[0].active);\n view[0].position.start+=3;\n var Span replacement=Span{.start=4,.end=9};\n view[0].position=replacement;replacement.start=100;\n assert(view[0].position.start==4);\n let ref mut Span span=ref mut view[0].position;\n edit(span);assert(span.start==6);\n let ref mut i64 value=ref mut view[0].value;\n *value=6000000000;assert(*value==6000000000);\n let ref i64 shared=ref view[0].value;assert(*shared==6000000000);\n let ref i64 returned=number(view);assert(*returned==6000000000);\n let Option<ref mut i64> result=tagged(view);\n switch(result){case .some(item):{*item=7000000000;assert(*item==7000000000);}case .none:{assert(false);}};\n assert(view[0].value==7000000000 && view[0].position.start==6);\n var usize calls=0;\n view[{calls+=1;0}].value+=1;\n assert(calls==1 && view[0].value==7000000001);\n discard vec::clear<Token>(ref mut owner);\n return 0;\n}\n"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004094404-0e740a58f87c+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0e740a58f87ce188dc7c998556272bb24735e804\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\success",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 181 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/indexed-fields-success.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "dedae10263d32a5377508888c9398996db6e078e7e807738a4e5129edefe0938"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/indexed-fields-success.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "1075c5f452b928d68e4e33ac60d1846a6d5e9ae6cf552b11b4dd3e3077ea9565"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\bounds",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 181 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\bounds",
+      "exit": 0,
+      "stdout": "built: build/indexed-fields-bounds.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "9b44ab6278ae93d7dab87b236546c7ca37df37274c65f0116d9aab686c3262b3"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\bounds",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\bounds",
+      "exit": 0,
+      "stdout": "built: build/indexed-fields-bounds.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "9f5fe0483976958ac2d325b58e21617d45fd1a28e88336bdf94eb7f8012eeb94"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\bounds",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-cli\\blocked-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:13:28: E2101: Access conflicts with an active shared or mutable loan. [bytes 686..699]\n  last-use: main.fy:33:21 [bytes 1625..1629]\n  loan: main.fy:12:48 [bytes 642..655]\n"
+    }
+  ]
+}

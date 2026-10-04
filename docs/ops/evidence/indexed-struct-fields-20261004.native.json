@@ -1,0 +1,614 @@
+{
+  "indexed-struct-fields": {
+    "cases": [
+      {
+        "case": "fields",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativefields2814400897\\001",
+        "imageSHA256": "862483cb7993ac2b45c10bd213f7d23ab353ace16cfd870a8fe0514169426912",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "ecd9a4ce66b884066327b1b41bf911135e31dfa75c91320b55a508bd3959413b",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/fields-dev.exe",
+          "sha256": "862483cb7993ac2b45c10bd213f7d23ab353ace16cfd870a8fe0514169426912"
+        }
+      },
+      {
+        "case": "fields",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativefields2814400897\\001",
+        "imageSHA256": "f6d367408570aa6c77a3d0ff6f9ce986c9a1fcce6a90baea58c03ebbb31d3892",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "ecd9a4ce66b884066327b1b41bf911135e31dfa75c91320b55a508bd3959413b",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/fields-release.exe",
+          "sha256": "f6d367408570aa6c77a3d0ff6f9ce986c9a1fcce6a90baea58c03ebbb31d3892"
+        }
+      },
+      {
+        "case": "bounds-before-rhs",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativebounds-before-rhs3288263850\\001",
+        "imageSHA256": "f50492c4bfffb4e80b318e7e1048d0f0ebe30d8d50e7afa63d2da0ed07db3123",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "c20809e72fdb406705e3004ee33027e67950df2a4cc25ef9ef31313f7a29213e",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/bounds-before-rhs-dev.exe",
+          "sha256": "f50492c4bfffb4e80b318e7e1048d0f0ebe30d8d50e7afa63d2da0ed07db3123"
+        }
+      },
+      {
+        "case": "bounds-before-rhs",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativebounds-before-rhs3288263850\\001",
+        "imageSHA256": "ec0d43f254e7a2985c5214efde2851d921523e75393bfa2d6bd15840bfeb226b",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "c20809e72fdb406705e3004ee33027e67950df2a4cc25ef9ef31313f7a29213e",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/bounds-before-rhs-release.exe",
+          "sha256": "ec0d43f254e7a2985c5214efde2851d921523e75393bfa2d6bd15840bfeb226b"
+        }
+      },
+      {
+        "case": "rhs-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativerhs-trap1932408624\\001",
+        "imageSHA256": "0f8264e7697551f227fec94daccbdecf643c24fce83808e9a6cac61c3a9e4b4b",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "f420d53646fa3af1b99fb7e1bd3b3c5991db108a43bd2e33208d0cb652f73ab9",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/rhs-trap-dev.exe",
+          "sha256": "0f8264e7697551f227fec94daccbdecf643c24fce83808e9a6cac61c3a9e4b4b"
+        }
+      },
+      {
+        "case": "rhs-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativerhs-trap1932408624\\001",
+        "imageSHA256": "c7dd0a4d944d8ceb0ec103e0daf12f227fe70f9852bea0f7586658dbf4f72650",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "f420d53646fa3af1b99fb7e1bd3b3c5991db108a43bd2e33208d0cb652f73ab9",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/rhs-trap-release.exe",
+          "sha256": "c7dd0a4d944d8ceb0ec103e0daf12f227fe70f9852bea0f7586658dbf4f72650"
+        }
+      },
+      {
+        "case": "overflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativeoverflow47332574\\001",
+        "imageSHA256": "f989fc49e1a21be89b42e1af0b573d72ef4ec69eb50f76885cc3fa5b2ca24c6b",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "dbdaf43fc0f9acba1060364208bddaf0905d2196c3f92249402f8f96be46b3e8",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/overflow-dev.exe",
+          "sha256": "f989fc49e1a21be89b42e1af0b573d72ef4ec69eb50f76885cc3fa5b2ca24c6b"
+        }
+      },
+      {
+        "case": "overflow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativeoverflow47332574\\001",
+        "imageSHA256": "50885d45ab22cc9956f66a890e5a452f30bf643368031c6e8ac7b252f828d236",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "dbdaf43fc0f9acba1060364208bddaf0905d2196c3f92249402f8f96be46b3e8",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/overflow-release.exe",
+          "sha256": "50885d45ab22cc9956f66a890e5a452f30bf643368031c6e8ac7b252f828d236"
+        }
+      },
+      {
+        "case": "borrow-bounds",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativeborrow-bounds3450206113\\001",
+        "imageSHA256": "5a80f2e89d5945568af810232f6088b6822de833a7f04e84b4caceafdfe01606",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "75e406fa0c184e5dbf2ef1bae0ba60975ae144ca56a459ace4bedbcf41a4fc8b",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/borrow-bounds-dev.exe",
+          "sha256": "5a80f2e89d5945568af810232f6088b6822de833a7f04e84b4caceafdfe01606"
+        }
+      },
+      {
+        "case": "borrow-bounds",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativeborrow-bounds3450206113\\001",
+        "imageSHA256": "b851529dfbbe0c39478454138e336ad91c9755698e73f260b23a4311e6410074",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "75e406fa0c184e5dbf2ef1bae0ba60975ae144ca56a459ace4bedbcf41a4fc8b",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/borrow-bounds-release.exe",
+          "sha256": "b851529dfbbe0c39478454138e336ad91c9755698e73f260b23a4311e6410074"
+        }
+      },
+      {
+        "case": "borrow-huge",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativeborrow-huge4018341154\\001",
+        "imageSHA256": "24c6c38338457406ae598c7d9834f756f3bf3cced276c850df399c5be5a7c50f",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "0ce25fafffbe9f72c0689fa5f251bba2c5eaa7e1cae0bd400629892dfeb68eee",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/borrow-huge-dev.exe",
+          "sha256": "24c6c38338457406ae598c7d9834f756f3bf3cced276c850df399c5be5a7c50f"
+        }
+      },
+      {
+        "case": "borrow-huge",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativeborrow-huge4018341154\\001",
+        "imageSHA256": "320657e1e15fa427eb0306dcc299c790bb742d3da0469430b095a00d9953c641",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "0ce25fafffbe9f72c0689fa5f251bba2c5eaa7e1cae0bd400629892dfeb68eee",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/borrow-huge-release.exe",
+          "sha256": "320657e1e15fa427eb0306dcc299c790bb742d3da0469430b095a00d9953c641"
+        }
+      },
+      {
+        "case": "nested-replacement",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativenested-replacement665103804\\001",
+        "imageSHA256": "a35032d07362195de3a93e2e6d2bc26d57023e86dfa9e2d6f27cf90353c4dc3b",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "df4b42cbceee714f75ca8bda0d89a273892c0308a54deff32de625d07c895c06",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/nested-replacement-dev.exe",
+          "sha256": "a35032d07362195de3a93e2e6d2bc26d57023e86dfa9e2d6f27cf90353c4dc3b"
+        }
+      },
+      {
+        "case": "nested-replacement",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsNativenested-replacement665103804\\001",
+        "imageSHA256": "07ee96da7a57d346743b0b265ddc68153e367824da319a22b61a6c7e0b670e9e",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "df4b42cbceee714f75ca8bda0d89a273892c0308a54deff32de625d07c895c06",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-struct-fields-native/windows/nested-replacement-release.exe",
+          "sha256": "07ee96da7a57d346743b0b265ddc68153e367824da319a22b61a6c7e0b670e9e"
+        }
+      }
+    ],
+    "schema": "fairyc.indexed-struct-fields-native/v1",
+    "sdk": "0.0.0-stage0.85"
+  },
+  "indexed-fields-selection": {
+    "cases": [
+      {
+        "case": "index-rebind",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsSelectionNativeindex-rebind2375755069\\001",
+        "imageSHA256": "10b7b82d0174b926cb55abab943abff67c13be96f895e1048bc2f1d15729ef58",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "c5d42ce41deadee4695de1f88badfa1f63942f3f9d4fdc5faf81c6fa4e4e1b0d",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-selection-native/windows/index-rebind-dev.exe",
+          "sha256": "10b7b82d0174b926cb55abab943abff67c13be96f895e1048bc2f1d15729ef58"
+        }
+      },
+      {
+        "case": "index-rebind",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsSelectionNativeindex-rebind2375755069\\001",
+        "imageSHA256": "c4485a7fc8b023615e65d3e762df67314a6c6d8bc4a4f075f26ac90952905a97",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "c5d42ce41deadee4695de1f88badfa1f63942f3f9d4fdc5faf81c6fa4e4e1b0d",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-selection-native/windows/index-rebind-release.exe",
+          "sha256": "c4485a7fc8b023615e65d3e762df67314a6c6d8bc4a4f075f26ac90952905a97"
+        }
+      },
+      {
+        "case": "rhs-rebind",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsSelectionNativerhs-rebind983106148\\001",
+        "imageSHA256": "342b335928806ff52bd1eb638e4b245e92c2ef40e28333865d01ddf5c7fed815",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "de6ace97f670d985882f2157e2a4fa50cd5cbf8c6879a2b4bee7aab0579fbd2a",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-selection-native/windows/rhs-rebind-dev.exe",
+          "sha256": "342b335928806ff52bd1eb638e4b245e92c2ef40e28333865d01ddf5c7fed815"
+        }
+      },
+      {
+        "case": "rhs-rebind",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsSelectionNativerhs-rebind983106148\\001",
+        "imageSHA256": "d6de6fecc2cab62c84d9f522302a175a99240bf79a570f61fdd53652b9a50c1c",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "de6ace97f670d985882f2157e2a4fa50cd5cbf8c6879a2b4bee7aab0579fbd2a",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-selection-native/windows/rhs-rebind-release.exe",
+          "sha256": "d6de6fecc2cab62c84d9f522302a175a99240bf79a570f61fdd53652b9a50c1c"
+        }
+      }
+    ],
+    "schema": "fairyc.indexed-fields-selection-native/v1",
+    "sdk": "0.0.0-stage0.85"
+  },
+  "indexed-fields-index-trap": {
+    "cases": [
+      {
+        "case": "store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsIndexTrapNativestore3920631781\\001",
+        "imageSHA256": "6895c5d57d1be2eafa208c8ed9a3f04f9dd83d9c5d17217328da231540f49b84",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "c7e0e2f1ed76e9c1a59e04e432f797d1e152440a752df7b94f89033a8698d9c4",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-index-trap-native/windows/store-dev.exe",
+          "sha256": "6895c5d57d1be2eafa208c8ed9a3f04f9dd83d9c5d17217328da231540f49b84"
+        }
+      },
+      {
+        "case": "store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsIndexTrapNativestore3920631781\\001",
+        "imageSHA256": "462b211c304f16edf59b6477c95268c96ddd9fad0029f000dcc6f59796f1eabe",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "c7e0e2f1ed76e9c1a59e04e432f797d1e152440a752df7b94f89033a8698d9c4",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-index-trap-native/windows/store-release.exe",
+          "sha256": "462b211c304f16edf59b6477c95268c96ddd9fad0029f000dcc6f59796f1eabe"
+        }
+      },
+      {
+        "case": "borrow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsIndexTrapNativeborrow1765405834\\001",
+        "imageSHA256": "a8c7af3cab46f244be714e1730409b69202fb6d88ab42812b9921369e1e55b8e",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "17a05dca153ce8d62b85131b96d1b243946884070ac7bfac4e7acb8879bdea51",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-index-trap-native/windows/borrow-dev.exe",
+          "sha256": "a8c7af3cab46f244be714e1730409b69202fb6d88ab42812b9921369e1e55b8e"
+        }
+      },
+      {
+        "case": "borrow",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestIndexedStructFieldsIndexTrapNativeborrow1765405834\\001",
+        "imageSHA256": "0c5affc6f344f81e8d98a2c1f0ef458a49df8aaa4339730f2f97b8cc3e9b2bb2",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "17a05dca153ce8d62b85131b96d1b243946884070ac7bfac4e7acb8879bdea51",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/indexed-fields-index-trap-native/windows/borrow-release.exe",
+          "sha256": "0c5affc6f344f81e8d98a2c1f0ef458a49df8aaa4339730f2f97b8cc3e9b2bb2"
+        }
+      }
+    ],
+    "schema": "fairyc.indexed-fields-index-trap-native/v1",
+    "sdk": "0.0.0-stage0.85"
+  }
+}

@@ -466,6 +466,9 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return cloneBorrowValue(state), true
 	case syntax.KindPrefix:
 		if isBorrowExpression(expression) {
+			if index := indexedPlace(expression.Children[0]); index != nil {
+				return f.evaluateIndexedPlace(index, expression.Text == "&mut", true, environment)
+			}
 			root := borrowPlaceRoot(expression.Children[0])
 			if root != expression.Children[0] {
 				if _, _, borrowed := hir.BorrowElement(f.analyzer.expressionTypes[root]); borrowed {
