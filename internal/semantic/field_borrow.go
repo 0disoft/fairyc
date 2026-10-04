@@ -11,7 +11,7 @@ import (
 func (c *typeChecker) sharedFieldBorrow(source *ast.Expression, field hir.Expression) (hir.Expression, bool) {
 	if root := borrowPlaceRoot(source); root != nil && root.Kind == syntax.KindIndex {
 		if !c.indexedStructPlace(source) {
-			return hir.Expression{}, false
+			return c.arrayFieldBorrow(source, field, false)
 		}
 		return projectFieldBorrow(field, false)
 	}
@@ -110,6 +110,9 @@ func (c *typeChecker) mutableFieldBorrow(source *ast.Expression, child *hir.Expr
 	if c.indexedStructPlace(source) {
 		return projectFieldBorrow(*child, true)
 	}
+	if field, ok := c.arrayFieldBorrow(source, *child, true); ok {
+		return field, true
+	}
 	root := fieldAssignmentRoot(source)
 	target := c.analyzer.resolved[root]
 	if target == nil {
@@ -128,6 +131,34 @@ func (c *typeChecker) mutableFieldBorrow(source *ast.Expression, child *hir.Expr
 		return hir.Expression{}, false
 	}
 	return projectFieldBorrow(*child, true)
+}
+
+// Rebase each field projection on an address in the original fixed array.
+// Never borrow a copied array-index value. Rebuild children without mutating
+// the ordinary field-read HIR; every projected reference retains one root loan.
+func (c *typeChecker) arrayFieldBorrow(source *ast.Expression, field hir.Expression, mutable bool) (hir.Expression, bool) {
+	for field.Kind == "group" && len(field.Children) == 1 {
+		field = field.Children[0]
+	}
+	if field.Kind != "field-expression" || len(field.Children) != 1 {
+		return hir.Expression{}, false
+	}
+	owner := field.Children[0]
+	for owner.Kind == "group" && len(owner.Children) == 1 {
+		owner = owner.Children[0]
+	}
+	var borrowed hir.Expression
+	var ok bool
+	if owner.Kind == "array-index" && c.analyzer.plainViewStruct(owner.Type) {
+		borrowed, ok = c.indexedArrayBorrow(source, &owner, mutable)
+	} else {
+		borrowed, ok = c.arrayFieldBorrow(source, owner, mutable)
+	}
+	if !ok {
+		return hir.Expression{}, false
+	}
+	field.Children = []hir.Expression{borrowed}
+	return projectFieldBorrow(field, mutable)
 }
 
 // Reuse exclusive-subview generations for field children. The generation freezes

@@ -107,6 +107,17 @@
   roots, competing index or right-hand-side owner access and live shared/
   exclusive references stay rejected. Resources, pointers, borrows, tagged fields
   and array fields remain excluded.
+- ADR 0464 admits direct struct array field references `ref array[index].field`
+  and nested paths such as `ref mut array[index].inner.field` on named fixed
+  arrays of admitted plain structs. The reference rebases the existing field
+  projection on a checked element borrow of the original array storage, never a
+  copied element. Scalar and whole nested plain-struct fields are admitted;
+  shared references also come from immutable local or by-value array bindings
+  and exclusive references require a mutable array root. The whole array stays
+  the loan owner, the index runs once under bounds dominance and fields or
+  indices never prove disjointness. Local/by-value array references cannot
+  escape and temporary or call roots stay rejected. Resources, pointers,
+  borrowed struct fields, tagged fields and array fields remain excluded.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

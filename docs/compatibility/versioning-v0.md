@@ -1763,3 +1763,18 @@ Language /20, SDK stage0.86, runtime /0, MIR/wire schemas, public ABI and target
 maturity are unchanged. Windows dev/release execution is verified, including
 dev/release and cache reuse of the native matrix; Linux actual execution remains
 deferred to the owner's batch.
+
+ADR 0464 admits direct struct array field references `ref array[index].field` and
+nested paths such as `ref mut array[index].inner.field` on named fixed arrays of
+admitted plain structs. Each reference rebases the existing field projection on a
+checked element borrow of the original array storage, so copied element values are
+never referenced. Shared references also come from immutable local or by-value
+array bindings and exclusive references require a mutable array root; shared and
+exclusive reference calls and returned identity-tagged wrappers reuse the existing
+origin and generation flow. The whole array stays the loan owner, the index runs
+once under bounds dominance and fields or indices never prove disjointness. Local
+or by-value array references cannot escape and temporary or call roots stay
+rejected. Language /20, SDK stage0.86, runtime /0, MIR/wire schemas, public ABI and
+target maturity are unchanged. Windows dev/release execution is verified,
+including the native harness, cache reuse and public CLI check/build/run; Linux
+actual execution remains deferred to the owner's batch.

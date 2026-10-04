@@ -7,8 +7,10 @@ fn i32 main() {
     let points::Point origin = points::Point { .x = 4000000000, .y = 7 };
     var points::Point[4] polygon = [origin; 4];
     polygon[0].y = 9;
-    polygon[0].x += 10;
-    polygon[3].x -= 10;
+    points::add_x(ref mut polygon[0].x, 10);
+    points::add_x(ref mut polygon[3].x, -10);
+    let ref i64 first_x = ref polygon[0].x;
+    assert(*first_x == 4000000010);
     let ref mut points::Point[] vertices = ref mut polygon;
     points::translate(vertices[1..3], 10, -2);
     let i64 total = points::sum_x(vertices);

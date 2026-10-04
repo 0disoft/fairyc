@@ -3,21 +3,8 @@
   "packageInstanceAlgorithm": "fairyc.package-instance/v1",
   "sourceDigestAlgorithm": "fairyc.package-source/v1",
   "language": "fairyc-language/20",
-  "root": "fypi1-sha256-33dbfb365c20f36d755c149d86ca54e1f0783602365984a51bfb47a042feb9bb",
+  "root": "fypi1-sha256-e6768abdbe1dc0d036147b826418c22577e61971d2be333cab0032f8dc5dacf2",
   "packages": [
-    {
-      "id": "fypi1-sha256-33dbfb365c20f36d755c149d86ca54e1f0783602365984a51bfb47a042feb9bb",
-      "role": "root",
-      "packageUid": "rodisoft.examples.struct-array-quickstart",
-      "sourceKind": "local",
-      "localPath": ".",
-      "sdkIdentity": "",
-      "runtimeAbi": "",
-      "sourceIdentity": "fysrc1-sha256-5c12fba59840e4c8a8dadf27cb508fa4cfe96a1998236a89ff8f7d2c1157710f",
-      "sourceDigest": "fysrc1-sha256-5c12fba59840e4c8a8dadf27cb508fa4cfe96a1998236a89ff8f7d2c1157710f",
-      "version": "0.1.0",
-      "features": []
-    },
     {
       "id": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
       "role": "standard-library",
@@ -30,11 +17,24 @@
       "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
       "version": "0.0.0-stage0.86",
       "features": []
+    },
+    {
+      "id": "fypi1-sha256-e6768abdbe1dc0d036147b826418c22577e61971d2be333cab0032f8dc5dacf2",
+      "role": "root",
+      "packageUid": "rodisoft.examples.struct-array-quickstart",
+      "sourceKind": "local",
+      "localPath": ".",
+      "sdkIdentity": "",
+      "runtimeAbi": "",
+      "sourceIdentity": "fysrc1-sha256-4c40a222754f1e448e7dcbf4a18108fafe1cb85daabe1467ace7b17962dee9b7",
+      "sourceDigest": "fysrc1-sha256-4c40a222754f1e448e7dcbf4a18108fafe1cb85daabe1467ace7b17962dee9b7",
+      "version": "0.1.0",
+      "features": []
     }
   ],
   "dependencies": [
     {
-      "owner": "fypi1-sha256-33dbfb365c20f36d755c149d86ca54e1f0783602365984a51bfb47a042feb9bb",
+      "owner": "fypi1-sha256-e6768abdbe1dc0d036147b826418c22577e61971d2be333cab0032f8dc5dacf2",
       "binding": "stdlib",
       "target": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a"
     }

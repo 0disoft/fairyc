@@ -2318,6 +2318,9 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 		if err != nil {
 			return Operand{}, err
 		}
+		if l.blockTerminated(l.current) {
+			return Operand{}, nil
+		}
 		argumentSpans = append(argumentSpans, argument.Span)
 		if path := l.liveResourcePath(argument); path != nil {
 			value = l.materializeMove(path, value, "call-argument", true)

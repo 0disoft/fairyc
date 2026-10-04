@@ -1,0 +1,209 @@
+{
+  "schema": "fairyc.struct-array-field-borrow-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "90bd24ec5f33f1843e698880afeaef8127202e5a",
+  "compiler": {
+    "path": ".cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+    "sha256": "18e1a8cac29aa8478ecf917a22906f0ae705ab675d11c7f6885f80ac0500836c",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004174336-90bd24ec5f33+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 90bd24ec5f33f1843e698880afeaef8127202e5a\nmodified: true\n",
+      "stderr": ""
+    },
+    "build": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/struct-array-field-borrow-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\struct-array-field-borrow-compiler\\source-manifest.json",
+    "sha256": "f49ba6188be29a2115b78a6a34ed7236bb9a8c748192facb2679f9ed08ee2cb3",
+    "fileCount": 606,
+    "sourceDigest": "76da58958f5e73a7a9c3e76322d5d6b7d33550d83e14c07dd3bfa53851860e39"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "docs/adr/0464-direct-struct-array-field-borrows.md",
+      "sha256": "c0513f721eae80278bbdbcdd7ec33c33607de34a916743afce0495ee07301844"
+    },
+    {
+      "path": "docs/compatibility/versioning-v0.md",
+      "sha256": "a541ca92068cfc7d2e5920de53d8a2be143a452e5eaf22b347871562308c7547"
+    },
+    {
+      "path": "docs/language/0005-surface-syntax-v0.md",
+      "sha256": "c8d376e1730fc1e69e405a2f57d769246919de03c1e343a58d751c4703fdee5b"
+    },
+    {
+      "path": "examples/struct_array_quickstart/README.md",
+      "sha256": "edcafcae18a300406e39f1b6ba275ab8d7687322f40ad6149e7ca03ba072921f"
+    },
+    {
+      "path": "examples/struct_array_quickstart/fairy.lock",
+      "sha256": "44d6775758d027ef1410e2e8b20fbf1c42733dce7d705cac379a682c5e9e3d58"
+    },
+    {
+      "path": "examples/struct_array_quickstart/src/main.fy",
+      "sha256": "7a80df2b15f9d4e008242388d96dd1b60c0da608b2aea9fb7ba7f08369a5e553"
+    },
+    {
+      "path": "examples/struct_array_quickstart/src/points.fy",
+      "sha256": "4effc9863b8a3831c3c30b971cbf70cd39da5cda56f931772e514cbfab4c5ef9"
+    },
+    {
+      "path": "internal/cli/struct_array_field_borrows_test.go",
+      "sha256": "2cac86b5b7229b24e1a0879df887c5bac94515ec21bb8161950522013bad1926"
+    },
+    {
+      "path": "internal/compiler/struct_array_field_borrows_test.go",
+      "sha256": "c6ad5070224a760e6ed6479f8be1619d81d0966844c6d805329844905679eba9"
+    },
+    {
+      "path": "internal/compiler/testdata/struct_array_field_borrows.fy",
+      "sha256": "cb6fb261e2f8d460706b18e95216044d0c4dabacbbc3386e0a9d6af6d42816e7"
+    },
+    {
+      "path": "internal/mir/lower.go",
+      "sha256": "734434f3a32b31b8a78fe4ce7d6f68b525e077e2bbe880646f7de9e5a3e9a7ab"
+    },
+    {
+      "path": "internal/semantic/field_borrow.go",
+      "sha256": "b4ec8af632432fe26a5e613087231c9b9128421b66c7cc4d4751c222adc615db"
+    },
+    {
+      "path": "internal/semantic/struct_array_field_borrows_test.go",
+      "sha256": "b8cf48461382194027ea654e9e5b286708b391c1ccb193ba78bf791c9436995e"
+    },
+    {
+      "path": "spec/grammar/stage0.ebnf",
+      "sha256": "3772d4dcacb77eca0f66d13619888781030e43e9827269df454f483eee21b26b"
+    }
+  ],
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "^Test(StructArray.*|ArrayElementBorrow.*|.*Field.*|.*Indexed.*|.*Subview.*|.*BorrowCreation.*|.*Struct.*|.*Call.*|.*Ordered.*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\struct-array-field-borrow-related-final.jsonl",
+      "sha256": "e11704e1261356b3a487273d0b52c2e40c8ee896912f3481e213a454e9c008e6",
+      "passed": 805,
+      "skipped": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestStructArrayFieldBorrow",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\struct-array-field-borrow-native-final.jsonl",
+      "sha256": "e3739a867dbf9ae6f0acc9a4f749846f469f52c521fcad096711ff09aca29381",
+      "passed": 7,
+      "skipped": 0
+    }
+  ],
+  "publicCLI": {
+    "path": "docs/ops/evidence/struct-array-field-borrow-20261005.cli.json",
+    "sha256": "26fc2b81575efeac17970345b96807f41bf4461c59f7014a0d63d085d8c8186f",
+    "nativeOutcomes": 10
+  },
+  "native": {
+    "path": "docs/ops/evidence/struct-array-field-borrow-20261005.native.json",
+    "sha256": "fd84c727dee4f1d79511d8410664619b765a9f621e7d56280dfd4bcf4623e411",
+    "outcomes": 10
+  },
+  "validation": {
+    "format": "passed",
+    "diffCheck": "passed",
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/struct-array-field-borrow-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for consolidated batch"
+  },
+  "limitations": [
+    "Named plain-struct fixed arrays; exclusive fields require mutable roots",
+    "Whole array is the loan owner; no sibling disjointness",
+    "Local and by-value array references cannot escape; temporary roots rejected"
+  ],
+  "compatibility": {
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "sdkVersion": "0.0.0-stage0.86",
+    "newSDKAPI": false,
+    "newMIROperation": false,
+    "newRuntimeHelper": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "ciChanges": false
+  }
+}

@@ -1,0 +1,409 @@
+{
+  "schema": "fairyc.struct-array-field-borrow-cli/v1",
+  "compilerSHA256": "18e1a8cac29aa8478ecf917a22906f0ae705ab675d11c7f6885f80ac0500836c",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004174336-90bd24ec5f33+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 90bd24ec5f33f1843e698880afeaef8127202e5a\nmodified: true\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004174336-90bd24ec5f33+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 90bd24ec5f33f1843e698880afeaef8127202e5a\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 8 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\matrix-dev.exe",
+      "imageSHA256": "e67ea5662ccf249f178ec598c825486a3e844bf8e101744a1834dfcb9b663aa8"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\matrix-release.exe",
+      "imageSHA256": "3144d78ad5ef689131848f65dfbf407dae7bd0ac84a78286e621d79b546b06d4"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\shared-end",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\shared-end",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-shared-end.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\shared-end-dev.exe",
+      "imageSHA256": "3c59ad879b3dbd6d1a5c0bb45f03e870dfd984d43a2d604b30f0b0a382cca39f"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\shared-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\shared-end",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-shared-end.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\shared-end-release.exe",
+      "imageSHA256": "d0bad18f432e8e114d7d1b4d01fb4a17490b5020d46606c09b65c4b96a405c72"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\shared-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\exclusive-end",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\exclusive-end",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-exclusive-end.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\exclusive-end-dev.exe",
+      "imageSHA256": "3fdc9bb92de2c21b1da22044562b22be6c8f4f4380acc47feac520dfd9a63c7f"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\exclusive-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\exclusive-end",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-exclusive-end.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\exclusive-end-release.exe",
+      "imageSHA256": "5313690be735c900c02012ea29ca0f141dd8c8f4744bb18e0fd8aa96b722a97a"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\exclusive-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\index-return",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\index-return",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-index-return.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\index-return-dev.exe",
+      "imageSHA256": "4aa87c04d5a26f8eb1b23289b2da87e5227e7e4de50dd5692d414cbd5ac74a11"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\index-return",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\index-return",
+      "exit": 0,
+      "stdout": "built: build/array-field-borrow-index-return.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\index-return-release.exe",
+      "imageSHA256": "17f67281849cb7197538bb42627bccc4d1ebb35bb8edd976b91e78ea580296d7"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\index-return",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\immutable",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:118: E1008: assignment target is not mutable [bytes 117..123]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\loan",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:171: E2101: Access conflicts with an active shared or mutable loan. [bytes 170..171]\n  last-use: main.fy:1:192 [bytes 191..192]\n  loan: main.fy:1:156 [bytes 155..169]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:86: E2102: Returned borrow originates from a local value. [bytes 85..95]\n  origin: main.fy:1:63 [bytes 62..63]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-cli\\temporary",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:130: E1008: assignment target is not mutable [bytes 129..140]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 156 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "built: build/struct-array-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\example-dev.exe",
+      "imageSHA256": "af78c68aa9239cdb8ed2297951fa602d3f2ab0c06d7dc7366297a20b567d8ba3"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "vertices=4 sum_x=16000000020\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "built: build/struct-array-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-borrow-cli\\images\\example-release.exe",
+      "imageSHA256": "90338ae8b4c1b4e69dcda830648926d8ffced37606abae9c3310d8b74f04c158"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "vertices=4 sum_x=16000000020\n",
+      "stderr": ""
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Span { i64 x; i32 y; bool ready; u8 byte; u32 word; usize size; }\nstruct Point { Span position; i64 sibling; }\nfn void add(ref mut i64 value, i64 amount) { *value = *value + amount; }\nfn i64 read(ref i64 value) { return *value; }\nfn ref i64 shared(ref i64 value) { return value; }\nfn ref mut i64 exclusive(ref mut i64 value) { return value; }\nfn Option<ref i64> optional(ref i64 value) { return .some(value); }\nfn Result<ref mut i64,u32> result(ref mut i64 value) { return .ok(value); }\nfn i64 copied(Point[2] data) {\n    let ref i64 field = ref data[1].position.x;\n    return *field;\n}\nfn i32 main() {\n    let Point origin = Point { .position = Span { .x = 4000000000, .y = 2,\n        .ready = true, .byte = 3, .word = 4, .size = 5 }, .sibling = 7 };\n    let Point[2] fixed = [origin; 2];\n    let ref i64 first = ref fixed[0].position.x;\n    let ref Span whole = ref ((fixed)[1]).position;\n    assert(*first == whole.x && copied(fixed) == 4000000000);\n    var Point[2] points = fixed;\n    let ref i64 a = ref points[0].position.x;\n    let ref i64 b = ref points[1].position.x;\n    assert(read(a) == read(b));\n    add(ref mut points[0].position.x, 20);\n    let ref i64 returned = shared(ref points[0].position.x);\n    let ref i64 returned_copy = returned;\n    assert(*returned_copy == 4000000020);\n    switch (optional(ref points[0].position.x)) {\n        case .some(value): { assert(*value == 4000000020); }\n        case .none: { assert(false); }\n    };\n    var usize calls = 0;\n    var usize index = 1;\n    let ref mut i64 selected = exclusive(ref mut ((points)[{calls += 1; index}]).position.x);\n    index = 0;\n    add(selected, -10);\n    assert(*selected == 3999999990 && calls == 1);\n    let ref mut Span nested = ref mut points[1].position;\n    nested.y = 9;\n    let ref mut Span alias = nested;\n    alias.x += 1;\n    switch (result(ref mut points[0].position.x)) {\n        case .ok(value): { add(value, 2); }\n        case .err(_): { assert(false); }\n    };\n    let ref mut i32 y = ref mut points[0].position.y; *y = 11;\n    let ref mut bool ready = ref mut points[0].position.ready; *ready = false;\n    let ref mut u8 byte = ref mut points[0].position.byte; *byte = 6;\n    let ref mut u32 word = ref mut points[0].position.word; *word = 8;\n    let ref mut usize size = ref mut points[0].position.size; *size = 10;\n    let ref i32 cy = ref points[0].position.y; assert(*cy == 11);\n    let ref bool cr = ref points[0].position.ready; assert(!*cr);\n    let ref u8 cb = ref points[0].position.byte; assert(*cb == 6);\n    let ref u32 cw = ref points[0].position.word; assert(*cw == 8);\n    let ref usize cs = ref points[0].position.size; assert(*cs == 10);\n    add(ref mut points[points.len - 1].sibling, 3);\n    assert(points[0].position.x == 4000000022 && points[1].position.x == 3999999991);\n    assert(points[1].position.y == 9 && points[1].sibling == 10);\n    assert(fixed[0].position.x == 4000000000 && fixed[0].position.ready);\n    return 0;\n}\n",
+      "sourceSHA256": "cb6fb261e2f8d460706b18e95216044d0c4dabacbbc3386e0a9d6af6d42816e7"
+    },
+    {
+      "name": "shared-end",
+      "source": "module main;struct Pos{i64 x;}struct Point{Pos pos;}fn void edit(ref mut i64 x){*x=9;}fn i32 main(){var Point[2] a=[Point{.pos=Pos{.x=1}};2];let ref i64 p=ref a[2].pos.x;return 0;}",
+      "sourceSHA256": "acfda28c5cf565dc51342706d40b35f996bdd39215197dc9c50de52e95f0a30a"
+    },
+    {
+      "name": "exclusive-end",
+      "source": "module main;struct Pos{i64 x;}struct Point{Pos pos;}fn void edit(ref mut i64 x){*x=9;}fn i32 main(){var Point[2] a=[Point{.pos=Pos{.x=1}};2];edit(ref mut a[2].pos.x);return 0;}",
+      "sourceSHA256": "b36d6c834d473b4de6e9a654fb399b01154f5bd7ecc989e0fb752a7bbf78c056"
+    },
+    {
+      "name": "index-return",
+      "source": "module main;struct Pos{i64 x;}struct Point{Pos pos;}fn void edit(ref mut i64 x){*x=9;}fn i32 main(){var Point[2] a=[Point{.pos=Pos{.x=1}};2];edit(ref mut a[{return 0;0}].pos.x);assert(false);return 1;}",
+      "sourceSHA256": "298c5cda4b19fcec28f8c8a870dd415bb4ca14ca7e19513a5f15f0c3936b3c80"
+    },
+    {
+      "name": "immutable",
+      "source": "module main;struct Point{i64 x;}fn void edit(ref mut i64 x){}fn i32 main(){let Point[1] a=[Point{.x=1}];edit(ref mut a[0].x);return 0;}",
+      "sourceSHA256": "9b1a43433e3fd15794bfbed0d6006ee3e012d75bc94e8b5f53b0340647e3504b"
+    },
+    {
+      "name": "loan",
+      "source": "module main;struct Pos{i64 x;}struct Point{Pos pos;}fn void edit(ref mut i64 x){*x=9;}fn i32 main(){var Point[2] a=[Point{.pos=Pos{.x=1}};2];let ref i64 p=ref a[0].pos.x;a[1].pos.x=9;assert(*p==1);return 0;}",
+      "sourceSHA256": "13784dca0ad3b9783d78c9f725151fbfc8628f7f55296f2125c0c134951a5d11"
+    },
+    {
+      "name": "escape",
+      "source": "module main;struct Point{i64 x;}fn ref i64 bad(){var Point[1] a=[Point{.x=1}];return ref a[0].x;}fn i32 main(){return 0;}",
+      "sourceSHA256": "9d3c1a4de8a4170bcbfe2f631494440eb088030df9bc62ff6c26e699dcca2804"
+    },
+    {
+      "name": "temporary",
+      "source": "module main;struct Point{i64 x;}fn void edit(ref mut i64 x){}fn Point[1] make(){return [Point{.x=1}];}fn i32 main(){edit(ref mut make()[0].x);return 0;}",
+      "sourceSHA256": "5c431bcc70ac757845ad681d8381e42c82d4d3d1b1702bcb2363ed345d9409fc"
+    }
+  ],
+  "nativeOutcomes": 10
+}
