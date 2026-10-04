@@ -45,14 +45,14 @@ func TestMutableStructForFlow(t *testing.T) {
 }
 func TestMutableStructForSourceBoundary(t *testing.T) {
 	for name, body := range map[string]string{
-		"shared-source":      "fn void edit(ref Token[] view){for(let ref mut Token item in view){}}",
-		"copied-item":        "fn void edit(ref mut Token[] view){for(let Token item in view){}}",
-		"mutable-descriptor": "fn void edit(ref mut Token[] view){var ref mut Token[] alias=view;for(let ref mut Token item in alias){}}",
-		"temporary":          "fn void edit(ref mut Token[] view){for(let ref mut Token item in view[..]){}}",
-		"wrong-nominal":      "fn void edit(ref mut Token[] view){for(let ref mut Other item in view){}}",
-		"integer-ref":        "fn void edit(ref mut i64[] view){for(let ref mut i64 item in view){}}",
-		"whole-deref-store":  "fn void edit(ref mut Token[] view){for(let ref mut Token item in view){*item=Token{.value=1};}}",
-		"direct-element":     "fn void edit(ref mut Token[] view){let ref mut Token item=ref mut view[0];}",
+		"shared-source":       "fn void edit(ref Token[] view){for(let ref mut Token item in view){}}",
+		"copied-item":         "fn void edit(ref mut Token[] view){for(let Token item in view){}}",
+		"mutable-descriptor":  "fn void edit(ref mut Token[] view){var ref mut Token[] alias=view;for(let ref mut Token item in alias){}}",
+		"temporary":           "fn void edit(ref mut Token[] view){for(let ref mut Token item in view[..]){}}",
+		"wrong-nominal":       "fn void edit(ref mut Token[] view){for(let ref mut Other item in view){}}",
+		"integer-ref":         "fn void edit(ref mut i64[] view){for(let ref mut i64 item in view){}}",
+		"whole-deref-store":   "fn void edit(ref mut Token[] view){for(let ref mut Token item in view){*item=Token{.value=1};}}",
+		"shared-to-exclusive": "fn void edit(ref Token[] view){let ref mut Token item=ref mut view[0];}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			r := analyzeText(t, map[string]string{"main.fy": "module main;struct Token{i64 value;}struct Other{i64 value;}" + body})

@@ -1,0 +1,208 @@
+{
+  "schema": "fairyc.indexed-struct-borrow-review/v1",
+  "date": "2026-10-04",
+  "baseRevision": "855be5858e67c0de79f7712fc3ccb060daee275f",
+  "scope": "ADR 0451 direct shared/exclusive stored struct element borrows; removes synthetic-only admission; token example avoids first-element copy",
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/indexed-struct-borrow-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "image": {
+      "path": ".cache/indexed-struct-borrow-compiler/fairyc.exe",
+      "sha256": "7680ab5e44c0f3117eb7adc07242c0ed8a0f209c6f69828d264e9ae7fca8747d"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004104019-855be5858e67+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 855be5858e67c0de79f7712fc3ccb060daee275f\nmodified: true\n",
+      "stderr": ""
+    },
+    "sourceDigest": {
+      "fileCount": 542,
+      "sha256": "701896254d7a45916d3a9fac434d5a623fc2e8461a6a75d8b838912ed82bdb81",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sourceManifest": {
+      "path": ".cache/indexed-struct-borrow-compiler/source-manifest.json",
+      "sha256": "bfcb9bdf79aa0e60681f06992b8d8c85b7d0a35b20ad79aaeb939426d4bc6669"
+    }
+  },
+  "sources": [
+    {
+      "path": "internal/compiler/testdata/indexed_struct_borrow.fy",
+      "sha256": "c317aa6f925cd4fe0c170b5974df3838e77f5320887148085ac391a620ba96f7"
+    },
+    {
+      "path": "examples/struct_vec_view/src/main.fy",
+      "sha256": "e490b8aaa5306bb4ddb5ca96164d35ee827840131306d643f335f2f72ec311b0"
+    },
+    {
+      "path": "examples/struct_vec_view/src/tokens.fy",
+      "sha256": "f83b41938fbeebfc7e4aac334bb37b3c1f5cf22469f7c1f987280f693e53866c"
+    },
+    {
+      "path": "examples/struct_vec_view/fairy.toml",
+      "sha256": "579393868eeb192def762f89270d2378cbceb6647f6182b346536df145061a70"
+    },
+    {
+      "path": "examples/struct_vec_view/fairy.lock",
+      "sha256": "2cd3668e75a93ced12a01f9bff4bad27796e68723507a06cbf14c9de88ee71ab"
+    },
+    {
+      "path": "examples/struct_vec_view/verify.py",
+      "sha256": "3ceb41ffc3273aa7331a681da900f1439bf1cf405bdf38466534a89de69eedca"
+    }
+  ],
+  "publicCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/indexed-struct-borrow-20261004.cli.json",
+      "sha256": "0d73e9db04efefdc7f5f26072f5f651b8e35630beabf870d2babb17659d0f15e"
+    },
+    "executions": 7
+  },
+  "native": {
+    "raw": {
+      "path": "docs/ops/evidence/indexed-struct-borrow-20261004.native.json",
+      "sha256": "990104145b68605380f7a902da639ee5bd67d75804e243b18c9295e02b96e43c"
+    },
+    "executions": 14
+  },
+  "example": {
+    "raw": {
+      "path": "docs/ops/evidence/indexed-struct-borrow-20261004.example.json",
+      "sha256": "742456b0655ec96bae625793834a02dd81c5e0dcd4c073f518fe599cb8c22643"
+    },
+    "argv": [
+      "python",
+      "-X",
+      "utf8",
+      "examples/struct_vec_view/verify.py",
+      ".cache/indexed-struct-borrow-compiler/fairyc.exe"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "PASS: public CLI and 14 native outcomes; build/verify-results.json\n",
+    "stderr": "",
+    "nativeExecutions": 14
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/cli",
+        "-run",
+        "^Test(IndexedStructBorrow(Check|Flow|SourceBoundary|Rejections)|MutableStructForFlow|MutableStructForSourceBoundary|MutableStructVecViewRejections)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-struct-borrow-check.jsonl",
+        "sha256": "42d92f75e958541e7fe83a0b981f3d5845e57c2caeb80fe94182aa23574f508f"
+      },
+      "passedTestEvents": 83,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/interpreter",
+        "-run",
+        "^(TestIndexedStructBorrow.*|TestIndexedStructFieldsMIR|TestIndexedStructFieldReference|TestMutableStructForFlow|TestMutableStructForMIR|TestMutableStructForInterpreter|TestMutableStructForSourceBoundary)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-struct-borrow-stage-final.jsonl",
+        "sha256": "8bdbfab07ba38c36cf2d98f98807a6a4769eeb90ce3a4f1926c9e4dfcf921d56"
+      },
+      "passedTestEvents": 55,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestIndexedStructBorrow",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": {
+        "path": ".cache/indexed-struct-borrow-cli-final.jsonl",
+        "sha256": "69235f3df70e7ce8a0dc354267f0d23f03b3ebe9f1e8cbd55e9107db9433c151"
+      },
+      "passedTestEvents": 20,
+      "skips": []
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/semantic",
+      "./internal/compiler",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "limits": [
+    "Linux actual execution deferred by owner; both C emission profiles checked.",
+    "Whole nominal dereference assignment, temporary descriptors, integer element references, fixed-array struct conversion and owning slices remain closed.",
+    "No new syntax, MIR operation, wire/ABI/runtime symbol, SDK export, DB or runner changes. SDK stage0.85, language /20 and runtime /0 unchanged.",
+    "Compiler source digest excludes Go tests. Native in-process records name cdriver; public CLI and example contain actual argv/cwd/outcomes.",
+    "Existing portable example verifier reused; no new PS1 or tracked harness.",
+    "No full-repository suite or benchmark: targeted semantic/MIR/native/cache regressions cover the change. No install, push or release."
+  ]
+}

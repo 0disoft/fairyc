@@ -12,14 +12,13 @@ import (
 )
 
 type typeChecker struct {
-	analyzer       *analyzer
-	module         *moduleScope
-	function       *ast.Function
-	hir            *hir.Function
-	resultType     hir.Type
-	loopDepth      int
-	unsafeScopes   []hir.Span
-	mutableForItem *ast.Expression
+	analyzer     *analyzer
+	module       *moduleScope
+	function     *ast.Function
+	hir          *hir.Function
+	resultType   hir.Type
+	loopDepth    int
+	unsafeScopes []hir.Span
 }
 
 func (a *analyzer) typeCheck() Result {
@@ -501,7 +500,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			if reason != "" {
 				c.analyzer.addUnsupported(c.module.file.Path, issueSpan, reason)
 			} else {
-				hirStatement.Expression, _ = c.checkViewFor(statement.Expression, statement.ByteFor)
+				hirStatement.Expression, _ = c.checkExpression(statement.Expression, hir.TypeVoid)
 				hirStatement.Kind = string(syntax.KindExprStmt)
 			}
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
@@ -1302,6 +1301,11 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return childType
 	case "&":
+		if borrowed, ok := c.indexedStructBorrow(expression.Children[0], child, false); ok {
+			*result = borrowed
+			result.Span = span(c.module.file.Path, expression.Span)
+			return borrowed.Type
+		}
 		if child != nil {
 			if field, ok := c.sharedFieldBorrow(expression.Children[0], *child); ok {
 				*result = field
@@ -1319,12 +1323,10 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return hir.SharedBorrow(childType)
 	case "&mut":
-		if expression == c.mutableForItem && child != nil {
-			if borrowed, ok := indexedElementBorrow(*child, true); ok {
-				*result = borrowed
-				result.Span = span(c.module.file.Path, expression.Span)
-				return borrowed.Type
-			}
+		if borrowed, ok := c.indexedStructBorrow(expression.Children[0], child, true); ok {
+			*result = borrowed
+			result.Span = span(c.module.file.Path, expression.Span)
+			return borrowed.Type
 		}
 		if field, ok := c.mutableFieldBorrow(expression.Children[0], child); ok {
 			*result = field

@@ -25,6 +25,22 @@ func (c *typeChecker) indexedStructPlace(source *ast.Expression) bool {
 	return nominal && c.analyzer.plainViewStruct(element)
 }
 
+// Only a named nominal descriptor can yield a stored whole-element address.
+// Grouping preserves place identity; calls, temporary views and arrays do not.
+func (c *typeChecker) indexedStructBorrow(source *ast.Expression, child *hir.Expression, mutable bool) (hir.Expression, bool) {
+	for source != nil && source.Kind == syntax.KindGroup && len(source.Children) == 1 {
+		source = source.Children[0]
+	}
+	if source == nil || source.Kind != syntax.KindIndex || child == nil || !c.indexedStructPlace(source) {
+		return hir.Expression{}, false
+	}
+	index := *child
+	for index.Kind == "group" && len(index.Children) == 1 {
+		index = index.Children[0]
+	}
+	return indexedElementBorrow(index, mutable)
+}
+
 func indexedElementBorrow(index hir.Expression, mutable bool) (hir.Expression, bool) {
 	if index.Kind != "view-index" || len(index.Children) != 2 {
 		return hir.Expression{}, false

@@ -182,3 +182,10 @@ Existing input limits and the portable `verify.py` remain applicable.
 Current Windows dev/release evidence:
 `docs/ops/evidence/mutable-struct-for-example-20261004.json`.
 Linux actual execution remains deferred to the owner's batch.
+
+ADR 0451 also admits direct `ref items[i]` and `ref mut items[i]` for named
+plain struct views. `rebase_segment` reads its first-token origin through
+`let ref Token first = ref segment[0]`, avoiding a whole Token value copy.
+The shared child ends at the origin calculation, so mutable iteration follows
+under the same last-use rules. Existing CLI output and portable verifier remain
+unchanged. Current evidence: `docs/ops/evidence/indexed-struct-borrow-20261004.json`.

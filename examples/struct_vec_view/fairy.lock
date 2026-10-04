@@ -3,18 +3,18 @@
   "packageInstanceAlgorithm": "fairyc.package-instance/v1",
   "sourceDigestAlgorithm": "fairyc.package-source/v1",
   "language": "fairyc-language/20",
-  "root": "fypi1-sha256-a5e757279af3fbcd9ebc63274872ef0d37894ff435322b2d0276aa30fdbd2665",
+  "root": "fypi1-sha256-4054c2d5f30163d5e518fab3ce476a6f48042c09be7676ae10267c956c0b584a",
   "packages": [
     {
-      "id": "fypi1-sha256-a5e757279af3fbcd9ebc63274872ef0d37894ff435322b2d0276aa30fdbd2665",
+      "id": "fypi1-sha256-4054c2d5f30163d5e518fab3ce476a6f48042c09be7676ae10267c956c0b584a",
       "role": "root",
       "packageUid": "example.struct-vec-view",
       "sourceKind": "local",
       "localPath": ".",
       "sdkIdentity": "",
       "runtimeAbi": "",
-      "sourceIdentity": "fysrc1-sha256-c102ccc913d8ccd5ea657eacfff321a69a9f68c3c9ab3cda375e8091cf81e0fb",
-      "sourceDigest": "fysrc1-sha256-c102ccc913d8ccd5ea657eacfff321a69a9f68c3c9ab3cda375e8091cf81e0fb",
+      "sourceIdentity": "fysrc1-sha256-4f714cb28789d5ed7802140e4e74c121063fbfabd84797d3cf8c1aa6961cc12e",
+      "sourceDigest": "fysrc1-sha256-4f714cb28789d5ed7802140e4e74c121063fbfabd84797d3cf8c1aa6961cc12e",
       "version": "0.1.0",
       "features": []
     },
@@ -34,7 +34,7 @@
   ],
   "dependencies": [
     {
-      "owner": "fypi1-sha256-a5e757279af3fbcd9ebc63274872ef0d37894ff435322b2d0276aa30fdbd2665",
+      "owner": "fypi1-sha256-4054c2d5f30163d5e518fab3ce476a6f48042c09be7676ae10267c956c0b584a",
       "binding": "stdlib",
       "target": "fypi1-sha256-fe92473e0fa2beb4d72ebb8a6c7023d6c9da6b1a92abf4d2923c34ee4c9c4c68"
     }

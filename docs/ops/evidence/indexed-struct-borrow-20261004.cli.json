@@ -1,0 +1,106 @@
+{
+  "schema": "fairyc.indexed-struct-borrow-public/v1",
+  "compilerSHA256": "7680ab5e44c0f3117eb7adc07242c0ed8a0f209c6f69828d264e9ae7fca8747d",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004104019-855be5858e67+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 855be5858e67c0de79f7712fc3ccb060daee275f\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "success",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void edit(ref mut Token item){item.value+=1000000000;item.position.start+=1;}\nfn ref Token selected(ref Token[] items,usize index){return ref items[index];}\nfn ref mut Token selected_mut(ref mut Token[] items,usize index){return ref mut items[index];}\nfn Option<ref mut Token> tagged(ref mut Token[] items){return .some(selected_mut(items,1));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=4000000000,.position=Span{.start=1,.end=4}});\n discard vec::push<Token>(ref mut owner,Token{.value=7,.position=Span{.start=5,.end=9}});\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n var usize calls=0;\n let ref mut Token item=ref mut ((items)[{calls+=1;0}]);\n var Token copy=*item;\n edit(item);assert(item.value==5000000000 && item.position.start==2);\n copy.value=9;assert(copy.position.start==1 && item.value==5000000000);\n let ref Token shared=ref items[0];let ref Token also=ref items[1];assert(shared.value==5000000000 && also.value==7);\n edit(ref mut items[1]);assert(items[1].value==1000000007);\n let Option<ref mut Token> result=tagged(items);\n switch(result){case .some(value):{let ref mut Span position=ref mut value.position;position.end+=2;value.value+=1;}case .none:{assert(false);}};\n assert(items[1].value==1000000008 && items[1].position.end==11 && calls==1);\n let ref Token[] shared_view=vec::view<Token>(ref owner);\n let ref Token returned=selected(shared_view,1);assert(returned.value==1000000008);\n discard vec::clear<Token>(ref mut owner);assert(copy.value==9);\n return 0;\n}\n",
+      "sourceSHA256": "c317aa6f925cd4fe0c170b5974df3838e77f5320887148085ac391a620ba96f7"
+    },
+    {
+      "name": "blocked-owner",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void edit(ref mut Token item){item.value+=1000000000;item.position.start+=1;}\nfn ref Token selected(ref Token[] items,usize index){return ref items[index];}\nfn ref mut Token selected_mut(ref mut Token[] items,usize index){return ref mut items[index];}\nfn Option<ref mut Token> tagged(ref mut Token[] items){return .some(selected_mut(items,1));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=4000000000,.position=Span{.start=1,.end=4}});\n discard vec::push<Token>(ref mut owner,Token{.value=7,.position=Span{.start=5,.end=9}});\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n var usize calls=0;\n let ref mut Token item=ref mut ((items)[{calls+=1;0}]);\n var Token copy=*item;\n discard vec::clear<Token>(ref mut owner);edit(item);assert(item.value==5000000000 && item.position.start==2);\n copy.value=9;assert(copy.position.start==1 && item.value==5000000000);\n let ref Token shared=ref items[0];let ref Token also=ref items[1];assert(shared.value==5000000000 && also.value==7);\n edit(ref mut items[1]);assert(items[1].value==1000000007);\n let Option<ref mut Token> result=tagged(items);\n switch(result){case .some(value):{let ref mut Span position=ref mut value.position;position.end+=2;value.value+=1;}case .none:{assert(false);}};\n assert(items[1].value==1000000008 && items[1].position.end==11 && calls==1);\n let ref Token[] shared_view=vec::view<Token>(ref owner);\n let ref Token returned=selected(shared_view,1);assert(returned.value==1000000008);\n discard vec::clear<Token>(ref mut owner);assert(copy.value==9);\n return 0;\n}\n",
+      "sourceSHA256": "b3be369a7abe0c20be0906d04c169b02f0131fdaf1b99580027a62537378f212"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004104019-855be5858e67+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 855be5858e67c0de79f7712fc3ccb060daee275f\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-public\\success",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 182 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-public\\success",
+      "exit": 0,
+      "stdout": "built: build/indexed-struct-borrow-success.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "34fec28cd8cfe87a72854db92f74f2efd8c2fea9161f88cba6354039c45fb93d"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-public\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-public\\success",
+      "exit": 0,
+      "stdout": "built: build/indexed-struct-borrow-success.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "2293148a5db6647ab30819fdc6d9ce7085831afcc4c213d1de4caffaadedb835"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-public\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-struct-borrow-public\\blocked-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:17:28: E2101: Access conflicts with an active shared or mutable loan. [bytes 905..918]\n  last-use: main.fy:23:39 [bytes 1472..1477]\n  loan: main.fy:13:49 [bytes 762..775]\n"
+    }
+  ]
+}

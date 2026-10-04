@@ -102,15 +102,3 @@ func (f *borrowFlowAnalyzer) evaluateViewFor(statement *ast.Statement, environme
 	_, reachable = f.evaluateExpression(prepared, environment)
 	return reachable
 }
-
-// Only the generated item initializer may take a whole stored-element address.
-// Ordinary written `ref mut view[index]` remains outside source admission.
-func (c *typeChecker) checkViewFor(prepared *ast.Expression, loop *ast.ByteForLoop) (*hir.Expression, hir.Type) {
-	prior := c.mutableForItem
-	c.mutableForItem = nil
-	if loop.Type.Kind == ast.TypeKindReference && loop.Type.Mutable {
-		c.mutableForItem = prepared.Block.Statements[1].For.Body.Statements[0].Binding.Expression
-	}
-	defer func() { c.mutableForItem = prior }()
-	return c.checkExpression(prepared, hir.TypeVoid)
-}

@@ -62,6 +62,8 @@ hidden post increment; break bypasses it. No new AST syntax, MIR operation, wire
 field, codec envelope, SDK export, runtime symbol or optimization flag is added.
 Existing Flow child-generation, loop fixed-point, origin summary and owner-hold
 analysis apply to the synthetic reference without a second borrowing model.
+ADR 0451 subsequently admits direct indexed element borrows and removes the
+checker-only initializer capability; source and synthetic references share a path.
 
 ## Verification and compatibility
 

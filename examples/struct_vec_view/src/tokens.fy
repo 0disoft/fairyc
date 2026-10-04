@@ -51,7 +51,10 @@ fn void rebase(ref mut Span position, usize origin) {
 /// Normalizes the stored spans once; the first token becomes the segment origin.
 /// Mutable item/field children retain the stored segment until their last use.
 pub fn void rebase_segment(ref mut Token[] segment) {
-    let usize origin = if (segment.is_empty) { 0 } else { segment[0].position.start };
+    let usize origin = if (segment.is_empty) { 0 } else {
+        let ref Token first = ref segment[0];
+        first.position.start
+    };
     for (let ref mut Token token in segment) {
         let ref mut Span position = ref mut token.position;
         rebase(position, origin);

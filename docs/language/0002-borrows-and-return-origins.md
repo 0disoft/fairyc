@@ -253,6 +253,16 @@ references retain origin and generation. Source direct element borrows, temporar
 iterables and whole nominal dereference assignment remain closed. Shared struct
 views keep copied-value iteration. SDK stage0.85, language /20, runtime /0.
 
+ADR 0451 extends the same named plain struct views to direct `ref items[i]`
+and `ref mut items[i]` element references, including grouped places, bindings,
+call arguments and parameter-origin returns. Shared views cannot produce
+exclusive references. Exclusive child generations freeze parent/aliases until
+last use; shared children block writes while live. Bounds dominate address
+creation, the index runs once, and receiver selection survives index-time
+reassignment of a mutable descriptor binding. Ordinary indexed values and
+`*item` reads still copy. Temporary descriptors, integer element references,
+fixed-array struct views and whole nominal dereference assignment stay closed.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one
