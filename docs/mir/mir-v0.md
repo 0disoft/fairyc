@@ -436,3 +436,12 @@ ADR 0449 adds `view-element-borrow`, producing an exact nominal reference from a
 ADR 0452 additionally admits whole plain struct replacement through `deref-store`. A separate aggregate shape validator checks the declaration graph; actual receiver/value locals must be exact mutable-reference/nominal types. The receiver descriptor is saved before RHS effects, and terminating RHS paths have no store. The interpreter updates stored struct identity with detached field copies. Scalar validation and wire fields remain unchanged.
 
 ADR 0453 widens `view-element-borrow` to the five existing integer view elements. Byte receivers now undergo actual-local type and usize-index validation as well. Static byte operands infer shared byte views only. The interpreter references stored scalar cells or immutable static bytes. Scalar dereference stores save their selected receiver before RHS effects. Existing bounds dominance, wire fields and nominal graph checks remain intact.
+
+ADR 0454 admits mutable reference for-in iteration over the five integer view
+kinds. The AST length snapshot and classic loop reuse checked
+`view-element-borrow` followed by scalar dereference loads/stores. No new MIR
+operation, codec field or C helper is added. Source admission requires an
+immutable named mutable descriptor with an exact integer element type. Bounds
+checks dominate each address; continue runs the hidden increment, break and
+return bypass it. Flow retains the owner for the written loop and validates
+child generations across iteration backedges and returned references.

@@ -153,8 +153,8 @@ while_stmt = "while" "(" expression ")" statement_block ;
    Each clause is optional; an omitted condition is true. *)
 (* The for-in alternative retains arbitrary written types/expressions for
    lossless source handling. Semantic admission allows exact integer/copied plain
-   struct items over named immutable descriptors, and ref mut plain struct items
-   over mutable views. SDK vector-reference iteration is separate. *)
+   struct items over named immutable descriptors, and ref mut integer/plain struct
+   items over mutable views. SDK vector-reference iteration is separate. *)
 for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block
          | "for" "(" "let" type IDENT "in" expression ")" statement_block ;
 for_init = binding_kind (IDENT | type IDENT) "=" expression

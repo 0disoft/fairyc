@@ -280,8 +280,20 @@ which runs once under checked bounds. Actual receiver/index types and exact
 reference kinds are verified. Existing parent freezes, shared write holds,
 call/return/tagged origins and escape rules apply. Scalar dereference stores
 snapshot the named receiver before RHS effects, including reference rebinding.
-Temporary descriptors, direct array element borrows and reference for-in loops
-remain closed. Fixed arrays can first convert to named integer views.
+Temporary descriptors and direct array element borrows remain closed. Fixed
+arrays can first convert to named integer views. ADR 0454 subsequently admits
+mutable integer reference for-in loops.
+
+ADR 0454 admits `for (let ref mut T item in values)` for exact
+u8/i32/i64/u32/usize items over named immutable `ref mut T[]` descriptors.
+The descriptor's length is saved once; each iteration borrows the stored cell
+under checked bounds. Last use releases the exclusive child; the whole owner
+stays held through the written loop exit, including break/continue/return and
+Result propagation. Returned item references retain their source origin and
+child generation. Shared sources/items, mutable descriptor bindings, temporary
+iterables and direct array roots remain closed. Copying `*item` still copies.
+Independent owners may be iterated in nested loops; indices do not prove
+exclusive sibling disjointness.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

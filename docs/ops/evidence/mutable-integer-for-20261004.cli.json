@@ -1,0 +1,184 @@
+{
+  "schema": "fairyc.mutable-integer-for-cli/v1",
+  "compilerSHA256": "18fc8c89544db12ed9c14b16e00c4b163460dc0ed6fcddd7dacdf975a08fddc7",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004120221-5a4e99f58568+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 5a4e99f585681e31f7e11d91337b39510759f149\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nfn void check_u8(){\n var u8[5] data=[0,1,200,3,4];\n let ref mut u8[] view=ref mut data;\n let ref mut u8[] part=view[1..4];\n var usize visits=0;\n for(let ref mut u8 item in part){\n  visits+=1;\n  let u8 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==200+1 && view[3]==4 && view[4]==4);\n let ref mut u8[] empty=view[5..];\n for(let ref mut u8 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_i32(){\n var i32[5] data=[0,1,2000000000,3,4];\n let ref mut i32[] view=ref mut data;\n let ref mut i32[] part=view[1..4];\n var usize visits=0;\n for(let ref mut i32 item in part){\n  visits+=1;\n  let i32 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==2000000000+1 && view[3]==4 && view[4]==4);\n let ref mut i32[] empty=view[5..];\n for(let ref mut i32 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_i64(){\n var i64[5] data=[0,1,4000000000,3,4];\n let ref mut i64[] view=ref mut data;\n let ref mut i64[] part=view[1..4];\n var usize visits=0;\n for(let ref mut i64 item in part){\n  visits+=1;\n  let i64 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==4000000000+1 && view[3]==4 && view[4]==4);\n let ref mut i64[] empty=view[5..];\n for(let ref mut i64 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_u32(){\n var u32[5] data=[0,1,4000000000,3,4];\n let ref mut u32[] view=ref mut data;\n let ref mut u32[] part=view[1..4];\n var usize visits=0;\n for(let ref mut u32 item in part){\n  visits+=1;\n  let u32 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==4000000000+1 && view[3]==4 && view[4]==4);\n let ref mut u32[] empty=view[5..];\n for(let ref mut u32 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_usize(){\n var usize[5] data=[0,1,4294967296,3,4];\n let ref mut usize[] view=ref mut data;\n let ref mut usize[] part=view[1..4];\n var usize visits=0;\n for(let ref mut usize item in part){\n  visits+=1;\n  let usize copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==4294967296+1 && view[3]==4 && view[4]==4);\n let ref mut usize[] empty=view[5..];\n for(let ref mut usize item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void bump(ref mut i64 value){*value=*value+4000000000;}\nfn Option<ref mut i64> first(ref mut i64[] values){for(let ref mut i64 item in values){return .some(item);}return .none;}\nfn Result<i32,u32> fail(){return .err(7);}\nfn Result<i32,u32> visit(ref mut i64[] values){for(let ref mut i64 item in values){bump(item);let i32 value=fail()?;}return .ok(0);}\nfn void nested(ref mut i64[] a,ref mut i64[] b){for(let ref mut i64 x in a){for(let ref mut i64 y in b){*y=*y+*x;}*x=*x+1;}}\nfn i32 main(){\n check_u8();check_i32();check_i64();check_u32();check_usize();\n var i64[2] data=[1,2];let ref mut i64[] values=ref mut data;\n switch(first(values)){case .some(item):{*item=42;}case .none:{assert(false);}};\n switch(visit(values)){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n assert(values[0]==4000000042 && values[1]==2);\n var i64[1] other=[7];let ref mut i64[] right=ref mut other;\n nested(values,right);\n assert(values[0]==4000000043 && values[1]==3 && right[0]==4000000051);\n return 0;\n}\n",
+      "sourceSHA256": "becb7d9490fb756ce95839e81c68c9f2070f7aa72885a8cd9ede1ec21172f445"
+    },
+    {
+      "name": "blocked-parent",
+      "source": "module main;\nfn void check_u8(){\n var u8[5] data=[0,1,200,3,4];\n let ref mut u8[] view=ref mut data;\n let ref mut u8[] part=view[1..4];\n var usize visits=0;\n for(let ref mut u8 item in part){\n  assert(part.len>0);visits+=1;\n  let u8 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==200+1 && view[3]==4 && view[4]==4);\n let ref mut u8[] empty=view[5..];\n for(let ref mut u8 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_i32(){\n var i32[5] data=[0,1,2000000000,3,4];\n let ref mut i32[] view=ref mut data;\n let ref mut i32[] part=view[1..4];\n var usize visits=0;\n for(let ref mut i32 item in part){\n  visits+=1;\n  let i32 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==2000000000+1 && view[3]==4 && view[4]==4);\n let ref mut i32[] empty=view[5..];\n for(let ref mut i32 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_i64(){\n var i64[5] data=[0,1,4000000000,3,4];\n let ref mut i64[] view=ref mut data;\n let ref mut i64[] part=view[1..4];\n var usize visits=0;\n for(let ref mut i64 item in part){\n  visits+=1;\n  let i64 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==4000000000+1 && view[3]==4 && view[4]==4);\n let ref mut i64[] empty=view[5..];\n for(let ref mut i64 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_u32(){\n var u32[5] data=[0,1,4000000000,3,4];\n let ref mut u32[] view=ref mut data;\n let ref mut u32[] part=view[1..4];\n var usize visits=0;\n for(let ref mut u32 item in part){\n  visits+=1;\n  let u32 copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==4000000000+1 && view[3]==4 && view[4]==4);\n let ref mut u32[] empty=view[5..];\n for(let ref mut u32 item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void check_usize(){\n var usize[5] data=[0,1,4294967296,3,4];\n let ref mut usize[] view=ref mut data;\n let ref mut usize[] part=view[1..4];\n var usize visits=0;\n for(let ref mut usize item in part){\n  visits+=1;\n  let usize copy=*item;\n  *item=*item+1;\n  assert(*item==copy+1);\n  if(copy==1){continue;}\n  if(copy==3){break;}\n }\n assert(visits==3 && view[0]==0 && view[1]==2 && view[2]==4294967296+1 && view[3]==4 && view[4]==4);\n let ref mut usize[] empty=view[5..];\n for(let ref mut usize item in empty){assert(false);}\n view[0]=9;\n assert(data[0]==9);\n}\nfn void bump(ref mut i64 value){*value=*value+4000000000;}\nfn Option<ref mut i64> first(ref mut i64[] values){for(let ref mut i64 item in values){return .some(item);}return .none;}\nfn Result<i32,u32> fail(){return .err(7);}\nfn Result<i32,u32> visit(ref mut i64[] values){for(let ref mut i64 item in values){bump(item);let i32 value=fail()?;}return .ok(0);}\nfn void nested(ref mut i64[] a,ref mut i64[] b){for(let ref mut i64 x in a){for(let ref mut i64 y in b){*y=*y+*x;}*x=*x+1;}}\nfn i32 main(){\n check_u8();check_i32();check_i64();check_u32();check_usize();\n var i64[2] data=[1,2];let ref mut i64[] values=ref mut data;\n switch(first(values)){case .some(item):{*item=42;}case .none:{assert(false);}};\n switch(visit(values)){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n assert(values[0]==4000000042 && values[1]==2);\n var i64[1] other=[7];let ref mut i64[] right=ref mut other;\n nested(values,right);\n assert(values[0]==4000000043 && values[1]==3 && right[0]==4000000051);\n return 0;\n}\n",
+      "sourceSHA256": "bd7ff24d293320ab58305a99adf43b60e0adcf5ebce15c28551b5efd6f78dec5"
+    },
+    {
+      "name": "blocked-owner",
+      "source": "module main;import std::vec as vec;fn i32 main(){var vec::Vec<i64> owner=vec::empty<i64>();discard vec::push<i64>(ref mut owner,7);let ref mut i64[] view=vec::view_mut_i64(ref mut owner);for(let ref mut i64 item in view){*item=9;discard vec::clear<i64>(ref mut owner);break;}return 0;}",
+      "sourceSHA256": "d3d9bd0329c6428b6611b1c305f13a60fdcd3d2d5b7a311751dcd2f9de5451cd"
+    }
+  ],
+  "exampleSourceSHA256": "02e86dc882496e2d27cbee3494fe3730526fbbe16532e81e3b1025e368a62b91",
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004120221-5a4e99f58568+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 5a4e99f585681e31f7e11d91337b39510759f149\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 11 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/mutable-integer-for-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "562b3b46b92ebdbcd381e913a64b9b7fa6f8cee49e691d6026e505f3f49fe603",
+      "imagePath": ".cache\\mutable-integer-for-cli\\images\\matrix-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/mutable-integer-for-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "4422d7eec18bca0a326709d3e101e964e987d91b5bf5059c1fb73f3f48207188",
+      "imagePath": ".cache\\mutable-integer-for-cli\\images\\matrix-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-cli\\blocked-parent",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:8:10: E2101: Access conflicts with an active shared or mutable loan. [bytes 201..205]\n  last-use: main.fy:11:11 [bytes 272..276]\n  loan: main.fy:7:29 [bytes 185..189]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-cli\\blocked-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:254: E2101: Access conflicts with an active shared or mutable loan. [bytes 253..266]\n  last-use: main.fy:1:254 [bytes 253..266]\n  loan: main.fy:1:173 [bytes 172..185]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_view_iteration",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 8 source file(s), 150 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_view_iteration",
+      "exit": 0,
+      "stdout": "built: build/integer-view-iteration.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "a9a0daf73e2f114f6420c7d3fb84557e0f16d4c83628518fcc557de409496763",
+      "imagePath": ".cache\\mutable-integer-for-cli\\images\\clamp-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_view_iteration",
+      "exit": 0,
+      "stdout": "0\n0\n42\n9\n100\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_view_iteration",
+      "exit": 0,
+      "stdout": "built: build/integer-view-iteration.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "aa458ec2b5bca20c5aa6bd57a9f608af0570959be203c8346c30c10c3c180327",
+      "imagePath": ".cache\\mutable-integer-for-cli\\images\\clamp-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_view_iteration",
+      "exit": 0,
+      "stdout": "0\n0\n42\n9\n100\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -489,3 +489,12 @@ ADR 0449 emits a typed indexed element address only after the matching successfu
 ADR 0452 emits whole plain struct `deref-store` as the existing typed indirect assignment after aggregate shape and actual-local type verification. The selected pointer survives RHS reference rebinding; traps/returns suppress the store. No helper, warning suppression, host flag or alias promise is added.
 
 ADR 0453 uses the existing typed indexed address emission for integer references after exact shared/mutable receiver and element verification. Static byte data yields const u8 pointers only. The descriptor is saved before index effects, scalar store receivers before RHS effects. No new C helper, host flag or alias promise is added.
+
+ADR 0454 admits mutable reference for-in iteration over the five integer view
+kinds. The AST length snapshot and classic loop reuse checked
+`view-element-borrow` followed by scalar dereference loads/stores. No new MIR
+operation, codec field or C helper is added. Source admission requires an
+immutable named mutable descriptor with an exact integer element type. Bounds
+checks dominate each address; continue runs the hidden increment, break and
+return bypass it. Flow retains the owner for the written loop and validates
+child generations across iteration backedges and returned references.

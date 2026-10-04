@@ -1,0 +1,374 @@
+{
+  "cases": [
+    {
+      "case": "stored-matrix",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativestored-matrix1091120805\\001",
+      "imageSHA256": "109ab2447ed8d2dca21cd795ece4a32d18aefd85432af88752a82122786061a4",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "becb7d9490fb756ce95839e81c68c9f2070f7aa72885a8cd9ede1ec21172f445",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "stored-matrix",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativestored-matrix1091120805\\001",
+      "imageSHA256": "ff73199b87010e4f6898cb92312df3347d2dc5c631397a68a5e31af0c1b90496",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "becb7d9490fb756ce95839e81c68c9f2070f7aa72885a8cd9ede1ec21172f445",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u8-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativeu8-overflow1961003994\\001",
+      "imageSHA256": "7d0af04bd5edbc36d7552cd8c6798f878e926e8089c8482c94365d6a0bd5300e",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "2879d0c3f82b9c67545883bf80105546bfa296d74074eac4185f5630b73e3559",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u8-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativeu8-overflow1961003994\\001",
+      "imageSHA256": "33731cf4b9bb89878c3fa7a7623d770f1f5991645ef43f384a081b0229693896",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "2879d0c3f82b9c67545883bf80105546bfa296d74074eac4185f5630b73e3559",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativei32-overflow1102889980\\001",
+      "imageSHA256": "2fe9f18768a64123426b0da5c810c3e7481cf370a5d57378a57f16f86520c2e9",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "55532bc62468c5cb3c5d7ca856e22d96da72d84d86d093a2c60632739222f429",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativei32-overflow1102889980\\001",
+      "imageSHA256": "028a1d59df58ffcb1fd00d98cf896511d999206cb6bf42fee601ac26fc9e60cc",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "55532bc62468c5cb3c5d7ca856e22d96da72d84d86d093a2c60632739222f429",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i64-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativei64-overflow255509476\\001",
+      "imageSHA256": "53435891f53345dc92436ce94b3436fcc38e4bde4a3313b3e415dfd48ed25e27",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "208da8333f5c3370a3eb0583c8a7f967a24ec4238ecd75263fe7dd933d489746",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i64-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativei64-overflow255509476\\001",
+      "imageSHA256": "3efef67aafcb8a703b722d8f6354bc82dca3826c7d106521f36692e4f707a673",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "208da8333f5c3370a3eb0583c8a7f967a24ec4238ecd75263fe7dd933d489746",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativeu32-overflow633481887\\001",
+      "imageSHA256": "dbecba379d397086e65208d43e104456c00dbba129e3fc099d19aff8a5f187ea",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "4324286b659385a949d338930d73b093486ce24d7763270b27cd9237b2ca8dcc",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativeu32-overflow633481887\\001",
+      "imageSHA256": "cb2c1e9c3b0c0df31cb7b5aaf40ab99459996cab3c8f9e51540211831126aa79",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "4324286b659385a949d338930d73b093486ce24d7763270b27cd9237b2ca8dcc",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "usize-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativeusize-overflow2531861384\\001",
+      "imageSHA256": "fb807274ee716827cb7d5c7b5fa7f9592fdd7d5f9bb0e65dabb0ea61cf51990f",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "de7aa76e9c11e3eaaccc8efb1d8bad602c6c14808bebe6769f9beebd410a45bd",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "usize-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativeusize-overflow2531861384\\001",
+      "imageSHA256": "2e89c0e06a5ec8e01b2c7a5d01b684b497e4d5ef34805413f7b5bfd1bc705de3",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "de7aa76e9c11e3eaaccc8efb1d8bad602c6c14808bebe6769f9beebd410a45bd",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "body-trap",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "assertion-failed",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativebody-trap993980842\\001",
+      "imageSHA256": "364d8dc34adfefb861e563ff4b798f5274d44d805d110c30b3c821c5ded2d6b4",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 134,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0006"
+      },
+      "sourceSHA256": "92f3d6aad3d0799286c4a4dd46c200ed0072c7af4bdbcf4ae1caaed5e69b250e",
+      "stderr": "trap: assertion-failed\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "body-trap",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "assertion-failed",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativebody-trap993980842\\001",
+      "imageSHA256": "03c125fc17c9c82551484ec9911e770c6251ed06a1c5ea66beca6f19018d6948",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 134,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0006"
+      },
+      "sourceSHA256": "92f3d6aad3d0799286c4a4dd46c200ed0072c7af4bdbcf4ae1caaed5e69b250e",
+      "stderr": "trap: assertion-failed\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "vec-owner",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativevec-owner3874832831\\001",
+      "imageSHA256": "d9f5de50ab4d95cd68e910eb06213a83409ced2f2dfe78fa10386edb67ebd4ac",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "c7851d2cfcfe9fd78207ee68eb0a48aaf893b3ae4590d403e0adc1e113e84a51",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "vec-owner",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableIntegerForNativevec-owner3874832831\\001",
+      "imageSHA256": "fb4fed5d2b7c0f83715449bc8fe839555be2cca85be731932a19d89474ecfc27",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "c7851d2cfcfe9fd78207ee68eb0a48aaf893b3ae4590d403e0adc1e113e84a51",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    }
+  ],
+  "schema": "fairyc.mutable-integer-for-native/v1",
+  "sdk": "0.0.0-stage0.85"
+}

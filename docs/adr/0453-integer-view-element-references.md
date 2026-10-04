@@ -24,7 +24,8 @@ named shared/mutable views; direct `ref array[i]`, temporary call/slice descript
 roots, raw pointers, bool views, owned slices and reference for-in loops stay
 outside this admission. Existing nominal element-reference graph validation
 and source boundaries remain intact. This supersedes the integer-reference
-exclusion in ADR 0451 without admitting integer reference iteration.
+exclusion in ADR 0451. ADR 0454 subsequently admits mutable integer reference
+iteration over named immutable mutable views.
 
 ## Lifetime and evaluation
 

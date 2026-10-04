@@ -1,0 +1,180 @@
+{
+  "schema": "fairyc.mutable-integer-for-evidence/v1",
+  "date": "2026-10-04",
+  "baseRevision": "5a4e99f585681e31f7e11d91337b39510759f149",
+  "compiler": {
+    "path": ".cache/mutable-integer-for-compiler/fairyc.exe",
+    "sha256": "18fc8c89544db12ed9c14b16e00c4b163460dc0ed6fcddd7dacdf975a08fddc7",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-integer-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004120221-5a4e99f58568+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 5a4e99f585681e31f7e11d91337b39510759f149\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\mutable-integer-for-compiler\\source-manifest.json",
+    "sha256": "bc1a8b96395f0294fda4e9b3a907f2277950d186a2a133ce169825e26cc8283e",
+    "productionFileCount": 542,
+    "sourceDigest": "66dda266fdb57eb1f7061508692751b6243239d5adf53b9bf5d6d4e97b56316d",
+    "sdkFileCount": 8,
+    "sdkDigest": "30ec9e8392ce4251a05a35c6d6f36d53920f90106fdea92d9eea2e78eb1d0b34"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "internal/semantic/byte_for.go",
+      "sha256": "01f1064d1a9814d8ee83d89a7add4b15a9c1a80456d304130cb1aa0f074cd75c"
+    },
+    {
+      "path": "internal/semantic/mutable_integer_for_test.go",
+      "sha256": "f2e60e1e4e69e46c56dbdf30ae5e4f273da8ef56dbb42a50f9202a4ad4e5509a"
+    },
+    {
+      "path": "internal/compiler/mutable_integer_for_test.go",
+      "sha256": "af735b9bb96250c1607d88fe81f4bce3f75a647daa68ec1003e15b4a1f649498"
+    },
+    {
+      "path": "internal/compiler/testdata/mutable_integer_for.fy",
+      "sha256": "becb7d9490fb756ce95839e81c68c9f2070f7aa72885a8cd9ede1ec21172f445"
+    },
+    {
+      "path": "internal/cli/mutable_integer_for_test.go",
+      "sha256": "e5cc0645ddc46c356a84f2f4ef9f119ba8b807366cd66b44ec27d7ab132df68f"
+    },
+    {
+      "path": "examples/integer_view_iteration/src/main.fy",
+      "sha256": "02e86dc882496e2d27cbee3494fe3730526fbbe16532e81e3b1025e368a62b91"
+    },
+    {
+      "path": "examples/integer_view_iteration/fairy.toml",
+      "sha256": "9f0206867992355d3d3bd1a79b150fc3b96b1ab3019589f149f8ac5ebf7c8fff"
+    },
+    {
+      "path": "examples/integer_view_iteration/fairy.lock",
+      "sha256": "b9b9c786bda781d901730b4c07ffdf7f3ba924948f0f657eb0fe28d1f01a648f"
+    }
+  ],
+  "tests": [
+    {
+      "path": ".cache/mutable-integer-for-related-final.jsonl",
+      "role": "final related stage regressions",
+      "sha256": "0c29b74d519a228231b5c94a09c31cb5a045f525a41f13a1466aa28a21fed74a",
+      "passEvents": 159,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/mutable-integer-for-native.jsonl",
+      "role": "Windows native",
+      "sha256": "80cb64b1e96637011b5630ee0b21c7f97f669ad034f94b456c031ad14674dbd3",
+      "passEvents": 9,
+      "skips": 0,
+      "failures": 0
+    }
+  ],
+  "cliReceipt": {
+    "path": "docs/ops/evidence/mutable-integer-for-20261004.cli.json",
+    "sha256": "9bf2dc02eac44ec20f27ac8fe984be275bd1c6c3a091cb4588a8f50756473e82",
+    "outcomes": 4
+  },
+  "nativeReceipt": {
+    "path": "docs/ops/evidence/mutable-integer-for-20261004.native.json",
+    "sha256": "5df00a907e38e883a42f8e5e563c50724e50f80ed6f9c54c94cb59f809322bbe",
+    "outcomes": 16,
+    "executor": "in-process workspace compiler and cdriver, built from the source closure; separate stable compiler binary used for public CLI"
+  },
+  "commands": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/interpreter",
+        "./internal/cli",
+        "./internal/ast",
+        "./internal/syntax",
+        "-run",
+        "^Test(ByteFor.*|IntegerElementBorrow(RoundTrip|Backing)|MutableStructFor(Flow|SourceBoundary|MIR|Check)|MutableIntegerFor(Flow|SourceBoundary|RoundTrip|Rejections))$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/mutable-integer-for-related-final.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestMutableIntegerForNative$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/mutable-integer-for-native.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "validation": {
+    "format": "passed",
+    "vet": "passed",
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for a later batch",
+    "sdkVersion": "0.0.0-stage0.85",
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "newRuntimeHelper": false,
+    "newSDKAPI": false
+  },
+  "corrections": [
+    {
+      "kind": "test expectation",
+      "description": "Local-owner escape is normative E2102, not conflicting-loan E2101. Corrected the test assertion; compiler behavior unchanged.",
+      "supersededRaw": ".cache/mutable-integer-for-boundary-expectation-error.jsonl",
+      "sha256": "1031ecf69a44577753f6a2565a107e868e0b0c375e0eb19cb8ae1fcfea774f03"
+    }
+  ],
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "benchmark": false,
+    "ciChanges": false
+  }
+}

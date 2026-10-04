@@ -24,7 +24,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, itemType, false)
 	_, integer := hir.IntegerViewElement(hir.Type("[" + string(wantElement) + "]"))
 	nominal := c.analyzer.plainViewStruct(wantElement)
-	if !resolved || !integer && !nominal || mutableItem && !nominal {
+	if !resolved || !integer && !nominal {
 		return "view iteration requires an exact u8, i32, i64, u32, usize or scalar-field struct item binding"
 	}
 	shape := loop.Type.Path + "-view iteration requires a named immutable ref " + loop.Type.Path + "[] or ref mut " + loop.Type.Path + "[] view"
@@ -32,9 +32,9 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 		shape = "struct-view iteration requires an exact named immutable shared struct view"
 	}
 	if mutableItem {
-		shape = "mutable struct-view iteration requires an exact ref mut struct item and a named immutable mutable struct view"
+		shape = "mutable view iteration requires an exact ref mut integer or struct item and a named immutable mutable view"
 	}
-	if wantElement == hir.TypeU8 {
+	if wantElement == hir.TypeU8 && !mutableItem {
 		shape = "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"
 	}
 	if prepared == nil || loop.View.Kind != syntax.KindPath || len(loop.View.Children) != 0 {
@@ -58,22 +58,22 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if value == nil || value.kind != "local" && value.kind != "parameter" || value.mutable {
 		return shape
 	}
-	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || nominal && hir.MutableIndexedView(value.typ) != mutableItem {
+	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || (nominal || mutableItem) && hir.MutableIndexedView(value.typ) != mutableItem {
 		return shape
 	}
 	if mutableItem {
 		classic := prepared.Block.Statements[1].For
 		if classic == nil || classic.Body == nil || len(classic.Body.Statements) == 0 {
-			return "malformed mutable struct-view iteration"
+			return "malformed mutable view iteration"
 		}
 		item := classic.Body.Statements[0].Binding
 		if item == nil || item.Name != loop.Name || item.Type == nil || c.canonicalType(*item.Type) != c.canonicalType(loop.Type) ||
 			item.Expression == nil || item.Expression.Kind != syntax.KindPrefix || item.Expression.Text != "&mut" || len(item.Expression.Children) != 1 {
-			return "malformed mutable struct-view iteration"
+			return "malformed mutable view iteration"
 		}
 		index := item.Expression.Children[0]
 		if index.Kind != syntax.KindIndex || len(index.Children) != 2 || index.Children[0].Kind != syntax.KindPath || index.Children[0].Text != loop.View.Text {
-			return "malformed mutable struct-view iteration"
+			return "malformed mutable view iteration"
 		}
 	}
 	return ""
