@@ -34,7 +34,7 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 		owner = &owner.Children[0]
 	}
 	slices.Reverse(fields)
-	indexed := owner.Kind == "view-index"
+	indexed := owner.Kind == "view-index" || owner.Kind == "array-index"
 	if indexed {
 		borrowed, ok := mutableIndexedOwner(*owner)
 		if !ok {
@@ -136,6 +136,21 @@ func ValidOneWordStructFieldStoreShape(op Operation, definition *StructType) boo
 func mutableIndexedOwner(index hir.Expression) (hir.Expression, bool) {
 	if len(index.Children) != 2 {
 		return hir.Expression{}, false
+	}
+	if index.Kind == "array-index" {
+		element, length, array := hir.FixedArrayParts(index.Children[0].Type)
+		if !array || element != index.Type || !hir.ExecutableFixedArrayShape(element, length) {
+			return hir.Expression{}, false
+		}
+		view := hir.MutableBorrow(hir.Type("[" + string(element) + "]"))
+		if !hir.ArrayViewBorrow(index.Children[0].Type, view, "&mut") {
+			return hir.Expression{}, false
+		}
+		index.Children = []hir.Expression{
+			{Kind: "array-view-borrow", Type: view, Span: index.Children[0].Span,
+				Symbol: hir.NoSymbol, Operator: "&mut", Children: []hir.Expression{index.Children[0]}},
+			index.Children[1],
+		}
 	}
 	element, nominal := hir.StructViewElement(index.Children[0].Type)
 	if !nominal || !hir.MutableIndexedView(index.Children[0].Type) || element != index.Type {

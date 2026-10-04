@@ -1,0 +1,279 @@
+{
+  "schema": "fairyc.struct-array-field-cli/v1",
+  "compilerSHA256": "9dc7928c9fbea33a9b748662ba3711b04652e9943d6f5ed50f26a0ba75ef076d",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004172529-7f0727d441e2+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 7f0727d441e26f12446e19cc818d1b8d8044b53b\nmodified: true\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004172529-7f0727d441e2+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 7f0727d441e26f12446e19cc818d1b8d8044b53b\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/struct-array-field-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-cli\\images\\matrix-dev.exe",
+      "imageSHA256": "fec2522a8c5deaf81d44d5cd2709340836799545e5bee0116fc5800726db1c6c"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/struct-array-field-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-cli\\images\\matrix-release.exe",
+      "imageSHA256": "93d97c33764cc1bc5039a7f0734dc0392796520122acf120b23a7a9dc8d94403"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\bounds-before-rhs",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\bounds-before-rhs",
+      "exit": 0,
+      "stdout": "built: build/struct-array-field-bounds-before-rhs.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-cli\\images\\bounds-before-rhs-dev.exe",
+      "imageSHA256": "3de6be31aaf5abb907e390e44f5cacc23e8265d963163342dd27be126fd20c7a"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\bounds-before-rhs",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\bounds-before-rhs",
+      "exit": 0,
+      "stdout": "built: build/struct-array-field-bounds-before-rhs.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-cli\\images\\bounds-before-rhs-release.exe",
+      "imageSHA256": "b548c06be247596039dc346cedf0c27e3f3a94b65c86b43b846ad1c96684e2f4"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\bounds-before-rhs",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\immutable",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:76: E1008: assignment target is not mutable [bytes 75..81]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\loan",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:103: E2101: Access conflicts with an active shared or mutable loan. [bytes 102..103]\n  last-use: main.fy:1:119 [bytes 118..119]\n  loan: main.fy:1:94 [bytes 93..101]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\rhs-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:85: E2101: Access conflicts with an active shared or mutable loan. [bytes 84..85]\n  last-use: main.fy:1:78 [bytes 77..83]\n  loan: main.fy:1:78 [bytes 77..78]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-cli\\temporary",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:88: E1008: assignment target is not mutable [bytes 87..98]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 155 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "built: build/struct-array-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-cli\\images\\example-dev.exe",
+      "imageSHA256": "d73fba2d6b65370c47c16854ceec11cde989ff49b30b5ac9d7343288a6fe5f47"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "vertices=4 sum_x=16000000020\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "built: build/struct-array-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-field-cli\\images\\example-release.exe",
+      "imageSHA256": "c798c7ea766cf66bbeca59908e3bd1b819d518904565886d6ca947a9d878e6fa"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-field-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "vertices=4 sum_x=16000000020\n",
+      "stderr": ""
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Position { i64 x; i32 y; }\nstruct Point { Position position; bool active; u8 tint; u32 id; usize count; }\n\nfn i32 main() {\n    let Point origin = Point { .position = Position { .x = 4000000000, .y = 2 },\n        .active = false, .tint = 3, .id = 4, .count = 5 };\n    var Point[2] points = [origin; 2];\n    let Point before = points[0];\n    points[0].position.x = 6000000000;\n    points[0].position.y += 7;\n    points[0].active = true;\n    points[0].tint *= 2;\n    points[0].id |= 8;\n    points[0].count <<= 1;\n    assert(points[0].position.x == 6000000000 && points[0].position.y == 9);\n    assert(points[0].active && points[0].tint == 6 && points[0].id == 12 && points[0].count == 10);\n    assert(before.position.x == 4000000000 && !before.active);\n    assert(points[1].position.x == 4000000000 && points[1].position.y == 2);\n    points[1].position = Position { .x = -5000000000, .y = 8 };\n    assert(points[1].position.x == -5000000000 && points[1].position.y == 8);\n\n    var usize index = 0;\n    var usize calls = 0;\n    var usize order = 0;\n    ((points)[{ calls += 1; order = 1; index }]).position.x += {\n        assert(order == 1);\n        order = 2;\n        index = 1;\n        20\n    };\n    assert(calls == 1 && order == 2 && points[0].position.x == 6000000020);\n    assert(points[1].position.x == -5000000000);\n    points[{ calls += 1; 1 }].position.y = { calls += 1; 17 };\n    assert(calls == 3 && points[1].position.y == 17);\n    points[points.len - 1].active = true;\n    let usize length = points.len;\n    for (var usize i = 0; i < length; i += 1) { points[i].position.x += 1; }\n    let ref Point[] view = ref points;\n    assert(view[0].position.x == 6000000021 && view[1].position.x == -4999999999);\n    assert(view[1].active);\n    return 0;\n}\n",
+      "sourceSHA256": "12328494ff65f079cc5a3bfc319a624845aefc01156b02041f7fab664752c2e4"
+    },
+    {
+      "name": "bounds-before-rhs",
+      "source": "module main;struct Point{i64 x;}fn i32 main(){var Point[2] a=[Point{.x=1};2];a[2].x={assert(false);9};return 0;}",
+      "sourceSHA256": "7ae64decc1aa19c196be687e5b968bc93989925096832d87b79c257740157639"
+    },
+    {
+      "name": "immutable",
+      "source": "module main;struct Point{i64 x;}fn i32 main(){let Point[1] a=[Point{.x=1}];a[0].x=9;return 0;}",
+      "sourceSHA256": "4914845c9f4320c059bebb5e0e13f2f64638ca030d89a11b5938125761e69a93"
+    },
+    {
+      "name": "loan",
+      "source": "module main;struct Point{i64 x;}fn i32 main(){var Point[2] a=[Point{.x=1};2];let ref Point p=ref a[1];a[0].x=9;assert(p.x==1);return 0;}",
+      "sourceSHA256": "0d1f0b5c9569a0615d88d8d9eaff4d0fcda2c47b24a0a813406a0e87fde1c3a6"
+    },
+    {
+      "name": "rhs-owner",
+      "source": "module main;struct Point{i64 x;}fn i32 main(){var Point[2] a=[Point{.x=1};2];a[0].x=a[1].x;return 0;}",
+      "sourceSHA256": "ff185c0921dd14280bc80648efa6701b007198ab11f5f6ccff8be39b42fd587d"
+    },
+    {
+      "name": "temporary",
+      "source": "module main;struct Point{i64 x;}fn Point[1] make(){return [Point{.x=1}];}fn i32 main(){make()[0].x=9;return 0;}",
+      "sourceSHA256": "b3781cbfa67b23117f570c0fde5957577fc21ecb3c8a8bd16fe4f19de50b871e"
+    }
+  ],
+  "nativeOutcomes": 6
+}

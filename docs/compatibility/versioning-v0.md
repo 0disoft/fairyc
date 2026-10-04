@@ -1749,3 +1749,17 @@ array wrappers after their complete element structs. Language /20, SDK stage0.86
 runtime /0, MIR/wire schemas, public ABI and target maturity are unchanged.
 Exact compiler identity isolates cached generations. Windows dev/release is
 verified; Linux actual execution remains deferred to the owner's batch.
+
+ADR 0463 admits direct indexed field stores on named mutable fixed arrays of
+admitted plain structs, including nested scalar and nested plain-struct field
+paths, whole plain-struct field replacement and checked scalar compound
+assignment. The whole array stays the loan owner; the index runs once under the
+existing whole-owner checks, then bounds, the compound read and the right-hand
+side run before a single field store. Lowering reuses the existing mutable view,
+checked element borrow and field-store operations with no new MIR, SDK or runtime
+operation. Immutable, temporary and shared roots, competing index or
+right-hand-side owner access and live shared/exclusive references stay rejected.
+Language /20, SDK stage0.86, runtime /0, MIR/wire schemas, public ABI and target
+maturity are unchanged. Windows dev/release execution is verified, including
+dev/release and cache reuse of the native matrix; Linux actual execution remains
+deferred to the owner's batch.

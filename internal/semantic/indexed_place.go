@@ -138,6 +138,10 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 }
 
 func (f *borrowFlowAnalyzer) evaluateArrayElementBorrow(expression, index *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
+	return f.evaluateArrayPlace(expression, index, expression.Text == "&mut", environment)
+}
+
+func (f *borrowFlowAnalyzer) evaluateArrayPlace(expression, index *ast.Expression, mutable bool, environment borrowEnvironment) (borrowValueState, bool) {
 	parent := index.Children[0]
 	owner := f.analyzer.resolved[assignmentRootPath(parent)]
 	if owner == nil {
@@ -146,10 +150,13 @@ func (f *borrowFlowAnalyzer) evaluateArrayElementBorrow(expression, index *ast.E
 	if _, reachable := f.evaluateExpression(parent, environment); !reachable {
 		return borrowValueState{}, false
 	}
-	f.checkBorrowCreation(expression, environment)
+	kind := "shared"
+	if mutable {
+		kind = "mutable"
+	}
+	f.checkNamedBorrowCreation(expression, owner, kind, environment)
 	origin := f.analyzer.originForSymbol(owner)
-	mutable := expression.Text == "&mut"
-	value := borrowValueState{known: true, origins: []flowOrigin{origin}, pending: []pendingBorrowLoan{{owner: owner, borrow: span(f.module.file.Path, expression.Span), kind: borrowKind(expression.Text), origin: origin}}}
+	value := borrowValueState{known: true, origins: []flowOrigin{origin}, pending: []pendingBorrowLoan{{owner: owner, borrow: span(f.module.file.Path, expression.Span), kind: kind, origin: origin}}}
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	f.callBorrows = append(f.callBorrows, value)
 	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: value, mutable: mutable, span: span(f.module.file.Path, expression.Span)})

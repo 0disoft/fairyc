@@ -71,7 +71,7 @@ func TestPlainStructFieldStoreRejects(t *testing.T) {
 		"nominal-mismatch": `struct Other{i64 start;i64 end;}fn void bad(ref mut Token s){s.position.span=Other{.start=1,.end=2};}`,
 		"compound":         `fn void bad(ref mut Token s,Position p){s.position+=p;}`,
 		"temporary":        `fn void bad(Position p){make().position=p;}`,
-		"array-root":       `fn void bad(Position p){var Token[1] a=[make()];a[0].position=p;}`,
+		"immutable-array":  `fn void bad(Position p){let Token[1] a=[make()];a[0].position=p;}`,
 		"resource-root":    `resource Owner{Position position;cleanup{}}fn void bad(ref mut Owner s,Position p){s.position=p;}`,
 		"nonplain-root":    `struct Owner{Position position;i32[2] other;}fn void bad(ref mut Owner s,Position p){s.position=p;}`,
 		"nonplain-leaf":    `struct Inner{i32[2] values;}struct Owner{Inner inner;}fn void bad(ref mut Owner s,Inner v){s.inner=v;}`,

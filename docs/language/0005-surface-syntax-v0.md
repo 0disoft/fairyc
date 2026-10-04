@@ -98,6 +98,15 @@
   Direct indexed field stores use a mutable view or an explicit element reference
   in this slice. Resources, pointers, borrows, tagged fields and array fields stay
   excluded; exact nominal identity and whole-owner borrow rules still apply.
+- ADR 0463 admits direct indexed field stores `array[index].field = value`,
+  nested scalar and nested plain-struct field paths, checked scalar compound
+  assignment and whole plain-struct field replacement on named mutable fixed
+  arrays of admitted plain structs. The place root is the array; the index
+  evaluates once under the whole-owner checks, then bounds, the compound read and
+  the right-hand side run before one field store. Immutable, temporary and shared
+  roots, competing index or right-hand-side owner access and live shared/
+  exclusive references stay rejected. Resources, pointers, borrows, tagged fields
+  and array fields remain excluded.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

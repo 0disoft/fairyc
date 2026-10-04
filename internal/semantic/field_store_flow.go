@@ -4,7 +4,15 @@ import "github.com/0disoft/fairyc/internal/ast"
 
 func (f *borrowFlowAnalyzer) evaluateFieldAssignment(statement *ast.Statement, environment borrowEnvironment) bool {
 	if index := indexedPlace(statement.Target); index != nil {
-		held, reachable := f.evaluateIndexedPlace(index, true, false, environment)
+		var held borrowValueState
+		var reachable bool
+		if indexedArrayOwner(f.analyzer, index) != nil {
+			// Select original array storage and hold the whole owner until store.
+			// The parent node's liveness includes loans last used in index or RHS.
+			held, reachable = f.evaluateArrayPlace(assignmentRootPath(index.Children[0]), index, true, environment)
+		} else {
+			held, reachable = f.evaluateIndexedPlace(index, true, false, environment)
+		}
 		if !reachable {
 			return false
 		}

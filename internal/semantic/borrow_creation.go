@@ -18,10 +18,18 @@ func (f *borrowFlowAnalyzer) checkBorrowCreation(expression *ast.Expression, env
 		}
 	}
 	owner := f.analyzer.resolved[root]
+	f.checkNamedBorrowCreation(expression, owner, borrowKind(expression.Text), environment)
+}
+
+// Implicit indexed stores use the same live-loan checks as explicit borrows.
+// The source node supplies expression liveness, including index and RHS uses.
+func (f *borrowFlowAnalyzer) checkNamedBorrowCreation(expression *ast.Expression, owner *symbol, kind string, environment borrowEnvironment) {
+	if f.summarizing || f.probing() {
+		return
+	}
 	if owner == nil {
 		return
 	}
-	kind := borrowKind(expression.Text)
 	seen := map[hir.Span]bool{}
 	report := func(priorOwner *symbol, priorKind string, borrow, lastUse hir.Span) {
 		if owner != priorOwner || kind == "shared" && priorKind == "shared" || seen[borrow] {
