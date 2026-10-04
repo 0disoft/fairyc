@@ -807,7 +807,7 @@ func (c *typeChecker) checkArray(expression *ast.Expression, result *hir.Express
 	if !valid {
 		return hir.TypeInvalid
 	}
-	if !hir.FixedArrayScalarElement(elementType) {
+	if !hir.FixedArrayScalarElement(elementType) && !c.analyzer.plainViewStruct(elementType) {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "fixed-array element type "+string(elementType))
 		return hir.TypeInvalid
 	}

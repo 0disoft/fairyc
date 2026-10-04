@@ -1738,3 +1738,14 @@ identity separates earlier restricted compilers/cache generations. Language /20,
 SDK stage0.86/source/exports, runtime /0, MIR/wire schemas, ABI and target maturity
 remain unchanged. Windows dev/release execution is verified; Linux actual
 execution remains deferred to the owner's batch.
+
+ADR 0462 admits fixed arrays of actual nonempty plain bool/integer-field structs,
+including nested plain structs. Value/list/repeated construction, checked index
+load/replacement, element references, shared/exclusive views and copied/shared/
+exclusive iteration reuse existing operations. Semantic and MIR admission validate
+the field graph; nominal array operands are checked against actual local definitions.
+The interpreter deep-copies aggregate array values; C emission declares nominal
+array wrappers after their complete element structs. Language /20, SDK stage0.86,
+runtime /0, MIR/wire schemas, public ABI and target maturity are unchanged.
+Exact compiler identity isolates cached generations. Windows dev/release is
+verified; Linux actual execution remains deferred to the owner's batch.

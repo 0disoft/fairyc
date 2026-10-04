@@ -334,7 +334,15 @@ func taggedPayloadLayout(
 		return enumerations[index].layoutType, true
 	}
 	if _, found := arrayByType[value]; found {
-		return scalarArrayLayoutType(value)
+		if result, ok := scalarArrayLayoutType(value); ok {
+			return result, true
+		}
+		element, length, array := hir.FixedArrayParts(value)
+		if index, ok := structByType[element]; array && ok {
+			elementLayout := structures[index].layoutType
+			return layout.Type{Kind: layout.KindArray, Element: &elementLayout, Length: length}, true
+		}
+		return layout.Type{}, false
 	}
 	index, found := resourceByType[value]
 	if !found {

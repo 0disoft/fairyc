@@ -1,0 +1,354 @@
+{
+  "schema": "fairyc.struct-array-cli/v1",
+  "compilerSHA256": "08e4eaab2bac8723d8e070f9a629a118d2630dc114566cf010eeb4bd4ff14348",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004170734-0e152466ea68+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0e152466ea681028a03630a5bafa1157633a45e8\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Span { i32 start; i64 end; }\nstruct Token { bool active; Span span; }\nfn Token make(i32 start){return Token{.active=true,.span=Span{.start=start,.end=4000000000}};}\nfn usize count(ref Token[] tokens){var usize n=0;for(let ref Token item in tokens){if(item.active){n+=1;}}return n;}\nfn Token[2] produce(){return [make(1),make(2)];}\nfn Token[2] copied(Token[2] values){return values;}\nfn Option<Token[1]> tagged(){return .some([make(7)]);}\nfn ref Token first(ref Token[] values){for(let ref Token item in values){return item;}return ref values[0];}\nfn void early(ref mut Token[] values){for(let ref mut Token item in values){item.active=false;return;}}\nfn i32 main(){\n var Token[3] data=[make(1),make(2),make(3)];\n assert(data.len==3 && data[1].span.start==2);\n var Token copy=data[0];copy.span.start=9;assert(data[0].span.start==1);\n data[0]=make(4);assert(data[0].span.start==4);\n {let ref mut Token item=ref mut data[0];item.span.start=5;}\n assert(data[0].span.start==5);\n let ref Token[] view=ref data;\n assert(count(view)==3 && count(view[3..])==0 && first(view).span.start==5);\n var usize visits=0;\n for(let Token item in data){assert(item.active);visits+=1;}\n assert(visits==3);\n for(let ref Token item in data){assert(item.span.end==4000000000);}\n visits=0;\n for(let ref mut Token item in data){item.span.start+=1;visits+=1;if(visits==1){continue;}if(visits==2){break;}}\n assert(visits==2 && data[0].span.start==6 && data[1].span.start==3 && data[2].span.start==3);\n let ref mut Token[] edit=ref mut data;\n {let ref mut Token[] child=edit[1..];for(let ref mut Token item in child){item.span.end+=1;}}\n assert(edit[1].span.end==4000000001 && edit[0].span.end==4000000000);\n early(edit);assert(!edit[0].active && edit[1].active);\n visits=0;\n for(let Token before in edit){if(visits==0){edit[1]=make(8);}if(visits==1){assert(before.span.start==8);}visits+=1;}\n let Token template=make(10);\n var Token[2] repeated=[template;2];\n {let ref mut Token item=ref mut repeated[0];item.span.start=99;}\n assert(repeated[1].span.start==10 && template.span.start==10);\n let Token[2] original=produce();var Token[2] independent=copied(original);\n {let ref mut Token item=ref mut independent[0];item.span.start=20;}\n assert(original[0].span.start==1 && independent[0].span.start==20);\n switch(tagged()){case .some(items):{assert(items[0].span.start==7);}case .none:{assert(false);}};\n return 0;\n}\n",
+      "sourceSHA256": "8ce3b05072ccaa138ecaf95b06e220068384c42067a4ccf4ec43ab8af0042823"
+    },
+    {
+      "name": "nominal-mismatch",
+      "source": "module main;struct A{i32 x;}struct B{i32 x;}fn void bad(){let A[1] data=[B{.x=1}];}fn i32 main(){return 0;}",
+      "sourceSHA256": "1b9b09bab424c44d688338de1e6f59196842f53683d7478b9b1f0531faa06112"
+    },
+    {
+      "name": "shared-store",
+      "source": "module main;struct Token{i32 value;}fn void bad(ref Token[] data){data[0]=Token{.value=1};}fn i32 main(){return 0;}",
+      "sourceSHA256": "a22a47c65be301db1663f9f49f926c5a1ba6df892486eecb95727ed49a7c9435"
+    },
+    {
+      "name": "owner-write",
+      "source": "module main;struct Token{i32 value;}fn void bad(){var Token[1] data=[Token{.value=1}];for(let ref Token item in data){data[0]=Token{.value=2};assert(item.value==1);}}fn i32 main(){return 0;}",
+      "sourceSHA256": "7c4b1ca0393c81781f555972e6783e7a62cae6da223305fce031028021a1b3b7"
+    },
+    {
+      "name": "local-escape",
+      "source": "module main;struct Token{i32 value;}fn ref Token bad(){var Token[1] data=[Token{.value=1}];return ref data[0];}fn i32 main(){return 0;}",
+      "sourceSHA256": "317bcdc4754630e40fe150f41cae12c0d34a7403556c3629672472d440c5c126"
+    },
+    {
+      "name": "empty-index",
+      "source": "module main;struct Token{i64 value;}fn i32 main(){var Token[2] data=[Token{.value=4000000000};2];let ref Token[] view=ref data;let Token copy=view[2..][0];return 0;}",
+      "sourceSHA256": "1b2f4e3efec410ddc306dd0cedc93c39522dc24eed12c04b1ca3ad489353dbd0"
+    },
+    {
+      "name": "store-end",
+      "source": "module main;struct Token{i64 value;}fn i32 main(){var Token[2] data=[Token{.value=4000000000};2];data[2]=Token{.value=7};return 0;}",
+      "sourceSHA256": "e8bca6abf97ce09fc87daf277235d45acf3bcdba6fc89c1d76ef3d7e12aa9017"
+    }
+  ],
+  "exampleSources": [
+    {
+      "path": "examples\\struct_array_quickstart\\src\\main.fy",
+      "sha256": "51036e11774a5adbe62acef2f595889bad97a126fbf99c8ff672a7ec9409289c"
+    },
+    {
+      "path": "examples\\struct_array_quickstart\\src\\points.fy",
+      "sha256": "c512657485012ba83292de2c202e8f702c2ed62d9cf17426a113d9f74eb8ebb5"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004170734-0e152466ea68+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0e152466ea681028a03630a5bafa1157633a45e8\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 8 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/struct-array-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "e644a5517389f780aaf3bff19015e83c3da9936609ed334359ae91faa090a3dd",
+      "imagePath": ".cache\\struct-array-cli\\images\\matrix-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/struct-array-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "ea981349a0affc1f41fac36503b222c2c3d1cd99fa9e40bf5bfb5c9f9da6fd0a",
+      "imagePath": ".cache\\struct-array-cli\\images\\matrix-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\nominal-mismatch",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:74: E1006: incompatible expected and actual types [bytes 73..80]\n  expected-type: main.fy:1:73 [bytes 72..81]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\shared-store",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:67: E1008: assignment target is not mutable [bytes 66..73]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\owner-write",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:119: E2101: Access conflicts with an active shared or mutable loan. [bytes 118..125]\n  last-use: main.fy:1:119 [bytes 118..125]\n  loan: main.fy:1:113 [bytes 112..116]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\local-escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:99: E2102: Returned borrow originates from a local value. [bytes 98..109]\n  origin: main.fy:1:69 [bytes 68..72]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\empty-index",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\empty-index",
+      "exit": 0,
+      "stdout": "built: build/struct-array-empty-index.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "2cf775a194f1464256c1368fd981490dcb78930d991b9146e6c4fff8cfaeaac2",
+      "imagePath": ".cache\\struct-array-cli\\images\\empty-index-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\empty-index",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\empty-index",
+      "exit": 0,
+      "stdout": "built: build/struct-array-empty-index.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "8bd30b9f79db6250b2de4937bbedc23cfee5238b1e3cc9bc2d187e6692534f3f",
+      "imagePath": ".cache\\struct-array-cli\\images\\empty-index-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\empty-index",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\store-end",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\store-end",
+      "exit": 0,
+      "stdout": "built: build/struct-array-store-end.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "f014fd398d10353c7bc5b072c94fa5f6f18b819fdf2f8774eb9294cde258e60e",
+      "imagePath": ".cache\\struct-array-cli\\images\\store-end-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\store-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\store-end",
+      "exit": 0,
+      "stdout": "built: build/struct-array-store-end.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "b9230aea6caaf6cbb99c0f8bf165c3703629c9b4a9454e53caee784a862286b6",
+      "imagePath": ".cache\\struct-array-cli\\images\\store-end-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-cli\\store-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 155 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "built: build/struct-array-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "44e7c37ca72d81d6f1ec2b0def3cd69dfed85252bd0b375022387067dcd0eefc",
+      "imagePath": ".cache\\struct-array-cli\\images\\example-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "vertices=4 sum_x=16000000020\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "built: build/struct-array-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "67a50b3024b88df300382173e41deccf2a1021ea0d285514722a510bed515558",
+      "imagePath": ".cache\\struct-array-cli\\images\\example-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_array_quickstart",
+      "exit": 0,
+      "stdout": "vertices=4 sum_x=16000000020\n",
+      "stderr": ""
+    }
+  ],
+  "nativeOutcomes": 8
+}

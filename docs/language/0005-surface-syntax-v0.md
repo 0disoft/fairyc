@@ -74,7 +74,7 @@
   and exclusive reborrows; live returned references retain that protection.
   Mutable items require mutable views. Resource/pointer/borrowed/array/tagged
   field graphs, computed
-  iterable roots and fixed struct arrays remain outside this admission.
+  iterable roots and fixed struct arrays were deferred there and are admitted by ADR 0462.
 - ADR 0460 admits copied plain struct items over immutable named mutable view
   bindings as well as shared views: `for (let Token item in items)`. Each item
   copies the current stored element before the body runs. Writes through the
@@ -90,6 +90,14 @@
   rules. Shared-reference loops block competing writes through loop exit;
   copied mutable-view loops allow writes and see current later elements.
   Bool storage is not bit-packed, and no numeric-to-bool conversion is added.
+- ADR 0462 admits fixed arrays of nonempty plain structs with bool/integer
+  leaves, including nested plain structs. Arrays support value copies, list and
+  repeated initialization, checked element loads/replacement, element references,
+  shared/exclusive views and copied/shared/exclusive named-array loops. A repeated
+  initializer is evaluated once and its elements are independent whole values.
+  Direct indexed field stores use a mutable view or an explicit element reference
+  in this slice. Resources, pointers, borrows, tagged fields and array fields stay
+  excluded; exact nominal identity and whole-owner borrow rules still apply.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.
@@ -228,19 +236,20 @@ origin when `start <= end && end <= bytes.len`; otherwise evaluation traps with 
 deriving a pointer. This does not admit inclusive bounds, `str` indexing or slicing, indexed
 assignment, mutable-view indexing or slicing, or unchecked access.
 
-The executable fixed-array subset accepts `T[N]` only when `T` is `bool`, `i32`, `i64`, `u8`,
-`u32`, or `usize` and `1 <= N <= 4096`. The ceiling is a provisional Stage 0 implementation guard
+The executable fixed-array subset accepts `T[N]` when `T` is `bool`, `i32`, `i64`, `u8`,
+`u32`, `usize`, or an admitted plain scalar-field struct (ADR 0462), and `1 <= N <= 4096`. The ceiling is a provisional Stage 0 implementation guard
 for the initial by-value representation, not a stable language or ABI limit. A nonempty list
 `[a, b, ...]` constructs an inert copy value and evaluates its elements exactly once from left to
 right. `array[index]` requires `usize`, returns `T`, and traps with `bounds` when the index is at
 least `N`. `array.len` evaluates the receiver once and returns exact canonical `N` as `usize`
 without a scan, allocation, runtime call, memory read, or trap. `[value; count]` evaluates `value`
-once and copies that scalar into each element; the count is an integer literal or evaluated global
+once and copies that scalar or plain struct into each element; the count is an integer literal or evaluated global
 integer constant in `1..=4096`. Empty and zero-count arrays remain unsupported until zero-size
 representation is defined. See [ADR 0416](../adr/0416-repeated-scalar-array-initialization.md).
-Array fields, nesting, resource elements,
-mutable indexing, slicing, properties other than `.len`, broad array coercions, and foreign
-signatures remain closed. One direct shared borrow of an admitted `u8[N]` place contextually
+Named mutable arrays support checked whole-element replacement. Arrays can produce
+shared/exclusive typed views; slicing is performed through those views. Array fields,
+nested arrays, resource elements, properties other than `.len`, broad array coercions,
+and foreign signatures remain closed. One direct shared borrow of an admitted `u8[N]` place contextually
 becomes `ref u8[]` when that view type is already expected, as in
 `let ref u8[] bytes = ref array` or an internal `ref u8[]` call argument. A direct exclusive borrow
 of a mutable admitted `u8[N]` place likewise becomes `ref mut u8[]` only where that exact type is

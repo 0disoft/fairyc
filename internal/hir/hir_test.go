@@ -84,7 +84,8 @@ func TestExecutableFixedArrayShapeEnforcesClosedElementAndLengthSet(t *testing.T
 		{element: TypeUSize, length: MaxExecutableFixedArrayElements, want: true},
 		{element: TypeI32, length: 0, want: false},
 		{element: TypeU8, length: MaxExecutableFixedArrayElements + 1, want: false},
-		{element: Type("main::Resource"), length: 1, want: false},
+		{element: Type("main::Token"), length: 1, want: true}, // Nominal shape only; stage-owned definition checks remain required.
+		{element: Type("*mut i32"), length: 1, want: false},
 	} {
 		if got := ExecutableFixedArrayShape(test.element, test.length); got != test.want {
 			t.Errorf("ExecutableFixedArrayShape(%q, %d) = %v, want %v", test.element, test.length, got, test.want)

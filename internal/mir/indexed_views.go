@@ -11,6 +11,28 @@ func verifyIndexedViewOperands(op Operation, types map[LocalID]hir.Type) string 
 	actual := fieldStoreOperandType(op.Operands[0], types)
 	viewElement, _ := hir.IndexedViewElement(actual)
 	switch op.Kind {
+	case OperationArrayConstruct:
+		element, _, array := hir.FixedArrayParts(op.Type)
+		if array && !hir.FixedArrayScalarElement(element) {
+			for _, operand := range op.Operands {
+				if fieldStoreOperandType(operand, types) != element {
+					return "struct array construction operand disagrees with its actual definition"
+				}
+			}
+		}
+	case OperationArrayLength, OperationArrayIndex, OperationArrayIndexCheck, OperationArrayIndexStore:
+		element, _, array := hir.FixedArrayParts(op.OwnerType)
+		if array && !hir.FixedArrayScalarElement(element) {
+			if actual != op.OwnerType {
+				return "struct array operation disagrees with its receiver definition"
+			}
+			if len(op.Operands) > 1 && fieldStoreOperandType(op.Operands[1], types) != hir.TypeUSize {
+				return "struct array index is not an actual usize"
+			}
+			if op.Kind == OperationArrayIndexStore && len(op.Operands) == 3 && fieldStoreOperandType(op.Operands[2], types) != element {
+				return "struct array store operand disagrees with its actual definition"
+			}
+		}
 	case OperationArrayBorrowView:
 		if actual != op.OwnerType || !hir.ArrayViewBorrow(actual, op.Type, op.Operator) {
 			return "integer array-view borrow disagrees with its owner definition"

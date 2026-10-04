@@ -96,8 +96,11 @@ func (e *emitter) arrayCTypeName(index int) string {
 	return fmt.Sprintf("fy_array_%d", index)
 }
 
-func (e *emitter) emitScalarArrayTypes(output *strings.Builder) error {
+func (e *emitter) emitScalarArrayTypes(output *strings.Builder, nominal bool) error {
 	for index, array := range e.arrayTypes {
+		if nominal == hir.FixedArrayScalarElement(array.element) {
+			continue
+		}
 		elementType, err := e.cValueType(array.element)
 		if err != nil {
 			return fmt.Errorf("emit fixed array %q: %w", array.typ, err)

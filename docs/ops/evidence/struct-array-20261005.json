@@ -1,0 +1,245 @@
+{
+  "schema": "fairyc.struct-array-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "0e152466ea681028a03630a5bafa1157633a45e8",
+  "compiler": {
+    "path": ".cache\\struct-array-compiler\\fairyc.exe",
+    "sha256": "08e4eaab2bac8723d8e070f9a629a118d2630dc114566cf010eeb4bd4ff14348",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004170734-0e152466ea68+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0e152466ea681028a03630a5bafa1157633a45e8\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\struct-array-compiler\\source-manifest.json",
+    "sha256": "8423f91e576a1195feb47fe5c3d7ca102269db5ee950bf11476122307d4d8aa8",
+    "fileCount": 604,
+    "sourceDigest": "35829f48201f3fb4081e837505265021afd83280625b72c9e4ef70891a1dde28"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "examples/struct_array_quickstart/README.md",
+      "sha256": "4d616ab1f669c36e4bca2be0dcc698e7f3da3235c2f7635cc40a52f30e386c72"
+    },
+    {
+      "path": "examples/struct_array_quickstart/fairy.lock",
+      "sha256": "66f73820d57b8632f932bdf88b4bc79a32c2400dae2232e477c1847f410651b3"
+    },
+    {
+      "path": "examples/struct_array_quickstart/fairy.toml",
+      "sha256": "178a59b56da6dbe11058bf07be17580541800f9be46c353adca8a2681d91bd68"
+    },
+    {
+      "path": "examples/struct_array_quickstart/src/main.fy",
+      "sha256": "51036e11774a5adbe62acef2f595889bad97a126fbf99c8ff672a7ec9409289c"
+    },
+    {
+      "path": "examples/struct_array_quickstart/src/points.fy",
+      "sha256": "c512657485012ba83292de2c202e8f702c2ed62d9cf17426a113d9f74eb8ebb5"
+    },
+    {
+      "path": "internal/cbackend/arrays.go",
+      "sha256": "b4c48f470e60476ea54c8f91a246854e115e339b74d13a64c2f86c1c4e2e4ccd"
+    },
+    {
+      "path": "internal/cbackend/emit.go",
+      "sha256": "870103c95a21aea6846ef8d7c8fc84170acdc4b60bdb608d7bbb3e748b863290"
+    },
+    {
+      "path": "internal/cbackend/tagged_types.go",
+      "sha256": "96b96c5295a020845586b53e67ad037ac1ff7afda3737d168e2e8e5dcf322f2a"
+    },
+    {
+      "path": "internal/cli/struct_arrays_test.go",
+      "sha256": "61607dc886bb64adc08fdbd25459a6b9cc44fdd9203a091361337a87e9a4b3c3"
+    },
+    {
+      "path": "internal/compiler/struct_arrays_test.go",
+      "sha256": "fc8f2571f8513319547a82429dabbbb1c0dd570d18007a9e402f8ceb1af2e73e"
+    },
+    {
+      "path": "internal/compiler/testdata/struct_arrays.fy",
+      "sha256": "8ce3b05072ccaa138ecaf95b06e220068384c42067a4ccf4ec43ab8af0042823"
+    },
+    {
+      "path": "internal/hir/hir.go",
+      "sha256": "03dd4e144ccb5571f8704832b7b2c97a21c622ecf0b3ed63d4f68830ac07e0b2"
+    },
+    {
+      "path": "internal/hir/hir_test.go",
+      "sha256": "b4ed53209a7be541ab7dc728bba736f780ad8d28d3c86e455c33af4bc7dbccec"
+    },
+    {
+      "path": "internal/interpreter/interpreter.go",
+      "sha256": "e893dd10b69aae91b8245197c3ffd4f7283dc6217cf32ae54d062b2924e02738"
+    },
+    {
+      "path": "internal/mir/field_store_types.go",
+      "sha256": "a177b43a0c468b5a23e2e87883de71909f29c4c29aa891e6a6ac4f89564a62e0"
+    },
+    {
+      "path": "internal/mir/indexed_views.go",
+      "sha256": "897bc723a99a5d6aea8b415967ccbd2aee3863fbef1992f35c51237be229d6c7"
+    },
+    {
+      "path": "internal/mir/struct_views.go",
+      "sha256": "a1e730ce2c824809ec0a8060220ff31fbf42b29a347cc75375fdf961030e078b"
+    },
+    {
+      "path": "internal/semantic/array_for.go",
+      "sha256": "713203c0d39a8288adb718dac7a0d35b4480fa35c66c28c8ddd668b5b22eacec"
+    },
+    {
+      "path": "internal/semantic/repeated_array.go",
+      "sha256": "4ef368741f7dbaa56309aa0f483cadac4e5f42881ea6ade91581c654bf6438a8"
+    },
+    {
+      "path": "internal/semantic/resource_types.go",
+      "sha256": "5c80770405dbef4d0c9814d944005bc27fd26553d70c5bdf3c4353a6252d9d55"
+    },
+    {
+      "path": "internal/semantic/struct_arrays_test.go",
+      "sha256": "9228f2105521fdf293d7a09a84e91cbc5fd9ce5faef727a402fbc4a3b8d0332b"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "5334441a68fd4c4be2e9b8c89f955089599444b3cf8bbd3e18e353612f365429"
+    }
+  ],
+  "tests": [
+    {
+      "raw": ".cache/struct-array-related-final.jsonl",
+      "sha256": "f8ca85eeb06496ee7e429849b346fab22a920a33390db116b9514227ea1bba41",
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "^Test(StructArray.*|BoolView.*|ArrayFor.*|ArrayElementBorrow.*|SharedStructFor.*|CopiedMutableStructFor.*|ExecutableFixedArray.*|.*Array.*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "passEvents": 376,
+      "skips": 0
+    },
+    {
+      "raw": ".cache/struct-array-native-final.jsonl",
+      "sha256": "4cc3b63d5242c492027f1c134f9e5fd8995fa2996e0de5d89ebd236b618695b6",
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestStructArray",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "passEvents": 7,
+      "skips": 0
+    }
+  ],
+  "cliReceipt": {
+    "path": "docs/ops/evidence/struct-array-20261005.cli.json",
+    "sha256": "1f012c9758675a51b15e43e0b276fbdb8d549bf918e8722fac57ecbbb1a15acb",
+    "outcomes": 8
+  },
+  "nativeReceipt": {
+    "path": "docs/ops/evidence/struct-array-20261005.native.json",
+    "sha256": "7ba4b78a6dab20b42b86e7e33951888a91a010e73e749366b3e2245773b3385f",
+    "outcomes": 10
+  },
+  "validation": {
+    "format": "passed",
+    "vet": "passed",
+    "vetRaw": ".cache/struct-array-vet.log",
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for consolidated batch",
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "sdkVersion": "0.0.0-stage0.86",
+    "newSDKAPI": false,
+    "newMIRInstruction": false,
+    "newRuntimeHelper": false
+  },
+  "remainingLimitations": [
+    "Direct indexed field stores require a named view or explicit element reference",
+    "Plain scalar-leaf structs only",
+    "No simultaneous mutable sibling loans"
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/struct-array-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/struct-array-vet.log"
+    }
+  ],
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "ciChanges": false
+  }
+}

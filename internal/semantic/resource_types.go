@@ -320,7 +320,7 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 		}
 		element, elementOK := a.canonicalTypeReference(module, *reference.Element, false)
 		length, lengthOK := parsePositiveArrayLength(reference.Length.Text)
-		if !elementOK || !lengthOK || !hir.ExecutableFixedArrayShape(element, length) {
+		if !elementOK || !lengthOK || !hir.ExecutableFixedArrayShape(element, length) || (!hir.FixedArrayScalarElement(element) && !a.plainViewStruct(element)) {
 			return hir.TypeInvalid, false
 		}
 		return hir.FixedArray(element, length), true

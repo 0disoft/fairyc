@@ -128,9 +128,11 @@ func FixedArrayScalarElement(value Type) bool {
 }
 
 // ExecutableFixedArrayShape reports whether one array shape belongs to the bounded first
-// executable subset shared by semantic analysis, MIR verification, interpretation, and C emission.
+// array shape. Nominal elements still require an actual plain struct definition in
+// semantic analysis and MIR verification before interpretation or C emission.
 func ExecutableFixedArrayShape(element Type, length uint64) bool {
-	return FixedArrayScalarElement(element) && length > 0 && length <= MaxExecutableFixedArrayElements
+	_, nominal := StructSliceElement(Type("[" + string(element) + "]"))
+	return (FixedArrayScalarElement(element) || nominal) && length > 0 && length <= MaxExecutableFixedArrayElements
 }
 
 // RawPointer returns the canonical nullable raw-pointer type for element.

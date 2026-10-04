@@ -691,10 +691,10 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					if err != nil {
 						return callCompletion{}, fmt.Errorf("fixed-array construction element %d in %q: %w", index, function.Name, err)
 					}
-					if !comparisonRuntimeMatches(value, elementType) {
+					if !indexedElementRuntimeMatches(value, elementType) {
 						return callCompletion{}, capabilityError("fixed-array construction element %d in %q has incompatible runtime type", index, function.Name)
 					}
-					values[index] = value
+					values[index] = value.cloneForValueCopy()
 				}
 				locals[operation.DestinationLocal] = runtimeValue{kind: valueArray, typ: operation.Type, array: &arrayState{elements: values}}
 			case mir.OperationArrayBorrowView:
@@ -710,7 +710,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q has incompatible runtime value", function.Name)
 				}
 				for index, element := range receiver.array.elements {
-					if !comparisonRuntimeMatches(element, elementType) {
+					if !indexedElementRuntimeMatches(element, elementType) {
 						return callCompletion{}, fmt.Errorf("fixed-array view borrow element %d in %q has incompatible type", index, function.Name)
 					}
 				}
@@ -740,7 +740,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if receiver.array == nil || index.u64 >= length || index.u64 >= uint64(len(receiver.array.elements)) {
 					return callCompletion{}, fmt.Errorf("fixed-array index in %q executed without a dominating bounds check", function.Name)
 				}
-				locals[operation.DestinationLocal] = receiver.array.elements[index.u64]
+				locals[operation.DestinationLocal] = receiver.array.elements[index.u64].cloneForValueCopy()
 			case mir.OperationArrayIndexCheck:
 			case mir.OperationArrayIndexStore:
 				receiver, index, value, err := evaluateArrayIndexStoreOperands(locals, operation.Operands)
@@ -749,10 +749,10 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
 				if !array || operation.Type != elementType || operation.IndexType != hir.TypeUSize || operation.Operator != "[]=" || receiver.typ != operation.OwnerType ||
-					receiver.array == nil || index.u64 >= length || index.u64 >= uint64(len(receiver.array.elements)) || !comparisonRuntimeMatches(value, elementType) {
+					receiver.array == nil || index.u64 >= length || index.u64 >= uint64(len(receiver.array.elements)) || !indexedElementRuntimeMatches(value, elementType) {
 					return callCompletion{}, fmt.Errorf("fixed-array index store in %q has incompatible runtime value", function.Name)
 				}
-				receiver.array.elements[index.u64] = value
+				receiver.array.elements[index.u64] = value.cloneForValueCopy()
 			case mir.OperationViewLength:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
