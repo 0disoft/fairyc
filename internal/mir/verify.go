@@ -855,10 +855,10 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 			case OperationDerefStore:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if !ValidDerefStoreShape(operation) ||
+				if (!ValidDerefStoreShape(operation) && !ValidPlainStructDerefStoreShape(operation, func(typ hir.Type) *StructType { return structTypes[typ] })) ||
 					fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType ||
 					fieldStoreOperandType(operation.Operands[1], storeTypes) != operation.Type {
-					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "scalar dereference store does not match its mutable reference and value"})
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "dereference store does not match its mutable reference and admitted value"})
 				}
 			case OperationFieldRead, OperationFieldBorrow:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)

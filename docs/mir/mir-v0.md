@@ -432,3 +432,5 @@ A terminating indexed-assignment RHS ends the path without a store. Codec/wire
 schemas and ordinary/query-only private-transfer rejection remain unchanged.
 
 ADR 0449 adds `view-element-borrow`, producing an exact nominal reference from a nominal descriptor and usize index after a dominating `view-index-check`. Shared results may shorten mutable receivers; exclusive results require mutable receivers. Actual local types, graph validity and closed metadata are verified before codec/backend use. Existing field operations consume that reference.
+
+ADR 0452 additionally admits whole plain struct replacement through `deref-store`. A separate aggregate shape validator checks the declaration graph; actual receiver/value locals must be exact mutable-reference/nominal types. The receiver descriptor is saved before RHS effects, and terminating RHS paths have no store. The interpreter updates stored struct identity with detached field copies. Scalar validation and wire fields remain unchanged.

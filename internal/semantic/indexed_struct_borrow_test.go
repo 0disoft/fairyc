@@ -57,7 +57,6 @@ func TestIndexedStructBorrowSourceBoundary(t *testing.T) {
 		"temporary-mutable":  "fn ref mut Token[] relay(ref mut Token[] view){return view;}fn void bad(ref mut Token[] view){let ref mut Token item=ref mut relay(view)[0];}",
 		"integer-element":    "fn void bad(ref mut i64[] view){let ref mut i64 value=ref mut view[0];}",
 		"wrong-nominal":      "fn void bad(ref mut Token[] view){let ref mut Other item=ref mut view[0];}",
-		"whole-deref-store":  "fn void bad(ref mut Token[] view){let ref mut Token item=ref mut view[0];*item=Token{.value=1};}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			r := analyzeText(t, map[string]string{"main.fy": "module main;struct Token{i64 value;}struct Other{i64 value;}" + body})

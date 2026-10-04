@@ -1,0 +1,121 @@
+{
+  "schema": "fairyc.struct-deref-store-cli/v1",
+  "compilerSHA256": "8f46708c5c0f47fa6abc077795b969f7bb7c535feabb753b8bddd5737b432345",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004105821-2599c27e4e4a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 2599c27e4e4a5bec52dbad93eb0cefdba88253c6\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "success",
+      "sourceSHA256": "cc4ec2af81b586a86dcf8bb3c8ad05d7832ef82b7be6247978fdd19e3b5b13e8",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void replace(ref mut Token item,Token value){*item=value;}\nfn ref mut Token selected(ref mut Token[] items,usize index){return ref mut items[index];}\nfn ref Token read(ref Token[] items,usize index){return ref items[index];}\nfn Option<ref mut Token> tagged(ref mut Token[] items){return .some(selected(items,1));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=7,.position=Span{.start=1,.end=4}});\n discard vec::push<Token>(ref mut owner,Token{.value=8,.position=Span{.start=5,.end=9}});\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n var usize calls=0;\n let ref mut Token item=selected(items,{calls+=1;0});\n var Token replacement=Token{.value=4000000000,.position=Span{.start=11,.end=14}};\n var Token old=*item;\n replace(item,replacement);replacement.position.start=99;\n assert(item.value==4000000000 && item.position.start==11 && old.position.start==1 && calls==1);\n *(item)=*item;assert(item.position.end==14);\n let Option<ref mut Token> result=tagged(items);\n switch(result){case .some(value):{*value=Token{.value=9223372036854775807,.position=Span{.start=15,.end=19}};}case .none:{assert(false);}};\n for(let ref mut Token value in items){*value=Token{.value=value.value-1,.position=value.position};}\n let ref Token first=read(items,0);let ref Token second=read(items,1);\n assert(first.value==3999999999 && second.value==9223372036854775806 && second.position.end==19);\n discard vec::clear<Token>(ref mut owner);assert(old.value==7 && replacement.position.start==99);\n return 0;\n}\n"
+    },
+    {
+      "name": "blocked-owner",
+      "sourceSHA256": "26c6b08484e424178348e9731cf7590cb5c464c45581b4f5ad85c9377197a1a8",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void replace(ref mut Token item,Token value){*item=value;}\nfn ref mut Token selected(ref mut Token[] items,usize index){return ref mut items[index];}\nfn ref Token read(ref Token[] items,usize index){return ref items[index];}\nfn Option<ref mut Token> tagged(ref mut Token[] items){return .some(selected(items,1));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=7,.position=Span{.start=1,.end=4}});\n discard vec::push<Token>(ref mut owner,Token{.value=8,.position=Span{.start=5,.end=9}});\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n var usize calls=0;\n let ref mut Token item=selected(items,{calls+=1;0});\n var Token replacement=Token{.value=4000000000,.position=Span{.start=11,.end=14}};\n var Token old=*item;\n discard vec::clear<Token>(ref mut owner);replace(item,replacement);replacement.position.start=99;\n assert(item.value==4000000000 && item.position.start==11 && old.position.start==1 && calls==1);\n *(item)=*item;assert(item.position.end==14);\n let Option<ref mut Token> result=tagged(items);\n switch(result){case .some(value):{*value=Token{.value=9223372036854775807,.position=Span{.start=15,.end=19}};}case .none:{assert(false);}};\n for(let ref mut Token value in items){*value=Token{.value=value.value-1,.position=value.position};}\n let ref Token first=read(items,0);let ref Token second=read(items,1);\n assert(first.value==3999999999 && second.value==9223372036854775806 && second.position.end==19);\n discard vec::clear<Token>(ref mut owner);assert(old.value==7 && replacement.position.start==99);\n return 0;\n}\n"
+    },
+    {
+      "name": "blocked-child",
+      "sourceSHA256": "a7d413f9dcc7e92407941e0a34042f4c417ef25f091ef07b4c0e054e0e38328e",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void replace(ref mut Token item,Token value){*item=value;}\nfn ref mut Token selected(ref mut Token[] items,usize index){return ref mut items[index];}\nfn ref Token read(ref Token[] items,usize index){return ref items[index];}\nfn Option<ref mut Token> tagged(ref mut Token[] items){return .some(selected(items,1));}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n discard vec::push<Token>(ref mut owner,Token{.value=7,.position=Span{.start=1,.end=4}});\n discard vec::push<Token>(ref mut owner,Token{.value=8,.position=Span{.start=5,.end=9}});\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n var usize calls=0;\n let ref mut Token item=selected(items,{calls+=1;0});\n var Token replacement=Token{.value=4000000000,.position=Span{.start=11,.end=14}};\n var Token old=*item;\n let ref usize child=ref item.position.start;replace(item,replacement);assert(*child==1);replacement.position.start=99;\n assert(item.value==4000000000 && item.position.start==11 && old.position.start==1 && calls==1);\n *(item)=*item;assert(item.position.end==14);\n let Option<ref mut Token> result=tagged(items);\n switch(result){case .some(value):{*value=Token{.value=9223372036854775807,.position=Span{.start=15,.end=19}};}case .none:{assert(false);}};\n for(let ref mut Token value in items){*value=Token{.value=value.value-1,.position=value.position};}\n let ref Token first=read(items,0);let ref Token second=read(items,1);\n assert(first.value==3999999999 && second.value==9223372036854775806 && second.position.end==19);\n discard vec::clear<Token>(ref mut owner);assert(old.value==7 && replacement.position.start==99);\n return 0;\n}\n"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004105821-2599c27e4e4a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 2599c27e4e4a5bec52dbad93eb0cefdba88253c6\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-cli\\success",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 181 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/struct-deref-store-success.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "88b868967af9b5bc895abad62d421f7b9a4ef915678de8b306f7b92bd8354dbd"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/struct-deref-store-success.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "0b526028bd781d15d99569175e9d3fffae515ca57d388b82b2ae6118a55aaff5"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-cli\\blocked-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:18:28: E2101: Access conflicts with an active shared or mutable loan. [bytes 944..957]\n  last-use: main.fy:20:23 [bytes 1135..1139]\n  loan: main.fy:13:49 [bytes 722..735]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-cli\\blocked-child",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:18:54: E2101: Access conflicts with an active shared or mutable loan. [bytes 970..974]\n  last-use: main.fy:18:80 [bytes 996..1001]\n  loan: main.fy:18:16 [bytes 932..937]\n"
+    }
+  ]
+}

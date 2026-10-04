@@ -32,7 +32,6 @@ fn i32 main() { var i32 value = 1; var Record record = Record { .value = 1 }; `
 		"alias":        {"let ref mut i32 view = ref mut value; let ref i32 alias = ref value; *view = 42; assert(*alias == 1);", "E2101"},
 		"owner read":   {"let ref mut i32 view = ref mut value; *view = value;", "E2101"},
 		"rhs reborrow": {"let ref mut i32 view = ref mut value; *view = *(ref value);", "E2101"},
-		"aggregate":    {"let ref mut Record view = ref mut record; *view = Record { .value = 42 };", "unsupported"},
 		"compound":     {"let ref mut i32 view = ref mut value; *view += 1;", "unsupported"},
 		"temporary":    {"*(ref mut value) = 42;", "unsupported"},
 	} {

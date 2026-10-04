@@ -928,7 +928,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("field store in %q: %w", function.Name, err)
 				}
 			case mir.OperationDerefStore:
-				if err := storeScalarDeref(locals, operation); err != nil {
+				if err := storeDeref(locals, operation, r.structTypes); err != nil {
 					return callCompletion{}, fmt.Errorf("dereference store in %q: %w", function.Name, err)
 				}
 			case mir.OperationFieldRead, mir.OperationFieldBorrow:

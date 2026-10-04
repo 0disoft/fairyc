@@ -24,8 +24,8 @@ Direct call arguments, bindings, parameter-origin returns and Option wrapping
 use the same element reference. Nested field projections continue through
 existing shared/mutable field-reference rules. `*token` and ordinary `items[i]`
 reads copy the plain aggregate; changing a copied value does not modify storage.
-Whole nominal `*token = value` remains closed, while indexed whole replacement
-retains ADR 0448.
+Whole nominal `*token = value` is subsequently admitted by ADR 0452, while
+indexed whole replacement retains ADR 0448.
 
 The element graph remains actual nonempty acyclic structs with scalar leaves;
 resource, pointer, borrowed, array and tagged fields remain excluded. Same-layout

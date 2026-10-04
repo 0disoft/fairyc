@@ -4,8 +4,8 @@ import "github.com/0disoft/fairyc/internal/hir"
 
 func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 	target := statement.Target
-	unsupported := &Unsupported{Feature: "scalar dereference assignment without executable mutable reference storage", Span: target.Span}
-	if len(target.Children) != 1 || target.Operator != "*" || !fieldStoreScalar(target.Type) ||
+	unsupported := &Unsupported{Feature: "dereference assignment without executable mutable reference storage", Span: target.Span}
+	if len(target.Children) != 1 || target.Operator != "*" || (!fieldStoreScalar(target.Type) && !l.properties.plainViewStruct(target.Type)) ||
 		statement.Expression == nil || statement.Expression.Type != target.Type || statement.Operator != "=" {
 		return unsupported
 	}
@@ -20,9 +20,21 @@ func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 	if err != nil {
 		return err
 	}
+	if l.blockTerminated(l.current) {
+		return nil
+	}
+	// Select the referent before RHS effects, including rebinding the named reference.
+	if l.properties.plainViewStruct(target.Type) {
+		saved := l.newTemporary()
+		l.appendOperation(Operation{Kind: OperationAssign, Span: target.Span, DestinationLocal: saved, Operands: []Operand{receiver}})
+		receiver = Operand{Kind: OperandLocal, Local: saved}
+	}
 	value, err := l.lowerExpression(statement.Expression)
 	if err != nil {
 		return err
+	}
+	if l.blockTerminated(l.current) {
+		return nil
 	}
 	l.appendOperation(Operation{Kind: OperationDerefStore, Span: target.Span, Symbol: hir.NoSymbol,
 		DestinationLocal: NoLocal, OwnerType: reference.Type, Type: target.Type,
@@ -33,10 +45,19 @@ func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 // ValidDerefStoreShape excludes implicit moves, aggregate replacement and
 // shared references. The verifier checks the concrete local types separately.
 func ValidDerefStoreShape(op Operation) bool {
-	return fieldStoreScalar(op.Type) && op.OwnerType == hir.MutableBorrow(op.Type) &&
+	return fieldStoreScalar(op.Type) && validDerefStoreCommonShape(op) && scalarOperandMatches(op.Operands[1], op.Type)
+}
+
+// ValidPlainStructDerefStoreShape admits whole copies of the same plain struct graph
+// used by indexed replacement. Concrete receiver/value types stay verifier-owned.
+func ValidPlainStructDerefStoreShape(op Operation, lookup func(hir.Type) *StructType) bool {
+	return validDerefStoreCommonShape(op) && op.Operands[1].Kind == OperandLocal && op.Operands[1].Local >= 0 && plainFieldStoreStruct(op.Type, lookup)
+}
+
+func validDerefStoreCommonShape(op Operation) bool {
+	return op.OwnerType == hir.MutableBorrow(op.Type) &&
 		op.DestinationLocal == NoLocal && op.Symbol == hir.NoSymbol && op.Field == "" &&
 		len(op.Operands) == 2 && op.Operands[0].Kind == OperandLocal && op.Operands[0].Local >= 0 &&
-		scalarOperandMatches(op.Operands[1], op.Type) &&
 		len(op.Fields) == 0 && len(op.TrapCategories) == 0 && op.Operator == "" && op.Destination == "" &&
 		op.ProjectionEntity == "" && op.DropFlagEntity == "" && op.IndexType == "" && op.Variant == "" &&
 		!op.MovePayload && !op.FlagClearedFirst && op.UnsafeScope == (hir.Span{}) && op.SourceForm == "" && op.ExitKind == ""

@@ -24,7 +24,8 @@ Each item points to the stored element. Scalar/nested field stores, checked
 compound assignment, nested nominal field replacement and shared/mutable field
 children use existing reference rules. Ordinary indexed reads and explicit
 value copies still copy the whole aggregate. Whole nominal `*item = value`
-assignment remains closed; whole indexed replacement retains ADR 0448.
+assignment is subsequently admitted by ADR 0452; whole indexed replacement
+retains ADR 0448.
 
 The item introduces an ADR 0415 exclusive child generation. While it or a
 retained descendant is live, parent descriptor, aliases and competing siblings

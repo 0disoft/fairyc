@@ -8,8 +8,8 @@ import (
 )
 
 func (e *emitter) inspectDerefStore(functionIndex int, operation mir.Operation) error {
-	if !mir.ValidDerefStoreShape(operation) {
-		return fmt.Errorf("invalid scalar dereference store shape")
+	if !mir.ValidDerefStoreShape(operation) && !mir.ValidPlainStructDerefStoreShape(operation, e.fieldStoreStruct) {
+		return fmt.Errorf("invalid dereference store shape")
 	}
 	receiverType, err := e.operandType(functionIndex, operation.Operands[0])
 	if err != nil || receiverType != operation.OwnerType {

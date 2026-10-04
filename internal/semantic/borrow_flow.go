@@ -319,7 +319,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		return false
 	case syntax.KindAssignment:
 		f.checkReferenceStore(statement.Target, environment)
-		if scalarDerefAssignmentTarget(statement.Target) {
+		if derefAssignmentTarget(statement.Target) {
 			previous := f.liveAfter[statement]
 			receiver := assignmentRootPath(statement.Target.Children[0])
 			if binding := f.analyzer.resolved[receiver]; isSafeBorrowSymbol(binding) {
@@ -1437,7 +1437,7 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 				delete(live, target)
 			}
 			live = f.liveExpression(statement.Expression, live, context)
-			if indexedAssignmentTarget(statement.Target) || scalarDerefAssignmentTarget(statement.Target) || statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr {
+			if indexedAssignmentTarget(statement.Target) || derefAssignmentTarget(statement.Target) || statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr {
 				live = f.liveExpression(statement.Target, live, context)
 			}
 		case statement.Kind == syntax.KindFor:

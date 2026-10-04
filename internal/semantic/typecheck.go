@@ -437,9 +437,9 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindAssignment:
 			target, targetType := c.checkExpression(statement.Target, hir.TypeInvalid)
 			value, actual := c.checkExpression(statement.Expression, targetType)
-			if scalarDerefAssignmentTarget(statement.Target) &&
-				(!hir.FixedArrayScalarElement(targetType) || !directDerefBorrowPath(statement.Target.Children[0])) {
-				c.analyzer.addUnsupported(c.module.file.Path, statement.Target.Span, "scalar dereference assignment requires a named mutable reference to an admitted scalar")
+			if derefAssignmentTarget(statement.Target) &&
+				((!hir.FixedArrayScalarElement(targetType) && !c.analyzer.plainViewStruct(targetType)) || !directDerefBorrowPath(statement.Target.Children[0])) {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Target.Span, "dereference assignment requires a named mutable reference to an admitted scalar or plain struct")
 			}
 			hirStatement.Operator = statement.Operator
 			if hirStatement.Operator == "" {
@@ -874,8 +874,8 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 	case "view-index":
 		return len(target.Children) == 2 && hir.MutableIndexedView(target.Children[0].Type)
 	case "prefix":
-		if !scalarDerefAssignmentTarget(source) || target.Operator != "*" || len(target.Children) != 1 ||
-			!hir.FixedArrayScalarElement(target.Type) || !directDerefBorrowPath(source.Children[0]) {
+		if !derefAssignmentTarget(source) || target.Operator != "*" || len(target.Children) != 1 ||
+			(!hir.FixedArrayScalarElement(target.Type) && !c.analyzer.plainViewStruct(target.Type)) || !directDerefBorrowPath(source.Children[0]) {
 			return false
 		}
 		element, mutable, borrowed := hir.BorrowElement(target.Children[0].Type)
@@ -919,7 +919,7 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 	}
 }
 
-func scalarDerefAssignmentTarget(expression *ast.Expression) bool {
+func derefAssignmentTarget(expression *ast.Expression) bool {
 	return expression != nil && expression.Kind == syntax.KindPrefix && expression.Text == "*" && len(expression.Children) == 1
 }
 

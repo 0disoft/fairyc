@@ -83,7 +83,7 @@ last retained child/alias/descendant use. Returned and tagged children retain
 parameter origins and generation status; local owner escape remains rejected.
 Resource/nonplain/indexed/call-result/pointer/dereference roots and simultaneous
 mutable siblings remain closed. Scalar children use existing dereference stores;
-struct children use existing field stores.
+struct children use existing field stores and ADR 0452 whole dereference stores.
 
 ADR 0446 admits explicit `ref parent.field` and nested/grouped stored field
 projection through a named `ref mut` plain struct reference. The root satisfies
@@ -101,13 +101,13 @@ new mutable-root form. Implicit whole-reference binding/return conversion remain
 closed, while ADR 0414's shared call conversion is unchanged.
 
 ADR 0401 admits plain `*slot = value` for a named `ref mut` to `bool`, `u8`,
-`i32`, `u32`, or `usize`. The exclusive loan remains live while the right-hand
-side is evaluated once; competing borrows, direct owner reads, and moves are
+`i32`, `u32`, or `usize` (and ADR 0410 `i64`). The exclusive loan remains live
+while the right-hand side is evaluated once; competing borrows, direct owner reads, and moves are
 rejected. A read through the same reference is allowed. `Vec.at_mut<i32>` may
 therefore update its selected element without copying or resizing the vector.
-Aggregate replacement, compound dereference assignment, temporary reference
-targets remain unsupported. Mutable plain struct field-address projection is
-admitted separately by ADR 0445.
+Compound dereference assignment and temporary reference targets remain
+unsupported; ADR 0452 separately admits plain struct replacement. Mutable plain
+struct field-address projection is admitted separately by ADR 0445.
 
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
 `ref mut T`. The original borrow becomes usable again after the call's last use. Returning, storing,
@@ -249,9 +249,9 @@ field references. ADR 0450 admits `for (let ref mut Token item in items)` over a
 named immutable mutable struct-view descriptor. Each item borrows the stored
 element, and its live exclusive generation freezes parent/aliases until last
 use. The whole owner stays held through all loop exits; returned/tagged item
-references retain origin and generation. Source direct element borrows, temporary
-iterables and whole nominal dereference assignment remain closed. Shared struct
-views keep copied-value iteration. SDK stage0.85, language /20, runtime /0.
+references retain origin and generation. Direct element borrows and whole
+nominal dereference assignment are added by ADRs 0451 and 0452; temporary
+iterables remain closed. Shared struct views keep copied-value iteration. SDK stage0.85, language /20, runtime /0.
 
 ADR 0451 extends the same named plain struct views to direct `ref items[i]`
 and `ref mut items[i]` element references, including grouped places, bindings,
@@ -261,7 +261,17 @@ last use; shared children block writes while live. Bounds dominate address
 creation, the index runs once, and receiver selection survives index-time
 reassignment of a mutable descriptor binding. Ordinary indexed values and
 `*item` reads still copy. Temporary descriptors, integer element references,
-fixed-array struct views and whole nominal dereference assignment stay closed.
+fixed-array struct views stay closed.
+
+ADR 0452 admits `*target = value` through a named (optionally grouped)
+`ref mut T` where T is a nonempty acyclic plain struct with scalar leaves.
+The RHS has the exact nominal type and is copied, including nested structs.
+The selected reference is saved before RHS effects, so rebinding the reference
+variable does not retarget the store. Source Flow holds its original loan
+through the final store. Live shared/exclusive children still block replacement;
+reads through that reference and transient shared children ending before the
+store are allowed. A terminating RHS performs no store. Resources/nonplain
+graphs, shared receivers, compound stores and temporary roots remain closed.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

@@ -1,0 +1,210 @@
+{
+  "schema": "fairyc.struct-deref-store-review/v1",
+  "date": "2026-10-04",
+  "baseRevision": "2599c27e4e4a5bec52dbad93eb0cefdba88253c6",
+  "scope": "ADR 0452 copied whole plain struct dereference replacement; named selected receiver, existing borrow generations, exact nominal types",
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/struct-deref-store-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "image": {
+      "path": ".cache/struct-deref-store-compiler/fairyc.exe",
+      "sha256": "8f46708c5c0f47fa6abc077795b969f7bb7c535feabb753b8bddd5737b432345"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-deref-store-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004105821-2599c27e4e4a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 2599c27e4e4a5bec52dbad93eb0cefdba88253c6\nmodified: true\n",
+      "stderr": ""
+    },
+    "sourceDigest": {
+      "fileCount": 542,
+      "sha256": "95e20931db1305b2dc64c3ef62fad6c6c882725f7104e50e33e8dfeeaa59c37e",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sourceManifest": {
+      "path": ".cache/struct-deref-store-compiler/source-manifest.json",
+      "sha256": "25a975ccd9c870f704cde134824e3d50c71aa9efe06280e86a094f8ef7a869db"
+    }
+  },
+  "sources": [
+    {
+      "path": "internal/cbackend/deref_store.go",
+      "sha256": "868f98d90c1da7ecca2ee7d022cf2bfa53139224d2584c87e578258daf5f0bfc"
+    },
+    {
+      "path": "internal/cli/struct_deref_store_test.go",
+      "sha256": "2a3517a0cb9bd4d011854b14b6b5679d9cd7207b707a18b4cf0d2f5b80cb91da"
+    },
+    {
+      "path": "internal/compiler/struct_deref_store_test.go",
+      "sha256": "d29a19045efe069dbf695e6fddc059565c2acdc3d39545778fd5b86a19e37365"
+    },
+    {
+      "path": "internal/compiler/testdata/struct_deref_store.fy",
+      "sha256": "cc4ec2af81b586a86dcf8bb3c8ad05d7832ef82b7be6247978fdd19e3b5b13e8"
+    },
+    {
+      "path": "internal/interpreter/deref_store.go",
+      "sha256": "bd545d2f72c9db58de245dee65a4d78f92b727fcf524fb6fd89e2e3435a27eb3"
+    },
+    {
+      "path": "internal/interpreter/interpreter.go",
+      "sha256": "59a96eaf7345fcfd3d652f04964ef5c1250b6a1a63994e3ee138743fe996a16e"
+    },
+    {
+      "path": "internal/interpreter/struct_deref_store_test.go",
+      "sha256": "7b078abb0bd7ef43f306014a06add9c73afb749c7c2487f778d6732c90ed1ab3"
+    },
+    {
+      "path": "internal/mir/deref_store.go",
+      "sha256": "6ec62138352353820d523df6bcb79cc6a9db0461a1a8c0f20127b8c53b7c0038"
+    },
+    {
+      "path": "internal/mir/verify.go",
+      "sha256": "beef7c945bbc25b987db8f34583364106a084ef2dd8bcc7eb81c842541c2fa56"
+    },
+    {
+      "path": "internal/semantic/borrow_flow.go",
+      "sha256": "762986462a2b846a55255f9b2507b432a3c420d048ac8ad54d68f1980bf1e236"
+    },
+    {
+      "path": "internal/semantic/deref_store_test.go",
+      "sha256": "8d6e0c9ff5d0fe40aa9dd506187df2eb488c100eefed7558a11b32b5b97e9c9d"
+    },
+    {
+      "path": "internal/semantic/indexed_struct_borrow_test.go",
+      "sha256": "9d3c5edcb08e5f595281e0f22b8c60a7194eed9a05ee3c7c974cd60e188637c0"
+    },
+    {
+      "path": "internal/semantic/mutable_struct_for_test.go",
+      "sha256": "af3862349976b9dd4f5c296865d84a9d7fff0b8a47557ad5f581b5228b01165a"
+    },
+    {
+      "path": "internal/semantic/struct_deref_store_test.go",
+      "sha256": "555cde2ef0684c08998c4e33cd60e3ecd5493187c309fb8786a50df4dddc895f"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "66d81efef0f7d16610e46211dda729a420d4879649508f9c82c534f7ecbe1905"
+    }
+  ],
+  "publicCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/struct-deref-store-20261004.cli.json",
+      "sha256": "c0c0d199b35bebeb9b2ad3b75361076b9e09bd7037c8defb50acd7d7589d19a4"
+    },
+    "runs": 8,
+    "outcome": "check/build/run dev+release passed; live owner and child E2101 rejections"
+  },
+  "native": {
+    "raw": {
+      "path": "docs/ops/evidence/struct-deref-store-20261004.native.json",
+      "sha256": "ff483e1857a2676642333e9caf5f52fb9feb82913a5bcefbcb52296a5b0479b5"
+    },
+    "executions": 10
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "./internal/cli",
+        "-run",
+        "StructDerefStore|FieldStoreScalarDeref|IndexedStructBorrow|MutableStructFor",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": {
+        "path": ".cache/struct-deref-store-final.jsonl",
+        "sha256": "b2348292df3ca2266d3e780d79741f33eb738c8d1a46409a70d669e3cbb923fc"
+      },
+      "passedTestEvents": 136,
+      "skips": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/compiler",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "StructDerefStore|FieldStore|IndexedStructBorrow|MutableStructFor",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": {
+        "path": ".cache/struct-deref-store-stages-final.jsonl",
+        "sha256": "8ec5a6c222ca1e8a820035a8c322c602a9011543a7311184ebd10bb565597c25"
+      },
+      "passedTestEvents": 205,
+      "skips": 0
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/semantic",
+      "./internal/mir",
+      "./internal/cbackend",
+      "./internal/interpreter",
+      "./internal/compiler",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "limits": [
+    "Linux native execution deferred by owner; both C emission profiles verified",
+    "No benchmark, install, SDK/ABI/runtime change, DB, CI/runner, push or release",
+    "Native helper executes in-process Go CLI compiler with captured MSVC toolchain identity; standalone public compiler identity is recorded separately"
+  ]
+}
