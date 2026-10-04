@@ -244,6 +244,15 @@ Receiver/index bounds are checked before RHS evaluation; a terminating RHS has
 no store or continuation. Indexed field stores/borrows and mutable struct-view
 for-in remain closed in this unit. SDK stage0.85, language /20 and runtime /0.
 
+ADR 0449 adds checked indexed plain struct field stores and shared/mutable
+field references. ADR 0450 admits `for (let ref mut Token item in items)` over a
+named immutable mutable struct-view descriptor. Each item borrows the stored
+element, and its live exclusive generation freezes parent/aliases until last
+use. The whole owner stays held through all loop exits; returned/tagged item
+references retain origin and generation. Source direct element borrows, temporary
+iterables and whole nominal dereference assignment remain closed. Shared struct
+views keep copied-value iteration. SDK stage0.85, language /20, runtime /0.
+
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one

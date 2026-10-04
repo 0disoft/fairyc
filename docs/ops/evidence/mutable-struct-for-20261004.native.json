@@ -1,0 +1,190 @@
+{
+  "cases": [
+    {
+      "case": "stored-loop",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativestored-loop85244931\\001",
+      "imageSHA256": "64e415406b214aec7687b4c76ba02f19a9908e1d37fcfed02da75db8e5ca0f1b",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "d2a2f1b5dee3787e40c2d947f9619bbb81adc2a7c4921cdbacd92d3f4b482e14",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "stored-loop",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativestored-loop85244931\\001",
+      "imageSHA256": "9eebba463d3c96ff2aa8b65b54796101947c6fd87137d0b5801cfde3275e0cf4",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "d2a2f1b5dee3787e40c2d947f9619bbb81adc2a7c4921cdbacd92d3f4b482e14",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "checked-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativechecked-overflow1285957905\\001",
+      "imageSHA256": "b92a4de9b9f5be37d4b21377a7c042a2a077cee2baba9699b409f1c12cbc73ef",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "b1e57dd85696d4f84858bf2247dd96e9ead3e2ff737853dfeed29eba951bc113",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "checked-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativechecked-overflow1285957905\\001",
+      "imageSHA256": "25a9b2609451b270177ee5acf0cea5010073d5b58a89ed4e8019a2deb38a49dc",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "b1e57dd85696d4f84858bf2247dd96e9ead3e2ff737853dfeed29eba951bc113",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "body-trap",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "assertion-failed",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativebody-trap1672368706\\001",
+      "imageSHA256": "b8fefbee7585eb6848ff7c91efabd20bc6cbc81fade767cc9a557d685d6073e7",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 134,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0006"
+      },
+      "sourceSHA256": "f6f3a6a1c0125d647ad5563b911bf4319e3c92a9bb4d4ab68755d495da17972f",
+      "stderr": "trap: assertion-failed\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "body-trap",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "assertion-failed",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativebody-trap1672368706\\001",
+      "imageSHA256": "bd350a19bef89c90f1d59d7cdc43c49aa4dbce1918f4d08ed29cd2865d507291",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 134,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0006"
+      },
+      "sourceSHA256": "f6f3a6a1c0125d647ad5563b911bf4319e3c92a9bb4d4ab68755d495da17972f",
+      "stderr": "trap: assertion-failed\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "nested-independent",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativenested-independent827986350\\001",
+      "imageSHA256": "6939ab07d7f2af23341613535cdb0e0f100915cf5afd90360ddfde1457b5e63d",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "365cf883d32fa1a43eb0ae9119083b0c5f5269ec57a53283c38b649177c03dd0",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "nested-independent",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructForNativenested-independent827986350\\001",
+      "imageSHA256": "a898f4c8481982d5fd927fc7149cec54c33b21d969060491933ee81950da7c1c",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "365cf883d32fa1a43eb0ae9119083b0c5f5269ec57a53283c38b649177c03dd0",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    }
+  ],
+  "schema": "fairyc.mutable-struct-for-native/v1",
+  "sdk": "0.0.0-stage0.85"
+}

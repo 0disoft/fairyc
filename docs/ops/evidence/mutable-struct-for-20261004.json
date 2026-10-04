@@ -1,0 +1,135 @@
+{
+  "schema": "fairyc.mutable-struct-for-review/v1",
+  "date": "2026-10-04",
+  "baseRevision": "ab78b0f8a13604c63571381d0284bf3bbeee1441",
+  "scope": "ADR 0450 stored mutable nominal for-in items",
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/mutable-struct-for-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "image": {
+      "path": ".cache/mutable-struct-for-compiler/fairyc.exe",
+      "sha256": "02fc784d018ebb854a4d0b795220fabe702e1230933c691417b1564a7bed06be"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004101648-ab78b0f8a136+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: ab78b0f8a13604c63571381d0284bf3bbeee1441\nmodified: true\n",
+      "stderr": ""
+    },
+    "sourceDigest": {
+      "fileCount": 542,
+      "sha256": "991bcb279d550e0df3d1f5b3e9e9c1ba278178c136215b47698cfd5a2d8473d0",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sourceManifest": {
+      "path": ".cache/mutable-struct-for-compiler/source-manifest.json",
+      "sha256": "17062e880b2b2b976590aecede985da14d6326beba3360e01428de84f03ab5c5"
+    }
+  },
+  "publicCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/mutable-struct-for-20261004.cli.json",
+      "sha256": "516f4f67b60e9d74661103ecd1c114ddb74599f25f3e9aaa921fa4ca228145e7"
+    },
+    "executions": 12
+  },
+  "native": {
+    "raw": {
+      "path": "docs/ops/evidence/mutable-struct-for-20261004.native.json",
+      "sha256": "a64adcb0ea2659b513a2a2df84df3c9ea256806057d7dc3fc156a1b39822720a"
+    },
+    "executions": 8
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/ast",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/interpreter",
+        "./internal/genericsource",
+        "-run",
+        "MutableStructFor|StructFor|ByteViewFor|MutableViewFor|I64For|IndexedStructFields|PreparedVectorFor|VectorFor",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/mutable-struct-for-stage-final.jsonl",
+        "sha256": "730fec5bdb68677568fceff12ce1b7ffa46adc8b2d8a30de69493d71517e2587"
+      },
+      "passedTestEvents": 145,
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestMutableStructFor",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/mutable-struct-for-cli-final.jsonl",
+        "sha256": "146d12a76caad34163fe2487b6322c1107e8738d9c5b4745cadd1370bcda3d1a"
+      },
+      "passedTestEvents": 13,
+      "skips": []
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/ast",
+      "./internal/semantic",
+      "./internal/compiler",
+      "./internal/interpreter",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "limits": [
+    "Linux actual execution deferred; both C emission profiles checked.",
+    "Direct source indexed element borrows, whole nominal dereference stores, temporary views and mutable descriptor iterables remain closed.",
+    "SDK stage0.85, language /20 and runtime /0 unchanged; no SDK exports, wire/ABI/runtime symbols or runner changes.",
+    "Compiler digest excludes Go test files; native tests compile in process and public CLI records actual argv/cwd.",
+    "One exploratory regex matched unrelated formatting native tests and was interrupted; only completed final targeted runs are acceptance evidence.",
+    "No benchmark, installation, push or release."
+  ]
+}

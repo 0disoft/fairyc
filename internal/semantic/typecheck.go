@@ -12,13 +12,14 @@ import (
 )
 
 type typeChecker struct {
-	analyzer     *analyzer
-	module       *moduleScope
-	function     *ast.Function
-	hir          *hir.Function
-	resultType   hir.Type
-	loopDepth    int
-	unsafeScopes []hir.Span
+	analyzer       *analyzer
+	module         *moduleScope
+	function       *ast.Function
+	hir            *hir.Function
+	resultType     hir.Type
+	loopDepth      int
+	unsafeScopes   []hir.Span
+	mutableForItem *ast.Expression
 }
 
 func (a *analyzer) typeCheck() Result {
@@ -494,13 +495,13 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			reason := c.byteForSourceIssue(statement.ByteFor, statement.Expression)
 			issueSpan := statement.Span
 			if len(c.analyzer.vectorForTypes) != 0 && statement.ByteFor != nil &&
-				statement.ByteFor.Type.Kind == ast.TypeKindReference {
+				statement.ByteFor.Type.Kind == ast.TypeKindReference && !statement.ByteFor.Type.Mutable {
 				reason, issueSpan = c.vectorForSourceIssue(statement.ByteFor, statement.Expression)
 			}
 			if reason != "" {
 				c.analyzer.addUnsupported(c.module.file.Path, issueSpan, reason)
 			} else {
-				hirStatement.Expression, _ = c.checkExpression(statement.Expression, hir.TypeVoid)
+				hirStatement.Expression, _ = c.checkViewFor(statement.Expression, statement.ByteFor)
 				hirStatement.Kind = string(syntax.KindExprStmt)
 			}
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
@@ -1318,6 +1319,13 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return hir.SharedBorrow(childType)
 	case "&mut":
+		if expression == c.mutableForItem && child != nil {
+			if borrowed, ok := indexedElementBorrow(*child, true); ok {
+				*result = borrowed
+				result.Span = span(c.module.file.Path, expression.Span)
+				return borrowed.Type
+			}
+		}
 		if field, ok := c.mutableFieldBorrow(expression.Children[0], child); ok {
 			*result = field
 			result.Span = span(c.module.file.Path, expression.Span)

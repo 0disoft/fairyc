@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.mutable-struct-for-cli/v1",
+  "compilerSHA256": "02fc784d018ebb854a4d0b795220fabe702e1230933c691417b1564a7bed06be",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004101648-ab78b0f8a136+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: ab78b0f8a13604c63571381d0284bf3bbeee1441\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "success",
+      "sourceSHA256": "b7ee97ad8c0f437dcdf57c7157f079654fe34e0fbeb1275c71b5fa8684b41f5e",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void bump(ref mut Token token){token.value+=4000000000;}\nfn void edit(ref mut Token[] items){\n var usize visits=0;\n for(let ref mut Token item in items){\n  visits+=1;\n  if(item.value==1){item.value=11;continue;}\n  bump(item);\n  let ref mut Span position=ref mut item.position;\n  position.start+=3;assert(position.end>position.start);\n  if(item.value==4000000003){break;}\n }\n assert(visits==3);\n}\nfn Option<ref mut Token> first(ref mut Token[] items){for(let ref mut Token item in items){return .some(item);}return .none;}\nfn Result<i32,u32> failure(){return .err(7);}\nfn Result<i32,u32> visit(ref mut Token[] items){for(let ref mut Token item in items){item.value+=1;let i32 value=failure()?;}return .ok(0);}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n var usize offset=1;\n for(var i32 i=1;i<=4;i+=1){discard vec::push<Token>(ref mut owner,Token{.value=i as i64,.position=Span{.start=offset,.end=offset+10}});offset+=1;}\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n edit(items);\n assert(items[0].value==11 && items[1].value==4000000002 && items[2].value==4000000003 && items[3].value==4);\n assert(items[1].position.start==5 && items[2].position.start==6);\n switch(first(items)){case .some(picked):{picked.value=42;assert(picked.value==42);}case .none:{assert(false);}};\n switch(visit(items)){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n assert(items[0].value==43 && items[1].value==4000000002);\n let ref mut Token[] empty=items[4..];for(let ref mut Token item in empty){assert(false);}\n discard vec::clear<Token>(ref mut owner);assert(vec::len<Token>(ref owner)==0);\n return 0;\n}\n"
+    },
+    {
+      "name": "overflow",
+      "sourceSHA256": "f30c54fca4eb7e470fe34c031deda53b266f2f3a54cb2f9e0914b12c4913447d",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void bump(ref mut Token token){token.value+=4000000000;}\nfn void edit(ref mut Token[] items){\n var usize visits=0;\n for(let ref mut Token item in items){\n  visits+=1;\n  if(item.value==1){item.value=9223372036854775807;item.value+=1;continue;}\n  bump(item);\n  let ref mut Span position=ref mut item.position;\n  position.start+=3;assert(position.end>position.start);\n  if(item.value==4000000003){break;}\n }\n assert(visits==3);\n}\nfn Option<ref mut Token> first(ref mut Token[] items){for(let ref mut Token item in items){return .some(item);}return .none;}\nfn Result<i32,u32> failure(){return .err(7);}\nfn Result<i32,u32> visit(ref mut Token[] items){for(let ref mut Token item in items){item.value+=1;let i32 value=failure()?;}return .ok(0);}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n var usize offset=1;\n for(var i32 i=1;i<=4;i+=1){discard vec::push<Token>(ref mut owner,Token{.value=i as i64,.position=Span{.start=offset,.end=offset+10}});offset+=1;}\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n edit(items);\n assert(items[0].value==11 && items[1].value==4000000002 && items[2].value==4000000003 && items[3].value==4);\n assert(items[1].position.start==5 && items[2].position.start==6);\n switch(first(items)){case .some(picked):{picked.value=42;assert(picked.value==42);}case .none:{assert(false);}};\n switch(visit(items)){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n assert(items[0].value==43 && items[1].value==4000000002);\n let ref mut Token[] empty=items[4..];for(let ref mut Token item in empty){assert(false);}\n discard vec::clear<Token>(ref mut owner);assert(vec::len<Token>(ref owner)==0);\n return 0;\n}\n"
+    },
+    {
+      "name": "blocked-owner",
+      "sourceSHA256": "2c8c4b606982d2a8a4f9c30748c861ed5ca292bc122ef79261b3e3536067fbd7",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {i64 value;Span position;}\nfn void bump(ref mut Token token){token.value+=4000000000;}\nfn void edit(ref mut Token[] items, ref mut vec::Vec<Token> owner){\n var usize visits=0;\n for(let ref mut Token item in items){\n  discard vec::clear<Token>(owner);visits+=1;\n  if(item.value==1){item.value=11;continue;}\n  bump(item);\n  let ref mut Span position=ref mut item.position;\n  position.start+=3;assert(position.end>position.start);\n  if(item.value==4000000003){break;}\n }\n assert(visits==3);\n}\nfn Option<ref mut Token> first(ref mut Token[] items){for(let ref mut Token item in items){return .some(item);}return .none;}\nfn Result<i32,u32> failure(){return .err(7);}\nfn Result<i32,u32> visit(ref mut Token[] items){for(let ref mut Token item in items){item.value+=1;let i32 value=failure()?;}return .ok(0);}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n var usize offset=1;\n for(var i32 i=1;i<=4;i+=1){discard vec::push<Token>(ref mut owner,Token{.value=i as i64,.position=Span{.start=offset,.end=offset+10}});offset+=1;}\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n edit(items,ref mut owner);\n assert(items[0].value==11 && items[1].value==4000000002 && items[2].value==4000000003 && items[3].value==4);\n assert(items[1].position.start==5 && items[2].position.start==6);\n switch(first(items)){case .some(picked):{picked.value=42;assert(picked.value==42);}case .none:{assert(false);}};\n switch(visit(items)){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n assert(items[0].value==43 && items[1].value==4000000002);\n let ref mut Token[] empty=items[4..];for(let ref mut Token item in empty){assert(false);}\n discard vec::clear<Token>(ref mut owner);assert(vec::len<Token>(ref owner)==0);\n return 0;\n}\n"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004101648-ab78b0f8a136+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: ab78b0f8a13604c63571381d0284bf3bbeee1441\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\success",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 183 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-for-success.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "11108fda7427d40ef7a99ef39081ccd0659c80546b80142fcd77ebd89c4758e6"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-for-success.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "d14eae1b2add57d743f50a924575df43f77301347af2864684a72bc556e7de2a"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\overflow",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 183 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\overflow",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-for-overflow.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "0eae7dcc68c65b6acff6509c290c27d740c67ae68d4bd194d1b5e8d40c86b73c"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\overflow",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: integer-overflow\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\overflow",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-for-overflow.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "b82ccb57b81f795f9eb507032a08756653c4ace794ff258d0c4ad722fef7d47a"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\overflow",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: integer-overflow\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-cli\\blocked-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:26:13: E2101: Access conflicts with an active shared or mutable loan. [bytes 1223..1236]\n  last-use: main.fy:32:28 [bytes 1709..1714]\n  loan: main.fy:25:49 [bytes 1194..1207]\n"
+    }
+  ]
+}

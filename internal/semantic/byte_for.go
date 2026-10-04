@@ -6,25 +6,33 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// byteForSourceIssue checks a named integer or shared struct view before the hidden scalar loop is
-// admitted. The descriptor binding must be immutable so the length snapshot
+// byteForSourceIssue checks a named integer/plain struct view before the hidden
+// scalar loop is admitted. The descriptor binding must be immutable so the length snapshot
 // and later indexed reads always use the same view, even for exclusive views.
 func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Expression) string {
 	if loop == nil || loop.Body == nil || loop.View == nil {
 		return "malformed byte-view iteration"
 	}
-	if (loop.Type.Kind != ast.TypeKindNamed && loop.Type.Kind != ast.TypeKindBoundNominal) || len(loop.Type.Arguments) != 0 {
+	itemType := loop.Type
+	mutableItem := itemType.Kind == ast.TypeKindReference && itemType.Mutable && itemType.Element != nil
+	if mutableItem {
+		itemType = *itemType.Element
+	}
+	if (itemType.Kind != ast.TypeKindNamed && itemType.Kind != ast.TypeKindBoundNominal) || len(itemType.Arguments) != 0 {
 		return "view iteration requires an exact integer or scalar-field struct item binding"
 	}
-	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, loop.Type, false)
+	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, itemType, false)
 	_, integer := hir.IntegerViewElement(hir.Type("[" + string(wantElement) + "]"))
 	nominal := c.analyzer.plainViewStruct(wantElement)
-	if !resolved || !integer && !nominal {
+	if !resolved || !integer && !nominal || mutableItem && !nominal {
 		return "view iteration requires an exact u8, i32, i64, u32, usize or scalar-field struct item binding"
 	}
 	shape := loop.Type.Path + "-view iteration requires a named immutable ref " + loop.Type.Path + "[] or ref mut " + loop.Type.Path + "[] view"
 	if nominal {
 		shape = "struct-view iteration requires an exact named immutable shared struct view"
+	}
+	if mutableItem {
+		shape = "mutable struct-view iteration requires an exact ref mut struct item and a named immutable mutable struct view"
 	}
 	if wantElement == hir.TypeU8 {
 		shape = "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"
@@ -50,8 +58,23 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if value == nil || value.kind != "local" && value.kind != "parameter" || value.mutable {
 		return shape
 	}
-	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || nominal && hir.MutableIndexedView(value.typ) {
+	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || nominal && hir.MutableIndexedView(value.typ) != mutableItem {
 		return shape
+	}
+	if mutableItem {
+		classic := prepared.Block.Statements[1].For
+		if classic == nil || classic.Body == nil || len(classic.Body.Statements) == 0 {
+			return "malformed mutable struct-view iteration"
+		}
+		item := classic.Body.Statements[0].Binding
+		if item == nil || item.Name != loop.Name || item.Type == nil || c.canonicalType(*item.Type) != c.canonicalType(loop.Type) ||
+			item.Expression == nil || item.Expression.Kind != syntax.KindPrefix || item.Expression.Text != "&mut" || len(item.Expression.Children) != 1 {
+			return "malformed mutable struct-view iteration"
+		}
+		index := item.Expression.Children[0]
+		if index.Kind != syntax.KindIndex || len(index.Children) != 2 || index.Children[0].Kind != syntax.KindPath || index.Children[0].Text != loop.View.Text {
+			return "malformed mutable struct-view iteration"
+		}
 	}
 	return ""
 }
@@ -78,4 +101,16 @@ func (f *borrowFlowAnalyzer) evaluateViewFor(statement *ast.Statement, environme
 	defer func() { f.callBorrows = f.callBorrows[:base] }()
 	_, reachable = f.evaluateExpression(prepared, environment)
 	return reachable
+}
+
+// Only the generated item initializer may take a whole stored-element address.
+// Ordinary written `ref mut view[index]` remains outside source admission.
+func (c *typeChecker) checkViewFor(prepared *ast.Expression, loop *ast.ByteForLoop) (*hir.Expression, hir.Type) {
+	prior := c.mutableForItem
+	c.mutableForItem = nil
+	if loop.Type.Kind == ast.TypeKindReference && loop.Type.Mutable {
+		c.mutableForItem = prepared.Block.Statements[1].For.Body.Statements[0].Binding.Expression
+	}
+	defer func() { c.mutableForItem = prior }()
+	return c.checkExpression(prepared, hir.TypeVoid)
 }
