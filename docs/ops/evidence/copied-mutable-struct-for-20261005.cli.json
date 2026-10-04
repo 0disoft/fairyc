@@ -1,0 +1,209 @@
+{
+  "schema": "fairyc.copied-mutable-struct-for-cli/v1",
+  "compilerSHA256": "f13dbcfdef25ff418a7fceafab20782aa4418e13ba1d4e57aa00d39cdf97854a",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004160855-1b2f8d63ead2+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 1b2f8d63ead294ba794dcbdcd066541c99b079c3\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span{usize start;usize end;}\nstruct Token{i64 value;Span position;bool active;}\nfn Option<Token> first(ref mut Token[] items){for(let Token item in items){return .some(item);}return .none;}\nfn Result<i32,u32> fail(){return .err(7);}\nfn Result<i32,u32> propagate(ref mut Token[] items){for(let Token item in items){items[0].value=item.value+1;let i32 ignored=fail()?;}return .ok(0);}\nfn void edit(ref mut Token[] items){\n var usize visits=0;\n for(let Token item in items){\n  visits+=1;\n  var Token copy=item;copy.value=99;copy.position.start=100;\n  assert(item.value!=99 && item.position.start!=100);\n  if(visits==1){\n   items[0]=Token{.value=9,.position=Span{.start=40,.end=50},.active=false};\n   items[1]=Token{.value=5000000000,.position=Span{.start=77,.end=88},.active=true};\n   assert(item.value==1 && item.position.start==1 && item.active);\n   continue;\n  }\n  if(visits==2){assert(item.value==5000000000 && item.position.start==77);}\n  if(visits==3){assert(item.value==3);break;}\n }\n assert(visits==3);\n}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n for(var u32 i=1;i<=4;i+=1){let usize offset=i as usize;assert(vec::push<Token>(ref mut owner,Token{.value=i as i64,.position=Span{.start=offset,.end=offset+10},.active=true}).is_ok);}\n let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);\n edit(items);\n assert(items[0].value==9 && !items[0].active && items[1].value==5000000000 && items[2].value==3 && items[3].value==4);\n let ref mut Token[] part=items[2..];var usize index=0;\n for(let Token item in part){part[index].value=item.value+10;assert(item.value<10);index+=1;}\n assert(index==2);\n var usize visits=0;for(let Token outer in items){for(let Token inner in items){assert(outer.value>0 && inner.value>0);visits+=1;}}assert(visits==16);\n var Option<Token> last=.none;for(let Token item in items){last=.some(item);}\n switch(last){case .some(copy):{assert(copy.value==14);}case .none:{assert(false);}};\n switch(propagate(items)){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n let Option<Token> saved=first(items);\n let ref mut Token[] empty=items[4..];for(let Token item in empty){assert(false);}\n for(let Token items in items){assert(items.value>0);}\n assert(vec::clear<Token>(ref mut owner)==4);\n switch(saved){case .some(copy):{assert(copy.value==10 && copy.position.start==40);}case .none:{assert(false);}};\n assert(vec::len<Token>(ref owner)==0);\n let ref mut Token[] cleared=vec::view_mut<Token>(ref mut owner);for(let Token item in cleared){assert(false);}\n return 0;\n}\n",
+      "sourceSHA256": "7d2ba2f119dcfe0489bacbe505d658f1dda6e70c5803a0100820f53869374ce5"
+    },
+    {
+      "name": "blocked-owner-clear",
+      "source": "module main;import std::vec as vec;struct Token{i64 value;}fn i32 main(){var vec::Vec<Token> owner=vec::empty<Token>();let ref mut Token[] items=vec::view_mut<Token>(ref mut owner);for(let Token item in items){discard vec::clear<Token>(ref mut owner);break;}return 0;}",
+      "sourceSHA256": "a3de62104ba2f863f934ba7563769258e2a4871cb63e2e2bdd704aca77410939"
+    },
+    {
+      "name": "blocked-item-store",
+      "source": "module main;struct Token{i64 value;}fn void bad(ref mut Token[] items){for(let Token item in items){item.value=9;}}fn i32 main(){return 0;}",
+      "sourceSHA256": "93836b255d681abc449ca1d5bcd3280ccd302b328cd2c15e2cc04752c85fc8f3"
+    },
+    {
+      "name": "blocked-copy-escape",
+      "source": "module main;struct Token{i64 value;}fn Option<ref Token> bad(ref mut Token[] items){for(let Token item in items){return .some(ref item);}return .none;}fn i32 main(){return 0;}",
+      "sourceSHA256": "a5e6df58fe12eea785b0eaa21c4bfde06485bb16391385db34ee02b3157016bf"
+    }
+  ],
+  "exampleSources": [
+    {
+      "path": "examples\\copied_mutable_struct_quickstart\\src\\main.fy",
+      "sha256": "99793c371f658d3cc9a2788de16136f71c7a34ea3b709674b15523a8e994d25a"
+    },
+    {
+      "path": "examples\\copied_mutable_struct_quickstart\\src\\records.fy",
+      "sha256": "e9d6b20bc1e919232d6b3467c02418ae77b8c9d77e84d014cce6569f8af9081b"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004160855-1b2f8d63ead2+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 1b2f8d63ead294ba794dcbdcd066541c99b079c3\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 186 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/copied-mutable-struct-for-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "a32cee1c804a0beffc49d381d97f07c4a5fc72dbbbbe62e7dc00177056a2e7da",
+      "imagePath": ".cache\\copied-mutable-struct-for-cli\\images\\matrix-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/copied-mutable-struct-for-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "373406c412d216b302ac2af860dfb814d4ed6592d2bc5a30e980000c1cd8d531",
+      "imagePath": ".cache\\copied-mutable-struct-for-cli\\images\\matrix-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\blocked-owner-clear",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:237: E2101: Access conflicts with an active shared or mutable loan. [bytes 236..249]\n  last-use: main.fy:1:237 [bytes 236..249]\n  loan: main.fy:1:167 [bytes 166..179]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\blocked-item-store",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:101: E1008: assignment target is not mutable [bytes 100..110]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-cli\\blocked-copy-escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:121: E2102: Returned borrow originates from a local value. [bytes 120..135]\n  origin: main.fy:1:99 [bytes 98..102]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\copied_mutable_struct_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 10 source file(s), 183 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\copied_mutable_struct_quickstart",
+      "exit": 0,
+      "stdout": "built: build/copied-mutable-struct-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "64b1bf1052f4fc438303e3f568de031ef1f35555e3df5fb6856f3f5e6400bd74",
+      "imagePath": ".cache\\copied-mutable-struct-for-cli\\images\\clamp-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\copied_mutable_struct_quickstart",
+      "exit": 0,
+      "stdout": "before=-5 after=0\nbefore=4000000000 after=10\nbefore=7 after=7\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\copied_mutable_struct_quickstart",
+      "exit": 0,
+      "stdout": "built: build/copied-mutable-struct-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "37d299df5b229fa75328eda9241ab6f28be9a0c43886ce12b0cea8c902ac97de",
+      "imagePath": ".cache\\copied-mutable-struct-for-cli\\images\\clamp-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\copied-mutable-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\copied_mutable_struct_quickstart",
+      "exit": 0,
+      "stdout": "before=-5 after=0\nbefore=4000000000 after=10\nbefore=7 after=7\n",
+      "stderr": ""
+    }
+  ],
+  "nativeOutcomes": 4
+}

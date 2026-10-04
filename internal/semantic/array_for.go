@@ -82,8 +82,13 @@ func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expre
 	if mutable {
 		operator = "&mut"
 	}
+	// Generic expansion may detach the retained source view from the checked
+	// bound path. Bind our new owner path to the symbol selected by that path;
+	// the written loop view is source provenance, not a resolved place token.
+	ownerPath := &ast.Expression{Kind: syntax.KindPath, Span: loop.View.Span, Text: loop.View.Text}
+	c.analyzer.resolved[ownerPath] = owner
 	view := &ast.Binding{Name: arrayForViewName, Span: loop.View.Span, NameSpan: loop.View.Span, Type: &viewType,
-		Expression: &ast.Expression{Kind: syntax.KindPrefix, Span: loop.View.Span, Text: operator, Children: []*ast.Expression{loop.View}}}
+		Expression: &ast.Expression{Kind: syntax.KindPrefix, Span: loop.View.Span, Text: operator, Children: []*ast.Expression{ownerPath}}}
 	value := &symbol{id: c.analyzer.allocateSymbol(), packageID: owner.packageID, kind: "local", name: arrayForViewName,
 		module: owner.module, source: owner.source, declaration: loop.View.Span, typeSpan: loop.View.Span}
 	c.analyzer.bindingSymbols[view] = value

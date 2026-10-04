@@ -30,7 +30,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	}
 	shape := loop.Type.Path + "-view iteration requires a named immutable ref " + loop.Type.Path + "[] or ref mut " + loop.Type.Path + "[] view"
 	if nominal {
-		shape = "struct-view iteration requires an exact named immutable shared struct view"
+		shape = "struct-view iteration requires an exact named immutable shared or mutable struct view"
 	}
 	if mutableItem {
 		shape = "mutable view iteration requires an exact ref mut integer or struct item and a named immutable mutable view"
@@ -67,7 +67,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if value.mutable {
 		return shape
 	}
-	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || (nominal && !referenceItem || mutableItem) && hir.MutableIndexedView(value.typ) != mutableItem {
+	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || mutableItem && !hir.MutableIndexedView(value.typ) {
 		return shape
 	}
 	if referenceItem {

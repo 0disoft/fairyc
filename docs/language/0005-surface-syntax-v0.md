@@ -72,9 +72,16 @@
   elements, including nested scalar-field structs, and can be returned or
   retained under existing lifetime rules. The whole loop blocks owner writes
   and exclusive reborrows; live returned references retain that protection.
-  Copied struct loops still require shared views, and mutable items require
-  mutable views. Resource/pointer/borrowed/array/tagged field graphs, computed
+  Mutable items require mutable views. Resource/pointer/borrowed/array/tagged
+  field graphs, computed
   iterable roots and fixed struct arrays remain outside this admission.
+- ADR 0460 admits copied plain struct items over immutable named mutable view
+  bindings as well as shared views: `for (let Token item in items)`. Each item
+  copies the current stored element before the body runs. Writes through the
+  mutable descriptor are allowed; later iterations observe earlier changes to
+  not-yet-visited elements. Retained value copies survive owner cleanup after
+  loop exit. The loop still holds the owner against structural mutation/moves;
+  existing live element-reference loans still restrict competing writes.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

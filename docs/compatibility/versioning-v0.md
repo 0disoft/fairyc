@@ -1716,3 +1716,14 @@ SDK authentication. Exact compiler identity separates earlier restricted
 compilers/cache generations. Language /20, SDK stage0.86, runtime /0,
 MIR/wire schemas and ABI stay unchanged. Windows dev/release execution is
 verified; Linux execution remains deferred to the owner's batch.
+
+ADR 0460 admits copied plain struct items over immutable named mutable struct
+view bindings. Each iteration uses the existing checked whole-element load;
+body writes through the descriptor are allowed and later iterations observe
+changes to later elements. Copies carry no owner loan, while the written loop
+still blocks structural owner changes and escaping references to a local copy.
+Array preparation also binds its synthetic owner path to the actual resolved
+symbol when generic expansion detaches the retained source path. Exact compiler
+identity separates prior behavior/cache generations. Language /20, SDK stage0.86,
+runtime /0, MIR/wire schemas and ABI stay unchanged. Windows dev/release execution
+is verified; Linux execution remains deferred to the owner's batch.
