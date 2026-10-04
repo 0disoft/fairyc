@@ -13,7 +13,10 @@ fn void row(ref str label, usize count) { discard io::write(label); discard io::
 fn i32 analyze_source(ref u8[] source) {
     var vec::Vec<tokens::Token> owned = vec::empty<tokens::Token>();
     if (!tokens::scan(source, ref mut owned)) { return error(); }
+    let ref mut tokens::Token[] writable = vec::view_mut<tokens::Token>(ref mut owned);
+    tokens::rebase_segment(writable);
     let ref tokens::Token[] view = vec::view<tokens::Token>(ref owned);
+    assert(view.is_empty || view[0].position.start == 0);
     let tokens::Stats all = switch(tokens::analyze(view)) {case .ok(s): {s} case .err(_): {return error();}};
     var usize first_end = 0;
     for (let tokens::Token token in view) {

@@ -165,3 +165,28 @@ ADR 0446과 대여/MIR/C backend/버전 계약을 갱신했다. 기존 공유 �
 요청대로 일괄 검증에 남겼으며 전체 저장소 스위트와 성능 벤치마크는 생략했다.
 SDK export·DB·CI·설치·새 runner/PS1·push 변경은 없다. 구현과 실제 예제 적용은
 별도 로컬 커밋으로 나눴다.
+
+
+## 현재 적용: ADR 0449 원본 벡터 원소의 필드 대여
+
+`src/main.fy`가 `vec::view_mut<Token>`을 만들고 `tokens::rebase_segment`에
+전달한다. 이 함수는 `ref mut segment[i].position`으로 저장된 Span을 직접
+대여해 첫 토큰의 시작 위치를 뺀다. 앞 공백이 있는 입력에서도 저장된 첫
+토큰의 시작은 0이고 각 구간 길이는 유지된다. 복사한 지역 Token을 수정하던
+경로는 제거했다. 정규화 후에는 기존 공유 뷰와 반복으로 통계를 계산한다.
+
+토큰 위치는 렉서 직후 원본 바이트 오프셋이고, 정규화 이후 첫 토큰 기준
+상대 오프셋이다. CLI의 토큰 수·숫자 합계·첫 구간 출력은 기존과 동일하다.
+계산과 원본 변경은 Fairy C가 수행하며 Python은 공개 CLI 검증만 담당한다.
+
+Windows 일반·릴리스에서 예제 13입력씩(총 26 native 결과)이 통과했다.
+기본·빈 입력·단일/다중 구간·앞 공백·세미콜론 없음·i64 최대와 잘못된
+바이트·한글·숫자/합계 overflow·토큰/인자 제한·usage를 확인했다.
+기존 portable verify.py도 check, 잠금 build/run 두 프로필과 14개 native
+결과를 확인했다. 새 앞 공백 사례는 원본 위치 정규화 assertion도 실행한다.
+원시 argv/cwd/stdout/stderr/exit와 source/lock/compiler/SDK/EXE 해시는
+`docs/ops/evidence/indexed-field-example-20261004.json`에 남겼다.
+
+SDK stage0.85, 언어 /20, 런타임 /0을 사용한다. Linux 실제 실행은 일괄
+검증으로 미뤘다. 전체 저장소 스위트·성능 실험·새 runner/PS1·설치·CI·push
+변경은 없다. 앞 절은 이전 구현의 기록이며 현재 예제 동작은 이 절을 따른다.

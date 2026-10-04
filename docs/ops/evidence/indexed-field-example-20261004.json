@@ -1,0 +1,106 @@
+{
+  "schema": "fairyc.indexed-field-example/v1",
+  "date": "2026-10-04",
+  "baseRevision": "41454213633f56ce890c075fb51147296862e4f7",
+  "scope": "Stored token span normalization through indexed mutable field references; unchanged CLI output",
+  "compiler": {
+    "image": {
+      "path": ".cache/indexed-fields-compiler/fairyc.exe",
+      "sha256": "81acc11001d2f58523d9559fe025d7b0fa39204a6842fa7e2c490319bf68db91"
+    },
+    "sourceDigest": {
+      "fileCount": 542,
+      "sha256": "02a4e2b975fdb6df3a5cb24fa482065fd9b6c14aebb88175b64aa63b02863973",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\indexed-fields-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004094404-0e740a58f87c+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0e740a58f87ce188dc7c998556272bb24735e804\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sources": [
+    {
+      "path": "examples/struct_vec_view/src/main.fy",
+      "sha256": "e490b8aaa5306bb4ddb5ca96164d35ee827840131306d643f335f2f72ec311b0"
+    },
+    {
+      "path": "examples/struct_vec_view/src/tokens.fy",
+      "sha256": "391018036f4bbe71b5f269593fb293e912a9a4d3296eab12fea4ab07eb2b7c61"
+    },
+    {
+      "path": "examples/struct_vec_view/fairy.toml",
+      "sha256": "579393868eeb192def762f89270d2378cbceb6647f6182b346536df145061a70"
+    },
+    {
+      "path": "examples/struct_vec_view/fairy.lock",
+      "sha256": "c4a90a760f4ab9fd5423ea0dc1f33a169c9f91e1932ba071d89310d85fb97996"
+    },
+    {
+      "path": "examples/struct_vec_view/verify.py",
+      "sha256": "3ceb41ffc3273aa7331a681da900f1439bf1cf405bdf38466534a89de69eedca"
+    }
+  ],
+  "native": {
+    "executions": 26,
+    "raw": {
+      "path": "docs/ops/evidence/indexed-field-example-20261004.native.json",
+      "sha256": "c48abedfe37695f4e29c298a66d5fbaa23855b0b312ea19dedfcd27b6991610f"
+    }
+  },
+  "publicCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/indexed-field-example-20261004.cli.json",
+      "sha256": "d0e0b58c013f38bfe33f598711e0c0b512207bb7d08d69fca3dfe58f2732b69f"
+    },
+    "command": {
+      "argv": [
+        "python",
+        "-X",
+        "utf8",
+        "examples/struct_vec_view/verify.py",
+        ".cache/indexed-fields-compiler/fairyc.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "PASS: public CLI and 14 native outcomes; build/verify-results.json\n",
+      "stderr": ""
+    }
+  },
+  "tests": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "test",
+      "-json",
+      "./internal/cli",
+      "-run",
+      "^TestStructToken(ExampleCheck|AnalyzerNative)$",
+      "-count=1"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "raw": {
+      "path": ".cache/indexed-fields-example-final.jsonl",
+      "sha256": "3389d53159289bb3ad787d7b9c2ad4563ff669f1231c0aae95fbbcec30bcbe84"
+    },
+    "passedTestEvents": 28
+  },
+  "limits": [
+    "Linux execution deferred to owner batch.",
+    "Scanner spans start as source offsets; rebase_segment changes stored spans relative to the first token. Counts and sums are unchanged.",
+    "Shared iteration still copies Token values for read-only statistics; normalization no longer mutates copied Token values.",
+    "Compiler implementation unchanged from ADR 0449; previously built exact compiler image reused with truthful dirty-build identity.",
+    "No repository-wide tests, benchmarks, installation, CI/runner changes, push or release."
+  ]
+}

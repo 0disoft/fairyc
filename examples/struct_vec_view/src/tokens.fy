@@ -48,15 +48,24 @@ fn void rebase(ref mut Span position, usize origin) {
     assert(position.end - position.start == width);
 }
 
-/// Reads a borrowed token segment; only each selected token value is copied.
+/// Normalizes the stored spans once; the first token becomes the segment origin.
+/// The mutable field child keeps the whole segment borrowed until its last use.
+pub fn void rebase_segment(ref mut Token[] segment) {
+    let usize origin = if (segment.is_empty) { 0 } else { segment[0].position.start };
+    var usize i = 0;
+    while (i < segment.len) {
+        let ref mut Span position = ref mut segment[i].position;
+        rebase(position, origin);
+        assert(position.start < position.end);
+        i += 1;
+    }
+}
+
+/// Reads the normalized stored token segment through a shared view.
 pub fn Result<Stats, u32> analyze(ref Token[] segment) {
     var Stats stats = Stats { .identifiers = 0, .numbers = 0, .sum = 0 };
-    let usize origin = if (segment.is_empty) { 0 } else { segment[0].position.start };
     for (let Token token in segment) {
-        var Token local = token;
-        let ref mut Span position = ref mut local.position;
-        rebase(position, origin);
-        assert(local.position.start < local.position.end);
+        assert(token.position.start < token.position.end);
         if (token.kind == 1) { stats.identifiers += 1; }
         if (token.kind == 2) {
             if (token.value > 9223372036854775807 - stats.sum) { return .err(1); }

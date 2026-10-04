@@ -51,6 +51,7 @@ func TestStructTokenAnalyzerNative(t *testing.T) {
 		{"default", nil, 0, tokenStatsOutput(10, 3, 2, "4000000007", 6, 2, 1)},
 		{"empty", []string{""}, 0, tokenStatsOutput(0, 0, 0, "0", 0, 0, 0)},
 		{"single-statement", []string{"x=7;"}, 0, tokenStatsOutput(4, 1, 1, "7", 4, 1, 1)},
+		{"leading-whitespace", []string{" \t x=7; other=9;"}, 0, tokenStatsOutput(8, 2, 2, "16", 4, 1, 1)},
 		{"no-semicolon", []string{"alpha+2"}, 0, tokenStatsOutput(3, 1, 1, "2", 3, 1, 1)},
 		{"i64-max", []string{"9223372036854775807;"}, 0, tokenStatsOutput(2, 0, 1, "9223372036854775807", 2, 0, 1)},
 		{"invalid-byte", []string{"@"}, 2, ""},

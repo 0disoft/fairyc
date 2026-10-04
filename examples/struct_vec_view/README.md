@@ -1,6 +1,7 @@
 # Nominal struct vector views
 
-SDK stage0.85 exposes the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]` in
+SDK stage0.85 exposes `std::vec::view<T>(ref Vec<T>) -> ref T[]` and
+`std::vec::view_mut<T>(ref mut Vec<T>) -> ref mut T[]` in
 `std::vec`. It borrows only the initialized element prefix of the vector without
 allocating or copying, and length/bounds count elements, so empty zero-backed
 vectors and empty subranges are valid.
@@ -10,13 +11,14 @@ vectors and empty subranges are valid.
 struct with plain language scalar leaves (`bool`, `u8`, `i32`, `i64`,
 `u32`, `usize`), including acyclic nonempty nested structs under ADR 0441. For a nominal element the view cannot reinterpret a `Token` view
 as a same-layout `Other` view. Cycles, missing definitions and array, resource,
-borrow, raw-pointer, enum, Option and Result fields at any depth are rejected. This example uses the shared form. ADR 0448 separately adds
-`vec::view_mut<T>` with checked whole-element replacement; indexed field
-stores/borrows and fixed-array struct conversion remain closed. Named immutable shared struct
+borrow, raw-pointer, enum, Option and Result fields at any depth are rejected. This example uses both forms. ADR 0448 admits whole-element replacement;
+ADR 0449 admits field stores and shared/mutable field references through named
+nominal descriptors. Fixed-array struct conversion remains closed. Named immutable shared struct
 views support copied-value `for-in` under ADR 0440.
 
 An index copies one whole struct value out of the view, and `view[i].field` reads
-are allowed. Element and field stores are rejected, while a `var ref Token[]`
+are allowed. Shared views reject stores, while mutable views permit exact whole-
+element replacement and plain field updates. A `var ref Token[]`
 binding may still be reassigned to another view. A copied mutable local is
 independent of the owner; the native fixture holds one copy while the owner is
 cleared and reads it back unchanged. A live view keeps the whole owner
@@ -27,10 +29,13 @@ slice bounds cannot mutate the owner. ADR 0415 sibling/ancestor rules still appl
 ## Example
 
 `src/tokens.fy` is a bounded ASCII lexer. Its `Token` contains a nested `Span`
-with byte offsets `[start,end)`, validated during copied-value iteration. It recognizes identifiers (letters,
+with byte offsets `[start,end)`. The lexer initially stores source offsets;
+`rebase_segment` then updates the stored spans relative to the first token using
+`ref mut segment[i].position`. Shared iteration validates the normalized spans. It recognizes identifiers (letters,
 digits, underscore), decimal integers, `+`, `=` and `;`, and ignores ASCII
 whitespace. The nonnegative i64 literal and the running sum are checked for
-overflow. `src/main.fy` builds a `Vec<Token>`, takes a shared view and a
+overflow. `src/main.fy` builds a `Vec<Token>`, normalizes its stored spans through
+a mutable view, then takes a shared view and a
 prefix-through-first-semicolon subrange, and reports token/identifier/number counts
 and the summed numeric values. With no argument it analyzes the built-in source and
 prints sum `4000000007`.
@@ -73,7 +78,7 @@ Windows amd64 MSVC native development and release each run eight struct-view cas
 (three success, five checked `bounds` traps) and twelve token-analyzer cases.
 ADR 0440 adds seven struct-iteration cases per profile, including normal and
 error exits, nested/mixed loops and checked sum overflow.
-The analyzer and first-semicolon discovery use `for (let Token token in view)`
+After mutable normalization, the analyzer and first-semicolon discovery use `for (let Token token in view)`
 (with a qualified item type in the main module). The owner stays borrowed through
 every loop exit; `break` and `continue` follow the usual C-shaped loop behavior.
 Mutable view bindings, reference items and expression-valued iterables are rejected.
@@ -141,3 +146,16 @@ is required. Current dev/release CLI evidence:
 ADR 0447 fixes the prior MSVC C4702 assertion/overflow reproduction.
 The mutable-view source fixture is `internal/compiler/testdata/mutable_struct_vec_view.fy`;
 this analyzer continues using shared views and copied local tokens.
+
+## Current indexed-field example (ADR 0449)
+
+`rebase_segment` updates each stored Span through a checked indexed field
+reference. `rebase` still reads shared start/end children, then modifies the
+parent after their last use. It preserves span widths. Analysis remains shared
+and the CLI report stays unchanged, including leading-whitespace inputs. No
+copied local Token is mutated for normalization.
+
+Windows dev/release public CLI and native results:
+`docs/ops/evidence/indexed-field-example-20261004.json`.
+Earlier ADR sections above describe their historical implementation stages.
+Linux actual execution remains deferred to the owner's batch.

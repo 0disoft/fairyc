@@ -39,7 +39,8 @@ for release in (False, True):
     run([compiler, "run", "--locked"] + (["--release"] if release else []), stdout=stats(10, 3, 2, 4000000007, 6, 2, 1))
     for args, expected in (([], stats(10, 3, 2, 4000000007, 6, 2, 1)),
                            ([""], stats(0, 0, 0, 0, 0, 0, 0)),
-                           (["x=7;"], stats(4, 1, 1, 7, 4, 1, 1))):
+                           (["x=7;"], stats(4, 1, 1, 7, 4, 1, 1)),
+                           ([" \t x=7; other=9;"], stats(8, 2, 2, 16, 4, 1, 1))):
         row = run([str(image)] + args, stdout=expected)
         row.update(profile=profile, imageSHA256=image_hash)
     for source in ("@", "9223372036854775808", "+" * 129):
@@ -49,4 +50,4 @@ for release in (False, True):
 receipt = dict(schema="fairyc.struct-view-portable-smoke/v1",
                compilerSHA256=hashlib.sha256(Path(compiler).read_bytes()).hexdigest(), runs=rows)
 (root / "build" / "verify-results.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-print("PASS: public CLI and 12 native outcomes; build/verify-results.json")
+print("PASS: public CLI and 14 native outcomes; build/verify-results.json")
