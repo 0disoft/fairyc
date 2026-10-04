@@ -40,7 +40,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if wantElement == hir.TypeU8 && !mutableItem {
 		shape = "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"
 	}
-	if prepared == nil || loop.View.Kind != syntax.KindPath || len(loop.View.Children) != 0 {
+	if prepared == nil {
 		return shape
 	}
 	if prepared.Kind != syntax.KindBlock || prepared.Block == nil || len(prepared.Block.Statements) != 2 {
@@ -52,6 +52,9 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 		return "malformed byte-view iteration"
 	}
 	view := bound.Expression.Children[0]
+	if loop.View.Kind == syntax.KindSlice {
+		return c.prepareSliceFor(loop, prepared, view, wantElement, mutableItem)
+	}
 	if view == nil || view.Kind != syntax.KindPath || view.Text != loop.View.Text || view.Span != loop.View.Span {
 		return "malformed byte-view iteration"
 	}

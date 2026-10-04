@@ -1557,6 +1557,9 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	start := Operand{Kind: OperandUSize, U64: 0}
 	if expression.Children[1].Kind == "omitted-range-bound" {
 		if expression.Children[1].Operator != "start" {
@@ -1566,6 +1569,9 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 		start, err = l.lowerExpression(&expression.Children[1])
 		if err != nil {
 			return Operand{}, err
+		}
+		if l.blockTerminated(l.current) {
+			return Operand{}, nil
 		}
 	}
 	var end Operand
@@ -1583,6 +1589,9 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 		end, err = l.lowerExpression(&expression.Children[2])
 		if err != nil {
 			return Operand{}, err
+		}
+		if l.blockTerminated(l.current) {
+			return Operand{}, nil
 		}
 	}
 	if receiver.Kind == OperandInvalid || start.Kind == OperandInvalid || end.Kind == OperandInvalid {

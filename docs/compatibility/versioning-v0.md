@@ -1778,3 +1778,29 @@ rejected. Language /20, SDK stage0.86, runtime /0, MIR/wire schemas, public ABI 
 target maturity are unchanged. Windows dev/release execution is verified,
 including the native harness, cache reuse and public CLI check/build/run; Linux
 actual execution remains deferred to the owner's batch.
+
+ADR 0465 admits direct slice and subview iteration `for (let T item in
+data[start..end])` over a bare named fixed array or an immutable named shared or
+mutable view binding. Bounds evaluate once before the loop and the existing
+runtime `start <= end <= len` guard runs before the body; omitted bounds and
+empty subviews are valid. Arrays are borrowed implicitly as shared for
+copied/shared items and exclusive items require a mutable array, while slicing a
+view preserves the parent view's mutability even for copied/shared items. A
+mutable subview generation freezes its parent descriptor and aliases for the
+loop duration under ADR 0415, with no mutable-sibling disjointness. Existing
+owner loan, break/continue/return and escape rules are reused. Semantic lowering
+materializes one private descriptor over a named array or slices an immutable
+named view, then reuses the existing view-slice, checked-bounds and
+element-address operations. No syntax production, MIR opcode, wire field, SDK
+export, runtime symbol or host flag is added. Language /20, SDK stage0.86,
+runtime /0, MIR/wire schemas, public ABI and target maturity remain unchanged.
+The related suite passes 994 tests with no failures or skips, and the Windows
+native harness passes 10 Go test entries (8 cases in dev and release, 16
+outcomes, plus a separate cache test). The standalone public CLI passes the
+matrix check/build/run in dev and release (2 outcomes) and rejects five forms,
+including an owner write (E2101), a local escape (E2102) and a bool bound
+(E1006). A bound expression that returns early is handled by a terminating
+`lowerViewSlice` guard, mirroring the ADR 0464 `lowerCall` guard. Formatting,
+diff and `go vet` checks pass. Results are recorded as
+`docs/ops/evidence/slice-for-20261005.json` with `.cli.json` and `.native.json`
+companions; Linux actual execution remains deferred to the owner's batch.

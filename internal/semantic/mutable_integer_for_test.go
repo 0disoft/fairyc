@@ -53,7 +53,7 @@ func TestMutableIntegerForSourceBoundary(t *testing.T) {
 			"shared-source":      "fn void edit(ref T[] view){for(let ref mut T item in view){}}",
 			"shared-item-store":  "fn void edit(ref mut T[] view){for(let ref T item in view){*item=9;}}",
 			"mutable-descriptor": "fn void edit(ref mut T[] view){var ref mut T[] alias=view;for(let ref mut T item in alias){}}",
-			"temporary":          "fn void edit(ref mut T[] view){for(let ref mut T item in view[..]){}}",
+			"temporary":          "fn void edit(ref mut T[] view){for(let ref mut T item in view[..][..]){}}",
 			"integer-mismatch":   "fn void edit(ref mut T[] view){for(let ref mut Other item in view){}}",
 			"local-escape":       "fn ref mut T edit(){var T[1] data=[1];let ref mut T[] view=ref mut data;for(let ref mut T item in view){return item;}return ref mut view[0];}",
 			"wrong-width":        "fn void edit(ref mut T[] view){for(let ref mut bool item in view){}}",

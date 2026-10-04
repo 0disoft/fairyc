@@ -118,6 +118,18 @@
   indices never prove disjointness. Local/by-value array references cannot
   escape and temporary or call roots stay rejected. Resources, pointers,
   borrowed struct fields, tagged fields and array fields remain excluded.
+- ADR 0465 admits direct slice and subview iteration `for (let T item in
+  data[start..end])` over a bare named fixed array or an immutable named
+  `ref T[]` / `ref mut T[]` view binding, with explicit or omitted bounds and
+  the same `bool`/integer/plain-struct item set. The root stays a bare name;
+  computed, call, field and nested-slice roots and mutable (`var`) descriptor
+  bindings remain closed. Bounds evaluate once before the loop and the runtime
+  checks `start <= end <= len` before the body; omitted bounds and empty
+  subviews are valid. Arrays are borrowed implicitly as shared for copied/shared
+  items and require a mutable array for exclusive items; slicing a view keeps the
+  parent's mutability even for copied/shared items, and a mutable subview
+  generation freezes the parent descriptor and its aliases for the loop duration
+  under ADR 0415. Owner loan, break/continue/return and escape rules are reused.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

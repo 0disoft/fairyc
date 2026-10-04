@@ -19,26 +19,7 @@ func resetArrayForPreparation(statement *ast.Statement) {
 	if len(block.Statements) != 3 || block.Statements[0].Binding == nil || block.Statements[0].Binding.Name != arrayForViewName {
 		return
 	}
-	bound := block.Statements[1].Binding
-	classic := block.Statements[2].For
-	if bound == nil || bound.Expression == nil || len(bound.Expression.Children) != 1 || classic == nil || classic.Body == nil || len(classic.Body.Statements) == 0 {
-		return
-	}
-	item := classic.Body.Statements[0].Binding
-	if item == nil || item.Expression == nil {
-		return
-	}
-	indexed := item.Expression
-	if indexed.Kind == syntax.KindPrefix && (indexed.Text == "&mut" || indexed.Text == "&") && len(indexed.Children) == 1 {
-		indexed = indexed.Children[0]
-	}
-	if indexed.Kind != syntax.KindIndex || len(indexed.Children) != 2 {
-		return
-	}
-	view := statement.ByteFor.View
-	bound.Expression.Children[0] = view
-	indexed.Children[0] = &ast.Expression{Kind: syntax.KindPath, Span: view.Span, Text: view.Text}
-	block.Statements = block.Statements[1:]
+	statement.Expression = nil
 }
 
 // Resolution already selected the written array and loop-local names. Add only
@@ -50,6 +31,18 @@ func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expre
 	if !array || element != want || !hir.ExecutableFixedArrayShape(element, length) || mutable && !owner.mutable {
 		return shape
 	}
+	operator := "&"
+	if mutable {
+		operator = "&mut"
+	}
+	ownerPath := &ast.Expression{Kind: syntax.KindPath, Span: loop.View.Span, Text: loop.View.Text}
+	c.analyzer.resolved[ownerPath] = owner
+	source := &ast.Expression{Kind: syntax.KindPrefix, Span: loop.View.Span, Text: operator, Children: []*ast.Expression{ownerPath}}
+	return c.prepareForDescriptor(loop, prepared, owner, source, mutable)
+}
+
+// Array and direct-subview loops share one descriptor and one element path.
+func (c *typeChecker) prepareForDescriptor(loop *ast.ByteForLoop, prepared *ast.Expression, owner *symbol, source *ast.Expression, mutable bool) string {
 	classic := prepared.Block.Statements[1].For
 	if classic == nil || classic.Body == nil || len(classic.Body.Statements) == 0 {
 		return "malformed fixed-array iteration"
@@ -61,7 +54,7 @@ func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expre
 	indexed := item.Expression
 	if loop.Type.Kind == ast.TypeKindReference {
 		operator := "&"
-		if mutable {
+		if loop.Type.Mutable {
 			operator = "&mut"
 		}
 		if indexed.Kind != syntax.KindPrefix || indexed.Text != operator || len(indexed.Children) != 1 {
@@ -69,7 +62,7 @@ func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expre
 		}
 		indexed = indexed.Children[0]
 	}
-	if indexed.Kind != syntax.KindIndex || len(indexed.Children) != 2 || indexed.Children[0].Kind != syntax.KindPath || indexed.Children[0].Text != loop.View.Text {
+	if indexed.Kind != syntax.KindIndex || len(indexed.Children) != 2 || !sameVectorForView(loop.View, indexed.Children[0]) {
 		return "malformed fixed-array iteration"
 	}
 	elementType := loop.Type
@@ -78,17 +71,7 @@ func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expre
 	}
 	sliceType := ast.TypeReference{Kind: ast.TypeKindSlice, Element: &elementType, Span: loop.View.Span}
 	viewType := ast.TypeReference{Kind: ast.TypeKindReference, Mutable: mutable, Element: &sliceType, Span: loop.View.Span}
-	operator := "&"
-	if mutable {
-		operator = "&mut"
-	}
-	// Generic expansion may detach the retained source view from the checked
-	// bound path. Bind our new owner path to the symbol selected by that path;
-	// the written loop view is source provenance, not a resolved place token.
-	ownerPath := &ast.Expression{Kind: syntax.KindPath, Span: loop.View.Span, Text: loop.View.Text}
-	c.analyzer.resolved[ownerPath] = owner
-	view := &ast.Binding{Name: arrayForViewName, Span: loop.View.Span, NameSpan: loop.View.Span, Type: &viewType,
-		Expression: &ast.Expression{Kind: syntax.KindPrefix, Span: loop.View.Span, Text: operator, Children: []*ast.Expression{ownerPath}}}
+	view := &ast.Binding{Name: arrayForViewName, Span: loop.View.Span, NameSpan: loop.View.Span, Type: &viewType, Expression: source}
 	value := &symbol{id: c.analyzer.allocateSymbol(), packageID: owner.packageID, kind: "local", name: arrayForViewName,
 		module: owner.module, source: owner.source, declaration: loop.View.Span, typeSpan: loop.View.Span}
 	c.analyzer.bindingSymbols[view] = value

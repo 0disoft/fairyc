@@ -53,7 +53,7 @@ func TestSharedStructForBoundary(t *testing.T) {
 	for name, body := range map[string]string{
 		"same-layout-other":          `struct Other{i64 value;}fn void test(ref Token[] view){for(let ref Other item in view){}}`,
 		"mutable-descriptor":         `fn void test(ref Token[] view){var ref Token[] alias=view;for(let ref Token item in alias){}}`,
-		"temporary":                  `fn void test(ref Token[] view){for(let ref Token item in view[..]){}}`,
+		"temporary":                  `fn void test(ref Token[] view){for(let ref Token item in view[..][..]){}}`,
 		"field-root":                 `struct Holder{ref Token[] view;}fn void test(ref Holder holder){for(let ref Token item in holder.view){}}`,
 		"exclusive-item-from-shared": `fn void test(ref Token[] view){for(let ref mut Token item in view){}}`,
 		"whole-shared-store":         `fn void test(ref Token[] view){for(let ref Token item in view){*item=Token{.value=9};}}`,

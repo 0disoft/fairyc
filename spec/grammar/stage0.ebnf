@@ -165,7 +165,12 @@ while_stmt = "while" "(" expression ")" statement_block ;
    named immutable mutable-view bindings (ADR 0460). Bool views, fixed arrays,
    and their copied/shared/exclusive items follow the scalar path (ADR 0461).
    Plain fixed struct arrays also follow that path (ADR 0462). SDK vector-reference
-   iteration is separate. *)
+   iteration is separate.
+   Direct slice/subview iteration `in data[start..end]` over a bare named array
+   or immutable shared/mutable view binding is admitted by ADR 0465; computed,
+   call, field and nested-slice roots and mutable descriptor bindings stay
+   closed. Bounds evaluate once with the checked start <= end <= len runtime
+   guard before the body. *)
 for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block
          | "for" "(" "let" type IDENT "in" expression ")" statement_block ;
 for_init = binding_kind (IDENT | type IDENT) "=" expression

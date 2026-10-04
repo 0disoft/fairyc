@@ -11,7 +11,7 @@ func TestI64ForSourceRejections(t *testing.T) {
 		"unsupported-item": "for (let i32 value in view) {}",
 		"reference-width":  "for (let ref u8 value in view) {}",
 		"mutable-binding":  "var ref i64[] alias = view; for (let i64 value in alias) {}",
-		"slice-expression": "for (let i64 value in view[..]) {}",
+		"nested-slice":     "for (let i64 value in view[..][..]) {}",
 		"call-expression":  "for (let i64 value in relay(view)) {}",
 		"bool-array":       "let bool[2] flags=[true,false];for (let i64 value in flags) {}",
 	} {

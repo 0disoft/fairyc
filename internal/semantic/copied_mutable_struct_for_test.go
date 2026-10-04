@@ -47,7 +47,7 @@ func TestCopiedMutableStructForFlow(t *testing.T) {
 func TestCopiedMutableStructForBoundary(t *testing.T) {
 	for name, source := range map[string]string{
 		"mutable-descriptor": `fn void test(ref mut Token[] view){var ref mut Token[] alias=view;for(let Token item in alias){}}`,
-		"temporary":          `fn void test(ref mut Token[] view){for(let Token item in view[..]){}}`,
+		"temporary":          `fn void test(ref mut Token[] view){for(let Token item in view[..][..]){}}`,
 		"wrong-nominal":      `struct Other{i64 value;}fn void test(ref mut Token[] view){for(let Other item in view){}}`,
 		"wrong-scalar":       `fn void test(ref mut Token[] view){for(let i64 item in view){}}`,
 		"resource-graph":     `resource Owned{i64 value;cleanup{}}fn void test(ref mut Owned[] view){for(let Owned item in view){}}`,

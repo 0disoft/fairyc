@@ -48,7 +48,7 @@ func TestMutableStructForSourceBoundary(t *testing.T) {
 		"shared-source":       "fn void edit(ref Token[] view){for(let ref mut Token item in view){}}",
 		"copied-item-store":   "fn void edit(ref mut Token[] view){for(let Token item in view){item.value=9;}}",
 		"mutable-descriptor":  "fn void edit(ref mut Token[] view){var ref mut Token[] alias=view;for(let ref mut Token item in alias){}}",
-		"temporary":           "fn void edit(ref mut Token[] view){for(let ref mut Token item in view[..]){}}",
+		"temporary":           "fn void edit(ref mut Token[] view){for(let ref mut Token item in view[..][..]){}}",
 		"wrong-nominal":       "fn void edit(ref mut Token[] view){for(let ref mut Other item in view){}}",
 		"shared-to-exclusive": "fn void edit(ref Token[] view){let ref mut Token item=ref mut view[0];}",
 	} {
