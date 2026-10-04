@@ -20,6 +20,7 @@ const (
 	TypeU32        Type = "u32"
 	TypeUSize      Type = "usize"
 	TypeByteSlice  Type = "[u8]"
+	TypeBoolSlice  Type = "[bool]"
 	TypeI64Slice   Type = "[i64]"
 	TypeI32Slice   Type = "[i32]"
 	TypeU32Slice   Type = "[u32]"

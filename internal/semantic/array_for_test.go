@@ -60,7 +60,6 @@ func TestArrayForBoundary(t *testing.T) {
 	for name, source := range map[string]string{
 		"immutable-mut":     "fn void bad(){let i64[1] data=[1];for(let ref mut i64 item in data){}}",
 		"wrong-width":       "fn void bad(){var i32[1] data=[1];for(let i64 item in data){}}",
-		"bool":              "fn void bad(){var bool[1] data=[true];for(let bool item in data){}}",
 		"literal":           "fn void bad(){for(let i64 item in [1,2]){}}",
 		"call":              "fn i64[1] make(){return [1];}fn void bad(){for(let i64 item in make()){}}",
 		"shared-item-store": "fn void bad(){var i64[1] data=[1];for(let ref i64 item in data){*item=9;}}",

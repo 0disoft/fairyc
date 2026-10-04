@@ -7,6 +7,8 @@ import "strings"
 // stage-owned scalar-leaf struct validation before execution.
 func IndexedViewElement(value Type) (Type, bool) {
 	switch value {
+	case SharedBorrow(TypeBoolSlice), MutableBorrow(TypeBoolSlice):
+		return TypeBool, true
 	case SharedBorrow(TypeByteSlice), MutableBorrow(TypeByteSlice):
 		return TypeU8, true
 	case SharedBorrow(TypeI64Slice), MutableBorrow(TypeI64Slice):
@@ -44,13 +46,13 @@ func I64View(value Type) bool {
 	return borrow && element == TypeI64Slice
 }
 
-// IntegerViewElement recognizes unsized integer slices without admitting ownership.
-func IntegerViewElement(value Type) (Type, bool) {
+// ScalarViewElement recognizes unsized bool/integer slices without admitting ownership.
+func ScalarViewElement(value Type) (Type, bool) {
 	element, ok := IndexedViewElement(SharedBorrow(value))
-	return element, ok && element != TypeBool && FixedArrayScalarElement(element)
+	return element, ok && FixedArrayScalarElement(element)
 }
 
-// NonByteIndexedView selects array-backed integer views rather than static byte data.
+// NonByteIndexedView selects typed storage views rather than static byte data.
 func NonByteIndexedView(value Type) bool {
 	element, ok := IndexedViewElement(value)
 	return ok && element != TypeU8

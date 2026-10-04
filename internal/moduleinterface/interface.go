@@ -338,7 +338,7 @@ func stableType(value hir.Type, packageID hir.PackageID, coordinates map[hir.Pac
 		}
 		return stable + "[]", nil
 	}
-	if element, slice := hir.IntegerViewElement(value); slice {
+	if element, slice := hir.ScalarViewElement(value); slice {
 		return string(element) + "[]", nil
 	}
 	if builtinType(value) {
@@ -427,7 +427,7 @@ func userTypeParts(value hir.Type, current hir.PackageID) (hir.PackageID, string
 }
 
 func builtinType(value hir.Type) bool {
-	_, integerSlice := hir.IntegerViewElement(value)
+	_, integerSlice := hir.ScalarViewElement(value)
 	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 ||
 		value == hir.TypeU32 || value == hir.TypeUSize || integerSlice || value == hir.TypeStr ||
 		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)

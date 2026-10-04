@@ -18,8 +18,9 @@ func indexedViewCType(value hir.Type) (descriptor, pointer string, ok bool) {
 	if !ok {
 		return "", "", false
 	}
-	names := map[hir.Type]string{hir.TypeU8: "byte", hir.TypeI64: "i64", hir.TypeI32: "i32", hir.TypeU32: "u32", hir.TypeUSize: "usize"}
-	types := map[hir.Type]string{hir.TypeU8: "uint8_t", hir.TypeI64: "int64_t", hir.TypeI32: "int32_t", hir.TypeU32: "uint32_t", hir.TypeUSize: "uintptr_t"}
+	names := map[hir.Type]string{hir.TypeBool: "bool", hir.TypeU8: "byte", hir.TypeI64: "i64", hir.TypeI32: "i32", hir.TypeU32: "u32", hir.TypeUSize: "usize"}
+	// Fairy bool uses the existing int32_t scalar/array representation, not C _Bool.
+	types := map[hir.Type]string{hir.TypeBool: "int32_t", hir.TypeU8: "uint8_t", hir.TypeI64: "int64_t", hir.TypeI32: "int32_t", hir.TypeU32: "uint32_t", hir.TypeUSize: "uintptr_t"}
 	if hir.MutableIndexedView(value) {
 		return "fy_mut_" + names[element] + "_slice", types[element] + " *", true
 	}
@@ -27,7 +28,7 @@ func indexedViewCType(value hir.Type) (descriptor, pointer string, ok bool) {
 }
 
 func (e *emitter) emitIntegerViewTypes(output *strings.Builder) {
-	for _, slice := range []hir.Type{hir.TypeI32Slice, hir.TypeU32Slice, hir.TypeUsizeSlice} {
+	for _, slice := range []hir.Type{hir.TypeBoolSlice, hir.TypeI32Slice, hir.TypeU32Slice, hir.TypeUsizeSlice} {
 		for _, value := range []hir.Type{hir.SharedBorrow(slice), hir.MutableBorrow(slice)} {
 			if !e.integerViews[value] {
 				continue

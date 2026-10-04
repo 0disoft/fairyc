@@ -215,7 +215,7 @@ func genericType(value ast.TypeReference, binders map[string]int, nominals map[s
 				return TypeRef{Kind: TypeSlice, Arguments: []TypeRef{element}}, nil
 			}
 			slice := hir.Type("[" + element.Name + "]")
-			if _, admitted := hir.IntegerViewElement(slice); admitted {
+			if _, admitted := hir.ScalarViewElement(slice); admitted {
 				return TypeRef{Kind: TypeBuiltin, Name: string(slice)}, nil
 			}
 			return TypeRef{}, fmt.Errorf("generic slice element has no resolved slice identity")

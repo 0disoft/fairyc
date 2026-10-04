@@ -6,7 +6,7 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// byteForSourceIssue checks a named integer/plain struct view before the hidden
+// byteForSourceIssue checks a named scalar/plain struct view before the hidden
 // scalar loop is admitted. The descriptor binding must be immutable so the length snapshot
 // and later indexed reads always use the same view, even for exclusive views.
 func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Expression) string {
@@ -20,22 +20,22 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 		itemType = *itemType.Element
 	}
 	if (itemType.Kind != ast.TypeKindNamed && itemType.Kind != ast.TypeKindBoundNominal) || len(itemType.Arguments) != 0 {
-		return "view iteration requires an exact integer or scalar-field struct item binding"
+		return "view iteration requires an exact bool/integer or scalar-field struct item binding"
 	}
 	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, itemType, false)
-	_, integer := hir.IntegerViewElement(hir.Type("[" + string(wantElement) + "]"))
+	_, scalar := hir.ScalarViewElement(hir.Type("[" + string(wantElement) + "]"))
 	nominal := c.analyzer.plainViewStruct(wantElement)
-	if !resolved || !integer && !nominal {
-		return "view iteration requires an exact u8, i32, i64, u32, usize or scalar-field struct item binding"
+	if !resolved || !scalar && !nominal {
+		return "view iteration requires an exact bool, u8, i32, i64, u32, usize or scalar-field struct item binding"
 	}
 	shape := loop.Type.Path + "-view iteration requires a named immutable ref " + loop.Type.Path + "[] or ref mut " + loop.Type.Path + "[] view"
 	if nominal {
 		shape = "struct-view iteration requires an exact named immutable shared or mutable struct view"
 	}
 	if mutableItem {
-		shape = "mutable view iteration requires an exact ref mut integer or struct item and a named immutable mutable view"
+		shape = "mutable view iteration requires an exact ref mut bool/integer or struct item and a named immutable mutable view"
 	} else if referenceItem {
-		shape = "shared reference iteration requires an exact integer or plain struct item and a named immutable view"
+		shape = "shared reference iteration requires an exact bool/integer or plain struct item and a named immutable view"
 	}
 	if wantElement == hir.TypeU8 && !mutableItem {
 		shape = "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"

@@ -45,9 +45,9 @@ func resetArrayForPreparation(statement *ast.Statement) {
 // a private descriptor and redirect the prepared header paths to that symbol;
 // never resolve the written body again or copy the array into a temporary.
 func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expression, owner *symbol, want hir.Type, mutable bool) string {
-	const shape = "array iteration requires an exact integer item and a named fixed integer array; mutable items require a mutable array"
+	const shape = "array iteration requires an exact bool or integer item and a named fixed scalar array; mutable items require a mutable array"
 	element, length, array := hir.FixedArrayParts(owner.typ)
-	if !array || element != want || element == hir.TypeBool || !hir.ExecutableFixedArrayShape(element, length) || mutable && !owner.mutable {
+	if !array || element != want || !hir.ExecutableFixedArrayShape(element, length) || mutable && !owner.mutable {
 		return shape
 	}
 	classic := prepared.Block.Statements[1].For

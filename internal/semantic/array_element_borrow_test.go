@@ -58,7 +58,7 @@ func TestArrayElementBorrowBoundary(t *testing.T) {
 	for name, src := range map[string]string{
 		"immutable-mut":    "fn void bad(){let i64[2] data=[1,2];let ref mut i64 item=ref mut data[0];}",
 		"wrong-width":      "fn void bad(){var i32[2] data=[1,2];let ref i64 item=ref data[0];}",
-		"bool":             "fn void bad(){var bool[2] data=[true,false];let ref mut bool item=ref mut data[0];}",
+		"bool-mismatch":    "fn void bad(){var bool[2] data=[true,false];let ref mut i32 item=ref mut data[0];}",
 		"call-root":        "fn i64[2] make(){return [1,2];}fn void bad(){let ref i64 item=ref make()[0];}",
 		"parameter-escape": "fn ref i64 bad(i64[2] data){return ref data[0];}",
 		"literal":          "fn void bad(){let ref i64 item=ref [1,2][0];}",

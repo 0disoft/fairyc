@@ -333,7 +333,7 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 			return hir.TypeInvalid, false
 		}
 		slice := hir.Type("[" + string(element) + "]")
-		_, admitted := hir.IntegerViewElement(slice)
+		_, admitted := hir.ScalarViewElement(slice)
 		_, nominal := hir.StructSliceElement(slice)
 		return slice, admitted || nominal && a.structTypes[element] != nil
 	case ast.TypeKindReference:
@@ -463,7 +463,7 @@ func parsePositiveArrayLength(raw string) (uint64, bool) {
 
 func validUnsizedTypeUse(value hir.Type) bool {
 	_, structSlice := hir.StructSliceElement(value)
-	if _, slice := hir.IntegerViewElement(value); slice || structSlice || value == hir.TypeStr || value == hir.TypeCStr {
+	if _, slice := hir.ScalarViewElement(value); slice || structSlice || value == hir.TypeStr || value == hir.TypeCStr {
 		return false
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {

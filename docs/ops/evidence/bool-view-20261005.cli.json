@@ -1,0 +1,354 @@
+{
+  "schema": "fairyc.bool-view-cli/v1",
+  "compilerSHA256": "cfbb6e1b9ec519943a60dfa2e4b148e0831e0bad48003feeed94d9f8d13f5722",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004162551-4f048530a7f1+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 4f048530a7f1aa2496528ce15c124bdfab2a5a60\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nfn usize count(ref bool[] flags) {\n var usize total=0;\n for(let bool flag in flags){if(flag){total+=1;}}\n for(let ref bool flag in flags){assert(*flag==flags[0] || *flag!=flags[0]);}\n return total;\n}\nfn ref bool first(ref bool[] flags){for(let ref bool flag in flags){return flag;}return ref flags[0];}\nfn void flip(ref mut bool[] flags){for(let ref mut bool flag in flags){*flag=!*flag;}}\nfn void early(ref mut bool[] flags){for(let ref mut bool flag in flags){*flag=true;return;}}\nfn Result<i32,u32> fail(){return .err(7);}\nfn Result<i32,u32> propagate(ref mut bool[] flags){for(let ref mut bool flag in flags){*flag=true;let i32 unused=fail()?;}return .ok(0);}\nfn usize by_value(bool[2] data){var usize total=0;for(let bool flag in data){if(flag){total+=1;}}return total;}\nfn i32 main(){\n var bool[5] flags=[false;5];\n {let ref mut bool cell=ref mut flags[1];*cell=true;}\n flags[3]=true;\n {let ref bool cell=ref flags[1];assert(*cell);}\n assert(count(ref flags)==2 && by_value([true,false])==1);\n let ref bool[] shared=ref flags;\n assert(!*first(shared) && shared.len==5 && !shared.is_empty);\n assert(count(shared[..])==2 && count(shared[1..4])==2);\n assert(count(shared[5..])==0 && shared[5..].is_empty);\n var usize seen=0;\n for(let bool flag in flags){if(flag){seen+=1;}}\n assert(seen==2);\n for(let ref bool flag in flags){assert(*flag==flags[seen-2]);break;}\n var usize visits=0;\n for(let ref mut bool flag in flags){visits+=1;*flag=!*flag;if(visits==1){continue;}if(visits==3){break;}}\n assert(visits==3 && flags[0] && !flags[1] && flags[2] && flags[3] && !flags[4]);\n let ref mut bool[] view=ref mut flags;\n {let ref mut bool[] child=view[1..4];flip(child);}\n assert(view[0] && view[1] && !view[2] && !view[3] && !view[4]);\n seen=0;\n for(let ref bool flag in view){if(*flag){seen+=1;}}\n assert(seen==2);\n visits=0;\n for(let bool flag in view){if(visits==0){view[1]=false;assert(flag);}if(visits==1){assert(!flag);}visits+=1;}\n assert(visits==5);\n flip(view[5..]);early(view[2..]);assert(view[2] && !view[3]);\n switch(propagate(view[3..])){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n assert(view[3] && !view[4]);\n {let ref mut bool cell=ref mut view[4];*cell=true;}\n assert(view[4]);\n var bool[1] other=[false];\n for(let ref mut bool flag in flags){for(let ref mut bool second in other){*second=*flag;}*flag=!*flag;}\n assert(!flags[0] && flags[1] && !flags[2] && !flags[3] && !flags[4] && other[0]);\n for(let ref mut bool flags in flags){*flags=!*flags;}\n assert(flags[0] && !flags[1] && flags[2] && flags[3] && flags[4]);\n return 0;\n}\n",
+      "sourceSHA256": "d3eaced8101add50a6788566404f5c361958aafe64c676cfe1a1538174a1d281"
+    },
+    {
+      "name": "numeric-store",
+      "source": "module main;fn void bad(ref mut bool[] flags){flags[0]=1;}fn i32 main(){return 0;}",
+      "sourceSHA256": "f1eec605fb722143183d057a140cc178eff0d5af9f034ed89cd715a268a8fc8a"
+    },
+    {
+      "name": "shared-store",
+      "source": "module main;fn void bad(ref bool[] flags){for(let ref bool item in flags){*item=false;}}fn i32 main(){return 0;}",
+      "sourceSHA256": "cb10fe72977aa3175f4566018b4a999316d79b0502adc0fd4473b1c4c986b5c1"
+    },
+    {
+      "name": "owner-write",
+      "source": "module main;fn void bad(){var bool[1] flags=[true];for(let ref bool item in flags){assert(*item);flags[0]=false;break;}}fn i32 main(){return 0;}",
+      "sourceSHA256": "89e352340c45eec04ba399cb22ddfa4dd41087533a234c964f7beca4b8822405"
+    },
+    {
+      "name": "local-escape",
+      "source": "module main;fn ref bool bad(){let bool[1] flags=[true];for(let ref bool item in flags){return item;}return ref flags[0];}fn i32 main(){return 0;}",
+      "sourceSHA256": "b139f49dc33906842e09b9a4c32797893d7625e9847f66d56006d00681f5aa42"
+    },
+    {
+      "name": "empty-index",
+      "source": "module main;fn i32 main(){var bool[2] flags=[true,false];let ref mut bool[] view=ref mut flags;let bool unused=view[2..][0];return 0;}",
+      "sourceSHA256": "1c9daf3bfca2c729c800816eea72dc3f60bfc4935da0558dd3233235a57579ea"
+    },
+    {
+      "name": "store-end",
+      "source": "module main;fn i32 main(){var bool[2] flags=[true,false];let ref mut bool[] view=ref mut flags;view[2]=true;return 0;}",
+      "sourceSHA256": "27111335ece94e1a6d3065207918806e3e0ff0cc4f474c3fe9437083cf983d66"
+    }
+  ],
+  "exampleSources": [
+    {
+      "path": "examples\\bool_view_quickstart\\src\\flags.fy",
+      "sha256": "d1c8cc979e05f4fc03038d3c2b2342a82e08fc7c36838f07448e88ea205bd385"
+    },
+    {
+      "path": "examples\\bool_view_quickstart\\src\\main.fy",
+      "sha256": "bda16bfdfda09d0fe231c75579bea2ff500ee6ac719e3337734fcf77e4c3ae3a"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004162551-4f048530a7f1+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 4f048530a7f1aa2496528ce15c124bdfab2a5a60\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 8 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/bool-view-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "df26a4a0d812020cdfd1d187d27b785ff546762882d0c9380f0385e08ebb13f0",
+      "imagePath": ".cache\\bool-view-cli\\images\\matrix-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/bool-view-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "7b8fa8acc8ca0fc14f4cbd226b859283b9438bd0d25f5db3f7ac9530114e70c8",
+      "imagePath": ".cache\\bool-view-cli\\images\\matrix-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\numeric-store",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:56: E1006: incompatible expected and actual types [bytes 55..56]\n  expected-type: main.fy:1:47 [bytes 46..54]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\shared-store",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:75: E1008: assignment target is not mutable [bytes 74..79]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\owner-write",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:98: E2101: Access conflicts with an active shared or mutable loan. [bytes 97..105]\n  last-use: main.fy:1:98 [bytes 97..105]\n  loan: main.fy:1:77 [bytes 76..81]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\local-escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:95: E2102: Returned borrow originates from a local value. [bytes 94..98]\n  origin: main.fy:1:43 [bytes 42..47]\nmain.fy:1:108: E2102: Returned borrow originates from a local value. [bytes 107..119]\n  origin: main.fy:1:43 [bytes 42..47]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\empty-index",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\empty-index",
+      "exit": 0,
+      "stdout": "built: build/bool-view-empty-index.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "7f70378352f0ed0440792299f60df15e620dbd18527a6f31a930c57ba39fd3be",
+      "imagePath": ".cache\\bool-view-cli\\images\\empty-index-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\empty-index",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\empty-index",
+      "exit": 0,
+      "stdout": "built: build/bool-view-empty-index.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "d5704152fff3f10c7ea204774e3d821f4933dcb0c9a28afe726e749404efc5c9",
+      "imagePath": ".cache\\bool-view-cli\\images\\empty-index-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\empty-index",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\store-end",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\store-end",
+      "exit": 0,
+      "stdout": "built: build/bool-view-store-end.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "8048870054dae65ab216f762088ade67d7a5edffa156a30cd5c4bc4c1c9ee40f",
+      "imagePath": ".cache\\bool-view-cli\\images\\store-end-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\store-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\store-end",
+      "exit": 0,
+      "stdout": "built: build/bool-view-store-end.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "7767782113dd81e105337b506a1c4542c9626e849570c0157db8ddf02481f73f",
+      "imagePath": ".cache\\bool-view-cli\\images\\store-end-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-cli\\store-end",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\bool_view_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 156 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\bool_view_quickstart",
+      "exit": 0,
+      "stdout": "built: build/bool-view-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "55ead2e2ef6c4a14df1ee1c57517c3b3a19364164c2b8988a4340efc958a971d",
+      "imagePath": ".cache\\bool-view-cli\\images\\example-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\bool_view_quickstart",
+      "exit": 0,
+      "stdout": "occupied=3 next=5 after=4\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\bool_view_quickstart",
+      "exit": 0,
+      "stdout": "built: build/bool-view-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "cfc37d78aa9f57207e7954ebcf041d966bff69c0543700ccc02410463fd03c0d",
+      "imagePath": ".cache\\bool-view-cli\\images\\example-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\bool-view-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\bool_view_quickstart",
+      "exit": 0,
+      "stdout": "occupied=3 next=5 after=4\n",
+      "stderr": ""
+    }
+  ],
+  "nativeOutcomes": 8
+}

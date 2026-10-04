@@ -737,7 +737,7 @@ func nominalTypeParts(value hir.Type) (hir.PackageID, string, bool) {
 }
 
 func builtinType(value hir.Type) bool {
-	_, integerSlice := hir.IntegerViewElement(value)
+	_, integerSlice := hir.ScalarViewElement(value)
 	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 ||
 		value == hir.TypeU32 || value == hir.TypeUSize || integerSlice || value == hir.TypeStr ||
 		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)

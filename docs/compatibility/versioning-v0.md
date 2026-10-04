@@ -1727,3 +1727,14 @@ symbol when generic expansion detaches the retained source path. Exact compiler
 identity separates prior behavior/cache generations. Language /20, SDK stage0.86,
 runtime /0, MIR/wire schemas and ABI stay unchanged. Windows dev/release execution
 is verified; Linux execution remains deferred to the owner's batch.
+
+ADR 0461 admits bool borrowed views, direct fixed-array element references and
+copied/shared/exclusive iteration over named bool arrays/views. The canonical
+scalar-slice classifier is shared by semantic checks, source snapshots, public
+interfaces, function identities and storage specialization. Existing MIR
+operations and the private int32_t bool storage representation are reused;
+bool views retain distinct typed descriptors from i32 views. Exact compiler
+identity separates earlier restricted compilers/cache generations. Language /20,
+SDK stage0.86/source/exports, runtime /0, MIR/wire schemas, ABI and target maturity
+remain unchanged. Windows dev/release execution is verified; Linux actual
+execution remains deferred to the owner's batch.

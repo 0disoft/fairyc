@@ -159,7 +159,9 @@ while_stmt = "while" "(" expression ")" statement_block ;
    Shared ref integer items also traverse named integer views and fixed arrays
    (ADR 0458). Shared ref plain struct items also traverse named shared or
    mutable struct views (ADR 0459). Copied plain struct items may also traverse
-   named immutable mutable-view bindings (ADR 0460). SDK vector-reference
+   named immutable mutable-view bindings (ADR 0460). Bool views, fixed arrays,
+   and their copied/shared/exclusive items follow the scalar path (ADR 0461).
+   SDK vector-reference
    iteration is separate. *)
 for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block
          | "for" "(" "let" type IDENT "in" expression ")" statement_block ;

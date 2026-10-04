@@ -60,7 +60,7 @@ func isStorageViewType(typ *ast.TypeReference) bool {
 	if typ == nil || typ.Kind != ast.TypeKindSlice || typ.Element == nil || len(typ.Element.Arguments) != 0 {
 		return false
 	}
-	_, ok := hir.IntegerViewElement(hir.Type("[" + typ.Element.Path + "]"))
+	_, ok := hir.ScalarViewElement(hir.Type("[" + typ.Element.Path + "]"))
 	return ok || typ.Element.Kind == ast.TypeKindBoundNominal || typ.Element.Kind == ast.TypeKindNamed && typ.Element.Path != "bool" && typ.Element.Path != "void"
 }
 

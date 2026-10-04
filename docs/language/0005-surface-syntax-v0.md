@@ -57,7 +57,7 @@
   reads but block mutation; exclusive loops block separate owner access even
   after an item's last use. `continue` advances the hidden index; break,
   return and propagation release the loop-held loan at exit. Current arrays
-  retain the `1..=4096` size guard. Bool/struct arrays, array fields and
+  retain the `1..=4096` size guard. Struct arrays, array fields and
   literal/call iterable roots are not admitted.
 - ADR 0458 admits `for (let ref T item in source)` for the same five integer
   types over named fixed arrays and immutable named `ref T[]`/`ref mut T[]`
@@ -82,6 +82,14 @@
   not-yet-visited elements. Retained value copies survive owner cleanup after
   loop exit. The loop still holds the owner against structural mutation/moves;
   existing live element-reference loans still restrict competing writes.
+- ADR 0461 extends the scalar view/iteration path to `bool`. Existing `bool[N]`
+  arrays can yield `ref bool[]`/`ref mut bool[]`, checked element references,
+  and copied/shared/exclusive loop items. Named view bindings must remain
+  immutable; exclusive array items require a mutable array. Bool subviews
+  preserve exact element type, bounds checks, owner lifetime and parent-freezing
+  rules. Shared-reference loops block competing writes through loop exit;
+  copied mutable-view loops allow writes and see current later elements.
+  Bool storage is not bit-packed, and no numeric-to-bool conversion is added.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

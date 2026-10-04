@@ -57,7 +57,6 @@ func TestSharedIntegerForBoundary(t *testing.T) {
 		"wrong-width":        `fn void test(ref i32[] values){for(let ref i64 item in values){}}`,
 		"mutable-descriptor": `fn void test(ref i64[] values){var ref i64[] alias=values;for(let ref i64 item in alias){}}`,
 		"temporary":          `fn void test(ref i64[] values){for(let ref i64 item in values[..]){}}`,
-		"bool":               `fn void test(){var bool[1] values=[true];for(let ref bool item in values){}}`,
 		"resource":           `resource Token{i32 code;cleanup{}}fn void test(ref Token[] values){for(let ref Token item in values){}}`,
 	} {
 		t.Run(name, func(t *testing.T) {

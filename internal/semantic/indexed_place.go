@@ -110,7 +110,7 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 		return hir.Expression{}, false
 	}
 	element, length, array := hir.FixedArrayParts(owner.typ)
-	if !array || element == hir.TypeBool || !hir.ExecutableFixedArrayShape(element, length) {
+	if !array || !hir.ExecutableFixedArrayShape(element, length) {
 		return hir.Expression{}, false
 	}
 	lowered := *child
