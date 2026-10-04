@@ -30,7 +30,7 @@ func TestStructForRejections(t *testing.T) {
 		{"call-expression", "for(let Token item in tail(ref owned)){}", ""},
 		{"direct-vector", "for(let Token item in owned){}", ""},
 		{"move-propagation", "for(let Token item in view){let i32 value=take_result(owned)?;}", "E2105"},
-		{"reference-item", "for(let ref Token item in view){}", ""},
+		{"reference-item-store", "for(let ref Token item in view){item.kind=2;}", ""},
 		{"mutable-reference-item", "for(let ref mut Token item in view){}", ""},
 	} {
 		t.Run(item.name, func(t *testing.T) {

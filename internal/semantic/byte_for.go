@@ -25,9 +25,6 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, itemType, false)
 	_, integer := hir.IntegerViewElement(hir.Type("[" + string(wantElement) + "]"))
 	nominal := c.analyzer.plainViewStruct(wantElement)
-	if referenceItem && !mutableItem && !integer {
-		return "shared reference iteration requires an exact integer item"
-	}
 	if !resolved || !integer && !nominal {
 		return "view iteration requires an exact u8, i32, i64, u32, usize or scalar-field struct item binding"
 	}
@@ -38,7 +35,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if mutableItem {
 		shape = "mutable view iteration requires an exact ref mut integer or struct item and a named immutable mutable view"
 	} else if referenceItem {
-		shape = "shared reference iteration requires an exact integer item and a named immutable integer view"
+		shape = "shared reference iteration requires an exact integer or plain struct item and a named immutable view"
 	}
 	if wantElement == hir.TypeU8 && !mutableItem {
 		shape = "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"
@@ -70,7 +67,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if value.mutable {
 		return shape
 	}
-	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || (nominal || mutableItem) && hir.MutableIndexedView(value.typ) != mutableItem {
+	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || (nominal && !referenceItem || mutableItem) && hir.MutableIndexedView(value.typ) != mutableItem {
 		return shape
 	}
 	if referenceItem {

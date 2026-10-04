@@ -157,7 +157,8 @@ while_stmt = "while" "(" expression ")" statement_block ;
    items over mutable views. Named fixed integer arrays also admit copied integer
    items, or ref mut integer items when the array binding is mutable (ADR 0457).
    Shared ref integer items also traverse named integer views and fixed arrays
-   (ADR 0458). SDK vector-reference iteration is separate. *)
+   (ADR 0458). Shared ref plain struct items also traverse named shared or
+   mutable struct views (ADR 0459). SDK vector-reference iteration is separate. *)
 for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block
          | "for" "(" "let" type IDENT "in" expression ")" statement_block ;
 for_init = binding_kind (IDENT | type IDENT) "=" expression

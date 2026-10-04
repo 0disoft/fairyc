@@ -67,6 +67,14 @@
   `Option<ref T>` under existing lifetime rules; local/by-value array storage
   cannot escape. Shared array loops may nest; length and checked ascending
   traversal are unchanged.
+- ADR 0459 also admits `for (let ref Token item in items)` over immutable
+  named shared or mutable plain struct view bindings. Items reference stored
+  elements, including nested scalar-field structs, and can be returned or
+  retained under existing lifetime rules. The whole loop blocks owner writes
+  and exclusive reborrows; live returned references retain that protection.
+  Copied struct loops still require shared views, and mutable items require
+  mutable views. Resource/pointer/borrowed/array/tagged field graphs, computed
+  iterable roots and fixed struct arrays remain outside this admission.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

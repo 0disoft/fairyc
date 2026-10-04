@@ -1706,3 +1706,13 @@ private descriptor identity, so Vec owner/escape checks still execute. Exact
 compiler identity separates earlier restricted compilers/cache generations.
 Language /20, SDK stage0.86, runtime /0, MIR/wire schemas and ABI stay unchanged.
 Windows dev/release execution is verified; Linux execution remains deferred.
+
+ADR 0459 admits shared-reference items over immutable named shared/mutable
+plain struct views. Existing element-address, bounds and owner lifetime
+operations are reused; copied struct and exclusive-item source restrictions
+remain intact. Deferred reference-loop bodies now expand their written generic
+calls and local types, while synthetic Vec candidates remain inert until
+SDK authentication. Exact compiler identity separates earlier restricted
+compilers/cache generations. Language /20, SDK stage0.86, runtime /0,
+MIR/wire schemas and ABI stay unchanged. Windows dev/release execution is
+verified; Linux execution remains deferred to the owner's batch.

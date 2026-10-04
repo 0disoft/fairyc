@@ -161,7 +161,14 @@ func (t transform) statement(v *ast.Statement) error {
 		if err != nil {
 			return err
 		}
-		loop.Body, err = inert.block(loop.Body)
+		// A view loop prepared later by semantic analysis still owns executable
+		// written calls and local types. Expand that body now; prepared loops
+		// already expanded it through v.Expression and keep source facts inert.
+		if v.Expression == nil {
+			loop.Body, err = t.block(loop.Body)
+		} else {
+			loop.Body, err = inert.block(loop.Body)
+		}
 		if err != nil {
 			return err
 		}

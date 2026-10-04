@@ -1,0 +1,209 @@
+{
+  "schema": "fairyc.shared-struct-for-cli/v1",
+  "compilerSHA256": "4436c173b3ff160c2eb80c1286e54e3f09af56ca9841de948402c5d75467b255",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004154610-664fe660462a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 664fe660462a91a43cf6878bcf80874e02909b58\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nimport std::vec as vec;\nstruct Span {usize start;usize end;}\nstruct Token {u32 kind;i64 value;bool active;Span position;}\nfn T identity<T>(T value){return value;}\nfn Option<ref Token> find(ref Token[] items,u32 kind){\n for(let ref Token item in items){if(item.kind==kind){return .some(item);}}\n return .none;\n}\nfn Option<ref Span> position(ref mut Token[] items,u32 kind){\n for(let ref Token item in items){if(item.kind==kind){return .some(ref item.position);}}\n return .none;\n}\nfn Result<i32,u32> fail(){return .err(7);}\nfn Result<i32,u32> propagate(ref Token[] items){for(let ref Token item in items){assert(item.active);let i32 ignored=fail()?;}return .ok(0);}\nfn i32 main(){\n var vec::Vec<Token> owner=vec::empty<Token>();\n for(var u32 kind=1;kind<=4;kind+=1){\n  let usize start=kind as usize;\n  assert(vec::push<Token>(ref mut owner,Token{.kind=kind,.value=4000000000+kind as i64,.active=true,.position=Span{.start=start,.end=start+10}}).is_ok);\n }\n let ref mut Token[] exclusive=vec::view_mut<Token>(ref mut owner);\n switch(position(exclusive,2)){case .some(picked):{assert(picked.start==2 && picked.end==12);}case .none:{assert(false);}};\n var usize visits=0;\n for(let ref Token item in exclusive){visits+=1;assert(item.value>4000000000);let ref Span child=ref item.position;assert(child.end-child.start==10);if(item.kind==1){continue;}if(item.kind==3){break;}}\n assert(visits==3);\n exclusive[0].value=9;\n let ref Token[] items=vec::view<Token>(ref owner);\n let ref Token[] part=items[1..];\n switch(find(part,2)){case .some(picked):{assert(picked.kind==2 && picked.value==4000000002);let ref Span child=ref picked.position;assert(child.start==2);}case .none:{assert(false);}};\n switch(find(items,1)){case .some(picked):{assert(picked.value==9);}case .none:{assert(false);}};\n switch(find(items,4)){case .some(picked):{assert(picked.position.end==14);}case .none:{assert(false);}};\n switch(find(items,99)){case .some(_):{assert(false);}case .none:{}};\n let ref Token[] empty=items[4..];switch(find(empty,1)){case .some(_):{assert(false);}case .none:{}};\n var Option<ref Token> last=.none;\n for(let ref Token item in items){switch(last){case .some(old):{assert(old.kind<item.kind);}case .none:{}};last=.some(item);}\n switch(last){case .some(item):{assert(item.kind==4);}case .none:{assert(false);}};\n visits=0;for(let ref Token a in items){for(let ref Token b in items){assert(a.active && b.active);visits+=1;}}assert(visits==16);\n for(let ref Token items in items){assert(items.active);let i64 value=identity<i64>(items.value);var vec::Vec<i64> scratch=vec::empty<i64>();assert(vec::push<i64>(ref mut scratch,value).is_ok);assert(vec::len<i64>(ref scratch)==1);}\n switch(propagate(items)){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};\n assert(vec::clear<Token>(ref mut owner)==4);\n assert(vec::len<Token>(ref owner)==0);\n let ref Token[] cleared=vec::view<Token>(ref owner);for(let ref Token item in cleared){assert(false);}\n return 0;\n}\n",
+      "sourceSHA256": "5cde8a494f413047943a2277ab0596d388902b47b81e5985ae3ddb820bb7caf7"
+    },
+    {
+      "name": "blocked-owner-write",
+      "source": "module main;struct Token{i64 value;}fn void bad(ref mut Token[] items){for(let ref Token item in items){assert(item.value>0);items[0].value=9;break;}}fn i32 main(){return 0;}",
+      "sourceSHA256": "984bfd1601c7fadd75bda828c1883f9b01180bbbdc8ad9d396c1604c5f2acf10"
+    },
+    {
+      "name": "blocked-shared-store",
+      "source": "module main;struct Token{i64 value;}fn void bad(ref Token[] items){for(let ref Token item in items){item.value=9;}}fn i32 main(){return 0;}",
+      "sourceSHA256": "4652cf834064c1606bebf7bedc0b5e8e97416507915a13aee0ad38487563874c"
+    },
+    {
+      "name": "blocked-escape",
+      "source": "module main;import std::vec as vec;struct Token{i64 value;}fn Option<ref Token> bad(){var vec::Vec<Token> owner=vec::empty<Token>();let ref Token[] view=vec::view<Token>(ref owner);for(let ref Token item in view){return .some(item);}return .none;}fn i32 main(){return 0;}",
+      "sourceSHA256": "544d271eb6a528d2bc537410dd79e1da34d7e0765290cfccc2936bd6a86133a3"
+    }
+  ],
+  "exampleSources": [
+    {
+      "path": "examples\\shared_struct_ref_quickstart\\src\\main.fy",
+      "sha256": "edd142a41f9953fb5cc970d91d5e46bbab10f0937bb83bae83e71852f398fdb1"
+    },
+    {
+      "path": "examples\\shared_struct_ref_quickstart\\src\\tokens.fy",
+      "sha256": "6ec41691b5a3717b392050f652c1937e135ee7b4db030eafe136abf88f54730b"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004154610-664fe660462a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 664fe660462a91a43cf6878bcf80874e02909b58\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 192 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/shared-struct-for-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "78cf6ae810887f43966cd5bbc08a329c9d9d8e9698df1d3a171d914a59c0ca87",
+      "imagePath": ".cache\\shared-struct-for-cli\\images\\matrix-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/shared-struct-for-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "6375e529b87136ff6757652a73c6c43f985c0ceeb23a7eef606c8190e8880b21",
+      "imagePath": ".cache\\shared-struct-for-cli\\images\\matrix-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\blocked-owner-write",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:126: E2101: Access conflicts with an active shared or mutable loan. [bytes 125..133]\n  last-use: main.fy:1:126 [bytes 125..130]\n  loan: main.fy:1:98 [bytes 97..102]\nmain.fy:1:126: E2101: Access conflicts with an active shared or mutable loan. [bytes 125..139]\n  last-use: main.fy:1:126 [bytes 125..130]\n  loan: main.fy:1:98 [bytes 97..102]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\blocked-shared-store",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:101: E1008: assignment target is not mutable [bytes 100..110]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-cli\\blocked-escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:221: E2102: Returned borrow originates from a local value. [bytes 220..231]\n  origin: main.fy:1:107 [bytes 106..111]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\shared_struct_ref_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 10 source file(s), 184 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\shared_struct_ref_quickstart",
+      "exit": 0,
+      "stdout": "built: build/shared-struct-ref-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "cb45ac576f0c92e9531860aba1b6f251b63fcded2736ff36c39c1b32f6445e1f",
+      "imagePath": ".cache\\shared-struct-for-cli\\images\\find-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\shared_struct_ref_quickstart",
+      "exit": 0,
+      "stdout": "kind=2 value=4000000002 span=2..12\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\shared_struct_ref_quickstart",
+      "exit": 0,
+      "stdout": "built: build/shared-struct-ref-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "aa3603a964c74347f2d81ea6b486912a4bc4e06ecdaba31180a9f36d54d2a25e",
+      "imagePath": ".cache\\shared-struct-for-cli\\images\\find-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\shared_struct_ref_quickstart",
+      "exit": 0,
+      "stdout": "kind=2 value=4000000002 span=2..12\n",
+      "stderr": ""
+    }
+  ],
+  "nativeOutcomes": 4
+}

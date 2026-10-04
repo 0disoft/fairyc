@@ -1,0 +1,233 @@
+{
+  "schema": "fairyc.shared-struct-for-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "664fe660462a91a43cf6878bcf80874e02909b58",
+  "compiler": {
+    "path": ".cache/shared-struct-for-compiler/fairyc.exe",
+    "sha256": "4436c173b3ff160c2eb80c1286e54e3f09af56ca9841de948402c5d75467b255",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-struct-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004154610-664fe660462a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 664fe660462a91a43cf6878bcf80874e02909b58\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\shared-struct-for-compiler\\source-manifest.json",
+    "sha256": "4397d7a3c2a43b7611f12a5df9fa7ff80a5759daf440f166ea6a07348429cae8",
+    "productionFileCount": 543,
+    "sourceDigest": "19f857b1526f412969013ed7c163d902fba5031bb2428b665138c67b6ff36d0d"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceDigest": "fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "internal/ast/byte_for_lower.go",
+      "sha256": "57cda9fed36f50c43522f176e33ac5601348784a51db4b513b12256f40da9129"
+    },
+    {
+      "path": "internal/semantic/byte_for.go",
+      "sha256": "263327a72cfe6f68e48431d9c83f5b78ad25ffcda58463d25f3b697ba4baec9e"
+    },
+    {
+      "path": "internal/semantic/resolve.go",
+      "sha256": "47a7f6d22da03fdb08158c682b6e7d79746e165c1adaacc3ad22326a512b747b"
+    },
+    {
+      "path": "internal/genericsource/clone.go",
+      "sha256": "9fd797ce5c182497562dcb865d21df16f1e1106b405d6e95a637ea7489256cba"
+    },
+    {
+      "path": "internal/semantic/shared_struct_for_test.go",
+      "sha256": "5a5260900258dd3e7837829df71023a52c8a8203da22881adbe509a4e5933096"
+    },
+    {
+      "path": "internal/compiler/shared_struct_for_test.go",
+      "sha256": "140198f617b63384515441e485edfec8df6eea76eac107ffbe49e4b68761df84"
+    },
+    {
+      "path": "internal/compiler/testdata/shared_struct_for.fy",
+      "sha256": "5cde8a494f413047943a2277ab0596d388902b47b81e5985ae3ddb820bb7caf7"
+    },
+    {
+      "path": "internal/cli/shared_struct_for_test.go",
+      "sha256": "d2500b14afdd429e2c7b602f56f23fe623824c842f87783f3431e9272e21d45d"
+    },
+    {
+      "path": "examples/shared_struct_ref_quickstart/src/main.fy",
+      "sha256": "edd142a41f9953fb5cc970d91d5e46bbab10f0937bb83bae83e71852f398fdb1"
+    },
+    {
+      "path": "examples/shared_struct_ref_quickstart/src/tokens.fy",
+      "sha256": "6ec41691b5a3717b392050f652c1937e135ee7b4db030eafe136abf88f54730b"
+    },
+    {
+      "path": "examples/shared_struct_ref_quickstart/fairy.toml",
+      "sha256": "211bfa00f129bc989a75694905b03bd74d711a6096a92eccd3bff3cd313f421a"
+    },
+    {
+      "path": "examples/shared_struct_ref_quickstart/fairy.lock",
+      "sha256": "b772c66de82282aa4df0702b0b0632fc2c9346d84e52fa4bf6024313ae81991c"
+    }
+  ],
+  "tests": [
+    {
+      "path": ".cache/shared-struct-for-related.jsonl",
+      "role": "related stage regressions",
+      "sha256": "2034ce02b1f4564daaae6e26ff190dd56f2a5ad254656e243e88ccdfaa07469d",
+      "passEvents": 437,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/shared-struct-for-native.jsonl",
+      "role": "Windows native and public check rejections",
+      "sha256": "a66996aa48670e172969a86b8c03fb19496497532a1bd8f579cce7bf8d79c07f",
+      "passEvents": 33,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/shared-struct-for-roundtrip.jsonl",
+      "role": "repeatable source analysis, MIR codec and verifier mutations",
+      "sha256": "559b484adf95afc0a5e32164e9969502b162e95d7275be07cf80c0a32c8d1b04",
+      "passEvents": 4,
+      "skips": 0,
+      "failures": 0
+    }
+  ],
+  "cliReceipt": {
+    "path": "docs/ops/evidence/shared-struct-for-20261005.cli.json",
+    "sha256": "d9c94fba34dc2a579ac492b12791957a14b9d0a77b3929db30bf9944a300923c",
+    "nativeOutcomes": 4
+  },
+  "nativeReceipt": {
+    "path": "docs/ops/evidence/shared-struct-for-20261005.native.json",
+    "sha256": "68fa21e31e505b95cec51a2fc66d155fb3d63531262fd67da992f809991c47e5",
+    "outcomes": 6,
+    "executor": "in-process compiler and cdriver, with separate public compiler executable"
+  },
+  "commands": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/ast",
+        "./internal/genericsource",
+        "-run",
+        "^Test(SharedStructFor.*|SharedIntegerFor.*|MutableStructFor.*|IndexedStructBorrow.*|StructDeref.*|.*(ByteViewFor|I64For|IntegerFor|ByteFor|VectorSDKCandidateLoop|VectorSDKCandidateResourceLoop|VectorFor|SDKVectorLoop).*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/shared-struct-for-related.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^Test(SharedStructFor.*|StructForRejections)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/shared-struct-for-native.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/compiler",
+        "-run",
+        "^TestSharedStructForMIR$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/shared-struct-for-roundtrip.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/shared-struct-for-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/ast",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/genericsource",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "validation": {
+    "format": "passed",
+    "vet": "passed",
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for later batch",
+    "sdkVersion": "0.0.0-stage0.86",
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "newRuntimeHelper": false,
+    "newSDKAPI": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "benchmark": false,
+    "ciChanges": false
+  }
+}

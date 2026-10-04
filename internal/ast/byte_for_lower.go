@@ -14,9 +14,9 @@ func byteForAsBlock(loop *ByteForLoop) *Expression {
 	return prepareViewFor(loop, false)
 }
 
-// PrepareIntegerReferenceLoop is used after SDK vector candidates have been
-// selected. Actual integer/view/array admission remains semantic-owned.
-func PrepareIntegerReferenceLoop(loop *ByteForLoop) *Expression {
+// PrepareReferenceViewLoop is used after SDK vector candidates have been
+// selected. Actual integer/struct view and array admission remains semantic-owned.
+func PrepareReferenceViewLoop(loop *ByteForLoop) *Expression {
 	return prepareViewFor(loop, true)
 }
 

@@ -78,7 +78,7 @@ func TestPreparedVectorForDoesNotAdmitSourceBeforeSemanticGate(t *testing.T) {
 		"std/vec.fy": "module std::vec; pub struct Placeholder { i32 value; }",
 	})
 	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 ||
-		result.Unsupported[0].Feature != "shared reference iteration requires an exact integer item and a named immutable integer view" {
+		result.Unsupported[0].Feature != "shared reference iteration requires an exact integer or plain struct item and a named immutable view" {
 		t.Fatalf("candidate source admission changed: diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
 	}
 }
