@@ -135,7 +135,9 @@ binding_kind = "let" | "var" ;
    Place validity is a semantic check, including direct indexed field stores into
    named mutable fixed plain-struct arrays (ADR 0463) and direct indexed field
    references `ref array[index].field` / `ref mut array[index].nested.field` into
-   the same arrays (ADR 0464). *)
+   the same arrays (ADR 0464). Compound assignment additionally admits an exact
+   integer dereference of a named mutable reference `*name` or the grouped
+   `*(name)` (ADR 0466). *)
 assignment_stmt = expression assignment_operator expression ";" ;
 assignment_operator = "=" | "+=" | "-=" | "*=" | "/=" | "%="
                     | "<<=" | ">>=" | "&=" | "^=" | "|=" ;

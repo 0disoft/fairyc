@@ -1,0 +1,202 @@
+{
+  "schema": "fairyc.deref-compound-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "8b7bedda1ecbc73d373b617b0d0b2ffe7a4aa962",
+  "compiler": {
+    "path": ".cache\\deref-compound-compiler\\fairyc.exe",
+    "sha256": "ac0f3b0367236dfa125ef57d938b599cb023e1b8199c73277b78980721616366",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004181630-8b7bedda1ecb+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 8b7bedda1ecbc73d373b617b0d0b2ffe7a4aa962\nmodified: true\n",
+      "stderr": ""
+    },
+    "build": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/deref-compound-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\deref-compound-compiler\\source-manifest.json",
+    "sha256": "d39da6df09d83c9f2203d6ef149cbfdde6554589a58103cb4c38a1a52f36c446",
+    "fileCount": 610,
+    "sourceDigest": "3e4e37f96644e0c82848e6decbba0dcc029af19a052f71c1510ccdd116691a1c"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceFileCount": 8,
+    "sourceFileManifestDigest": "01a68c5f4fbea762c6c30c2f3fef103fa1c29310b9157cecd1d73e6ef65dbc9f",
+    "digestAlgorithm": "sha256(path-tab-fileSHA256-LF)"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "docs/adr/0457-direct-integer-array-iteration.md",
+      "sha256": "2206d55ab68159e91cc7f560ef5474383a18c23d315995f4201e47e08f0271ac"
+    },
+    {
+      "path": "docs/adr/0466-checked-reference-compound-assignment.md",
+      "sha256": "663a070aa2bd7a9fe51fcf63b3540c05ebaf29fd4182308a39b9e27d24463d71"
+    },
+    {
+      "path": "docs/compatibility/versioning-v0.md",
+      "sha256": "0e12c8df2e8c7fc2dbcb2259aa072fa064864da575edebfdbfeccff68d56ce90"
+    },
+    {
+      "path": "docs/language/0005-surface-syntax-v0.md",
+      "sha256": "b752b9e164744201d02c62b1c7101e8b7392f36f30db43f1cd07534f448e1fa2"
+    },
+    {
+      "path": "internal/cli/deref_compound_test.go",
+      "sha256": "69bc83803df487b1d4eb658bf251675254f7fbcc854fbc17f2cc3147f304026b"
+    },
+    {
+      "path": "internal/compiler/deref_compound_test.go",
+      "sha256": "02e3e70c1bbed1dbe32e3fa363498b367d62f263d4204c5285f6da6e76bbc921"
+    },
+    {
+      "path": "internal/compiler/testdata/deref_compound.fy",
+      "sha256": "11a15e60c5220436879b87dcc8b94eefdbbe678621b09af24bb79ff002785b74"
+    },
+    {
+      "path": "internal/mir/deref_store.go",
+      "sha256": "7472179c7daedcfa9515d1d54a234c705cc32a4f4ccdc75a0dec5beb5a7be697"
+    },
+    {
+      "path": "internal/semantic/deref_compound_test.go",
+      "sha256": "4f00574b2cb89afb72c93f985bb1b4121ff43e931ddd46bbf539c0efff447fdc"
+    },
+    {
+      "path": "internal/semantic/deref_store_test.go",
+      "sha256": "821503800f9f4adaa8360a53bdc748bf796cc5d58401c26ed7bc37ecc0e1af44"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "effee5e5a0c6c788635ef5070990e1b9cde8bbaa45bb4e9980200cf13b0bdd62"
+    },
+    {
+      "path": "spec/grammar/stage0.ebnf",
+      "sha256": "fa9be40fcb894c293ce875efac7a3a223bc41c19e3e73d3ba10a00c7ba81847a"
+    }
+  ],
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "^Test(DerefCompound.*|.*DerefStore.*|Analyze.*Compound.*|PracticalFieldCompound.*|FieldStore.*|SliceFor.*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\deref-compound-related-final.jsonl",
+      "sha256": "4267f119c7384ab6f2fa17d5176efa8cc7f05982e691d761b91e50010263e7d6",
+      "passed": 149,
+      "skipped": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestDerefCompound",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\deref-compound-native-final.jsonl",
+      "sha256": "ce88f1c6edd7d3aad4a9a341912ab8d0d08924f7b67200fc31fb3306e15995aa",
+      "passed": 16,
+      "skipped": 0
+    }
+  ],
+  "publicCLI": {
+    "path": "docs/ops/evidence/deref-compound-20261005.cli.json",
+    "sha256": "a0138afcd0ef1a27afecc6c176c0d55a0458cf55e1f89d374394b9f59e528b5d",
+    "nativeOutcomes": 2
+  },
+  "native": {
+    "path": "docs/ops/evidence/deref-compound-20261005.native.json",
+    "sha256": "a6b456ec39e019fb0756c586c0c95b8c52c67e048f8a4007c4b62b192c541cb2",
+    "outcomes": 28
+  },
+  "validation": {
+    "format": "passed",
+    "diffCheck": "passed",
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/deref-compound-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for consolidated batch"
+  },
+  "limitations": [
+    "Named exact mutable integer references only; grouped reference allowed; compound bool/struct/raw pointer/call roots rejected",
+    "Address and old scalar frozen before RHS; original referent receives checked result despite RHS descriptor rebind",
+    "Failed operation or terminating RHS skips compound store; RHS effects are retained"
+  ],
+  "compatibility": {
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "sdkVersion": "0.0.0-stage0.86",
+    "newSDKAPI": false,
+    "newMIROperation": false,
+    "newRuntimeHelper": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "ciChanges": false
+  }
+}

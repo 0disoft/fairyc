@@ -1804,3 +1804,14 @@ including an owner write (E2101), a local escape (E2102) and a bool bound
 diff and `go vet` checks pass. Results are recorded as
 `docs/ops/evidence/slice-for-20261005.json` with `.cli.json` and `.native.json`
 companions; Linux actual execution remains deferred to the owner's batch.
+
+ADR 0466 admits checked compound assignment through a named mutable integer
+reference (`*(name) op= value`). Semantic admission reuses
+`hir.CompoundAssignmentType`, and lowering reuses the existing unary `*` load,
+checked binary operations and `deref-store`, so no MIR operation, wire field,
+grammar production, SDK export, runtime symbol or target flag is added. Language
+/20, SDK stage0.86, runtime /0, MIR/wire schemas, public ABI and target maturity
+remain unchanged; exact compiler revision/executable identity separates cached
+generations. The related suite, the Windows native matrix and the standalone
+public CLI pass with no failures or skips, and both the Windows MSVC and Linux C
+profiles emit; Linux actual execution remains deferred to the owner's batch.

@@ -519,14 +519,18 @@ for `i32` and logical behavior for unsigned types. Both shifts trap on an amount
 operand width; left shift additionally traps when the mathematical result is not representable.
 Mixed types and implicit promotions remain rejected.
 
-Assignment remains a statement, never an expression. Mutable `i32`, `u8`, `u32`, and `usize`
-locals and admitted mutable indexed scalar places support `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`,
-`>>=`, `&=`, `^=`, and `|=`. A compound assignment evaluates its target place once, captures the
-old scalar value, evaluates the right-hand side once, applies the corresponding existing checked
-binary operation, and stores only on success. Bounds, overflow, division, remainder, and shift
-traps therefore leave the target unchanged. The right-hand side must have exactly the target type;
-there are no promotions, wrapping shortcuts, resource compound assignments, field-target support,
-or returned assignment value.
+Assignment remains a statement, never an expression. Mutable `i32`, `i64`, `u8`, `u32`, and
+`usize` locals, admitted mutable indexed scalar places, admitted plain-struct scalar field places,
+and named mutable integer references (`*name` or the grouped `*(name)`) support `+=`, `-=`, `*=`,
+`/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=`. A compound assignment evaluates its target place
+once, captures the old scalar value, evaluates the right-hand side once, applies the corresponding
+existing checked binary operation, and stores only on success. Through a named `ref mut` target the
+selected referent address and old value are captured before the right-hand side, so a right-hand
+side that rebinds the reference still stores to the original address. Bounds, overflow, division,
+remainder, and shift traps therefore skip the final compound write; the right-hand side's own
+effects persist, so a destination the right-hand side wrote keeps that value. The right-hand side
+must have exactly the target type; there are no promotions, wrapping shortcuts, resource compound
+assignments, `bool`, raw-pointer, or aggregate compound assignments, or returned assignment value.
 
 The first `defer` surface accepts only resolved internal calls returning `void`. Explicit arguments
 are limited to `bool`, `i32`, `u8`, `u32`, and `usize`; each is evaluated once at registration and

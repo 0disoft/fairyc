@@ -1,0 +1,650 @@
+{
+  "cases": [
+    {
+      "case": "matrix",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativematrix1965112087\\001",
+      "imageSHA256": "bcb141cd7a381490bcf7486e9ef1fa15fdf90af2d7108564827a49e19ab6c5d7",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "11a15e60c5220436879b87dcc8b94eefdbbe678621b09af24bb79ff002785b74",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "matrix",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativematrix1965112087\\001",
+      "imageSHA256": "8b5eee0e84d4fbc792aee09aa9523706c10c909c0c8eeb8c933323f53f38a778",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "11a15e60c5220436879b87dcc8b94eefdbbe678621b09af24bb79ff002785b74",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "generic",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativegeneric3334926188\\001",
+      "imageSHA256": "4dba80926fd77be608068f3179ac5c258ef72c44ea030745343d17149530b38c",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "9a13282d13f195d49395f5b14d0f746735706611d3c0eb0a2c8781bc287dafc0",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "generic",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 0,
+      "expectedTrap": "",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativegeneric3334926188\\001",
+      "imageSHA256": "b66909fc7aab368a8862978cc4d742cf6a03c0d380375bb8437d624372c7c375",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 0,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": ""
+      },
+      "sourceSHA256": "9a13282d13f195d49395f5b14d0f746735706611d3c0eb0a2c8781bc287dafc0",
+      "stderr": "",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "div-zero",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "division-by-zero",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativediv-zero1625442441\\001",
+      "imageSHA256": "e2db865cadb7582e45ad153c2ace86d832aadb6cfa2e2f1a87501db63f87bb88",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 131,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0003"
+      },
+      "sourceSHA256": "3eb3c0292cf5d029a423662d0fad1385d4bf86b1d47bd81d91f69130dea518a8",
+      "stderr": "trap: division-by-zero\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "div-zero",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "division-by-zero",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativediv-zero1625442441\\001",
+      "imageSHA256": "419142a583f4748d64756620fc88a9e72cede8b7a314146127365dcf8a9ca33d",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 131,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0003"
+      },
+      "sourceSHA256": "3eb3c0292cf5d029a423662d0fad1385d4bf86b1d47bd81d91f69130dea518a8",
+      "stderr": "trap: division-by-zero\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "mod-zero",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "division-by-zero",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativemod-zero2098699503\\001",
+      "imageSHA256": "501ba0f4e5d3ccf541875353acc8f25378395ba14492cae847f8475e3927d656",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 131,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0003"
+      },
+      "sourceSHA256": "92c096cc24635dd5ca8207326a9241b19d5a266a9622e7c3e73beac8e40a46b4",
+      "stderr": "trap: division-by-zero\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "mod-zero",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "division-by-zero",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativemod-zero2098699503\\001",
+      "imageSHA256": "231e6eac708408a2aa1bdebafe95feaa6009c2e912849b4e432786c25be3c103",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 131,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0003"
+      },
+      "sourceSHA256": "92c096cc24635dd5ca8207326a9241b19d5a266a9622e7c3e73beac8e40a46b4",
+      "stderr": "trap: division-by-zero\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "signed-div-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "signed-division-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativesigned-div-overflow3700345767\\001",
+      "imageSHA256": "10766dfeadc747fb147cc43482f775d270b4527d4592580d336719f520c62b9c",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 132,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0004"
+      },
+      "sourceSHA256": "4c19399957854bb7dd09e41f699db69eda8118b9f130a17a6d6909defa75f587",
+      "stderr": "trap: signed-division-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "signed-div-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "signed-division-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativesigned-div-overflow3700345767\\001",
+      "imageSHA256": "bb65bfa11c5b81c38b799adbabad0bd81ed54e2aa3493e14f3b84c98477dd61e",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 132,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0004"
+      },
+      "sourceSHA256": "4c19399957854bb7dd09e41f699db69eda8118b9f130a17a6d6909defa75f587",
+      "stderr": "trap: signed-division-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "signed-mod-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "signed-division-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativesigned-mod-overflow1922157172\\001",
+      "imageSHA256": "be8c1d702f65de38762ef387a99ff3b44d813b2ba49fd982c16c0aab10449d3e",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 132,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0004"
+      },
+      "sourceSHA256": "2e02d8c525ca48585772bc571d98ab1c3649886a0c855a23f4843b0788f48017",
+      "stderr": "trap: signed-division-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "signed-mod-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "signed-division-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativesigned-mod-overflow1922157172\\001",
+      "imageSHA256": "5785d9e47a871df7648191bf0b1dda5754d5e1fad960be9073ebf0e722d9acf2",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 132,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0004"
+      },
+      "sourceSHA256": "2e02d8c525ca48585772bc571d98ab1c3649886a0c855a23f4843b0788f48017",
+      "stderr": "trap: signed-division-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "invalid-shift",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "invalid-shift",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeinvalid-shift574697628\\001",
+      "imageSHA256": "33a66dd0a757168211a59aacb969fadf0b67e0eabfb7b795abaa949839a4bdb5",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 133,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0005"
+      },
+      "sourceSHA256": "e2c08c36d3158586a64fc2e38961b13a7a80baccde06132f8244fdda0983bb94",
+      "stderr": "trap: invalid-shift\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "invalid-shift",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "invalid-shift",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeinvalid-shift574697628\\001",
+      "imageSHA256": "050e55397c4bd4859d90920aebc39f32731b7fffde1c4632b5d286222f5c7be2",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 133,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0005"
+      },
+      "sourceSHA256": "e2c08c36d3158586a64fc2e38961b13a7a80baccde06132f8244fdda0983bb94",
+      "stderr": "trap: invalid-shift\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "left-shift-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeleft-shift-overflow2913713832\\001",
+      "imageSHA256": "6e6b68152c4b71b69904f0430e35f09a8c417d3d8c874d1c7bd87b8da899b876",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "6ddb5a8d82005a390ae2dce741d7c3a5535a6e6a09d13ed3337ebc98272fd6fa",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "left-shift-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeleft-shift-overflow2913713832\\001",
+      "imageSHA256": "37a5640148589231be358e92d91fa93d209444dd09c3b0fb0e2bcb86429e2ee0",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "6ddb5a8d82005a390ae2dce741d7c3a5535a6e6a09d13ed3337ebc98272fd6fa",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "rhs-trap",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "assertion-failed",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativerhs-trap1207837427\\001",
+      "imageSHA256": "982f4a396ad75dcd4a55f6b697b73db29950bc565b0721ee304126fbf6453787",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 134,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0006"
+      },
+      "sourceSHA256": "1da6ed2ffc54be0eb2aa7cd9efcd054d281814aec45b6acd2ade899ae353388e",
+      "stderr": "trap: assertion-failed\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "rhs-trap",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "assertion-failed",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativerhs-trap1207837427\\001",
+      "imageSHA256": "617f126b0118e935a8fb1ae0beac87dfef91a93c021ef74d399a21a69a7b9ba1",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 134,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0006"
+      },
+      "sourceSHA256": "1da6ed2ffc54be0eb2aa7cd9efcd054d281814aec45b6acd2ade899ae353388e",
+      "stderr": "trap: assertion-failed\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u8-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeu8-overflow595239886\\001",
+      "imageSHA256": "1e38a73f64a3d10e87ba0dbd51b3c1c4b9ab2e672008290f007c1c4af46984ec",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "379100c17784ee24c686f8bc8c64d706cea89be74faed6cbe4679cba9c18006e",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u8-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeu8-overflow595239886\\001",
+      "imageSHA256": "094901701a7242aa8f4f1a56975fe992499b7e63f431300fa7e0f142c9f9a8fc",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "379100c17784ee24c686f8bc8c64d706cea89be74faed6cbe4679cba9c18006e",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativei32-overflow1246966449\\001",
+      "imageSHA256": "738ceb58f7f2aa4d128371f0cb910b1488dbb2946e7b8a1d58d4b115862d2102",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "affc07e0eb70f6ad378edc69f9ead4d61e86decd6559656d4d6073f4b663dcb9",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativei32-overflow1246966449\\001",
+      "imageSHA256": "4434cac58cc4ddf1f6f12827bd2c844bd3e92432c2530de1442c0b4d582635b4",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "affc07e0eb70f6ad378edc69f9ead4d61e86decd6559656d4d6073f4b663dcb9",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i64-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativei64-overflow4068143191\\001",
+      "imageSHA256": "ea8fc357f604905c3c9e80735526960a4c192bd7473e398aaa09e2d8b20df0eb",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "3070bdb3295264ffefe693464633324462aaf5b89b525e7a61feb9dbb8fa55ad",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "i64-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativei64-overflow4068143191\\001",
+      "imageSHA256": "3fefbc526f100a892877b1e292be3c3ef0c5c4d1b8e4291a91e60df99475e393",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "3070bdb3295264ffefe693464633324462aaf5b89b525e7a61feb9dbb8fa55ad",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeu32-overflow4178253644\\001",
+      "imageSHA256": "18868a15e8012aa8848c4ea33c0524c816ff94a3374e65131ccddad0a34b7f6b",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "a200f645db9bbc20e8ff90cb6d186886507f812691f8abbc7ddc4782c955ae41",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "u32-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeu32-overflow4178253644\\001",
+      "imageSHA256": "0f4f805e8ef1e3dcfadcf270326670509365b142cc35886367d7517fa9b2c505",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "a200f645db9bbc20e8ff90cb6d186886507f812691f8abbc7ddc4782c955ae41",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "usize-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeusize-overflow2883854039\\001",
+      "imageSHA256": "0d0fc88036d7da6ff590b9fd115b9414aaa0f2b4dfb78fd7bf0fedcb5a1f6690",
+      "profile": "dev",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "bb2570f04f2f57c141d88b83a90c6edf6c850312758463e5bde1d47400fcedc5",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    },
+    {
+      "case": "usize-overflow",
+      "executor": "cdriver.ExecuteWindowsMSVCTarget",
+      "exit": 5,
+      "expectedTrap": "integer-overflow",
+      "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestDerefCompoundNativeusize-overflow2883854039\\001",
+      "imageSHA256": "b0b8e22e9c2429061521ed879a4a1792647cc2278b6e549f1a4c88ffe4499d41",
+      "profile": "release",
+      "rawOutcome": {
+        "ExitCode": 130,
+        "Stdout": "",
+        "Stderr": "",
+        "TrapControl": "\u0002"
+      },
+      "sourceSHA256": "bb2570f04f2f57c141d88b83a90c6edf6c850312758463e5bde1d47400fcedc5",
+      "stderr": "trap: integer-overflow\n",
+      "stdout": "",
+      "toolchain": {
+        "name": "msvc",
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "version": "14.51.36231"
+      }
+    }
+  ],
+  "schema": "fairyc.deref-compound-native/v1",
+  "sdk": "0.0.0-stage0.86"
+}

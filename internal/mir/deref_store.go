@@ -5,8 +5,10 @@ import "github.com/0disoft/fairyc/internal/hir"
 func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 	target := statement.Target
 	unsupported := &Unsupported{Feature: "dereference assignment without executable mutable reference storage", Span: target.Span}
+	operator := statement.Operator
+	compound := operator != "" && operator != "="
 	if len(target.Children) != 1 || target.Operator != "*" || (!fieldStoreScalar(target.Type) && !l.properties.plainViewStruct(target.Type)) ||
-		statement.Expression == nil || statement.Expression.Type != target.Type || statement.Operator != "=" {
+		statement.Expression == nil || statement.Expression.Type != target.Type || compound && !hir.CompoundAssignmentType(operator, target.Type) {
 		return unsupported
 	}
 	reference := &target.Children[0]
@@ -27,12 +29,30 @@ func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 	saved := l.newTemporary()
 	l.appendOperation(Operation{Kind: OperationAssign, Span: target.Span, DestinationLocal: saved, Operands: []Operand{receiver}})
 	receiver = Operand{Kind: OperandLocal, Local: saved}
+	var prior Operand
+	if compound {
+		// Load from the selected address, not from a reference that RHS effects
+		// may rebind. The temporary also snapshots the scalar before the RHS.
+		old := l.newTemporary()
+		l.appendOperation(Operation{Kind: OperationUnary, Span: target.Span, DestinationLocal: old,
+			Operator: "*", OwnerType: reference.Type, Type: target.Type, Operands: []Operand{receiver}})
+		prior = Operand{Kind: OperandLocal, Local: old}
+	}
 	value, err := l.lowerExpression(statement.Expression)
 	if err != nil {
 		return err
 	}
 	if l.blockTerminated(l.current) {
 		return nil
+	}
+	if compound {
+		binary, _ := hir.CompoundAssignmentBinary(operator)
+		combined := &hir.Expression{Kind: "binary", Type: target.Type, Span: statement.Span,
+			Operator: binary, Children: []hir.Expression{*target, *statement.Expression}}
+		value, err = l.lowerBinaryOperands(combined, prior, value)
+		if err != nil {
+			return err
+		}
 	}
 	l.appendOperation(Operation{Kind: OperationDerefStore, Span: target.Span, Symbol: hir.NoSymbol,
 		DestinationLocal: NoLocal, OwnerType: reference.Type, Type: target.Type,

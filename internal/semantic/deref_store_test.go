@@ -27,13 +27,13 @@ func TestAnalyzeFieldStoreScalarDerefRejections(t *testing.T) {
 	const prelude = `module main; struct Record { i32 value; }
 fn i32 main() { var i32 value = 1; var Record record = Record { .value = 1 }; `
 	for name, test := range map[string]struct{ body, code string }{
-		"shared":       {"let ref i32 view = ref value; *view = 42;", "E1008"},
-		"mismatch":     {"let ref mut i32 view = ref mut value; *view = true;", "E1006"},
-		"alias":        {"let ref mut i32 view = ref mut value; let ref i32 alias = ref value; *view = 42; assert(*alias == 1);", "E2101"},
-		"owner read":   {"let ref mut i32 view = ref mut value; *view = value;", "E2101"},
-		"rhs reborrow": {"let ref mut i32 view = ref mut value; *view = *(ref value);", "E2101"},
-		"compound":     {"let ref mut i32 view = ref mut value; *view += 1;", "unsupported"},
-		"temporary":    {"*(ref mut value) = 42;", "unsupported"},
+		"shared":        {"let ref i32 view = ref value; *view = 42;", "E1008"},
+		"mismatch":      {"let ref mut i32 view = ref mut value; *view = true;", "E1006"},
+		"alias":         {"let ref mut i32 view = ref mut value; let ref i32 alias = ref value; *view = 42; assert(*alias == 1);", "E2101"},
+		"owner read":    {"let ref mut i32 view = ref mut value; *view = value;", "E2101"},
+		"rhs reborrow":  {"let ref mut i32 view = ref mut value; *view = *(ref value);", "E2101"},
+		"compound bool": {"var bool flag = true; let ref mut bool view = ref mut flag; *view += true;", "unsupported"},
+		"temporary":     {"*(ref mut value) = 42;", "unsupported"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			result := analyzeText(t, map[string]string{"main.fy": prelude + test.body + " return 0; }"})

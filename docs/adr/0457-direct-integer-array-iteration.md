@@ -19,6 +19,10 @@ for (let ref mut i64 value in values) { *value += 1; }
 for (let i64 value in values) { assert(value > 0); }
 ```
 
+The exclusive loop's `*value += 1` is a named-reference compound assignment
+admitted separately by ADR 0466; this ADR owns the iteration that produces the
+reference.
+
 An internal immutable descriptor borrows original storage once, then uses the
 existing checked view loop. No array value copy is introduced by the loop.
 Length is captured once; indices advance in ascending order. `continue` runs

@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.deref-compound-cli/v1",
+  "compilerSHA256": "ac0f3b0367236dfa125ef57d938b599cb023e1b8199c73277b78980721616366",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004181630-8b7bedda1ecb+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 8b7bedda1ecbc73d373b617b0d0b2ffe7a4aa962\nmodified: true\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004181630-8b7bedda1ecb+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 8b7bedda1ecbc73d373b617b0d0b2ffe7a4aa962\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 9 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/deref-compound-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\deref-compound-cli\\images\\matrix-dev.exe",
+      "imageSHA256": "403bb9877cb43475cccb57ef62dd7332647b46181f933bff061433492f6f0ab9"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/deref-compound-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\deref-compound-cli\\images\\matrix-release.exe",
+      "imageSHA256": "8e15d7458afcc64f0daba52425494d73b7cb8e63eb14d5fa320b3981af7a4f3b"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\shared",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:71: E1008: assignment target is not mutable [bytes 70..75]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\loan",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:87: E2101: Access conflicts with an active shared or mutable loan. [bytes 86..91]\n  last-use: main.fy:1:87 [bytes 86..91]\n  loan: main.fy:1:65 [bytes 64..77]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\width",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:100: E1006: incompatible expected and actual types [bytes 99..102]\n  expected-type: main.fy:1:93 [bytes 92..97]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\bool",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support compound assignment &= on bool at main.fy [bytes 82..94]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\deref-compound-cli\\temporary",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:44: E1008: assignment target is not mutable [bytes 43..59]\n"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Counter { i64 value; }\nfn void edit_u8(ref mut u8 item) {\n    *(item) += 5; assert(*item == 17);\n    *(item) -= 2; assert(*item == 15);\n    *(item) *= 3; assert(*item == 45);\n    *(item) /= 4; assert(*item == 11);\n    *(item) %= 5; assert(*item == 1);\n    *(item) <<= 2; assert(*item == 4);\n    *(item) >>= 1; assert(*item == 2);\n    *(item) |= 8; assert(*item == 10);\n    *(item) &= 11; assert(*item == 10);\n    *(item) ^= 3; assert(*item == 9);\n}\nfn void edit_i32(ref mut i32 item) {\n    *(item) += 5; assert(*item == 17);\n    *(item) -= 2; assert(*item == 15);\n    *(item) *= 3; assert(*item == 45);\n    *(item) /= 4; assert(*item == 11);\n    *(item) %= 5; assert(*item == 1);\n    *(item) <<= 2; assert(*item == 4);\n    *(item) >>= 1; assert(*item == 2);\n    *(item) |= 8; assert(*item == 10);\n    *(item) &= 11; assert(*item == 10);\n    *(item) ^= 3; assert(*item == 9);\n}\nfn void edit_i64(ref mut i64 item) {\n    *(item) += 5; assert(*item == 17);\n    *(item) -= 2; assert(*item == 15);\n    *(item) *= 3; assert(*item == 45);\n    *(item) /= 4; assert(*item == 11);\n    *(item) %= 5; assert(*item == 1);\n    *(item) <<= 2; assert(*item == 4);\n    *(item) >>= 1; assert(*item == 2);\n    *(item) |= 8; assert(*item == 10);\n    *(item) &= 11; assert(*item == 10);\n    *(item) ^= 3; assert(*item == 9);\n}\nfn void edit_u32(ref mut u32 item) {\n    *(item) += 5; assert(*item == 17);\n    *(item) -= 2; assert(*item == 15);\n    *(item) *= 3; assert(*item == 45);\n    *(item) /= 4; assert(*item == 11);\n    *(item) %= 5; assert(*item == 1);\n    *(item) <<= 2; assert(*item == 4);\n    *(item) >>= 1; assert(*item == 2);\n    *(item) |= 8; assert(*item == 10);\n    *(item) &= 11; assert(*item == 10);\n    *(item) ^= 3; assert(*item == 9);\n}\nfn void edit_usize(ref mut usize item) {\n    *(item) += 5; assert(*item == 17);\n    *(item) -= 2; assert(*item == 15);\n    *(item) *= 3; assert(*item == 45);\n    *(item) /= 4; assert(*item == 11);\n    *(item) %= 5; assert(*item == 1);\n    *(item) <<= 2; assert(*item == 4);\n    *(item) >>= 1; assert(*item == 2);\n    *(item) |= 8; assert(*item == 10);\n    *(item) &= 11; assert(*item == 10);\n    *(item) ^= 3; assert(*item == 9);\n}\nfn i32 early(ref mut i64 item) { *item += { return 42; 1 }; return 0; }\nfn Result<i64,u32> fail() { return .err(9); }\nfn Result<i64,u32> propagate(ref mut i64 item) { *item += fail()?; return .ok(*item); }\nfn i32 main() {\n    var u8[2] data_u8 = [12,12];\n    for (let ref mut u8 item in data_u8[1..]) { edit_u8(item); }\n    assert(data_u8[0] == 12 && data_u8[1] == 9);\n    var i32[2] data_i32 = [12,12];\n    for (let ref mut i32 item in data_i32[1..]) { edit_i32(item); }\n    assert(data_i32[0] == 12 && data_i32[1] == 9);\n    var i64[2] data_i64 = [12,12];\n    for (let ref mut i64 item in data_i64[1..]) { edit_i64(item); }\n    assert(data_i64[0] == 12 && data_i64[1] == 9);\n    var u32[2] data_u32 = [12,12];\n    for (let ref mut u32 item in data_u32[1..]) { edit_u32(item); }\n    assert(data_u32[0] == 12 && data_u32[1] == 9);\n    var usize[2] data_usize = [12,12];\n    for (let ref mut usize item in data_usize[1..]) { edit_usize(item); }\n    assert(data_usize[0] == 12 && data_usize[1] == 9);\n    var i64 x = 10;\n    let ref mut i64 snapshot = ref mut x;\n    *snapshot += { *snapshot = 100; 2 };\n    assert(x == 12);\n    var i64 y = 20;\n    var ref mut i64 selected = ref mut x;\n    var usize calls = 0;\n    *selected += { calls += 1; selected = ref mut y; 3 };\n    assert(*selected == 20 && calls == 1);\n    assert(x == 15 && y == 20);\n    assert(early(ref mut x) == 42 && x == 15);\n    switch (propagate(ref mut x)) { case .err(code): { assert(code == 9); } case .ok(_): { assert(false); } };\n    assert(x == 15);\n    var Counter counter = Counter { .value = 4000000000 };\n    let ref mut i64 field = ref mut counter.value;\n    *field += 2;\n    assert(counter.value == 4000000002);\n    var i64 neg = -8;\n    let ref mut i64 signed = ref mut neg;\n    *signed >>= 1;\n    assert(neg == -4);\n    return 0;\n}\n",
+      "sourceSHA256": "d738c5127ff0ac8047a196bd6794220a2daf41b07ffda35f45e900662b7f52b6"
+    },
+    {
+      "name": "shared",
+      "source": "module main;fn i32 main(){var i64 value=10;let ref i64 item=ref value;*item+=1;return 0;}",
+      "sourceSHA256": "3ceba08b30132acea7d52e07b78ba3b96dd76457da56fa6c2f778c12edb67c6c"
+    },
+    {
+      "name": "loan",
+      "source": "module main;fn i32 main(){var i64 value=10;let ref mut i64 item=ref mut value;*item+={value=9;1};return 0;}",
+      "sourceSHA256": "50f0afcf714f207033908f369d8ef648cc75c6fd43c6b157c70c3dcc3a45b28b"
+    },
+    {
+      "name": "width",
+      "source": "module main;fn i32 main(){var i64 value=10;let ref mut i64 item=ref mut value;let i32 rhs=1;*item+=rhs;return 0;}",
+      "sourceSHA256": "9bab5461a523bdf71f7d86795934afb1ca80a76f2d8bf46f8a5f06d20868f671"
+    },
+    {
+      "name": "bool",
+      "source": "module main;fn i32 main(){var bool value=true;let ref mut bool item=ref mut value;*item&=true;return 0;}",
+      "sourceSHA256": "fe71a2ea631ae5e70249ff9afb0e2fafac894f356f9d6d7caba1d0d9f784e8d6"
+    },
+    {
+      "name": "temporary",
+      "source": "module main;fn i32 main(){var i64 value=10;*(ref mut value)+=1;return 0;}",
+      "sourceSHA256": "dcd6d8da16f94661b1bee82dd236d3a929cb1cd93b5e4008cdcb01be84fa6c84"
+    }
+  ],
+  "nativeOutcomes": 2
+}
