@@ -1,0 +1,64 @@
+{
+  "schema": "fairyc.scanner-parity-repair/v1",
+  "baseRevision": "035f5339f2c9b5bc917ecdf6e2d56dc3087d49be",
+  "cause": "SDK scalar view signatures instantiate Vec and its take_slot cleanup for u8/i32/i64/u32/usize: five additional resources plus five cleanup functions, 21 -> 31; both scanner forms share the same canonical specialization multiset.",
+  "tests": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "test",
+      "-json",
+      "./internal/compiler",
+      "-run",
+      "^TestPrivateVectorSDKCandidate(ScannerCanonicalCallParity|UnusedNativeFootprint)$",
+      "-count=1"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "env": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "raw": ".cache\\scanner-parity-repair.jsonl",
+    "sha256": "85ec53a9c930782e0b0d622de8f8d3d94384123929acbbd140648f31dd3bfc2e",
+    "passes": 4,
+    "skips": 0,
+    "canonicalSpecializations": [
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=i32",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=i64",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=source_nominal_v0::package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::bytes::Buffer",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=u32",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=u8",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec|T=usize",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::at|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::at|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::at|T=source_nominal_v0::package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::bytes::Buffer",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::empty|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::empty|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::empty|T=source_nominal_v0::package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::bytes::Buffer",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::len|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::len|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::len|T=source_nominal_v0::package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::bytes::Buffer",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::push|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::push|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::push|T=source_nominal_v0::package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::bytes::Buffer",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=i32",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=i64",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=source_nominal_v0::package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::bytes::Buffer",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=u32",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=u8",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::take_slot|T=usize",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::write_slot|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::diagnostics::Entry",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::write_slot|T=source_nominal_v0::package_coordinate_v1_50a32b93ccb9c66443c20be70204a88bfd2ee22e83461b642a079e79b7685484::scanner::Token",
+      "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::write_slot|T=source_nominal_v0::package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::bytes::Buffer"
+    ],
+    "nativeComparisons": [
+      "vector_lexer_unused_native_size_test.go:63: unused vector mode low: generated C=373469 EXE=273408 sections=6 equal",
+      "vector_lexer_unused_native_size_test.go:63: unused vector mode optimized: generated C=373469 EXE=197120 sections=6 equal"
+    ]
+  },
+  "scope": "Test gates only; public compiler behavior unchanged. Linux execution deferred. Other opt-in scanner measurement baselines retain their explicit historic workload guards."
+}

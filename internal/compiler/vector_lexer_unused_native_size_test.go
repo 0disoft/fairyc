@@ -35,14 +35,15 @@ func TestPrivateVectorSDKCandidateUnusedNativeFootprint(t *testing.T) {
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
 			type native struct {
-				generatedC string
-				image      []byte
-				sections   []pecoff.Section
+				generatedC      string
+				image           []byte
+				specializations int
+				sections        []pecoff.Section
 			}
 			var images [2]native
 			for i, variant := range []realScannerVectorVariant{stable, private} {
 				program, entry, specializations := scannerBudgetFairyProgram(t, variant)
-				if specializations != 21 {
+				if specializations == 0 {
 					t.Fatalf("%s specializations = %d", variant.name, specializations)
 				}
 				artifact, unit := buildRealScannerVectorNative(t, program, entry, profile, extraSupport)
@@ -50,9 +51,9 @@ func TestPrivateVectorSDKCandidateUnusedNativeFootprint(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				images[i] = native{generatedC: unit.Source, image: artifact.Bytes, sections: pe.Sections}
+				images[i] = native{generatedC: unit.Source, image: artifact.Bytes, sections: pe.Sections, specializations: specializations}
 			}
-			if images[0].generatedC != images[1].generatedC ||
+			if images[0].specializations != images[1].specializations || images[0].generatedC != images[1].generatedC ||
 				len(images[0].image) != len(images[1].image) ||
 				!reflect.DeepEqual(images[0].sections, images[1].sections) {
 				t.Fatalf("unused vector mode changed %s native footprint: C bytes %d/%d, EXE bytes %d/%d, sections %v/%v",

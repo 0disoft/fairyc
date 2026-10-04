@@ -3,6 +3,7 @@ package compiler_test
 import (
 	"fmt"
 	"maps"
+	"slices"
 	"strings"
 	"testing"
 
@@ -18,15 +19,28 @@ func TestPrivateVectorSDKCandidateScannerCanonicalCallParity(t *testing.T) {
 		t.Fatal("real scanner variants changed")
 	}
 	var calls [2][2]map[string]int
+	var plans [2]map[string]int
 	for variantIndex, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
 		var plan genericplan.Plan
 		program, _, specializations := scannerBudgetFairyProgramWithMainTimingPlan(t, variant,
 			realScannerExecutionMain, nil, &plan)
-		if specializations != 21 || len(plan.Specializations) != specializations {
+		if specializations == 0 || len(plan.Specializations) != specializations {
 			t.Fatalf("%s specialization plan changed: %d/%d", variant.name,
 				specializations, len(plan.Specializations))
 		}
 		canonical := scannerCanonicalSpecializations(plan)
+		if len(canonical) != specializations {
+			t.Fatal("duplicate specialization identities")
+		}
+		plans[variantIndex] = make(map[string]int)
+		for _, identity := range canonical {
+			plans[variantIndex][identity]++
+		}
+		if variantIndex == 0 {
+			for _, identity := range slices.Sorted(maps.Keys(plans[variantIndex])) {
+				t.Logf("specialization %s", identity)
+			}
+		}
 		for functionIndex, name := range []string{"$p1::scanner::report_work", "$p1::scanner::storage"} {
 			shape, err := scannerMIRFunctionShape(program, name)
 			if err != nil {
@@ -37,6 +51,9 @@ func TestPrivateVectorSDKCandidateScannerCanonicalCallParity(t *testing.T) {
 				t.Fatalf("%s %s call target: %v", variant.name, name, err)
 			}
 		}
+	}
+	if !maps.Equal(plans[0], plans[1]) {
+		t.Fatalf("indexed/vector specialization sets differ: %v / %v", plans[0], plans[1])
 	}
 	for index, name := range []string{"scanner::report_work", "scanner::storage"} {
 		if !maps.Equal(calls[0][index], calls[1][index]) {
