@@ -116,3 +116,26 @@ and input limits are preserved. Resources/nonplain graphs and simultaneous
 mutable sibling borrows remain outside the admitted projection. Run the same
 portable `verify.py`; no additional harness is needed. Current public CLI and
 dev/release receipt: `docs/ops/evidence/mutable-field-example-20261004.json`.
+
+ADR 0446 additionally allows explicit shared field projection from the named
+mutable plain struct reference. `rebase` now reads its original span width from
+two shared scalar field references before adjusting the mutable span:
+
+```fairy
+let ref usize start = ref position.start;
+let ref usize end = ref position.end;
+let usize width = *end - *start;
+position.start -= origin;
+position.end -= origin;
+assert(position.end - position.start == width);
+```
+
+The last shared use ends at the width calculation, so the following writes are
+allowed. A retained shared child/alias would block writes through its parent,
+parent aliases or any sibling. Shared reads and shared siblings may coexist;
+reference descriptor rebinding preserves the earlier child's original referent.
+The borrowed vector and report format stay unchanged. No new validation harness
+is required. Current dev/release CLI evidence:
+`docs/ops/evidence/shared-field-example-20261004.json`.
+The separate prior MSVC C4702 limitation for an always-trapping assertion/overflow
+function is recorded in the implementation receipt; this example does not hit it.

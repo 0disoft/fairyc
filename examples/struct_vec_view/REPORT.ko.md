@@ -127,3 +127,41 @@ resource, 배열 원소, 호출 결과, 포인터/역참조 루트, 비평범한
 Linux 실제 실행은 요청대로 이후 일괄 검증에 남겼다. 전체 저장소 스위트와
 성능 벤치마크를 실행하지 않았고 SDK export·DB·CI·설치·runner·PS1 변경과
 push는 없다. 구현과 실제 예제 적용을 별도 로컬 커밋으로 나눴다.
+
+
+## ADR 0446: 가변 구조체 참조에서 공유 필드 대여
+
+현재 `rebase(ref mut Span position, usize origin)`는 시작·끝 필드를 `ref usize`로
+공유 대여하고 원래 길이를 읽는다. 마지막 공유 사용 뒤 부모 필드를 보정하고
+길이가 유지되는지 검사한다. 원본 공유 벡터와 CLI 출력은 유지한다. 제품 계산과
+필드 대여는 Fairy C이며 기존 Python 파일은 공개 CLI 검증만 수행한다.
+
+직접·중첩·그룹 필드 투영은 이름 있는 가변 참조와 ADR 0441의 평범한 구조체
+그래프에 한정한다. 살아 있는 공유 자식/별칭/반환값·Option/Result가 있으면
+부모·부모 별칭·형제·원본의 쓰기는 E2101이다. 공유 읽기와 여러 공유 형제는
+함께 사용할 수 있다. 참조 변수 재지정은 기존 규칙을 유지하며, 먼저 만든
+자식은 원래 소유자를 계속 가리키고 보호한다. 지역/다중 원점 반환은 E2102/
+E2103이고 resource·비평범한/배열 원소/호출 결과/포인터/역참조 루트와 전체
+참조의 암시적 공유 바인딩 전환은 이번 허용 범위에 포함하지 않는다.
+
+관련 semantic/MIR/C emission/interpreter 86개, compiler/codec 및 기존 가변
+필드·공유 재대여 회귀 64개가 통과했다. 네이티브 성공과 실행 시 입력에 따른
+checked overflow를 일반·릴리스에서 실행해 4개 결과를 확인했고, 캐시 cold/
+warm all-hit와 관련 Go vet도 통과했다. 이 예제의 공개 CLI check, 잠금 일반·
+릴리스 build/run 및 정상·오류 native 입력 12회가 통과했다. 원시 argv/cwd/
+stdout/stderr/exit, 소스·잠금·SDK·compiler identity·EXE 해시는
+`docs/ops/evidence/shared-field-example-20261004.json`과 구현 증거
+`docs/ops/evidence/shared-mutable-field-borrow-20261004.json`에 기록했다.
+
+초기 상수 overflow 오류 사례는 MSVC C4702/C2220으로 빌드가 실패했다. 새 필드
+투영 대신 기존 공유 호출 재대여를 쓴 재현도 이전의 깨끗한 251d15b0 컴파일러에서
+같은 릴리스 빌드 실패(종료 6)를 보였다. 기존 C 도달성 한계로 남았으며, 현재
+동적 오류 사례의 통과가 이 문제를 해결했다고 주장하지 않는다. 초기/이전
+컴파일러 실패와 정상적인 runtime trap 결과를 구분해 보존했다.
+
+ADR 0446과 대여/MIR/C backend/버전 계약을 갱신했다. 기존 공유 재대여와 공유
+필드 opcode를 조합하며 verifier/backend 규칙을 약화하지 않는다. SDK stage0.84,
+언어 /20, 런타임 /0, 문법·wire schema·타깃 성숙도를 유지한다. Linux 실제 실행은
+요청대로 일괄 검증에 남겼으며 전체 저장소 스위트와 성능 벤치마크는 생략했다.
+SDK export·DB·CI·설치·새 runner/PS1·push 변경은 없다. 구현과 실제 예제 적용은
+별도 로컬 커밋으로 나눴다.

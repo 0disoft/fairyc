@@ -40,8 +40,12 @@ pub fn bool scan(ref u8[] input, ref mut vec::Vec<Token> output) {
 }
 
 fn void rebase(ref mut Span position, usize origin) {
+    let ref usize start = ref position.start;
+    let ref usize end = ref position.end;
+    let usize width = *end - *start;
     position.start -= origin;
     position.end -= origin;
+    assert(position.end - position.start == width);
 }
 
 /// Reads a borrowed token segment; only each selected token value is copied.
