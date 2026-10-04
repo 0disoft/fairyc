@@ -60,6 +60,49 @@ unsafe extern C fn raw_console_write_result stderr_write_usize_raw(usize value) 
 @link_name("fy_std_stdin_read_v0")
 unsafe extern C fn raw_console_read_result stdin_read_raw(ptr mut u8 data, usize length) ;
 
+fn u8 signed_decimal_digit(i64 value) {
+    return if (value == -9 || value == 9) {
+        57
+    } else if (value == -8 || value == 8) {
+        56
+    } else if (value == -7 || value == 7) {
+        55
+    } else if (value == -6 || value == 6) {
+        54
+    } else if (value == -5 || value == 5) {
+        53
+    } else if (value == -4 || value == 4) {
+        52
+    } else if (value == -3 || value == 3) {
+        51
+    } else if (value == -2 || value == 2) {
+        50
+    } else if (value == -1 || value == 1) {
+        49
+    } else {
+        48
+    };
+}
+
+// Fills a caller-owned 20-byte scratch view and returns its encoded suffix start.
+// Keep the signed remainder: never negate the i64 minimum value.
+fn usize encode_i64_decimal(ref mut u8[] digits, i64 value) {
+    var usize position = 20;
+    var i64 remaining = value;
+    while (remaining <= -10 || remaining >= 10) {
+        position -= 1;
+        digits[position] = signed_decimal_digit(remaining % 10);
+        remaining /= 10;
+    }
+    position -= 1;
+    digits[position] = signed_decimal_digit(remaining);
+    if (value < 0) {
+        position -= 1;
+        digits[position] = 45;
+    }
+    return position;
+}
+
 fn Result<usize, ConsoleError> checked_write_result(u32 status, usize written) {
     return if (status == 0) {
         .ok(written)
@@ -107,6 +150,15 @@ pub fn Result<usize, ConsoleError> write_i32(i32 value) {
         stdout_write_i32_raw(value)
     };
     return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII without allocation or a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_i64(i64 value) {
+    var u8[20] digits = [0; 20];
+    let usize position = encode_i64_decimal(ref mut digits, value);
+    let ref u8[] encoded = ref digits;
+    return write_bytes(encoded[position..]);
 }
 
 /// Writes value as locale-independent decimal ASCII to stdout without adding a newline.
@@ -162,6 +214,15 @@ pub fn Result<usize, ConsoleError> write_stderr_i32(i32 value) {
         stderr_write_i32_raw(value)
     };
     return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII without allocation or a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_stderr_i64(i64 value) {
+    var u8[20] digits = [0; 20];
+    let usize position = encode_i64_decimal(ref mut digits, value);
+    let ref u8[] encoded = ref digits;
+    return write_stderr_bytes(encoded[position..]);
 }
 
 /// Writes value as locale-independent decimal ASCII to stderr without adding a newline.

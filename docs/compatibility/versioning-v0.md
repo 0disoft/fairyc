@@ -1681,3 +1681,11 @@ Language /20, runtime /0, grammar, foreign ABI and MIR/interface/artifact schema
 stay unchanged. Compiler identity separates caches; Linux execution is deferred.
 
 ADR 0449 adds indexed nominal field places and the `view-element-borrow` operation vocabulary within existing MIR/2 fields. SDK stage0.85, language /20, runtime /0, grammar, ABI and codec envelope shapes stay unchanged. Exact compiler identity separates cached artifacts; Linux execution stays deferred.
+
+ADR 0456 advances the bundled SDK to `0.0.0-stage0.86` for public
+`std::io::write_i64` and `std::io::write_stderr_i64`. Decimal conversion is
+written in Fairy over local fixed-array storage and reuses the existing
+byte-output foreign symbols. SDK source/export/digest and dependent package,
+lock and cache identities refresh. Language /20, runtime /0, grammar,
+MIR/wire schemas, foreign ABI and target maturity stay unchanged. Windows
+dev/release execution is verified; Linux execution remains deferred.

@@ -1,0 +1,236 @@
+{
+  "schema": "fairyc.io-i64-cli/v1",
+  "compilerSHA256": "157633494dc842234536b5f50d5536e6d005352c03afb3205b1ddf8f7ad3a529",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004140828-63c86ccff28f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 63c86ccff28f2b9bd2105660f8f70197a2f60423\nmodified: true\n",
+    "stderr": ""
+  },
+  "exampleSourceSHA256": "c7ad9a66726d2162874f556e02077f7dbcc933f235061ae93f58b9b7879c56d6",
+  "fixtures": [
+    {
+      "stream": "stdout",
+      "source": "module main; import std::io as io; @effects(console) fn i32 main() {return switch(io::write_i64(-9223372036854775808)) {case .ok(_): {2} case .err(e): {if(e.status != 0 && e.written == 0){0}else{3}}};}",
+      "sourceSHA256": "5c05250d1e0b7b736ef9bea826dc458a3c77ecda872eea50449b547b5e5ad047"
+    },
+    {
+      "stream": "stderr",
+      "source": "module main; import std::io as io; @effects(console) fn i32 main() {return switch(io::write_stderr_i64(-9223372036854775808)) {case .ok(_): {2} case .err(e): {if(e.status != 0 && e.written == 0){0}else{3}}};}",
+      "sourceSHA256": "f13905528e1883f1560ccadc29d3e57db69d407b97857e441f974c5eedfd9c47"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004140828-63c86ccff28f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 63c86ccff28f2b9bd2105660f8f70197a2f60423\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\io_i64_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 8 source file(s), 154 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\io_i64_quickstart",
+      "exit": 0,
+      "stdout": "built: build/io-i64-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\io-i64-cli\\images\\console-dev.exe",
+      "imageSHA256": "d5ac102c29ed539f1fa070863ae69dbc8e726e069f426a61a7175f532506d9e9"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\io_i64_quickstart",
+      "exit": 0,
+      "stdout": "0\n1\n-1\n9\n-9\n10\n-10\n2147483647\n-2147483648\n2147483648\n-2147483649\n4000000000\n-4000000000\n9223372036854775807\n-9223372036854775808\n",
+      "stderr": "0\n1\n-1\n9\n-9\n10\n-10\n2147483647\n-2147483648\n2147483648\n-2147483649\n4000000000\n-4000000000\n9223372036854775807\n-9223372036854775808\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\io_i64_quickstart",
+      "exit": 0,
+      "stdout": "built: build/io-i64-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\io-i64-cli\\images\\console-release.exe",
+      "imageSHA256": "97582a664b606155271515148c0dfba74cefd4b65a7d72b00aa5b32991f607e9"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\io_i64_quickstart",
+      "exit": 0,
+      "stdout": "0\n1\n-1\n9\n-9\n10\n-10\n2147483647\n-2147483648\n2147483648\n-2147483649\n4000000000\n-4000000000\n9223372036854775807\n-9223372036854775808\n",
+      "stderr": "0\n1\n-1\n9\n-9\n10\n-10\n2147483647\n-2147483648\n2147483648\n-2147483649\n4000000000\n-4000000000\n9223372036854775807\n-9223372036854775808\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stdout",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stdout",
+      "exit": 0,
+      "stdout": "built: build/failed-stdout.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\io-i64-cli\\images\\failed-stdout-dev.exe",
+      "imageSHA256": "ee26a193c64afa862d2ebde72883cccf90161cbf2356fb1e16f3be56518ede99"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\images\\failed-stdout-dev.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stdout",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "case": "read-only-stdout",
+      "profile": "dev",
+      "redirectedStream": "stdout",
+      "inputHandleAccess": "read-only",
+      "imageSHA256": "ee26a193c64afa862d2ebde72883cccf90161cbf2356fb1e16f3be56518ede99",
+      "fileSHA256": "031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stdout",
+      "exit": 0,
+      "stdout": "built: build/failed-stdout.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\io-i64-cli\\images\\failed-stdout-release.exe",
+      "imageSHA256": "7238e64b488b6b383773420030e7b84a40984d7760d570776cf367b05f1fb101"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\images\\failed-stdout-release.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stdout",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "case": "read-only-stdout",
+      "profile": "release",
+      "redirectedStream": "stdout",
+      "inputHandleAccess": "read-only",
+      "imageSHA256": "7238e64b488b6b383773420030e7b84a40984d7760d570776cf367b05f1fb101",
+      "fileSHA256": "031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stderr",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stderr",
+      "exit": 0,
+      "stdout": "built: build/failed-stderr.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\io-i64-cli\\images\\failed-stderr-dev.exe",
+      "imageSHA256": "546bd06cdb52a0f733f5166b969c329cb090a60b8724ae15b4bd015cc584248e"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\images\\failed-stderr-dev.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stderr",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "case": "read-only-stderr",
+      "profile": "dev",
+      "redirectedStream": "stderr",
+      "inputHandleAccess": "read-only",
+      "imageSHA256": "546bd06cdb52a0f733f5166b969c329cb090a60b8724ae15b4bd015cc584248e",
+      "fileSHA256": "031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stderr",
+      "exit": 0,
+      "stdout": "built: build/failed-stderr.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\io-i64-cli\\images\\failed-stderr-release.exe",
+      "imageSHA256": "b3c9d3817760e87e0fe35d42ef878fb430f0b16ff844e6df886a3ea0e11b0c7b"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\images\\failed-stderr-release.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-cli\\failed-stderr",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "case": "read-only-stderr",
+      "profile": "release",
+      "redirectedStream": "stderr",
+      "inputHandleAccess": "read-only",
+      "imageSHA256": "b3c9d3817760e87e0fe35d42ef878fb430f0b16ff844e6df886a3ea0e11b0c7b",
+      "fileSHA256": "031818a443e242a52d04a5ba06a0de986375b48576d70e1667152e2ce2da556d"
+    }
+  ],
+  "numericValuesPerStream": 15,
+  "successOutcomes": 2,
+  "osWriteFailureOutcomes": 4
+}

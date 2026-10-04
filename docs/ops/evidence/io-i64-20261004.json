@@ -1,0 +1,145 @@
+{
+  "schema": "fairyc.io-i64-evidence/v1",
+  "date": "2026-10-04",
+  "baseRevision": "63c86ccff28f2b9bd2105660f8f70197a2f60423",
+  "compiler": {
+    "path": ".cache/io-i64-compiler/fairyc.exe",
+    "sha256": "157633494dc842234536b5f50d5536e6d005352c03afb3205b1ddf8f7ad3a529",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\io-i64-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004140828-63c86ccff28f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 63c86ccff28f2b9bd2105660f8f70197a2f60423\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\io-i64-compiler\\source-manifest.json",
+    "sha256": "10bae4817f1417caa150110da22d15b13ce7042b08cdbf0ec704529ae427756b",
+    "productionFileCount": 542,
+    "sourceDigest": "240ecbb834e14b7464e1cd6e333bb585365cd6819e2c0933dfc029f1775075b2"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib.go",
+      "sha256": "418b24a10b443b784275c886c7b87d3f9b97e72923406b567335b26569ac6f3b"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib_test.go",
+      "sha256": "f94430a01d60d6712996993a5a58b8bf8cc934ae1b9f421a36333fdb4d119fc6"
+    },
+    {
+      "path": "internal/sdkstdlib/io_i64_test.go",
+      "sha256": "b93e0bdec386b9a3545672d39827fad1d82b002b906efdbf3bb70f07d9352199"
+    },
+    {
+      "path": "internal/cli/io_i64_test.go",
+      "sha256": "2db65689d463717c59aa2ab8ff73a8dd9e425a3e68ad0ad356c6abb4dbd408ab"
+    },
+    {
+      "path": "internal/cli/io_i64_native_test.go",
+      "sha256": "da9a270ca7082508cf2c80870a359e95617afa0dfd63b43cf087228b56f4547d"
+    },
+    {
+      "path": "examples/io_i64_quickstart/src/main.fy",
+      "sha256": "c7ad9a66726d2162874f556e02077f7dbcc933f235061ae93f58b9b7879c56d6"
+    },
+    {
+      "path": "examples/io_i64_quickstart/fairy.toml",
+      "sha256": "58880ca991a3344c463b3aad87508a66a01a5a013708adfd362fa463b4d77e68"
+    },
+    {
+      "path": "examples/io_i64_quickstart/fairy.lock",
+      "sha256": "57dab65f34a4b211a979cee5075041e4e90ab3b72425f82bcb9f0ad0749f23fb"
+    }
+  ],
+  "tests": [
+    {
+      "path": ".cache/io-i64-related.jsonl",
+      "sha256": "8d7a8a63a04569bd4c5f5f89e90b0a6eb25b8cb3ebafc0d70ba34e2fda0e0f27",
+      "passEvents": 6,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/io-i64-regression.jsonl",
+      "sha256": "d08c2e626d060fa092dd7239cf665a1ab589a48f754a4525bd2b6fa1f09fad8f",
+      "passEvents": 20,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/io-i64-boundary.jsonl",
+      "sha256": "5095aa5ae24295c6ac113e0b0b086521f7f2a2d7e2ea946ac3c9514fee501e86",
+      "passEvents": 5,
+      "skips": 0,
+      "failures": 0
+    }
+  ],
+  "cEmission": [
+    {
+      "path": ".cache\\io-i64-emission\\x86_64-linux-gnu.c",
+      "sha256": "38f3c73fea27433493eb1295c3c5c7832f47ea3ba7b53854215f0aa63cd15a11"
+    },
+    {
+      "path": ".cache\\io-i64-emission\\x86_64-windows-msvc.c",
+      "sha256": "20c5d6d5fabe58df2416e5bf73814c9856a047dce07e41d24f40e6028bb193a6"
+    }
+  ],
+  "cliReceipt": {
+    "path": "docs\\ops\\evidence\\io-i64-20261004.cli.json",
+    "sha256": "5a3c9bd958898d79bfa82f8fb1d67df52fff7c3884b8265ce0a1a0aa9ee7b143",
+    "successOutcomes": 2,
+    "osFailureOutcomes": 4
+  },
+  "validation": {
+    "format": "passed",
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/sdkstdlib",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "native": "Windows MSVC dev/release; exact output and byte counts on both streams",
+    "linuxExecution": "deferred by owner for later batch",
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "newRuntimeSymbol": false,
+    "newSDKAPI": [
+      "std::io::write_i64",
+      "std::io::write_stderr_i64"
+    ]
+  },
+  "limits": [
+    "No new partial nonzero-prefix OS failure reproduction; existing write-all error mapping reused"
+  ],
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "benchmark": false,
+    "ciChanges": false
+  }
+}
