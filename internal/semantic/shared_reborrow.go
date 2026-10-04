@@ -6,7 +6,8 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// Only calls may shorten an exclusive reference to the same shared referent.
+// Calls may shorten an exclusive reference to the same shared referent.
+// Explicit plain-field projection has its separate ADR 0446 admission.
 // Bindings, returns, casts and tagged construction retain exact-type rules.
 func (c *typeChecker) sharedCallArgument(source **ast.Expression, child *hir.Expression, actual, expected hir.Type) (*hir.Expression, hir.Type) {
 	element, mutable, borrow := hir.BorrowElement(actual)
@@ -40,18 +41,21 @@ func borrowValuesOverlap(left, right borrowValueState) bool {
 // parent. This parent loan handles references received as parameters, which
 // have an origin but no local root loan.
 func (f *borrowFlowAnalyzer) sharedReborrowValue(expression *ast.Expression, value borrowValueState) borrowValueState {
-	value = cloneBorrowValue(value)
 	if len(expression.Children) != 1 {
 		return borrowValueState{known: false}
 	}
-	parent := expression.Children[0]
-	for parent != nil && parent.Kind == syntax.KindGroup && len(parent.Children) == 1 {
-		parent = parent.Children[0]
-	}
+	return f.retainSharedParent(expression.Children[0], span(f.module.file.Path, expression.Span), value)
+}
+
+// Retain named-parent loans for shared children. Reference descriptor rebinding
+// keeps the child's selected origin; referent writes are checked by origin.
+func (f *borrowFlowAnalyzer) retainSharedParent(parent *ast.Expression, at hir.Span, value borrowValueState) borrowValueState {
+	value = cloneBorrowValue(value)
+	parent = assignmentRootPath(parent)
 	if parent != nil && parent.Kind == syntax.KindPath {
 		owner := f.analyzer.resolved[parent]
 		for _, origin := range value.origins {
-			value.pending = append(value.pending, pendingBorrowLoan{owner: owner, borrow: span(f.module.file.Path, expression.Span), kind: "shared", origin: origin})
+			value.pending = append(value.pending, pendingBorrowLoan{owner: owner, borrow: at, kind: "shared", origin: origin})
 		}
 	}
 	return value

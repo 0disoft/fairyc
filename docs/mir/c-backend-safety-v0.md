@@ -462,3 +462,9 @@ target beyond the evidence supplied by the differential fixtures.
 - LLVM IR undefined-behavior guidance: <https://llvm.org/docs/UndefinedBehavior.html>
 
 These references constrain backend transports; they do not become Fairy C's language specification.
+
+ADR 0446's shared fields from mutable plain struct references use an explicit
+verified shared root before ordinary shared field-address emission. The backend
+still receives matching owner/result reference kinds and never copies a stored
+struct to obtain a projected address. No additional alias-optimization promise,
+runtime symbol or target admission is implied.

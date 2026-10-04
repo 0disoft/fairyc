@@ -35,3 +35,14 @@ func TestEmitMutableFieldBorrowUsesOwnerAddress(t *testing.T) {
 		t.Fatalf("lost projected addresses: %s", unit.Source)
 	}
 }
+
+func TestEmitSharedMutableFieldBorrowUsesOwnerAddress(t *testing.T) {
+	program := lowerSource(t, `module main;struct Span{i64 start;}struct Token{Span position;}fn ref i64 number(ref mut Token t){return ref t.position.start;}fn void edit(ref mut Token t){let ref Span s=ref t.position;assert(s.start==4000000000);t.position.start+=2;}fn i32 main(){var Token t=Token{.position=Span{.start=4000000000}};edit(ref mut t);let ref i64 n=number(ref mut t);assert(*n==4000000002);return 0;}`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(unit.Source, "= &((fy_l_") != 3 {
+		t.Fatalf("lost stored-field addresses: %s", unit.Source)
+	}
+}

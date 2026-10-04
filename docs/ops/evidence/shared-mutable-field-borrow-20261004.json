@@ -1,0 +1,275 @@
+{
+  "schema": "fairyc.shared-mutable-field-borrow-review/v1",
+  "date": "2026-10-04",
+  "baseCommit": "fa27ad419a00ce6e9e4e96e665aca5e9facca3dd",
+  "vcsModifiedAtBuild": true,
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-compiler\\fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "",
+    "stderr": "",
+    "exit": 0
+  },
+  "compilerIdentityInvocation": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004075952-fa27ad419a00+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: fa27ad419a00ce6e9e4e96e665aca5e9facca3dd\nmodified: true\n",
+    "stderr": "",
+    "exit": 0
+  },
+  "compilerSHA256": "ec8b47751a6f2910e7b0988c8028664c204712e622d09e04c8411746e5739209",
+  "compilerSourceSet": {
+    "fileCount": 479,
+    "SHA256": "84d32f95da687f7eb7953f102f12243c91ba01e9f017523636fcc4ac9dd28076",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "sdkSourceSet": {
+    "fileCount": 8,
+    "SHA256": "a81b7b9e4beda6dcfc76bb2ceef7c6d6b31dd9bb20cadf5088a3678dbc0cb3ec",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "changedSourceFiles": {
+    "internal/cbackend/field_borrow_test.go": "d22132cc23ac6807b064f4078f69b18aa0d71c8adf4c409100189070bb04cbd3",
+    "internal/semantic/field_borrow.go": "c422eef116954a5de9696b69a1ed0b76c0e42e82450394ca5f1b4f36f5af4a6d",
+    "internal/semantic/field_borrow_test.go": "28680993219fd70cdc329bba2e14bac9cdaa56d1b0d9d5bf9f2e6c8b604d9043",
+    "internal/semantic/shared_reborrow.go": "b8f62ba51099dc945f99c05b8a50d63d60e4273dba0d32bf73c9bf33ccfb5b3c",
+    "internal/semantic/typecheck.go": "0e37a271569266bec760f7fe52d3b85a8c3560a63e5e9f8859a1fc3db9e53ba6",
+    "internal/cli/shared_mutable_field_borrow_test.go": "87a61b88b955f88aaf9974e70a272650a6b44519d9c2616bfcd69e8e9e89cd0d",
+    "internal/compiler/shared_mutable_field_borrow_test.go": "d5b6c957c394f26773efbc8271a2684088258069ff9630583bd5f28a6f68f90e",
+    "internal/compiler/testdata/shared_mutable_field_borrow.fy": "b6ec29219a470370f1835bf3f7bf1ad9b52bee408e7b97a846d3cece1f7169a4"
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/cbackend",
+        "./internal/interpreter",
+        "-run",
+        "FieldBorrow|SharedReborrow|ExclusiveSubview",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-stages.jsonl",
+      "SHA256": "32fd27ec1d390e2ca01e320a8cb2882a20726099702a8f4326204003588b5f12",
+      "exit": 0,
+      "passed": 86,
+      "skipped": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/compiler",
+        "-run",
+        "^Test(SharedMutableFieldBorrow|MutableFieldBorrow|SharedReborrowArtifactAndInterpreter)",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-compiler.jsonl",
+      "SHA256": "3a960a55386f4c9a5855fc657c9b6720b56a127752c53f6cfd13c3446c153f62",
+      "exit": 0,
+      "passed": 64,
+      "skipped": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestSharedMutableFieldBorrow(Native|Cache)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-native.jsonl",
+      "SHA256": "57015c03971ec241fe9b1ad58bd39d6601592c6a8ee66b7788b19f48477a8595",
+      "exit": 0,
+      "passed": 4,
+      "skipped": []
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/semantic",
+      "./internal/mir",
+      "./internal/cbackend",
+      "./internal/interpreter",
+      "./internal/compiler",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "",
+    "stderr": "",
+    "exit": 0
+  },
+  "native": {
+    "cases": [
+      {
+        "case": "shared-fields-origins",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestSharedMutableFieldBorrowNativeshared-fields-origins1905847730\\001",
+        "imageSHA256": "a5c33ebad6da464a12fc5252c7ceadb45ca6a7ed34151ec8043bb7717ac62231",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "5e9fb591d2dcadab4c6c65b88d8bcdb9d9658f4ba5bf75724c6d363f8f85c49d",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "shared-fields-origins",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestSharedMutableFieldBorrowNativeshared-fields-origins1905847730\\001",
+        "imageSHA256": "3006768646ab76023a04a3257bc698c09ddf8d8537d99a372c38be99944c2da8",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "5e9fb591d2dcadab4c6c65b88d8bcdb9d9658f4ba5bf75724c6d363f8f85c49d",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "post-release-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestSharedMutableFieldBorrowNativepost-release-trap4196117370\\001",
+        "imageSHA256": "7dca5f696f0eaa5c78510e66f08ccee382e397c3a88f69141117719f136c9096",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "2dcd600f7dc05169aee8a3c842bf8a76ba574b9883f2ba20cf7271d3a011a754",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "post-release-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestSharedMutableFieldBorrowNativepost-release-trap4196117370\\001",
+        "imageSHA256": "87780d3e39bda6711e60bb88d911fece0912d36e90cf0d544b6d22b797544e92",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "2dcd600f7dc05169aee8a3c842bf8a76ba574b9883f2ba20cf7271d3a011a754",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      }
+    ],
+    "schema": "fairyc.shared-mutable-field-borrow-native/v1",
+    "sdk": "0.0.0-stage0.84"
+  },
+  "unresolvedBaseline": {
+    "classification": "pre-existing MSVC always-trapping assertion/overflow C reachability; not fixed by this feature",
+    "initialSource": "module main;struct Span{i64 start;}struct Token{Span position;}fn void edit(ref mut Token t){let ref i64 before=ref t.position.start;assert(*before==9223372036854775807);t.position.start+=1;}fn i32 main(){var Token t=Token{.position=Span{.start=9223372036854775807}};edit(ref mut t);return 0;}",
+    "initialSourceSHA256": "cfbb0efcb5e9538681f59ab6bcfe423f6ee01630ce37ef61749b109022189458",
+    "initialRawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-native-first.jsonl",
+    "initialRawLogSHA256": "6bc1b7bb63146d083191bd5f7c63d21d18048ce33bb8c6fc03b5a45871d45919",
+    "baseline": {
+      "source": "module main;struct Span{i64 start;}struct Token{Span position;}fn ref i64 number(ref Token t){return ref t.position.start;}fn void edit(ref mut Token t){let ref i64 before=number(t);assert(*before==9223372036854775807);t.position.start+=1;}fn i32 main(){var Token t=Token{.position=Span{.start=9223372036854775807}};edit(ref mut t);return 0;}",
+      "runs": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+            "--version"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-baseline",
+          "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004075725-251d15b04c4b\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 251d15b04c4b6f4351614eeebc8d59ed8adcf279\nmodified: false\n",
+          "stderr": "",
+          "exit": 0
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+            "check"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-baseline",
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock updated\n",
+          "stderr": "",
+          "exit": 0
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+            "build",
+            "--release",
+            "--locked"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-baseline",
+          "stdout": "",
+          "stderr": "fairyc: build failed: MSVC host command failed: exit status 2: unit.c\n<temporary>\\unit.c(104) : error C2220: the following warning is treated as an error\n<temporary>\\unit.c(104) : warning C4702: unreachable code\n",
+          "exit": 6
+        }
+      ],
+      "compilerSHA256": "a2cfe1e3be793294fb17d663e54a8e29f6f4840925c4fd5e47ffd36bbccbceeb",
+      "sourceSHA256": "56f4d7fc241fd94cb34e3a224c953fa5d8f9bbc35b1a0ed87c78f729a0329c61"
+    }
+  },
+  "linuxExecution": "deferred at user request",
+  "sdk": "0.0.0-stage0.84",
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0"
+}

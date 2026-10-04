@@ -41,8 +41,8 @@ existing shared aggregate references, including nested fields. A local root keep
 its local origin; projection through a shared reference retains that reference's
 origin and loans. Resource field privacy is unchanged, and no intermediate field
 value is copied or moved. Owned call-result temporaries remain outside this executable slice. ADR 0445
-admits mutable plain struct field projection below; shared projection through
-mutable aggregate references remains closed.
+admits mutable plain struct field projection below. ADR 0446 also admits explicit
+shared field projection through named mutable plain struct references.
 
 ADR 0394 admits plain assignment to a direct `i32`, `u8`, `u32`, `usize`, or `bool` field of
 a mutable local struct/resource or an existing `ref mut` aggregate receiver.
@@ -84,6 +84,21 @@ parameter origins and generation status; local owner escape remains rejected.
 Resource/nonplain/indexed/call-result/pointer/dereference roots and simultaneous
 mutable siblings remain closed. Scalar children use existing dereference stores;
 struct children use existing field stores.
+
+ADR 0446 admits explicit `ref parent.field` and nested/grouped stored field
+projection through a named `ref mut` plain struct reference. The root satisfies
+ADR 0441 and the projected leaf is a scalar or plain struct. Lowering shortens
+the named root to a shared reference before selecting field addresses; no
+intermediate value is copied. Shared children, aliases, descendants and returned/
+tagged values retain the selected owner origin. Parent/parent-alias/sibling/root
+referent writes wait until the last retained shared use; shared reads and shared
+siblings may coexist. Exclusive call arguments conflict in either source order.
+Descriptor rebinding follows existing origin replacement: an earlier child stays
+on its originally selected owner, and protects that referent after the parent
+selects another owner. Local/multiple-origin escape remains rejected. Resource,
+nonplain, indexed, call-result, pointer and dereference roots are outside this
+new mutable-root form. Implicit whole-reference binding/return conversion remains
+closed, while ADR 0414's shared call conversion is unchanged.
 
 ADR 0401 admits plain `*slot = value` for a named `ref mut` to `bool`, `u8`,
 `i32`, `u32`, or `usize`. The exclusive loan remains live while the right-hand

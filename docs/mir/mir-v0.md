@@ -414,3 +414,11 @@ interpreter retains live scalar field cells for reads/writes through a reference
 while aggregate references address the original stored struct. Source Flow owns
 whole-root child generations and escape rules; MIR does not infer field-disjoint
 loans or emit an alias-optimization promise.
+
+ADR 0446 source shared projection from a named mutable plain struct reference
+lowers to `shared-reborrow` at the root followed by shared/shared `field-borrow`.
+No mutable/shared mixed-kind field operation is admitted. Existing actual-local
+receiver, exact-referent and field-definition checks stay intact; codec and cache
+transport need no new shape. Source Flow retains shared owner origins across
+aliases/returned/tagged children and forbids conflicting writes until last use.
+Reference descriptor rebinding never retargets an earlier projected address.

@@ -1299,7 +1299,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		return childType
 	case "&":
 		if child != nil {
-			if field, ok := sharedFieldBorrow(*child); ok {
+			if field, ok := c.sharedFieldBorrow(expression.Children[0], *child); ok {
 				*result = field
 				result.Span = span(c.module.file.Path, expression.Span)
 				return field.Type

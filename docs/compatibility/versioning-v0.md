@@ -1659,3 +1659,13 @@ no opcode/wire/schema change is required. Compiler revision/executable identity
 separates older restricted compilers and cached generations. SDK stage0.84,
 language /20, runtime /0, grammar, exports and target maturity stay unchanged.
 Windows dev/release execution is verified; Linux execution remains deferred.
+
+ADR 0446 admits shared field-address projection from named mutable plain struct
+references. Semantic lowering reuses the exact-root `shared-reborrow` plus
+shared/shared `field-borrow`; actual-local/kind/field verifiers stay unchanged.
+Compiler executable identity separates older restricted source subsets and
+cached generations. SDK stage0.84, language /20, runtime /0, grammar, wire/schema,
+exports and target maturity remain unchanged. Windows execution is verified;
+Linux execution is deferred. The prior MSVC always-trapping assertion/overflow
+reachability limitation remains separately recorded, rather than hidden by the
+runtime-dependent fault test.

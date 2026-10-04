@@ -8,8 +8,35 @@ import (
 
 // sharedFieldBorrow projects an address, never a copied aggregate temporary.
 // Every projection retains the complete root owner; fields do not split loans.
-func sharedFieldBorrow(field hir.Expression) (hir.Expression, bool) {
-	return projectFieldBorrow(field, false)
+func (c *typeChecker) sharedFieldBorrow(source *ast.Expression, field hir.Expression) (hir.Expression, bool) {
+	if result, ok := projectFieldBorrow(field, false); ok {
+		return result, true
+	}
+	root := fieldAssignmentRoot(source)
+	target := c.analyzer.resolved[root]
+	if target == nil {
+		return hir.Expression{}, false
+	}
+	element, mutable, borrowed := hir.BorrowElement(target.typ)
+	if !borrowed || !mutable || !c.analyzer.plainViewStruct(element) {
+		return hir.Expression{}, false
+	}
+	return projectFieldBorrow(shareFieldRoot(field), false)
+}
+
+// Shorten the named root before projecting shared addresses. Rebuild the HIR
+// children so the original mutable place and its type facts stay unchanged.
+func shareFieldRoot(field hir.Expression) hir.Expression {
+	if field.Kind == "path" {
+		element, mutable, borrowed := hir.BorrowElement(field.Type)
+		if borrowed && mutable {
+			return hir.Expression{Kind: string(ast.PrivateSharedReborrow), Type: hir.SharedBorrow(element),
+				Span: field.Span, Symbol: hir.NoSymbol, Children: []hir.Expression{field}}
+		}
+	} else if (field.Kind == "field-expression" || field.Kind == "group") && len(field.Children) == 1 {
+		field.Children = []hir.Expression{shareFieldRoot(field.Children[0])}
+	}
+	return field
 }
 
 func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, bool) {
@@ -93,6 +120,10 @@ func (c *typeChecker) mutableFieldBorrow(source *ast.Expression, child *hir.Expr
 func (f *borrowFlowAnalyzer) evaluateFieldBorrowRoot(expression, root *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
 	value, reachable := f.evaluateExpression(root, environment)
 	if expression.Text != "&mut" {
+		if _, mutable, borrowed := hir.BorrowElement(f.analyzer.expressionTypes[root]); borrowed && mutable {
+			f.checkReferenceAccess(root, value, false, environment, span(f.module.file.Path, expression.Span))
+			value = f.retainSharedParent(root, span(f.module.file.Path, expression.Span), value)
+		}
 		return value, reachable
 	}
 	f.checkReferenceAccess(root, value, true, environment, span(f.module.file.Path, expression.Span))

@@ -90,11 +90,11 @@ fn ref i32 escape() { return ref make().inner.number; }`})
 	}
 }
 
-func TestAnalyzeSharedFieldBorrowKeepsMutableReborrowClosed(t *testing.T) {
+func TestAnalyzeSharedFieldBorrowKeepsMutableResourceReborrowClosed(t *testing.T) {
 	result := analyzeText(t, map[string]string{"main.fy": fieldBorrowPrelude + `
 fn ref i32 read_mut(ref mut Owner owner) { return ref owner.inner.number; }`})
 	if len(result.Unsupported) == 0 {
-		t.Fatal("mutable-owner reborrow admitted without exclusive lifetime support")
+		t.Fatal("mutable resource field projection accepted")
 	}
 }
 
