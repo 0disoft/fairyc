@@ -1315,6 +1315,11 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return hir.SharedBorrow(childType)
 	case "&mut":
+		if field, ok := c.mutableFieldBorrow(expression.Children[0], child); ok {
+			*result = field
+			result.Span = span(c.module.file.Path, expression.Span)
+			return field.Type
+		}
 		target := c.analyzer.resolved[expression.Children[0]]
 		if target == nil || !target.mutable {
 			c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, expression.Children[0].Span))

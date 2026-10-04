@@ -11,8 +11,8 @@ import (
 func (e *emitter) inspectFieldBorrow(functionIndex int, operation mir.Operation) error {
 	element, mutable, borrowed := hir.BorrowElement(operation.Type)
 	_, ownerMutable, ownerBorrowed := hir.BorrowElement(operation.OwnerType)
-	if !borrowed || mutable || !ownerBorrowed || ownerMutable {
-		return fmt.Errorf("field borrow requires a borrowed owner and shared result")
+	if !borrowed || !ownerBorrowed || mutable != ownerMutable {
+		return fmt.Errorf("field borrow requires matching owner and result reference kinds")
 	}
 	// Reuse definition and operand-type checks, not field-read value emission.
 	operation.Kind, operation.Type = mir.OperationFieldRead, element

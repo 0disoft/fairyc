@@ -315,6 +315,8 @@ type taggedState struct {
 }
 
 type scalarReference struct {
+	fields map[string]runtimeValue
+	field  string
 	locals map[mir.LocalID]runtimeValue
 	local  mir.LocalID
 }
@@ -935,6 +937,15 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
 				}
 				if operation.Kind == mir.OperationFieldBorrow {
+					if element, _, _ := hir.BorrowElement(operation.Type); hir.FixedArrayScalarElement(element) {
+						var fields map[string]runtimeValue
+						if receiver.structure != nil {
+							fields = receiver.structure.fields
+						} else if receiver.resource != nil {
+							fields = receiver.resource.fields
+						}
+						value.reference = &scalarReference{fields: fields, field: operation.Field}
+					}
 					value.typ = operation.Type
 				}
 				locals[operation.DestinationLocal] = value
@@ -1288,7 +1299,7 @@ func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation)
 			return runtimeValue{}, "", capabilityError("safe dereference has incompatible operand or result type")
 		}
 		if value.reference != nil {
-			referent, exists := value.reference.locals[value.reference.local]
+			referent, exists := value.reference.load()
 			if !exists || !scalarStoreValueMatches(referent, element) {
 				return runtimeValue{}, "", capabilityError("safe dereference has invalid scalar referent")
 			}

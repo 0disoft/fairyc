@@ -457,7 +457,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 			root := borrowPlaceRoot(expression.Children[0])
 			if root != expression.Children[0] {
 				if _, _, borrowed := hir.BorrowElement(f.analyzer.expressionTypes[root]); borrowed {
-					return f.evaluateExpression(root, environment)
+					return f.evaluateFieldBorrowRoot(expression, root, environment)
 				}
 			}
 			f.checkBorrowCreation(expression, environment)
@@ -469,7 +469,8 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 			return borrowValueState{
 				known: true, origins: []flowOrigin{origin},
 				pending: []pendingBorrowLoan{{
-					owner: owner, borrow: span(f.module.file.Path, expression.Span),
+					subview: expression.Text == "&mut" && root != expression.Children[0],
+					owner:   owner, borrow: span(f.module.file.Path, expression.Span),
 					kind: borrowKind(expression.Text), origin: origin,
 				}},
 			}, true

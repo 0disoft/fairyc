@@ -1,0 +1,218 @@
+{
+  "schema": "fairyc.mutable-field-borrow-review/v1",
+  "date": "2026-10-04",
+  "baseCommit": "8b2f8652c52a25a97866018a6caa2b2d820634ec",
+  "vcsModifiedAtBuild": true,
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-compiler\\fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "",
+    "stderr": "",
+    "exit": 0
+  },
+  "compilerIdentityInvocation": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004073607-8b2f8652c52a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 8b2f8652c52a25a97866018a6caa2b2d820634ec\nmodified: true\n",
+    "stderr": "",
+    "exit": 0
+  },
+  "compilerSHA256": "4f6c3ed128f473831b61b4028e3af828785a6eac1d4f396efd2dba2f389b5f31",
+  "compilerSourceSet": {
+    "fileCount": 479,
+    "SHA256": "acf7d8c2f86e791c674f45602d5a0f12d46dbe9e3d13fb8f6170f3ef8b1c68ce",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "sdkSourceSet": {
+    "fileCount": 8,
+    "SHA256": "a81b7b9e4beda6dcfc76bb2ceef7c6d6b31dd9bb20cadf5088a3678dbc0cb3ec",
+    "encoding": "UTF-8 sorted path<TAB>content-SHA256<LF>"
+  },
+  "changedSourceFiles": {
+    "internal/cbackend/field_borrow.go": "5561f84daadbc443e1d81a5fc7379b2a6c0226fbdd4a576261af955308951158",
+    "internal/cbackend/field_borrow_test.go": "5a5cac22f00e63019267f56a1af2f0787c2483b5e8843d7e5122890115b2c09b",
+    "internal/interpreter/deref_store.go": "031310e12fc80f60b3923f856d2542beda396c9773d41874a8cc7dcdc1d3cca2",
+    "internal/interpreter/interpreter.go": "0580acd065b3bbece396862d0356798f63ce0f595c3aba2fb54b3be040b278da",
+    "internal/mir/field_borrow.go": "1ee22d2d3e447197a91be9a28d46087bc7dd6ccd2ae29d1d4af6ecb3a10776fb",
+    "internal/mir/field_borrow_test.go": "420880350b5660e09d8e7786280543bf4c88f009cc7e795faa0a0b2c97325b21",
+    "internal/mir/field_store_types.go": "1e6e3f91672fb616de52cca0c082a8523e247be250ed98eb534c752c65b657a9",
+    "internal/mir/verify.go": "a5bdf9c08ff7c1bfceabb2be914645c7295b4d9cc2eacac5826fa9f0330af5cc",
+    "internal/semantic/borrow_flow.go": "161d01eac42e63a676110c63be8ae21971b368329ee15d643bcba63646aebe0e",
+    "internal/semantic/field_borrow.go": "5247beedbb836010b35e209636adaef868acd02ef793f5b6fee0a3e4cc710008",
+    "internal/semantic/typecheck.go": "4c3893be0e3dd54bb4087b7637a4b0dd7e747520a3d5d458b17b3f5fbc289c2d",
+    "internal/cli/mutable_field_borrow_test.go": "560e99958732eb1a7e094499e201625502a367a0aae360bdbc36a9701652b19e",
+    "internal/compiler/mutable_field_borrow_test.go": "afe77d1b8ddf12f7292cd6d6f8cd7af8bf15c96e6b86cb5cf05eb21bd53910c5",
+    "internal/compiler/testdata/mutable_field_borrow.fy": "06a0c598987fab7b99dc35a5efa3b023a21bb46e05b30583708516321ca71d55"
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/cbackend",
+        "./internal/interpreter",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-stages.jsonl",
+      "SHA256": "f6e403e34c378287fab89845a91bb7f93dcd3a735f41db4b71be4d226bc70e39",
+      "passed": 1166,
+      "skipped": [
+        "TestI64HelpersStrictLinuxConsumers"
+      ]
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/compiler",
+        "-run",
+        "^Test(MutableFieldBorrow|PlainStructFieldStoreRoundTrip|NestedFieldStoreRoundTrip)",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-compiler.jsonl",
+      "SHA256": "87832807cdab1168dd58c37478fa8c8d3e0d51972fb7053fc0cf9ed7447f16cd",
+      "passed": 28,
+      "skipped": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestMutableFieldBorrow(Native|Cache)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "rawLog": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-native.jsonl",
+      "SHA256": "b4d735dfbc9fa25502f3546f8143b05b1143a1a0f755eb0619127e0dd6bddbf0",
+      "passed": 4,
+      "skipped": []
+    }
+  ],
+  "native": {
+    "cases": [
+      {
+        "case": "fields-generations",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableFieldBorrowNativefields-generations2840427036\\001",
+        "imageSHA256": "eb58748f5f9be9c73423061bbf1b5cee6f18ca9f7e6adf300826af662b35893a",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "3adfefd4063cfa989181512d347f79e0c79f96276f760f9302eb5b1b7a4bb36b",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "fields-generations",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableFieldBorrowNativefields-generations2840427036\\001",
+        "imageSHA256": "930306cda5c631e5635578b601cb986cc84d3035ba418349be68b00241066274",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "3adfefd4063cfa989181512d347f79e0c79f96276f760f9302eb5b1b7a4bb36b",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "checked-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableFieldBorrowNativechecked-trap4057402750\\001",
+        "imageSHA256": "23ab2f2ad9dae3d5fafdb8d84bec7a1e446fe14c024b272f18345f2ba4702dda",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "9ace7c196944c54e9a57ff2e96b843dd0bd158fa15731de49bf265c17cbd8e74",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "checked-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableFieldBorrowNativechecked-trap4057402750\\001",
+        "imageSHA256": "fab252eb4ce89509f4f8b3ffd52ab5a7fe321388371da7abf1218f9426a309ab",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "9ace7c196944c54e9a57ff2e96b843dd0bd158fa15731de49bf265c17cbd8e74",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      }
+    ],
+    "schema": "fairyc.mutable-field-borrow-native/v1",
+    "sdk": "0.0.0-stage0.84"
+  },
+  "linuxExecution": "deferred at user request",
+  "sdk": "0.0.0-stage0.84",
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0"
+}

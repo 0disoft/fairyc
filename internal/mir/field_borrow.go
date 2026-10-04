@@ -7,8 +7,8 @@ import (
 )
 
 func (l *functionLowerer) lowerFieldBorrow(expression *hir.Expression) (Operand, error) {
-	_, mutable, borrowed := hir.BorrowElement(expression.Type)
-	if !borrowed || mutable || len(expression.Children) != 1 || expression.Operator == "" {
+	_, _, borrowed := hir.BorrowElement(expression.Type)
+	if !borrowed || len(expression.Children) != 1 || expression.Operator == "" {
 		return Operand{}, fmt.Errorf("malformed field borrow")
 	}
 	owner, err := l.lowerExpression(&expression.Children[0])
@@ -28,11 +28,18 @@ func (l *functionLowerer) lowerFieldBorrow(expression *hir.Expression) (Operand,
 func validFieldBorrowShape(op Operation) bool {
 	_, mutable, borrowed := hir.BorrowElement(op.Type)
 	_, ownerMutable, ownerBorrowed := hir.BorrowElement(op.OwnerType)
-	return borrowed && !mutable && ownerBorrowed && !ownerMutable && op.Field != "" &&
+	return borrowed && ownerBorrowed && mutable == ownerMutable && op.Field != "" &&
 		op.Symbol == hir.NoSymbol && op.DestinationLocal >= 0 && len(op.Operands) == 1 &&
 		op.Operands[0].Kind == OperandLocal && op.Operands[0].Local >= 0 && op.Operands[0].Local != op.DestinationLocal &&
 		len(op.Fields) == 0 && len(op.TrapCategories) == 0 && op.Operator == "" &&
 		op.Destination == "" && op.ProjectionEntity == "" && op.DropFlagEntity == "" &&
 		op.IndexType == "" && op.Variant == "" && !op.MovePayload && !op.FlagClearedFirst &&
 		op.UnsafeScope == (hir.Span{}) && op.SourceForm == "" && op.ExitKind == ""
+}
+
+// Mutable projection preserves only plain, non-owning field addresses.
+func validMutableFieldBorrow(op Operation, lookup func(hir.Type) *StructType) bool {
+	element, mutable, _ := hir.BorrowElement(op.Type)
+	return !mutable || plainFieldStoreStruct(fieldAggregateType(op.OwnerType), lookup) &&
+		(fieldStoreScalar(element) || plainFieldStoreStruct(element, lookup))
 }

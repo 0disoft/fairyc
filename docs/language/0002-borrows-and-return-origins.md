@@ -40,9 +40,9 @@ ADR 0391 implements shared field-address projection from local/by-value places a
 existing shared aggregate references, including nested fields. A local root keeps
 its local origin; projection through a shared reference retains that reference's
 origin and loans. Resource field privacy is unchanged, and no intermediate field
-value is copied or moved. Owned call-result temporaries, mutable field borrows and
-projection through mutable aggregate references remain outside this executable
-slice.
+value is copied or moved. Owned call-result temporaries remain outside this executable slice. ADR 0445
+admits mutable plain struct field projection below; shared projection through
+mutable aggregate references remains closed.
 
 ADR 0394 admits plain assignment to a direct `i32`, `u8`, `u32`, `usize`, or `bool` field of
 a mutable local struct/resource or an existing `ref mut` aggregate receiver.
@@ -73,7 +73,17 @@ stores. Named-local root replacement during the RHS still stores to that local.
 Other aggregate-field replacements remain source-located unsupported lowering.
 The older direct non-`repr(C)` one-`usize`-field inert struct exception is retained.
 Shared field reads and borrows retain the separate projection boundary above;
-field stores do not admit mutable field borrows.
+field stores alone do not admit mutable field borrows. ADR 0445 additionally
+admits `ref mut root.field` and nested/grouped field places from named mutable
+locals or existing `ref mut` struct references when the root forms the ADR 0441
+plain graph. The field is a plain struct or scalar leaf. The address selects
+stored fields without copying. Each child retains a whole-owner exclusive loan
+and a child generation: parent/root/sibling/parent-alias access waits until the
+last retained child/alias/descendant use. Returned and tagged children retain
+parameter origins and generation status; local owner escape remains rejected.
+Resource/nonplain/indexed/call-result/pointer/dereference roots and simultaneous
+mutable siblings remain closed. Scalar children use existing dereference stores;
+struct children use existing field stores.
 
 ADR 0401 admits plain `*slot = value` for a named `ref mut` to `bool`, `u8`,
 `i32`, `u32`, or `usize`. The exclusive loan remains live while the right-hand
@@ -81,7 +91,8 @@ side is evaluated once; competing borrows, direct owner reads, and moves are
 rejected. A read through the same reference is allowed. `Vec.at_mut<i32>` may
 therefore update its selected element without copying or resizing the vector.
 Aggregate replacement, compound dereference assignment, temporary reference
-targets, and mutable field-address projection remain unsupported.
+targets remain unsupported. Mutable plain struct field-address projection is
+admitted separately by ADR 0445.
 
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
 `ref mut T`. The original borrow becomes usable again after the call's last use. Returning, storing,

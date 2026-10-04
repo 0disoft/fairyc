@@ -54,3 +54,35 @@ func TestVerifyFieldBorrow(t *testing.T) {
 		})
 	}
 }
+
+func TestVerifyMutableFieldBorrow(t *testing.T) {
+	owner := hir.Type("main::Owner")
+	program := Program{StructTypes: []StructType{{Type: owner, Name: "Owner", Fields: []StructField{{Name: "value", Type: hir.TypeI64}}}}, Functions: []Function{{Symbol: 1, Name: "main::field", Parameters: []LocalID{2}, ParameterTypes: []hir.Type{hir.MutableBorrow(owner)}, ResultType: hir.MutableBorrow(hir.TypeI64), Entry: 0, Blocks: []Block{{ID: 0, Operations: []Operation{{Kind: OperationFieldBorrow, Symbol: hir.NoSymbol, DestinationLocal: 3, OwnerType: hir.MutableBorrow(owner), Type: hir.MutableBorrow(hir.TypeI64), Field: "value", Operands: []Operand{{Kind: OperandLocal, Local: 2}}}}, Terminator: Terminator{Kind: TerminatorReturn, ReturnValue: Operand{Kind: OperandLocal, Local: 3}, UnwindSuccessor: NoBlock}}}}}}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("valid mutable field: %+v", failures)
+	}
+	op := &program.Functions[0].Blocks[0].Operations[0]
+	baseline := *op
+	for name, mutate := range map[string]func(){
+		"shared result":           func() { op.Type = hir.SharedBorrow(hir.TypeI64) },
+		"shared owner annotation": func() { op.OwnerType = hir.SharedBorrow(owner) },
+		"forged parameter":        func() { program.Functions[0].ParameterTypes[0] = hir.SharedBorrow(owner) },
+		"wrong field":             func() { op.Field = "missing" },
+		"wrong value":             func() { op.Type = hir.MutableBorrow(hir.TypeUSize) },
+		"extra path":              func() { op.Fields = []string{"value"} },
+		"nonplain root": func() {
+			program.StructTypes[0].Fields = append(program.StructTypes[0].Fields, StructField{Name: "other", Type: hir.SharedBorrow(hir.TypeI64)})
+		},
+		"missing operand": func() { op.Operands = nil },
+	} {
+		t.Run(name, func(t *testing.T) {
+			*op = baseline
+			program.Functions[0].ParameterTypes[0] = hir.MutableBorrow(owner)
+			program.StructTypes[0].Fields = []StructField{{Name: "value", Type: hir.TypeI64}}
+			mutate()
+			if failures := Verify(program); len(failures) == 0 {
+				t.Fatal("forged projection accepted")
+			}
+		})
+	}
+}

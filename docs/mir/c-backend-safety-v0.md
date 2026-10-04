@@ -191,7 +191,7 @@ unsupported or recursive nested built-in tags, unsupported built-in tag fields, 
 recursive or resource-bearing user enums, and other tagged payload
 combinations; returning a safe borrow through a foreign C function boundary;
 safe-borrow operations other than exact verified local borrowing and dereference, array-view construction, owner-bound text
-raw-parts construction, view metadata, borrowed resource field reads, shared field-address projections, immutable
+raw-parts construction, view metadata, borrowed resource field reads, shared field-address projections and ADR 0445 exclusive plain-struct field projections, immutable
 byte indexing, and immutable byte slicing; unsafe operations outside the admitted raw-address,
 owner-bound text construction, and scalar foreign-call forms; complete runtime and
 standard-library lowering; malformed

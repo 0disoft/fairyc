@@ -21,10 +21,26 @@ func storeScalarDeref(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 	if reference.typ != op.OwnerType || reference.reference == nil || !scalarStoreValueMatches(value, op.Type) {
 		return fmt.Errorf("scalar dereference store type or reference mismatch")
 	}
-	referent, exists := reference.reference.locals[reference.reference.local]
+	referent, exists := reference.reference.load()
 	if !exists || !scalarStoreValueMatches(referent, op.Type) {
 		return fmt.Errorf("scalar dereference store has invalid referent")
 	}
-	reference.reference.locals[reference.reference.local] = value
+	reference.reference.store(value)
 	return nil
+}
+
+func (r *scalarReference) load() (runtimeValue, bool) {
+	if r.fields != nil {
+		v, ok := r.fields[r.field]
+		return v, ok
+	}
+	v, ok := r.locals[r.local]
+	return v, ok
+}
+func (r *scalarReference) store(v runtimeValue) {
+	if r.fields != nil {
+		r.fields[r.field] = v
+	} else {
+		r.locals[r.local] = v
+	}
 }

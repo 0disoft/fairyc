@@ -865,8 +865,10 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				fieldType := operation.Type
 				if operation.Kind == OperationFieldBorrow {
 					element, _, _ := hir.BorrowElement(operation.Type)
-					if !validFieldBorrowShape(operation) {
-						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field borrow requires a borrowed owner and shared result"})
+					if !validFieldBorrowShape(operation) ||
+						!validMutableFieldBorrow(operation, func(typ hir.Type) *StructType { return structTypes[typ] }) ||
+						fieldStoreOperandType(operation.Operands[0], storeTypes) != operation.OwnerType {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field borrow requires matching reference kinds, actual owner type and an admitted field"})
 					}
 					fieldType = element
 				}

@@ -405,3 +405,12 @@ runner stops at C text and therefore is backend emission evidence, not native di
 cleanup-trace evidence. The separate Linux runner re-emits the same verified MIR with a closed
 `drop-trace-v0` observer profile and compares exact source/type/span site sequences with the
 interpreter; product emission remains uninstrumented and hosted execution is still unobserved.
+
+ADR 0445 widens `field-borrow` to matching exclusive owner/result references in
+plain struct graphs. Verification checks the actual receiver local type and
+exact field definition before accepting the projection. Each nested projection
+addresses a stored field; no ownership or cleanup duty is transferred. The
+interpreter retains live scalar field cells for reads/writes through a reference,
+while aggregate references address the original stored struct. Source Flow owns
+whole-root child generations and escape rules; MIR does not infer field-disjoint
+loans or emit an alias-optimization promise.

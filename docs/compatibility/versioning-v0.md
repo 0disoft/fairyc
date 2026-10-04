@@ -1651,3 +1651,11 @@ trap semantics remain unchanged. Native output and static helper demand change;
 compiler revision/executable identity separates cache generations. No SDK export,
 stage0.84 version, language /20, runtime /0, grammar, ABI, wire schema or target
 maturity change is made. Linux actual execution remains deferred.
+
+ADR 0445 admits exclusive direct/nested plain-struct field-address projection,
+retaining whole-root and child-generation loans. The existing `field-borrow`
+operation now verifies matching reference kinds and actual local receiver types;
+no opcode/wire/schema change is required. Compiler revision/executable identity
+separates older restricted compilers and cached generations. SDK stage0.84,
+language /20, runtime /0, grammar, exports and target maturity stay unchanged.
+Windows dev/release execution is verified; Linux execution remains deferred.
