@@ -1815,3 +1815,26 @@ remain unchanged; exact compiler revision/executable identity separates cached
 generations. The related suite, the Windows native matrix and the standalone
 public CLI pass with no failures or skips, and both the Windows MSVC and Linux C
 profiles emit; Linux actual execution remains deferred to the owner's batch.
+
+ADR 0467 admits explicit `ref`/`ref mut` borrows of a slice range over a bare
+named local or by-value parameter fixed array (`let ref Point[] middle =
+ref points[1..3]`, `adjust(ref mut points[1..3])`), with grouping and explicit,
+half-open or omitted bounds. Bounds evaluate once, start then end, and the
+existing runtime `start <= end <= len` guard traps `bounds` before any element is
+addressed. Exclusive borrows need a mutable owner (`E1008`). A shared subview
+coexists with shared reads, borrows and sibling shared subviews, but an owner
+write or exclusive borrow while it is live is `E2101`, and an exclusive subview
+blocks owner reads and writes and every competing borrow. Local or by-value views
+cannot escape (`E2102`). Lowering reuses the existing
+array-view-borrow and view-slice operations with no copied array, temporary
+address, new MIR opcode, wire field, SDK export or runtime symbol. Language /20,
+SDK stage0.86, runtime /0, MIR/wire schemas, public ABI and target maturity remain
+unchanged. Semantic and compiler round-trip tests are defined; the related suite
+passes 355 tests with no failures or skips, the Windows native matrix produced 16
+outcomes across 8 cases and both dev and release profiles, and the public CLI
+`check`/`build`/`run` recording passed for dev and release with the five rejected
+sources rejecting as expected. Both the Windows MSVC and Linux C11 profiles emit;
+Linux actual execution is deferred to the owner's batch, so only C emission is
+verified for Linux. Evidence is recorded at
+`docs/ops/evidence/array-subview-borrow-20261005.json` with `.cli.json` and
+`.native.json` companions.

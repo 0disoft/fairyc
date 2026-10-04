@@ -951,6 +951,12 @@ func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Express
 		return hir.TypeInvalid
 	}
 	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+	return c.checkSliceRange(expression, result, receiver, receiverType)
+}
+
+// Array-subview borrows supply a view of original storage; ordinary slices
+// supply their already checked descriptor. Both share the same bounds rules.
+func (c *typeChecker) checkSliceRange(expression *ast.Expression, result *hir.Expression, receiver *hir.Expression, receiverType hir.Type) hir.Type {
 	start, startType := c.checkSliceBound(expression.Children[1], "start")
 	end, endType := c.checkSliceBound(expression.Children[2], "end")
 	result.Children = appendExpression(result.Children, receiver, start, end)
@@ -1260,6 +1266,9 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 	result.Operator = expression.Text
 	if len(expression.Children) != 1 {
 		return hir.TypeInvalid
+	}
+	if typ, handled := c.checkArraySubviewBorrow(expression, result); handled {
+		return typ
 	}
 	if expression.Text == "-" && expected == hir.TypeI64 && directSignedMinimumLiteral(expression.Children[0], 64) {
 		result.Kind = "literal"

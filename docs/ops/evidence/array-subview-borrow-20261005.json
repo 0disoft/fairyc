@@ -1,0 +1,206 @@
+{
+  "schema": "fairyc.array-subview-borrow-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "62ac0348a37f5a554558cda2288f73eec33f5bf9",
+  "compiler": {
+    "path": ".cache\\array-subview-borrow-compiler\\fairyc.exe",
+    "sha256": "c39780bf2af7b96b117a057c42b3a20d48597c5ca3fe19205fbf5587bfe4af1d",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004183032-62ac0348a37f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 62ac0348a37f5a554558cda2288f73eec33f5bf9\nmodified: true\n",
+      "stderr": ""
+    },
+    "build": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/array-subview-borrow-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\array-subview-borrow-compiler\\source-manifest.json",
+    "sha256": "5da677168d8674c303076c31c635618fe63f85574cbe991c3adf19ee523cae58",
+    "fileCount": 612,
+    "sourceDigest": "4daccf47713d9c12a86afee4acbb4561baa34fce2974828f37ba0ce85f4b8ebb"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceFileCount": 8,
+    "sourceFileManifestDigest": "01a68c5f4fbea762c6c30c2f3fef103fa1c29310b9157cecd1d73e6ef65dbc9f",
+    "digestAlgorithm": "sha256(path-tab-fileSHA256-LF)"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "docs/adr/0467-direct-array-subview-borrow.md",
+      "sha256": "ba9c81820521b830f30f028157b7a04c011e6847d73fea9f721329907fbc5e2b"
+    },
+    {
+      "path": "docs/compatibility/versioning-v0.md",
+      "sha256": "b1b07bf14dd4257ae33670d7380f9e2f250f9f75e8087b947d7dd780ef07677f"
+    },
+    {
+      "path": "docs/language/0005-surface-syntax-v0.md",
+      "sha256": "8cb277a68ac70b6200ef39cf4fcea285c1205ad24ffc88f43088f232e32b62dc"
+    },
+    {
+      "path": "internal/cli/array_subview_borrow_test.go",
+      "sha256": "147a241d36186eb0b1ae68586d0a208f8e491ae2e2a03609ab0f567416640a77"
+    },
+    {
+      "path": "internal/compiler/array_subview_borrow_test.go",
+      "sha256": "d31156027fe0a46be9ae9b5c9bd75000b7b0b5daf384d402327457d764955dfd"
+    },
+    {
+      "path": "internal/compiler/testdata/array_subview_borrow.fy",
+      "sha256": "3024182d5cc39e1dba30d51d31882f53be35237bf51fce28ae49baf2315b4527"
+    },
+    {
+      "path": "internal/semantic/array_subview_borrow.go",
+      "sha256": "823895292202857ece9a7f280543571cc65a1dcbf5287802b9bda5fcb5207d56"
+    },
+    {
+      "path": "internal/semantic/array_subview_borrow_test.go",
+      "sha256": "4c56549bc2016a7f66644403d7148bc812e40f5f15d9ff5b17c5911b0285130d"
+    },
+    {
+      "path": "internal/semantic/borrow_flow.go",
+      "sha256": "bd9a846f210d5aca08920d3dfd90c293c45b746fe5cde9f72f694685d31d063c"
+    },
+    {
+      "path": "internal/semantic/indexed_place.go",
+      "sha256": "54455de80c5e26d569bc8df20eb5513346bbe548006c40e57234fdb02bb92484"
+    },
+    {
+      "path": "internal/semantic/slice_for.go",
+      "sha256": "85404f5675f8ae36b5a742c852c9fc1a65a932e2ff25f5c6ca61c07313701d62"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "93d852e6c2615cd7493108ad538af4237b590e0ceaea547caf8fd1c2f3c1115b"
+    },
+    {
+      "path": "spec/grammar/stage0.ebnf",
+      "sha256": "2ce7c3e0d792ab844e3614f07a1a442d58848a3daa68812075a2bb8c5b7e050c"
+    }
+  ],
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "^Test(ArraySubviewBorrow.*|SliceFor.*|ArrayFor.*|ArrayElementBorrow.*|StructArray.*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\array-subview-borrow-related-final.jsonl",
+      "sha256": "f965230641665ffb0c4bd21aff2156f6b42c459ef4d2eeac29d404f5f94d1476",
+      "passed": 355,
+      "skipped": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestArraySubviewBorrow",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\array-subview-borrow-native-final.jsonl",
+      "sha256": "53805bd6ea45b297c53e056fb820cf7ce4f65d439c7b4de6edf2425f327182b1",
+      "passed": 10,
+      "skipped": 0
+    }
+  ],
+  "publicCLI": {
+    "path": "docs/ops/evidence/array-subview-borrow-20261005.cli.json",
+    "sha256": "f9867a58302c2e44937037145b368eda2397e96f4e990af3e1a85a4c2a83aab2",
+    "nativeOutcomes": 2
+  },
+  "native": {
+    "path": "docs/ops/evidence/array-subview-borrow-20261005.native.json",
+    "sha256": "651fe3249e84ab6e8a27a5378f3efabf247732e39253a5fd72451fcba83bde7d",
+    "outcomes": 16
+  },
+  "validation": {
+    "format": "passed",
+    "diffCheck": "passed",
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/array-subview-borrow-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for consolidated batch"
+  },
+  "limitations": [
+    "Named local or by-value parameter arrays with admitted scalar/plain struct elements only; grouping allowed; call/temporary/field/nested-slice roots rejected",
+    "Whole-owner loans; disjoint sibling mutable ranges are not admitted",
+    "Bounds evaluate once start then end; early return skips remaining bounds and later call arguments; empty ranges are valid"
+  ],
+  "compatibility": {
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "sdkVersion": "0.0.0-stage0.86",
+    "newSDKAPI": false,
+    "newMIROperation": false,
+    "newRuntimeHelper": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "ciChanges": false
+  }
+}

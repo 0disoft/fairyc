@@ -466,6 +466,11 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return cloneBorrowValue(state), true
 	case syntax.KindPrefix:
 		if isBorrowExpression(expression) {
+			if selected := arraySubviewSelection(expression.Children[0]); selected != nil {
+				if _, _, array := hir.FixedArrayParts(f.analyzer.expressionTypes[selected.Children[0]]); array {
+					return f.evaluateArrayPlace(expression, selected, expression.Text == "&mut", environment)
+				}
+			}
 			if index := indexedPlace(expression.Children[0]); index != nil {
 				if _, _, array := hir.FixedArrayParts(f.analyzer.expressionTypes[index.Children[0]]); array {
 					return f.evaluateArrayElementBorrow(expression, index, environment)

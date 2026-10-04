@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.array-subview-borrow-cli/v1",
+  "compilerSHA256": "c39780bf2af7b96b117a057c42b3a20d48597c5ca3fe19205fbf5587bfe4af1d",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004183032-62ac0348a37f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 62ac0348a37f5a554558cda2288f73eec33f5bf9\nmodified: true\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004183032-62ac0348a37f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 62ac0348a37f5a554558cda2288f73eec33f5bf9\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 6 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-subview-borrow-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\array-subview-borrow-cli\\images\\matrix-dev.exe",
+      "imageSHA256": "ca8aec9808edcf2bde621ad78256ae1aee7bca5df58c54ae388821a2baeef393"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-subview-borrow-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\array-subview-borrow-cli\\images\\matrix-release.exe",
+      "imageSHA256": "90b1c9e5b208d7876c2cc5db3c5b52753e0152eba9f836302192de8c19c37523"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\immutable",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:80: E1008: assignment target is not mutable [bytes 79..83]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\sibling",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:107: E2101: Access conflicts with an active shared or mutable loan. [bytes 106..123]\n  last-use: main.fy:1:125 [bytes 124..125]\n  loan: main.fy:1:69 [bytes 68..85]\nmain.fy:1:115: E2101: Access conflicts with an active shared or mutable loan. [bytes 114..118]\n  last-use: main.fy:1:125 [bytes 124..125]\n  loan: main.fy:1:69 [bytes 68..85]\nmain.fy:1:125: E2101: Access conflicts with an active shared or mutable loan. [bytes 124..125]\n  last-use: main.fy:1:130 [bytes 129..130]\n  loan: main.fy:1:107 [bytes 106..123]\nmain.fy:1:130: E2101: Access conflicts with an active shared or mutable loan. [bytes 129..130]\n  last-use: main.fy:1:130 [bytes 129..130]\n  loan: main.fy:1:69 [bytes 68..85]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:61: E2102: Returned borrow originates from a local value. [bytes 60..72]\n  origin: main.fy:1:43 [bytes 42..46]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\width",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:68: E1006: incompatible expected and actual types [bytes 67..79]\n  expected-type: main.fy:1:53 [bytes 52..61]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-subview-borrow-cli\\temporary",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support borrow of a non-place expression at main.fy [bytes 76..90]\nfairyc: semantic subset does not support slicing outside executable array views at main.fy [bytes 80..86]\n"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Point { i64 x; i32 y; }\nfn i64 sum(ref i64[] values) {\n    var i64 total = 0;\n    for (let i64 value in values) { total += value; }\n    return total;\n}\nfn void adjust(ref mut Point[] values) {\n    for (let ref mut Point value in values) { value.x += 10; }\n}\nfn i64 copied(i64[4] values) { return sum(ref values[1..3]); }\nfn ref i64[] relay(ref i64[] values) { return values; }\nfn Option<ref i64[]> wrapped(ref i64[] values) { return .some(values); }\nfn i32 main() {\n    let i64[4] fixed = [4000000000, 2, 3, 4];\n    let ref i64[] middle = ref fixed[1..3];\n    assert(middle.len == 2 && sum(middle) == 5 && copied(fixed) == 5);\n    assert(sum(ref (fixed)[..2]) == 4000000002);\n    assert(sum(ref fixed[2..]) == 7 && sum(ref fixed[..]) == 4000000009);\n    let ref i64[] empty = ref fixed[4..4]; assert(empty.is_empty);\n    var i64[4] data = fixed;\n    var usize calls = 0;\n    let ref mut i64[] selected = ref mut (data[{calls += 1; 1}..{assert(calls == 1); calls += 1; 3}]);\n    selected[0] += 20; selected[1] += 30;\n    assert(selected[0] == 22 && calls == 2);\n    assert(data[0] == 4000000000 && data[1] == 22 && data[2] == 33 && data[3] == 4);\n    let ref i64[] returned = relay(ref data[1..3]);\n    let ref i64[] alias = returned; assert(sum(alias) == 55);\n    switch (wrapped(ref data[1..3])) {\n        case .some(value): { assert(sum(value) == 55); }\n        case .none: { assert(false); }\n    };\n    var Point[4] points = [Point { .x = 4000000000, .y = 7 }; 4];\n    let ref Point[] two = ref ((points)[1..3]);\n    assert(two.len == 2 && two[0].x == 4000000000);\n    adjust(ref mut points[1..3]);\n    assert(points[0].x == 4000000000 && points[1].x == 4000000010);\n    assert(points[2].x == 4000000010 && points[3].x == 4000000000);\n    let ref mut Point[] tail = ref mut points[2..]; tail[1].y = 9;\n    assert(points[3].y == 9 && points[2].y == 7);\n    let bool[2] flags = [true, false]; let ref bool[] flag = ref flags[1..]; assert(!flag[0]);\n    let i32[2] ints = [1, 2]; let ref i32[] int = ref ints[..1]; assert(int[0] == 1);\n    let u8[2] bytes = [1, 2]; let ref u8[] byte = ref bytes[1..]; assert(byte[0] == 2);\n    let u32[2] words = [1, 2]; let ref u32[] word = ref words[..1]; assert(word[0] == 1);\n    let usize[2] sizes = [1, 2]; let ref usize[] size = ref sizes[1..]; assert(size[0] == 2);\n    return 0;\n}\n",
+      "sourceSHA256": "3024182d5cc39e1dba30d51d31882f53be35237bf51fce28ae49baf2315b4527"
+    },
+    {
+      "name": "immutable",
+      "source": "module main;fn i32 main(){let i64[2] data=[1,2];let ref mut i64[] view=ref mut data[..];return 0;}",
+      "sourceSHA256": "0b055d91ad112db8d684cf2f5c8f771b398846b658f5eb2fa71983a571a2aee9"
+    },
+    {
+      "name": "sibling",
+      "source": "module main;fn i32 main(){var i64[2] data=[1,2];let ref mut i64[] a=ref mut data[..1];let ref mut i64[] b=ref mut data[1..];a[0]=b[0];return 0;}",
+      "sourceSHA256": "6e23966d0b07625444f4433c49c1dde93fb940fd52506075eb540f173580a489"
+    },
+    {
+      "name": "escape",
+      "source": "module main;fn ref i64[] bad(){let i64[2] data=[1,2];return ref data[..];}fn i32 main(){return 0;}",
+      "sourceSHA256": "434b83498926ae42708b136f1a8284096f7247134ce729ed63dc00a97d782e06"
+    },
+    {
+      "name": "width",
+      "source": "module main;fn i32 main(){var i64[2] data=[1,2];let ref i32[] view=ref data[..];return 0;}",
+      "sourceSHA256": "d7469f354c92c20f3e46187f3d5c3531f3df4e447c4408161cf39d21cba4fc2e"
+    },
+    {
+      "name": "temporary",
+      "source": "module main;fn i64[2] make(){return [1,2];}fn i32 main(){let ref i64[] view=ref make()[..];return 0;}",
+      "sourceSHA256": "1137e0f6277e3446f4b2315ea32458ec31fd2c9ed5aa6e03499d590bc3f6a6fc"
+    }
+  ],
+  "nativeOutcomes": 2
+}

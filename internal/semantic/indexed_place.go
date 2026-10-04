@@ -141,8 +141,8 @@ func (f *borrowFlowAnalyzer) evaluateArrayElementBorrow(expression, index *ast.E
 	return f.evaluateArrayPlace(expression, index, expression.Text == "&mut", environment)
 }
 
-func (f *borrowFlowAnalyzer) evaluateArrayPlace(expression, index *ast.Expression, mutable bool, environment borrowEnvironment) (borrowValueState, bool) {
-	parent := index.Children[0]
+func (f *borrowFlowAnalyzer) evaluateArrayPlace(expression, selected *ast.Expression, mutable bool, environment borrowEnvironment) (borrowValueState, bool) {
+	parent := selected.Children[0]
 	owner := f.analyzer.resolved[assignmentRootPath(parent)]
 	if owner == nil {
 		return borrowValueState{known: false}, true
@@ -161,8 +161,10 @@ func (f *borrowFlowAnalyzer) evaluateArrayPlace(expression, index *ast.Expressio
 	f.callBorrows = append(f.callBorrows, value)
 	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: value, mutable: mutable, span: span(f.module.file.Path, expression.Span)})
 	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
-	if _, reachable := f.evaluateExpression(index.Children[1], environment); !reachable {
-		return borrowValueState{}, false
+	for _, selector := range selected.Children[1:] {
+		if _, reachable := f.evaluateExpression(selector, environment); !reachable {
+			return borrowValueState{}, false
+		}
 	}
 	// Exclusive elements freeze the whole owner and existing view aliases until
 	// last use. Array indices do not establish disjointness.

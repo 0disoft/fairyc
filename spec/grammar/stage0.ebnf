@@ -201,6 +201,12 @@ multiplicative_expression = cast_expression (("*" | "/" | "%") cast_expression)*
 
 cast_expression = prefix_expression ("as" type)* ;
 prefix_expression = prefix_operator prefix_expression | postfix_expression ;
+(* ADR 0467 admits an explicit ref/ref mut borrow of a slice range whose base is a
+   bare named local or by-value parameter fixed array: "ref points[1..3]" and
+   "ref mut points[1..3]". Grouping around the base is preserved. Scalar and
+   plain-struct element types reuse the existing array-view-borrow and view-slice
+   operations; computed, call, temporary, field and nested-slice bases and
+   ordinary slicing outside this explicit borrow remain closed. *)
 prefix_operator = "-" | "+" | "!" | "~" | "ref" | "ref" "mut" | "*" ;
 
 postfix_expression = primary_expression postfix_suffix* ;

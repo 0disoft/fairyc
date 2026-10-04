@@ -130,6 +130,19 @@
   parent's mutability even for copied/shared items, and a mutable subview
   generation freezes the parent descriptor and its aliases for the loop duration
   under ADR 0415. Owner loan, break/continue/return and escape rules are reused.
+- ADR 0467 admits explicit `ref`/`ref mut` borrows of a slice range over a bare
+  named local or by-value parameter fixed array: `let ref Point[] middle =
+  ref points[1..3]` and `adjust(ref mut points[1..3])`, with grouping around the
+  base and explicit, half-open or omitted bounds. Element types follow the
+  admitted fixed-array scalar and plain-struct set. Bounds evaluate once, start
+  then end, and the runtime checks `start <= end <= len`; empty ranges are valid
+  and out-of-range slices trap `bounds`. The root stays a bare name, so computed,
+  call, temporary, field and nested-slice roots and ordinary slicing outside this
+  explicit borrow remain closed. Exclusive borrows require a mutable `var` owner
+  (`E1008`). Shared reads and borrows coexist, and only conflicting access is
+  `E2101`: an owner write or exclusive borrow conflicts with a live shared subview,
+  and an exclusive subview conflicts with owner reads and writes and every
+  competing borrow. Local or by-value views cannot escape (`E2102`).
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

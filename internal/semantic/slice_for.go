@@ -33,27 +33,9 @@ func (c *typeChecker) prepareSliceFor(loop *ast.ByteForLoop, prepared *ast.Expre
 		if mutableItem {
 			operator = "&mut"
 		}
-		// Whole-array conversion needs a typed binding. Keep it in a private
-		// expression block so ordinary slice checking receives a view, without
-		// extending array slicing elsewhere or copying array storage.
-		elementType := loop.Type
-		if elementType.Kind == ast.TypeKindReference {
-			elementType = *elementType.Element
-		}
-		sliceType := ast.TypeReference{Kind: ast.TypeKindSlice, Element: &elementType, Span: root.Span}
-		viewType := ast.TypeReference{Kind: ast.TypeKindReference, Mutable: mutableItem, Element: &sliceType, Span: root.Span}
-		const name = "\x00fairyc_slice_for_array"
-		binding := &ast.Binding{Name: name, Span: root.Span, NameSpan: root.Span, Type: &viewType,
-			Expression: &ast.Expression{Kind: syntax.KindPrefix, Span: root.Span, Text: operator, Children: []*ast.Expression{root}}}
-		value := &symbol{id: c.analyzer.allocateSymbol(), packageID: owner.packageID, kind: "local", name: name,
-			module: owner.module, source: owner.source, declaration: root.Span, typeSpan: root.Span}
-		c.analyzer.bindingSymbols[binding] = value
-		path := &ast.Expression{Kind: syntax.KindPath, Span: root.Span, Text: name}
-		c.analyzer.resolved[path] = value
-		source.Children[0] = path
-		block := &ast.Expression{Kind: syntax.KindBlock, Span: checked.Span, Block: &ast.Block{Span: checked.Span,
-			Statements: []ast.Statement{{Kind: syntax.KindBinding, Span: root.Span, Binding: binding}}, Tail: &source}}
-		return c.prepareForDescriptor(loop, prepared, owner, block, mutableItem)
+		// Use the same explicit subview borrow as ordinary bindings and calls.
+		borrow := &ast.Expression{Kind: syntax.KindPrefix, Span: checked.Span, Text: operator, Children: []*ast.Expression{checked}}
+		return c.prepareForDescriptor(loop, prepared, owner, borrow, mutableItem)
 	} else {
 		element, indexed := hir.IndexedViewElement(owner.typ)
 		if !indexed || element != want || owner.mutable || mutableItem && !hir.MutableIndexedView(owner.typ) {
