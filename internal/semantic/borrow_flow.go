@@ -424,7 +424,19 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 				return borrowValueState{}, false
 			}
 		}
-		return cloneBorrowValue(owner), true
+		value := cloneBorrowValue(owner)
+		// A mutable storage view is a child of the owner reference, even
+		// when that reference is a parameter with no local root loan.
+		// Carry its generation through return summaries and tagged payloads.
+		if expression.Text == "borrow-mut" && hir.MutableIndexedView(f.analyzer.expressionTypes[expression]) {
+			for _, origin := range value.origins {
+				value.pending = append(value.pending, pendingBorrowLoan{
+					subview: true, owner: f.analyzer.resolved[assignmentRootPath(expression.Children[0])],
+					borrow: span(f.module.file.Path, expression.Span), kind: "mutable", origin: origin,
+				})
+			}
+		}
+		return value, true
 	case syntax.KindLiteral:
 		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
 			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}

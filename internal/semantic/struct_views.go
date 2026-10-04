@@ -17,9 +17,9 @@ func (a *analyzer) plainViewStruct(element hir.Type) bool {
 }
 
 func (a *analyzer) validStructViewUse(value hir.Type) bool {
-	if slice, mutable, borrowed := hir.BorrowElement(value); borrowed {
+	if slice, _, borrowed := hir.BorrowElement(value); borrowed {
 		if element, nominal := hir.StructSliceElement(slice); nominal {
-			return !mutable && a.plainViewStruct(element)
+			return a.plainViewStruct(element)
 		}
 		return a.validStructViewUse(slice)
 	}

@@ -475,3 +475,11 @@ single-block reference-return projections. Writes, rebinding, unknown operations
 or calls, merges and unwind entries invalidate those facts. One failure map
 controls checked guard output, reachable blocks, non-returning inference and
 helper demand. Assertion trap ordering and original verified MIR remain intact.
+
+ADR 0448 uses `fy_mut_struct_slice { void *data; uintptr_t length; }` for
+exclusive plain nominal views. Whole indexed stores and copied loads cast to
+the exact concrete struct type. Empty zero-start slices do no pointer arithmetic.
+Windows nominal programs with mutable descriptors use the existing volatile
+store policy and volatile struct loads; Linux emission uses ordinary typed
+access. Bounds precede RHS evaluation; terminating RHS paths emit no store or
+normal continuation. No runtime C symbol, foreign ABI or host flag is added.

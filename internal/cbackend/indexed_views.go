@@ -8,7 +8,10 @@ import (
 )
 
 func indexedViewCType(value hir.Type) (descriptor, pointer string, ok bool) {
-	if _, structView := hir.SharedStructViewElement(value); structView {
+	if _, structView := hir.StructViewElement(value); structView {
+		if hir.MutableIndexedView(value) {
+			return "fy_mut_struct_slice", "void *", true
+		}
 		return "fy_struct_slice", "const void *", true
 	}
 	element, ok := hir.IndexedViewElement(value)

@@ -1674,3 +1674,8 @@ ADR 0447 corrects asserted checked-failure C reachability and MSVC release build
 Exact compiler revision/executable identity separates native/cache generations.
 SDK stage0.84, language /20, runtime /0, grammar, MIR/wire schemas, ABI and public
 APIs remain unchanged; Linux execution is deferred to the owner's batch.
+
+ADR 0448 advances SDK source/export/version identity to `0.0.0-stage0.85` for
+`std::vec::view_mut<T>` and exclusive plain nominal view whole-element stores.
+Language /20, runtime /0, grammar, foreign ABI and MIR/interface/artifact schemas
+stay unchanged. Compiler identity separates caches; Linux execution is deferred.

@@ -1139,8 +1139,22 @@ are allowed, while element and field stores are rejected. A copied mutable local
 is independent of the owner and survives an owner clear. The view holds the whole
 owner shared-borrowed, so move, replacement, reallocation and structural mutation
 wait for the last retained use, and the conservative sibling rules of ADR 0415
-apply. There is no `ref mut` struct slice or fixed-array conversion. ADR 0440
+apply. ADR 0448 adds the separate exclusive form below; fixed-array struct
+conversion remains closed. ADR 0440
 adds copied-value for-in over named immutable shared struct views with loop-held
 owner loans. No new runtime C symbol or host-storage interpreter is introduced. The descriptor is one
 `const void *`/`uintptr_t` record. See `examples/struct_vec_view`; Linux
 execution is deferred to the owner's batch.
+
+## Mutable nominal vector views (SDK stage0.85)
+
+ADR 0448 adds `std::vec::view_mut<T>(ref mut Vec<T>) -> ref mut T[]` for the
+existing five integer elements and ADR 0441 plain nested nominal structs. It
+borrows the initialized prefix without allocation or copies; indices and bounds
+count elements. Indexed reads copy values and indexed whole-element assignment
+replaces the exact nominal value. The view and its returned/tagged descendants
+hold the owner exclusively, blocking direct owner access and structural changes
+until last use. Subviews retain ADR 0415 parent/sibling rules. Indexed field
+stores/borrows, mutable struct-view for-in and fixed-array struct conversion
+remain closed. The C descriptor is a mutable void pointer and uintptr_t count;
+there is no new runtime C symbol or allocator behavior.

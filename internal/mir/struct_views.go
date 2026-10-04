@@ -17,9 +17,9 @@ func (p typeProperties) plainViewStruct(element hir.Type) bool {
 }
 
 func (p typeProperties) validStructViewType(value hir.Type) bool {
-	if slice, mutable, borrowed := hir.BorrowElement(value); borrowed {
+	if slice, _, borrowed := hir.BorrowElement(value); borrowed {
 		if element, nominal := hir.StructSliceElement(slice); nominal {
-			return !mutable && p.plainViewStruct(element)
+			return p.plainViewStruct(element)
 		}
 		return p.validStructViewType(slice)
 	}
@@ -40,7 +40,7 @@ func verifyStructViewTypes(function *Function, p typeProperties) []VerificationE
 	var failures []VerificationError
 	check := func(value hir.Type) {
 		if !p.validStructViewType(value) {
-			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "struct view requires an actual nonempty shared scalar-field struct"})
+			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "struct view requires an actual nonempty plain scalar-field struct"})
 		}
 	}
 	check(function.ResultType)

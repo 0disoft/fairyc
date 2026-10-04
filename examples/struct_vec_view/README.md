@@ -1,6 +1,6 @@
 # Nominal struct vector views
 
-SDK stage0.84 exposes the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]` in
+SDK stage0.85 exposes the shared `std::vec::view<T>(ref Vec<T>) -> ref T[]` in
 `std::vec`. It borrows only the initialized element prefix of the vector without
 allocating or copying, and length/bounds count elements, so empty zero-backed
 vectors and empty subranges are valid.
@@ -10,8 +10,9 @@ vectors and empty subranges are valid.
 struct with plain language scalar leaves (`bool`, `u8`, `i32`, `i64`,
 `u32`, `usize`), including acyclic nonempty nested structs under ADR 0441. For a nominal element the view cannot reinterpret a `Token` view
 as a same-layout `Other` view. Cycles, missing definitions and array, resource,
-borrow, raw-pointer, enum, Option and Result fields at any depth are rejected. The view is shared-only: there is no
-`ref mut` struct slice or fixed-array conversion. Named immutable shared struct
+borrow, raw-pointer, enum, Option and Result fields at any depth are rejected. This example uses the shared form. ADR 0448 separately adds
+`vec::view_mut<T>` with checked whole-element replacement; indexed field
+stores/borrows and fixed-array struct conversion remain closed. Named immutable shared struct
 views support copied-value `for-in` under ADR 0440.
 
 An index copies one whole struct value out of the view, and `view[i].field` reads
@@ -137,5 +138,6 @@ reference descriptor rebinding preserves the earlier child's original referent.
 The borrowed vector and report format stay unchanged. No new validation harness
 is required. Current dev/release CLI evidence:
 `docs/ops/evidence/shared-field-example-20261004.json`.
-The separate prior MSVC C4702 limitation for an always-trapping assertion/overflow
-function is recorded in the implementation receipt; this example does not hit it.
+ADR 0447 fixes the prior MSVC C4702 assertion/overflow reproduction.
+The mutable-view source fixture is `internal/compiler/testdata/mutable_struct_vec_view.fy`;
+this analyzer continues using shared views and copied local tokens.

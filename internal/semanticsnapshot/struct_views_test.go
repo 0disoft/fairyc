@@ -22,6 +22,21 @@ func TestStructViewSnapshotRetainsNominalElement(t *testing.T) {
 	}
 }
 
+func TestMutableStructViewSnapshotRetainsNominalElement(t *testing.T) {
+	text := "module main; struct Token {i64 value;} pub fn void edit(ref mut Token[] tokens) {tokens[0]=Token{.value=4000000000};} fn i32 main(){return 0;}"
+	result := compileSinglePackage(t, 7, "main.fy", text)
+	input := packageInput(t, 7, "test.struct.mutable.snapshot", "tokens", "1.0.0", "main.fy", text, "root")
+	snapshot, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{input})
+	if err != nil {
+		t.Fatal(err)
+	}
+	edit := findDeclaration(t, snapshot.Declarations(), semanticsnapshot.DeclarationFunction, "edit")
+	want := semanticsnapshot.TypeRef{Kind: semanticsnapshot.TypeBorrow, Mutable: true, Arguments: []semanticsnapshot.TypeRef{{Kind: semanticsnapshot.TypeSlice, Arguments: []semanticsnapshot.TypeRef{{Kind: semanticsnapshot.TypeNominal, Name: "main::Token", PackageCoordinate: input.Coordinate.String(), Arguments: []semanticsnapshot.TypeRef{}}}}}}
+	if len(edit.Parameters) != 1 || !reflect.DeepEqual(edit.Parameters[0].Type, want) {
+		t.Fatalf("exclusive nominal slice lost: %+v", edit)
+	}
+}
+
 func TestGenericStructViewHeaderRetainsSlices(t *testing.T) {
 	for _, element := range []string{"Token", "T"} {
 		text := "module main; struct Token {i64 value;} pub fn usize count<T>(ref " + element + "[] tokens) {return missing;} fn i32 main(){return 0;}"

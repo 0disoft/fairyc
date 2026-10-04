@@ -369,10 +369,10 @@ func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
 		}
 		value := v.view.array.elements[v.view.offset+index]
 		element, _ := hir.IndexedViewElement(v.typ)
-		if !comparisonRuntimeMatches(value, element) {
+		if !indexedElementRuntimeMatches(value, element) {
 			return runtimeValue{}, capabilityError("i64-view backing contains a non-i64 value")
 		}
-		return value, nil
+		return value.cloneForValueCopy(), nil
 	}
 	value, err := v.byteAt(index)
 	return runtimeValue{kind: valueU8, u64: uint64(value), typ: hir.TypeU8}, err
@@ -381,14 +381,14 @@ func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
 func (v runtimeValue) storeIndexed(index uint64, value runtimeValue) error {
 	element, indexed := hir.IndexedViewElement(v.typ)
 	if !indexed || v.kind != valueView || v.view == nil || !v.view.mutable || !hir.MutableIndexedView(v.typ) ||
-		v.view.array == nil || index >= v.view.length || !comparisonRuntimeMatches(value, element) {
+		v.view.array == nil || index >= v.view.length || !indexedElementRuntimeMatches(value, element) {
 		return capabilityError("mutable byte-view store received an invalid runtime value")
 	}
 	absolute := v.view.offset + index
 	if absolute >= uint64(len(v.view.array.elements)) {
 		return capabilityError("mutable byte-view store exceeds its array backing")
 	}
-	v.view.array.elements[absolute] = value
+	v.view.array.elements[absolute] = value.cloneForValueCopy()
 	return nil
 }
 
@@ -1500,6 +1500,14 @@ func orderedScalarValues(operator string, left, right runtimeValue, ownerType hi
 	}
 }
 
+// Struct stores copy an exact inert nominal value, preserving source independence.
+func indexedElementRuntimeMatches(value runtimeValue, element hir.Type) bool {
+	if value.kind == valueStruct {
+		return value.typ == element && value.structure != nil
+	}
+	return comparisonRuntimeMatches(value, element)
+}
+
 func comparisonRuntimeMatches(value runtimeValue, ownerType hir.Type) bool {
 	switch ownerType {
 	case hir.TypeI64:
@@ -1870,7 +1878,7 @@ func evaluateViewIndexStoreOperands(locals map[mir.LocalID]runtimeValue, operand
 	}
 	element, indexed := hir.IndexedViewElement(receiver.typ)
 	if !indexed || receiver.kind != valueView || receiver.view == nil || !hir.MutableIndexedView(receiver.typ) ||
-		index.kind != valueUSize || index.typ != hir.TypeUSize || !comparisonRuntimeMatches(value, element) {
+		index.kind != valueUSize || index.typ != hir.TypeUSize || !indexedElementRuntimeMatches(value, element) {
 		return runtimeValue{}, runtimeValue{}, runtimeValue{}, capabilityError("mutable byte-view index store received incompatible operands")
 	}
 	return receiver, index, value, nil

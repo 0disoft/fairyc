@@ -1,0 +1,770 @@
+{
+  "primary": {
+    "cases": [
+      {
+        "case": "rhs-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativerhs-trap3644788852\\001",
+        "imageSHA256": "d5c6ef7681cc3deccec9aac98830271a93520cac616c29dca98490e114ad66cb",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "f1236ed3dce05120db213f078847bdb7e5a141acdbe85db517b3801da7e10082",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/rhs-trap-dev.exe",
+          "sha256": "d5c6ef7681cc3deccec9aac98830271a93520cac616c29dca98490e114ad66cb"
+        }
+      },
+      {
+        "case": "rhs-trap",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativerhs-trap3644788852\\001",
+        "imageSHA256": "db570e85e931b4271874a5089b65b121d020bef679d80aff298d6ba440bf0bb7",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "f1236ed3dce05120db213f078847bdb7e5a141acdbe85db517b3801da7e10082",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/rhs-trap-release.exe",
+          "sha256": "db570e85e931b4271874a5089b65b121d020bef679d80aff298d6ba440bf0bb7"
+        }
+      },
+      {
+        "case": "whole-replacement",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativewhole-replacement1828384169\\001",
+        "imageSHA256": "8f6861264dd5d25c78474287532fd21258050ce48e5800d43fd12f50b4457b71",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "72f25d34093d5b42aa56306052411f86cae6f3d428fbc490d062966357b49d24",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/whole-replacement-dev.exe",
+          "sha256": "8f6861264dd5d25c78474287532fd21258050ce48e5800d43fd12f50b4457b71"
+        }
+      },
+      {
+        "case": "whole-replacement",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativewhole-replacement1828384169\\001",
+        "imageSHA256": "a9c25f26a058a5b4b054d4badae8ff3c251c51f00c1508c21e80958e6fe32989",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "72f25d34093d5b42aa56306052411f86cae6f3d428fbc490d062966357b49d24",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/whole-replacement-release.exe",
+          "sha256": "a9c25f26a058a5b4b054d4badae8ff3c251c51f00c1508c21e80958e6fe32989"
+        }
+      },
+      {
+        "case": "child-last-use",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativechild-last-use2172897275\\001",
+        "imageSHA256": "fbb72cc0019f6f376b415c3f098a152e0e63898524bdf2826f544a23471645c9",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "2f007b2b23035233955298cfa3b37ca916103f598001076356097c3200c8a7aa",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/child-last-use-dev.exe",
+          "sha256": "fbb72cc0019f6f376b415c3f098a152e0e63898524bdf2826f544a23471645c9"
+        }
+      },
+      {
+        "case": "child-last-use",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativechild-last-use2172897275\\001",
+        "imageSHA256": "a9b7fa8ff61c179918beab31b9416854afc1eae082b043f73ad229990cda9f99",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "2f007b2b23035233955298cfa3b37ca916103f598001076356097c3200c8a7aa",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/child-last-use-release.exe",
+          "sha256": "a9b7fa8ff61c179918beab31b9416854afc1eae082b043f73ad229990cda9f99"
+        }
+      },
+      {
+        "case": "returned-tagged",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativereturned-tagged2708019612\\001",
+        "imageSHA256": "ed5ddc7ea91a175f7cebfc22f94ca24529bff86948b626eea7e30d26c311ba17",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "034a1d1df7c172eac1eb463b27f45a968175020a589096fe585d434583751cb9",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/returned-tagged-dev.exe",
+          "sha256": "ed5ddc7ea91a175f7cebfc22f94ca24529bff86948b626eea7e30d26c311ba17"
+        }
+      },
+      {
+        "case": "returned-tagged",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativereturned-tagged2708019612\\001",
+        "imageSHA256": "4ce7eeeb3e3d78805ee1083f9669a5deebe328129300fa5d693084ba6288d867",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "034a1d1df7c172eac1eb463b27f45a968175020a589096fe585d434583751cb9",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/returned-tagged-release.exe",
+          "sha256": "4ce7eeeb3e3d78805ee1083f9669a5deebe328129300fa5d693084ba6288d867"
+        }
+      },
+      {
+        "case": "empty-growth",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeempty-growth1531095390\\001",
+        "imageSHA256": "c05f0d1a0ef2441563c1c3e8d3247e4c3f7716af25f44e5f174bc4ade3cdecc4",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "e4d690021ef0acdfc07da465688f955a2952a593c0e6668f363450366b99fb22",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/empty-growth-dev.exe",
+          "sha256": "c05f0d1a0ef2441563c1c3e8d3247e4c3f7716af25f44e5f174bc4ade3cdecc4"
+        }
+      },
+      {
+        "case": "empty-growth",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeempty-growth1531095390\\001",
+        "imageSHA256": "8a1ed068617e68fb0dc166d5422e42b5c1fc3b8d3bcd6aefa4daa6c0a00afc5e",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "e4d690021ef0acdfc07da465688f955a2952a593c0e6668f363450366b99fb22",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/empty-growth-release.exe",
+          "sha256": "8a1ed068617e68fb0dc166d5422e42b5c1fc3b8d3bcd6aefa4daa6c0a00afc5e"
+        }
+      },
+      {
+        "case": "end-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeend-store3742239760\\001",
+        "imageSHA256": "b17eadc09a5e098a26aa896e4c2a731eb2dfe363d1664e5847609770cb778420",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "303811845f6067a189bd46ec341ce8fd5ae0c15cb4b9093116666e1f526625ee",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/end-store-dev.exe",
+          "sha256": "b17eadc09a5e098a26aa896e4c2a731eb2dfe363d1664e5847609770cb778420"
+        }
+      },
+      {
+        "case": "end-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeend-store3742239760\\001",
+        "imageSHA256": "9afb52190655d6bb45f0a882b02a95618a59182ecb7a0fe19d8108f0bd7e2912",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "303811845f6067a189bd46ec341ce8fd5ae0c15cb4b9093116666e1f526625ee",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/end-store-release.exe",
+          "sha256": "9afb52190655d6bb45f0a882b02a95618a59182ecb7a0fe19d8108f0bd7e2912"
+        }
+      },
+      {
+        "case": "bounds-before-rhs",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativebounds-before-rhs4152860531\\001",
+        "imageSHA256": "4bd99658db5199b2ae194331381f9b8effdafe4a75beadeadccf67bcf7174ba8",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "e116caf6281ce7cbee7f65a1f60ddc533b2e5c5ee557611828042adc280c8091",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/bounds-before-rhs-dev.exe",
+          "sha256": "4bd99658db5199b2ae194331381f9b8effdafe4a75beadeadccf67bcf7174ba8"
+        }
+      },
+      {
+        "case": "bounds-before-rhs",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativebounds-before-rhs4152860531\\001",
+        "imageSHA256": "efdc3d8a25da543afce87a216b9dd9bb7868f10e608f2fc3434e02731c25dcd5",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "e116caf6281ce7cbee7f65a1f60ddc533b2e5c5ee557611828042adc280c8091",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/bounds-before-rhs-release.exe",
+          "sha256": "efdc3d8a25da543afce87a216b9dd9bb7868f10e608f2fc3434e02731c25dcd5"
+        }
+      },
+      {
+        "case": "empty-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeempty-store341930967\\001",
+        "imageSHA256": "14c8f7f893d79969024dce4a59d20c5a6d253cf97a8019b5cbb0beb2081a4edd",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "fa72e27ff82c399aaa61f7db35ae0e0e7af75de38423e6bb9ed16924f5e420c8",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/empty-store-dev.exe",
+          "sha256": "14c8f7f893d79969024dce4a59d20c5a6d253cf97a8019b5cbb0beb2081a4edd"
+        }
+      },
+      {
+        "case": "empty-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeempty-store341930967\\001",
+        "imageSHA256": "c79d5d8446c486cef289e6236af769fe1f0d15daee7537ce7549f2d22fa541be",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "fa72e27ff82c399aaa61f7db35ae0e0e7af75de38423e6bb9ed16924f5e420c8",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/empty-store-release.exe",
+          "sha256": "c79d5d8446c486cef289e6236af769fe1f0d15daee7537ce7549f2d22fa541be"
+        }
+      },
+      {
+        "case": "huge-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativehuge-store200314889\\001",
+        "imageSHA256": "e018a16a15012dd1c88114dfaa06891b44a8d540e29a666b466fd8404c9ef4bc",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "ae348df43de8eda1da9b38d79570fbf55fba2e07e9530dddb02d8d162f5a5b0d",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/huge-store-dev.exe",
+          "sha256": "e018a16a15012dd1c88114dfaa06891b44a8d540e29a666b466fd8404c9ef4bc"
+        }
+      },
+      {
+        "case": "huge-store",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativehuge-store200314889\\001",
+        "imageSHA256": "67545d326fefc4db1926dd6b10f684dc73944c25ee19ae0f3689148dd21b483e",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "ae348df43de8eda1da9b38d79570fbf55fba2e07e9530dddb02d8d162f5a5b0d",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/huge-store-release.exe",
+          "sha256": "67545d326fefc4db1926dd6b10f684dc73944c25ee19ae0f3689148dd21b483e"
+        }
+      },
+      {
+        "case": "end-read",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeend-read1008742765\\001",
+        "imageSHA256": "b8e09798f6f62087907d17a7c869f77a458f7e9a5d38e7f80984c6275322884f",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "a3d3a805205f78ac50994ef368545092c7ea0f57c49d1ddefa224eaf3549ab8f",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/end-read-dev.exe",
+          "sha256": "b8e09798f6f62087907d17a7c869f77a458f7e9a5d38e7f80984c6275322884f"
+        }
+      },
+      {
+        "case": "end-read",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativeend-read1008742765\\001",
+        "imageSHA256": "8e43385d1e87e315cf7cca1f8a2e6da4060b8748520a3a7501beba12a09afac2",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "a3d3a805205f78ac50994ef368545092c7ea0f57c49d1ddefa224eaf3549ab8f",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/end-read-release.exe",
+          "sha256": "8e43385d1e87e315cf7cca1f8a2e6da4060b8748520a3a7501beba12a09afac2"
+        }
+      },
+      {
+        "case": "reversed",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativereversed2506137044\\001",
+        "imageSHA256": "447ec0435f8e16eae158838cf8388f5c060e51a04c5eeb8a6bdbdcf003903e82",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "ed6da7b51d73ff62086e6e1601e862fbfbef3ec63a7e85adf26721043aab4064",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/reversed-dev.exe",
+          "sha256": "447ec0435f8e16eae158838cf8388f5c060e51a04c5eeb8a6bdbdcf003903e82"
+        }
+      },
+      {
+        "case": "reversed",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativereversed2506137044\\001",
+        "imageSHA256": "c4d42dce5c19a9303eb6e6bb6e3dd2ac1ffc4820c22b556a3e56d9c3919d63dd",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "ed6da7b51d73ff62086e6e1601e862fbfbef3ec63a7e85adf26721043aab4064",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/reversed-release.exe",
+          "sha256": "c4d42dce5c19a9303eb6e6bb6e3dd2ac1ffc4820c22b556a3e56d9c3919d63dd"
+        }
+      },
+      {
+        "case": "past-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativepast-end308465525\\001",
+        "imageSHA256": "c239e70267f12a2fbedd35acd2fad8f65de1580fd52e46cf1ba430f378ccf55f",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "1c5bc710ec04c25ef3a907103ed8d7a53934a12adf588164d02aeb3f568a3218",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/past-end-dev.exe",
+          "sha256": "c239e70267f12a2fbedd35acd2fad8f65de1580fd52e46cf1ba430f378ccf55f"
+        }
+      },
+      {
+        "case": "past-end",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "bounds",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativepast-end308465525\\001",
+        "imageSHA256": "2d8053bf338f11af680f8d441fa1a6cf6f8e3f1ed5b94885d0dc77968c8cd297",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 129,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0001"
+        },
+        "sourceSHA256": "1c5bc710ec04c25ef3a907103ed8d7a53934a12adf588164d02aeb3f568a3218",
+        "stderr": "trap: bounds\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/past-end-release.exe",
+          "sha256": "2d8053bf338f11af680f8d441fa1a6cf6f8e3f1ed5b94885d0dc77968c8cd297"
+        }
+      },
+      {
+        "case": "generic-integer-aliases",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativegeneric-integer-aliases3499652014\\001",
+        "imageSHA256": "770c31acf7b1638ddff589b4d75e460087773bcc7b65fdd4f86702db53fb5abe",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "af04b95f154affff6aebe210986fa45e1ed2a4e3d3e72b3349aee6ba12169912",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/generic-integer-aliases-dev.exe",
+          "sha256": "770c31acf7b1638ddff589b4d75e460087773bcc7b65fdd4f86702db53fb5abe"
+        }
+      },
+      {
+        "case": "generic-integer-aliases",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewNativegeneric-integer-aliases3499652014\\001",
+        "imageSHA256": "bf20731d7f18d006f2e725de1f06d3976690e20b18b9988aad56db20c4cfbae6",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "af04b95f154affff6aebe210986fa45e1ed2a4e3d3e72b3349aee6ba12169912",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-vec-view-native/windows/generic-integer-aliases-release.exe",
+          "sha256": "bf20731d7f18d006f2e725de1f06d3976690e20b18b9988aad56db20c4cfbae6"
+        }
+      }
+    ],
+    "schema": "fairyc.mutable-struct-vec-view-native/v1",
+    "sdk": "0.0.0-stage0.85"
+  },
+  "parameter": {
+    "cases": [
+      {
+        "case": "tagged-last-use",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewParameterNativetagged-last-use1384877427\\001",
+        "imageSHA256": "7acc7773d1ad2ee641b14a191f93097a105229d4e32f1c1a22b3178432a51532",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "eb9c23d5fc1ee0911979a772403494db461ba25756127f25687fbc6321b7edde",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-parameter-native/windows/tagged-last-use-dev.exe",
+          "sha256": "7acc7773d1ad2ee641b14a191f93097a105229d4e32f1c1a22b3178432a51532"
+        }
+      },
+      {
+        "case": "tagged-last-use",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestMutableStructVecViewParameterNativetagged-last-use1384877427\\001",
+        "imageSHA256": "bc101dc9d53578651477062f90e77fea77d0befc74fa03f67689608cc7b08ec3",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "eb9c23d5fc1ee0911979a772403494db461ba25756127f25687fbc6321b7edde",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "imageArtifact": {
+          "path": ".cache/mutable-struct-parameter-native/windows/tagged-last-use-release.exe",
+          "sha256": "bc101dc9d53578651477062f90e77fea77d0befc74fa03f67689608cc7b08ec3"
+        }
+      }
+    ],
+    "schema": "fairyc.mutable-struct-parameter-native/v1",
+    "sdk": "0.0.0-stage0.85"
+  }
+}

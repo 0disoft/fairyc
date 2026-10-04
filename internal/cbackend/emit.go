@@ -137,6 +137,8 @@ type emitter struct {
 	byteStringStorage  map[string]string
 	stringStorage      map[string]string
 	cStringStorage     map[string]string
+
+	needsMutStructSlice bool
 }
 
 type structCType struct {
@@ -1683,10 +1685,14 @@ func (e *emitter) recordCValueTypeRequirements(value hir.Type) {
 		e.recordCValueTypeRequirements(success)
 		e.recordCValueTypeRequirements(failure)
 	}
-	if _, structView := hir.SharedStructViewElement(value); structView {
-		e.needsStructSlice = true
+	if _, structView := hir.StructViewElement(value); structView {
+		if hir.MutableIndexedView(value) {
+			e.needsMutStructSlice = true
+		} else {
+			e.needsStructSlice = true
+		}
 	}
-	if hir.NonByteIndexedView(value) && !hir.I64View(value) {
+	if _, nominal := hir.StructViewElement(value); hir.NonByteIndexedView(value) && !hir.I64View(value) && !nominal {
 		if e.integerViews == nil {
 			e.integerViews = make(map[hir.Type]bool)
 		}
@@ -3037,6 +3043,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("extern uint32_t fy_std_region_reset_v0(void *region);\n\n")
 	}
 	_, usesStaticByteString := e.features["static-byte-string"]
+	if e.needsMutStructSlice {
+		output.WriteString("typedef struct fy_mut_struct_slice { void *data; uintptr_t length; } fy_mut_struct_slice;\n\n")
+	}
 	if e.needsStructSlice {
 		output.WriteString("typedef struct fy_struct_slice { const void *data; uintptr_t length; } fy_struct_slice;\n\n")
 	}
@@ -3678,12 +3687,16 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		// MSVC /O2 can retain stale reads after exclusive i64 stores (ADR 0433).
 		// Keep shared-only programs and other targets on ordinary loads.
-		if element, structView := hir.SharedStructViewElement(operation.OwnerType); structView {
+		if element, structView := hir.StructViewElement(operation.OwnerType); structView {
 			typ, err := e.cValueType(element)
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(output, "    fy_l_%d = ((const %s *)(%s).data)[%s];\n", operation.DestinationLocal, typ, receiverValue, indexValue)
+			qualifier := "const "
+			if e.targetID == target.X8664WindowsMSVC && e.needsMutStructSlice {
+				qualifier += "volatile "
+			}
+			fmt.Fprintf(output, "    fy_l_%d = ((%s%s *)(%s).data)[%s];\n", operation.DestinationLocal, qualifier, typ, receiverValue, indexValue)
 		} else if e.targetID == target.X8664WindowsMSVC && e.needsMutI64Slice && operation.Type == hir.TypeI64 {
 			fmt.Fprintf(output, "    fy_l_%d = ((const volatile int64_t *)(%s).data)[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
 		} else {
@@ -3700,7 +3713,13 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if receiverErr != nil || indexErr != nil || valueErr != nil {
 			return fmt.Errorf("mutable byte-view index store in %s has an invalid operand", function)
 		}
-		if e.targetID == target.X8664WindowsMSVC {
+		if element, nominal := hir.StructViewElement(operation.OwnerType); nominal && e.targetID != target.X8664WindowsMSVC {
+			cType, err := e.cValueType(element)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(output, "    ((%s *)(%s).data)[%s] = %s;\n", cType, receiverValue, indexValue, storedValue)
+		} else if e.targetID == target.X8664WindowsMSVC {
 			// MSVC 14.51 /O2 loses inlined stores through a
 			// copied subview descriptor. Keep this store observable without
 			// changing descriptor layout or disabling function optimization.
@@ -3733,14 +3752,18 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return err
 		}
-		if element, structView := hir.SharedStructViewElement(operation.OwnerType); structView {
+		if element, structView := hir.StructViewElement(operation.OwnerType); structView {
 			typ, err := e.cValueType(element)
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(output, "    fy_l_%d = (fy_struct_slice){ .data = (%s).data, .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, endValue, startValue)
+			fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = (%s).data, .length = (%s) - (%s) };\n", operation.DestinationLocal, viewType, receiverValue, endValue, startValue)
 			if start.Kind != mir.OperandUSize || start.U64 != 0 {
-				fmt.Fprintf(output, "    if ((%s) != ((uintptr_t)UINT64_C(0))) { fy_l_%d.data = (const %s *)(%s).data + (%s); }\n", startValue, operation.DestinationLocal, typ, receiverValue, startValue)
+				qualifier := "const "
+				if hir.MutableIndexedView(operation.OwnerType) {
+					qualifier = ""
+				}
+				fmt.Fprintf(output, "    if ((%s) != ((uintptr_t)UINT64_C(0))) { fy_l_%d.data = (%s%s *)(%s).data + (%s); }\n", startValue, operation.DestinationLocal, qualifier, typ, receiverValue, startValue)
 			}
 			return nil
 		}

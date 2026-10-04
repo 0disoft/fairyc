@@ -3,7 +3,7 @@ package hir
 import "strings"
 
 // IndexedViewElement returns the element of an executable borrowed slice.
-// The closed set admits the executable integer elements and shared nominal shapes. Nominal elements require
+// The closed set admits the executable integer elements and borrowed nominal shapes. Nominal elements require
 // stage-owned scalar-leaf struct validation before execution.
 func IndexedViewElement(value Type) (Type, bool) {
 	switch value {
@@ -18,7 +18,7 @@ func IndexedViewElement(value Type) (Type, bool) {
 	case SharedBorrow(TypeUsizeSlice), MutableBorrow(TypeUsizeSlice):
 		return TypeUSize, true
 	default:
-		return SharedStructViewElement(value)
+		return StructViewElement(value)
 	}
 }
 
@@ -68,6 +68,16 @@ func StructSliceElement(value Type) (Type, bool) {
 		return TypeInvalid, false
 	}
 	return Type(element), true
+}
+
+// StructViewElement recognizes nominal shared or exclusive descriptors.
+// Each consumer must validate the actual plain struct definition separately.
+func StructViewElement(value Type) (Type, bool) {
+	slice, _, borrowed := BorrowElement(value)
+	if !borrowed {
+		return TypeInvalid, false
+	}
+	return StructSliceElement(slice)
 }
 
 func SharedStructViewElement(value Type) (Type, bool) {

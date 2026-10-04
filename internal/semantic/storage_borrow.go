@@ -20,8 +20,8 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 		typ = c.analyzer.canonicalType(c.module, *expression.Type)
 	}
 	_, view := hir.IndexedViewElement(hir.SharedBorrow(typ))
-	if element, nominal := hir.StructSliceElement(typ); nominal && (expression.Text != "borrow" || !c.analyzer.plainViewStruct(element)) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "storage struct views require a shared scalar-field struct")
+	if element, nominal := hir.StructSliceElement(typ); nominal && !c.analyzer.plainViewStruct(element) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "storage struct views require a plain scalar-field struct")
 		return hir.TypeInvalid
 	}
 	if !view && len(expression.Children) != 2 || view && len(expression.Children) != 3 {

@@ -45,11 +45,14 @@ func checkStorageViewMIR(t *testing.T, source string, mutable bool, slice hir.Ty
 	name := map[hir.Type]string{hir.TypeU8: "byte", hir.TypeI64: "i64", hir.TypeI32: "i32", hir.TypeU32: "u32", hir.TypeUSize: "usize"}[element]
 	cType := map[hir.Type]string{hir.TypeU8: "uint8_t", hir.TypeI64: "int64_t", hir.TypeI32: "int32_t", hir.TypeU32: "uint32_t", hir.TypeUSize: "uintptr_t"}[element]
 	cDescriptor := "(fy_" + name + "_slice){ .data = (const " + cType + " *)"
-	if _, nominal := hir.SharedStructViewElement(viewType); nominal {
-		cDescriptor = "(fy_struct_slice){ .data = (const void *)"
-	}
 	if mutable {
 		cDescriptor = "(fy_mut_" + name + "_slice){ .data = (" + cType + " *)"
+	}
+	if _, nominal := hir.StructViewElement(viewType); nominal {
+		cDescriptor = "(fy_struct_slice){ .data = (const void *)"
+		if mutable {
+			cDescriptor = "(fy_mut_struct_slice){ .data = (void *)"
+		}
 	}
 	otherSlice := hir.TypeByteSlice
 	if slice == hir.TypeByteSlice {

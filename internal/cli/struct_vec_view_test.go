@@ -70,11 +70,11 @@ func TestStructVecViewRejections(t *testing.T) {
 		})
 	}
 	for name, source := range map[string]string{
-		"local-escape":    "struct Token {i32 value;} fn ref Token[] bad(){let vec::Vec<Token> owned=vec::empty<Token>();return vec::view<Token>(ref owned);}",
-		"mutable-view":    "struct Token {i32 value;} fn void bad(ref mut Token[] view){}",
-		"owned-slice":     "struct Token {i32 value;} fn void bad(Token[] view){}",
-		"private-builtin": "struct Token {i32 value;} fn void bad(){let ref Token[] view=unsafe{storage_borrow<Token[]>(null,null,0)};}",
-		"wrong-nominal":   "struct Token {i32 value;} struct Other {i32 value;} fn void bad(ref vec::Vec<Token> owner){let ref Other[] view=vec::view<Token>(owner);assert(view.is_empty);}",
+		"local-escape":      "struct Token {i32 value;} fn ref Token[] bad(){let vec::Vec<Token> owned=vec::empty<Token>();return vec::view<Token>(ref owned);}",
+		"shared-to-mutable": "struct Token {i32 value;} fn void bad(ref Token[] view){let ref mut Token[] exclusive=view;}",
+		"owned-slice":       "struct Token {i32 value;} fn void bad(Token[] view){}",
+		"private-builtin":   "struct Token {i32 value;} fn void bad(){let ref Token[] view=unsafe{storage_borrow<Token[]>(null,null,0)};}",
+		"wrong-nominal":     "struct Token {i32 value;} struct Other {i32 value;} fn void bad(ref vec::Vec<Token> owner){let ref Other[] view=vec::view<Token>(owner);assert(view.is_empty);}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			root := t.TempDir()

@@ -50,7 +50,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if value == nil || value.kind != "local" && value.kind != "parameter" || value.mutable {
 		return shape
 	}
-	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement {
+	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || nominal && hir.MutableIndexedView(value.typ) {
 		return shape
 	}
 	return ""

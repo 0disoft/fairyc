@@ -210,7 +210,9 @@ elements (u8/i32/i64/u32/usize), which aliases the current per-type integer view
 or an actual nonempty nominal struct with scalar leaves, including nested structs
 under ADR 0441. For a nominal element the slice cannot reinterpret a `Token` view
 as a same-layout `Other` view; array/resource/borrow/pointer/enum/Option/Result
-fields at any depth, a `ref mut` struct slice or an owned slice are rejected. An index copies one struct value and `view[i].field`
+fields at any depth and owned slices are rejected. ADR 0448 separately admits
+exclusive nominal views; this paragraph describes the shared view. An index
+copies one struct value and `view[i].field`
 reads are allowed, while element and field stores are rejected; a copied mutable
 local survives an owner clear, and a `var ref Token[]` binding may still be
 reassigned to another view. Owner holds, returned/tagged origins, subrange and
@@ -232,6 +234,15 @@ structs. Every reachable struct must be nonempty, and every leaf must be one of
 self/indirect cycles and missing definitions are rejected. Indexing and iteration
 copy the entire element including nested fields; no nested loan is introduced.
 The owner loan, nominal identity, bounds and mutation rules above are unchanged.
+
+ADR 0448 adds `std::vec::view_mut<T>(ref mut Vec<T>) -> ref mut T[]` for the
+same integer/plain nominal element families. Whole-element `view[i] = value`
+requires the exact nominal type and copies the entire element. Indexed reads
+copy values. Exclusive whole-owner holds, checked subviews, short shared-call
+reborrows, returned/tagged origins and ADR 0415 generations apply until last use.
+Receiver/index bounds are checked before RHS evaluation; a terminating RHS has
+no store or continuation. Indexed field stores/borrows and mutable struct-view
+for-in remain closed in this unit. SDK stage0.85, language /20 and runtime /0.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.mutable-struct-cli/v1",
+  "compilerSHA256": "7418737bbb7e0863b7b204506208cae74fc218f48af123921350de650838b4ab",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004090812-d50c0a325339+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: d50c0a325339b44e6b3b444e73764ccde096f548\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "success",
+      "sourceSHA256": "fe3331d21db712b23499c1b1d406459d1d79d157153c5e6e9af24c31d89f8579",
+      "source": "module main;\nimport std::vec as vec;\n\nstruct Span { usize start; usize end; }\nstruct Token { u32 kind; Span position; i64 value; bool active; }\n\nfn Token token(i64 value) {\n    return Token { .kind = 2, .position = Span { .start = 3, .end = 8 }, .value = value, .active = true };\n}\nfn i64 read(ref Token[] values) { return values[0].value; }\n\nfn i32 main() {\n    var vec::Vec<Token> owner = vec::empty<Token>();\n    assert(switch(vec::push<Token>(ref mut owner, token(4000000000))) {\n        case .ok(_): { true } case .err(_): { false }\n    });\n    assert(switch(vec::push<Token>(ref mut owner, token(7))) {\n        case .ok(_): { true } case .err(_): { false }\n    });\n    let ref mut Token[] view = vec::view_mut<Token>(ref mut owner);\n    assert(view.len == 2 && !view.is_empty);\n    let Token old = view[0];\n    var Token replacement = token(5000000000);\n    view[0] = replacement;\n    replacement.value = 9;\n    assert(view[0].value == 5000000000 && view[0].position.end == 8 && view[0].active);\n    assert(old.value == 4000000000);\n    view[1] = view[0];\n    assert(view[1].value == 5000000000);\n    view[1] = token(-7);\n    assert(view[1].value == -7 && read(view) == 5000000000);\n    let ref Token[] shared = vec::view<Token>(ref owner);\n    assert(shared[0].value == 5000000000 && shared[1].value == -7);\n    return 0;\n}\n"
+    },
+    {
+      "name": "bounds",
+      "sourceSHA256": "7e402ca75870a03430bc80342415bdebad3851293f82db3e80a6a9d1edfca150",
+      "source": "module main;\nimport std::vec as vec;\n\nstruct Span { usize start; usize end; }\nstruct Token { u32 kind; Span position; i64 value; bool active; }\n\nfn Token token(i64 value) {\n    return Token { .kind = 2, .position = Span { .start = 3, .end = 8 }, .value = value, .active = true };\n}\nfn i64 read(ref Token[] values) { return values[0].value; }\n\nfn i32 main() {\n    var vec::Vec<Token> owner = vec::empty<Token>();\n    assert(switch(vec::push<Token>(ref mut owner, token(4000000000))) {\n        case .ok(_): { true } case .err(_): { false }\n    });\n    assert(switch(vec::push<Token>(ref mut owner, token(7))) {\n        case .ok(_): { true } case .err(_): { false }\n    });\n    let ref mut Token[] view = vec::view_mut<Token>(ref mut owner);\n    assert(view.len == 2 && !view.is_empty);\n    let Token old = view[0];\n    var Token replacement = token(5000000000);\n    view[2] = replacement;\n    replacement.value = 9;\n    assert(view[0].value == 5000000000 && view[0].position.end == 8 && view[0].active);\n    assert(old.value == 4000000000);\n    view[1] = view[0];\n    assert(view[1].value == 5000000000);\n    view[1] = token(-7);\n    assert(view[1].value == -7 && read(view) == 5000000000);\n    let ref Token[] shared = vec::view<Token>(ref owner);\n    assert(shared[0].value == 5000000000 && shared[1].value == -7);\n    return 0;\n}\n"
+    },
+    {
+      "name": "blocked-owner",
+      "sourceSHA256": "6b31abe4575b716ce14eb43b21dd0238a9e635cb8724e439bc7b7b28c27eef45",
+      "source": "module main;\nimport std::vec as vec;\n\nstruct Span { usize start; usize end; }\nstruct Token { u32 kind; Span position; i64 value; bool active; }\n\nfn Token token(i64 value) {\n    return Token { .kind = 2, .position = Span { .start = 3, .end = 8 }, .value = value, .active = true };\n}\nfn i64 read(ref Token[] values) { return values[0].value; }\n\nfn i32 main() {\n    var vec::Vec<Token> owner = vec::empty<Token>();\n    assert(switch(vec::push<Token>(ref mut owner, token(4000000000))) {\n        case .ok(_): { true } case .err(_): { false }\n    });\n    assert(switch(vec::push<Token>(ref mut owner, token(7))) {\n        case .ok(_): { true } case .err(_): { false }\n    });\n    let ref mut Token[] view = vec::view_mut<Token>(ref mut owner);\n    assert(view.len == 2 && !view.is_empty);\n    let Token old = view[0];\n    var Token replacement = token(5000000000);\n    discard vec::clear<Token>(ref mut owner);\n    view[0] = replacement;\n    replacement.value = 9;\n    assert(view[0].value == 5000000000 && view[0].position.end == 8 && view[0].active);\n    assert(old.value == 4000000000);\n    view[1] = view[0];\n    assert(view[1].value == 5000000000);\n    view[1] = token(-7);\n    assert(view[1].value == -7 && read(view) == 5000000000);\n    let ref Token[] shared = vec::view<Token>(ref owner);\n    assert(shared[0].value == 5000000000 && shared[1].value == -7);\n    return 0;\n}\n"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004090812-d50c0a325339+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: d50c0a325339b44e6b3b444e73764ccde096f548\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\success",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 178 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-success.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "6431989cba97967ecb64f47660ba691dc2c5cfe28a82e8c25c605abee6ea458c"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\success",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-success.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "949da2f86bc2a0d6197e8c775e70c5f34da7fcd59bc3c5d4d917d63a6de39f3c"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\success",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\bounds",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 178 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\bounds",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-bounds.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "e0af6bfb4f01a0a62372d84a12bf0abb384fbcf7806cc0ffc02280405be337b4"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\bounds",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\bounds",
+      "exit": 0,
+      "stdout": "built: build/mutable-struct-bounds.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "a9d00a7ddccac9025dc6e6c8a4a23fa359b1a3f1d24fc3a8baa9a2eb295d9c8b"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\bounds",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-cli\\blocked-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:24:31: E2101: Access conflicts with an active shared or mutable loan. [bytes 913..926]\n  last-use: main.fy:32:40 [bytes 1244..1248]\n  loan: main.fy:20:53 [bytes 742..755]\n"
+    }
+  ]
+}

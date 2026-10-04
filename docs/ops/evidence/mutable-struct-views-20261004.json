@@ -1,0 +1,405 @@
+{
+  "schema": "fairyc.mutable-struct-views-review/v1",
+  "date": "2026-10-04",
+  "baseRevision": "d50c0a325339b44e6b3b444e73764ccde096f548",
+  "scope": "ADR 0448 mutable plain struct vector views; whole-element replacement only",
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/mutable-struct-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "image": {
+      "path": ".cache/mutable-struct-compiler/fairyc.exe",
+      "sha256": "7418737bbb7e0863b7b204506208cae74fc218f48af123921350de650838b4ab"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004090812-d50c0a325339+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: d50c0a325339b44e6b3b444e73764ccde096f548\nmodified: true\n",
+      "stderr": ""
+    },
+    "sourceDigest": {
+      "fileCount": 538,
+      "sha256": "631a90ff3b61a3157bd166799b56ee9696bc05626bc2bf9ccdd9df541420875d",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sourceManifest": {
+      "path": ".cache/mutable-struct-compiler/source-manifest.json",
+      "sha256": "d3cdf9a69a982cabbd32d76573afcef44f02f301e2ee6a368b3a2bb5db03029b"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sdkSources": [
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/alloc.fy",
+        "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "b8c8c08ec40be5ee099e4e8ccc79bcea4dd20b4884d427e2019556c03ca33374"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/num.fy",
+        "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      }
+    ]
+  },
+  "publicCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/mutable-struct-views-20261004.cli.json",
+      "sha256": "6352db951523234d995da4e80b29bc96216b11584f7ad186139291deea85266d"
+    },
+    "executions": 12,
+    "fixtures": [
+      {
+        "name": "success",
+        "sourceSHA256": "fe3331d21db712b23499c1b1d406459d1d79d157153c5e6e9af24c31d89f8579"
+      },
+      {
+        "name": "bounds",
+        "sourceSHA256": "7e402ca75870a03430bc80342415bdebad3851293f82db3e80a6a9d1edfca150"
+      },
+      {
+        "name": "blocked-owner",
+        "sourceSHA256": "6b31abe4575b716ce14eb43b21dd0238a9e635cb8724e439bc7b7b28c27eef45"
+      }
+    ]
+  },
+  "native": {
+    "raw": {
+      "path": "docs/ops/evidence/mutable-struct-views-20261004.native.json",
+      "sha256": "75eb1c7abd3761cbf809b874ebaee871c28d0a77e933c9381ab676fa26b6a2b2"
+    },
+    "executions": 28
+  },
+  "sharedViewRegression": {
+    "raw": {
+      "path": ".cache/struct-vec-view-native/windows/receipt.json",
+      "sha256": "60d50af87234a1f8aa3a49a529ec26c34401842c64db4467c641c0413007ab5f"
+    },
+    "executions": 16,
+    "images": [
+      {
+        "case": "copy-and-subviews",
+        "profile": "dev",
+        "exit": 0,
+        "imageSHA256": "6e8495b0a9f386f679a4ffbcb1b68f7934d719972eb9be4e71edc6d7d5c4757b"
+      },
+      {
+        "case": "copy-and-subviews",
+        "profile": "release",
+        "exit": 0,
+        "imageSHA256": "2dc2779dd3703b615a27eac14091cec090800fdffaed4a0917dedb6ce9b3fd5f"
+      },
+      {
+        "case": "copy-after-owner-clear",
+        "profile": "dev",
+        "exit": 0,
+        "imageSHA256": "86c32c7c402cc0d86a9aea4d90940495bd37b6f2fa9ca5e2cf99fa2343425019"
+      },
+      {
+        "case": "copy-after-owner-clear",
+        "profile": "release",
+        "exit": 0,
+        "imageSHA256": "6f422052be2224248ab4e5d3db4696f283fd8ff2a400ef97751daa28ceb33211"
+      },
+      {
+        "case": "empty-and-growth",
+        "profile": "dev",
+        "exit": 0,
+        "imageSHA256": "a0d1bc5bee78755a53cc2b10625dedd18a5d3a2b73a44d0d0989b45b10a7101a"
+      },
+      {
+        "case": "empty-and-growth",
+        "profile": "release",
+        "exit": 0,
+        "imageSHA256": "6cb45e4df28576bcee1d8676e3095632a511760f1af3ad47b68abda6e4acf768"
+      },
+      {
+        "case": "end-read",
+        "profile": "dev",
+        "exit": 5,
+        "imageSHA256": "d253cab4e40e8341b743dfd3cc72d35979de02b729a1caccad393109e2307688"
+      },
+      {
+        "case": "end-read",
+        "profile": "release",
+        "exit": 5,
+        "imageSHA256": "962e22162f1cf1ac54be6dd87a24521aa17a148a2b0470925279625aac6dfb5a"
+      },
+      {
+        "case": "empty-read",
+        "profile": "dev",
+        "exit": 5,
+        "imageSHA256": "bff66c835223616bad398d17e9b427a6d78cb4adc6b3daa53b283368b43edef1"
+      },
+      {
+        "case": "empty-read",
+        "profile": "release",
+        "exit": 5,
+        "imageSHA256": "cc5512a721a9532d2cf38f8f6ccf7d789b3ca225390d93a6cf2d36834b8590a2"
+      },
+      {
+        "case": "huge-read",
+        "profile": "dev",
+        "exit": 5,
+        "imageSHA256": "1b04d761a5b26772ae141db1baee338cda62ddde6bc9a4a4d221b7b8e1d83a80"
+      },
+      {
+        "case": "huge-read",
+        "profile": "release",
+        "exit": 5,
+        "imageSHA256": "9f170d66e014c3f6f5a101083480596ebf8bcd65e8ad0c8fb195f72f8f6117e1"
+      },
+      {
+        "case": "reversed",
+        "profile": "dev",
+        "exit": 5,
+        "imageSHA256": "94e45b7833fd00c1e5e6f45d937e31a167be784c1a55bc9f76093a4d2dc3a1fe"
+      },
+      {
+        "case": "reversed",
+        "profile": "release",
+        "exit": 5,
+        "imageSHA256": "c3d1213c28818d4029da91571a0ef6a3347bf01b2ebe5ee569e462fd0077651a"
+      },
+      {
+        "case": "past-end",
+        "profile": "dev",
+        "exit": 5,
+        "imageSHA256": "e8b8f5bbd841fa66701c2f28ab56472588ae125d847367251196003a519a5025"
+      },
+      {
+        "case": "past-end",
+        "profile": "release",
+        "exit": 5,
+        "imageSHA256": "da9d3d59710218f39dc6ab53ece5fc06817b9b900ac9e378972b29b5850b4db0"
+      }
+    ]
+  },
+  "hostCCompiler": {
+    "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+    "sha256": "dc8426b8760d92cf757df3d10b9f0244a95b454ff43194a58161568a0ec70d53",
+    "version": "14.51.36231"
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/cbackend",
+        "./internal/sdkstdlib",
+        "./internal/compiler",
+        "./internal/interpreter",
+        "./internal/semanticsnapshot",
+        "-run",
+        "View|Storage|Subview|Struct|ValueCopy|EmbeddedStandardLibrary|Borrow|AssertChecked",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/mut-struct-stage-final.jsonl",
+        "sha256": "ea09181404f913ae35d0f39c412e12399bbe626ac89c33fcfaa1808c83b07b55"
+      },
+      "passedTestEvents": 1027,
+      "packageOutcomes": [
+        {
+          "Time": "2026-10-04T18:39:03.442729+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/hir",
+          "Elapsed": 0.418
+        },
+        {
+          "Time": "2026-10-04T18:39:08.5513824+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/mir",
+          "Elapsed": 0.265
+        },
+        {
+          "Time": "2026-10-04T18:39:08.7428519+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/sdkstdlib",
+          "Elapsed": 0.451
+        },
+        {
+          "Time": "2026-10-04T18:39:09.0692225+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/semantic",
+          "Elapsed": 0.792
+        },
+        {
+          "Time": "2026-10-04T18:39:09.5872271+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/interpreter",
+          "Elapsed": 0.143
+        },
+        {
+          "Time": "2026-10-04T18:39:09.745054+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/semanticsnapshot",
+          "Elapsed": 0.301
+        },
+        {
+          "Time": "2026-10-04T18:39:19.6908332+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/cbackend",
+          "Elapsed": 11.403
+        },
+        {
+          "Time": "2026-10-04T18:39:44.852762+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/compiler",
+          "Elapsed": 35.412
+        }
+      ],
+      "skips": [
+        {
+          "Time": "2026-10-04T18:39:43.3242995+09:00",
+          "Action": "skip",
+          "Package": "github.com/0disoft/fairyc/internal/compiler",
+          "Test": "TestPrivateVectorSDKCandidateIndependentCScannerStorageAB",
+          "Elapsed": 0
+        },
+        {
+          "Time": "2026-10-04T18:39:44.8392937+09:00",
+          "Action": "skip",
+          "Package": "github.com/0disoft/fairyc/internal/compiler",
+          "Test": "TestPrivateVectorStorageGeneratedLinuxNative",
+          "Elapsed": 0
+        }
+      ]
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^Test(MutableStructVecView|StructVecView)",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/mut-struct-cli-final.jsonl",
+        "sha256": "518bbf00aabe1216f6d69151ce953dad759e7eed8dc4c37db0921fc0a1006dd1"
+      },
+      "passedTestEvents": 83,
+      "packageOutcomes": [
+        {
+          "Time": "2026-10-04T18:40:05.8670364+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/cli",
+          "Elapsed": 84.915
+        }
+      ],
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestMutableStructVecViewParameterNative$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/mut-struct-parameter-final.jsonl",
+        "sha256": "885dad5df44fadb7506f5291619d316ddf0755fdecccdc1dd2a36346f311bd84"
+      },
+      "passedTestEvents": 2,
+      "packageOutcomes": [
+        {
+          "Time": "2026-10-04T18:41:02.9199864+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/cli",
+          "Elapsed": 2.833
+        }
+      ],
+      "skips": []
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/hir",
+      "./internal/semantic",
+      "./internal/mir",
+      "./internal/cbackend",
+      "./internal/sdkstdlib",
+      "./internal/compiler",
+      "./internal/interpreter",
+      "./internal/semanticsnapshot",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "raw": {
+      "path": ".cache/mut-struct-vet-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  "limits": [
+    "Linux GCC/Clang actual execution deferred by owner; Linux C emission verified in stage tests.",
+    "Indexed element field stores/borrows and example conversion deferred to later units.",
+    "No whole-repository suite, benchmark, install, CI change, push or release.",
+    "Native records name the in-process cdriver executor; raw public CLI records contain actual argv and cwd.",
+    "Compiler binary built from the modified working tree; version identity retained verbatim.",
+    "Compiler source digest includes non-test Go, embedded C/H/Fairy sources, go.mod/go.sum and the build wrapper; test sources are excluded."
+  ]
+}

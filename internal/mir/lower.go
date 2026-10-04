@@ -590,6 +590,10 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 	if err != nil {
 		return err
 	}
+	// A terminating RHS has no stored value and no normal continuation.
+	if l.blockTerminated(l.current) {
+		return nil
+	}
 	if value.Kind == OperandInvalid {
 		return fmt.Errorf("indexed assignment has an invalid value operand")
 	}

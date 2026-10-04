@@ -422,3 +422,11 @@ receiver, exact-referent and field-definition checks stay intact; codec and cach
 transport need no new shape. Source Flow retains shared owner origins across
 aliases/returned/tagged children and forbids conflicting writes until last use.
 Reference descriptor rebinding never retargets an earlier projected address.
+
+ADR 0448 admits exclusive plain nominal descriptors through the existing private
+`storage-borrow-mut`, `view-index`, `view-index-store` and `view-slice` shapes.
+Definition-owned plain-graph checks apply to both borrow kinds. Indexed stores
+must name an actual exact nominal value and actual exclusive receiver with a
+dominating matching bounds check. Local operand annotations cannot relabel them.
+A terminating indexed-assignment RHS ends the path without a store. Codec/wire
+schemas and ordinary/query-only private-transfer rejection remain unchanged.
