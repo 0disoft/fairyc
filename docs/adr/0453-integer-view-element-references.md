@@ -25,7 +25,8 @@ roots, raw pointers, bool views, owned slices and reference for-in loops stay
 outside this admission. Existing nominal element-reference graph validation
 and source boundaries remain intact. This supersedes the integer-reference
 exclusion in ADR 0451. ADR 0454 subsequently admits mutable integer reference
-iteration over named immutable mutable views.
+iteration over named immutable mutable views. ADR 0455 subsequently admits
+direct named fixed-array integer element references.
 
 ## Lifetime and evaluation
 

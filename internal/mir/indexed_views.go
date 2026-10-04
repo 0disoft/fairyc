@@ -12,11 +12,8 @@ func verifyIndexedViewOperands(op Operation, types map[LocalID]hir.Type) string 
 	viewElement, _ := hir.IndexedViewElement(actual)
 	switch op.Kind {
 	case OperationArrayBorrowView:
-		element, _, array := hir.FixedArrayParts(actual)
-		if hir.NonByteIndexedView(op.Type) || array && element != hir.TypeU8 {
-			if actual != op.OwnerType || !hir.ArrayViewBorrow(actual, op.Type, op.Operator) {
-				return "integer array-view borrow disagrees with its owner definition"
-			}
+		if actual != op.OwnerType || !hir.ArrayViewBorrow(actual, op.Type, op.Operator) {
+			return "integer array-view borrow disagrees with its owner definition"
 		}
 	case OperationViewLength, OperationViewEmpty, OperationViewIndex, OperationViewElementBorrow, OperationViewIndexCheck, OperationViewSlice, OperationViewSliceCheck, OperationViewIndexStore:
 		if op.Kind == OperationViewElementBorrow || hir.NonByteIndexedView(actual) || hir.NonByteIndexedView(op.OwnerType) || hir.NonByteIndexedView(op.Type) {

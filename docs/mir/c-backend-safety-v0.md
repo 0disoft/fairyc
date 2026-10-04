@@ -498,3 +498,11 @@ immutable named mutable descriptor with an exact integer element type. Bounds
 checks dominate each address; continue runs the hidden increment, break and
 return bypass it. Flow retains the owner for the written loop and validates
 child generations across iteration backedges and returned references.
+
+ADR 0455 prepares direct named integer array element references through the
+existing `array-view-borrow` and checked `view-element-borrow` paths. The internal
+descriptor lends original storage before one-time index effects; bounds still
+dominate each address. Actual local owner types are checked for u8 array-view
+conversions as well as other integers. No new operation, codec field or runtime
+helper is introduced. Source Flow retains whole-array origins, exclusive child
+generations and the temporary owner hold during index evaluation.

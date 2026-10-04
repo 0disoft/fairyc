@@ -6,8 +6,8 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// Indexed places are rooted in one named view descriptor. Calls, temporary
-// descriptors and raw pointers do not acquire place identity here.
+// Indexed places are rooted in one named view descriptor or fixed array.
+// Calls, temporary descriptors and raw pointers do not acquire place identity.
 func indexedPlace(expression *ast.Expression) *ast.Expression {
 	root := borrowPlaceRoot(expression)
 	if root != nil && root.Kind == syntax.KindIndex && len(root.Children) == 2 && assignmentRootPath(root.Children[0]) != nil {
@@ -34,13 +34,19 @@ func (c *typeChecker) indexedIntegerPlace(source *ast.Expression) bool {
 	return indexed && hir.FixedArrayScalarElement(element)
 }
 
-// Only a named integer or plain nominal descriptor yields a stored element address.
-// Grouping preserves place identity; calls, temporary views and arrays do not.
+// Named integer arrays and integer/plain nominal view descriptors yield stored
+// element addresses. Grouping preserves identity; temporary roots do not.
 func (c *typeChecker) indexedViewBorrow(source *ast.Expression, child *hir.Expression, mutable bool) (hir.Expression, bool) {
 	for source != nil && source.Kind == syntax.KindGroup && len(source.Children) == 1 {
 		source = source.Children[0]
 	}
-	if source == nil || source.Kind != syntax.KindIndex || child == nil || !c.indexedStructPlace(source) && !c.indexedIntegerPlace(source) {
+	if source == nil || source.Kind != syntax.KindIndex || child == nil {
+		return hir.Expression{}, false
+	}
+	if borrowed, ok := c.indexedArrayBorrow(source, child, mutable); ok {
+		return borrowed, true
+	}
+	if !c.indexedStructPlace(source) && !c.indexedIntegerPlace(source) {
 		return hir.Expression{}, false
 	}
 	index := *child
@@ -89,5 +95,70 @@ func (f *borrowFlowAnalyzer) evaluateIndexedPlace(index *ast.Expression, mutable
 	for _, origin := range value.origins {
 		value.pending = append(value.pending, pendingBorrowLoan{subview: true, owner: f.analyzer.resolved[assignmentRootPath(parent)], borrow: span(f.module.file.Path, index.Span), kind: "mutable", origin: origin})
 	}
+	return value, true
+}
+
+// Direct fixed-array places lower through an internal view of the original
+// storage. Do not lower the indexed value first: that would reference a copy.
+func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expression, mutable bool) (hir.Expression, bool) {
+	index := indexedPlace(source)
+	if index == nil {
+		return hir.Expression{}, false
+	}
+	owner := c.analyzer.resolved[assignmentRootPath(index.Children[0])]
+	if owner == nil || (owner.kind != "local" && owner.kind != "parameter") || mutable && !owner.mutable {
+		return hir.Expression{}, false
+	}
+	element, length, array := hir.FixedArrayParts(owner.typ)
+	if !array || element == hir.TypeBool || !hir.ExecutableFixedArrayShape(element, length) {
+		return hir.Expression{}, false
+	}
+	lowered := *child
+	for lowered.Kind == "group" && len(lowered.Children) == 1 {
+		lowered = lowered.Children[0]
+	}
+	if lowered.Kind != "array-index" || len(lowered.Children) != 2 || lowered.Type != element || lowered.Children[0].Type != owner.typ {
+		return hir.Expression{}, false
+	}
+	view := hir.SharedBorrow(hir.Type("[" + string(element) + "]"))
+	operator := "&"
+	if mutable {
+		view = hir.MutableBorrow(hir.Type("[" + string(element) + "]"))
+		operator = "&mut"
+	}
+	if !hir.ArrayViewBorrow(owner.typ, view, operator) {
+		return hir.Expression{}, false
+	}
+	lowered.Kind = "view-index"
+	lowered.Children = []hir.Expression{
+		{Kind: "array-view-borrow", Type: view, Span: lowered.Children[0].Span, Symbol: hir.NoSymbol, Operator: operator, Children: []hir.Expression{lowered.Children[0]}},
+		lowered.Children[1],
+	}
+	return indexedElementBorrow(lowered, mutable)
+}
+
+func (f *borrowFlowAnalyzer) evaluateArrayElementBorrow(expression, index *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
+	parent := index.Children[0]
+	owner := f.analyzer.resolved[assignmentRootPath(parent)]
+	if owner == nil {
+		return borrowValueState{known: false}, true
+	}
+	if _, reachable := f.evaluateExpression(parent, environment); !reachable {
+		return borrowValueState{}, false
+	}
+	f.checkBorrowCreation(expression, environment)
+	origin := f.analyzer.originForSymbol(owner)
+	mutable := expression.Text == "&mut"
+	value := borrowValueState{known: true, origins: []flowOrigin{origin}, pending: []pendingBorrowLoan{{owner: owner, borrow: span(f.module.file.Path, expression.Span), kind: borrowKind(expression.Text), origin: origin}}}
+	base, accessBase := len(f.callBorrows), len(f.callAccesses)
+	f.callBorrows = append(f.callBorrows, value)
+	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: value, mutable: mutable, span: span(f.module.file.Path, expression.Span)})
+	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+	if _, reachable := f.evaluateExpression(index.Children[1], environment); !reachable {
+		return borrowValueState{}, false
+	}
+	// Exclusive elements freeze the whole owner and existing view aliases until
+	// last use. Array indices do not establish disjointness.
+	value.pending[0].subview = mutable
 	return value, true
 }

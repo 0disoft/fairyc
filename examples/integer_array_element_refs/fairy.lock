@@ -1,0 +1,42 @@
+{
+  "schema": "fairyc.lock/v1",
+  "packageInstanceAlgorithm": "fairyc.package-instance/v1",
+  "sourceDigestAlgorithm": "fairyc.package-source/v1",
+  "language": "fairyc-language/20",
+  "root": "fypi1-sha256-824dc9b6798d6453238916c145c2869879e63e5bd7ac96d9e95ac3dbc5e453b2",
+  "packages": [
+    {
+      "id": "fypi1-sha256-824dc9b6798d6453238916c145c2869879e63e5bd7ac96d9e95ac3dbc5e453b2",
+      "role": "root",
+      "packageUid": "rodisoft.examples.integer-array-element-refs",
+      "sourceKind": "local",
+      "localPath": ".",
+      "sdkIdentity": "",
+      "runtimeAbi": "",
+      "sourceIdentity": "fysrc1-sha256-0e8fd35fb67c128f3a9996aedf96c61c01c46a4f25fa96b5dddc2d8eb0e7de99",
+      "sourceDigest": "fysrc1-sha256-0e8fd35fb67c128f3a9996aedf96c61c01c46a4f25fa96b5dddc2d8eb0e7de99",
+      "version": "0.1.0",
+      "features": []
+    },
+    {
+      "id": "fypi1-sha256-9d06782bda599289f83ecb912fcb100046f638b5034346e35e25f1f29b5e412d",
+      "role": "standard-library",
+      "packageUid": "fairyc.std",
+      "sourceKind": "sdk",
+      "localPath": "",
+      "sdkIdentity": "fairyc-sdk-stdlib/0",
+      "runtimeAbi": "fairyc-runtime/0",
+      "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-5d3c9c448ca8da517692734c80a6a9ea036fdaadfa8f3148af065ac73cd7ee92",
+      "sourceDigest": "fysrc1-sha256-5d3c9c448ca8da517692734c80a6a9ea036fdaadfa8f3148af065ac73cd7ee92",
+      "version": "0.0.0-stage0.85",
+      "features": []
+    }
+  ],
+  "dependencies": [
+    {
+      "owner": "fypi1-sha256-824dc9b6798d6453238916c145c2869879e63e5bd7ac96d9e95ac3dbc5e453b2",
+      "binding": "stdlib",
+      "target": "fypi1-sha256-9d06782bda599289f83ecb912fcb100046f638b5034346e35e25f1f29b5e412d"
+    }
+  ]
+}

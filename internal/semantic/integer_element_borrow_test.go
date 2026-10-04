@@ -54,7 +54,6 @@ func TestIntegerElementBorrowBoundary(t *testing.T) {
 		"shared-store":     `fn void bad(ref i64[] view){let ref i64 item=ref view[0];*item=1;}`,
 		"wrong-width":      `fn void bad(ref i32[] view){let ref i64 item=ref view[0];}`,
 		"temporary":        `fn void bad(ref mut i64[] view){let ref mut i64 item=ref mut view[..][0];}`,
-		"fixed-array-root": `fn void bad(){var i64[2] data=[1,2];let ref mut i64 item=ref mut data[0];}`,
 		"local-escape":     `fn ref i64 bad(){var i64[2] data=[1,2];let ref i64[] view=ref data;return ref view[0];}`,
 		"mutable-escape":   `fn ref mut i64 bad(){var i64[2] data=[1,2];let ref mut i64[] view=ref mut data;return ref mut view[0];}`,
 	} {

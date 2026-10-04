@@ -11,7 +11,13 @@ func (f *borrowFlowAnalyzer) checkBorrowCreation(expression *ast.Expression, env
 	if f.summarizing || f.probing() || !isBorrowExpression(expression) {
 		return
 	}
-	owner := f.analyzer.resolved[borrowPlaceRoot(expression.Children[0])]
+	root := borrowPlaceRoot(expression.Children[0])
+	if index := indexedPlace(root); index != nil {
+		if _, _, array := hir.FixedArrayParts(f.analyzer.expressionTypes[index.Children[0]]); array {
+			root = assignmentRootPath(index.Children[0])
+		}
+	}
+	owner := f.analyzer.resolved[root]
 	if owner == nil {
 		return
 	}

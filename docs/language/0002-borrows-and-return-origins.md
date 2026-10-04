@@ -280,9 +280,9 @@ which runs once under checked bounds. Actual receiver/index types and exact
 reference kinds are verified. Existing parent freezes, shared write holds,
 call/return/tagged origins and escape rules apply. Scalar dereference stores
 snapshot the named receiver before RHS effects, including reference rebinding.
-Temporary descriptors and direct array element borrows remain closed. Fixed
-arrays can first convert to named integer views. ADR 0454 subsequently admits
-mutable integer reference for-in loops.
+Temporary descriptors remain closed. Fixed arrays can first convert to named
+integer views. ADR 0454 subsequently admits mutable integer reference for-in
+loops; ADR 0455 admits direct named integer array element references.
 
 ADR 0454 admits `for (let ref mut T item in values)` for exact
 u8/i32/i64/u32/usize items over named immutable `ref mut T[]` descriptors.
@@ -376,3 +376,12 @@ The C backend must not emit `restrict`, LLVM `noalias`, or related alias promise
 Diagnostics must identify the conflicting access, the active loan and its last use, an escaping local origin, a multiple-origin return, a stored safe borrow, and a borrow-returning function-value conversion. When possible, the explanation should recommend copying, splitting the API, returning an index, or using a region.
 
 ADR 0449 admits field stores and shared/exclusive field address projections through named plain nominal views. Indices are evaluated once and checked before address creation; fields and indices retain whole-owner loan rules. See `docs/adr/0449-indexed-plain-struct-fields.md`.
+
+ADR 0455 admits `ref data[i]` and `ref mut data[i]` for named fixed arrays of
+u8/i32/i64/u32/usize. Mutable items require a mutable owner binding. References
+select original array storage through an internal view, with an index evaluated
+once under a temporary owner hold and checked bounds. Exclusive items freeze
+the whole owner and aliases until last use; distinct indices do not imply
+disjointness. Shared items permit reads but block mutation. Local and by-value
+parameter array references cannot escape. Temporary roots, bool/struct arrays,
+array fields and direct fixed-array for-in remain closed.
