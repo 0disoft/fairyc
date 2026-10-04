@@ -36,7 +36,7 @@ func (x *expander) activateSDKVectorLoops() error {
 			if err != nil {
 				return err
 			}
-			ast.PrepareSDKVectorLoopBody(clone.Body, imported.Alias)
+			ast.PrepareSDKVectorLoopBody(clone.Body, imported.Alias, clone.Parameters...)
 			activateVectorForBlock(clone.Body)
 			detached.Functions[i] = clone
 		}

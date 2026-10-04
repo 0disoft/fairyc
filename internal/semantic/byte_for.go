@@ -15,7 +15,8 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	}
 	itemType := loop.Type
 	mutableItem := itemType.Kind == ast.TypeKindReference && itemType.Mutable && itemType.Element != nil
-	if mutableItem {
+	referenceItem := itemType.Kind == ast.TypeKindReference && itemType.Element != nil
+	if referenceItem {
 		itemType = *itemType.Element
 	}
 	if (itemType.Kind != ast.TypeKindNamed && itemType.Kind != ast.TypeKindBoundNominal) || len(itemType.Arguments) != 0 {
@@ -24,6 +25,9 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, itemType, false)
 	_, integer := hir.IntegerViewElement(hir.Type("[" + string(wantElement) + "]"))
 	nominal := c.analyzer.plainViewStruct(wantElement)
+	if referenceItem && !mutableItem && !integer {
+		return "shared reference iteration requires an exact integer item"
+	}
 	if !resolved || !integer && !nominal {
 		return "view iteration requires an exact u8, i32, i64, u32, usize or scalar-field struct item binding"
 	}
@@ -33,6 +37,8 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	}
 	if mutableItem {
 		shape = "mutable view iteration requires an exact ref mut integer or struct item and a named immutable mutable view"
+	} else if referenceItem {
+		shape = "shared reference iteration requires an exact integer item and a named immutable integer view"
 	}
 	if wantElement == hir.TypeU8 && !mutableItem {
 		shape = "byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view"
@@ -67,14 +73,18 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || (nominal || mutableItem) && hir.MutableIndexedView(value.typ) != mutableItem {
 		return shape
 	}
-	if mutableItem {
+	if referenceItem {
 		classic := prepared.Block.Statements[1].For
 		if classic == nil || classic.Body == nil || len(classic.Body.Statements) == 0 {
 			return "malformed mutable view iteration"
 		}
 		item := classic.Body.Statements[0].Binding
+		operator := "&"
+		if mutableItem {
+			operator = "&mut"
+		}
 		if item == nil || item.Name != loop.Name || item.Type == nil || c.canonicalType(*item.Type) != c.canonicalType(loop.Type) ||
-			item.Expression == nil || item.Expression.Kind != syntax.KindPrefix || item.Expression.Text != "&mut" || len(item.Expression.Children) != 1 {
+			item.Expression == nil || item.Expression.Kind != syntax.KindPrefix || item.Expression.Text != operator || len(item.Expression.Children) != 1 {
 			return "malformed mutable view iteration"
 		}
 		index := item.Expression.Children[0]
@@ -92,7 +102,12 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 func (f *borrowFlowAnalyzer) evaluateViewFor(statement *ast.Statement, environment borrowEnvironment) bool {
 	prepared := statement.Expression
 	if prepared != nil && prepared.Block != nil && len(prepared.Block.Statements) == 3 {
-		return f.evaluateArrayFor(prepared, environment)
+		if first := prepared.Block.Statements[0].Binding; first != nil && first.Name == arrayForViewName {
+			return f.evaluateArrayFor(prepared, environment)
+		}
+		// SDK Vec preparation holds its owner through an ordinary block binding.
+		_, reachable := f.evaluateExpression(prepared, environment)
+		return reachable
 	}
 	if prepared == nil || prepared.Block == nil || len(prepared.Block.Statements) != 2 {
 		return true // Malformed source is rejected by the type-checking gate.
@@ -105,9 +120,12 @@ func (f *borrowFlowAnalyzer) evaluateViewFor(statement *ast.Statement, environme
 	if !reachable {
 		return false
 	}
-	base := len(f.callBorrows)
+	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	f.callBorrows = append(f.callBorrows, view)
-	defer func() { f.callBorrows = f.callBorrows[:base] }()
+	if statement.ByteFor.Type.Kind == ast.TypeKindReference && !statement.ByteFor.Type.Mutable {
+		f.callAccesses = append(f.callAccesses, borrowCallAccess{value: view, mutable: false, span: span(f.module.file.Path, statement.ByteFor.View.Span)})
+	}
+	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
 	_, reachable = f.evaluateExpression(prepared, environment)
 	return reachable
 }

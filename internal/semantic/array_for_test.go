@@ -58,15 +58,15 @@ func TestArrayForFlow(t *testing.T) {
 
 func TestArrayForBoundary(t *testing.T) {
 	for name, source := range map[string]string{
-		"immutable-mut":    "fn void bad(){let i64[1] data=[1];for(let ref mut i64 item in data){}}",
-		"wrong-width":      "fn void bad(){var i32[1] data=[1];for(let i64 item in data){}}",
-		"bool":             "fn void bad(){var bool[1] data=[true];for(let bool item in data){}}",
-		"literal":          "fn void bad(){for(let i64 item in [1,2]){}}",
-		"call":             "fn i64[1] make(){return [1];}fn void bad(){for(let i64 item in make()){}}",
-		"shared-item":      "fn void bad(){var i64[1] data=[1];for(let ref i64 item in data){}}",
-		"field":            "struct Box{i64 value;}fn void bad(){let Box data=Box{.value=1};for(let i64 item in data.value){}}",
-		"local-escape":     "fn ref mut i64 bad(){var i64[1] data=[1];for(let ref mut i64 item in data){return item;}return ref mut data[0];}",
-		"parameter-escape": "fn ref i64 bad(i64[1] data){for(let i64 item in data){return ref data[0];}return ref data[0];}",
+		"immutable-mut":     "fn void bad(){let i64[1] data=[1];for(let ref mut i64 item in data){}}",
+		"wrong-width":       "fn void bad(){var i32[1] data=[1];for(let i64 item in data){}}",
+		"bool":              "fn void bad(){var bool[1] data=[true];for(let bool item in data){}}",
+		"literal":           "fn void bad(){for(let i64 item in [1,2]){}}",
+		"call":              "fn i64[1] make(){return [1];}fn void bad(){for(let i64 item in make()){}}",
+		"shared-item-store": "fn void bad(){var i64[1] data=[1];for(let ref i64 item in data){*item=9;}}",
+		"field":             "struct Box{i64 value;}fn void bad(){let Box data=Box{.value=1};for(let i64 item in data.value){}}",
+		"local-escape":      "fn ref mut i64 bad(){var i64[1] data=[1];for(let ref mut i64 item in data){return item;}return ref mut data[0];}",
+		"parameter-escape":  "fn ref i64 bad(i64[1] data){for(let i64 item in data){return ref data[0];}return ref data[0];}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			r := analyzeText(t, map[string]string{"main.fy": "module main;" + source})

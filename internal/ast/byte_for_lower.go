@@ -11,13 +11,24 @@ const byteForIndexName = "\x00fairyc_byte_for_index"
 // written AST node. Semantic admission still checks the source form and may
 // reject it before the generated expression reaches executable MIR.
 func byteForAsBlock(loop *ByteForLoop) *Expression {
+	return prepareViewFor(loop, false)
+}
+
+// PrepareIntegerReferenceLoop is used after SDK vector candidates have been
+// selected. Actual integer/view/array admission remains semantic-owned.
+func PrepareIntegerReferenceLoop(loop *ByteForLoop) *Expression {
+	return prepareViewFor(loop, true)
+}
+
+func prepareViewFor(loop *ByteForLoop, sharedItems bool) *Expression {
 	if loop == nil || loop.Body == nil || loop.View == nil || loop.View.Kind != syntax.KindPath {
 		return nil
 	}
 	itemType := loop.Type
 	mutableItem := itemType.Kind == TypeKindReference && itemType.Mutable && itemType.Element != nil
+	referenceItem := itemType.Kind == TypeKindReference && itemType.Element != nil && (itemType.Mutable || sharedItems)
 	element := itemType
-	if mutableItem {
+	if referenceItem {
 		element = *itemType.Element
 	}
 	if (element.Kind != TypeKindNamed && element.Kind != TypeKindBoundNominal) || len(element.Arguments) != 0 {
@@ -49,8 +60,12 @@ func byteForAsBlock(loop *ByteForLoop) *Expression {
 		Expression: &Expression{Kind: syntax.KindIndex, Span: loop.View.Span,
 			Children: []*Expression{view(), path(byteForIndexName)}},
 	}
-	if mutableItem {
-		item.Expression = &Expression{Kind: syntax.KindPrefix, Span: loop.NameSpan, Text: "&mut", Children: []*Expression{item.Expression}}
+	if referenceItem {
+		operator := "&"
+		if mutableItem {
+			operator = "&mut"
+		}
+		item.Expression = &Expression{Kind: syntax.KindPrefix, Span: loop.NameSpan, Text: operator, Children: []*Expression{item.Expression}}
 	}
 	body := *loop.Body
 	body.Statements = make([]Statement, 0, len(loop.Body.Statements)+1)

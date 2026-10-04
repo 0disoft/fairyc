@@ -57,8 +57,16 @@
   reads but block mutation; exclusive loops block separate owner access even
   after an item's last use. `continue` advances the hidden index; break,
   return and propagation release the loop-held loan at exit. Current arrays
-  retain the `1..=4096` size guard. Bool/struct arrays, shared reference items,
-  array fields and literal/call iterable roots are not admitted.
+  retain the `1..=4096` size guard. Bool/struct arrays, array fields and
+  literal/call iterable roots are not admitted.
+- ADR 0458 admits `for (let ref T item in source)` for the same five integer
+  types over named fixed arrays and immutable named `ref T[]`/`ref mut T[]`
+  bindings. Items reference original storage and cannot be written through.
+  The shared loop loan blocks owner writes and exclusive reborrows through
+  exit. Items may be returned from borrowed parameters or retained in
+  `Option<ref T>` under existing lifetime rules; local/by-value array storage
+  cannot escape. Shared array loops may nest; length and checked ascending
+  traversal are unchanged.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

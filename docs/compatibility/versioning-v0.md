@@ -1697,3 +1697,12 @@ compiler identity separates older restricted compilers and cached generations.
 SDK stage0.86/source/exports, language /20, runtime /0, grammar productions,
 MIR/wire schemas, ABI and target maturity remain unchanged. Windows native
 execution is verified; Linux execution remains deferred to the owner's batch.
+
+ADR 0458 admits shared-reference integer items over named fixed arrays and
+immutable named integer view bindings. Shared item loans retain owner storage,
+block writes/exclusive reborrows through loop exit and obey existing reference
+return/escape rules. SDK Vec and array preparation are distinguished by their
+private descriptor identity, so Vec owner/escape checks still execute. Exact
+compiler identity separates earlier restricted compilers/cache generations.
+Language /20, SDK stage0.86, runtime /0, MIR/wire schemas and ABI stay unchanged.
+Windows dev/release execution is verified; Linux execution remains deferred.

@@ -9,7 +9,7 @@ func TestI64ForSourceRejections(t *testing.T) {
 	for name, loop := range map[string]string{
 		"wrong-item":       "for (let u8 value in view) {}",
 		"unsupported-item": "for (let i32 value in view) {}",
-		"reference-item":   "for (let ref i64 value in view) {}",
+		"reference-width":  "for (let ref u8 value in view) {}",
 		"mutable-binding":  "var ref i64[] alias = view; for (let i64 value in alias) {}",
 		"slice-expression": "for (let i64 value in view[..]) {}",
 		"call-expression":  "for (let i64 value in relay(view)) {}",

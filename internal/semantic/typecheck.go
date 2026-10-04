@@ -494,7 +494,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			reason := c.byteForSourceIssue(statement.ByteFor, statement.Expression)
 			issueSpan := statement.Span
 			if len(c.analyzer.vectorForTypes) != 0 && statement.ByteFor != nil &&
-				statement.ByteFor.Type.Kind == ast.TypeKindReference && !statement.ByteFor.Type.Mutable {
+				statement.ByteFor.Type.Kind == ast.TypeKindReference && reason != "" {
 				reason, issueSpan = c.vectorForSourceIssue(statement.ByteFor, statement.Expression)
 			}
 			if reason != "" {

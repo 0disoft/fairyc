@@ -29,7 +29,7 @@ func resetArrayForPreparation(statement *ast.Statement) {
 		return
 	}
 	indexed := item.Expression
-	if indexed.Kind == syntax.KindPrefix && indexed.Text == "&mut" && len(indexed.Children) == 1 {
+	if indexed.Kind == syntax.KindPrefix && (indexed.Text == "&mut" || indexed.Text == "&") && len(indexed.Children) == 1 {
 		indexed = indexed.Children[0]
 	}
 	if indexed.Kind != syntax.KindIndex || len(indexed.Children) != 2 {
@@ -59,8 +59,12 @@ func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expre
 		return "malformed fixed-array iteration"
 	}
 	indexed := item.Expression
-	if mutable {
-		if indexed.Kind != syntax.KindPrefix || indexed.Text != "&mut" || len(indexed.Children) != 1 {
+	if loop.Type.Kind == ast.TypeKindReference {
+		operator := "&"
+		if mutable {
+			operator = "&mut"
+		}
+		if indexed.Kind != syntax.KindPrefix || indexed.Text != operator || len(indexed.Children) != 1 {
 			return "malformed mutable fixed-array iteration"
 		}
 		indexed = indexed.Children[0]
@@ -69,7 +73,7 @@ func (c *typeChecker) prepareArrayFor(loop *ast.ByteForLoop, prepared *ast.Expre
 		return "malformed fixed-array iteration"
 	}
 	elementType := loop.Type
-	if mutable {
+	if loop.Type.Kind == ast.TypeKindReference {
 		elementType = *loop.Type.Element
 	}
 	sliceType := ast.TypeReference{Kind: ast.TypeKindSlice, Element: &elementType, Span: loop.View.Span}

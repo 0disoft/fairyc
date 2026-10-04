@@ -540,6 +540,9 @@ func (a *analyzer) resolveBlock(module *moduleScope, block *ast.Block, parent *l
 			continue
 		}
 		resetArrayForPreparation(statement)
+		if statement.ByteFor != nil && statement.Expression == nil {
+			statement.Expression = ast.PrepareIntegerReferenceLoop(statement.ByteFor)
+		}
 		a.resolveExpression(module, scope, statement.Target)
 		a.resolveExpression(module, scope, statement.Expression)
 	}

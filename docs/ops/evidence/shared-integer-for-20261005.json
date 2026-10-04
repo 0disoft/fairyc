@@ -1,0 +1,241 @@
+{
+  "schema": "fairyc.shared-integer-for-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "f5d5a071e7047194c9117c47c95cfe4de9278fd4",
+  "compiler": {
+    "path": ".cache/shared-integer-for-compiler/fairyc.exe",
+    "sha256": "f1bfec85954e0c85a1e775af6e540aece804ab1b376271e2d2012f6e3d8dae6c",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-integer-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004145921-f5d5a071e704+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: f5d5a071e7047194c9117c47c95cfe4de9278fd4\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\shared-integer-for-compiler\\source-manifest.json",
+    "sha256": "0efeff85817a5fe416a147d09bfdcc3aa61869582f3d3afa1099309ec2e86817",
+    "productionFileCount": 543,
+    "sourceDigest": "5298270124f8d298ebd0c33fa56ce62c424182dd9fcc2ac84ef6ad3589c72a87"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "internal/ast/byte_for_lower.go",
+      "sha256": "ea7f51e31b5525e116207f809055923a94f4b08a091e329ff69b51409b310a16"
+    },
+    {
+      "path": "internal/ast/vector_for_lower.go",
+      "sha256": "94ab4f076789dfdac34047fb27951b5dc2ae669a4a15eaab833030ed209449fc"
+    },
+    {
+      "path": "internal/genericsource/vector_for.go",
+      "sha256": "158962c8d7667e24536336bb7cbb654a19996a956e5364d0685c6372a9b713e3"
+    },
+    {
+      "path": "internal/semantic/array_for.go",
+      "sha256": "8c0256123f52d67ba746b51def54c943bb7dda2df2f735660c2ce8a8916b29fa"
+    },
+    {
+      "path": "internal/semantic/byte_for.go",
+      "sha256": "b4a928a3e08cf1342b6c4d14380447607f3482f7acb0c423e1fa2a3031fdda9b"
+    },
+    {
+      "path": "internal/semantic/resolve.go",
+      "sha256": "7f6ca25677eb66dc360fd5abbd1f92af69db5349eaa5d087712b51d3e4114d2c"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "1e586adb39533243f6f490d2ce17a3d4b9f9973dbfd96d058409a73f7271089b"
+    },
+    {
+      "path": "internal/semantic/shared_integer_for_test.go",
+      "sha256": "a51eb245f3b354eac9f60f28da053e2667d808ad645beb676972c94cfd8c7a28"
+    },
+    {
+      "path": "internal/compiler/shared_integer_for_test.go",
+      "sha256": "db1c5ffc649696bb388fa54133498eac71578bdacfbb3c0dcff597dce1d1e37c"
+    },
+    {
+      "path": "internal/compiler/testdata/shared_integer_for.fy",
+      "sha256": "bd86a387fb0713033caa41089699a5248cbda58e9f546a969e2028ac57a8ce35"
+    },
+    {
+      "path": "internal/cli/shared_integer_for_test.go",
+      "sha256": "68a69fce3049c58e0c42572a9b838580e466f97df64c16d84ffa7ecbf0bf45ec"
+    },
+    {
+      "path": "examples/shared_integer_ref_quickstart/src/main.fy",
+      "sha256": "337d2288fed1fb1124631f8f9289c0e49ac15db515701cc54a281f111a8960fb"
+    },
+    {
+      "path": "examples/shared_integer_ref_quickstart/fairy.toml",
+      "sha256": "64953d60cfc81d83add7af2a6a3be72f5eac24cca670a71b899762aa979f8c8e"
+    },
+    {
+      "path": "examples/shared_integer_ref_quickstart/fairy.lock",
+      "sha256": "1088c481481373810d01addde37dfd584978e60c1fc11bf65c62aba8aa2eebd2"
+    }
+  ],
+  "tests": [
+    {
+      "path": ".cache/shared-integer-for-related.jsonl",
+      "role": "related stage regressions",
+      "sha256": "ede9fe76a200404e4036d1ef919efc4c009d8e824a9727f3b12f3631ae8130cc",
+      "passEvents": 442,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/shared-integer-for-native.jsonl",
+      "role": "Windows native and public check rejections",
+      "sha256": "0d9327cf64d3532ff8f2867d9cfbe1d604c0f8fd743453940fff5ac234d3279d",
+      "passEvents": 8,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/shared-integer-for-roundtrip.jsonl",
+      "role": "retained AST deterministic MIR and verifier mutations",
+      "sha256": "3e453cd75e04555bda614a79ce9d89fbf558801e5e1953777975f92252b078c7",
+      "passEvents": 6,
+      "skips": 0,
+      "failures": 0
+    }
+  ],
+  "cliReceipt": {
+    "path": "docs/ops/evidence/shared-integer-for-20261005.cli.json",
+    "sha256": "60d2f2b156cb77cefdcacde7611d9abcd314308aaae1ec3b31d3f56ec1951b56",
+    "nativeOutcomes": 4
+  },
+  "nativeReceipt": {
+    "path": "docs/ops/evidence/shared-integer-for-20261005.native.json",
+    "sha256": "626bbb1f847244fde508fb23d8da98c13d3a9740927ef8fe97b0d94c5b0d0abe",
+    "outcomes": 4,
+    "executor": "in-process compiler and cdriver, with separate public compiler executable"
+  },
+  "commands": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/ast",
+        "./internal/genericsource",
+        "-run",
+        "^Test(SharedIntegerFor.*|ArrayFor.*|MutableIntegerFor.*|.*(ByteViewFor|I64For|IntegerFor|ByteFor|VectorSDKCandidateLoop|VectorSDKCandidateResourceLoop|VectorFor|SDKVectorLoop).*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/shared-integer-for-related.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestSharedIntegerFor(Native|CheckRejections)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/shared-integer-for-native.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/compiler",
+        "-run",
+        "^TestSharedIntegerFor.*$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/shared-integer-for-roundtrip.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/shared-integer-for-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/ast",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/genericsource",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "validation": {
+    "format": "passed",
+    "vet": "passed",
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for later batch",
+    "sdkVersion": "0.0.0-stage0.86",
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "newRuntimeHelper": false,
+    "newSDKAPI": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "benchmark": false,
+    "ciChanges": false
+  }
+}

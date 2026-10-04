@@ -51,7 +51,7 @@ func TestMutableIntegerForSourceBoundary(t *testing.T) {
 	for _, typ := range []string{"u8", "i32", "i64", "u32", "usize"} {
 		for name, body := range map[string]string{
 			"shared-source":      "fn void edit(ref T[] view){for(let ref mut T item in view){}}",
-			"shared-item":        "fn void edit(ref mut T[] view){for(let ref T item in view){}}",
+			"shared-item-store":  "fn void edit(ref mut T[] view){for(let ref T item in view){*item=9;}}",
 			"mutable-descriptor": "fn void edit(ref mut T[] view){var ref mut T[] alias=view;for(let ref mut T item in alias){}}",
 			"temporary":          "fn void edit(ref mut T[] view){for(let ref mut T item in view[..]){}}",
 			"integer-mismatch":   "fn void edit(ref mut T[] view){for(let ref mut Other item in view){}}",

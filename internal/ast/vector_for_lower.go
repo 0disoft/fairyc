@@ -12,51 +12,77 @@ const vectorForIndexName = "\x00fairyc_vector_for_index"
 // PrepareSDKVectorLoopBody attaches candidate lowering to a detached function
 // body after its std::vec provider has been authenticated. Ordinary AST
 // lowering never builds these unused blocks.
-func PrepareSDKVectorLoopBody(block *Block, alias string) {
+func PrepareSDKVectorLoopBody(block *Block, alias string, parameters ...Parameter) {
+	sources := map[string]bool{}
+	for _, parameter := range parameters {
+		sources[parameter.Name] = arrayOrSliceSource(parameter.Type)
+	}
 	if alias != "" {
-		prepareVectorForBlock(block, alias)
+		prepareVectorForBlock(block, alias, sources)
 	}
 }
 
-func prepareVectorForBlock(block *Block, alias string) {
+// Skip positively known arrays/slices before registering SDK-only Vec calls.
+// This is preparation routing; semantic checking still admits the actual type.
+func arrayOrSliceSource(typ TypeReference) bool {
+	return typ.Kind == TypeKindArray || typ.Kind == TypeKindReference && typ.Element != nil && typ.Element.Kind == TypeKindSlice
+}
+func copyLoopSources(sources map[string]bool) map[string]bool {
+	copy := make(map[string]bool, len(sources))
+	for name, value := range sources {
+		copy[name] = value
+	}
+	return copy
+}
+
+func prepareVectorForBlock(block *Block, alias string, sources map[string]bool) {
 	if block == nil {
 		return
 	}
+	sources = copyLoopSources(sources)
 	for index := range block.Statements {
 		statement := &block.Statements[index]
 		if statement.ByteFor != nil {
-			prepareVectorForBlock(statement.ByteFor.Body, alias)
-			if statement.ByteFor.Type.Kind == TypeKindReference && !statement.ByteFor.Type.Mutable {
+			child := copyLoopSources(sources)
+			child[statement.ByteFor.Name] = false
+			prepareVectorForBlock(statement.ByteFor.Body, alias, child)
+			if statement.ByteFor.Type.Kind == TypeKindReference && !statement.ByteFor.Type.Mutable && !(statement.ByteFor.View != nil && statement.ByteFor.View.Kind == syntax.KindPath && sources[statement.ByteFor.View.Text]) {
 				statement.ByteFor.PreparedVector = vectorForAsBlock(statement.ByteFor, alias)
 			}
 			continue
 		}
 		if statement.For != nil {
-			prepareVectorForBlock(statement.For.Body, alias)
-			if statement.For.Initializer != nil {
-				prepareVectorForExpression(statement.For.Initializer.Expression, alias)
+			loopSources := copyLoopSources(sources)
+			if statement.For.Initializer != nil && statement.For.Initializer.Binding != nil {
+				b := statement.For.Initializer.Binding
+				loopSources[b.Name] = b.Type != nil && arrayOrSliceSource(*b.Type)
 			}
-			prepareVectorForExpression(statement.For.Condition, alias)
+			prepareVectorForBlock(statement.For.Body, alias, loopSources)
+			if statement.For.Initializer != nil {
+				prepareVectorForExpression(statement.For.Initializer.Expression, alias, sources)
+			}
+			prepareVectorForExpression(statement.For.Condition, alias, loopSources)
 			if statement.For.Post != nil {
-				prepareVectorForExpression(statement.For.Post.Expression, alias)
+				prepareVectorForExpression(statement.For.Post.Expression, alias, loopSources)
 			}
 		}
 		if statement.Binding != nil {
-			prepareVectorForExpression(statement.Binding.Expression, alias)
+			prepareVectorForExpression(statement.Binding.Expression, alias, sources)
+			sources[statement.Binding.Name] = statement.Binding.Type != nil && arrayOrSliceSource(*statement.Binding.Type)
 		}
-		prepareVectorForExpression(statement.Target, alias)
-		prepareVectorForExpression(statement.Expression, alias)
+		prepareVectorForExpression(statement.Target, alias, sources)
+		prepareVectorForExpression(statement.Expression, alias, sources)
 	}
-	prepareVectorForExpression(block.Tail, alias)
+	prepareVectorForExpression(block.Tail, alias, sources)
 }
 
-func prepareVectorForExpression(expression *Expression, alias string) {
+func prepareVectorForExpression(expression *Expression, alias string, sources map[string]bool) {
 	if expression == nil {
 		return
 	}
-	prepareVectorForBlock(expression.Block, alias)
+	prepareVectorForBlock(expression.Block, alias, sources)
 	for _, child := range expression.Children {
-		prepareVectorForExpression(child, alias)
+		prepareVectorForExpression(child, alias, sources)
 	}
 }
 

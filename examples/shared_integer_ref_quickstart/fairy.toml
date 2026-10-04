@@ -1,0 +1,7 @@
+schema = "fairyc.manifest/v1"
+[package]
+uid = "rodisoft.examples.shared-integer-ref-quickstart"
+name = "shared-integer-ref-quickstart"
+version = "0.1.0"
+language = "fairyc-language/20"
+source = "src"
