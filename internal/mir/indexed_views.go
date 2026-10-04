@@ -19,8 +19,8 @@ func verifyIndexedViewOperands(op Operation, types map[LocalID]hir.Type) string 
 			}
 		}
 	case OperationViewLength, OperationViewEmpty, OperationViewIndex, OperationViewElementBorrow, OperationViewIndexCheck, OperationViewSlice, OperationViewSliceCheck, OperationViewIndexStore:
-		if hir.NonByteIndexedView(actual) || hir.NonByteIndexedView(op.OwnerType) || hir.NonByteIndexedView(op.Type) {
-			if !hir.NonByteIndexedView(actual) || actual != op.OwnerType {
+		if op.Kind == OperationViewElementBorrow || hir.NonByteIndexedView(actual) || hir.NonByteIndexedView(op.OwnerType) || hir.NonByteIndexedView(op.Type) {
+			if _, indexed := hir.IndexedViewElement(actual); !indexed || actual != op.OwnerType {
 				return "integer view operation disagrees with its receiver definition"
 			}
 			bounds := op.Operands[1:]

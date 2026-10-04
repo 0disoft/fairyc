@@ -260,8 +260,8 @@ exclusive references. Exclusive child generations freeze parent/aliases until
 last use; shared children block writes while live. Bounds dominate address
 creation, the index runs once, and receiver selection survives index-time
 reassignment of a mutable descriptor binding. Ordinary indexed values and
-`*item` reads still copy. Temporary descriptors, integer element references,
-fixed-array struct views stay closed.
+`*item` reads still copy. Temporary descriptors and fixed-array struct views
+stay closed; integer element references are separately added by ADR 0453.
 
 ADR 0452 admits `*target = value` through a named (optionally grouped)
 `ref mut T` where T is a nonempty acyclic plain struct with scalar leaves.
@@ -272,6 +272,16 @@ through the final store. Live shared/exclusive children still block replacement;
 reads through that reference and transient shared children ending before the
 store are allowed. A terminating RHS performs no store. Resources/nonplain
 graphs, shared receivers, compound stores and temporary roots remain closed.
+
+ADR 0453 admits the same named-view element places for u8/i32/i64/u32/usize.
+Shared/mutable references select stored cells without copying; static byte data
+can produce only shared u8 references. Descriptor selection precedes the index,
+which runs once under checked bounds. Actual receiver/index types and exact
+reference kinds are verified. Existing parent freezes, shared write holds,
+call/return/tagged origins and escape rules apply. Scalar dereference stores
+snapshot the named receiver before RHS effects, including reference rebinding.
+Temporary descriptors, direct array element borrows and reference for-in loops
+remain closed. Fixed arrays can first convert to named integer views.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct

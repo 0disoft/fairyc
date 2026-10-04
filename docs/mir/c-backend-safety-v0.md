@@ -487,3 +487,5 @@ normal continuation. No runtime C symbol, foreign ABI or host flag is added.
 ADR 0449 emits a typed indexed element address only after the matching successful bounds branch. The descriptor is saved before index effects and stores use the selected address across RHS effects. Ordinary nominal index reads remain value copies. No runtime helper or warning suppression is added.
 
 ADR 0452 emits whole plain struct `deref-store` as the existing typed indirect assignment after aggregate shape and actual-local type verification. The selected pointer survives RHS reference rebinding; traps/returns suppress the store. No helper, warning suppression, host flag or alias promise is added.
+
+ADR 0453 uses the existing typed indexed address emission for integer references after exact shared/mutable receiver and element verification. Static byte data yields const u8 pointers only. The descriptor is saved before index effects, scalar store receivers before RHS effects. No new C helper, host flag or alias promise is added.

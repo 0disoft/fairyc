@@ -1,0 +1,233 @@
+{
+  "schema": "fairyc.integer-element-borrow-review/v1",
+  "date": "2026-10-04",
+  "baseRevision": "a38511a4603f9c1a92486d353dd9ff68ca01b81d",
+  "scope": "ADR 0453 named shared/exclusive integer element references and scalar selected-receiver preservation; Fairy byte histogram example",
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/integer-element-borrow-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "image": {
+      "path": ".cache/integer-element-borrow-compiler/fairyc.exe",
+      "sha256": "55fc5f0fd13f7ccd47736e3cacb4d8847f62589c6806d18d23c28670e6b4ee30"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004112637-a38511a4603f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: a38511a4603f9c1a92486d353dd9ff68ca01b81d\nmodified: true\n",
+      "stderr": ""
+    },
+    "sourceDigest": {
+      "fileCount": 542,
+      "sha256": "e4286f192e0e7330d441797c9a6cb62f55590bf5737b274371b3b8898c61d27a",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sourceManifest": {
+      "path": ".cache/integer-element-borrow-compiler/source-manifest.json",
+      "sha256": "d771830d371328c92712be8e612941763eaeaa42f98e217c7b45242bf1e30ccd"
+    }
+  },
+  "sources": [
+    {
+      "path": "examples/integer_element_refs/README.md",
+      "sha256": "2e99f3cdfd2c468685c601e547ffcc0785486276ce770aee0742fed15709cccc"
+    },
+    {
+      "path": "examples/integer_element_refs/fairy.lock",
+      "sha256": "c2628a079564b812a96a78f1b5758ff59e79ee9f4dbbe532b0af516d292aaeb7"
+    },
+    {
+      "path": "examples/integer_element_refs/fairy.toml",
+      "sha256": "4687fb0495ded8a4b0b2356510497bb19eb7d5722455d18b30cf63f37150513a"
+    },
+    {
+      "path": "examples/integer_element_refs/src/main.fy",
+      "sha256": "c9646fed7e4e289837666676d578510a597219ea22a7e02b512ad9017fdb1603"
+    },
+    {
+      "path": "internal/cli/integer_element_borrow_test.go",
+      "sha256": "e3bf91e5086b23fda0f871017add85be5c7ed51542f8686000cf65e78ec4c45c"
+    },
+    {
+      "path": "internal/compiler/integer_element_borrow_test.go",
+      "sha256": "5d3d9f061d152df5ffe1517da51017c0fee54fd96a47346ca0da4e97e6727007"
+    },
+    {
+      "path": "internal/compiler/testdata/integer_element_borrow.fy",
+      "sha256": "189a13bc561aaba0c43bbb74c096fbe12c8ebe60c1153e5dccda9c9a9b629a2f"
+    },
+    {
+      "path": "internal/interpreter/deref_store.go",
+      "sha256": "7fed31cd952f014aedee5dfc626a329054fbfe71c06a6d6dd03ebcf55686f43a"
+    },
+    {
+      "path": "internal/interpreter/integer_element_borrow_test.go",
+      "sha256": "06eaf8dad20fb43385347583470f8eccb868756eb91e945d845a761e58c9ab64"
+    },
+    {
+      "path": "internal/interpreter/interpreter.go",
+      "sha256": "953a4237fd6963ddfe6a55f25014501dba0f89d8de79e00c8faec6bedbbad33d"
+    },
+    {
+      "path": "internal/interpreter/view_element_borrow.go",
+      "sha256": "a270ff1ce4ef09279625fafc8ab5653320ed6d502a52df7cde60dc562ed31879"
+    },
+    {
+      "path": "internal/mir/deref_store.go",
+      "sha256": "aa5499b814c16430992f96caa19da6e6dea0d73a3ded07d79a9f03f2e5794be9"
+    },
+    {
+      "path": "internal/mir/field_store_types.go",
+      "sha256": "671a5e6b73555ba8299162b447f12c29a47ca28223f021c2c37fb8ad770386cf"
+    },
+    {
+      "path": "internal/mir/indexed_views.go",
+      "sha256": "1364424b99e06809ee5594883ae0a5ced9b186d35a11e0712e9f4633d778ac33"
+    },
+    {
+      "path": "internal/mir/verify.go",
+      "sha256": "151cfc9a991f1fdb7fa28c3c86560d1957de9947556e1c7d9accfb5ce729111a"
+    },
+    {
+      "path": "internal/mir/view_element_borrow.go",
+      "sha256": "617b1b99b2c47942bb41d733044456222f32b0cb360698b3e176c517ec51a724"
+    },
+    {
+      "path": "internal/semantic/indexed_place.go",
+      "sha256": "94e37c6e1e83c52b8d5d36e68e297fa98e215700c3b8048ec75d6e3e5d6e4483"
+    },
+    {
+      "path": "internal/semantic/indexed_struct_borrow_test.go",
+      "sha256": "61bdd731b992ad8160745151b3a2486b8dfb77229b6853bd18c49225c956c4d7"
+    },
+    {
+      "path": "internal/semantic/integer_element_borrow_test.go",
+      "sha256": "3d047da030dad26caaa6299484f2e72e785946d02ba76422d0093d88b171f928"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "05227eaee69e63c6384041d10f73b85799eaec6e872007e00ee47c678b0c0dfb"
+    }
+  ],
+  "publicCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/integer-element-borrow-20261004.cli.json",
+      "sha256": "0c8dbb9946d6b48e5d9ec7e3eb5dde19436e5832a8972ff37d45849012f80ec0"
+    },
+    "runs": 8,
+    "outcome": "matrix check/build/run dev+release; live parent and Vec owner E2101 rejections"
+  },
+  "native": {
+    "raw": {
+      "path": "docs/ops/evidence/integer-element-borrow-20261004.native.json",
+      "sha256": "03ac5ac507e99e67cdc59eb7385cf06689f4c4248b28a568ff36b4bba5bc5dee"
+    },
+    "executions": 16
+  },
+  "example": {
+    "raw": {
+      "path": "docs/ops/evidence/integer-element-borrow-20261004.example.json",
+      "sha256": "5f57663ce374a91ca9cc0b4741980e1474fa5e2c52272563abe006e7fd0014a9"
+    },
+    "executions": 14,
+    "oracle": "Python collections.Counter of UTF-8 input bytes; sorted numeric byte/count rows; exact empty/stdout/stderr/exit and 4096-byte limit"
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "IntegerElementBorrow|IndexedStructBorrow|StructDerefStore|FieldStoreScalarDeref|IntegerView|I64View|ByteView",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": {
+        "path": ".cache/integer-element-borrow-verified-final.jsonl",
+        "sha256": "1675aeb00b81022d0369e7ee8f0c6ba2bb8717ad16fff5657c71402031760430"
+      },
+      "passedTestEvents": 288,
+      "skips": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestIntegerElementBorrowNative$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": {
+        "path": ".cache/integer-element-borrow-native-tests.jsonl",
+        "sha256": "3f1295daaffd7b9b352138571811303cafbb1b3e0135be51324a2a916995d7ab"
+      },
+      "passedTestEvents": 9,
+      "skips": 0
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/semantic",
+      "./internal/mir",
+      "./internal/interpreter",
+      "./internal/compiler",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "limits": [
+    "Linux actual execution deferred by owner; both C emission profiles verified",
+    "No SDK export/version, ABI/runtime, dependency, DB, CI/runner, install, benchmark, push or release change",
+    "Source roots must be named views; direct array element refs, temporary descriptors, bool/owned slices and reference for-in remain closed",
+    "Native helper uses in-process Go CLI compiler; standalone public compiler and captured MSVC toolchain identities are distinguished"
+  ]
+}

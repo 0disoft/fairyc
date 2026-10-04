@@ -315,6 +315,9 @@ type taggedState struct {
 }
 
 type scalarReference struct {
+	array  *arrayState
+	index  uint64
+	static *indexedViewState
 	fields map[string]runtimeValue
 	field  string
 	locals map[mir.LocalID]runtimeValue
@@ -788,7 +791,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, err
 				}
-				value, err := receiver.borrowStructElement(index.u64, operation.Type)
+				value, err := receiver.borrowViewElement(index.u64, operation.Type)
 				if err != nil {
 					return callCompletion{}, err
 				}

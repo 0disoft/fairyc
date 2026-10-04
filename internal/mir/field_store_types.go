@@ -86,6 +86,11 @@ func fieldStoreOperandType(operand Operand, locals map[LocalID]hir.Type) hir.Typ
 			return hir.TypeInvalid
 		}
 		return hir.TypeI32
+	case OperandByteString:
+		if operand.Type == hir.SharedBorrow(hir.TypeByteSlice) {
+			return operand.Type
+		}
+		return hir.TypeInvalid
 	case OperandI64:
 		return hir.TypeI64
 	case OperandU8:

@@ -927,7 +927,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewElementBorrow:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !ValidViewElementBorrowShape(operation) {
-					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "indexed nominal element borrow shape is invalid"})
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "indexed element borrow shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationViewIndexStore:

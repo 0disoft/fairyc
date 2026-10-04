@@ -6,7 +6,7 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// Indexed places are rooted in one named nominal descriptor. Calls, temporary
+// Indexed places are rooted in one named view descriptor. Calls, temporary
 // descriptors and raw pointers do not acquire place identity here.
 func indexedPlace(expression *ast.Expression) *ast.Expression {
 	root := borrowPlaceRoot(expression)
@@ -25,13 +25,22 @@ func (c *typeChecker) indexedStructPlace(source *ast.Expression) bool {
 	return nominal && c.analyzer.plainViewStruct(element)
 }
 
-// Only a named nominal descriptor can yield a stored whole-element address.
+func (c *typeChecker) indexedIntegerPlace(source *ast.Expression) bool {
+	index := indexedPlace(source)
+	if index == nil {
+		return false
+	}
+	element, indexed := hir.IndexedViewElement(c.analyzer.expressionTypes[index.Children[0]])
+	return indexed && hir.FixedArrayScalarElement(element)
+}
+
+// Only a named integer or plain nominal descriptor yields a stored element address.
 // Grouping preserves place identity; calls, temporary views and arrays do not.
-func (c *typeChecker) indexedStructBorrow(source *ast.Expression, child *hir.Expression, mutable bool) (hir.Expression, bool) {
+func (c *typeChecker) indexedViewBorrow(source *ast.Expression, child *hir.Expression, mutable bool) (hir.Expression, bool) {
 	for source != nil && source.Kind == syntax.KindGroup && len(source.Children) == 1 {
 		source = source.Children[0]
 	}
-	if source == nil || source.Kind != syntax.KindIndex || child == nil || !c.indexedStructPlace(source) {
+	if source == nil || source.Kind != syntax.KindIndex || child == nil || !c.indexedStructPlace(source) && !c.indexedIntegerPlace(source) {
 		return hir.Expression{}, false
 	}
 	index := *child
@@ -45,8 +54,8 @@ func indexedElementBorrow(index hir.Expression, mutable bool) (hir.Expression, b
 	if index.Kind != "view-index" || len(index.Children) != 2 {
 		return hir.Expression{}, false
 	}
-	element, nominal := hir.StructViewElement(index.Children[0].Type)
-	if !nominal || element != index.Type || mutable && !hir.MutableIndexedView(index.Children[0].Type) {
+	element, indexed := hir.IndexedViewElement(index.Children[0].Type)
+	if !indexed || element != index.Type || mutable && !hir.MutableIndexedView(index.Children[0].Type) {
 		return hir.Expression{}, false
 	}
 	typ := hir.SharedBorrow(element)

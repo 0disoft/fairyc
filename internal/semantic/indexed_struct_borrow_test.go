@@ -55,7 +55,6 @@ func TestIndexedStructBorrowSourceBoundary(t *testing.T) {
 		"shared-field-store": "fn void bad(ref Token[] view){let ref Token item=ref view[0];item.value=1;}",
 		"temporary-shared":   "fn ref Token[] relay(ref Token[] view){return view;}fn void bad(ref Token[] view){let ref Token item=ref relay(view)[0];}",
 		"temporary-mutable":  "fn ref mut Token[] relay(ref mut Token[] view){return view;}fn void bad(ref mut Token[] view){let ref mut Token item=ref mut relay(view)[0];}",
-		"integer-element":    "fn void bad(ref mut i64[] view){let ref mut i64 value=ref mut view[0];}",
 		"wrong-nominal":      "fn void bad(ref mut Token[] view){let ref mut Other item=ref mut view[0];}",
 	} {
 		t.Run(name, func(t *testing.T) {

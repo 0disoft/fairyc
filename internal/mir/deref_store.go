@@ -24,11 +24,9 @@ func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 		return nil
 	}
 	// Select the referent before RHS effects, including rebinding the named reference.
-	if l.properties.plainViewStruct(target.Type) {
-		saved := l.newTemporary()
-		l.appendOperation(Operation{Kind: OperationAssign, Span: target.Span, DestinationLocal: saved, Operands: []Operand{receiver}})
-		receiver = Operand{Kind: OperandLocal, Local: saved}
-	}
+	saved := l.newTemporary()
+	l.appendOperation(Operation{Kind: OperationAssign, Span: target.Span, DestinationLocal: saved, Operands: []Operand{receiver}})
+	receiver = Operand{Kind: OperandLocal, Local: saved}
 	value, err := l.lowerExpression(statement.Expression)
 	if err != nil {
 		return err

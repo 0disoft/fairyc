@@ -1,0 +1,124 @@
+{
+  "schema": "fairyc.integer-element-borrow-cli/v1",
+  "compilerSHA256": "55fc5f0fd13f7ccd47736e3cacb4d8847f62589c6806d18d23c28670e6b4ee30",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004112637-a38511a4603f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: a38511a4603f9c1a92486d353dd9ff68ca01b81d\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nfn ref u8 first_u8(ref u8[] view){return ref view[0];}\nfn ref mut u8 last_u8(ref mut u8[] view){return ref mut view[1];}\nfn void check_u8(){\n var u8[3] data=[1,255,3];\n let ref mut u8[] view=ref mut data;\n let ref mut u8[] child=view[1..];\n let ref mut u8 item=ref mut child[0];\n let u8 copy=*item;*item=7;assert(copy==255 && *item==7);\n let ref mut u8 returned=last_u8(view);*returned=*returned+2;\n let ref u8 shared=first_u8(view);let ref u8 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref i32 first_i32(ref i32[] view){return ref view[0];}\nfn ref mut i32 last_i32(ref mut i32[] view){return ref mut view[1];}\nfn void check_i32(){\n var i32[3] data=[1,2147483647,3];\n let ref mut i32[] view=ref mut data;\n let ref mut i32[] child=view[1..];\n let ref mut i32 item=ref mut child[0];\n let i32 copy=*item;*item=7;assert(copy==2147483647 && *item==7);\n let ref mut i32 returned=last_i32(view);*returned=*returned+2;\n let ref i32 shared=first_i32(view);let ref i32 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref i64 first_i64(ref i64[] view){return ref view[0];}\nfn ref mut i64 last_i64(ref mut i64[] view){return ref mut view[1];}\nfn void check_i64(){\n var i64[3] data=[1,4000000000,3];\n let ref mut i64[] view=ref mut data;\n let ref mut i64[] child=view[1..];\n let ref mut i64 item=ref mut child[0];\n let i64 copy=*item;*item=7;assert(copy==4000000000 && *item==7);\n let ref mut i64 returned=last_i64(view);*returned=*returned+2;\n let ref i64 shared=first_i64(view);let ref i64 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref u32 first_u32(ref u32[] view){return ref view[0];}\nfn ref mut u32 last_u32(ref mut u32[] view){return ref mut view[1];}\nfn void check_u32(){\n var u32[3] data=[1,4294967295,3];\n let ref mut u32[] view=ref mut data;\n let ref mut u32[] child=view[1..];\n let ref mut u32 item=ref mut child[0];\n let u32 copy=*item;*item=7;assert(copy==4294967295 && *item==7);\n let ref mut u32 returned=last_u32(view);*returned=*returned+2;\n let ref u32 shared=first_u32(view);let ref u32 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref usize first_usize(ref usize[] view){return ref view[0];}\nfn ref mut usize last_usize(ref mut usize[] view){return ref mut view[1];}\nfn void check_usize(){\n var usize[3] data=[1,4294967296,3];\n let ref mut usize[] view=ref mut data;\n let ref mut usize[] child=view[1..];\n let ref mut usize item=ref mut child[0];\n let usize copy=*item;*item=7;assert(copy==4294967296 && *item==7);\n let ref mut usize returned=last_usize(view);*returned=*returned+2;\n let ref usize shared=first_usize(view);let ref usize sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn Option<ref mut i64> tagged(ref mut i64[] view){return .some(ref mut view[0]);}\nfn i32 main(){\n check_u8();check_i32();check_i64();check_u32();check_usize();\n var i64[2] data=[4000000000,7];let ref mut i64[] view=ref mut data;\n var usize calls=0;let ref mut i64 item=ref mut ((view)[{calls+=1;0}]);*item=*item+10;\n let Option<ref mut i64> result=tagged(view);\n switch(result){case .some(value):{*value=*value+1;}case .none:{assert(false);}};\n assert(data[0]==4000000011 && calls==1);\n let ref u8[] text=b\"Az\";let ref u8 letter=ref text[1];assert(*letter==122);\n return 0;\n}\n",
+      "sourceSHA256": "189a13bc561aaba0c43bbb74c096fbe12c8ebe60c1153e5dccda9c9a9b629a2f"
+    },
+    {
+      "name": "blocked-parent",
+      "source": "module main;\nfn ref u8 first_u8(ref u8[] view){return ref view[0];}\nfn ref mut u8 last_u8(ref mut u8[] view){return ref mut view[1];}\nfn void check_u8(){\n var u8[3] data=[1,255,3];\n let ref mut u8[] view=ref mut data;\n let ref mut u8[] child=view[1..];\n let ref mut u8 item=ref mut child[0];\n let u8 copy=*item;*item=7;assert(copy==255 && *item==7);\n let ref mut u8 returned=last_u8(view);*returned=*returned+2;\n let ref u8 shared=first_u8(view);let ref u8 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref i32 first_i32(ref i32[] view){return ref view[0];}\nfn ref mut i32 last_i32(ref mut i32[] view){return ref mut view[1];}\nfn void check_i32(){\n var i32[3] data=[1,2147483647,3];\n let ref mut i32[] view=ref mut data;\n let ref mut i32[] child=view[1..];\n let ref mut i32 item=ref mut child[0];\n let i32 copy=*item;*item=7;assert(copy==2147483647 && *item==7);\n let ref mut i32 returned=last_i32(view);*returned=*returned+2;\n let ref i32 shared=first_i32(view);let ref i32 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref i64 first_i64(ref i64[] view){return ref view[0];}\nfn ref mut i64 last_i64(ref mut i64[] view){return ref mut view[1];}\nfn void check_i64(){\n var i64[3] data=[1,4000000000,3];\n let ref mut i64[] view=ref mut data;\n let ref mut i64[] child=view[1..];\n let ref mut i64 item=ref mut child[0];\n assert(view.len>0);let i64 copy=*item;*item=7;assert(copy==4000000000 && *item==7);\n let ref mut i64 returned=last_i64(view);*returned=*returned+2;\n let ref i64 shared=first_i64(view);let ref i64 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref u32 first_u32(ref u32[] view){return ref view[0];}\nfn ref mut u32 last_u32(ref mut u32[] view){return ref mut view[1];}\nfn void check_u32(){\n var u32[3] data=[1,4294967295,3];\n let ref mut u32[] view=ref mut data;\n let ref mut u32[] child=view[1..];\n let ref mut u32 item=ref mut child[0];\n let u32 copy=*item;*item=7;assert(copy==4294967295 && *item==7);\n let ref mut u32 returned=last_u32(view);*returned=*returned+2;\n let ref u32 shared=first_u32(view);let ref u32 sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn ref usize first_usize(ref usize[] view){return ref view[0];}\nfn ref mut usize last_usize(ref mut usize[] view){return ref mut view[1];}\nfn void check_usize(){\n var usize[3] data=[1,4294967296,3];\n let ref mut usize[] view=ref mut data;\n let ref mut usize[] child=view[1..];\n let ref mut usize item=ref mut child[0];\n let usize copy=*item;*item=7;assert(copy==4294967296 && *item==7);\n let ref mut usize returned=last_usize(view);*returned=*returned+2;\n let ref usize shared=first_usize(view);let ref usize sibling=ref view[1];\n assert(*shared==1 && *sibling==9 && data[2]==3);\n}\nfn Option<ref mut i64> tagged(ref mut i64[] view){return .some(ref mut view[0]);}\nfn i32 main(){\n check_u8();check_i32();check_i64();check_u32();check_usize();\n var i64[2] data=[4000000000,7];let ref mut i64[] view=ref mut data;\n var usize calls=0;let ref mut i64 item=ref mut ((view)[{calls+=1;0}]);*item=*item+10;\n let Option<ref mut i64> result=tagged(view);\n switch(result){case .some(value):{*value=*value+1;}case .none:{assert(false);}};\n assert(data[0]==4000000011 && calls==1);\n let ref u8[] text=b\"Az\";let ref u8 letter=ref text[1];assert(*letter==122);\n return 0;\n}\n",
+      "sourceSHA256": "8da7785305b89c0f58677a40222773f615c4faeedfbb46b5d75243cdd249e7bc"
+    },
+    {
+      "name": "blocked-owner",
+      "source": "module main;import std::vec as v;fn i32 main(){var v::Vec<i64> owner=v::empty<i64>();discard v::push<i64>(ref mut owner,4000000000);let ref mut i64[] view=v::view_mut_i64(ref mut owner);let ref mut i64 item=ref mut view[0];discard v::clear<i64>(ref mut owner);*item=9;return 0;}",
+      "sourceSHA256": "75633bbbfca4553ff2ae3f8685ff07105a317bfd0ed3c06ecf59a4a497b06af8"
+    }
+  ],
+  "exampleSourceSHA256": "c9646fed7e4e289837666676d578510a597219ea22a7e02b512ad9017fdb1603",
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004112637-a38511a4603f+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: a38511a4603f9c1a92486d353dd9ff68ca01b81d\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 17 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/integer-element-borrow-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "1e4d5dd986233abedf96b3b1ba94afb7681258399aa65d533f8853177899c2f7",
+      "imagePath": ".cache\\integer-element-borrow-cli\\images\\matrix-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/integer-element-borrow-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "5a40717b566fdaef505b5c5913c09150f8458f277772c6b6ce9008bcbdeab696",
+      "imagePath": ".cache\\integer-element-borrow-cli\\images\\matrix-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-cli\\blocked-parent",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:33:9: E2101: Access conflicts with an active shared or mutable loan. [bytes 1383..1387]\n  last-use: main.fy:33:76 [bytes 1450..1454]\n  loan: main.fy:31:26 [bytes 1324..1333]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\integer-element-borrow-cli\\blocked-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:246: E2101: Access conflicts with an active shared or mutable loan. [bytes 245..258]\n  last-use: main.fy:1:262 [bytes 261..265]\n  loan: main.fy:1:172 [bytes 171..184]\n"
+    }
+  ]
+}

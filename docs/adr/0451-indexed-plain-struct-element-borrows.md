@@ -29,9 +29,10 @@ indexed whole replacement retains ADR 0448.
 
 The element graph remains actual nonempty acyclic structs with scalar leaves;
 resource, pointer, borrowed, array and tagged fields remain excluded. Same-layout
-nominals are not interchangeable. Integer element references, temporary
-call/slice-expression descriptors, raw-pointer roots, fixed-array struct views
-and owning slices are outside this admission.
+nominals are not interchangeable. Integer element references are
+subsequently admitted by ADR 0453. Temporary call/slice-expression descriptors,
+raw-pointer roots, fixed-array struct views and owning slices remain outside
+this admission.
 
 ## Lifetime and evaluation
 

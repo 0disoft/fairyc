@@ -31,6 +31,18 @@ func storeScalarDeref(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 }
 
 func (r *scalarReference) load() (runtimeValue, bool) {
+	if r.array != nil {
+		if r.index >= uint64(len(r.array.elements)) {
+			return runtimeValue{}, false
+		}
+		return r.array.elements[r.index], true
+	}
+	if r.static != nil {
+		if r.index >= uint64(len(r.static.staticData)) {
+			return runtimeValue{}, false
+		}
+		return runtimeValue{kind: valueU8, typ: hir.TypeU8, u64: uint64(r.static.staticData[r.index])}, true
+	}
 	if r.fields != nil {
 		v, ok := r.fields[r.field]
 		return v, ok
@@ -39,6 +51,10 @@ func (r *scalarReference) load() (runtimeValue, bool) {
 	return v, ok
 }
 func (r *scalarReference) store(v runtimeValue) {
+	if r.array != nil {
+		r.array.elements[r.index] = v
+		return
+	}
 	if r.fields != nil {
 		r.fields[r.field] = v
 	} else {

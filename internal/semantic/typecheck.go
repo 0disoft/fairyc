@@ -1301,7 +1301,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return childType
 	case "&":
-		if borrowed, ok := c.indexedStructBorrow(expression.Children[0], child, false); ok {
+		if borrowed, ok := c.indexedViewBorrow(expression.Children[0], child, false); ok {
 			*result = borrowed
 			result.Span = span(c.module.file.Path, expression.Span)
 			return borrowed.Type
@@ -1323,7 +1323,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		return hir.SharedBorrow(childType)
 	case "&mut":
-		if borrowed, ok := c.indexedStructBorrow(expression.Children[0], child, true); ok {
+		if borrowed, ok := c.indexedViewBorrow(expression.Children[0], child, true); ok {
 			*result = borrowed
 			result.Span = span(c.module.file.Path, expression.Span)
 			return borrowed.Type
