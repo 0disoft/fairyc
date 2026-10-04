@@ -1,0 +1,109 @@
+{
+  "schema": "fairyc.mutable-struct-for-example/v1",
+  "date": "2026-10-04",
+  "baseRevision": "2369127755c15f16786e071fec8f1465ef751a31",
+  "scope": "Stored token span normalization through mutable nominal for-in items; unchanged CLI output",
+  "compiler": {
+    "image": {
+      "path": ".cache/mutable-struct-for-compiler/fairyc.exe",
+      "sha256": "02fc784d018ebb854a4d0b795220fabe702e1230933c691417b1564a7bed06be"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-struct-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004101648-ab78b0f8a136+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.85\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: ab78b0f8a13604c63571381d0284bf3bbeee1441\nmodified: true\n",
+      "stderr": ""
+    },
+    "sourceDigest": {
+      "fileCount": 542,
+      "sha256": "991bcb279d550e0df3d1f5b3e9e9c1ba278178c136215b47698cfd5a2d8473d0",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "70c847b1bb16a7e1d3ff81f054087aaa3f5d0c6233323ca5be4371801265d932",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    }
+  },
+  "sources": [
+    {
+      "path": "examples/struct_vec_view/src/main.fy",
+      "sha256": "e490b8aaa5306bb4ddb5ca96164d35ee827840131306d643f335f2f72ec311b0"
+    },
+    {
+      "path": "examples/struct_vec_view/src/tokens.fy",
+      "sha256": "c4b711f1fb4e2c9ddaec97215a9f65f0487d4a824553f8985fb6cfbf2fd86814"
+    },
+    {
+      "path": "examples/struct_vec_view/fairy.toml",
+      "sha256": "579393868eeb192def762f89270d2378cbceb6647f6182b346536df145061a70"
+    },
+    {
+      "path": "examples/struct_vec_view/fairy.lock",
+      "sha256": "22bb15ea0e35b07089db36472b649ad40e15027c8cce135d535a4b190372a248"
+    },
+    {
+      "path": "examples/struct_vec_view/verify.py",
+      "sha256": "3ceb41ffc3273aa7331a681da900f1439bf1cf405bdf38466534a89de69eedca"
+    }
+  ],
+  "portableCLI": {
+    "raw": {
+      "path": "docs/ops/evidence/mutable-struct-for-example-20261004.cli.json",
+      "sha256": "8868da43f0d4a7decaf0aefe84c15157e4a1a3b69432456747497981252f4d93"
+    },
+    "argv": [
+      "python",
+      "-X",
+      "utf8",
+      "examples/struct_vec_view/verify.py",
+      ".cache/mutable-struct-for-compiler/fairyc.exe"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "PASS: public CLI and 14 native outcomes; build/verify-results.json\n",
+    "stderr": "",
+    "executions": 19,
+    "nativeExecutions": 14
+  },
+  "native": {
+    "raw": {
+      "path": "docs/ops/evidence/mutable-struct-for-example-20261004.native.json",
+      "sha256": "bd971a25ef366be9e0ea3c18c12be087febb577410cf6636d44ecf1461cd8467"
+    },
+    "executions": 26
+  },
+  "test": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "test",
+      "-json",
+      "./internal/cli",
+      "-run",
+      "^TestStructToken(ExampleCheck|AnalyzerNative)$",
+      "-count=1"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "raw": {
+      "path": ".cache/mutable-struct-for-example-cli-final.jsonl",
+      "sha256": "e95f25820d1a7bb270f130abe0e4f73fb9fc5bf995913ba2697a716b9a478ad9"
+    },
+    "passedTestEvents": 28
+  },
+  "limits": [
+    "Linux actual execution deferred to owner batch.",
+    "Reused verified compiler image from the implementation unit; compiler source manifest rechecked unchanged.",
+    "Existing portable verifier and native suite reused; no new runner or PS1.",
+    "SDK stage0.85, language /20, runtime /0 and output format unchanged.",
+    "No benchmark, installation, CI, push or release."
+  ]
+}

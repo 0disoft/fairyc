@@ -167,7 +167,7 @@ SDK export·DB·CI·설치·새 runner/PS1·push 변경은 없다. 구현과 실
 별도 로컬 커밋으로 나눴다.
 
 
-## 현재 적용: ADR 0449 원본 벡터 원소의 필드 대여
+## 이전 적용: ADR 0449 원본 벡터 원소의 필드 대여
 
 `src/main.fy`가 `vec::view_mut<Token>`을 만들고 `tokens::rebase_segment`에
 전달한다. 이 함수는 `ref mut segment[i].position`으로 저장된 Span을 직접
@@ -189,4 +189,22 @@ Windows 일반·릴리스에서 예제 13입력씩(총 26 native 결과)이 통�
 
 SDK stage0.85, 언어 /20, 런타임 /0을 사용한다. Linux 실제 실행은 일괄
 검증으로 미뤘다. 전체 저장소 스위트·성능 실험·새 runner/PS1·설치·CI·push
-변경은 없다. 앞 절은 이전 구현의 기록이며 현재 예제 동작은 이 절을 따른다.
+변경은 없다. 이 절은 ADR 0449 시점의 기록이다.
+
+
+## 현재 적용: ADR 0450 가변 구조체 뷰 반복
+
+`rebase_segment`의 수동 인덱스/while을 `for (let ref mut Token token in segment)`로
+교체했다. 각 token은 저장된 원소를 가리키며 `ref mut token.position`으로 Span을
+대여해 정규화한다. 첫 토큰 시작 0과 각 구간 길이 보존을 확인한다. 마지막 사용
+뒤에는 자식 대여가 풀리며 이후 공유 분석의 CLI 출력과 입력 제한은 유지한다.
+제품 계산과 원본 수정은 Fairy C 소스가 수행한다.
+
+Windows 일반·릴리스에서 기존 정상·오류 13입력씩, 총 26 native 결과가 통과했다.
+기존 portable verify.py도 공개 CLI check와 잠금 build/run 두 프로필, 14 native
+결과를 확인했다. 별도 검증 스크립트나 PS1은 추가하지 않았다. 원시 argv/cwd/
+stdout/stderr/exit와 compiler·SDK·소스·잠금·EXE 해시는
+`docs/ops/evidence/mutable-struct-for-example-20261004.json`에 남겼다.
+
+SDK stage0.85, 언어 /20, 런타임 /0은 유지한다. Linux 실제 실행은 요청대로
+이후 일괄 검증한다. SDK export·DB·CI/runner·설치·성능 실험·push 변경은 없다.

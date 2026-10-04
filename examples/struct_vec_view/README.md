@@ -13,7 +13,8 @@ struct with plain language scalar leaves (`bool`, `u8`, `i32`, `i64`,
 as a same-layout `Other` view. Cycles, missing definitions and array, resource,
 borrow, raw-pointer, enum, Option and Result fields at any depth are rejected. This example uses both forms. ADR 0448 admits whole-element replacement;
 ADR 0449 admits field stores and shared/mutable field references through named
-nominal descriptors. Fixed-array struct conversion remains closed. Named immutable shared struct
+nominal descriptors. ADR 0450 admits stored-element `ref mut` iteration.
+Fixed-array struct conversion remains closed. Named immutable shared struct
 views support copied-value `for-in` under ADR 0440.
 
 An index copies one whole struct value out of the view, and `view[i].field` reads
@@ -31,7 +32,7 @@ slice bounds cannot mutate the owner. ADR 0415 sibling/ancestor rules still appl
 `src/tokens.fy` is a bounded ASCII lexer. Its `Token` contains a nested `Span`
 with byte offsets `[start,end)`. The lexer initially stores source offsets;
 `rebase_segment` then updates the stored spans relative to the first token using
-`ref mut segment[i].position`. Shared iteration validates the normalized spans. It recognizes identifiers (letters,
+`for (let ref mut Token token in segment)` and `ref mut token.position`. Shared iteration validates the normalized spans. It recognizes identifiers (letters,
 digits, underscore), decimal integers, `+`, `=` and `;`, and ignores ASCII
 whitespace. The nonnegative i64 literal and the running sum are checked for
 overflow. `src/main.fy` builds a `Vec<Token>`, normalizes its stored spans through
@@ -81,7 +82,9 @@ error exits, nested/mixed loops and checked sum overflow.
 After mutable normalization, the analyzer and first-semicolon discovery use `for (let Token token in view)`
 (with a qualified item type in the main module). The owner stays borrowed through
 every loop exit; `break` and `continue` follow the usual C-shaped loop behavior.
-Mutable view bindings, reference items and expression-valued iterables are rejected.
+Mutable descriptor bindings and expression-valued iterables are rejected.
+Shared struct views keep copied items; mutable struct views require exact
+`ref mut Token` items under ADR 0450.
 
 Raw receipts are under `.cache/struct-vec-view-native` and
 `.cache/struct-token-native`; the checked receipt is
@@ -145,9 +148,9 @@ is required. Current dev/release CLI evidence:
 `docs/ops/evidence/shared-field-example-20261004.json`.
 ADR 0447 fixes the prior MSVC C4702 assertion/overflow reproduction.
 The mutable-view source fixture is `internal/compiler/testdata/mutable_struct_vec_view.fy`;
-this analyzer continues using shared views and copied local tokens.
+at that revision the analyzer used shared views and copied local tokens.
 
-## Current indexed-field example (ADR 0449)
+## Indexed-field example (ADR 0449, preceding stage)
 
 `rebase_segment` updates each stored Span through a checked indexed field
 reference. `rebase` still reads shared start/end children, then modifies the
@@ -158,4 +161,24 @@ copied local Token is mutated for normalization.
 Windows dev/release public CLI and native results:
 `docs/ops/evidence/indexed-field-example-20261004.json`.
 Earlier ADR sections above describe their historical implementation stages.
+Linux actual execution remains deferred to the owner's batch.
+
+## Current mutable iteration example (ADR 0450)
+
+`rebase_segment` now visits stored tokens directly:
+
+```fairy
+for (let ref mut Token token in segment) {
+    let ref mut Span position = ref mut token.position;
+    rebase(position, origin);
+    assert(position.start < position.end);
+}
+```
+
+The generated checked loop replaces the explicit index/while loop. Item and
+field-child generations retain the whole owner and freeze parent/aliases while
+live. After normalization the same shared analysis produces the same report.
+Existing input limits and the portable `verify.py` remain applicable.
+Current Windows dev/release evidence:
+`docs/ops/evidence/mutable-struct-for-example-20261004.json`.
 Linux actual execution remains deferred to the owner's batch.
