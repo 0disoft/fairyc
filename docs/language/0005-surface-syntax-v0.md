@@ -49,6 +49,16 @@
   immutable local or parameter of exact type `ref u8[]`. The view length is
   captured once; every iteration copies one checked byte. `continue` advances
   the hidden index, and exits use ordinary scalar-loop cleanup (ADR 0403).
+- ADR 0457 also admits direct named fixed-array iteration for `u8`, `i32`, `i64`,
+  `u32` and `usize`: `for (let T item in array)` copies each element;
+  `for (let ref mut T item in array)` lends each stored element and requires
+  a mutable array binding. The whole original array is borrowed through loop
+  exit, without copying it into a temporary. Copied loops permit shared owner
+  reads but block mutation; exclusive loops block separate owner access even
+  after an item's last use. `continue` advances the hidden index; break,
+  return and propagation release the loop-held loan at exit. Current arrays
+  retain the `1..=4096` size guard. Bool/struct arrays, shared reference items,
+  array fields and literal/call iterable roots are not admitted.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

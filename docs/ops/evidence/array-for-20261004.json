@@ -1,0 +1,232 @@
+{
+  "schema": "fairyc.array-for-evidence/v1",
+  "date": "2026-10-04",
+  "baseRevision": "45e0f2145778ffec8a80a7c73ab99d3efb42bbe1",
+  "compiler": {
+    "path": ".cache/array-for-compiler/fairyc.exe",
+    "sha256": "ccc57e18dcb3fa255b42618e2094498397a93139c8f8948208cbcb69eafb09d7",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004143232-45e0f2145778+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 45e0f2145778ffec8a80a7c73ab99d3efb42bbe1\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\array-for-compiler\\source-manifest.json",
+    "sha256": "dd96238dc9dad7979bd7c6ec6d75a6c801666a381e868dc5bac5e4ad3809c031",
+    "productionFileCount": 543,
+    "sourceDigest": "0a97727e6d8bbd84780bad77d5009639a9e666faae51973126450b91f4fbdcb9"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "internal/semantic/array_for.go",
+      "sha256": "70aa7e55c680faa4f83e22c4e63684c173bf78960a38cb15794b4634d37e4ead"
+    },
+    {
+      "path": "internal/semantic/byte_for.go",
+      "sha256": "55d4188f1c7ce8790daf3d4a4daccbd109493511e55f7ab7adfaaf43f68f094b"
+    },
+    {
+      "path": "internal/semantic/resolve.go",
+      "sha256": "7359c7fb885758f56e4148e10192444b8da624eca63b8f7c10a6555ba518653e"
+    },
+    {
+      "path": "internal/semantic/array_for_test.go",
+      "sha256": "be7440c7fc34c77000baa77108d7642af549743f190e3b40270d73e00ccbd81b"
+    },
+    {
+      "path": "internal/semantic/i64_for_test.go",
+      "sha256": "56df2c1d79665f95638f08e10356c7c110699e032e1be34ba17b1c3a7ec7ac0f"
+    },
+    {
+      "path": "internal/semantic/mutable_integer_for_test.go",
+      "sha256": "6fee7f4621adfc37d77e80b9842ec5c899a954955864df83b9bfc13cf1813526"
+    },
+    {
+      "path": "internal/compiler/array_for_test.go",
+      "sha256": "20359e8d9e67580061c903551278c1edfe13d4c1ece0ab17de6617a7bcde5d60"
+    },
+    {
+      "path": "internal/compiler/testdata/array_for.fy",
+      "sha256": "a5d82030425ac42cb81229630f3d8e294a9e6bcdcc473ce619ce13c81a4edaeb"
+    },
+    {
+      "path": "internal/cli/array_for_test.go",
+      "sha256": "67f78d6182ee65203bcfc394c2b9dcd68f0dd82421fffaff73dde1c3280fdc2b"
+    },
+    {
+      "path": "examples/integer_array_for_quickstart/src/main.fy",
+      "sha256": "69d259cde2585235afe0cabf72b3d795cbd825a9d76939510a9f23ca01b81b2c"
+    },
+    {
+      "path": "examples/integer_array_for_quickstart/fairy.toml",
+      "sha256": "09e82c2a05c1a75e3158a17143323fa96286a2a8e88e5ff0c0c6ed45616c8b13"
+    },
+    {
+      "path": "examples/integer_array_for_quickstart/fairy.lock",
+      "sha256": "32ae48139a554e0829fac0c3775efbf128c9eedcc450dc585e188eb83b90fdb1"
+    }
+  ],
+  "tests": [
+    {
+      "path": ".cache/array-for-related.jsonl",
+      "role": "related stage regressions",
+      "sha256": "4c60aa0743cebc642cf08ed4b8ac9b1afc7e2944c725d40c997c5b955be3355f",
+      "passEvents": 466,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/array-for-native.jsonl",
+      "role": "Windows native and public check rejections",
+      "sha256": "f64ae4d6ca06571cb452f06f6f0d35cf850aaf322421e1f9d613f0231e67f7ef",
+      "passEvents": 12,
+      "skips": 0,
+      "failures": 0
+    },
+    {
+      "path": ".cache/array-for-roundtrip.jsonl",
+      "role": "retained AST deterministic MIR and verifier mutations",
+      "sha256": "676d346f918fb3465b23d58113139ed9bb4a1d5278ff968a03849f3161af55b8",
+      "passEvents": 5,
+      "skips": 0,
+      "failures": 0
+    }
+  ],
+  "cliReceipt": {
+    "path": "docs/ops/evidence/array-for-20261004.cli.json",
+    "sha256": "c8e84d120f9c32df31c9fd452ae0647b99af211b96187ef801e4785ba67a2ab6",
+    "nativeOutcomes": 4
+  },
+  "nativeReceipt": {
+    "path": "docs/ops/evidence/array-for-20261004.native.json",
+    "sha256": "b94e8378c2a9b628810632ae32d40e5f771c6fd94fff91ef984548dbd03bac06",
+    "outcomes": 14,
+    "executor": "in-process compiler and cdriver, with separate public compiler executable"
+  },
+  "commands": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/ast",
+        "./internal/mir",
+        "./internal/interpreter",
+        "-run",
+        "^Test(ArrayFor.*|ArrayElementBorrow.*|MutableIntegerFor.*|IntegerElementBorrow.*|.*(ByteViewFor|I64For|IntegerFor|ArrayView|FixedArray|ByteFor).*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/array-for-related.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestArrayFor(Native|CheckRejections)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/array-for-native.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/compiler",
+        "-run",
+        "^TestArrayForRoundTrip$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/array-for-roundtrip.jsonl"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/array-for-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "validation": {
+    "format": "passed",
+    "vet": "passed",
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for later batch",
+    "sdkVersion": "0.0.0-stage0.86",
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "newRuntimeHelper": false,
+    "newSDKAPI": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "benchmark": false,
+    "ciChanges": false
+  }
+}

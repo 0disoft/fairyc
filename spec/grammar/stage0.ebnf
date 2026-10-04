@@ -154,7 +154,9 @@ while_stmt = "while" "(" expression ")" statement_block ;
 (* The for-in alternative retains arbitrary written types/expressions for
    lossless source handling. Semantic admission allows exact integer/copied plain
    struct items over named immutable descriptors, and ref mut integer/plain struct
-   items over mutable views. SDK vector-reference iteration is separate. *)
+   items over mutable views. Named fixed integer arrays also admit copied integer
+   items, or ref mut integer items when the array binding is mutable (ADR 0457).
+   SDK vector-reference iteration is separate. *)
 for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block
          | "for" "(" "let" type IDENT "in" expression ")" statement_block ;
 for_init = binding_kind (IDENT | type IDENT) "=" expression

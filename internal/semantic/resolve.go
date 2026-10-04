@@ -539,6 +539,7 @@ func (a *analyzer) resolveBlock(module *moduleScope, block *ast.Block, parent *l
 			a.resolveFor(module, scope, statement.For)
 			continue
 		}
+		resetArrayForPreparation(statement)
 		a.resolveExpression(module, scope, statement.Target)
 		a.resolveExpression(module, scope, statement.Expression)
 	}

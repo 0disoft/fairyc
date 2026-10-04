@@ -13,7 +13,7 @@ func TestI64ForSourceRejections(t *testing.T) {
 		"mutable-binding":  "var ref i64[] alias = view; for (let i64 value in alias) {}",
 		"slice-expression": "for (let i64 value in view[..]) {}",
 		"call-expression":  "for (let i64 value in relay(view)) {}",
-		"direct-array":     "for (let i64 value in data) {}",
+		"bool-array":       "let bool[2] flags=[true,false];for (let i64 value in flags) {}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			text := "module main; fn ref i64[] relay(ref i64[] view) { return view; } fn void run() { let i64[2] data = [1,2]; let ref i64[] view = ref data; " + loop + " }"

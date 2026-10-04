@@ -55,7 +55,13 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 	// AST cloning may detach the source node from the prepared bound expression.
 	// Resolve the actual checked path instead of relying on shared pointers.
 	value := c.analyzer.resolved[view]
-	if value == nil || value.kind != "local" && value.kind != "parameter" || value.mutable {
+	if value == nil || value.kind != "local" && value.kind != "parameter" {
+		return shape
+	}
+	if _, _, array := hir.FixedArrayParts(value.typ); array {
+		return c.prepareArrayFor(loop, prepared, value, wantElement, mutableItem)
+	}
+	if value.mutable {
 		return shape
 	}
 	if element, indexed := hir.IndexedViewElement(value.typ); !indexed || element != wantElement || (nominal || mutableItem) && hir.MutableIndexedView(value.typ) != mutableItem {
@@ -85,6 +91,9 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 // views may still perform element stores and short reborrows inside the body.
 func (f *borrowFlowAnalyzer) evaluateViewFor(statement *ast.Statement, environment borrowEnvironment) bool {
 	prepared := statement.Expression
+	if prepared != nil && prepared.Block != nil && len(prepared.Block.Statements) == 3 {
+		return f.evaluateArrayFor(prepared, environment)
+	}
 	if prepared == nil || prepared.Block == nil || len(prepared.Block.Statements) != 2 {
 		return true // Malformed source is rejected by the type-checking gate.
 	}

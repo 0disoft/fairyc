@@ -57,7 +57,7 @@ func TestMutableIntegerForSourceBoundary(t *testing.T) {
 			"integer-mismatch":   "fn void edit(ref mut T[] view){for(let ref mut Other item in view){}}",
 			"local-escape":       "fn ref mut T edit(){var T[1] data=[1];let ref mut T[] view=ref mut data;for(let ref mut T item in view){return item;}return ref mut view[0];}",
 			"wrong-width":        "fn void edit(ref mut T[] view){for(let ref mut bool item in view){}}",
-			"direct-array":       "fn void edit(){var T[1] data=[1];for(let ref mut T item in data){}}",
+			"immutable-array":    "fn void edit(){let T[1] data=[1];for(let ref mut T item in data){}}",
 		} {
 			t.Run(typ+"/"+name, func(t *testing.T) {
 				other := "i64"

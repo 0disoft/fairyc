@@ -1689,3 +1689,11 @@ byte-output foreign symbols. SDK source/export/digest and dependent package,
 lock and cache identities refresh. Language /20, runtime /0, grammar,
 MIR/wire schemas, foreign ABI and target maturity stay unchanged. Windows
 dev/release execution is verified; Linux execution remains deferred.
+
+ADR 0457 admits direct copied/exclusive integer item iteration over named fixed
+integer arrays. Semantic lowering creates a private view of the original array,
+then reuses existing loop, array-view and checked element operations. Exact
+compiler identity separates older restricted compilers and cached generations.
+SDK stage0.86/source/exports, language /20, runtime /0, grammar productions,
+MIR/wire schemas, ABI and target maturity remain unchanged. Windows native
+execution is verified; Linux execution remains deferred to the owner's batch.

@@ -1,0 +1,200 @@
+{
+  "schema": "fairyc.array-for-cli/v1",
+  "compilerSHA256": "ccc57e18dcb3fa255b42618e2094498397a93139c8f8948208cbcb69eafb09d7",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004143232-45e0f2145778+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 45e0f2145778ffec8a80a7c73ab99d3efb42bbe1\nmodified: true\n",
+    "stderr": ""
+  },
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nfn void check_u8(){\n var u8[5] data=[0,1,200,3,4];\n var usize visits=0;\n for(let u8 item in data){visits+=1;assert(item==data[visits-1]);}\n assert(visits==5 && data[2]==200);\n visits=0;\n for(let ref mut u8 item in data){\n  visits+=1;let u8 copy=*item;*item=*item+1;assert(*item==copy+1);\n  if(copy==0){continue;}if(copy==3){break;}\n }\n assert(visits==4 && data[0]==1 && data[1]==2 && data[2]==200+1 && data[3]==4 && data[4]==4);\n for(let ref mut u8 item in data){*item=*item+1;}\n assert(data[0]==2 && data[4]==5);\n let u8[1] single=[7];var u8 total=0;\n for(let u8 item in single){total+=item;}\n assert(total==7);\n}\nfn void check_i32(){\n var i32[5] data=[0,1,2000000000,3,4];\n var usize visits=0;\n for(let i32 item in data){visits+=1;assert(item==data[visits-1]);}\n assert(visits==5 && data[2]==2000000000);\n visits=0;\n for(let ref mut i32 item in data){\n  visits+=1;let i32 copy=*item;*item=*item+1;assert(*item==copy+1);\n  if(copy==0){continue;}if(copy==3){break;}\n }\n assert(visits==4 && data[0]==1 && data[1]==2 && data[2]==2000000000+1 && data[3]==4 && data[4]==4);\n for(let ref mut i32 item in data){*item=*item+1;}\n assert(data[0]==2 && data[4]==5);\n let i32[1] single=[7];var i32 total=0;\n for(let i32 item in single){total+=item;}\n assert(total==7);\n}\nfn void check_i64(){\n var i64[5] data=[0,1,4000000000,3,4];\n var usize visits=0;\n for(let i64 item in data){visits+=1;assert(item==data[visits-1]);}\n assert(visits==5 && data[2]==4000000000);\n visits=0;\n for(let ref mut i64 item in data){\n  visits+=1;let i64 copy=*item;*item=*item+1;assert(*item==copy+1);\n  if(copy==0){continue;}if(copy==3){break;}\n }\n assert(visits==4 && data[0]==1 && data[1]==2 && data[2]==4000000000+1 && data[3]==4 && data[4]==4);\n for(let ref mut i64 item in data){*item=*item+1;}\n assert(data[0]==2 && data[4]==5);\n let i64[1] single=[7];var i64 total=0;\n for(let i64 item in single){total+=item;}\n assert(total==7);\n}\nfn void check_u32(){\n var u32[5] data=[0,1,4000000000,3,4];\n var usize visits=0;\n for(let u32 item in data){visits+=1;assert(item==data[visits-1]);}\n assert(visits==5 && data[2]==4000000000);\n visits=0;\n for(let ref mut u32 item in data){\n  visits+=1;let u32 copy=*item;*item=*item+1;assert(*item==copy+1);\n  if(copy==0){continue;}if(copy==3){break;}\n }\n assert(visits==4 && data[0]==1 && data[1]==2 && data[2]==4000000000+1 && data[3]==4 && data[4]==4);\n for(let ref mut u32 item in data){*item=*item+1;}\n assert(data[0]==2 && data[4]==5);\n let u32[1] single=[7];var u32 total=0;\n for(let u32 item in single){total+=item;}\n assert(total==7);\n}\nfn void check_usize(){\n var usize[5] data=[0,1,4294967296,3,4];\n var usize visits=0;\n for(let usize item in data){visits+=1;assert(item==data[visits-1]);}\n assert(visits==5 && data[2]==4294967296);\n visits=0;\n for(let ref mut usize item in data){\n  visits+=1;let usize copy=*item;*item=*item+1;assert(*item==copy+1);\n  if(copy==0){continue;}if(copy==3){break;}\n }\n assert(visits==4 && data[0]==1 && data[1]==2 && data[2]==4294967296+1 && data[3]==4 && data[4]==4);\n for(let ref mut usize item in data){*item=*item+1;}\n assert(data[0]==2 && data[4]==5);\n let usize[1] single=[7];var usize total=0;\n for(let usize item in single){total+=item;}\n assert(total==7);\n}\nfn i64 sum(i64[3] data){var i64 total=0;for(let i64 item in data){total+=item;}return total;}\nfn void early(){var i64[2] data=[1,2];for(let ref mut i64 item in data){*item=9;return;}assert(false);}\nfn Result<i32,u32> fail(){return .err(7);}\nfn Result<i32,u32> propagation(){var i64[2] data=[1,2];for(let ref mut i64 item in data){*item=9;let i32 unused=fail()?;}return .ok(0);}\nfn void nested(){var i64[2] left=[1,2];var i64[1] right=[7];for(let ref mut i64 x in left){for(let ref mut i64 y in right){*y=*y+*x;}*x=*x+1;}assert(left[0]==2 && left[1]==3 && right[0]==10);}\nfn void shadow(){var i64[2] data=[1,2];for(let ref mut i64 data in data){*data=*data+1;}assert(data[0]==2 && data[1]==3);}\nfn i32 main(){check_u8();check_i32();check_i64();check_u32();check_usize();early();nested();shadow();assert(sum([1,4000000000,3])==4000000004);switch(propagation()){case .ok(_):{assert(false);}case .err(code):{assert(code==7);}};return 0;}\n",
+      "sourceSHA256": "a5d82030425ac42cb81229630f3d8e294a9e6bcdcc473ce619ce13c81a4edaeb"
+    },
+    {
+      "name": "blocked-copied-write",
+      "source": "module main;fn i32 main(){var i64[1] data=[1];for(let i64 item in data){data[0]=item;break;}return 0;}",
+      "sourceSHA256": "24fc8d0e02db671fd4982329ef082260287f638517a5ed78de5b2a04da6b50d5"
+    },
+    {
+      "name": "blocked-mutable-owner",
+      "source": "module main;fn i32 main(){var i64[1] data=[1];for(let ref mut i64 item in data){*item=9;data[0]=1;}return 0;}",
+      "sourceSHA256": "6d5738479c7088a797ce91978a8d3fcaf2a1fd53779e7a4be7e2030e7f729483"
+    },
+    {
+      "name": "blocked-escape",
+      "source": "module main;fn ref mut i64 bad(){var i64[1] data=[1];for(let ref mut i64 item in data){return item;}return ref mut data[0];}fn i32 main(){return 0;}",
+      "sourceSHA256": "e697e2b750c18c46b22019f8669cbf74d2d068ed29787e3632735deb4bffaafe"
+    }
+  ],
+  "exampleSourceSHA256": "69d259cde2585235afe0cabf72b3d795cbd825a9d76939510a9f23ca01b81b2c",
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004143232-45e0f2145778+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 45e0f2145778ffec8a80a7c73ab99d3efb42bbe1\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 12 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-for-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "3d7497a781847cad8378eaa06901c0c9fc66e08194fbd343ddffc8ee49ef3f35",
+      "imagePath": ".cache\\array-for-cli\\images\\matrix-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-for-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "72f77f2b62e48c2c28582007180dc86e7d2a1d37773adb7ac2117725f4c29097",
+      "imagePath": ".cache\\array-for-cli\\images\\matrix-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\blocked-copied-write",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:73: E2101: Access conflicts with an active shared or mutable loan. [bytes 72..79]\n  last-use: main.fy:1:73 [bytes 72..79]\n  loan: main.fy:1:67 [bytes 66..70]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\blocked-mutable-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:89: E2101: Access conflicts with an active shared or mutable loan. [bytes 88..92]\n  last-use: main.fy:1:75 [bytes 74..78]\n  loan: main.fy:1:75 [bytes 74..78]\nmain.fy:1:89: E2101: Access conflicts with an active shared or mutable loan. [bytes 88..95]\n  last-use: main.fy:1:89 [bytes 88..95]\n  loan: main.fy:1:75 [bytes 74..78]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-cli\\blocked-escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:95: E2102: Returned borrow originates from a local value. [bytes 94..98]\n  origin: main.fy:1:45 [bytes 44..48]\nmain.fy:1:108: E2102: Returned borrow originates from a local value. [bytes 107..122]\n  origin: main.fy:1:45 [bytes 44..48]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_array_for_quickstart",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_array_for_quickstart",
+      "exit": 0,
+      "stdout": "built: build/integer-array-for-quickstart.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "a2c572b1e5b58b1466228bc78c7806996ecb8b7b200786cd3234f05ceb3e5a9b",
+      "imagePath": ".cache\\array-for-cli\\images\\clamp-dev.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_array_for_quickstart",
+      "exit": 0,
+      "stdout": "0\n0\n10\n10\n7\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_array_for_quickstart",
+      "exit": 0,
+      "stdout": "built: build/integer-array-for-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imageSHA256": "1c6f30875d3e7b982f8b768e17b7795b79059b6838d9fac1bf71795033bc224b",
+      "imagePath": ".cache\\array-for-cli\\images\\clamp-release.exe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\integer_array_for_quickstart",
+      "exit": 0,
+      "stdout": "0\n0\n10\n10\n7\n",
+      "stderr": ""
+    }
+  ],
+  "nativeOutcomes": 4
+}
