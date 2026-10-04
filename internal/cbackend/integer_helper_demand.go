@@ -12,7 +12,7 @@ func (e *emitter) refreshIntegerHelperDemand() {
 	e.needsBitcast, e.needsShift = false, false
 	e.i64Helpers = i64Helpers{}
 	for _, fn := range e.functions {
-		reachable := reachableBlocksForC(fn, e.nonReturning)
+		reachable := reachableBlocksForC(fn, e.nonReturning, e.checkedFailures[fn.Symbol])
 		for i, block := range fn.Blocks {
 			if !reachable[i] {
 				continue
@@ -43,6 +43,9 @@ func (e *emitter) refreshIntegerHelperDemand() {
 			}
 			term := block.Terminator
 			if term.Kind != mir.TerminatorSwitch || term.SwitchType != hir.TypeI64 {
+				continue
+			}
+			if hasCheckedFailure(e.checkedFailures[fn.Symbol], block.ID) {
 				continue
 			}
 			if _, pruned := constantCheckedFailure(block); pruned {

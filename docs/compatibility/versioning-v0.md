@@ -1669,3 +1669,8 @@ exports and target maturity remain unchanged. Windows execution is verified;
 Linux execution is deferred. The prior MSVC always-trapping assertion/overflow
 reachability limitation remains separately recorded, rather than hidden by the
 runtime-dependent fault test.
+
+ADR 0447 corrects asserted checked-failure C reachability and MSVC release builds.
+Exact compiler revision/executable identity separates native/cache generations.
+SDK stage0.84, language /20, runtime /0, grammar, MIR/wire schemas, ABI and public
+APIs remain unchanged; Linux execution is deferred to the owner's batch.

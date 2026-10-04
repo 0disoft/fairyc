@@ -1,0 +1,886 @@
+{
+  "schema": "fairyc.assert-checked-c-review/v1",
+  "date": "2026-10-04",
+  "baseRevision": "46b74f3f027de1ddb561416f683d0e39895f99f3",
+  "scope": "ADR 0447 asserted checked-failure C reachability",
+  "before": {
+    "cleanBaseline": {
+      "source": "module main;struct Span{i64 start;}struct Token{Span position;}fn ref i64 number(ref Token t){return ref t.position.start;}fn void edit(ref mut Token t){let ref i64 before=number(t);assert(*before==9223372036854775807);t.position.start+=1;}fn i32 main(){var Token t=Token{.position=Span{.start=9223372036854775807}};edit(ref mut t);return 0;}",
+      "runs": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+            "--version"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-baseline",
+          "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004075725-251d15b04c4b\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 251d15b04c4b6f4351614eeebc8d59ed8adcf279\nmodified: false\n",
+          "stderr": "",
+          "exit": 0
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+            "check"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-baseline",
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock updated\n",
+          "stderr": "",
+          "exit": 0
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+            "build",
+            "--release",
+            "--locked"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\shared-field-baseline",
+          "stdout": "",
+          "stderr": "fairyc: build failed: MSVC host command failed: exit status 2: unit.c\n<temporary>\\unit.c(104) : error C2220: the following warning is treated as an error\n<temporary>\\unit.c(104) : warning C4702: unreachable code\n",
+          "exit": 6
+        }
+      ]
+    },
+    "baselineCompilerSHA256": "a2cfe1e3be793294fb17d663e54a8e29f6f4840925c4fd5e47ffd36bbccbceeb",
+    "currentReproduction": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/compiler",
+        "./internal/cli",
+        "-run",
+        "^TestAssertCheckedTrap",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 1,
+      "combinedOutput": "ok  \tgithub.com/0disoft/fairyc/internal/compiler\t0.348s\n--- FAIL: TestAssertCheckedTrapNative (2.80s)\n    --- FAIL: TestAssertCheckedTrapNative/shared-call (2.79s)\n        vec_i64_views_test.go:161: fairyc: build failed: MSVC host command failed: exit status 2: unit.c\n            <temporary>\\unit.c(104) : error C2220: the following warning is treated as an error\n            <temporary>\\unit.c(104) : warning C4702: unreachable code\n            \nFAIL\nFAIL\tgithub.com/0disoft/fairyc/internal/cli\t2.990s\nFAIL\n"
+    }
+  },
+  "compilerBuild": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-o",
+      ".cache/assert-checked-compiler/fairyc.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "environment": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sourceDigest": {
+      "fileCount": 603,
+      "sha256": "edccee1a6039f9953048a0ce87efaf8d10f49a4180345f27f19c0b390f602903",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    },
+    "sourceManifest": {
+      "path": ".cache/assert-checked-compiler/source-manifest.json",
+      "sha256": "71d1948438bf24f43524e55989249606ccbed4dfa20eeaee6970aac407c169b6"
+    },
+    "sdkSourceDigest": {
+      "fileCount": 8,
+      "sha256": "caf17e30825ef5d3440fd53d65944e9320db26129f9987be45fba6561792b70e",
+      "algorithm": "SHA256 of sorted UTF-8 path NUL file-SHA256 LF rows"
+    }
+  },
+  "publicCLI": {
+    "schema": "fairyc.assert-checked-cli/v1",
+    "compilerSHA256": "5eb7402f2b065fd65e777345a2fba9ad725b7333a810bfa88d42711f04807a38",
+    "compilerIdentity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004084034-46b74f3f027d+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 46b74f3f027de1ddb561416f683d0e39895f99f3\nmodified: true\n",
+      "stderr": "",
+      "exit": 0,
+      "seconds": 0.164
+    },
+    "fixtures": [
+      {
+        "name": "original",
+        "source": "module main;struct Span{i64 start;}struct Token{Span position;}fn ref i64 number(ref Token t){return ref t.position.start;}fn void edit(ref mut Token t){let ref i64 before=number(t);assert(*before==9223372036854775807);t.position.start+=1;}fn i32 main(){var Token t=Token{.position=Span{.start=9223372036854775807}};edit(ref mut t);return 0;}",
+        "sourceSHA256": "56f4d7fc241fd94cb34e3a224c953fa5d8f9bbc35b1a0ed87c78f729a0329c61"
+      },
+      {
+        "name": "effects",
+        "source": "module main;import std::io as io;struct Span{i64 start;}struct Token{Span position;}fn ref i64 number(ref Token t){return ref t.position.start;}fn void edit(ref mut Token t){let ref i64 before=number(t);assert(*before==9223372036854775807);t.position.start+=1;}@effects(console) fn i32 main(){discard io::write(\"before\\n\");var Token t=Token{.position=Span{.start=9223372036854775807}};edit(ref mut t);discard io::write(\"after\\n\");return 0;}",
+        "sourceSHA256": "6171efa0bdf2cee4297250e0a2efd963693bab9c9d16ddcb216a45708676069f"
+      }
+    ],
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004084034-46b74f3f027d+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 46b74f3f027de1ddb561416f683d0e39895f99f3\nmodified: true\n",
+        "stderr": "",
+        "exit": 0,
+        "seconds": 0.164
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\original",
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock updated\n",
+        "stderr": "",
+        "exit": 0,
+        "seconds": 0.178
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\original",
+        "stdout": "built: build/assert-checked-original.exe (x86_64-windows-msvc, development, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "seconds": 0.981,
+        "imageSHA256": "8ff97b18a9f722e3fd5fe08100ef4326822c9cb7af868e5e697b836f760cbcb4"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "run",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\original",
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n",
+        "exit": 5,
+        "seconds": 1.883
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "build",
+          "--release",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\original",
+        "stdout": "built: build/assert-checked-original.exe (x86_64-windows-msvc, release, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "seconds": 1.177,
+        "imageSHA256": "2c27f2dcc85b35794dfb9c58d6a7434469228dd55a3c2d98863127dee97c6b0a"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "run",
+          "--release",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\original",
+        "stdout": "",
+        "stderr": "trap: integer-overflow\n",
+        "exit": 5,
+        "seconds": 1.74
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\effects",
+        "stdout": "check ok: 2 instance(s), 8 source file(s), 151 MIR function(s), lock updated\n",
+        "stderr": "",
+        "exit": 0,
+        "seconds": 0.274
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\effects",
+        "stdout": "built: build/assert-checked-effects.exe (x86_64-windows-msvc, development, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "seconds": 1.902,
+        "imageSHA256": "d2a367716e251f1856c5d230b44dd9e46568aef4796b31186d14ada05bc087f7"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "run",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\effects",
+        "stdout": "before\n",
+        "stderr": "trap: integer-overflow\n",
+        "exit": 5,
+        "seconds": 1.175
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "build",
+          "--release",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\effects",
+        "stdout": "built: build/assert-checked-effects.exe (x86_64-windows-msvc, release, lock verified)\n",
+        "stderr": "",
+        "exit": 0,
+        "seconds": 1.029,
+        "imageSHA256": "c7c3d8f6a7e8c2f945042938de94696a97debf6e88c0b386b698f46cf2717a95"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-compiler\\fairyc.exe",
+          "run",
+          "--release",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\assert-checked-cli\\effects",
+        "stdout": "before\n",
+        "stderr": "trap: integer-overflow\n",
+        "exit": 5,
+        "seconds": 1.91
+      }
+    ]
+  },
+  "native": {
+    "cases": [
+      {
+        "case": "shared-call",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeshared-call4136567155\\001",
+        "imageSHA256": "83b66238faaaf65ad24c0086b098ee5535be9b343b3dd96333afc0556b1f30c7",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "56f4d7fc241fd94cb34e3a224c953fa5d8f9bbc35b1a0ed87c78f729a0329c61",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "shared-call",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeshared-call4136567155\\001",
+        "imageSHA256": "78e509dede6b2dcb4ee164bca8eb6fe1f5bd127b2aef6066d54415ba9ab9d734",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "56f4d7fc241fd94cb34e3a224c953fa5d8f9bbc35b1a0ed87c78f729a0329c61",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "shared-field",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeshared-field3744261840\\001",
+        "imageSHA256": "dd7e867766cfe1976e00b4a17dfc02f2edebb90acfd0912a6adadafe0a2fd6ea",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "968bdc8e0f8a6c5a261d9bffe813175cc59fd8909f09ca10fa98b7b887f1bdea",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "shared-field",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "integer-overflow",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeshared-field3744261840\\001",
+        "imageSHA256": "da45220d4ec13873270edc0b8f5d2dd0ce79543b63493fbc38a2547c676cef63",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 130,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0002"
+        },
+        "sourceSHA256": "968bdc8e0f8a6c5a261d9bffe813175cc59fd8909f09ca10fa98b7b887f1bdea",
+        "stderr": "trap: integer-overflow\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "assertion-first",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeassertion-first1284336779\\001",
+        "imageSHA256": "5fae35a7f555700e00ad97aa80f4ced0de5c19c81f00baf56bc7253a5630a58e",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "fe9ccd811e516c634cdad18e524f740adcc00e474326fedfccb1655155b76935",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "assertion-first",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 5,
+        "expectedTrap": "assertion-failed",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeassertion-first1284336779\\001",
+        "imageSHA256": "c0a045fd9c2638ec5d79ebf70657b18f046c762b6961cea8fd1c89a702b791b3",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 134,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": "\u0006"
+        },
+        "sourceSHA256": "fe9ccd811e516c634cdad18e524f740adcc00e474326fedfccb1655155b76935",
+        "stderr": "trap: assertion-failed\n",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "scalar-rebind",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativescalar-rebind383075892\\001",
+        "imageSHA256": "ce600b508e24e56bfeeccaa3123b8305d7126855e3b4b1e5be11a48e7114ec14",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "3641376e6f85bcfdf68d764a4bad189a0495a2ca28430f36cdd4715917f7eba7",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "scalar-rebind",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativescalar-rebind383075892\\001",
+        "imageSHA256": "7352e4d9006dd6c80f132d2083675db9918a1d2662ebf7162323c9757a4b5bc6",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "3641376e6f85bcfdf68d764a4bad189a0495a2ca28430f36cdd4715917f7eba7",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "unknown-call",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeunknown-call1961932674\\001",
+        "imageSHA256": "2cb47089690b84fee41537a6f5c2857d975ca939d6b11dadfd373781eaccd118",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "9fc000d513be973d4f1e05f6d1693aab941a56f7d27cb13e122dd225b8f429e1",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "unknown-call",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativeunknown-call1961932674\\001",
+        "imageSHA256": "93f82b9432d363cf084a45bd70026d4d3d9e8f3e3495dd1eb75bfb3bf3baa730",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "9fc000d513be973d4f1e05f6d1693aab941a56f7d27cb13e122dd225b8f429e1",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "field-write",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativefield-write511046360\\001",
+        "imageSHA256": "ebb5d2b2d07ef1c3a17a9a9a0f3d5cb6d07be22e8c6ed2a1677ee8a8f23d0d74",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "3866446fe23807dc4740d7c25a3fbabc52ddb51116a20db7875d38942dc37727",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "field-write",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestAssertCheckedTrapNativefield-write511046360\\001",
+        "imageSHA256": "29a23b731ff79e0a67fa01e5d450ec5fc8822acdf58b6cc4fa3b04b1b4d8ca80",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "3866446fe23807dc4740d7c25a3fbabc52ddb51116a20db7875d38942dc37727",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      }
+    ],
+    "schema": "fairyc.assert-checked-trap-native/v1",
+    "sdk": "0.0.0-stage0.84"
+  },
+  "regressions": [
+    {
+      "artifact": {
+        "path": ".cache/constant-checked-trap-native/windows/receipt.json",
+        "sha256": "382d5e9551afbd162cc61d1b3542f8758ad92621fa5fff62418960ec305e5a64"
+      },
+      "executions": 20,
+      "images": [
+        {
+          "case": "aggregate-rhs",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "a6af1975452cb1082c38358002ae45755ff3d6631687a970da954cd16a41289f",
+          "imageSHA256": "d0960a161e2c15145d495a3d729ed8fa0e7e67aaeb23e5dc8b205ad5029acf14"
+        },
+        {
+          "case": "aggregate-rhs",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "a6af1975452cb1082c38358002ae45755ff3d6631687a970da954cd16a41289f",
+          "imageSHA256": "e19bb096fe41f8517467bb6297ee49b5a4c983ff65c57e93e7c213490f42781d"
+        },
+        {
+          "case": "aggregate-return",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "4dc7ed90d24c08c317260a7b36e71580031f54ee6ed27ea49c426b4390ee9f6e",
+          "imageSHA256": "eaeea6dbba1d7c94f512db56cfaf56e5aa48af5bb9e37a0362f92638a69dc507"
+        },
+        {
+          "case": "aggregate-return",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "4dc7ed90d24c08c317260a7b36e71580031f54ee6ed27ea49c426b4390ee9f6e",
+          "imageSHA256": "c6c4f8e05bbe0da3d52025736b0bbc29ac07540ccd302a4bf5d4c3bbe6179490"
+        },
+        {
+          "case": "dynamic-safe",
+          "profile": "dev",
+          "exit": 0,
+          "expectedTrap": "",
+          "sourceSHA256": "6af40d6df5cd42dfeff1f4ce59f491b3a743cc233597e00d4ee247f01c92172c",
+          "imageSHA256": "33dffbc09ab389dfa402eb76f0e0125b54aa8db10e664cf1af7bcfeb16e4630a"
+        },
+        {
+          "case": "dynamic-safe",
+          "profile": "release",
+          "exit": 0,
+          "expectedTrap": "",
+          "sourceSHA256": "6af40d6df5cd42dfeff1f4ce59f491b3a743cc233597e00d4ee247f01c92172c",
+          "imageSHA256": "870a0918c8a1dcd6f68aba39a75f6b5ab47f3af9ea4ed0316560e2e791f542e9"
+        },
+        {
+          "case": "alias-rewrite",
+          "profile": "dev",
+          "exit": 0,
+          "expectedTrap": "",
+          "sourceSHA256": "0e9a3c65b6d7c845218be2f4f208aaa14ae4a7851d264329a0514be13f73481a",
+          "imageSHA256": "edb7aae2410e7ec2f359dd3ba48cb24b1ed26885a1ba5883e58ed93cc02d8bd1"
+        },
+        {
+          "case": "alias-rewrite",
+          "profile": "release",
+          "exit": 0,
+          "expectedTrap": "",
+          "sourceSHA256": "0e9a3c65b6d7c845218be2f4f208aaa14ae4a7851d264329a0514be13f73481a",
+          "imageSHA256": "ef618dd9da58e7c232d62a46ca14e900fe05a119619a9530242f6fac7e528569"
+        },
+        {
+          "case": "i64-sub",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "d7ae6ac9c7751fbab6103d30c5ce0a4c1e1736926060a4ff166d02205185078b",
+          "imageSHA256": "dddbfacdbe9dec5506a028f2dab806703778057c615d53eeb9ac011ff3251690"
+        },
+        {
+          "case": "i64-sub",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "d7ae6ac9c7751fbab6103d30c5ce0a4c1e1736926060a4ff166d02205185078b",
+          "imageSHA256": "6bd365f7e2cfbf31a9c8104e27fbdd633681e278bf67592acb8359d7202accdc"
+        },
+        {
+          "case": "i64-mul",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "da93caede404a534e388c2593db6f6d15bdb9985042690524b740bc12196db52",
+          "imageSHA256": "ec6e30ce172c694c3c81b4e191179d42c51ca5fe71d695c7c82d22df232e5693"
+        },
+        {
+          "case": "i64-mul",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "da93caede404a534e388c2593db6f6d15bdb9985042690524b740bc12196db52",
+          "imageSHA256": "e52c8e01276e65e0dd90d26a185456b8e78a78004c9a9d84d0315d7ca2ee2608"
+        },
+        {
+          "case": "i32-add",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "449cec159225f4451e3ac7dc16342241a09fa0c3a198c6a7c338884c52b0de91",
+          "imageSHA256": "bfc792e6424fd28659014549c91fe237469d6132eecc38b3dc60514d3e9198c9"
+        },
+        {
+          "case": "i32-add",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "449cec159225f4451e3ac7dc16342241a09fa0c3a198c6a7c338884c52b0de91",
+          "imageSHA256": "0c7f0854ab1f647d767c497ba52e7b9eaae1e2fa57111eed2b1ac4d849c57d7b"
+        },
+        {
+          "case": "u8-add",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "ba6dae33de9d8d1fc2855e69b1a2dd7533a3e6f5bb99ddfdf22589cf4692cce3",
+          "imageSHA256": "7d51852c221a9cbc0e1b7430f983304fc203b3278727e5f03d3aa773e2c74001"
+        },
+        {
+          "case": "u8-add",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "ba6dae33de9d8d1fc2855e69b1a2dd7533a3e6f5bb99ddfdf22589cf4692cce3",
+          "imageSHA256": "01ceccda134f31f226354bbf218807a3bc48e46b29f35051f6f89571361eaf48"
+        },
+        {
+          "case": "u32-sub",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "f984421243efc3c73072a9d5b490974773c9103262d1cc00e4412826b553261b",
+          "imageSHA256": "37e96b40d70cf7316b4cd1aa5228bf0775bda25bdffb89bc25e5e1b72aa78002"
+        },
+        {
+          "case": "u32-sub",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "f984421243efc3c73072a9d5b490974773c9103262d1cc00e4412826b553261b",
+          "imageSHA256": "73f1c030f35922735818492d1ce0c69460878dc98124558557ff5afdc343ff42"
+        },
+        {
+          "case": "usize-mul",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "d803d3731058c5db6db93f20c84c8c0848ff632324d8a88c62c0a3efcd41b597",
+          "imageSHA256": "6bf0ccc0d1d6e1a5ed78886befc1a3807fc82575d2200f9344e05fc92d94b8d1"
+        },
+        {
+          "case": "usize-mul",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "d803d3731058c5db6db93f20c84c8c0848ff632324d8a88c62c0a3efcd41b597",
+          "imageSHA256": "b666aa2fd5e9f097b398667761e54dfce1b72d39c81e670f327d63e0a54e68d1"
+        }
+      ]
+    },
+    {
+      "artifact": {
+        "path": ".cache/shared-mutable-field-borrow-native/windows/receipt.json",
+        "sha256": "9f6b0991dac39597a52f67e982c788040c0bf5b9aff746f2f40649b7726ada04"
+      },
+      "executions": 4,
+      "images": [
+        {
+          "case": "shared-fields-origins",
+          "profile": "dev",
+          "exit": 0,
+          "expectedTrap": "",
+          "sourceSHA256": "5e9fb591d2dcadab4c6c65b88d8bcdb9d9658f4ba5bf75724c6d363f8f85c49d",
+          "imageSHA256": "3dbb42268ccbb2b9ac5790403924dc81596f58ff7edf863bdc410eb1cc32c671"
+        },
+        {
+          "case": "shared-fields-origins",
+          "profile": "release",
+          "exit": 0,
+          "expectedTrap": "",
+          "sourceSHA256": "5e9fb591d2dcadab4c6c65b88d8bcdb9d9658f4ba5bf75724c6d363f8f85c49d",
+          "imageSHA256": "7c18fd100430517a9dba10bf21f97ac3a927af9998785a19b2a8c164a940b5ab"
+        },
+        {
+          "case": "post-release-trap",
+          "profile": "dev",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "2dcd600f7dc05169aee8a3c842bf8a76ba574b9883f2ba20cf7271d3a011a754",
+          "imageSHA256": "cbe14f77850d65868a3384717a1a260c41c0a6c381b86848251e6e32eae3b3e5"
+        },
+        {
+          "case": "post-release-trap",
+          "profile": "release",
+          "exit": 5,
+          "expectedTrap": "integer-overflow",
+          "sourceSHA256": "2dcd600f7dc05169aee8a3c842bf8a76ba574b9883f2ba20cf7271d3a011a754",
+          "imageSHA256": "a1fe7cdd37c2e66655f44b428824493f920988da9c48e320006219cb6c405663"
+        }
+      ]
+    }
+  ],
+  "hostCCompiler": {
+    "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+    "sha256": "dc8426b8760d92cf757df3d10b9f0244a95b454ff43194a58161568a0ec70d53",
+    "version": "14.51.36231"
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cbackend",
+        "./internal/compiler",
+        "-run",
+        "TestAssertChecked|TestConstantChecked|TestLiteralChecked|TestSharedMutableFieldBorrow|TestMutableFieldBorrow",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/assert-checked-stage-final.jsonl",
+        "sha256": "3d263fd66a0e14336b148d0b20023cab85cbb912b43eac47439a6b6baaff8861"
+      },
+      "passedTestEvents": 93,
+      "packageOutcomes": [
+        {
+          "Time": "2026-10-04T18:02:24.1243456+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/cbackend",
+          "Elapsed": 0.51
+        },
+        {
+          "Time": "2026-10-04T18:02:28.0939101+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/compiler",
+          "Elapsed": 1.055
+        }
+      ],
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^Test(AssertCheckedTrapNative|ConstantCheckedTrapNative|SharedMutableFieldBorrowNative)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/assert-checked-native-final.jsonl",
+        "sha256": "649abf562eccc6e4fbc0f68f44414fb5bd3de37e09e1bee63d714158c9e39d5a"
+      },
+      "passedTestEvents": 21,
+      "packageOutcomes": [
+        {
+          "Time": "2026-10-04T18:03:56.5775524+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/cli",
+          "Elapsed": 59.815
+        }
+      ],
+      "skips": []
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cbackend",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "raw": {
+        "path": ".cache/assert-checked-backend-final.jsonl",
+        "sha256": "13c35818f66770887f5178779a2fd7a363feb994b370871f29110da407a30380"
+      },
+      "passedTestEvents": 280,
+      "packageOutcomes": [
+        {
+          "Time": "2026-10-04T18:03:01.1305063+09:00",
+          "Action": "pass",
+          "Package": "github.com/0disoft/fairyc/internal/cbackend",
+          "Elapsed": 11.356
+        }
+      ],
+      "skips": [
+        {
+          "Time": "2026-10-04T18:02:49.8649436+09:00",
+          "Action": "skip",
+          "Package": "github.com/0disoft/fairyc/internal/cbackend",
+          "Test": "TestI64HelpersStrictLinuxConsumers",
+          "Elapsed": 0
+        }
+      ]
+    }
+  ],
+  "vet": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "vet",
+      "./internal/cbackend",
+      "./internal/compiler",
+      "./internal/cli"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "combinedOutput": ""
+  },
+  "generatedC": [
+    {
+      "path": ".cache/assert-checked/x86_64-windows-msvc.c",
+      "sha256": "91246bcc465eece2a678c908e77344462b097a7e0f36c3d4efaf1be87209219d"
+    },
+    {
+      "path": ".cache/assert-checked/x86_64-linux-gnu.c",
+      "sha256": "1ea5721a85b6e5a716c5758c96d668b151b45e9ca7d1c02ba748337c44fe1ab1"
+    }
+  ],
+  "limits": [
+    "Linux GCC/Clang actual execution deferred by owner; Linux profile C emission only.",
+    "No whole-repository suite or performance experiment.",
+    "Compiler binary was built from the modified working tree; --version identity is retained verbatim.",
+    "Bounded facts deliberately stop at unknown writes/calls, merges and unwind entries.",
+    "New native rawOutcome exit 130/129 plus control byte denotes overflow/assertion; normalized CLI exit is 5."
+  ]
+}

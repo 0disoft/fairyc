@@ -46,7 +46,7 @@ func TestConstantCheckedFailureFacts(t *testing.T) {
 	b := makeBlock()
 	b.Terminator.UnwindSuccessor = 3
 	fn := mir.Function{Entry: 0, Blocks: []mir.Block{b, {ID: 1, Terminator: mir.Terminator{Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock}}, {ID: 2, Terminator: mir.Terminator{Kind: mir.TerminatorTrap, UnwindSuccessor: mir.NoBlock}}, {ID: 3, Terminator: mir.Terminator{Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock}}}}
-	reach := reachableBlocksForC(fn, nil)
+	reach := reachableBlocksForC(fn, nil, nil)
 	if reach[1] || !reach[2] || !reach[3] {
 		t.Fatalf("failure/unwind reachability: %v", reach)
 	}

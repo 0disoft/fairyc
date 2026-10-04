@@ -1,0 +1,1 @@
+module main;struct Span{i64 start;}struct Token{Span position;}fn ref i64 number(ref Token t){return ref t.position.start;}fn void edit(ref mut Token t){let ref i64 before=number(t);assert(*before==9223372036854775807);t.position.start+=1;}fn i32 main(){var Token t=Token{.position=Span{.start=9223372036854775807}};edit(ref mut t);return 0;}

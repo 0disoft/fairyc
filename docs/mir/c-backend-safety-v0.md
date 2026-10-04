@@ -468,3 +468,10 @@ verified shared root before ordinary shared field-address emission. The backend
 still receives matching owner/result reference kinds and never copies a stored
 struct to obtain a projected address. No additional alias-optimization promise,
 runtime symbol or target admission is implied.
+
+ADR 0447 adds transient asserted-integer equality facts on unique-predecessor
+normal paths, including verified stored field identities and effect-free
+single-block reference-return projections. Writes, rebinding, unknown operations
+or calls, merges and unwind entries invalidate those facts. One failure map
+controls checked guard output, reachable blocks, non-returning inference and
+helper demand. Assertion trap ordering and original verified MIR remain intact.

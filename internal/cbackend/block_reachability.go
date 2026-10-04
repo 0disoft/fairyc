@@ -7,7 +7,7 @@ import (
 
 // reachableBlocksForC omits MIR blocks that have no executable path from the
 // entry. MIR verification and canonical block-ID checks run before emission.
-func reachableBlocksForC(function mir.Function, nonReturning map[hir.SymbolID]bool) []bool {
+func reachableBlocksForC(function mir.Function, nonReturning map[hir.SymbolID]bool, proofs map[mir.BlockID]mir.BlockID) []bool {
 	reachable := make([]bool, len(function.Blocks))
 	queue := []mir.BlockID{function.Entry}
 	for len(queue) != 0 {
@@ -21,6 +21,8 @@ func reachableBlocksForC(function mir.Function, nonReturning map[hir.SymbolID]bo
 		reachable[index] = true
 		if block.Terminator.Kind == mir.TerminatorCall && nonReturning[block.Terminator.Callee] {
 			// A trapping or infinite callee cannot reach the normal continuation.
+		} else if hasCheckedFailure(proofs, id) {
+			queue = append(queue, proofs[id])
 		} else if selected, failure := constantCheckedFailure(*block); failure {
 			queue = append(queue, selected)
 		} else if selected, constant := constantBooleanSuccessor(block.Terminator); constant {
@@ -37,7 +39,7 @@ func reachableBlocksForC(function mir.Function, nonReturning map[hir.SymbolID]bo
 
 // Infer only from verified local CFGs and already proven local callees. Foreign
 // calls remain unknown, and unwind edges are retained conservatively.
-func nonReturningFunctionsForC(functions []mir.Function) map[hir.SymbolID]bool {
+func nonReturningFunctionsForC(functions []mir.Function, proofs checkedFailureProofs) map[hir.SymbolID]bool {
 	known := make(map[hir.SymbolID]bool)
 	for {
 		changed := false
@@ -45,7 +47,7 @@ func nonReturningFunctionsForC(functions []mir.Function) map[hir.SymbolID]bool {
 			if known[function.Symbol] {
 				continue
 			}
-			reachable := reachableBlocksForC(function, known)
+			reachable := reachableBlocksForC(function, known, proofs[function.Symbol])
 			returns := false
 			for index, block := range function.Blocks {
 				if reachable[index] && block.Terminator.Kind == mir.TerminatorReturn {
@@ -78,4 +80,9 @@ func constantBooleanSuccessor(terminator mir.Terminator) (mir.BlockID, bool) {
 		return terminator.Successors[1], true
 	}
 	return terminator.Successors[0], true
+}
+
+func hasCheckedFailure(proofs map[mir.BlockID]mir.BlockID, id mir.BlockID) bool {
+	_, ok := proofs[id]
+	return ok
 }

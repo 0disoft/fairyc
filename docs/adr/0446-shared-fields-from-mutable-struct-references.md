@@ -78,8 +78,9 @@ checked overflow after release; source-session cold/warm all-hit is verified.
 An initial always-overflowing function containing an assertion fails release
 build with MSVC C4702/C2220 (CLI exit 6). A version using the already-supported
 shared-call reborrow reproduces on the clean prior `251d15b0` compiler without
-this feature. This pre-existing C reachability limitation remains unresolved;
-the successful dynamic fault test does not claim it fixed. Initial failure and
+this feature. ADR 0447 subsequently fixes this reproduction with a bounded asserted-value
+C reachability proof and verifies both Windows native profiles. The original
+dynamic fault test remains separate evidence. Initial failure and
 baseline sources/tool identities/raw logs are kept with the current review in
 `docs/ops/evidence/shared-mutable-field-borrow-20261004.json`.
 Linux actual execution stays deferred to the owner's batch; there is no whole-

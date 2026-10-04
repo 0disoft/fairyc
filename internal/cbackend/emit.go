@@ -99,6 +99,7 @@ type emitter struct {
 	functions          []mir.Function
 	bySymbol           map[hir.SymbolID]int
 	nonReturning       map[hir.SymbolID]bool
+	checkedFailures    checkedFailureProofs
 	foreignFunctions   []mir.ForeignFunction
 	foreignBySymbol    map[hir.SymbolID]int
 	entryIndex         int
@@ -331,12 +332,14 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 	if err != nil {
 		return Unit{}, err
 	}
+	checkedFailures := assertedCheckedFailuresForC(functions)
 	value := &emitter{
 		targetID:           profile.Target,
 		layoutEngine:       layoutEngine,
 		functions:          functions,
 		bySymbol:           make(map[hir.SymbolID]int, len(functions)),
-		nonReturning:       nonReturningFunctionsForC(functions),
+		nonReturning:       nonReturningFunctionsForC(functions, checkedFailures),
+		checkedFailures:    checkedFailures,
 		foreignFunctions:   foreignFunctions,
 		foreignBySymbol:    foreignBySymbol,
 		entryIndex:         -1,
@@ -3277,7 +3280,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	fmt.Fprintf(output, "    goto fy_b_%d;\n", function.Entry)
 	blocks := slices.Clone(function.Blocks)
 	slices.SortFunc(blocks, func(left, right mir.Block) int { return int(left.ID - right.ID) })
-	reachable := reachableBlocksForC(*function, e.nonReturning)
+	reachable := reachableBlocksForC(*function, e.nonReturning, e.checkedFailures[function.Symbol])
 	fixedTrapGroups := make(map[string][]mir.BlockID)
 	for _, block := range blocks {
 		// Empty, non-returning traps with the same category have identical C behavior.
@@ -4078,6 +4081,10 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 			fmt.Fprintf(output, "    goto fy_b_%d;\n", target)
 		}
 	case mir.TerminatorSwitch:
+		if failure, known := e.checkedFailures[function.Symbol][blockID]; known {
+			fmt.Fprintf(output, "    %sgoto fy_b_%d;\n", e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
+			return nil
+		}
 		if failure, known := constantCheckedFailure(function.Blocks[int(blockID)]); known {
 			fmt.Fprintf(output, "    %sgoto fy_b_%d;\n", e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW"), failure)
 			return nil
