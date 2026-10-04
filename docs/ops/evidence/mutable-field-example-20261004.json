@@ -1,0 +1,238 @@
+{
+  "schema": "fairyc.struct-view-portable-smoke/v1",
+  "compilerSHA256": "a2cfe1e3be793294fb17d663e54a8e29f6f4840925c4fd5e47ffd36bbccbceeb",
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "check ok: 2 instance(s), 10 source file(s), 186 MIR function(s), lock updated\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "exit": 0,
+      "imageSHA256": "180ba60f4fb48a906dc6e6c01087fd25f4e432f06187862ef1cf75c2054cb3fe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+      "stderr": "",
+      "exit": 0,
+      "profile": "dev",
+      "imageSHA256": "180ba60f4fb48a906dc6e6c01087fd25f4e432f06187862ef1cf75c2054cb3fe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        ""
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+      "stderr": "",
+      "exit": 0,
+      "profile": "dev",
+      "imageSHA256": "180ba60f4fb48a906dc6e6c01087fd25f4e432f06187862ef1cf75c2054cb3fe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "x=7;"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+      "stderr": "",
+      "exit": 0,
+      "profile": "dev",
+      "imageSHA256": "180ba60f4fb48a906dc6e6c01087fd25f4e432f06187862ef1cf75c2054cb3fe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "@"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "",
+      "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+      "exit": 2,
+      "profile": "dev",
+      "imageSHA256": "180ba60f4fb48a906dc6e6c01087fd25f4e432f06187862ef1cf75c2054cb3fe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "9223372036854775808"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "",
+      "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+      "exit": 2,
+      "profile": "dev",
+      "imageSHA256": "180ba60f4fb48a906dc6e6c01087fd25f4e432f06187862ef1cf75c2054cb3fe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "",
+      "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+      "exit": 2,
+      "profile": "dev",
+      "imageSHA256": "180ba60f4fb48a906dc6e6c01087fd25f4e432f06187862ef1cf75c2054cb3fe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+        "build",
+        "--locked",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "built: build/struct-vec-view.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "exit": 0,
+      "imageSHA256": "ff6d4667329e7dd0bcdf424c16674ba2657e67fe417482619b487a033f7a28a2"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+        "run",
+        "--locked",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+      "stderr": "",
+      "exit": 0,
+      "profile": "release",
+      "imageSHA256": "ff6d4667329e7dd0bcdf424c16674ba2657e67fe417482619b487a033f7a28a2"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        ""
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t0\nidentifiers\t0\nnumbers\t0\nsum\t0\nfirst_tokens\t0\nfirst_identifiers\t0\nfirst_numbers\t0\n",
+      "stderr": "",
+      "exit": 0,
+      "profile": "release",
+      "imageSHA256": "ff6d4667329e7dd0bcdf424c16674ba2657e67fe417482619b487a033f7a28a2"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "x=7;"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "tokens\t4\nidentifiers\t1\nnumbers\t1\nsum\t7\nfirst_tokens\t4\nfirst_identifiers\t1\nfirst_numbers\t1\n",
+      "stderr": "",
+      "exit": 0,
+      "profile": "release",
+      "imageSHA256": "ff6d4667329e7dd0bcdf424c16674ba2657e67fe417482619b487a033f7a28a2"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "@"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "",
+      "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+      "exit": 2,
+      "profile": "release",
+      "imageSHA256": "ff6d4667329e7dd0bcdf424c16674ba2657e67fe417482619b487a033f7a28a2"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "9223372036854775808"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "",
+      "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+      "exit": 2,
+      "profile": "release",
+      "imageSHA256": "ff6d4667329e7dd0bcdf424c16674ba2657e67fe417482619b487a033f7a28a2"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view\\build\\struct-vec-view.exe",
+        "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\struct_vec_view",
+      "stdout": "",
+      "stderr": "invalid ASCII input, integer overflow, token limit or allocation failure\n",
+      "exit": 2,
+      "profile": "release",
+      "imageSHA256": "ff6d4667329e7dd0bcdf424c16674ba2657e67fe417482619b487a033f7a28a2"
+    }
+  ],
+  "date": "2026-10-04",
+  "implementationRevision": "251d15b04c4b6f4351614eeebc8d59ed8adcf279",
+  "compilerIdentityInvocation": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mutable-field-example\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004075725-251d15b04c4b\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.84\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 251d15b04c4b6f4351614eeebc8d59ed8adcf279\nmodified: false\n",
+    "stderr": "",
+    "exit": 0
+  },
+  "sourceSHA256": {
+    "examples/struct_vec_view/src/main.fy": "8ad3c0d1fb0bff1d8f97ddc3448956dcc943bb4f58d13b6f228751583e961b35",
+    "examples/struct_vec_view/src/tokens.fy": "6743cda10d933861dd74600448d89ad7a5f8c58dfd662a37a65625975d1427af"
+  },
+  "lockSHA256": "2a5848e0f2628854959799f45e86707d79ea512c3e12ed201ef97efb9031f266",
+  "portableVerification": {
+    "argv": [
+      "python",
+      "-X",
+      "utf8",
+      "examples/struct_vec_view/verify.py",
+      ".cache/mutable-field-example/fairyc.exe"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "stdout": "PASS: public CLI and 12 native outcomes; build/verify-results.json\n",
+    "stderr": "",
+    "exit": 0
+  },
+  "linuxExecution": "deferred at user request",
+  "implementationEvidence": "docs/ops/evidence/mutable-field-borrow-20261004.json"
+}

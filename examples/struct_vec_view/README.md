@@ -94,9 +94,25 @@ protect shared views. At that revision aggregate-field replacement and mutable
 field borrows remained outside the extension. Evidence:
 `docs/ops/evidence/nested-field-store-20261004.json`.
 
-ADR 0443 now uses `token.position = Span { ... }` inside `rebase` to replace the
+At ADR 0443, the example used `token.position = Span { ... }` inside `rebase` to replace the
 whole copied span. Direct and nested aggregate stores support the same exact-type
-plain graph; mutable field borrows and struct-view element stores remain closed.
+plain graph; at that revision mutable field borrows remained closed. Shared
+struct-view element stores remain closed.
 Run the existing portable `verify.py` for actual CLI dev/release execution, or
 `bun tools/run-go.ts test ./internal/cli -run '^TestPlainStructFieldStore(Native|Cache)$' -count=1`.
 Current evidence: `docs/ops/evidence/plain-struct-field-store-20261004.json`.
+
+ADR 0445 now rebases through a mutable field reference in the copied local token:
+
+```fairy
+let ref mut Span position = ref mut local.position;
+rebase(position, origin);
+```
+
+`rebase(ref mut Span, usize)` edits the stored start/end fields. The child holds
+the entire copied token until its last use; the following local assertion is
+allowed once `rebase` returns. The shared vector remains unchanged, and output
+and input limits are preserved. Resources/nonplain graphs and simultaneous
+mutable sibling borrows remain outside the admitted projection. Run the same
+portable `verify.py`; no additional harness is needed. Current public CLI and
+dev/release receipt: `docs/ops/evidence/mutable-field-example-20261004.json`.

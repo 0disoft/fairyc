@@ -97,3 +97,33 @@ Windows 네이티브 10사례씩, 20회 결과를 확인했다. 상수 증명은
 경고 억제·SDK/런타임/API·DB·CI·runner 변경은 없으며 Linux 실제 실행은
 이후 일괄 검증으로 남긴다. 증거는
 `docs/ops/evidence/constant-checked-c-20261004.json`이다.
+
+
+## ADR 0445: 가변 필드 대여 적용
+
+현재 `analyze`는 복사한 지역 토큰의 `local.position`을 `ref mut Span`으로
+대여하고 `rebase(position, origin)`에 넘긴다. `rebase`가 시작/끝 필드에
+checked 복합 대입을 수행한다. 함수 호출 뒤 자식 대여의 마지막 사용이
+끝나면 지역 토큰의 필드를 다시 읽어 검사한다. 원본 공유 벡터와 출력은
+유지하며, 제품 계산은 Fairy C 소스가 수행한다.
+
+직접·중첩·그룹 필드 대여는 평범한 구조체 그래프와 이름 있는 가변 지역
+루트/기존 `ref mut` 수신자에 한정한다. 자식/별칭/후손 대여가 살아 있는
+동안 부모·루트·형제 접근은 E2101이며, 지역 소유자에서 유래한 반환은
+E2102이다. 반환 함수와 Option/Result를 통한 자식도 같은 보호를 유지한다.
+resource, 배열 원소, 호출 결과, 포인터/역참조 루트, 비평범한 구조체와
+동시에 보유하는 여러 가변 sibling 대여는 허용하지 않는다.
+
+공개 CLI `check`, 잠금 일반·릴리스 `build`/`run`, 정상·오류 native 입력
+12회가 통과했다. 이번 구현 fixture도 일반·릴리스 성공/overflow trap
+4회, 인터프리터/codec 저장·복원, 캐시 cold/warm all-hit, 소스 거부와
+위조 MIR 변조 검사를 통과했다. 관련 패키지의 Go vet를 확인했다.
+원시 argv/cwd/stdout/stderr/exit와 compiler identity·소스·잠금·EXE 해시는
+`docs/ops/evidence/mutable-field-example-20261004.json`, 구현 검증은
+`docs/ops/evidence/mutable-field-borrow-20261004.json`에 남겼다.
+
+계약은 ADR 0445와 대여·MIR·C backend·버전 문서에 반영했다. SDK stage0.84,
+언어 /20, 런타임 /0 및 문법·wire schema·타깃 성숙도는 유지한다.
+Linux 실제 실행은 요청대로 이후 일괄 검증에 남겼다. 전체 저장소 스위트와
+성능 벤치마크를 실행하지 않았고 SDK export·DB·CI·설치·runner·PS1 변경과
+push는 없다. 구현과 실제 예제 적용을 별도 로컬 커밋으로 나눴다.

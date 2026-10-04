@@ -39,11 +39,9 @@ pub fn bool scan(ref u8[] input, ref mut vec::Vec<Token> output) {
     return true;
 }
 
-fn void rebase(ref mut Token token, usize origin) {
-    token.position = Span {
-        .start = token.position.start - origin,
-        .end = token.position.end - origin
-    };
+fn void rebase(ref mut Span position, usize origin) {
+    position.start -= origin;
+    position.end -= origin;
 }
 
 /// Reads a borrowed token segment; only each selected token value is copied.
@@ -52,7 +50,8 @@ pub fn Result<Stats, u32> analyze(ref Token[] segment) {
     let usize origin = if (segment.is_empty) { 0 } else { segment[0].position.start };
     for (let Token token in segment) {
         var Token local = token;
-        rebase(ref mut local, origin);
+        let ref mut Span position = ref mut local.position;
+        rebase(position, origin);
         assert(local.position.start < local.position.end);
         if (token.kind == 1) { stats.identifiers += 1; }
         if (token.kind == 2) {
