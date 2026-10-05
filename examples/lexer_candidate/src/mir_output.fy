@@ -1,5 +1,6 @@
 module mir_output;
 import mir_model as m;
+import mir_verify as verify;
 import std::bytes as bytes;
 
 fn bool row(ref mut bytes::Buffer out, ref u8[] tag, usize[20] values, usize count) {
@@ -12,6 +13,8 @@ fn bool end(ref mut bytes::Buffer out) { return bytes::append_byte(out,10).is_ok
 // Private numeric TSV. Complete output is buffered before the caller publishes.
 // 3 allocation, 4 transport limit. Schema field order is owned below.
 pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
+    let m::Problem problem = verify::check(p);
+    if (problem.code != 0) { return problem.code; }
     if (!bytes::append(out,b"fairyc.scalar-mir/v1\nP\t").is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
     var usize id = 1;
     while (id <= m::target_count(p)) {

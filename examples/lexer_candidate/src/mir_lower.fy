@@ -3,6 +3,7 @@ import hir_model as h;
 import mir_model as m;
 import mir_state as state;
 import mir_cleanup as finalize;
+import mir_verify as verify;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -288,5 +289,10 @@ pub fn Result<m::Program,m::Problem> lower(h::Program input) {
         if (!v::push<m::Function>(ref mut functions,m::Function { .target = c.targets[f.binding], .entry, .local_start, .local_count = v::len<m::Local>(ref locals) - local_start, .block_start, .block_count = v::len<m::Block>(ref blocks) - block_start, .parameter_start, .parameter_count = f.parameter_count, .start = f.start, .end = f.end, .public = f.public }).is_ok) { return .err(m::Problem { .code = 3, .start = f.start, .end = f.end }); }
         index += 1;
     }
-    return m::assemble(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input));
+    let m::Program result = switch(m::assemble(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input))) {
+        case .ok(value): { value } case .err(problem): { return .err(problem); }
+    };
+    let m::Problem problem = verify::check(ref result);
+    if (problem.code != 0) { return .err(problem); }
+    return .ok(result);
 }

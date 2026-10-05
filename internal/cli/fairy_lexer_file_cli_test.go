@@ -19,7 +19,7 @@ func copyLexerFileCLIExample(t *testing.T, root string) {
 		"src/type_control.fy", "src/type_state.fy", "src/type_check.fy", "src/type_cli.fy",
 		"src/module_registry.fy", "src/module_cli.fy", "src/module_check.fy",
 		"src/hir_model.fy", "src/hir_state.fy", "src/hir_lower.fy", "src/hir_cli.fy", "src/hir_output.fy",
-		"src/mir_model.fy", "src/mir_state.fy", "src/mir_cleanup.fy", "src/mir_lower.fy", "src/mir_cli.fy", "src/mir_output.fy",
+		"src/mir_model.fy", "src/mir_state.fy", "src/mir_cleanup.fy", "src/mir_verify.fy", "src/mir_verify_shape.fy", "src/mir_verify_flow.fy", "src/mir_lower.fy", "src/mir_cli.fy", "src/mir_output.fy",
 		"src/syntax.fy", "src/types.fy", "src/records.fy", "src/bodies.fy", "src/body_state.fy", "src/attributes.fy", "src/cleanup_syntax.fy", "src/parse_tokens.fy"} {
 		data, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {

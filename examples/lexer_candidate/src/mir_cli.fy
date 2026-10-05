@@ -15,6 +15,13 @@ import std::bytes as bytes;
 import std::io as io;
 
 @effects(console)
+fn void verification_error(u32 code) {
+    discard io::write_stderr(if (code == 1001) { "error: MIR verification V1001\n" } else if (code == 1002) { "error: MIR verification V1002\n" }
+        else if (code == 1501) { "error: MIR verification V1501\n" } else if (code == 2) { "error: MIR limit\n" }
+        else if (code == 3) { "error: buffer allocation failed\n" } else { "error: invalid or unsupported MIR input\n" });
+}
+
+@effects(console)
 pub fn i32 run(scanner::Stream stream, ref u8[] path) {
     let syntax::Parsed parsed = switch(syntax::parse(stream,512)) {
         case .ok(value): { value }
@@ -28,10 +35,10 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path) {
     let h::Program input = switch(hir::lower(typed,0)) { case .ok(value): { value } case .err(_): { discard io::write_stderr("error: HIR lowering failed\n"); return 2; } };
     let m::Program program = switch(lower::lower(input)) {
         case .ok(value): { value }
-        case .err(problem): { discard io::write_stderr(if (problem.code == 2) { "error: MIR limit\n" } else if (problem.code == 3) { "error: buffer allocation failed\n" } else { "error: invalid or unsupported MIR input\n" }); return 2; }
+        case .err(problem): { verification_error(problem.code); return 2; }
     };
     var bytes::Buffer rendered = bytes::empty(); let u32 code = output::render(ref program,ref mut rendered);
-    if (code != 0) { discard io::write_stderr(if (code == 4) { "error: MIR output limit (2097152 bytes)\n" } else { "error: buffer allocation failed\n" }); return 2; }
+    if (code != 0) { if (code == 4) { discard io::write_stderr("error: MIR output limit (2097152 bytes)\n"); } else { verification_error(code); } return 2; }
     let ref u8[] data = bytes::view(ref rendered);
     return if (switch(io::write_bytes(data)) { case .ok(count): { count == data.len } case .err(_): { false } }) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
 }

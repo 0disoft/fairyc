@@ -571,12 +571,36 @@ first. Complete output is buffered under a 2 MiB cap before stdout publication. 
 allocation, limit and HIR-lowering failures return 2 with empty stdout and a plain
 message; scanner, name and type errors keep their existing located messages.
 
-`mir_model::assemble` is a checked construction boundary, not the full production
-MIR verifier. It rejects unfinished blocks, malformed links, range drift and budget
-violations, but it does not implement the documented `V1001`-`V1701` production
-verifier invariants such as initialization dominance, move and cleanup discipline,
-borrow origins, region placement and unsafe provenance. There is no production
-verifier, interpreter, backend or executable compilation of the input in this mode.
+`mir_model::assemble` checks construction ranges and links. The separate Fairy
+`mir_verify::check` then checks the admitted scalar invariants: `V1001` operation,
+literal, call, return and table shapes; `V1002` definite initialization on every
+reachable predecessor path; and `V1501` exact checked arithmetic, trap edges and
+unreachable proofs. Both lowering and rendering require this verification to
+succeed. Rendering rejects an invalid graph before appending any bytes, preserving
+an existing caller buffer. CLI verification failures exit 2 with empty stdout and
+the private `MIR verification V1001`, `V1002` or `V1501` error on stderr.
+
+The verifier requires closed internal function bodies and signatures, unique
+parameter/edge/operation ownership, correctly typed operands and destinations,
+canonical range-checked integer literals, and no orphan executable table entries.
+Checked arithmetic must be the first operation of its success block, match the
+guard's frozen operands, and have no unchecked predecessor bypass. Trap blocks
+contain no operations or cleanup. An unreachable success block requires a false
+assertion on a non-parameter local with exactly one constant-false definition.
+
+Initialization uses heap-backed bitsets and a worklist. Reachability is established
+first; predecessor intersections descend from the greatest fixed point, with entry
+always seeded only from its declared parameters. Uses are checked after convergence.
+Call results become initialized only on the normal successor. Zero-iteration loops
+and cyclic predecessor paths cannot manufacture initialized values. Analysis is
+bounded to 67108864 charged steps across the program; exhaustion returns the existing
+limit code 2, and allocation failure returns 3. Per-function bitset storage is at
+most 33554432 bytes under the existing local/block caps, plus bounded graph indexes.
+
+Move/drop discipline, borrow origins, Region placement and unsafe provenance
+remain subsequent verifier components because their value forms are not admitted
+by this scalar model. There is no candidate interpreter, backend or executable
+compilation of the input in this mode.
 
 From the repository root, regenerate the independent Go MIR oracle with:
 
@@ -692,6 +716,20 @@ Linux native execution remains deferred to the owner's batch. A Go lowering defe
 found by the registration-return case was fixed first in a separate commit:
 an argument that returns must stop further capture and parent-call registration.
 Evidence: `docs/ops/evidence/mir-defer-file-cli-20261006.json`.
+
+Version 0.14.0 adds the scalar verifier. Its comparison passes 1256 CLI executions
+in both profiles together, retaining all 106 MIR fixtures with unchanged results
+and trace bytes. One native test per profile runs a grouped graph inventory:
+four valid graphs and 23 invalid graphs that all pass basic construction, plus two
+work-budget rejection cases and one invalid-render buffer-preservation case.
+The inventory covers call argument/result typing, missing bodies, duplicate target
+identities, uninitialized operands and joins, loop entry versus backedges, forged
+unreachable proofs, malformed literals, orphan records and checked-operation bypass.
+This grouping avoids recompiling the full candidate for every individual mutation.
+Windows and Linux C emission and scoped Go workspace/vet checks pass. Linux native
+execution remains deferred to the owner's batch; ownership verification and
+self-hosting promotion remain subsequent work. Evidence:
+`docs/ops/evidence/mir-verifier-file-cli-20261006.json`.
 
 ## Recognition and limits
 
