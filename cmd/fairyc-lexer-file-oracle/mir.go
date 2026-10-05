@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/interpreter"
@@ -30,6 +31,7 @@ func writeMIR(destination string) error {
 		Program       mir.Program         `json:"program"`
 		Outcome       interpreter.Outcome `json:"outcome"`
 		OutcomeOrigin string              `json:"outcomeOrigin"`
+		TraceCalls    bool                `json:"traceCalls,omitempty"`
 	}
 	var fixtures []fixture
 	seeds := []scalarMIRSeed{
@@ -56,10 +58,11 @@ func writeMIR(destination string) error {
 		{"short-circuit-simple", "fn i32 main(){assert(false || true); return 0;}", true},
 		{"while-basic", "fn i32 main(){var i32 x=0; while(x<2){x+=1;} return x;}", true},
 		{"for-basic", "fn i32 main(){var i32 x=0; for(var i32 i=0;i<2;i+=1){x+=1;} return x;}", true},
-		{"deferred-defer", "fn i32 main(){defer observe(1); return 0;} fn void observe(i32 x){discard x;}", false},
+		{"defer-basic", "fn i32 main(){defer observe(1); return 0;} fn void observe(i32 x){discard x;}", true},
 	}
 	seeds = append(seeds, scalarMIRControlSeeds()...)
 	seeds = append(seeds, scalarMIRLoopSeeds()...)
+	seeds = append(seeds, scalarMIRDeferSeeds()...)
 	for _, seed := range seeds {
 		input := "module main; " + seed.input
 		file := source.NewFile("main.fy", []byte(input))
@@ -77,16 +80,22 @@ func writeMIR(destination string) error {
 		}
 		program, err := mir.Lower(checked.HIR)
 		if err != nil {
-			return err
+			return fmt.Errorf("MIR oracle lower %s: %w", seed.name, err)
 		}
 		if failures := mir.Verify(program); len(failures) != 0 {
 			return fmt.Errorf("MIR oracle verifier %s: %v", seed.name, failures)
 		}
-		outcome, err := interpreter.Execute(program, "main::main")
+		trace := strings.HasPrefix(seed.name, "defer-trace-")
+		options := interpreter.Options{}
+		if trace {
+			options.TestIntrinsics = map[string]interpreter.TestIntrinsicKind{"main::defer_trace": interpreter.TestIntrinsicWriteStdoutByte}
+			options.OutputLimit = 4096
+		}
+		outcome, err := interpreter.ExecuteWithOptions(program, "main::main", options)
 		if err != nil {
 			return fmt.Errorf("MIR oracle execution %s: %w", seed.name, err)
 		}
-		fixtures = append(fixtures, fixture{seed.name, hex.EncodeToString([]byte(input)), seed.admitted, program, outcome, "go-mir-interpreter"})
+		fixtures = append(fixtures, fixture{seed.name, hex.EncodeToString([]byte(input)), seed.admitted, program, outcome, "go-mir-interpreter", trace})
 	}
 	data, err := json.MarshalIndent(struct {
 		Schema   string    `json:"schema"`

@@ -2,16 +2,11 @@ module mir_lower;
 import hir_model as h;
 import mir_model as m;
 import mir_state as state;
+import mir_cleanup as finalize;
 import std::bytes as bytes;
 import std::vec as v;
 
-// Scalar lowering includes conditionals, short-circuit branches and loops.
-// Defer remains rejected until its captured arguments and cleanup paths land.
-fn bool admitted(ref h::Program input) {
-    var usize i = 1;
-    while (i <= h::statement_count(input)) { if (h::statement_code(h::statement_at(input,i).kind) == 11) { return false; } i += 1; }
-    return true;
-}
+// Scalar lowering includes conditionals, loops and bounded lexical defer.
 
 fn bool prepare(ref h::Program input, ref mut v::Vec<m::Target> targets, ref mut v::Vec<m::Signature> signatures, ref mut state::Context c) {
     var usize id = 1;
@@ -142,6 +137,23 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
 fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, usize depth) {
     let h::Statement s = h::statement_at(input,id); let u32 kind = h::statement_code(s.kind);
     if (depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
+    if (kind == 11) {
+        let h::Expression call = h::expression_at(input,s.expression);
+        let usize callee = c.targets[call.binding];
+        if (h::expression_code(call.kind) != 6 || h::type_code(call.type) != 7 || callee == 0 || h::binding_code(h::binding_at(input,call.binding).kind) != 1) { discard state::fail(c,4,s.start,s.end); return false; }
+        if (c.defer_count >= 256) { discard state::fail(c,2,s.start,s.end); return false; }
+        let usize captured = c.capture_count; var usize j = 0;
+        while (j < call.edge_count) {
+            let usize value = expression(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,call.edge_start + j),depth + 1);
+            if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+            if (c.capture_count >= 4096) { discard state::fail(c,2,s.start,s.end); return false; }
+            let usize slot = c.capture_count; c.captures[slot] = value; c.capture_count += 1; j += 1;
+        }
+        let usize at = c.defer_count; c.defer_count += 1;
+        c.deferred_targets[at] = callee; c.deferred_starts[at] = s.start; c.deferred_ends[at] = s.end;
+        c.deferred_arg_starts[at] = captured; c.deferred_arg_counts[at] = call.edge_count;
+        return true;
+    }
     if (kind == 7 || kind == 8) {
         if (c.loop_depth == 0 || c.loop_ids[c.loop_depth - 1] != s.loop_target) { discard state::fail(c,4,s.start,s.end); return false; }
         let usize frame = c.loop_depth - 1;
@@ -152,6 +164,8 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
             let usize post = state::new_block(blocks,c,loop.start,loop.end); c.continues[frame] = post;
         }
         let usize target = if (kind == 7) { c.breaks[frame] } else { c.continues[frame] };
+        let usize from = c.loop_defer_base[frame];
+        if (!finalize::emit_deferred(blocks,edges,c,from)) { return false; }
         return state::jump(blocks,c,target,s.start,s.end);
     }
     if (kind == 5 || kind == 6) {
@@ -174,6 +188,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         if (c.loop_depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
         let usize frame = c.loop_depth; c.loop_depth += 1;
         c.loop_ids[frame] = id; c.breaks[frame] = exit;
+        let usize deferred_base = c.defer_count; c.loop_defer_base[frame] = deferred_base;
         c.continues[frame] = if (s.post == 0) { header } else { 0 };
         c.current = body;
         discard block(input,locals,blocks,operations,edges,payload,c,s.body,depth + 1);
@@ -209,6 +224,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
     if (kind == 2) {
         let usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+        if (!finalize::emit_deferred(blocks,edges,c,0)) { return false; }
         var m::Block term = state::block(c.function,s.start,s.end); term.kind = 1; term.value = value;
         return state::terminate(blocks,c,term);
     }
@@ -231,15 +247,18 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
 fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, usize depth) {
     let h::Block b = h::block_at(input,id);
     if (depth >= 64) { return state::fail(c,2,b.start,b.end); }
+    let usize deferred_base = c.defer_count; let usize capture_base = c.capture_count;
     var usize i = 0;
     while (i < b.edge_count && c.current != 0 && c.problem.code == 0) {
         if (!statement(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,b.edge_start + i),depth + 1)) { return 0; } i += 1;
     }
-    return expression(input,locals,blocks,operations,edges,payload,c,b.tail,depth + 1);
+    let usize value = expression(input,locals,blocks,operations,edges,payload,c,b.tail,depth + 1);
+    if (c.current != 0 && c.problem.code == 0) { discard finalize::emit_deferred(blocks,edges,c,deferred_base); }
+    c.defer_count = deferred_base; c.capture_count = capture_base;
+    return value;
 }
 
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
-    if (!admitted(ref input)) { return .err(m::Problem { .code = 4, .start = 0, .end = h::source_view(ref input).len }); }
     var state::Context c = state::empty(); var bytes::Buffer source = bytes::empty(); var bytes::Buffer payload = bytes::empty();
     var v::Vec<m::Target> targets = v::empty<m::Target>(); var v::Vec<m::Signature> signatures = v::empty<m::Signature>();
     var v::Vec<m::Function> functions = v::empty<m::Function>(); var v::Vec<m::Local> locals = v::empty<m::Local>();

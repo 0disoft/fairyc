@@ -4,6 +4,7 @@ This is an independent observation utility, never a candidate runtime dependency
 The complete product MIR verifier and native input execution are later units.
 """
 import re
+import base64
 
 FIELDS = {
     'T': 'id binding module declaration result signature_start signature_count start end external'.split(),
@@ -152,11 +153,14 @@ def check(operator,a,b,type,unary):
     value=arithmetic(operator,a,b,type,unary)
     return '' if lo<=value<=hi else 'integer-overflow'
 
-def execute(t,names):
-    by_target={f['target']:id for id,f in t['F'].items()};steps=[0]
+def execute(t,names,trace_calls=False):
+    by_target={f['target']:id for id,f in t['F'].items()};steps=[0];trace=bytearray()
     def invoke(fid,args,depth=0):
         assert depth<64
         f=t['F'][fid];values={t['A'][f['parameter_start']+i]['value']:a for i,a in enumerate(args)}
+        if trace_calls and names[f['target']]=='main::defer_trace':
+            assert len(args)==1 and 0<=args[0]<=255 and len(trace)<4096
+            trace.append(args[0])
         bid=f['entry']
         while True:
             steps[0]+=1;assert steps[0]<10000
@@ -189,7 +193,9 @@ def execute(t,names):
             else:raise AssertionError(('unexpected terminal',b))
     entry=next(fid for fid,f in t['F'].items() if names[f['target']]=='main::main')
     value,trap=invoke(entry,[])
-    return dict(Kind='trap' if trap else 'return',Value=0 if trap else value,TrapCategory=trap)
+    result=dict(Kind='trap' if trap else 'return',Value=0 if trap else value,TrapCategory=trap)
+    if trace_calls: result['Stdout']=base64.b64encode(trace).decode('ascii') if trace else None
+    return result
 
 def verify_mir(image,reference,directory,rows,run,sha,location):
     counts=dict(fixtures=0,accepted=0,returns=0,traps=0,deferred=0,unchangedFiles=0,differential=0,contractGoldens=0)
@@ -211,7 +217,7 @@ def verify_mir(image,reference,directory,rows,run,sha,location):
             assert (f['start'],f['end'])==(go['Span']['StartByte'],go['Span']['EndByte'])
             assert TYPES[target['result']]==go['ResultType']
             assert [TYPES[tables['S'][j]['type']] for j in range(target['signature_start'],target['signature_start']+target['signature_count'])]==(go['ParameterTypes'] or [])
-        actual=execute(tables,names);expected={k:fixture['outcome'][k] for k in actual}
+        actual=execute(tables,names,fixture.get('traceCalls',False));expected={k:fixture['outcome'][k] for k in actual}
         assert actual==expected,dict(case=fixture['name'],actual=actual,expected=expected)
         row['mirObservation']=actual
         assert fixture['outcomeOrigin']=='go-mir-interpreter'

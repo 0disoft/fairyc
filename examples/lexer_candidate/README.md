@@ -536,8 +536,14 @@ an omitted `for` condition is true. `continue` reaches the post clause before th
 next condition, while `break` skips post. Post blocks are allocated only when a
 body fallthrough or continue reaches them, avoiding orphan blocks for unconditional
 breaks or returns. Loop targets use a bounded 64-frame stack of HIR Statement IDs;
-the existing recursion budget applies first. `defer` still fails closed until its
-captured arguments and cleanup paths are implemented.
+the existing recursion budget applies first. Bounded lexical `defer` captures
+copy-scalar arguments immediately, once from left to right, and emits ordinary
+void internal calls in LIFO order when the registering block exits by fallthrough,
+return, break or continue. The return or block-tail value is evaluated before those
+calls. Traps skip deferred calls; a trapping deferred call skips remaining calls.
+Capture descriptors use a bounded compile-time scope stack, not a runtime queue.
+Resource drops, Region resets and Result propagation are outside this scalar MIR
+subset; their ordering with defer remains subsequent ownership work.
 
 The private TSV format begins with `fairyc.scalar-mir/v1` and a `P` module-index
 record. `T`, `S`, `F`, `L`, `B`, `O` and `A` records describe call
@@ -559,8 +565,9 @@ masks and this format are private implementation contracts.
 
 Limits are 32768 source bytes, 512 functions/targets, 16384 locals, 16384 blocks,
 32768 operations, 65536 edges/signatures and 688128 payload bytes, with recursion
-depth 64; the existing parser, resolver, type and HIR budgets apply first. Complete
-output is buffered under a 2 MiB cap before stdout publication. Malformed, deferred,
+depth 64, at most 256 simultaneously active defer descriptors and 4096 captured
+argument references; the existing parser, resolver, type and HIR budgets apply
+first. Complete output is buffered under a 2 MiB cap before stdout publication. Malformed, unsupported,
 allocation, limit and HIR-lowering failures return 2 with empty stdout and a plain
 message; scanner, name and type errors keep their existing located messages.
 
@@ -581,7 +588,9 @@ Pass that file as `--mir-reference` to `verify.py`, together with the earlier
 token/declaration/name/type/module/HIR references. `verify_mir.py` is a test-only
 reader and scalar executor: it reconstructs the tables from the native TSV, checks
 the block and edge graph, and executes admitted programs to compare the observed
-return value or trap category with the verified Go MIR. It is an independent
+return value, trap category and fixture-only deferred-call trace with the verified
+Go MIR. The trace hook is enabled only for explicitly marked reference fixtures.
+It is an independent
 observation utility, never a candidate runtime dependency, and it does not natively
 compile or execute the input. Every admitted fixture must now match the executed
 Go MIR reference; a reference execution error fails the oracle rather than
@@ -594,10 +603,12 @@ short-circuit assertion:
 ```sh
 lexer-candidate --mir-file samples/mir-demo.fy
 lexer-candidate --mir-file samples/mir-branches-demo.fy
+lexer-candidate --mir-file samples/mir-loops-demo.fy
+lexer-candidate --mir-file samples/mir-defer-demo.fy
 ```
 
-The current reference set is 84 fixtures: 83 admitted and 1 deferred. The admitted
-set is 67 returning programs and 16 trapping programs covering constants, forward and nested
+The current reference set is 106 fixtures, all admitted: 87 returning programs
+and 19 trapping programs covering constants, forward and nested
 calls, lexical blocks, checked compound assignment, signed `i32`/`i64` overflow and
 negation, division-by-zero, signed division/remainder overflow, invalid-shift and
 overflowing-shift traps, and assertion traps, extended by value and void conditionals
@@ -610,9 +621,14 @@ accepted successes rather than traps. Loop cases additionally cover zero iterati
 `i64` counters, side-effecting/calling conditions, nested and mixed loops, loop-local
 shadowing, omitted clauses, initializer assignment, return/break/continue in a while
 condition, early body returns, body/post overflow and calls skipped by loop control.
-The remaining deferred `defer` case fails closed with empty stdout and status 2.
+Defer cases cover immediate `i64` capture, nested LIFO scopes, skipped branches,
+left-to-right argument evaluation, return during registration, return-value-first
+cleanup, zero arguments, local shadowing, short-circuit paths, loop fallthrough,
+break/continue and traps during registration, body execution or deferred cleanup.
+Twenty-one explicitly marked cases compare exact emitted trace bytes as well as
+their return value or trap category.
 
-All 83 admitted fixtures match the Go MIR interpreter, with no contract goldens.
+All 106 admitted fixtures match the Go MIR interpreter, with no contract goldens.
 The Go lowerer captures source-local scalar reads before subsequent binary operands
 or call arguments can change them, and propagates termination through binary and
 short-circuit operands, conditions and enclosing returns. Thus
@@ -647,7 +663,7 @@ evidence remains in `mir-branch-file-cli-20261006.json` and
 `mir-sequential-file-cli-20261006.json`. Linux native execution is deferred to the
 owner's batch, and self-hosting promotion remains blocked.
 
-The loop unit advances this example to version 0.12.0. Its full comparison passes
+The preceding loop unit advanced this example to version 0.12.0. Its comparison passed
 1212 CLI executions (606 per profile), with all 83 admitted MIR fixtures matching
 the executed Go reference and one deferred case. The 12 direct API tests in
 `tests/mir.fy` pass under both native profiles. They include structural checks that
@@ -665,6 +681,17 @@ No TSV tag/field, SDK API, language revision, runtime symbol or stable CLI comma
 is added. The pinned compiler executable and SDK remain unchanged; current Go
 oracle sources are intentionally distinct from the pinned compiler build inputs.
 Evidence: `docs/ops/evidence/mir-loop-file-cli-20261006.json`.
+
+The defer unit advances this example to version 0.13.0. Its full comparison passes
+1256 CLI executions (628 per profile), including all 106 MIR fixtures. Fifteen
+direct API tests in `tests/mir.fy` pass in both native profiles, with new checks
+for scalar capture temporaries, nested LIFO calls and absence of deferred-call
+argument edges on a trapped path. The sample's test executor returns 7. Both
+Windows and Linux target C emission and the scoped Go workspace/vet checks pass;
+Linux native execution remains deferred to the owner's batch. A Go lowering defect
+found by the registration-return case was fixed first in a separate commit:
+an argument that returns must stop further capture and parent-call registration.
+Evidence: `docs/ops/evidence/mir-defer-file-cli-20261006.json`.
 
 ## Recognition and limits
 

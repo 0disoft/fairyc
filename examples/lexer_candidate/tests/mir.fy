@@ -74,10 +74,43 @@ fn void nested_call_arguments_have_separate_ranges() {
 }
 
 @test
-fn void defer_still_fails_closed() {
-    assert(!lowered(b"module main; fn void f(){defer g();} fn void g(){}",0).is_ok);
+fn void defer_uses_ordinary_calls() {
+    let m::Program p = retained(b"module main; fn void f(){defer g();} fn void g(){}",0);
+    let m::Block call = m::block_at(ref p,m::function_at(ref p,1).entry);
+    assert(call.kind == 5 && call.destination == 0 && call.argument_count == 0);
+    assert(m::block_at(ref p,call.target).kind == 1);
     let m::Program empty = retained(b"module main;",0);
     assert(m::function_count(ref empty) == 0 && m::block_count(ref empty) == 0);
+}
+
+@test
+fn void defer_captures_a_temporary_before_assignment() {
+    let m::Program p = retained(b"module main; fn i32 main(){var i32 x=1;defer check(x);x=2;return 0;}fn void check(i32 x){assert(x==1);}",0);
+    let m::Block call = m::block_at(ref p,m::function_at(ref p,1).entry);
+    assert(call.kind == 5 && call.argument_count == 1);
+    let m::Local captured = m::local_at(ref p,m::edge_at(ref p,call.argument_start));
+    assert(captured.binding == 0 && captured.type == 1 && !captured.parameter);
+    assert(m::block_at(ref p,call.target).kind == 1);
+}
+
+@test
+fn void defer_scopes_produce_lifo_calls() {
+    let m::Program p = retained(b"module main; fn i32 main(){defer a();return {defer b();9};}fn void a(){}fn void b(){}",0);
+    let m::Block first = m::block_at(ref p,m::function_at(ref p,1).entry);
+    let m::Block second = m::block_at(ref p,first.target);
+    assert(first.kind == 5 && second.kind == 5);
+    let m::Target b = m::target_at(ref p,first.callee); let m::Target a = m::target_at(ref p,second.callee);
+    assert(bytes::equal(m::source_view(ref p)[b.start..b.end],b"b"));
+    assert(bytes::equal(m::source_view(ref p)[a.start..a.end],b"a"));
+    assert(m::block_at(ref p,second.target).kind == 1);
+}
+
+@test
+fn void trapped_scope_publishes_no_deferred_argument_edges() {
+    let m::Program p = retained(b"module main; fn i32 main(){defer check(1);assert(false);return 0;}fn void check(i32 x){discard x;}",0);
+    assert(m::edge_count(ref p) == 1);
+    var usize i = 1;
+    while (i <= m::block_count(ref p)) { assert(m::block_at(ref p,i).kind != 5); i += 1; }
 }
 
 @test
