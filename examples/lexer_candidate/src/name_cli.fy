@@ -18,9 +18,16 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path, bool dump) {
     };
     if (syntax::problem_count(ref parsed) != 0) { return declarations::errors(ref parsed,path); }
     let names::Resolved resolved = names::resolve(parsed);
-    let names::Problem problem = names::problem(ref resolved);
+    if (names::problem(ref resolved).code != 0) { return errors(ref resolved,path); }
+    if (dump) { return bindings::run(ref resolved); }
+    return if (io::write("names ok\n").is_ok) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+}
+
+@effects(console)
+pub fn i32 errors(ref names::Resolved resolved, ref u8[] path) {
+    let names::Problem problem = names::problem(resolved);
     if (problem.code != 0) {
-        output::prefix(names::source_view(ref resolved),path,problem.start);
+        output::prefix(names::source_view(resolved),path,problem.start);
         discard io::write_stderr(if (problem.code == 1) { "unresolved name" }
             else if (problem.code == 2) { "duplicate name in scope" }
             else if (problem.code == 3) { "unsupported name-check syntax" }
@@ -28,6 +35,5 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path, bool dump) {
             else if (problem.code == 6) { "invalid parsed source" } else { "name-check limit" });
         output::range(problem.start,problem.end); return 2;
     }
-    if (dump) { return bindings::run(ref resolved); }
-    return if (io::write("names ok\n").is_ok) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+    return 0;
 }

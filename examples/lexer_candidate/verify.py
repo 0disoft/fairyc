@@ -10,12 +10,13 @@ import shutil
 import subprocess
 import tempfile
 from verify_names import verify_names
+from verify_types import verify_types
 
 ROOT = Path(__file__).resolve().parent
 KINDS = ['invalid', 'eof', 'trivia', 'identifier', 'keyword', 'integer', 'float', 'string', 'byte-string', 'c-string', 'symbol']
 TRIVIA = ['none', 'preamble', 'whitespace', 'line-comment', 'block-comment', 'documentation-line']
 HEADER = 'kind\ttrivia\tstart\tend\traw_hex\tcooked_hex\n'
-USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n'
+USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n'
 HELP = USAGE + '       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n'
 
 
@@ -115,6 +116,7 @@ def main():
     parser.add_argument('--receipt', type=Path, required=True)
     parser.add_argument('--declarations-reference', type=Path)
     parser.add_argument('--names-reference', type=Path)
+    parser.add_argument('--types-reference', type=Path)
     options = parser.parse_args()
     compiler = options.compiler.resolve(strict=True)
     reference_path = options.reference.resolve(strict=True)
@@ -124,6 +126,10 @@ def main():
     declarations_reference = json.loads(declarations_path.read_text(encoding='utf-8')) if declarations_path else None
     if declarations_reference:
         assert declarations_reference['schema'] == 'fairyc.declarations-file-oracle/v1'
+    types_path = options.types_reference.resolve(strict=True) if options.types_reference else None
+    types_reference = json.loads(types_path.read_text(encoding='utf-8')) if types_path else None
+    if types_reference:
+        assert types_reference['schema'] == 'fairyc.types-file-oracle/v1' and types_reference['fixtures']
     names_path = options.names_reference.resolve(strict=True) if options.names_reference else None
     names_reference = json.loads(names_path.read_text(encoding='utf-8')) if names_path else None
     if names_reference:
@@ -191,6 +197,8 @@ def main():
 
             name_counts = verify_names(image, names_reference, directory, rows, run, sha, location) if names_reference else None
 
+            type_counts = verify_types(image, types_reference, directory, rows, run, sha, location) if types_reference else None
+
             errors = [('missing-argument', ['--tokens-file'], USAGE),
                       ('unknown-option', ['--unknown'], USAGE),
                       ('extra-argument', ['--tokens-file', 'a', 'b'], USAGE),
@@ -226,6 +234,19 @@ def main():
                         row['input'] = dict(path=str(path),beforeSHA256=before,afterSHA256=sha(path),bytes=len(source))
                         assert before == sha(path)
                         assert (row['exit'], row['stdout'], row['stderr']) == (2, '', str(path) + suffix), row
+            if types_reference:
+                for name, args, expected in errors:
+                    type_args = ['--check-types-file' if x == '--tokens-file' else x for x in args]
+                    row = run([image, *type_args], rows, 'types-' + name)
+                    assert (row['exit'], row['stdout'], row['stderr']) == (2, '', expected), row
+                for source, suffix in [(b'module main', ':1:12: error: expected ; (bytes 11..11)\n'),
+                                       (b'module main;\xff', ':1:13: error: E0001 (bytes 12..13)\n')]:
+                    path = directory / 'types-malformed.fy'
+                    path.write_bytes(source)
+                    before = sha(path)
+                    row = run([image, '--check-types-file', path], rows, 'types-malformed')
+                    assert before == sha(path)
+                    assert (row['exit'], row['stdout'], row['stderr']) == (2, '', str(path) + suffix), row
             row = run([image, '--help'], rows, 'help')
             assert (row['exit'], row['stdout'], row['stderr']) == (0, HELP, ''), row
             row = run([image], rows, 'legacy-empty-stdin')
@@ -239,15 +260,16 @@ def main():
             save(raw, dict(profile=profile, runs=rows))
             profiles.append(dict(profile=profile, passed=True, fileCases=len(reference['fixtures']),
                                  accepted=successes, diagnosticCases=diagnostics, limitCases=limits, unchangedFiles=unchanged,
-                                 declarations=declaration_counts, names=name_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
+                                 declarations=declaration_counts, names=name_counts, types=type_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
                                  raw=str(raw), rawSHA256=sha(raw)))
-    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), *sorted((ROOT / 'tests').glob('*.fy'))]
+    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', ROOT / 'verify_types.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), *sorted((ROOT / 'tests').glob('*.fy'))]
     save(receipt, dict(schema='fairyc.lexer-file-cli-verification/v1', compiler=dict(path=str(compiler), sha256=sha(compiler)),
                        reference=dict(path=str(reference_path), sha256=sha(reference_path)),
                        declarationsReference=dict(path=str(declarations_path), sha256=sha(declarations_path)) if declarations_path else None, common=common,
                        namesReference=dict(path=str(names_path), sha256=sha(names_path)) if names_path else None,
+                       typesReference=dict(path=str(types_path), sha256=sha(types_path)) if types_path else None,
                        sources=[dict(path=str(p.relative_to(ROOT)), sha256=sha(p)) for p in sources], profiles=profiles))
-    print('PASS:', sum(p['cliExecutions'] for p in profiles), 'CLI executions;', len(reference['fixtures']), 'Go token reference files/profile; declarations:', declarations_reference and len(declarations_reference['fixtures']), '; names:', names_reference and len(names_reference['fixtures']))
+    print('PASS:', sum(p['cliExecutions'] for p in profiles), 'CLI executions;', len(reference['fixtures']), 'Go token reference files/profile; declarations:', declarations_reference and len(declarations_reference['fixtures']), '; names:', names_reference and len(names_reference['fixtures']), '; types:', types_reference and len(types_reference['fixtures']))
 
 
 if __name__ == '__main__':

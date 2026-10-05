@@ -31,6 +31,9 @@ type fixture struct {
 }
 
 func run() error {
+	if len(os.Args) == 3 && os.Args[1] == "--types" {
+		return writeTypes(os.Args[2])
+	}
 	if len(os.Args) == 3 && os.Args[1] == "--names" {
 		return writeNames(os.Args[2])
 	}
@@ -38,7 +41,7 @@ func run() error {
 		return writeDeclarations(os.Args[2])
 	}
 	if len(os.Args) != 2 {
-		return fmt.Errorf("usage: fairyc-lexer-file-oracle [--declarations|--names] <output.json>")
+		return fmt.Errorf("usage: fairyc-lexer-file-oracle [--declarations|--names|--types] <output.json>")
 	}
 	var fixtures []fixture
 	add := func(name string, input []byte) error {

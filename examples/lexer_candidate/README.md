@@ -33,7 +33,7 @@ a live borrow.
 A new front end adds a regular file mode without changing the binary stdin protocol:
 the no-argument frame reader stays exactly as described below, and
 `--tokens-file <path>`, `--declarations-file <path>`,
-`--check-names-file <path>`, `--bindings-file <path>`, and `--help` are the file-mode arguments.
+`--check-names-file <path>`, `--bindings-file <path>`, `--check-types-file <path>`, and `--help` are the file-mode arguments.
 
 ```sh
 lexer-candidate --tokens-file path/to/source.fy
@@ -281,6 +281,61 @@ is unavailable because this component uses the native-only `std::vec` SDK path.
 Evidence is `docs/ops/evidence/bindings-file-cli-20261005.json`. The example version is
 0.4.0; compiler, SDK and language contracts are unchanged. Linux native execution is
 still deferred to the batch; no allocation-failure or OS I/O injection was run.
+
+## Scalar type checking (`--check-types-file`)
+
+```sh
+lexer-candidate --check-types-file samples/types-demo.fy
+```
+
+Success emits `types ok` and exit 0 after lexing, parsing, name resolution and
+checking the complete file. Failure emits one source/line/byte-range diagnostic
+to stderr, exit 2 and no stdout. The input file is read only. This mode checks
+`i32`, `i64`, `u8`, `u32`, `usize`, `bool` and `void` function results, typed or
+inferred locals, arithmetic/bitwise/shift/comparison/boolean operators, immutable
+assignment, direct function calls, argument count/types and return types. It
+applies ADR 0417's fixed-peer contextual integer rules without implicit width
+conversion, checks each literal's range, and preserves the direct-token signed
+minimum exception in decimal, hexadecimal and binary.
+
+The reusable `type_check::Typed` resource owns the resolved source and a bounded
+SDK vector of scalar type slots. `problem`, `source_view`, `resolved`,
+`symbol_type`, `expression_type` and `signed_minimum` expose the retained facts;
+type-table queries require success. Private type codes are 0 absent/linkage,
+1 i32, 2 i64, 3 u8, 4 u32, 5 usize, 6 bool, 7 void and 8 callable. Function
+symbol types describe their results; a callee expression uses code 8. Postorder
+linkage nodes carry no value type. Only a direct negative minimum sets the
+signed-minimum flag, including its separately retained magnitude child type.
+
+Slots use bounded heap storage, avoiding large fixed-array copies on the Windows
+native stack. Allocation failure rejects the file. Additional limits are 4096
+syntax expression nodes, 1024 entries, 1152 symbols and 64 active checker levels;
+existing source/parser/name limits also apply. Statements after a return are
+still checked. The straight-line function return gate matches the Go reference;
+branch/loop return coverage and ownership/initialization Flow remain subsequent
+work. Imports, composite types, casts, control-flow syntax and generics are
+currently rejected by the preceding name phase.
+
+Generate independent test data and run the portable harness from the repository
+root (no PowerShell runtime is required):
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle .cache/types-file-cli/tokens-reference.json
+go run ./cmd/fairyc-lexer-file-oracle --declarations .cache/types-file-cli/declarations-reference.json
+go run ./cmd/fairyc-lexer-file-oracle --names .cache/types-file-cli/names-reference.json
+go run ./cmd/fairyc-lexer-file-oracle --types .cache/types-file-cli/reference.json
+python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/types-file-cli/tokens-reference.json --declarations-reference .cache/types-file-cli/declarations-reference.json --names-reference .cache/types-file-cli/names-reference.json --types-reference .cache/types-file-cli/reference.json --receipt /path/to/evidence/receipt.json
+```
+
+The type fixtures compare pass/fail and the selected error span against Go
+semantic analysis, while unsupported syntax and the candidate's storage cap have
+explicit rejection checks. CLI/file errors, malformed syntax/UTF-8, source
+preservation, existing modes and the framed stdin protocol run in both Windows
+native profiles. `tests/types.fy` checks retained symbol/expression types and
+minimum flags. Evidence is `docs/ops/evidence/types-file-cli-20261005.json`;
+the example is version 0.5.0, with compiler/SDK inputs unchanged. Linux C emission
+is checked; Linux native execution remains deferred to the owner's batch.
+Allocation/OS fault injection and performance experiments were not run.
 
 ## Recognition and limits
 
