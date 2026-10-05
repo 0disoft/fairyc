@@ -17,13 +17,13 @@ fn void precedence_and_scanner_modes() {
     assert(tokens::scan_eval(b"x=0*(9223372036854775807+1);", ref mut page).is_ok);
     assert(switch(evaluator::evaluate(b"x=0*(9223372036854775807+1);", tokens::valid(ref page), ref mut environment)) {
         case .ok(_): { false }
-        case .err(code): { code == 10 }
+        case .err(problem): { problem.code == 10 }
     });
     assert(environment.used == 0);
     assert(tokens::scan_eval(b"x=2*(3+);", ref mut page).is_ok);
     assert(switch(evaluator::evaluate(b"x=2*(3+);", tokens::valid(ref page), ref mut environment)) {
         case .ok(_): { false }
-        case .err(code): { code == 8 }
+        case .err(problem): { problem.code == 8 }
     });
     assert(tokens::scan_eval(b"x=(1+2)*3;", ref mut page).is_ok);
     assert(evaluator::evaluate(b"x=(1+2)*3;", tokens::valid(ref page), ref mut environment).is_ok);

@@ -1,0 +1,301 @@
+{
+  "schema": "fairyc.token-page-diagnostics-cli-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "c2d324a88e409c90ed795af23dbb5a63e91c9047",
+  "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+  "sourceArtifacts": [
+    {
+      "path": "examples/token_page_cli/fairy.lock",
+      "sha256": "943a14d54568f7c873f821e63d4720cf7f2162b5fa7940a69c70017dfac73219"
+    },
+    {
+      "path": "examples/token_page_cli/fairy.toml",
+      "sha256": "e8ee7f841764b3dfa97520fda7b39ae2d9af01583993fd942b8d2fcda2c97258"
+    },
+    {
+      "path": "examples/token_page_cli/README.md",
+      "sha256": "60819f5de93412fb6aefc24038a59d1c01c2ad04efb37679456574dc21677c5b"
+    },
+    {
+      "path": "examples/token_page_cli/samples/program.calc",
+      "sha256": "cbfa059bf6f67ea5cecc1de34c7037f3033ca74941bc76f9d3f98a79cb83d195"
+    },
+    {
+      "path": "examples/token_page_cli/src/arithmetic.fy",
+      "sha256": "cf3f109560e8cd2a0382368a99fec0e3b651e41a92f9164c0294cce7071f8566"
+    },
+    {
+      "path": "examples/token_page_cli/src/diagnostics.fy",
+      "sha256": "eb98bd1f2526af14636d391895b00497c4676efe44b9e12970cbe0c7153ceb51"
+    },
+    {
+      "path": "examples/token_page_cli/src/evaluator.fy",
+      "sha256": "4c5f7db6af4d968d793b6b2ebb5e01625b6ad68a22cf1f8f935e092aadfc1ac2"
+    },
+    {
+      "path": "examples/token_page_cli/src/input_file.fy",
+      "sha256": "f580186528685771d9c27b0bc22458a72140ff8b5726007d35ed4efb17471448"
+    },
+    {
+      "path": "examples/token_page_cli/src/main.fy",
+      "sha256": "1d01bb237fd33e042f92658ee8269d08526d254d6b01c0954d363c41263b14ff"
+    },
+    {
+      "path": "examples/token_page_cli/src/tokens.fy",
+      "sha256": "0f44828d28a7e629311bcf68a74d53c8b3d957c00a5f5201eaa5bbf3738396aa"
+    },
+    {
+      "path": "examples/token_page_cli/tests/arithmetic.fy",
+      "sha256": "5ab87016b21c02b54fbaa2ecd35229649db226a064754645aa7df57582394a5c"
+    },
+    {
+      "path": "examples/token_page_cli/tests/diagnostics.fy",
+      "sha256": "93eab4b0da04a29f67ae25e1ff8536875fa70047b5370bb1724f0ed9bf8e3b24"
+    },
+    {
+      "path": "examples/token_page_cli/tests/evaluation.fy",
+      "sha256": "8210aac60f55f1f1cab4df1e1ca411e60f8fe271001b8a523aa7521fd25f1c06"
+    },
+    {
+      "path": "examples/token_page_cli/tests/page.fy",
+      "sha256": "81fcce2312449c212933efe2bf2bd7eb08d5fdb56d04ec552b3265bdf4f90b08"
+    },
+    {
+      "path": "examples/token_page_cli/verify.py",
+      "sha256": "be8894a434a0dbd6d4c4f5f07958317674677dd07f7877c95a9c0ada031052e7"
+    },
+    {
+      "path": "internal/cli/token_page_cli_test.go",
+      "sha256": "b55ac682e7794fc8a59baefa9d9eac6ec17d585a8f4b937b8965c0e6234da992"
+    }
+  ],
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+    "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf"
+  },
+  "compilerSourceManifest": {
+    "path": ".cache\\nominal-array-field-view-compiler\\source-manifest.json",
+    "sha256": "62763a51977d82a18255f07af3c424ddc988a1e1b8f96cd3afabfaeafc302107",
+    "sourceDigest": "6de6ed7dc29d60d5c47ddbc59863341c4a80f98cb1559cb0b0010b280704e0f4",
+    "fileCount": 619,
+    "matchesCurrentCompilerInputs": true,
+    "reused": true
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sdkIdentity": "fairyc-sdk-stdlib/0",
+    "runtimeAbi": "fairyc-runtime/0",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "verification": {
+    "argv": [
+      "python",
+      "examples/token_page_cli/verify.py",
+      "--compiler",
+      ".cache/nominal-array-field-view-compiler/fairyc.exe",
+      "--receipt",
+      ".cache/token-page-diagnostics-cli/receipt.json"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "common": [
+      {
+        "case": "compiler --version",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\token_page_cli",
+        "exit": 0,
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005093555-585e5ef53991+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 585e5ef53991368dce52094889ba7bb275b52103\nmodified: true\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\token_page_cli",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 13 source file(s), 186 MIR function(s), lock unchanged\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check --locked",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\token_page_cli",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 13 source file(s), 186 MIR function(s), lock verified\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler test --json --locked",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "test",
+          "--json",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\token_page_cli",
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"interpreter\",\"target\":null,\"profile\":null,\"tests\":[{\"identity\":\"tests::arithmetic::precedence_and_scanner_modes\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::diagnostics::error_offsets_and_byte_locations\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::evaluation::bindings_and_reuse\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::page::normalized_spans_and_reuse\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":4,\"passed\":4,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": ""
+      }
+    ],
+    "profiles": [
+      {
+        "profile": "dev",
+        "imageSHA256": "3f60f8d7936a5d37a65c161407217cf9ff17f49f257c0ca5dfc135f76280a4ba",
+        "cases": 173,
+        "fileCases": 28,
+        "passed": true,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\token-page-diagnostics-cli\\dev.exe",
+        "raw": "docs/ops/evidence/token-page-diagnostics-cli-20261005.dev.json",
+        "rawSHA256": "253e5ed38505037cf9336b4ad8ebab349dca74989d5b988f05b3420b7c7b4111",
+        "unchangedInputFiles": 24
+      },
+      {
+        "profile": "release",
+        "imageSHA256": "214b751db84276991b56af39183fa640c8fe6ccb288974409df954418997b2f4",
+        "cases": 173,
+        "fileCases": 28,
+        "passed": true,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\token-page-diagnostics-cli\\release.exe",
+        "raw": "docs/ops/evidence/token-page-diagnostics-cli-20261005.release.json",
+        "rawSHA256": "2b275503f53e9fe2ddf010fffe466ab4a9188903e7b86e76a8dd01e43055eedb",
+        "unchangedInputFiles": 24
+      }
+    ],
+    "cliExecutions": 346,
+    "interpreterTests": 4,
+    "nativeSourceTests": 8,
+    "oracle": "Python recursive grammar, independent byte-line regex oracle and 18 authored diagnostic goldens; bounded file fixtures with SHA256 preservation"
+  },
+  "additionalValidation": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-linux-gnu",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\token_page_cli",
+      "exit": 0,
+      "stderr": "",
+      "stdoutPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\token-page-diagnostics-cli\\x86_64-linux-gnu.c",
+      "stdoutSHA256": "0e38ad9cd0f7494e4696cf5758a2123fb175f5ff301fae5d10112b17c9ba5b40"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-windows-msvc",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\token_page_cli",
+      "exit": 0,
+      "stderr": "",
+      "stdoutPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\token-page-diagnostics-cli\\x86_64-windows-msvc.c",
+      "stdoutSHA256": "1a537c1d8f14787385bc5ec8d4ec81ab31418d1de1669e3f6360bbd9072a3ca1"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/cli",
+        "-run",
+        "^TestTokenPageCLIStorage$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/cli\t0.212s\n",
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      }
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      }
+    }
+  ],
+  "limits": {
+    "inputBytes": 4095,
+    "fileReadBytesMaximum": 4096,
+    "filePathUtf8Bytes": 4095,
+    "tokens": 128,
+    "variables": 16,
+    "parenthesisDepth": 16,
+    "fileWorkload": "regular files; read-only open, read until EOF or sentinel limit, successful close before evaluation",
+    "linuxExecution": "deferred by owner to consolidated batch",
+    "ioFaultInjection": "not run",
+    "performance": "not measured"
+  },
+  "scope": {
+    "localCommitOnly": true,
+    "push": false,
+    "compilerChanges": false,
+    "sdkChanges": false,
+    "newPS1": false,
+    "ciChanges": false
+  },
+  "diagnostics": {
+    "modes": [
+      "--eval",
+      "--eval-file"
+    ],
+    "argumentLabel": "<argument>",
+    "fileLabel": "path as supplied",
+    "locatedCodes": [
+      1,
+      2,
+      3,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "plainCodes": [
+      5,
+      6,
+      7,
+      13,
+      14
+    ],
+    "lineBase": 1,
+    "columnBase": 1,
+    "columnUnit": "byte",
+    "newlines": [
+      "LF",
+      "CRLF",
+      "CR"
+    ],
+    "tabColumns": 1,
+    "eof": "one past final byte",
+    "overflowLocation": "literal: first overflowing digit; arithmetic: failing operator"
+  }
+}

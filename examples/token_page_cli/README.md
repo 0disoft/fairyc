@@ -2,8 +2,8 @@
 
 Windows AMD64 and Linux GNU amd64 example. It requires a compiler with ADR 0472 support;
 the SDK stage0.86 version alone does not identify that support. Product logic is Fairy C in
-`src/main.fy`, `src/tokens.fy`, `src/evaluator.fy`, `src/arithmetic.fy`, and
-`src/input_file.fy`.
+`src/main.fy`, `src/tokens.fy`, `src/evaluator.fy`, `src/arithmetic.fy`, `src/input_file.fy`,
+and `src/diagnostics.fy`.
 
 A bounded ASCII lexer stores every scanned token directly into the fixed array field of
 a plain struct instead of a `Vec`:
@@ -11,7 +11,7 @@ a plain struct instead of a `Vec`:
 ```fairy
 struct Span { usize start; usize end; }
 struct Token { u32 kind; Span position; i64 value; }
-struct TokenPage { Token[128] tokens; usize used; }
+struct TokenPage { Token[128] tokens; usize used; usize error_offset; }
 ```
 
 The command is `token-page-cli [ASCII-source]` for the default analysis mode,
@@ -85,7 +85,8 @@ summaries are ready, and lexical or sum errors produce no stdout. The token-capa
 runs before parsing the next significant token, so the token-limit diagnostic wins when the
 129th token begins.
 
-Failure cases exit 2 with exactly one of these lines on stderr:
+In the default analysis mode, failure cases exit 2 with exactly one of these plain lines on
+stderr:
 
 ```text
 error: invalid ASCII input
@@ -168,7 +169,8 @@ stack of 128 slots each rather than a recursive parser; stack saturation reports
 `error: invalid evaluation syntax`, and exceeding 16 parenthesis levels reports
 `error: parenthesis limit (16)`.
 
-Evaluation-mode failures exit 2 with exactly one of these lines on stderr:
+Evaluation-mode failures exit 2 with exactly one located line
+`<argument>:LINE:COLUMN: error: <message>` on stderr, using these messages:
 
 ```text
 error: invalid evaluation syntax
@@ -178,11 +180,13 @@ error: variable limit (16)
 error: parenthesis limit (16)
 ```
 
-The lexical, integer, token-limit, input-limit, allocation, and stdout-write errors above
-still apply. `--eval` requires exactly one source argument after the flag; any other
-argument count exits 2 with `usage: token-page-cli [ASCII-source]` on stderr. `--eval
---help` treats `--help` as the source and fails with `error: invalid ASCII input`, because
-in this mode the second argument is always the source.
+The lexical, integer, and token-limit errors above also gain a location in evaluation mode,
+while the input-limit, allocation, and stdout-write errors stay plain. `--eval` requires
+exactly one source argument after the flag; any other argument count exits 2 with
+`usage: token-page-cli [ASCII-source]` on stderr. `--eval --help` treats `--help` as the
+source and fails with a located `error: invalid ASCII input`, because in this mode the
+second argument is always the source. The Diagnostics section below lists the exact offset
+for each code.
 
 ## File input (`--eval-file`)
 
@@ -210,7 +214,7 @@ produce no computation output, while a stdout write failure can still occur afte
 have already been written. The same 128-token, 16-variable, and 16-level parenthesis limits
 apply.
 
-File-input failures exit 2 with exactly one of these lines on stderr:
+File-input open and path failures exit 2 with exactly one of these plain lines on stderr:
 
 ```text
 error: input file read failed
@@ -219,10 +223,11 @@ error: file path limit (4095 UTF-8 bytes)
 
 The `error: input file read failed` line covers an undecodable path and any open, read, or
 close failure; a path argument longer than 4095 UTF-8 bytes reports
-`error: file path limit (4095 UTF-8 bytes)`. `--eval-file` requires exactly one path
-argument after the flag; any other argument count keeps the single-line
-`usage: token-page-cli [ASCII-source]` stderr message. The second argument is always a path
-in this mode, even when it is named `--help`.
+`error: file path limit (4095 UTF-8 bytes)`. Errors inside the loaded source use the located
+form below with the path as supplied. `--eval-file` requires exactly one path argument after
+the flag; any other argument count keeps the single-line `usage: token-page-cli
+[ASCII-source]` stderr message. The second argument is always a path in this mode, even when
+it is named `--help`.
 
 `samples/program.calc` holds `price = 4000000000 + 7; total = (price + 3) * 2;` and prints:
 
@@ -230,6 +235,53 @@ in this mode, even when it is named `--help`.
 price	4000000007
 total	8000000020
 ```
+
+## Diagnostics
+
+`--eval` and `--eval-file` report evaluation failures as one located line:
+
+```text
+<argument>:LINE:COLUMN: error: message
+```
+
+For `--eval` the prefix is the literal label `<argument>`, and for `--eval-file` it is the
+path exactly as supplied. `LINE` and `COLUMN` are 1-based byte positions: a tab counts as
+one column, LF, a lone CR, and CRLF each count as one newline, and EOF sits just after the
+last byte.
+
+For example, a file named `program.calc` holding:
+
+```text
+price=10;
+total=price+;
+```
+
+reports `program.calc:2:13: error: invalid evaluation syntax`, because the parser reaches the
+`;` at byte column 13 of line 2 where a primary was expected.
+
+`src/diagnostics.fy` provides `Problem{ u32 code; usize offset; }` and a `Location{ line;
+column }`. A new `TokenPage.error_offset` locates scan failures, the arithmetic stacks keep
+operator offsets, and each code points at:
+
+| Code | Message | Offset |
+| --- | --- | --- |
+| 1 | `invalid ASCII input` | exact offending byte |
+| 2 | `integer overflow` | first literal digit that exceeds i64 max |
+| 3 | `token limit (128)` | first token after the 128 admitted |
+| 8 | `invalid evaluation syntax` | current unexpected token, or EOF |
+| 9 | `undefined variable` | start of the undefined name |
+| 10 | `evaluation overflow` | the `+` or `*` that overflowed |
+| 11 | `variable limit (16)` | start of the new name beyond 16 |
+| 12 | `parenthesis limit (16)` | the 17th opening `(` |
+
+The arithmetic stacks keep each operator's byte offset, so overflow points at the actual `+`
+or `*` even when a later reduction would have folded it away.
+
+The default analysis mode keeps its plain, unlocated messages and unchanged stdout. IO,
+allocation, input-size, path-size, and usage failures stay plain in both modes:
+`error: buffer allocation failed`, `error: input limit (4095 UTF-8 bytes)`,
+`error: stdout write failed`, `error: input file read failed`,
+`error: file path limit (4095 UTF-8 bytes)`, and `usage: token-page-cli [ASCII-source]`.
 
 Feature locations:
 
@@ -261,6 +313,9 @@ Feature locations:
   it read-only, reads `fs::read` in a bounded loop into an initialized 4096-byte Buffer
   until EOF, closes the handle on success, and returns the byte count to the existing
   evaluator; path, open, read, and close failures return the file-input error.
+- `src/diagnostics.fy` provides `Problem{ u32 code; usize offset; }` and a
+  `Location{ line; column }`, converting a byte offset to a 1-based byte line and column for
+  the located evaluation messages.
 - `tests/evaluation.fy` is a source `@test` (`bindings_and_reuse`): for `'  x=4000000000;
   x=x+7; total=x+3;'` it asserts two bindings whose values `4000000007` and `4000000010`
   exceed i32, that the reassigned name keeps its original unrebased source span `2..3`,
@@ -273,6 +328,11 @@ Feature locations:
   `parenthesis limit (16)` and `invalid evaluation syntax` failures, and checked multiply
   and add overflow. It passes under the interpreter and as a native development and release
   case.
+- `tests/diagnostics.fy` is a source `@test` covering located offsets for an invalid byte,
+  numeric overflow, syntax and EOF, an undefined name, and `+`/`*` overflow, plus LF, CRLF,
+  CR, tab, and empty-source locations and the scanner error-offset reset. The token-limit,
+  variable-limit, and parenthesis-limit locations are covered by the `verify.py` CLI goldens
+  instead.
 
 Token storage uses the fixed array field, so scanning, rebasing and analysis neither
 allocate per token nor copy the whole token array; constructing the page returns a
@@ -283,14 +343,16 @@ no performance claim.
 Portable verification (Python 3.10 or later, standard library only) requires the compiler
 executable and runs `check`, `check --locked`, the locked development and release builds with
 their actual EXEs, the interpreter source tests, and the whole-stdout, error and boundary
-cases for the analysis, evaluation, arithmetic, and file-input modes. Evaluation outputs
-are checked against an independent recursive-descent oracle written in Python, including
-16-level parenthesis nesting and mixed-operator stack pressure. File-input cases use Python
-`tempfile` fixtures for LF and CRLF endings, empty content, invalid bytes, a BOM, over-limit
-content, a missing file, a directory, and empty and over-long paths, and they sha-check that
-the source file is unchanged, including `samples/program.calc`; the three interpreter source
-tests are unchanged. The suite is described by what it exercises rather than by a fixed case
-count. The optional
+cases for the analysis, evaluation, arithmetic, and file-input modes. Evaluation outputs and
+their byte line/column locations are checked against an independent recursive-descent oracle
+written in Python, covering precedence, 16-level parenthesis nesting, mixed-operator stack
+pressure, and the per-code diagnostic offsets. File-input cases use Python `tempfile`
+fixtures for LF and CRLF endings, empty content, invalid bytes, a BOM, over-limit content, a
+missing file, a directory, and empty and over-long paths, and they sha-check that every
+regular input file is unchanged, including `samples/program.calc`. The interpreter source
+tests cover the
+token page, evaluation, arithmetic, and diagnostics modules. The suite is described by what
+it exercises rather than by a fixed case count. The optional
 `--receipt PATH` option writes a summary plus the development and release raw JSON and
 retained images (execute permission preserved) to that path; without it no extra evidence
 logs or image copies are saved, while the ordinary `check` and `build` outputs (the lock
@@ -302,18 +364,24 @@ python verify.py --compiler /absolute/path/to/fairyc --receipt /path/to/evidence
 python verify.py --compiler C:\path\to\fairyc.exe --receipt C:\path\to\evidence\receipt.json
 ```
 
-The full suite passes on Windows amd64 for analysis, `--eval`, and `--eval-file`,
-and the fresh Linux and Windows C emission checks pass. The focused
+The full suite passes on Windows amd64 for analysis, `--eval`, `--eval-file`, and the
+diagnostics extension: `check`, `check --locked`, and the locked development and release
+builds with their interpreter and native tests all pass, every regular file input keeps its
+original SHA, and the fresh Linux and Windows C emission checks pass. The focused
 `TestTokenPageCLIStorage` and `go vet` checks pass as well; `TestTokenPageCLIStorage`
 confirms the tokens module's authored workspace MIR has no fixed-array `FieldRead` or
 `ArrayIndex` copy, exercising the descriptor views and stores instead. The recorded runs used
-the cached compiler `.cache/nominal-array-field-view-compiler/fairyc.exe`, with no compiler
-or SDK changes. Actual Linux execution remains deferred to the owner's consolidated batch, so
-Linux is verified by C emission only. The analysis baseline evidence is
+the cached compiler
+`.cache/nominal-array-field-view-compiler/fairyc.exe` (SHA-256
+`ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf`), with no compiler or SDK
+changes and a matching source manifest. Actual Linux execution remains deferred to the
+owner's consolidated batch, so Linux is verified by C emission only. The analysis baseline
+evidence is
 `docs/ops/evidence/token-page-cli-20261005.json`, the evaluation-mode evidence is
 `docs/ops/evidence/token-page-eval-cli-20261005.json`, the arithmetic extension evidence is
-`docs/ops/evidence/token-page-arithmetic-cli-20261005.json`, and the file-input evidence is
-`docs/ops/evidence/token-page-file-cli-20261005.json`; each records `.dev.json` and
-`.release.json` raw logs against the final source hashes. There is no PowerShell harness and
-no performance claim. See
+`docs/ops/evidence/token-page-arithmetic-cli-20261005.json`, the file-input evidence is
+`docs/ops/evidence/token-page-file-cli-20261005.json`, and the diagnostics extension evidence
+is `docs/ops/evidence/token-page-diagnostics-cli-20261005.json`; each records `.dev.json`
+and `.release.json` raw logs against the final source hashes. There is no PowerShell harness
+and no performance claim. See
 [ADR 0472](../../docs/adr/0472-direct-plain-struct-array-field-views-and-iteration.md).

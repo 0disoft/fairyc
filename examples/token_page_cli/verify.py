@@ -23,33 +23,54 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def oracle(args):
+def byte_location(source, offset):
+    # Count newlines independently of the product's byte-by-byte location loop.
+    prefix = source[:offset]
+    breaks = list(re.finditer(rb"\r\n|\r|\n", prefix))
+    return len(breaks) + 1, len(prefix) - (breaks[-1].end() if breaks else 0) + 1
+
+
+def located_failure(source, label, offset, message):
+    line, column = byte_location(source, offset)
+    return 2, "", f"{label}:{line}:{column}: error: {message}\n"
+
+
+def oracle(args, label="<argument>", raw_source=None):
     evaluation = len(args) == 2 and args[0] == "--eval"
     if len(args) > 1 and not evaluation or args in (["--eval"], ["--eval-file"]):
         return 2, "", USAGE
     source = args[1] if evaluation else args[0] if args else DEMO
-    if len(source.encode("utf-8")) > 4095:
+    source_bytes = source.encode("utf-8") if raw_source is None else raw_source
+    if len(source_bytes) > 4095:
         return 2, "", "error: input limit (4095 UTF-8 bytes)\n"
     if args == ["--help"]:
         return 0, HELP, ""
-    tokens, position = [], 0
+    def failure(message, offset):
+        if evaluation:
+            byte_offset = len(source[:offset].encode("utf-8")) if raw_source is None else offset
+            return located_failure(source_bytes, label, byte_offset, message)
+        return 2, "", f"error: {message}\n"
+
+    tokens, offsets, position = [], [], 0
     for match in (EVAL_LEXEME if evaluation else LEXEME).finditer(source):
         if match.start() != position:
-            return 2, "", "error: token limit (128)\n" if len(tokens) == 128 else "error: invalid ASCII input\n"
+            return failure("token limit (128)" if len(tokens) == 128 else "invalid ASCII input", position)
         text, position = match.group(), match.end()
         if text.isspace():
             continue
         if len(tokens) == 128:
-            return 2, "", "error: token limit (128)\n"
+            return failure("token limit (128)", match.start())
         kind = "number" if text.isdecimal() else "identifier" if text[0].isalpha() or text[0] == "_" else text
         value = int(text) if kind == "number" else 0
         if value > MAX_I64:
-            return 2, "", "error: integer overflow\n"
+            overflow_digit = next(i for i in range(1, len(text) + 1) if int(text[:i]) > MAX_I64)
+            return failure("integer overflow", match.start() + overflow_digit - 1)
         tokens.append((kind, value, text))
+        offsets.append(match.start())
     if position != len(source):
-        return 2, "", "error: token limit (128)\n" if len(tokens) == 128 else "error: invalid ASCII input\n"
+        return failure("token limit (128)" if len(tokens) == 128 else "invalid ASCII input", position)
     if evaluation:
-        return evaluation_oracle(tokens)
+        return evaluation_oracle(tokens, offsets, source_bytes, label)
     if sum(value for _, value, _ in tokens) > MAX_I64:
         return 2, "", "error: sum overflow\n"
     first_end = next((i + 1 for i, token in enumerate(tokens) if token[0] == ";"), len(tokens))
@@ -62,13 +83,15 @@ def oracle(args):
     return 0, "".join(f"{key}\t{value}\n" for key, value in rows), ""
 
 
-def evaluation_oracle(tokens):
+def evaluation_oracle(tokens, offsets, source, label):
     # Recursive grammar oracle, independent of the product's iterative stacks.
     # Python arbitrary-precision values make each i64 overflow check explicit.
     cursor, environment = 0, {}
 
-    def failure(message):
-        raise ValueError(message)
+    def failure(message, offset=None):
+        if offset is None:
+            offset = offsets[cursor] if cursor < len(tokens) else len(source)
+        raise ValueError(message, offset)
 
     def peek():
         return tokens[cursor][0] if cursor < len(tokens) else None
@@ -81,18 +104,19 @@ def evaluation_oracle(tokens):
         cursor += 1
         return token
 
-    def checked(value):
+    def checked(value, offset):
         if value > MAX_I64:
-            failure("evaluation overflow")
+            failure("evaluation overflow", offset)
         return value
 
     def primary(depth):
         if peek() == "number":
             return take("number")[1]
         if peek() == "identifier":
+            offset = offsets[cursor]
             name = take("identifier")[2]
             if name not in environment:
-                failure("undefined variable")
+                failure("undefined variable", offset)
             return environment[name]
         if peek() == "(":
             if depth == 16:
@@ -106,28 +130,31 @@ def evaluation_oracle(tokens):
     def product(depth):
         value = primary(depth)
         while peek() == "*":
+            offset = offsets[cursor]
             take("*")
-            value = checked(value * primary(depth))
+            value = checked(value * primary(depth), offset)
         return value
 
     def expression(depth):
         value = product(depth)
         while peek() == "+":
+            offset = offsets[cursor]
             take("+")
-            value = checked(value + product(depth))
+            value = checked(value + product(depth), offset)
         return value
 
     try:
         while cursor < len(tokens):
+            name_offset = offsets[cursor]
             name = take("identifier")[2]
             take("=")
             value = expression(0)
             take(";")
             if name not in environment and len(environment) == 16:
-                failure("variable limit (16)")
+                failure("variable limit (16)", name_offset)
             environment[name] = value
     except ValueError as error:
-        return 2, "", f"error: {error}\n"
+        return located_failure(source, label, error.args[1], error.args[0])
     return 0, "".join(f"{key}\t{value}\n" for key, value in environment.items()), ""
 
 
@@ -154,7 +181,7 @@ def cases():
         ("analysis-rejects-close-parenthesis", ["x=1);"]),
         ("file-missing-path", ["--eval-file"]),
         ("file-extra-argument", ["--eval-file", "source.calc", "extra"]),
-    ] + evaluation_cases() + arithmetic_cases()
+    ] + evaluation_cases() + arithmetic_cases() + diagnostics_cases()
 
 
 def evaluation_cases():
@@ -243,6 +270,36 @@ def arithmetic_cases():
     return [("arithmetic-" + name, ["--eval", source]) for name, source in fixtures]
 
 
+def diagnostics_cases():
+    fixtures = [
+        ("syntax-LF", "price=10;\ntotal=price+;", 2, 13, "invalid evaluation syntax"),
+        ("syntax-CRLF", "price=10;\r\ntotal=price+;", 2, 13, "invalid evaluation syntax"),
+        ("syntax-CR", "price=10;\rtotal=price+;", 2, 13, "invalid evaluation syntax"),
+        ("tabs", "x=1;\n\ty=missing;", 2, 4, "undefined variable"),
+        ("EOF", "x=1;\r\ny=2", 2, 4, "invalid evaluation syntax"),
+        ("EOF-after-newline", "x=1;\r\ny=2\r\n", 3, 1, "invalid evaluation syntax"),
+        ("EOF-after-CR", "x=1;\ry=2\r", 3, 1, "invalid evaluation syntax"),
+        ("EOF-open-group", "x=(1+2", 1, 7, "invalid evaluation syntax"),
+        ("byte-invalid", "x=1;\r\n\t@", 2, 2, "invalid ASCII input"),
+        ("UTF8-invalid", "x=1;\n\t한", 2, 2, "invalid ASCII input"),
+        ("overflow-digit", "x=1;\ny=9223372036854775808;", 2, 21, "integer overflow"),
+        ("overflow-product", "x=1;\ny=3037000500*3037000500;", 2, 13, "evaluation overflow"),
+        ("overflow-earlier-plus", "x=9223372036854775807+1+0;", 1, 22, "evaluation overflow"),
+        ("overflow-group", "x=0*(9223372036854775807+1);", 1, 25, "evaluation overflow"),
+        ("mixed-newlines", "x=1;\r\n\ny=2;\r\tz=missing;", 4, 4, "undefined variable"),
+        ("variable-limit", "".join(f"v{i}=0;\n" for i in range(17)), 17, 1, "variable limit (16)"),
+        ("token-limit", "x=" + "+".join("0" for _ in range(63)) + ";\n@", 2, 1, "token limit (128)"),
+        ("paren-limit", "x=\n" + "(" * 17 + "1" + ")" * 17 + ";", 2, 17, "parenthesis limit (16)"),
+    ]
+    result = []
+    for name, source, line, column, message in fixtures:
+        args = ["--eval", source]
+        expected = (2, "", f"<argument>:{line}:{column}: error: {message}\n")
+        assert oracle(args) == expected, (name, oracle(args), expected)
+        result.append(("diagnostics-" + name, args))
+    return result
+
+
 def save(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
@@ -251,6 +308,12 @@ def save(path, value):
 def file_cases(directory):
     fixtures = [
         ("empty", b""), ("whitespace", b" \t\r\n"),
+        ("syntax-LF", b"price=10;\ntotal=price+;"),
+        ("syntax-CRLF", b"price=10;\r\ntotal=price+;"),
+        ("syntax-CR", b"price=10;\rtotal=price+;"),
+        ("EOF-newline", b"x=1;\r\ny=2\r\n"),
+        ("tabs-undefined", b"x=1;\n\ty=missing;"),
+        ("invalid-byte-after-newline", b"x=1;\r\n\t\xff"),
         ("LF", b"price=4000000000+7;\ntotal=(price+3)*2;\n"),
         ("CRLF", b"price=4000000000+7;\r\ntotal=(price+3)*2;\r\n"),
         ("no-final-newline", b"a=2+3*4;b=(2+3)*4;"),
@@ -270,17 +333,12 @@ def file_cases(directory):
     for name, content in fixtures:
         path = directory / ("한글 계산.calc" if name == "korean-and-space-path" else name + ".calc")
         path.write_bytes(content)
-        if len(content) > 4095:
-            expected = 2, "", "error: input limit (4095 UTF-8 bytes)\n"
-        elif any(value > 127 for value in content):
-            expected = 2, "", "error: invalid ASCII input\n"
-        else:
-            expected = oracle(["--eval", content.decode("ascii")])
         argument = str(path.relative_to(ROOT)) if name == "korean-and-space-path" else str(path)
+        expected = oracle(["--eval", content.decode("latin1")], label=argument, raw_source=content)
         result.append(("file-" + name, ["--eval-file", argument], expected, path))
     sample = ROOT / "samples" / "program.calc"
     result.append(("file-sample", ["--eval-file", "samples/program.calc"],
-                   oracle(["--eval", sample.read_text(encoding="ascii")]), sample))
+                   oracle(["--eval", sample.read_text(encoding="ascii")], label="samples/program.calc"), sample))
     failure = 2, "", "error: input file read failed\n"
     result.extend([
         ("file-not-found", ["--eval-file", str(directory / "missing.calc")], failure, None),
@@ -319,7 +377,7 @@ def main():
             raise RuntimeError(row)
         if args[0] == "test":
             report = json.loads(row["stdout"])
-            if report["count"] != 3 or report["passed"] != 3 or report["failed"] != 0:
+            if report["count"] != 4 or report["passed"] != 4 or report["failed"] != 0:
                 raise RuntimeError(row)
     with tempfile.TemporaryDirectory(prefix="file-input-", dir=build_directory) as temporary:
         fixture_directory = Path(temporary).resolve()
@@ -337,7 +395,7 @@ def verify_profiles(compiler, receipt, common, profiles, file_fixtures, run):
             raise RuntimeError(row)
         row = run([compiler, "test", "--json", "--native", *flags, "--locked"], rows, "native source tests")
         report = json.loads(row["stdout"]) if row["exit"] == 0 else {}
-        if row["exit"] or report["count"] != 3 or report["passed"] != 3 or report["failed"] != 0:
+        if row["exit"] or report["count"] != 4 or report["passed"] != 4 or report["failed"] != 0:
             raise RuntimeError(row)
         image = ROOT / "build" / ("token-page-cli.exe" if os.name == "nt" else "token-page-cli")
         image_hash = sha(image)

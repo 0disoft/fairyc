@@ -18,7 +18,7 @@ fn void bindings_and_reuse() {
     assert(tokens::scan(b"x=1; x=missing;", ref mut page).is_ok);
     assert(switch(evaluator::evaluate(b"x=1; x=missing;", tokens::valid(ref page), ref mut environment)) {
         case .ok(_): { false }
-        case .err(code): { code == 9 }
+        case .err(problem): { problem.code == 9 }
     });
     // A failed RHS does not overwrite the earlier binding; no CLI output is emitted.
     assert(environment.used == 1 && environment.bindings[0].value == 1);
@@ -28,6 +28,6 @@ fn void bindings_and_reuse() {
     assert(tokens::scan(b"x=x+1;", ref mut page).is_ok);
     assert(switch(evaluator::evaluate(b"x=x+1;", tokens::valid(ref page), ref mut environment)) {
         case .ok(_): { false }
-        case .err(code): { code == 9 }
+        case .err(problem): { problem.code == 9 }
     });
 }

@@ -2,13 +2,13 @@ module tokens;
 
 pub struct Span { usize start; usize end; }
 pub struct Token { u32 kind; Span position; i64 value; }
-pub struct TokenPage { Token[128] tokens; usize used; }
+pub struct TokenPage { Token[128] tokens; usize used; usize error_offset; }
 pub struct Stats { usize identifiers; usize numbers; i64 sum; }
 
 pub fn TokenPage empty() {
     return TokenPage {
         .tokens = [Token { .kind = 0, .position = Span { .start = 0, .end = 0 }, .value = 0 }; 128],
-        .used = 0
+        .used = 0, .error_offset = 0
     };
 }
 fn bool letter(u8 c) { return c >= 65 && c <= 90 || c >= 97 && c <= 122 || c == 95; }
@@ -25,12 +25,13 @@ pub fn Result<usize, u32> scan_eval(ref u8[] input, ref mut TokenPage page) {
 }
 fn Result<usize, u32> scan_mode(ref u8[] input, ref mut TokenPage page, bool evaluation) {
     page.used = 0;
+    page.error_offset = 0;
     var usize index = 0;
     while (index < input.len) {
         let u8 c = input[index];
         if (c == 32 || c == 9 || c == 10 || c == 13) { index += 1; continue; }
         let usize slot = page.used;
-        if (slot == 128) { return .err(3); }
+        if (slot == 128) { page.error_offset = index; return .err(3); }
         let usize start = index;
         var u32 kind = 0;
         var i64 value = 0;
@@ -41,7 +42,7 @@ fn Result<usize, u32> scan_mode(ref u8[] input, ref mut TokenPage page, bool eva
             kind = 2;
             while (index < input.len && digit(input[index])) {
                 let i64 next = (input[index] - 48) as i64;
-                if (value > 922337203685477580 || value == 922337203685477580 && next > 7) { return .err(2); }
+                if (value > 922337203685477580 || value == 922337203685477580 && next > 7) { page.error_offset = index; return .err(2); }
                 value = value * 10 + next; index += 1;
             }
         } else {
@@ -49,7 +50,7 @@ fn Result<usize, u32> scan_mode(ref u8[] input, ref mut TokenPage page, bool eva
             if (evaluation && kind == 0) {
                 kind = if (c == 42) { 6 } else if (c == 40) { 7 } else if (c == 41) { 8 } else { 0 };
             }
-            if (kind == 0) { return .err(1); }
+            if (kind == 0) { page.error_offset = index; return .err(1); }
             index += 1;
         }
         // Snapshot the owner metadata before holding its exclusive element loan.

@@ -1,6 +1,7 @@
 module main;
 import tokens as tokens;
 import evaluator as evaluator;
+import diagnostics as diagnostics;
 import input_file as input_file;
 import std::bytes as bytes;
 import std::io as io;
@@ -34,6 +35,17 @@ fn i32 error(u32 code) {
         else { "usage: token-page-cli [ASCII-source]\n" };
     discard io::write_stderr(message);
     return 2;
+}
+@effects(console)
+fn i32 located_error(ref u8[] source, ref u8[] label, diagnostics::Problem problem) {
+    let diagnostics::Location position = diagnostics::locate(source, problem.offset);
+    discard io::write_stderr_bytes(label);
+    discard io::write_stderr(":");
+    discard io::write_stderr_usize(position.line);
+    discard io::write_stderr(":");
+    discard io::write_stderr_usize(position.column);
+    discard io::write_stderr(": ");
+    return error(problem.code);
 }
 fn bool count_row(ref mut bytes::Buffer output, ref u8[] label, usize count) {
     return bytes::append(output, label).is_ok && bytes::append_usize(output, count).is_ok && bytes::append(output, b"\n").is_ok;
@@ -74,18 +86,18 @@ fn i32 analyze_source(ref u8[] source) {
     return if (switch(io::write_bytes(result)) { case .ok(count): { count == result.len } case .err(_): { false } }) { 0 } else { error(7) };
 }
 @effects(console)
-fn i32 evaluate_source(ref u8[] source) {
+fn i32 evaluate_source(ref u8[] source, ref u8[] label) {
     var tokens::TokenPage page = tokens::empty();
     discard switch(tokens::scan_eval(source, ref mut page)) {
         case .ok(count): { count }
-        case .err(code): { return error(code); }
+        case .err(code): { return located_error(source, label, diagnostics::problem(code, page.error_offset)); }
     };
     // Identifier spans retain offsets into the original source; do not rebase.
     let ref tokens::Token[] stream = tokens::valid(ref page);
     var evaluator::Environment environment = evaluator::empty();
     discard switch(evaluator::evaluate(source, stream, ref mut environment)) {
         case .ok(count): { count }
-        case .err(code): { return error(code); }
+        case .err(problem): { return located_error(source, label, problem); }
     };
     var bytes::Buffer output = bytes::empty();
     let ref evaluator::Binding[] bindings = evaluator::valid(ref environment);
@@ -124,9 +136,9 @@ fn i32 main() {
                 case .ok(value): { value }
                 case .err(code): { return error(code); }
             };
-            return evaluate_source(bytes::view(ref content)[..count]);
+            return evaluate_source(bytes::view(ref content)[..count], argument);
         }
-        return evaluate_source(argument);
+        return evaluate_source(argument, b"<argument>");
     }
     if (argc != 2) { return error(0); }
     if (equal(source, b"--help")) {
