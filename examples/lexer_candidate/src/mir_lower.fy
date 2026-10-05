@@ -5,11 +5,11 @@ import mir_state as state;
 import std::bytes as bytes;
 import std::vec as v;
 
-// Scalar lowering includes value/void conditionals and short-circuit branches.
-// Loops and defer remain rejected until their control/cleanup paths are lowered.
+// Scalar lowering includes conditionals, short-circuit branches and loops.
+// Defer remains rejected until its captured arguments and cleanup paths land.
 fn bool admitted(ref h::Program input) {
     var usize i = 1;
-    while (i <= h::statement_count(input)) { let u32 kind = h::statement_code(h::statement_at(input,i).kind); if (kind == 5 || kind == 6 || kind == 7 || kind == 8 || kind == 11) { return false; } i += 1; }
+    while (i <= h::statement_count(input)) { if (h::statement_code(h::statement_at(input,i).kind) == 11) { return false; } i += 1; }
     return true;
 }
 
@@ -142,6 +142,55 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
 fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, usize depth) {
     let h::Statement s = h::statement_at(input,id); let u32 kind = h::statement_code(s.kind);
     if (depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
+    if (kind == 7 || kind == 8) {
+        if (c.loop_depth == 0 || c.loop_ids[c.loop_depth - 1] != s.loop_target) { discard state::fail(c,4,s.start,s.end); return false; }
+        let usize frame = c.loop_depth - 1;
+        if (kind == 8 && c.continues[frame] == 0) {
+            // A for-post block is created only when a continue or fallthrough
+            // reaches it, so an unconditional break/return leaves no orphan.
+            let h::Statement loop = h::statement_at(input,s.loop_target);
+            let usize post = state::new_block(blocks,c,loop.start,loop.end); c.continues[frame] = post;
+        }
+        let usize target = if (kind == 7) { c.breaks[frame] } else { c.continues[frame] };
+        return state::jump(blocks,c,target,s.start,s.end);
+    }
+    if (kind == 5 || kind == 6) {
+        if (s.initial != 0 && !statement(input,locals,blocks,operations,edges,payload,c,s.initial,depth + 1)) { return false; }
+        if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+        let usize header = state::new_block(blocks,c,s.start,s.end);
+        if (!state::jump(blocks,c,header,s.start,s.end)) { return false; }
+        c.current = header;
+        var usize condition = 0;
+        if (s.expression != 0) { condition = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1); }
+        else {
+            condition = state::local(locals,c,6,0,false,false,s.start,s.end);
+            var m::Operation truth = state::operation(1,condition,6,6,0,0,0,s.start,s.end); truth.boolean = true;
+            if (state::emit(operations,blocks,c,truth) == 0) { return false; }
+        }
+        if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+        let usize body = state::new_block(blocks,c,s.start,s.end);
+        let usize exit = state::new_block(blocks,c,s.start,s.end);
+        if (!state::branch(blocks,c,condition,body,exit,s.start,s.end)) { return false; }
+        if (c.loop_depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
+        let usize frame = c.loop_depth; c.loop_depth += 1;
+        c.loop_ids[frame] = id; c.breaks[frame] = exit;
+        c.continues[frame] = if (s.post == 0) { header } else { 0 };
+        c.current = body;
+        discard block(input,locals,blocks,operations,edges,payload,c,s.body,depth + 1);
+        if (c.problem.code != 0) { return false; }
+        if (c.current != 0) {
+            if (c.continues[frame] == 0) { let usize post = state::new_block(blocks,c,s.start,s.end); c.continues[frame] = post; }
+            let usize target = c.continues[frame];
+            if (!state::jump(blocks,c,target,s.start,s.end)) { return false; }
+        }
+        let usize post = c.continues[frame]; c.loop_depth -= 1;
+        if (s.post != 0 && post != 0) {
+            c.current = post;
+            if (!statement(input,locals,blocks,operations,edges,payload,c,s.post,depth + 1)) { return false; }
+            if (c.current != 0 && !state::jump(blocks,c,header,s.start,s.end)) { return false; }
+        }
+        c.current = exit; return true;
+    }
     if (kind == 1 || kind == 3) {
         let usize binding = if (kind == 1) { s.binding } else { h::expression_at(input,s.target).binding };
         let usize destination = c.locals[binding]; if (destination == 0) { discard state::fail(c,4,s.start,s.end); return false; }

@@ -530,9 +530,14 @@ assertions) plus value and void conditionals: `if`/`else`, `if` without an `else
 right operand is evaluated only when the left side requires it and may be any
 admitted boolean expression, including side effects, calls or a return block. Those
 CFG forms use an unconditional jump terminator and a two-way boolean-branch
-terminator alongside the earlier checked switch. `while`, classic `for`, nearest-loop
-`break`/`continue` and `defer` are still rejected, so loop and cleanup paths keep
-failing closed until their control and cleanup lowering lands.
+terminator alongside the earlier checked switch. `while`, classic `for` and
+nearest-loop `break`/`continue` now lower to this same CFG. Initializers run once;
+an omitted `for` condition is true. `continue` reaches the post clause before the
+next condition, while `break` skips post. Post blocks are allocated only when a
+body fallthrough or continue reaches them, avoiding orphan blocks for unconditional
+breaks or returns. Loop targets use a bounded 64-frame stack of HIR Statement IDs;
+the existing recursion budget applies first. `defer` still fails closed until its
+captured arguments and cleanup paths are implemented.
 
 The private TSV format begins with `fairyc.scalar-mir/v1` and a `P` module-index
 record. `T`, `S`, `F`, `L`, `B`, `O` and `A` records describe call
@@ -591,8 +596,8 @@ lexer-candidate --mir-file samples/mir-demo.fy
 lexer-candidate --mir-file samples/mir-branches-demo.fy
 ```
 
-The reference set is 59 fixtures: 56 admitted and 3 deferred. The admitted set is 42
-returning programs and 14 trapping programs covering constants, forward and nested
+The current reference set is 84 fixtures: 83 admitted and 1 deferred. The admitted
+set is 67 returning programs and 16 trapping programs covering constants, forward and nested
 calls, lexical blocks, checked compound assignment, signed `i32`/`i64` overflow and
 negation, division-by-zero, signed division/remainder overflow, invalid-shift and
 overflowing-shift traps, and assertion traps, extended by value and void conditionals
@@ -601,21 +606,25 @@ argument that returns from the first or last call position, a returning `if` use
 an argument, both-returning arms, branch side effects taken and skipped, conditional
 fallthrough, and short-circuit `&&`/`||` with side-effecting or trapping right
 operands; the unsigned-limit case exercises `usize`, `u32` and `u8` maximum values as
-accepted successes rather than traps. The 3 deferred cases (`while`, classic `for` and
-`defer`) fail closed with an empty stdout and status 2.
+accepted successes rather than traps. Loop cases additionally cover zero iterations,
+`i64` counters, side-effecting/calling conditions, nested and mixed loops, loop-local
+shadowing, omitted clauses, initializer assignment, return/break/continue in a while
+condition, early body returns, body/post overflow and calls skipped by loop control.
+The remaining deferred `defer` case fails closed with empty stdout and status 2.
 
-All 56 admitted fixtures now match the Go MIR interpreter, with no contract goldens.
+All 83 admitted fixtures match the Go MIR interpreter, with no contract goldens.
 The Go lowerer captures source-local scalar reads before subsequent binary operands
 or call arguments can change them, and propagates termination through binary and
 short-circuit operands, conditions and enclosing returns. Thus
 `var i32 x=5;return x+if(true){x=2;3}else{4};` returns 8, and returning operands in
 conditions or calls preserve their inner `return 9` without evaluating later calls.
-Eleven dedicated Go verifier/interpreter regressions cover these paths, including
-the already-correct conditional argument and its fallthrough alternative. The same
-eleven assertions execute in generated native C under low and optimized MSVC.
+Twelve dedicated Go verifier/interpreter regressions cover these paths, including
+the already-correct conditional argument, its fallthrough alternative and the
+subsequent while-condition return fix. The same twelve assertions execute in
+generated native C under low and optimized MSVC.
 
-The full CLI comparison passes on both profiles: 1162 executions (581 per profile),
-including the 59 MIR fixtures (56 admitted: 42 returning, 14 trapping; 3 deferred).
+The earlier return-order fix passed 1162 CLI executions (581 per profile),
+including its 59 MIR fixtures (56 admitted: 42 returning, 14 trapping; 3 deferred).
 After restricting snapshots to source locals rather than already-materialized
 temporaries, the final Go reference is regenerated and the 59-case MIR comparison
 reruns on each retained image. Scoped Go MIR, interpreter, C backend and fixture
@@ -628,15 +637,34 @@ scalar array fields of length 1, 2 and 4096 through source analysis, MIR codec a
 both Windows/Linux C emission. Historical evidence retains the observed failure
 and its initial classification; this correction does not change language behavior.
 
-This unit intentionally changes Go MIR source. Of the pinned compiler's 619 input
+That return-order unit intentionally changed Go MIR source. Of the pinned compiler's 619 input
 records, only `internal/mir/lower.go` differs; the pinned compiler executable and SDK
 remain unchanged. The candidate is still built with that prebuilt compiler, while
 the oracle and native regression use current Go source. Example package version
-0.11.0 and its Fairy product sources remain unchanged. Evidence:
+0.11.0 and its Fairy product sources were unchanged in that unit. Evidence:
 `docs/ops/evidence/mir-control-order-fix-20261006.json`. Earlier branch and sequential
 evidence remains in `mir-branch-file-cli-20261006.json` and
 `mir-sequential-file-cli-20261006.json`. Linux native execution is deferred to the
 owner's batch, and self-hosting promotion remains blocked.
+
+The loop unit advances this example to version 0.12.0. Its full comparison passes
+1212 CLI executions (606 per profile), with all 83 admitted MIR fixtures matching
+the executed Go reference and one deferred case. The 12 direct API tests in
+`tests/mir.fy` pass under both native profiles. They include structural checks that
+while-break reaches exit, for-continue reaches the checked post before the header,
+and unconditional break allocates no unreachable post block. Supplementary file
+cases reject break/continue outside a loop, a non-bool for condition, an effectful
+post clause and a deferred call inside a loop, with empty stdout and unchanged
+input bytes. `samples/mir-loops-demo.fy` emits MIR whose test executor returns 2
+after an `i64` loop with continue and a while with break. Both target C emission
+profiles and the scoped Go workspace/vet checks pass; Linux native execution remains
+deferred. The Go while-condition return defect found by this unit was fixed first
+in its own commit, with interpreter and low/optimized MSVC regressions.
+
+No TSV tag/field, SDK API, language revision, runtime symbol or stable CLI command
+is added. The pinned compiler executable and SDK remain unchanged; current Go
+oracle sources are intentionally distinct from the pinned compiler build inputs.
+Evidence: `docs/ops/evidence/mir-loop-file-cli-20261006.json`.
 
 ## Recognition and limits
 

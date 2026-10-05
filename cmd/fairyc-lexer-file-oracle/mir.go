@@ -54,11 +54,12 @@ func writeMIR(destination string) error {
 		{"assertion", "fn i32 main(){assert(false); return 0;}", true},
 		{"if-simple", "fn i32 main(){return if(true){1}else{2};}", true},
 		{"short-circuit-simple", "fn i32 main(){assert(false || true); return 0;}", true},
-		{"deferred-while", "fn i32 main(){var i32 x=0; while(x<2){x+=1;} return x;}", false},
-		{"deferred-for", "fn i32 main(){var i32 x=0; for(var i32 i=0;i<2;i+=1){x+=1;} return x;}", false},
+		{"while-basic", "fn i32 main(){var i32 x=0; while(x<2){x+=1;} return x;}", true},
+		{"for-basic", "fn i32 main(){var i32 x=0; for(var i32 i=0;i<2;i+=1){x+=1;} return x;}", true},
 		{"deferred-defer", "fn i32 main(){defer observe(1); return 0;} fn void observe(i32 x){discard x;}", false},
 	}
 	seeds = append(seeds, scalarMIRControlSeeds()...)
+	seeds = append(seeds, scalarMIRLoopSeeds()...)
 	for _, seed := range seeds {
 		input := "module main; " + seed.input
 		file := source.NewFile("main.fy", []byte(input))

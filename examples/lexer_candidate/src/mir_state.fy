@@ -2,8 +2,9 @@ module mir_state;
 import mir_model as m;
 import std::vec as v;
 
-pub struct Context { m::Problem problem; usize function; usize current; usize[1153] locals; usize[1153] targets; }
-pub fn Context empty() { return Context { .problem = m::Problem { .code = 0, .start = 0, .end = 0 }, .function = 0, .current = 0, .locals = [0;1153], .targets = [0;1153] }; }
+// Active loop frames are bounded by the existing recursion-depth budget.
+pub struct Context { m::Problem problem; usize function; usize current; usize[1153] locals; usize[1153] targets; usize loop_depth; usize[64] loop_ids; usize[64] breaks; usize[64] continues; }
+pub fn Context empty() { return Context { .problem = m::Problem { .code = 0, .start = 0, .end = 0 }, .function = 0, .current = 0, .locals = [0;1153], .targets = [0;1153], .loop_depth = 0, .loop_ids = [0;64], .breaks = [0;64], .continues = [0;64] }; }
 pub fn usize fail(ref mut Context c, u32 code, usize start, usize end) { if (c.problem.code == 0) { c.problem = m::Problem { .code, .start, .end }; } return 0; }
 pub fn bool edge(ref mut v::Vec<usize> edges, usize id, ref mut Context c) {
     if (c.problem.code != 0) { return false; }

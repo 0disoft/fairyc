@@ -74,11 +74,43 @@ fn void nested_call_arguments_have_separate_ranges() {
 }
 
 @test
-fn void loops_and_defer_fail_closed() {
-    assert(!lowered(b"module main; fn void f(){while(true){break;}}",0).is_ok);
+fn void defer_still_fails_closed() {
     assert(!lowered(b"module main; fn void f(){defer g();} fn void g(){}",0).is_ok);
     let m::Program empty = retained(b"module main;",0);
     assert(m::function_count(ref empty) == 0 && m::block_count(ref empty) == 0);
+}
+
+@test
+fn void while_break_targets_exit() {
+    let m::Program p = retained(b"module main; fn void f(){while(true){break;}}",0);
+    let m::Function f = m::function_at(ref p,1);
+    let m::Block entry = m::block_at(ref p,f.entry); assert(entry.kind == 2);
+    let m::Block header = m::block_at(ref p,entry.target); assert(header.kind == 3);
+    let m::Block body = m::block_at(ref p,header.target);
+    assert(body.kind == 2 && body.target == header.alternative);
+    assert(m::block_at(ref p,header.alternative).kind == 1);
+}
+
+@test
+fn void for_continue_goes_through_checked_post() {
+    let m::Program p = retained(b"module main; fn void f(){for(var i32 i=0;i<2;i+=1){continue;}}",0);
+    let m::Block entry = m::block_at(ref p,m::function_at(ref p,1).entry);
+    let m::Block header = m::block_at(ref p,entry.target);
+    let m::Block body = m::block_at(ref p,header.target);
+    assert(body.kind == 2 && body.target != entry.target && body.target != header.alternative);
+    let m::Block post = m::block_at(ref p,body.target); assert(post.kind == 4 && post.trap_mask == 1);
+    let m::Block normal = m::block_at(ref p,post.target);
+    assert(normal.kind == 2 && normal.target == entry.target);
+}
+
+@test
+fn void unconditional_break_never_allocates_a_post_block() {
+    let m::Program p = retained(b"module main; fn void f(){for(var i32 i=0;true;i+=1){break;}}",0);
+    let m::Function f = m::function_at(ref p,1); assert(f.block_count == 4);
+    let m::Block entry = m::block_at(ref p,f.entry);
+    let m::Block header = m::block_at(ref p,entry.target);
+    let m::Block body = m::block_at(ref p,header.target);
+    assert(body.kind == 2 && body.target == header.alternative);
 }
 
 @test
