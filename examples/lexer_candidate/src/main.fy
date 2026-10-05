@@ -2,6 +2,8 @@ module main;
 import scanner as scanner;
 import std::io as io;
 import std::bytes as bytes;
+import file_cli as file_cli;
+import std::process as process;
 
 struct Byte { usize count; u8 value; bool ok; }
 struct Word { usize value; bool ok; }
@@ -33,8 +35,9 @@ fn Word read_word() {
 // Modes 0/1 use defaults; 2/3 add four u32 LE limits after the u16 LE length.
 // Odd modes select the previous revision. Exact source bytes follow the header.
 // Clean EOF is accepted only between frames; malformed framing exits 8.
-@effects(console)
+@effects(filesystem, console)
 fn i32 main() {
+    if (process::arg_count() != 1) { return file_cli::run(); }
     var usize frames = 0;
     while (true) {
         let Byte mode = read_byte();

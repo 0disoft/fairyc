@@ -1,0 +1,345 @@
+{
+  "schema": "fairyc.lexer-file-cli-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "5a61ea103dc0a79968a31e159dc43e4d54a2eba4",
+  "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+  "sourceArtifacts": [
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/main.go",
+      "sha256": "ef39e672073a1b239ee161f73ec2ddec9d1e7ea9d481aa850c83da0fcd41fea6"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "abd267e12edf9fbc9ce09220b594cf700d6b5d75469e2ff34ced28562c99fe51"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "sha256": "b0b32355646be5f0be30abf75020e21491cfcb99644bef0aac9f0950909768eb"
+    },
+    {
+      "path": "examples/lexer_candidate/README.md",
+      "sha256": "02d8413bf7d971ca229391e075990ef25d3945ff1d4e5aacc7acef51b7ff39da"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/token-demo.fy",
+      "sha256": "1e19bb36ac6a4c4a8b612ce389f9ba20d9a11547eb2310242336db8af5a21646"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "91c63177404ae49a64812a2c466e10c58d67caf5307a2488cc31a673863542b6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "examples/lexer_candidate/src/main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "2d3e266d6753eaf70b1ab939b3ebc7d0a3e430d3c4189651c419947912e8c8e5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/token_output.fy",
+      "sha256": "10301881781a0cf70ba01e7bfdaef6cb8e9b0cb7a0ceeac3e00d5e6f8599af40"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/verify.py",
+      "sha256": "9191a13c9760a3255ec66320f6f0e71f8490719adb3f61088fe556af9dd5e53e"
+    },
+    {
+      "path": "internal/cli/fairy_lexer_corpus_test.go",
+      "sha256": "024ea4b94e233ba73c7d2ea8d59b40300555529392bdb5dc292ac1f533b8f4f7"
+    },
+    {
+      "path": "internal/cli/fairy_lexer_file_cli_test.go",
+      "sha256": "6cc2dc7cfad1603adeddd555744a36de11f74fc697e5e0564f3e72901f91766f"
+    }
+  ],
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+    "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf"
+  },
+  "compilerSourceManifest": {
+    "path": ".cache/nominal-array-field-view-compiler/source-manifest.json",
+    "sha256": "62763a51977d82a18255f07af3c424ddc988a1e1b8f96cd3afabfaeafc302107",
+    "sourceDigest": "6de6ed7dc29d60d5c47ddbc59863341c4a80f98cb1559cb0b0010b280704e0f4",
+    "fileCount": 619,
+    "matchesCurrentCompilerInputs": true,
+    "reused": true
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sdkIdentity": "fairyc-sdk-stdlib/0",
+    "runtimeAbi": "fairyc-runtime/0",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\lexer-file-cli\\reference.json",
+    "sha256": "f3003d21409680f83ec18c6832f088dd706c74c60239a04ec061c8f5b62e3b0a",
+    "generator": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "run",
+        "./cmd/fairyc-lexer-file-oracle",
+        ".cache/lexer-file-cli/reference.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      }
+    },
+    "fileCases": 29,
+    "comparison": "accepted: exact kind/trivia/span/raw/cooked; diagnostic: code/span/byte line-column multiset; raw spans reconstruct complete source including trivia and single EOF"
+  },
+  "verification": {
+    "argv": [
+      "python",
+      "examples/lexer_candidate/verify.py",
+      "--compiler",
+      ".cache/nominal-array-field-view-compiler/fairyc.exe",
+      "--reference",
+      ".cache/lexer-file-cli/reference.json",
+      "--receipt",
+      ".cache/lexer-file-cli/receipt.json"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "common": [
+      {
+        "case": "compiler --version",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005093555-585e5ef53991+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 585e5ef53991368dce52094889ba7bb275b52103\nmodified: true\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 28 source file(s), 475 MIR function(s), lock unchanged\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check --locked",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 28 source file(s), 475 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ],
+    "profiles": [
+      {
+        "profile": "dev",
+        "passed": true,
+        "fileCases": 29,
+        "accepted": 18,
+        "diagnosticCases": 10,
+        "limitCases": 1,
+        "unchangedFiles": 29,
+        "cliExecutions": 41,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\lexer-file-cli\\dev.exe",
+        "imageSHA256": "16f065cf51e04d569249650cf4acd423303613a669de1de6759d3e8e3d3fc60e",
+        "raw": "docs/ops/evidence/lexer-file-cli-20261005.dev.json",
+        "rawSHA256": "e3a90547162809067bad2afffdccdfc7bfb94b4090d4ce8568b05cbebb3fb306"
+      },
+      {
+        "profile": "release",
+        "passed": true,
+        "fileCases": 29,
+        "accepted": 18,
+        "diagnosticCases": 10,
+        "limitCases": 1,
+        "unchangedFiles": 29,
+        "cliExecutions": 41,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\lexer-file-cli\\release.exe",
+        "imageSHA256": "e032368007078e7058fa2dd7ffe2e058c4279aabedce7cad29b211f2de3b8e5c",
+        "raw": "docs/ops/evidence/lexer-file-cli-20261005.release.json",
+        "rawSHA256": "b87d805eb2abae7a11bc068b51ade23bfaaa3641236c2d2ebf5bbbbbbf428a76"
+      }
+    ],
+    "cliExecutions": 82
+  },
+  "additionalValidation": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-linux-gnu",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stderr": "",
+      "stdoutPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\lexer-file-cli\\x86_64-linux-gnu.c",
+      "stdoutSHA256": "9e4cc6e7a87ed76956012e2d5ad7b9871968951d311831d7c70454f2d2d2de9c"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-windows-msvc",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stderr": "",
+      "stdoutPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\lexer-file-cli\\x86_64-windows-msvc.c",
+      "stdoutSHA256": "cf6267939b8b035a3eecaccbc4febce087b62284a61f4b2b6795014c2c2f9e61"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./cmd/fairyc-lexer-file-oracle"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      }
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/cli",
+        "-run",
+        "^TestLexerFileCLIWorkspace$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/cli\t0.506s\n",
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      }
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      }
+    }
+  ],
+  "limits": {
+    "sourceBytes": 32768,
+    "readSentinelBytes": 1,
+    "pathUtf8Bytes": 4095,
+    "outputBytes": 1048576,
+    "rowGuard": "conservative 96 + 2*rawLength + 2*cookedLength before append",
+    "scanner": "existing current-revision collect; 1048576 tokens, 256 diagnostics, 16777216 work units; existing storage guards retained",
+    "linuxExecution": "deferred by owner to consolidated batch",
+    "performance": "not measured",
+    "faultInjection": "allocation, write and OS I/O faults not injected",
+    "fullOldCorpus": "not repeated; scanner unchanged, framed-protocol smoke and copied dependency check passed"
+  },
+  "scope": {
+    "localCommitOnly": true,
+    "push": false,
+    "compilerChanges": false,
+    "sdkChanges": false,
+    "recognitionRuleChanges": false,
+    "stableLexerPromotion": false,
+    "ciChanges": false,
+    "newPS1": false,
+    "runner": "portable Python verification and test-only Go fixture generator"
+  }
+}

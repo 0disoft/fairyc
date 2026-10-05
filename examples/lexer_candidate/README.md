@@ -28,6 +28,85 @@ contracts, not a stable SDK or public ABI. Native consumers exercise transfer an
 budget exhaustion; compile-fail tests cover local escape and use after/drop during
 a live borrow.
 
+## Regular file token dump CLI (`--tokens-file`)
+
+A new front end adds a regular file mode without changing the binary stdin protocol:
+the no-argument frame reader stays exactly as described below, and
+`--tokens-file <path>` plus `--help` are the only new arguments.
+
+```sh
+lexer-candidate --tokens-file path/to/source.fy
+```
+
+A checked-in `samples/token-demo.fy` demonstrates it:
+
+```powershell
+.\build\lexer-candidate.exe --tokens-file samples/token-demo.fy
+```
+
+The supplied path is UTF-8. `src/file_cli.fy` opens it read-only and reads at most
+32768 source bytes plus one sentinel byte, so any 32769th byte trips the existing
+byte limit. It collects current-revision tokens only, through the same
+`scanner::collect` entry point and the default byte/token/diagnostic/work budgets
+used by the binary stdin driver; it does not accept the previous revision and does
+not add scanner rules. It accepts any supplied regular file name, with no `.fy` suffix
+requirement, and the path argument is bounded at 4095 bytes.
+
+`src/token_output.fy` writes one TSV row per token, including trivia and the single
+EOF token. Each row has six tab-separated columns: a human kind label, a human
+trivia label, the half-open start and end byte offsets into the original source, and
+the lowercase hexadecimal bytes of the raw source slice and of the scanner's cooked
+representation. Dumping reuses the existing read-only Stream access
+(`token_count`, `token_info`, `token_raw`, `token_cooked`, `source_view`) and
+releases the Stream afterwards; no candidate tokens are precomputed and Go supplies
+none. The dump is capped at 1 MiB: each row's conservative bound (96 plus twice the
+raw length plus twice the cooked length) is checked before append.
+
+Any scan diagnostic makes the dump fail closed: stdout stays empty, the process
+exits 2, and stderr carries one line per diagnostic in recognition order:
+
+```text
+path:LINE:COLUMN: error: E000x (bytes START..END)
+```
+
+`path` is the path exactly as supplied, `LINE` and `COLUMN` are 1-based byte
+positions over the original source, and the half-open `START..END` bytes are that
+diagnostic's span. CLI I/O, usage, allocation and candidate-limit failures print
+plain messages without the path/line/column prefix, and `--help` prints the usage.
+
+Scanner rules, the compiler and the SDK are unchanged; this is a read-only reporting
+front end over the existing candidate. The default diagnostic budget and the
+`E0010` exhaustion contract described above are unchanged.
+
+Portable verification uses a test-only Go reference fixture producer plus
+`examples/lexer_candidate/verify.py` (Python standard library); both commands run from
+the repository root:
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle .cache/lexer-file-cli/reference.json
+python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/lexer-file-cli/reference.json --receipt /path/to/evidence/receipt.json
+```
+
+The `go run` form is the portable default; an optional workspace wrapper is:
+
+```sh
+bun tools/run-go.ts run ./cmd/fairyc-lexer-file-oracle .cache/lexer-file-cli/reference.json
+```
+
+The file CLI passes on Windows development and release: 29 Go reference files per
+profile with their 29 original hashes preserved across 82 CLI executions, covering the
+file, I/O, usage, `--help` and legacy-protocol cases. Accepted tokens are compared
+exactly for kind, trivia, byte range, raw and cooked bytes, and byte reconstruction;
+diagnostics are compared as a multiset of code, span and byte line/column, because the
+candidate reports in recognition order while Go sorts. An output-limit fixture
+alternates identifiers and spaces to 32768 source bytes, for which the Go oracle
+expects more than 1 MiB of TSV while the native binary exits 2 with the output-limit
+message on stderr and empty stdout. The narrow `TestLexerFileCLIWorkspace` test, the
+CLI vet, the Go oracle vet, and the Linux and Windows C emission checks pass. Actual
+Linux execution remains deferred to the owner's consolidated batch. This section makes
+no performance claim, and allocation-failure or OS I/O fault injection was not run.
+Evidence is `docs/ops/evidence/lexer-file-cli-20261005.json`.
+
 ## Recognition and limits
 
 Current recognition: leading UTF-8 BOM, ASCII identifiers and exact current

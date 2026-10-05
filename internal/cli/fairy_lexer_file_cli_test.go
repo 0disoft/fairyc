@@ -1,0 +1,38 @@
+package cli
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
+	"github.com/0disoft/fairyc/internal/workspaceloader"
+)
+
+// The legacy corpus uses the authored main. Keep its new file-mode dependencies
+// in the same workspace, even when a test exercises only the stdin branch.
+func copyLexerFileCLIExample(t *testing.T, root string) {
+	t.Helper()
+	example := filepath.Join("..", "..", "examples", "lexer_candidate")
+	for _, name := range []string{"fairy.toml", "src/main.fy", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy",
+		"src/utf8.fy", "src/strings.fy", "src/budget.fy", "src/file_cli.fy", "src/token_output.fy"} {
+		data, err := os.ReadFile(filepath.Join(example, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writeTestSource(t, root, name, string(data))
+	}
+}
+
+func TestLexerFileCLIWorkspace(t *testing.T) {
+	root := t.TempDir()
+	copyLexerFileCLIExample(t, root)
+	workspace, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checked, err := workspacecompiler.Check(workspace)
+	if err != nil || !checked.Verified {
+		t.Fatalf("legacy corpus CLI dependency check: %v %+v %+v", err, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+	}
+}

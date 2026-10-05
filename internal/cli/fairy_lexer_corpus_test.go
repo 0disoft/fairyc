@@ -157,14 +157,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 	appendCase("long-comment", []byte("/*"+strings.Repeat("a", 12000)+"*/"), false)
 	appendCase("long-unterminated-comment", []byte("/*"+strings.Repeat("a", 12000)), false)
 	root := t.TempDir()
-	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/main.fy", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
-		data, err := os.ReadFile(filepath.Join(example, name))
-		if err != nil {
-			t.Fatal(err)
-		}
-		writeTestSource(t, root, name, string(data))
-	}
+	copyLexerFileCLIExample(t, root)
 	for _, release := range []bool{false, true} {
 		profile := cdriver.LowProfile
 		if release {
