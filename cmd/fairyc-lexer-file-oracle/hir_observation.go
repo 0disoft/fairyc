@@ -11,7 +11,8 @@ import (
 )
 
 // These projections retain actual Go HIR field names and scalar tree structure,
-// while omitting package process IDs, nominal declarations and provenance.
+// while omitting package process IDs and provenance. Nominal corpora additionally
+// retain actual struct declaration/field facts, independently of candidate IDs.
 // Expression.Children preserve order. A call's first child is its callee path
 // (Type == invalid, empty Value); later children are arguments. If has condition,
 // then-block and optional else-block/if children. While has condition/body.
@@ -22,6 +23,7 @@ type hirOracleModule struct {
 	Path       string
 	SourcePath string
 	Functions  []hirOracleFunction
+	Structs    []hir.Struct `json:",omitempty"`
 }
 type hirOracleFunction struct {
 	Symbol     hir.SymbolID
@@ -74,7 +76,7 @@ func observeOracleHIR(pkg hir.Package, files []semantic.File) (*hirOraclePackage
 	}
 	for mi, mod := range pkg.Modules {
 		_, sourcePath := hir.SourcePathParts(mod.SourcePath)
-		module := hirOracleModule{Path: mod.Path, SourcePath: sourcePath, Functions: []hirOracleFunction{}}
+		module := hirOracleModule{Path: mod.Path, SourcePath: sourcePath, Functions: []hirOracleFunction{}, Structs: mod.Structs}
 		for _, fn := range mod.Functions {
 			declaration, found := declarations[sourcePath+"\x00"+fn.Name]
 			if !found {
@@ -182,12 +184,12 @@ func observeOracleExpression(expression *hir.Expression, symbols map[string]hirO
 		return nil, nil
 	}
 	switch expression.Kind {
-	case "literal", "path", "group", "prefix", "binary", "call", "block", "if", "while":
+	case "literal", "path", "group", "prefix", "binary", "call", "block", "if", "while", "record", "field-expression":
 	default:
 		return nil, fmt.Errorf("unobserved expression kind %q", expression.Kind)
 	}
 	result := *expression
-	if expression.Symbol != hir.NoSymbol {
+	if expression.Symbol != hir.NoSymbol && expression.Kind != "record" {
 		if _, found := symbols[strconv.Itoa(int(expression.Symbol))]; !found {
 			return nil, fmt.Errorf("unknown expression target %d", expression.Symbol)
 		}

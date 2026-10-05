@@ -1,5 +1,6 @@
 module mir_lower;
 import hir_model as h;
+import hir_shapes as shapes;
 import mir_model as m;
 import mir_state as state;
 import mir_cleanup as finalize;
@@ -260,6 +261,7 @@ fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v:
 }
 
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
+    if (shapes::count(h::nominal(ref input)) != 0) { return .err(m::Problem { .code = 4, .start = 0, .end = h::source_view(ref input).len }); }
     var state::Context c = state::empty(); var bytes::Buffer source = bytes::empty(); var bytes::Buffer payload = bytes::empty();
     var v::Vec<m::Target> targets = v::empty<m::Target>(); var v::Vec<m::Signature> signatures = v::empty<m::Signature>();
     var v::Vec<m::Function> functions = v::empty<m::Function>(); var v::Vec<m::Local> locals = v::empty<m::Local>();

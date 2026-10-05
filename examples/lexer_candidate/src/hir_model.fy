@@ -1,22 +1,24 @@
 module hir_model;
 import std::bytes as bytes;
 import std::vec as v;
+import hir_shapes as shapes;
 
-// Private scalar HIR v1. No syntax/type table is retained. All entity IDs are
+// Private owned HIR. No syntax/type input table is retained. All entity IDs are
 // one-based; zero is absent. Query table indexes and edge offsets are zero-based.
 // Module indexes remain zero-based and declaration IDs retain their source index
 // plus one (including module/import declarations). Binding IDs preserve resolved
 // symbol IDs, but their owner/target/type facts below are independently owned.
-pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; }
-pub enum BindingKind { Function; Parameter; Let; Var; External; }
-pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; }
+pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Nominal { u32 id; }; }
+pub enum BindingKind { Function; Parameter; Let; Var; External; Struct; }
+pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; }
 pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; }
 pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
 // The fixed SDK/compiler admits enum switching, not enum equality or enum casts.
 // These exhaustive private-format tags also permit exact scalar comparisons.
-pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } }; }
-pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } }; }
-pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } }; }
+pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Nominal { .id = id }: { id } }; }
+pub fn bool represented_type(Type value) { return switch(value) { case .Invalid: { false } case .Callable: { false } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } }; }
+pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } case .Struct: { 6 } }; }
+pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } }; }
 pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Binding: { 1 } case .Return: { 2 } case .Assignment: { 3 } case .Expression: { 4 } case .While: { 5 } case .For: { 6 } case .Break: { 7 } case .Continue: { 8 } case .Assert: { 9 } case .Discard: { 10 } case .Defer: { 11 } }; }
 pub fn u32 operator_code(Operator value) { return switch(value) { case .None: { 0 } case .Plus: { 1 } case .Minus: { 2 } case .Not: { 3 } case .Complement: { 4 } case .Multiply: { 5 } case .Divide: { 6 } case .Remainder: { 7 } case .BitAnd: { 8 } case .BitOr: { 9 } case .BitXor: { 10 } case .ShiftLeft: { 11 } case .ShiftRight: { 12 } case .Equal: { 13 } case .NotEqual: { 14 } case .Less: { 15 } case .LessEqual: { 16 } case .Greater: { 17 } case .GreaterEqual: { 18 } case .And: { 19 } case .Or: { 20 } case .Assign: { 21 } }; }
 pub struct Problem { u32 code; usize start; usize end; }
@@ -33,6 +35,9 @@ pub struct Function { usize binding; usize start; usize end; usize scope; bool p
 // edge_start/count index ordered argument Expression IDs. Reference binding is
 // authoritative; callee syntax and grouping nodes are eliminated. Integer stores
 // canonical decimal ASCII in payload[start..end]; signed-minimum has no child.
+// Construct binding is a Struct Binding ID; its edges retain Initializer
+// Expression IDs in written order. Initializer/Field binding is a one-based
+// nominal Field ID. Initializer left is the value; Field left is the owner.
 pub struct Expression { ExpressionKind kind; Type type; Operator operator; usize start; usize end; usize left; usize right; usize alternative; usize block; usize binding; usize edge_start; usize edge_count; usize payload_start; usize payload_end; bool boolean; }
 // expression and target are Expression IDs; binding is defined local Binding ID.
 // body is Block ID; initial/post are Statement IDs for explicit For clauses.
@@ -45,6 +50,7 @@ pub struct Statement { StatementKind kind; usize start; usize end; usize scope; 
 // owner is Function Binding ID; scope is the resolver lexical scope ID.
 pub struct Block { usize start; usize end; usize owner; usize scope; usize parent_scope; usize edge_start; usize edge_count; usize tail; }
 pub resource Program {
+    shapes::Table nominal;
     bytes::Buffer source; bytes::Buffer payload;
     v::Vec<Function> functions; v::Vec<Binding> bindings;
     v::Vec<Expression> expressions; v::Vec<Statement> statements;
@@ -64,6 +70,7 @@ pub fn usize statement_count(ref Program p) { assert(p.success); return v::len<S
 pub fn usize block_count(ref Program p) { assert(p.success); return v::len<Block>(ref p.blocks); }
 pub fn usize edge_count(ref Program p) { assert(p.success); return v::len<usize>(ref p.edges); }
 pub fn usize signature_count(ref Program p) { assert(p.success); return v::len<Signature>(ref p.signatures); }
+pub fn ref shapes::Table nominal(ref Program p) { assert(p.success); return ref p.nominal; }
 pub fn usize module_index(ref Program p) { assert(p.success); return p.module_index; }
 pub fn Function function_at(ref Program p, usize index) { assert(index < function_count(p)); return *v::at<Function>(ref p.functions,index); }
 pub fn Binding binding_at(ref Program p, usize id) { assert(id > 0 && id <= binding_count(p)); return *v::at<Binding>(ref p.bindings,id - 1); }
@@ -80,19 +87,33 @@ pub fn ref u8[] binding_text(ref Program p, usize id) { let Binding b = binding_
 // handoff, after all local SDK containers have been populated. No container
 // mutation through a resource field is required by either construction or query.
 pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payload, v::Vec<Function> functions, v::Vec<Binding> bindings, v::Vec<Expression> expressions, v::Vec<Statement> statements, v::Vec<Block> blocks, v::Vec<usize> edges, v::Vec<Signature> signatures, usize module_index) {
+    return assemble_nominal(source,payload,functions,bindings,expressions,statements,blocks,edges,signatures,module_index,shapes::empty());
+}
+pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buffer payload, v::Vec<Function> functions, v::Vec<Binding> bindings, v::Vec<Expression> expressions, v::Vec<Statement> statements, v::Vec<Block> blocks, v::Vec<usize> edges, v::Vec<Signature> signatures, usize module_index, shapes::Table nominal) {
     let usize ns = bytes::len(ref source); let usize np = bytes::len(ref payload);
     let usize nf = v::len<Function>(ref functions); let usize nb = v::len<Binding>(ref bindings);
     let usize ne = v::len<Expression>(ref expressions); let usize nt = v::len<Statement>(ref statements);
     let usize nk = v::len<Block>(ref blocks); let usize na = v::len<usize>(ref edges); let usize ntypes = v::len<Signature>(ref signatures);
     if (ns > 32768 || np > 86016 || nf > 512 || nb > 1152 || ne > 4096 || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
+    if (!shapes::valid(ref nominal,ns,nb)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
+    var usize shape_index = 0;
+    while (shape_index < shapes::count(ref nominal)) {
+        let shapes::Shape shape = shapes::at(ref nominal,shape_index);
+        let Binding b = *v::at<Binding>(ref bindings,shape.binding - 1);
+        if (binding_code(b.kind) != 6 || type_code(b.type) != shape.type || b.declaration != (shape.type - 255) as usize || b.signature_count != 0 || b.module_index != module_index) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        shape_index += 1;
+    }
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
         if (b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External)) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
+        if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || (binding_code(b.kind) == 6 && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (binding_code(b.kind) == 6 && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct)) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
         else if (b.owner == 0 || b.scope == 0 || type_code(b.type) == type_code(.Void) || b.signature_count != 0 || binding_code(v::at<Binding>(ref bindings,b.owner - 1).kind) != binding_code(.Function)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         i += 1;
     }
+    i = 0; while (i < ntypes) { let Type type = v::at<Signature>(ref signatures,i).type; if (!represented_type(type) || !shapes::valid_type(ref nominal,type_code(type),false)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); } i += 1; }
     i = 0;
     while (i < nf) {
         let Function f = *v::at<Function>(ref functions,i);
@@ -112,10 +133,12 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
     i = 0;
     while (i < ne) {
         let Expression e = *v::at<Expression>(ref expressions,i);
-        if (e.start > e.end || e.end > ns || type_code(e.type) == type_code(.Invalid) || e.left > ne || e.right > ne || e.alternative > ne || e.block > nk || e.binding > nb || e.edge_start > na || e.edge_count > na - e.edge_start || e.payload_start > e.payload_end || e.payload_end > np) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        let u32 kind = expression_code(e.kind); let u32 type = type_code(e.type);
+        let bool is_field = kind == 10 || kind == 11;
+        if (e.start > e.end || e.end > ns || !represented_type(e.type) || !shapes::valid_type(ref nominal,type,true) || e.left > ne || e.right > ne || e.alternative > ne || e.block > nk || (!is_field && e.binding > nb) || e.edge_start > na || e.edge_count > na - e.edge_start || e.payload_start > e.payload_end || e.payload_end > np) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         // Expression links are postorder and cannot create cycles.
         if (e.left > i || e.right > i || e.alternative > i) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (expression_code(e.kind) == expression_code(.Integer) && (e.payload_start == e.payload_end || type_code(e.type) == type_code(.Bool) || type_code(e.type) == type_code(.Void) || type_code(e.type) == type_code(.Callable))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if (expression_code(e.kind) == expression_code(.Integer) && (e.payload_start == e.payload_end || type < 1 || type > 5)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if (expression_code(e.kind) == expression_code(.Boolean) && type_code(e.type) != type_code(.Bool)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if ((expression_code(e.kind) == expression_code(.Reference) || expression_code(e.kind) == expression_code(.Call)) && e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if ((expression_code(e.kind) == expression_code(.Unary) || expression_code(e.kind) == expression_code(.Binary)) && (e.left == 0 || operator_code(e.operator) == operator_code(.None))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
@@ -124,7 +147,7 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
         if (expression_code(e.kind) == expression_code(.If) && (e.left == 0 || type_code(v::at<Expression>(ref expressions,e.left - 1).type) != type_code(.Bool))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if (expression_code(e.kind) == expression_code(.Reference) || expression_code(e.kind) == expression_code(.Call)) {
             let Binding b = *v::at<Binding>(ref bindings,e.binding - 1);
-            if (type_code(e.type) != type_code(b.type) || (expression_code(e.kind) == expression_code(.Reference) && (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External))) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (type_code(e.type) != type_code(b.type) || (expression_code(e.kind) == expression_code(.Reference) && (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct))) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             if (expression_code(e.kind) == expression_code(.Call)) {
                 if (e.edge_count != b.signature_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
                 var usize j = 0;
@@ -132,6 +155,26 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
                     let usize id = *v::at<usize>(ref edges,e.edge_start + j);
                     if (id == 0 || id > i || type_code(v::at<Expression>(ref expressions,id - 1).type) != type_code(v::at<Signature>(ref signatures,b.signature_start + j).type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); } j += 1;
                 }
+            }
+        }
+        if (is_field) {
+            if (e.binding == 0 || e.binding > shapes::field_count(ref nominal) || e.left == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            let shapes::Field f = shapes::field_at(ref nominal,e.binding);
+            let u32 left_type = type_code(v::at<Expression>(ref expressions,e.left - 1).type);
+            if (type != f.type || (kind == 10 && left_type != f.owner) || (kind == 11 && left_type != f.type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        }
+        if (kind == 9) {
+            let usize shape = shapes::find(ref nominal,type);
+            if (shape == 0 || e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            let shapes::Shape s = shapes::at(ref nominal,shape - 1);
+            if (e.binding != s.binding || binding_code(v::at<Binding>(ref bindings,e.binding - 1).kind) != 6 || e.edge_count != s.field_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            var u8[1024] seen = [0;1024]; var usize j = 0;
+            while (j < e.edge_count) {
+                let usize id = *v::at<usize>(ref edges,e.edge_start + j);
+                if (id == 0 || id > i) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+                let Expression f = *v::at<Expression>(ref expressions,id - 1);
+                if (expression_code(f.kind) != 11 || f.binding <= s.field_start || f.binding > s.field_start + s.field_count || seen[f.binding - 1] != 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+                seen[f.binding - 1] = 1; j += 1;
             }
         }
         i += 1;
@@ -159,5 +202,5 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
         if (k.start > k.end || k.end > ns || k.owner == 0 || k.owner > nb || k.scope == 0 || k.parent_scope == 0 || k.edge_start > na || k.edge_count > na - k.edge_start || k.tail > ne || binding_code(v::at<Binding>(ref bindings,k.owner - 1).kind) != binding_code(.Function)) { return .err(Problem { .code = 4, .start = k.start, .end = k.end }); }
         var usize j = 0; while (j < k.edge_count) { let usize id = *v::at<usize>(ref edges,k.edge_start + j); if (id == 0 || id > nt) { return .err(Problem { .code = 4, .start = k.start, .end = k.end }); } j += 1; } i += 1;
     }
-    return .ok(Program { .source, .payload, .functions, .bindings, .expressions, .statements, .blocks, .edges, .signatures, .module_index, .success = true });
+    return .ok(Program { .nominal, .source, .payload, .functions, .bindings, .expressions, .statements, .blocks, .edges, .signatures, .module_index, .success = true });
 }

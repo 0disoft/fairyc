@@ -1407,9 +1407,10 @@ syntax, public SDK type or runtime ABI is introduced.
 
 The existing 128-global, 512-declaration, 1024-field and depth-64 bounds apply.
 Resources, borrowed/array fields, generic structs, methods, attributes and imported
-nominal definitions require subsequent components. The scalar HIR/MIR/C modes
-reject nominal input with empty stdout instead of treating it as a scalar.
-This unit checks input programs; it does not execute their struct operations.
+nominal definitions require subsequent components. At version 0.16.0 the scalar
+HIR/MIR/C modes rejected nominal input with empty stdout. Version 0.17.0 below
+admits nominal HIR; MIR/C still reject it. The type-checking unit does not execute
+input struct operations.
 
 ```sh
 go run ./cmd/fairyc-lexer-file-oracle --nominal .cache/nominal-types-file-cli/reference.json
@@ -1436,8 +1437,52 @@ verified MIR, interpreter results and both Windows native profiles. It evaluates
 initializers in written order, captures copied source values, then normalizes
 only construction operands; an initializer return stops remaining construction.
 
-Evidence: `docs/ops/evidence/nominal-types-file-cli-20261006.json`. Struct HIR/MIR
-and native execution are the next components; self-hosting promotion stays closed.
+Evidence: `docs/ops/evidence/nominal-types-file-cli-20261006.json`.
+
+## Owned nominal HIR
+
+Version 0.17.0 retains same-file plain struct layouts and semantic trees after
+the parsed, resolved and typed input owners are destroyed. The candidate owns
+declaration-based type IDs, field types/name spans, constructor targets, written
+initializer order, field accesses, nested assignment places and nominal function
+signatures. It supports scalar and acyclic nested struct fields, empty structs,
+forward declarations, shorthand, whole-value assignment and struct-valued
+branches/calls/returns. Input struct code does not execute yet: MIR lowering
+rejects the nominal table before publishing a program; MIR/C errors publish no
+stdout.
+
+`src/hir_shapes.fy` owns checked layout tables: at most 512 shapes, 1024 fields
+and depth 64. Unknown field types, cycles, wrong owners/ranges and reused
+identities are rejected before graph traversal. `src/hir_shape_lower.fy` copies
+those facts from checked input. HIR assembly checks declaration/field identities,
+field operand types, postorder edges, initializer uniqueness and complete
+construction. A forged nominal variant cannot alias a scalar tag.
+
+Scalar-only HIR retains byte-identical `fairyc.scalar-hir/v1`. Nominal HIR uses
+the separate private `fairyc.nominal-hir/v1` transport: `N` rows retain type,
+binding, field start/count and visibility; `D` rows retain field ID, owner/type and name span.
+Named types render as `nominal:<declaration-type-id>`. Expression kinds add
+`construct`, `field` and ordered `initializer`; their binding slots identify
+the nominal declaration or field respectively. Scalar tags and record columns
+are unchanged. This is an example-private format, not a stable CLI/SDK/ABI change.
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle --nominal-hir .cache/nominal-hir-file-cli/reference.json
+python examples/lexer_candidate/verify_nominal_hir.py --images /path/to/dev /path/to/release --reference .cache/nominal-hir-file-cli/reference.json --receipt .cache/nominal-hir-file-cli/hir-receipt.json
+```
+
+Independent Go semantic HIR supplies 15 positive fixtures. Both native candidate
+profiles compare complete function trees and field layouts (30 comparisons),
+including initializer mutation/order and early return. The nominal checker
+corpus retains 58 CLI runs: 46 semantic comparisons, six explicit candidate
+rejections, two accepted HIR controls and four MIR/C rejections. Native API tests
+check retained owners, deterministic rendering and malformed layout rejection.
+The 1256 scalar CLI regression executions remain unchanged.
+Sample: `samples/nominal_hir.fy`.
+
+Evidence: `docs/ops/evidence/nominal-hir-file-cli-20261006.json`. Struct MIR,
+verification and C execution remain next; Linux native execution stays deferred
+to the consolidated batch. No self-hosting promotion is claimed.
 
 ## Cost baseline
 

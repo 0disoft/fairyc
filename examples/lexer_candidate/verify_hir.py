@@ -2,6 +2,8 @@
 import re
 
 FIELDS = {
+    'N': 'id binding field_start field_count public'.split(),
+    'D': 'id owner type start end'.split(),
     'F': 'id binding start end scope body parameter_start parameter_count public'.split(),
     'B': 'id kind type start end owner scope module_index declaration signature_start signature_count'.split(),
     'E': 'id kind type operator start end left right alternative block binding edge_start edge_count boolean value'.split(),
@@ -96,7 +98,7 @@ def byte_span(row, source, header=False):
 
 def parse_tables(stdout, source):
     lines = stdout.splitlines()
-    assert lines and lines[0] == 'fairyc.scalar-hir/v1'
+    assert lines and lines[0] in ('fairyc.scalar-hir/v1','fairyc.nominal-hir/v1')
     assert len(lines) >= 2 and lines[1] == 'P\t0', 'single-module HIR requires module index 0'
     tables = {k:{} for k in FIELDS}
     for line in lines[2:]:
@@ -114,13 +116,23 @@ def parse_tables(stdout, source):
             assert row['public' if tag == 'F' else 'boolean'] in (0, 1), row
         tables[tag][row['id']] = row
     for tag, arena in tables.items():
+        if tag == 'N':
+            assert all(256 <= id <= 767 for id in arena)
+            continue
         base = 0 if tag in ('A','T') else 1
         assert sorted(arena) == list(range(base,base+len(arena))), tag
+    assert bool(tables['N']) == (lines[0] == 'fairyc.nominal-hir/v1')
+    nominal_names = {id: 'main::'+source[tables['B'][n['binding']]['start']:tables['B'][n['binding']]['end']].decode('ascii') for id,n in tables['N'].items()}
+    scalar_names = dict(enumerate(('invalid','i32','i64','u8','u32','usize','bool','void','callable')))
+    for tag in ('B','E','T','D'):
+        for row in tables[tag].values():
+            if tag == 'D': row['type'] = nominal_names.get(int(row['type']),scalar_names.get(int(row['type'])))
+            elif row['type'].startswith('nominal:'): row['type'] = nominal_names[int(row['type'].split(':')[1])]
     return tables
 
 
 def candidate_tree(t, source):
-    visited = {k:set() for k in ('F','B','E','S','K','A','T')}
+    visited = {k:set() for k in FIELDS}
     active = set()
     scope_owners = {}
     declarations = source_functions(source)
@@ -145,6 +157,18 @@ def candidate_tree(t, source):
         return ('parameter' if b['kind']=='parameter' else 'local',owner,name,b['start'],b['end'])
     def edges(start,count):
         return [get('A',i)['value'] for i in range(start,start+count)]
+    def field(id):
+        f=get('D',id)
+        return source[f['start']:f['end']].decode('ascii'),f
+    offset = 0
+    for id,n in t['N'].items():
+        get('N',id); b=get('B',n['binding'])
+        assert b['kind']=='struct' and b['owner']==b['scope']==0 and b['type']=='main::'+source[b['start']:b['end']].decode('ascii')
+        assert b['declaration']==id-255 and n['field_start']==offset
+        for j in range(n['field_count']):
+            _,f=field(offset+j+1); assert f['owner']==id
+        offset+=n['field_count']
+    assert offset==len(t['D'])
     def expr(id,owner,loops,scopes):
         if not id: return None
         key=('E',id); assert key not in active,key
@@ -170,6 +194,21 @@ def candidate_tree(t, source):
         elif kind=='if':
             assert e['right']==0
             value.update(condition=expr(e['left'],owner,loops,scopes),then=block(e['block'],owner,loops,scopes),otherwise=expr(e['alternative'],owner,loops,scopes))
+        elif kind=='construct':
+            b=get('B',e['binding']); assert b['kind']=='struct' and b['type']==e['type']
+            shape=next(n for n in t['N'].values() if n['binding']==e['binding']); assert e['edge_count']==shape['field_count']
+            fields=[]; seen=set()
+            for id in edges(e['edge_start'],e['edge_count']):
+                init=get('E',id); assert init['kind']=='initializer' and init['binding'] not in seen
+                seen.add(init['binding']); name,f=field(init['binding'])
+                assert f['owner']==shape['id'] and init['type']==f['type']
+                child=expr(init['left'],owner,loops,scopes); assert child['type']==f['type']
+                fields.append(dict(name=name,expression=child))
+            value['fields']=fields
+        elif kind=='field':
+            name,f=field(e['binding']); child=expr(e['left'],owner,loops,scopes)
+            shape=t['N'][f['owner']]; assert child['type']==t['B'][shape['binding']]['type'] and e['type']==f['type']
+            value.update(name=name,child=child)
         else: raise AssertionError(e)
         active.remove(key); return value
     def stmt(id,owner,loops,scopes,header=False):
@@ -184,8 +223,9 @@ def candidate_tree(t, source):
             b=get('B',s['binding']); assert b['owner']==owner and b['scope']==s['scope'],(s,b)
             value.update(target=identity(s['binding']),expression=expr(s['expression'],owner,loops,scopes))
         elif kind=='assignment':
-            target=expr(s['target'],owner,loops,scopes); assert target['kind']=='reference'
-            b=get('B',get('E',s['target'])['binding']); assert b['kind']=='var'
+            target=expr(s['target'],owner,loops,scopes); root=get('E',s['target'])
+            while root['kind']=='field': root=get('E',root['left'])
+            assert root['kind']=='reference'; b=get('B',root['binding']); assert b['kind']=='var'
             value.update(operator=s['operator'],target=target,expression=expr(s['expression'],owner,loops,scopes))
         elif kind in ('return','expression','assert','discard','defer'):
             value['expression']=expr(s['expression'],owner,loops,scopes)
@@ -219,7 +259,7 @@ def candidate_tree(t, source):
             locals=sorted([dict(target=identity(p['id']),type=p['type'],mutable=p['kind']=='var') for p in locals_],key=lambda x:x['target']),
             body=block(f['body'],f['binding'],[],[f['scope']])))
     for b in t['B'].values():
-        if b['kind'] != 'function':
+        if b['kind'] not in ('function','struct'):
             assert b['scope'] in scope_owners and scope_owners[b['scope']][0] == b['owner'], b
     # Every retained semantic node and edge must have a real consumer. A callee
     # path/group/minimum magnitude must not remain as an unreachable side table.
@@ -260,6 +300,8 @@ def oracle_tree(fixture):
         elif kind=='call': value.update(target=identity(e['Symbol']),arguments=[expr(c) for c in children[1:]])
         elif kind=='block': value['block']=block(e['Block'])
         elif kind=='if': value.update(condition=expr(children[0]),then=block(children[1]['Block']),otherwise=expr(children[2]) if len(children)>2 else None)
+        elif kind=='record': value.update(kind='construct',fields=[dict(name=name,expression=expr(c)) for name,c in zip(e['Fields'] or [],children,strict=True)])
+        elif kind=='field-expression': value.update(kind='field',name=e['Value'],child=expr(children[0]))
         else: raise AssertionError(e)
         return value
     def stmt(s):

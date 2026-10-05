@@ -1,0 +1,2407 @@
+{
+  "schema": "fairyc.nominal-hir-file-cli-evidence/v1",
+  "date": "2026-10-06",
+  "baseRevision": "05ca56538c79a1f51a225ba76404f8eeaca3cd0f",
+  "sourceArtifacts": [
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "sha256": "45aeb4c3dbfb970984069174b8060c65769d0d2cc04c1dc684c8608665f8b46a"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "d7dfc6502f055ffeadda2f5a0715b4cbf6d827e460fa27a126db17ed538b2ffe"
+    },
+    {
+      "path": "examples/lexer_candidate/verify.py",
+      "sha256": "4d0858a15d3adf083ebad2bfac42189d84728f0336a58d5e5237490a374e9013"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_names.py",
+      "sha256": "94f3902e76e1174d91b239fccdb2357b7571bc7807376632ed497627b11857a6"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_types.py",
+      "sha256": "1525191a14062b39449d4f8730849db1dc30c810807b5724d9bf6cd395b8717b"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_modules.py",
+      "sha256": "66497cf9b6bb1044b9cf0a74889ab93335481fbfd6be7d942c3ee9442f90958d"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_hir.py",
+      "sha256": "65182e7637fd78da0029e8f4c1c04af6ed7a4ae8ead2983c2934419d820b6e98"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_mir.py",
+      "sha256": "7f733bc5c5a8d8160fc8d0090af9b263dc596d3244f57c43d2cb2998b15a511f"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_c.py",
+      "sha256": "adddd65b29519ef4829ba566d335694804e0d962111df808e44ba48cdf2d4258"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_nominal.py",
+      "sha256": "233deb796056c6224bf737edaeee34b866af7f52380f3a6a8ca9c4ba1d2eae2d"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_nominal_hir.py",
+      "sha256": "bc2df6c25c186c5e599fcd96524e7c7ff5e804dae0d59fde3dd17a0f06b632a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/binding_output.fy",
+      "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_emit.fy",
+      "sha256": "bd4ecabdf73c52107d64066d58e869cc5710a9c891cf88dccab83e7a34e0a5f2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_flow.fy",
+      "sha256": "93e172ae922e21b87e33d01f203a010b88e5aea9260f3c91bbdaf4e160272f47"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_scalar.fy",
+      "sha256": "d3b6389c68e57c283d3d1d590eff67364e7e5b57408cb901185a2bba20e4943c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_text.fy",
+      "sha256": "a9b358ec31df293bd3d3cc2264f47170ed3e0bf313dd7843ddba15cd8c65ea96"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_cli.fy",
+      "sha256": "d7a103f978b6e6cf9df2695bc44f6af5be3a999046a775a458f4430f1fcd48cf"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_lower.fy",
+      "sha256": "bca8065f5285cfc73b0cf1d0a813b900715fdf2ccc38e4557aa446c9526f4175"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "sha256": "a7ab66919e2691a8e378e901db1922e1d6feeebdcc6bd3ef91ca4ffa460be56b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_output.fy",
+      "sha256": "2ea8d8a43f75512ed0b9c87a8cce68f75e0ad0bbe828c88b962228ab1623e1ba"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shape_lower.fy",
+      "sha256": "60bd05be0b971bc60af90c20c6d4c276b892eb89c63c9c11d28baaa062de3742"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shapes.fy",
+      "sha256": "d9fa1de8d4855fc5a5ff498553e0a3bbb3895bcf57e8b115a006198e6309ad0a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_state.fy",
+      "sha256": "610ff02450b8ea2378472b1c9f3f8c074f8d65c17149a6132044675fcb854b05"
+    },
+    {
+      "path": "examples/lexer_candidate/src/integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "examples/lexer_candidate/src/main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+      "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cli.fy",
+      "sha256": "be70f56701979bf30ab6e352a5148908361247de5c97c07fd1ca69fbb41c6741"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_lower.fy",
+      "sha256": "6a1b7379b9ee0e9b928c9971b677167a4e276fc1a62c2278083da90085f8e85f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_model.fy",
+      "sha256": "0a455847bc1a2d91605e58452d49f7338feb7880f3c74858c432799df3983e60"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_output.fy",
+      "sha256": "a0ec61eb60db3e583bcb9a789943d6fd1169b83d68a8f38fadc410926a852875"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_state.fy",
+      "sha256": "c3bda4ee9792903e83140548552ef2232de1933d216dc0a097a46b4689c0aa35"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify.fy",
+      "sha256": "d912593c798d04d3bcd7d80d1e5147d4060eb870f167f499b1363829d04ff8d9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_flow.fy",
+      "sha256": "f32764943fbc1b088899f7ff0156d8b8bda0e04da1fb53433355cea9b63d75d2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_shape.fy",
+      "sha256": "04f09c4da772b518664a8b2bb46c5750842cf85818b8a90654ca463515d6a75b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_resolution.fy",
+      "sha256": "675002ec1c9a4ed5406896c2935582fb806cd7af31f80347d2f8da95b697b917"
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_types.fy",
+      "sha256": "aa92b01f7025a626e5d587a2fb6ffcee30c23bd08b7508aa63ad90f9398ac03e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "2d3e266d6753eaf70b1ab939b3ebc7d0a3e430d3c4189651c419947912e8c8e5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_check.fy",
+      "sha256": "413f03780cec199b1ee6d29c9251915fd983ba51468621a485a071e916f2e257"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_cli.fy",
+      "sha256": "a6b9d25be4db61ac370aaf1b185bc1f3a7c00c4a1c392281f70d10d006923bb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_control.fy",
+      "sha256": "dcc5732b46bc14a366dd21c57b9b03415e25f8552e33e0a0f55d246895b92cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "a4d0a814c23cdbfb8b50523ab43020225d2d5a561c6773b07f58ed2e478cee00"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/control-names-demo.fy",
+      "sha256": "f5ccdef101884e116ccab4d63ecae03f76072ef402e6e096c9e5af7863e81911"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/hir-demo.fy",
+      "sha256": "9d7f197d6d32aed4ab72392acc7f0746f370d700050b3c77c6ad30f329f47e79"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/mir-branches-demo.fy",
+      "sha256": "1824a0d8ccc0b41ed6ff38ec07f05e88d6fc5852f3d365d803df2d33fad97780"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/mir-defer-demo.fy",
+      "sha256": "b874fa0158e6732fae903716daa0e6d4d1838b5dc1739328f10ef8b89bc365c3"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/mir-demo.fy",
+      "sha256": "ec3f971336f21f814f65217c7987ef4f9d575f04dd6fa823fe6b9a62cfc87c1c"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/mir-loops-demo.fy",
+      "sha256": "dc080c9ec45f9f620dbacf09bbf55a866e32e584deb4f1fb72cdb63e7d0d6e36"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/modules-library.fy",
+      "sha256": "48ab5f5657bd1d318526bc49d9bec8abad668bf8d5cb79c748a27916e34c9a38"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/modules-main.fy",
+      "sha256": "b950d90c543080fd4ce6d147b83efc06184edf2a943ce9a1d7d87ed3b6c79ca0"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/names-demo.fy",
+      "sha256": "06503ce4049d44d428b590f4bfc9f59c202cdb8b71dad0ae1c8dde2b1579db02"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/nominal_hir.fy",
+      "sha256": "311af519b97fc9a6538357514e2e0d48cbc757bdee154d306a0987a15833802c"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/token-demo.fy",
+      "sha256": "1e19bb36ac6a4c4a8b612ce389f9ba20d9a11547eb2310242336db8af5a21646"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/types-demo.fy",
+      "sha256": "2b4a001e25749858c861d42ad1742f78622ee5c73b7250ccde284b1d58dc6f52"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/modules.txt",
+      "sha256": "1c22803046413d70d39841b9b1719627d44810bee8c50fc8259877ef0491a9ca"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/bindings.fy",
+      "sha256": "0954f82fa11f16a26cf8ca247c5b042454726f26ac8655cdae1fcdbf5d7acfc4"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/c_emit.fy",
+      "sha256": "ef63307e14cee5c982224a6bdbbcab735e772a6eb2b5b76cd7030a6af146389f"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/hir.fy",
+      "sha256": "918963770fe49de15dffd34cdbb66fe979a56b94e4e6e5807f19a2b641aa1fb9"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/hir_nominal.fy",
+      "sha256": "517355dc2f7ae521b94b812b0e88248492660def6512d7d49ca2db895761dfc9"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/mir.fy",
+      "sha256": "96caee687b1fc05222e7c783e39b0260722f3bc7a11f6cbed59a5b682af7d308"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/mir_verify.fy",
+      "sha256": "d484863bf8d8706f7ced799aa6f26d8c0bb14f4e254014fc5004c1d120352e64"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/modules.fy",
+      "sha256": "dfe7648e25b070f518c413ad30347fab5414a33a12c75f0e037b27d0f62c1749"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/name_control.fy",
+      "sha256": "fbd238d2ea93ffc524f7641ba3b2836164d941cdc9bad5fdbc3445167b0c0080"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/nominal_types.fy",
+      "sha256": "63354749890edb040d5a53453fa550a4af1dc125e9236554316373c4af38c53a"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/type_control.fy",
+      "sha256": "77762922c052df7fca588dac91d34e555f7290ba875e6c23a7004e0d771bc561"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/types.fy",
+      "sha256": "77cd79234ea17e853cd3842e95b9df4978e67845f9d31cc5dfb12a17567b3b46"
+    },
+    {
+      "path": "examples/lexer_candidate/README.md",
+      "sha256": "e3ae99f134e00acfc00c64404bb34ac233442da1a0a80396636a35d1a096d116"
+    },
+    {
+      "path": "internal/cli/fairy_lexer_file_cli_test.go",
+      "sha256": "ebe24e56aa3d9d5f04fe3cb963fdebb133787196d6c6baf6cc3ecbd85fb6a681"
+    },
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/main.go",
+      "sha256": "013ba53ab6b4203c01a99ae7dc64eb056b962cba2dffcb902eb6a31bace54496"
+    },
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/hir_observation.go",
+      "sha256": "0930804fbeb9ff25639c17e7dc18b995d213bac5afff71a965e5fb35a0754a28"
+    },
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/nominal_hir.go",
+      "sha256": "70813caf411f432595aa7cf11d0b14f736b8f5dbe879828eb7786bc52be4aa81"
+    }
+  ],
+  "sourceIdentity": "Exact staged UTF-8 LF blobs; final sources, reference inputs, raw receipts and EXE hashes match",
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+    "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf"
+  },
+  "compilerSourceManifest": {
+    "path": ".cache/nominal-array-field-view-compiler/source-manifest.json",
+    "sha256": "62763a51977d82a18255f07af3c424ddc988a1e1b8f96cd3afabfaeafc302107",
+    "sourceDigest": "6de6ed7dc29d60d5c47ddbc59863341c4a80f98cb1559cb0b0010b280704e0f4",
+    "files": 619,
+    "changedPaths": [
+      "internal/mir/lower.go",
+      "internal/mir/model.go"
+    ]
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "unchanged": true,
+    "sourceFiles": 10,
+    "sourceDigest": "9f2ab4a998f6fd701c4dafa9a369f5f6ce60f19bb78500aebda40c05f4558c35"
+  },
+  "verification": {
+    "schema": "fairyc.lexer-file-cli-verification/v1",
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+      "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf"
+    },
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\tokens-reference.json",
+      "sha256": "e180dc35830965730fabadc3f0e917ec1f056df2e6d30959a00b6bb586f6b749"
+    },
+    "declarationsReference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\declarations-reference.json",
+      "sha256": "8fa9182fb199d1bcf8f5f9fda49f8a25923051dd47c55e4291e2decb482f3b12"
+    },
+    "common": [
+      {
+        "case": "compiler --version",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005093555-585e5ef53991+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 585e5ef53991368dce52094889ba7bb275b52103\nmodified: true\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 62 source file(s), 939 MIR function(s), lock updated\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check --locked",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 62 source file(s), 939 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ],
+    "namesReference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-types-file-cli\\names-reference.json",
+      "sha256": "4e3718c572418a3cc860330dcd64c61f728244590d453119007d1760cb9ff1c1"
+    },
+    "typesReference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-types-file-cli\\types-reference.json",
+      "sha256": "0525d58f9f4026be8007bf42c6305edb2952bd9c5e3d7c43bf30f4a2b382aa81"
+    },
+    "modulesReference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\modules-reference.json",
+      "sha256": "348196ff54116f835fe3860d7ba58b2dc906fabcfa13fd11d604c2a59d2893e5"
+    },
+    "hirReference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\reference.json",
+      "sha256": "bcbec44db2b5263a94b165dc551a617349574c7da27f8a005540c550e92abe28"
+    },
+    "mirReference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-defer-file-cli\\reference.json",
+      "sha256": "b9372b9430abc577a7b09cbedb99d2fb8da4b9893e1ce98e6eedf7c002a92b65"
+    },
+    "sources": [
+      {
+        "path": "fairy.toml",
+        "sha256": "45aeb4c3dbfb970984069174b8060c65769d0d2cc04c1dc684c8608665f8b46a"
+      },
+      {
+        "path": "fairy.lock",
+        "sha256": "d7dfc6502f055ffeadda2f5a0715b4cbf6d827e460fa27a126db17ed538b2ffe"
+      },
+      {
+        "path": "verify.py",
+        "sha256": "4d0858a15d3adf083ebad2bfac42189d84728f0336a58d5e5237490a374e9013"
+      },
+      {
+        "path": "verify_names.py",
+        "sha256": "94f3902e76e1174d91b239fccdb2357b7571bc7807376632ed497627b11857a6"
+      },
+      {
+        "path": "verify_types.py",
+        "sha256": "1525191a14062b39449d4f8730849db1dc30c810807b5724d9bf6cd395b8717b"
+      },
+      {
+        "path": "verify_modules.py",
+        "sha256": "66497cf9b6bb1044b9cf0a74889ab93335481fbfd6be7d942c3ee9442f90958d"
+      },
+      {
+        "path": "verify_hir.py",
+        "sha256": "65182e7637fd78da0029e8f4c1c04af6ed7a4ae8ead2983c2934419d820b6e98"
+      },
+      {
+        "path": "verify_mir.py",
+        "sha256": "7f733bc5c5a8d8160fc8d0090af9b263dc596d3244f57c43d2cb2998b15a511f"
+      },
+      {
+        "path": "verify_c.py",
+        "sha256": "adddd65b29519ef4829ba566d335694804e0d962111df808e44ba48cdf2d4258"
+      },
+      {
+        "path": "verify_nominal.py",
+        "sha256": "233deb796056c6224bf737edaeee34b866af7f52380f3a6a8ca9c4ba1d2eae2d"
+      },
+      {
+        "path": "verify_nominal_hir.py",
+        "sha256": "bc2df6c25c186c5e599fcd96524e7c7ff5e804dae0d59fde3dd17a0f06b632a0"
+      },
+      {
+        "path": "src\\attributes.fy",
+        "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+      },
+      {
+        "path": "src\\binding_output.fy",
+        "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb"
+      },
+      {
+        "path": "src\\bodies.fy",
+        "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+      },
+      {
+        "path": "src\\body_state.fy",
+        "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+      },
+      {
+        "path": "src\\budget.fy",
+        "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+      },
+      {
+        "path": "src\\c_cli.fy",
+        "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+      },
+      {
+        "path": "src\\c_emit.fy",
+        "sha256": "bd4ecabdf73c52107d64066d58e869cc5710a9c891cf88dccab83e7a34e0a5f2"
+      },
+      {
+        "path": "src\\c_flow.fy",
+        "sha256": "93e172ae922e21b87e33d01f203a010b88e5aea9260f3c91bbdaf4e160272f47"
+      },
+      {
+        "path": "src\\c_guard.fy",
+        "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+      },
+      {
+        "path": "src\\c_scalar.fy",
+        "sha256": "d3b6389c68e57c283d3d1d590eff67364e7e5b57408cb901185a2bba20e4943c"
+      },
+      {
+        "path": "src\\c_text.fy",
+        "sha256": "a9b358ec31df293bd3d3cc2264f47170ed3e0bf313dd7843ddba15cd8c65ea96"
+      },
+      {
+        "path": "src\\cleanup_syntax.fy",
+        "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+      },
+      {
+        "path": "src\\declaration_output.fy",
+        "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+      },
+      {
+        "path": "src\\diagnostics.fy",
+        "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+      },
+      {
+        "path": "src\\file_cli.fy",
+        "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870"
+      },
+      {
+        "path": "src\\file_syntax.fy",
+        "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+      },
+      {
+        "path": "src\\hir_cli.fy",
+        "sha256": "d7a103f978b6e6cf9df2695bc44f6af5be3a999046a775a458f4430f1fcd48cf"
+      },
+      {
+        "path": "src\\hir_lower.fy",
+        "sha256": "bca8065f5285cfc73b0cf1d0a813b900715fdf2ccc38e4557aa446c9526f4175"
+      },
+      {
+        "path": "src\\hir_model.fy",
+        "sha256": "a7ab66919e2691a8e378e901db1922e1d6feeebdcc6bd3ef91ca4ffa460be56b"
+      },
+      {
+        "path": "src\\hir_output.fy",
+        "sha256": "2ea8d8a43f75512ed0b9c87a8cce68f75e0ad0bbe828c88b962228ab1623e1ba"
+      },
+      {
+        "path": "src\\hir_shape_lower.fy",
+        "sha256": "60bd05be0b971bc60af90c20c6d4c276b892eb89c63c9c11d28baaa062de3742"
+      },
+      {
+        "path": "src\\hir_shapes.fy",
+        "sha256": "d9fa1de8d4855fc5a5ff498553e0a3bbb3895bcf57e8b115a006198e6309ad0a"
+      },
+      {
+        "path": "src\\hir_state.fy",
+        "sha256": "610ff02450b8ea2378472b1c9f3f8c074f8d65c17149a6132044675fcb854b05"
+      },
+      {
+        "path": "src\\integrity.fy",
+        "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+      },
+      {
+        "path": "src\\main.fy",
+        "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+      },
+      {
+        "path": "src\\mir_cleanup.fy",
+        "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19"
+      },
+      {
+        "path": "src\\mir_cli.fy",
+        "sha256": "be70f56701979bf30ab6e352a5148908361247de5c97c07fd1ca69fbb41c6741"
+      },
+      {
+        "path": "src\\mir_lower.fy",
+        "sha256": "6a1b7379b9ee0e9b928c9971b677167a4e276fc1a62c2278083da90085f8e85f"
+      },
+      {
+        "path": "src\\mir_model.fy",
+        "sha256": "0a455847bc1a2d91605e58452d49f7338feb7880f3c74858c432799df3983e60"
+      },
+      {
+        "path": "src\\mir_output.fy",
+        "sha256": "a0ec61eb60db3e583bcb9a789943d6fd1169b83d68a8f38fadc410926a852875"
+      },
+      {
+        "path": "src\\mir_state.fy",
+        "sha256": "c3bda4ee9792903e83140548552ef2232de1933d216dc0a097a46b4689c0aa35"
+      },
+      {
+        "path": "src\\mir_verify.fy",
+        "sha256": "d912593c798d04d3bcd7d80d1e5147d4060eb870f167f499b1363829d04ff8d9"
+      },
+      {
+        "path": "src\\mir_verify_flow.fy",
+        "sha256": "f32764943fbc1b088899f7ff0156d8b8bda0e04da1fb53433355cea9b63d75d2"
+      },
+      {
+        "path": "src\\mir_verify_shape.fy",
+        "sha256": "04f09c4da772b518664a8b2bb46c5750842cf85818b8a90654ca463515d6a75b"
+      },
+      {
+        "path": "src\\module_check.fy",
+        "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+      },
+      {
+        "path": "src\\module_cli.fy",
+        "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+      },
+      {
+        "path": "src\\module_registry.fy",
+        "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+      },
+      {
+        "path": "src\\name_cli.fy",
+        "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+      },
+      {
+        "path": "src\\name_resolution.fy",
+        "sha256": "675002ec1c9a4ed5406896c2935582fb806cd7af31f80347d2f8da95b697b917"
+      },
+      {
+        "path": "src\\nominal_types.fy",
+        "sha256": "aa92b01f7025a626e5d587a2fb6ffcee30c23bd08b7508aa63ad90f9398ac03e"
+      },
+      {
+        "path": "src\\numbers.fy",
+        "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+      },
+      {
+        "path": "src\\pages.fy",
+        "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+      },
+      {
+        "path": "src\\parse_tokens.fy",
+        "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+      },
+      {
+        "path": "src\\records.fy",
+        "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+      },
+      {
+        "path": "src\\scanner.fy",
+        "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+      },
+      {
+        "path": "src\\strings.fy",
+        "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+      },
+      {
+        "path": "src\\syntax.fy",
+        "sha256": "2d3e266d6753eaf70b1ab939b3ebc7d0a3e430d3c4189651c419947912e8c8e5"
+      },
+      {
+        "path": "src\\token_output.fy",
+        "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+      },
+      {
+        "path": "src\\type_check.fy",
+        "sha256": "413f03780cec199b1ee6d29c9251915fd983ba51468621a485a071e916f2e257"
+      },
+      {
+        "path": "src\\type_cli.fy",
+        "sha256": "a6b9d25be4db61ac370aaf1b185bc1f3a7c00c4a1c392281f70d10d006923bb2"
+      },
+      {
+        "path": "src\\type_control.fy",
+        "sha256": "dcc5732b46bc14a366dd21c57b9b03415e25f8552e33e0a0f55d246895b92cb2"
+      },
+      {
+        "path": "src\\type_state.fy",
+        "sha256": "a4d0a814c23cdbfb8b50523ab43020225d2d5a561c6773b07f58ed2e478cee00"
+      },
+      {
+        "path": "src\\types.fy",
+        "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+      },
+      {
+        "path": "src\\utf8.fy",
+        "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      {
+        "path": "samples\\control-names-demo.fy",
+        "sha256": "f5ccdef101884e116ccab4d63ecae03f76072ef402e6e096c9e5af7863e81911"
+      },
+      {
+        "path": "samples\\hir-demo.fy",
+        "sha256": "9d7f197d6d32aed4ab72392acc7f0746f370d700050b3c77c6ad30f329f47e79"
+      },
+      {
+        "path": "samples\\mir-branches-demo.fy",
+        "sha256": "1824a0d8ccc0b41ed6ff38ec07f05e88d6fc5852f3d365d803df2d33fad97780"
+      },
+      {
+        "path": "samples\\mir-defer-demo.fy",
+        "sha256": "b874fa0158e6732fae903716daa0e6d4d1838b5dc1739328f10ef8b89bc365c3"
+      },
+      {
+        "path": "samples\\mir-demo.fy",
+        "sha256": "ec3f971336f21f814f65217c7987ef4f9d575f04dd6fa823fe6b9a62cfc87c1c"
+      },
+      {
+        "path": "samples\\mir-loops-demo.fy",
+        "sha256": "dc080c9ec45f9f620dbacf09bbf55a866e32e584deb4f1fb72cdb63e7d0d6e36"
+      },
+      {
+        "path": "samples\\modules-library.fy",
+        "sha256": "48ab5f5657bd1d318526bc49d9bec8abad668bf8d5cb79c748a27916e34c9a38"
+      },
+      {
+        "path": "samples\\modules-main.fy",
+        "sha256": "b950d90c543080fd4ce6d147b83efc06184edf2a943ce9a1d7d87ed3b6c79ca0"
+      },
+      {
+        "path": "samples\\names-demo.fy",
+        "sha256": "06503ce4049d44d428b590f4bfc9f59c202cdb8b71dad0ae1c8dde2b1579db02"
+      },
+      {
+        "path": "samples\\nominal_hir.fy",
+        "sha256": "311af519b97fc9a6538357514e2e0d48cbc757bdee154d306a0987a15833802c"
+      },
+      {
+        "path": "samples\\token-demo.fy",
+        "sha256": "1e19bb36ac6a4c4a8b612ce389f9ba20d9a11547eb2310242336db8af5a21646"
+      },
+      {
+        "path": "samples\\types-demo.fy",
+        "sha256": "2b4a001e25749858c861d42ad1742f78622ee5c73b7250ccde284b1d58dc6f52"
+      },
+      {
+        "path": "samples\\modules.txt",
+        "sha256": "1c22803046413d70d39841b9b1719627d44810bee8c50fc8259877ef0491a9ca"
+      },
+      {
+        "path": "tests\\bindings.fy",
+        "sha256": "0954f82fa11f16a26cf8ca247c5b042454726f26ac8655cdae1fcdbf5d7acfc4"
+      },
+      {
+        "path": "tests\\c_emit.fy",
+        "sha256": "ef63307e14cee5c982224a6bdbbcab735e772a6eb2b5b76cd7030a6af146389f"
+      },
+      {
+        "path": "tests\\hir.fy",
+        "sha256": "918963770fe49de15dffd34cdbb66fe979a56b94e4e6e5807f19a2b641aa1fb9"
+      },
+      {
+        "path": "tests\\hir_nominal.fy",
+        "sha256": "517355dc2f7ae521b94b812b0e88248492660def6512d7d49ca2db895761dfc9"
+      },
+      {
+        "path": "tests\\mir.fy",
+        "sha256": "96caee687b1fc05222e7c783e39b0260722f3bc7a11f6cbed59a5b682af7d308"
+      },
+      {
+        "path": "tests\\mir_verify.fy",
+        "sha256": "d484863bf8d8706f7ced799aa6f26d8c0bb14f4e254014fc5004c1d120352e64"
+      },
+      {
+        "path": "tests\\modules.fy",
+        "sha256": "dfe7648e25b070f518c413ad30347fab5414a33a12c75f0e037b27d0f62c1749"
+      },
+      {
+        "path": "tests\\name_control.fy",
+        "sha256": "fbd238d2ea93ffc524f7641ba3b2836164d941cdc9bad5fdbc3445167b0c0080"
+      },
+      {
+        "path": "tests\\nominal_types.fy",
+        "sha256": "63354749890edb040d5a53453fa550a4af1dc125e9236554316373c4af38c53a"
+      },
+      {
+        "path": "tests\\type_control.fy",
+        "sha256": "77762922c052df7fca588dac91d34e555f7290ba875e6c23a7004e0d771bc561"
+      },
+      {
+        "path": "tests\\types.fy",
+        "sha256": "77cd79234ea17e853cd3842e95b9df4978e67845f9d31cc5dfb12a17567b3b46"
+      }
+    ],
+    "profiles": [
+      {
+        "profile": "dev",
+        "passed": true,
+        "fileCases": 29,
+        "accepted": 18,
+        "diagnosticCases": 10,
+        "limitCases": 1,
+        "unchangedFiles": 29,
+        "declarations": {
+          "files": 29,
+          "accepted": 15,
+          "syntaxErrors": 9,
+          "lexicalErrors": 4,
+          "limits": 1,
+          "unchangedFiles": 29
+        },
+        "names": {
+          "bindingFiles": 63,
+          "bindingReferences": 61,
+          "files": 63,
+          "accepted": 29,
+          "unresolved": 14,
+          "duplicate": 3,
+          "unsupported": 14,
+          "limits": 3,
+          "unchangedFiles": 63
+        },
+        "types": {
+          "files": 148,
+          "accepted": 85,
+          "errors": 60,
+          "unsupported": 2,
+          "limits": 1,
+          "unchangedFiles": 148
+        },
+        "modules": {
+          "fixtures": 46,
+          "accepted": 23,
+          "semanticErrors": 17,
+          "unsupported": 4,
+          "limits": 2,
+          "unchangedFiles": 203
+        },
+        "hir": {
+          "fixtures": 60,
+          "accepted": 34,
+          "rejected": 26,
+          "unchangedFiles": 60
+        },
+        "mir": {
+          "fixtures": 106,
+          "accepted": 106,
+          "returns": 87,
+          "traps": 19,
+          "deferred": 0,
+          "unchangedFiles": 106,
+          "differential": 106,
+          "contractGoldens": 0
+        },
+        "cliExecutions": 628,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+        "imageSHA256": "c649f25236dd58171dc01b7329d0e2312707dd027838c3bd2184668b3235e123",
+        "raw": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\receipt.dev.json",
+        "rawSHA256": "5d7b8cceb24cc30622f7c6347adc24812bdf8a1a70baf0cdda430de03239ba4f",
+        "trackedFeatureRaw": {
+          "path": "docs/ops/evidence/nominal-hir-file-cli-20261006.dev.json",
+          "sha256": "3aa9c5c0fa7502f248f03c366a92a559801fbe58c55ff93bb5c744c64f9de282"
+        }
+      },
+      {
+        "profile": "release",
+        "passed": true,
+        "fileCases": 29,
+        "accepted": 18,
+        "diagnosticCases": 10,
+        "limitCases": 1,
+        "unchangedFiles": 29,
+        "declarations": {
+          "files": 29,
+          "accepted": 15,
+          "syntaxErrors": 9,
+          "lexicalErrors": 4,
+          "limits": 1,
+          "unchangedFiles": 29
+        },
+        "names": {
+          "bindingFiles": 63,
+          "bindingReferences": 61,
+          "files": 63,
+          "accepted": 29,
+          "unresolved": 14,
+          "duplicate": 3,
+          "unsupported": 14,
+          "limits": 3,
+          "unchangedFiles": 63
+        },
+        "types": {
+          "files": 148,
+          "accepted": 85,
+          "errors": 60,
+          "unsupported": 2,
+          "limits": 1,
+          "unchangedFiles": 148
+        },
+        "modules": {
+          "fixtures": 46,
+          "accepted": 23,
+          "semanticErrors": 17,
+          "unsupported": 4,
+          "limits": 2,
+          "unchangedFiles": 203
+        },
+        "hir": {
+          "fixtures": 60,
+          "accepted": 34,
+          "rejected": 26,
+          "unchangedFiles": 60
+        },
+        "mir": {
+          "fixtures": 106,
+          "accepted": 106,
+          "returns": 87,
+          "traps": 19,
+          "deferred": 0,
+          "unchangedFiles": 106,
+          "differential": 106,
+          "contractGoldens": 0
+        },
+        "cliExecutions": 628,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+        "imageSHA256": "c76e19e50e53ea3f36e74bc04ad04730b59e63718ac03e5c9a8f8a3c342818f7",
+        "raw": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\receipt.release.json",
+        "rawSHA256": "85b5047cf7355fbd824fceb81bebd3df549c97f03a649fc154509776b815ee95",
+        "trackedFeatureRaw": {
+          "path": "docs/ops/evidence/nominal-hir-file-cli-20261006.release.json",
+          "sha256": "e8313f9f4b95b5128c3cce0cf80125ac9ab53055719185a4c882a2851ef6a430"
+        }
+      }
+    ]
+  },
+  "nominalVerification": {
+    "schema": "fairyc.nominal-type-cli-verification/v1",
+    "passed": true,
+    "counts": {
+      "semanticComparisons": 46,
+      "candidateLayoutRejections": 4,
+      "candidateValueRejections": 2,
+      "backendRejections": 4,
+      "hirAccepted": 2
+    },
+    "images": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+        "sha256": "c649f25236dd58171dc01b7329d0e2312707dd027838c3bd2184668b3235e123"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+        "sha256": "c76e19e50e53ea3f36e74bc04ad04730b59e63718ac03e5c9a8f8a3c342818f7"
+      }
+    ],
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-types-file-cli\\reference.json",
+      "sha256": "52a23eee38cad653259b783169b493a0a596a53311fa51240be58b8a7ecd36bb"
+    },
+    "scriptSHA256": "233deb796056c6224bf737edaeee34b866af7f52380f3a6a8ca9c4ba1d2eae2d",
+    "runs": [
+      {
+        "case": "fields",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\fields.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "f29e8bb3c6a4ad7644c79129af1a044d9767ca43cf0fdb44215da5747297d293",
+        "unchanged": true
+      },
+      {
+        "case": "fields",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\fields.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "f29e8bb3c6a4ad7644c79129af1a044d9767ca43cf0fdb44215da5747297d293",
+        "unchanged": true
+      },
+      {
+        "case": "nested",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nested.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "d824db4df9d475dea5409c8fba94b0f7d127fce2f046872fdd15d573d0dbb9a7",
+        "unchanged": true
+      },
+      {
+        "case": "nested",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nested.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "d824db4df9d475dea5409c8fba94b0f7d127fce2f046872fdd15d573d0dbb9a7",
+        "unchanged": true
+      },
+      {
+        "case": "forward",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\forward.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "1136c26795a01dd2d79d4f9b5fcb34513726a187268b3872c210bf3c3a22b3d4",
+        "unchanged": true
+      },
+      {
+        "case": "forward",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\forward.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "1136c26795a01dd2d79d4f9b5fcb34513726a187268b3872c210bf3c3a22b3d4",
+        "unchanged": true
+      },
+      {
+        "case": "parameter-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\parameter-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "c1ea223bdbfef5394a569a2637504388c7a4181667e6b3b86decb6740d737d57",
+        "unchanged": true
+      },
+      {
+        "case": "parameter-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\parameter-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "c1ea223bdbfef5394a569a2637504388c7a4181667e6b3b86decb6740d737d57",
+        "unchanged": true
+      },
+      {
+        "case": "empty",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\empty.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "57cebc5d4ebcfb132603f73be7288bbd8a2871358eb760b0a5ff40c758269303",
+        "unchanged": true
+      },
+      {
+        "case": "empty",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\empty.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "57cebc5d4ebcfb132603f73be7288bbd8a2871358eb760b0a5ff40c758269303",
+        "unchanged": true
+      },
+      {
+        "case": "shorthand",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\shorthand.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "46da102fe19570f46d79cbfdc9255d80cc3c01313c3f5a58af9b852a448dc670",
+        "unchanged": true
+      },
+      {
+        "case": "shorthand",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\shorthand.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "46da102fe19570f46d79cbfdc9255d80cc3c01313c3f5a58af9b852a448dc670",
+        "unchanged": true
+      },
+      {
+        "case": "branch",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\branch.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "62af2dc96c5aafca4cbc76a30dab11f4ff0df3748659d600ff51b2d99c869bd2",
+        "unchanged": true
+      },
+      {
+        "case": "branch",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\branch.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "62af2dc96c5aafca4cbc76a30dab11f4ff0df3748659d600ff51b2d99c869bd2",
+        "unchanged": true
+      },
+      {
+        "case": "whole-assignment",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\whole-assignment.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "cf7dc9e15319142a1131d824a9234a93ddd3d35247dae29b5eccb25b3ff63901",
+        "unchanged": true
+      },
+      {
+        "case": "whole-assignment",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\whole-assignment.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "cf7dc9e15319142a1131d824a9234a93ddd3d35247dae29b5eccb25b3ff63901",
+        "unchanged": true
+      },
+      {
+        "case": "context-minimum",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\context-minimum.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "0977beb18e4f4f51ed9a848fda31a3f6ad446e218adcb3e28e2055d9020c4576",
+        "unchanged": true
+      },
+      {
+        "case": "context-minimum",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\context-minimum.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "0977beb18e4f4f51ed9a848fda31a3f6ad446e218adcb3e28e2055d9020c4576",
+        "unchanged": true
+      },
+      {
+        "case": "CRLF-UTF8",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\CRLF-UTF8.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "a544838febd5bd8d98d9391c290e94379dad088a01556bd88082d703ea4eb4f4",
+        "unchanged": true
+      },
+      {
+        "case": "CRLF-UTF8",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\CRLF-UTF8.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "types ok\n",
+        "stderr": "",
+        "inputSHA256": "a544838febd5bd8d98d9391c290e94379dad088a01556bd88082d703ea4eb4f4",
+        "unchanged": true
+      },
+      {
+        "case": "nominal-mismatch",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nominal-mismatch.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nominal-mismatch.fy:1:64: error: type mismatch (bytes 63..64)\n",
+        "inputSHA256": "bea4f7c67fc6e93454046abb0effc6471d09fa7dd62ae46247aa4984e89f7c93",
+        "unchanged": true
+      },
+      {
+        "case": "nominal-mismatch",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nominal-mismatch.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nominal-mismatch.fy:1:64: error: type mismatch (bytes 63..64)\n",
+        "inputSHA256": "bea4f7c67fc6e93454046abb0effc6471d09fa7dd62ae46247aa4984e89f7c93",
+        "unchanged": true
+      },
+      {
+        "case": "field-type",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\field-type.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\field-type.fy:1:50: error: type mismatch (bytes 49..53)\n",
+        "inputSHA256": "41d1d77331672a7f2cc42d6893a55c50fa2bc4b4ed55bca85a43d8fc1b25540b",
+        "unchanged": true
+      },
+      {
+        "case": "field-type",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\field-type.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\field-type.fy:1:50: error: type mismatch (bytes 49..53)\n",
+        "inputSHA256": "41d1d77331672a7f2cc42d6893a55c50fa2bc4b4ed55bca85a43d8fc1b25540b",
+        "unchanged": true
+      },
+      {
+        "case": "missing-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\missing-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\missing-field.fy:1:45: error: missing struct fields (bytes 44..47)\n",
+        "inputSHA256": "95934e40f2be190609d6b62b0c02c0a85168b2e5b1318e9cf9d90dbc5844e4b1",
+        "unchanged": true
+      },
+      {
+        "case": "missing-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\missing-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\missing-field.fy:1:45: error: missing struct fields (bytes 44..47)\n",
+        "inputSHA256": "95934e40f2be190609d6b62b0c02c0a85168b2e5b1318e9cf9d90dbc5844e4b1",
+        "unchanged": true
+      },
+      {
+        "case": "duplicate-initializer",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-initializer.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-initializer.fy:1:52: error: duplicate field (bytes 51..55)\n",
+        "inputSHA256": "025353ce16062377c369e90d792182ccb9872f54518e5d6793625bf26e450086",
+        "unchanged": true
+      },
+      {
+        "case": "duplicate-initializer",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-initializer.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-initializer.fy:1:52: error: duplicate field (bytes 51..55)\n",
+        "inputSHA256": "025353ce16062377c369e90d792182ccb9872f54518e5d6793625bf26e450086",
+        "unchanged": true
+      },
+      {
+        "case": "unknown-initializer",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-initializer.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-initializer.fy:1:47: error: unknown field (bytes 46..50)\n",
+        "inputSHA256": "df0c82c17a423633d0998cc849738fd8d975ad414c3e5d5e4f376d687080330b",
+        "unchanged": true
+      },
+      {
+        "case": "unknown-initializer",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-initializer.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-initializer.fy:1:47: error: unknown field (bytes 46..50)\n",
+        "inputSHA256": "df0c82c17a423633d0998cc849738fd8d975ad414c3e5d5e4f376d687080330b",
+        "unchanged": true
+      },
+      {
+        "case": "unknown-member",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-member.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-member.fy:1:52: error: unknown field (bytes 51..52)\n",
+        "inputSHA256": "90889736f3065882f9315d9e0f10f24b4fa47475f70d756e61714a5ae45effb7",
+        "unchanged": true
+      },
+      {
+        "case": "unknown-member",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-member.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-member.fy:1:52: error: unknown field (bytes 51..52)\n",
+        "inputSHA256": "90889736f3065882f9315d9e0f10f24b4fa47475f70d756e61714a5ae45effb7",
+        "unchanged": true
+      },
+      {
+        "case": "immutable-parameter",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-parameter.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-parameter.fy:1:44: error: assignment target is immutable (bytes 43..46)\n",
+        "inputSHA256": "38739f43f5b007b7ab8f4b52cf7dd9fc37ba2fd9306409a78d4ccfe4804efabd",
+        "unchanged": true
+      },
+      {
+        "case": "immutable-parameter",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-parameter.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-parameter.fy:1:44: error: assignment target is immutable (bytes 43..46)\n",
+        "inputSHA256": "38739f43f5b007b7ab8f4b52cf7dd9fc37ba2fd9306409a78d4ccfe4804efabd",
+        "unchanged": true
+      },
+      {
+        "case": "immutable-let",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-let.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-let.fy:1:55: error: assignment target is immutable (bytes 54..57)\n",
+        "inputSHA256": "ef0e4b8d48a4dd1f96ae12a1e39a9ec04682a32962c7b14419115c0b07a763be",
+        "unchanged": true
+      },
+      {
+        "case": "immutable-let",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-let.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\immutable-let.fy:1:55: error: assignment target is immutable (bytes 54..57)\n",
+        "inputSHA256": "ef0e4b8d48a4dd1f96ae12a1e39a9ec04682a32962c7b14419115c0b07a763be",
+        "unchanged": true
+      },
+      {
+        "case": "temporary-place",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\temporary-place.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\temporary-place.fy:1:69: error: assignment target is immutable (bytes 68..76)\n",
+        "inputSHA256": "0ac34e7224460f30fffa635d70810d9462d5adee81e172fc1849e4892730e4cb",
+        "unchanged": true
+      },
+      {
+        "case": "temporary-place",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\temporary-place.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\temporary-place.fy:1:69: error: assignment target is immutable (bytes 68..76)\n",
+        "inputSHA256": "0ac34e7224460f30fffa635d70810d9462d5adee81e172fc1849e4892730e4cb",
+        "unchanged": true
+      },
+      {
+        "case": "duplicate-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-field.fy:1:32: error: duplicate field (bytes 31..32)\n",
+        "inputSHA256": "ca2b8e80ab2975fdc24b597549d9b20b3946fc2ac56ad529dbb2702944cb4c9a",
+        "unchanged": true
+      },
+      {
+        "case": "duplicate-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\duplicate-field.fy:1:32: error: duplicate field (bytes 31..32)\n",
+        "inputSHA256": "ca2b8e80ab2975fdc24b597549d9b20b3946fc2ac56ad529dbb2702944cb4c9a",
+        "unchanged": true
+      },
+      {
+        "case": "direct-cycle",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\direct-cycle.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\direct-cycle.fy:1:20: error: recursive value type (bytes 19..20)\n",
+        "inputSHA256": "89f2224daeaa4a6c57dd6ecb4d36b765e9faefbd1201a75db7bda5895ff99adc",
+        "unchanged": true
+      },
+      {
+        "case": "direct-cycle",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\direct-cycle.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\direct-cycle.fy:1:20: error: recursive value type (bytes 19..20)\n",
+        "inputSHA256": "89f2224daeaa4a6c57dd6ecb4d36b765e9faefbd1201a75db7bda5895ff99adc",
+        "unchanged": true
+      },
+      {
+        "case": "indirect-cycle",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\indirect-cycle.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\indirect-cycle.fy:1:20: error: recursive value type (bytes 19..20)\n",
+        "inputSHA256": "248969f1f71a24a7befe259387e0025b8ce702c7ac390af99e55918400e342be",
+        "unchanged": true
+      },
+      {
+        "case": "indirect-cycle",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\indirect-cycle.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\indirect-cycle.fy:1:20: error: recursive value type (bytes 19..20)\n",
+        "inputSHA256": "248969f1f71a24a7befe259387e0025b8ce702c7ac390af99e55918400e342be",
+        "unchanged": true
+      },
+      {
+        "case": "unknown-type",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-type.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-type.fy:1:22: error: invalid nominal type (bytes 21..31)\n",
+        "inputSHA256": "ecd854161d262fd0936a10c28187b0251cfb7c04da3d5ee131db2647362148a3",
+        "unchanged": true
+      },
+      {
+        "case": "unknown-type",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-type.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\unknown-type.fy:1:22: error: invalid nominal type (bytes 21..31)\n",
+        "inputSHA256": "ecd854161d262fd0936a10c28187b0251cfb7c04da3d5ee131db2647362148a3",
+        "unchanged": true
+      },
+      {
+        "case": "bare-type-value",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\bare-type-value.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\bare-type-value.fy:1:45: error: invalid nominal type (bytes 44..45)\n",
+        "inputSHA256": "87be363e6ba96b04036d7666138e1ed64c3e8392f73d00b67dd71f668f3b205b",
+        "unchanged": true
+      },
+      {
+        "case": "bare-type-value",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\bare-type-value.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\bare-type-value.fy:1:45: error: invalid nominal type (bytes 44..45)\n",
+        "inputSHA256": "87be363e6ba96b04036d7666138e1ed64c3e8392f73d00b67dd71f668f3b205b",
+        "unchanged": true
+      },
+      {
+        "case": "aggregate-operator",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\aggregate-operator.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\aggregate-operator.fy:1:55: error: invalid scalar operator (bytes 54..58)\n",
+        "inputSHA256": "2cfc24f2188bbc1a989c7872f59cd92d6e6030f74081c8f917aba0ec75ce842c",
+        "unchanged": true
+      },
+      {
+        "case": "aggregate-operator",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\aggregate-operator.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\aggregate-operator.fy:1:55: error: invalid scalar operator (bytes 54..58)\n",
+        "inputSHA256": "2cfc24f2188bbc1a989c7872f59cd92d6e6030f74081c8f917aba0ec75ce842c",
+        "unchanged": true
+      },
+      {
+        "case": "literal-range",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\literal-range.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\literal-range.fy:1:49: error: integer literal out of range (bytes 48..51)\n",
+        "inputSHA256": "2e2c9103e19a5803a2afd77a5cad874e4de9fea68baabe4d1d2feb3d36a6dae7",
+        "unchanged": true
+      },
+      {
+        "case": "literal-range",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--check-types-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\literal-range.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\literal-range.fy:1:49: error: integer literal out of range (bytes 48..51)\n",
+        "inputSHA256": "2e2c9103e19a5803a2afd77a5cad874e4de9fea68baabe4d1d2feb3d36a6dae7",
+        "unchanged": true
+      },
+      {
+        "case": "backend-boundary",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\backend-boundary.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t28\t29\nF\t1\t2\t31\t66\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t38\t42\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t60\t61\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t57\t61\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t52\t62\t0\t0\t0\t0\t1\t1\t1\t0\t-\nE\t4\tfield\ti32\t-\t52\t64\t3\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\treturn\t45\t65\t2\t4\t0\t0\t-\t0\t0\t0\t0\nK\t1\t44\t66\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+        "unchanged": true
+      },
+      {
+        "case": "backend-boundary",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\backend-boundary.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: invalid or unsupported MIR input\n",
+        "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+        "unchanged": true
+      },
+      {
+        "case": "backend-boundary",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\backend-boundary.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: invalid or unsupported MIR input\n",
+        "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+        "unchanged": true
+      },
+      {
+        "case": "backend-boundary",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\backend-boundary.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t28\t29\nF\t1\t2\t31\t66\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t38\t42\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t60\t61\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t57\t61\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t52\t62\t0\t0\t0\t0\t1\t1\t1\t0\t-\nE\t4\tfield\ti32\t-\t52\t64\t3\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\treturn\t45\t65\t2\t4\t0\t0\t-\t0\t0\t0\t0\nK\t1\t44\t66\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+        "unchanged": true
+      },
+      {
+        "case": "backend-boundary",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\backend-boundary.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: invalid or unsupported MIR input\n",
+        "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+        "unchanged": true
+      },
+      {
+        "case": "backend-boundary",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\backend-boundary.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: invalid or unsupported MIR input\n",
+        "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+        "unchanged": true
+      }
+    ]
+  },
+  "hirVerification": {
+    "schema": "fairyc.nominal-hir-cli-verification/v1",
+    "passed": true,
+    "semanticComparisons": 30,
+    "images": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+        "sha256": "c649f25236dd58171dc01b7329d0e2312707dd027838c3bd2184668b3235e123"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+        "sha256": "c76e19e50e53ea3f36e74bc04ad04730b59e63718ac03e5c9a8f8a3c342818f7"
+      }
+    ],
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\reference.json",
+      "sha256": "1891b8136386b18ec31c6ea88c60d3111d6160e09b6f2abd5058c4f4471b7015"
+    },
+    "sources": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_nominal_hir.py",
+        "sha256": "bc2df6c25c186c5e599fcd96524e7c7ff5e804dae0d59fde3dd17a0f06b632a0"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_hir.py",
+        "sha256": "65182e7637fd78da0029e8f4c1c04af6ed7a4ae8ead2983c2934419d820b6e98"
+      }
+    ],
+    "runs": [
+      {
+        "case": "fields",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\fields.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t2\t25\t26\nD\t2\t257\t6\t32\t33\nF\t1\t2\t35\t89\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti64\t42\t43\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tnominal:257\t50\t51\t2\t2\t0\t0\t0\t0\nE\t1\tboolean\tbool\t-\t57\t61\t0\t0\t0\t0\t0\t0\t0\t1\t-\nE\t2\tinitializer\tbool\t-\t54\t61\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\ti64\t-\t65\t75\t0\t0\t0\t0\t0\t0\t0\t0\t4000000000\nE\t4\tinitializer\ti64\t-\t62\t75\t3\t0\t0\t0\t1\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t52\t76\t0\t0\t0\t0\t1\t2\t2\t0\t-\nE\t6\treference\tnominal:257\t-\t84\t85\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\tfield\ti64\t-\t84\t87\t6\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t46\t77\t2\t5\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t77\t88\t2\t7\t0\t0\t-\t0\t0\t0\t0\nK\t1\t45\t89\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t2\nA\t3\t4\n",
+        "stderr": "",
+        "inputSHA256": "f29e8bb3c6a4ad7644c79129af1a044d9767ca43cf0fdb44215da5747297d293",
+        "unchanged": true
+      },
+      {
+        "case": "fields",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\fields.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t2\t25\t26\nD\t2\t257\t6\t32\t33\nF\t1\t2\t35\t89\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti64\t42\t43\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tnominal:257\t50\t51\t2\t2\t0\t0\t0\t0\nE\t1\tboolean\tbool\t-\t57\t61\t0\t0\t0\t0\t0\t0\t0\t1\t-\nE\t2\tinitializer\tbool\t-\t54\t61\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\ti64\t-\t65\t75\t0\t0\t0\t0\t0\t0\t0\t0\t4000000000\nE\t4\tinitializer\ti64\t-\t62\t75\t3\t0\t0\t0\t1\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t52\t76\t0\t0\t0\t0\t1\t2\t2\t0\t-\nE\t6\treference\tnominal:257\t-\t84\t85\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\tfield\ti64\t-\t84\t87\t6\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t46\t77\t2\t5\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t77\t88\t2\t7\t0\t0\t-\t0\t0\t0\t0\nK\t1\t45\t89\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t2\nA\t3\t4\n",
+        "stderr": "",
+        "inputSHA256": "f29e8bb3c6a4ad7644c79129af1a044d9767ca43cf0fdb44215da5747297d293",
+        "unchanged": true
+      },
+      {
+        "case": "nested",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nested.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t257\t39\t40\nF\t1\t3\t42\t110\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\ti32\t49\t50\t0\t0\t0\t4\t0\t0\nB\t4\tvar\tnominal:258\t57\t58\t3\t2\t0\t0\t0\t0\nB\t5\tlet\tnominal:258\t86\t90\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t69\t70\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t66\t70\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t64\t71\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t4\tinitializer\tnominal:257\t-\t61\t71\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:258\t-\t59\t72\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t6\treference\tnominal:258\t-\t73\t74\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t7\tfield\tnominal:257\t-\t73\t76\t6\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tfield\ti32\t-\t73\t78\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t10\treference\tnominal:258\t-\t91\t92\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t11\treference\tnominal:258\t-\t100\t104\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t12\tfield\tnominal:257\t-\t100\t106\t11\t0\t0\t0\t2\t0\t0\t0\t-\nE\t13\tfield\ti32\t-\t100\t108\t12\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t53\t73\t2\t5\t0\t4\t-\t0\t0\t0\t0\nS\t2\tassignment\t73\t82\t2\t9\t8\t0\t+\t0\t0\t0\t0\nS\t3\tbinding\t82\t93\t2\t10\t0\t5\t-\t0\t0\t0\t0\nS\t4\treturn\t93\t109\t2\t13\t0\t0\t-\t0\t0\t0\t0\nK\t1\t52\t110\t3\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t4\nA\t5\t2\n",
+        "stderr": "",
+        "inputSHA256": "d824db4df9d475dea5409c8fba94b0f7d127fce2f046872fdd15d573d0dbb9a7",
+        "unchanged": true
+      },
+      {
+        "case": "nested",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nested.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t257\t39\t40\nF\t1\t3\t42\t110\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\ti32\t49\t50\t0\t0\t0\t4\t0\t0\nB\t4\tvar\tnominal:258\t57\t58\t3\t2\t0\t0\t0\t0\nB\t5\tlet\tnominal:258\t86\t90\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t69\t70\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t66\t70\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t64\t71\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t4\tinitializer\tnominal:257\t-\t61\t71\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:258\t-\t59\t72\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t6\treference\tnominal:258\t-\t73\t74\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t7\tfield\tnominal:257\t-\t73\t76\t6\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tfield\ti32\t-\t73\t78\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t10\treference\tnominal:258\t-\t91\t92\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t11\treference\tnominal:258\t-\t100\t104\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t12\tfield\tnominal:257\t-\t100\t106\t11\t0\t0\t0\t2\t0\t0\t0\t-\nE\t13\tfield\ti32\t-\t100\t108\t12\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t53\t73\t2\t5\t0\t4\t-\t0\t0\t0\t0\nS\t2\tassignment\t73\t82\t2\t9\t8\t0\t+\t0\t0\t0\t0\nS\t3\tbinding\t82\t93\t2\t10\t0\t5\t-\t0\t0\t0\t0\nS\t4\treturn\t93\t109\t2\t13\t0\t0\t-\t0\t0\t0\t0\nK\t1\t52\t110\t3\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t4\nA\t5\t2\n",
+        "stderr": "",
+        "inputSHA256": "d824db4df9d475dea5409c8fba94b0f7d127fce2f046872fdd15d573d0dbb9a7",
+        "unchanged": true
+      },
+      {
+        "case": "forward",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\forward.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t258\t23\t24\nD\t2\t258\t1\t39\t40\nF\t1\t3\t42\t73\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t33\t34\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\tnominal:257\t47\t48\t0\t0\t0\t4\t0\t0\nE\t1\tinteger\ti32\t-\t68\t69\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t2\tinitializer\ti32\t-\t65\t69\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:258\t-\t63\t70\t0\t0\t0\t0\t2\t2\t1\t0\t-\nE\t4\tinitializer\tnominal:258\t-\t60\t70\t3\t0\t0\t0\t1\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t58\t71\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t51\t72\t2\t5\t0\t0\t-\t0\t0\t0\t0\nK\t1\t50\t73\t3\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t4\nA\t2\t2\n",
+        "stderr": "",
+        "inputSHA256": "1136c26795a01dd2d79d4f9b5fcb34513726a187268b3872c210bf3c3a22b3d4",
+        "unchanged": true
+      },
+      {
+        "case": "forward",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\forward.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t258\t23\t24\nD\t2\t258\t1\t39\t40\nF\t1\t3\t42\t73\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t33\t34\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\tnominal:257\t47\t48\t0\t0\t0\t4\t0\t0\nE\t1\tinteger\ti32\t-\t68\t69\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t2\tinitializer\ti32\t-\t65\t69\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:258\t-\t63\t70\t0\t0\t0\t0\t2\t2\t1\t0\t-\nE\t4\tinitializer\tnominal:258\t-\t60\t70\t3\t0\t0\t0\t1\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t58\t71\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t51\t72\t2\t5\t0\t0\t-\t0\t0\t0\t0\nK\t1\t50\t73\t3\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t4\nA\t2\t2\n",
+        "stderr": "",
+        "inputSHA256": "1136c26795a01dd2d79d4f9b5fcb34513726a187268b3872c210bf3c3a22b3d4",
+        "unchanged": true
+      },
+      {
+        "case": "parameter-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\parameter-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t51\t1\t1\t0\t1\t0\nF\t2\t3\t51\t84\t3\t2\t2\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t35\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t58\t59\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tnominal:257\t38\t39\t2\t1\t0\t0\t1\t0\nE\t1\treference\tnominal:257\t-\t48\t49\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t4\nE\t3\tinitializer\ti32\t-\t74\t78\t2\t0\t0\t0\t1\t0\t0\t0\t-\nE\t4\tconstruct\tnominal:257\t-\t72\t79\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t5\tcall\tnominal:257\t-\t69\t80\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t6\tfield\ti32\t-\t69\t82\t5\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\treturn\t41\t50\t2\t1\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t62\t83\t4\t6\t0\t0\t-\t0\t0\t0\t0\nK\t1\t40\t51\t2\t2\t1\t1\t1\t0\nK\t2\t61\t84\t3\t4\t3\t2\t1\t0\nA\t0\t4\nA\t1\t1\nA\t2\t2\nA\t3\t4\nA\t4\t3\nT\t0\tnominal:257\n",
+        "stderr": "",
+        "inputSHA256": "c1ea223bdbfef5394a569a2637504388c7a4181667e6b3b86decb6740d737d57",
+        "unchanged": true
+      },
+      {
+        "case": "parameter-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\parameter-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t51\t1\t1\t0\t1\t0\nF\t2\t3\t51\t84\t3\t2\t2\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t35\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t58\t59\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tnominal:257\t38\t39\t2\t1\t0\t0\t1\t0\nE\t1\treference\tnominal:257\t-\t48\t49\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t4\nE\t3\tinitializer\ti32\t-\t74\t78\t2\t0\t0\t0\t1\t0\t0\t0\t-\nE\t4\tconstruct\tnominal:257\t-\t72\t79\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t5\tcall\tnominal:257\t-\t69\t80\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t6\tfield\ti32\t-\t69\t82\t5\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\treturn\t41\t50\t2\t1\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t62\t83\t4\t6\t0\t0\t-\t0\t0\t0\t0\nK\t1\t40\t51\t2\t2\t1\t1\t1\t0\nK\t2\t61\t84\t3\t4\t3\t2\t1\t0\nA\t0\t4\nA\t1\t1\nA\t2\t2\nA\t3\t4\nA\t4\t3\nT\t0\tnominal:257\n",
+        "stderr": "",
+        "inputSHA256": "c1ea223bdbfef5394a569a2637504388c7a4181667e6b3b86decb6740d737d57",
+        "unchanged": true
+      },
+      {
+        "case": "empty",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\empty.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nF\t1\t2\t22\t43\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t27\t28\t0\t0\t0\t3\t0\t0\nE\t1\tconstruct\tnominal:257\t-\t38\t41\t0\t0\t0\t0\t1\t1\t0\t0\t-\nS\t1\treturn\t31\t42\t2\t1\t0\t0\t-\t0\t0\t0\t0\nK\t1\t30\t43\t2\t2\t1\t0\t1\t0\nA\t0\t1\n",
+        "stderr": "",
+        "inputSHA256": "57cebc5d4ebcfb132603f73be7288bbd8a2871358eb760b0a5ff40c758269303",
+        "unchanged": true
+      },
+      {
+        "case": "empty",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\empty.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nF\t1\t2\t22\t43\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t27\t28\t0\t0\t0\t3\t0\t0\nE\t1\tconstruct\tnominal:257\t-\t38\t41\t0\t0\t0\t0\t1\t1\t0\t0\t-\nS\t1\treturn\t31\t42\t2\t1\t0\t0\t-\t0\t0\t0\t0\nK\t1\t30\t43\t2\t2\t1\t0\t1\t0\nA\t0\t1\n",
+        "stderr": "",
+        "inputSHA256": "57cebc5d4ebcfb132603f73be7288bbd8a2871358eb760b0a5ff40c758269303",
+        "unchanged": true
+      },
+      {
+        "case": "shorthand",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\shorthand.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t25\t26\nD\t2\t257\t6\t32\t33\nF\t1\t2\t35\t73\t1\t1\t0\t2\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t40\t41\t0\t0\t0\t3\t0\t2\nB\t3\tparameter\ti32\t46\t47\t2\t1\t0\t0\t2\t0\nB\t4\tparameter\tbool\t53\t54\t2\t1\t0\t0\t2\t0\nE\t1\treference\ti32\t-\t66\t67\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tinitializer\ti32\t-\t65\t67\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\treference\tbool\t-\t69\t70\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t4\tinitializer\tbool\t-\t68\t70\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t63\t71\t0\t0\t0\t0\t1\t3\t2\t0\t-\nS\t1\treturn\t56\t72\t2\t5\t0\t0\t-\t0\t0\t0\t0\nK\t1\t55\t73\t2\t2\t1\t2\t1\t0\nA\t0\t3\nA\t1\t4\nA\t2\t1\nA\t3\t2\nA\t4\t4\nT\t0\ti32\nT\t1\tbool\n",
+        "stderr": "",
+        "inputSHA256": "46da102fe19570f46d79cbfdc9255d80cc3c01313c3f5a58af9b852a448dc670",
+        "unchanged": true
+      },
+      {
+        "case": "shorthand",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\shorthand.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t25\t26\nD\t2\t257\t6\t32\t33\nF\t1\t2\t35\t73\t1\t1\t0\t2\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t40\t41\t0\t0\t0\t3\t0\t2\nB\t3\tparameter\ti32\t46\t47\t2\t1\t0\t0\t2\t0\nB\t4\tparameter\tbool\t53\t54\t2\t1\t0\t0\t2\t0\nE\t1\treference\ti32\t-\t66\t67\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tinitializer\ti32\t-\t65\t67\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\treference\tbool\t-\t69\t70\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t4\tinitializer\tbool\t-\t68\t70\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t63\t71\t0\t0\t0\t0\t1\t3\t2\t0\t-\nS\t1\treturn\t56\t72\t2\t5\t0\t0\t-\t0\t0\t0\t0\nK\t1\t55\t73\t2\t2\t1\t2\t1\t0\nA\t0\t3\nA\t1\t4\nA\t2\t1\nA\t3\t2\nA\t4\t4\nT\t0\ti32\nT\t1\tbool\n",
+        "stderr": "",
+        "inputSHA256": "46da102fe19570f46d79cbfdc9255d80cc3c01313c3f5a58af9b852a448dc670",
+        "unchanged": true
+      },
+      {
+        "case": "branch",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\branch.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t79\t1\t3\t0\t1\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t1\nB\t3\tparameter\tbool\t40\t41\t2\t1\t0\t0\t1\t0\nE\t1\treference\tbool\t-\t53\t54\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t61\t62\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t3\tinitializer\ti32\t-\t58\t62\t2\t0\t0\t0\t1\t0\t0\t0\t-\nE\t4\tconstruct\tnominal:257\t-\t56\t63\t0\t0\t0\t0\t1\t2\t1\t0\t-\nE\t5\tinteger\ti32\t-\t74\t75\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t6\tinitializer\ti32\t-\t71\t75\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t69\t76\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t8\tblock\tnominal:257\t-\t68\t77\t0\t0\t0\t2\t0\t0\t0\t0\t-\nE\t9\tif\tnominal:257\t-\t50\t77\t1\t0\t8\t1\t0\t0\t0\t0\t-\nS\t1\treturn\t43\t78\t2\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t55\t64\t2\t3\t2\t2\t0\t4\nK\t2\t68\t77\t2\t4\t2\t3\t0\t7\nK\t3\t42\t79\t2\t2\t1\t1\t1\t0\nA\t0\t3\nA\t1\t1\nA\t2\t3\nA\t3\t6\nT\t0\tbool\n",
+        "stderr": "",
+        "inputSHA256": "62af2dc96c5aafca4cbc76a30dab11f4ff0df3748659d600ff51b2d99c869bd2",
+        "unchanged": true
+      },
+      {
+        "case": "branch",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\branch.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t79\t1\t3\t0\t1\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t1\nB\t3\tparameter\tbool\t40\t41\t2\t1\t0\t0\t1\t0\nE\t1\treference\tbool\t-\t53\t54\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t61\t62\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t3\tinitializer\ti32\t-\t58\t62\t2\t0\t0\t0\t1\t0\t0\t0\t-\nE\t4\tconstruct\tnominal:257\t-\t56\t63\t0\t0\t0\t0\t1\t2\t1\t0\t-\nE\t5\tinteger\ti32\t-\t74\t75\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t6\tinitializer\ti32\t-\t71\t75\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t69\t76\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t8\tblock\tnominal:257\t-\t68\t77\t0\t0\t0\t2\t0\t0\t0\t0\t-\nE\t9\tif\tnominal:257\t-\t50\t77\t1\t0\t8\t1\t0\t0\t0\t0\t-\nS\t1\treturn\t43\t78\t2\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t55\t64\t2\t3\t2\t2\t0\t4\nK\t2\t68\t77\t2\t4\t2\t3\t0\t7\nK\t3\t42\t79\t2\t2\t1\t1\t1\t0\nA\t0\t3\nA\t1\t1\nA\t2\t3\nA\t3\t6\nT\t0\tbool\n",
+        "stderr": "",
+        "inputSHA256": "62af2dc96c5aafca4cbc76a30dab11f4ff0df3748659d600ff51b2d99c869bd2",
+        "unchanged": true
+      },
+      {
+        "case": "whole-assignment",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\whole-assignment.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t71\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t0\nB\t3\tvar\tnominal:257\t41\t42\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t48\t49\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t45\t49\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t43\t50\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t4\treference\tnominal:257\t-\t51\t52\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t58\t59\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t6\tinitializer\ti32\t-\t55\t59\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t53\t60\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t8\treference\tnominal:257\t-\t68\t69\t0\t0\t0\t0\t3\t0\t0\t0\t-\nS\t1\tbinding\t37\t51\t2\t3\t0\t3\t-\t0\t0\t0\t0\nS\t2\tassignment\t51\t61\t2\t7\t4\t0\t=\t0\t0\t0\t0\nS\t3\treturn\t61\t70\t2\t8\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t71\t2\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t2\nA\t4\t6\n",
+        "stderr": "",
+        "inputSHA256": "cf7dc9e15319142a1131d824a9234a93ddd3d35247dae29b5eccb25b3ff63901",
+        "unchanged": true
+      },
+      {
+        "case": "whole-assignment",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\whole-assignment.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t71\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t0\nB\t3\tvar\tnominal:257\t41\t42\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t48\t49\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t45\t49\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t43\t50\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t4\treference\tnominal:257\t-\t51\t52\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t58\t59\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t6\tinitializer\ti32\t-\t55\t59\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t53\t60\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t8\treference\tnominal:257\t-\t68\t69\t0\t0\t0\t0\t3\t0\t0\t0\t-\nS\t1\tbinding\t37\t51\t2\t3\t0\t3\t-\t0\t0\t0\t0\nS\t2\tassignment\t51\t61\t2\t7\t4\t0\t=\t0\t0\t0\t0\nS\t3\treturn\t61\t70\t2\t8\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t71\t2\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t2\nA\t4\t6\n",
+        "stderr": "",
+        "inputSHA256": "cf7dc9e15319142a1131d824a9234a93ddd3d35247dae29b5eccb25b3ff63901",
+        "unchanged": true
+      },
+      {
+        "case": "context-minimum",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\context-minimum.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t2\t25\t26\nF\t1\t2\t28\t72\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti64\t-\t49\t69\t0\t0\t0\t0\t0\t0\t0\t0\t-9223372036854775808\nE\t2\tinitializer\ti64\t-\t46\t69\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t44\t70\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t37\t71\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t72\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "0977beb18e4f4f51ed9a848fda31a3f6ad446e218adcb3e28e2055d9020c4576",
+        "unchanged": true
+      },
+      {
+        "case": "context-minimum",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\context-minimum.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t2\t25\t26\nF\t1\t2\t28\t72\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti64\t-\t49\t69\t0\t0\t0\t0\t0\t0\t0\t0\t-9223372036854775808\nE\t2\tinitializer\ti64\t-\t46\t69\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t44\t70\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t37\t71\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t72\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "0977beb18e4f4f51ed9a848fda31a3f6ad446e218adcb3e28e2055d9020c4576",
+        "unchanged": true
+      },
+      {
+        "case": "CRLF-UTF8",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\CRLF-UTF8.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t37\t38\nF\t1\t2\t40\t65\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t31\t32\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t45\t46\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t61\t62\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t2\tinitializer\ti32\t-\t58\t62\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t56\t63\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t49\t64\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t48\t65\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "a544838febd5bd8d98d9391c290e94379dad088a01556bd88082d703ea4eb4f4",
+        "unchanged": true
+      },
+      {
+        "case": "CRLF-UTF8",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\CRLF-UTF8.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t37\t38\nF\t1\t2\t40\t65\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t31\t32\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t45\t46\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t61\t62\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t2\tinitializer\ti32\t-\t58\t62\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t56\t63\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t49\t64\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t48\t65\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "a544838febd5bd8d98d9391c290e94379dad088a01556bd88082d703ea4eb4f4",
+        "unchanged": true
+      },
+      {
+        "case": "public-struct",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\public-struct.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t1\nD\t1\t257\t1\t29\t30\nF\t1\t2\t32\t57\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t23\t24\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t37\t38\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t53\t54\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t50\t54\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t48\t55\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t41\t56\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t40\t57\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "55dea5857897e4982990e60991f665b65ebe0c77978eeeb4b520c14ad5ececcc",
+        "unchanged": true
+      },
+      {
+        "case": "public-struct",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\public-struct.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t1\nD\t1\t257\t1\t29\t30\nF\t1\t2\t32\t57\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t23\t24\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t37\t38\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t53\t54\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t50\t54\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t48\t55\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t41\t56\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t40\t57\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+        "stderr": "",
+        "inputSHA256": "55dea5857897e4982990e60991f665b65ebe0c77978eeeb4b520c14ad5ececcc",
+        "unchanged": true
+      },
+      {
+        "case": "initializer-order",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\initializer-order.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t28\t29\nD\t2\t257\t1\t34\t35\nF\t1\t2\t37\t91\t1\t2\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t45\t46\t0\t0\t0\t3\t0\t0\nB\t3\tvar\ti32\t57\t58\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t59\t60\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\treference\ti32\t-\t76\t77\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tinitializer\ti32\t-\t73\t77\t2\t0\t0\t0\t2\t0\t0\t0\t-\nE\t4\treference\ti32\t-\t82\t83\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t84\t85\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t6\treference\ti32\t-\t86\t87\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\tblock\ti32\t-\t81\t88\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t8\tinitializer\ti32\t-\t78\t88\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tconstruct\tnominal:257\t-\t68\t89\t0\t0\t0\t0\t1\t2\t2\t0\t-\nS\t1\tbinding\t49\t61\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t61\t90\t2\t9\t0\t0\t-\t0\t0\t0\t0\nS\t3\tassignment\t82\t86\t3\t5\t4\t0\t=\t0\t0\t0\t0\nK\t1\t81\t88\t2\t3\t2\t4\t1\t6\nK\t2\t48\t91\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t8\nA\t4\t3\n",
+        "stderr": "",
+        "inputSHA256": "399fb6b46864b44830c8432602b1a745f008fbe498b0917c854cbe8f0e41ebd9",
+        "unchanged": true
+      },
+      {
+        "case": "initializer-order",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\initializer-order.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t28\t29\nD\t2\t257\t1\t34\t35\nF\t1\t2\t37\t91\t1\t2\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t45\t46\t0\t0\t0\t3\t0\t0\nB\t3\tvar\ti32\t57\t58\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t59\t60\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\treference\ti32\t-\t76\t77\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tinitializer\ti32\t-\t73\t77\t2\t0\t0\t0\t2\t0\t0\t0\t-\nE\t4\treference\ti32\t-\t82\t83\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t84\t85\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t6\treference\ti32\t-\t86\t87\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\tblock\ti32\t-\t81\t88\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t8\tinitializer\ti32\t-\t78\t88\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tconstruct\tnominal:257\t-\t68\t89\t0\t0\t0\t0\t1\t2\t2\t0\t-\nS\t1\tbinding\t49\t61\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t61\t90\t2\t9\t0\t0\t-\t0\t0\t0\t0\nS\t3\tassignment\t82\t86\t3\t5\t4\t0\t=\t0\t0\t0\t0\nK\t1\t81\t88\t2\t3\t2\t4\t1\t6\nK\t2\t48\t91\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t8\nA\t4\t3\n",
+        "stderr": "",
+        "inputSHA256": "399fb6b46864b44830c8432602b1a745f008fbe498b0917c854cbe8f0e41ebd9",
+        "unchanged": true
+      },
+      {
+        "case": "initializer-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\initializer-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t28\t29\nD\t2\t257\t1\t34\t35\nF\t1\t2\t37\t93\t1\t2\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t44\t45\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tnominal:257\t52\t53\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t62\t63\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t59\t63\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\ti32\t-\t75\t76\t0\t0\t0\t0\t0\t0\t0\t0\t9\nE\t4\tinteger\ti32\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tblock\ti32\t-\t67\t79\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t6\tinitializer\ti32\t-\t64\t79\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t54\t80\t0\t0\t0\t0\t1\t2\t2\t0\t-\nE\t8\treference\tnominal:257\t-\t88\t89\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t9\tfield\ti32\t-\t88\t91\t8\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t48\t81\t2\t7\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t68\t77\t3\t3\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t81\t92\t2\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t67\t79\t2\t3\t2\t4\t1\t4\nK\t2\t47\t93\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t3\nA\t2\t2\nA\t3\t6\nA\t4\t2\n",
+        "stderr": "",
+        "inputSHA256": "67f314d81c971db39c5058ca25d091faa1b197e31581871b48907916837146c7",
+        "unchanged": true
+      },
+      {
+        "case": "initializer-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\initializer-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t28\t29\nD\t2\t257\t1\t34\t35\nF\t1\t2\t37\t93\t1\t2\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t44\t45\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tnominal:257\t52\t53\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t62\t63\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t59\t63\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\ti32\t-\t75\t76\t0\t0\t0\t0\t0\t0\t0\t0\t9\nE\t4\tinteger\ti32\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tblock\ti32\t-\t67\t79\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t6\tinitializer\ti32\t-\t64\t79\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t54\t80\t0\t0\t0\t0\t1\t2\t2\t0\t-\nE\t8\treference\tnominal:257\t-\t88\t89\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t9\tfield\ti32\t-\t88\t91\t8\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t48\t81\t2\t7\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t68\t77\t3\t3\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t81\t92\t2\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t67\t79\t2\t3\t2\t4\t1\t4\nK\t2\t47\t93\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t3\nA\t2\t2\nA\t3\t6\nA\t4\t2\n",
+        "stderr": "",
+        "inputSHA256": "67f314d81c971db39c5058ca25d091faa1b197e31581871b48907916837146c7",
+        "unchanged": true
+      },
+      {
+        "case": "nested-assignment",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nested-assignment.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t257\t39\t40\nF\t1\t3\t42\t93\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\tnominal:258\t47\t48\t0\t0\t0\t4\t0\t0\nB\t4\tvar\tnominal:258\t55\t56\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t67\t68\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t64\t68\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t62\t69\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t4\tinitializer\tnominal:257\t-\t59\t69\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:258\t-\t57\t70\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t6\treference\tnominal:258\t-\t71\t72\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t7\tfield\tnominal:257\t-\t71\t74\t6\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t9\tinitializer\ti32\t-\t77\t81\t8\t0\t0\t0\t1\t0\t0\t0\t-\nE\t10\tconstruct\tnominal:257\t-\t75\t82\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t11\treference\tnominal:258\t-\t90\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nS\t1\tbinding\t51\t71\t2\t5\t0\t4\t-\t0\t0\t0\t0\nS\t2\tassignment\t71\t83\t2\t10\t7\t0\t=\t0\t0\t0\t0\nS\t3\treturn\t83\t92\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t50\t93\t3\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t2\nA\t5\t9\n",
+        "stderr": "",
+        "inputSHA256": "c1200375b35f514cf0e1372adf1dec11980eff0a07c3b0d97cd3db1e84d582ce",
+        "unchanged": true
+      },
+      {
+        "case": "nested-assignment",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\nested-assignment.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t257\t39\t40\nF\t1\t3\t42\t93\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\tnominal:258\t47\t48\t0\t0\t0\t4\t0\t0\nB\t4\tvar\tnominal:258\t55\t56\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t67\t68\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t64\t68\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t62\t69\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t4\tinitializer\tnominal:257\t-\t59\t69\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:258\t-\t57\t70\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t6\treference\tnominal:258\t-\t71\t72\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t7\tfield\tnominal:257\t-\t71\t74\t6\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t9\tinitializer\ti32\t-\t77\t81\t8\t0\t0\t0\t1\t0\t0\t0\t-\nE\t10\tconstruct\tnominal:257\t-\t75\t82\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t11\treference\tnominal:258\t-\t90\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nS\t1\tbinding\t51\t71\t2\t5\t0\t4\t-\t0\t0\t0\t0\nS\t2\tassignment\t71\t83\t2\t10\t7\t0\t=\t0\t0\t0\t0\nS\t3\treturn\t83\t92\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t50\t93\t3\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t2\nA\t5\t9\n",
+        "stderr": "",
+        "inputSHA256": "c1200375b35f514cf0e1372adf1dec11980eff0a07c3b0d97cd3db1e84d582ce",
+        "unchanged": true
+      },
+      {
+        "case": "distinct-identities",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\dev.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\distinct-identities.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t1\t41\t42\nF\t1\t3\t44\t99\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\ti32\t51\t52\t0\t0\t0\t4\t0\t0\nB\t4\tlet\tnominal:257\t59\t60\t3\t2\t0\t0\t0\t0\nB\t5\tlet\tnominal:258\t73\t74\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t66\t67\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t63\t67\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t61\t68\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t4\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tinitializer\ti32\t-\t77\t81\t4\t0\t0\t0\t2\t0\t0\t0\t-\nE\t6\tconstruct\tnominal:258\t-\t75\t82\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t7\treference\tnominal:257\t-\t90\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t8\tfield\ti32\t-\t90\t93\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\treference\tnominal:258\t-\t94\t95\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t10\tfield\ti32\t-\t94\t97\t9\t0\t0\t0\t2\t0\t0\t0\t-\nE\t11\tbinary\ti32\t+\t90\t97\t8\t10\t0\t0\t0\t0\t0\t0\t-\nS\t1\tbinding\t55\t69\t2\t3\t0\t4\t-\t0\t0\t0\t0\nS\t2\tbinding\t69\t83\t2\t6\t0\t5\t-\t0\t0\t0\t0\nS\t3\treturn\t83\t98\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t54\t99\t3\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t2\nA\t4\t5\n",
+        "stderr": "",
+        "inputSHA256": "ac528d8103ae482effb8cc3328c9b2181502a83d2df4dcad2ec6b7638813bea7",
+        "unchanged": true
+      },
+      {
+        "case": "distinct-identities",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\release.exe",
+          "--hir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-hir-file-cli\\distinct-identities.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t1\t41\t42\nF\t1\t3\t44\t99\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\ti32\t51\t52\t0\t0\t0\t4\t0\t0\nB\t4\tlet\tnominal:257\t59\t60\t3\t2\t0\t0\t0\t0\nB\t5\tlet\tnominal:258\t73\t74\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t66\t67\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t63\t67\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t61\t68\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t4\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tinitializer\ti32\t-\t77\t81\t4\t0\t0\t0\t2\t0\t0\t0\t-\nE\t6\tconstruct\tnominal:258\t-\t75\t82\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t7\treference\tnominal:257\t-\t90\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t8\tfield\ti32\t-\t90\t93\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\treference\tnominal:258\t-\t94\t95\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t10\tfield\ti32\t-\t94\t97\t9\t0\t0\t0\t2\t0\t0\t0\t-\nE\t11\tbinary\ti32\t+\t90\t97\t8\t10\t0\t0\t0\t0\t0\t0\t-\nS\t1\tbinding\t55\t69\t2\t3\t0\t4\t-\t0\t0\t0\t0\nS\t2\tbinding\t69\t83\t2\t6\t0\t5\t-\t0\t0\t0\t0\nS\t3\treturn\t83\t98\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t54\t99\t3\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t2\nA\t4\t5\n",
+        "stderr": "",
+        "inputSHA256": "ac528d8103ae482effb8cc3328c9b2181502a83d2df4dcad2ec6b7638813bea7",
+        "unchanged": true
+      }
+    ]
+  },
+  "nominalHIRReference": {
+    "path": "docs/ops/evidence/nominal-hir-file-cli-20261006.reference.json",
+    "sha256": "7d837d51516aebcde0ea56eaa2e61fee75e6acff244224667cb370eedb9d0553"
+  },
+  "additionalValidation": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "stdout": "check ok: 2 instance(s), 62 source file(s), 939 MIR function(s), lock verified\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "test",
+        "--native",
+        "--file",
+        "tests/hir_nominal.fy",
+        "--json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::hir_nominal::duplicate_declaration_identity_cannot_enter_program\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::hir_nominal::malformed_layouts_are_rejected_before_indexing\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::hir_nominal::owned_layout_and_written_initializers_survive_input\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"unchanged\"}\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "test",
+        "--native",
+        "--release",
+        "--file",
+        "tests/hir_nominal.fy",
+        "--json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"release\",\"tests\":[{\"identity\":\"tests::hir_nominal::duplicate_declaration_identity_cannot_enter_program\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::hir_nominal::malformed_layouts_are_rejected_before_indexing\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::hir_nominal::owned_layout_and_written_initializers_survive_input\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"unchanged\"}\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\.bun\\bin\\bun.EXE",
+        "tools/run-go.ts",
+        "vet",
+        "./cmd/fairyc-lexer-file-oracle",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "stdout": "",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\.bun\\bin\\bun.EXE",
+        "tools/run-go.ts",
+        "test",
+        "./internal/cli",
+        "-run",
+        "^TestLexerFileCLIWorkspace$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/cli\t2.147s\n",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "py_compile",
+        "examples/lexer_candidate/verify.py",
+        "examples/lexer_candidate/verify_hir.py",
+        "examples/lexer_candidate/verify_nominal.py",
+        "examples/lexer_candidate/verify_nominal_hir.py"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "stdout": "",
+      "stderr": "",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "stdout": "",
+      "stderr": "",
+      "exit": 0
+    }
+  ],
+  "rawRetention": "New feature raw runs are tracked; full 1256-run scalar regression raw logs remain at the hashed local paths in verification.profiles",
+  "scope": {
+    "productLogic": "Fairy C and public SDK",
+    "exampleVersion": "0.17.0",
+    "sameFileNominalHIR": true,
+    "nominalIdentity": "defining declaration",
+    "ownedLayout": [
+      "declaration binding",
+      "field names/types/owners",
+      "declaration visibility",
+      "written initializer order",
+      "field and constructor links",
+      "nominal signatures"
+    ],
+    "nominalFormat": "fairyc.nominal-hir/v1",
+    "scalarFormatUnchanged": "fairyc.scalar-hir/v1",
+    "maxShapes": 512,
+    "maxFields": 1024,
+    "maxDepth": 64,
+    "ordinaryCLIExecutions": 1256,
+    "nominalCLIExecutions": 58,
+    "nominalHIRComparisons": 30,
+    "nativeAPITestsPerProfile": 3,
+    "compilerExecutableChanged": false,
+    "sdkChanged": false,
+    "languageChanged": false,
+    "runtimeChanged": false,
+    "structMIRLowering": false,
+    "structNativeInputExecution": false,
+    "linuxNativeExecuted": false,
+    "selfHostingPromoted": false
+  },
+  "skippedValidation": [
+    "Linux native execution deferred to owner batch",
+    "Nominal MIR/verification/C execution and imported types await subsequent components",
+    "Whole-repository suites, performance experiments and OS fault injection outside this unit"
+  ],
+  "skills": [
+    "feature",
+    "cli-tool",
+    "test-hardening",
+    "bugfix"
+  ]
+}

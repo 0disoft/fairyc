@@ -1,5 +1,6 @@
 module hir_output;
 import hir_model as h;
+import hir_shapes as shapes;
 import std::bytes as bytes;
 
 fn bool put(ref mut bytes::Buffer out, ref u8[] text) { return bytes::append(out,text).is_ok; }
@@ -11,12 +12,14 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
         case .I64: { put(out,b"i64") } case .U8: { put(out,b"u8") } case .U32: { put(out,b"u32") }
         case .Usize: { put(out,b"usize") } case .Bool: { put(out,b"bool") }
         case .Void: { put(out,b"void") } case .Callable: { put(out,b"callable") }
+        case .Nominal { .id = id }: { put(out,b"nominal:") && bytes::append_u32(out,id).is_ok }
     };
 }
 fn bool binding_kind(ref mut bytes::Buffer out, h::BindingKind kind) {
     return tab(out) && switch(kind) {
         case .Function: { put(out,b"function") } case .Parameter: { put(out,b"parameter") }
         case .Let: { put(out,b"let") } case .Var: { put(out,b"var") } case .External: { put(out,b"external") }
+        case .Struct: { put(out,b"struct") }
     };
 }
 fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
@@ -25,6 +28,7 @@ fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
         case .Reference: { put(out,b"reference") } case .Unary: { put(out,b"unary") }
         case .Binary: { put(out,b"binary") } case .Call: { put(out,b"call") }
         case .Block: { put(out,b"block") } case .If: { put(out,b"if") }
+        case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") }
     };
 }
 fn bool statement_kind(ref mut bytes::Buffer out, h::StatementKind kind) {
@@ -54,8 +58,21 @@ fn bool operator(ref mut bytes::Buffer out, h::Operator op) {
 // guard reserves a whole record below the 2 MiB CLI transport ceiling.
 // 3 allocation failure, 4 output limit. Enum names and IDs are private v1 data.
 pub fn u32 render(ref h::Program p, ref mut bytes::Buffer out) {
-    if (!put(out,b"fairyc.scalar-hir/v1\nP") || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
+    let ref shapes::Table nominal = h::nominal(p);
+    if (!put(out,if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
     var usize index = 0;
+    while (index < shapes::count(nominal)) {
+        if (bytes::len(out) > 2097152 - 1024) { return 4; }
+        let shapes::Shape shape = shapes::at(nominal,index);
+        if (!put(out,b"N") || !number(out,shape.type as usize) || !number(out,shape.binding) || !number(out,shape.field_start) || !number(out,shape.field_count) || !number(out,if (shape.public) { 1 } else { 0 }) || !put(out,b"\n")) { return 3; } index += 1;
+    }
+    index = 1;
+    while (index <= shapes::field_count(nominal)) {
+        if (bytes::len(out) > 2097152 - 1024) { return 4; }
+        let shapes::Field field = shapes::field_at(nominal,index);
+        if (!put(out,b"D") || !number(out,index) || !number(out,field.owner as usize) || !number(out,field.type as usize) || !number(out,field.start) || !number(out,field.end) || !put(out,b"\n")) { return 3; } index += 1;
+    }
+    index = 0;
     while (index < h::function_count(p)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
         let h::Function f = h::function_at(p,index);

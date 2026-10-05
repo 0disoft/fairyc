@@ -1,0 +1,4426 @@
+{
+  "schema": "fairyc.nominal-hir-oracle/v1",
+  "fixtures": [
+    {
+      "name": "fields",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69363420783b626f6f6c20793b7d666e20693634206628297b6c657420613d417b2e793d747275652c2e783d343030303030303030307d3b72657475726e20612e783b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 35,
+                  "EndByte": 89
+                },
+                "Parameters": [],
+                "Locals": [
+                  {
+                    "Symbol": 2,
+                    "Name": "a",
+                    "Type": "main::A",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 50,
+                      "EndByte": 51
+                    }
+                  }
+                ],
+                "ResultType": "i64",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 45,
+                    "EndByte": 89
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 46,
+                        "EndByte": 77
+                      },
+                      "Operator": "",
+                      "Binding": 2,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 52,
+                          "EndByte": 76
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "bool",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 57,
+                              "EndByte": 61
+                            },
+                            "Value": "true",
+                            "Cooked": "true",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          },
+                          {
+                            "Kind": "literal",
+                            "Type": "i64",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 65,
+                              "EndByte": 75
+                            },
+                            "Value": "4000000000",
+                            "Cooked": "4000000000",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "y",
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 77,
+                        "EndByte": 88
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "field-expression",
+                        "Type": "i64",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 84,
+                          "EndByte": 87
+                        },
+                        "Value": "x",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "x",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "path",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 84,
+                              "EndByte": 85
+                            },
+                            "Value": "a",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 2,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 35
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i64",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  },
+                  {
+                    "Name": "y",
+                    "Type": "bool",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 27,
+                      "EndByte": 34
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 42,
+            "EndByte": 43
+          },
+          "type": "i64",
+          "mutable": false
+        },
+        "2": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "a",
+          "qualifiedName": "main::f::a",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 42,
+            "EndByte": 43
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 50,
+            "EndByte": 51
+          },
+          "type": "main::A",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "nested",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d73747275637420427b4120613b7d666e20693332206628297b76617220623d427b2e613d417b2e783d317d7d3b622e612e782b3d323b6c657420636f70793d623b72657475726e20636f70792e612e783b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 2,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 42,
+                  "EndByte": 110
+                },
+                "Parameters": [],
+                "Locals": [
+                  {
+                    "Symbol": 3,
+                    "Name": "b",
+                    "Type": "main::B",
+                    "Mutable": true,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 57,
+                      "EndByte": 58
+                    }
+                  },
+                  {
+                    "Symbol": 4,
+                    "Name": "copy",
+                    "Type": "main::B",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 86,
+                      "EndByte": 90
+                    }
+                  }
+                ],
+                "ResultType": "i32",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 52,
+                    "EndByte": 110
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 53,
+                        "EndByte": 73
+                      },
+                      "Operator": "",
+                      "Binding": 3,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::B",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 59,
+                          "EndByte": 72
+                        },
+                        "Value": "B",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "record",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 64,
+                              "EndByte": 71
+                            },
+                            "Value": "A",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 0,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "literal",
+                                "Type": "i32",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 69,
+                                  "EndByte": 70
+                                },
+                                "Value": "1",
+                                "Cooked": "1",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": -1,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": [
+                              "x"
+                            ],
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "a"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "assignment",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 73,
+                        "EndByte": 82
+                      },
+                      "Operator": "+=",
+                      "Binding": -1,
+                      "Target": {
+                        "Kind": "field-expression",
+                        "Type": "i32",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 73,
+                          "EndByte": 78
+                        },
+                        "Value": "x",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "x",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "field-expression",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 73,
+                              "EndByte": 76
+                            },
+                            "Value": "a",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "a",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "path",
+                                "Type": "main::B",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 73,
+                                  "EndByte": 74
+                                },
+                                "Value": "b",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 3,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "Expression": {
+                        "Kind": "literal",
+                        "Type": "i32",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 80,
+                          "EndByte": 81
+                        },
+                        "Value": "2",
+                        "Cooked": "2",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 82,
+                        "EndByte": 93
+                      },
+                      "Operator": "",
+                      "Binding": 4,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "path",
+                        "Type": "main::B",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 91,
+                          "EndByte": 92
+                        },
+                        "Value": "b",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 3,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 93,
+                        "EndByte": 109
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "field-expression",
+                        "Type": "i32",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 100,
+                          "EndByte": 108
+                        },
+                        "Value": "x",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "x",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "field-expression",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 100,
+                              "EndByte": 106
+                            },
+                            "Value": "a",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "a",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "path",
+                                "Type": "main::B",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 100,
+                                  "EndByte": 104
+                                },
+                                "Value": "copy",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 4,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 28
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  }
+                ]
+              },
+              {
+                "Name": "B",
+                "Public": false,
+                "Type": "main::B",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 28,
+                  "EndByte": 42
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "a",
+                    "Type": "main::A",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 37,
+                      "EndByte": 41
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "2": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 49,
+            "EndByte": 50
+          },
+          "type": "i32",
+          "mutable": false
+        },
+        "3": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "b",
+          "qualifiedName": "main::f::b",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 49,
+            "EndByte": 50
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 57,
+            "EndByte": 58
+          },
+          "type": "main::B",
+          "mutable": true
+        },
+        "4": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "copy",
+          "qualifiedName": "main::f::copy",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 49,
+            "EndByte": 50
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 86,
+            "EndByte": 90
+          },
+          "type": "main::B",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "forward",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420427b4120613b7d73747275637420417b69333220783b7d666e2042206628297b72657475726e20427b2e613d417b2e783d337d7d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 2,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 42,
+                  "EndByte": 73
+                },
+                "Parameters": [],
+                "Locals": [],
+                "ResultType": "main::B",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 50,
+                    "EndByte": 73
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 51,
+                        "EndByte": 72
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::B",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 58,
+                          "EndByte": 71
+                        },
+                        "Value": "B",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "record",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 63,
+                              "EndByte": 70
+                            },
+                            "Value": "A",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "literal",
+                                "Type": "i32",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 68,
+                                  "EndByte": 69
+                                },
+                                "Value": "3",
+                                "Cooked": "3",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": -1,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": [
+                              "x"
+                            ],
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "a"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "B",
+                "Public": false,
+                "Type": "main::B",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 26
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "a",
+                    "Type": "main::A",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 25
+                    }
+                  }
+                ]
+              },
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 26,
+                  "EndByte": 42
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 35,
+                      "EndByte": 41
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "2": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 47,
+            "EndByte": 48
+          },
+          "type": "main::B",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "parameter-return",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e204120696428412061297b72657475726e20613b7d666e20693332206628297b72657475726e20696428417b2e783d347d292e783b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "id",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 28,
+                  "EndByte": 51
+                },
+                "Parameters": [
+                  {
+                    "Symbol": 3,
+                    "Name": "a",
+                    "Type": "main::A",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 38,
+                      "EndByte": 39
+                    }
+                  }
+                ],
+                "Locals": [],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 40,
+                    "EndByte": 51
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 41,
+                        "EndByte": 50
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "path",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 48,
+                          "EndByte": 49
+                        },
+                        "Value": "a",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 3,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              },
+              {
+                "Symbol": 2,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 51,
+                  "EndByte": 84
+                },
+                "Parameters": [],
+                "Locals": [],
+                "ResultType": "i32",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 61,
+                    "EndByte": 84
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 62,
+                        "EndByte": 83
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "field-expression",
+                        "Type": "i32",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 69,
+                          "EndByte": 82
+                        },
+                        "Value": "x",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "x",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "call",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 69,
+                              "EndByte": 80
+                            },
+                            "Value": "",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "path",
+                                "Type": "<invalid>",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 69,
+                                  "EndByte": 71
+                                },
+                                "Value": "",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 1,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              },
+                              {
+                                "Kind": "record",
+                                "Type": "main::A",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 72,
+                                  "EndByte": 79
+                                },
+                                "Value": "A",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 0,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [
+                                  {
+                                    "Kind": "literal",
+                                    "Type": "i32",
+                                    "Span": {
+                                      "Package": 0,
+                                      "Source": "main.fy",
+                                      "StartByte": 77,
+                                      "EndByte": 78
+                                    },
+                                    "Value": "4",
+                                    "Cooked": "4",
+                                    "Variant": "",
+                                    "Operator": "",
+                                    "TargetType": "",
+                                    "Symbol": -1,
+                                    "ForeignABI": "",
+                                    "Effects": null,
+                                    "UnsafeScope": null,
+                                    "Children": [],
+                                    "Fields": null,
+                                    "Block": null,
+                                    "Arms": null
+                                  }
+                                ],
+                                "Fields": [
+                                  "x"
+                                ],
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 28
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "id",
+          "qualifiedName": "main::id",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 33,
+            "EndByte": 35
+          },
+          "type": "main::A",
+          "mutable": false
+        },
+        "2": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 58,
+            "EndByte": 59
+          },
+          "type": "i32",
+          "mutable": false
+        },
+        "3": {
+          "kind": "parameter",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "a",
+          "qualifiedName": "main::id::a",
+          "owner": "main::id",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 33,
+            "EndByte": 35
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 38,
+            "EndByte": 39
+          },
+          "type": "main::A",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "empty",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b7d666e2041206628297b72657475726e20417b7d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 22,
+                  "EndByte": 43
+                },
+                "Parameters": [],
+                "Locals": [],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 30,
+                    "EndByte": 43
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 31,
+                        "EndByte": 42
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 38,
+                          "EndByte": 41
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 22
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": null
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 27,
+            "EndByte": 28
+          },
+          "type": "main::A",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "shorthand",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b626f6f6c20793b7d666e204120662869333220782c626f6f6c2079297b72657475726e20417b2e782c2e797d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 35,
+                  "EndByte": 73
+                },
+                "Parameters": [
+                  {
+                    "Symbol": 2,
+                    "Name": "x",
+                    "Type": "i32",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 46,
+                      "EndByte": 47
+                    }
+                  },
+                  {
+                    "Symbol": 3,
+                    "Name": "y",
+                    "Type": "bool",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 53,
+                      "EndByte": 54
+                    }
+                  }
+                ],
+                "Locals": [],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 55,
+                    "EndByte": 73
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 56,
+                        "EndByte": 72
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 63,
+                          "EndByte": 71
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "path",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 66,
+                              "EndByte": 67
+                            },
+                            "Value": "x",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 2,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          },
+                          {
+                            "Kind": "path",
+                            "Type": "bool",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 69,
+                              "EndByte": 70
+                            },
+                            "Value": "y",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 3,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x",
+                          "y"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 35
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  },
+                  {
+                    "Name": "y",
+                    "Type": "bool",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 27,
+                      "EndByte": 34
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 40,
+            "EndByte": 41
+          },
+          "type": "main::A",
+          "mutable": false
+        },
+        "2": {
+          "kind": "parameter",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "x",
+          "qualifiedName": "main::f::x",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 40,
+            "EndByte": 41
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 46,
+            "EndByte": 47
+          },
+          "type": "i32",
+          "mutable": false
+        },
+        "3": {
+          "kind": "parameter",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "y",
+          "qualifiedName": "main::f::y",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 40,
+            "EndByte": 41
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 53,
+            "EndByte": 54
+          },
+          "type": "bool",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "branch",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628626f6f6c2062297b72657475726e2069662862297b417b2e783d317d7d656c73657b417b2e783d327d7d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 28,
+                  "EndByte": 79
+                },
+                "Parameters": [
+                  {
+                    "Symbol": 2,
+                    "Name": "b",
+                    "Type": "bool",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 40,
+                      "EndByte": 41
+                    }
+                  }
+                ],
+                "Locals": [],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 42,
+                    "EndByte": 79
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 43,
+                        "EndByte": 78
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "if",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 50,
+                          "EndByte": 77
+                        },
+                        "Value": "",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "path",
+                            "Type": "bool",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 53,
+                              "EndByte": 54
+                            },
+                            "Value": "b",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 2,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          },
+                          {
+                            "Kind": "block",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 55,
+                              "EndByte": 64
+                            },
+                            "Value": "",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": {
+                              "Span": {
+                                "Package": 0,
+                                "Source": "main.fy",
+                                "StartByte": 55,
+                                "EndByte": 64
+                              },
+                              "Statements": [],
+                              "Tail": {
+                                "Kind": "record",
+                                "Type": "main::A",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 56,
+                                  "EndByte": 63
+                                },
+                                "Value": "A",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 0,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [
+                                  {
+                                    "Kind": "literal",
+                                    "Type": "i32",
+                                    "Span": {
+                                      "Package": 0,
+                                      "Source": "main.fy",
+                                      "StartByte": 61,
+                                      "EndByte": 62
+                                    },
+                                    "Value": "1",
+                                    "Cooked": "1",
+                                    "Variant": "",
+                                    "Operator": "",
+                                    "TargetType": "",
+                                    "Symbol": -1,
+                                    "ForeignABI": "",
+                                    "Effects": null,
+                                    "UnsafeScope": null,
+                                    "Children": [],
+                                    "Fields": null,
+                                    "Block": null,
+                                    "Arms": null
+                                  }
+                                ],
+                                "Fields": [
+                                  "x"
+                                ],
+                                "Block": null,
+                                "Arms": null
+                              }
+                            },
+                            "Arms": null
+                          },
+                          {
+                            "Kind": "block",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 68,
+                              "EndByte": 77
+                            },
+                            "Value": "",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": {
+                              "Span": {
+                                "Package": 0,
+                                "Source": "main.fy",
+                                "StartByte": 68,
+                                "EndByte": 77
+                              },
+                              "Statements": [],
+                              "Tail": {
+                                "Kind": "record",
+                                "Type": "main::A",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 69,
+                                  "EndByte": 76
+                                },
+                                "Value": "A",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 0,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [
+                                  {
+                                    "Kind": "literal",
+                                    "Type": "i32",
+                                    "Span": {
+                                      "Package": 0,
+                                      "Source": "main.fy",
+                                      "StartByte": 74,
+                                      "EndByte": 75
+                                    },
+                                    "Value": "2",
+                                    "Cooked": "2",
+                                    "Variant": "",
+                                    "Operator": "",
+                                    "TargetType": "",
+                                    "Symbol": -1,
+                                    "ForeignABI": "",
+                                    "Effects": null,
+                                    "UnsafeScope": null,
+                                    "Children": [],
+                                    "Fields": null,
+                                    "Block": null,
+                                    "Arms": null
+                                  }
+                                ],
+                                "Fields": [
+                                  "x"
+                                ],
+                                "Block": null,
+                                "Arms": null
+                              }
+                            },
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 28
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 33,
+            "EndByte": 34
+          },
+          "type": "main::A",
+          "mutable": false
+        },
+        "2": {
+          "kind": "parameter",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "b",
+          "qualifiedName": "main::f::b",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 33,
+            "EndByte": 34
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 40,
+            "EndByte": 41
+          },
+          "type": "bool",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "whole-assignment",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628297b76617220613d417b2e783d317d3b613d417b2e783d327d3b72657475726e20613b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 28,
+                  "EndByte": 71
+                },
+                "Parameters": [],
+                "Locals": [
+                  {
+                    "Symbol": 2,
+                    "Name": "a",
+                    "Type": "main::A",
+                    "Mutable": true,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 41,
+                      "EndByte": 42
+                    }
+                  }
+                ],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 36,
+                    "EndByte": 71
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 37,
+                        "EndByte": 51
+                      },
+                      "Operator": "",
+                      "Binding": 2,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 43,
+                          "EndByte": 50
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 48,
+                              "EndByte": 49
+                            },
+                            "Value": "1",
+                            "Cooked": "1",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "assignment",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 51,
+                        "EndByte": 61
+                      },
+                      "Operator": "=",
+                      "Binding": -1,
+                      "Target": {
+                        "Kind": "path",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 51,
+                          "EndByte": 52
+                        },
+                        "Value": "a",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 2,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 53,
+                          "EndByte": 60
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 58,
+                              "EndByte": 59
+                            },
+                            "Value": "2",
+                            "Cooked": "2",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 61,
+                        "EndByte": 70
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "path",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 68,
+                          "EndByte": 69
+                        },
+                        "Value": "a",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 2,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 28
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 33,
+            "EndByte": 34
+          },
+          "type": "main::A",
+          "mutable": false
+        },
+        "2": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "a",
+          "qualifiedName": "main::f::a",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 33,
+            "EndByte": 34
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 41,
+            "EndByte": 42
+          },
+          "type": "main::A",
+          "mutable": true
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "context-minimum",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69363420783b7d666e2041206628297b72657475726e20417b2e783d2d393232333337323033363835343737353830387d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 28,
+                  "EndByte": 72
+                },
+                "Parameters": [],
+                "Locals": [],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 36,
+                    "EndByte": 72
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 37,
+                        "EndByte": 71
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 44,
+                          "EndByte": 70
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i64",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 49,
+                              "EndByte": 69
+                            },
+                            "Value": "-9223372036854775808",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 28
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i64",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 33,
+            "EndByte": 34
+          },
+          "type": "main::A",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "CRLF-UTF8",
+      "inputHex": "6d6f64756c65206d61696e3b202f2f20ed959ceab8800d0a73747275637420417b69333220783b7d666e2041206628297b72657475726e20417b2e783d337d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 40,
+                  "EndByte": 65
+                },
+                "Parameters": [],
+                "Locals": [],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 48,
+                    "EndByte": 65
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 49,
+                        "EndByte": 64
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 56,
+                          "EndByte": 63
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 61,
+                              "EndByte": 62
+                            },
+                            "Value": "3",
+                            "Cooked": "3",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 24,
+                  "EndByte": 40
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 33,
+                      "EndByte": 39
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 45,
+            "EndByte": 46
+          },
+          "type": "main::A",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "public-struct",
+      "inputHex": "6d6f64756c65206d61696e3b7075622073747275637420417b69333220783b7d666e2041206628297b72657475726e20417b2e783d317d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 32,
+                  "EndByte": 57
+                },
+                "Parameters": [],
+                "Locals": [],
+                "ResultType": "main::A",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 40,
+                    "EndByte": 57
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 41,
+                        "EndByte": 56
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 48,
+                          "EndByte": 55
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 53,
+                              "EndByte": 54
+                            },
+                            "Value": "1",
+                            "Cooked": "1",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": true,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 32
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 25,
+                      "EndByte": 31
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 37,
+            "EndByte": 38
+          },
+          "type": "main::A",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "initializer-order",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420506169727b69333220783b69333220793b7d666e2050616972206628297b7661722069333220613d313b72657475726e20506169727b2e793d612c2e783d7b613d333b617d7d3b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 37,
+                  "EndByte": 91
+                },
+                "Parameters": [],
+                "Locals": [
+                  {
+                    "Symbol": 2,
+                    "Name": "a",
+                    "Type": "i32",
+                    "Mutable": true,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 57,
+                      "EndByte": 58
+                    }
+                  }
+                ],
+                "ResultType": "main::Pair",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 48,
+                    "EndByte": 91
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 49,
+                        "EndByte": 61
+                      },
+                      "Operator": "",
+                      "Binding": 2,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "literal",
+                        "Type": "i32",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 59,
+                          "EndByte": 60
+                        },
+                        "Value": "1",
+                        "Cooked": "1",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 61,
+                        "EndByte": 90
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::Pair",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 68,
+                          "EndByte": 89
+                        },
+                        "Value": "Pair",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "path",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 76,
+                              "EndByte": 77
+                            },
+                            "Value": "a",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 2,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          },
+                          {
+                            "Kind": "block",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 81,
+                              "EndByte": 88
+                            },
+                            "Value": "",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": {
+                              "Span": {
+                                "Package": 0,
+                                "Source": "main.fy",
+                                "StartByte": 81,
+                                "EndByte": 88
+                              },
+                              "Statements": [
+                                {
+                                  "Kind": "assignment",
+                                  "Span": {
+                                    "Package": 0,
+                                    "Source": "main.fy",
+                                    "StartByte": 82,
+                                    "EndByte": 86
+                                  },
+                                  "Operator": "=",
+                                  "Binding": -1,
+                                  "Target": {
+                                    "Kind": "path",
+                                    "Type": "i32",
+                                    "Span": {
+                                      "Package": 0,
+                                      "Source": "main.fy",
+                                      "StartByte": 82,
+                                      "EndByte": 83
+                                    },
+                                    "Value": "a",
+                                    "Cooked": "",
+                                    "Variant": "",
+                                    "Operator": "",
+                                    "TargetType": "",
+                                    "Symbol": 2,
+                                    "ForeignABI": "",
+                                    "Effects": null,
+                                    "UnsafeScope": null,
+                                    "Children": [],
+                                    "Fields": null,
+                                    "Block": null,
+                                    "Arms": null
+                                  },
+                                  "Expression": {
+                                    "Kind": "literal",
+                                    "Type": "i32",
+                                    "Span": {
+                                      "Package": 0,
+                                      "Source": "main.fy",
+                                      "StartByte": 84,
+                                      "EndByte": 85
+                                    },
+                                    "Value": "3",
+                                    "Cooked": "3",
+                                    "Variant": "",
+                                    "Operator": "",
+                                    "TargetType": "",
+                                    "Symbol": -1,
+                                    "ForeignABI": "",
+                                    "Effects": null,
+                                    "UnsafeScope": null,
+                                    "Children": [],
+                                    "Fields": null,
+                                    "Block": null,
+                                    "Arms": null
+                                  },
+                                  "For": null
+                                }
+                              ],
+                              "Tail": {
+                                "Kind": "path",
+                                "Type": "i32",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 86,
+                                  "EndByte": 87
+                                },
+                                "Value": "a",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 2,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            },
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "y",
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "Pair",
+                "Public": false,
+                "Type": "main::Pair",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 37
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 24,
+                      "EndByte": 30
+                    }
+                  },
+                  {
+                    "Name": "y",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 30,
+                      "EndByte": 36
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 45,
+            "EndByte": 46
+          },
+          "type": "main::Pair",
+          "mutable": false
+        },
+        "2": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "a",
+          "qualifiedName": "main::f::a",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 45,
+            "EndByte": 46
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 57,
+            "EndByte": 58
+          },
+          "type": "i32",
+          "mutable": true
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "initializer-return",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420506169727b69333220783b69333220793b7d666e20693332206628297b6c657420703d506169727b2e793d312c2e783d7b72657475726e20393b327d7d3b72657475726e20702e783b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 1,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 37,
+                  "EndByte": 93
+                },
+                "Parameters": [],
+                "Locals": [
+                  {
+                    "Symbol": 2,
+                    "Name": "p",
+                    "Type": "main::Pair",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 52,
+                      "EndByte": 53
+                    }
+                  }
+                ],
+                "ResultType": "i32",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 47,
+                    "EndByte": 93
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 48,
+                        "EndByte": 81
+                      },
+                      "Operator": "",
+                      "Binding": 2,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::Pair",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 54,
+                          "EndByte": 80
+                        },
+                        "Value": "Pair",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 62,
+                              "EndByte": 63
+                            },
+                            "Value": "1",
+                            "Cooked": "1",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          },
+                          {
+                            "Kind": "block",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 67,
+                              "EndByte": 79
+                            },
+                            "Value": "",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": {
+                              "Span": {
+                                "Package": 0,
+                                "Source": "main.fy",
+                                "StartByte": 67,
+                                "EndByte": 79
+                              },
+                              "Statements": [
+                                {
+                                  "Kind": "return",
+                                  "Span": {
+                                    "Package": 0,
+                                    "Source": "main.fy",
+                                    "StartByte": 68,
+                                    "EndByte": 77
+                                  },
+                                  "Operator": "",
+                                  "Binding": -1,
+                                  "Target": null,
+                                  "Expression": {
+                                    "Kind": "literal",
+                                    "Type": "i32",
+                                    "Span": {
+                                      "Package": 0,
+                                      "Source": "main.fy",
+                                      "StartByte": 75,
+                                      "EndByte": 76
+                                    },
+                                    "Value": "9",
+                                    "Cooked": "9",
+                                    "Variant": "",
+                                    "Operator": "",
+                                    "TargetType": "",
+                                    "Symbol": -1,
+                                    "ForeignABI": "",
+                                    "Effects": null,
+                                    "UnsafeScope": null,
+                                    "Children": [],
+                                    "Fields": null,
+                                    "Block": null,
+                                    "Arms": null
+                                  },
+                                  "For": null
+                                }
+                              ],
+                              "Tail": {
+                                "Kind": "literal",
+                                "Type": "i32",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 77,
+                                  "EndByte": 78
+                                },
+                                "Value": "2",
+                                "Cooked": "2",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": -1,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            },
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "y",
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 81,
+                        "EndByte": 92
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "field-expression",
+                        "Type": "i32",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 88,
+                          "EndByte": 91
+                        },
+                        "Value": "x",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "x",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "path",
+                            "Type": "main::Pair",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 88,
+                              "EndByte": 89
+                            },
+                            "Value": "p",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 2,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "Pair",
+                "Public": false,
+                "Type": "main::Pair",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 37
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 24,
+                      "EndByte": 30
+                    }
+                  },
+                  {
+                    "Name": "y",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 30,
+                      "EndByte": 36
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "1": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 44,
+            "EndByte": 45
+          },
+          "type": "i32",
+          "mutable": false
+        },
+        "2": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "p",
+          "qualifiedName": "main::f::p",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 44,
+            "EndByte": 45
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 52,
+            "EndByte": 53
+          },
+          "type": "main::Pair",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "nested-assignment",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d73747275637420427b4120613b7d666e2042206628297b76617220623d427b2e613d417b2e783d317d7d3b622e613d417b2e783d387d3b72657475726e20623b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 2,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 42,
+                  "EndByte": 93
+                },
+                "Parameters": [],
+                "Locals": [
+                  {
+                    "Symbol": 3,
+                    "Name": "b",
+                    "Type": "main::B",
+                    "Mutable": true,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 55,
+                      "EndByte": 56
+                    }
+                  }
+                ],
+                "ResultType": "main::B",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 50,
+                    "EndByte": 93
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 51,
+                        "EndByte": 71
+                      },
+                      "Operator": "",
+                      "Binding": 3,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::B",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 57,
+                          "EndByte": 70
+                        },
+                        "Value": "B",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "record",
+                            "Type": "main::A",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 62,
+                              "EndByte": 69
+                            },
+                            "Value": "A",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 0,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "literal",
+                                "Type": "i32",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 67,
+                                  "EndByte": 68
+                                },
+                                "Value": "1",
+                                "Cooked": "1",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": -1,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": [
+                              "x"
+                            ],
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "a"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "assignment",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 71,
+                        "EndByte": 83
+                      },
+                      "Operator": "=",
+                      "Binding": -1,
+                      "Target": {
+                        "Kind": "field-expression",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 71,
+                          "EndByte": 74
+                        },
+                        "Value": "a",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "a",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "path",
+                            "Type": "main::B",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 71,
+                              "EndByte": 72
+                            },
+                            "Value": "b",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": 3,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 75,
+                          "EndByte": 82
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 80,
+                              "EndByte": 81
+                            },
+                            "Value": "8",
+                            "Cooked": "8",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 83,
+                        "EndByte": 92
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "path",
+                        "Type": "main::B",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 90,
+                          "EndByte": 91
+                        },
+                        "Value": "b",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 3,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 28
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  }
+                ]
+              },
+              {
+                "Name": "B",
+                "Public": false,
+                "Type": "main::B",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 28,
+                  "EndByte": 42
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "a",
+                    "Type": "main::A",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 37,
+                      "EndByte": 41
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "2": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 47,
+            "EndByte": 48
+          },
+          "type": "main::B",
+          "mutable": false
+        },
+        "3": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "b",
+          "qualifiedName": "main::f::b",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 47,
+            "EndByte": 48
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 55,
+            "EndByte": 56
+          },
+          "type": "main::B",
+          "mutable": true
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "distinct-identities",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d73747275637420427b69333220783b7d666e20693332206628297b6c657420613d417b2e783d317d3b6c657420623d427b2e783d327d3b72657475726e20612e782b622e783b7d",
+      "files": null,
+      "outcome": "pass",
+      "completedThrough": "",
+      "failedPhase": "",
+      "hir": {
+        "Modules": [
+          {
+            "Path": "main",
+            "SourcePath": "main.fy",
+            "Functions": [
+              {
+                "Symbol": 2,
+                "Name": "f",
+                "Public": false,
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 44,
+                  "EndByte": 99
+                },
+                "Parameters": [],
+                "Locals": [
+                  {
+                    "Symbol": 3,
+                    "Name": "a",
+                    "Type": "main::A",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 59,
+                      "EndByte": 60
+                    }
+                  },
+                  {
+                    "Symbol": 4,
+                    "Name": "b",
+                    "Type": "main::B",
+                    "Mutable": false,
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 73,
+                      "EndByte": 74
+                    }
+                  }
+                ],
+                "ResultType": "i32",
+                "Body": {
+                  "Span": {
+                    "Package": 0,
+                    "Source": "main.fy",
+                    "StartByte": 54,
+                    "EndByte": 99
+                  },
+                  "Statements": [
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 55,
+                        "EndByte": 69
+                      },
+                      "Operator": "",
+                      "Binding": 3,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::A",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 61,
+                          "EndByte": 68
+                        },
+                        "Value": "A",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 0,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 66,
+                              "EndByte": 67
+                            },
+                            "Value": "1",
+                            "Cooked": "1",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "binding",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 69,
+                        "EndByte": 83
+                      },
+                      "Operator": "",
+                      "Binding": 4,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "record",
+                        "Type": "main::B",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 75,
+                          "EndByte": 82
+                        },
+                        "Value": "B",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "",
+                        "TargetType": "",
+                        "Symbol": 1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "literal",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 80,
+                              "EndByte": 81
+                            },
+                            "Value": "2",
+                            "Cooked": "2",
+                            "Variant": "",
+                            "Operator": "",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": [
+                          "x"
+                        ],
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    },
+                    {
+                      "Kind": "return",
+                      "Span": {
+                        "Package": 0,
+                        "Source": "main.fy",
+                        "StartByte": 83,
+                        "EndByte": 98
+                      },
+                      "Operator": "",
+                      "Binding": -1,
+                      "Target": null,
+                      "Expression": {
+                        "Kind": "binary",
+                        "Type": "i32",
+                        "Span": {
+                          "Package": 0,
+                          "Source": "main.fy",
+                          "StartByte": 90,
+                          "EndByte": 97
+                        },
+                        "Value": "+",
+                        "Cooked": "",
+                        "Variant": "",
+                        "Operator": "+",
+                        "TargetType": "",
+                        "Symbol": -1,
+                        "ForeignABI": "",
+                        "Effects": null,
+                        "UnsafeScope": null,
+                        "Children": [
+                          {
+                            "Kind": "field-expression",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 90,
+                              "EndByte": 93
+                            },
+                            "Value": "x",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "x",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "path",
+                                "Type": "main::A",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 90,
+                                  "EndByte": 91
+                                },
+                                "Value": "a",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 3,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          },
+                          {
+                            "Kind": "field-expression",
+                            "Type": "i32",
+                            "Span": {
+                              "Package": 0,
+                              "Source": "main.fy",
+                              "StartByte": 94,
+                              "EndByte": 97
+                            },
+                            "Value": "x",
+                            "Cooked": "",
+                            "Variant": "",
+                            "Operator": "x",
+                            "TargetType": "",
+                            "Symbol": -1,
+                            "ForeignABI": "",
+                            "Effects": null,
+                            "UnsafeScope": null,
+                            "Children": [
+                              {
+                                "Kind": "path",
+                                "Type": "main::B",
+                                "Span": {
+                                  "Package": 0,
+                                  "Source": "main.fy",
+                                  "StartByte": 94,
+                                  "EndByte": 95
+                                },
+                                "Value": "b",
+                                "Cooked": "",
+                                "Variant": "",
+                                "Operator": "",
+                                "TargetType": "",
+                                "Symbol": 4,
+                                "ForeignABI": "",
+                                "Effects": null,
+                                "UnsafeScope": null,
+                                "Children": [],
+                                "Fields": null,
+                                "Block": null,
+                                "Arms": null
+                              }
+                            ],
+                            "Fields": null,
+                            "Block": null,
+                            "Arms": null
+                          }
+                        ],
+                        "Fields": null,
+                        "Block": null,
+                        "Arms": null
+                      },
+                      "For": null
+                    }
+                  ],
+                  "Tail": null
+                }
+              }
+            ],
+            "Structs": [
+              {
+                "Name": "A",
+                "Public": false,
+                "Type": "main::A",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 12,
+                  "EndByte": 28
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 21,
+                      "EndByte": 27
+                    }
+                  }
+                ]
+              },
+              {
+                "Name": "B",
+                "Public": false,
+                "Type": "main::B",
+                "Span": {
+                  "Package": 0,
+                  "Source": "main.fy",
+                  "StartByte": 28,
+                  "EndByte": 44
+                },
+                "DocumentationSpan": {
+                  "Package": 0,
+                  "Source": "",
+                  "StartByte": 0,
+                  "EndByte": 0
+                },
+                "ReprC": false,
+                "Fields": [
+                  {
+                    "Name": "x",
+                    "Type": "i32",
+                    "Span": {
+                      "Package": 0,
+                      "Source": "main.fy",
+                      "StartByte": 37,
+                      "EndByte": 43
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "symbols": {
+        "2": {
+          "kind": "function",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "f",
+          "qualifiedName": "main::f",
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 51,
+            "EndByte": 52
+          },
+          "type": "i32",
+          "mutable": false
+        },
+        "3": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "a",
+          "qualifiedName": "main::f::a",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 51,
+            "EndByte": 52
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 59,
+            "EndByte": 60
+          },
+          "type": "main::A",
+          "mutable": false
+        },
+        "4": {
+          "kind": "local",
+          "moduleIndex": 0,
+          "module": "main",
+          "name": "b",
+          "qualifiedName": "main::f::b",
+          "owner": "main::f",
+          "ownerDeclaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 51,
+            "EndByte": 52
+          },
+          "declaration": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 73,
+            "EndByte": 74
+          },
+          "type": "main::B",
+          "mutable": false
+        }
+      },
+      "resolutions": null,
+      "types": null,
+      "diagnostics": null,
+      "unsupported": null
+    }
+  ]
+}

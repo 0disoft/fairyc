@@ -11,8 +11,8 @@ pub fn usize fail(ref mut Context c, u32 code, usize start, usize end) { if (c.p
 pub fn usize scope(ref Context c) { return if (c.scope_count == 0) { 0 } else { c.scopes[c.scope_count - 1] }; }
 pub fn bool enter(ref mut Context c) { if (c.scope_count >= 128) { discard fail(c,2,0,0); return false; } let usize slot = c.scope_count; let usize next = c.next_scope; c.scopes[slot] = next; c.scope_count += 1; c.next_scope += 1; return true; }
 pub fn bool visible(ref Context c, h::Binding b) { if (h::binding_code(b.kind) == h::binding_code(.Function) || h::binding_code(b.kind) == h::binding_code(.External)) { return true; } if (b.owner != c.owner) { return false; } var usize i = 0; while (i < c.scope_count) { if (c.scopes[i] == b.scope) { return true; } i += 1; } return false; }
-pub fn h::Type type(u32 code) { return if (code == 1) { .I32 } else if (code == 2) { .I64 } else if (code == 3) { .U8 } else if (code == 4) { .U32 } else if (code == 5) { .Usize } else if (code == 6) { .Bool } else if (code == 7) { .Void } else if (code == 8) { .Callable } else { .Invalid }; }
-pub fn h::BindingKind binding_kind(u32 code) { return if (code == 1) { .Function } else if (code == 2) { .Parameter } else if (code == 3) { .Let } else if (code == 4) { .Var } else { .External }; }
+pub fn h::Type type(u32 code) { return if (code == 1) { .I32 } else if (code == 2) { .I64 } else if (code == 3) { .U8 } else if (code == 4) { .U32 } else if (code == 5) { .Usize } else if (code == 6) { .Bool } else if (code == 7) { .Void } else if (code == 8) { .Callable } else if (code >= 256 && code <= 767) { .Nominal { .id = code } } else { .Invalid }; }
+pub fn h::BindingKind binding_kind(u32 code) { return if (code == 1) { .Function } else if (code == 2) { .Parameter } else if (code == 3) { .Let } else if (code == 4) { .Var } else if (code == 6) { .Struct } else { .External }; }
 pub fn h::Operator operator(ref u8[] raw) {
     if (bytes::equal(raw,b"+" ) || bytes::equal(raw,b"+=")) { return .Plus; }
     if (bytes::equal(raw,b"-" ) || bytes::equal(raw,b"-=")) { return .Minus; }
