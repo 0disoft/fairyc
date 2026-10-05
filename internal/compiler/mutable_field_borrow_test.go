@@ -65,7 +65,7 @@ func TestMutableFieldBorrowRejections(t *testing.T) {
 		"shared-held":        `fn void bad(ref mut Token t){let ref Token v=read(t);let ref mut Span s=ref mut t.position;edit(s);assert(v.sibling==7);} fn ref Token read(ref Token t){return t;}`,
 		"resource":           `resource Owner{Span position;cleanup{}}fn ref mut Span bad(ref mut Owner t){return ref mut t.position;}`,
 		"temporary-element":  `fn ref mut Token[] view(ref mut Token[] t){return t;}fn void bad(ref mut Token[] t){let ref mut Token s=ref mut view(t)[0];}`,
-		"nonplain":           `struct Owner{Span position;u8[2] bytes;}fn ref mut Span bad(ref mut Owner t){return ref mut t.position;}`,
+		"nonplain":           `struct Owner{Span position;Option<u8> bytes;}fn ref mut Span bad(ref mut Owner t){return ref mut t.position;}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", prelude+body)})

@@ -23,6 +23,9 @@ func prepareScalarArrayTypes(functions []mir.Function, structures ...[]structCTy
 	seen := make(map[hir.Type]arrayCType)
 	var record func(hir.Type) error
 	record = func(value hir.Type) error {
+		if element, _, borrowed := hir.BorrowElement(value); borrowed {
+			return record(element)
+		}
 		if element, option := hir.OptionElement(value); option {
 			return record(element)
 		}

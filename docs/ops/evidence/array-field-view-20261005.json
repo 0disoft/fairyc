@@ -1,0 +1,254 @@
+{
+  "schema": "fairyc.array-field-view-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "0d3b92b41781d35682323cf186bea496397d1c47",
+  "compiler": {
+    "path": ".cache\\array-field-view-compiler\\fairyc.exe",
+    "sha256": "b26b1b6ef1e684ed7b23693050dac9c5ccac1c473be3c0a5796d35a9c932688d",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-view-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005072427-0d3b92b41781+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 0d3b92b41781d35682323cf186bea496397d1c47\nmodified: true\n",
+      "stderr": ""
+    },
+    "build": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/array-field-view-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\array-field-view-compiler\\source-manifest.json",
+    "sha256": "0c147a0cbe88dd1e30c4a1e6b767590d48d22948518bb89f4892e8ece352b76b",
+    "fileCount": 615,
+    "sourceDigest": "3534a90235636f12e1f08ae8068614744d4fb52361113d0489902c7011109869"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceFileCount": 8,
+    "sourceFileManifestDigest": "01a68c5f4fbea762c6c30c2f3fef103fa1c29310b9157cecd1d73e6ef65dbc9f",
+    "digestAlgorithm": "sha256(path-tab-fileSHA256-LF)"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "docs/adr/0468-inline-scalar-array-fields.md",
+      "sha256": "d5113b9d2b03ddaf35d51335d666253f65f99115956199ed2318ae2a396a04ec"
+    },
+    {
+      "path": "docs/adr/0469-direct-array-field-views.md",
+      "sha256": "adea55330c6bb1f4d1659f1618fc5f3216d98bc2a0f78278b5ff039c67b784e7"
+    },
+    {
+      "path": "docs/compatibility/versioning-v0.md",
+      "sha256": "85ebd38095483f8f8b3a1b1b8947047797378b7ecd4f7d3128b62c1f855e3142"
+    },
+    {
+      "path": "docs/language/0005-surface-syntax-v0.md",
+      "sha256": "ad628ca4b34aa2ac5ca1a94d2fcda8bab79d7bcc721082fb8000e8468fe53b36"
+    },
+    {
+      "path": "internal/cbackend/arrays.go",
+      "sha256": "86aee1dc6a727fd72ccc5c8b8fc8f77c3402e4800fbd98d39e75a0000b7affa3"
+    },
+    {
+      "path": "internal/cbackend/emit.go",
+      "sha256": "88fe1e4775ec865b3ddc247165fc50fa58ef14a97a47863a4274ed00e154333b"
+    },
+    {
+      "path": "internal/cli/array_field_views_test.go",
+      "sha256": "e77030f94e79a1e0b397714ba43e944af8772ed84401cd3c40e7209daa3f5a0e"
+    },
+    {
+      "path": "internal/compiler/array_field_views_test.go",
+      "sha256": "c07f36e59d44686982ce95bf0b02e7b8d0005a9ee69dc42a454d1d8e5ef55240"
+    },
+    {
+      "path": "internal/compiler/mutable_field_borrow_test.go",
+      "sha256": "2f295d00b98807bc1c1e793536657910909a3240cd3818cc0677a6d6a9d829fc"
+    },
+    {
+      "path": "internal/compiler/shared_mutable_field_borrow_test.go",
+      "sha256": "ac6b7ea056fe7b9acb69e346d96fa519a244ed4a0636b335c4836694a99f1eb4"
+    },
+    {
+      "path": "internal/compiler/testdata/array_field_views.fy",
+      "sha256": "2b41baf3d4111fc82e4449c567946daea4b7eef929ea312dfc81f55d86bb31bf"
+    },
+    {
+      "path": "internal/hir/views.go",
+      "sha256": "bde3e21ddef92945c2dc6b3fe26daebf6331cd8380c3cf39de31f9324f2e85d5"
+    },
+    {
+      "path": "internal/interpreter/interpreter.go",
+      "sha256": "29c3cf443c7b30ca2b60765232398ce075042146b408c1d3804f664d2c919515"
+    },
+    {
+      "path": "internal/mir/field_borrow.go",
+      "sha256": "30cf85bc190b8f24d0b3e096082f64556446cb836fb3ad8598261a06ea3a754a"
+    },
+    {
+      "path": "internal/mir/lower.go",
+      "sha256": "ef154ae449919e723004116a3b7eb7884d66abca4097fa368042a75825176b01"
+    },
+    {
+      "path": "internal/semantic/array_field_views.go",
+      "sha256": "1e2bbdf8fe4d7e1a67694b8fd951746a98f7811c7352e4a0f5172b8260cd432c"
+    },
+    {
+      "path": "internal/semantic/array_field_views_test.go",
+      "sha256": "502a70b0542a2abca795a3d44842a8d17681ba41177e6e1240b11811a6b263e2"
+    },
+    {
+      "path": "internal/semantic/array_subview_borrow.go",
+      "sha256": "bfc9f1cb967bee38b49905ea936bfdea7166bb3dcf8b2d8b1feacf2e78b907a7"
+    },
+    {
+      "path": "internal/semantic/array_subview_borrow_test.go",
+      "sha256": "daceec181bd2bb8ab3d9f4d0ff0058ea6027fb42dfd0f777b35b4ad5513e00b3"
+    },
+    {
+      "path": "internal/semantic/borrow_flow.go",
+      "sha256": "3c7c3f3935e820398e52a466a13d5eceae6fa1e665f1e6917ceadbc68674d93e"
+    },
+    {
+      "path": "internal/semantic/exclusive_subview.go",
+      "sha256": "64328456a551597bde5a7e43099363826d6fd2017a98bc6347d933f206f69cac"
+    },
+    {
+      "path": "internal/semantic/indexed_place.go",
+      "sha256": "c2c2f92f8b03442d5acd2ee16257f9062cf7d39f23fa98883ce0bc7dc5e69afc"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "eb1a302e5b9532e34382c4d68adddac897c47a9795f613e96ecf83b05955f219"
+    },
+    {
+      "path": "spec/grammar/stage0.ebnf",
+      "sha256": "f538b9ed39f5ee92c0fa37e4bd6213cbc4533e91d7b37eb2b96fbf55cefb423e"
+    }
+  ],
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/compiler",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "^Test(ArrayFieldView.*|StructArrayStorage.*|ArraySubviewBorrow.*|ArrayElementBorrow.*|StructArray.*|SliceFor.*|.*FieldBorrow.*|.*NestedFieldStore.*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\array-field-view-related-final.jsonl",
+      "sha256": "7e8041dd5a84629f5bf40ff060ef2132aa9506a78c2c6d8e755da9a9b3e09fd6",
+      "passed": 427,
+      "skipped": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestArrayFieldView",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\array-field-view-native-final.jsonl",
+      "sha256": "1ef1404d8b25b2dba34b770a9dcd7204596885e30f43124ebbeb383074e928ac",
+      "passed": 10,
+      "skipped": 0
+    }
+  ],
+  "publicCLI": {
+    "path": "docs/ops/evidence/array-field-view-20261005.cli.json",
+    "sha256": "928da9529341ddc74e5fe2732ecac45c4b5b2c973bf6ff1ba3c8f5ce3e52df17",
+    "nativeOutcomes": 2
+  },
+  "native": {
+    "path": "docs/ops/evidence/array-field-view-20261005.native.json",
+    "sha256": "b9f187c7aa3d1ec7fca210463727d149b90254d16daa98a2e2d4a869b5692d9f",
+    "outcomes": 16
+  },
+  "validation": {
+    "format": "passed",
+    "diffCheck": "passed",
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/array-field-view-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for consolidated batch"
+  },
+  "limitations": [
+    "Named plain struct local/parameter roots through field/group projections only; temporary/call/pointer/indexed aggregate roots remain closed",
+    "Whole struct owner loans; disjoint mutable sibling fields or ranges remain closed",
+    "Wholefield value reads copy arrays; element access and explicit field views address original inline storage; Linux actual execution deferred"
+  ],
+  "compatibility": {
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "sdkVersion": "0.0.0-stage0.86",
+    "newSDKAPI": false,
+    "newMIROperation": false,
+    "newRuntimeHelper": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "ciChanges": false
+  }
+}

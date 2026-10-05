@@ -1863,4 +1863,39 @@ and Linux C11 profiles emit; Linux actual execution remains deferred to the owne
 batch, so only C emission is verified for Linux. Evidence is recorded at
 `docs/ops/evidence/struct-array-storage-20261005.json` with `.cli.json` and
 `.native.json` companions. Direct array-field element stores and `ref` field
-views/subviews remain deferred to ADR 0469.
+views/subviews are admitted by ADR 0469.
+
+ADR 0469 admits direct element access and explicit `ref`/`ref mut` views over the
+bounded inline scalar array fields of ADR 0468 on plain non-`@repr(C)` structs:
+element stores and checked compound stores, element references, whole-field views
+and explicit, half-open, omitted or empty field subviews. The place root must
+resolve to a named local or a by-value/`ref`/`ref mut` parameter through field
+and group projections only, so call, temporary, pointer, tagged, indexed-aggregate
+and nested-slice roots, ordinary slicing without the explicit borrow and a direct
+field loop source stay closed. Element reads, stores and borrows rebase the
+existing array-view, view-index and view-element-borrow operations on the resolved
+field address, and whole-field views are admitted where the view type is already
+expected, so no array copy or allocation is added; whole-field reads and copies
+still keep independent values and scale with the field. The struct owner is the
+single loan owner with no field or range disjointness: shared views coexist with
+shared owner reads and sibling shared views, an owner write or exclusive borrow
+while a shared view is live is `E2101`, an exclusive view blocks owner reads and
+writes and every competing borrow, an exclusive view needs a mutable owner
+(`E1008`), width and non-`usize` bound mismatches are `E1006`, and local or
+by-value escapes are `E2102`. `hir.ArrayViewBorrow` now also matches a shared or
+mutable fixed-array reference owner, and the C emitter and interpreter unwrap that
+owner before computing the address. The index or bounds evaluate once with the
+original storage selected first, bounds trap before element access and an early
+index or bound return skips the remaining work. No syntax production, MIR opcode,
+wire field, artifact schema, SDK export, runtime symbol or host flag is added;
+language /20, SDK stage0.86, runtime /0, MIR/wire schemas, public ABI and target
+maturity remain unchanged, and exact compiler executable identity separates cached
+generations. The related suite passes 427 tests with no failures or skips, the
+Windows native suite passes 10 test entries (8 cases in dev and release, 16
+outcomes, plus cache reuse), and the standalone public CLI check/build/run recording
+passed 2 normal outcomes for dev and release with the five rejected sources
+rejecting as expected. Compiler build, go vet, formatting and diff checks pass;
+Linux actual execution remains deferred to the owner's batch, so only C emission is
+verified for Linux. Evidence is recorded at
+`docs/ops/evidence/array-field-view-20261005.json` with `.cli.json` and
+`.native.json` companions.

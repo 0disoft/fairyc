@@ -846,6 +846,11 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 		return hir.TypeInvalid
 	}
 	if fixedArray {
+		if view, ok := c.arrayFieldView(expression.Children[0], *receiver, false); ok {
+			result.Kind, result.Operator = "view-index", "[]"
+			result.Children[0] = view
+			return arrayElement
+		}
 		result.Kind = "array-index"
 		result.Operator = "[]"
 		return arrayElement
@@ -867,11 +872,25 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		if len(source.Children) != 2 || len(target.Children) != 2 {
 			return false
 		}
+		if view, ok := c.arrayFieldView(source.Children[0], target.Children[0], true); ok {
+			target.Kind = "view-index"
+			target.Children[0] = view
+			return true
+		}
 		receiver := assignmentRootPath(source.Children[0])
 		resolved := c.analyzer.resolved[receiver]
 		_, _, fixedArray := hir.FixedArrayParts(target.Children[0].Type)
 		return fixedArray && resolved != nil && resolved.mutable
 	case "view-index":
+		if len(source.Children) == 2 && arrayFieldRoot(source.Children[0]) != nil {
+			field, _ := c.checkExpression(source.Children[0], hir.TypeInvalid)
+			view, ok := c.arrayFieldView(source.Children[0], *field, true)
+			if !ok {
+				return false
+			}
+			target.Children[0] = view
+			return true
+		}
 		return len(target.Children) == 2 && hir.MutableIndexedView(target.Children[0].Type)
 	case "prefix":
 		if !derefAssignmentTarget(source) || target.Operator != "*" || len(target.Children) != 1 ||
@@ -1322,6 +1341,16 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		}
 		if child != nil {
 			if field, ok := c.sharedFieldBorrow(expression.Children[0], *child); ok {
+				if hir.ArrayViewBorrow(field.Type, expected, "&") {
+					view, ok := c.arrayFieldView(expression.Children[0], *child, false)
+					if !ok {
+						c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "array field view requires a named plain struct owner")
+						return hir.TypeInvalid
+					}
+					view.Span = result.Span
+					*result = view
+					return expected
+				}
 				*result = field
 				result.Span = span(c.module.file.Path, expression.Span)
 				return field.Type
@@ -1343,6 +1372,16 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			return borrowed.Type
 		}
 		if field, ok := c.mutableFieldBorrow(expression.Children[0], child); ok {
+			if hir.ArrayViewBorrow(field.Type, expected, "&mut") {
+				view, ok := c.arrayFieldView(expression.Children[0], *child, true)
+				if !ok {
+					c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "array field view requires a named plain struct owner")
+					return hir.TypeInvalid
+				}
+				view.Span = result.Span
+				*result = view
+				return expected
+			}
 			*result = field
 			result.Span = span(c.module.file.Path, expression.Span)
 			return field.Type

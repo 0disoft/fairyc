@@ -10,7 +10,7 @@ import (
 // Calls, temporary descriptors and raw pointers do not acquire place identity.
 func indexedPlace(expression *ast.Expression) *ast.Expression {
 	root := borrowPlaceRoot(expression)
-	if root != nil && root.Kind == syntax.KindIndex && len(root.Children) == 2 && assignmentRootPath(root.Children[0]) != nil {
+	if root != nil && root.Kind == syntax.KindIndex && len(root.Children) == 2 && (assignmentRootPath(root.Children[0]) != nil || arrayFieldRoot(root.Children[0]) != nil) {
 		return root
 	}
 	return nil
@@ -105,6 +105,22 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 	if index == nil {
 		return hir.Expression{}, false
 	}
+	if arrayFieldRoot(index.Children[0]) != nil && child != nil {
+		lowered := *child
+		for lowered.Kind == "group" && len(lowered.Children) == 1 {
+			lowered = lowered.Children[0]
+		}
+		if (lowered.Kind != "array-index" && lowered.Kind != "view-index") || len(lowered.Children) != 2 {
+			return hir.Expression{}, false
+		}
+		field, _ := c.checkExpression(index.Children[0], hir.TypeInvalid)
+		view, ok := c.arrayFieldView(index.Children[0], *field, mutable)
+		if !ok {
+			return hir.Expression{}, false
+		}
+		lowered.Kind, lowered.Children[0] = "view-index", view
+		return indexedElementBorrow(lowered, mutable)
+	}
 	owner := c.analyzer.resolved[assignmentRootPath(index.Children[0])]
 	if owner == nil || (owner.kind != "local" && owner.kind != "parameter") || mutable && !owner.mutable {
 		return hir.Expression{}, false
@@ -143,6 +159,9 @@ func (f *borrowFlowAnalyzer) evaluateArrayElementBorrow(expression, index *ast.E
 
 func (f *borrowFlowAnalyzer) evaluateArrayPlace(expression, selected *ast.Expression, mutable bool, environment borrowEnvironment) (borrowValueState, bool) {
 	parent := selected.Children[0]
+	if arrayFieldRoot(parent) != nil {
+		return f.evaluateArrayFieldPlace(expression, selected, mutable, environment)
+	}
 	owner := f.analyzer.resolved[assignmentRootPath(parent)]
 	if owner == nil {
 		return borrowValueState{known: false}, true

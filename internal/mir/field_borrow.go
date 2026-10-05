@@ -44,5 +44,5 @@ func validFieldBorrowShape(op Operation) bool {
 func validMutableFieldBorrow(op Operation, lookup func(hir.Type) *StructType) bool {
 	element, mutable, _ := hir.BorrowElement(op.Type)
 	return !mutable || plainFieldStoreStruct(fieldAggregateType(op.OwnerType), lookup) &&
-		(fieldStoreScalar(element) || plainFieldStoreStruct(element, lookup))
+		(hir.PlainViewField(element) || plainFieldStoreStruct(element, lookup))
 }

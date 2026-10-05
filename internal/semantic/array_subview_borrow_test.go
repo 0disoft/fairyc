@@ -16,7 +16,7 @@ func TestArraySubviewBorrowRejections(t *testing.T) {
 		{"literal", `fn void bad(){let ref i64[] v=ref [1,2][..];}`, ""},
 		{"nested", `fn void bad(){let i64[2] a=[1,2];let ref i64[] v=ref a[..][..];}`, ""},
 		{"ordinary-slice", `fn void bad(){let i64[2] a=[1,2];let ref i64[] v=a[..];}`, ""},
-		{"field", `struct Box{ i64[2] data; }fn void bad(Box b){let ref i64[] v=ref b.data[..];}`, ""},
+		{"temporary-field", `struct Box{ i64[2] data; }fn Box make(){return Box{.data=[1,2]};}fn void bad(){let ref i64[] v=ref make().data[..];}`, ""},
 		{"shared-write", `let ref i64[] v=ref a[..1];a[1]=9;assert(v[0]==1);`, "E2101"},
 		{"exclusive-read", `let ref mut i64[] v=ref mut a[..1];assert(a[1]==2);v[0]=9;`, "E2101"},
 		{"exclusive-write", `let ref mut i64[] v=ref mut a[..1];a[1]=9;v[0]=8;`, "E2101"},

@@ -524,9 +524,15 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 	if err != nil {
 		return err
 	}
+	if l.blockTerminated(l.current) {
+		return nil
+	}
 	index, err := l.lowerExpression(&target.Children[1])
 	if err != nil {
 		return err
+	}
+	if l.blockTerminated(l.current) {
+		return nil
 	}
 	if receiver.Kind == OperandInvalid || index.Kind == OperandInvalid {
 		return fmt.Errorf("indexed assignment has an invalid place operand")

@@ -107,6 +107,9 @@ func (f *borrowFlowAnalyzer) evaluateSubviewIndexStore(statement *ast.Statement,
 	if len(target.Children) != 2 {
 		return true
 	}
+	if arrayFieldRoot(target.Children[0]) != nil && hir.ScalarArrayField(f.analyzer.expressionTypes[target.Children[0]]) {
+		return f.evaluateArrayFieldStore(statement, environment)
+	}
 	receiver, reachable := f.evaluateExpression(target.Children[0], environment)
 	if !reachable {
 		return false

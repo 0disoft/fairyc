@@ -155,8 +155,30 @@
   copies and the copy cost scales with the array contents. Nested arrays, arrays
   of nominal structs, resources, raw pointers, borrowed, tagged and array-of-array
   fields stay closed and `@repr(C)` keeps rejecting array fields. Direct
-  array-field element stores and `ref` field views/subviews are the next unit
-  (ADR 0469) and are not admitted here.
+  array-field element stores and `ref` field views/subviews are admitted by
+  ADR 0469 over this same bounded field.
+- ADR 0469 admits direct element access and explicit `ref`/`ref mut` views over
+  the bounded inline scalar array fields of ADR 0468 on plain non-`@repr(C)`
+  structs: element stores and checked compound stores (`packet.bytes[0] = 1;`,
+  `packet.bytes[0] += 1;`), element references (`ref packet.bytes[0]`,
+  `ref mut packet.bytes[0]`), whole-field views (`let ref u8[] all =
+  ref packet.bytes;`) and field subviews with explicit, half-open, omitted or
+  empty bounds (`fill(ref mut envelope.packet.bytes[1..3]);`). The root must
+  resolve to a named local or a by-value/`ref`/`ref mut` parameter through
+  field and group projections, so call, temporary, raw-pointer, tagged,
+  indexed-aggregate and nested-slice roots stay closed; ordinary array-field slicing without the
+  explicit borrow stays closed and a direct field loop source stays closed, so the
+  view is bound first. Element access and borrowing reuse the existing array-view,
+  view-index and view-element-borrow operations on the resolved field address with
+  no array copy or allocation. The whole struct is the single loan owner with no
+  field or range disjointness: shared views coexist with shared owner reads, an
+  owner write or exclusive borrow while a shared view is live is `E2101`, an
+  exclusive view blocks owner reads and writes and every competing borrow, an
+  exclusive view needs a mutable owner (`E1008`), width and non-`usize` bound
+  mismatches are `E1006`, and local or by-value escapes are `E2102`. Indices
+  and bounds evaluate once with the original storage selected first, bounds trap
+  before element access and an early index or bound return skips the rest. Nested
+  arrays and arrays of nominal structs stay closed.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

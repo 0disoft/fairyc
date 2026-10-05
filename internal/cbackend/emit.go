@@ -3628,7 +3628,12 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil || receiver.Kind != mir.OperandLocal {
 			return fmt.Errorf("fixed-array byte-view borrow in %s has no local receiver", function)
 		}
-		_, length, array := hir.FixedArrayParts(operation.OwnerType)
+		ownerType := operation.OwnerType
+		access := "."
+		if element, _, borrowed := hir.BorrowElement(ownerType); borrowed {
+			ownerType, access = element, "->"
+		}
+		_, length, array := hir.FixedArrayParts(ownerType)
 		if !array {
 			return fmt.Errorf("fixed-array byte-view borrow in %s has type %q", function, operation.OwnerType)
 		}
@@ -3636,7 +3641,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = fy_l_%d.data, .length = ((uintptr_t)UINT64_C(%d)) };\n", operation.DestinationLocal, viewType, receiver.Local, length)
+		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = fy_l_%d%sdata, .length = ((uintptr_t)UINT64_C(%d)) };\n", operation.DestinationLocal, viewType, receiver.Local, access, length)
 	case mir.OperationStorageLayout:
 		value, err := e.storageQueryValue(operation)
 		if err != nil {

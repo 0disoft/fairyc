@@ -6,13 +6,13 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// Grouping preserves a named array's storage identity. Calls, field roots and
+// Grouping preserves named array and array-field storage identity. Calls and
 // temporary arrays cannot become places through slicing.
 func arraySubviewSelection(expression *ast.Expression) *ast.Expression {
 	for expression != nil && expression.Kind == syntax.KindGroup && len(expression.Children) == 1 {
 		expression = expression.Children[0]
 	}
-	if expression != nil && expression.Kind == syntax.KindSlice && len(expression.Children) == 3 && assignmentRootPath(expression.Children[0]) != nil {
+	if expression != nil && expression.Kind == syntax.KindSlice && len(expression.Children) == 3 && (assignmentRootPath(expression.Children[0]) != nil || arrayFieldRoot(expression.Children[0]) != nil) {
 		return expression
 	}
 	return nil
@@ -27,6 +27,20 @@ func (c *typeChecker) checkArraySubviewBorrow(expression *ast.Expression, result
 	selected := arraySubviewSelection(expression.Children[0])
 	if selected == nil {
 		return hir.TypeInvalid, false
+	}
+	if arrayFieldRoot(selected.Children[0]) != nil {
+		field, typ := c.checkExpression(selected.Children[0], hir.TypeInvalid)
+		if !hir.ScalarArrayField(typ) {
+			return hir.TypeInvalid, false
+		}
+		view, ok := c.arrayFieldView(selected.Children[0], *field, expression.Text == "&mut")
+		if !ok {
+			c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, selected.Children[0].Span))
+			return hir.TypeInvalid, true
+		}
+		actual := c.checkSliceRange(selected, result, &view, view.Type)
+		c.analyzer.expressionTypes[selected] = actual
+		return actual, true
 	}
 	owner := c.analyzer.resolved[assignmentRootPath(selected.Children[0])]
 	if owner == nil || (owner.kind != "local" && owner.kind != "parameter") {

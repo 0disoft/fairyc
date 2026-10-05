@@ -702,7 +702,11 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q: %w", function.Name, err)
 				}
-				elementType, length, _ := hir.FixedArrayParts(operation.OwnerType)
+				arrayType := operation.OwnerType
+				if element, _, borrowed := hir.BorrowElement(arrayType); borrowed {
+					arrayType = element
+				}
+				elementType, length, _ := hir.FixedArrayParts(arrayType)
 				wantView := operation.Type
 				if !hir.ArrayViewBorrow(operation.OwnerType, wantView, operation.Operator) ||
 					receiver.kind != valueArray || receiver.typ != operation.OwnerType || receiver.array == nil || uint64(len(receiver.array.elements)) != length ||

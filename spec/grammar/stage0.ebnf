@@ -59,9 +59,10 @@ struct_decl = "struct" IDENT type_parameters? "{" field_decl* "}" ;
    bool, u8, i32, i64, u32 and usize elements with length 1..=4096. Whole-field
    reads, copies and replacement reuse the existing array value transport. Nested
    arrays, arrays of nominal structs, resources, raw pointers, borrows and tagged
-   fields stay closed, and @repr(C) keeps rejecting array fields. Direct
-   array-field element stores and ref field views/subviews remain the separate
-   ADR 0469 unit. This adds no grammar production. *)
+   fields stay closed, and @repr(C) keeps rejecting array fields. ADR 0469 adds
+   direct element stores and ref/ref mut element references, whole-field views
+   and field subviews over that same bounded field, with its own root, loan and
+   trap rules. Neither adds a grammar production. *)
 field_decl = "pub"? type IDENT ";" ;
 
 resource_decl = "resource" IDENT type_parameters? "{" field_decl* cleanup_decl? "}" ;
@@ -142,9 +143,11 @@ binding_kind = "let" | "var" ;
    Place validity is a semantic check, including direct indexed field stores into
    named mutable fixed plain-struct arrays (ADR 0463) and direct indexed field
    references `ref array[index].field` / `ref mut array[index].nested.field` into
-   the same arrays (ADR 0464). Compound assignment additionally admits an exact
-   integer dereference of a named mutable reference `*name` or the grouped
-   `*(name)` (ADR 0466). *)
+   the same arrays (ADR 0464). Direct element stores and checked compound stores
+   into a bounded inline scalar array field of a named mutable plain struct
+   (`packet.bytes[0] = 1`, `packet.bytes[0] += 1`) are admitted by ADR 0469.
+   Compound assignment additionally admits an exact integer dereference of a named
+   mutable reference `*name` or the grouped `*(name)` (ADR 0466). *)
 assignment_stmt = expression assignment_operator expression ";" ;
 assignment_operator = "=" | "+=" | "-=" | "*=" | "/=" | "%="
                     | "<<=" | ">>=" | "&=" | "^=" | "|=" ;
@@ -213,7 +216,12 @@ prefix_expression = prefix_operator prefix_expression | postfix_expression ;
    "ref mut points[1..3]". Grouping around the base is preserved. Scalar and
    plain-struct element types reuse the existing array-view-borrow and view-slice
    operations; computed, call, temporary, field and nested-slice bases and
-   ordinary slicing outside this explicit borrow remain closed. *)
+   ordinary slicing outside this explicit borrow remain closed. ADR 0469 reuses
+   this explicit borrow form for a bounded inline scalar array field of a named
+   plain-struct local or by-value/ref/ref mut parameter ("ref packet.bytes[0]",
+   "ref mut packet.bytes[1..3]", whole-field "ref packet.bytes" where the view
+   type is expected); call, temporary, pointer, tagged, indexed-aggregate and
+   nested-slice field roots still remain closed. *)
 prefix_operator = "-" | "+" | "!" | "~" | "ref" | "ref" "mut" | "*" ;
 
 postfix_expression = primary_expression postfix_suffix* ;

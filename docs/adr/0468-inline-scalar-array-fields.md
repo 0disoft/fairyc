@@ -1,13 +1,13 @@
 # ADR 0468: Inline scalar array fields
 
-- Status: implemented; Windows dev/release native and public CLI validated; Linux C emission only, actual execution deferred to the owner's batch
+- Status: implemented; Windows dev/release native and public CLI validated; Linux C emission only, actual execution deferred to the owner's batch; the direct element-store and `ref` field-view subset is extended by ADR 0469
 - Date: 2026-10-05
-- Related: ADRs 0416, 0461, 0462, 0463, 0464, 0467
+- Related: ADRs 0416, 0461, 0462, 0463, 0464, 0467, 0469
 
 ## Decision
 
 Admit a bounded inline scalar fixed-array field on a non-`@repr(C)` struct:
-`struct Packet { u8[64] bytes; usize length; }`. The element set is exactly the existing
+`struct Packet { u8[4] bytes; usize length; }`. The element set is exactly the existing
 copy-scalar leaf set `bool`, `u8`, `i32`, `i64`, `u32` and `usize`, and the length is
 `1..=4096`. Fields receive no implicit initialization, so every struct literal supplies each
 array field explicitly with a list (`[1, 2, 3, 4]`) or repeated (`[7; 4]`) initializer.
@@ -30,7 +30,8 @@ independently, so the copy cost scales with the field contents rather than shari
 Nested arrays (`u8[2][2]`), arrays of nominal structs, resource elements, raw pointers,
 borrowed, tagged and array-of-array fields stay closed, and `@repr(C)` structs keep rejecting
 array fields. Direct array-field element stores (`packet.bytes[0] = 1`) and `ref` field
-views/subviews are the next unit (ADR 0469) and are not claimed here.
+views/subviews are admitted by ADR 0469 over this same bounded field; the
+whole-field read, copy and replacement rules above are unchanged.
 
 ## Evaluation and lowering
 

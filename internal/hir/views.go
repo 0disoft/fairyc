@@ -26,6 +26,13 @@ func IndexedViewElement(value Type) (Type, bool) {
 
 // ArrayViewBorrow matches the exact fixed-array element and borrow kind.
 func ArrayViewBorrow(owner, view Type, operator string) bool {
+	if array, ownerMutable, borrowed := BorrowElement(owner); borrowed {
+		_, viewMutable, viewBorrowed := BorrowElement(view)
+		if !ScalarArrayField(array) || !viewBorrowed || ownerMutable != viewMutable {
+			return false
+		}
+		owner = array
+	}
 	element, length, array := FixedArrayParts(owner)
 	viewElement, indexed := IndexedViewElement(view)
 	_, mutable, borrow := BorrowElement(view)
@@ -90,7 +97,7 @@ func SharedStructViewElement(value Type) (Type, bool) {
 	return StructSliceElement(slice)
 }
 
-// PlainViewField admits only language scalar fields with no ownership or loans.
+// PlainViewField admits scalar leaves and bounded inline scalar arrays without loans.
 func PlainViewField(value Type) bool {
 	return FixedArrayScalarElement(value) || ScalarArrayField(value)
 }
