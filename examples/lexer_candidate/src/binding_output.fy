@@ -17,7 +17,7 @@ pub fn i32 run(ref names::Resolved resolved) {
     while (id <= names::symbol_count(resolved)) {
         let names::Symbol symbol = names::symbol_at(resolved,id);
         let ref str label = if (symbol.kind == 1) { "function" } else if (symbol.kind == 2) { "parameter" }
-            else if (symbol.kind == 3) { "local-let" } else { "local-var" };
+            else if (symbol.kind == 6) { "struct" } else if (symbol.kind == 3) { "local-let" } else { "local-var" };
         if (!bytes::append(ref mut buffer,b"symbol").is_ok || !number(ref mut buffer,id) ||
             !bytes::append(ref mut buffer,b"\t").is_ok || !bytes::append(ref mut buffer,text::as_bytes(label)).is_ok ||
             !number(ref mut buffer,symbol.start) || !number(ref mut buffer,symbol.end) ||

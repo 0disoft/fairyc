@@ -23,6 +23,11 @@ pub fn Problem fail(u32 code, usize start, usize end, u32 expected, u32 actual) 
     return Problem { .code, .start, .end, .expected, .actual };
 }
 pub fn bool integer(u32 type) { return type >= 1 && type <= 5; }
+// Declaration/field arenas have at most 1024 entries; no unchecked narrowing.
+pub fn u32 small_id(usize value) {
+    assert(value <= 1024); var usize left = value; var u32 result = 0;
+    while (left != 0) { left -= 1; result += 1; } return result;
+}
 pub fn u32 primitive(ref syntax::Parsed parsed, usize root) {
     if (root == 0) { return 0; }
     let ref u8[] text = syntax::type_text(parsed,root);

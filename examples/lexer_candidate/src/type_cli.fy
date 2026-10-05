@@ -35,7 +35,7 @@ pub fn i32 errors(ref typing::Typed typed, ref u8[] path) {
             else if (problem.code == 3) { "expected bool operand" } else if (problem.code == 4) { "assignment target is immutable" }
             else if (problem.code == 5) { "call argument count mismatch" } else if (problem.code == 6) { "expression is not callable" }
             else if (problem.code == 7) { "missing return value" } else if (problem.code == 8) { "non-scalar binding value" }
-            else if (problem.code == 9) { "invalid scalar operator" } else if (problem.code == 10) { "type-check limit" } else if (problem.code == 12) { "buffer allocation failed" } else if (problem.code == 13) { "loop control outside loop" } else if (problem.code == 14) { "unsupported for header" } else if (problem.code == 15) { "unsupported defer call" } else { "unsupported type-check syntax" });
+            else if (problem.code == 9) { "invalid scalar operator" } else if (problem.code == 10) { "type-check limit" } else if (problem.code == 12) { "buffer allocation failed" } else if (problem.code == 13) { "loop control outside loop" } else if (problem.code == 14) { "unsupported for header" } else if (problem.code == 15) { "unsupported defer call" } else if (problem.code == 16) { "invalid nominal type" } else if (problem.code == 17) { "duplicate field" } else if (problem.code == 18) { "unknown field" } else if (problem.code == 19) { "missing struct fields" } else if (problem.code == 20) { "recursive value type" } else { "unsupported type-check syntax" });
         output::range(problem.start,problem.end); return 2;
     }
     return 0;

@@ -2,6 +2,7 @@ module type_check;
 import name_resolution as names;
 import syntax as syntax;
 import type_state as state;
+import nominal_types as nominal;
 import type_control as control;
 import std::bytes as bytes;
 import std::vec as v;
@@ -29,6 +30,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 2) {
         let usize symbol_id = state::uses(tables,id - 1); assert(symbol_id != 0);
         let names::Symbol symbol = names::symbol_at(resolved,symbol_id);
+        if (symbol.kind == 6) { return error(problem,16,node.start,node.end,0,0); }
         let u32 type = if (symbol.kind == 1 || symbol.kind == 5) { 8 } else { state::symbols(tables,symbol_id - 1) };
         return recorded(tables,id,value(type,false));
     }
@@ -108,7 +110,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         while (entry_index < function.entry_start + function.entry_count) {
             let syntax::Entry entry = syntax::entry_at(parsed,entry_index);
             if (entry.kind == 1) {
-                let usize argument_id = syntax::call_argument(parsed,id,argument); let u32 type = state::primitive(parsed,entry.type_root);
+                let usize argument_id = syntax::call_argument(parsed,id,argument); let u32 type = nominal::resolve(parsed,entry.type_root);
                 let state::Value actual = expression(resolved,tables,problem,argument_id,type,result_type,depth + 1,loop_depth);
                 if (problem.code != 0) { return actual; }
                 if (actual.type != type) { let syntax::Expression source = syntax::expression_at(parsed,argument_id); return error(problem,1,source.start,source.end,type,actual.type); }
@@ -117,6 +119,39 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
             entry_index += 1;
         }
         let u32 type = state::symbols(tables,callee_id - 1); return recorded(tables,id,value(type,terminates));
+    }
+    if (node.kind == 8) {
+        let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
+        if (problem.code != 0) { return owner; }
+        let usize field = nominal::field(parsed,owner.type,op);
+        if (field == 0) { return error(problem,18,node.end - op.len,node.end,owner.type,0); }
+        let u32 type = nominal::resolve(parsed,syntax::field_at(parsed,field - 1).type_root);
+        state::set_flags(tables,id - 1,state::small_id(field));
+        return recorded(tables,id,value(type,owner.terminates));
+    }
+    if (node.kind == 10) {
+        let syntax::Expression target = syntax::expression_at(parsed,node.left);
+        if (target.kind != 2) { return error(problem,16,target.start,target.end,0,0); }
+        let usize symbol_id = state::uses(tables,node.left - 1);
+        if (symbol_id == 0 || names::symbol_at(resolved,symbol_id).kind != 6) { return error(problem,16,target.start,target.end,0,0); }
+        let u32 type = state::symbols(tables,symbol_id - 1);
+        let syntax::Declaration declaration = syntax::declaration_at(parsed,(type - 256) as usize);
+        var u8[1024] seen = [0;1024]; var bool terminates = false; var usize i = 0;
+        while (i < syntax::record_field_count(parsed,id)) {
+            let usize entry = syntax::record_field(parsed,id,i); let syntax::Expression field = syntax::expression_at(parsed,entry);
+            let ref u8[] name = syntax::expression_text(parsed,entry); let usize at = nominal::field(parsed,type,name);
+            if (at == 0) { return error(problem,18,field.start,field.end,type,0); }
+            if (seen[at - 1] != 0) { return error(problem,17,field.start,field.end,0,0); } seen[at - 1] = 1;
+            let u32 expected_field = nominal::resolve(parsed,syntax::field_at(parsed,at - 1).type_root);
+            let state::Value actual = expression(resolved,tables,problem,field.left,expected_field,result_type,depth + 1,loop_depth);
+            if (problem.code != 0) { return actual; }
+            if (actual.type != expected_field) { let syntax::Expression source = syntax::expression_at(parsed,field.left); return error(problem,1,source.start,source.end,expected_field,actual.type); }
+            state::set_flags(tables,entry - 1,state::small_id(at)); state::set_expressions(tables,entry - 1,actual.type);
+            terminates = terminates || actual.terminates; i += 1;
+        }
+        if (i != declaration.field_count) { return error(problem,19,node.start,node.end,type,0); }
+        state::set_expressions(tables,node.left - 1,type);
+        return recorded(tables,id,value(type,terminates));
     }
     if (node.kind == 13) {
         let state::Value condition = expression(resolved,tables,problem,node.left,6,result_type,depth + 1,loop_depth);
@@ -143,7 +178,7 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
     if (depth >= 64) { return error(problem,10,item.start,item.end,0,0); }
         if (item.kind == 2) {
             let usize symbol_id = state::entries(tables,item.entry - 1); let names::Symbol symbol = names::symbol_at(resolved,symbol_id);
-            let u32 expected = state::primitive(parsed,symbol.type_root);
+            let u32 expected = nominal::resolve(parsed,symbol.type_root);
             let state::Value actual = expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
             let syntax::Expression source = syntax::expression_at(parsed,item.expression);
@@ -159,12 +194,16 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             }
             return value(7,true);
         } else if (item.kind == 4) {
-            let usize symbol_id = state::uses(tables,item.target - 1); let names::Symbol symbol = names::symbol_at(resolved,symbol_id);
-            let u32 expected = state::symbols(tables,symbol_id - 1); let state::Value target = expression(resolved,tables,problem,item.target,0,result_type,depth + 1,loop_depth);
+            let state::Value target = expression(resolved,tables,problem,item.target,0,result_type,depth + 1,loop_depth);
+            if (problem.code != 0) { return target; }
+            var usize root = item.target;
+            while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3) { root = syntax::expression_at(parsed,root).left; }
+            let usize symbol_id = if (syntax::expression_at(parsed,root).kind == 2) { state::uses(tables,root - 1) } else { 0 };
+            let u32 expected = target.type;
             let state::Value actual = expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
             let syntax::Expression place = syntax::expression_at(parsed,item.target);
-            if (symbol.kind != 4) { return error(problem,4,place.start,place.end,0,target.type); }
+            if (symbol_id == 0 || names::symbol_at(resolved,symbol_id).kind != 4) { return error(problem,4,place.start,place.end,0,target.type); }
             if (expected != actual.type) { let syntax::Expression source = syntax::expression_at(parsed,item.expression); return error(problem,1,source.start,source.end,expected,actual.type); }
             if (!bytes::equal(syntax::assignment_operator(parsed,id),b"=") && !state::integer(expected)) { return error(problem,9,item.start,item.end,0,expected); }
             return value(7,actual.terminates);
@@ -234,9 +273,10 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
     let ref syntax::Parsed parsed = names::parsed(resolved);
     if (names::symbol_count(resolved) > 1152 || syntax::expression_count(parsed) > 4096 || syntax::entry_count(parsed) > 1024 || syntax::declaration_count(parsed) > 512) { return state::fail(10,0,syntax::source_view(parsed).len,0,0); }
     if (!state::initialize(tables,names::symbol_count(resolved),syntax::expression_count(parsed),syntax::entry_count(parsed))) { return state::fail(12,0,syntax::source_view(parsed).len,0,0); }
+    let state::Problem declarations = nominal::validate(parsed); if (declarations.code != 0) { return declarations; }
     var usize id = 1;
     while (id <= names::symbol_count(resolved)) {
-        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = if (symbol.kind == 5) { names::external_signature(resolved,id).result } else { state::primitive(parsed,symbol.type_root) };
+        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = if (symbol.kind == 5) { names::external_signature(resolved,id).result } else if (symbol.kind == 6) { 255 + state::small_id(symbol.declaration) } else { nominal::resolve(parsed,symbol.type_root) };
         state::set_symbols(tables,id - 1,type);
         if (symbol.entry != 0) { state::set_entries(tables,symbol.entry - 1,id); }
         id += 1;
@@ -256,7 +296,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration function = syntax::declaration_at(parsed,index);
         if (function.kind == 3) {
-            let u32 result_type = state::primitive(parsed,function.result_type);
+            let u32 result_type = nominal::resolve(parsed,function.result_type);
             let state::Value actual = block(resolved,tables,ref mut problem,function.body,result_type,result_type,0,0);
             if (problem.code != 0) { return problem; }
             let syntax::Statement body = syntax::statement_at(parsed,function.body);
@@ -278,4 +318,5 @@ pub fn ref u8[] source_view(ref Typed typed) { return names::source_view(ref typ
 pub fn ref names::Resolved resolved(ref Typed typed) { return ref typed.source; }
 pub fn u32 symbol_type(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= names::symbol_count(ref typed.source)); return state::symbols(ref typed.tables,id - 1); }
 pub fn u32 expression_type(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return state::expressions(ref typed.tables,id - 1); }
-pub fn bool signed_minimum(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return state::flags(ref typed.tables,id - 1) == 1; }
+pub fn usize field_target(ref Typed typed, usize id) { assert(typed.problem.code == 0); return state::flags(ref typed.tables,id - 1) as usize; }
+pub fn bool signed_minimum(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return syntax::expression_at(names::parsed(ref typed.source),id).kind == 4 && state::flags(ref typed.tables,id - 1) == 1; }

@@ -1387,6 +1387,58 @@ Compiler/SDK inputs are unchanged. Compound values, ownership/cleanup lowering,
 complete verifier coverage, package linking and a self-compiling compiler remain
 subsequent work. No self-hosting promotion or performance claim is made.
 
+## Same-file nominal struct type checking
+
+Version 0.16.0 connects plain struct declarations to the existing name and type
+checker. Named identity is the defining declaration, so equal field shapes do not
+make two structs interchangeable. Scalar fields and acyclic nested plain structs
+support record literals, reordered and shorthand initializers, copied bindings,
+whole-value assignment, field reads/writes and internal function arguments/returns.
+Every declared field must be supplied exactly once. Field writes require a mutable
+local root; parameter, let-bound and temporary roots stay immutable. Scalar field
+initializers retain contextual integer range/minimum checks.
+
+`src/nominal_types.fy` owns the declaration lookup and bounded acyclic field graph.
+Private type IDs are 256 plus the zero-based declaration index; scalar IDs stay
+unchanged. The binding dump adds `struct` symbols. The typed result retains
+declaration-based symbol/expression type IDs and `type_check::field_target` links to
+the parser field arena, preserving written initializer order. No new language
+syntax, public SDK type or runtime ABI is introduced.
+
+The existing 128-global, 512-declaration, 1024-field and depth-64 bounds apply.
+Resources, borrowed/array fields, generic structs, methods, attributes and imported
+nominal definitions require subsequent components. The scalar HIR/MIR/C modes
+reject nominal input with empty stdout instead of treating it as a scalar.
+This unit checks input programs; it does not execute their struct operations.
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle --nominal .cache/nominal-types-file-cli/reference.json
+python examples/lexer_candidate/verify_nominal.py --images /path/to/dev /path/to/release --reference .cache/nominal-types-file-cli/reference.json --receipt .cache/nominal-types-file-cli/nominal-receipt.json
+```
+
+Windows development/release verification compares 23 semantic outcomes per
+profile with the Go reference, checks three explicit candidate rejection controls
+per profile and six scalar-backend rejection controls, totaling 58 CLI runs.
+The reference records Go semantic facts separately from later MIR errors: unused
+by-value cycles pass Go semantics but are rejected by this candidate's finite
+layout prerequisite; a bare type-name value also passes Go semantics but fails
+Go MIR lowering and is rejected here. These three controls are not counted as
+semantic-parity cases. Two native API tests per profile check retained field links,
+nested mutation, nominal identity, empty structs, shorthand and malformed inputs.
+The existing 1256 CLI runs pass with updated independent struct declaration
+expectations. Linux native execution stays deferred to the consolidated batch.
+
+During comparison, reordered aggregate initializers exposed a Go MIR defect:
+the lowerer retained written field order while the verifier required declaration
+order, and mutable source reads could change during later initializers. The
+separate compiler regression now checks seven struct/resource cases through
+verified MIR, interpreter results and both Windows native profiles. It evaluates
+initializers in written order, captures copied source values, then normalizes
+only construction operands; an initializer return stops remaining construction.
+
+Evidence: `docs/ops/evidence/nominal-types-file-cli-20261006.json`. Struct HIR/MIR
+and native execution are the next components; self-hosting promotion stays closed.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token

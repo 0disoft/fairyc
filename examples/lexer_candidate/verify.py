@@ -302,7 +302,7 @@ def main():
                                  accepted=successes, diagnosticCases=diagnostics, limitCases=limits, unchangedFiles=unchanged,
                                  declarations=declaration_counts, names=name_counts, types=type_counts, modules=module_counts, hir=hir_counts, mir=mir_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
                                  raw=str(raw), rawSHA256=sha(raw)))
-    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', ROOT / 'verify_types.py', ROOT / 'verify_modules.py', ROOT / 'verify_hir.py', ROOT / 'verify_mir.py', ROOT / 'verify_c.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), ROOT / 'samples/modules.txt', *sorted((ROOT / 'tests').glob('*.fy'))]
+    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', ROOT / 'verify_types.py', ROOT / 'verify_modules.py', ROOT / 'verify_hir.py', ROOT / 'verify_mir.py', ROOT / 'verify_c.py', ROOT / 'verify_nominal.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), ROOT / 'samples/modules.txt', *sorted((ROOT / 'tests').glob('*.fy'))]
     save(receipt, dict(schema='fairyc.lexer-file-cli-verification/v1', compiler=dict(path=str(compiler), sha256=sha(compiler)),
                        reference=dict(path=str(reference_path), sha256=sha(reference_path)),
                        declarationsReference=dict(path=str(declarations_path), sha256=sha(declarations_path)) if declarations_path else None, common=common,

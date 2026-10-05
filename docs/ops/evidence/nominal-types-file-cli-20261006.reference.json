@@ -1,0 +1,403 @@
+{
+  "schema": "fairyc.nominal-types-oracle/v1",
+  "fixtures": [
+    {
+      "name": "fields",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69363420783b626f6f6c20793b7d666e20693634206628297b6c657420613d417b2e793d747275652c2e783d343030303030303030307d3b72657475726e20612e783b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "nested",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d73747275637420427b4120613b7d666e20693332206628297b76617220623d427b2e613d417b2e783d317d7d3b622e612e782b3d323b6c657420636f70793d623b72657475726e20636f70792e612e783b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "forward",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420427b4120613b7d73747275637420417b69333220783b7d666e2042206628297b72657475726e20427b2e613d417b2e783d337d7d3b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "parameter-return",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e204120696428412061297b72657475726e20613b7d666e20693332206628297b72657475726e20696428417b2e783d347d292e783b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "empty",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b7d666e2041206628297b72657475726e20417b7d3b7d",
+      "outcome": "pass",
+      "message": "mir-lower: lower main::f: malformed aggregate construction with 0 values and 0 fields",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "shorthand",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b626f6f6c20793b7d666e204120662869333220782c626f6f6c2079297b72657475726e20417b2e782c2e797d3b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "branch",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628626f6f6c2062297b72657475726e2069662862297b417b2e783d317d7d656c73657b417b2e783d327d7d3b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "whole-assignment",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628297b76617220613d417b2e783d317d3b613d417b2e783d327d3b72657475726e20613b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "context-minimum",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69363420783b7d666e2041206628297b72657475726e20417b2e783d2d393232333337323033363835343737353830387d3b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "CRLF-UTF8",
+      "inputHex": "6d6f64756c65206d61696e3b202f2f20ed959ceab8800d0a73747275637420417b69333220783b7d666e2041206628297b72657475726e20417b2e783d337d3b7d",
+      "outcome": "pass",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "nominal-mismatch",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d73747275637420427b69333220783b7d666e2041206628422062297b72657475726e20623b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": [
+        {
+          "Code": "E1009",
+          "Primary": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 63,
+            "EndByte": 64
+          },
+          "Related": [
+            {
+              "Role": "expected-type",
+              "Span": {
+                "Package": 0,
+                "Source": "main.fy",
+                "StartByte": 47,
+                "EndByte": 48
+              }
+            }
+          ],
+          "ExpectedType": "",
+          "ActualType": ""
+        }
+      ],
+      "unsupported": null
+    },
+    {
+      "name": "field-type",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628297b72657475726e20417b2e783d747275657d3b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": [
+        {
+          "Code": "E1006",
+          "Primary": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 49,
+            "EndByte": 53
+          },
+          "Related": [
+            {
+              "Role": "expected-type",
+              "Span": {
+                "Package": 0,
+                "Source": "main.fy",
+                "StartByte": 25,
+                "EndByte": 26
+              }
+            }
+          ],
+          "ExpectedType": "",
+          "ActualType": ""
+        }
+      ],
+      "unsupported": null
+    },
+    {
+      "name": "missing-field",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628297b72657475726e20417b7d3b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": [
+        {
+          "Feature": "resource construction with missing fields",
+          "Span": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 44,
+            "EndByte": 47
+          }
+        }
+      ]
+    },
+    {
+      "name": "duplicate-initializer",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628297b72657475726e20417b2e783d312c2e783d327d3b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": [
+        {
+          "Feature": "duplicate resource field x",
+          "Span": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 51,
+            "EndByte": 55
+          }
+        }
+      ]
+    },
+    {
+      "name": "unknown-initializer",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628297b72657475726e20417b2e7a3d317d3b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": [
+        {
+          "Feature": "resource construction with missing fields",
+          "Span": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 44,
+            "EndByte": 51
+          }
+        },
+        {
+          "Feature": "unknown or malformed resource field z",
+          "Span": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 46,
+            "EndByte": 50
+          }
+        }
+      ]
+    },
+    {
+      "name": "unknown-member",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e20693332206628412061297b72657475726e20612e7a3b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": [
+        {
+          "Feature": "unknown resource field z",
+          "Span": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 49,
+            "EndByte": 52
+          }
+        }
+      ]
+    },
+    {
+      "name": "immutable-parameter",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e20766f6964206628412061297b612e783d323b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": [
+        {
+          "Code": "E1008",
+          "Primary": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 43,
+            "EndByte": 46
+          },
+          "Related": null,
+          "ExpectedType": "",
+          "ActualType": ""
+        }
+      ],
+      "unsupported": null
+    },
+    {
+      "name": "immutable-let",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e20766f6964206628297b6c657420613d417b2e783d317d3b612e783d323b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": [
+        {
+          "Code": "E1008",
+          "Primary": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 54,
+            "EndByte": 57
+          },
+          "Related": null,
+          "ExpectedType": "",
+          "ActualType": ""
+        }
+      ],
+      "unsupported": null
+    },
+    {
+      "name": "temporary-place",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206d616b6528297b72657475726e20417b2e783d317d3b7d666e20766f6964206628297b6d616b6528292e783d323b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": [
+        {
+          "Code": "E1008",
+          "Primary": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 68,
+            "EndByte": 76
+          },
+          "Related": null,
+          "ExpectedType": "",
+          "ActualType": ""
+        }
+      ],
+      "unsupported": null
+    },
+    {
+      "name": "duplicate-field",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b69333220783b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": [
+        {
+          "Code": "E0102",
+          "Primary": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 31,
+            "EndByte": 32
+          },
+          "Related": [
+            {
+              "Role": "previous-declaration",
+              "Span": {
+                "Package": 0,
+                "Source": "main.fy",
+                "StartByte": 25,
+                "EndByte": 26
+              }
+            }
+          ],
+          "ExpectedType": "",
+          "ActualType": ""
+        }
+      ],
+      "unsupported": null
+    },
+    {
+      "name": "direct-cycle",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b4120783b7d",
+      "outcome": "candidate-layout-rejection",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "indirect-cycle",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b4220783b7d73747275637420427b4120783b7d",
+      "outcome": "candidate-layout-rejection",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "unknown-type",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b4d697373696e6720783b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": [
+        {
+          "Feature": "type Missing",
+          "Span": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 21,
+            "EndByte": 28
+          }
+        }
+      ]
+    },
+    {
+      "name": "bare-type-value",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e2041206628297b72657475726e20413b7d",
+      "outcome": "candidate-value-rejection",
+      "message": "mir-verify: V1002 at block:0.terminator: local 0 used before initialization",
+      "diagnostics": null,
+      "unsupported": null
+    },
+    {
+      "name": "aggregate-operator",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b69333220783b7d666e20626f6f6c2066284120612c412062297b72657475726e20613d3d623b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": null,
+      "unsupported": [
+        {
+          "Feature": "equality comparison on main::A",
+          "Span": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 54,
+            "EndByte": 58
+          }
+        }
+      ]
+    },
+    {
+      "name": "literal-range",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420417b753820783b7d666e2041206628297b72657475726e20417b2e783d3235367d3b7d",
+      "outcome": "error",
+      "message": "",
+      "diagnostics": [
+        {
+          "Code": "E1013",
+          "Primary": {
+            "Package": 0,
+            "Source": "main.fy",
+            "StartByte": 48,
+            "EndByte": 51
+          },
+          "Related": null,
+          "ExpectedType": "",
+          "ActualType": ""
+        }
+      ],
+      "unsupported": null
+    }
+  ]
+}

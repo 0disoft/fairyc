@@ -1,5 +1,6 @@
 module name_resolution;
 import syntax as syntax;
+import nominal_types as nominal;
 import module_registry as modules;
 import std::bytes as bytes;
 import std::vec as v;
@@ -64,11 +65,8 @@ fn Problem local(ref syntax::Parsed parsed, ref mut Context context, syntax::Ent
 }
 fn bool scalar_type(ref syntax::Parsed parsed, usize id, bool result) {
     if (id == 0) { return true; } // Inferred local: resolution does not infer its type.
-    if (syntax::type_at(parsed, id).kind != 1) { return false; }
-    let ref u8[] name = syntax::type_text(parsed, id);
-    return bytes::equal(name,b"i32") || bytes::equal(name,b"i64") || bytes::equal(name,b"u8") ||
-        bytes::equal(name,b"u32") || bytes::equal(name,b"usize") || bytes::equal(name,b"bool") ||
-        (result && bytes::equal(name,b"void"));
+    let u32 type = nominal::resolve(parsed,id);
+    return type != 0 && (result || type != 7);
 }
 fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize id, usize depth, ref mut v::Vec<Symbol> symbols, ref mut v::Vec<Reference> references) {
     if (id == 0) { return ok(); }
@@ -111,6 +109,17 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         }
         return ok();
     }
+    if (node.kind == 8) { return expression(parsed,context,node.left,depth + 1,symbols,references); }
+    if (node.kind == 10) {
+        let Problem target = expression(parsed,context,node.left,depth + 1,symbols,references);
+        if (target.code != 0) { return target; }
+        var usize index = 0; while (index < syntax::record_field_count(parsed,id)) {
+            let syntax::Expression field = syntax::expression_at(parsed,syntax::record_field(parsed,id,index));
+            let Problem value = expression(parsed,context,field.left,depth + 1,symbols,references);
+            if (value.code != 0) { return value; } index += 1;
+        }
+        return ok();
+    }
     if (node.kind == 13) {
         let Problem condition = expression(parsed,context,node.left,depth + 1,symbols,references);
         if (condition.code != 0) { return condition; }
@@ -135,7 +144,7 @@ fn Problem statement(ref syntax::Parsed parsed, ref mut Context context, usize i
     }
     if (item.kind == 3 || item.kind == 4 || item.kind == 6 || item.kind == 11 || item.kind == 12 || item.kind == 13) {
         if (item.kind == 4) {
-            if (syntax::expression_at(parsed,item.target).kind != 2) { return fail(3,item.start,item.end); }
+            if (syntax::expression_at(parsed,item.target).kind != 2 && syntax::expression_at(parsed,item.target).kind != 8) { return fail(3,item.start,item.end); }
             let Problem target = expression(parsed,context,item.target,depth,symbols,references);
             if (target.code != 0) { return target; }
         }
@@ -186,8 +195,8 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
         if (item.kind != 1 && !(context.modules && item.kind == 2)) {
-            if (item.kind != 3 || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
-                item.generic_parameters != 0 || !scalar_type(parsed,item.result_type,true)) { return fail(3,item.start,item.end); }
+            if ((item.kind != 3 && item.kind != 4) || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
+                item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
             var usize previous = 0;
             while (previous < context.global_count) {
@@ -196,7 +205,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             }
             if (context.global_count >= 128) { return fail(4,item.name_start,item.name_end); }
             let usize slot = context.global_count;
-            let Symbol value = Symbol { .kind = 1, .start = item.name_start, .end = item.name_end, .scope = 0,
+            let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
                 .owner = 0, .type_root = item.result_type, .entry = 0, .declaration = index + 1 };
             if (!v::push<Symbol>(symbols,value).is_ok) { return fail(5,item.name_start,item.name_end); }
             let usize symbol = v::len<Symbol>(symbols);

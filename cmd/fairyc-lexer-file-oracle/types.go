@@ -47,6 +47,7 @@ func writeTypes(destination string) error {
 	}
 	for _, s := range []struct{ name, input string }{
 		{"module-only", "module main;"},
+		{"struct", "module main; struct S { i32 x; }"},
 		{"i64-forward-call", "module main; fn i64 f() { return g(4000000000); } fn i64 g(i64 x) { return x; }"},
 		{"recursive", "module main; fn i64 f(i64 x) { return f(x); }"},
 		{"inferred-shadow", "module main; fn i64 f(i64 x) { let y=x; { let y=y+1; y; } return y; }"},
@@ -117,7 +118,6 @@ func writeTypes(destination string) error {
 	for _, s := range []struct{ name, input string }{
 		{"switch", "module main; fn i32 f() { return switch(1) { case .none: { 0 } }; }"},
 		{"import", "module main; import std::io as io;"},
-		{"struct", "module main; struct S { i32 x; }"},
 	} {
 		if err := add(s.name, s.input, "unsupported", "unsupported name-check syntax"); err != nil {
 			return err

@@ -62,7 +62,7 @@ def compare_bindings(output, fixture, source):
     expected_symbols = sorted((v['kind'],v['start'],v['end']) for v in (fixture['symbols'] or []))
     assert actual_symbols == expected_symbols, (fixture['name'],actual_symbols,expected_symbols)
     for symbol in symbols.values():
-        if symbol['kind'] == 'function':
+        if symbol['kind'] in ('function','struct'):
             assert symbol['scope'] == symbol['owner'] == 0
         else:
             assert symbol['scope'] > 0 and symbols[symbol['owner']]['kind'] == 'function'

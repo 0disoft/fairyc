@@ -51,6 +51,9 @@ func writeNames(destination string) error {
 		result := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: module}})
 		f := nameFixture{Name: name, InputHex: hex.EncodeToString([]byte(input)), Outcome: outcome, ReferencePhase: result.FailedPhase}
 		if outcome == "pass" {
+			for _, declaration := range module.Structs {
+				f.Symbols = append(f.Symbols, nameSymbol{"struct", declaration.NameSpan.StartByte, declaration.NameSpan.EndByte})
+			}
 			for _, function := range module.Functions {
 				f.Symbols = append(f.Symbols, nameSymbol{"function", function.NameSpan.StartByte, function.NameSpan.EndByte})
 				for _, parameter := range function.Parameters {
@@ -93,6 +96,7 @@ func writeNames(destination string) error {
 	}
 	for _, s := range []struct{ name, input string }{
 		{"module-only", "module main;"},
+		{"struct", "module main; struct S { i64 x; }"},
 		{"params", "module main; fn i64 f(i64 price, i64 fee) { let i64 total=price+fee*2; return total; }"},
 		{"forward-call", "module main; fn i64 f() { return later(3); } fn i64 later(i64 x) { return x; }"},
 		{"recursive-name", "module main; fn i64 f(i64 x) { return f(x); }"},
@@ -149,7 +153,6 @@ func writeNames(destination string) error {
 	for _, s := range []struct{ name, input string }{
 		{"import", "module main; import std::io as io;"},
 		{"constant", "module main; const i64 n=1;"},
-		{"struct", "module main; struct S { i64 x; }"},
 		{"generic", "module main; fn T f<T>(T x) { return x; }"},
 		{"attribute", "module main; @must_use fn i64 f() { return 1; }"},
 		{"unsafe", "module main; unsafe fn i64 f() { return 1; }"},
