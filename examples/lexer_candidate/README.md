@@ -32,7 +32,8 @@ a live borrow.
 
 A new front end adds a regular file mode without changing the binary stdin protocol:
 the no-argument frame reader stays exactly as described below, and
-`--tokens-file <path>` plus `--help` are the only new arguments.
+`--tokens-file <path>`, `--declarations-file <path>`, and `--help` are the only new
+arguments.
 
 ```sh
 lexer-candidate --tokens-file path/to/source.fy
@@ -106,6 +107,70 @@ CLI vet, the Go oracle vet, and the Linux and Windows C emission checks pass. Ac
 Linux execution remains deferred to the owner's consolidated batch. This section makes
 no performance claim, and allocation-failure or OS I/O fault injection was not run.
 Evidence is `docs/ops/evidence/lexer-file-cli-20261005.json`.
+
+## Regular file declarations CLI (`--declarations-file`)
+
+`--declarations-file <path>` reads the same bounded regular file and reuses
+`scanner::collect` plus the byte-only `syntax::parse(stream, 512)`. It is a standalone
+structure dump, not a project check, so there is deliberately no basename, module or
+path identity validation.
+
+On success it writes one TSV row per declaration in source order with six columns:
+
+```text
+kind	name	start	end	name_start	name_end
+```
+
+`kind` is one of `module`, `import` (the alias is the name), `function`, `struct`,
+`resource`, `const`, `static-assert`, `foreign-function`, `state`, or `enum`. An
+unnamed `static-assert` or `state` has an empty `name` and `0..0` name spans; method
+name spans keep the member spelling.
+
+Lexical diagnostics keep the existing `--tokens-file` code format. Any parser problem
+returns 2 with empty stdout and one located line per problem:
+
+```text
+path:LINE:COLUMN: error: expected TEXT (bytes START..END)
+```
+
+`syntax::Problem.code == 4` with `expected == 0` gives unsupported syntax; a parse
+error 4 gives plain parser-limit. Go parser diagnostic IDs are not fabricated, and
+allocation failures stay plain. The same 32768-byte file cap, 4095-byte path bound and
+1 MiB output cap apply, and the 512-declaration parser limit counts module and import
+items while the existing parser node, field and depth limits are retained.
+
+Portable source invocation:
+
+```sh
+lexer-candidate --declarations-file samples/token-demo.fy
+```
+
+Optional Windows executable form:
+
+```powershell
+.\build\lexer-candidate.exe --declarations-file samples/token-demo.fy
+```
+
+`src/declaration_output.fy` writes the dump. Reference comparison runs from the
+repository root and needs both references:
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle .cache/declarations-file-cli/tokens-reference.json
+go run ./cmd/fairyc-lexer-file-oracle --declarations .cache/declarations-file-cli/declarations-reference.json
+python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/declarations-file-cli/tokens-reference.json --declarations-reference .cache/declarations-file-cli/declarations-reference.json --receipt /path/to/evidence/receipt.json
+```
+
+The Windows development and release profiles pass 156 CLI executions (78 per profile),
+with 29 token fixtures and 29 declaration fixtures per profile; the per-profile
+declaration set is 15 accepted, 9 syntax, 4 lexical and 1 limit. Declaration output is
+compared exactly for kind, name, start, end, nameStart and nameEnd against Go
+`syntax.Parse` for accepted inputs, and negative inputs are checked against authored
+diagnostic goldens; original source hashes are preserved. `TestLexerFileCLIWorkspace`,
+`go vet ./internal/cli ./cmd/fairyc-lexer-file-oracle`, and the Linux and Windows
+`--locked` C emission checks pass, and the 619 compiler inputs match the manifest with
+the compiler EXE hash unchanged. The example package is version 0.2.0 with no compiler
+or SDK change. Evidence is `docs/ops/evidence/declarations-file-cli-20261005.json`; the
+earlier token-dump receipt above remains the historical record for that mode.
 
 ## Recognition and limits
 

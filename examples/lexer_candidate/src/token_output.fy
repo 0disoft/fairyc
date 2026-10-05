@@ -73,8 +73,18 @@ pub fn i32 errors(ref scanner::Stream stream, ref u8[] path) {
     var usize index = 0;
     while (index < scanner::diagnostic_count(stream)) {
         let info = scanner::diagnostic_info(stream, index);
+        prefix(source, path, info.start);
+        discard io::write_stderr(if (info.code == 1) { "E0001" } else if (info.code == 4) { "E0004" }
+            else if (info.code == 5) { "E0005" } else if (info.code == 6) { "E0006" } else { "E0010" });
+        range(info.start, info.end); index += 1;
+    }
+    return 2;
+}
+
+@effects(console)
+pub fn void prefix(ref u8[] source, ref u8[] path, usize offset) {
         var usize line = 1; var usize column = 1; var usize byte = 0;
-        while (byte < info.start) {
+        while (byte < offset) {
             if (source[byte] == 13) { line += 1; column = 1; }
             else if (source[byte] == 10) {
                 if (byte == 0 || source[byte - 1] != 13) { line += 1; }
@@ -85,11 +95,11 @@ pub fn i32 errors(ref scanner::Stream stream, ref u8[] path) {
         discard io::write_stderr_bytes(path); discard io::write_stderr(":");
         discard io::write_stderr_usize(line); discard io::write_stderr(":");
         discard io::write_stderr_usize(column); discard io::write_stderr(": error: ");
-        discard io::write_stderr(if (info.code == 1) { "E0001" } else if (info.code == 4) { "E0004" }
-            else if (info.code == 5) { "E0005" } else if (info.code == 6) { "E0006" } else { "E0010" });
-        discard io::write_stderr(" (bytes "); discard io::write_stderr_usize(info.start);
-        discard io::write_stderr(".."); discard io::write_stderr_usize(info.end);
-        discard io::write_stderr(")\n"); index += 1;
-    }
-    return 2;
+}
+
+@effects(console)
+pub fn void range(usize start, usize end) {
+    discard io::write_stderr(" (bytes "); discard io::write_stderr_usize(start);
+    discard io::write_stderr(".."); discard io::write_stderr_usize(end);
+    discard io::write_stderr(")\n");
 }

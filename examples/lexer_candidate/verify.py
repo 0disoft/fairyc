@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent
 KINDS = ['invalid', 'eof', 'trivia', 'identifier', 'keyword', 'integer', 'float', 'string', 'byte-string', 'c-string', 'symbol']
 TRIVIA = ['none', 'preamble', 'whitespace', 'line-comment', 'block-comment', 'documentation-line']
 HEADER = 'kind\ttrivia\tstart\tend\traw_hex\tcooked_hex\n'
-USAGE = 'usage: lexer-candidate --tokens-file <path>\n'
+USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n'
 HELP = USAGE + '       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n'
 
 
@@ -57,16 +57,71 @@ def reconstruct(stdout, source):
     assert eof == 1 and bytes(reconstructed) == source
 
 
+DECLARATION_HEADER = 'kind\tname\tstart\tend\tname_start\tname_end\n'
+
+
+def verify_declarations(image, reference, directory, rows, run):
+    counts = dict(files=0, accepted=0, syntaxErrors=0, lexicalErrors=0, limits=0, unchangedFiles=0)
+    for index, fixture in enumerate(reference['fixtures']):
+        source = bytes.fromhex(fixture['inputHex'])
+        path = directory / ('한글 선언.fy' if index == 1 else f'declarations-{index}.fy')
+        path.write_bytes(source)
+        argument = str(path.relative_to(ROOT)) if index == 1 else str(path)
+        before = sha(path)
+        row = run([image, '--declarations-file', argument], rows, 'declarations-' + fixture['name'])
+        row['input'] = dict(path=str(path), beforeSHA256=before, afterSHA256=sha(path), bytes=len(source))
+        assert before == sha(path), row
+        counts['files'] += 1
+        counts['unchangedFiles'] += 1
+        outcome = fixture['outcome']
+        if outcome == 'pass':
+            expected = DECLARATION_HEADER + ''.join(f"{d['kind']}\t{d['name']}\t{d['start']}\t{d['end']}\t{d['nameStart']}\t{d['nameEnd']}\n" for d in fixture['records'])
+            assert (row['exit'], row['stdout'], row['stderr']) == (0, expected, ''), dict(row, expected=expected)
+            for d in fixture['records']:
+                assert source[d['nameStart']:d['nameEnd']].decode('ascii') == d['name']
+                assert 0 <= d['start'] < d['end'] <= len(source)
+            counts['accepted'] += 1
+        elif outcome == 'syntax':
+            assert row['exit'] == 2 and row['stdout'] == '', row
+            expected = []
+            for problem in fixture['goldens']:
+                start, end = problem['start'], problem['end']
+                line, column = location(source, start)
+                expected.append(f"{argument}:{line}:{column}: error: {problem['message']} (bytes {start}..{end})")
+            assert row['stderr'].splitlines() == expected, dict(row, expected=expected)
+            counts['syntaxErrors'] += 1
+        elif outcome == 'lexical':
+            assert row['exit'] == 2 and row['stdout'] == '', row
+            expected = []
+            for error in fixture['lexical']:
+                start, end = error['Span']['StartByte'], error['Span']['EndByte']
+                line, column = location(source, start)
+                expected.append(f"{argument}:{line}:{column}: error: {error['Code']} (bytes {start}..{end})")
+            assert sorted(row['stderr'].splitlines()) == sorted(expected), row
+            counts['lexicalErrors'] += 1
+        elif outcome == 'limit':
+            assert (row['exit'], row['stdout'], row['stderr']) == (2, '', 'error: parser limit\n'), row
+            counts['limits'] += 1
+        else:
+            raise AssertionError(fixture)
+    return counts
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--compiler', type=Path, required=True)
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--receipt', type=Path, required=True)
+    parser.add_argument('--declarations-reference', type=Path)
     options = parser.parse_args()
     compiler = options.compiler.resolve(strict=True)
     reference_path = options.reference.resolve(strict=True)
     reference = json.loads(reference_path.read_text(encoding='utf-8'))
     assert reference['schema'] == 'fairyc.lexer-file-oracle/v1' and reference['fixtures']
+    declarations_path = options.declarations_reference.resolve(strict=True) if options.declarations_reference else None
+    declarations_reference = json.loads(declarations_path.read_text(encoding='utf-8')) if declarations_path else None
+    if declarations_reference:
+        assert declarations_reference['schema'] == 'fairyc.declarations-file-oracle/v1'
     receipt = options.receipt.resolve()
     receipt.parent.mkdir(parents=True, exist_ok=True)
     common, profiles = [], []
@@ -126,6 +181,8 @@ def main():
                     reconstruct(row['stdout'], source)
                     successes += 1
 
+            declaration_counts = verify_declarations(image, declarations_reference, directory, rows, run) if declarations_reference else None
+
             errors = [('missing-argument', ['--tokens-file'], USAGE),
                       ('unknown-option', ['--unknown'], USAGE),
                       ('extra-argument', ['--tokens-file', 'a', 'b'], USAGE),
@@ -141,6 +198,11 @@ def main():
                 row = run([image, *args], rows, name)
                 assert (row['exit'], row['stdout'], row['stderr']) == (2, '', expected), row
                 assert sha(over) == before
+            if declarations_reference:
+                for name, args, expected in errors:
+                    declaration_args = ['--declarations-file' if x == '--tokens-file' else x for x in args]
+                    row = run([image, *declaration_args], rows, 'declarations-' + name)
+                    assert (row['exit'], row['stdout'], row['stderr']) == (2, '', expected), row
             row = run([image, '--help'], rows, 'help')
             assert (row['exit'], row['stdout'], row['stderr']) == (0, HELP, ''), row
             row = run([image], rows, 'legacy-empty-stdin')
@@ -154,13 +216,14 @@ def main():
             save(raw, dict(profile=profile, runs=rows))
             profiles.append(dict(profile=profile, passed=True, fileCases=len(reference['fixtures']),
                                  accepted=successes, diagnosticCases=diagnostics, limitCases=limits, unchangedFiles=unchanged,
-                                 cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
+                                 declarations=declaration_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
                                  raw=str(raw), rawSHA256=sha(raw)))
     sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy'))]
     save(receipt, dict(schema='fairyc.lexer-file-cli-verification/v1', compiler=dict(path=str(compiler), sha256=sha(compiler)),
-                       reference=dict(path=str(reference_path), sha256=sha(reference_path)), common=common,
+                       reference=dict(path=str(reference_path), sha256=sha(reference_path)),
+                       declarationsReference=dict(path=str(declarations_path), sha256=sha(declarations_path)) if declarations_path else None, common=common,
                        sources=[dict(path=str(p.relative_to(ROOT)), sha256=sha(p)) for p in sources], profiles=profiles))
-    print('PASS:', sum(p['cliExecutions'] for p in profiles), 'CLI executions;', len(reference['fixtures']), 'Go reference files/profile')
+    print('PASS:', sum(p['cliExecutions'] for p in profiles), 'CLI executions;', len(reference['fixtures']), 'Go token reference files/profile; declarations:', declarations_reference and len(declarations_reference['fixtures']))
 
 
 if __name__ == '__main__':
