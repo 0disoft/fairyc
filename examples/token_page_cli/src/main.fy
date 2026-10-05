@@ -1,6 +1,7 @@
 module main;
 import tokens as tokens;
 import evaluator as evaluator;
+import input_file as input_file;
 import std::bytes as bytes;
 import std::io as io;
 import std::process as process;
@@ -28,6 +29,8 @@ fn i32 error(u32 code) {
         else if (code == 10) { "error: evaluation overflow\n" }
         else if (code == 11) { "error: variable limit (16)\n" }
         else if (code == 12) { "error: parenthesis limit (16)\n" }
+        else if (code == 13) { "error: input file read failed\n" }
+        else if (code == 14) { "error: file path limit (4095 UTF-8 bytes)\n" }
         else { "usage: token-page-cli [ASCII-source]\n" };
     discard io::write_stderr(message);
     return 2;
@@ -93,7 +96,7 @@ fn i32 evaluate_source(ref u8[] source) {
     let ref u8[] result = bytes::view(ref output);
     return if (switch(io::write_bytes(result)) { case .ok(count): { count == result.len } case .err(_): { false } }) { 0 } else { error(7) };
 }
-@effects(console)
+@effects(filesystem, console)
 fn i32 main() {
     let usize argc = process::arg_count();
     if (argc == 1) { return analyze_source(b"price = 4000000000 + fee; other = 7;"); }
@@ -106,18 +109,28 @@ fn i32 main() {
     };
     if (length > 4095) { return error(if (argc == 3) { 0 } else { 6 }); }
     let ref u8[] source = bytes::view(ref input)[..length];
-    if (equal(source, b"--eval")) {
+    let bool file_mode = equal(source, b"--eval-file");
+    if (file_mode || equal(source, b"--eval")) {
         if (argc != 3) { return error(0); }
         let usize eval_length = switch(process::arg(2, bytes::view_mut(ref mut input))) {
             case .ok(count): { count }
-            case .err(_): { return error(6); }
+            case .err(_): { return error(if (file_mode) { 14 } else { 6 }); }
         };
-        if (eval_length > 4095) { return error(6); }
-        return evaluate_source(bytes::view(ref input)[..eval_length]);
+        if (eval_length > 4095) { return error(if (file_mode) { 14 } else { 6 }); }
+        let ref u8[] argument = bytes::view(ref input)[..eval_length];
+        if (file_mode) {
+            var bytes::Buffer content = bytes::empty();
+            let usize count = switch(input_file::load(argument, ref mut content)) {
+                case .ok(value): { value }
+                case .err(code): { return error(code); }
+            };
+            return evaluate_source(bytes::view(ref content)[..count]);
+        }
+        return evaluate_source(argument);
     }
     if (argc != 2) { return error(0); }
     if (equal(source, b"--help")) {
-        return if (io::write("usage: token-page-cli [ASCII-source]\n       token-page-cli --eval <ASCII-source>\n").is_ok) { 0 } else { error(7) };
+        return if (io::write("usage: token-page-cli [ASCII-source]\n       token-page-cli --eval <ASCII-source>\n       token-page-cli --eval-file <path>\n").is_ok) { 0 } else { error(7) };
     }
     return analyze_source(source);
 }

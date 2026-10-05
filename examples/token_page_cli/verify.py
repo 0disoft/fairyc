@@ -7,11 +7,13 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parent
 DEMO = "price = 4000000000 + fee; other = 7;"
 USAGE = "usage: token-page-cli [ASCII-source]\n"
 HELP = USAGE + "       token-page-cli --eval <ASCII-source>\n"
+HELP += "       token-page-cli --eval-file <path>\n"
 MAX_I64 = (1 << 63) - 1
 LEXEME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*|[0-9]+|[+=;]|[ \t\r\n]+")
 EVAL_LEXEME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*|[0-9]+|[+=;*()]|[ \t\r\n]+")
@@ -23,7 +25,7 @@ def sha(path):
 
 def oracle(args):
     evaluation = len(args) == 2 and args[0] == "--eval"
-    if len(args) > 1 and not evaluation or args == ["--eval"]:
+    if len(args) > 1 and not evaluation or args in (["--eval"], ["--eval-file"]):
         return 2, "", USAGE
     source = args[1] if evaluation else args[0] if args else DEMO
     if len(source.encode("utf-8")) > 4095:
@@ -150,6 +152,8 @@ def cases():
         ("analysis-rejects-multiply", ["x=2*3;"]),
         ("analysis-rejects-open-parenthesis", ["x=(1);"]),
         ("analysis-rejects-close-parenthesis", ["x=1);"]),
+        ("file-missing-path", ["--eval-file"]),
+        ("file-extra-argument", ["--eval-file", "source.calc", "extra"]),
     ] + evaluation_cases() + arithmetic_cases()
 
 
@@ -244,6 +248,50 @@ def save(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
+def file_cases(directory):
+    fixtures = [
+        ("empty", b""), ("whitespace", b" \t\r\n"),
+        ("LF", b"price=4000000000+7;\ntotal=(price+3)*2;\n"),
+        ("CRLF", b"price=4000000000+7;\r\ntotal=(price+3)*2;\r\n"),
+        ("no-final-newline", b"a=2+3*4;b=(2+3)*4;"),
+        ("korean-and-space-path", b"a=14;b=a*2;"),
+        ("max-size", b"x=1;" + b" " * 4091),
+        ("size-overflow", b"x=1;" + b" " * 4092),
+        ("larger-file", b" " * 8192),
+        ("invalid-byte", b"a=14;\xff"), ("UTF8-BOM", b"\xef\xbb\xbfx=1;"),
+        ("non-ASCII", "한글=1;".encode("utf-8")),
+        ("embedded-NUL", b"a=14;\x00"),
+        ("late-syntax", b"a=14;b=(2+);"),
+        ("undefined", b"a=14;b=missing;"),
+        ("overflow", f"a=14;b={MAX_I64}*2;".encode("ascii")),
+        ("token-overflow", ("x=" + "*".join("0" for _ in range(64)) + ";").encode("ascii")),
+    ]
+    result = []
+    for name, content in fixtures:
+        path = directory / ("한글 계산.calc" if name == "korean-and-space-path" else name + ".calc")
+        path.write_bytes(content)
+        if len(content) > 4095:
+            expected = 2, "", "error: input limit (4095 UTF-8 bytes)\n"
+        elif any(value > 127 for value in content):
+            expected = 2, "", "error: invalid ASCII input\n"
+        else:
+            expected = oracle(["--eval", content.decode("ascii")])
+        argument = str(path.relative_to(ROOT)) if name == "korean-and-space-path" else str(path)
+        result.append(("file-" + name, ["--eval-file", argument], expected, path))
+    sample = ROOT / "samples" / "program.calc"
+    result.append(("file-sample", ["--eval-file", "samples/program.calc"],
+                   oracle(["--eval", sample.read_text(encoding="ascii")]), sample))
+    failure = 2, "", "error: input file read failed\n"
+    result.extend([
+        ("file-not-found", ["--eval-file", str(directory / "missing.calc")], failure, None),
+        ("file-directory", ["--eval-file", str(directory)], failure, None),
+        ("file-empty-path", ["--eval-file", ""], failure, None),
+        ("file-path-overflow", ["--eval-file", "a" * 4096],
+         (2, "", "error: file path limit (4095 UTF-8 bytes)\n"), None),
+    ])
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--compiler", required=True, type=Path)
@@ -252,6 +300,10 @@ def main():
     compiler = options.compiler.expanduser().resolve(strict=True)
     receipt = options.receipt.expanduser().resolve() if options.receipt else None
     common, profiles = [], []
+    # Fixtures stay under this example's generated build directory and are removed
+    # automatically. No project source or user input file is used for cleanup.
+    build_directory = ROOT / "build"
+    build_directory.mkdir(exist_ok=True)
 
     def run(argv, rows, name):
         process = subprocess.run([str(arg) for arg in argv], cwd=ROOT, stdin=subprocess.DEVNULL,
@@ -269,6 +321,15 @@ def main():
             report = json.loads(row["stdout"])
             if report["count"] != 3 or report["passed"] != 3 or report["failed"] != 0:
                 raise RuntimeError(row)
+    with tempfile.TemporaryDirectory(prefix="file-input-", dir=build_directory) as temporary:
+        fixture_directory = Path(temporary).resolve()
+        assert fixture_directory.parent == build_directory.resolve()
+        file_fixtures = file_cases(fixture_directory)
+        verify_profiles(compiler, receipt, common, profiles, file_fixtures, run)
+
+
+def verify_profiles(compiler, receipt, common, profiles, file_fixtures, run):
+    total_cases = len(cases()) + len(file_fixtures)
     for profile, flags in [("dev", []), ("release", ["--release"])]:
         rows = []
         row = run([compiler, "build", *flags, "--locked"], rows, "build")
@@ -286,7 +347,18 @@ def main():
             if (row["exit"], row["stdout"], row["stderr"]) != expected:
                 raise RuntimeError(dict(profile=profile, case=name, expected=expected,
                                         actual=(row["exit"], row["stdout"], row["stderr"])))
-        record = dict(profile=profile, imageSHA256=image_hash, cases=len(cases()), passed=True)
+        for name, args, expected, source in file_fixtures:
+            before = sha(source) if source else None
+            row = run([image, *args], rows, name)
+            if (row["exit"], row["stdout"], row["stderr"]) != expected:
+                raise RuntimeError(dict(profile=profile, case=name, expected=expected,
+                                        actual=(row["exit"], row["stdout"], row["stderr"])))
+            if source:
+                row["input"] = dict(path=str(source), bytes=source.stat().st_size,
+                                    beforeSHA256=before, afterSHA256=sha(source))
+                if row["input"]["afterSHA256"] != before:
+                    raise RuntimeError(dict(profile=profile, case=name, input_changed=True))
+        record = dict(profile=profile, imageSHA256=image_hash, cases=total_cases, fileCases=len(file_fixtures), passed=True)
         if receipt:
             saved = receipt.parent / (profile + image.suffix)
             saved.parent.mkdir(parents=True, exist_ok=True)
@@ -298,12 +370,13 @@ def main():
         profiles.append(record)
     if receipt:
         sources = [ROOT / "fairy.toml", ROOT / "fairy.lock", ROOT / "verify.py",
-                   *sorted((ROOT / "src").glob("*.fy")), *sorted((ROOT / "tests").glob("*.fy"))]
+                   *sorted((ROOT / "src").glob("*.fy")), *sorted((ROOT / "tests").glob("*.fy")),
+                   *sorted((ROOT / "samples").glob("*.calc"))]
         save(receipt, dict(schema="fairyc.token-page-cli-verification/v1", cwd=str(ROOT),
                            compiler=dict(path=str(compiler), sha256=sha(compiler)), common=common,
                            sources=[dict(path=str(p.relative_to(ROOT)), sha256=sha(p)) for p in sources],
-                           profiles=profiles, executions=2 * len(cases())))
-    print(f"PASS: {len(cases())} cases per profile; {2 * len(cases())} native executions")
+                           profiles=profiles, executions=2 * total_cases))
+    print(f"PASS: {total_cases} cases per profile; {2 * total_cases} native executions")
 
 
 if __name__ == "__main__":

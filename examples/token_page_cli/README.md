@@ -2,7 +2,8 @@
 
 Windows AMD64 and Linux GNU amd64 example. It requires a compiler with ADR 0472 support;
 the SDK stage0.86 version alone does not identify that support. Product logic is Fairy C in
-`src/main.fy`, `src/tokens.fy`, `src/evaluator.fy`, and `src/arithmetic.fy`.
+`src/main.fy`, `src/tokens.fy`, `src/evaluator.fy`, `src/arithmetic.fy`, and
+`src/input_file.fy`.
 
 A bounded ASCII lexer stores every scanned token directly into the fixed array field of
 a plain struct instead of a `Vec`:
@@ -13,13 +14,15 @@ struct Token { u32 kind; Span position; i64 value; }
 struct TokenPage { Token[128] tokens; usize used; }
 ```
 
-The command is `token-page-cli [ASCII-source]` for the default analysis mode, and
-`token-page-cli --eval <ASCII-source>` for the evaluation mode described below. `--help`
-prints both forms on stdout:
+The command is `token-page-cli [ASCII-source]` for the default analysis mode,
+`token-page-cli --eval <ASCII-source>` for the evaluation mode described below, and
+`token-page-cli --eval-file <path>` for evaluating an ASCII program read from a file.
+`--help` prints all three forms on stdout:
 
 ```text
 usage: token-page-cli [ASCII-source]
        token-page-cli --eval <ASCII-source>
+       token-page-cli --eval-file <path>
 ```
 
 Argument-count errors keep the single-line stderr message. With no argument it analyzes the
@@ -181,6 +184,53 @@ argument count exits 2 with `usage: token-page-cli [ASCII-source]` on stderr. `-
 --help` treats `--help` as the source and fails with `error: invalid ASCII input`, because
 in this mode the second argument is always the source.
 
+## File input (`--eval-file`)
+
+`token-page-cli --eval-file "<path>"` reads a regular program file and evaluates it with the
+same parser as `--eval`. The path is decoded with `text::validate_utf8` and opened
+read-only with `fs::open_read_utf8`, so Korean and space-containing paths work.
+
+```sh
+fairyc run --locked -- --eval-file samples/program.calc
+```
+
+```powershell
+.\build\token-page-cli.exe --eval-file .\samples\program.calc
+```
+
+`src/input_file.fy` reads the file with `fs::read` into an initialized 4096-byte Buffer in
+a bounded loop, keeps short reads going until EOF, then closes the handle on success before
+evaluation or output. The content limit is the same 4095 bytes; the 4096th byte reports the
+existing `error: input limit (4095 UTF-8 bytes)`.
+
+The file content uses the same ASCII calculation grammar as `--eval`, with no BOM: raw bytes
+are accepted with LF, CRLF, or no final newline, and a blank source succeeds with no output.
+The file is only read, never written or modified; file-read, parser, and evaluation errors
+produce no computation output, while a stdout write failure can still occur after some bytes
+have already been written. The same 128-token, 16-variable, and 16-level parenthesis limits
+apply.
+
+File-input failures exit 2 with exactly one of these lines on stderr:
+
+```text
+error: input file read failed
+error: file path limit (4095 UTF-8 bytes)
+```
+
+The `error: input file read failed` line covers an undecodable path and any open, read, or
+close failure; a path argument longer than 4095 UTF-8 bytes reports
+`error: file path limit (4095 UTF-8 bytes)`. `--eval-file` requires exactly one path
+argument after the flag; any other argument count keeps the single-line
+`usage: token-page-cli [ASCII-source]` stderr message. The second argument is always a path
+in this mode, even when it is named `--help`.
+
+`samples/program.calc` holds `price = 4000000000 + 7; total = (price + 3) * 2;` and prints:
+
+```text
+price	4000000007
+total	8000000020
+```
+
 Feature locations:
 
 - `src/tokens.fy` scans the source and stores each token with a whole-element overwrite
@@ -207,6 +257,10 @@ Feature locations:
 - `src/arithmetic.fy` owns the evaluator's arithmetic: a fixed value stack and a fixed
   operator stack of 128 slots each, the `+`/`*` reduction with precedence and
   left-associativity, and the checked add and multiply that raise the overflow result.
+- `src/input_file.fy` loads a `--eval-file` source: it validates the path as UTF-8, opens
+  it read-only, reads `fs::read` in a bounded loop into an initialized 4096-byte Buffer
+  until EOF, closes the handle on success, and returns the byte count to the existing
+  evaluator; path, open, read, and close failures return the file-input error.
 - `tests/evaluation.fy` is a source `@test` (`bindings_and_reuse`): for `'  x=4000000000;
   x=x+7; total=x+3;'` it asserts two bindings whose values `4000000007` and `4000000010`
   exceed i32, that the reassigned name keeps its original unrebased source span `2..3`,
@@ -229,14 +283,18 @@ no performance claim.
 Portable verification (Python 3.10 or later, standard library only) requires the compiler
 executable and runs `check`, `check --locked`, the locked development and release builds with
 their actual EXEs, the interpreter source tests, and the whole-stdout, error and boundary
-cases for the analysis, evaluation, and arithmetic modes. Evaluation outputs are checked
-against an independent recursive-descent oracle written in Python, including 16-level
-parenthesis nesting and mixed-operator stack pressure. The suite is described by what it
-exercises rather than by a fixed case count. The optional `--receipt PATH` option writes a
-summary plus the development and release raw JSON and retained images (execute permission
-preserved) to that path; without it no extra evidence logs or image copies are saved, while
-the ordinary `check` and `build` outputs (the lock file and the executable) are still
-written:
+cases for the analysis, evaluation, arithmetic, and file-input modes. Evaluation outputs
+are checked against an independent recursive-descent oracle written in Python, including
+16-level parenthesis nesting and mixed-operator stack pressure. File-input cases use Python
+`tempfile` fixtures for LF and CRLF endings, empty content, invalid bytes, a BOM, over-limit
+content, a missing file, a directory, and empty and over-long paths, and they sha-check that
+the source file is unchanged, including `samples/program.calc`; the three interpreter source
+tests are unchanged. The suite is described by what it exercises rather than by a fixed case
+count. The optional
+`--receipt PATH` option writes a summary plus the development and release raw JSON and
+retained images (execute permission preserved) to that path; without it no extra evidence
+logs or image copies are saved, while the ordinary `check` and `build` outputs (the lock
+file and the executable) are still written:
 
 ```sh
 python verify.py --compiler /absolute/path/to/fairyc
@@ -244,17 +302,18 @@ python verify.py --compiler /absolute/path/to/fairyc --receipt /path/to/evidence
 python verify.py --compiler C:\path\to\fairyc.exe --receipt C:\path\to\evidence\receipt.json
 ```
 
-The full suite passes on Windows amd64 in both analysis and evaluation modes, including the arithmetic extension,
-and the fresh Linux and Windows C emission checks pass. The focused `TestTokenPageCLIStorage`
-and `go vet` checks pass as well; `TestTokenPageCLIStorage` confirms the tokens module's
-authored workspace MIR has no fixed-array `FieldRead` or `ArrayIndex` copy, exercising the
-descriptor views and stores instead. The recorded runs used the cached compiler
-`.cache/nominal-array-field-view-compiler/fairyc.exe`, with no compiler or SDK changes.
-Actual Linux execution remains deferred to the owner's consolidated batch, so Linux is
-verified by C emission only. The analysis baseline evidence is
+The full suite passes on Windows amd64 for analysis, `--eval`, and `--eval-file`,
+and the fresh Linux and Windows C emission checks pass. The focused
+`TestTokenPageCLIStorage` and `go vet` checks pass as well; `TestTokenPageCLIStorage`
+confirms the tokens module's authored workspace MIR has no fixed-array `FieldRead` or
+`ArrayIndex` copy, exercising the descriptor views and stores instead. The recorded runs used
+the cached compiler `.cache/nominal-array-field-view-compiler/fairyc.exe`, with no compiler
+or SDK changes. Actual Linux execution remains deferred to the owner's consolidated batch, so
+Linux is verified by C emission only. The analysis baseline evidence is
 `docs/ops/evidence/token-page-cli-20261005.json`, the evaluation-mode evidence is
-`docs/ops/evidence/token-page-eval-cli-20261005.json`, and the arithmetic extension evidence
-is `docs/ops/evidence/token-page-arithmetic-cli-20261005.json`; each records `.dev.json`
-and `.release.json` raw logs against the final source hashes. There is no PowerShell harness
-and no performance claim. See
+`docs/ops/evidence/token-page-eval-cli-20261005.json`, the arithmetic extension evidence is
+`docs/ops/evidence/token-page-arithmetic-cli-20261005.json`, and the file-input evidence is
+`docs/ops/evidence/token-page-file-cli-20261005.json`; each records `.dev.json` and
+`.release.json` raw logs against the final source hashes. There is no PowerShell harness and
+no performance claim. See
 [ADR 0472](../../docs/adr/0472-direct-plain-struct-array-field-views-and-iteration.md).
