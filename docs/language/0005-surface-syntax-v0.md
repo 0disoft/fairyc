@@ -156,7 +156,8 @@
   of nominal structs, resources, raw pointers, borrowed, tagged and array-of-array
   fields stay closed and `@repr(C)` keeps rejecting array fields. Direct
   array-field element stores and `ref` field views/subviews are admitted by
-  ADR 0469 over this same bounded field.
+  ADR 0469 over this same bounded field, and the whole-field position is
+  extended to an admitted plain-struct element by ADR 0471.
 - ADR 0469 admits direct element access and explicit `ref`/`ref mut` views over
   the bounded inline scalar array fields of ADR 0468 on plain non-`@repr(C)`
   structs: element stores and checked compound stores (`packet.bytes[0] = 1;`,
@@ -197,6 +198,28 @@
   the length snapshot and the body, and the runtime checks `start <= end <= len`, so omitted
   bounds and empty subviews are valid and out-of-range slices trap `bounds`. Existing
   `break`/`continue`/`return` cleanup and escape rules are reused.
+- ADR 0471 admits a bounded inline fixed-array field whose element is an admitted
+  plain struct (ADR 0462) on a non-`@repr(C)` struct:
+  `struct APage { ZToken[4] tokens; usize used; }`, where `ZToken` is an actual
+  nonempty acyclic struct with `bool`/`u8`/`i32`/`i64`/`u32`/`usize` leaves and
+  nested ordinary structs but no array field anywhere in its field graph. Length
+  is `1..=4096` and nominal identity stays exact. Fields receive no implicit
+  initialization, so every struct literal supplies each array field with a list
+  or repeated initializer of that element struct. Whole-field reads and copies,
+  and replacement through a named mutable owner or `ref mut` owner including a
+  nested plain parent path, reuse the existing array value transport, so by-value
+  structs, calls, returns, arrays of structs and `Option` payloads carry
+  independent copies and the cost scales with the contents. Declaration order is
+  free, so the element struct may follow its container. A whole-field read is an
+  ordinary value copy, so it can be indexed immediately (`let ZToken first =
+  page.tokens[0];`) with no field place or reference, and a local nominal array
+  copied out of the field keeps its existing fixed-array operations. Direct field
+  mutation through an element store, element references, field subviews and `for`
+  over the field stay closed for the next unit. Nominal element mismatch, a missing
+  initializer field
+  and a length mismatch are rejected, and resource, raw-pointer, borrowed, tagged
+  and array-of-array elements, nested arrays, cyclic element graphs and any array
+  field on a `@repr(C)` struct are rejected.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.
@@ -347,8 +370,9 @@ integer constant in `1..=4096`. Empty and zero-count arrays remain unsupported u
 representation is defined. See [ADR 0416](../adr/0416-repeated-scalar-array-initialization.md).
 Named mutable arrays support checked whole-element replacement. Arrays can produce
 shared/exclusive typed views; slicing is performed through those views. Array fields are limited
-to the bounded scalar array fields admitted by ADR 0468; nested arrays, resource
-elements, properties other than `.len`, broad array coercions, and foreign signatures remain
+to the bounded scalar array fields admitted by ADR 0468 and the bounded plain-struct-element array
+fields admitted by ADR 0471; nested arrays, resource elements, properties other than `.len`, broad
+array coercions, and foreign signatures remain
 closed. One direct shared borrow of an admitted `u8[N]` place contextually
 becomes `ref u8[]` when that view type is already expected, as in
 `let ref u8[] bytes = ref array` or an internal `ref u8[]` call argument. A direct exclusive borrow

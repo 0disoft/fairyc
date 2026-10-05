@@ -1,0 +1,868 @@
+{
+  "schema": "fairyc.inline-nominal-array-fields/v1",
+  "date": "2026-10-05",
+  "baseRevision": "36a533b26b2b37ca717ac3c5e8f049b432809b3f",
+  "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+  "sourceArtifacts": [
+    {
+      "path": "docs/adr/0468-inline-scalar-array-fields.md",
+      "sha256": "9d77cb2a47f3c73ad08a64d9f47ef9891b9f2621de0ae0c860357e10fa140890"
+    },
+    {
+      "path": "docs/adr/0471-inline-plain-struct-array-fields.md",
+      "sha256": "32f21e49b25488f06a9c9940f979d8e113ab41dad61affa27bd8e92ad1fd651d"
+    },
+    {
+      "path": "docs/language/0005-surface-syntax-v0.md",
+      "sha256": "9d435528cb337b45ee8f1e120e3ab7830e294f9daa26ff08e3aa7ffa33dc519b"
+    },
+    {
+      "path": "internal/cbackend/aggregate_types.go",
+      "sha256": "f828da18f54a4bbaafe603e8905ace3800e676a62b27ebfead50fb4dca3f9d0a"
+    },
+    {
+      "path": "internal/cbackend/arrays.go",
+      "sha256": "6fb56bab1fb10e7fe936c7d46a767f948e95c394460f19ad7a8283a6833adcb5"
+    },
+    {
+      "path": "internal/cbackend/emit.go",
+      "sha256": "74d537b262b0ade9ed1a32b4e0897f22d04e1033730ce0c469495d2d14e7039e"
+    },
+    {
+      "path": "internal/cli/inline_nominal_array_fields_test.go",
+      "sha256": "bb4ad73468f16d6382c55a9ea67b0ba004f5ec6182064c0362fd0f56cccab946"
+    },
+    {
+      "path": "internal/compiler/inline_nominal_array_fields_test.go",
+      "sha256": "ca94007ba5d4e61e06256e1d227e2e3a0ac6f5a0a6b2484f3710c56013778ad4"
+    },
+    {
+      "path": "internal/compiler/plain_struct_field_store_test.go",
+      "sha256": "debf1979125ff694a4d3f30a9686796bfebdeb8b4b004f12e2a6f3f7a85cf6ab"
+    },
+    {
+      "path": "internal/compiler/testdata/inline_nominal_array_fields.fy",
+      "sha256": "aa66f080203c8b5aba9c62c6b0af5474b7475dd4d72ba517fb53cb8d07687390"
+    },
+    {
+      "path": "internal/hir/inline_nominal_array_fields_test.go",
+      "sha256": "1f901f6eaeeb584634d6b30c279468b666738f5184977f3454547707c37796be"
+    },
+    {
+      "path": "internal/hir/views.go",
+      "sha256": "01651c965a2559c679d291ebc467c43c716171296985da9d78344066f30e0341"
+    },
+    {
+      "path": "internal/interpreter/field_store.go",
+      "sha256": "b09ae82567670da6c8a50856132e9795f514499b0b6c75afdbd207d89cbc609f"
+    },
+    {
+      "path": "internal/mir/field_borrow.go",
+      "sha256": "3474684f8a2825eece59627f15b69175e9dcad8f8402810e8409a3e58c625bae"
+    },
+    {
+      "path": "internal/mir/field_store.go",
+      "sha256": "0e4b19ba0d417d50cf078591ee4b20134de17efd674bd9f274b64e53f24251f5"
+    },
+    {
+      "path": "internal/mir/inline_nominal_array_fields_test.go",
+      "sha256": "eab46eeb03a929d681897d600fd71c6d5814506d94c27dd8e8f0f979fb5b6339"
+    },
+    {
+      "path": "internal/mir/plain_struct_field_store.go",
+      "sha256": "fdc194d97dec3fd91226af98524fbf0cb92d13318276e3df47008f65e7eb38e1"
+    },
+    {
+      "path": "internal/mir/struct_views.go",
+      "sha256": "49a97eabfb4d7feb7fda6f41d0c9b6c051c7b9d7a42bbc6ae6d34d5247708a1d"
+    },
+    {
+      "path": "internal/mir/verify.go",
+      "sha256": "15209e2ad14fbe9a31713a8147803fae8ef2bc41388858311ec9e5885080c7b3"
+    },
+    {
+      "path": "internal/semantic/field_borrow.go",
+      "sha256": "228943a79b09f76c28748fb146b75ddfe5949c514177e7e18245971883996cee"
+    },
+    {
+      "path": "internal/semantic/inline_nominal_array_fields_test.go",
+      "sha256": "c7382798b8289b0dcd469ace4a54bbe65e98424daedc7cfbfc20eef3df1c7dc8"
+    },
+    {
+      "path": "internal/semantic/resource_types.go",
+      "sha256": "05e197bc286da975aa7844e77a6a4aa562b300c123268c2b0a9d9a9e8eba7ca6"
+    },
+    {
+      "path": "internal/semantic/struct_array_storage_test.go",
+      "sha256": "dfaeb5cfd82c66ac25e143d27de583c27db37e512f18c420aab8e1f46003078a"
+    },
+    {
+      "path": "internal/semantic/struct_views.go",
+      "sha256": "d24db16d95a6f3e9c06632752b56e9948ccd8bd0f5bee1f9bb960b60b513f47e"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "cfd77ca23f708a9b430f5cd6bbcfafef7258f50e5e2ac77acacac191c01bf57c"
+    }
+  ],
+  "contract": {
+    "adr": "0471",
+    "arrayLength": "1..4096",
+    "element": "actual nonempty acyclic struct with scalar-only leaves; no arrays in its element graph",
+    "valueOperations": [
+      "explicit list/repeated construction",
+      "independent whole-field reads and replacement",
+      "copied-value indexing",
+      "nested parent replacement",
+      "copy through calls/returns/Option/outer arrays"
+    ],
+    "closed": [
+      "repr(C) container fields",
+      "resource/pointer/borrow/tagged elements",
+      "nested arrays",
+      "array-bearing element graph",
+      "recursive element graph",
+      "direct nominal-array field references/subviews/element mutation/for"
+    ],
+    "language": "fairyc-language/20",
+    "sdk": "0.0.0-stage0.86",
+    "runtime": "fairyc-runtime/0",
+    "newMIRWireFields": false,
+    "newSDKExports": false
+  },
+  "compiler": {
+    "executable": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+      "sha256": "fad718b972966c58f033da05d0a769bb505e8bdc53ed96505b75a2672cd1c312"
+    },
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005090235-36a533b26b2b+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 36a533b26b2b37ca717ac3c5e8f049b432809b3f\nmodified: true\n",
+      "stderr": "",
+      "exit": 0
+    },
+    "sourceManifest": {
+      "path": ".cache/inline-nominal-array-compiler/source-manifest.json",
+      "sha256": "ec319a162da40669354a2d5468b96006460732a9fd1068089b254d750a685cab",
+      "digest": "e1a8745d61a130dfc635645b9d4b70b184749eb3a4d2aec27253ee3ae7491935"
+    }
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cbackend",
+        "./internal/interpreter",
+        "./internal/cli",
+        "-run",
+        "^Test(InlineNominalArrayField|PlainViewStructGraph|PlainStructFieldStoreRejects|ArrayFieldViewBoundary|ArrayFieldViewRoundTrip)",
+        "-count=1"
+      ],
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/inline-nominal-array-final-unit.jsonl",
+      "sha256": "c576326f1db77e4aa02ae03187536539254e40f31c8f8a71dfd27f136eff63f6",
+      "passedTestEntries": 93,
+      "passed": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph/scalars"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph/empty"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph/array-leaf"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph/borrow-leaf"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph/pointer-leaf"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph/tagged-leaf"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph/recursive-leaf"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestInlineNominalArrayFieldGraph"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/scalar"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/diamond"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/empty"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/missing"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/self-cycle"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/indirect-cycle"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/borrow"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/pointer"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/array"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/zero-array"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/nested-array"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/option"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph/deep"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/hir",
+          "test": "TestPlainViewStructGraph"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/immutable-store"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/immutable-view"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/shared-parameter"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/shared-parameter-view"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/width"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/bound-type"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/local-escape"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/value-parameter-escape"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/element-escape"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/temporary"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/nested-slice"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/ordinary-slice"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/indexed-owner"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/tagged-owner"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/shared-owner-write"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/exclusive-owner-read"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/exclusive-owner-write"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/sibling"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/call-held"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/shared-live-direct-store"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/element-live-store"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/bound-write"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/index-write"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/read-index-write"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/rhs-read"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/rhs-replace"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/returned-alias"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/tagged-alias"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary/borrowed-child-parent"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestArrayFieldViewBoundary"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/immutable"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/shared-owner"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/nominal-mismatch"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/missing-field"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/wrong-length"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/shared-live"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-view"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-reference"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/mutable-field-reference"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-slice"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-for"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-store"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldDeclarationOrder"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestArrayFieldViewRoundTrip/lost-bounds"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestArrayFieldViewRoundTrip/wrong-owner"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestArrayFieldViewRoundTrip/mutable-laundering"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestArrayFieldViewRoundTrip"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestInlineNominalArrayFieldRoundTrip/repr-c"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestInlineNominalArrayFieldRoundTrip/wrong-element"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestInlineNominalArrayFieldRoundTrip/recursive-array"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestInlineNominalArrayFieldRoundTrip/element-array"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestInlineNominalArrayFieldRoundTrip"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/rhs-owner-write"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/nominal-mismatch"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/compound"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/nonplain-root"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/nonplain-leaf"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/immutable"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/owner-loan"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/field-loan"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/mutable-loan"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/rhs-owner-read"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/temporary"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/immutable-array"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/resource-root"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects/shared"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/compiler",
+          "test": "TestPlainStructFieldStoreRejects"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/cli",
+          "test": "TestInlineNominalArrayFieldNative/value-copy-matrix"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/cli",
+          "test": "TestInlineNominalArrayFieldNative"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/cli",
+          "test": "TestInlineNominalArrayFieldCache"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/mir",
+        "-run",
+        "^TestInlineNominalArrayFieldBorrowGuard$",
+        "-count=1"
+      ],
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/inline-nominal-array-mir-guard.jsonl",
+      "sha256": "ef773f9c1210af1daa6f615cdaecd007351bf04d387017863304260b5d1d1312",
+      "passedTestEntries": 1,
+      "passed": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/mir",
+          "test": "TestInlineNominalArrayFieldBorrowGuard"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "-run",
+        "^TestInlineNominalArrayField",
+        "-count=1"
+      ],
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/inline-nominal-array-final-boundary.jsonl",
+      "sha256": "c5bd6e5d64d91af01ea666a5f34de90c9e36e77fad25dff95b58955727b03e82",
+      "passedTestEntries": 16,
+      "passed": [
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/immutable"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/shared-owner"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/nominal-mismatch"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/missing-field"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/wrong-length"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/shared-live"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-view"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-reference"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/mutable-field-reference"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-slice"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-for"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-store"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/whole-element-store"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary/field-element-reference"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldBoundary"
+        },
+        {
+          "package": "github.com/0disoft/fairyc/internal/semantic",
+          "test": "TestInlineNominalArrayFieldDeclarationOrder"
+        }
+      ]
+    }
+  ],
+  "native": {
+    "path": ".cache/inline-nominal-array-field-native/windows/receipt.json",
+    "sha256": "491299d38daaa1d7e7459a47896ee0c08293c209f52a60cad116060d22f09777",
+    "executions": 2,
+    "cases": [
+      {
+        "case": "value-copy-matrix",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestInlineNominalArrayFieldNativevalue-copy-matrix1229245083\\001",
+        "imageSHA256": "d64e1c3108e32c275cb871603affa2e668b67c99376fa45c62b65a9dc2cd82b2",
+        "profile": "dev",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "aa66f080203c8b5aba9c62c6b0af5474b7475dd4d72ba517fb53cb8d07687390",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      },
+      {
+        "case": "value-copy-matrix",
+        "executor": "cdriver.ExecuteWindowsMSVCTarget",
+        "exit": 0,
+        "expectedTrap": "",
+        "fixtureRoot": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-tmp\\TestInlineNominalArrayFieldNativevalue-copy-matrix1229245083\\001",
+        "imageSHA256": "d8aed5bc387671d9e685cecd98187af222d76f1372ee4ee85ada10f9eaf15fc6",
+        "profile": "release",
+        "rawOutcome": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "sourceSHA256": "aa66f080203c8b5aba9c62c6b0af5474b7475dd4d72ba517fb53cb8d07687390",
+        "stderr": "",
+        "stdout": "",
+        "toolchain": {
+          "name": "msvc",
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        }
+      }
+    ]
+  },
+  "publicCLI": {
+    "path": ".cache/inline-nominal-array-public/receipt.json",
+    "sha256": "9a77a3da1836c5ae89563ac4d7d31e11924aa35d97bf89d745a129197e0f70c1",
+    "rows": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005090235-36a533b26b2b+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 36a533b26b2b37ca717ac3c5e8f049b432809b3f\nmodified: true\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock updated\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+          "build"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "built: build/inline-nominal-array-field.exe (x86_64-windows-msvc, development, lock unchanged)\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public\\build\\inline-nominal-array-field.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+          "build",
+          "--release",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "built: build/inline-nominal-array-field.exe (x86_64-windows-msvc, release, lock verified)\n",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public\\build\\inline-nominal-array-field.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "",
+        "stderr": "",
+        "exit": 0
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "",
+        "stderr": "main.fy:1:98: E1008: assignment target is not mutable [bytes 97..105]\n",
+        "exit": 3,
+        "case": "immutable"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "",
+        "stderr": "main.fy:1:102: E1006: incompatible expected and actual types [bytes 101..108]\n  expected-type: main.fy:1:101 [bytes 100..111]\n",
+        "exit": 3,
+        "case": "nominal"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public",
+        "stdout": "",
+        "stderr": "fairyc: semantic subset does not support borrow of a non-place expression at main.fy [bytes 87..99]\n",
+        "exit": 3,
+        "case": "field-view"
+      }
+    ],
+    "images": [
+      {
+        "profile": "dev",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public\\dev.exe",
+        "sha256": "c2b1215066f4f66d04cd172b6a12d96b17c4327e237f06502827b52a22b62dff"
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\inline-nominal-array-public\\release.exe",
+        "sha256": "af9874884a2b037c19602b0516098194036c01866b9258ed256f2fc5f3b91c79"
+      }
+    ]
+  },
+  "validation": {
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cbackend",
+        "./internal/interpreter",
+        "./internal/cli"
+      ],
+      "exit": 0,
+      "raw": ".cache/inline-nominal-array-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "format": "gofmt and git diff --check passed",
+    "mirCodec": "round-trip and exact V1001 invalid inline-field mutation guard",
+    "cache": "cold and all-hit warm checks plus MIR comparison/interpreter execution",
+    "linux": "C emission passed; actual execution deferred by owner",
+    "performance": "not measured",
+    "priorRelatedRegression": {
+      "raw": ".cache/inline-nominal-array-tests-final.jsonl",
+      "sha256": "d070a0a4c4e149f8642d047ca3ad480d486a3b33f297a99e1d8123964eb51592",
+      "obsoleteCases": [
+        "TestPlainStructFieldStoreRejects/nonplain-root",
+        "TestPlainStructFieldStoreRejects/nonplain-leaf"
+      ],
+      "resolution": "i32[2] fields were already plain since ADR0468; replaced their nonplain test shapes with Option<i32>. Corrected tests passed in final unit run."
+    }
+  },
+  "scope": {
+    "localCommitOnly": true,
+    "push": false,
+    "newPS1": false,
+    "runnerChanges": false
+  }
+}

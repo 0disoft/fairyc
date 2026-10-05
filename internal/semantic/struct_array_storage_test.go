@@ -10,7 +10,7 @@ func TestStructArrayStorageBoundary(t *testing.T) {
 		{"repr-c", `@repr(C) struct P{u8[2] bytes;}`, ""},
 		{"zero", `struct P{u8[0] bytes;}`, ""},
 		{"oversize", `struct P{u8[4097] bytes;}`, ""},
-		{"nominal", `struct T{i32 x;}struct P{T[2] data;}`, ""},
+		{"nominal-array-element", `struct T{i32[2] x;}struct P{T[2] data;}`, ""},
 		{"resource", `resource R{cleanup{}}struct P{R[2] data;}`, ""},
 		{"nested-array", `struct P{u8[2][2] data;}`, ""},
 		{"shared-owner", `struct P{u8[2] bytes;i32 other;}fn void bad(){var P p=P{.bytes=[1,2],.other=0};let ref P v=ref p;p.bytes=[3,4];assert(v.other==0);}`, "E2101"},

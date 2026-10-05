@@ -3138,9 +3138,6 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if err := e.emitAggregateTypes(output); err != nil {
 		return err
 	}
-	if err := e.emitScalarArrayTypes(output, true); err != nil {
-		return err
-	}
 	for index, resource := range e.resourceTypes {
 		output.WriteString("typedef struct {\n")
 		for fieldIndex, field := range resource.definition.Fields {

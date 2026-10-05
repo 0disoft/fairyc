@@ -176,6 +176,15 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 			return array, nil
 		}
 	}
+	if element, length, array := hir.FixedArrayParts(value); !reprC && array && hir.ExecutableFixedArrayShape(element, length) {
+		if _, found := r.structures[element]; found {
+			resolved, err := r.resolve(element)
+			if err != nil {
+				return layout.Type{}, err
+			}
+			return layout.Type{Kind: layout.KindArray, Element: &resolved, Length: length}, nil
+		}
+	}
 	if nested, found := r.structures[value]; found {
 		if reprC && !nested.ReprC {
 			return layout.Type{}, fmt.Errorf("nested struct type %q is not repr(C)", value)
@@ -354,8 +363,12 @@ func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, err
 		state[definition.Type] = 1
 		dependencies := make([]hir.Type, 0, len(definition.Fields))
 		for _, field := range definition.Fields {
-			if _, nested := byType[field.Type]; nested {
-				dependencies = append(dependencies, field.Type)
+			dependency := field.Type
+			if element, _, array := hir.FixedArrayParts(dependency); array {
+				dependency = element
+			}
+			if _, nested := byType[dependency]; nested {
+				dependencies = append(dependencies, dependency)
 			}
 		}
 		slices.SortFunc(dependencies, func(left, right hir.Type) int { return strings.Compare(string(left), string(right)) })
@@ -381,22 +394,28 @@ type aggregateEmissionNode struct {
 	structure   int
 	enumeration int
 	tagged      int
+	array       int
 }
 
 func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 	nodes := make(map[hir.Type]aggregateEmissionNode, len(e.structTypes)+len(e.enumTypes))
 	for index, value := range e.structTypes {
-		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: index, enumeration: -1, tagged: -1}
+		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: index, enumeration: -1, tagged: -1, array: -1}
 	}
 	for index, value := range e.enumTypes {
-		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: -1, enumeration: index, tagged: -1}
+		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: -1, enumeration: index, tagged: -1, array: -1}
 	}
 	for index := range e.taggedTypes {
 		if !e.taggedParticipatesInAggregateGraph(index) {
 			continue
 		}
 		value := e.taggedTypes[index]
-		nodes[value.typ] = aggregateEmissionNode{typ: value.typ, structure: -1, enumeration: -1, tagged: index}
+		nodes[value.typ] = aggregateEmissionNode{typ: value.typ, structure: -1, enumeration: -1, tagged: index, array: -1}
+	}
+	for index, value := range e.arrayTypes {
+		if !hir.FixedArrayScalarElement(value.element) {
+			nodes[value.typ] = aggregateEmissionNode{typ: value.typ, structure: -1, enumeration: -1, tagged: -1, array: index}
+		}
 	}
 	roots := make([]hir.Type, 0, len(nodes))
 	for _, value := range e.structTypes {
@@ -408,6 +427,11 @@ func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 	for index := range e.taggedTypes {
 		if e.taggedParticipatesInAggregateGraph(index) {
 			roots = append(roots, e.taggedTypes[index].typ)
+		}
+	}
+	for _, value := range e.arrayTypes {
+		if !hir.FixedArrayScalarElement(value.element) {
+			roots = append(roots, value.typ)
 		}
 	}
 	state := make(map[hir.Type]uint8, len(nodes))
@@ -436,6 +460,11 @@ func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 						dependencies = append(dependencies, canonicalCValueType(field.Type))
 					}
 				}
+			}
+		} else if node.array >= 0 {
+			element := canonicalCValueType(e.arrayTypes[node.array].element)
+			if _, found := nodes[element]; found {
+				dependencies = append(dependencies, element)
 			}
 		} else {
 			for _, payload := range e.taggedTypes[node.tagged].payloads {
@@ -476,8 +505,14 @@ func (e *emitter) emitAggregateTypes(output *strings.Builder) error {
 			if err := e.emitEnumType(output, node.enumeration); err != nil {
 				return err
 			}
-		} else if err := e.emitTaggedType(output, node.tagged); err != nil {
-			return err
+		} else if node.array >= 0 {
+			if err := e.emitArrayType(output, node.array); err != nil {
+				return err
+			}
+		} else {
+			if err := e.emitTaggedType(output, node.tagged); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

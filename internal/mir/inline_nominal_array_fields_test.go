@@ -1,0 +1,32 @@
+package mir
+
+import (
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/hir"
+)
+
+func TestInlineNominalArrayFieldBorrowGuard(t *testing.T) {
+	token := hir.Type("main::Token")
+	owner := hir.Type("main::Owner")
+	nominal := hir.FixedArray(token, 2)
+	scalar := hir.FixedArray(hir.TypeI64, 2)
+	lookup := func(typ hir.Type) *StructType {
+		switch typ {
+		case token:
+			return &StructType{Type: token, Fields: []StructField{{Name: "x", Type: hir.TypeI64}}}
+		case owner:
+			return &StructType{Type: owner, Fields: []StructField{{Name: "tokens", Type: nominal}, {Name: "scalars", Type: scalar}}}
+		default:
+			return nil
+		}
+	}
+	for _, borrow := range []func(hir.Type) hir.Type{hir.SharedBorrow, hir.MutableBorrow} {
+		if validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(nominal)}, lookup) {
+			t.Fatal("nominal array field reference admitted before its borrowing unit")
+		}
+		if !validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(scalar)}, lookup) {
+			t.Fatal("existing scalar array field reference rejected")
+		}
+	}
+}

@@ -113,14 +113,22 @@ func (e *emitter) emitScalarArrayTypes(output *strings.Builder, nominal bool) er
 		if nominal == hir.FixedArrayScalarElement(array.element) {
 			continue
 		}
-		elementType, err := e.cValueType(array.element)
-		if err != nil {
-			return fmt.Errorf("emit fixed array %q: %w", array.typ, err)
+		if err := e.emitArrayType(output, index); err != nil {
+			return err
 		}
-		fmt.Fprintf(output, "typedef struct { %s data[UINT64_C(%d)]; } %s;\n", elementType, array.length, e.arrayCTypeName(index))
 	}
 	if len(e.arrayTypes) != 0 {
 		output.WriteString("\n")
 	}
+	return nil
+}
+
+func (e *emitter) emitArrayType(output *strings.Builder, index int) error {
+	array := e.arrayTypes[index]
+	elementType, err := e.cValueType(array.element)
+	if err != nil {
+		return fmt.Errorf("emit fixed array %q: %w", array.typ, err)
+	}
+	fmt.Fprintf(output, "typedef struct { %s data[UINT64_C(%d)]; } %s;\n", elementType, array.length, e.arrayCTypeName(index))
 	return nil
 }

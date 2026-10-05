@@ -73,8 +73,8 @@ func TestPlainStructFieldStoreRejects(t *testing.T) {
 		"temporary":        `fn void bad(Position p){make().position=p;}`,
 		"immutable-array":  `fn void bad(Position p){let Token[1] a=[make()];a[0].position=p;}`,
 		"resource-root":    `resource Owner{Position position;cleanup{}}fn void bad(ref mut Owner s,Position p){s.position=p;}`,
-		"nonplain-root":    `struct Owner{Position position;i32[2] other;}fn void bad(ref mut Owner s,Position p){s.position=p;}`,
-		"nonplain-leaf":    `struct Inner{i32[2] values;}struct Owner{Inner inner;}fn void bad(ref mut Owner s,Inner v){s.inner=v;}`,
+		"nonplain-root":    `struct Owner{Position position;Option<i32> other;}fn void bad(ref mut Owner s,Position p){s.position=p;}`,
+		"nonplain-leaf":    `struct Inner{Option<i32> values;}struct Owner{Inner inner;}fn void bad(ref mut Owner s,Inner v){s.inner=v;}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			r, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", prelude+source)})

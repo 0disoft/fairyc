@@ -52,6 +52,9 @@ func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, boo
 	if field.Kind != "field-expression" || len(field.Children) != 1 || field.Type == hir.TypeInvalid {
 		return hir.Expression{}, false
 	}
+	if _, _, array := hir.FixedArrayParts(field.Type); array && !hir.ScalarArrayField(field.Type) {
+		return hir.Expression{}, false
+	}
 	owner := field.Children[0]
 	for owner.Kind == "group" && len(owner.Children) == 1 {
 		owner = owner.Children[0]

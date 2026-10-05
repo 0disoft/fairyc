@@ -3,17 +3,23 @@ package mir
 import "github.com/0disoft/fairyc/internal/hir"
 
 func (p typeProperties) plainViewStruct(element hir.Type) bool {
-	return hir.PlainViewStruct(element, func(value hir.Type) ([]hir.Type, bool) {
-		info := p.structs[value]
-		if info == nil {
-			return nil, false
-		}
-		fields := make([]hir.Type, len(info.Fields))
-		for i, field := range info.Fields {
-			fields[i] = field.Type
-		}
-		return fields, true
-	})
+	return hir.PlainViewStruct(element, p.plainStructFields)
+}
+
+func (p typeProperties) inlineArrayField(value hir.Type) bool {
+	return hir.InlineArrayField(value, p.plainStructFields)
+}
+
+func (p typeProperties) plainStructFields(value hir.Type) ([]hir.Type, bool) {
+	info := p.structs[value]
+	if info == nil {
+		return nil, false
+	}
+	fields := make([]hir.Type, len(info.Fields))
+	for i, field := range info.Fields {
+		fields[i] = field.Type
+	}
+	return fields, true
 }
 
 func (p typeProperties) validStructViewType(value hir.Type) bool {

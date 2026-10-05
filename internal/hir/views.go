@@ -108,6 +108,31 @@ func ScalarArrayField(value Type) bool {
 	return array && FixedArrayScalarElement(element) && ExecutableFixedArrayShape(element, length)
 }
 
+// InlineArrayField also admits arrays of actual scalar-leaf structs. Array
+// fields inside the element graph remain closed, keeping this subset acyclic
+// and independent of array-field borrowing and iteration.
+func InlineArrayField(value Type, fields func(Type) ([]Type, bool)) bool {
+	if ScalarArrayField(value) {
+		return true
+	}
+	element, length, array := FixedArrayParts(value)
+	if !array || !ExecutableFixedArrayShape(element, length) {
+		return false
+	}
+	return PlainViewStruct(element, func(typ Type) ([]Type, bool) {
+		children, ok := fields(typ)
+		if !ok {
+			return nil, false
+		}
+		for _, child := range children {
+			if _, _, array := FixedArrayParts(child); array {
+				return nil, false
+			}
+		}
+		return children, true
+	})
+}
+
 // PlainViewStruct validates a nonempty, acyclic graph of structs with scalar
 // leaves. The lookup admits only actual struct definitions. An explicit DFS
 // stack and completed-node memoization bound work by the reachable type graph,
@@ -124,6 +149,7 @@ func PlainViewStruct(element Type, fields func(Type) ([]Type, bool)) bool {
 	}
 	stack := []frame{{typ: element, fields: first}}
 	state := map[Type]uint8{element: 1}
+	arrayFields := make(map[Type]bool)
 	for len(stack) != 0 {
 		top := &stack[len(stack)-1]
 		if top.next == len(top.fields) {
@@ -134,6 +160,17 @@ func PlainViewStruct(element Type, fields func(Type) ([]Type, bool)) bool {
 		child := top.fields[top.next]
 		top.next++
 		if PlainViewField(child) {
+			continue
+		}
+		if _, _, array := FixedArrayParts(child); array {
+			admitted, checked := arrayFields[child]
+			if !checked {
+				admitted = InlineArrayField(child, fields)
+				arrayFields[child] = admitted
+			}
+			if !admitted {
+				return false
+			}
 			continue
 		}
 		switch state[child] {

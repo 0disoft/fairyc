@@ -269,10 +269,7 @@ func (a *analyzer) prepareStructTypes() {
 					a.addDiagnostic("E0102", span(module.file.Path, field.NameSpan), RelatedSpan{Role: "previous-declaration", Span: previous.declaration})
 					continue
 				}
-				fieldType := a.canonicalType(module, field.Type)
-				if _, _, array := hir.FixedArrayParts(fieldType); array && (info.reprC || !hir.ScalarArrayField(fieldType)) {
-					a.addUnsupported(module.file.Path, field.Type.Span, "fixed-array struct field requires a bounded scalar array in a non-repr(C) struct")
-				}
+				fieldType := a.canonicalStructFieldType(module, field.Type)
 				if fieldType == hir.TypeRegion {
 					a.addDiagnostic("E3103", span(module.file.Path, field.Type.Span), RelatedSpan{
 						Role: "capability",
@@ -294,6 +291,41 @@ func (a *analyzer) prepareStructTypes() {
 			}
 		}
 	}
+	// Resolve every definition before validating nominal element graphs, so a
+	// field does not depend on the source order of its element declaration.
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Structs {
+			structure := &module.file.Module.Structs[index]
+			value := a.structs[structure]
+			if value == nil {
+				continue
+			}
+			info := a.structTypes[value.typ]
+			for _, declared := range structure.Fields {
+				field := info.fields[declared.Name]
+				if _, _, array := hir.FixedArrayParts(field.typ); array && (info.reprC || !a.inlineArrayField(field.typ)) {
+					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded scalar or scalar-leaf struct elements in a non-repr(C) struct")
+				}
+			}
+		}
+	}
+}
+
+func (a *analyzer) canonicalStructFieldType(module *moduleScope, reference ast.TypeReference) hir.Type {
+	if reference.Kind == ast.TypeKindGrouped && reference.Element != nil {
+		return a.canonicalStructFieldType(module, *reference.Element)
+	}
+	if reference.Kind == ast.TypeKindArray && reference.Element != nil && reference.Length != nil {
+		element, ok := a.canonicalTypeReference(module, *reference.Element, false)
+		length, sized := parsePositiveArrayLength(reference.Length.Text)
+		if ok && sized && hir.ExecutableFixedArrayShape(element, length) &&
+			(hir.FixedArrayScalarElement(element) || a.structTypes[element] != nil) {
+			return hir.FixedArray(element, length)
+		}
+		a.addUnsupported(module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
+		return hir.TypeInvalid
+	}
+	return a.canonicalType(module, reference)
 }
 
 func (a *analyzer) structType(value hir.Type) (*structInfo, bool) {

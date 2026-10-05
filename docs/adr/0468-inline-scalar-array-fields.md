@@ -1,8 +1,8 @@
 # ADR 0468: Inline scalar array fields
 
-- Status: implemented; Windows dev/release native and public CLI validated; Linux C emission only, actual execution deferred to the owner's batch; the direct element-store and `ref` field-view subset is extended by ADR 0469
+- Status: implemented; Windows dev/release native and public CLI validated; Linux C emission only, actual execution deferred to the owner's batch; the direct element-store and `ref` field-view subset is extended by ADR 0469; the whole-field position is extended to an admitted plain-struct element by ADR 0471
 - Date: 2026-10-05
-- Related: ADRs 0416, 0461, 0462, 0463, 0464, 0467, 0469
+- Related: ADRs 0416, 0461, 0462, 0463, 0464, 0467, 0469, 0471
 
 ## Decision
 
