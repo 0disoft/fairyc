@@ -34,7 +34,7 @@ A new front end adds a regular file mode without changing the binary stdin proto
 the no-argument frame reader stays exactly as described below, and
 `--tokens-file <path>`, `--declarations-file <path>`,
 `--check-names-file <path>`, `--bindings-file <path>`, `--check-types-file <path>`,
-`--check-modules-file <manifest>`, and `--help` are the file-mode arguments.
+`--check-modules-file <manifest>`, `--hir-file <path>`, and `--help` are the file-mode arguments.
 
 ```sh
 lexer-candidate --tokens-file path/to/source.fy
@@ -451,6 +451,68 @@ controls check exact status/output and input preservation. Native `tests/modules
 checks retained import signatures and resolution/type facts. Evidence:
 `docs/ops/evidence/modules-file-cli-20261005.json`. Windows native execution is
 checked locally; Linux native execution remains deferred to the owner's batch.
+
+## Owned scalar HIR (`--hir-file`)
+
+`lexer-candidate --hir-file <path>` reads the same bounded source file, then
+parses, resolves names, checks scalar types and consumes the successful `Typed`
+value through `hir_lower::lower`. The returned `hir_model::Program` owns source
+bytes, canonical integer text and separate function, binding, expression,
+statement, block, edge and signature arenas. It retains no parser or type-check
+table. `hir_lower::lower(typed, module_index)` also preserves external function
+module/declaration identity when its caller supplies an imported typed input;
+the file CLI itself accepts one module without imports.
+
+The private TSV format begins with `fairyc.scalar-hir/v1` and a `P` module-index
+record. `F`, `B`, `E`, `S`, `K`, `A` and `T` records describe functions, bindings,
+expressions, statements, blocks, ordered edges and signature types. Entity IDs
+are one-based; zero means absent. Edge/signature indexes and module indexes are
+zero-based. Enum labels and this format are private implementation contracts.
+
+Supported semantics are scalar literals, resolved locals and parameters, unary
+and binary operations, ordered calls, blocks and tails, `if`, `while`, classic
+`for`, nearest-loop `break`/`continue`, assignment, return, assert, discard and
+unevaluated void-call `defer`. Grouping and callee syntax become semantic links.
+Integer payload is canonical decimal ASCII, including direct signed minima and
+AMD64 `usize` maximum, without overflowing a signed intermediate.
+
+The source cap is 32768 bytes, with at most 512 declarations/functions, 1152
+bindings, 4096 expressions, 8192 statements/blocks, 32768 edges/signature entries,
+86016 payload bytes and recursion depth 64. The existing parser/resolver/type
+budgets apply first. Complete output is buffered under a 2 MiB cap before stdout
+publication. Malformed, unsupported, allocation or limit failures return 2 with
+empty stdout; scanner/name/type errors retain their existing located messages.
+There is no MIR lowering, interpreter, backend or executable compilation of the
+input in this mode.
+
+From the repository root, regenerate the independent Go HIR oracle with:
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle --hir .cache/hir-file-cli/reference.json
+```
+
+Pass that file as `--hir-reference` to `verify.py`, together with the earlier
+token/declaration/name/type/module references. `verify_hir.py` reconstructs nested
+semantic trees from the native TSV and compares them with Go HIR; it also rejects
+cycles and unreachable retained nodes. `tests/hir.fy` exercises the owned API
+directly. The Go oracle and Python comparator are test utilities; the candidate
+runtime uses Fairy C and public SDK only.
+
+`samples/hir-demo.fy` demonstrates a contextual i64 literal, ordered call
+arguments, a conditional result and a classic `for` loop:
+
+```sh
+lexer-candidate --hir-file samples/hir-demo.fy
+```
+
+Windows development and release pass 1024 CLI executions across the existing
+file modes and HIR. Each profile compares 34 positive HIR fixtures and 26
+rejections; six direct native API tests pass per profile. The final comparator
+checks declaration targets, lexical scope relationships, source spans and error
+categories, and rejects 159 deliberate observation mutations per profile.
+Check, scoped Go test/vet and Linux/Windows C emission pass; Linux native execution
+is deferred to the owner's batch. Compiler/SDK inputs remain unchanged. Evidence:
+`docs/ops/evidence/hir-file-cli-20261005.json`.
 
 ## Recognition and limits
 

@@ -1,0 +1,163 @@
+module hir_model;
+import std::bytes as bytes;
+import std::vec as v;
+
+// Private scalar HIR v1. No syntax/type table is retained. All entity IDs are
+// one-based; zero is absent. Query table indexes and edge offsets are zero-based.
+// Module indexes remain zero-based and declaration IDs retain their source index
+// plus one (including module/import declarations). Binding IDs preserve resolved
+// symbol IDs, but their owner/target/type facts below are independently owned.
+pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; }
+pub enum BindingKind { Function; Parameter; Let; Var; External; }
+pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; }
+pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; }
+pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
+// The fixed SDK/compiler admits enum switching, not enum equality or enum casts.
+// These exhaustive private-format tags also permit exact scalar comparisons.
+pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } }; }
+pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } }; }
+pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } }; }
+pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Binding: { 1 } case .Return: { 2 } case .Assignment: { 3 } case .Expression: { 4 } case .While: { 5 } case .For: { 6 } case .Break: { 7 } case .Continue: { 8 } case .Assert: { 9 } case .Discard: { 10 } case .Defer: { 11 } }; }
+pub fn u32 operator_code(Operator value) { return switch(value) { case .None: { 0 } case .Plus: { 1 } case .Minus: { 2 } case .Not: { 3 } case .Complement: { 4 } case .Multiply: { 5 } case .Divide: { 6 } case .Remainder: { 7 } case .BitAnd: { 8 } case .BitOr: { 9 } case .BitXor: { 10 } case .ShiftLeft: { 11 } case .ShiftRight: { 12 } case .Equal: { 13 } case .NotEqual: { 14 } case .Less: { 15 } case .LessEqual: { 16 } case .Greater: { 17 } case .GreaterEqual: { 18 } case .And: { 19 } case .Or: { 20 } case .Assign: { 21 } }; }
+pub struct Problem { u32 code; usize start; usize end; }
+pub struct Signature { Type type; }
+// Binding owner is the enclosing Function Binding ID; scope is its lexical scope
+// ID. Function/External use module_index+declaration as authoritative call target.
+// Callable result is type; signature_start/count index the Type signature arena.
+pub struct Binding { BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
+pub struct Function { usize binding; usize start; usize end; usize scope; bool public; usize body; usize parameter_start; usize parameter_count; }
+// left/right/alternative are Expression IDs. If uses left=condition,
+// block=consequent Block ID, alternative=else Expression ID (zero if absent),
+// right=0. Binary uses left/right; Unary uses left.
+// block is Block ID (Block expression or If consequent). Call binding is target;
+// edge_start/count index ordered argument Expression IDs. Reference binding is
+// authoritative; callee syntax and grouping nodes are eliminated. Integer stores
+// canonical decimal ASCII in payload[start..end]; signed-minimum has no child.
+pub struct Expression { ExpressionKind kind; Type type; Operator operator; usize start; usize end; usize left; usize right; usize alternative; usize block; usize binding; usize edge_start; usize edge_count; usize payload_start; usize payload_end; bool boolean; }
+// expression and target are Expression IDs; binding is defined local Binding ID.
+// body is Block ID; initial/post are Statement IDs for explicit For clauses.
+// Omitted for condition is expression=0 (true), initial/post=0 mean absent.
+// Assignment operator is Assign or its arithmetic/bitwise operation; RHS is
+// evaluated once. Defer captures an unevaluated void Call expression for scope
+// exit. Break/Continue target the nearest enclosing While/For Statement ID.
+pub struct Statement { StatementKind kind; usize start; usize end; usize scope; usize expression; usize target; usize binding; Operator operator; usize body; usize initial; usize post; usize loop_target; }
+// Ordered statement IDs in edge arena; tail is optional Expression ID.
+// owner is Function Binding ID; scope is the resolver lexical scope ID.
+pub struct Block { usize start; usize end; usize owner; usize scope; usize parent_scope; usize edge_start; usize edge_count; usize tail; }
+pub resource Program {
+    bytes::Buffer source; bytes::Buffer payload;
+    v::Vec<Function> functions; v::Vec<Binding> bindings;
+    v::Vec<Expression> expressions; v::Vec<Statement> statements;
+    v::Vec<Block> blocks; v::Vec<usize> edges; v::Vec<Signature> signatures;
+    usize module_index; bool success;
+    cleanup { }
+}
+// Hard caps: source 32768 bytes, 512 functions/declarations, 1152 bindings,
+// 4096 expressions, 8192 statements, 8192 blocks, 32768 edges, 32768 signature
+// entries, 86016 canonical payload bytes (4096*21), recursion depth 64.
+// Errors: 1 unsuccessful input, 2 budget, 3 allocation, 4 unsupported/malformed
+// semantic graph. Failure returns .err only, never a partially usable Program.
+pub fn usize function_count(ref Program p) { assert(p.success); return v::len<Function>(ref p.functions); }
+pub fn usize binding_count(ref Program p) { assert(p.success); return v::len<Binding>(ref p.bindings); }
+pub fn usize expression_count(ref Program p) { assert(p.success); return v::len<Expression>(ref p.expressions); }
+pub fn usize statement_count(ref Program p) { assert(p.success); return v::len<Statement>(ref p.statements); }
+pub fn usize block_count(ref Program p) { assert(p.success); return v::len<Block>(ref p.blocks); }
+pub fn usize edge_count(ref Program p) { assert(p.success); return v::len<usize>(ref p.edges); }
+pub fn usize signature_count(ref Program p) { assert(p.success); return v::len<Signature>(ref p.signatures); }
+pub fn usize module_index(ref Program p) { assert(p.success); return p.module_index; }
+pub fn Function function_at(ref Program p, usize index) { assert(index < function_count(p)); return *v::at<Function>(ref p.functions,index); }
+pub fn Binding binding_at(ref Program p, usize id) { assert(id > 0 && id <= binding_count(p)); return *v::at<Binding>(ref p.bindings,id - 1); }
+pub fn Expression expression_at(ref Program p, usize id) { assert(id > 0 && id <= expression_count(p)); return *v::at<Expression>(ref p.expressions,id - 1); }
+pub fn Statement statement_at(ref Program p, usize id) { assert(id > 0 && id <= statement_count(p)); return *v::at<Statement>(ref p.statements,id - 1); }
+pub fn Block block_at(ref Program p, usize id) { assert(id > 0 && id <= block_count(p)); return *v::at<Block>(ref p.blocks,id - 1); }
+pub fn usize edge_at(ref Program p, usize index) { assert(index < edge_count(p)); return *v::at<usize>(ref p.edges,index); }
+pub fn Type signature_at(ref Program p, usize index) { assert(index < signature_count(p)); return v::at<Signature>(ref p.signatures,index).type; }
+pub fn ref u8[] source_view(ref Program p) { assert(p.success); return bytes::view(ref p.source); }
+pub fn ref u8[] integer_text(ref Program p, usize id) { let Expression e = expression_at(p,id); assert(expression_code(e.kind) == expression_code(.Integer)); return bytes::view(ref p.payload)[e.payload_start..e.payload_end]; }
+pub fn ref u8[] binding_text(ref Program p, usize id) { let Binding b = binding_at(p,id); return source_view(p)[b.start..b.end]; }
+
+// Resource fields are module-private. This checked factory is the lowering
+// handoff, after all local SDK containers have been populated. No container
+// mutation through a resource field is required by either construction or query.
+pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payload, v::Vec<Function> functions, v::Vec<Binding> bindings, v::Vec<Expression> expressions, v::Vec<Statement> statements, v::Vec<Block> blocks, v::Vec<usize> edges, v::Vec<Signature> signatures, usize module_index) {
+    let usize ns = bytes::len(ref source); let usize np = bytes::len(ref payload);
+    let usize nf = v::len<Function>(ref functions); let usize nb = v::len<Binding>(ref bindings);
+    let usize ne = v::len<Expression>(ref expressions); let usize nt = v::len<Statement>(ref statements);
+    let usize nk = v::len<Block>(ref blocks); let usize na = v::len<usize>(ref edges); let usize ntypes = v::len<Signature>(ref signatures);
+    if (ns > 32768 || np > 86016 || nf > 512 || nb > 1152 || ne > 4096 || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
+    var usize i = 0;
+    while (i < nb) {
+        let Binding b = *v::at<Binding>(ref bindings,i);
+        if (b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External)) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
+        else if (b.owner == 0 || b.scope == 0 || type_code(b.type) == type_code(.Void) || b.signature_count != 0 || binding_code(v::at<Binding>(ref bindings,b.owner - 1).kind) != binding_code(.Function)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        i += 1;
+    }
+    i = 0;
+    while (i < nf) {
+        let Function f = *v::at<Function>(ref functions,i);
+        if (f.start > f.end || f.end > ns || f.binding == 0 || f.binding > nb || f.body == 0 || f.body > nk || f.parameter_start > na || f.parameter_count > na - f.parameter_start || f.scope == 0) { return .err(Problem { .code = 4, .start = f.start, .end = f.end }); }
+        let Binding b = *v::at<Binding>(ref bindings,f.binding - 1); let Block body = *v::at<Block>(ref blocks,f.body - 1);
+        if (binding_code(b.kind) != binding_code(.Function) || b.module_index != module_index || b.signature_count != f.parameter_count || body.owner != f.binding || body.parent_scope != f.scope) { return .err(Problem { .code = 4, .start = f.start, .end = f.end }); }
+        var usize j = 0;
+        while (j < f.parameter_count) {
+            let usize id = *v::at<usize>(ref edges,f.parameter_start + j);
+            if (id == 0 || id > nb) { return .err(Problem { .code = 4, .start = f.start, .end = f.end }); }
+            let Binding parameter = *v::at<Binding>(ref bindings,id - 1);
+            if (binding_code(parameter.kind) != binding_code(.Parameter) || parameter.owner != f.binding || parameter.scope != f.scope || type_code(parameter.type) != type_code(v::at<Signature>(ref signatures,b.signature_start + j).type)) { return .err(Problem { .code = 4, .start = parameter.start, .end = parameter.end }); }
+            j += 1;
+        }
+        i += 1;
+    }
+    i = 0;
+    while (i < ne) {
+        let Expression e = *v::at<Expression>(ref expressions,i);
+        if (e.start > e.end || e.end > ns || type_code(e.type) == type_code(.Invalid) || e.left > ne || e.right > ne || e.alternative > ne || e.block > nk || e.binding > nb || e.edge_start > na || e.edge_count > na - e.edge_start || e.payload_start > e.payload_end || e.payload_end > np) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        // Expression links are postorder and cannot create cycles.
+        if (e.left > i || e.right > i || e.alternative > i) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if (expression_code(e.kind) == expression_code(.Integer) && (e.payload_start == e.payload_end || type_code(e.type) == type_code(.Bool) || type_code(e.type) == type_code(.Void) || type_code(e.type) == type_code(.Callable))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if (expression_code(e.kind) == expression_code(.Boolean) && type_code(e.type) != type_code(.Bool)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if ((expression_code(e.kind) == expression_code(.Reference) || expression_code(e.kind) == expression_code(.Call)) && e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if ((expression_code(e.kind) == expression_code(.Unary) || expression_code(e.kind) == expression_code(.Binary)) && (e.left == 0 || operator_code(e.operator) == operator_code(.None))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if (expression_code(e.kind) == expression_code(.Binary) && e.right == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if ((expression_code(e.kind) == expression_code(.Block) || expression_code(e.kind) == expression_code(.If)) && e.block == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if (expression_code(e.kind) == expression_code(.If) && (e.left == 0 || type_code(v::at<Expression>(ref expressions,e.left - 1).type) != type_code(.Bool))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if (expression_code(e.kind) == expression_code(.Reference) || expression_code(e.kind) == expression_code(.Call)) {
+            let Binding b = *v::at<Binding>(ref bindings,e.binding - 1);
+            if (type_code(e.type) != type_code(b.type) || (expression_code(e.kind) == expression_code(.Reference) && (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External))) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (expression_code(e.kind) == expression_code(.Call)) {
+                if (e.edge_count != b.signature_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+                var usize j = 0;
+                while (j < e.edge_count) {
+                    let usize id = *v::at<usize>(ref edges,e.edge_start + j);
+                    if (id == 0 || id > i || type_code(v::at<Expression>(ref expressions,id - 1).type) != type_code(v::at<Signature>(ref signatures,b.signature_start + j).type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); } j += 1;
+                }
+            }
+        }
+        i += 1;
+    }
+    i = 0;
+    while (i < nt) {
+        let Statement s = *v::at<Statement>(ref statements,i);
+        if (s.start > s.end || s.end > ns || s.expression > ne || s.target > ne || s.binding > nb || s.body > nk || s.initial > nt || s.post > nt || s.loop_target > nt || s.scope == 0) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        if (statement_code(s.kind) == statement_code(.Break) || statement_code(s.kind) == statement_code(.Continue)) {
+            if (s.loop_target == 0 || s.loop_target > i) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+            let Statement target = *v::at<Statement>(ref statements,s.loop_target - 1);
+            if (statement_code(target.kind) != statement_code(.While) && statement_code(target.kind) != statement_code(.For)) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        }
+        if (statement_code(s.kind) == statement_code(.Binding) && (s.binding == 0 || s.expression == 0)) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        if (statement_code(s.kind) == statement_code(.Assignment) && (s.target == 0 || s.expression == 0 || operator_code(s.operator) == operator_code(.None))) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        if ((statement_code(s.kind) == statement_code(.While) || statement_code(s.kind) == statement_code(.For)) && s.body == 0) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        if ((statement_code(s.kind) == statement_code(.Assert) || statement_code(s.kind) == statement_code(.While)) && (s.expression == 0 || type_code(v::at<Expression>(ref expressions,s.expression - 1).type) != type_code(.Bool))) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        if (statement_code(s.kind) == statement_code(.For) && s.expression != 0 && type_code(v::at<Expression>(ref expressions,s.expression - 1).type) != type_code(.Bool)) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        if (statement_code(s.kind) == statement_code(.Defer) && (s.expression == 0 || expression_code(v::at<Expression>(ref expressions,s.expression - 1).kind) != expression_code(.Call) || type_code(v::at<Expression>(ref expressions,s.expression - 1).type) != type_code(.Void))) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
+        i += 1;
+    }
+    i = 0;
+    while (i < nk) {
+        let Block k = *v::at<Block>(ref blocks,i);
+        if (k.start > k.end || k.end > ns || k.owner == 0 || k.owner > nb || k.scope == 0 || k.parent_scope == 0 || k.edge_start > na || k.edge_count > na - k.edge_start || k.tail > ne || binding_code(v::at<Binding>(ref bindings,k.owner - 1).kind) != binding_code(.Function)) { return .err(Problem { .code = 4, .start = k.start, .end = k.end }); }
+        var usize j = 0; while (j < k.edge_count) { let usize id = *v::at<usize>(ref edges,k.edge_start + j); if (id == 0 || id > nt) { return .err(Problem { .code = 4, .start = k.start, .end = k.end }); } j += 1; } i += 1;
+    }
+    return .ok(Program { .source, .payload, .functions, .bindings, .expressions, .statements, .blocks, .edges, .signatures, .module_index, .success = true });
+}

@@ -1,0 +1,2229 @@
+{
+  "schema": "fairyc.hir-comparator-replay/v1",
+  "method": "final CLI raw replay; no additional native executions",
+  "comparator": {
+    "path": "examples/lexer_candidate/verify_hir.py",
+    "sha256": "2b316d7a87b72738d55fc0e2ed6a44d5adf41d1dd20c69bdaee3cedcf54d328f"
+  },
+  "referenceSHA256": "bcbec44db2b5263a94b165dc551a617349574c7da27f8a005540c550e92abe28",
+  "profiles": [
+    {
+      "profile": "dev",
+      "accepted": 34,
+      "rejected": 26,
+      "verdicts": [
+        {
+          "case": "module-only",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "signed-minima",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "canonical-radices",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "u8-context",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "u32-context",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "short-circuit-order",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "grouped-unary",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "shadow-restored",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "mutable-inferred",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "compound-all",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "block-tail-return",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "mutual-recursion",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-else-if-value",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-if-all-return",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-i64",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-shadow",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-inferred",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-assignment",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-bool",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-nested-loops",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-assert-discard",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-if-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-while-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-for-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-assert-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-if-branch-types",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-if-one-return",
+          "outcome": "unsupported",
+          "passed": true
+        },
+        {
+          "case": "control-break-outside",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-continue-outside",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-for-initial-call",
+          "outcome": "unsupported",
+          "passed": true
+        },
+        {
+          "case": "control-for-immutable-post",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-defer-not-call",
+          "outcome": "unsupported",
+          "passed": true
+        },
+        {
+          "case": "control-defer-argument-type",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "bad-binding",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "bad-return",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "bad-assignment",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "immutable-local",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "immutable-parameter",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "mixed-width",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "argument-order-type",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "arity",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "unresolved-after-valid-function",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "minimum-parenthesized",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "usize-overflow",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "inferred-default-overflow",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "u64-unadmitted",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "not-callable",
+          "outcome": "unsupported",
+          "passed": true
+        }
+      ],
+      "mutations": [
+        {
+          "case": "module-only",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-if-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-while-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-for-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-if-branch-types",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-if-one-return",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-break-outside",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-continue-outside",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-for-initial-call",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-for-immutable-post",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-not-call",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-argument-type",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "bad-binding",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "bad-return",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "bad-assignment",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "immutable-local",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "immutable-parameter",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "mixed-width",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "argument-order-type",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "arity",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "unresolved-after-valid-function",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "minimum-parenthesized",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "usize-overflow",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "inferred-default-overflow",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "u64-unadmitted",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "not-callable",
+          "mutation": "unrelated-error",
+          "rejected": true
+        }
+      ],
+      "originalRaw": {
+        "path": "docs/ops/evidence/hir-file-cli-20261005.dev.json",
+        "sha256": "4353e4b05b4ddd185b35d89783498a79e5cd42819d10b22853e6f5b613412d5f"
+      },
+      "imageSHA256": "453857fefab8f9e9b08acbf8153c04b9a50274dccea84bdcb48ccbea34137448"
+    },
+    {
+      "profile": "release",
+      "accepted": 34,
+      "rejected": 26,
+      "verdicts": [
+        {
+          "case": "module-only",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "signed-minima",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "canonical-radices",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "u8-context",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "u32-context",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "short-circuit-order",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "grouped-unary",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "shadow-restored",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "mutable-inferred",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "compound-all",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "block-tail-return",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "mutual-recursion",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-else-if-value",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-if-all-return",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-i64",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-shadow",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-inferred",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-assignment",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-for-bool",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-nested-loops",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-assert-discard",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "outcome": "pass",
+          "passed": true
+        },
+        {
+          "case": "control-if-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-while-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-for-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-assert-condition",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-if-branch-types",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-if-one-return",
+          "outcome": "unsupported",
+          "passed": true
+        },
+        {
+          "case": "control-break-outside",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-continue-outside",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-for-initial-call",
+          "outcome": "unsupported",
+          "passed": true
+        },
+        {
+          "case": "control-for-immutable-post",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "control-defer-not-call",
+          "outcome": "unsupported",
+          "passed": true
+        },
+        {
+          "case": "control-defer-argument-type",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "bad-binding",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "bad-return",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "bad-assignment",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "immutable-local",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "immutable-parameter",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "mixed-width",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "argument-order-type",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "arity",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "unresolved-after-valid-function",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "minimum-parenthesized",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "usize-overflow",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "inferred-default-overflow",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "u64-unadmitted",
+          "outcome": "error",
+          "passed": true
+        },
+        {
+          "case": "not-callable",
+          "outcome": "unsupported",
+          "passed": true
+        }
+      ],
+      "mutations": [
+        {
+          "case": "module-only",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "signed-minima-radix",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "canonical-radices",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "usize-maximum-context",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "i64-context-grouped",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "u8-context",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "u32-context",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "short-circuit-order",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "grouped-unary",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "shadow-restored",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "mutable-inferred",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "compound-all",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "block-tail-return",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "ordered-forward-call",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "mutual-recursion",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "UTF8-CRLF",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-if-value-i64",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-else-if-value",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-if-all-return",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-while-continue-break",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-while-call-condition",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-i64",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-shadow",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-inferred",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-assignment",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-omitted-clauses",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-for-bool",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-nested-loops",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-discard",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-false-assert-return-gate",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-scalars",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-in-loop",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "invalid-P",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "declaration-9999",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "scope-777",
+          "rejected": true
+        },
+        {
+          "case": "control-post-after-body-shadow",
+          "mutation": "zero-spans",
+          "rejected": true
+        },
+        {
+          "case": "control-if-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-while-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-for-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-assert-condition",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-if-branch-types",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-if-one-return",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-break-outside",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-continue-outside",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-for-initial-call",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-for-immutable-post",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-not-call",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "control-defer-argument-type",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "bad-binding",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "bad-return",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "bad-assignment",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "immutable-local",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "immutable-parameter",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "mixed-width",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "argument-order-type",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "arity",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "unresolved-after-valid-function",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "minimum-parenthesized",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "usize-overflow",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "inferred-default-overflow",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "u64-unadmitted",
+          "mutation": "unrelated-error",
+          "rejected": true
+        },
+        {
+          "case": "not-callable",
+          "mutation": "unrelated-error",
+          "rejected": true
+        }
+      ],
+      "originalRaw": {
+        "path": "docs/ops/evidence/hir-file-cli-20261005.release.json",
+        "sha256": "618d834387da8cbd28cd98da1d0c3d1da785d2c070406be05ce3110b1c3751b0"
+      },
+      "imageSHA256": "77a4570e4242c405f8c3baf127fe49e0ce134e7782f32c72f0d165e14cc30dcc"
+    }
+  ]
+}

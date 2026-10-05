@@ -12,12 +12,13 @@ import tempfile
 from verify_names import verify_names
 from verify_types import verify_types
 from verify_modules import verify_modules
+from verify_hir import verify_hir
 
 ROOT = Path(__file__).resolve().parent
 KINDS = ['invalid', 'eof', 'trivia', 'identifier', 'keyword', 'integer', 'float', 'string', 'byte-string', 'c-string', 'symbol']
 TRIVIA = ['none', 'preamble', 'whitespace', 'line-comment', 'block-comment', 'documentation-line']
 HEADER = 'kind\ttrivia\tstart\tend\traw_hex\tcooked_hex\n'
-USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n'
+USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n'
 HELP = USAGE + '       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n'
 
 
@@ -119,6 +120,7 @@ def main():
     parser.add_argument('--names-reference', type=Path)
     parser.add_argument('--types-reference', type=Path)
     parser.add_argument('--modules-reference', type=Path)
+    parser.add_argument('--hir-reference', type=Path)
     options = parser.parse_args()
     compiler = options.compiler.resolve(strict=True)
     reference_path = options.reference.resolve(strict=True)
@@ -140,6 +142,10 @@ def main():
     modules_reference = json.loads(modules_path.read_text(encoding='utf-8')) if modules_path else None
     if modules_reference:
         assert modules_reference['schema'] == 'fairyc.modules-file-oracle/v1' and modules_reference['fixtures']
+    hir_path = options.hir_reference.resolve(strict=True) if options.hir_reference else None
+    hir_reference = json.loads(hir_path.read_text(encoding='utf-8')) if hir_path else None
+    if hir_reference:
+        assert hir_reference['schema'] == 'fairyc.hir-file-oracle/v1' and hir_reference['fixtures']
     receipt = options.receipt.resolve()
     receipt.parent.mkdir(parents=True, exist_ok=True)
     common, profiles = [], []
@@ -205,6 +211,7 @@ def main():
 
             type_counts = verify_types(image, types_reference, directory, rows, run, sha, location) if types_reference else None
             module_counts = verify_modules(image, modules_reference, directory, rows, run, sha, location) if modules_reference else None
+            hir_counts = verify_hir(image, hir_reference, directory, rows, run, sha, location) if hir_reference else None
 
             errors = [('missing-argument', ['--tokens-file'], USAGE),
                       ('unknown-option', ['--unknown'], USAGE),
@@ -254,6 +261,15 @@ def main():
                     row = run([image, '--check-types-file', path], rows, 'types-malformed')
                     assert before == sha(path)
                     assert (row['exit'], row['stdout'], row['stderr']) == (2, '', str(path) + suffix), row
+            if hir_reference:
+                for name,args,expected in errors:
+                    hir_args=['--hir-file' if x=='--tokens-file' else x for x in args]
+                    row=run([image,*hir_args],rows,'hir-'+name)
+                    assert (row['exit'],row['stdout'],row['stderr'])==(2,'',expected),row
+                for source,suffix in [(b'module main',':1:12: error: expected ; (bytes 11..11)\n'),(b'module main;\xff',':1:13: error: E0001 (bytes 12..13)\n')]:
+                    path=directory/'hir-malformed.fy';path.write_bytes(source);before=sha(path)
+                    row=run([image,'--hir-file',path],rows,'hir-malformed')
+                    assert sha(path)==before and (row['exit'],row['stdout'],row['stderr'])==(2,'',str(path)+suffix),row
             row = run([image, '--help'], rows, 'help')
             assert (row['exit'], row['stdout'], row['stderr']) == (0, HELP, ''), row
             row = run([image], rows, 'legacy-empty-stdin')
@@ -267,15 +283,16 @@ def main():
             save(raw, dict(profile=profile, runs=rows))
             profiles.append(dict(profile=profile, passed=True, fileCases=len(reference['fixtures']),
                                  accepted=successes, diagnosticCases=diagnostics, limitCases=limits, unchangedFiles=unchanged,
-                                 declarations=declaration_counts, names=name_counts, types=type_counts, modules=module_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
+                                 declarations=declaration_counts, names=name_counts, types=type_counts, modules=module_counts, hir=hir_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
                                  raw=str(raw), rawSHA256=sha(raw)))
-    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', ROOT / 'verify_types.py', ROOT / 'verify_modules.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), ROOT / 'samples/modules.txt', *sorted((ROOT / 'tests').glob('*.fy'))]
+    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', ROOT / 'verify_types.py', ROOT / 'verify_modules.py', ROOT / 'verify_hir.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), ROOT / 'samples/modules.txt', *sorted((ROOT / 'tests').glob('*.fy'))]
     save(receipt, dict(schema='fairyc.lexer-file-cli-verification/v1', compiler=dict(path=str(compiler), sha256=sha(compiler)),
                        reference=dict(path=str(reference_path), sha256=sha(reference_path)),
                        declarationsReference=dict(path=str(declarations_path), sha256=sha(declarations_path)) if declarations_path else None, common=common,
                        namesReference=dict(path=str(names_path), sha256=sha(names_path)) if names_path else None,
                        typesReference=dict(path=str(types_path), sha256=sha(types_path)) if types_path else None,
                        modulesReference=dict(path=str(modules_path), sha256=sha(modules_path)) if modules_path else None,
+                       hirReference=dict(path=str(hir_path), sha256=sha(hir_path)) if hir_path else None,
                        sources=[dict(path=str(p.relative_to(ROOT)), sha256=sha(p)) for p in sources], profiles=profiles))
     print('PASS:', sum(p['cliExecutions'] for p in profiles), 'CLI executions;', len(reference['fixtures']), 'Go token reference files/profile; declarations:', declarations_reference and len(declarations_reference['fixtures']), '; names:', names_reference and len(names_reference['fixtures']), '; types:', types_reference and len(types_reference['fixtures']))
 
