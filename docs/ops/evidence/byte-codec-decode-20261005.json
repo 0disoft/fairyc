@@ -1,0 +1,163 @@
+{
+  "schema": "fairyc.byte-codec-decode/v1",
+  "date": "2026-10-05",
+  "baseRevision": "46f12548e0061a955063485922141960b5d5bbf0",
+  "sourceArtifacts": [
+    {
+      "path": "examples/checked_byte_codec_quickstart/src/codec.fy",
+      "sha256": "2e27cb4c2152f081f16ed4fb1464d0bd6ea16465189e0ea0d8e39d01ecd83bb7"
+    },
+    {
+      "path": "examples/checked_byte_codec_quickstart/src/main.fy",
+      "sha256": "225b2bbd56667d9b404d79568de8509529631a8de3c0d77af547ab80e3927737"
+    },
+    {
+      "path": "examples/checked_byte_codec_quickstart/src/numbers.fy",
+      "sha256": "81bf86f77a6c87ccac273898854d4e0d4053bf501a8472fb78f9380c24435fd9"
+    },
+    {
+      "path": "examples/checked_byte_codec_quickstart/fairy.toml",
+      "sha256": "ac0fef72b3938a12450835671b05abbcab4dc1c29252433390840e740864696f"
+    },
+    {
+      "path": "examples/checked_byte_codec_quickstart/README.md",
+      "sha256": "2ed95f1da0b333c3edda4bdc56136b07e60de7ccf2b6a7dcc77935d5bd5e8e51"
+    },
+    {
+      "path": "internal/cli/checked_byte_codec_example_test.go",
+      "sha256": "79759fa867876a2adb4d280af63c4883c8d400ff7021ce4089a1f178c9dec36b"
+    }
+  ],
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0",
+  "changes": {
+    "cli": "decode-le HEX added; byte/le numeric policy and output retained, usage text expanded",
+    "hex": "2..16 ASCII hex digits, upper/lower/mixed case, no separators or prefix",
+    "validationOrder": [
+      "empty",
+      "length exceeds16",
+      "odd length",
+      "all hex digits",
+      "numeric range"
+    ],
+    "range": "0..9223372036854775807; check value>(max-digit)/256 before multiplication/addition",
+    "decodeAPI": "example-local decode_le(shared raw bytes) and decode_hex_le(shared ASCII bytes)",
+    "output": "decimal integer and LF; no stdout before full decode success",
+    "exitCodes": {
+      "input": 1,
+      "usage": 2,
+      "console": 3
+    },
+    "packageVersion": "1.1.0"
+  },
+  "tests": {
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "test",
+      "-json",
+      "./internal/cli",
+      "-run",
+      "^TestCheckedByteCodec(Example(Policy|Native)|DecodePolicy)$",
+      "-count=1"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "env": {
+      "CGO_ENABLED": "0"
+    },
+    "exit": 0,
+    "raw": ".cache\\decode-codec-tests-final.jsonl",
+    "sha256": "6222559e419c4655fffdd396b021bc63a05e0ff6897f81d89add7fd9bc0ec71d",
+    "passed": 131,
+    "skipped": 0,
+    "policyOracle": "interpreter and Windows/Linux C emission of maintained Fairy codec: 7 encoder errors preserve Packet state; 24 encode/decode round trips across widths1..8, raw empty/oversize/high-bit rejection and hex diagnostic ordering",
+    "policyRaw": [
+      {
+        "Time": "2026-10-05T17:30:19.2480148+09:00",
+        "Action": "output",
+        "Package": "github.com/0disoft/fairyc/internal/cli",
+        "Test": "TestCheckedByteCodecExamplePolicy",
+        "Output": "    checked_byte_codec_example_test.go:251: 7 exact codec errors preserve every sentinel and packet length; prefix and offset encoding preserve bytes outside the selected field view\n"
+      },
+      {
+        "Time": "2026-10-05T17:30:19.4360876+09:00",
+        "Action": "output",
+        "Package": "github.com/0disoft/fairyc/internal/cli",
+        "Test": "TestCheckedByteCodecDecodePolicy",
+        "Output": "    checked_byte_codec_example_test.go:282: 24 encoder/decoder round trips across widths 1..8 preserve caller state; raw-byte limits and hex diagnostic ordering verified\n"
+      }
+    ]
+  },
+  "native": {
+    "path": "docs/ops/evidence/byte-codec-decode-20261005.native.json",
+    "sha256": "31260f41a632b9612c00983e5a19aa4506e1165cc70c8a008a645e913f192bc0",
+    "casesPerProfile": 64,
+    "profiles": 2,
+    "executions": 128,
+    "compilerIdentity": {
+      "buildInfo": "go\tgo1.27.1\npath\tgithub.com/0disoft/fairyc/internal/cli.test\nmod\tgithub.com/0disoft/fairyc\t(devel)\t\ndep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\nbuild\tCGO_ENABLED=0\nbuild\tGOARCH=amd64\nbuild\tGOOS=windows\nbuild\tGOAMD64=v1\n",
+      "executableSHA256": "ffbacc0a434f87e4ed2aaefa331c1cc7383e0d4ee38c7e7d35557ece477568ad",
+      "goVersion": "go1.27.1",
+      "kind": "in-process CLI compiler in Go test executable"
+    }
+  },
+  "publicCLI": {
+    "path": "docs/ops/evidence/byte-codec-decode-20261005.cli.json",
+    "sha256": "a4bf5feb33620901e27f2aaf0281a1d2edf315c33b3f7de74d03c0b3e262e064",
+    "nativeExecutions": 16,
+    "compiler": {
+      "path": ".cache\\array-field-for-compiler\\fairyc.exe",
+      "sha256": "d6bbf51359aa077045d7cd6a866cfbfe471cd55e89e8537f161801b7da9cd681",
+      "identity": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005075149-feb6311c43f8+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: feb6311c43f854f034739f705af516733197e90d\nmodified: true\n",
+        "stderr": "",
+        "exit": 0
+      },
+      "sourceManifest": {
+        "path": ".cache/array-field-for-compiler/source-manifest.json",
+        "sha256": "5e1a683bfecb138a1bddd2f8d606d54040e7bcac976b3fb50cbaa98859e6796e",
+        "checkedAgainstCurrentFiles": true
+      }
+    }
+  },
+  "validation": {
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/cli"
+      ],
+      "exit": 0,
+      "raw": ".cache/decode-codec-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "format": "gofmt passed for changed Go test; Fairy source follows existing style",
+    "diffCheck": "passed",
+    "linuxExecution": "deferred by owner for consolidated batch",
+    "performance": "not measured"
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "newSDKAPI": false,
+    "newCompilerFeature": false,
+    "newPS1": false,
+    "runnerChanges": false,
+    "examplePackageVersion": "1.1.0"
+  }
+}

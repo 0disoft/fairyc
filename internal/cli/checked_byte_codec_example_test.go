@@ -17,6 +17,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
@@ -95,10 +96,34 @@ func TestCheckedByteCodecExampleNative(t *testing.T) {
 		{"width-overflow", []string{"le", "1", "9223372036854775808"}, "", "WIDTH: integer is outside i64 range", 1},
 		{"too-long", []string{"byte", strings.Repeat("0", 21)}, "", "VALUE: argument exceeds 20 UTF-8 bytes", 1},
 		{"max-length", []string{"byte", strings.Repeat("0", 20)}, "00\n", "", 0},
-		{"missing", nil, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH", 2},
-		{"missing-width", []string{"le", "1"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH", 2},
-		{"extra", []string{"byte", "1", "2"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH", 2},
-		{"unknown-mode", []string{"other", "1"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH", 2},
+		{"missing", nil, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH | decode-le HEX", 2},
+		{"missing-width", []string{"le", "1"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH | decode-le HEX", 2},
+		{"extra", []string{"byte", "1", "2"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH | decode-le HEX", 2},
+		{"unknown-mode", []string{"other", "1"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH | decode-le HEX", 2},
+		{"decode-zero", []string{"decode-le", "00"}, "0\n", "", 0},
+		{"decode-zero-eight", []string{"decode-le", "0000000000000000"}, "0\n", "", 0},
+		{"decode-byte", []string{"decode-le", "ff"}, "255\n", "", 0},
+		{"decode-256", []string{"decode-le", "0001"}, "256\n", "", 0},
+		{"decode-order", []string{"decode-le", "3412"}, "4660\n", "", 0},
+		{"decode-mixed-case", []string{"decode-le", "aBcD"}, "52651\n", "", 0},
+		{"decode-above-i32", []string{"decode-le", "00286Bee"}, "4000000000\n", "", 0},
+		{"decode-seven", []string{"decode-le", "ffffffffffffff"}, "72057594037927935\n", "", 0},
+		{"decode-i64-max", []string{"decode-le", "ffffffffffffff7f"}, "9223372036854775807\n", "", 0},
+		{"decode-high-bit", []string{"decode-le", "0000000000000080"}, "", "HEX: value is outside nonnegative i64 range", 1},
+		{"decode-u64-max", []string{"decode-le", "ffffffffffffffff"}, "", "HEX: value is outside nonnegative i64 range", 1},
+		{"decode-empty", []string{"decode-le", ""}, "", "HEX: empty input", 1},
+		{"decode-odd", []string{"decode-le", "0"}, "", "HEX: expected pairs of hex digits", 1},
+		{"decode-odd-long", []string{"decode-le", "000000000000000"}, "", "HEX: expected pairs of hex digits", 1},
+		{"decode-invalid", []string{"decode-le", "g0"}, "", "HEX: expected ASCII hex digits without separators", 1},
+		{"decode-prefix", []string{"decode-le", "0x00"}, "", "HEX: expected ASCII hex digits without separators", 1},
+		{"decode-separator", []string{"decode-le", "00  "}, "", "HEX: expected ASCII hex digits without separators", 1},
+		{"decode-plus", []string{"decode-le", "+0"}, "", "HEX: expected ASCII hex digits without separators", 1},
+		{"decode-korean", []string{"decode-le", "한글"}, "", "HEX: expected ASCII hex digits without separators", 1},
+		{"decode-syntax-before-range", []string{"decode-le", "ffffffffffffff8g"}, "", "HEX: expected ASCII hex digits without separators", 1},
+		{"decode-too-long", []string{"decode-le", "000000000000000000"}, "", "HEX: expected at most 16 hex digits", 1},
+		{"decode-length-before-syntax", []string{"decode-le", "g0000000000000000"}, "", "HEX: expected at most 16 hex digits", 1},
+		{"decode-missing", []string{"decode-le"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH | decode-le HEX", 2},
+		{"decode-extra", []string{"decode-le", "00", "1"}, "", "usage: checked-byte-codec byte VALUE | le VALUE WIDTH | decode-le HEX", 2},
 	}
 	evidenceRoot := filepath.Join("..", "..", ".cache", "checked-byte-codec-example")
 	if err := os.MkdirAll(evidenceRoot, 0700); err != nil {
@@ -179,14 +204,6 @@ func TestCheckedByteCodecExampleNative(t *testing.T) {
 
 // Exercise the maintained codec itself with untouched caller-owned sentinel bytes.
 func TestCheckedByteCodecExamplePolicy(t *testing.T) {
-	root := t.TempDir()
-	if err := os.Mkdir(filepath.Join(root, "src"), 0700); err != nil {
-		t.Fatal(err)
-	}
-	codec, err := os.ReadFile(filepath.Join("..", "..", "examples", "checked_byte_codec_quickstart", "src", "codec.fy"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	source := `module main;
 import codec as codec;
 fn i32 error_code(codec::EncodeError error) {
@@ -230,6 +247,51 @@ fn i32 main() {
     return 0;
 }
 `
+	runCheckedByteCodecPolicy(t, source)
+	t.Log("7 exact codec errors preserve every sentinel and packet length; prefix and offset encoding preserve bytes outside the selected field view")
+}
+
+func TestCheckedByteCodecDecodePolicy(t *testing.T) {
+	source := `module main;
+import codec as codec;
+fn i32 decode_error_code(codec::DecodeError error){return switch(error){case .Empty:{1}case .OddLength:{2}case .TooLong:{3}case .InvalidHex:{4}case .OutsideI64:{5}};}
+fn void roundtrip(i64 value,usize width) {
+    var codec::Packet packet=codec::Packet{.bytes=[85;8],.length=width};
+    let bool encoded=switch(codec::encode_le(value,width,ref mut packet.bytes[..width])){case .ok(n):{n==width}case .err(_):{false}};
+    assert(encoded);let codec::Packet before=packet;
+    let i64 decoded=switch(codec::decode_le(ref packet.bytes[..packet.length])){case .ok(n):{n}case .err(_):{assert(false);0}};
+    assert(decoded==value&&packet.length==before.length);
+    var usize at=0;while(at<8){assert(packet.bytes[at]==before.bytes[at]);at+=1;}
+    for(let u8 byte in packet.bytes[width..]){assert(byte==85);}
+}
+fn i32 main() {
+    for(var usize width=1;width<=8;width+=1){roundtrip(0,width);roundtrip(1,width);}
+    roundtrip(255,1);roundtrip(65535,2);roundtrip(16777215,3);roundtrip(4294967295,4);
+    roundtrip(1099511627775,5);roundtrip(281474976710655,6);roundtrip(72057594037927935,7);roundtrip(9223372036854775807,8);
+    let u8[1] zero=[0];let ref u8[] view=ref zero;
+    assert(switch(codec::decode_le(view[..0])){case .err(e):{decode_error_code(e)==1}case .ok(_):{false}});
+    let u8[9] wide=[0;9];assert(switch(codec::decode_le(ref wide)){case .err(e):{decode_error_code(e)==3}case .ok(_):{false}});
+    let u8[8] high=[0,0,0,0,0,0,0,128];assert(switch(codec::decode_le(ref high)){case .err(e):{decode_error_code(e)==5}case .ok(_):{false}});
+    assert(switch(codec::decode_hex_le(b"0001")){case .ok(n):{n==256}case .err(_):{false}});
+    assert(switch(codec::decode_hex_le(b"g0000000000000000")){case .err(e):{decode_error_code(e)==3}case .ok(_):{false}});
+    assert(switch(codec::decode_hex_le(b"000000000000000")){case .err(e):{decode_error_code(e)==2}case .ok(_):{false}});
+    assert(switch(codec::decode_hex_le(b"ffffffffffffff8g")){case .err(e):{decode_error_code(e)==4}case .ok(_):{false}});
+    return 0;
+}`
+	runCheckedByteCodecPolicy(t, source)
+	t.Log("24 encoder/decoder round trips across widths 1..8 preserve caller state; raw-byte limits and hex diagnostic ordering verified")
+}
+
+func runCheckedByteCodecPolicy(t *testing.T, source string) {
+	t.Helper()
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "src"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	codec, err := os.ReadFile(filepath.Join("..", "..", "examples", "checked_byte_codec_quickstart", "src", "codec.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	files := map[string][]byte{"fairy.toml": []byte("schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.byte-codec-policy\"\nname = \"byte-codec-policy\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/20\"\nsource = \"src\"\n"), "src/codec.fy": codec, "src/main.fy": []byte(source)}
 	for p, data := range files {
 		if err := os.WriteFile(filepath.Join(root, p), data, 0600); err != nil {
@@ -248,5 +310,9 @@ fn i32 main() {
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 0 {
 		t.Fatalf("policy execution: %v %+v", err, outcome)
 	}
-	t.Log("7 exact codec errors preserve every sentinel and packet length; prefix and offset encoding preserve bytes outside the selected field view")
+	for _, profile := range []cbackend.Profile{cbackend.Stage0WindowsMSVCProfile(), cbackend.Stage0Profile()} {
+		if _, err := cbackend.Emit(checked.MIR, tokenScannerEntry(t, checked), profile); err != nil {
+			t.Fatal(err)
+		}
+	}
 }
