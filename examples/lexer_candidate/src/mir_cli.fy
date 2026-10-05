@@ -22,21 +22,27 @@ fn void verification_error(u32 code) {
 }
 
 @effects(console)
-pub fn i32 run(scanner::Stream stream, ref u8[] path) {
+pub fn Result<m::Program,i32> compile(scanner::Stream stream, ref u8[] path) {
     let syntax::Parsed parsed = switch(syntax::parse(stream,512)) {
         case .ok(value): { value }
-        case .err(code): { discard io::write_stderr(if (code == 4) { "error: parser limit\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: parser failed\n" }); return 2; }
+        case .err(code): { discard io::write_stderr(if (code == 4) { "error: parser limit\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: parser failed\n" }); return .err(2); }
     };
-    if (syntax::problem_count(ref parsed) != 0) { return declarations::errors(ref parsed,path); }
+    if (syntax::problem_count(ref parsed) != 0) { return .err(declarations::errors(ref parsed,path)); }
     let names::Resolved resolved = names::resolve(parsed);
-    if (names::problem(ref resolved).code != 0) { return name_output::errors(ref resolved,path); }
+    if (names::problem(ref resolved).code != 0) { return .err(name_output::errors(ref resolved,path)); }
     let typing::Typed typed = typing::check(resolved);
-    if (typing::problem(ref typed).code != 0) { return type_output::errors(ref typed,path); }
-    let h::Program input = switch(hir::lower(typed,0)) { case .ok(value): { value } case .err(_): { discard io::write_stderr("error: HIR lowering failed\n"); return 2; } };
+    if (typing::problem(ref typed).code != 0) { return .err(type_output::errors(ref typed,path)); }
+    let h::Program input = switch(hir::lower(typed,0)) { case .ok(value): { value } case .err(_): { discard io::write_stderr("error: HIR lowering failed\n"); return .err(2); } };
     let m::Program program = switch(lower::lower(input)) {
         case .ok(value): { value }
-        case .err(problem): { verification_error(problem.code); return 2; }
+        case .err(problem): { verification_error(problem.code); return .err(2); }
     };
+    return .ok(program);
+}
+
+@effects(console)
+pub fn i32 run(scanner::Stream stream, ref u8[] path) {
+    let m::Program program = switch(compile(stream,path)) { case .ok(value): { value } case .err(code): { return code; } };
     var bytes::Buffer rendered = bytes::empty(); let u32 code = output::render(ref program,ref mut rendered);
     if (code != 0) { if (code == 4) { discard io::write_stderr("error: MIR output limit (2097152 bytes)\n"); } else { verification_error(code); } return 2; }
     let ref u8[] data = bytes::view(ref rendered);

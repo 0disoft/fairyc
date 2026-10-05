@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent
 KINDS = ['invalid', 'eof', 'trivia', 'identifier', 'keyword', 'integer', 'float', 'string', 'byte-string', 'c-string', 'symbol']
 TRIVIA = ['none', 'preamble', 'whitespace', 'line-comment', 'block-comment', 'documentation-line']
 HEADER = 'kind\ttrivia\tstart\tend\traw_hex\tcooked_hex\n'
-USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n'
+USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n'
 HELP = USAGE + '       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n'
 
 
@@ -302,7 +302,7 @@ def main():
                                  accepted=successes, diagnosticCases=diagnostics, limitCases=limits, unchangedFiles=unchanged,
                                  declarations=declaration_counts, names=name_counts, types=type_counts, modules=module_counts, hir=hir_counts, mir=mir_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
                                  raw=str(raw), rawSHA256=sha(raw)))
-    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', ROOT / 'verify_types.py', ROOT / 'verify_modules.py', ROOT / 'verify_hir.py', ROOT / 'verify_mir.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), ROOT / 'samples/modules.txt', *sorted((ROOT / 'tests').glob('*.fy'))]
+    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', ROOT / 'verify_types.py', ROOT / 'verify_modules.py', ROOT / 'verify_hir.py', ROOT / 'verify_mir.py', ROOT / 'verify_c.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), ROOT / 'samples/modules.txt', *sorted((ROOT / 'tests').glob('*.fy'))]
     save(receipt, dict(schema='fairyc.lexer-file-cli-verification/v1', compiler=dict(path=str(compiler), sha256=sha(compiler)),
                        reference=dict(path=str(reference_path), sha256=sha(reference_path)),
                        declarationsReference=dict(path=str(declarations_path), sha256=sha(declarations_path)) if declarations_path else None, common=common,

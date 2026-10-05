@@ -34,7 +34,7 @@ A new front end adds a regular file mode without changing the binary stdin proto
 the no-argument frame reader stays exactly as described below, and
 `--tokens-file <path>`, `--declarations-file <path>`,
 `--check-names-file <path>`, `--bindings-file <path>`, `--check-types-file <path>`,
-`--check-modules-file <manifest>`, `--hir-file <path>`, `--mir-file <path>`, and `--help`
+`--check-modules-file <manifest>`, `--hir-file <path>`, `--mir-file <path>`, `--c-file <path>`, and `--help`
 are the file-mode arguments.
 
 ```sh
@@ -1329,6 +1329,63 @@ runs the inventory/outcome rejection controls and native corpus without unrelate
 syntax suites; `fairyc_go_test_parser_sdk` also runs the corpus. Complete syntax
 is not proof of SDK execution or semantic conformance. See the
 [SDK syntax report](parser-sdk-syntax-2026-09-12.md).
+
+## Verified scalar C emission (`--c-file`)
+
+Version 0.15.0 adds a Fairy-written C backend over the verified scalar MIR:
+
+```sh
+lexer-candidate --c-file samples/mir-defer-demo.fy
+```
+
+It accepts one module with exactly one `fn i32 main()` without parameters. The
+existing scalar types, checked arithmetic, calls, branches, loops and lexical
+defer are emitted as deterministic C11. The transport requires a 64-bit,
+8-bit-byte, two's-complement target. Private numeric `fy_` symbols avoid source
+identifier interpolation. Link the unit with the private scalar runtime providing
+`fy_runtime_trap`; it is not a standalone public C ABI. Defining
+`FY_CANDIDATE_NO_MAIN` omits the generated main wrapper.
+
+`src/c_flow.fy` conservatively proves nonreturning closed callees and retains only
+reachable blocks. A block-local final bool constant or literal zero divisor may select one successor;
+unknown conditions and calls keep both possible paths. The bounded monotone pass
+does not assume recursive calls return or trap. Emission omits normal continuations
+of proven nonreturning calls and emits only required arithmetic helpers, keeping
+strict C warning checks enabled. Arithmetic uses unsigned bit transport for signed
+operations and explicit overflow, divisor and shift guards.
+
+The same 32768-byte source bound applies. C output is buffered under a 2 MiB cap
+before stdout publication. Invalid MIR/entry rejection preserves the caller's
+existing Buffer. A later writer allocation/size failure may leave an unpublished
+prefix in that internal Buffer; CLI failures still emit no C bytes. The writer
+also rejects caller buffers already above its cap without arithmetic underflow.
+
+Portable verification uses Python only for fixtures and observation, with a Go
+test runner invoking the shared C driver; code generation remains Fairy C:
+
+```sh
+go build -o .cache/c-file-cli/native-runner ./cmd/fairyc-candidate-c-native
+python examples/lexer_candidate/verify_c.py --images /path/to/dev /path/to/release --reference .cache/mir-defer-file-cli/reference.json --native-runner .cache/c-file-cli/native-runner --receipt .cache/c-file-cli/c-receipt.json
+```
+
+Both candidate images emit byte-identical C for 106 Go-reference fixtures.
+Native comparison observes the full i32 return separately from process status,
+checks the private trap receipt and exact stdout, and adds a trace hook only to
+test copies of the explicit defer trace function. The original generated main
+also runs in a normal-return and a trap case. Windows low/optimized verification
+covers 216 native executions, 228 C CLI executions and the existing 1256 CLI
+executions. `tests/c_emit.fy` checks entry rejection, Buffer preservation,
+determinism and the writer cap in both native profiles.
+The Windows test runner can reuse an earlier successful build with the same
+source/runtime hashes, compiler path/version and profile after verifying the
+saved image hash. It always executes that image again and compares fresh results.
+Linux builds are not reused by this runner.
+
+Evidence: `docs/ops/evidence/c-file-cli-20261006.json`. Linux-target C emission is
+checked; Linux native execution is deferred to the owner's consolidated batch.
+Compiler/SDK inputs are unchanged. Compound values, ownership/cleanup lowering,
+complete verifier coverage, package linking and a self-compiling compiler remain
+subsequent work. No self-hosting promotion or performance claim is made.
 
 ## Cost baseline
 

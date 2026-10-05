@@ -6,6 +6,7 @@ import type_cli as typing;
 import module_cli as modules;
 import hir_cli as hir;
 import mir_cli as mir;
+import c_cli as c;
 import token_output as output;
 import std::bytes as bytes;
 import std::text as text;
@@ -43,15 +44,15 @@ pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
 @effects(filesystem, console)
 pub fn i32 run() {
     let usize argc = process::arg_count();
-    if (argc != 2 && argc != 3) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n"); }
+    if (argc != 2 && argc != 3) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
     var bytes::Buffer argument = bytes::empty();
     if (!bytes::resize_zeroed(ref mut argument, 4096).is_ok) { return error("error: buffer allocation failed\n"); }
     let usize flag_length = switch(process::arg(1, bytes::view_mut(ref mut argument))) {
-        case .ok(value): { value } case .err(_): { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n"); }
+        case .ok(value): { value } case .err(_): { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
     if (argc == 2 && bytes::equal(flag, b"--help")) {
-        return if (io::write("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
+        return if (io::write("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
             else { error("error: stdout write failed\n") };
     }
     let bool binding_mode = bytes::equal(flag,b"--bindings-file");
@@ -59,9 +60,10 @@ pub fn i32 run() {
     let bool module_mode = bytes::equal(flag,b"--check-modules-file");
     let bool hir_mode = bytes::equal(flag,b"--hir-file");
     let bool mir_mode = bytes::equal(flag,b"--mir-file");
+    let bool c_mode = bytes::equal(flag,b"--c-file");
     let bool name_mode = bytes::equal(flag, b"--check-names-file");
     let bool declaration_mode = bytes::equal(flag, b"--declarations-file");
-    if (argc != 3 || (!bytes::equal(flag, b"--tokens-file") && !declaration_mode && !name_mode && !binding_mode && !type_mode && !module_mode && !hir_mode && !mir_mode)) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n"); }
+    if (argc != 3 || (!bytes::equal(flag, b"--tokens-file") && !declaration_mode && !name_mode && !binding_mode && !type_mode && !module_mode && !hir_mode && !mir_mode && !c_mode)) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
     let usize length = switch(process::arg(2, bytes::view_mut(ref mut argument))) {
         case .ok(value): { value } case .err(_): { return error("error: file path limit (4095 UTF-8 bytes)\n"); }
     };
@@ -81,6 +83,7 @@ pub fn i32 run() {
     if (scanner::diagnostic_count(ref stream) > 0) { return output::errors(ref stream, path); }
     if (hir_mode) { return hir::run(stream,path); }
     if (mir_mode) { return mir::run(stream,path); }
+    if (c_mode) { return c::run(stream,path); }
     if (type_mode) { return typing::run(stream,path); }
     if (name_mode || binding_mode) { return names::run(stream, path, binding_mode); }
     if (declaration_mode) { return declarations::run(stream, path); }
