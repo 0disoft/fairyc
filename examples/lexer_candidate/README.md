@@ -34,7 +34,8 @@ A new front end adds a regular file mode without changing the binary stdin proto
 the no-argument frame reader stays exactly as described below, and
 `--tokens-file <path>`, `--declarations-file <path>`,
 `--check-names-file <path>`, `--bindings-file <path>`, `--check-types-file <path>`,
-`--check-modules-file <manifest>`, `--hir-file <path>`, and `--help` are the file-mode arguments.
+`--check-modules-file <manifest>`, `--hir-file <path>`, `--mir-file <path>`, and `--help`
+are the file-mode arguments.
 
 ```sh
 lexer-candidate --tokens-file path/to/source.fy
@@ -513,6 +514,86 @@ categories, and rejects 159 deliberate observation mutations per profile.
 Check, scoped Go test/vet and Linux/Windows C emission pass; Linux native execution
 is deferred to the owner's batch. Compiler/SDK inputs remain unchanged. Evidence:
 `docs/ops/evidence/hir-file-cli-20261005.json`.
+
+## Owned scalar MIR (`--mir-file`)
+
+`lexer-candidate --mir-file <path>` reads the same bounded source file, then
+parses, resolves names, checks scalar types, lowers the successful `Typed` value
+to HIR and consumes that `hir_model::Program` through `mir_lower::lower`. The
+returned `mir_model::Program` owns source bytes, canonical literal payload and
+separate target, signature, function, local, block, operation and edge arenas; no
+parser, type or HIR table is retained. This first lowering unit admits sequential
+scalar code: literals, resolved locals and parameters, unary and binary
+operations, ordered calls, assignment, checked compound assignment, nested lexical
+blocks and assertions. Source `if`, `while`, classic `for`, nearest-loop
+`break`/`continue`, `defer` and the short-circuit `&&`/`||` operators are
+recognized by HIR but rejected here, so lowering fails closed until their CFG form
+lands.
+
+The private TSV format begins with `fairyc.scalar-mir/v1` and a `P` module-index
+record. `T`, `S`, `F`, `L`, `B`, `O` and `A` records describe call
+targets, signature types, functions, locals, basic blocks/terminators, operations
+and ordered edges. Entity IDs are one-based and zero means absent; edge and
+signature indexes are zero-based. Blocks form a mutable-local control-flow graph,
+not SSA. A checked operation emits a typed `check` marker, a two-successor
+checked-switch terminator and a non-returning trap block whose mask keeps the
+type-specific failure categories: integer overflow, division by zero,
+signed-division overflow, invalid shift and assertion failure. Nested calls reserve
+their argument range in the shared edge arena before evaluating the arguments left
+to right. The record labels, trap masks and this format are private implementation
+contracts.
+
+Limits are 32768 source bytes, 512 functions/targets, 16384 locals, 16384 blocks,
+32768 operations, 65536 edges/signatures and 688128 payload bytes, with recursion
+depth 64; the existing parser, resolver, type and HIR budgets apply first. Complete
+output is buffered under a 2 MiB cap before stdout publication. Malformed, deferred,
+allocation, limit and HIR-lowering failures return 2 with empty stdout and a plain
+message; scanner, name and type errors keep their existing located messages.
+
+`mir_model::assemble` is a checked construction boundary, not the full production
+MIR verifier. It rejects unfinished blocks, malformed links, range drift and budget
+violations, but it does not implement the documented `V1001`-`V1701` production
+verifier invariants such as initialization dominance, move and cleanup discipline,
+borrow origins, region placement and unsafe provenance. There is no production
+verifier, interpreter, backend or executable compilation of the input in this mode.
+
+From the repository root, regenerate the independent Go MIR oracle with:
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle --mir .cache/mir-file-cli/reference.json
+```
+
+Pass that file as `--mir-reference` to `verify.py`, together with the earlier
+token/declaration/name/type/module/HIR references. `verify_mir.py` is a test-only
+reader and scalar executor: it reconstructs the tables from the native TSV, checks
+the block and edge graph, and executes admitted programs to compare the observed
+return value or trap category with the verified Go MIR. It is an independent
+observation utility, never a candidate runtime dependency, and it does not natively
+compile or execute the input. `tests/mir.fy` exercises the owned API directly.
+
+`samples/mir-demo.fy` demonstrates a checked compound assignment across a forward
+call:
+
+```sh
+lexer-candidate --mir-file samples/mir-demo.fy
+```
+
+The reference set is 24 fixtures: 19 admitted and 5 deferred. The admitted set is 9
+returning programs and 10 trapping programs covering constants, forward and nested
+calls, lexical blocks, checked compound assignment, signed `i32`/`i64` overflow and
+negation, division-by-zero, signed division/remainder overflow, invalid-shift and
+overflowing-shift traps, and assertion traps; the unsigned-limit case exercises
+`usize`, `u32` and `u8` maximum values as accepted successes rather than traps. The 5
+deferred cases (`if`, short-circuit `&&`/`||`, `while`, classic `for` and `defer`) fail
+closed with empty stdout and status 2.
+
+Windows development and release pass 1092 CLI executions (546 per profile) across the
+existing file modes and MIR, and each profile compares the same 24 MIR fixtures: 19
+admitted (9 returning, 10 trapping) and 5 deferred. Source hashes are unchanged before
+and after every fixture execution. The direct native API tests in `tests/mir.fy` pass
+5/5 in both the development and release profiles. Compiler/SDK inputs remain unchanged;
+this is example package version 0.10.0. Evidence:
+`docs/ops/evidence/mir-sequential-file-cli-20261006.json`.
 
 ## Recognition and limits
 
