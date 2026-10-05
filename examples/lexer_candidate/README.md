@@ -619,10 +619,14 @@ including the 59 MIR fixtures (56 admitted: 42 returning, 14 trapping; 3 deferre
 After restricting snapshots to source locals rather than already-materialized
 temporaries, the final Go reference is regenerated and the 59-case MIR comparison
 reruns on each retained image. Scoped Go MIR, interpreter, C backend and fixture
-suites and vet pass. A separate existing failure, `TestStructNestedStorageMIR/array`,
-is reproduced with both the unchanged baseline lowerer and the revised lowerer:
-mutating a nested leaf to an array is accepted by the storage-view verifier. It
-remains separate follow-up work and prevents a claim that all compiler tests pass.
+suites and vet pass. At that snapshot, `TestStructNestedStorageMIR/array` failed
+with both the unchanged baseline lowerer and the revised lowerer. Subsequent
+contract review established that its `i32[2]` field is already admitted by ADR 0468;
+the failure was an obsolete rejection expectation, not a verifier defect. The
+follow-up test now rejects zero-length, oversize and nested arrays and admits
+scalar array fields of length 1, 2 and 4096 through source analysis, MIR codec and
+both Windows/Linux C emission. Historical evidence retains the observed failure
+and its initial classification; this correction does not change language behavior.
 
 This unit intentionally changes Go MIR source. Of the pinned compiler's 619 input
 records, only `internal/mir/lower.go` differs; the pinned compiler executable and SDK

@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
@@ -28,7 +29,7 @@ func TestStructNestedStorageMIR(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, mutation := range []string{"empty", "missing", "borrow", "pointer", "resource", "enum", "array", "option", "result", "self-cycle", "indirect-cycle"} {
+	for _, mutation := range []string{"empty", "missing", "borrow", "pointer", "resource", "enum", "zero-array", "oversize-array", "nested-array", "option", "result", "self-cycle", "indirect-cycle"} {
 		t.Run(mutation, func(t *testing.T) {
 			program, err := mircodec.DecodeStorageTransfers(encoded, 1<<20)
 			if err != nil {
@@ -61,8 +62,12 @@ func TestStructNestedStorageMIR(t *testing.T) {
 				case "enum":
 					s.Fields[0].Type = hir.Type("main::Tag")
 					program.EnumTypes = append(program.EnumTypes, mir.EnumType{Type: hir.Type("main::Tag"), Name: "Tag"})
-				case "array":
-					s.Fields[0].Type = hir.FixedArray(hir.TypeI32, 2)
+				case "zero-array":
+					s.Fields[0].Type = hir.FixedArray(hir.TypeI32, 0)
+				case "oversize-array":
+					s.Fields[0].Type = hir.FixedArray(hir.TypeI32, 4097)
+				case "nested-array":
+					s.Fields[0].Type = hir.FixedArray(hir.FixedArray(hir.TypeI32, 2), 2)
 				case "option":
 					s.Fields[0].Type = hir.Option(hir.TypeI32)
 				case "result":
@@ -88,6 +93,41 @@ func TestStructNestedStorageMIR(t *testing.T) {
 			}
 			if _, err := mircodec.EncodeStorageTransfers(program, 1<<20); err == nil {
 				t.Fatal("invalid nested graph crossed codec")
+			}
+		})
+	}
+}
+
+// ADR 0468 admits bounded inline scalar arrays even through nested plain structs.
+// Keep positive source-to-codec/backend coverage beside the invalid graph mutations.
+func TestStructNestedStorageArrayFieldMIR(t *testing.T) {
+	for _, test := range []struct{ name, field string }{
+		{"minimum", "bool[1]"},
+		{"previous-rejection-shape", "i32[2]"},
+		{"maximum", "i64[4096]"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			source := strings.Replace(nestedStorageViewSource(structStorageViewSource), "usize start", test.field+" start", 1)
+			analysis, err := analyzeStorageBorrow(t, source)
+			if err != nil {
+				t.Fatal(err)
+			}
+			checked, err := compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
+			if err != nil || !checked.Verified {
+				t.Fatalf("lower admitted nested array field: %v", err)
+			}
+			encoded, err := mircodec.EncodeStorageTransfers(checked.MIR, 1<<20)
+			if err != nil {
+				t.Fatal(err)
+			}
+			program, err := mircodec.DecodeStorageTransfers(encoded, 1<<20)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, profile := range []cbackend.Profile{cbackend.Stage0WindowsMSVCProfile(), cbackend.Stage0Profile()} {
+				if _, err := cbackend.EmitStorageTransfers(program, hir.QualifiedModulePath(1, "main")+"::main", profile); err != nil {
+					t.Fatal(err)
+				}
 			}
 		})
 	}
