@@ -1,0 +1,126 @@
+{
+  "schema": "fairyc.lexer-unicode-batch/v1",
+  "date": "2026-10-05",
+  "baseRevision": "e099f12e7dc4c1e774145528d6afbab570e4c21b",
+  "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+  "sourceArtifacts": [
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "234b3b8f8beb537c2c8324ca5951fd4d94dc3caaea54ea638956a8ddb72644f8"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "sha256": "32fe9de8b3f87429e3cfe11feefa8d34cbb38b376d746967557b34790005b947"
+    },
+    {
+      "path": "internal/cli/fairy_lexer_candidate_test.go",
+      "sha256": "88eb750dcb9174169bc22a4e37acb67e969620e2f007e419c98297be8bd6f2da"
+    }
+  ],
+  "change": {
+    "storage": "EncodedScalar with u8[4] initialized by [0; 4]",
+    "publication": "one bytes::append of the initialized field subview per valid Unicode escape",
+    "widths": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "precondition": "caller rejects surrogates and values above U+10FFFF before encoding",
+    "failure": "append error retains scanner status 3 and publishes no token stream",
+    "packageVersion": "0.1.1"
+  },
+  "verification": {
+    "profiles": [
+      "Windows AMD64 MSVC dev",
+      "Windows AMD64 MSVC release"
+    ],
+    "oracle": "Go lexer exact token/cooked bytes/diagnostic/recovery-span comparison",
+    "boundaryCoverage": [
+      "U+0000",
+      "U+007F",
+      "U+0080",
+      "U+07FF",
+      "U+0800",
+      "U+D7FF",
+      "surrogate first/interior/last",
+      "U+E000",
+      "U+FFFF",
+      "U+10000",
+      "U+10FFFF",
+      "U+110000 rejected",
+      "Korean and emoji escapes",
+      "mixed-width consecutive escapes"
+    ],
+    "budgetCombinationsPerProfile": 570,
+    "nativeProgramExecutions": 8,
+    "runs": [
+      {
+        "argv": [
+          "bun",
+          "tools/run-go.ts",
+          "test",
+          "-json",
+          "./internal/cli",
+          "-run",
+          "^TestWindowsFairyLexer(Candidate$|WorkBudget/(escapes|malformed-escapes|string-bytes)$)",
+          "-count=1"
+        ],
+        "env": {
+          "CGO_ENABLED": "0"
+        },
+        "exit": 0,
+        "raw": ".cache/lexer-unicode-batch-tests.jsonl",
+        "sha256": "b6a9cc42ad96dd314ed453bf83459db5c6345b1ec31f27f42825e67d4084744a",
+        "passed": [
+          "TestWindowsFairyLexerCandidate"
+        ]
+      },
+      {
+        "argv": [
+          "bun",
+          "tools/run-go.ts",
+          "test",
+          "-json",
+          "./internal/cli",
+          "-run",
+          "^TestWindowsFairyLexerWorkBudget$/^(escapes|malformed-escapes|string-bytes)$",
+          "-count=1"
+        ],
+        "env": {
+          "CGO_ENABLED": "0"
+        },
+        "exit": 0,
+        "raw": ".cache/lexer-unicode-work-tests.jsonl",
+        "sha256": "8a1cffccd03ff4e647d47c0679b7bd97a5d872bdb4083a1e30e1a63baf677f5f",
+        "passed": [
+          "TestWindowsFairyLexerWorkBudget",
+          "TestWindowsFairyLexerWorkBudget/escapes",
+          "TestWindowsFairyLexerWorkBudget/malformed-escapes",
+          "TestWindowsFairyLexerWorkBudget/string-bytes"
+        ]
+      }
+    ],
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/cli"
+      ],
+      "exit": 0,
+      "raw": ".cache/lexer-unicode-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "format": "gofmt and git diff --check passed",
+    "linuxExecution": "deferred by owner for consolidated batch",
+    "performance": "not measured; only append call count reduced",
+    "allocationFailureInjection": "not run; public Buffer append error mapping preserved by source inspection"
+  },
+  "scope": {
+    "newSDKAPI": false,
+    "compilerChanges": false,
+    "newPS1": false,
+    "push": false
+  }
+}

@@ -36,6 +36,8 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		strings.Repeat("\x00", 257),
 		`"" b"" c"" "hello 한 😀" b"bytes" c"cstring"`,
 		`"\\\"\n\r\t\0\x41" "\u{0}\u{7f}\u{80}\u{7ff}\u{800}\u{ffff}\u{10000}\u{10ffff}"`,
+		`"\u{d7ff}\u{e000}" "\u{d800}\u{dbff}\u{dc00}\u{dfff}"`,
+		`"\u{d55c}\u{ae00}\u{1f600}\u{41}\u{80}\u{800}\u{0}" "한글😀A"`,
 		`b"\xff\x00" c"\0\x00" "\xc2\xa0" "\xff" "\u{d800}\u{110000}"`,
 		`"\q\x\x1Z\u\u{}\u{1234567}" b"\u{41}" c"\u{41}"`,
 		"\"unterminated\nnext\r\n\"again\rend",

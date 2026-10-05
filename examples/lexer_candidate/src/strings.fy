@@ -6,6 +6,7 @@ import utf8 as utf8;
 import budget as budget;
 
 pub struct Step { usize end; i32 status; }
+struct EncodedScalar { u8[4] bytes; usize length; }
 
 fn Step finish(usize end, i32 status) {
     return Step { .end = end, .status = status };
@@ -31,14 +32,30 @@ fn Step error(ref mut v::Vec<diagnostics::Entry> errors, ref mut usize count, us
     return finish(end, status);
 }
 fn bool encode(ref mut bytes::Buffer output, u32 value) {
-    if (value < 128) { return put(output, octet(value)); }
-    if (value < 2048) {
-        return put(output, octet(value / 64 + 192)) && put(output, octet(value % 64 + 128));
+    // The escape parser has already rejected surrogates and values above U+10FFFF.
+    var EncodedScalar encoded = EncodedScalar { .bytes = [0; 4], .length = 1 };
+    if (value < 128) {
+        encoded.bytes[0] = octet(value);
+    } else if (value < 2048) {
+        encoded.bytes[0] = octet(value / 64 + 192);
+        encoded.bytes[1] = octet(value % 64 + 128);
+        encoded.length = 2;
+    } else if (value < 65536) {
+        encoded.bytes[0] = octet(value / 4096 + 224);
+        encoded.bytes[1] = octet((value / 64) % 64 + 128);
+        encoded.bytes[2] = octet(value % 64 + 128);
+        encoded.length = 3;
+    } else {
+        encoded.bytes[0] = octet(value / 262144 + 240);
+        encoded.bytes[1] = octet((value / 4096) % 64 + 128);
+        encoded.bytes[2] = octet((value / 64) % 64 + 128);
+        encoded.bytes[3] = octet(value % 64 + 128);
+        encoded.length = 4;
     }
-    if (value < 65536) {
-        return put(output, octet(value / 4096 + 224)) && put(output, octet((value / 64) % 64 + 128)) && put(output, octet(value % 64 + 128));
-    }
-    return put(output, octet(value / 262144 + 240)) && put(output, octet((value / 4096) % 64 + 128)) && put(output, octet((value / 64) % 64 + 128)) && put(output, octet(value % 64 + 128));
+    return switch (bytes::append(output, ref encoded.bytes[..encoded.length])) {
+        case .ok(_): { true }
+        case .err(_): { false }
+    };
 }
 
 fn Step escape(ref u8[] input, usize start, u32 kind, ref mut bytes::Buffer output, ref mut v::Vec<diagnostics::Entry> errors, ref mut usize count, usize limit, ref mut budget::Work work) {
