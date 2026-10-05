@@ -52,7 +52,7 @@ func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, boo
 	if field.Kind != "field-expression" || len(field.Children) != 1 || field.Type == hir.TypeInvalid {
 		return hir.Expression{}, false
 	}
-	if _, _, array := hir.FixedArrayParts(field.Type); array && !hir.ScalarArrayField(field.Type) {
+	if element, length, array := hir.FixedArrayParts(field.Type); array && !hir.ExecutableFixedArrayShape(element, length) {
 		return hir.Expression{}, false
 	}
 	owner := field.Children[0]
@@ -152,7 +152,7 @@ func (c *typeChecker) arrayFieldBorrow(source *ast.Expression, field hir.Express
 	}
 	var borrowed hir.Expression
 	var ok bool
-	if owner.Kind == "array-index" && c.analyzer.plainViewStruct(owner.Type) {
+	if (owner.Kind == "array-index" || owner.Kind == "view-index") && c.analyzer.plainViewStruct(owner.Type) {
 		borrowed, ok = c.indexedArrayBorrow(source, &owner, mutable)
 	} else {
 		borrowed, ok = c.arrayFieldBorrow(source, owner, mutable)

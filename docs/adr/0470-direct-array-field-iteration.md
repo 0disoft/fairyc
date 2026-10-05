@@ -1,8 +1,8 @@
 # ADR 0470: Direct array field iteration
 
-- Status: implemented; Windows dev/release native, related suite and standalone public CLI verified; Linux C emission only, actual execution deferred to the owner's batch
+- Status: implemented; Windows dev/release native, related suite and standalone public CLI verified; Linux C emission only, actual execution deferred to the owner's batch; direct iteration over an admitted plain-struct element field is extended by ADR 0472
 - Date: 2026-10-05
-- Related: ADRs 0415, 0457, 0458, 0461, 0462, 0465, 0467, 0468, 0469
+- Related: ADRs 0415, 0457, 0458, 0461, 0462, 0465, 0467, 0468, 0469, 0471, 0472
 
 ## Decision
 
@@ -44,6 +44,7 @@ and exclusive borrows through exit, and an exclusive loop holds an exclusive loa
 owner reads and writes and every competing borrow, freezing its parent descriptor and aliases for
 the written loop's duration under ADR 0415. `break`, `continue`, `return`, Result propagation
 and local or by-value escape rules are inherited unchanged from the existing loops.
+Direct iteration over the ADR 0471 inline plain-struct array field is extended by ADR 0472, reusing this loop over the ADR 0469-style explicit field view.
 
 ## Evaluation and lowering
 

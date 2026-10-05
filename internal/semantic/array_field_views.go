@@ -21,7 +21,7 @@ func arrayFieldRoot(source *ast.Expression) *ast.Expression {
 func (c *typeChecker) arrayFieldView(source *ast.Expression, field hir.Expression, mutable bool) (hir.Expression, bool) {
 	root := arrayFieldRoot(source)
 	owner := c.analyzer.resolved[root]
-	if root == nil || owner == nil || (owner.kind != "local" && owner.kind != "parameter") || !hir.ScalarArrayField(field.Type) {
+	if root == nil || owner == nil || (owner.kind != "local" && owner.kind != "parameter") || !c.analyzer.inlineArrayField(field.Type) {
 		return hir.Expression{}, false
 	}
 	typ := owner.typ

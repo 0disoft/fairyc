@@ -28,7 +28,8 @@ func IndexedViewElement(value Type) (Type, bool) {
 func ArrayViewBorrow(owner, view Type, operator string) bool {
 	if array, ownerMutable, borrowed := BorrowElement(owner); borrowed {
 		_, viewMutable, viewBorrowed := BorrowElement(view)
-		if !ScalarArrayField(array) || !viewBorrowed || ownerMutable != viewMutable {
+		element, length, fixed := FixedArrayParts(array)
+		if !fixed || !ExecutableFixedArrayShape(element, length) || !viewBorrowed || ownerMutable != viewMutable {
 			return false
 		}
 		owner = array

@@ -1,8 +1,8 @@
 # ADR 0469: Direct array field views
 
-- Status: implemented; Windows dev/release native matrix and standalone public CLI validated; compiler round-trip, interpreter and both Windows MSVC and Linux C11 emission profiles pass; Linux actual execution deferred to the owner's batch
+- Status: implemented; Windows dev/release native matrix and standalone public CLI validated; compiler round-trip, interpreter and both Windows MSVC and Linux C11 emission profiles pass; Linux actual execution deferred to the owner's batch; the same direct field view mechanism over an admitted plain-struct element field is extended by ADR 0472
 - Date: 2026-10-05
-- Related: ADRs 0415, 0455, 0457, 0461, 0462, 0463, 0464, 0465, 0467, 0468, 0470
+- Related: ADRs 0415, 0455, 0457, 0461, 0462, 0463, 0464, 0465, 0467, 0468, 0470, 0471, 0472
 
 ## Decision
 
@@ -39,8 +39,9 @@ same bounded field; binding a view first remains a valid alternative.
 Whole-field reads and copies, like whole-struct copies, keep independent values (ADR 0468) and
 may copy the array contents, so their cost scales with the field. Direct element access and
 explicit views select the original field storage and reuse the existing field, array-view and
-view operations, so no array copy or allocation is introduced. Nested arrays and arrays of
-nominal structs remain closed, and `@repr(C)` keeps rejecting array fields.
+view operations, so no array copy or allocation is introduced. Nested arrays remain closed and
+`@repr(C)` keeps rejecting array fields, and the same element access, view, subview and borrow
+mechanism is extended to the ADR 0471 inline plain-struct array field by ADR 0472.
 
 ## Evaluation and lowering
 

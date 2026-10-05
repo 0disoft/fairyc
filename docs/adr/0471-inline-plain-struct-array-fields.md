@@ -1,8 +1,8 @@
 # ADR 0471: Inline plain-struct array fields
 
-- Status: implemented; Windows dev/release native and MIR codec/interpreter verified; Linux C emission only, actual execution deferred to the owner's batch
+- Status: implemented; Windows dev/release native and MIR codec/interpreter verified; Linux C emission only, actual execution deferred to the owner's batch; the direct element-store, whole-element, view, subview and iteration subset over this same field position is extended by ADR 0472
 - Date: 2026-10-05
-- Related: ADRs 0416, 0462, 0463, 0464, 0468, 0469, 0470
+- Related: ADRs 0416, 0462, 0463, 0464, 0468, 0469, 0470, 0472
 
 ## Decision
 
@@ -32,7 +32,7 @@ struct ZToken { u32 kind; u8 flags; }   // declared after its container
 
 var APage page = APage { .tokens = [ZToken { .kind = 1, .flags = 0 }; 4], .used = 4 };
 let ZToken[4] copied = page.tokens;                        // whole-field read copies
-let ZToken first = page.tokens[0];                         // value-read copy, indexed immediately
+let ZToken first = page.tokens[0];                         // unit1 value-read copy (ADR 0472: descriptor read)
 page.tokens = [ZToken { .kind = 2, .flags = 1 }; 4];       // replacement through a mutable owner
 
 var ASection section = ASection {
@@ -44,13 +44,16 @@ var ZToken[4] local = section.page.tokens;                 // copied-out local n
 local[0].kind = 5;                                         // existing nominal-array operation
 ```
 
-A whole-field read is an ordinary value copy, so it can be indexed immediately:
-`let ZToken first = page.tokens[0];` reads the field value and then indexes the copied value, with
-no field place or reference and no element-level borrow of the field storage. A local nominal array
-copied out of the field likewise keeps its existing fixed-array operations (ADR 0462, ADR 0463), so
-`local[0].kind = 5` above is the ordinary array path and not a field path. Direct field mutation
-through an element store (`page.tokens[0] = ...`), element references (`ref page.tokens[0]`), field
-subviews and `for` over the field remain closed and are reserved for the next. Nominal element
+In the original ADR 0471 unit a whole-field read was an ordinary value copy, so it could be indexed
+immediately, and `let ZToken first = page.tokens[0];` read the field value and then indexed the
+copied value with no field place or reference. ADR 0472 supersedes that direct indexing lowering:
+`page.tokens[0]` now selects the original field descriptor and copies only the selected element
+value, so the whole field is no longer read. A local nominal array copied out of the field keeps its
+existing fixed-array operations (ADR 0462, ADR 0463), so `local[0].kind = 5` above is the ordinary
+array path and not a field path. Direct element stores
+(`page.tokens[0].kind = 2;`), whole-element replacement (`page.tokens[0] = ...`), element
+references, explicit views, field subviews and `for` over the field are admitted by ADR 0472 over
+this same field position. Nominal element
 mismatch, a missing initializer field and a length mismatch are rejected, and resource, raw-pointer,
 borrowed, tagged and array-of-array elements, nested arrays, cyclic element graphs and any array
 field on a `@repr(C)` struct are rejected.

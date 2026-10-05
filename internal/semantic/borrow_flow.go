@@ -508,7 +508,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return f.evaluateSubview(expression, environment)
 	case syntax.KindIndex:
 		if len(expression.Children) == 2 {
-			if arrayFieldRoot(expression.Children[0]) != nil && hir.ScalarArrayField(f.analyzer.expressionTypes[expression.Children[0]]) {
+			if arrayFieldRoot(expression.Children[0]) != nil && f.analyzer.inlineArrayField(f.analyzer.expressionTypes[expression.Children[0]]) {
 				return f.evaluateArrayFieldPlace(arrayFieldRoot(expression.Children[0]), expression, false, environment)
 			}
 			if _, indexed := hir.IndexedViewElement(f.analyzer.expressionTypes[expression.Children[0]]); indexed {

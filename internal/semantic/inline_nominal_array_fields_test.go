@@ -11,14 +11,8 @@ func TestInlineNominalArrayFieldBoundary(t *testing.T) {
 		{"missing-field", `fn void bad(){let APage p=APage{};}`, ""},
 		{"wrong-length", `fn void bad(){let APage p=APage{.tokens=[ZToken{.value=1}]};}`, ""},
 		{"shared-live", `fn void bad(){var APage p=APage{.tokens=[ZToken{.value=1};2]};let ref APage v=ref p;p.tokens=[ZToken{.value=2};2];let ZToken[2] a=v.tokens;assert(a[0].value==1);}`, "E2101"},
-		{"field-view", `fn void bad(ref APage p){let ref ZToken[] v=ref p.tokens;}`, ""},
 		{"field-reference", `fn void bad(ref APage p){let ref ZToken[2] v=ref p.tokens;}`, ""},
 		{"mutable-field-reference", `fn void bad(ref mut APage p){let ref mut ZToken[2] v=ref mut p.tokens;}`, ""},
-		{"field-slice", `fn void bad(ref APage p){let ref ZToken[] v=ref p.tokens[..];}`, ""},
-		{"field-for", `fn void bad(ref APage p){for(let ZToken t in p.tokens){}}`, ""},
-		{"field-store", `fn void bad(ref mut APage p){p.tokens[0].value=2;}`, ""},
-		{"whole-element-store", `fn void bad(ref mut APage p){p.tokens[0]=ZToken{.value=2};}`, ""},
-		{"field-element-reference", `fn void bad(ref APage p){let ref ZToken t=ref p.tokens[0];}`, ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			r := analyzeText(t, map[string]string{"main.fy": base + tc.source})

@@ -1,0 +1,266 @@
+{
+  "schema": "fairyc.nominal-array-field-view-cli/v1",
+  "compilerSHA256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005093555-585e5ef53991+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 585e5ef53991368dce52094889ba7bb275b52103\nmodified: true\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005093555-585e5ef53991+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 585e5ef53991368dce52094889ba7bb275b52103\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 11 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\matrix",
+      "exit": 0,
+      "stdout": "built: build/nominal-field-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\nominal-array-field-view-public\\images\\matrix-dev.exe",
+      "imageSHA256": "91c86925f516de4f72f70fdd75c4326b30a244e7bfbf528ba489fedbfc826884"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\images\\matrix-dev.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\matrix",
+      "exit": 0,
+      "stdout": "built: build/nominal-field-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\nominal-array-field-view-public\\images\\matrix-release.exe",
+      "imageSHA256": "6aa7dd9cfdd7cd7400c5fceb862cda2bda5ee1168d330bff0162c5d5cbd5e8ec"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\images\\matrix-release.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\bounds-before-rhs",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\bounds-before-rhs",
+      "exit": 0,
+      "stdout": "built: build/nominal-field-bounds-before-rhs.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\nominal-array-field-view-public\\images\\bounds-before-rhs-dev.exe",
+      "imageSHA256": "2eec0029dc2639d398e9c170ecc47575da4fcb8d96e446f43106a707820b816e"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\bounds-before-rhs",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\bounds-before-rhs",
+      "exit": 0,
+      "stdout": "built: build/nominal-field-bounds-before-rhs.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\nominal-array-field-view-public\\images\\bounds-before-rhs-release.exe",
+      "imageSHA256": "887a3484e1d5561212d5824549304ab76052d33cb861bc6bb7ae23a9e5f48f70"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\bounds-before-rhs",
+      "exit": 5,
+      "stdout": "",
+      "stderr": "trap: bounds\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\immutable",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:92: E1008: assignment target is not mutable [bytes 91..102]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\loan",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:130: E2101: Access conflicts with an active shared or mutable loan. [bytes 129..130]\n  last-use: main.fy:1:151 [bytes 150..151]\n  loan: main.fy:1:119 [bytes 118..128]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\nominal",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:123: E1006: incompatible expected and actual types [bytes 122..132]\n  expected-type: main.fy:1:109 [bytes 108..119]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:76: E2102: Returned borrow originates from a local value. [bytes 75..85]\n  origin: main.fy:1:66 [bytes 65..66]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\fixed-ref",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support nominal array field references require an unsized view at main.fy [bytes 119..129]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-public\\indexed-owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support array field view requires a named plain struct owner at main.fy [bytes 137..154]\n"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Page { Token[3] tokens; usize used; }\nstruct Envelope { Page page; }\nstruct Meta { u32 kind; }\nstruct Token { i64 value; Meta meta; }\nfn void fill(ref mut Token[] data) { for (let ref mut Token t in data) { t.value += 1; t.meta.kind += 1; } }\nfn i64 sum(ref Page p) { var i64 total = 0; for (let Token t in p.tokens) { total += t.value; } return total; }\nfn ref Token first(ref Page p) { for (let ref Token t in p.tokens[1..]) { return t; } return ref p.tokens[0]; }\nfn ref Token[] expose(ref Page p) { return ref p.tokens[1..]; }\nfn ref mut Token[] writable(ref mut Page p) { return ref mut p.tokens[..2]; }\nfn Option<ref Token[]> tagged(ref Page p) { return .some(ref p.tokens[1..]); }\nfn void edit(ref mut Envelope e) { e.page.tokens[0].value += 10; fill(ref mut e.page.tokens[1..]); }\nfn void early(ref mut Page p) { for (let ref mut Token t in p.tokens) { t.value += 1; return; } }\nfn Result<i32,u32> fail() { return .err(7); }\nfn Result<i32,u32> propagate(ref mut Page p) { for (let ref mut Token t in p.tokens) { t.value += 1; let i32 unused = fail()?; } return .ok(0); }\nfn i32 main() {\n    var Page p = Page { .tokens = [Token { .value = 4000000000, .meta = Meta { .kind = 1 } }; 3], .used = 3 };\n    let Page original = p;\n    let Token[3] copied = p.tokens;\n    var usize calls = 0;\n    p.tokens[{calls += 1; 0}].value += 1;\n    p.tokens[1] = Token { .value = 2, .meta = Meta { .kind = 2 } };\n    p.tokens[1].meta.kind += 1;\n    assert(calls == 1 && p.tokens[0].value == 4000000001 && p.tokens[1].meta.kind == 3);\n    assert(sum(ref p) == 8000000003);\n    let ref Token[] all = ref p.tokens;\n    let ref Token[] tail = ref p.tokens[1..];\n    assert(all[0].value == 4000000001 && tail[0].value == 2 && p.used == 3);\n    let ref mut Token slot = ref mut p.tokens[1]; slot.value += 3;\n    let ref Token read = ref p.tokens[1]; assert(read.value == 5);\n    let ref mut i64 leaf = ref mut p.tokens[1].value; *leaf += 1;\n    let ref mut Token[] selected = ref mut ((p).tokens[{calls += 1; 1}..{calls += 10; 3}]);\n    selected[0].value += 1; assert(selected[0].value == 7 && calls == 12);\n    fill(ref mut p.tokens[..2]);\n    let ref Token[] returned = expose(ref p); let ref Token[] alias = returned; assert(alias[0].value == 8);\n    switch(tagged(ref p)) { case .some(value): { assert(value[0].value == 8); } case .none: { assert(false); } };\n    let ref mut Token[] write = writable(ref mut p); write[0].meta.kind += 1;\n    var usize end = 3; var i64 total = 0;\n    for (let Token t in p.tokens[{calls += 1; 1}..{calls += 10; end}]) { end = 1; total += t.value; }\n    assert(calls == 23 && total == 4000000008);\n    for (let ref mut Token t in p.tokens[1..]) { t.value += 1; continue; }\n    for (let ref mut Token t in ((p).tokens)) { t.value += 1; break; }\n    var usize count = 0;\n    for (let ref Token t in p.tokens[..]) { assert(t.value > 0); count += 1; }\n    for (let Token t in p.tokens[3..]) { assert(false); }\n    for (let ref mut Token t in p.tokens[2..2]) { assert(false); }\n    let ref Token[] empty = ref p.tokens[3..]; assert(empty.is_empty && count == 3);\n    let ref Token item = first(ref p); assert(item.value == 9);\n    early(ref mut p);\n    switch(propagate(ref mut p)) { case .err(code): { assert(code == 7); } case .ok(value): { assert(false); } };\n    assert(p.tokens[0].value == 4000000005);\n    var Envelope e = Envelope { .page = p }; edit(ref mut e);\n    assert(e.page.tokens[0].value == 4000000015 && e.page.tokens[1].value == 10 && p.tokens[1].value == 9);\n    assert(original.tokens[0].value == 4000000000 && copied[1].value == 4000000000);\n    return 0;\n}\n",
+      "sourceSHA256": "27f920da67d8b7a28e6d6f0a83ca01374b1fe92d885dced3fce3a475a9776d86"
+    },
+    {
+      "name": "bounds-before-rhs",
+      "source": "module main;struct T{i64 x;}struct P{T[2] data;usize n;}fn i32 main(){var P p=P{.data=[T{.x=1};2],.n=2};p.data[2].x={assert(false);9};return 0;}",
+      "sourceSHA256": "d3dd8dae17b2a373a7b136a05310fd50a3b0038ca718a16dee68c84c7ac80e05"
+    },
+    {
+      "name": "immutable",
+      "source": "module main;struct T{i64 x;}struct P{T[2] data;}fn i32 main(){let P p=P{.data=[T{.x=1};2]};p.data[0].x=3;return 0;}",
+      "sourceSHA256": "7041be5c040986bb39014e5b84cf5d85c800bd4f1e89261107654d7ab18140cb"
+    },
+    {
+      "name": "loan",
+      "source": "module main;struct T{i64 x;}struct P{T[2] data;usize n;}fn i32 main(){var P p=P{.data=[T{.x=1};2],.n=2};let ref T[] v=ref p.data;p.data[0].x=3;assert(v[0].x==1);return 0;}",
+      "sourceSHA256": "453dcc2ac31ec1002e18ce352f7bd71e481468ba61dd4ab1a50b4b881bb3d6c1"
+    },
+    {
+      "name": "nominal",
+      "source": "module main;struct T{i64 x;}struct P{T[2] data;usize n;}fn i32 main(){var P p=P{.data=[T{.x=1};2],.n=2};let ref usize[] v=ref p.data;return 0;}",
+      "sourceSHA256": "90b2f09f894d7de446c11892094dbf498bea9c47959f6a58d1acb434856f819c"
+    },
+    {
+      "name": "escape",
+      "source": "module main;struct T{i64 x;}struct P{T[2] data;}fn ref T[] bad(P p){return ref p.data;}fn i32 main(){return 0;}",
+      "sourceSHA256": "e996a25d0893bed8e2d5675cca7fe64dcb64fd37be60af50f95787001a32f5c1"
+    },
+    {
+      "name": "fixed-ref",
+      "source": "module main;struct T{i64 x;}struct P{T[2] data;usize n;}fn i32 main(){var P p=P{.data=[T{.x=1};2],.n=2};let ref T[2] v=ref p.data;return 0;}",
+      "sourceSHA256": "6f057c1504a77d8b8ffaf35b7c8e6932450982dd9ae4f099e7687885f985e0fa"
+    },
+    {
+      "name": "indexed-owner",
+      "source": "module main;struct T{i64 x;}struct P{T[2] data;usize n;}fn i32 main(){var P p=P{.data=[T{.x=1};2],.n=2};var P[1] pages=[p];let ref T[] v=ref pages[0].data;return 0;}",
+      "sourceSHA256": "22023bb91f8e36b887d8c439718fe35f2ce05632bed4955ec5fc93b1d344d358"
+    }
+  ]
+}

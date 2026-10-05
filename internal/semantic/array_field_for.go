@@ -9,7 +9,7 @@ import (
 // Keep the resolved field address and bounds in one explicit borrow. The common
 // descriptor path holds its whole-owner loan through every written loop exit.
 func (c *typeChecker) prepareArrayFieldFor(loop *ast.ByteForLoop, prepared, checked *ast.Expression, want hir.Type, mutable bool) string {
-	const shape = "array-field iteration requires an exact scalar item and a named plain struct owner; mutable items require mutable storage"
+	const shape = "array-field iteration requires an exact scalar or plain struct item and a named plain struct owner; mutable items require mutable storage"
 	if !sameVectorForView(loop.View, checked) {
 		return shape
 	}
@@ -23,7 +23,7 @@ func (c *typeChecker) prepareArrayFieldFor(loop *ast.ByteForLoop, prepared, chec
 		return shape
 	}
 	value, typ := c.checkExpression(field, hir.TypeInvalid)
-	if !hir.ScalarArrayField(typ) {
+	if !c.analyzer.inlineArrayField(typ) {
 		return shape
 	}
 	element, _, _ := hir.FixedArrayParts(typ)

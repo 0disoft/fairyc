@@ -22,8 +22,13 @@ func TestInlineNominalArrayFieldBorrowGuard(t *testing.T) {
 		}
 	}
 	for _, borrow := range []func(hir.Type) hir.Type{hir.SharedBorrow, hir.MutableBorrow} {
-		if validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(nominal)}, lookup) {
-			t.Fatal("nominal array field reference admitted before its borrowing unit")
+		if !validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(nominal)}, lookup) {
+			t.Fatal("valid nominal array field address rejected")
+		}
+		for _, invalid := range []hir.Type{hir.FixedArray(hir.Type("main::Missing"), 2), hir.FixedArray(token, 4097)} {
+			if validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(invalid)}, lookup) {
+				t.Fatal("invalid nominal array address admitted")
+			}
 		}
 		if !validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(scalar)}, lookup) {
 			t.Fatal("existing scalar array field reference rejected")

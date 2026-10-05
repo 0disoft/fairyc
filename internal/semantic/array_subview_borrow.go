@@ -30,7 +30,7 @@ func (c *typeChecker) checkArraySubviewBorrow(expression *ast.Expression, result
 	}
 	if arrayFieldRoot(selected.Children[0]) != nil {
 		field, typ := c.checkExpression(selected.Children[0], hir.TypeInvalid)
-		if !hir.ScalarArrayField(typ) {
+		if !c.analyzer.inlineArrayField(typ) {
 			return hir.TypeInvalid, false
 		}
 		view, ok := c.arrayFieldView(selected.Children[0], *field, expression.Text == "&mut")

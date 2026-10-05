@@ -6,7 +6,9 @@ func (f *borrowFlowAnalyzer) evaluateFieldAssignment(statement *ast.Statement, e
 	if index := indexedPlace(statement.Target); index != nil {
 		var held borrowValueState
 		var reachable bool
-		if indexedArrayOwner(f.analyzer, index) != nil {
+		if arrayFieldRoot(index.Children[0]) != nil && f.analyzer.inlineArrayField(f.analyzer.expressionTypes[index.Children[0]]) {
+			held, reachable = f.evaluateArrayFieldPlace(arrayFieldRoot(index.Children[0]), index, true, environment)
+		} else if indexedArrayOwner(f.analyzer, index) != nil {
 			// Select original array storage and hold the whole owner until store.
 			// The parent node's liveness includes loans last used in index or RHS.
 			held, reachable = f.evaluateArrayPlace(assignmentRootPath(index.Children[0]), index, true, environment)

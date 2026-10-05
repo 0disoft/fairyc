@@ -210,16 +210,42 @@
   nested plain parent path, reuse the existing array value transport, so by-value
   structs, calls, returns, arrays of structs and `Option` payloads carry
   independent copies and the cost scales with the contents. Declaration order is
-  free, so the element struct may follow its container. A whole-field read is an
-  ordinary value copy, so it can be indexed immediately (`let ZToken first =
-  page.tokens[0];`) with no field place or reference, and a local nominal array
-  copied out of the field keeps its existing fixed-array operations. Direct field
-  mutation through an element store, element references, field subviews and `for`
-  over the field stay closed for the next unit. Nominal element mismatch, a missing
-  initializer field
+  free, so the element struct may follow its container. A direct element read
+  (`let ZToken first = page.tokens[0];`) selects the original field descriptor and
+  copies only the selected element value, so it does not read or copy the whole
+  field, and a local nominal array copied out of the field keeps its existing
+  fixed-array operations. Direct field
+  mutation through an element store, whole-element replacement, element references,
+  explicit views, field subviews and `for` over the field are admitted by ADR 0472
+  over this same field position. Nominal element mismatch, a missing initializer field
   and a length mismatch are rejected, and resource, raw-pointer, borrowed, tagged
   and array-of-array elements, nested arrays, cyclic element graphs and any array
   field on a `@repr(C)` struct are rejected.
+- ADR 0472 admits direct element access, explicit `ref`/`ref mut` views and subviews,
+  and `for` iteration over the ADR 0471 inline plain-struct array field on plain
+  non-`@repr(C)` structs: scalar field stores (`page.tokens[0].kind = 2;`),
+  whole-element replacement (`page.tokens[0] = ZToken { .kind = 3, .flags = 1 };`),
+  shared/exclusive whole-field views (`let ref ZToken[] all = ref page.tokens;`,
+  `ref mut ZToken[]`), field subviews (`ref page.tokens[0..]`), shared element or
+  scalar-field references, and copied/shared/exclusive `for` items over the same
+  element. The place root resolves to a named plain-struct local or a
+  by-value/`ref`/`ref mut` parameter through field and group projections, so call,
+  temporary, raw-pointer, tagged, indexed-aggregate and nested-slice roots stay
+  closed; the whole-field borrow must be the unsized `ref T[]`/`ref mut T[]`, so a
+  sized `ref T[N]` field binding stays closed. Element access, views, subviews and
+  iteration select the original field storage and reuse the existing array-view,
+  view-index, view-element-borrow and view-slice operations, so no whole-array copy
+  or allocation is added; a direct element value read or a copied `for` item still
+  copies that one element, and whole-field value reads and copies keep independent
+  values (ADR 0471). The whole struct is the single loan owner with no field, index
+  or range disjointness: a shared view or element reference coexists with shared
+  reads, an owner write or exclusive borrow while one is live is `E2101`, an
+  exclusive view, element reference or loop item needs named mutable storage (`var`
+  local, `ref mut` parameter or a local/parameter holding a `ref mut` owner; `E1008`),
+  bounds and element mismatches are `E1006`, and local or by-value escapes are
+  `E2102`. Indices and bounds evaluate once in written order with the original
+  storage selected first, bounds trap before element access and an early index or
+  bound return skips the rest.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

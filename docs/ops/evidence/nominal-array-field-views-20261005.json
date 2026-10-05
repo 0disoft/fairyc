@@ -1,0 +1,248 @@
+{
+  "schema": "fairyc.nominal-array-field-views-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "585e5ef53991368dce52094889ba7bb275b52103",
+  "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+  "sourceArtifacts": [
+    {
+      "path": "docs/adr/0469-direct-array-field-views.md",
+      "sha256": "2b6f4966559d44d9fcc1063866ef736f0915b171e52fc6a5b9b5f4bd72cad2b8"
+    },
+    {
+      "path": "docs/adr/0470-direct-array-field-iteration.md",
+      "sha256": "87b0618a6f11b0b76b12fb7020f159f8084bf1bdbfc38d62f8dd8683f7d66787"
+    },
+    {
+      "path": "docs/adr/0471-inline-plain-struct-array-fields.md",
+      "sha256": "3643f69c46e18dbf066970861fe60b50b5a1dea52480510a0deb972dae2ef6c1"
+    },
+    {
+      "path": "docs/adr/0472-direct-plain-struct-array-field-views-and-iteration.md",
+      "sha256": "9c0d38035b6256c23c407f0cd07a7446224c405bc2eabbd9b8d51d7a5f66148d"
+    },
+    {
+      "path": "docs/language/0005-surface-syntax-v0.md",
+      "sha256": "3b2e602715a35fe182cec6c746982e8d90cc98b57d32d70c63ea7f82898362aa"
+    },
+    {
+      "path": "internal/cli/nominal_array_field_views_test.go",
+      "sha256": "2390b6a4caf89ead1150b55a5d3d5274640bf3261bc2ad238a6fcfcc9b23f8da"
+    },
+    {
+      "path": "internal/compiler/nominal_array_field_views_test.go",
+      "sha256": "77ecda33eaa52dffd39d06fecf8b535270f9b55e53baadf735c5d5249ec4d7c3"
+    },
+    {
+      "path": "internal/compiler/testdata/nominal_array_field_views.fy",
+      "sha256": "27f920da67d8b7a28e6d6f0a83ca01374b1fe92d885dced3fce3a475a9776d86"
+    },
+    {
+      "path": "internal/hir/inline_nominal_array_fields_test.go",
+      "sha256": "575d597bb693f2a014651cf2436971f33fc95d17f3c5a7d757023a37125bd2a5"
+    },
+    {
+      "path": "internal/hir/views.go",
+      "sha256": "e990163ed27bd90912767cca156009516f29fcc15c7131cfe8650a055f51f0f0"
+    },
+    {
+      "path": "internal/mir/field_borrow.go",
+      "sha256": "6b2f2c92cf57a5dd224572759c1bb05207f74192bcd436a9ff581b3607897b20"
+    },
+    {
+      "path": "internal/mir/inline_nominal_array_fields_test.go",
+      "sha256": "1d58147e35b9c06e178dc2dccad63f946a4300a1e13441f31a8b4cb0e8179d9f"
+    },
+    {
+      "path": "internal/semantic/array_field_for.go",
+      "sha256": "9c380f0e89a9cca417ef7f25a938bc8695168d47cc0147ba1387ef59448cb537"
+    },
+    {
+      "path": "internal/semantic/array_field_views.go",
+      "sha256": "60945f2fb66b83075fc0eb1b31bf956580a1128988e618143b29e3f919222716"
+    },
+    {
+      "path": "internal/semantic/array_subview_borrow.go",
+      "sha256": "df6bcd552c2027299b7d8212cbd80f72b5627438b4583a8a2a447a7e3d1c9014"
+    },
+    {
+      "path": "internal/semantic/borrow_flow.go",
+      "sha256": "35555bba65a2a7fe52ce30620a5f5fce60aee376eb1c2262efecdbab3651ed85"
+    },
+    {
+      "path": "internal/semantic/exclusive_subview.go",
+      "sha256": "b9777c3c07efba9bd3193760d51d375f60a8bee3b65839cb34378f72ec558ca1"
+    },
+    {
+      "path": "internal/semantic/field_borrow.go",
+      "sha256": "b648eda7c0120bbdd4d56208f4d6ea926e76dd7b6b54ffa016c1e817fa9a8274"
+    },
+    {
+      "path": "internal/semantic/field_store_flow.go",
+      "sha256": "204d70455c90224d2c7483c37e616e6c0ab7a12e393e077d01eac249441199b0"
+    },
+    {
+      "path": "internal/semantic/inline_nominal_array_fields_test.go",
+      "sha256": "2346a88142d00da303ac29b77a91f357aa0f93e594109d44f195c276b007fd3e"
+    },
+    {
+      "path": "internal/semantic/nominal_array_field_views_test.go",
+      "sha256": "cde3026ac1c42a42ab96bcca3d8b864b4b7866e0bfa009281210ba5ad60480e0"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "9b14e98a22825a4b416861730f039bdcabbc8131bc61347529e9a76d5ef8ed76"
+    }
+  ],
+  "compiler": {
+    "path": ".cache\\nominal-array-field-view-compiler\\fairyc.exe",
+    "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005093555-585e5ef53991+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 585e5ef53991368dce52094889ba7bb275b52103\nmodified: true\n",
+      "stderr": ""
+    },
+    "build": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/nominal-array-field-view-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/nominal-array-field-view-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\nominal-array-field-view-compiler\\source-manifest.json",
+    "sha256": "62763a51977d82a18255f07af3c424ddc988a1e1b8f96cd3afabfaeafc302107",
+    "sourceDigest": "6de6ed7dc29d60d5c47ddbc59863341c4a80f98cb1559cb0b0010b280704e0f4",
+    "fileCount": 619
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceDigest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+    "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+  },
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cbackend",
+        "./internal/interpreter",
+        "-run",
+        "Test(NominalArrayFieldView|NominalArrayFieldViewBorrowShape|InlineNominalArrayField|ArrayField|PlainStructField|StructArray|StructView|IndexedField)",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\nominal-array-field-view-unit-final.jsonl",
+      "sha256": "1101e391467f09adabd1578bc3d3e7bec55f5f3e5f97c4fbb72c6f5882aef3a5",
+      "passed": 253,
+      "skipped": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestNominalArrayFieldView",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\nominal-array-field-view-native.jsonl",
+      "sha256": "41c064b1d04447307593fd8f191dbcfff796368cbf9f551798dbe6806a6d3046",
+      "passed": 14,
+      "skipped": 0
+    }
+  ],
+  "publicCLI": {
+    "path": "docs/ops/evidence/nominal-array-field-views-20261005.cli.json",
+    "sha256": "8365e41d9ed0bfd71e068f3e68fa6e8d0283438e39377ee561f42c0ffddd6d1a",
+    "successfulNativeRuns": 6,
+    "rejectionCases": 6
+  },
+  "native": {
+    "path": "docs/ops/evidence/nominal-array-field-views-20261005.native.json",
+    "sha256": "ac14a2866c7fe2824fdb8e208f6a912e745f24e759b05bde844c037bb59f59a5",
+    "outcomes": 24
+  },
+  "validation": {
+    "format": "gofmt and git diff --check passed",
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/cli"
+      ],
+      "exit": 0,
+      "raw": ".cache/nominal-array-field-view-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "mirCodec": "round trip and mutations for missing range checks, mismatched owner, mutable laundering",
+    "storageIdentity": "field descriptor has original address; no whole-array field-read or array-index copy in TestNominalArrayFieldViewStorageIdentity",
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner to consolidated batch",
+    "performance": "not measured",
+    "wholeSuite": "not run"
+  },
+  "compatibility": {
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "sdk": "0.0.0-stage0.86",
+    "newGrammar": false,
+    "newMIROperation": false,
+    "newSDKExport": false,
+    "newRuntimeHelper": false,
+    "abiChange": false
+  },
+  "limits": [
+    "Named plain non-repr(C) owner field/group paths only",
+    "Array-free scalar-leaf nominal elements, 1..4096 length",
+    "Unsized views only; sized nominal field references stay closed",
+    "Whole struct remains loan owner; no sibling disjointness",
+    "Selected-value reads copy only the element; whole-field value reads still copy the array"
+  ],
+  "scope": {
+    "localCommitOnly": true,
+    "push": false,
+    "newPS1": false,
+    "ciChanges": false
+  }
+}
