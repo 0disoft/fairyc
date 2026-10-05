@@ -648,6 +648,9 @@ func (l *functionLowerer) lowerDefer(statement hir.Statement) error {
 		if err != nil {
 			return err
 		}
+		if l.blockTerminated(l.current) {
+			return nil
+		}
 		if value.Kind == OperandInvalid {
 			return fmt.Errorf("defer argument %d has no executable value", index-1)
 		}

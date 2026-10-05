@@ -13,6 +13,7 @@ func TestControlOperandsPreserveSourceOrderAndReturn(t *testing.T) {
 fn i32 sum(i32 a, i32 b) { return a+b; }
 fn i32 id(i32 x) { return x; }
 fn i32 fail() { assert(false); return 99; }
+fn void observe(i32 x) { assert(x==1); }
 `
 	for _, test := range []struct {
 		name, body string
@@ -22,6 +23,7 @@ fn i32 fail() { assert(false); return 99; }
 		{"call-read-before-if", `var i32 x=5; return sum(x,if(true){x=2;3}else{4});`, 8},
 		{"if-condition-return", `if({return 9;true}){discard 1;}return 0;`, 9},
 		{"while-condition-return", `while({return 9;true}){discard fail();}return 0;`, 9},
+		{"defer-argument-return", `defer observe(1);defer observe({return 9;2});return 0;`, 9},
 		{"and-left-return", `discard {return 9;true}&&{discard fail();true};return 0;`, 9},
 		{"or-left-return", `discard {return 9;false}||{discard fail();true};return 0;`, 9},
 		{"binary-left-return", `return {return 9;1}+fail();`, 9},

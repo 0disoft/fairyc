@@ -21,10 +21,12 @@ func TestControlOperandsRunWithMSVC(t *testing.T) {
 fn i32 sum(i32 a,i32 b){return a+b;}
 fn i32 id(i32 x){return x;}
 fn i32 fail(){assert(false);return 99;}
+fn void observe(i32 x){assert(x==1);}
 fn i32 binary_read(){var i32 x=5;return x+if(true){x=2;3}else{4};}
 fn i32 call_read(){var i32 x=5;return sum(x,if(true){x=2;3}else{4});}
 fn i32 condition_return(){if({return 9;true}){discard fail();}return 0;}
 fn i32 while_condition_return(){while({return 9;true}){discard fail();}return 0;}
+fn i32 deferred_argument_return(){defer observe(1);defer observe({return 9;2});return 0;}
 fn i32 and_return(){discard {return 9;true}&&{discard fail();true};return 0;}
 fn i32 or_return(){discard {return 9;false}||{discard fail();true};return 0;}
 fn i32 binary_left(){return {return 9;1}+fail();}
@@ -37,6 +39,7 @@ fn i32 main(){
     assert(binary_read()==8);assert(call_read()==8);
     assert(condition_return()==9);assert(and_return()==9);assert(or_return()==9);
     assert(while_condition_return()==9);
+    assert(deferred_argument_return()==9);
     assert(binary_left()==9);assert(binary_right()==9);
     assert(call_first()==9);assert(call_last()==9);assert(call_both()==9);
     assert(call_fallthrough()==5);return 42;
