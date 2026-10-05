@@ -1871,8 +1871,9 @@ element stores and checked compound stores, element references, whole-field view
 and explicit, half-open, omitted or empty field subviews. The place root must
 resolve to a named local or a by-value/`ref`/`ref mut` parameter through field
 and group projections only, so call, temporary, pointer, tagged, indexed-aggregate
-and nested-slice roots, ordinary slicing without the explicit borrow and a direct
-field loop source stay closed. Element reads, stores and borrows rebase the
+and nested-slice roots and ordinary slicing without the explicit borrow stay
+closed; the direct field loop source ADR 0469 closed is admitted by ADR 0470.
+Element reads, stores and borrows rebase the
 existing array-view, view-index and view-element-borrow operations on the resolved
 field address, and whole-field views are admitted where the view type is already
 expected, so no array copy or allocation is added; whole-field reads and copies
@@ -1899,3 +1900,40 @@ Linux actual execution remains deferred to the owner's batch, so only C emission
 verified for Linux. Evidence is recorded at
 `docs/ops/evidence/array-field-view-20261005.json` with `.cli.json` and
 `.native.json` companions.
+
+ADR 0470 admits direct `for` iteration over the bounded inline scalar array fields of
+ADR 0468 (`for (let T item in packet.bytes)`, `for (let ref T item in
+packet.bytes[lo..hi])`, `for (let ref mut T item in envelope.packet.bytes[..])`). The
+place root must resolve to a named plain non-`@repr(C)` struct local or a
+by-value/`ref`/`ref mut` parameter through field and group projections only, so call,
+temporary, indexed-aggregate, tagged, raw-pointer and nested-slice roots stay closed, and
+ordinary array-field slicing stays closed outside the direct `for` source and the explicit
+field view of ADR 0469. The item set is exactly the field's scalar element type
+(`bool`/`u8`/`i32`/`i64`/`u32`/`usize`), copied, shared or exclusive, and
+exclusive items require a mutable owner (`E1008`). The loop reuses the implicit descriptor
+generation of the named-array and named-view loops over the explicit field view of ADR 0469,
+selecting the original field storage with no array copy or allocation. The whole struct is the
+single loan owner with no field or range disjointness: a shared loop holds a shared loan that
+blocks owner writes and exclusive borrows through exit, and an exclusive loop holds an exclusive
+loan that blocks owner reads and writes and every competing borrow, freezing the parent
+descriptor and aliases under ADR 0415. Bounds evaluate once left to right before the length
+snapshot and the body, and the existing runtime `start <= end <= len` guard runs before the
+body, so omitted bounds and empty subviews are valid. No syntax production, MIR opcode, wire
+field, artifact schema, SDK export, runtime symbol or host flag is added; language /20, SDK
+stage0.86, runtime /0, MIR/wire schemas, public ABI and target maturity remain unchanged, and
+exact compiler executable identity separates cached generations. Implementation and validation
+pass. The related suite passes 313 test entries with no failures or
+skips, the Windows native suite passes 9 test entries (7 cases in dev and release, 14 outcomes,
+plus a cache test), and the standalone public CLI `check`/`build`/`run` recording passed 2
+normal outcomes for dev and release with five rejected sources (immutable `E1008`, width
+`E1006`, owner write `E2101`, local escape `E2102` and the unsupported temporary root). The
+matrix covers all six scalars, field and grouped/nested paths, single-evaluation bounds with a
+changing end variable, empty slices, break/continue/function return, a returned `ref` parameter
+item, `?` propagation and later original owner access; the native cases cover past-end, reversed,
+start-past-end, checked i64 overflow, start-return and end-return. Retained-AST deterministic
+encoded MIR, MIR codec and interpreter round-trip and both the Windows MSVC and Linux C11 emission
+profiles pass, and a bounds-check-removal MIR mutation is rejected by the verifier, codec and
+backend. Build, vet, formatting and diff checks pass; Linux actual
+execution remains deferred to the owner's batch. Evidence is recorded at
+`docs/ops/evidence/array-field-for-20261005.json` with `.cli.json` and `.native.json`
+companions.

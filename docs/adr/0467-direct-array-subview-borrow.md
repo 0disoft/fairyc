@@ -29,7 +29,9 @@ window[0] = 11;
 
 The root must resolve to a bare name; computed, call, temporary, field and nested-slice roots
 stay closed, and ordinary array slicing outside this explicit `ref` / `ref mut` form remains
-closed. Exclusive borrows require a mutable (`var`) owner (`E1008`); a by-value parameter array
+closed. ADR 0469 admits the bounded inline scalar array field root for this explicit view form, and
+ADR 0470 admits it as a direct `for` source. Exclusive borrows require a mutable (`var`) owner
+(`E1008`); a by-value parameter array
 supports shared borrows only.
 
 ## Evaluation and lowering

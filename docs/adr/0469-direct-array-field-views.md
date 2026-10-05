@@ -2,7 +2,7 @@
 
 - Status: implemented; Windows dev/release native matrix and standalone public CLI validated; compiler round-trip, interpreter and both Windows MSVC and Linux C11 emission profiles pass; Linux actual execution deferred to the owner's batch
 - Date: 2026-10-05
-- Related: ADRs 0415, 0455, 0457, 0461, 0462, 0463, 0464, 0465, 0467, 0468
+- Related: ADRs 0415, 0455, 0457, 0461, 0462, 0463, 0464, 0465, 0467, 0468, 0470
 
 ## Decision
 
@@ -31,9 +31,10 @@ fill(ref mut envelope.packet.bytes[1..3]);      // nested owner path
 
 The place root must resolve to a named local or to a by-value, `ref` or `ref mut` parameter,
 and only through field and group projections. Call, temporary, raw-pointer, tagged,
-indexed-aggregate and nested-slice roots stay closed, ordinary array-field slicing without the
-explicit `ref` / `ref mut` stays closed, and a direct array field as a `for` source stays
-closed, so a view is bound first and the existing loop runs over that binding.
+indexed-aggregate and nested-slice roots stay closed, and ordinary array-field slicing without the
+explicit `ref` / `ref mut` stays closed. A direct array field as a `for` source was closed in
+this record and is superseded by ADR 0470, which admits direct array field iteration over this
+same bounded field; binding a view first remains a valid alternative.
 
 Whole-field reads and copies, like whole-struct copies, keep independent values (ADR 0468) and
 may copy the array contents, so their cost scales with the field. Direct element access and

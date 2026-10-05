@@ -15,6 +15,9 @@ func (c *typeChecker) prepareSliceFor(loop *ast.ByteForLoop, prepared *ast.Expre
 		return shape
 	}
 	root := checked.Children[0]
+	if arrayFieldRoot(root) != nil {
+		return c.prepareArrayFieldFor(loop, prepared, checked, want, mutableItem)
+	}
 	if root == nil || root.Kind != syntax.KindPath || len(root.Children) != 0 {
 		return shape
 	}

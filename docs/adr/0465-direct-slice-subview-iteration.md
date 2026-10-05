@@ -10,7 +10,8 @@ Admit `for (let T item in source[start..end])` over a bare named fixed array
 or an immutable named `ref T[]` / `ref mut T[]` view binding. Bounds may be
 explicit or omitted, matching ordinary slicing. The root must resolve to that
 bare name; computed, call, field and nested-slice iterable roots and mutable
-(`var`) descriptor bindings remain closed. The item set is exactly the existing
+(`var`) descriptor bindings remain closed. ADR 0470 extends the closed field-root rule for a
+direct `for` over a named plain struct scalar-array field (ADR 0468). The item set is exactly the existing
 `bool`, `u8`, `i32`, `i64`, `u32` and `usize` scalars and nonempty acyclic
 plain scalar-field structs, copied, shared-reference or exclusive-reference.
 

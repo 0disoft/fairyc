@@ -52,6 +52,9 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 		return "malformed byte-view iteration"
 	}
 	view := bound.Expression.Children[0]
+	if arrayFieldRoot(view) != nil {
+		return c.prepareArrayFieldFor(loop, prepared, view, wantElement, mutableItem)
+	}
 	if loop.View.Kind == syntax.KindSlice {
 		return c.prepareSliceFor(loop, prepared, view, wantElement, mutableItem)
 	}

@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.array-field-for-cli/v1",
+  "compilerSHA256": "d6bbf51359aa077045d7cd6a866cfbfe471cd55e89e8537f161801b7da9cd681",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005075149-feb6311c43f8+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: feb6311c43f854f034739f705af516733197e90d\nmodified: true\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005075149-feb6311c43f8+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: feb6311c43f854f034739f705af516733197e90d\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 7 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-field-for-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\array-field-for-cli\\images\\matrix-dev.exe",
+      "imageSHA256": "5daf9b9ad111787be97b733d3cd434bdad3e2cf6a10631f35c2b2d8f6976c0ea"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/array-field-for-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\array-field-for-cli\\images\\matrix-release.exe",
+      "imageSHA256": "0a9d0d76fcf6c43766df067acf4dbd432bb12d53077c5b4d391140677a4d22af"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\immutable",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:97: E1008: assignment target is not mutable [bytes 96..103]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\owner",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:117: E2101: Access conflicts with an active shared or mutable loan. [bytes 116..123]\n  last-use: main.fy:1:117 [bytes 116..123]\n  loan: main.fy:1:108 [bytes 107..114]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\escape",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:90: E2102: Returned borrow originates from a local value. [bytes 89..90]\n  origin: main.fy:1:51 [bytes 50..51]\nmain.fy:1:100: E2102: Returned borrow originates from a local value. [bytes 99..113]\n  origin: main.fy:1:51 [bytes 50..51]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\width",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:109: E1006: incompatible expected and actual types [bytes 108..115]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\array-field-for-cli\\temporary",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support byte-view iteration requires a named immutable ref u8[] or ref mut u8[] view at main.fy [bytes 84..115]\n"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Packet { u8[4] bytes; i64[3] totals; bool[2] flags; i32[2] codes; u32[2] words; usize[2] sizes; }\nstruct Envelope { Packet packet; }\nfn i64 sum(ref Packet p) { var i64 total = 0; for (let i64 x in p.totals) { total += x; } return total; }\nfn ref u8 first(ref Packet p) { for (let ref u8 x in p.bytes[1..]) { return x; } return ref p.bytes[0]; }\nfn void edit(ref mut Envelope e) { for (let ref mut u8 x in e.packet.bytes[1..3]) { *x += 1; } }\nfn void early(ref mut Packet p) { for (let ref mut u8 x in p.bytes) { *x += 1; return; } }\nfn Result<i32,u32> fail() { return .err(7); }\nfn Result<i32,u32> propagate(ref mut Packet p) { for (let ref mut u8 x in p.bytes) { *x += 1; let i32 unused = fail()?; } return .ok(0); }\nfn i32 main() {\n    var Packet p = Packet { .bytes = [1,2,3,4], .totals = [4000000000,2,3], .flags = [true,false], .codes = [-2,3], .words = [1,2], .sizes = [1,2] };\n    let Packet original = p;\n    assert(sum(ref p) == 4000000005);\n    var usize calls = 0; var usize end = 3; var i64 total = 0;\n    for (let i64 x in p.totals[{calls += 1; 1}..{calls += 10; end}]) { end = 1; total += x; }\n    assert(calls == 11 && total == 5);\n    for (let ref mut i64 x in p.totals[1..]) { *x += 1; continue; }\n    assert(p.totals[1] == 3 && p.totals[2] == 4);\n    for (let ref mut u8 x in ((p).bytes)) { *x += 1; break; }\n    assert(p.bytes[0] == 2 && p.bytes[1] == 2);\n    var usize count = 0;\n    for (let ref u8 x in p.bytes[..]) { assert(*x > 0); count += 1; }\n    for (let u8 x in p.bytes[4..]) { assert(false); }\n    for (let ref mut u8 x in p.bytes[2..2]) { assert(false); }\n    assert(count == 4);\n    for (let ref mut bool x in p.flags) { *x = !*x; }\n    for (let bool x in p.flags[1..]) { assert(x); }\n    for (let ref mut i32 x in p.codes) { *x += 1; }\n    for (let ref mut u32 x in p.words[..]) { *x += 1; }\n    for (let ref mut usize x in p.sizes) { *x += 1; }\n    assert(!p.flags[0] && p.flags[1] && p.codes[0] == -1 && p.words[1] == 3 && p.sizes[1] == 3);\n    let ref u8 a = first(ref p); assert(*a == 2);\n    early(ref mut p); assert(p.bytes[0] == 3);\n    switch (propagate(ref mut p)) { case .err(code): { assert(code == 7); } case .ok(value): { assert(false); } };\n    assert(p.bytes[0] == 4);\n    var Envelope e = Envelope { .packet = p }; edit(ref mut e);\n    assert(e.packet.bytes[1] == 3 && e.packet.bytes[2] == 4 && p.bytes[1] == 2);\n    for (let u8 e in e.packet.bytes[..1]) { assert(e == 4); }\n    assert(original.bytes[0] == 1 && original.totals[1] == 2);\n    return 0;\n}\n",
+      "sourceSHA256": "b16f7bc25316017de971e6a082e336ac45b055b18faa5ec8b6eced161c118fa2"
+    },
+    {
+      "name": "immutable",
+      "source": "module main;struct P{u8[2] bytes;}fn i32 main(){let P p=P{.bytes=[1,2]};for(let ref mut u8 x in p.bytes){}return 0;}",
+      "sourceSHA256": "3d6839d9c2106f2b0b5515586bf9d32d581ecc01cc1c64c4292efc0d332b44a0"
+    },
+    {
+      "name": "owner",
+      "source": "module main;struct P{u8[2] bytes;i32 other;}fn i32 main(){var P p=P{.bytes=[1,2],.other=0};for(let u8 x in p.bytes){p.other=9;break;}return 0;}",
+      "sourceSHA256": "c01ad9e980fe3f936e19102f39ccf43ff77aed21e644c152e2e46e24bf0d4956"
+    },
+    {
+      "name": "escape",
+      "source": "module main;struct P{u8[2] bytes;}fn ref u8 bad(P p){for(let ref u8 x in p.bytes){return x;}return ref p.bytes[0];}fn i32 main(){return 0;}",
+      "sourceSHA256": "d3161bc1346f3280193633fd2ea5118cd91c9ee41d6b82e17b422c89759c5201"
+    },
+    {
+      "name": "width",
+      "source": "module main;struct P{u8[2] bytes;i32 other;}fn i32 main(){var P p=P{.bytes=[1,2],.other=0};for(let i64 x in p.bytes){}return 0;}",
+      "sourceSHA256": "91c07a78aec0e9037ed54f2612b7ebad5291ab09983f9914675dd49ff1a5c687"
+    },
+    {
+      "name": "temporary",
+      "source": "module main;struct P{u8[2] bytes;}fn P make(){return P{.bytes=[1,2]};}fn i32 main(){for(let u8 x in make().bytes){}return 0;}",
+      "sourceSHA256": "a338d74e248f93e6a2efb9e7291fbb4d169acb10f96a44703ab18fd24a31d7d8"
+    }
+  ],
+  "nativeOutcomes": 2
+}

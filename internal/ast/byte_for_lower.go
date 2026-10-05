@@ -35,7 +35,7 @@ func prepareViewFor(loop *ByteForLoop, sharedItems bool) *Expression {
 		return nil
 	}
 	view := func() *Expression {
-		if loop.View.Kind == syntax.KindSlice {
+		if loop.View.Kind != syntax.KindPath {
 			return loop.View // Semantic preparation replaces this with a single descriptor.
 		}
 		return &Expression{Kind: syntax.KindPath, Span: loop.View.Span, Text: loop.View.Text}
@@ -90,11 +90,33 @@ func prepareViewFor(loop *ByteForLoop, sharedItems bool) *Expression {
 	return &Expression{Kind: syntax.KindBlock, Span: loop.Span, Block: block}
 }
 
-// Only a named receiver has stable storage identity. Bounds retain the ordinary
+// Named receivers and field/group paths retain stable storage identity. Bounds retain the ordinary
 // expression grammar; semantic analysis materializes the subview exactly once.
 func viewForSource(view *Expression) bool {
 	if view.Kind == syntax.KindSlice && len(view.Children) == 3 {
 		view = view.Children[0]
 	}
-	return view != nil && view.Kind == syntax.KindPath && len(view.Children) == 0
+	if view != nil && view.Kind == syntax.KindPath && len(view.Children) == 0 {
+		return true
+	}
+	for view != nil && view.Kind == syntax.KindGroup && len(view.Children) == 1 {
+		view = view.Children[0]
+	}
+	if view == nil || view.Kind != syntax.KindFieldExpr {
+		return false
+	}
+	for view != nil {
+		switch view.Kind {
+		case syntax.KindFieldExpr, syntax.KindGroup:
+			if len(view.Children) != 1 {
+				return false
+			}
+			view = view.Children[0]
+		case syntax.KindPath:
+			return len(view.Children) == 0
+		default:
+			return false
+		}
+	}
+	return false
 }

@@ -166,9 +166,9 @@
   empty bounds (`fill(ref mut envelope.packet.bytes[1..3]);`). The root must
   resolve to a named local or a by-value/`ref`/`ref mut` parameter through
   field and group projections, so call, temporary, raw-pointer, tagged,
-  indexed-aggregate and nested-slice roots stay closed; ordinary array-field slicing without the
-  explicit borrow stays closed and a direct field loop source stays closed, so the
-  view is bound first. Element access and borrowing reuse the existing array-view,
+  indexed-aggregate and nested-slice roots stay closed; ordinary array-field slicing stays closed
+  outside the explicit `ref`/`ref mut` borrow and the ADR 0470 direct `for` source, so a view is
+  no longer required first. Element access and borrowing reuse the existing array-view,
   view-index and view-element-borrow operations on the resolved field address with
   no array copy or allocation. The whole struct is the single loan owner with no
   field or range disjointness: shared views coexist with shared owner reads, an
@@ -179,6 +179,24 @@
   and bounds evaluate once with the original storage selected first, bounds trap
   before element access and an early index or bound return skips the rest. Nested
   arrays and arrays of nominal structs stay closed.
+- ADR 0470 admits direct `for` iteration over the bounded inline scalar array fields of
+  ADR 0468: `for (let T item in packet.bytes)`, `for (let ref T item in
+  packet.bytes[lo..hi])` and `for (let ref mut T item in envelope.packet.bytes[..])`. The
+  place root must resolve to a named plain non-`@repr(C)` struct local or a
+  by-value/`ref`/`ref mut` parameter through field and group projections, so call,
+  temporary, indexed-aggregate, tagged, raw-pointer and nested-slice roots stay closed. Ordinary
+  array-field slicing stays closed outside the direct `for` source and the explicit
+  `ref`/`ref mut` field view of ADR 0469. The item set is
+  exactly the field's scalar element type (`bool`, `u8`, `i32`, `i64`, `u32`,
+  `usize`). The loop reuses the implicit descriptor of the named-array and named-view loops
+  over the explicit field view of ADR 0469, so no array copy or allocation is added. The whole
+  struct is the loan owner with no field or range disjointness: a shared loop blocks owner
+  writes and exclusive borrows through exit, an exclusive loop blocks owner reads and writes and
+  every competing borrow and freezes the parent descriptor and aliases under ADR 0415, and
+  exclusive items require a mutable owner (`E1008`). Bounds evaluate once left to right before
+  the length snapshot and the body, and the runtime checks `start <= end <= len`, so omitted
+  bounds and empty subviews are valid and out-of-range slices trap `bounds`. Existing
+  `break`/`continue`/`return` cleanup and escape rules are reused.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.

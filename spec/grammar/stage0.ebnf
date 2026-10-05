@@ -182,7 +182,16 @@ while_stmt = "while" "(" expression ")" statement_block ;
    or immutable shared/mutable view binding is admitted by ADR 0465; computed,
    call, field and nested-slice roots and mutable descriptor bindings stay
    closed. Bounds evaluate once with the checked start <= end <= len runtime
-   guard before the body. *)
+   guard before the body.
+   Direct iteration over a bounded inline scalar array field of a named plain
+   struct (`in packet.bytes`, `in packet.bytes[lo..hi]`,
+   `in envelope.packet.bytes[..]`) is admitted by ADR 0470 over the ADR 0468
+   field through field and group projections only, with the field's exact scalar
+   element type; call, temporary, indexed-aggregate, tagged, raw-pointer and
+   nested-slice roots stay closed. This narrows the historical field-root
+   exclusion stated above for a named plain struct scalar-array field source;
+   ordinary array-field slicing outside this direct `for` source and the ADR
+   0469 explicit field view stays closed. No grammar production changes. *)
 for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block
          | "for" "(" "let" type IDENT "in" expression ")" statement_block ;
 for_init = binding_kind (IDENT | type IDENT) "=" expression
