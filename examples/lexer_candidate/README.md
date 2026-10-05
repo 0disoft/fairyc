@@ -32,8 +32,8 @@ a live borrow.
 
 A new front end adds a regular file mode without changing the binary stdin protocol:
 the no-argument frame reader stays exactly as described below, and
-`--tokens-file <path>`, `--declarations-file <path>`, and `--help` are the only new
-arguments.
+`--tokens-file <path>`, `--declarations-file <path>`,
+`--check-names-file <path>`, and `--help` are the file-mode arguments.
 
 ```sh
 lexer-candidate --tokens-file path/to/source.fy
@@ -171,6 +171,69 @@ diagnostic goldens; original source hashes are preserved. `TestLexerFileCLIWorks
 the compiler EXE hash unchanged. The example package is version 0.2.0 with no compiler
 or SDK change. Evidence is `docs/ops/evidence/declarations-file-cli-20261005.json`; the
 earlier token-dump receipt above remains the historical record for that mode.
+
+## Regular file name checking (`--check-names-file`)
+
+```sh
+lexer-candidate --check-names-file samples/names-demo.fy
+```
+
+This private name-only candidate reads the same bounded file and reuses the scanner
+and parser. `src/name_resolution.fy` collects ordinary function names before checking
+parameters and source-ordered local bindings. The rules follow
+`docs/language/0007-name-resolution-and-typing-v0.md` and the Go resolver in
+`internal/semantic/resolve.go`. Functions can reference later functions. Parameters
+occupy their own scope; the function body and each nested block open child scopes.
+Same-scope duplicates fail, nested shadowing is allowed, and an initializer resolves
+before its new local is registered. A local is invisible after its owning block ends.
+
+The admitted subset is a module plus non-generic ordinary functions with optional
+`pub`, scalar written types (`i32`, `i64`, `u8`, `u32`, `usize`, `bool`, result-only
+`void`), inferred locals, integer/bool literals, simple names, arithmetic/comparison/
+boolean expressions, ordinary positional calls, parenthesized expressions, nested
+blocks, `let`/`var`, returns and simple-name assignment targets. This checks names
+only: call arity, types, mutability, return obligations, overflow and ownership are
+unchecked. For example a named but mistyped return or assignment to a `let` can pass
+this command. Those are later type/flow checks, not valid-program claims.
+
+Imports, constants, composite types, fields, references, labeled calls, generics,
+attributes, methods, unsafe forms, control flow and the `source_location` intrinsic
+are rejected as unsupported. Output is `names ok` plus newline only after all checks
+succeed. The first failure returns 2 with empty stdout and:
+
+```text
+path:LINE:COLUMN: error: MESSAGE (bytes START..END)
+```
+
+Messages are `unresolved name`, `duplicate name in scope`,
+`unsupported name-check syntax`, and `name-check limit`. These are private candidate
+messages, not new public Go diagnostic codes. Scanner/parser errors retain their
+existing file-mode format. Limits are 128 module functions, 128 simultaneously active
+parameters/locals, and 64 active walker levels, in addition to existing file/parser
+limits. Sibling blocks release their active-name slots. One error is reported; this
+candidate does not provide full diagnostic recovery or bound HIR/MIR.
+
+From the repository root, generate the three test references and run the portable
+harness against the desired native compiler:
+
+```sh
+go run ./cmd/fairyc-lexer-file-oracle .cache/names-file-cli/tokens-reference.json
+go run ./cmd/fairyc-lexer-file-oracle --declarations .cache/names-file-cli/declarations-reference.json
+go run ./cmd/fairyc-lexer-file-oracle --names .cache/names-file-cli/reference.json
+python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/names-file-cli/tokens-reference.json --declarations-reference .cache/names-file-cli/declarations-reference.json --names-reference .cache/names-file-cli/reference.json --receipt /path/to/evidence/receipt.json
+```
+
+Windows dev/release pass 276 CLI executions (138/profile). Each profile includes
+50 name fixtures: 19 accepted, 8 unresolved, 3 duplicate, 17 unsupported and 3 limits;
+accepted names and the exact unresolved/duplicate spans are independently checked
+against Go semantic analysis. The 29 token and 29 declaration fixtures per profile,
+malformed input, CLI/file errors and framed stdin smoke also pass. Source hashes are
+unchanged before/after every fixture execution. Existing historical receipts remain
+separate. Additional target/dependency checks are recorded in
+`docs/ops/evidence/names-file-cli-20261005.json`. Linux native execution is deferred to
+the owner's batch; allocation/I/O fault injection and performance testing were not
+run. This changes the example package to 0.3.0; compiler, SDK and language contracts
+are unchanged.
 
 ## Recognition and limits
 
