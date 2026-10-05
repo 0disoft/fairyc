@@ -1,0 +1,1429 @@
+{
+  "casesPerProfile": 40,
+  "compilerIdentity": {
+    "buildInfo": "go\tgo1.27.1\npath\tgithub.com/0disoft/fairyc/internal/cli.test\nmod\tgithub.com/0disoft/fairyc\t(devel)\t\ndep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\nbuild\tCGO_ENABLED=0\nbuild\tGOARCH=amd64\nbuild\tGOOS=windows\nbuild\tGOAMD64=v1\n",
+    "executableSHA256": "e79ca022e46ef5ff33a6abecad83372e6a981169620abb66eec9c6256484084a",
+    "goVersion": "go1.27.1",
+    "kind": "in-process CLI compiler in Go test executable"
+  },
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "0"
+      ],
+      "case": "byte-zero",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "255"
+      ],
+      "case": "byte-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "ff\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "ff\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "256"
+      ],
+      "case": "byte-outside",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "9223372036854775807"
+      ],
+      "case": "byte-i64-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "-1"
+      ],
+      "case": "byte-negative",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "-9223372036854775808"
+      ],
+      "case": "byte-minimum",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "256",
+        "2"
+      ],
+      "case": "little-256",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00 01\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "00 01\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "4660",
+        "2"
+      ],
+      "case": "little-order",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "34 12\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "34 12\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "9223372036854775807",
+        "8"
+      ],
+      "case": "little-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "ff ff ff ff ff ff ff 7f\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "ff ff ff ff ff ff ff 7f\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "0",
+        "8"
+      ],
+      "case": "little-zero-padding",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00 00 00 00 00 00 00 00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "00 00 00 00 00 00 00 00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "255",
+        "1"
+      ],
+      "case": "little-one-byte",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "ff\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "ff\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "256",
+        "1"
+      ],
+      "case": "little-high-bits",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "9223372036854775807",
+        "7"
+      ],
+      "case": "little-max-seven",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "-1",
+        "8"
+      ],
+      "case": "little-negative",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "-9223372036854775808",
+        "8"
+      ],
+      "case": "little-minimum",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "1",
+        "0"
+      ],
+      "case": "width-zero",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "1",
+        "9"
+      ],
+      "case": "width-nine",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "1",
+        "-1"
+      ],
+      "case": "width-negative",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "1",
+        "9223372036854775807"
+      ],
+      "case": "width-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "-1",
+        "0"
+      ],
+      "case": "error-order",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "9223372036854775808"
+      ],
+      "case": "above-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "-9223372036854775809"
+      ],
+      "case": "below-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "9223372036854775808x"
+      ],
+      "case": "overflow-before-syntax",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "922337203685477580x8"
+      ],
+      "case": "syntax-before-overflow",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "00256",
+        "02"
+      ],
+      "case": "leading-zeros",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00 01\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "00 01\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "-0"
+      ],
+      "case": "negative-zero",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        ""
+      ],
+      "case": "empty",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: empty integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: empty integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "-"
+      ],
+      "case": "bare-sign",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "+1"
+      ],
+      "case": "plus",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        " 1"
+      ],
+      "case": "space",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "1.0"
+      ],
+      "case": "decimal",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "한글"
+      ],
+      "case": "korean",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "1",
+        "x"
+      ],
+      "case": "width-syntax",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: WIDTH: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "1",
+        "9223372036854775808"
+      ],
+      "case": "width-overflow",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: WIDTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "000000000000000000000"
+      ],
+      "case": "too-long",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: argument exceeds 20 UTF-8 bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: VALUE: argument exceeds 20 UTF-8 bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "00000000000000000000"
+      ],
+      "case": "max-length",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "",
+      "stdout": "00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe"
+      ],
+      "case": "missing",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "le",
+        "1"
+      ],
+      "case": "missing-width",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "byte",
+        "1",
+        "2"
+      ],
+      "case": "extra",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\low.exe",
+        "other",
+        "1"
+      ],
+      "case": "unknown-mode",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "low",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "0"
+      ],
+      "case": "byte-zero",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "255"
+      ],
+      "case": "byte-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "ff\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "ff\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "256"
+      ],
+      "case": "byte-outside",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "9223372036854775807"
+      ],
+      "case": "byte-i64-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: outside byte range 0..255\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "-1"
+      ],
+      "case": "byte-negative",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "-9223372036854775808"
+      ],
+      "case": "byte-minimum",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "256",
+        "2"
+      ],
+      "case": "little-256",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00 01\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "00 01\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "4660",
+        "2"
+      ],
+      "case": "little-order",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "34 12\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "34 12\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "9223372036854775807",
+        "8"
+      ],
+      "case": "little-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "ff ff ff ff ff ff ff 7f\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "ff ff ff ff ff ff ff 7f\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "0",
+        "8"
+      ],
+      "case": "little-zero-padding",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00 00 00 00 00 00 00 00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "00 00 00 00 00 00 00 00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "255",
+        "1"
+      ],
+      "case": "little-one-byte",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "ff\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "ff\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "256",
+        "1"
+      ],
+      "case": "little-high-bits",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "9223372036854775807",
+        "7"
+      ],
+      "case": "little-max-seven",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: does not fit WIDTH bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "-1",
+        "8"
+      ],
+      "case": "little-negative",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "-9223372036854775808",
+        "8"
+      ],
+      "case": "little-minimum",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: negative value\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: negative value\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "1",
+        "0"
+      ],
+      "case": "width-zero",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "1",
+        "9"
+      ],
+      "case": "width-nine",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "1",
+        "-1"
+      ],
+      "case": "width-negative",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "1",
+        "9223372036854775807"
+      ],
+      "case": "width-max",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "-1",
+        "0"
+      ],
+      "case": "error-order",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: WIDTH: expected 1..8\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "9223372036854775808"
+      ],
+      "case": "above-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "-9223372036854775809"
+      ],
+      "case": "below-i64",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "9223372036854775808x"
+      ],
+      "case": "overflow-before-syntax",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "922337203685477580x8"
+      ],
+      "case": "syntax-before-overflow",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "00256",
+        "02"
+      ],
+      "case": "leading-zeros",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00 01\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "00 01\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "-0"
+      ],
+      "case": "negative-zero",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        ""
+      ],
+      "case": "empty",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: empty integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: empty integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "-"
+      ],
+      "case": "bare-sign",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "+1"
+      ],
+      "case": "plus",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        " 1"
+      ],
+      "case": "space",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "1.0"
+      ],
+      "case": "decimal",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "한글"
+      ],
+      "case": "korean",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "1",
+        "x"
+      ],
+      "case": "width-syntax",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: expected signed decimal integer\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: WIDTH: expected signed decimal integer\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "1",
+        "9223372036854775808"
+      ],
+      "case": "width-overflow",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: WIDTH: integer is outside i64 range\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: WIDTH: integer is outside i64 range\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "000000000000000000000"
+      ],
+      "case": "too-long",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedStderr": "checked-byte-codec: VALUE: argument exceeds 20 UTF-8 bytes\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: VALUE: argument exceeds 20 UTF-8 bytes\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "00000000000000000000"
+      ],
+      "case": "max-length",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedStderr": "",
+      "expectedStdout": "00\n",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "",
+      "stdout": "00\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe"
+      ],
+      "case": "missing",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "le",
+        "1"
+      ],
+      "case": "missing-width",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "byte",
+        "1",
+        "2"
+      ],
+      "case": "extra",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example\\optimized.exe",
+        "other",
+        "1"
+      ],
+      "case": "unknown-mode",
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\checked-byte-codec-example",
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "expectedStderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "expectedStdout": "",
+      "outputEncoding": "UTF-8",
+      "profile": "optimized",
+      "stderr": "checked-byte-codec: usage: checked-byte-codec byte VALUE | le VALUE WIDTH\n",
+      "stdout": ""
+    }
+  ],
+  "images": [
+    {
+      "exeBytes": 136192,
+      "exeSHA256": "c5b0aecdf743b351311edc15d6a8f10c436efcf7f53ee1808eef259e24d74252",
+      "profile": "low",
+      "toolchain": "msvc 14.51.36231"
+    },
+    {
+      "exeBytes": 118272,
+      "exeSHA256": "80100549c236f46c93053d7efb4d5b67fca0a75d3349c689a144c9490625f7e8",
+      "profile": "optimized",
+      "toolchain": "msvc 14.51.36231"
+    }
+  ],
+  "language": "fairyc-language/20",
+  "runtime": "fairyc-runtime/0",
+  "schema": "fairyc.checked-byte-codec-example/v1",
+  "sdk": "0.0.0-stage0.86",
+  "sdkSourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+  "sourceSHA256": {
+    "fairy.toml": "1915a7036cbacb9c73a89c577ee9d73298e0f9405b4a0bf6c60fb3478315b6f9",
+    "src/codec.fy": "bdb4777af85e221b97891d8aae9fc4a4def9ca23ad84e6a204a95448a8e599f3",
+    "src/main.fy": "72adb251f8d10584e89db938172e69901e8ee319112ca955df2a129bfc3b41b2",
+    "src/numbers.fy": "81bf86f77a6c87ccac273898854d4e0d4053bf501a8472fb78f9380c24435fd9"
+  },
+  "target": "x86_64-windows-msvc"
+}

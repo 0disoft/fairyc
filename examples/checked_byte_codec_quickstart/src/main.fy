@@ -34,21 +34,21 @@ fn i32 input_error(ref str name, numbers::InputError failure) {
 }
 
 @effects(console)
-fn i32 render(ref u8[] encoded) {
+fn i32 render(ref codec::Packet packet) {
     let ref u8[] alphabet = b"0123456789abcdef";
     var u8[24] output = [0; 24];
     var usize at = 0;
-    while (at < encoded.len) {
-        let usize high = (encoded[at] / 16) as usize;
-        let usize low = (encoded[at] % 16) as usize;
+    for (let u8 byte in packet.bytes[..packet.length]) {
+        let usize high = (byte / 16) as usize;
+        let usize low = (byte % 16) as usize;
         output[at * 3] = alphabet[high];
         output[at * 3 + 1] = alphabet[low];
-        output[at * 3 + 2] = if (at + 1 == encoded.len) { 10 } else { 32 };
+        output[at * 3 + 2] = if (at + 1 == packet.length) { 10 } else { 32 };
         at += 1;
     }
     let ref u8[] view = ref output;
-    return switch (io::write_bytes(view[..encoded.len * 3])) {
-        case .ok(count): { if (count == encoded.len * 3) { 0 } else { 3 } }
+    return switch (io::write_bytes(view[..packet.length * 3])) {
+        case .ok(count): { if (count == packet.length * 3) { 0 } else { 3 } }
         case .err(_): { 3 }
     };
 }
@@ -71,10 +71,10 @@ fn i32 main() {
         case .ok(parsed): { parsed }
         case .err(failure): { return input_error("VALUE", failure); }
     };
-    var u8[8] encoded = [0; 8];
+    var codec::Packet packet = codec::Packet { .bytes = [0; 8], .length = 0 };
     var usize width = 1;
     if (single) {
-        encoded[0] = switch (num::u8_from_i64(value)) {
+        packet.bytes[0] = switch (num::u8_from_i64(value)) {
             case .ok(byte): { byte }
             case .err(failure): {
                 let ref str message = switch (failure) {
@@ -84,6 +84,7 @@ fn i32 main() {
                 return error(message, 1);
             }
         };
+        packet.length = 1;
     } else {
         let i64 requested = switch (numbers::argument(3)) {
             case .ok(parsed): { parsed }
@@ -94,7 +95,7 @@ fn i32 main() {
             case .ok(converted): { converted }
             case .err(_): { return error("WIDTH: cannot convert width", 3); }
         };
-        let usize written = switch (codec::encode_le(value, width, ref mut encoded)) {
+        let usize written = switch (codec::encode_le(value, width, ref mut packet.bytes[..width])) {
             case .ok(count): { count }
             case .err(failure): {
                 let ref str message = switch (failure) {
@@ -112,7 +113,7 @@ fn i32 main() {
             }
         };
         if (written != width) { return error("incorrect encoded length", 3); }
+        packet.length = written;
     }
-    let ref u8[] view = ref encoded;
-    return render(view[..width]);
+    return render(ref packet);
 }

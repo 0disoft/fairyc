@@ -196,13 +196,12 @@ fn i32 error_code(codec::EncodeError error) {
     };
 }
 fn void failure(i64 value, usize width, i32 expected) {
-    var u8[8] output = [85; 8];
-    let bool correct = switch (codec::encode_le(value, width, ref mut output)) {
+    var codec::Packet output = codec::Packet { .bytes = [85; 8], .length = 3 };
+    let bool correct = switch (codec::encode_le(value, width, ref mut output.bytes[..])) {
         case .ok(_): { false } case .err(error): { error_code(error) == expected }
     };
-    assert(correct);
-    var usize at = 0;
-    while (at < output.len) { assert(output[at] == 85); at += 1; }
+    assert(correct && output.length == 3);
+    for (let u8 byte in output.bytes) { assert(byte == 85); }
 }
 fn i32 main() {
     failure(-1, 8, 1);
@@ -211,15 +210,23 @@ fn i32 main() {
     failure(1, 9, 2);
     failure(256, 1, 4);
     failure(9223372036854775807, 7, 4);
-    { var u8[1] output = [85; 1];
-      let bool capacity = switch (codec::encode_le(1, 2, ref mut output)) {
+    { var codec::Packet output = codec::Packet { .bytes = [85; 8], .length = 3 };
+      let bool capacity = switch (codec::encode_le(1, 2, ref mut output.bytes[..1])) {
           case .ok(_): { false } case .err(error): { error_code(error) == 3 }
-      }; assert(capacity && output[0] == 85); }
-    { var u8[8] output = [85; 8];
-      let bool encoded = switch (codec::encode_le(256, 2, ref mut output)) {
+      }; assert(capacity && output.length == 3);
+      for (let u8 byte in output.bytes) { assert(byte == 85); } }
+    { var codec::Packet output = codec::Packet { .bytes = [85; 8], .length = 3 };
+      let bool encoded = switch (codec::encode_le(256, 2, ref mut output.bytes[..2])) {
           case .ok(n): { n == 2 } case .err(_): { false }
-      }; assert(encoded && output[0] == 0 && output[1] == 1);
-      var usize at = 2; while (at < 8) { assert(output[at] == 85); at += 1; } }
+      }; assert(encoded && output.bytes[0] == 0 && output.bytes[1] == 1 && output.length == 3);
+      output.length = 2;
+      for (let u8 byte in output.bytes[2..]) { assert(byte == 85); } }
+    { var codec::Packet output = codec::Packet { .bytes = [85; 8], .length = 3 };
+      let bool encoded = switch (codec::encode_le(4660, 2, ref mut output.bytes[2..4])) {
+          case .ok(n): { n == 2 } case .err(_): { false }
+      }; assert(encoded && output.length == 3 && output.bytes[2] == 52 && output.bytes[3] == 18);
+      for (let u8 byte in output.bytes[..2]) { assert(byte == 85); }
+      for (let u8 byte in output.bytes[4..]) { assert(byte == 85); } }
     return 0;
 }
 `
@@ -241,5 +248,5 @@ fn i32 main() {
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 0 {
 		t.Fatalf("policy execution: %v %+v", err, outcome)
 	}
-	t.Log("7 exact codec errors preserve every sentinel; successful encoding preserves all suffix bytes")
+	t.Log("7 exact codec errors preserve every sentinel and packet length; prefix and offset encoding preserve bytes outside the selected field view")
 }

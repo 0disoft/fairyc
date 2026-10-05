@@ -4,6 +4,8 @@ import std::num as num;
 
 pub enum EncodeError { Negative; InvalidWidth; Capacity; HighBits; Conversion; }
 
+pub struct Packet { u8[8] bytes; usize length; }
+
 // This example owns unsigned little-endian field policy. Conversion owns only a byte.
 // Complete preflight before the first write; failures preserve the caller's buffer.
 pub fn Result<usize, EncodeError> encode_le(i64 input, usize width, ref mut u8[] output) {
