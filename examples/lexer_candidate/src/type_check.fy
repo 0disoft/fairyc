@@ -29,7 +29,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 2) {
         let usize symbol_id = state::uses(tables,id - 1); assert(symbol_id != 0);
         let names::Symbol symbol = names::symbol_at(resolved,symbol_id);
-        let u32 type = if (symbol.kind == 1) { 8 } else { state::symbols(tables,symbol_id - 1) };
+        let u32 type = if (symbol.kind == 1 || symbol.kind == 5) { 8 } else { state::symbols(tables,symbol_id - 1) };
         return recorded(tables,id,value(type,false));
     }
     if (node.kind == 3) { let state::Value actual = expression(resolved,tables,problem,node.left,expected,result_type,depth + 1,loop_depth); return recorded(tables,id,actual); }
@@ -80,8 +80,24 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if (node.kind == 6) {
         let usize callee_id = state::uses(tables,node.left - 1); let names::Symbol callee = names::symbol_at(resolved,callee_id);
-        if (callee.kind != 1) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
+        if (callee.kind != 1 && callee.kind != 5) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
         state::set_expressions(tables,node.left - 1,8);
+        if (callee.kind == 5) {
+            let usize count = names::external_signature(resolved,callee_id).parameter_count;
+            let usize start = names::external_signature(resolved,callee_id).parameter_start;
+            if (count != syntax::call_argument_count(parsed,id)) { return error(problem,5,node.start,node.end,0,0); }
+            var usize argument = 0; var bool terminates = false;
+            while (argument < count) {
+                let usize argument_id = syntax::call_argument(parsed,id,argument);
+                let u32 type = names::external_parameter(resolved,start + argument);
+                let state::Value actual = expression(resolved,tables,problem,argument_id,type,result_type,depth + 1,loop_depth);
+                if (problem.code != 0) { return actual; }
+                if (actual.type != type) { let syntax::Expression source = syntax::expression_at(parsed,argument_id); return error(problem,1,source.start,source.end,type,actual.type); }
+                terminates = terminates || actual.terminates; argument += 1;
+            }
+            let u32 type = state::symbols(tables,callee_id - 1);
+            return recorded(tables,id,value(type,terminates));
+        }
         let syntax::Declaration function = syntax::declaration_at(parsed,callee.declaration - 1);
         var usize parameters = 0; var usize entry_index = function.entry_start;
         while (entry_index < function.entry_start + function.entry_count) {
@@ -220,7 +236,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
     if (!state::initialize(tables,names::symbol_count(resolved),syntax::expression_count(parsed),syntax::entry_count(parsed))) { return state::fail(12,0,syntax::source_view(parsed).len,0,0); }
     var usize id = 1;
     while (id <= names::symbol_count(resolved)) {
-        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = state::primitive(parsed,symbol.type_root);
+        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = if (symbol.kind == 5) { names::external_signature(resolved,id).result } else { state::primitive(parsed,symbol.type_root) };
         state::set_symbols(tables,id - 1,type);
         if (symbol.entry != 0) { state::set_entries(tables,symbol.entry - 1,id); }
         id += 1;

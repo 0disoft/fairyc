@@ -1,5 +1,6 @@
 module name_resolution;
 import syntax as syntax;
+import module_registry as modules;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -10,14 +11,14 @@ pub struct Reference { usize expression; usize start; usize end; usize symbol; }
 struct Name { usize start; usize end; usize scope; usize symbol; }
 struct Context {
     Name[128] globals; usize global_count; Name[128] locals; usize local_count;
-    usize scope; usize next_scope; usize owner;
+    usize scope; usize next_scope; usize owner; bool modules;
 }
-pub resource Resolved { syntax::Parsed source; Context context; v::Vec<Symbol> symbols; v::Vec<Reference> references; Problem problem; cleanup { } }
+pub resource Resolved { syntax::Parsed source; Context context; v::Vec<Symbol> symbols; v::Vec<Reference> references; v::Vec<modules::Item> external; v::Vec<u32> parameters; Problem problem; cleanup { } }
 fn Problem ok() { return Problem { .code = 0, .start = 0, .end = 0 }; }
 fn Problem fail(u32 code, usize start, usize end) { return Problem { .code, .start, .end }; }
 fn Context empty() {
     return Context { .globals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .global_count = 0,
-        .locals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .local_count = 0, .scope = 0, .next_scope = 1, .owner = 0 };
+        .locals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .local_count = 0, .scope = 0, .next_scope = 1, .owner = 0, .modules = false };
 }
 fn bool simple(ref u8[] name) {
     if (name.len == 0) { return false; }
@@ -79,6 +80,10 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
             { ok() } else { fail(3,node.start,node.end) };
     }
     if (node.kind == 2) {
+        if (context.modules && !simple(spelling)) {
+            var usize index = 0;
+            while (index < v::len<Reference>(references)) { if (v::at<Reference>(references,index).expression == id) { return ok(); } index += 1; }
+        }
         if (!simple(spelling)) { return fail(3,node.start,node.end); }
         let usize symbol = known(parsed,context,node.start,node.end);
         if (symbol == 0) { return fail(1,node.start,node.end); }
@@ -180,7 +185,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
     var usize index = 0;
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
-        if (item.kind != 1) {
+        if (item.kind != 1 && !(context.modules && item.kind == 2)) {
             if (item.kind != 3 || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
                 item.generic_parameters != 0 || !scalar_type(parsed,item.result_type,true)) { return fail(3,item.start,item.end); }
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
@@ -229,8 +234,45 @@ pub fn Resolved resolve(syntax::Parsed parsed) {
     var Context context = empty();
     var v::Vec<Symbol> symbols = v::empty<Symbol>(); var v::Vec<Reference> references = v::empty<Reference>();
     let Problem problem = collect(ref parsed,ref mut context,ref mut symbols,ref mut references);
-    return Resolved { .source = parsed, .context, .symbols, .references, .problem };
+    return Resolved { .source = parsed, .context, .symbols, .references, .external = v::empty<modules::Item>(), .parameters = v::empty<u32>(), .problem };
 }
+// Registry lookup binds actual qualified expression IDs to copied signatures.
+// The result owns all type facts; it borrows neither the registry nor other files.
+pub fn Resolved resolve_modules(syntax::Parsed parsed, ref modules::Registry registry, usize module_index) {
+    var Context context = empty(); context.modules = true;
+    var v::Vec<Symbol> symbols = v::empty<Symbol>(); var v::Vec<Reference> references = v::empty<Reference>();
+    var v::Vec<modules::Item> external = v::empty<modules::Item>(); var v::Vec<u32> parameters = v::empty<u32>();
+    var Problem problem = ok(); var usize id = 1;
+    while (id <= syntax::expression_count(ref parsed)) {
+        let syntax::Expression node = syntax::expression_at(ref parsed,id);
+        if (node.kind == 2 && !simple(syntax::expression_text(ref parsed,id))) {
+            let modules::Lookup lookup = modules::lookup(registry,module_index,syntax::expression_text(ref parsed,id));
+            if (lookup.code != 0) {
+                problem = fail(if (lookup.code == 4) { 7 } else if (lookup.code == 5) { 8 } else if (lookup.code == 6) { 9 } else if (lookup.code == 11) { 5 } else { 10 },node.start,node.end); break;
+            }
+            if (v::len<Symbol>(ref symbols) >= 1024) { problem = fail(4,node.start,node.end); break; }
+            var modules::Item signature = modules::item_at(registry,lookup.item - 1);
+            let usize parameter_start = v::len<u32>(ref parameters); var usize argument = 0;
+            while (argument < signature.parameter_count) {
+                if (!v::push<u32>(ref mut parameters,modules::parameter_at(registry,signature.parameter_start + argument)).is_ok) { problem = fail(5,node.start,node.end); break; }
+                argument += 1;
+            }
+            if (problem.code != 0) { break; }
+            signature.parameter_start = parameter_start;
+            if (!v::push<modules::Item>(ref mut external,signature).is_ok) { problem = fail(5,node.start,node.end); break; }
+            let Symbol symbol = Symbol { .kind = 5, .start = node.start, .end = node.end, .scope = 0, .owner = 0, .type_root = 0, .entry = 0, .declaration = v::len<modules::Item>(ref external) };
+            if (!v::push<Symbol>(ref mut symbols,symbol).is_ok || !v::push<Reference>(ref mut references,Reference { .expression = id, .start = node.start, .end = node.end, .symbol = v::len<Symbol>(ref symbols) }).is_ok) { problem = fail(5,node.start,node.end); break; }
+        }
+        id += 1;
+    }
+    if (problem.code == 0) { problem = collect(ref parsed,ref mut context,ref mut symbols,ref mut references); }
+    return Resolved { .source = parsed, .context, .symbols, .references, .external, .parameters, .problem };
+}
+pub fn modules::Item external_signature(ref Resolved resolved, usize symbol_id) {
+    let Symbol symbol = symbol_at(resolved,symbol_id); assert(symbol.kind == 5);
+    return *v::at<modules::Item>(ref resolved.external,symbol.declaration - 1);
+}
+pub fn u32 external_parameter(ref Resolved resolved, usize index) { return *v::at<u32>(ref resolved.parameters,index); }
 pub fn Problem check(ref syntax::Parsed parsed) {
     var Context context = empty(); var v::Vec<Symbol> symbols = v::empty<Symbol>(); var v::Vec<Reference> references = v::empty<Reference>();
     return collect(parsed,ref mut context,ref mut symbols,ref mut references);

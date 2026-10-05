@@ -33,7 +33,8 @@ a live borrow.
 A new front end adds a regular file mode without changing the binary stdin protocol:
 the no-argument frame reader stays exactly as described below, and
 `--tokens-file <path>`, `--declarations-file <path>`,
-`--check-names-file <path>`, `--bindings-file <path>`, `--check-types-file <path>`, and `--help` are the file-mode arguments.
+`--check-names-file <path>`, `--bindings-file <path>`, `--check-types-file <path>`,
+`--check-modules-file <manifest>`, and `--help` are the file-mode arguments.
 
 ```sh
 lexer-candidate --tokens-file path/to/source.fy
@@ -390,6 +391,66 @@ The portable `--types` oracle now adds normal and rejected control cases from
 uses freshly regenerated references. `tests/type_control.fy` reads actual retained
 branch and comparison types, contextual u8 branch values, and return/loop results
 in both native profiles. Evidence: `docs/ops/evidence/control-types-cli-20261005.json`.
+
+## Multi-file scalar checking (`--check-modules-file`)
+
+Version 0.8.0 connects explicit imports to the existing name/type/control-flow
+walkers. Run from this example directory:
+
+```text
+lexer-candidate --check-modules-file samples/modules.txt
+```
+
+The UTF-8 manifest contains one unquoted, untrimmed relative filename per line.
+Paths resolve against the process working directory, including `..`; this is
+explicit read-only input selection. LF, CRLF and no final newline are accepted.
+Empty lines, BOM, control bytes, absolute entries and colon/ADS spelling are
+rejected. Spaces and Korean filenames are accepted. The manifest filename itself
+uses the existing CLI UTF-8 path reader. Limits are 8192 manifest bytes, 4095
+bytes per path, 32 files and 32768 bytes per source, with the existing parser and
+name/type budgets. Duplicate source selection fails as a duplicate module.
+
+`module_registry.fy` builds module identities, import aliases and scalar function
+signatures from the actual parser-owned syntax. Token normalization ignores
+comments/trivia in qualified paths without rewriting the source. All files are
+registered before imports resolve, so manifest order, forward imports and import
+cycles do not prevent lookup. Each import alias and ordinary function name shares
+the module declaration namespace. Only an explicit `alias::function` reaches a
+public item in its target module; imported aliases do not re-export items. Private
+functions remain usable within their own module.
+
+`name_resolution::resolve_modules` retains each qualified expression's declaration
+link and copied scalar signature. `type_check` applies the real imported parameter
+and result types to the existing contextual integer and call checks. Every source
+body is checked, including private functions and modules not called by another
+file. Local variable names may shadow an alias for unqualified references without
+changing the qualified import lookup. `module_check.fy` and `module_cli.fy` publish
+`modules ok` and exit 0 only after the whole set succeeds. Failures exit 2 with
+empty stdout and an input or source-location diagnostic on stderr. Inputs are
+never modified. Single-file modes retain their existing import rejection.
+
+This mode receives an explicit source set, not a resolved workspace/package graph:
+it does not discover files, validate filename/module correspondence, parse
+`fairy.toml` or locks, select SDK dependencies, or implement cross-package identity.
+Reserved `source_location` item/alias bindings fail closed. Constants, composite
+values, generic functions, attributes, effects and ownership
+remain outside this scalar component. Unsupported constructs fail closed.
+
+Generate Go semantic reference observations and verify both native profiles:
+
+```text
+go run ./cmd/fairyc-lexer-file-oracle --modules .cache/modules-file-cli/reference.json
+python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/modules-file-cli/tokens-reference.json --declarations-reference .cache/modules-file-cli/declarations-reference.json --names-reference .cache/modules-file-cli/names-reference.json --types-reference .cache/modules-file-cli/types-reference.json --modules-reference .cache/modules-file-cli/reference.json --receipt /path/to/evidence/receipt.json
+```
+
+The portable Python harness prepares files only; registry/resolution/typing run in
+the Fairy executable. Semantic rejection categories are compared to Go diagnostics,
+and candidate byte ranges are checked against the selected source. Candidate
+messages are private, not the stable Go diagnostic schema. Manifest/IO/syntax
+controls check exact status/output and input preservation. Native `tests/modules.fy`
+checks retained import signatures and resolution/type facts. Evidence:
+`docs/ops/evidence/modules-file-cli-20261005.json`. Windows native execution is
+checked locally; Linux native execution remains deferred to the owner's batch.
 
 ## Recognition and limits
 

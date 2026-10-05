@@ -21,9 +21,16 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path) {
     if (syntax::problem_count(ref parsed) != 0) { return declarations::errors(ref parsed,path); }
     let names::Resolved resolved = names::resolve(parsed);
     if (names::problem(ref resolved).code != 0) { return name_output::errors(ref resolved,path); }
-    let typing::Typed typed = typing::check(resolved); let state::Problem problem = typing::problem(ref typed);
+    let typing::Typed typed = typing::check(resolved);
+    if (typing::problem(ref typed).code != 0) { return errors(ref typed,path); }
+    return if (io::write("types ok\n").is_ok) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+}
+
+@effects(console)
+pub fn i32 errors(ref typing::Typed typed, ref u8[] path) {
+    let state::Problem problem = typing::problem(typed);
     if (problem.code != 0) {
-        output::prefix(typing::source_view(ref typed),path,problem.start);
+        output::prefix(typing::source_view(typed),path,problem.start);
         discard io::write_stderr(if (problem.code == 1) { "type mismatch" } else if (problem.code == 2) { "integer literal out of range" }
             else if (problem.code == 3) { "expected bool operand" } else if (problem.code == 4) { "assignment target is immutable" }
             else if (problem.code == 5) { "call argument count mismatch" } else if (problem.code == 6) { "expression is not callable" }
@@ -31,5 +38,5 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path) {
             else if (problem.code == 9) { "invalid scalar operator" } else if (problem.code == 10) { "type-check limit" } else if (problem.code == 12) { "buffer allocation failed" } else if (problem.code == 13) { "loop control outside loop" } else if (problem.code == 14) { "unsupported for header" } else if (problem.code == 15) { "unsupported defer call" } else { "unsupported type-check syntax" });
         output::range(problem.start,problem.end); return 2;
     }
-    return if (io::write("types ok\n").is_ok) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+    return 0;
 }
