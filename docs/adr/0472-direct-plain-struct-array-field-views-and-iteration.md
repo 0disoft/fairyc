@@ -139,3 +139,23 @@ to the owner's batch, so Linux is verified by C emission only.
 
 Evidence is recorded at `docs/ops/evidence/nominal-array-field-views-20261005.json`. No whole-suite
 result is claimed here.
+
+## Adoption
+
+`examples/token_page_cli` is the first end-to-end adoption of this ADR. Its `TokenPage`
+field `Token[128] tokens; usize used;` receives each scanned token through a whole-element
+overwrite, is rebased through direct element field stores and a `ref mut Token[]` subview
+over `..used`, and is analyzed through a shared `ref Token[]` view and `for`, so scanning,
+rebasing and analysis do not copy the whole token array (initialization constructs the
+`TokenPage` value by value).
+
+Verification passes: the example runs 62 native results (30 CLI cases per profile, 60
+development and release executions, plus the `tests/page.fy` `normalized_spans_and_reuse`
+case in both dev and release) and one interpreter run of that same source test, over `check`,
+`check --locked`, the locked development and release builds and their actual EXEs, with
+Windows amd64 native execution and Linux C emission both passing and actual Linux execution
+deferred to the owner's batch. `TestTokenPageCLIStorage` checks
+the authored workspace MIR of the tokens module and confirms no fixed-array `FieldRead` or
+`ArrayIndex` copy, with the descriptor views and stores exercised. Evidence is
+`docs/ops/evidence/token-page-cli-20261005.json` with `.dev.json` and `.release.json` raw
+logs. See `examples/token_page_cli/README.md` for the CLI contract and commands.
