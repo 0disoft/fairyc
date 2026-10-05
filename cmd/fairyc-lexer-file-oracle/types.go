@@ -132,6 +132,9 @@ func writeTypes(destination string) error {
 			return err
 		}
 	}
+	if err := addControlTypes(add); err != nil {
+		return err
+	}
 	data, err := json.MarshalIndent(struct {
 		Schema   string        `json:"schema"`
 		Fixtures []typeFixture `json:"fixtures"`

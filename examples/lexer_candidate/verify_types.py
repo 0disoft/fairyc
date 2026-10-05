@@ -6,7 +6,7 @@ def verify_types(image, reference, directory, rows, run, sha, location):
     counts = dict(files=0, accepted=0, errors=0, unsupported=0, limits=0, unchangedFiles=0)
     codes = {'type mismatch': {'E1006', 'E1009'}, 'integer literal out of range': {'E1013'},
              'expected bool operand': {'E1007'}, 'assignment target is immutable': {'E1008'},
-             'call argument count mismatch': {'E1010'}, 'unresolved name': {'E0101'}}
+             'call argument count mismatch': {'E1010'}, 'unresolved name': {'E0101'}, 'loop control outside loop': {'E1012'}}
     for index, fixture in enumerate(reference['fixtures']):
         source = bytes.fromhex(fixture['inputHex'])
         path = directory / ('한글 타입.fy' if index == 12 else f'types-{index}.fy')

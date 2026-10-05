@@ -191,13 +191,13 @@ The admitted subset is a module plus non-generic ordinary functions with optiona
 `pub`, scalar written types (`i32`, `i64`, `u8`, `u32`, `usize`, `bool`, result-only
 `void`), inferred locals, integer/bool literals, simple names, arithmetic/comparison/
 boolean expressions, ordinary positional calls, parenthesized expressions, nested
-blocks, `let`/`var`, returns and simple-name assignment targets. This checks names
-only: call arity, types, mutability, return obligations, overflow and ownership are
+blocks, `let`/`var`, returns and simple-name assignment targets. Version 0.6.0
+also admits the control-flow name scopes described below. This checks names only: call arity, types, mutability, return obligations, overflow and ownership are
 unchecked. For example a named but mistyped return or assignment to a `let` can pass
 this command. Those are later type/flow checks, not valid-program claims.
 
 Imports, constants, composite types, fields, references, labeled calls, generics,
-attributes, methods, unsafe forms, control flow and the `source_location` intrinsic
+attributes, methods, unsafe forms, `switch` patterns and the `source_location` intrinsic
 are rejected as unsupported. Output is `names ok` plus newline only after all checks
 succeed. The first failure returns 2 with empty stdout and:
 
@@ -311,10 +311,9 @@ Slots use bounded heap storage, avoiding large fixed-array copies on the Windows
 native stack. Allocation failure rejects the file. Additional limits are 4096
 syntax expression nodes, 1024 entries, 1152 symbols and 64 active checker levels;
 existing source/parser/name limits also apply. Statements after a return are
-still checked. The straight-line function return gate matches the Go reference;
-branch/loop return coverage and ownership/initialization Flow remain subsequent
-work. Imports, composite types, casts, control-flow syntax and generics are
-currently rejected by the preceding name phase.
+still checked. The return gate is extended by the control-flow section below;
+ownership/initialization Flow remains subsequent work. Imports, composite types,
+casts and generics are currently rejected by the preceding name phase.
 
 Generate independent test data and run the portable harness from the repository
 root (no PowerShell runtime is required):
@@ -353,12 +352,44 @@ lexer-candidate --bindings-file samples/control-names-demo.fy
 
 This is name resolution only: condition/operator types, loop-control validity,
 return coverage and defer-call restrictions belong to the following type-phase
-unit. Existing `--check-types-file` rejects newly admitted control-flow syntax
-until that unit is connected. `switch` patterns require the later enum/Option/
+unit, connected in version 0.7.0 below. `switch` patterns require the later enum/Option/
 Result type component. File, name-slot, recursion, first-error and no-partial-
 output policies remain the same. Native `tests/name_control.fy` checks the exact
 use targets across outer parameters, loop initializers, body shadows and branches.
 Evidence: `docs/ops/evidence/control-names-cli-20261005.json`.
+
+## Control-flow type checking
+
+Version 0.7.0 connects `--check-types-file` to the control-flow name scopes above.
+`if/else` and `else if` require bool conditions, propagate the destination type to
+branch values and require matching branch results. `while`, classic scalar `for`
+and `assert` require bool conditions. `break`/`continue` require an enclosing loop,
+and nested scopes preserve the loop context until that loop's body finishes.
+
+Classic `for` admits optional initializer, condition and post clauses. Its header
+uses the current scalar subset and rejects calls, blocks and other effects under
+ADR 0213; body expressions retain ordinary call semantics. `defer` admits direct
+internal void calls with scalar arguments under ADR 0217. Both argument types and
+arity are checked. `discard` checks its operand. The candidate performs static
+analysis only: it never executes a loop, assertion, deferred call or input program.
+
+The function return gate follows the Go reference: direct return, an exact
+`assert(false)`, or complete nested `if/else` coverage satisfies the gate. A loop
+by itself is not return proof, and a plain standalone block's nested return is not
+promoted. All source branches and statements after a return are still checked.
+Ownership/initialization Flow and code generation remain later components.
+`switch` requires the later composite-type pattern implementation; it stays
+explicitly unsupported here.
+
+```sh
+lexer-candidate --check-types-file samples/control-names-demo.fy
+```
+
+The portable `--types` oracle now adds normal and rejected control cases from
+`cmd/fairyc-lexer-file-oracle/control_types.go`; the existing verification command
+uses freshly regenerated references. `tests/type_control.fy` reads actual retained
+branch and comparison types, contextual u8 branch values, and return/loop results
+in both native profiles. Evidence: `docs/ops/evidence/control-types-cli-20261005.json`.
 
 ## Recognition and limits
 
