@@ -17,25 +17,29 @@ const NoBlock BlockID = -1
 
 // typeProperties provides the compiler-known type facts needed during lowering.
 type typeProperties struct {
-	resources map[hir.Type]struct{}
-	structs   map[hir.Type]*StructType
-	enums     map[hir.Type]*EnumType
+	resources          map[hir.Type]struct{}
+	structs            map[hir.Type]*StructType
+	enums              map[hir.Type]*EnumType
+	constructionFields map[hir.Type][]string
 }
 
 func newTypeProperties(resources []ResourceType, structs []StructType, enums []EnumType) typeProperties {
+	constructionFields := make(map[hir.Type][]string, len(resources)+len(structs))
 	resourceValues := make(map[hir.Type]struct{}, len(resources))
 	for _, value := range resources {
 		resourceValues[value.Type] = struct{}{}
+		constructionFields[value.Type] = resourceFieldNames(value.Fields)
 	}
 	structValues := make(map[hir.Type]*StructType, len(structs))
 	for index := range structs {
 		structValues[structs[index].Type] = &structs[index]
+		constructionFields[structs[index].Type] = structFieldNames(structs[index].Fields)
 	}
 	enumValues := make(map[hir.Type]*EnumType, len(enums))
 	for index := range enums {
 		enumValues[enums[index].Type] = &enums[index]
 	}
-	return typeProperties{resources: resourceValues, structs: structValues, enums: enumValues}
+	return typeProperties{resources: resourceValues, structs: structValues, enums: enumValues, constructionFields: constructionFields}
 }
 
 func sameSpanSource(left, right hir.Span) bool {

@@ -1403,11 +1403,22 @@ func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression)
 	if !isResource && !isStruct {
 		return Operand{}, fmt.Errorf("aggregate construction type %q has no MIR definition", expression.Type)
 	}
-	operands := make([]Operand, 0, len(expression.Children))
+	fields := l.properties.constructionFields[expression.Type]
+	if len(fields) != len(expression.Fields) {
+		return Operand{}, fmt.Errorf("aggregate construction fields do not match definition %q", expression.Type)
+	}
+	positions := make(map[string]int, len(fields))
+	for index, name := range fields {
+		positions[name] = index
+	}
+	operands := make([]Operand, len(fields))
 	for index := range expression.Children {
 		value, err := l.lowerExpression(&expression.Children[index])
 		if err != nil {
 			return Operand{}, err
+		}
+		if l.blockTerminated(l.current) {
+			return Operand{}, nil
 		}
 		if value.Kind == OperandInvalid {
 			return Operand{}, fmt.Errorf("aggregate field %q has no value", expression.Fields[index])
@@ -1415,7 +1426,17 @@ func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression)
 		if path := l.liveResourcePath(&expression.Children[index]); isResource && path != nil {
 			value = l.materializeMove(path, value, "resource-field", true)
 		}
-		operands = append(operands, value)
+		// Evaluate written initializers in order; snapshot copyable values before
+		// later initializers can mutate their source locals. Only the final
+		// construction operand list follows declaration order.
+		if _, sourceLocal := l.bindings[hir.SymbolID(value.Local)]; value.Kind == OperandLocal && sourceLocal && !l.properties.NeedsDrop(expression.Children[index].Type) {
+			value = l.freezeScalarOperand(value, expression.Children[index].Span)
+		}
+		position, found := positions[expression.Fields[index]]
+		if !found || operands[position].Kind != OperandInvalid {
+			return Operand{}, fmt.Errorf("aggregate construction has unknown or duplicate field %q", expression.Fields[index])
+		}
+		operands[position] = value
 	}
 	destination := l.newTemporary()
 	kind := OperationStructConstruct
@@ -1424,7 +1445,7 @@ func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression)
 	}
 	l.appendOperation(Operation{
 		Kind: kind, Span: expression.Span, DestinationLocal: destination,
-		Operands: operands, Fields: slices.Clone(expression.Fields), Type: expression.Type,
+		Operands: operands, Fields: slices.Clone(fields), Type: expression.Type,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
