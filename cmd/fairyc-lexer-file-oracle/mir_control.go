@@ -1,0 +1,42 @@
+package main
+
+// Observe control through both paths, side effects, calls and exact trap results.
+func scalarMIRControlSeeds() []scalarMIRSeed {
+	return []scalarMIRSeed{
+		{"if-false", "fn i32 main(){return if(false){1}else{2};}", true},
+		{"if-i64-call", "fn i32 main(){assert(pick(true)==4000000000);assert(pick(false)==5000000000);return 0;} fn i64 pick(bool b){return if(b){4000000000}else{5000000000};}", true},
+		{"if-no-else-both-paths", "fn i32 main(){var i32 x=1;if(false){x=8;}if(true){x+=2;}return x;}", true},
+		{"else-if-all-paths", "fn i32 main(){return pick(1)+pick(0)+pick(-1);} fn i32 pick(i32 x){return if(x>0){2}else if(x<0){3}else{4};}", true},
+		{"if-both-return", "fn i32 main(){return pick(true)+pick(false);} fn i32 pick(bool b){if(b){return 3;}else{return 5;}}", true},
+		{"if-one-return", "fn i32 main(){return pick(true)+pick(false);} fn i32 pick(bool b){if(b){return 3;}return 5;}", true},
+		{"if-else-if-return", "fn i32 main(){return pick(1)+pick(0)+pick(-1);} fn i32 pick(i32 x){if(x>0){return 2;}else if(x<0){return 3;}else{return 4;}}", true},
+		{"if-side-effects", "fn i32 main(){var i32 x=0;let i32 y=if(false){x=1;2}else{x=3;4};return x+y;}", true},
+		{"nested-if-calls", "fn i32 main(){return sum(if(true){id(1)}else{id(2)},if(false){id(3)}else{if(true){id(4)}else{id(5)}});}fn i32 id(i32 x){return x;}fn i32 sum(i32 a,i32 b){return a+b;}", true},
+		{"binary-read-before-if", "fn i32 main(){var i32 x=5;return x+if(true){x=2;3}else{4};}", true},
+		{"compound-read-before-if", "fn i32 main(){var i32 x=5;x+=if(true){x=2;3}else{4};return x;}", true},
+		{"if-skips-trapping-call", "fn i32 main(){return if(false){fail()}else{7};}fn i32 fail(){assert(false);return 1;}", true},
+		{"if-takes-trapping-call", "fn i32 main(){return if(true){fail()}else{7};}fn i32 fail(){assert(false);return 1;}", true},
+		{"if-return-or-false-assert", "fn i32 main(){return pick(true);}fn i32 pick(bool b){if(b){return 7;}else{assert(false);}}", true},
+		{"if-false-assert-trap", "fn i32 main(){return pick(false);}fn i32 pick(bool b){if(b){return 7;}else{assert(false);}}", true},
+		{"short-circuit-truth-table", "fn i32 main(){assert(!(false&&false));assert(!(false&&true));assert(!(true&&false));assert(true&&true);assert(!(false||false));assert(false||true);assert(true||false);assert(true||true);return 0;}", true},
+		{"and-skips-side-effects", "fn i32 main(){var i32 x=0;discard false&&{x=1;true};return x;}", true},
+		{"and-takes-side-effects", "fn i32 main(){var i32 x=0;discard true&&{x=1;false};return x;}", true},
+		{"or-skips-side-effects", "fn i32 main(){var i32 x=0;discard true||{x=1;false};return x;}", true},
+		{"or-takes-side-effects", "fn i32 main(){var i32 x=0;discard false||{x=1;true};return x;}", true},
+		{"and-skips-trapping-call", "fn i32 main(){discard false&&fail();return 0;}fn bool fail(){assert(false);return true;}", true},
+		{"and-takes-trapping-call", "fn i32 main(){discard true&&fail();return 0;}fn bool fail(){assert(false);return true;}", true},
+		{"or-skips-trapping-call", "fn i32 main(){discard true||fail();return 0;}fn bool fail(){assert(false);return true;}", true},
+		{"or-takes-trapping-call", "fn i32 main(){discard false||fail();return 0;}fn bool fail(){assert(false);return true;}", true},
+		{"nested-short-circuit", "fn i32 main(){var i32 x=0;assert((false&&{x=1;true})||({x=2;true}&&(true||{x=3;false})));return x;}", true},
+		{"condition-left-effects", "fn i32 main(){var i32 x=0;if(({x=1;true})&&({x+=2;true})){x+=4;}return x;}", true},
+		{"if-condition-return", "fn i32 main(){if({return 9;true}){discard 1;}return 0;}", true},
+		{"and-rhs-return-skipped", "fn i32 main(){discard false&&{return 9;true};return 4;}", true},
+		{"and-rhs-return-taken", "fn i32 main(){discard true&&{return 9;true};return 4;}", true},
+		{"or-rhs-return-skipped", "fn i32 main(){discard true||{return 9;true};return 4;}", true},
+		{"or-rhs-return-taken", "fn i32 main(){discard false||{return 9;true};return 4;}", true},
+		{"call-first-argument-return", "fn i32 main(){return sum({return 9;1},fail());}fn i32 sum(i32 a,i32 b){return a+b;}fn i32 fail(){assert(false);return 99;}", true},
+		{"call-last-argument-return", "fn i32 main(){return sum(id(1),{return 9;2});}fn i32 id(i32 x){return x;}fn i32 sum(i32 a,i32 b){return a+b;}", true},
+		{"call-conditional-argument-returns", "fn i32 main(){return sum(if(true){return 9;1}else{return 10;2},fail());}fn i32 sum(i32 a,i32 b){return a+b;}fn i32 fail(){assert(false);return 99;}", true},
+		{"call-conditional-argument-fallthrough", "fn i32 main(){return sum(if(false){return 9;1}else{2},3);}fn i32 sum(i32 a,i32 b){return a+b;}", true},
+	}
+}

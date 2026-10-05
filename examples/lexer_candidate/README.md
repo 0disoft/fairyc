@@ -522,13 +522,17 @@ parses, resolves names, checks scalar types, lowers the successful `Typed` value
 to HIR and consumes that `hir_model::Program` through `mir_lower::lower`. The
 returned `mir_model::Program` owns source bytes, canonical literal payload and
 separate target, signature, function, local, block, operation and edge arenas; no
-parser, type or HIR table is retained. This first lowering unit admits sequential
-scalar code: literals, resolved locals and parameters, unary and binary
-operations, ordered calls, assignment, checked compound assignment, nested lexical
-blocks and assertions. Source `if`, `while`, classic `for`, nearest-loop
-`break`/`continue`, `defer` and the short-circuit `&&`/`||` operators are
-recognized by HIR but rejected here, so lowering fails closed until their CFG form
-lands.
+parser, type or HIR table is retained. Lowering admits sequential scalar code
+(literals, resolved locals and parameters, unary and binary operations, ordered
+calls, assignment, checked compound assignment, nested lexical blocks and
+assertions) plus value and void conditionals: `if`/`else`, `if` without an `else`,
+`else if` chains, arms where both branches return, and short-circuit `&&`/`||` whose
+right operand is evaluated only when the left side requires it and may be any
+admitted boolean expression, including side effects, calls or a return block. Those
+CFG forms use an unconditional jump terminator and a two-way boolean-branch
+terminator alongside the earlier checked switch. `while`, classic `for`, nearest-loop
+`break`/`continue` and `defer` are still rejected, so loop and cleanup paths keep
+failing closed until their control and cleanup lowering lands.
 
 The private TSV format begins with `fairyc.scalar-mir/v1` and a `P` module-index
 record. `T`, `S`, `F`, `L`, `B`, `O` and `A` records describe call
@@ -538,10 +542,15 @@ signature indexes are zero-based. Blocks form a mutable-local control-flow graph
 not SSA. A checked operation emits a typed `check` marker, a two-successor
 checked-switch terminator and a non-returning trap block whose mask keeps the
 type-specific failure categories: integer overflow, division by zero,
-signed-division overflow, invalid shift and assertion failure. Nested calls reserve
-their argument range in the shared edge arena before evaluating the arguments left
-to right. The record labels, trap masks and this format are private implementation
-contracts.
+signed-division overflow, invalid shift and assertion failure. Nested calls publish
+their argument edge range in the shared arena only after every argument completes:
+evaluation collects the ordered argument locals in a temporary vector left to right
+and appends the contiguous range after the last argument, so an argument that returns
+leaves neither orphan argument slots nor a dangling parent call. The branch work adds
+no record tag or field: the jump and boolean-branch terminators reuse the existing `B`
+layout, and a literal `assert(false)` ends its block with an unreachable,
+successor-free success block so no live success path remains. The record labels, trap
+masks and this format are private implementation contracts.
 
 Limits are 32768 source bytes, 512 functions/targets, 16384 locals, 16384 blocks,
 32768 operations, 65536 edges/signatures and 688128 payload bytes, with recursion
@@ -569,30 +578,65 @@ reader and scalar executor: it reconstructs the tables from the native TSV, chec
 the block and edge graph, and executes admitted programs to compare the observed
 return value or trap category with the verified Go MIR. It is an independent
 observation utility, never a candidate runtime dependency, and it does not natively
-compile or execute the input. `tests/mir.fy` exercises the owned API directly.
+compile or execute the input. Fixture cases where the Go reference itself is
+defective are pinned as explicit contract goldens instead of counted as Go
+differential matches, so the comparator claims no full Go parity. `tests/mir.fy`
+exercises the owned API directly.
 
 `samples/mir-demo.fy` demonstrates a checked compound assignment across a forward
-call:
+call, and `samples/mir-branches-demo.fy` demonstrates a conditional result and a
+short-circuit assertion:
 
 ```sh
 lexer-candidate --mir-file samples/mir-demo.fy
+lexer-candidate --mir-file samples/mir-branches-demo.fy
 ```
 
-The reference set is 24 fixtures: 19 admitted and 5 deferred. The admitted set is 9
-returning programs and 10 trapping programs covering constants, forward and nested
+The reference set is 59 fixtures: 56 admitted and 3 deferred. The admitted set is 42
+returning programs and 14 trapping programs covering constants, forward and nested
 calls, lexical blocks, checked compound assignment, signed `i32`/`i64` overflow and
 negation, division-by-zero, signed division/remainder overflow, invalid-shift and
-overflowing-shift traps, and assertion traps; the unsigned-limit case exercises
-`usize`, `u32` and `u8` maximum values as accepted successes rather than traps. The 5
-deferred cases (`if`, short-circuit `&&`/`||`, `while`, classic `for` and `defer`) fail
-closed with empty stdout and status 2.
+overflowing-shift traps, and assertion traps, extended by value and void conditionals
+with and without an `else`, `else if` chains, returning condition operands, an
+argument that returns from the first or last call position, a returning `if` used as
+an argument, both-returning arms, branch side effects taken and skipped, conditional
+fallthrough, and short-circuit `&&`/`||` with side-effecting or trapping right
+operands; the unsigned-limit case exercises `usize`, `u32` and `u8` maximum values as
+accepted successes rather than traps. The 3 deferred cases (`while`, classic `for` and
+`defer`) fail closed with an empty stdout and status 2.
 
-Windows development and release pass 1092 CLI executions (546 per profile) across the
-existing file modes and MIR, and each profile compares the same 24 MIR fixtures: 19
-admitted (9 returning, 10 trapping) and 5 deferred. Source hashes are unchanged before
-and after every fixture execution. The direct native API tests in `tests/mir.fy` pass
-5/5 in both the development and release profiles. Compiler/SDK inputs remain unchanged;
-this is example package version 0.10.0. Evidence:
+Of the 56 admitted fixtures, 52 are differential against the Go MIR reference and 4
+are explicit contract goldens that record known Go defects instead of asserting
+agreement. Three belong to one termination-propagation defect, where a returning
+operand fails to stop the enclosing condition or call: `if-condition-return`
+(`if({return 9;true}){discard 1;}return 0;`), `call-first-argument-return`
+(`sum({return 9;1},fail())`) and `call-last-argument-return` (`sum(id(1),{return 9;2})`).
+The Go reference stops with `operand has no executable value` (the call cases keep a
+`return from "main::main": ` prefix in the oracle), and each golden keeps the
+source-order result `return 9` and that error. The fourth golden is the separate
+binary late-read defect:
+`binary-read-before-if` (`var i32 x=5;return x+if(true){x=2;3}else{4};`) does not read
+the left local before the conditional's side effect in the Go reference, so it reads
+`x` late and returns 5 (2+3); the left-to-right contract reads `x` before the
+conditional and requires 8 (5+3), and the golden keeps 8 while recording the Go
+outcome 5. A returning `if` used as a call argument (`call-conditional-argument-returns`)
+matches Go and stays differential. These two Go defect categories, retained across
+four fixtures, are the next unit of work, so Go differential equality stays 52/56 and
+this unit does not claim self-hosting or promotion of the candidate.
+
+The whole CLI comparison reran for this argument-publication change and passes on
+both profiles: 1162 CLI executions (581 per profile), each comparing the same 59 MIR
+fixtures (56 admitted: 42 returning and 14 trapping, plus 3 deferred) split into 52
+Go differential outcomes and the 4 contract goldens above, alongside 9 direct native
+API tests in `tests/mir.fy` that pass 9/9 in both profiles. Source hashes are unchanged
+before and after every fixture execution, and `samples/mir-branches-demo.fy` executes
+through the emitted MIR test executor to `return 7` on both retained images with the
+short-circuit `fail()` call skipped. The scoped Go test and vet checks and the Windows
+and Linux C emission both pass; Linux native execution remains deferred to the owner's
+batch. Compiler/SDK inputs remain unchanged and read-only in this unit: the 619
+compiler inputs and the compiler executable SHA are unchanged. This is example package
+version 0.11.0. Evidence: `docs/ops/evidence/mir-branch-file-cli-20261006.json`; the
+earlier sequential-only unit remains at
 `docs/ops/evidence/mir-sequential-file-cli-20261006.json`.
 
 ## Recognition and limits

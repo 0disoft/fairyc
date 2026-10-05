@@ -5,16 +5,11 @@ import mir_state as state;
 import std::bytes as bytes;
 import std::vec as v;
 
-// First lowering unit: sequential scalar code, nested lexical blocks, calls,
-// checked operations, assertions, returns and assignments. Structured source
-// control/defer is rejected before construction; its CFG lowering follows.
+// Scalar lowering includes value/void conditionals and short-circuit branches.
+// Loops and defer remain rejected until their control/cleanup paths are lowered.
 fn bool admitted(ref h::Program input) {
     var usize i = 1;
-    while (i <= h::expression_count(input)) {
-        let h::Expression e = h::expression_at(input,i); let u32 kind = h::expression_code(e.kind); let u32 op = h::operator_code(e.operator);
-        if (kind == 8 || op == 19 || op == 20) { return false; } i += 1;
-    }
-    i = 1; while (i <= h::statement_count(input)) { let u32 kind = h::statement_code(h::statement_at(input,i).kind); if (kind == 5 || kind == 6 || kind == 7 || kind == 8 || kind == 11) { return false; } i += 1; }
+    while (i <= h::statement_count(input)) { let u32 kind = h::statement_code(h::statement_at(input,i).kind); if (kind == 5 || kind == 6 || kind == 7 || kind == 8 || kind == 11) { return false; } i += 1; }
     return true;
 }
 
@@ -72,6 +67,22 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         if (c.current == 0 || c.problem.code != 0) { return 0; }
         let u32 owner_type = h::type_code(h::expression_at(input,e.left).type);
         if (kind == 5) {
+            if (operator == 19 || operator == 20) {
+                // Default result is the frozen left value. Only the required
+                // RHS path overwrites it; its return/trap never reaches join.
+                let usize result = state::local(locals,c,6,0,false,false,e.start,e.end);
+                if (state::emit(operations,blocks,c,state::operation(2,result,6,6,0,left,0,e.start,e.end)) == 0) { return 0; }
+                let usize rhs = state::new_block(blocks,c,e.start,e.end); let usize join = state::new_block(blocks,c,e.start,e.end);
+                let usize consequent = if (operator == 19) { rhs } else { join };
+                let usize alternative = if (operator == 19) { join } else { rhs };
+                if (!state::branch(blocks,c,left,consequent,alternative,e.start,e.end)) { return 0; }
+                c.current = rhs; let usize right = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth + 1);
+                if (c.problem.code != 0) { return 0; }
+                if (c.current != 0) {
+                    if (state::emit(operations,blocks,c,state::operation(2,result,6,6,0,right,0,e.start,e.end)) == 0 || !state::jump(blocks,c,join,e.start,e.end)) { return 0; }
+                }
+                c.current = join; return result;
+            }
             let usize right = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth + 1);
             if (c.current == 0 || c.problem.code != 0) { return 0; }
             return binary(locals,blocks,operations,c,type,owner_type,operator,left,right,e.start,e.end);
@@ -83,15 +94,19 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     }
     if (kind == 6) {
         let usize callee = c.targets[e.binding]; if (callee == 0) { return state::fail(c,4,e.start,e.end); }
-        // Nested calls also use the edge arena. Reserve this argument range first.
+        // Materialize ordered arguments before publishing their contiguous
+        // range. An argument may return, leaving no orphan parent-call edges.
         if (e.edge_count > 65536 - v::len<usize>(edges)) { return state::fail(c,2,e.start,e.end); }
-        let usize start = v::len<usize>(edges); var usize j = 0;
-        while (j < e.edge_count) { if (!state::edge(edges,1,c)) { return 0; } j += 1; }
-        j = 0;
+        var v::Vec<usize> arguments = v::empty<usize>(); var usize j = 0;
         while (j < e.edge_count) {
             let usize argument = expression(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,e.edge_start + j),depth + 1);
             if (c.current == 0 || c.problem.code != 0) { return 0; }
-            { let ref mut usize slot = v::at_mut<usize>(edges,start + j); *slot = argument; } j += 1;
+            if (!v::push<usize>(ref mut arguments,argument).is_ok) { return state::fail(c,3,e.start,e.end); } j += 1;
+        }
+        let usize start = v::len<usize>(edges); j = 0;
+        while (j < e.edge_count) {
+            let usize argument = *v::at<usize>(ref arguments,j);
+            if (!state::edge(edges,argument,c)) { return 0; } j += 1;
         }
         let usize destination = if (type == 7) { 0 } else { state::local(locals,c,type,0,false,false,e.start,e.end) };
         let usize continuation = state::new_block(blocks,c,e.start,e.end);
@@ -100,6 +115,28 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         if (!state::terminate(blocks,c,term)) { return 0; } c.current = continuation; return destination;
     }
     if (kind == 7) { return block(input,locals,blocks,operations,edges,payload,c,e.block,depth + 1); }
+    if (kind == 8) {
+        let usize condition = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth + 1);
+        if (c.current == 0 || c.problem.code != 0) { return 0; }
+        let usize consequent = state::new_block(blocks,c,e.start,e.end); let usize alternative = state::new_block(blocks,c,e.start,e.end);
+        if (!state::branch(blocks,c,condition,consequent,alternative,e.start,e.end)) { return 0; }
+        let usize result = if (type == 7) { 0 } else { state::local(locals,c,type,0,false,false,e.start,e.end) };
+        c.current = consequent; let usize yes = block(input,locals,blocks,operations,edges,payload,c,e.block,depth + 1);
+        if (c.problem.code != 0) { return 0; }
+        if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,yes,0,e.start,e.end)) == 0) { return 0; }
+        let usize yes_end = c.current;
+        c.current = alternative; let usize no = expression(input,locals,blocks,operations,edges,payload,c,e.alternative,depth + 1);
+        if (c.problem.code != 0) { return 0; }
+        if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,no,0,e.start,e.end)) == 0) { return 0; }
+        let usize no_end = c.current;
+        // Allocate a join only for live fallthrough; both returning arms leave
+        // no orphan unfinished block and suppress enclosing RHS/store/return.
+        if (yes_end == 0 && no_end == 0) { c.current = 0; return 0; }
+        let usize join = state::new_block(blocks,c,e.start,e.end);
+        if (yes_end != 0) { c.current = yes_end; if (!state::jump(blocks,c,join,e.start,e.end)) { return 0; } }
+        if (no_end != 0) { c.current = no_end; if (!state::jump(blocks,c,join,e.start,e.end)) { return 0; } }
+        c.current = join; return result;
+    }
     return state::fail(c,4,e.start,e.end);
 }
 fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, usize depth) {
@@ -129,7 +166,15 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
     if (kind == 4 || kind == 9 || kind == 10) {
         let usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
-        if (kind == 9) { return state::guard(operations,blocks,c,6,0,value,0,16,s.start,s.end); }
+        if (kind == 9) {
+            if (!state::guard(operations,blocks,c,6,0,value,0,16,s.start,s.end)) { return false; }
+            let h::Expression assertion = h::expression_at(input,s.expression);
+            if (h::expression_code(assertion.kind) == 2 && !assertion.boolean) {
+                var m::Block term = state::block(c.function,s.start,s.end); term.kind = 7;
+                return state::terminate(blocks,c,term);
+            }
+            return true;
+        }
         return true;
     }
     discard state::fail(c,4,s.start,s.end); return false;

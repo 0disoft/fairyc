@@ -1,0 +1,755 @@
+{
+  "schema": "fairyc.mir-branch-file-cli-evidence/v1",
+  "date": "2026-10-06",
+  "baseRevision": "bfcd4416d1a41fd1d88eeee5674184e6ff3b15a1",
+  "sourceArtifacts": [
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "sha256": "c60d1af8f2187c303191503abe18430d0cec8971d1379f32adfb0582ceafeb95"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "077f402573b0b73fc252290bcc462b12382dddf327a6d837609bdb85db720a62"
+    },
+    {
+      "path": "examples/lexer_candidate/verify.py",
+      "sha256": "3a7fa39c40d184fa32411b5831f6df2c59d66a70e94e47ec03405d3a0d803255"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_names.py",
+      "sha256": "1b72a797182f2bbf9ecea459495c44978fb1a2e50f112d78a5c507b438d03aa0"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_types.py",
+      "sha256": "1525191a14062b39449d4f8730849db1dc30c810807b5724d9bf6cd395b8717b"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_modules.py",
+      "sha256": "66497cf9b6bb1044b9cf0a74889ab93335481fbfd6be7d942c3ee9442f90958d"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_hir.py",
+      "sha256": "2b316d7a87b72738d55fc0e2ed6a44d5adf41d1dd20c69bdaee3cedcf54d328f"
+    },
+    {
+      "path": "examples/lexer_candidate/verify_mir.py",
+      "sha256": "411a1728512253e72739320089671185b0e3c282dd3d478479971b8de39197c3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/binding_output.fy",
+      "sha256": "16a5a66784f6ee41c66d365426d4badd0a9475a922f3ddc8d34562b19e37e25f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "a8c6eedf397c67ce70c8e9c2e0ec5567fcdfb42f67c169585e9cb527f7c56eb0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_cli.fy",
+      "sha256": "d7a103f978b6e6cf9df2695bc44f6af5be3a999046a775a458f4430f1fcd48cf"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_lower.fy",
+      "sha256": "04083e93304ce09c5b5e01def93213d56128964117bb30fd0c4525e9ee3abaf6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "sha256": "06f39f992da5a3b2f93085fe7392ec4049b17375eebd375de76275bb49b92730"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_output.fy",
+      "sha256": "a55651ff62ffde2110fd390cf43b5856252d56928c874f6d3a54c8e0b2a61c4b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_state.fy",
+      "sha256": "e212f03bba3cbd8ff69f2644410ba51011e36311c4fabd7104ddafd736c64c62"
+    },
+    {
+      "path": "examples/lexer_candidate/src/integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "examples/lexer_candidate/src/main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cli.fy",
+      "sha256": "53ef36ff19efb82e1fd142e82ea8136297dad5ece0958c59039923c4df6a3265"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_lower.fy",
+      "sha256": "c80b0e0a3ff28ad368ef227d4356bf0f07eb5793c6b97c8579d210052a08aa15"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_model.fy",
+      "sha256": "0a455847bc1a2d91605e58452d49f7338feb7880f3c74858c432799df3983e60"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_output.fy",
+      "sha256": "8717af170f7a9cfcf02513c09ac0ad4035ef0b79a7046fe70b1d5fa8d7cb5ed5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_state.fy",
+      "sha256": "a5189d634c19da49ca08a320c55d94d9240836b7780859e5ff9bd844fbcd2aaf"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_resolution.fy",
+      "sha256": "af94f5b2a42febae2d77a2501f1153ca048a87c423cf59f53f89cf7b6dd48d98"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "2d3e266d6753eaf70b1ab939b3ebc7d0a3e430d3c4189651c419947912e8c8e5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_check.fy",
+      "sha256": "59da4fc68761b5e7e02de20c5444dde501341d0016d31bd3e3a763a119bac431"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_cli.fy",
+      "sha256": "a5015445705f6b0320b9037fb714025b263f177b0f0cb6427c9789be0cc81bfa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_control.fy",
+      "sha256": "dcc5732b46bc14a366dd21c57b9b03415e25f8552e33e0a0f55d246895b92cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "7583a037796daab144b0f48ca55d8ac152f273a48a421a9d79af6c6a332e00f8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/control-names-demo.fy",
+      "sha256": "f5ccdef101884e116ccab4d63ecae03f76072ef402e6e096c9e5af7863e81911"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/hir-demo.fy",
+      "sha256": "9d7f197d6d32aed4ab72392acc7f0746f370d700050b3c77c6ad30f329f47e79"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/mir-branches-demo.fy",
+      "sha256": "1824a0d8ccc0b41ed6ff38ec07f05e88d6fc5852f3d365d803df2d33fad97780"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/mir-demo.fy",
+      "sha256": "ec3f971336f21f814f65217c7987ef4f9d575f04dd6fa823fe6b9a62cfc87c1c"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/modules-library.fy",
+      "sha256": "48ab5f5657bd1d318526bc49d9bec8abad668bf8d5cb79c748a27916e34c9a38"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/modules-main.fy",
+      "sha256": "b950d90c543080fd4ce6d147b83efc06184edf2a943ce9a1d7d87ed3b6c79ca0"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/names-demo.fy",
+      "sha256": "06503ce4049d44d428b590f4bfc9f59c202cdb8b71dad0ae1c8dde2b1579db02"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/token-demo.fy",
+      "sha256": "1e19bb36ac6a4c4a8b612ce389f9ba20d9a11547eb2310242336db8af5a21646"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/types-demo.fy",
+      "sha256": "2b4a001e25749858c861d42ad1742f78622ee5c73b7250ccde284b1d58dc6f52"
+    },
+    {
+      "path": "examples/lexer_candidate/samples/modules.txt",
+      "sha256": "1c22803046413d70d39841b9b1719627d44810bee8c50fc8259877ef0491a9ca"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/bindings.fy",
+      "sha256": "0954f82fa11f16a26cf8ca247c5b042454726f26ac8655cdae1fcdbf5d7acfc4"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/hir.fy",
+      "sha256": "918963770fe49de15dffd34cdbb66fe979a56b94e4e6e5807f19a2b641aa1fb9"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/mir.fy",
+      "sha256": "b500161736a64c5ac0d06a40d521870836e6b024a7674d0e451f497cb1755ae6"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/modules.fy",
+      "sha256": "dfe7648e25b070f518c413ad30347fab5414a33a12c75f0e037b27d0f62c1749"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/name_control.fy",
+      "sha256": "fbd238d2ea93ffc524f7641ba3b2836164d941cdc9bad5fdbc3445167b0c0080"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/type_control.fy",
+      "sha256": "77762922c052df7fca588dac91d34e555f7290ba875e6c23a7004e0d771bc561"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/types.fy",
+      "sha256": "77cd79234ea17e853cd3842e95b9df4978e67845f9d31cc5dfb12a17567b3b46"
+    },
+    {
+      "path": "examples/lexer_candidate/README.md",
+      "sha256": "dbbe565f1232ebdee4f6c8f286c03a2ef15415861750663a23e9741fc6453056"
+    },
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/main.go",
+      "sha256": "db760be17df5276444649d5118b1bca2e9153ae776445ec9a38b7064ff6bf7c0"
+    },
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/mir.go",
+      "sha256": "82e59a44802175c180bac7515f0c7ff0ae9c25e58054d3a7a0d3c7ce50ec3e1f"
+    },
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/mir_control.go",
+      "sha256": "aa171e0f5ad1b4dec34255b2be1b6a9a5dc5e7748571ff4990d946f358077709"
+    },
+    {
+      "path": "internal/cli/fairy_lexer_file_cli_test.go",
+      "sha256": "4e007b93c25608eb9a406799aa14011cbb99f39cc494c567af623c5925a1f348"
+    }
+  ],
+  "sourceIdentity": "SHA256 of exact staged Git blobs; branch sample validated separately after CLI corpus run",
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+    "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf"
+  },
+  "compilerSourceManifest": {
+    "path": ".cache/nominal-array-field-view-compiler/source-manifest.json",
+    "sha256": "62763a51977d82a18255f07af3c424ddc988a1e1b8f96cd3afabfaeafc302107",
+    "sourceDigest": "6de6ed7dc29d60d5c47ddbc59863341c4a80f98cb1559cb0b0010b280704e0f4",
+    "files": 619,
+    "unchanged": true
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceFiles": 10,
+    "sourceDigest": "9f2ab4a998f6fd701c4dafa9a369f5f6ce60f19bb78500aebda40c05f4558c35"
+  },
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\tokens-reference.json",
+    "sha256": "e180dc35830965730fabadc3f0e917ec1f056df2e6d30959a00b6bb586f6b749"
+  },
+  "declarationsReference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\declarations-reference.json",
+    "sha256": "8fa9182fb199d1bcf8f5f9fda49f8a25923051dd47c55e4291e2decb482f3b12"
+  },
+  "namesReference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\names-reference.json",
+    "sha256": "76d55d097f29941753bb115619a5ad380bd987fa11945017f27f498664618c3b"
+  },
+  "typesReference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\types-reference.json",
+    "sha256": "6def5e545bf43e8d6d69a019925aeea0c42114af85559c2c0abadf642d6e7387"
+  },
+  "modulesReference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\modules-reference.json",
+    "sha256": "348196ff54116f835fe3860d7ba58b2dc906fabcfa13fd11d604c2a59d2893e5"
+  },
+  "hirReference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\hir-file-cli\\reference.json",
+    "sha256": "bcbec44db2b5263a94b165dc551a617349574c7da27f8a005540c550e92abe28"
+  },
+  "mirReference": {
+    "path": "docs/ops/evidence/mir-branch-file-cli-20261006.reference.json",
+    "sha256": "265a58a9597ca397b327aa9158b5c2633d3d66faefcff9fbcca5074d48a54d75"
+  },
+  "referenceStorage": "MIR reference tracked here; historical references remain in their existing hashed local cache paths",
+  "verification": {
+    "common": [
+      {
+        "case": "compiler --version",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261005093555-585e5ef53991+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 585e5ef53991368dce52094889ba7bb275b52103\nmodified: true\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 49 source file(s), 839 MIR function(s), lock unchanged\n",
+        "stderr": ""
+      },
+      {
+        "case": "compiler check --locked",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+          "check",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 49 source file(s), 839 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ],
+    "profiles": [
+      {
+        "profile": "dev",
+        "passed": true,
+        "fileCases": 29,
+        "accepted": 18,
+        "diagnosticCases": 10,
+        "limitCases": 1,
+        "unchangedFiles": 29,
+        "declarations": {
+          "files": 29,
+          "accepted": 15,
+          "syntaxErrors": 9,
+          "lexicalErrors": 4,
+          "limits": 1,
+          "unchangedFiles": 29
+        },
+        "names": {
+          "bindingFiles": 63,
+          "bindingReferences": 61,
+          "files": 63,
+          "accepted": 28,
+          "unresolved": 14,
+          "duplicate": 3,
+          "unsupported": 15,
+          "limits": 3,
+          "unchangedFiles": 63
+        },
+        "types": {
+          "files": 148,
+          "accepted": 84,
+          "errors": 60,
+          "unsupported": 3,
+          "limits": 1,
+          "unchangedFiles": 148
+        },
+        "modules": {
+          "fixtures": 46,
+          "accepted": 23,
+          "semanticErrors": 17,
+          "unsupported": 4,
+          "limits": 2,
+          "unchangedFiles": 203
+        },
+        "hir": {
+          "fixtures": 60,
+          "accepted": 34,
+          "rejected": 26,
+          "unchangedFiles": 60
+        },
+        "mir": {
+          "fixtures": 59,
+          "accepted": 56,
+          "returns": 42,
+          "traps": 14,
+          "deferred": 3,
+          "unchangedFiles": 59,
+          "differential": 52,
+          "contractGoldens": 4
+        },
+        "cliExecutions": 581,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-branch-file-cli\\dev.exe",
+        "imageSHA256": "a633af9e10dea228fcb7e1508d516a8e899d548ed50974ec4c2d30de6c0aaac2",
+        "raw": "docs/ops/evidence/mir-branch-file-cli-20261006.dev.json",
+        "rawSHA256": "bc9939bf4f1b1cce311464df8d77a21ceedf11007d0dbbbe2df7cb9c496cf451"
+      },
+      {
+        "profile": "release",
+        "passed": true,
+        "fileCases": 29,
+        "accepted": 18,
+        "diagnosticCases": 10,
+        "limitCases": 1,
+        "unchangedFiles": 29,
+        "declarations": {
+          "files": 29,
+          "accepted": 15,
+          "syntaxErrors": 9,
+          "lexicalErrors": 4,
+          "limits": 1,
+          "unchangedFiles": 29
+        },
+        "names": {
+          "bindingFiles": 63,
+          "bindingReferences": 61,
+          "files": 63,
+          "accepted": 28,
+          "unresolved": 14,
+          "duplicate": 3,
+          "unsupported": 15,
+          "limits": 3,
+          "unchangedFiles": 63
+        },
+        "types": {
+          "files": 148,
+          "accepted": 84,
+          "errors": 60,
+          "unsupported": 3,
+          "limits": 1,
+          "unchangedFiles": 148
+        },
+        "modules": {
+          "fixtures": 46,
+          "accepted": 23,
+          "semanticErrors": 17,
+          "unsupported": 4,
+          "limits": 2,
+          "unchangedFiles": 203
+        },
+        "hir": {
+          "fixtures": 60,
+          "accepted": 34,
+          "rejected": 26,
+          "unchangedFiles": 60
+        },
+        "mir": {
+          "fixtures": 59,
+          "accepted": 56,
+          "returns": 42,
+          "traps": 14,
+          "deferred": 3,
+          "unchangedFiles": 59,
+          "differential": 52,
+          "contractGoldens": 4
+        },
+        "cliExecutions": 581,
+        "imagePath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-branch-file-cli\\release.exe",
+        "imageSHA256": "51f36d2d3ff1b493411a60bf0c94ef794e55d17cd3d9320ed99d4ae81d52265e",
+        "raw": "docs/ops/evidence/mir-branch-file-cli-20261006.release.json",
+        "rawSHA256": "46b51309e4d624e9fc8842f9f7e7a4b9e77f63c91cd1efde131addf54f037f16"
+      }
+    ],
+    "cliExecutions": 1162
+  },
+  "additionalValidation": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "test",
+        "--native",
+        "--file",
+        "tests/mir.fy",
+        "--locked",
+        "--json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::mir::checked_arithmetic_has_explicit_trap_edges\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::conditional_results_join_only_live_paths\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::construction_rejects_unfinished_and_dangling_operations\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::false_assert_has_no_live_success_path\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::loops_and_defer_fail_closed\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::nested_call_arguments_have_separate_ranges\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::owned_constants_and_module_identity\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::return_in_argument_does_not_publish_parent_edges\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::short_circuit_preserves_a_default_before_branch\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":9,\"passed\":9,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "test",
+        "--native",
+        "--release",
+        "--file",
+        "tests/mir.fy",
+        "--locked",
+        "--json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"release\",\"tests\":[{\"identity\":\"tests::mir::checked_arithmetic_has_explicit_trap_edges\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::conditional_results_join_only_live_paths\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::construction_rejects_unfinished_and_dangling_operations\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::false_assert_has_no_live_success_path\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::loops_and_defer_fail_closed\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::nested_call_arguments_have_separate_ranges\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::owned_constants_and_module_identity\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::return_in_argument_does_not_publish_parent_edges\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir::short_circuit_preserves_a_default_before_branch\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":9,\"passed\":9,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-windows-msvc",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "stdoutPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-branch-file-cli\\x86_64-windows-msvc.c",
+      "stdoutSHA256": "2e4d11f304231e915f4a52fda1fb7203d1e483dfe2e96ef696cfdfd63f8f3dec"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-linux-gnu",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "stdoutPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-branch-file-cli\\x86_64-linux-gnu.c",
+      "stdoutSHA256": "e348eb25e3b9b3d2f5a7d35629ec10923548d2a9f2ac45e4ebe5ed5994dc8d43"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/cli",
+        "-run",
+        "^TestLexerFileCLIWorkspace$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/cli\t1.897s\n"
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./cmd/fairyc-lexer-file-oracle",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "run",
+        "./cmd/fairyc-lexer-file-oracle",
+        "--mir",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-branch-file-cli\\reference-rebuilt.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "referenceSHA256": "265a58a9597ca397b327aa9158b5c2633d3d66faefcff9fbcca5074d48a54d75",
+      "matchesInitialReference": true
+    }
+  ],
+  "sampleValidation": [
+    {
+      "profile": "dev",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-branch-file-cli\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\samples\\mir-branches-demo.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t21\t25\t0\nT\t2\t2\t0\t3\t6\t0\t0\t196\t200\t0\nF\t1\t1\t1\t0\t19\t0\t13\t0\t0\t14\t186\t0\nF\t2\t2\t14\t19\t1\t13\t3\t0\t0\t188\t243\t0\nL\t1\t1\t3\t1\t0\t1\t42\t47\nL\t2\t1\t4\t1\t0\t0\t65\t73\nL\t3\t1\t0\t1\t0\t0\t50\t51\nL\t4\t1\t0\t1\t0\t0\t80\t85\nL\t5\t1\t0\t1\t0\t0\t88\t89\nL\t6\t1\t0\t6\t0\t0\t80\t89\nL\t7\t1\t0\t1\t0\t0\t76\t115\nL\t8\t1\t0\t1\t0\t0\t93\t98\nL\t9\t1\t0\t1\t0\t0\t101\t102\nL\t10\t1\t0\t1\t0\t0\t93\t102\nL\t11\t1\t0\t1\t0\t0\t112\t113\nL\t12\t1\t0\t1\t0\t0\t128\t136\nL\t13\t1\t0\t1\t0\t0\t140\t141\nL\t14\t1\t0\t6\t0\t0\t128\t141\nL\t15\t1\t0\t6\t0\t0\t128\t161\nL\t16\t1\t0\t6\t0\t0\t146\t150\nL\t17\t1\t0\t6\t0\t0\t146\t160\nL\t18\t1\t0\t6\t0\t0\t154\t160\nL\t19\t1\t0\t1\t0\t0\t175\t183\nL\t20\t2\t0\t6\t0\t0\t216\t221\nB\t1\t1\t1\t5\t3\t6\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t76\t115\nB\t2\t1\t6\t8\t4\t0\t8\t9\t1\t1\t4\t5\t8\t0\t0\t0\t0\t1\t93\t102\nB\t3\t1\t11\t12\t2\t0\t0\t0\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t76\t115\nB\t4\t1\t9\t10\t2\t0\t0\t0\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t76\t115\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t93\t102\nB\t6\t1\t13\t17\t3\t14\t0\t0\t0\t6\t7\t8\t0\t0\t0\t0\t0\t0\t128\t161\nB\t7\t1\t18\t19\t3\t16\t0\t0\t0\t6\t10\t9\t0\t0\t0\t0\t0\t0\t146\t160\nB\t8\t1\t22\t22\t4\t0\t15\t0\t0\t6\t12\t13\t22\t0\t0\t0\t0\t16\t121\t163\nB\t9\t1\t0\t0\t5\t0\t0\t0\t0\t0\t11\t0\t0\t2\t18\t0\t0\t0\t154\t160\nB\t10\t1\t21\t21\t2\t0\t0\t0\t0\t0\t8\t0\t0\t0\t0\t0\t0\t0\t128\t161\nB\t11\t1\t20\t20\t2\t0\t0\t0\t0\t0\t10\t0\t0\t0\t0\t0\t0\t0\t146\t160\nB\t12\t1\t23\t23\t1\t19\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t168\t184\nB\t13\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t121\t163\nB\t14\t2\t24\t25\t4\t0\t20\t0\t0\t6\t15\t16\t25\t0\t0\t0\t0\t16\t209\t223\nB\t15\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t209\t223\nB\t16\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t209\t223\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t1\t0\t50\t51\t5\nO\t2\t1\t1\t2\t1\t1\t1\t0\t3\t0\t3\t0\t0\t0\t34\t52\t-\nO\t3\t1\t1\t2\t4\t1\t1\t0\t1\t0\t4\t0\t0\t0\t80\t85\t-\nO\t4\t1\t1\t1\t5\t1\t1\t0\t0\t0\t5\t1\t2\t0\t88\t89\t0\nO\t5\t1\t1\t4\t6\t6\t1\t17\t4\t5\t0\t0\t0\t0\t80\t89\t-\nO\t6\t1\t2\t2\t8\t1\t1\t0\t1\t0\t7\t0\t0\t0\t93\t98\t-\nO\t7\t1\t2\t1\t9\t1\t1\t0\t0\t0\t8\t2\t3\t0\t101\t102\t2\nO\t8\t1\t2\t5\t0\t1\t1\t1\t8\t9\t0\t0\t0\t0\t93\t102\t-\nO\t9\t1\t4\t4\t10\t1\t1\t1\t8\t9\t10\t0\t0\t0\t93\t102\t-\nO\t10\t1\t4\t2\t7\t1\t1\t0\t10\t0\t0\t0\t0\t0\t76\t115\t-\nO\t11\t1\t3\t1\t11\t1\t1\t0\t0\t0\t12\t3\t4\t0\t112\t113\t0\nO\t12\t1\t3\t2\t7\t1\t1\t0\t11\t0\t0\t0\t0\t0\t76\t115\t-\nO\t13\t1\t6\t2\t2\t1\t1\t0\t7\t0\t14\t0\t0\t0\t57\t116\t-\nO\t14\t1\t6\t2\t12\t1\t1\t0\t2\t0\t15\t0\t0\t0\t128\t136\t-\nO\t15\t1\t6\t1\t13\t1\t1\t0\t0\t0\t16\t4\t5\t0\t140\t141\t7\nO\t16\t1\t6\t4\t14\t6\t1\t13\t12\t13\t17\t0\t0\t0\t128\t141\t-\nO\t17\t1\t6\t2\t15\t6\t6\t0\t14\t0\t0\t0\t0\t0\t128\t161\t-\nO\t18\t1\t7\t1\t16\t6\t6\t0\t0\t0\t19\t0\t0\t1\t146\t150\t-\nO\t19\t1\t7\t2\t17\t6\t6\t0\t16\t0\t0\t0\t0\t0\t146\t160\t-\nO\t20\t1\t11\t2\t17\t6\t6\t0\t18\t0\t0\t0\t0\t0\t146\t160\t-\nO\t21\t1\t10\t2\t15\t6\t6\t0\t17\t0\t0\t0\t0\t0\t128\t161\t-\nO\t22\t1\t8\t5\t0\t6\t6\t0\t15\t0\t0\t0\t0\t0\t121\t163\t-\nO\t23\t1\t12\t2\t19\t1\t1\t0\t2\t0\t0\t0\t0\t0\t175\t183\t-\nO\t24\t2\t14\t1\t20\t6\t6\t0\t0\t0\t25\t0\t0\t0\t216\t221\t-\nO\t25\t2\t14\t5\t0\t6\t6\t0\t20\t0\t0\t0\t0\t0\t209\t223\t-\n",
+      "stderr": "",
+      "sourceSHA256": "1824a0d8ccc0b41ed6ff38ec07f05e88d6fc5852f3d365d803df2d33fad97780",
+      "imageSHA256": "a633af9e10dea228fcb7e1508d516a8e899d548ed50974ec4c2d30de6c0aaac2",
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": ""
+      }
+    },
+    {
+      "profile": "release",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-branch-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\samples\\mir-branches-demo.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t21\t25\t0\nT\t2\t2\t0\t3\t6\t0\t0\t196\t200\t0\nF\t1\t1\t1\t0\t19\t0\t13\t0\t0\t14\t186\t0\nF\t2\t2\t14\t19\t1\t13\t3\t0\t0\t188\t243\t0\nL\t1\t1\t3\t1\t0\t1\t42\t47\nL\t2\t1\t4\t1\t0\t0\t65\t73\nL\t3\t1\t0\t1\t0\t0\t50\t51\nL\t4\t1\t0\t1\t0\t0\t80\t85\nL\t5\t1\t0\t1\t0\t0\t88\t89\nL\t6\t1\t0\t6\t0\t0\t80\t89\nL\t7\t1\t0\t1\t0\t0\t76\t115\nL\t8\t1\t0\t1\t0\t0\t93\t98\nL\t9\t1\t0\t1\t0\t0\t101\t102\nL\t10\t1\t0\t1\t0\t0\t93\t102\nL\t11\t1\t0\t1\t0\t0\t112\t113\nL\t12\t1\t0\t1\t0\t0\t128\t136\nL\t13\t1\t0\t1\t0\t0\t140\t141\nL\t14\t1\t0\t6\t0\t0\t128\t141\nL\t15\t1\t0\t6\t0\t0\t128\t161\nL\t16\t1\t0\t6\t0\t0\t146\t150\nL\t17\t1\t0\t6\t0\t0\t146\t160\nL\t18\t1\t0\t6\t0\t0\t154\t160\nL\t19\t1\t0\t1\t0\t0\t175\t183\nL\t20\t2\t0\t6\t0\t0\t216\t221\nB\t1\t1\t1\t5\t3\t6\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t76\t115\nB\t2\t1\t6\t8\t4\t0\t8\t9\t1\t1\t4\t5\t8\t0\t0\t0\t0\t1\t93\t102\nB\t3\t1\t11\t12\t2\t0\t0\t0\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t76\t115\nB\t4\t1\t9\t10\t2\t0\t0\t0\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t76\t115\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t93\t102\nB\t6\t1\t13\t17\t3\t14\t0\t0\t0\t6\t7\t8\t0\t0\t0\t0\t0\t0\t128\t161\nB\t7\t1\t18\t19\t3\t16\t0\t0\t0\t6\t10\t9\t0\t0\t0\t0\t0\t0\t146\t160\nB\t8\t1\t22\t22\t4\t0\t15\t0\t0\t6\t12\t13\t22\t0\t0\t0\t0\t16\t121\t163\nB\t9\t1\t0\t0\t5\t0\t0\t0\t0\t0\t11\t0\t0\t2\t18\t0\t0\t0\t154\t160\nB\t10\t1\t21\t21\t2\t0\t0\t0\t0\t0\t8\t0\t0\t0\t0\t0\t0\t0\t128\t161\nB\t11\t1\t20\t20\t2\t0\t0\t0\t0\t0\t10\t0\t0\t0\t0\t0\t0\t0\t146\t160\nB\t12\t1\t23\t23\t1\t19\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t168\t184\nB\t13\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t121\t163\nB\t14\t2\t24\t25\t4\t0\t20\t0\t0\t6\t15\t16\t25\t0\t0\t0\t0\t16\t209\t223\nB\t15\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t209\t223\nB\t16\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t209\t223\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t1\t0\t50\t51\t5\nO\t2\t1\t1\t2\t1\t1\t1\t0\t3\t0\t3\t0\t0\t0\t34\t52\t-\nO\t3\t1\t1\t2\t4\t1\t1\t0\t1\t0\t4\t0\t0\t0\t80\t85\t-\nO\t4\t1\t1\t1\t5\t1\t1\t0\t0\t0\t5\t1\t2\t0\t88\t89\t0\nO\t5\t1\t1\t4\t6\t6\t1\t17\t4\t5\t0\t0\t0\t0\t80\t89\t-\nO\t6\t1\t2\t2\t8\t1\t1\t0\t1\t0\t7\t0\t0\t0\t93\t98\t-\nO\t7\t1\t2\t1\t9\t1\t1\t0\t0\t0\t8\t2\t3\t0\t101\t102\t2\nO\t8\t1\t2\t5\t0\t1\t1\t1\t8\t9\t0\t0\t0\t0\t93\t102\t-\nO\t9\t1\t4\t4\t10\t1\t1\t1\t8\t9\t10\t0\t0\t0\t93\t102\t-\nO\t10\t1\t4\t2\t7\t1\t1\t0\t10\t0\t0\t0\t0\t0\t76\t115\t-\nO\t11\t1\t3\t1\t11\t1\t1\t0\t0\t0\t12\t3\t4\t0\t112\t113\t0\nO\t12\t1\t3\t2\t7\t1\t1\t0\t11\t0\t0\t0\t0\t0\t76\t115\t-\nO\t13\t1\t6\t2\t2\t1\t1\t0\t7\t0\t14\t0\t0\t0\t57\t116\t-\nO\t14\t1\t6\t2\t12\t1\t1\t0\t2\t0\t15\t0\t0\t0\t128\t136\t-\nO\t15\t1\t6\t1\t13\t1\t1\t0\t0\t0\t16\t4\t5\t0\t140\t141\t7\nO\t16\t1\t6\t4\t14\t6\t1\t13\t12\t13\t17\t0\t0\t0\t128\t141\t-\nO\t17\t1\t6\t2\t15\t6\t6\t0\t14\t0\t0\t0\t0\t0\t128\t161\t-\nO\t18\t1\t7\t1\t16\t6\t6\t0\t0\t0\t19\t0\t0\t1\t146\t150\t-\nO\t19\t1\t7\t2\t17\t6\t6\t0\t16\t0\t0\t0\t0\t0\t146\t160\t-\nO\t20\t1\t11\t2\t17\t6\t6\t0\t18\t0\t0\t0\t0\t0\t146\t160\t-\nO\t21\t1\t10\t2\t15\t6\t6\t0\t17\t0\t0\t0\t0\t0\t128\t161\t-\nO\t22\t1\t8\t5\t0\t6\t6\t0\t15\t0\t0\t0\t0\t0\t121\t163\t-\nO\t23\t1\t12\t2\t19\t1\t1\t0\t2\t0\t0\t0\t0\t0\t175\t183\t-\nO\t24\t2\t14\t1\t20\t6\t6\t0\t0\t0\t25\t0\t0\t0\t216\t221\t-\nO\t25\t2\t14\t5\t0\t6\t6\t0\t20\t0\t0\t0\t0\t0\t209\t223\t-\n",
+      "stderr": "",
+      "sourceSHA256": "1824a0d8ccc0b41ed6ff38ec07f05e88d6fc5852f3d365d803df2d33fad97780",
+      "imageSHA256": "51f36d2d3ff1b493411a60bf0c94ef794e55d17cd3d9320ed99d4ae81d52265e",
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": ""
+      }
+    }
+  ],
+  "referenceDefects": [
+    {
+      "case": "binary-read-before-if",
+      "source": "module main; fn i32 main(){var i32 x=5;return x+if(true){x=2;3}else{4};}",
+      "outcomeOrigin": "fixed-source-left-to-right",
+      "contractOutcome": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "referenceExecutionError": null,
+      "referenceOutcome": {
+        "Kind": "return",
+        "Value": 5,
+        "TrapCategory": "",
+        "DropTrace": null,
+        "RegionTrace": null,
+        "Stdout": null,
+        "Stderr": null,
+        "IOTrace": null
+      }
+    },
+    {
+      "case": "if-condition-return",
+      "source": "module main; fn i32 main(){if({return 9;true}){discard 1;}return 0;}",
+      "outcomeOrigin": "fixed-source-return-order",
+      "contractOutcome": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "referenceExecutionError": "operand has no executable value",
+      "referenceOutcome": null
+    },
+    {
+      "case": "call-first-argument-return",
+      "source": "module main; fn i32 main(){return sum({return 9;1},fail());}fn i32 sum(i32 a,i32 b){return a+b;}fn i32 fail(){assert(false);return 99;}",
+      "outcomeOrigin": "fixed-source-return-order",
+      "contractOutcome": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "referenceExecutionError": "return from \"main::main\": operand has no executable value",
+      "referenceOutcome": null
+    },
+    {
+      "case": "call-last-argument-return",
+      "source": "module main; fn i32 main(){return sum(id(1),{return 9;2});}fn i32 id(i32 x){return x;}fn i32 sum(i32 a,i32 b){return a+b;}",
+      "outcomeOrigin": "fixed-source-return-order",
+      "contractOutcome": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "referenceExecutionError": "return from \"main::main\": operand has no executable value",
+      "referenceOutcome": null
+    }
+  ],
+  "sourceFormatting": {
+    "newFairyFiles": "UTF-8 LF with final newline",
+    "pythonByteCompilation": true,
+    "gitDiffCheck": true
+  },
+  "scope": {
+    "productLogic": "Fairy C and public SDK only",
+    "compilerChanged": false,
+    "sdkChanged": false,
+    "linuxNativeExecuted": false,
+    "referenceParity": "52 admitted fixtures match Go; 4 explicit contract goldens expose 2 Go reference defect families; no promotion claim",
+    "mirAdmission": "Scalars, if/else/else-if, conditional RHS evaluation, early returns, checked operators, assertions and local calls",
+    "constructionBoundary": "Checked assemble is not the future full MIR verifier",
+    "inputExecution": "Emitted candidate MIR executed only by the test-only Python comparator; no candidate native code emission"
+  },
+  "skippedValidation": [
+    "Linux native execution deferred to owner batch",
+    "Allocation/OS fault injection and performance experiments outside this unit",
+    "Whole-repository suite omitted for example-only change"
+  ]
+}

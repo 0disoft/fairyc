@@ -96,6 +96,8 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
         if ((b.kind == 1 || b.kind == 6 || b.kind == 7) && (b.target != 0 || b.alternative != 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((b.kind >= 2 && b.kind <= 5) && (b.target <= f.block_start || b.target > f.block_start + f.block_count)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((b.kind == 3 || b.kind == 4) && (b.alternative <= f.block_start || b.alternative > f.block_start + f.block_count || b.target == b.alternative)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (b.kind == 2 && b.alternative != 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (b.kind == 3 && (b.value == 0 || b.type != 6 || v::at<Local>(ref locals,b.value - 1).type != 6 || v::at<Local>(ref locals,b.value - 1).function != b.function)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (b.kind == 4 && (b.check == 0 || b.check != b.last || b.trap_mask == 0 || v::at<Operation>(ref operations,b.check - 1).kind != 5 || v::at<Block>(ref blocks,b.alternative - 1).kind != 6 || v::at<Block>(ref blocks,b.alternative - 1).trap_mask != b.trap_mask)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (b.kind == 5 && (b.callee == 0 || b.argument_count != v::at<Target>(ref targets,b.callee - 1).signature_count)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         var usize op = b.first; var usize last = 0;

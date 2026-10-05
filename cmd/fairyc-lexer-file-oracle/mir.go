@@ -17,19 +17,24 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
+type scalarMIRSeed struct {
+	name, input string
+	admitted    bool
+}
+
 func writeMIR(destination string) error {
 	type fixture struct {
-		Name     string              `json:"name"`
-		InputHex string              `json:"inputHex"`
-		Admitted bool                `json:"admitted"`
-		Program  mir.Program         `json:"program"`
-		Outcome  interpreter.Outcome `json:"outcome"`
+		Name                    string               `json:"name"`
+		InputHex                string               `json:"inputHex"`
+		Admitted                bool                 `json:"admitted"`
+		Program                 mir.Program          `json:"program"`
+		Outcome                 interpreter.Outcome  `json:"outcome"`
+		OutcomeOrigin           string               `json:"outcomeOrigin"`
+		ReferenceExecutionError string               `json:"referenceExecutionError,omitempty"`
+		ReferenceOutcome        *interpreter.Outcome `json:"referenceOutcome,omitempty"`
 	}
 	var fixtures []fixture
-	seeds := []struct {
-		name, input string
-		admitted    bool
-	}{
+	seeds := []scalarMIRSeed{
 		{"constant", "fn i32 main(){return 17;}", true},
 		{"i64-and-forward-call", "fn i32 main(){var i64 x=4000000000; x+=add(1,2); assert(x==4000000003); return 0;} fn i64 add(i64 a,i64 b){return a+b;}", true},
 		{"signed-minima", "fn i32 main(){let i32 x=-2147483648; let i64 y=-0x8000000000000000; assert(x==-2147483648); assert(y==-9223372036854775808); return 0;}", true},
@@ -49,12 +54,13 @@ func writeMIR(destination string) error {
 		{"shift-width", "fn i32 main(){let u8 x=1; discard x<<8; return 0;}", true},
 		{"shift-overflow", "fn i32 main(){let u32 x=4294967295; discard x<<1; return 0;}", true},
 		{"assertion", "fn i32 main(){assert(false); return 0;}", true},
-		{"deferred-if", "fn i32 main(){return if(true){1}else{2};}", false},
-		{"deferred-short-circuit", "fn i32 main(){assert(false || true); return 0;}", false},
+		{"if-simple", "fn i32 main(){return if(true){1}else{2};}", true},
+		{"short-circuit-simple", "fn i32 main(){assert(false || true); return 0;}", true},
 		{"deferred-while", "fn i32 main(){var i32 x=0; while(x<2){x+=1;} return x;}", false},
 		{"deferred-for", "fn i32 main(){var i32 x=0; for(var i32 i=0;i<2;i+=1){x+=1;} return x;}", false},
 		{"deferred-defer", "fn i32 main(){defer observe(1); return 0;} fn void observe(i32 x){discard x;}", false},
 	}
+	seeds = append(seeds, scalarMIRControlSeeds()...)
 	for _, seed := range seeds {
 		input := "module main; " + seed.input
 		file := source.NewFile("main.fy", []byte(input))
@@ -78,10 +84,35 @@ func writeMIR(destination string) error {
 			return fmt.Errorf("MIR oracle verifier %s: %v", seed.name, failures)
 		}
 		outcome, err := interpreter.Execute(program, "main::main")
+		origin := "go-mir-interpreter"
+		referenceError := ""
+		var referenceOutcome *interpreter.Outcome
 		if err != nil {
-			return fmt.Errorf("MIR oracle execution %s: %w", seed.name, err)
+			// Retain this known reference-lowering defect as a fixed source-order
+			// golden, never count it as Go differential success or hide the error.
+			known := map[string]string{
+				"if-condition-return":               "operand has no executable value",
+				"call-first-argument-return":        "return from \"main::main\": operand has no executable value",
+				"call-last-argument-return":         "return from \"main::main\": operand has no executable value",
+				"call-conditional-argument-returns": "return from \"main::main\": operand has no executable value",
+			}
+			if expected, found := known[seed.name]; !found || err.Error() != expected {
+				return fmt.Errorf("MIR oracle execution %s: %w", seed.name, err)
+			}
+			outcome = interpreter.Outcome{Kind: "return", Value: 9}
+			origin = "fixed-source-return-order"
+			referenceError = err.Error()
 		}
-		fixtures = append(fixtures, fixture{seed.name, hex.EncodeToString([]byte(input)), seed.admitted, program, outcome})
+		if seed.name == "binary-read-before-if" {
+			if outcome.Kind != "return" || outcome.Value != 5 || outcome.TrapCategory != "" {
+				return fmt.Errorf("known reference evaluation-order defect changed: %+v", outcome)
+			}
+			observed := outcome
+			referenceOutcome = &observed
+			outcome = interpreter.Outcome{Kind: "return", Value: 8}
+			origin = "fixed-source-left-to-right"
+		}
+		fixtures = append(fixtures, fixture{seed.name, hex.EncodeToString([]byte(input)), seed.admitted, program, outcome, origin, referenceError, referenceOutcome})
 	}
 	data, err := json.MarshalIndent(struct {
 		Schema   string    `json:"schema"`

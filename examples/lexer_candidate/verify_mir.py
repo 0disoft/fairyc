@@ -65,7 +65,7 @@ def validate(t,source):
             bid=pending.pop()
             if bid in seen: continue
             seen.add(bid);used_blocks.add(bid);assert bid in owned
-            b=t['B'][bid];assert b['function']==fid and b['kind'] in (1,4,5,6)
+            b=t['B'][bid];assert b['function']==fid and b['kind'] in range(1,8)
             op=b['first'];last=0
             while op:
                 assert op>last and op not in used_ops
@@ -91,6 +91,15 @@ def validate(t,source):
                 else: local(b['value'],fid,target['result'])
             elif b['kind']==6:
                 assert b['target']==b['alternative']==0 and b['trap_mask']>0
+            elif b['kind']==7:
+                assert b['target']==b['alternative']==0
+            elif b['kind']==2:
+                assert b['alternative']==0 and b['target'] in owned
+                pending.append(b['target'])
+            elif b['kind']==3:
+                local(b['value'],fid,6)
+                assert b['type']==6 and b['target'] in owned and b['alternative'] in owned and b['target']!=b['alternative']
+                pending.extend([b['target'],b['alternative']])
             elif b['kind']==4:
                 o=t['O'][b['check']]
                 assert (b['left'],b['right'],b['type'],b['operator'])==(o['left'],o['right'],o['owner_type'],o['operator'])
@@ -160,7 +169,12 @@ def execute(t,names):
                 else:assert kind==5
                 op=o['next']
             if b['kind']==1:return values[b['value']] if b['value'] else None,''
-            if b['kind']==4:
+            if b['kind']==2:
+                bid=b['target']
+            elif b['kind']==3:
+                condition=values[b['value']];assert isinstance(condition,bool)
+                bid=b['target'] if condition else b['alternative']
+            elif b['kind']==4:
                 trap=check(b['operator'],values[b['left']],values[b['right']] if b['right'] else 0,b['type'],not b['right'])
                 if trap:
                     assert b['trap_mask']&next(bit for bit,name in TRAPS.items() if name==trap)
@@ -178,7 +192,7 @@ def execute(t,names):
     return dict(Kind='trap' if trap else 'return',Value=0 if trap else value,TrapCategory=trap)
 
 def verify_mir(image,reference,directory,rows,run,sha,location):
-    counts=dict(fixtures=0,accepted=0,returns=0,traps=0,deferred=0,unchangedFiles=0)
+    counts=dict(fixtures=0,accepted=0,returns=0,traps=0,deferred=0,unchangedFiles=0,differential=0,contractGoldens=0)
     for i,fixture in enumerate(reference['fixtures']):
         source=bytes.fromhex(fixture['inputHex']);path=directory/f'mir-{i}.fy';path.write_bytes(source);before=sha(path)
         row=run([image,'--mir-file',path],rows,'mir-'+fixture['name'])
@@ -200,5 +214,21 @@ def verify_mir(image,reference,directory,rows,run,sha,location):
         actual=execute(tables,names);expected={k:fixture['outcome'][k] for k in actual}
         assert actual==expected,dict(case=fixture['name'],actual=actual,expected=expected)
         row['mirObservation']=actual
+        origin=fixture.get('outcomeOrigin','go-mir-interpreter');row['outcomeOrigin']=origin
+        if origin=='fixed-source-return-order':
+            known={'if-condition-return':'operand has no executable value',
+                   **dict.fromkeys(('call-first-argument-return','call-last-argument-return','call-conditional-argument-returns'),
+                                   'return from "main::main": operand has no executable value')}
+            assert fixture['name'] in known and expected==dict(Kind='return',Value=9,TrapCategory='')
+            assert fixture['referenceExecutionError']==known[fixture['name']]
+            row['referenceExecutionError']=fixture['referenceExecutionError'];counts['contractGoldens']+=1
+        elif origin=='fixed-source-left-to-right':
+            assert fixture['name']=='binary-read-before-if' and expected==dict(Kind='return',Value=8,TrapCategory='')
+            observed={k:fixture['referenceOutcome'][k] for k in actual}
+            assert observed==dict(Kind='return',Value=5,TrapCategory='')
+            row['referenceOutcome']=observed;counts['contractGoldens']+=1
+        else:
+            assert origin=='go-mir-interpreter' and not fixture.get('referenceExecutionError')
+            counts['differential']+=1
         counts['accepted']+=1;counts['traps' if actual['Kind']=='trap' else 'returns']+=1
     return counts

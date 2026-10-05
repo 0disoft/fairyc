@@ -74,13 +74,55 @@ fn void nested_call_arguments_have_separate_ranges() {
 }
 
 @test
-fn void structured_control_and_defer_fail_closed() {
-    assert(!lowered(b"module main; fn i32 f(){return if(true){1}else{2};}",0).is_ok);
-    assert(!lowered(b"module main; fn bool f(){return false || true;}",0).is_ok);
+fn void loops_and_defer_fail_closed() {
     assert(!lowered(b"module main; fn void f(){while(true){break;}}",0).is_ok);
     assert(!lowered(b"module main; fn void f(){defer g();} fn void g(){}",0).is_ok);
     let m::Program empty = retained(b"module main;",0);
     assert(m::function_count(ref empty) == 0 && m::block_count(ref empty) == 0);
+}
+
+@test
+fn void conditional_results_join_only_live_paths() {
+    let m::Program p = retained(b"module main; fn i64 f(bool b){return if(b){4000000000}else{5000000000};}",0);
+    let m::Function f = m::function_at(ref p,1); let m::Block branch = m::block_at(ref p,f.entry);
+    assert(branch.kind == 3 && branch.type == 6 && m::local_at(ref p,branch.value).type == 6);
+    let m::Block yes = m::block_at(ref p,branch.target); let m::Block no = m::block_at(ref p,branch.alternative);
+    assert(yes.kind == 2 && no.kind == 2 && yes.target == no.target);
+    let m::Operation yes_result = m::operation_at(ref p,yes.last); let m::Operation no_result = m::operation_at(ref p,no.last);
+    assert(yes_result.kind == 2 && no_result.kind == 2 && yes_result.result == no_result.result);
+    assert(m::block_at(ref p,yes.target).value == yes_result.result);
+    let m::Program ended = retained(b"module main; fn i32 f(bool b){if(b){return 1;}else{return 2;}}",0);
+    assert(m::block_count(ref ended) == 3);
+    assert(m::block_at(ref ended,2).kind == 1 && m::block_at(ref ended,3).kind == 1);
+}
+
+@test
+fn void short_circuit_preserves_a_default_before_branch() {
+    let m::Program p = retained(b"module main; fn bool f(bool b){return b && true;}",0);
+    let m::Function f = m::function_at(ref p,1); let m::Block branch = m::block_at(ref p,f.entry);
+    assert(branch.kind == 3);
+    let m::Operation initial = m::operation_at(ref p,branch.last);
+    assert(initial.kind == 2 && initial.left == branch.value);
+    let m::Block rhs = m::block_at(ref p,branch.target); let m::Block join = m::block_at(ref p,branch.alternative);
+    assert(rhs.kind == 2 && rhs.target == branch.alternative && join.kind == 1 && join.value == initial.result);
+    assert(m::operation_at(ref p,rhs.last).result == initial.result);
+}
+
+@test
+fn void false_assert_has_no_live_success_path() {
+    let m::Program p = retained(b"module main; fn i32 f(){assert(false);}",0);
+    let m::Block b = m::block_at(ref p,m::function_at(ref p,1).entry);
+    assert(b.kind == 4 && b.trap_mask == 16);
+    assert(m::block_at(ref p,b.target).kind == 7 && m::block_at(ref p,b.alternative).kind == 6);
+}
+
+@test
+fn void return_in_argument_does_not_publish_parent_edges() {
+    let m::Program p = retained(b"module main; fn i32 main(){return sum({return 9;1},2);} fn i32 sum(i32 a,i32 b){return a+b;}",0);
+    let m::Block entry = m::block_at(ref p,m::function_at(ref p,1).entry);
+    assert(entry.kind == 1 && m::edge_count(ref p) == 2);
+    var usize i = 1;
+    while (i <= m::block_count(ref p)) { assert(m::block_at(ref p,i).kind != 5); i += 1; }
 }
 
 @test

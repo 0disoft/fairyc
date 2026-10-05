@@ -48,6 +48,14 @@ pub fn bool terminate(ref mut v::Vec<m::Block> blocks, ref mut Context c, m::Blo
     b.trap_mask = value.trap_mask; b.start = value.start; b.end = value.end;
     c.current = 0; return true;
 }
+pub fn bool jump(ref mut v::Vec<m::Block> blocks, ref mut Context c, usize target, usize start, usize end) {
+    var m::Block term = block(c.function,start,end); term.kind = 2; term.target = target;
+    return terminate(blocks,c,term);
+}
+pub fn bool branch(ref mut v::Vec<m::Block> blocks, ref mut Context c, usize condition, usize consequent, usize alternative, usize start, usize end) {
+    var m::Block term = block(c.function,start,end); term.kind = 3; term.value = condition; term.type = 6;
+    term.target = consequent; term.alternative = alternative; return terminate(blocks,c,term);
+}
 // A checked operator has a marker, a normal continuation and a non-unwinding
 // trap block. The trap mask preserves every type-specific failure category.
 pub fn bool guard(ref mut v::Vec<m::Operation> operations, ref mut v::Vec<m::Block> blocks, ref mut Context c, u32 type, u32 operator, usize left, usize right, u32 mask, usize start, usize end) {
