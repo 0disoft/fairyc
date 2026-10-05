@@ -17,7 +17,7 @@ import (
 func TestTokenPageCLIStorage(t *testing.T) {
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "token_page_cli")
-	for _, name := range []string{"fairy.toml", "src/main.fy", "src/tokens.fy"} {
+	for _, name := range []string{"fairy.toml", "src/main.fy", "src/tokens.fy", "src/evaluator.fy"} {
 		source, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {
 			t.Fatal(err)

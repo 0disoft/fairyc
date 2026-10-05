@@ -2,7 +2,7 @@
 
 Windows AMD64 and Linux GNU amd64 example. It requires a compiler with ADR 0472 support;
 the SDK stage0.86 version alone does not identify that support. Product logic is Fairy C in
-`src/main.fy` and `src/tokens.fy`.
+`src/main.fy`, `src/tokens.fy`, and `src/evaluator.fy`.
 
 A bounded ASCII lexer stores every scanned token directly into the fixed array field of
 a plain struct instead of a `Vec`:
@@ -13,8 +13,16 @@ struct Token { u32 kind; Span position; i64 value; }
 struct TokenPage { Token[128] tokens; usize used; }
 ```
 
-The command is `token-page-cli [ASCII-source]`, and `--help` prints
-`usage: token-page-cli [ASCII-source]` on stdout. With no argument it analyzes the
+The command is `token-page-cli [ASCII-source]` for the default analysis mode, and
+`token-page-cli --eval <ASCII-source>` for the evaluation mode described below. `--help`
+prints both forms on stdout:
+
+```text
+usage: token-page-cli [ASCII-source]
+       token-page-cli --eval <ASCII-source>
+```
+
+Argument-count errors keep the single-line stderr message. With no argument it analyzes the
 built-in source `price = 4000000000 + fee; other = 7;`.
 
 ```sh
@@ -36,8 +44,9 @@ The optional argument is the ASCII source to analyze. Its byte length is limited
 tokens are admitted. The admitted grammar is identifiers `[A-Za-z_][A-Za-z0-9_]*`,
 unsigned decimal integers in `0..=i64 max`, the operators `+`, `=` and `;`, and the ASCII
 whitespace SP, HT, LF and CR. The nonnegative i64 literal and the running number sum are
-overflow-checked. The program lexes and sums only: it has no expression parser and does not
-evaluate expressions.
+overflow-checked. In the default analysis mode the program lexes and sums only: it has no
+expression parser and does not evaluate expressions. The separate `--eval` mode below adds
+a bounded assignment evaluator on top of the same lexer.
 
 Output is eight deterministic TSV rows in this order:
 
@@ -85,6 +94,68 @@ error: stdout write failed
 
 A usage error exits 2 with `usage: token-page-cli [ASCII-source]` on stderr.
 
+## Evaluation mode (`--eval`)
+
+`token-page-cli --eval "<ASCII-source>"` evaluates a bounded assignment program instead of
+analyzing it. It reuses the same bounded lexer and the same 4095-byte input limit and
+128-token cap as the analysis mode.
+
+```sh
+fairyc run --locked -- --eval "price = 4000000000 + 7; total = price + 3;"
+```
+
+```powershell
+.\build\token-page-cli.exe --eval "price = 4000000000 + 7; total = price + 3;"
+```
+
+Output is one `name<TAB>value` row per assigned name, in the order the names were first
+defined, with a newline after each row:
+
+```text
+price	4000000007
+total	4000000010
+```
+
+The admitted program is a sequence of assignments, each terminated by `;`:
+
+```text
+program = (identifier '=' term ('+' term)* ';')* ;
+term    = unsigned-i64-literal | earlier-defined-identifier ;
+```
+
+Every `;` is required. Terms are unsigned decimal i64 literals, still capped at i64 max by
+the lexer, or identifiers defined earlier; unary `+` and `-`, parentheses, comments,
+subtraction, and every other expression form are rejected, so a value is a sum of
+nonnegative terms only. The lexer scans the whole input before evaluation begins. An empty
+or all-whitespace source succeeds and writes no output.
+
+A name may be reassigned: the later assignment updates the existing slot, and the first
+definition order is kept in the output. Each right-hand side is evaluated against the
+bindings that existed before its own statement, so `x = x + 1;` fails with
+`error: undefined variable` when `x` is new, while an already-defined `x` may reference
+itself. Addition is checked, and a value above i64 max fails with
+`error: evaluation overflow`. At most 16 distinct names are admitted; a 17th new name
+fails with `error: variable limit (16)`.
+
+No stdout is written until every statement has been evaluated and the whole output buffer is
+complete; that buffer is then written to stdout once. Evaluation uses the unrebased original
+token spans from the lexer.
+
+Evaluation-mode failures exit 2 with exactly one of these lines on stderr:
+
+```text
+error: invalid evaluation syntax
+error: undefined variable
+error: evaluation overflow
+error: variable limit (16)
+```
+
+The lexical, integer, token-limit, input-limit, allocation, and stdout-write errors above
+still apply. `--eval` requires exactly one source argument after the flag; any other
+argument count exits 2 with `usage: token-page-cli [ASCII-source]` on stderr. `--eval
+--help` treats `--help` as the source and fails with `error: invalid ASCII input`, because
+in this mode the second argument is always the source.
+
 Feature locations:
 
 - `src/tokens.fy` scans the source and stores each token with a whole-element overwrite
@@ -98,11 +169,22 @@ Feature locations:
   `for (let ref Token token in segment)` over that passed segment, not the page directly.
   The first-segment end is found with a shared `ref` scan up to and including the first `;`.
 - `src/main.fy` initializes the `TokenPage`, selects the first-segment range, formats the
-  TSV rows and handles the argument, limit and failure paths.
+  TSV rows and handles the argument, help, limit and failure paths.
 - `tests/page.fy` is a source `@test` (`normalized_spans_and_reuse`): for `' \talpha=7;'` it
   asserts the four tokens' original offsets `2..10` normalize to `0..8` with exact per-span
   values and number `7`, then reuses the same page to show an empty input keeps `used = 0`
   and a `;` scan leaves `used = 1`, so no stale prefix is exposed. It passes under the
+  interpreter and as a native development and release case.
+- `src/evaluator.fy` holds the evaluation mode: a `Binding[16]` `Environment` records
+  first-seen names in definition order, resolves each right-hand side against the bindings
+  from earlier statements, and `src/main.fy` formats the result as `name<TAB>value` rows
+  for one stdout write.
+- `tests/evaluation.fy` is a source `@test` (`bindings_and_reuse`): for `'  x=4000000000;
+  x=x+7; total=x+3;'` it asserts two bindings whose values `4000000007` and `4000000010`
+  exceed i32, that the reassigned name keeps its original unrebased source span `2..3`,
+  that a failed `x = missing;` right-hand side returns the undefined-variable error and
+  leaves the earlier binding intact (`used = 1`, value `1`) with no CLI output, and that
+  reusing the environment for an empty input resets `used` to `0`. It passes under the
   interpreter and as a native development and release case.
 
 Token storage uses the fixed array field, so scanning, rebasing and analysis neither
@@ -113,13 +195,13 @@ no performance claim.
 
 Portable verification (Python 3.10 or later, standard library only) requires the compiler
 executable and runs `check`, `check --locked`, the locked development and release builds with
-their actual EXEs, the interpreter source test, and the whole-stdout, error and boundary cases.
-The current run drives one interpreter test and 62 native results: 30 CLI cases per profile, 60
-development and release executions, plus the normalized-span test in both profiles. The
-`--receipt PATH` option is optional and writes a summary plus the development and release raw
-JSON and retained images (execute permission preserved) to that path; without it no extra
-evidence logs or image copies are saved, while the ordinary `check` and `build` outputs (the
-lock file and the executable) are still written:
+their actual EXEs, the interpreter source tests, and the whole-stdout, error and boundary
+cases for both modes. The suite covers the analysis and evaluation cases and is described by
+what it exercises rather than by a fixed case count. The optional `--receipt PATH` option
+writes a summary plus the development and release raw JSON and retained images (execute
+permission preserved) to that path; without it no extra evidence logs or image copies are
+saved, while the ordinary `check` and `build` outputs (the lock file and the executable)
+are still written:
 
 ```sh
 python verify.py --compiler /absolute/path/to/fairyc
@@ -127,12 +209,15 @@ python verify.py --compiler /absolute/path/to/fairyc --receipt /path/to/evidence
 python verify.py --compiler C:\path\to\fairyc.exe --receipt C:\path\to\evidence\receipt.json
 ```
 
-Windows amd64 native execution and Linux C emission both pass; actual Linux execution
-remains deferred to the owner's consolidated batch, so Linux is verified by C emission
-only. The run used the cached compiler `.cache/nominal-array-field-view-compiler/fairyc.exe`
-from the current source, and no compiler source changed. `TestTokenPageCLIStorage` checks
-the authored workspace MIR of the tokens module and confirms no fixed-array `FieldRead` or
-`ArrayIndex` copy, exercising the descriptor views and stores instead. Evidence is
-`docs/ops/evidence/token-page-cli-20261005.json` with `.dev.json` and `.release.json` raw
-logs. There is no PowerShell harness and no performance claim. See
+The help-updated full suite passes on Windows amd64 in both the analysis and evaluation
+modes, and the Linux C emission check passes. The focused `TestTokenPageCLIStorage` and
+`go vet` checks pass as well; `TestTokenPageCLIStorage` confirms the tokens module's authored
+workspace MIR has no fixed-array `FieldRead` or `ArrayIndex` copy, exercising the descriptor
+views and stores instead. The recorded runs used the cached compiler
+`.cache/nominal-array-field-view-compiler/fairyc.exe`. Actual Linux execution remains
+deferred to the owner's consolidated batch, so Linux is verified by C emission only. The
+analysis baseline evidence is `docs/ops/evidence/token-page-cli-20261005.json`, and the
+evaluation-mode evidence is `docs/ops/evidence/token-page-eval-cli-20261005.json`; each
+records `.dev.json` and `.release.json` raw logs against the final source hashes. There is
+no PowerShell harness and no performance claim. See
 [ADR 0472](../../docs/adr/0472-direct-plain-struct-array-field-views-and-iteration.md).

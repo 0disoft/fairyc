@@ -10,7 +10,8 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parent
 DEMO = "price = 4000000000 + fee; other = 7;"
-HELP = "usage: token-page-cli [ASCII-source]\n"
+USAGE = "usage: token-page-cli [ASCII-source]\n"
+HELP = USAGE + "       token-page-cli --eval <ASCII-source>\n"
 MAX_I64 = (1 << 63) - 1
 LEXEME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*|[0-9]+|[+=;]|[ \t\r\n]+")
 
@@ -20,9 +21,10 @@ def sha(path):
 
 
 def oracle(args):
-    if len(args) > 1:
-        return 2, "", HELP
-    source = args[0] if args else DEMO
+    evaluation = len(args) == 2 and args[0] == "--eval"
+    if len(args) > 1 and not evaluation or args == ["--eval"]:
+        return 2, "", USAGE
+    source = args[1] if evaluation else args[0] if args else DEMO
     if len(source.encode("utf-8")) > 4095:
         return 2, "", "error: input limit (4095 UTF-8 bytes)\n"
     if args == ["--help"]:
@@ -40,19 +42,53 @@ def oracle(args):
         value = int(text) if kind == "number" else 0
         if value > MAX_I64:
             return 2, "", "error: integer overflow\n"
-        tokens.append((kind, value))
+        tokens.append((kind, value, text))
     if position != len(source):
         return 2, "", "error: token limit (128)\n" if len(tokens) == 128 else "error: invalid ASCII input\n"
-    if sum(value for _, value in tokens) > MAX_I64:
+    if evaluation:
+        return evaluation_oracle(tokens)
+    if sum(value for _, value, _ in tokens) > MAX_I64:
         return 2, "", "error: sum overflow\n"
     first_end = next((i + 1 for i, token in enumerate(tokens) if token[0] == ";"), len(tokens))
     rows = []
     for prefix, segment in [("", tokens), ("first_", tokens[:first_end])]:
         rows.extend([(prefix + "tokens", len(segment)),
-                     (prefix + "identifiers", sum(kind == "identifier" for kind, _ in segment)),
-                     (prefix + "numbers", sum(kind == "number" for kind, _ in segment)),
-                     (prefix + "sum", sum(value for _, value in segment))])
+                     (prefix + "identifiers", sum(kind == "identifier" for kind, _, _ in segment)),
+                     (prefix + "numbers", sum(kind == "number" for kind, _, _ in segment)),
+                     (prefix + "sum", sum(value for _, value, _ in segment))])
     return 0, "".join(f"{key}\t{value}\n" for key, value in rows), ""
+
+
+def evaluation_oracle(tokens):
+    # Python arbitrary-precision values and insertion-ordered bindings are the oracle.
+    remaining = iter(tokens)
+    environment = {}
+
+    def failure(message):
+        return 2, "", f"error: {message}\n"
+
+    while (name := next(remaining, None)) is not None:
+        if name[0] != "identifier" or (equal := next(remaining, None)) is None or equal[0] != "=":
+            return failure("invalid evaluation syntax")
+        total = 0
+        while True:
+            term = next(remaining, None)
+            if term is None or term[0] not in ("identifier", "number"):
+                return failure("invalid evaluation syntax")
+            if term[0] == "identifier" and term[2] not in environment:
+                return failure("undefined variable")
+            total += term[1] if term[0] == "number" else environment[term[2]]
+            if total > MAX_I64:
+                return failure("evaluation overflow")
+            operator = next(remaining, None)
+            if operator is None or operator[0] not in ("+", ";"):
+                return failure("invalid evaluation syntax")
+            if operator[0] == ";":
+                break
+        if name[2] not in environment and len(environment) == 16:
+            return failure("variable limit (16)")
+        environment[name[2]] = total
+    return 0, "".join(f"{key}\t{value}\n" for key, value in environment.items()), ""
 
 
 def cases():
@@ -72,6 +108,53 @@ def cases():
         ("capacity-late-invalid", [" ".join(["a"] * 128) + " @"]),
         ("input-max", ["a" * 4095]), ("input-overflow", ["a" * 4096]),
         ("UTF8-byte-limit", ["가" * 1366]), ("extra-argument", ["a", "b"]),
+        ("extra-argument-long-source", ["a" * 4096, "b"]),
+    ] + evaluation_cases()
+
+
+def evaluation_cases():
+    fixtures = [
+        ("demo", "price = 4000000000 + 7; total = price + 3;"),
+        ("empty", ""), ("whitespace", " \t\r\n"),
+        ("zero", "x=0;"), ("large", "x=4000000000;"),
+        ("i64-max", f"x={MAX_I64};"),
+        ("sum-max", f"x={MAX_I64 - 7}+7;"),
+        ("separate-max-values", f"x={MAX_I64};y={MAX_I64};"),
+        ("reassignment", "x=1; x=x+2; y=x+3; x=0;"),
+        ("repeated-reference", "x=4;y=x+x+1;"),
+        ("case-sensitive", "A=1;a=2;B=A+a;"),
+        ("prefix-names", "ab=2;a=1;abc=ab+a;"),
+        ("identifier-characters", "_x1=1; x1=_x1+2;"),
+        ("first-definition-order", "z=1;a=2;z=a+1;"),
+        ("offsets-and-lines", " \tfirst=1;\r\n second = first + 2;\n"),
+        ("leading-zero", "x=" + "0" * 64 + "1;"),
+        ("integer-overflow", f"x={MAX_I64 + 1};"),
+        ("addition-overflow", f"x={MAX_I64}+1;"),
+        ("reference-overflow", f"x={MAX_I64};y=x+1;"),
+        ("late-overflow", f"x=1;y={MAX_I64};x=x+y;"),
+        ("undefined", "x=missing;"), ("forward-reference", "x=y;y=1;"),
+        ("new-self-reference", "x=x+1;"), ("late-undefined", "x=1;y=missing;"),
+        ("missing-semicolon", "x=1"), ("late-missing-semicolon", "x=1;y=2"),
+        ("missing-equal", "x 1;"), ("missing-term", "x=;"),
+        ("trailing-plus", "x=1+;"), ("double-plus", "x=1++2;"),
+        ("bare-number", "1;"), ("extra-term", "x=1 2;"),
+        ("empty-statement", ";"), ("extra-semicolon", "x=1;;"),
+        ("missing-statement", "x=1;y"), ("double-equal", "x==1;"),
+        ("negative", "x=-1;"), ("parentheses", "x=(1);"),
+        ("late-invalid", "x=1;@"), ("non-ASCII", "한글=1;"),
+        ("variable-limit", "".join(f"v{i}=0;" for i in range(16))),
+        ("variable-overflow", "".join(f"v{i}=0;" for i in range(17))),
+        ("update-at-limit", "".join(f"v{i}=0;" for i in range(16)) + "v0=v15+1;"),
+        ("token-limit", "x=" + "+".join("0" for _ in range(63)) + ";"),
+        ("token-overflow", "x=" + "+".join("0" for _ in range(64)) + ";"),
+        ("input-max", "x=1;" + " " * 4091),
+        ("input-overflow", "x=1;" + " " * 4092),
+        ("long-name", "x" * 4092 + "=0;"),
+        ("help-as-source", "--help"),
+    ]
+    return [("eval-" + name, ["--eval", source]) for name, source in fixtures] + [
+        ("eval-missing-source", ["--eval"]),
+        ("eval-extra-argument", ["--eval", "x=1;", "extra"]),
     ]
 
 
@@ -103,16 +186,16 @@ def main():
             raise RuntimeError(row)
         if args[0] == "test":
             report = json.loads(row["stdout"])
-            if report["count"] != 1 or report["passed"] != 1 or report["failed"] != 0:
+            if report["count"] != 2 or report["passed"] != 2 or report["failed"] != 0:
                 raise RuntimeError(row)
     for profile, flags in [("dev", []), ("release", ["--release"])]:
         rows = []
         row = run([compiler, "build", *flags, "--locked"], rows, "build")
         if row["exit"]:
             raise RuntimeError(row)
-        row = run([compiler, "test", "--json", "--native", *flags, "--locked"], rows, "native span test")
+        row = run([compiler, "test", "--json", "--native", *flags, "--locked"], rows, "native source tests")
         report = json.loads(row["stdout"]) if row["exit"] == 0 else {}
-        if row["exit"] or report["count"] != 1 or report["passed"] != 1 or report["failed"] != 0:
+        if row["exit"] or report["count"] != 2 or report["passed"] != 2 or report["failed"] != 0:
             raise RuntimeError(row)
         image = ROOT / "build" / ("token-page-cli.exe" if os.name == "nt" else "token-page-cli")
         image_hash = sha(image)
