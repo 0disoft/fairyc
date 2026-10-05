@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent
 KINDS = ['invalid', 'eof', 'trivia', 'identifier', 'keyword', 'integer', 'float', 'string', 'byte-string', 'c-string', 'symbol']
 TRIVIA = ['none', 'preamble', 'whitespace', 'line-comment', 'block-comment', 'documentation-line']
 HEADER = 'kind\ttrivia\tstart\tend\traw_hex\tcooked_hex\n'
-USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n'
+USAGE = 'usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n'
 HELP = USAGE + '       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n'
 
 
@@ -212,19 +212,20 @@ def main():
                     row = run([image, *declaration_args], rows, 'declarations-' + name)
                     assert (row['exit'], row['stdout'], row['stderr']) == (2, '', expected), row
             if names_reference:
-                for name, args, expected in errors:
-                    name_args = ['--check-names-file' if x == '--tokens-file' else x for x in args]
-                    row = run([image, *name_args], rows, 'names-' + name)
-                    assert (row['exit'], row['stdout'], row['stderr']) == (2, '', expected), row
-                for source, suffix in [(b'module main', ':1:12: error: expected ; (bytes 11..11)\n'),
-                                       (b'module main;\xff', ':1:13: error: E0001 (bytes 12..13)\n')]:
-                    path = directory / 'names-malformed.fy'
-                    path.write_bytes(source)
-                    before = sha(path)
-                    row = run([image, '--check-names-file', path], rows, 'names-malformed')
-                    row['input'] = dict(path=str(path),beforeSHA256=before,afterSHA256=sha(path),bytes=len(source))
-                    assert before == sha(path)
-                    assert (row['exit'], row['stdout'], row['stderr']) == (2, '', str(path) + suffix), row
+                for mode in ['--check-names-file', '--bindings-file']:
+                    for name, args, expected in errors:
+                        name_args = [mode if x == '--tokens-file' else x for x in args]
+                        row = run([image, *name_args], rows, 'names-' + name)
+                        assert (row['exit'], row['stdout'], row['stderr']) == (2, '', expected), row
+                    for source, suffix in [(b'module main', ':1:12: error: expected ; (bytes 11..11)\n'),
+                                           (b'module main;\xff', ':1:13: error: E0001 (bytes 12..13)\n')]:
+                        path = directory / 'names-malformed.fy'
+                        path.write_bytes(source)
+                        before = sha(path)
+                        row = run([image, mode, path], rows, 'names-malformed')
+                        row['input'] = dict(path=str(path),beforeSHA256=before,afterSHA256=sha(path),bytes=len(source))
+                        assert before == sha(path)
+                        assert (row['exit'], row['stdout'], row['stderr']) == (2, '', str(path) + suffix), row
             row = run([image, '--help'], rows, 'help')
             assert (row['exit'], row['stdout'], row['stderr']) == (0, HELP, ''), row
             row = run([image], rows, 'legacy-empty-stdin')
@@ -240,7 +241,7 @@ def main():
                                  accepted=successes, diagnosticCases=diagnostics, limitCases=limits, unchangedFiles=unchanged,
                                  declarations=declaration_counts, names=name_counts, cliExecutions=len(rows) - 1, imagePath=str(saved), imageSHA256=sha(saved),
                                  raw=str(raw), rawSHA256=sha(raw)))
-    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy'))]
+    sources = [ROOT / 'fairy.toml', ROOT / 'fairy.lock', ROOT / 'verify.py', ROOT / 'verify_names.py', *sorted((ROOT / 'src').glob('*.fy')), *sorted((ROOT / 'samples').glob('*.fy')), *sorted((ROOT / 'tests').glob('*.fy'))]
     save(receipt, dict(schema='fairyc.lexer-file-cli-verification/v1', compiler=dict(path=str(compiler), sha256=sha(compiler)),
                        reference=dict(path=str(reference_path), sha256=sha(reference_path)),
                        declarationsReference=dict(path=str(declarations_path), sha256=sha(declarations_path)) if declarations_path else None, common=common,

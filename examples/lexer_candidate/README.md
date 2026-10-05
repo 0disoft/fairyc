@@ -33,7 +33,7 @@ a live borrow.
 A new front end adds a regular file mode without changing the binary stdin protocol:
 the no-argument frame reader stays exactly as described below, and
 `--tokens-file <path>`, `--declarations-file <path>`,
-`--check-names-file <path>`, and `--help` are the file-mode arguments.
+`--check-names-file <path>`, `--bindings-file <path>`, and `--help` are the file-mode arguments.
 
 ```sh
 lexer-candidate --tokens-file path/to/source.fy
@@ -234,6 +234,53 @@ separate. Additional target/dependency checks are recorded in
 the owner's batch; allocation/I/O fault injection and performance testing were not
 run. This changes the example package to 0.3.0; compiler, SDK and language contracts
 are unchanged.
+
+## Retained declaration-use links (`--bindings-file`)
+
+```sh
+lexer-candidate --bindings-file samples/names-demo.fy
+```
+
+The name resolver now retains its exact `syntax::Parsed` owner together with symbol
+and reference vectors in `name_resolution::Resolved`. `resolve(parsed)` consumes
+that syntax owner; `problem`, `parsed`, `source_view`, `symbol_count`, `symbol_at`,
+`reference_count`, and `reference_at` are shared queries. A symbol ID is a one-based
+index local to that result, not a durable cross-file/compiler identity. Every name
+expression retains its expression ID, use span and actual target symbol ID.
+Symbols retain kind, name span, unique owning scope, function owner, written type
+root and syntax declaration/entry coordinates for the next type phase. Locals have
+independent IDs even when sibling blocks reuse an active-name slot. Function symbols
+are collected first, then parameter/local symbols in traversal order. Failed results
+retain source for diagnostics, but table queries assert success and the CLI emits no
+partial table. Builders own separate vectors while collecting; the completed resource
+owns and cleans them alongside syntax, without mutable resource-field reborrows.
+
+The command has the same admitted syntax and first-error behavior as name checking.
+Success emits a TSV table with columns:
+
+```text
+record	id	kind	start	end	scope	owner	target
+```
+
+A `symbol` row uses `function`, `parameter`, `local-let` or `local-var`; its target is
+zero. A `reference` row has kind `name`, its ID is the syntax expression ID, scope and
+owner are zero, and target is the symbol ID. Spans identify source bytes; function
+symbols use scope/owner zero. Output is fully buffered before publication and bounded
+at 1 MiB. Parser bounds also cap storage at 128 module functions plus 1024 entries and
+at most 4160 expression-use links.
+
+The portable verification command in the preceding section accepts the regenerated
+`--names` reference, now including Go AST symbol inventories and exact Go semantic
+use-to-declaration resolutions. The Windows dev/release harness passes 396 CLI executions (198/profile).
+Both name and binding file modes are checked for all 50 name fixtures, file/CLI errors, malformed syntax and invalid bytes. Per-profile
+accepted inventories and 26 reference targets are compared independently with Go, including
+forward calls, shadow initializer targets, restored outer names and sibling scopes.
+`tests/bindings.fy::retained_symbol_links` reads the moved source owner and verifies
+symbol/type/entry and expression links in both native profiles. Interpreter execution
+is unavailable because this component uses the native-only `std::vec` SDK path.
+Evidence is `docs/ops/evidence/bindings-file-cli-20261005.json`. The example version is
+0.4.0; compiler, SDK and language contracts are unchanged. Linux native execution is
+still deferred to the batch; no allocation-failure or OS I/O injection was run.
 
 ## Recognition and limits
 

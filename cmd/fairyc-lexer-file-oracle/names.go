@@ -20,6 +20,20 @@ type nameFixture struct {
 	Outcome        string         `json:"outcome"`
 	Expected       *parserGolden  `json:"expected"`
 	ReferencePhase semantic.Phase `json:"referenceFailedPhase"`
+	Symbols        []nameSymbol   `json:"symbols"`
+	Resolutions    []nameUse      `json:"resolutions"`
+}
+type nameSymbol struct {
+	Kind  string `json:"kind"`
+	Start int    `json:"start"`
+	End   int    `json:"end"`
+}
+type nameUse struct {
+	Start       int    `json:"start"`
+	End         int    `json:"end"`
+	TargetStart int    `json:"targetStart"`
+	TargetEnd   int    `json:"targetEnd"`
+	TargetKind  string `json:"targetKind"`
 }
 
 func writeNames(destination string) error {
@@ -36,6 +50,24 @@ func writeNames(destination string) error {
 		}
 		result := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: module}})
 		f := nameFixture{Name: name, InputHex: hex.EncodeToString([]byte(input)), Outcome: outcome, ReferencePhase: result.FailedPhase}
+		if outcome == "pass" {
+			for _, function := range module.Functions {
+				f.Symbols = append(f.Symbols, nameSymbol{"function", function.NameSpan.StartByte, function.NameSpan.EndByte})
+				for _, parameter := range function.Parameters {
+					f.Symbols = append(f.Symbols, nameSymbol{"parameter", parameter.NameSpan.StartByte, parameter.NameSpan.EndByte})
+				}
+			}
+			for _, binding := range module.Bindings {
+				kind := "local-let"
+				if binding.Mutable {
+					kind = "local-var"
+				}
+				f.Symbols = append(f.Symbols, nameSymbol{kind, binding.NameSpan.StartByte, binding.NameSpan.EndByte})
+			}
+			for _, use := range result.Resolutions {
+				f.Resolutions = append(f.Resolutions, nameUse{use.Use.StartByte, use.Use.EndByte, use.Target.Declaration.StartByte, use.Target.Declaration.EndByte, use.Target.Kind})
+			}
+		}
 		var naming []semantic.Diagnostic
 		for _, d := range result.Diagnostics {
 			if d.Code == "E0101" || d.Code == "E0102" {
