@@ -2039,6 +2039,9 @@ func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	if !sameLiveState(headerLive, l.live) {
 		return Operand{}, fmt.Errorf("while condition changes resource state after Flow validation")
 	}

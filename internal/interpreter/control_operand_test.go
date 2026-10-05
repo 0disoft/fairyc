@@ -21,6 +21,7 @@ fn i32 fail() { assert(false); return 99; }
 		{"binary-read-before-if", `var i32 x=5; return x+if(true){x=2;3}else{4};`, 8},
 		{"call-read-before-if", `var i32 x=5; return sum(x,if(true){x=2;3}else{4});`, 8},
 		{"if-condition-return", `if({return 9;true}){discard 1;}return 0;`, 9},
+		{"while-condition-return", `while({return 9;true}){discard fail();}return 0;`, 9},
 		{"and-left-return", `discard {return 9;true}&&{discard fail();true};return 0;`, 9},
 		{"or-left-return", `discard {return 9;false}||{discard fail();true};return 0;`, 9},
 		{"binary-left-return", `return {return 9;1}+fail();`, 9},
