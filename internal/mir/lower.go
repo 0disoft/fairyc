@@ -894,9 +894,19 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		if err != nil {
 			return Operand{}, err
 		}
+		if l.blockTerminated(l.current) {
+			return Operand{}, nil
+		}
+		// Capture the read before a later operand can mutate its source local.
+		if _, sourceLocal := l.bindings[hir.SymbolID(left.Local)]; left.Kind == OperandLocal && sourceLocal {
+			left = l.freezeScalarOperand(left, expression.Children[0].Span)
+		}
 		right, err := l.lowerExpression(&expression.Children[1])
 		if err != nil {
 			return Operand{}, err
+		}
+		if l.blockTerminated(l.current) {
+			return Operand{}, nil
 		}
 		return l.lowerBinaryOperands(expression, left, right)
 	case "propagate":
@@ -2185,6 +2195,9 @@ func (l *functionLowerer) lowerIf(expression *hir.Expression) (Operand, error) {
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	branchLive := cloneLive(l.live)
 	thenBlock := l.newBlock()
 	elseBlock := l.newBlock()
@@ -2266,6 +2279,9 @@ func (l *functionLowerer) lowerShortCircuit(expression *hir.Expression) (Operand
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	branchLive := cloneLive(l.live)
 	rightBlock := l.newBlock()
 	shortBlock := l.newBlock()
@@ -2339,6 +2355,10 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 		argumentSpans = append(argumentSpans, argument.Span)
 		if path := l.liveResourcePath(argument); path != nil {
 			value = l.materializeMove(path, value, "call-argument", true)
+		} else if index+1 < len(arguments) && value.Kind == OperandLocal && hir.FixedArrayScalarElement(argument.Type) {
+			if _, sourceLocal := l.bindings[hir.SymbolID(value.Local)]; sourceLocal {
+				value = l.freezeScalarOperand(value, argument.Span)
+			}
 		}
 		argumentValues = append(argumentValues, value)
 	}
@@ -2507,6 +2527,9 @@ func (l *functionLowerer) lowerReturn(expression *hir.Expression, exit hir.Span)
 	value, err := l.lowerExpression(expression)
 	if err != nil {
 		return err
+	}
+	if l.blockTerminated(l.current) {
+		return nil
 	}
 	if path := l.liveResourcePath(expression); path != nil {
 		value = l.materializeMove(path, value, "return-value", true)

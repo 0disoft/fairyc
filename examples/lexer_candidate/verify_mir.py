@@ -214,21 +214,8 @@ def verify_mir(image,reference,directory,rows,run,sha,location):
         actual=execute(tables,names);expected={k:fixture['outcome'][k] for k in actual}
         assert actual==expected,dict(case=fixture['name'],actual=actual,expected=expected)
         row['mirObservation']=actual
-        origin=fixture.get('outcomeOrigin','go-mir-interpreter');row['outcomeOrigin']=origin
-        if origin=='fixed-source-return-order':
-            known={'if-condition-return':'operand has no executable value',
-                   **dict.fromkeys(('call-first-argument-return','call-last-argument-return','call-conditional-argument-returns'),
-                                   'return from "main::main": operand has no executable value')}
-            assert fixture['name'] in known and expected==dict(Kind='return',Value=9,TrapCategory='')
-            assert fixture['referenceExecutionError']==known[fixture['name']]
-            row['referenceExecutionError']=fixture['referenceExecutionError'];counts['contractGoldens']+=1
-        elif origin=='fixed-source-left-to-right':
-            assert fixture['name']=='binary-read-before-if' and expected==dict(Kind='return',Value=8,TrapCategory='')
-            observed={k:fixture['referenceOutcome'][k] for k in actual}
-            assert observed==dict(Kind='return',Value=5,TrapCategory='')
-            row['referenceOutcome']=observed;counts['contractGoldens']+=1
-        else:
-            assert origin=='go-mir-interpreter' and not fixture.get('referenceExecutionError')
-            counts['differential']+=1
+        assert fixture['outcomeOrigin']=='go-mir-interpreter'
+        assert not fixture.get('referenceExecutionError') and not fixture.get('referenceOutcome')
+        row['outcomeOrigin']='go-mir-interpreter';counts['differential']+=1
         counts['accepted']+=1;counts['traps' if actual['Kind']=='trap' else 'returns']+=1
     return counts

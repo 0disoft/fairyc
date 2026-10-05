@@ -578,10 +578,9 @@ reader and scalar executor: it reconstructs the tables from the native TSV, chec
 the block and edge graph, and executes admitted programs to compare the observed
 return value or trap category with the verified Go MIR. It is an independent
 observation utility, never a candidate runtime dependency, and it does not natively
-compile or execute the input. Fixture cases where the Go reference itself is
-defective are pinned as explicit contract goldens instead of counted as Go
-differential matches, so the comparator claims no full Go parity. `tests/mir.fy`
-exercises the owned API directly.
+compile or execute the input. Every admitted fixture must now match the executed
+Go MIR reference; a reference execution error fails the oracle rather than
+substituting a fixed expected result. `tests/mir.fy` exercises the owned API directly.
 
 `samples/mir-demo.fy` demonstrates a checked compound assignment across a forward
 call, and `samples/mir-branches-demo.fy` demonstrates a conditional result and a
@@ -605,39 +604,35 @@ operands; the unsigned-limit case exercises `usize`, `u32` and `u8` maximum valu
 accepted successes rather than traps. The 3 deferred cases (`while`, classic `for` and
 `defer`) fail closed with an empty stdout and status 2.
 
-Of the 56 admitted fixtures, 52 are differential against the Go MIR reference and 4
-are explicit contract goldens that record known Go defects instead of asserting
-agreement. Three belong to one termination-propagation defect, where a returning
-operand fails to stop the enclosing condition or call: `if-condition-return`
-(`if({return 9;true}){discard 1;}return 0;`), `call-first-argument-return`
-(`sum({return 9;1},fail())`) and `call-last-argument-return` (`sum(id(1),{return 9;2})`).
-The Go reference stops with `operand has no executable value` (the call cases keep a
-`return from "main::main": ` prefix in the oracle), and each golden keeps the
-source-order result `return 9` and that error. The fourth golden is the separate
-binary late-read defect:
-`binary-read-before-if` (`var i32 x=5;return x+if(true){x=2;3}else{4};`) does not read
-the left local before the conditional's side effect in the Go reference, so it reads
-`x` late and returns 5 (2+3); the left-to-right contract reads `x` before the
-conditional and requires 8 (5+3), and the golden keeps 8 while recording the Go
-outcome 5. A returning `if` used as a call argument (`call-conditional-argument-returns`)
-matches Go and stays differential. These two Go defect categories, retained across
-four fixtures, are the next unit of work, so Go differential equality stays 52/56 and
-this unit does not claim self-hosting or promotion of the candidate.
+All 56 admitted fixtures now match the Go MIR interpreter, with no contract goldens.
+The Go lowerer captures source-local scalar reads before subsequent binary operands
+or call arguments can change them, and propagates termination through binary and
+short-circuit operands, conditions and enclosing returns. Thus
+`var i32 x=5;return x+if(true){x=2;3}else{4};` returns 8, and returning operands in
+conditions or calls preserve their inner `return 9` without evaluating later calls.
+Eleven dedicated Go verifier/interpreter regressions cover these paths, including
+the already-correct conditional argument and its fallthrough alternative. The same
+eleven assertions execute in generated native C under low and optimized MSVC.
 
-The whole CLI comparison reran for this argument-publication change and passes on
-both profiles: 1162 CLI executions (581 per profile), each comparing the same 59 MIR
-fixtures (56 admitted: 42 returning and 14 trapping, plus 3 deferred) split into 52
-Go differential outcomes and the 4 contract goldens above, alongside 9 direct native
-API tests in `tests/mir.fy` that pass 9/9 in both profiles. Source hashes are unchanged
-before and after every fixture execution, and `samples/mir-branches-demo.fy` executes
-through the emitted MIR test executor to `return 7` on both retained images with the
-short-circuit `fail()` call skipped. The scoped Go test and vet checks and the Windows
-and Linux C emission both pass; Linux native execution remains deferred to the owner's
-batch. Compiler/SDK inputs remain unchanged and read-only in this unit: the 619
-compiler inputs and the compiler executable SHA are unchanged. This is example package
-version 0.11.0. Evidence: `docs/ops/evidence/mir-branch-file-cli-20261006.json`; the
-earlier sequential-only unit remains at
-`docs/ops/evidence/mir-sequential-file-cli-20261006.json`.
+The full CLI comparison passes on both profiles: 1162 executions (581 per profile),
+including the 59 MIR fixtures (56 admitted: 42 returning, 14 trapping; 3 deferred).
+After restricting snapshots to source locals rather than already-materialized
+temporaries, the final Go reference is regenerated and the 59-case MIR comparison
+reruns on each retained image. Scoped Go MIR, interpreter, C backend and fixture
+suites and vet pass. A separate existing failure, `TestStructNestedStorageMIR/array`,
+is reproduced with both the unchanged baseline lowerer and the revised lowerer:
+mutating a nested leaf to an array is accepted by the storage-view verifier. It
+remains separate follow-up work and prevents a claim that all compiler tests pass.
+
+This unit intentionally changes Go MIR source. Of the pinned compiler's 619 input
+records, only `internal/mir/lower.go` differs; the pinned compiler executable and SDK
+remain unchanged. The candidate is still built with that prebuilt compiler, while
+the oracle and native regression use current Go source. Example package version
+0.11.0 and its Fairy product sources remain unchanged. Evidence:
+`docs/ops/evidence/mir-control-order-fix-20261006.json`. Earlier branch and sequential
+evidence remains in `mir-branch-file-cli-20261006.json` and
+`mir-sequential-file-cli-20261006.json`. Linux native execution is deferred to the
+owner's batch, and self-hosting promotion remains blocked.
 
 ## Recognition and limits
 

@@ -24,14 +24,12 @@ type scalarMIRSeed struct {
 
 func writeMIR(destination string) error {
 	type fixture struct {
-		Name                    string               `json:"name"`
-		InputHex                string               `json:"inputHex"`
-		Admitted                bool                 `json:"admitted"`
-		Program                 mir.Program          `json:"program"`
-		Outcome                 interpreter.Outcome  `json:"outcome"`
-		OutcomeOrigin           string               `json:"outcomeOrigin"`
-		ReferenceExecutionError string               `json:"referenceExecutionError,omitempty"`
-		ReferenceOutcome        *interpreter.Outcome `json:"referenceOutcome,omitempty"`
+		Name          string              `json:"name"`
+		InputHex      string              `json:"inputHex"`
+		Admitted      bool                `json:"admitted"`
+		Program       mir.Program         `json:"program"`
+		Outcome       interpreter.Outcome `json:"outcome"`
+		OutcomeOrigin string              `json:"outcomeOrigin"`
 	}
 	var fixtures []fixture
 	seeds := []scalarMIRSeed{
@@ -84,35 +82,10 @@ func writeMIR(destination string) error {
 			return fmt.Errorf("MIR oracle verifier %s: %v", seed.name, failures)
 		}
 		outcome, err := interpreter.Execute(program, "main::main")
-		origin := "go-mir-interpreter"
-		referenceError := ""
-		var referenceOutcome *interpreter.Outcome
 		if err != nil {
-			// Retain this known reference-lowering defect as a fixed source-order
-			// golden, never count it as Go differential success or hide the error.
-			known := map[string]string{
-				"if-condition-return":               "operand has no executable value",
-				"call-first-argument-return":        "return from \"main::main\": operand has no executable value",
-				"call-last-argument-return":         "return from \"main::main\": operand has no executable value",
-				"call-conditional-argument-returns": "return from \"main::main\": operand has no executable value",
-			}
-			if expected, found := known[seed.name]; !found || err.Error() != expected {
-				return fmt.Errorf("MIR oracle execution %s: %w", seed.name, err)
-			}
-			outcome = interpreter.Outcome{Kind: "return", Value: 9}
-			origin = "fixed-source-return-order"
-			referenceError = err.Error()
+			return fmt.Errorf("MIR oracle execution %s: %w", seed.name, err)
 		}
-		if seed.name == "binary-read-before-if" {
-			if outcome.Kind != "return" || outcome.Value != 5 || outcome.TrapCategory != "" {
-				return fmt.Errorf("known reference evaluation-order defect changed: %+v", outcome)
-			}
-			observed := outcome
-			referenceOutcome = &observed
-			outcome = interpreter.Outcome{Kind: "return", Value: 8}
-			origin = "fixed-source-left-to-right"
-		}
-		fixtures = append(fixtures, fixture{seed.name, hex.EncodeToString([]byte(input)), seed.admitted, program, outcome, origin, referenceError, referenceOutcome})
+		fixtures = append(fixtures, fixture{seed.name, hex.EncodeToString([]byte(input)), seed.admitted, program, outcome, "go-mir-interpreter"})
 	}
 	data, err := json.MarshalIndent(struct {
 		Schema   string    `json:"schema"`

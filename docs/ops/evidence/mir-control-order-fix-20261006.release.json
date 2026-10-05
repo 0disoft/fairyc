@@ -1,0 +1,1403 @@
+{
+  "profile": "release",
+  "runs": [
+    {
+      "label": "mir-constant",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-0.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t1\t0\t1\t0\t0\t13\t38\t0\nL\t1\t1\t0\t1\t0\t0\t34\t36\nB\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t37\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t2\t0\t34\t36\t17\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-0.fy",
+        "beforeSHA256": "392d9cad651907c26a20795bd5cab93a4088999b8444815b0891351d252871f6",
+        "afterSHA256": "392d9cad651907c26a20795bd5cab93a4088999b8444815b0891351d252871f6",
+        "bytes": 38
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 17,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-i64-and-forward-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-1.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t2\t0\t2\t103\t106\t0\nS\t0\t2\nS\t1\t2\nF\t1\t1\t1\t0\t11\t0\t6\t0\t0\t13\t95\t0\nF\t2\t2\t7\t11\t5\t6\t3\t2\t2\t96\t132\t0\nL\t1\t1\t3\t2\t0\t1\t35\t36\nL\t2\t1\t0\t2\t0\t0\t37\t47\nL\t3\t1\t0\t2\t0\t0\t49\t50\nL\t4\t1\t0\t2\t0\t0\t56\t57\nL\t5\t1\t0\t2\t0\t0\t58\t59\nL\t6\t1\t0\t2\t0\t0\t52\t60\nL\t7\t1\t0\t2\t0\t0\t49\t61\nL\t8\t1\t0\t2\t0\t0\t69\t70\nL\t9\t1\t0\t2\t0\t0\t72\t82\nL\t10\t1\t0\t6\t0\t0\t69\t82\nL\t11\t1\t0\t1\t0\t0\t92\t93\nL\t12\t2\t4\t2\t1\t0\t111\t112\nL\t13\t2\t5\t2\t1\t0\t117\t118\nL\t14\t2\t0\t2\t0\t0\t127\t128\nL\t15\t2\t0\t2\t0\t0\t129\t130\nL\t16\t2\t0\t2\t0\t0\t127\t130\nB\t1\t1\t1\t5\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t6\t0\t2\t0\t52\t60\nB\t2\t1\t6\t6\t4\t0\t3\t6\t1\t2\t3\t4\t6\t0\t0\t0\t0\t1\t49\t61\nB\t3\t1\t7\t12\t4\t0\t10\t0\t0\t6\t5\t6\t12\t0\t0\t0\t0\t16\t62\t84\nB\t4\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t49\t61\nB\t5\t1\t13\t13\t1\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t85\t94\nB\t6\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t62\t84\nB\t7\t2\t14\t16\t4\t0\t14\t15\t1\t2\t8\t9\t16\t0\t0\t0\t0\t1\t127\t130\nB\t8\t2\t17\t17\t1\t16\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t120\t131\nB\t9\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t127\t130\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t10\t0\t37\t47\t4000000000\nO\t2\t1\t1\t2\t1\t2\t2\t0\t2\t0\t3\t0\t0\t0\t27\t48\t-\nO\t3\t1\t1\t2\t3\t2\t2\t0\t1\t0\t4\t0\t0\t0\t49\t50\t-\nO\t4\t1\t1\t1\t4\t2\t2\t0\t0\t0\t5\t10\t11\t0\t56\t57\t1\nO\t5\t1\t1\t1\t5\t2\t2\t0\t0\t0\t0\t11\t12\t0\t58\t59\t2\nO\t6\t1\t2\t5\t0\t2\t2\t1\t3\t6\t0\t0\t0\t0\t49\t61\t-\nO\t7\t1\t3\t4\t7\t2\t2\t1\t3\t6\t8\t0\t0\t0\t49\t61\t-\nO\t8\t1\t3\t2\t1\t2\t2\t0\t7\t0\t9\t0\t0\t0\t49\t61\t-\nO\t9\t1\t3\t2\t8\t2\t2\t0\t1\t0\t10\t0\t0\t0\t69\t70\t-\nO\t10\t1\t3\t1\t9\t2\t2\t0\t0\t0\t11\t12\t22\t0\t72\t82\t4000000003\nO\t11\t1\t3\t4\t10\t6\t2\t13\t8\t9\t12\t0\t0\t0\t69\t82\t-\nO\t12\t1\t3\t5\t0\t6\t6\t0\t10\t0\t0\t0\t0\t0\t62\t84\t-\nO\t13\t1\t5\t1\t11\t1\t1\t0\t0\t0\t0\t22\t23\t0\t92\t93\t0\nO\t14\t2\t7\t2\t14\t2\t2\t0\t12\t0\t15\t0\t0\t0\t127\t128\t-\nO\t15\t2\t7\t2\t15\t2\t2\t0\t13\t0\t16\t0\t0\t0\t129\t130\t-\nO\t16\t2\t7\t5\t0\t2\t2\t1\t14\t15\t0\t0\t0\t0\t127\t130\t-\nO\t17\t2\t8\t4\t16\t2\t2\t1\t14\t15\t0\t0\t0\t0\t127\t130\t-\nA\t0\t4\nA\t1\t5\nA\t2\t12\nA\t3\t13\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-1.fy",
+        "beforeSHA256": "999b3044d01d1c0b45dc54e7956e72c65ed859a64d075824ad4d23b88d3abc89",
+        "afterSHA256": "999b3044d01d1c0b45dc54e7956e72c65ed859a64d075824ad4d23b88d3abc89",
+        "bytes": 132
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-signed-minima",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-2.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t11\t0\t5\t0\t0\t13\t148\t0\nL\t1\t1\t2\t1\t0\t0\t35\t36\nL\t2\t1\t3\t2\t0\t0\t58\t59\nL\t3\t1\t0\t1\t0\t0\t37\t48\nL\t4\t1\t0\t2\t0\t0\t60\t79\nL\t5\t1\t0\t1\t0\t0\t88\t89\nL\t6\t1\t0\t1\t0\t0\t91\t102\nL\t7\t1\t0\t6\t0\t0\t88\t102\nL\t8\t1\t0\t2\t0\t0\t112\t113\nL\t9\t1\t0\t2\t0\t0\t115\t135\nL\t10\t1\t0\t6\t0\t0\t112\t135\nL\t11\t1\t0\t1\t0\t0\t145\t146\nB\t1\t1\t1\t8\t4\t0\t7\t0\t0\t6\t2\t3\t8\t0\t0\t0\t0\t16\t81\t104\nB\t2\t1\t9\t12\t4\t0\t10\t0\t0\t6\t4\t5\t12\t0\t0\t0\t0\t16\t105\t137\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t81\t104\nB\t4\t1\t13\t13\t1\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t138\t147\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t105\t137\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t11\t0\t37\t48\t-2147483648\nO\t2\t1\t1\t2\t1\t1\t1\t0\t3\t0\t3\t0\t0\t0\t27\t49\t-\nO\t3\t1\t1\t1\t4\t2\t2\t0\t0\t0\t4\t11\t31\t0\t60\t79\t-9223372036854775808\nO\t4\t1\t1\t2\t2\t2\t2\t0\t4\t0\t5\t0\t0\t0\t50\t80\t-\nO\t5\t1\t1\t2\t5\t1\t1\t0\t1\t0\t6\t0\t0\t0\t88\t89\t-\nO\t6\t1\t1\t1\t6\t1\t1\t0\t0\t0\t7\t31\t42\t0\t91\t102\t-2147483648\nO\t7\t1\t1\t4\t7\t6\t1\t13\t5\t6\t8\t0\t0\t0\t88\t102\t-\nO\t8\t1\t1\t5\t0\t6\t6\t0\t7\t0\t0\t0\t0\t0\t81\t104\t-\nO\t9\t1\t2\t2\t8\t2\t2\t0\t2\t0\t10\t0\t0\t0\t112\t113\t-\nO\t10\t1\t2\t1\t9\t2\t2\t0\t0\t0\t11\t42\t62\t0\t115\t135\t-9223372036854775808\nO\t11\t1\t2\t4\t10\t6\t2\t13\t8\t9\t12\t0\t0\t0\t112\t135\t-\nO\t12\t1\t2\t5\t0\t6\t6\t0\t10\t0\t0\t0\t0\t0\t105\t137\t-\nO\t13\t1\t4\t1\t11\t1\t1\t0\t0\t0\t0\t62\t63\t0\t145\t146\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-2.fy",
+        "beforeSHA256": "c9daff712a6ea90b6e1848e4453e199b1c490843209b88957fbcf21794ab1d4d",
+        "afterSHA256": "c9daff712a6ea90b6e1848e4453e199b1c490843209b88957fbcf21794ab1d4d",
+        "bytes": 148
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-unsigned-limits",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-3.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t16\t0\t7\t0\t0\t13\t178\t0\nL\t1\t1\t2\t5\t0\t0\t37\t38\nL\t2\t1\t3\t4\t0\t0\t69\t70\nL\t3\t1\t4\t3\t0\t0\t90\t91\nL\t4\t1\t0\t5\t0\t0\t39\t59\nL\t5\t1\t0\t4\t0\t0\t71\t81\nL\t6\t1\t0\t3\t0\t0\t92\t95\nL\t7\t1\t0\t5\t0\t0\t104\t105\nL\t8\t1\t0\t5\t0\t0\t107\t125\nL\t9\t1\t0\t6\t0\t0\t104\t125\nL\t10\t1\t0\t4\t0\t0\t135\t136\nL\t11\t1\t0\t4\t0\t0\t138\t148\nL\t12\t1\t0\t6\t0\t0\t135\t148\nL\t13\t1\t0\t3\t0\t0\t158\t159\nL\t14\t1\t0\t3\t0\t0\t161\t165\nL\t15\t1\t0\t6\t0\t0\t158\t165\nL\t16\t1\t0\t1\t0\t0\t175\t176\nB\t1\t1\t1\t10\t4\t0\t9\t0\t0\t6\t2\t3\t10\t0\t0\t0\t0\t16\t97\t127\nB\t2\t1\t11\t14\t4\t0\t12\t0\t0\t6\t4\t5\t14\t0\t0\t0\t0\t16\t128\t150\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t97\t127\nB\t4\t1\t15\t18\t4\t0\t15\t0\t0\t6\t6\t7\t18\t0\t0\t0\t0\t16\t151\t167\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t128\t150\nB\t6\t1\t19\t19\t1\t16\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t168\t177\nB\t7\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t151\t167\nO\t1\t1\t1\t1\t4\t5\t5\t0\t0\t0\t2\t0\t20\t0\t39\t59\t18446744073709551615\nO\t2\t1\t1\t2\t1\t5\t5\t0\t4\t0\t3\t0\t0\t0\t27\t60\t-\nO\t3\t1\t1\t1\t5\t4\t4\t0\t0\t0\t4\t20\t30\t0\t71\t81\t4294967295\nO\t4\t1\t1\t2\t2\t4\t4\t0\t5\t0\t5\t0\t0\t0\t61\t82\t-\nO\t5\t1\t1\t1\t6\t3\t3\t0\t0\t0\t6\t30\t33\t0\t92\t95\t255\nO\t6\t1\t1\t2\t3\t3\t3\t0\t6\t0\t7\t0\t0\t0\t83\t96\t-\nO\t7\t1\t1\t2\t7\t5\t5\t0\t1\t0\t8\t0\t0\t0\t104\t105\t-\nO\t8\t1\t1\t1\t8\t5\t5\t0\t0\t0\t9\t33\t53\t0\t107\t125\t18446744073709551615\nO\t9\t1\t1\t4\t9\t6\t5\t13\t7\t8\t10\t0\t0\t0\t104\t125\t-\nO\t10\t1\t1\t5\t0\t6\t6\t0\t9\t0\t0\t0\t0\t0\t97\t127\t-\nO\t11\t1\t2\t2\t10\t4\t4\t0\t2\t0\t12\t0\t0\t0\t135\t136\t-\nO\t12\t1\t2\t1\t11\t4\t4\t0\t0\t0\t13\t53\t63\t0\t138\t148\t4294967295\nO\t13\t1\t2\t4\t12\t6\t4\t13\t10\t11\t14\t0\t0\t0\t135\t148\t-\nO\t14\t1\t2\t5\t0\t6\t6\t0\t12\t0\t0\t0\t0\t0\t128\t150\t-\nO\t15\t1\t4\t2\t13\t3\t3\t0\t3\t0\t16\t0\t0\t0\t158\t159\t-\nO\t16\t1\t4\t1\t14\t3\t3\t0\t0\t0\t17\t63\t66\t0\t161\t165\t255\nO\t17\t1\t4\t4\t15\t6\t3\t13\t13\t14\t18\t0\t0\t0\t158\t165\t-\nO\t18\t1\t4\t5\t0\t6\t6\t0\t15\t0\t0\t0\t0\t0\t151\t167\t-\nO\t19\t1\t6\t1\t16\t1\t1\t0\t0\t0\t0\t66\t67\t0\t175\t176\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-3.fy",
+        "beforeSHA256": "29f1ad090a8889c6b147551b79b1092d48e4a86e48186bab835de20e6624866e",
+        "afterSHA256": "29f1ad090a8889c6b147551b79b1092d48e4a86e48186bab835de20e6624866e",
+        "bytes": 178
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-all-operators",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-4.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t69\t0\t41\t0\t0\t13\t259\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t39\nL\t3\t1\t0\t1\t0\t0\t41\t42\nL\t4\t1\t0\t1\t0\t0\t44\t45\nL\t5\t1\t0\t1\t0\t0\t41\t46\nL\t6\t1\t0\t1\t0\t0\t47\t48\nL\t7\t1\t0\t1\t0\t0\t50\t51\nL\t8\t1\t0\t1\t0\t0\t47\t52\nL\t9\t1\t0\t1\t0\t0\t53\t54\nL\t10\t1\t0\t1\t0\t0\t56\t57\nL\t11\t1\t0\t1\t0\t0\t53\t58\nL\t12\t1\t0\t1\t0\t0\t59\t60\nL\t13\t1\t0\t1\t0\t0\t62\t63\nL\t14\t1\t0\t1\t0\t0\t59\t64\nL\t15\t1\t0\t1\t0\t0\t65\t66\nL\t16\t1\t0\t1\t0\t0\t68\t69\nL\t17\t1\t0\t1\t0\t0\t65\t70\nL\t18\t1\t0\t1\t0\t0\t71\t72\nL\t19\t1\t0\t1\t0\t0\t74\t75\nL\t20\t1\t0\t1\t0\t0\t71\t76\nL\t21\t1\t0\t1\t0\t0\t77\t78\nL\t22\t1\t0\t1\t0\t0\t80\t81\nL\t23\t1\t0\t1\t0\t0\t77\t82\nL\t24\t1\t0\t1\t0\t0\t83\t84\nL\t25\t1\t0\t1\t0\t0\t86\t87\nL\t26\t1\t0\t1\t0\t0\t83\t88\nL\t27\t1\t0\t1\t0\t0\t89\t90\nL\t28\t1\t0\t1\t0\t0\t93\t94\nL\t29\t1\t0\t1\t0\t0\t89\t95\nL\t30\t1\t0\t1\t0\t0\t96\t97\nL\t31\t1\t0\t1\t0\t0\t100\t101\nL\t32\t1\t0\t1\t0\t0\t96\t102\nL\t33\t1\t0\t1\t0\t0\t110\t111\nL\t34\t1\t0\t1\t0\t0\t113\t114\nL\t35\t1\t0\t6\t0\t0\t110\t114\nL\t36\t1\t0\t1\t0\t0\t125\t126\nL\t37\t1\t0\t1\t0\t0\t124\t126\nL\t38\t1\t0\t1\t0\t0\t128\t129\nL\t39\t1\t0\t6\t0\t0\t124\t129\nL\t40\t1\t0\t1\t0\t0\t140\t141\nL\t41\t1\t0\t1\t0\t0\t139\t141\nL\t42\t1\t0\t1\t0\t0\t144\t145\nL\t43\t1\t0\t1\t0\t0\t143\t145\nL\t44\t1\t0\t6\t0\t0\t139\t145\nL\t45\t1\t0\t1\t0\t0\t156\t157\nL\t46\t1\t0\t1\t0\t0\t155\t157\nL\t47\t1\t0\t1\t0\t0\t160\t161\nL\t48\t1\t0\t1\t0\t0\t159\t161\nL\t49\t1\t0\t6\t0\t0\t155\t161\nL\t50\t1\t0\t1\t0\t0\t173\t174\nL\t51\t1\t0\t1\t0\t0\t176\t177\nL\t52\t1\t0\t6\t0\t0\t173\t177\nL\t53\t1\t0\t6\t0\t0\t171\t178\nL\t54\t1\t0\t1\t0\t0\t188\t189\nL\t55\t1\t0\t1\t0\t0\t191\t192\nL\t56\t1\t0\t6\t0\t0\t188\t192\nL\t57\t1\t0\t1\t0\t0\t202\t203\nL\t58\t1\t0\t1\t0\t0\t204\t205\nL\t59\t1\t0\t6\t0\t0\t202\t205\nL\t60\t1\t0\t1\t0\t0\t215\t216\nL\t61\t1\t0\t1\t0\t0\t218\t219\nL\t62\t1\t0\t6\t0\t0\t215\t219\nL\t63\t1\t0\t1\t0\t0\t229\t230\nL\t64\t1\t0\t1\t0\t0\t231\t232\nL\t65\t1\t0\t6\t0\t0\t229\t232\nL\t66\t1\t0\t1\t0\t0\t242\t243\nL\t67\t1\t0\t1\t0\t0\t245\t246\nL\t68\t1\t0\t6\t0\t0\t242\t246\nL\t69\t1\t0\t1\t0\t0\t256\t257\nB\t1\t1\t1\t5\t4\t0\t3\t4\t1\t1\t2\t3\t5\t0\t0\t0\t0\t1\t41\t46\nB\t2\t1\t6\t10\t4\t0\t6\t7\t2\t1\t4\t5\t10\t0\t0\t0\t0\t1\t47\t52\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t41\t46\nB\t4\t1\t11\t15\t4\t0\t9\t10\t5\t1\t6\t7\t15\t0\t0\t0\t0\t1\t53\t58\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t47\t52\nB\t6\t1\t16\t20\t4\t0\t12\t13\t6\t1\t8\t9\t20\t0\t0\t0\t0\t6\t59\t64\nB\t7\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t53\t58\nB\t8\t1\t21\t25\t4\t0\t15\t16\t7\t1\t10\t11\t25\t0\t0\t0\t0\t6\t65\t70\nB\t9\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t6\t59\t64\nB\t10\t1\t26\t42\t4\t0\t27\t28\t11\t1\t12\t13\t42\t0\t0\t0\t0\t9\t89\t95\nB\t11\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t6\t65\t70\nB\t12\t1\t43\t47\t4\t0\t30\t31\t12\t1\t14\t15\t47\t0\t0\t0\t0\t8\t96\t102\nB\t13\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t9\t89\t95\nB\t14\t1\t48\t53\t4\t0\t35\t0\t0\t6\t16\t17\t53\t0\t0\t0\t0\t16\t103\t116\nB\t15\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t8\t96\t102\nB\t16\t1\t54\t58\t4\t0\t39\t0\t0\t6\t18\t19\t58\t0\t0\t0\t0\t16\t117\t131\nB\t17\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t103\t116\nB\t18\t1\t59\t62\t4\t0\t42\t0\t2\t1\t20\t21\t62\t0\t0\t0\t0\t1\t143\t145\nB\t19\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t117\t131\nB\t20\t1\t63\t65\t4\t0\t44\t0\t0\t6\t22\t23\t65\t0\t0\t0\t0\t16\t132\t147\nB\t21\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t143\t145\nB\t22\t1\t66\t67\t4\t0\t45\t0\t2\t1\t24\t25\t67\t0\t0\t0\t0\t1\t155\t157\nB\t23\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t132\t147\nB\t24\t1\t68\t70\t4\t0\t47\t0\t2\t1\t26\t27\t70\t0\t0\t0\t0\t1\t159\t161\nB\t25\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t155\t157\nB\t26\t1\t71\t73\t4\t0\t49\t0\t0\t6\t28\t29\t73\t0\t0\t0\t0\t16\t148\t163\nB\t27\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t159\t161\nB\t28\t1\t74\t78\t4\t0\t53\t0\t0\t6\t30\t31\t78\t0\t0\t0\t0\t16\t164\t180\nB\t29\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t148\t163\nB\t30\t1\t79\t82\t4\t0\t56\t0\t0\t6\t32\t33\t82\t0\t0\t0\t0\t16\t181\t194\nB\t31\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t164\t180\nB\t32\t1\t83\t86\t4\t0\t59\t0\t0\t6\t34\t35\t86\t0\t0\t0\t0\t16\t195\t207\nB\t33\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t181\t194\nB\t34\t1\t87\t90\t4\t0\t62\t0\t0\t6\t36\t37\t90\t0\t0\t0\t0\t16\t208\t221\nB\t35\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t195\t207\nB\t36\t1\t91\t94\t4\t0\t65\t0\t0\t6\t38\t39\t94\t0\t0\t0\t0\t16\t222\t234\nB\t37\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t208\t221\nB\t38\t1\t95\t98\t4\t0\t68\t0\t0\t6\t40\t41\t98\t0\t0\t0\t0\t16\t235\t248\nB\t39\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t222\t234\nB\t40\t1\t99\t99\t1\t69\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t249\t258\nB\t41\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t235\t248\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t2\t0\t37\t39\t17\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t40\t-\nO\t3\t1\t1\t2\t3\t1\t1\t0\t1\t0\t4\t0\t0\t0\t41\t42\t-\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t5\t2\t3\t0\t44\t45\t2\nO\t5\t1\t1\t5\t0\t1\t1\t1\t3\t4\t0\t0\t0\t0\t41\t46\t-\nO\t6\t1\t2\t4\t5\t1\t1\t1\t3\t4\t7\t0\t0\t0\t41\t46\t-\nO\t7\t1\t2\t2\t1\t1\t1\t0\t5\t0\t8\t0\t0\t0\t41\t46\t-\nO\t8\t1\t2\t2\t6\t1\t1\t0\t1\t0\t9\t0\t0\t0\t47\t48\t-\nO\t9\t1\t2\t1\t7\t1\t1\t0\t0\t0\t10\t3\t4\t0\t50\t51\t1\nO\t10\t1\t2\t5\t0\t1\t1\t2\t6\t7\t0\t0\t0\t0\t47\t52\t-\nO\t11\t1\t4\t4\t8\t1\t1\t2\t6\t7\t12\t0\t0\t0\t47\t52\t-\nO\t12\t1\t4\t2\t1\t1\t1\t0\t8\t0\t13\t0\t0\t0\t47\t52\t-\nO\t13\t1\t4\t2\t9\t1\t1\t0\t1\t0\t14\t0\t0\t0\t53\t54\t-\nO\t14\t1\t4\t1\t10\t1\t1\t0\t0\t0\t15\t4\t5\t0\t56\t57\t2\nO\t15\t1\t4\t5\t0\t1\t1\t5\t9\t10\t0\t0\t0\t0\t53\t58\t-\nO\t16\t1\t6\t4\t11\t1\t1\t5\t9\t10\t17\t0\t0\t0\t53\t58\t-\nO\t17\t1\t6\t2\t1\t1\t1\t0\t11\t0\t18\t0\t0\t0\t53\t58\t-\nO\t18\t1\t6\t2\t12\t1\t1\t0\t1\t0\t19\t0\t0\t0\t59\t60\t-\nO\t19\t1\t6\t1\t13\t1\t1\t0\t0\t0\t20\t5\t6\t0\t62\t63\t3\nO\t20\t1\t6\t5\t0\t1\t1\t6\t12\t13\t0\t0\t0\t0\t59\t64\t-\nO\t21\t1\t8\t4\t14\t1\t1\t6\t12\t13\t22\t0\t0\t0\t59\t64\t-\nO\t22\t1\t8\t2\t1\t1\t1\t0\t14\t0\t23\t0\t0\t0\t59\t64\t-\nO\t23\t1\t8\t2\t15\t1\t1\t0\t1\t0\t24\t0\t0\t0\t65\t66\t-\nO\t24\t1\t8\t1\t16\t1\t1\t0\t0\t0\t25\t6\t7\t0\t68\t69\t7\nO\t25\t1\t8\t5\t0\t1\t1\t7\t15\t16\t0\t0\t0\t0\t65\t70\t-\nO\t26\t1\t10\t4\t17\t1\t1\t7\t15\t16\t27\t0\t0\t0\t65\t70\t-\nO\t27\t1\t10\t2\t1\t1\t1\t0\t17\t0\t28\t0\t0\t0\t65\t70\t-\nO\t28\t1\t10\t2\t18\t1\t1\t0\t1\t0\t29\t0\t0\t0\t71\t72\t-\nO\t29\t1\t10\t1\t19\t1\t1\t0\t0\t0\t30\t7\t8\t0\t74\t75\t3\nO\t30\t1\t10\t4\t20\t1\t1\t8\t18\t19\t31\t0\t0\t0\t71\t76\t-\nO\t31\t1\t10\t2\t1\t1\t1\t0\t20\t0\t32\t0\t0\t0\t71\t76\t-\nO\t32\t1\t10\t2\t21\t1\t1\t0\t1\t0\t33\t0\t0\t0\t77\t78\t-\nO\t33\t1\t10\t1\t22\t1\t1\t0\t0\t0\t34\t8\t9\t0\t80\t81\t4\nO\t34\t1\t10\t4\t23\t1\t1\t9\t21\t22\t35\t0\t0\t0\t77\t82\t-\nO\t35\t1\t10\t2\t1\t1\t1\t0\t23\t0\t36\t0\t0\t0\t77\t82\t-\nO\t36\t1\t10\t2\t24\t1\t1\t0\t1\t0\t37\t0\t0\t0\t83\t84\t-\nO\t37\t1\t10\t1\t25\t1\t1\t0\t0\t0\t38\t9\t10\t0\t86\t87\t1\nO\t38\t1\t10\t4\t26\t1\t1\t10\t24\t25\t39\t0\t0\t0\t83\t88\t-\nO\t39\t1\t10\t2\t1\t1\t1\t0\t26\t0\t40\t0\t0\t0\t83\t88\t-\nO\t40\t1\t10\t2\t27\t1\t1\t0\t1\t0\t41\t0\t0\t0\t89\t90\t-\nO\t41\t1\t10\t1\t28\t1\t1\t0\t0\t0\t42\t10\t11\t0\t93\t94\t1\nO\t42\t1\t10\t5\t0\t1\t1\t11\t27\t28\t0\t0\t0\t0\t89\t95\t-\nO\t43\t1\t12\t4\t29\t1\t1\t11\t27\t28\t44\t0\t0\t0\t89\t95\t-\nO\t44\t1\t12\t2\t1\t1\t1\t0\t29\t0\t45\t0\t0\t0\t89\t95\t-\nO\t45\t1\t12\t2\t30\t1\t1\t0\t1\t0\t46\t0\t0\t0\t96\t97\t-\nO\t46\t1\t12\t1\t31\t1\t1\t0\t0\t0\t47\t11\t12\t0\t100\t101\t1\nO\t47\t1\t12\t5\t0\t1\t1\t12\t30\t31\t0\t0\t0\t0\t96\t102\t-\nO\t48\t1\t14\t4\t32\t1\t1\t12\t30\t31\t49\t0\t0\t0\t96\t102\t-\nO\t49\t1\t14\t2\t1\t1\t1\t0\t32\t0\t50\t0\t0\t0\t96\t102\t-\nO\t50\t1\t14\t2\t33\t1\t1\t0\t1\t0\t51\t0\t0\t0\t110\t111\t-\nO\t51\t1\t14\t1\t34\t1\t1\t0\t0\t0\t52\t12\t13\t0\t113\t114\t4\nO\t52\t1\t14\t4\t35\t6\t1\t13\t33\t34\t53\t0\t0\t0\t110\t114\t-\nO\t53\t1\t14\t5\t0\t6\t6\t0\t35\t0\t0\t0\t0\t0\t103\t116\t-\nO\t54\t1\t16\t2\t36\t1\t1\t0\t1\t0\t55\t0\t0\t0\t125\t126\t-\nO\t55\t1\t16\t3\t37\t1\t1\t1\t36\t0\t56\t0\t0\t0\t124\t126\t-\nO\t56\t1\t16\t1\t38\t1\t1\t0\t0\t0\t57\t13\t14\t0\t128\t129\t4\nO\t57\t1\t16\t4\t39\t6\t1\t13\t37\t38\t58\t0\t0\t0\t124\t129\t-\nO\t58\t1\t16\t5\t0\t6\t6\t0\t39\t0\t0\t0\t0\t0\t117\t131\t-\nO\t59\t1\t18\t2\t40\t1\t1\t0\t1\t0\t60\t0\t0\t0\t140\t141\t-\nO\t60\t1\t18\t3\t41\t1\t1\t4\t40\t0\t61\t0\t0\t0\t139\t141\t-\nO\t61\t1\t18\t1\t42\t1\t1\t0\t0\t0\t62\t14\t15\t0\t144\t145\t5\nO\t62\t1\t18\t5\t0\t1\t1\t2\t42\t0\t0\t0\t0\t0\t143\t145\t-\nO\t63\t1\t20\t3\t43\t1\t1\t2\t42\t0\t64\t0\t0\t0\t143\t145\t-\nO\t64\t1\t20\t4\t44\t6\t1\t13\t41\t43\t65\t0\t0\t0\t139\t145\t-\nO\t65\t1\t20\t5\t0\t6\t6\t0\t44\t0\t0\t0\t0\t0\t132\t147\t-\nO\t66\t1\t22\t2\t45\t1\t1\t0\t1\t0\t67\t0\t0\t0\t156\t157\t-\nO\t67\t1\t22\t5\t0\t1\t1\t2\t45\t0\t0\t0\t0\t0\t155\t157\t-\nO\t68\t1\t24\t3\t46\t1\t1\t2\t45\t0\t69\t0\t0\t0\t155\t157\t-\nO\t69\t1\t24\t1\t47\t1\t1\t0\t0\t0\t70\t15\t16\t0\t160\t161\t4\nO\t70\t1\t24\t5\t0\t1\t1\t2\t47\t0\t0\t0\t0\t0\t159\t161\t-\nO\t71\t1\t26\t3\t48\t1\t1\t2\t47\t0\t72\t0\t0\t0\t159\t161\t-\nO\t72\t1\t26\t4\t49\t6\t1\t13\t46\t48\t73\t0\t0\t0\t155\t161\t-\nO\t73\t1\t26\t5\t0\t6\t6\t0\t49\t0\t0\t0\t0\t0\t148\t163\t-\nO\t74\t1\t28\t2\t50\t1\t1\t0\t1\t0\t75\t0\t0\t0\t173\t174\t-\nO\t75\t1\t28\t1\t51\t1\t1\t0\t0\t0\t76\t16\t17\t0\t176\t177\t3\nO\t76\t1\t28\t4\t52\t6\t1\t13\t50\t51\t77\t0\t0\t0\t173\t177\t-\nO\t77\t1\t28\t3\t53\t6\t6\t3\t52\t0\t78\t0\t0\t0\t171\t178\t-\nO\t78\t1\t28\t5\t0\t6\t6\t0\t53\t0\t0\t0\t0\t0\t164\t180\t-\nO\t79\t1\t30\t2\t54\t1\t1\t0\t1\t0\t80\t0\t0\t0\t188\t189\t-\nO\t80\t1\t30\t1\t55\t1\t1\t0\t0\t0\t81\t17\t18\t0\t191\t192\t3\nO\t81\t1\t30\t4\t56\t6\t1\t14\t54\t55\t82\t0\t0\t0\t188\t192\t-\nO\t82\t1\t30\t5\t0\t6\t6\t0\t56\t0\t0\t0\t0\t0\t181\t194\t-\nO\t83\t1\t32\t2\t57\t1\t1\t0\t1\t0\t84\t0\t0\t0\t202\t203\t-\nO\t84\t1\t32\t1\t58\t1\t1\t0\t0\t0\t85\t18\t19\t0\t204\t205\t5\nO\t85\t1\t32\t4\t59\t6\t1\t15\t57\t58\t86\t0\t0\t0\t202\t205\t-\nO\t86\t1\t32\t5\t0\t6\t6\t0\t59\t0\t0\t0\t0\t0\t195\t207\t-\nO\t87\t1\t34\t2\t60\t1\t1\t0\t1\t0\t88\t0\t0\t0\t215\t216\t-\nO\t88\t1\t34\t1\t61\t1\t1\t0\t0\t0\t89\t19\t20\t0\t218\t219\t4\nO\t89\t1\t34\t4\t62\t6\t1\t16\t60\t61\t90\t0\t0\t0\t215\t219\t-\nO\t90\t1\t34\t5\t0\t6\t6\t0\t62\t0\t0\t0\t0\t0\t208\t221\t-\nO\t91\t1\t36\t2\t63\t1\t1\t0\t1\t0\t92\t0\t0\t0\t229\t230\t-\nO\t92\t1\t36\t1\t64\t1\t1\t0\t0\t0\t93\t20\t21\t0\t231\t232\t3\nO\t93\t1\t36\t4\t65\t6\t1\t17\t63\t64\t94\t0\t0\t0\t229\t232\t-\nO\t94\t1\t36\t5\t0\t6\t6\t0\t65\t0\t0\t0\t0\t0\t222\t234\t-\nO\t95\t1\t38\t2\t66\t1\t1\t0\t1\t0\t96\t0\t0\t0\t242\t243\t-\nO\t96\t1\t38\t1\t67\t1\t1\t0\t0\t0\t97\t21\t22\t0\t245\t246\t4\nO\t97\t1\t38\t4\t68\t6\t1\t18\t66\t67\t98\t0\t0\t0\t242\t246\t-\nO\t98\t1\t38\t5\t0\t6\t6\t0\t68\t0\t0\t0\t0\t0\t235\t248\t-\nO\t99\t1\t40\t2\t69\t1\t1\t0\t1\t0\t0\t0\t0\t0\t256\t257\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-4.fy",
+        "beforeSHA256": "44e5049124ede089e7b4b73a5516726faf9134d00432a10a6fe79af0d296e423",
+        "afterSHA256": "44e5049124ede089e7b4b73a5516726faf9134d00432a10a6fe79af0d296e423",
+        "bytes": 259
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 4,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-ordered-nested-calls",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-5.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t71\t73\t0\nT\t3\t3\t0\t4\t1\t1\t2\t99\t102\t0\nS\t0\t1\nS\t1\t1\nS\t2\t1\nF\t1\t1\t1\t0\t8\t0\t6\t0\t0\t13\t63\t0\nF\t2\t2\t7\t8\t2\t6\t1\t7\t1\t64\t91\t0\nF\t3\t3\t8\t10\t5\t7\t3\t8\t2\t92\t128\t0\nL\t1\t1\t0\t1\t0\t0\t41\t42\nL\t2\t1\t0\t1\t0\t0\t38\t43\nL\t3\t1\t0\t1\t0\t0\t51\t52\nL\t4\t1\t0\t1\t0\t0\t48\t53\nL\t5\t1\t0\t1\t0\t0\t57\t58\nL\t6\t1\t0\t1\t0\t0\t54\t59\nL\t7\t1\t0\t1\t0\t0\t44\t60\nL\t8\t1\t0\t1\t0\t0\t34\t61\nL\t9\t2\t4\t1\t1\t0\t78\t79\nL\t10\t2\t0\t1\t0\t0\t88\t89\nL\t11\t3\t5\t1\t1\t0\t107\t108\nL\t12\t3\t6\t1\t1\t0\t113\t114\nL\t13\t3\t0\t1\t0\t0\t123\t124\nL\t14\t3\t0\t1\t0\t0\t125\t126\nL\t15\t3\t0\t1\t0\t0\t123\t126\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t38\t43\nB\t2\t1\t2\t2\t5\t0\t0\t0\t0\t0\t3\t0\t0\t2\t4\t1\t1\t0\t48\t53\nB\t3\t1\t3\t3\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t6\t2\t1\t0\t54\t59\nB\t4\t1\t0\t0\t5\t0\t0\t0\t0\t0\t5\t0\t0\t3\t7\t3\t2\t0\t44\t60\nB\t5\t1\t0\t0\t5\t0\t0\t0\t0\t0\t6\t0\t0\t3\t8\t5\t2\t0\t34\t61\nB\t6\t1\t0\t0\t1\t8\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t62\nB\t7\t2\t4\t4\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t81\t90\nB\t8\t3\t5\t7\t4\t0\t13\t14\t1\t1\t9\t10\t7\t0\t0\t0\t0\t1\t123\t126\nB\t9\t3\t8\t8\t1\t15\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t116\t127\nB\t10\t3\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t123\t126\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t41\t42\t1\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t1\t2\t0\t51\t52\t2\nO\t3\t1\t3\t1\t5\t1\t1\t0\t0\t0\t0\t2\t3\t0\t57\t58\t3\nO\t4\t2\t7\t2\t10\t1\t1\t0\t9\t0\t0\t0\t0\t0\t88\t89\t-\nO\t5\t3\t8\t2\t13\t1\t1\t0\t11\t0\t6\t0\t0\t0\t123\t124\t-\nO\t6\t3\t8\t2\t14\t1\t1\t0\t12\t0\t7\t0\t0\t0\t125\t126\t-\nO\t7\t3\t8\t5\t0\t1\t1\t1\t13\t14\t0\t0\t0\t0\t123\t126\t-\nO\t8\t3\t9\t4\t15\t1\t1\t1\t13\t14\t0\t0\t0\t0\t123\t126\t-\nA\t0\t1\nA\t1\t3\nA\t2\t5\nA\t3\t4\nA\t4\t6\nA\t5\t2\nA\t6\t7\nA\t7\t9\nA\t8\t11\nA\t9\t12\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-5.fy",
+        "beforeSHA256": "b0d780f5655edbcfe9969b155e95ab1d43f2c617d445a46f93dca61c15ee65bc",
+        "afterSHA256": "b0d780f5655edbcfe9969b155e95ab1d43f2c617d445a46f93dca61c15ee65bc",
+        "bytes": 128
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 6,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-void-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-6.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t7\t0\t1\t78\t85\t0\nS\t0\t1\nF\t1\t1\t1\t0\t3\t0\t3\t0\t0\t13\t69\t0\nF\t2\t2\t4\t3\t2\t3\t1\t2\t1\t70\t104\t0\nL\t1\t1\t0\t1\t0\t0\t35\t36\nL\t2\t1\t0\t1\t0\t0\t55\t56\nL\t3\t1\t0\t1\t0\t0\t66\t67\nL\t4\t2\t3\t1\t1\t0\t90\t91\nL\t5\t2\t0\t1\t0\t0\t101\t102\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t0\t0\t1\t0\t27\t37\nB\t2\t1\t2\t2\t5\t0\t0\t0\t0\t0\t3\t0\t0\t2\t0\t1\t1\t0\t47\t57\nB\t3\t1\t3\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t59\t68\nB\t4\t2\t4\t4\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t70\t104\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t35\t36\t2\nO\t2\t1\t2\t1\t2\t1\t1\t0\t0\t0\t0\t1\t2\t0\t55\t56\t1\nO\t3\t1\t3\t1\t3\t1\t1\t0\t0\t0\t0\t2\t3\t0\t66\t67\t0\nO\t4\t2\t4\t2\t5\t1\t1\t0\t4\t0\t0\t0\t0\t0\t101\t102\t-\nA\t0\t1\nA\t1\t2\nA\t2\t4\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-6.fy",
+        "beforeSHA256": "a6027c14c3e0514eb87ea75ccafd2e6d396d7e9fc097a302d2b03d045be890bd",
+        "afterSHA256": "a6027c14c3e0514eb87ea75ccafd2e6d396d7e9fc097a302d2b03d045be890bd",
+        "bytes": 104
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-lexical-blocks",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-7.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t10\t0\t3\t0\t0\t13\t85\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t3\t1\t0\t0\t59\t60\nL\t3\t1\t4\t1\t0\t0\t48\t49\nL\t4\t1\t0\t1\t0\t0\t37\t38\nL\t5\t1\t0\t1\t0\t0\t61\t62\nL\t6\t1\t0\t1\t0\t0\t64\t65\nL\t7\t1\t0\t1\t0\t0\t66\t67\nL\t8\t1\t0\t1\t0\t0\t64\t67\nL\t9\t1\t0\t1\t0\t0\t72\t73\nL\t10\t1\t0\t1\t0\t0\t82\t83\nB\t1\t1\t1\t7\t4\t0\t6\t7\t1\t1\t2\t3\t7\t0\t0\t0\t0\t1\t64\t67\nB\t2\t1\t8\t12\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t75\t84\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t64\t67\nO\t1\t1\t1\t1\t4\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t2\nO\t2\t1\t1\t2\t1\t1\t1\t0\t4\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t5\t1\t1\t0\t0\t0\t4\t1\t2\t0\t61\t62\t3\nO\t4\t1\t1\t2\t2\t1\t1\t0\t5\t0\t5\t0\t0\t0\t51\t63\t-\nO\t5\t1\t1\t2\t6\t1\t1\t0\t2\t0\t6\t0\t0\t0\t64\t65\t-\nO\t6\t1\t1\t1\t7\t1\t1\t0\t0\t0\t7\t2\t3\t0\t66\t67\t1\nO\t7\t1\t1\t5\t0\t1\t1\t1\t6\t7\t0\t0\t0\t0\t64\t67\t-\nO\t8\t1\t2\t4\t8\t1\t1\t1\t6\t7\t9\t0\t0\t0\t64\t67\t-\nO\t9\t1\t2\t2\t3\t1\t1\t0\t8\t0\t10\t0\t0\t0\t40\t69\t-\nO\t10\t1\t2\t2\t9\t1\t1\t0\t3\t0\t11\t0\t0\t0\t72\t73\t-\nO\t11\t1\t2\t2\t1\t1\t1\t0\t9\t0\t12\t0\t0\t0\t70\t74\t-\nO\t12\t1\t2\t2\t10\t1\t1\t0\t1\t0\t0\t0\t0\t0\t82\t83\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-7.fy",
+        "beforeSHA256": "1ea2781621be3538996a0093d806e26119116492b8cd76a6a54834ef728cd5a2",
+        "afterSHA256": "1ea2781621be3538996a0093d806e26119116492b8cd76a6a54834ef728cd5a2",
+        "bytes": 85
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 4,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-compound-read-frozen",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t7\t0\t3\t0\t0\t13\t63\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t1\t0\t0\t40\t41\nL\t4\t1\t0\t1\t0\t0\t46\t47\nL\t5\t1\t0\t1\t0\t0\t49\t50\nL\t6\t1\t0\t1\t0\t0\t40\t52\nL\t7\t1\t0\t1\t0\t0\t60\t61\nB\t1\t1\t1\t7\t4\t0\t3\t5\t1\t1\t2\t3\t7\t0\t0\t0\t0\t1\t40\t52\nB\t2\t1\t8\t10\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t53\t62\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t40\t52\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t5\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t2\t3\t1\t1\t0\t1\t0\t4\t0\t0\t0\t40\t41\t-\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t5\t1\t2\t0\t46\t47\t2\nO\t5\t1\t1\t2\t1\t1\t1\t0\t4\t0\t6\t0\t0\t0\t44\t48\t-\nO\t6\t1\t1\t1\t5\t1\t1\t0\t0\t0\t7\t2\t3\t0\t49\t50\t3\nO\t7\t1\t1\t5\t0\t1\t1\t1\t3\t5\t0\t0\t0\t0\t40\t52\t-\nO\t8\t1\t2\t4\t6\t1\t1\t1\t3\t5\t9\t0\t0\t0\t40\t52\t-\nO\t9\t1\t2\t2\t1\t1\t1\t0\t6\t0\t10\t0\t0\t0\t40\t52\t-\nO\t10\t1\t2\t2\t7\t1\t1\t0\t1\t0\t0\t0\t0\t0\t60\t61\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-8.fy",
+        "beforeSHA256": "4e5106a469b4847374c7503fd4a3ad03227f13f573bd7a8e302e64ea0f1a2683",
+        "afterSHA256": "4e5106a469b4847374c7503fd4a3ad03227f13f573bd7a8e302e64ea0f1a2683",
+        "bytes": 63
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-overflow-i32",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-9.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t5\t0\t3\t0\t0\t13\t61\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t47\nL\t3\t1\t0\t1\t0\t0\t56\t57\nL\t4\t1\t0\t1\t0\t0\t58\t59\nL\t5\t1\t0\t1\t0\t0\t56\t59\nB\t1\t1\t1\t5\t4\t0\t3\t4\t1\t1\t2\t3\t5\t0\t0\t0\t0\t1\t56\t59\nB\t2\t1\t6\t6\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t49\t60\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t56\t59\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t10\t0\t37\t47\t2147483647\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t48\t-\nO\t3\t1\t1\t2\t3\t1\t1\t0\t1\t0\t4\t0\t0\t0\t56\t57\t-\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t5\t10\t11\t0\t58\t59\t1\nO\t5\t1\t1\t5\t0\t1\t1\t1\t3\t4\t0\t0\t0\t0\t56\t59\t-\nO\t6\t1\t2\t4\t5\t1\t1\t1\t3\t4\t0\t0\t0\t0\t56\t59\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-9.fy",
+        "beforeSHA256": "2e992bb82a0bf56a6dabd160e0ef5e00fe94f7fabf68353305b0148c8f0f2af1",
+        "afterSHA256": "2e992bb82a0bf56a6dabd160e0ef5e00fe94f7fabf68353305b0148c8f0f2af1",
+        "bytes": 61
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "integer-overflow"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-overflow-i64",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-10.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t6\t0\t3\t0\t0\t13\t81\t0\nL\t1\t1\t2\t2\t0\t0\t35\t36\nL\t2\t1\t0\t2\t0\t0\t37\t56\nL\t3\t1\t0\t2\t0\t0\t66\t67\nL\t4\t1\t0\t2\t0\t0\t68\t69\nL\t5\t1\t0\t2\t0\t0\t66\t69\nL\t6\t1\t0\t1\t0\t0\t78\t79\nB\t1\t1\t1\t5\t4\t0\t3\t4\t1\t2\t2\t3\t5\t0\t0\t0\t0\t1\t66\t69\nB\t2\t1\t6\t7\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t71\t80\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t66\t69\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t19\t0\t37\t56\t9223372036854775807\nO\t2\t1\t1\t2\t1\t2\t2\t0\t2\t0\t3\t0\t0\t0\t27\t57\t-\nO\t3\t1\t1\t2\t3\t2\t2\t0\t1\t0\t4\t0\t0\t0\t66\t67\t-\nO\t4\t1\t1\t1\t4\t2\t2\t0\t0\t0\t5\t19\t20\t0\t68\t69\t1\nO\t5\t1\t1\t5\t0\t2\t2\t1\t3\t4\t0\t0\t0\t0\t66\t69\t-\nO\t6\t1\t2\t4\t5\t2\t2\t1\t3\t4\t7\t0\t0\t0\t66\t69\t-\nO\t7\t1\t2\t1\t6\t1\t1\t0\t0\t0\t0\t20\t21\t0\t78\t79\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-10.fy",
+        "beforeSHA256": "9a47a4c27a680cee5e4227c2ee9500c92c3e7f79fb833acf43e4505eb8f0e31f",
+        "afterSHA256": "9a47a4c27a680cee5e4227c2ee9500c92c3e7f79fb833acf43e4505eb8f0e31f",
+        "bytes": 81
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "integer-overflow"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-negate-minimum",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-11.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t5\t0\t3\t0\t0\t13\t81\t0\nL\t1\t1\t2\t2\t0\t0\t35\t36\nL\t2\t1\t0\t2\t0\t0\t37\t57\nL\t3\t1\t0\t2\t0\t0\t68\t69\nL\t4\t1\t0\t2\t0\t0\t67\t69\nL\t5\t1\t0\t1\t0\t0\t78\t79\nB\t1\t1\t1\t4\t4\t0\t3\t0\t2\t2\t2\t3\t4\t0\t0\t0\t0\t1\t67\t69\nB\t2\t1\t5\t6\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t71\t80\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t67\t69\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t20\t0\t37\t57\t-9223372036854775808\nO\t2\t1\t1\t2\t1\t2\t2\t0\t2\t0\t3\t0\t0\t0\t27\t58\t-\nO\t3\t1\t1\t2\t3\t2\t2\t0\t1\t0\t4\t0\t0\t0\t68\t69\t-\nO\t4\t1\t1\t5\t0\t2\t2\t2\t3\t0\t0\t0\t0\t0\t67\t69\t-\nO\t5\t1\t2\t3\t4\t2\t2\t2\t3\t0\t6\t0\t0\t0\t67\t69\t-\nO\t6\t1\t2\t1\t5\t1\t1\t0\t0\t0\t0\t20\t21\t0\t78\t79\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-11.fy",
+        "beforeSHA256": "c2e84fb064e91a8db47e0d043dbab25f7e007427338c8cb39aab326c9a05e28d",
+        "afterSHA256": "c2e84fb064e91a8db47e0d043dbab25f7e007427338c8cb39aab326c9a05e28d",
+        "bytes": 81
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "integer-overflow"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-division-zero",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-12.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t6\t0\t3\t0\t0\t13\t63\t0\nL\t1\t1\t2\t2\t0\t0\t35\t36\nL\t2\t1\t0\t2\t0\t0\t37\t38\nL\t3\t1\t0\t2\t0\t0\t48\t49\nL\t4\t1\t0\t2\t0\t0\t50\t51\nL\t5\t1\t0\t2\t0\t0\t48\t51\nL\t6\t1\t0\t1\t0\t0\t60\t61\nB\t1\t1\t1\t5\t4\t0\t3\t4\t6\t2\t2\t3\t5\t0\t0\t0\t0\t6\t48\t51\nB\t2\t1\t6\t7\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t53\t62\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t6\t48\t51\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t1\t0\t37\t38\t5\nO\t2\t1\t1\t2\t1\t2\t2\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t2\t3\t2\t2\t0\t1\t0\t4\t0\t0\t0\t48\t49\t-\nO\t4\t1\t1\t1\t4\t2\t2\t0\t0\t0\t5\t1\t2\t0\t50\t51\t0\nO\t5\t1\t1\t5\t0\t2\t2\t6\t3\t4\t0\t0\t0\t0\t48\t51\t-\nO\t6\t1\t2\t4\t5\t2\t2\t6\t3\t4\t7\t0\t0\t0\t48\t51\t-\nO\t7\t1\t2\t1\t6\t1\t1\t0\t0\t0\t0\t2\t3\t0\t60\t61\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-12.fy",
+        "beforeSHA256": "574ea926e7d0b557f91355a3f3f437c8a588389afff3774e7ae3fe54408af6d4",
+        "afterSHA256": "574ea926e7d0b557f91355a3f3f437c8a588389afff3774e7ae3fe54408af6d4",
+        "bytes": 63
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "division-by-zero"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-signed-division-overflow",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-13.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t7\t0\t5\t0\t0\t13\t83\t0\nL\t1\t1\t2\t2\t0\t0\t35\t36\nL\t2\t1\t0\t2\t0\t0\t37\t57\nL\t3\t1\t0\t2\t0\t0\t67\t68\nL\t4\t1\t0\t2\t0\t0\t70\t71\nL\t5\t1\t0\t2\t0\t0\t69\t71\nL\t6\t1\t0\t2\t0\t0\t67\t71\nL\t7\t1\t0\t1\t0\t0\t80\t81\nB\t1\t1\t1\t5\t4\t0\t4\t0\t2\t2\t2\t3\t5\t0\t0\t0\t0\t1\t69\t71\nB\t2\t1\t6\t7\t4\t0\t3\t5\t6\t2\t4\t5\t7\t0\t0\t0\t0\t6\t67\t71\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t69\t71\nB\t4\t1\t8\t9\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t73\t82\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t6\t67\t71\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t20\t0\t37\t57\t-9223372036854775808\nO\t2\t1\t1\t2\t1\t2\t2\t0\t2\t0\t3\t0\t0\t0\t27\t58\t-\nO\t3\t1\t1\t2\t3\t2\t2\t0\t1\t0\t4\t0\t0\t0\t67\t68\t-\nO\t4\t1\t1\t1\t4\t2\t2\t0\t0\t0\t5\t20\t21\t0\t70\t71\t1\nO\t5\t1\t1\t5\t0\t2\t2\t2\t4\t0\t0\t0\t0\t0\t69\t71\t-\nO\t6\t1\t2\t3\t5\t2\t2\t2\t4\t0\t7\t0\t0\t0\t69\t71\t-\nO\t7\t1\t2\t5\t0\t2\t2\t6\t3\t5\t0\t0\t0\t0\t67\t71\t-\nO\t8\t1\t4\t4\t6\t2\t2\t6\t3\t5\t9\t0\t0\t0\t67\t71\t-\nO\t9\t1\t4\t1\t7\t1\t1\t0\t0\t0\t0\t21\t22\t0\t80\t81\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-13.fy",
+        "beforeSHA256": "32066659cdf64d6b1faa14b8b88f4c645a09626a672087652ad9070360aaa22e",
+        "afterSHA256": "32066659cdf64d6b1faa14b8b88f4c645a09626a672087652ad9070360aaa22e",
+        "bytes": 83
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "signed-division-overflow"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-signed-remainder-overflow",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-14.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t7\t0\t5\t0\t0\t13\t74\t0\nL\t1\t1\t2\t1\t0\t0\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t48\nL\t3\t1\t0\t1\t0\t0\t58\t59\nL\t4\t1\t0\t1\t0\t0\t61\t62\nL\t5\t1\t0\t1\t0\t0\t60\t62\nL\t6\t1\t0\t1\t0\t0\t58\t62\nL\t7\t1\t0\t1\t0\t0\t71\t72\nB\t1\t1\t1\t5\t4\t0\t4\t0\t2\t1\t2\t3\t5\t0\t0\t0\t0\t1\t60\t62\nB\t2\t1\t6\t7\t4\t0\t3\t5\t7\t1\t4\t5\t7\t0\t0\t0\t0\t6\t58\t62\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t60\t62\nB\t4\t1\t8\t9\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t64\t73\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t6\t58\t62\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t11\t0\t37\t48\t-2147483648\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t49\t-\nO\t3\t1\t1\t2\t3\t1\t1\t0\t1\t0\t4\t0\t0\t0\t58\t59\t-\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t5\t11\t12\t0\t61\t62\t1\nO\t5\t1\t1\t5\t0\t1\t1\t2\t4\t0\t0\t0\t0\t0\t60\t62\t-\nO\t6\t1\t2\t3\t5\t1\t1\t2\t4\t0\t7\t0\t0\t0\t60\t62\t-\nO\t7\t1\t2\t5\t0\t1\t1\t7\t3\t5\t0\t0\t0\t0\t58\t62\t-\nO\t8\t1\t4\t4\t6\t1\t1\t7\t3\t5\t9\t0\t0\t0\t58\t62\t-\nO\t9\t1\t4\t1\t7\t1\t1\t0\t0\t0\t0\t12\t13\t0\t71\t72\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-14.fy",
+        "beforeSHA256": "a0ba9793ccdf106c79015ea062bd323ca3faea3a8acd18793c2828121b9e2dc5",
+        "afterSHA256": "a0ba9793ccdf106c79015ea062bd323ca3faea3a8acd18793c2828121b9e2dc5",
+        "bytes": 74
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "signed-division-overflow"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-shift-negative",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-15.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t6\t0\t5\t0\t0\t13\t54\t0\nL\t1\t1\t2\t1\t0\t0\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t1\t0\t0\t47\t48\nL\t4\t1\t0\t1\t0\t0\t51\t52\nL\t5\t1\t0\t1\t0\t0\t50\t52\nL\t6\t1\t0\t1\t0\t0\t47\t52\nB\t1\t1\t1\t5\t4\t0\t4\t0\t2\t1\t2\t3\t5\t0\t0\t0\t0\t1\t50\t52\nB\t2\t1\t6\t7\t4\t0\t3\t5\t12\t1\t4\t5\t7\t0\t0\t0\t0\t8\t47\t52\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t50\t52\nB\t4\t1\t8\t8\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t40\t53\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t8\t47\t52\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t2\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t2\t3\t1\t1\t0\t1\t0\t4\t0\t0\t0\t47\t48\t-\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t5\t1\t2\t0\t51\t52\t1\nO\t5\t1\t1\t5\t0\t1\t1\t2\t4\t0\t0\t0\t0\t0\t50\t52\t-\nO\t6\t1\t2\t3\t5\t1\t1\t2\t4\t0\t7\t0\t0\t0\t50\t52\t-\nO\t7\t1\t2\t5\t0\t1\t1\t12\t3\t5\t0\t0\t0\t0\t47\t52\t-\nO\t8\t1\t4\t4\t6\t1\t1\t12\t3\t5\t0\t0\t0\t0\t47\t52\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-15.fy",
+        "beforeSHA256": "249232fef87e39095dbb2b17f447ac32810de7cf268970e2d6e4064588a00750",
+        "afterSHA256": "249232fef87e39095dbb2b17f447ac32810de7cf268970e2d6e4064588a00750",
+        "bytes": 54
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "invalid-shift"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-shift-width",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-16.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t6\t0\t3\t0\t0\t13\t63\t0\nL\t1\t1\t2\t3\t0\t0\t34\t35\nL\t2\t1\t0\t3\t0\t0\t36\t37\nL\t3\t1\t0\t3\t0\t0\t47\t48\nL\t4\t1\t0\t3\t0\t0\t50\t51\nL\t5\t1\t0\t3\t0\t0\t47\t51\nL\t6\t1\t0\t1\t0\t0\t60\t61\nB\t1\t1\t1\t5\t4\t0\t3\t4\t11\t3\t2\t3\t5\t0\t0\t0\t0\t9\t47\t51\nB\t2\t1\t6\t7\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t53\t62\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t9\t47\t51\nO\t1\t1\t1\t1\t2\t3\t3\t0\t0\t0\t2\t0\t1\t0\t36\t37\t1\nO\t2\t1\t1\t2\t1\t3\t3\t0\t2\t0\t3\t0\t0\t0\t27\t38\t-\nO\t3\t1\t1\t2\t3\t3\t3\t0\t1\t0\t4\t0\t0\t0\t47\t48\t-\nO\t4\t1\t1\t1\t4\t3\t3\t0\t0\t0\t5\t1\t2\t0\t50\t51\t8\nO\t5\t1\t1\t5\t0\t3\t3\t11\t3\t4\t0\t0\t0\t0\t47\t51\t-\nO\t6\t1\t2\t4\t5\t3\t3\t11\t3\t4\t7\t0\t0\t0\t47\t51\t-\nO\t7\t1\t2\t1\t6\t1\t1\t0\t0\t0\t0\t2\t3\t0\t60\t61\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-16.fy",
+        "beforeSHA256": "860505e830876d77768f9e2821c8660d1dab94de0d07eaf2fc23c0adb315128a",
+        "afterSHA256": "860505e830876d77768f9e2821c8660d1dab94de0d07eaf2fc23c0adb315128a",
+        "bytes": 63
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "invalid-shift"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-shift-overflow",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-17.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t6\t0\t3\t0\t0\t13\t73\t0\nL\t1\t1\t2\t4\t0\t0\t35\t36\nL\t2\t1\t0\t4\t0\t0\t37\t47\nL\t3\t1\t0\t4\t0\t0\t57\t58\nL\t4\t1\t0\t4\t0\t0\t60\t61\nL\t5\t1\t0\t4\t0\t0\t57\t61\nL\t6\t1\t0\t1\t0\t0\t70\t71\nB\t1\t1\t1\t5\t4\t0\t3\t4\t11\t4\t2\t3\t5\t0\t0\t0\t0\t9\t57\t61\nB\t2\t1\t6\t7\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t63\t72\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t9\t57\t61\nO\t1\t1\t1\t1\t2\t4\t4\t0\t0\t0\t2\t0\t10\t0\t37\t47\t4294967295\nO\t2\t1\t1\t2\t1\t4\t4\t0\t2\t0\t3\t0\t0\t0\t27\t48\t-\nO\t3\t1\t1\t2\t3\t4\t4\t0\t1\t0\t4\t0\t0\t0\t57\t58\t-\nO\t4\t1\t1\t1\t4\t4\t4\t0\t0\t0\t5\t10\t11\t0\t60\t61\t1\nO\t5\t1\t1\t5\t0\t4\t4\t11\t3\t4\t0\t0\t0\t0\t57\t61\t-\nO\t6\t1\t2\t4\t5\t4\t4\t11\t3\t4\t7\t0\t0\t0\t57\t61\t-\nO\t7\t1\t2\t1\t6\t1\t1\t0\t0\t0\t0\t11\t12\t0\t70\t71\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-17.fy",
+        "beforeSHA256": "93cc442a003efefdded9b9b3ebbe9bb9dad0b2bc225514bccb2e46b7f8f90d11",
+        "afterSHA256": "93cc442a003efefdded9b9b3ebbe9bb9dad0b2bc225514bccb2e46b7f8f90d11",
+        "bytes": 73
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "integer-overflow"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-assertion",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-18.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t1\t0\t3\t0\t0\t13\t52\t0\nL\t1\t1\t0\t6\t0\t0\t34\t39\nB\t1\t1\t1\t2\t4\t0\t1\t0\t0\t6\t2\t3\t2\t0\t0\t0\t0\t16\t27\t41\nB\t2\t1\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t41\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t27\t41\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t0\t34\t39\t-\nO\t2\t1\t1\t5\t0\t6\t6\t0\t1\t0\t0\t0\t0\t0\t27\t41\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-18.fy",
+        "beforeSHA256": "a912c0e896643566c7ef80218030d6ad444518d8f99da21c239ec52f73e43990",
+        "afterSHA256": "a912c0e896643566c7ef80218030d6ad444518d8f99da21c239ec52f73e43990",
+        "bytes": 52
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "assertion-failed"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-simple",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-19.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t4\t0\t4\t0\t0\t13\t54\t0\nL\t1\t1\t0\t6\t0\t0\t37\t41\nL\t2\t1\t0\t1\t0\t0\t34\t52\nL\t3\t1\t0\t1\t0\t0\t43\t44\nL\t4\t1\t0\t1\t0\t0\t50\t51\nB\t1\t1\t1\t1\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t34\t52\nB\t2\t1\t2\t3\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t34\t52\nB\t3\t1\t4\t5\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t34\t52\nB\t4\t1\t0\t0\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t53\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t37\t41\t-\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t3\t0\t1\t0\t43\t44\t1\nO\t3\t1\t2\t2\t2\t1\t1\t0\t3\t0\t0\t0\t0\t0\t34\t52\t-\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t5\t1\t2\t0\t50\t51\t2\nO\t5\t1\t3\t2\t2\t1\t1\t0\t4\t0\t0\t0\t0\t0\t34\t52\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-19.fy",
+        "beforeSHA256": "3f7ffbe90769d1471be711e4493510310425983cb040a41a195eaf59c329b862",
+        "afterSHA256": "3f7ffbe90769d1471be711e4493510310425983cb040a41a195eaf59c329b862",
+        "bytes": 54
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 1,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-short-circuit-simple",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-20.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t4\t0\t5\t0\t0\t13\t60\t0\nL\t1\t1\t0\t6\t0\t0\t34\t39\nL\t2\t1\t0\t6\t0\t0\t34\t47\nL\t3\t1\t0\t6\t0\t0\t43\t47\nL\t4\t1\t0\t1\t0\t0\t57\t58\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t3\t2\t0\t0\t0\t0\t0\t0\t34\t47\nB\t2\t1\t3\t4\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t34\t47\nB\t3\t1\t5\t5\t4\t0\t2\t0\t0\t6\t4\t5\t5\t0\t0\t0\t0\t16\t27\t49\nB\t4\t1\t6\t6\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t50\t59\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t27\t49\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t0\t34\t39\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t34\t47\t-\nO\t3\t1\t2\t1\t3\t6\t6\t0\t0\t0\t4\t0\t0\t1\t43\t47\t-\nO\t4\t1\t2\t2\t2\t6\t6\t0\t3\t0\t0\t0\t0\t0\t34\t47\t-\nO\t5\t1\t3\t5\t0\t6\t6\t0\t2\t0\t0\t0\t0\t0\t27\t49\t-\nO\t6\t1\t4\t1\t4\t1\t1\t0\t0\t0\t0\t0\t1\t0\t57\t58\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-20.fy",
+        "beforeSHA256": "db8856d60b02542d83e7ced5e834073ea3d5104a95ed904c704ef19a33c1b0f1",
+        "afterSHA256": "db8856d60b02542d83e7ced5e834073ea3d5104a95ed904c704ef19a33c1b0f1",
+        "bytes": 60
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-deferred-while",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-21.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported MIR input\n",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-21.fy",
+        "beforeSHA256": "c351e70619f2cd8ad125b40a98dade6044f08cd2c0261deeea0b11accb69f026",
+        "afterSHA256": "c351e70619f2cd8ad125b40a98dade6044f08cd2c0261deeea0b11accb69f026",
+        "bytes": 68
+      }
+    },
+    {
+      "label": "mir-deferred-for",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-22.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported MIR input\n",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-22.fy",
+        "beforeSHA256": "72efe448e6a7f501e1912de0df731805412f9a669141343d605afa14725683c5",
+        "afterSHA256": "72efe448e6a7f501e1912de0df731805412f9a669141343d605afa14725683c5",
+        "bytes": 83
+      }
+    },
+    {
+      "label": "mir-deferred-defer",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-23.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported MIR input\n",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-23.fy",
+        "beforeSHA256": "958224977efdf3d83833fa2363e00844a97b8532c4aa10a4556f500cc0af3c62",
+        "afterSHA256": "958224977efdf3d83833fa2363e00844a97b8532c4aa10a4556f500cc0af3c62",
+        "bytes": 90
+      }
+    },
+    {
+      "label": "mir-if-false",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-24.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t4\t0\t4\t0\t0\t13\t55\t0\nL\t1\t1\t0\t6\t0\t0\t37\t42\nL\t2\t1\t0\t1\t0\t0\t34\t53\nL\t3\t1\t0\t1\t0\t0\t44\t45\nL\t4\t1\t0\t1\t0\t0\t51\t52\nB\t1\t1\t1\t1\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t34\t53\nB\t2\t1\t2\t3\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t34\t53\nB\t3\t1\t4\t5\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t34\t53\nB\t4\t1\t0\t0\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t54\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t0\t37\t42\t-\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t3\t0\t1\t0\t44\t45\t1\nO\t3\t1\t2\t2\t2\t1\t1\t0\t3\t0\t0\t0\t0\t0\t34\t53\t-\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t5\t1\t2\t0\t51\t52\t2\nO\t5\t1\t3\t2\t2\t1\t1\t0\t4\t0\t0\t0\t0\t0\t34\t53\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-24.fy",
+        "beforeSHA256": "07147ee4dbc2b1b05e8319d3a3ac2810802198cfbc1768dd9c754d836f00b1a6",
+        "afterSHA256": "07147ee4dbc2b1b05e8319d3a3ac2810802198cfbc1768dd9c754d836f00b1a6",
+        "bytes": 55
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 2,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-i64-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-25.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t2\t0\t1\t108\t112\t0\nS\t0\t6\nF\t1\t1\t1\t0\t9\t0\t7\t0\t0\t13\t100\t0\nF\t2\t2\t8\t9\t5\t7\t4\t2\t1\t101\t163\t0\nL\t1\t1\t0\t6\t0\t0\t39\t43\nL\t2\t1\t0\t2\t0\t0\t34\t44\nL\t3\t1\t0\t2\t0\t0\t46\t56\nL\t4\t1\t0\t6\t0\t0\t34\t56\nL\t5\t1\t0\t6\t0\t0\t70\t75\nL\t6\t1\t0\t2\t0\t0\t65\t76\nL\t7\t1\t0\t2\t0\t0\t78\t88\nL\t8\t1\t0\t6\t0\t0\t65\t88\nL\t9\t1\t0\t1\t0\t0\t97\t98\nL\t10\t2\t3\t6\t1\t0\t118\t119\nL\t11\t2\t0\t6\t0\t0\t131\t132\nL\t12\t2\t0\t2\t0\t0\t128\t161\nL\t13\t2\t0\t2\t0\t0\t134\t144\nL\t14\t2\t0\t2\t0\t0\t150\t160\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t34\t44\nB\t2\t1\t2\t4\t4\t0\t4\t0\t0\t6\t3\t4\t4\t0\t0\t0\t0\t16\t27\t58\nB\t3\t1\t5\t5\t5\t0\t0\t0\t0\t0\t5\t0\t0\t2\t6\t1\t1\t0\t65\t76\nB\t4\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t27\t58\nB\t5\t1\t6\t8\t4\t0\t8\t0\t0\t6\t6\t7\t8\t0\t0\t0\t0\t16\t58\t90\nB\t6\t1\t9\t9\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t90\t99\nB\t7\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t58\t90\nB\t8\t2\t10\t10\t3\t11\t0\t0\t0\t6\t9\t10\t0\t0\t0\t0\t0\t0\t128\t161\nB\t9\t2\t11\t12\t2\t0\t0\t0\t0\t0\t11\t0\t0\t0\t0\t0\t0\t0\t128\t161\nB\t10\t2\t13\t14\t2\t0\t0\t0\t0\t0\t11\t0\t0\t0\t0\t0\t0\t0\t128\t161\nB\t11\t2\t0\t0\t1\t12\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t121\t162\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t39\t43\t-\nO\t2\t1\t2\t1\t3\t2\t2\t0\t0\t0\t3\t0\t10\t0\t46\t56\t4000000000\nO\t3\t1\t2\t4\t4\t6\t2\t13\t2\t3\t4\t0\t0\t0\t34\t56\t-\nO\t4\t1\t2\t5\t0\t6\t6\t0\t4\t0\t0\t0\t0\t0\t27\t58\t-\nO\t5\t1\t3\t1\t5\t6\t6\t0\t0\t0\t0\t0\t0\t0\t70\t75\t-\nO\t6\t1\t5\t1\t7\t2\t2\t0\t0\t0\t7\t10\t20\t0\t78\t88\t5000000000\nO\t7\t1\t5\t4\t8\t6\t2\t13\t6\t7\t8\t0\t0\t0\t65\t88\t-\nO\t8\t1\t5\t5\t0\t6\t6\t0\t8\t0\t0\t0\t0\t0\t58\t90\t-\nO\t9\t1\t6\t1\t9\t1\t1\t0\t0\t0\t0\t20\t21\t0\t97\t98\t0\nO\t10\t2\t8\t2\t11\t6\t6\t0\t10\t0\t0\t0\t0\t0\t131\t132\t-\nO\t11\t2\t9\t1\t13\t2\t2\t0\t0\t0\t12\t21\t31\t0\t134\t144\t4000000000\nO\t12\t2\t9\t2\t12\t2\t2\t0\t13\t0\t0\t0\t0\t0\t128\t161\t-\nO\t13\t2\t10\t1\t14\t2\t2\t0\t0\t0\t14\t31\t41\t0\t150\t160\t5000000000\nO\t14\t2\t10\t2\t12\t2\t2\t0\t14\t0\t0\t0\t0\t0\t128\t161\t-\nA\t0\t1\nA\t1\t5\nA\t2\t10\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-25.fy",
+        "beforeSHA256": "7e35c0a7aea4301f67ec2c5a468befff2ac6e70d43968434f88c116a6d6a98d6",
+        "afterSHA256": "7e35c0a7aea4301f67ec2c5a468befff2ac6e70d43968434f88c116a6d6a98d6",
+        "bytes": 163
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-no-else-both-paths",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-26.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t9\t0\t9\t0\t0\t13\t79\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t6\t0\t0\t42\t47\nL\t4\t1\t0\t1\t0\t0\t51\t52\nL\t5\t1\t0\t6\t0\t0\t57\t61\nL\t6\t1\t0\t1\t0\t0\t63\t64\nL\t7\t1\t0\t1\t0\t0\t66\t67\nL\t8\t1\t0\t1\t0\t0\t63\t68\nL\t9\t1\t0\t1\t0\t0\t76\t77\nB\t1\t1\t1\t3\t3\t3\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t39\t54\nB\t2\t1\t4\t5\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t39\t54\nB\t3\t1\t0\t0\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t39\t54\nB\t4\t1\t6\t6\t3\t5\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t54\t69\nB\t5\t1\t7\t9\t4\t0\t6\t7\t1\t1\t7\t8\t9\t0\t0\t0\t0\t1\t63\t68\nB\t6\t1\t0\t0\t2\t0\t0\t0\t0\t0\t9\t0\t0\t0\t0\t0\t0\t0\t54\t69\nB\t7\t1\t10\t11\t2\t0\t0\t0\t0\t0\t9\t0\t0\t0\t0\t0\t0\t0\t54\t69\nB\t8\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t63\t68\nB\t9\t1\t12\t12\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t69\t78\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t1\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t3\t6\t6\t0\t0\t0\t0\t0\t0\t0\t42\t47\t-\nO\t4\t1\t2\t1\t4\t1\t1\t0\t0\t0\t5\t1\t2\t0\t51\t52\t8\nO\t5\t1\t2\t2\t1\t1\t1\t0\t4\t0\t0\t0\t0\t0\t49\t53\t-\nO\t6\t1\t4\t1\t5\t6\t6\t0\t0\t0\t0\t0\t0\t1\t57\t61\t-\nO\t7\t1\t5\t2\t6\t1\t1\t0\t1\t0\t8\t0\t0\t0\t63\t64\t-\nO\t8\t1\t5\t1\t7\t1\t1\t0\t0\t0\t9\t2\t3\t0\t66\t67\t2\nO\t9\t1\t5\t5\t0\t1\t1\t1\t6\t7\t0\t0\t0\t0\t63\t68\t-\nO\t10\t1\t7\t4\t8\t1\t1\t1\t6\t7\t11\t0\t0\t0\t63\t68\t-\nO\t11\t1\t7\t2\t1\t1\t1\t0\t8\t0\t0\t0\t0\t0\t63\t68\t-\nO\t12\t1\t9\t2\t9\t1\t1\t0\t1\t0\t0\t0\t0\t0\t76\t77\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-26.fy",
+        "beforeSHA256": "adca49f9e84f7f8feb1484f9d1188e4bc72d1d1dcc140013d4f2321a1d9827c4",
+        "afterSHA256": "adca49f9e84f7f8feb1484f9d1188e4bc72d1d1dcc140013d4f2321a1d9827c4",
+        "bytes": 79
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 3,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-else-if-all-paths",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-27.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t68\t72\t0\nS\t0\t1\nF\t1\t1\t1\t0\t9\t0\t10\t0\t0\t13\t60\t0\nF\t2\t2\t11\t9\t12\t10\t7\t3\t1\t61\t121\t0\nL\t1\t1\t0\t1\t0\t0\t39\t40\nL\t2\t1\t0\t1\t0\t0\t34\t41\nL\t3\t1\t0\t1\t0\t0\t47\t48\nL\t4\t1\t0\t1\t0\t0\t42\t49\nL\t5\t1\t0\t1\t0\t0\t34\t49\nL\t6\t1\t0\t1\t0\t0\t56\t57\nL\t7\t1\t0\t1\t0\t0\t55\t57\nL\t8\t1\t0\t1\t0\t0\t50\t58\nL\t9\t1\t0\t1\t0\t0\t34\t58\nL\t10\t2\t3\t1\t1\t0\t77\t78\nL\t11\t2\t0\t1\t0\t0\t90\t91\nL\t12\t2\t0\t1\t0\t0\t92\t93\nL\t13\t2\t0\t6\t0\t0\t90\t93\nL\t14\t2\t0\t1\t0\t0\t87\t119\nL\t15\t2\t0\t1\t0\t0\t95\t96\nL\t16\t2\t0\t1\t0\t0\t105\t106\nL\t17\t2\t0\t1\t0\t0\t107\t108\nL\t18\t2\t0\t6\t0\t0\t105\t108\nL\t19\t2\t0\t1\t0\t0\t102\t119\nL\t20\t2\t0\t1\t0\t0\t110\t111\nL\t21\t2\t0\t1\t0\t0\t117\t118\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t34\t41\nB\t2\t1\t2\t2\t5\t0\t0\t0\t0\t0\t3\t0\t0\t2\t4\t1\t1\t0\t42\t49\nB\t3\t1\t3\t3\t4\t0\t2\t4\t1\t1\t4\t5\t3\t0\t0\t0\t0\t1\t34\t49\nB\t4\t1\t4\t6\t4\t0\t6\t0\t2\t1\t6\t7\t6\t0\t0\t0\t0\t1\t55\t57\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t34\t49\nB\t6\t1\t7\t7\t5\t0\t0\t0\t0\t0\t8\t0\t0\t2\t8\t2\t1\t0\t50\t58\nB\t7\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t55\t57\nB\t8\t1\t8\t8\t4\t0\t5\t8\t1\t1\t9\t10\t8\t0\t0\t0\t0\t1\t34\t58\nB\t9\t1\t9\t9\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t59\nB\t10\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t34\t58\nB\t11\t2\t10\t12\t3\t13\t0\t0\t0\t6\t12\t13\t0\t0\t0\t0\t0\t0\t87\t119\nB\t12\t2\t13\t14\t2\t0\t0\t0\t0\t0\t17\t0\t0\t0\t0\t0\t0\t0\t87\t119\nB\t13\t2\t15\t17\t3\t18\t0\t0\t0\t6\t14\t15\t0\t0\t0\t0\t0\t0\t102\t119\nB\t14\t2\t18\t19\t2\t0\t0\t0\t0\t0\t16\t0\t0\t0\t0\t0\t0\t0\t102\t119\nB\t15\t2\t20\t21\t2\t0\t0\t0\t0\t0\t16\t0\t0\t0\t0\t0\t0\t0\t102\t119\nB\t16\t2\t22\t22\t2\t0\t0\t0\t0\t0\t17\t0\t0\t0\t0\t0\t0\t0\t87\t119\nB\t17\t2\t0\t0\t1\t14\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t80\t120\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t39\t40\t1\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t1\t2\t0\t47\t48\t0\nO\t3\t1\t3\t5\t0\t1\t1\t1\t2\t4\t0\t0\t0\t0\t34\t49\t-\nO\t4\t1\t4\t4\t5\t1\t1\t1\t2\t4\t5\t0\t0\t0\t34\t49\t-\nO\t5\t1\t4\t1\t6\t1\t1\t0\t0\t0\t6\t2\t3\t0\t56\t57\t1\nO\t6\t1\t4\t5\t0\t1\t1\t2\t6\t0\t0\t0\t0\t0\t55\t57\t-\nO\t7\t1\t6\t3\t7\t1\t1\t2\t6\t0\t0\t0\t0\t0\t55\t57\t-\nO\t8\t1\t8\t5\t0\t1\t1\t1\t5\t8\t0\t0\t0\t0\t34\t58\t-\nO\t9\t1\t9\t4\t9\t1\t1\t1\t5\t8\t0\t0\t0\t0\t34\t58\t-\nO\t10\t2\t11\t2\t11\t1\t1\t0\t10\t0\t11\t0\t0\t0\t90\t91\t-\nO\t11\t2\t11\t1\t12\t1\t1\t0\t0\t0\t12\t3\t4\t0\t92\t93\t0\nO\t12\t2\t11\t4\t13\t6\t1\t17\t11\t12\t0\t0\t0\t0\t90\t93\t-\nO\t13\t2\t12\t1\t15\t1\t1\t0\t0\t0\t14\t4\t5\t0\t95\t96\t2\nO\t14\t2\t12\t2\t14\t1\t1\t0\t15\t0\t0\t0\t0\t0\t87\t119\t-\nO\t15\t2\t13\t2\t16\t1\t1\t0\t10\t0\t16\t0\t0\t0\t105\t106\t-\nO\t16\t2\t13\t1\t17\t1\t1\t0\t0\t0\t17\t5\t6\t0\t107\t108\t0\nO\t17\t2\t13\t4\t18\t6\t1\t15\t16\t17\t0\t0\t0\t0\t105\t108\t-\nO\t18\t2\t14\t1\t20\t1\t1\t0\t0\t0\t19\t6\t7\t0\t110\t111\t3\nO\t19\t2\t14\t2\t19\t1\t1\t0\t20\t0\t0\t0\t0\t0\t102\t119\t-\nO\t20\t2\t15\t1\t21\t1\t1\t0\t0\t0\t21\t7\t8\t0\t117\t118\t4\nO\t21\t2\t15\t2\t19\t1\t1\t0\t21\t0\t0\t0\t0\t0\t102\t119\t-\nO\t22\t2\t16\t2\t14\t1\t1\t0\t19\t0\t0\t0\t0\t0\t87\t119\t-\nA\t0\t1\nA\t1\t3\nA\t2\t7\nA\t3\t10\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-27.fy",
+        "beforeSHA256": "e24bf6dc29a5834a03ea91601a8c675f405902dd8d48cc8bf341aafc3b9797d0",
+        "afterSHA256": "e24bf6dc29a5834a03ea91601a8c675f405902dd8d48cc8bf341aafc3b9797d0",
+        "bytes": 121
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-both-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-28.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t66\t70\t0\nS\t0\t6\nF\t1\t1\t1\t0\t5\t0\t5\t0\t0\t13\t58\t0\nF\t2\t2\t6\t5\t4\t5\t3\t2\t1\t59\t111\t0\nL\t1\t1\t0\t6\t0\t0\t39\t43\nL\t2\t1\t0\t1\t0\t0\t34\t44\nL\t3\t1\t0\t6\t0\t0\t50\t55\nL\t4\t1\t0\t1\t0\t0\t45\t56\nL\t5\t1\t0\t1\t0\t0\t34\t56\nL\t6\t2\t3\t6\t1\t0\t76\t77\nL\t7\t2\t0\t6\t0\t0\t82\t83\nL\t8\t2\t0\t1\t0\t0\t92\t93\nL\t9\t2\t0\t1\t0\t0\t107\t108\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t34\t44\nB\t2\t1\t2\t2\t5\t0\t0\t0\t0\t0\t3\t0\t0\t2\t4\t1\t1\t0\t45\t56\nB\t3\t1\t3\t3\t4\t0\t2\t4\t1\t1\t4\t5\t3\t0\t0\t0\t0\t1\t34\t56\nB\t4\t1\t4\t4\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t57\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t34\t56\nB\t6\t2\t5\t5\t3\t7\t0\t0\t0\t6\t7\t8\t0\t0\t0\t0\t0\t0\t79\t110\nB\t7\t2\t6\t6\t1\t8\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t85\t94\nB\t8\t2\t7\t7\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t100\t109\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t39\t43\t-\nO\t2\t1\t2\t1\t3\t6\t6\t0\t0\t0\t0\t0\t0\t0\t50\t55\t-\nO\t3\t1\t3\t5\t0\t1\t1\t1\t2\t4\t0\t0\t0\t0\t34\t56\t-\nO\t4\t1\t4\t4\t5\t1\t1\t1\t2\t4\t0\t0\t0\t0\t34\t56\t-\nO\t5\t2\t6\t2\t7\t6\t6\t0\t6\t0\t0\t0\t0\t0\t82\t83\t-\nO\t6\t2\t7\t1\t8\t1\t1\t0\t0\t0\t0\t0\t1\t0\t92\t93\t3\nO\t7\t2\t8\t1\t9\t1\t1\t0\t0\t0\t0\t1\t2\t0\t107\t108\t5\nA\t0\t1\nA\t1\t3\nA\t2\t6\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-28.fy",
+        "beforeSHA256": "1b27e2ffe2d1904f3b2ceb1526f0f1de50a6c8f585586f3df2a993d70e20a28c",
+        "afterSHA256": "1b27e2ffe2d1904f3b2ceb1526f0f1de50a6c8f585586f3df2a993d70e20a28c",
+        "bytes": 111
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-one-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-29.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t66\t70\t0\nS\t0\t6\nF\t1\t1\t1\t0\t5\t0\t5\t0\t0\t13\t58\t0\nF\t2\t2\t6\t5\t4\t5\t4\t2\t1\t59\t105\t0\nL\t1\t1\t0\t6\t0\t0\t39\t43\nL\t2\t1\t0\t1\t0\t0\t34\t44\nL\t3\t1\t0\t6\t0\t0\t50\t55\nL\t4\t1\t0\t1\t0\t0\t45\t56\nL\t5\t1\t0\t1\t0\t0\t34\t56\nL\t6\t2\t3\t6\t1\t0\t76\t77\nL\t7\t2\t0\t6\t0\t0\t82\t83\nL\t8\t2\t0\t1\t0\t0\t92\t93\nL\t9\t2\t0\t1\t0\t0\t102\t103\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t34\t44\nB\t2\t1\t2\t2\t5\t0\t0\t0\t0\t0\t3\t0\t0\t2\t4\t1\t1\t0\t45\t56\nB\t3\t1\t3\t3\t4\t0\t2\t4\t1\t1\t4\t5\t3\t0\t0\t0\t0\t1\t34\t56\nB\t4\t1\t4\t4\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t57\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t34\t56\nB\t6\t2\t5\t5\t3\t7\t0\t0\t0\t6\t7\t8\t0\t0\t0\t0\t0\t0\t79\t95\nB\t7\t2\t6\t6\t1\t8\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t85\t94\nB\t8\t2\t0\t0\t2\t0\t0\t0\t0\t0\t9\t0\t0\t0\t0\t0\t0\t0\t79\t95\nB\t9\t2\t7\t7\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t95\t104\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t39\t43\t-\nO\t2\t1\t2\t1\t3\t6\t6\t0\t0\t0\t0\t0\t0\t0\t50\t55\t-\nO\t3\t1\t3\t5\t0\t1\t1\t1\t2\t4\t0\t0\t0\t0\t34\t56\t-\nO\t4\t1\t4\t4\t5\t1\t1\t1\t2\t4\t0\t0\t0\t0\t34\t56\t-\nO\t5\t2\t6\t2\t7\t6\t6\t0\t6\t0\t0\t0\t0\t0\t82\t83\t-\nO\t6\t2\t7\t1\t8\t1\t1\t0\t0\t0\t0\t0\t1\t0\t92\t93\t3\nO\t7\t2\t9\t1\t9\t1\t1\t0\t0\t0\t0\t1\t2\t0\t102\t103\t5\nA\t0\t1\nA\t1\t3\nA\t2\t6\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-29.fy",
+        "beforeSHA256": "dcf707ea771b2d293e3e6d4590d38ba27534586ae0699264e148c529bd355020",
+        "afterSHA256": "dcf707ea771b2d293e3e6d4590d38ba27534586ae0699264e148c529bd355020",
+        "bytes": 105
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-else-if-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-30.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t68\t72\t0\nS\t0\t1\nF\t1\t1\t1\t0\t9\t0\t10\t0\t0\t13\t60\t0\nF\t2\t2\t11\t9\t10\t10\t5\t3\t1\t61\t137\t0\nL\t1\t1\t0\t1\t0\t0\t39\t40\nL\t2\t1\t0\t1\t0\t0\t34\t41\nL\t3\t1\t0\t1\t0\t0\t47\t48\nL\t4\t1\t0\t1\t0\t0\t42\t49\nL\t5\t1\t0\t1\t0\t0\t34\t49\nL\t6\t1\t0\t1\t0\t0\t56\t57\nL\t7\t1\t0\t1\t0\t0\t55\t57\nL\t8\t1\t0\t1\t0\t0\t50\t58\nL\t9\t1\t0\t1\t0\t0\t34\t58\nL\t10\t2\t3\t1\t1\t0\t77\t78\nL\t11\t2\t0\t1\t0\t0\t83\t84\nL\t12\t2\t0\t1\t0\t0\t85\t86\nL\t13\t2\t0\t6\t0\t0\t83\t86\nL\t14\t2\t0\t1\t0\t0\t95\t96\nL\t15\t2\t0\t1\t0\t0\t106\t107\nL\t16\t2\t0\t1\t0\t0\t108\t109\nL\t17\t2\t0\t6\t0\t0\t106\t109\nL\t18\t2\t0\t1\t0\t0\t118\t119\nL\t19\t2\t0\t1\t0\t0\t133\t134\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t34\t41\nB\t2\t1\t2\t2\t5\t0\t0\t0\t0\t0\t3\t0\t0\t2\t4\t1\t1\t0\t42\t49\nB\t3\t1\t3\t3\t4\t0\t2\t4\t1\t1\t4\t5\t3\t0\t0\t0\t0\t1\t34\t49\nB\t4\t1\t4\t6\t4\t0\t6\t0\t2\t1\t6\t7\t6\t0\t0\t0\t0\t1\t55\t57\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t34\t49\nB\t6\t1\t7\t7\t5\t0\t0\t0\t0\t0\t8\t0\t0\t2\t8\t2\t1\t0\t50\t58\nB\t7\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t55\t57\nB\t8\t1\t8\t8\t4\t0\t5\t8\t1\t1\t9\t10\t8\t0\t0\t0\t0\t1\t34\t58\nB\t9\t1\t9\t9\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t59\nB\t10\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t34\t58\nB\t11\t2\t10\t12\t3\t13\t0\t0\t0\t6\t12\t13\t0\t0\t0\t0\t0\t0\t80\t136\nB\t12\t2\t13\t13\t1\t14\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t88\t97\nB\t13\t2\t14\t16\t3\t17\t0\t0\t0\t6\t14\t15\t0\t0\t0\t0\t0\t0\t103\t136\nB\t14\t2\t17\t17\t1\t18\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t111\t120\nB\t15\t2\t18\t18\t1\t19\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t126\t135\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t39\t40\t1\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t1\t2\t0\t47\t48\t0\nO\t3\t1\t3\t5\t0\t1\t1\t1\t2\t4\t0\t0\t0\t0\t34\t49\t-\nO\t4\t1\t4\t4\t5\t1\t1\t1\t2\t4\t5\t0\t0\t0\t34\t49\t-\nO\t5\t1\t4\t1\t6\t1\t1\t0\t0\t0\t6\t2\t3\t0\t56\t57\t1\nO\t6\t1\t4\t5\t0\t1\t1\t2\t6\t0\t0\t0\t0\t0\t55\t57\t-\nO\t7\t1\t6\t3\t7\t1\t1\t2\t6\t0\t0\t0\t0\t0\t55\t57\t-\nO\t8\t1\t8\t5\t0\t1\t1\t1\t5\t8\t0\t0\t0\t0\t34\t58\t-\nO\t9\t1\t9\t4\t9\t1\t1\t1\t5\t8\t0\t0\t0\t0\t34\t58\t-\nO\t10\t2\t11\t2\t11\t1\t1\t0\t10\t0\t11\t0\t0\t0\t83\t84\t-\nO\t11\t2\t11\t1\t12\t1\t1\t0\t0\t0\t12\t3\t4\t0\t85\t86\t0\nO\t12\t2\t11\t4\t13\t6\t1\t17\t11\t12\t0\t0\t0\t0\t83\t86\t-\nO\t13\t2\t12\t1\t14\t1\t1\t0\t0\t0\t0\t4\t5\t0\t95\t96\t2\nO\t14\t2\t13\t2\t15\t1\t1\t0\t10\t0\t15\t0\t0\t0\t106\t107\t-\nO\t15\t2\t13\t1\t16\t1\t1\t0\t0\t0\t16\t5\t6\t0\t108\t109\t0\nO\t16\t2\t13\t4\t17\t6\t1\t15\t15\t16\t0\t0\t0\t0\t106\t109\t-\nO\t17\t2\t14\t1\t18\t1\t1\t0\t0\t0\t0\t6\t7\t0\t118\t119\t3\nO\t18\t2\t15\t1\t19\t1\t1\t0\t0\t0\t0\t7\t8\t0\t133\t134\t4\nA\t0\t1\nA\t1\t3\nA\t2\t7\nA\t3\t10\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-30.fy",
+        "beforeSHA256": "b3dbdc4bb0b8159a7571d5b8014e9780bb615eacdc8d64240c9204718d52f27c",
+        "afterSHA256": "b3dbdc4bb0b8159a7571d5b8014e9780bb615eacdc8d64240c9204718d52f27c",
+        "bytes": 137
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-side-effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-31.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t12\t0\t6\t0\t0\t13\t89\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t3\t1\t0\t0\t47\t48\nL\t3\t1\t0\t1\t0\t0\t37\t38\nL\t4\t1\t0\t6\t0\t0\t52\t57\nL\t5\t1\t0\t1\t0\t0\t49\t76\nL\t6\t1\t0\t1\t0\t0\t61\t62\nL\t7\t1\t0\t1\t0\t0\t63\t64\nL\t8\t1\t0\t1\t0\t0\t72\t73\nL\t9\t1\t0\t1\t0\t0\t74\t75\nL\t10\t1\t0\t1\t0\t0\t84\t85\nL\t11\t1\t0\t1\t0\t0\t86\t87\nL\t12\t1\t0\t1\t0\t0\t84\t87\nB\t1\t1\t1\t3\t3\t4\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t49\t76\nB\t2\t1\t4\t7\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t49\t76\nB\t3\t1\t8\t11\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t49\t76\nB\t4\t1\t12\t15\t4\t0\t10\t11\t1\t1\t5\t6\t15\t0\t0\t0\t0\t1\t84\t87\nB\t5\t1\t16\t16\t1\t12\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t77\t88\nB\t6\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t84\t87\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t3\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t4\t6\t6\t0\t0\t0\t0\t0\t0\t0\t52\t57\t-\nO\t4\t1\t2\t1\t6\t1\t1\t0\t0\t0\t5\t1\t2\t0\t61\t62\t1\nO\t5\t1\t2\t2\t1\t1\t1\t0\t6\t0\t6\t0\t0\t0\t59\t63\t-\nO\t6\t1\t2\t1\t7\t1\t1\t0\t0\t0\t7\t2\t3\t0\t63\t64\t2\nO\t7\t1\t2\t2\t5\t1\t1\t0\t7\t0\t0\t0\t0\t0\t49\t76\t-\nO\t8\t1\t3\t1\t8\t1\t1\t0\t0\t0\t9\t3\t4\t0\t72\t73\t3\nO\t9\t1\t3\t2\t1\t1\t1\t0\t8\t0\t10\t0\t0\t0\t70\t74\t-\nO\t10\t1\t3\t1\t9\t1\t1\t0\t0\t0\t11\t4\t5\t0\t74\t75\t4\nO\t11\t1\t3\t2\t5\t1\t1\t0\t9\t0\t0\t0\t0\t0\t49\t76\t-\nO\t12\t1\t4\t2\t2\t1\t1\t0\t5\t0\t13\t0\t0\t0\t39\t77\t-\nO\t13\t1\t4\t2\t10\t1\t1\t0\t1\t0\t14\t0\t0\t0\t84\t85\t-\nO\t14\t1\t4\t2\t11\t1\t1\t0\t2\t0\t15\t0\t0\t0\t86\t87\t-\nO\t15\t1\t4\t5\t0\t1\t1\t1\t10\t11\t0\t0\t0\t0\t84\t87\t-\nO\t16\t1\t5\t4\t12\t1\t1\t1\t10\t11\t0\t0\t0\t0\t84\t87\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-31.fy",
+        "beforeSHA256": "47d3a166800fe939c54ac867dd053a07d8dd99b539abd1ea5483c87b5aeb153d",
+        "afterSHA256": "47d3a166800fe939c54ac867dd053a07d8dd99b539abd1ea5483c87b5aeb153d",
+        "bytes": 89
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-nested-if-calls",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t123\t125\t0\nT\t3\t3\t0\t4\t1\t1\t2\t150\t153\t0\nS\t0\t1\nS\t1\t1\nS\t2\t1\nF\t1\t1\t1\t0\t17\t0\t16\t0\t0\t13\t116\t0\nF\t2\t2\t17\t17\t2\t16\t1\t7\t1\t116\t143\t0\nF\t3\t3\t18\t19\t5\t17\t3\t8\t2\t143\t179\t0\nL\t1\t1\t0\t6\t0\t0\t41\t45\nL\t2\t1\t0\t1\t0\t0\t38\t64\nL\t3\t1\t0\t1\t0\t0\t50\t51\nL\t4\t1\t0\t1\t0\t0\t47\t52\nL\t5\t1\t0\t1\t0\t0\t61\t62\nL\t6\t1\t0\t1\t0\t0\t58\t63\nL\t7\t1\t0\t6\t0\t0\t68\t73\nL\t8\t1\t0\t1\t0\t0\t65\t113\nL\t9\t1\t0\t1\t0\t0\t78\t79\nL\t10\t1\t0\t1\t0\t0\t75\t80\nL\t11\t1\t0\t6\t0\t0\t89\t93\nL\t12\t1\t0\t1\t0\t0\t86\t112\nL\t13\t1\t0\t1\t0\t0\t98\t99\nL\t14\t1\t0\t1\t0\t0\t95\t100\nL\t15\t1\t0\t1\t0\t0\t109\t110\nL\t16\t1\t0\t1\t0\t0\t106\t111\nL\t17\t1\t0\t1\t0\t0\t34\t114\nL\t18\t2\t4\t1\t1\t0\t130\t131\nL\t19\t2\t0\t1\t0\t0\t140\t141\nL\t20\t3\t5\t1\t1\t0\t158\t159\nL\t21\t3\t6\t1\t1\t0\t164\t165\nL\t22\t3\t0\t1\t0\t0\t174\t175\nL\t23\t3\t0\t1\t0\t0\t176\t177\nL\t24\t3\t0\t1\t0\t0\t174\t177\nB\t1\t1\t1\t1\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t38\t64\nB\t2\t1\t2\t2\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t4\t0\t1\t0\t47\t52\nB\t3\t1\t4\t4\t5\t0\t0\t0\t0\t0\t5\t0\t0\t2\t6\t1\t1\t0\t58\t63\nB\t4\t1\t3\t3\t2\t0\t0\t0\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t38\t64\nB\t5\t1\t5\t5\t2\t0\t0\t0\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t38\t64\nB\t6\t1\t6\t6\t3\t7\t0\t0\t0\t6\t7\t8\t0\t0\t0\t0\t0\t0\t65\t113\nB\t7\t1\t7\t7\t5\t0\t0\t0\t0\t0\t9\t0\t0\t2\t10\t2\t1\t0\t75\t80\nB\t8\t1\t9\t9\t3\t11\t0\t0\t0\t6\t10\t11\t0\t0\t0\t0\t0\t0\t86\t112\nB\t9\t1\t8\t8\t2\t0\t0\t0\t0\t0\t15\t0\t0\t0\t0\t0\t0\t0\t65\t113\nB\t10\t1\t10\t10\t5\t0\t0\t0\t0\t0\t12\t0\t0\t2\t14\t3\t1\t0\t95\t100\nB\t11\t1\t12\t12\t5\t0\t0\t0\t0\t0\t13\t0\t0\t2\t16\t4\t1\t0\t106\t111\nB\t12\t1\t11\t11\t2\t0\t0\t0\t0\t0\t14\t0\t0\t0\t0\t0\t0\t0\t86\t112\nB\t13\t1\t13\t13\t2\t0\t0\t0\t0\t0\t14\t0\t0\t0\t0\t0\t0\t0\t86\t112\nB\t14\t1\t14\t14\t2\t0\t0\t0\t0\t0\t15\t0\t0\t0\t0\t0\t0\t0\t65\t113\nB\t15\t1\t0\t0\t5\t0\t0\t0\t0\t0\t16\t0\t0\t3\t17\t5\t2\t0\t34\t114\nB\t16\t1\t0\t0\t1\t17\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t115\nB\t17\t2\t15\t15\t1\t19\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t133\t142\nB\t18\t3\t16\t18\t4\t0\t22\t23\t1\t1\t19\t20\t18\t0\t0\t0\t0\t1\t174\t177\nB\t19\t3\t19\t19\t1\t24\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t167\t178\nB\t20\t3\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t174\t177\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t41\t45\t-\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t50\t51\t1\nO\t3\t1\t4\t2\t2\t1\t1\t0\t4\t0\t0\t0\t0\t0\t38\t64\t-\nO\t4\t1\t3\t1\t5\t1\t1\t0\t0\t0\t0\t1\t2\t0\t61\t62\t2\nO\t5\t1\t5\t2\t2\t1\t1\t0\t6\t0\t0\t0\t0\t0\t38\t64\t-\nO\t6\t1\t6\t1\t7\t6\t6\t0\t0\t0\t0\t0\t0\t0\t68\t73\t-\nO\t7\t1\t7\t1\t9\t1\t1\t0\t0\t0\t0\t2\t3\t0\t78\t79\t3\nO\t8\t1\t9\t2\t8\t1\t1\t0\t10\t0\t0\t0\t0\t0\t65\t113\t-\nO\t9\t1\t8\t1\t11\t6\t6\t0\t0\t0\t0\t0\t0\t1\t89\t93\t-\nO\t10\t1\t10\t1\t13\t1\t1\t0\t0\t0\t0\t3\t4\t0\t98\t99\t4\nO\t11\t1\t12\t2\t12\t1\t1\t0\t14\t0\t0\t0\t0\t0\t86\t112\t-\nO\t12\t1\t11\t1\t15\t1\t1\t0\t0\t0\t0\t4\t5\t0\t109\t110\t5\nO\t13\t1\t13\t2\t12\t1\t1\t0\t16\t0\t0\t0\t0\t0\t86\t112\t-\nO\t14\t1\t14\t2\t8\t1\t1\t0\t12\t0\t0\t0\t0\t0\t65\t113\t-\nO\t15\t2\t17\t2\t19\t1\t1\t0\t18\t0\t0\t0\t0\t0\t140\t141\t-\nO\t16\t3\t18\t2\t22\t1\t1\t0\t20\t0\t17\t0\t0\t0\t174\t175\t-\nO\t17\t3\t18\t2\t23\t1\t1\t0\t21\t0\t18\t0\t0\t0\t176\t177\t-\nO\t18\t3\t18\t5\t0\t1\t1\t1\t22\t23\t0\t0\t0\t0\t174\t177\t-\nO\t19\t3\t19\t4\t24\t1\t1\t1\t22\t23\t0\t0\t0\t0\t174\t177\t-\nA\t0\t3\nA\t1\t5\nA\t2\t9\nA\t3\t13\nA\t4\t15\nA\t5\t2\nA\t6\t8\nA\t7\t18\nA\t8\t20\nA\t9\t21\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-32.fy",
+        "beforeSHA256": "470b933f4a798618c242dba84a8d5dfbbeb0d2aa0d1ad90e990fffd06bd3b59d",
+        "afterSHA256": "470b933f4a798618c242dba84a8d5dfbbeb0d2aa0d1ad90e990fffd06bd3b59d",
+        "bytes": 179
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 5,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-binary-read-before-if",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-33.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t9\t0\t6\t0\t0\t13\t72\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t1\t0\t0\t46\t47\nL\t4\t1\t0\t6\t0\t0\t51\t55\nL\t5\t1\t0\t1\t0\t0\t48\t70\nL\t6\t1\t0\t1\t0\t0\t59\t60\nL\t7\t1\t0\t1\t0\t0\t61\t62\nL\t8\t1\t0\t1\t0\t0\t68\t69\nL\t9\t1\t0\t1\t0\t0\t46\t70\nB\t1\t1\t1\t4\t3\t4\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t48\t70\nB\t2\t1\t5\t8\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t48\t70\nB\t3\t1\t9\t10\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t48\t70\nB\t4\t1\t11\t11\t4\t0\t3\t5\t1\t1\t5\t6\t11\t0\t0\t0\t0\t1\t46\t70\nB\t5\t1\t12\t12\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t39\t71\nB\t6\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t46\t70\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t5\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t2\t3\t1\t1\t0\t1\t0\t4\t0\t0\t0\t46\t47\t-\nO\t4\t1\t1\t1\t4\t6\t6\t0\t0\t0\t0\t0\t0\t1\t51\t55\t-\nO\t5\t1\t2\t1\t6\t1\t1\t0\t0\t0\t6\t1\t2\t0\t59\t60\t2\nO\t6\t1\t2\t2\t1\t1\t1\t0\t6\t0\t7\t0\t0\t0\t57\t61\t-\nO\t7\t1\t2\t1\t7\t1\t1\t0\t0\t0\t8\t2\t3\t0\t61\t62\t3\nO\t8\t1\t2\t2\t5\t1\t1\t0\t7\t0\t0\t0\t0\t0\t48\t70\t-\nO\t9\t1\t3\t1\t8\t1\t1\t0\t0\t0\t10\t3\t4\t0\t68\t69\t4\nO\t10\t1\t3\t2\t5\t1\t1\t0\t8\t0\t0\t0\t0\t0\t48\t70\t-\nO\t11\t1\t4\t5\t0\t1\t1\t1\t3\t5\t0\t0\t0\t0\t46\t70\t-\nO\t12\t1\t5\t4\t9\t1\t1\t1\t3\t5\t0\t0\t0\t0\t46\t70\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-33.fy",
+        "beforeSHA256": "59da05a2303d2a434ef6a9e3a84b730fa68fbbccd3f6ba427e80d74981fa307b",
+        "afterSHA256": "59da05a2303d2a434ef6a9e3a84b730fa68fbbccd3f6ba427e80d74981fa307b",
+        "bytes": 72
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-compound-read-before-if",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-34.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t10\t0\t6\t0\t0\t13\t75\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t1\t0\t0\t39\t40\nL\t4\t1\t0\t6\t0\t0\t45\t49\nL\t5\t1\t0\t1\t0\t0\t42\t64\nL\t6\t1\t0\t1\t0\t0\t53\t54\nL\t7\t1\t0\t1\t0\t0\t55\t56\nL\t8\t1\t0\t1\t0\t0\t62\t63\nL\t9\t1\t0\t1\t0\t0\t39\t65\nL\t10\t1\t0\t1\t0\t0\t72\t73\nB\t1\t1\t1\t4\t3\t4\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t42\t64\nB\t2\t1\t5\t8\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t42\t64\nB\t3\t1\t9\t10\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t42\t64\nB\t4\t1\t11\t11\t4\t0\t3\t5\t1\t1\t5\t6\t11\t0\t0\t0\t0\t1\t39\t65\nB\t5\t1\t12\t14\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t65\t74\nB\t6\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t39\t65\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t5\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t2\t3\t1\t1\t0\t1\t0\t4\t0\t0\t0\t39\t40\t-\nO\t4\t1\t1\t1\t4\t6\t6\t0\t0\t0\t0\t0\t0\t1\t45\t49\t-\nO\t5\t1\t2\t1\t6\t1\t1\t0\t0\t0\t6\t1\t2\t0\t53\t54\t2\nO\t6\t1\t2\t2\t1\t1\t1\t0\t6\t0\t7\t0\t0\t0\t51\t55\t-\nO\t7\t1\t2\t1\t7\t1\t1\t0\t0\t0\t8\t2\t3\t0\t55\t56\t3\nO\t8\t1\t2\t2\t5\t1\t1\t0\t7\t0\t0\t0\t0\t0\t42\t64\t-\nO\t9\t1\t3\t1\t8\t1\t1\t0\t0\t0\t10\t3\t4\t0\t62\t63\t4\nO\t10\t1\t3\t2\t5\t1\t1\t0\t8\t0\t0\t0\t0\t0\t42\t64\t-\nO\t11\t1\t4\t5\t0\t1\t1\t1\t3\t5\t0\t0\t0\t0\t39\t65\t-\nO\t12\t1\t5\t4\t9\t1\t1\t1\t3\t5\t13\t0\t0\t0\t39\t65\t-\nO\t13\t1\t5\t2\t1\t1\t1\t0\t9\t0\t14\t0\t0\t0\t39\t65\t-\nO\t14\t1\t5\t2\t10\t1\t1\t0\t1\t0\t0\t0\t0\t0\t72\t73\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-34.fy",
+        "beforeSHA256": "fc64df686f503dc0c08e2ad6c58b24bf8026020a74e4d52a8928fa5a972907dd",
+        "afterSHA256": "fc64df686f503dc0c08e2ad6c58b24bf8026020a74e4d52a8928fa5a972907dd",
+        "bytes": 75
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-skips-trapping-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-35.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t0\t67\t71\t0\nF\t1\t1\t1\t0\t4\t0\t5\t0\t0\t13\t60\t0\nF\t2\t2\t6\t4\t1\t5\t3\t0\t0\t60\t98\t0\nL\t1\t1\t0\t6\t0\t0\t37\t42\nL\t2\t1\t0\t1\t0\t0\t34\t58\nL\t3\t1\t0\t1\t0\t0\t44\t50\nL\t4\t1\t0\t1\t0\t0\t56\t57\nL\t5\t2\t0\t6\t0\t0\t81\t86\nB\t1\t1\t1\t1\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t34\t58\nB\t2\t1\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t3\t0\t0\t0\t44\t50\nB\t3\t1\t3\t4\t2\t0\t0\t0\t0\t0\t5\t0\t0\t0\t0\t0\t0\t0\t34\t58\nB\t4\t1\t2\t2\t2\t0\t0\t0\t0\t0\t5\t0\t0\t0\t0\t0\t0\t0\t34\t58\nB\t5\t1\t0\t0\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t59\nB\t6\t2\t5\t6\t4\t0\t5\t0\t0\t6\t7\t8\t6\t0\t0\t0\t0\t16\t74\t88\nB\t7\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t74\t88\nB\t8\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t74\t88\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t0\t37\t42\t-\nO\t2\t1\t4\t2\t2\t1\t1\t0\t3\t0\t0\t0\t0\t0\t34\t58\t-\nO\t3\t1\t3\t1\t4\t1\t1\t0\t0\t0\t4\t0\t1\t0\t56\t57\t7\nO\t4\t1\t3\t2\t2\t1\t1\t0\t4\t0\t0\t0\t0\t0\t34\t58\t-\nO\t5\t2\t6\t1\t5\t6\t6\t0\t0\t0\t6\t0\t0\t0\t81\t86\t-\nO\t6\t2\t6\t5\t0\t6\t6\t0\t5\t0\t0\t0\t0\t0\t74\t88\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-35.fy",
+        "beforeSHA256": "bb69a408cc3222d33258d595d11ad8641b6821f3acdfd46a031cbbfe9c943277",
+        "afterSHA256": "bb69a408cc3222d33258d595d11ad8641b6821f3acdfd46a031cbbfe9c943277",
+        "bytes": 98
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-takes-trapping-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-36.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t0\t66\t70\t0\nF\t1\t1\t1\t0\t4\t0\t5\t0\t0\t13\t59\t0\nF\t2\t2\t6\t4\t1\t5\t3\t0\t0\t59\t97\t0\nL\t1\t1\t0\t6\t0\t0\t37\t41\nL\t2\t1\t0\t1\t0\t0\t34\t57\nL\t3\t1\t0\t1\t0\t0\t43\t49\nL\t4\t1\t0\t1\t0\t0\t55\t56\nL\t5\t2\t0\t6\t0\t0\t80\t85\nB\t1\t1\t1\t1\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t34\t57\nB\t2\t1\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t3\t0\t0\t0\t43\t49\nB\t3\t1\t3\t4\t2\t0\t0\t0\t0\t0\t5\t0\t0\t0\t0\t0\t0\t0\t34\t57\nB\t4\t1\t2\t2\t2\t0\t0\t0\t0\t0\t5\t0\t0\t0\t0\t0\t0\t0\t34\t57\nB\t5\t1\t0\t0\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t58\nB\t6\t2\t5\t6\t4\t0\t5\t0\t0\t6\t7\t8\t6\t0\t0\t0\t0\t16\t73\t87\nB\t7\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t73\t87\nB\t8\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t73\t87\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t37\t41\t-\nO\t2\t1\t4\t2\t2\t1\t1\t0\t3\t0\t0\t0\t0\t0\t34\t57\t-\nO\t3\t1\t3\t1\t4\t1\t1\t0\t0\t0\t4\t0\t1\t0\t55\t56\t7\nO\t4\t1\t3\t2\t2\t1\t1\t0\t4\t0\t0\t0\t0\t0\t34\t57\t-\nO\t5\t2\t6\t1\t5\t6\t6\t0\t0\t0\t6\t0\t0\t0\t80\t85\t-\nO\t6\t2\t6\t5\t0\t6\t6\t0\t5\t0\t0\t0\t0\t0\t73\t87\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-36.fy",
+        "beforeSHA256": "4440a5ccb11c461d982f1b71e3d2a4c3d87d0ef8e74a136930434daf19d907e5",
+        "afterSHA256": "4440a5ccb11c461d982f1b71e3d2a4c3d87d0ef8e74a136930434daf19d907e5",
+        "bytes": 97
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "assertion-failed"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-return-or-false-assert",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-37.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t53\t57\t0\nS\t0\t6\nF\t1\t1\t1\t0\t2\t0\t2\t0\t0\t13\t46\t0\nF\t2\t2\t3\t2\t4\t2\t5\t1\t1\t46\t103\t0\nL\t1\t1\t0\t6\t0\t0\t39\t43\nL\t2\t1\t0\t1\t0\t0\t34\t44\nL\t3\t2\t3\t6\t1\t0\t63\t64\nL\t4\t2\t0\t6\t0\t0\t69\t70\nL\t5\t2\t0\t1\t0\t0\t79\t80\nL\t6\t2\t0\t6\t0\t0\t94\t99\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t34\t44\nB\t2\t1\t0\t0\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t45\nB\t3\t2\t2\t2\t3\t4\t0\t0\t0\t6\t4\t5\t0\t0\t0\t0\t0\t0\t66\t102\nB\t4\t2\t3\t3\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t72\t81\nB\t5\t2\t4\t5\t4\t0\t6\t0\t0\t6\t6\t7\t5\t0\t0\t0\t0\t16\t87\t101\nB\t6\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t87\t101\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t87\t101\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t39\t43\t-\nO\t2\t2\t3\t2\t4\t6\t6\t0\t3\t0\t0\t0\t0\t0\t69\t70\t-\nO\t3\t2\t4\t1\t5\t1\t1\t0\t0\t0\t0\t0\t1\t0\t79\t80\t7\nO\t4\t2\t5\t1\t6\t6\t6\t0\t0\t0\t5\t0\t0\t0\t94\t99\t-\nO\t5\t2\t5\t5\t0\t6\t6\t0\t6\t0\t0\t0\t0\t0\t87\t101\t-\nA\t0\t1\nA\t1\t3\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-37.fy",
+        "beforeSHA256": "37fa2a696f659e53e3eb492458dae407da4f945735edad5f8a427ee4619d5d47",
+        "afterSHA256": "37fa2a696f659e53e3eb492458dae407da4f945735edad5f8a427ee4619d5d47",
+        "bytes": 103
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-false-assert-trap",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-38.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t54\t58\t0\nS\t0\t6\nF\t1\t1\t1\t0\t2\t0\t2\t0\t0\t13\t47\t0\nF\t2\t2\t3\t2\t4\t2\t5\t1\t1\t47\t104\t0\nL\t1\t1\t0\t6\t0\t0\t39\t44\nL\t2\t1\t0\t1\t0\t0\t34\t45\nL\t3\t2\t3\t6\t1\t0\t64\t65\nL\t4\t2\t0\t6\t0\t0\t70\t71\nL\t5\t2\t0\t1\t0\t0\t80\t81\nL\t6\t2\t0\t6\t0\t0\t95\t100\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t34\t45\nB\t2\t1\t0\t0\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t46\nB\t3\t2\t2\t2\t3\t4\t0\t0\t0\t6\t4\t5\t0\t0\t0\t0\t0\t0\t67\t103\nB\t4\t2\t3\t3\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t73\t82\nB\t5\t2\t4\t5\t4\t0\t6\t0\t0\t6\t6\t7\t5\t0\t0\t0\t0\t16\t88\t102\nB\t6\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t88\t102\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t88\t102\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t0\t39\t44\t-\nO\t2\t2\t3\t2\t4\t6\t6\t0\t3\t0\t0\t0\t0\t0\t70\t71\t-\nO\t3\t2\t4\t1\t5\t1\t1\t0\t0\t0\t0\t0\t1\t0\t80\t81\t7\nO\t4\t2\t5\t1\t6\t6\t6\t0\t0\t0\t5\t0\t0\t0\t95\t100\t-\nO\t5\t2\t5\t5\t0\t6\t6\t0\t6\t0\t0\t0\t0\t0\t88\t102\t-\nA\t0\t1\nA\t1\t3\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-38.fy",
+        "beforeSHA256": "b602e3fce1b42f25e663f3c9332ae9dc8ca81c41d0c948e1d8f66df24f0a5afd",
+        "afterSHA256": "b602e3fce1b42f25e663f3c9332ae9dc8ca81c41d0c948e1d8f66df24f0a5afd",
+        "bytes": 104
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "assertion-failed"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-short-circuit-truth-table",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-39.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t29\t0\t33\t0\t0\t13\t209\t0\nL\t1\t1\t0\t6\t0\t0\t36\t41\nL\t2\t1\t0\t6\t0\t0\t36\t48\nL\t3\t1\t0\t6\t0\t0\t43\t48\nL\t4\t1\t0\t6\t0\t0\t34\t49\nL\t5\t1\t0\t6\t0\t0\t60\t65\nL\t6\t1\t0\t6\t0\t0\t60\t71\nL\t7\t1\t0\t6\t0\t0\t67\t71\nL\t8\t1\t0\t6\t0\t0\t58\t72\nL\t9\t1\t0\t6\t0\t0\t83\t87\nL\t10\t1\t0\t6\t0\t0\t83\t94\nL\t11\t1\t0\t6\t0\t0\t89\t94\nL\t12\t1\t0\t6\t0\t0\t81\t95\nL\t13\t1\t0\t6\t0\t0\t104\t108\nL\t14\t1\t0\t6\t0\t0\t104\t114\nL\t15\t1\t0\t6\t0\t0\t110\t114\nL\t16\t1\t0\t6\t0\t0\t125\t130\nL\t17\t1\t0\t6\t0\t0\t125\t137\nL\t18\t1\t0\t6\t0\t0\t132\t137\nL\t19\t1\t0\t6\t0\t0\t123\t138\nL\t20\t1\t0\t6\t0\t0\t147\t152\nL\t21\t1\t0\t6\t0\t0\t147\t158\nL\t22\t1\t0\t6\t0\t0\t154\t158\nL\t23\t1\t0\t6\t0\t0\t167\t171\nL\t24\t1\t0\t6\t0\t0\t167\t178\nL\t25\t1\t0\t6\t0\t0\t173\t178\nL\t26\t1\t0\t6\t0\t0\t187\t191\nL\t27\t1\t0\t6\t0\t0\t187\t197\nL\t28\t1\t0\t6\t0\t0\t193\t197\nL\t29\t1\t0\t1\t0\t0\t206\t207\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t36\t48\nB\t2\t1\t3\t4\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t36\t48\nB\t3\t1\t5\t6\t4\t0\t4\t0\t0\t6\t4\t5\t6\t0\t0\t0\t0\t16\t27\t51\nB\t4\t1\t7\t8\t3\t5\t0\t0\t0\t6\t6\t7\t0\t0\t0\t0\t0\t0\t60\t71\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t27\t51\nB\t6\t1\t9\t10\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t60\t71\nB\t7\t1\t11\t12\t4\t0\t8\t0\t0\t6\t8\t9\t12\t0\t0\t0\t0\t16\t51\t74\nB\t8\t1\t13\t14\t3\t9\t0\t0\t0\t6\t10\t11\t0\t0\t0\t0\t0\t0\t83\t94\nB\t9\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t51\t74\nB\t10\t1\t15\t16\t2\t0\t0\t0\t0\t0\t11\t0\t0\t0\t0\t0\t0\t0\t83\t94\nB\t11\t1\t17\t18\t4\t0\t12\t0\t0\t6\t12\t13\t18\t0\t0\t0\t0\t16\t74\t97\nB\t12\t1\t19\t20\t3\t13\t0\t0\t0\t6\t14\t15\t0\t0\t0\t0\t0\t0\t104\t114\nB\t13\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t74\t97\nB\t14\t1\t21\t22\t2\t0\t0\t0\t0\t0\t15\t0\t0\t0\t0\t0\t0\t0\t104\t114\nB\t15\t1\t23\t23\t4\t0\t14\t0\t0\t6\t16\t17\t23\t0\t0\t0\t0\t16\t97\t116\nB\t16\t1\t24\t25\t3\t16\t0\t0\t0\t6\t19\t18\t0\t0\t0\t0\t0\t0\t125\t137\nB\t17\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t97\t116\nB\t18\t1\t26\t27\t2\t0\t0\t0\t0\t0\t19\t0\t0\t0\t0\t0\t0\t0\t125\t137\nB\t19\t1\t28\t29\t4\t0\t19\t0\t0\t6\t20\t21\t29\t0\t0\t0\t0\t16\t116\t140\nB\t20\t1\t30\t31\t3\t20\t0\t0\t0\t6\t23\t22\t0\t0\t0\t0\t0\t0\t147\t158\nB\t21\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t116\t140\nB\t22\t1\t32\t33\t2\t0\t0\t0\t0\t0\t23\t0\t0\t0\t0\t0\t0\t0\t147\t158\nB\t23\t1\t34\t34\t4\t0\t21\t0\t0\t6\t24\t25\t34\t0\t0\t0\t0\t16\t140\t160\nB\t24\t1\t35\t36\t3\t23\t0\t0\t0\t6\t27\t26\t0\t0\t0\t0\t0\t0\t167\t178\nB\t25\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t140\t160\nB\t26\t1\t37\t38\t2\t0\t0\t0\t0\t0\t27\t0\t0\t0\t0\t0\t0\t0\t167\t178\nB\t27\t1\t39\t39\t4\t0\t24\t0\t0\t6\t28\t29\t39\t0\t0\t0\t0\t16\t160\t180\nB\t28\t1\t40\t41\t3\t26\t0\t0\t0\t6\t31\t30\t0\t0\t0\t0\t0\t0\t187\t197\nB\t29\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t160\t180\nB\t30\t1\t42\t43\t2\t0\t0\t0\t0\t0\t31\t0\t0\t0\t0\t0\t0\t0\t187\t197\nB\t31\t1\t44\t44\t4\t0\t27\t0\t0\t6\t32\t33\t44\t0\t0\t0\t0\t16\t180\t199\nB\t32\t1\t45\t45\t1\t29\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t199\t208\nB\t33\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t180\t199\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t0\t36\t41\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t36\t48\t-\nO\t3\t1\t2\t1\t3\t6\t6\t0\t0\t0\t4\t0\t0\t0\t43\t48\t-\nO\t4\t1\t2\t2\t2\t6\t6\t0\t3\t0\t0\t0\t0\t0\t36\t48\t-\nO\t5\t1\t3\t3\t4\t6\t6\t3\t2\t0\t6\t0\t0\t0\t34\t49\t-\nO\t6\t1\t3\t5\t0\t6\t6\t0\t4\t0\t0\t0\t0\t0\t27\t51\t-\nO\t7\t1\t4\t1\t5\t6\t6\t0\t0\t0\t8\t0\t0\t0\t60\t65\t-\nO\t8\t1\t4\t2\t6\t6\t6\t0\t5\t0\t0\t0\t0\t0\t60\t71\t-\nO\t9\t1\t6\t1\t7\t6\t6\t0\t0\t0\t10\t0\t0\t1\t67\t71\t-\nO\t10\t1\t6\t2\t6\t6\t6\t0\t7\t0\t0\t0\t0\t0\t60\t71\t-\nO\t11\t1\t7\t3\t8\t6\t6\t3\t6\t0\t12\t0\t0\t0\t58\t72\t-\nO\t12\t1\t7\t5\t0\t6\t6\t0\t8\t0\t0\t0\t0\t0\t51\t74\t-\nO\t13\t1\t8\t1\t9\t6\t6\t0\t0\t0\t14\t0\t0\t1\t83\t87\t-\nO\t14\t1\t8\t2\t10\t6\t6\t0\t9\t0\t0\t0\t0\t0\t83\t94\t-\nO\t15\t1\t10\t1\t11\t6\t6\t0\t0\t0\t16\t0\t0\t0\t89\t94\t-\nO\t16\t1\t10\t2\t10\t6\t6\t0\t11\t0\t0\t0\t0\t0\t83\t94\t-\nO\t17\t1\t11\t3\t12\t6\t6\t3\t10\t0\t18\t0\t0\t0\t81\t95\t-\nO\t18\t1\t11\t5\t0\t6\t6\t0\t12\t0\t0\t0\t0\t0\t74\t97\t-\nO\t19\t1\t12\t1\t13\t6\t6\t0\t0\t0\t20\t0\t0\t1\t104\t108\t-\nO\t20\t1\t12\t2\t14\t6\t6\t0\t13\t0\t0\t0\t0\t0\t104\t114\t-\nO\t21\t1\t14\t1\t15\t6\t6\t0\t0\t0\t22\t0\t0\t1\t110\t114\t-\nO\t22\t1\t14\t2\t14\t6\t6\t0\t15\t0\t0\t0\t0\t0\t104\t114\t-\nO\t23\t1\t15\t5\t0\t6\t6\t0\t14\t0\t0\t0\t0\t0\t97\t116\t-\nO\t24\t1\t16\t1\t16\t6\t6\t0\t0\t0\t25\t0\t0\t0\t125\t130\t-\nO\t25\t1\t16\t2\t17\t6\t6\t0\t16\t0\t0\t0\t0\t0\t125\t137\t-\nO\t26\t1\t18\t1\t18\t6\t6\t0\t0\t0\t27\t0\t0\t0\t132\t137\t-\nO\t27\t1\t18\t2\t17\t6\t6\t0\t18\t0\t0\t0\t0\t0\t125\t137\t-\nO\t28\t1\t19\t3\t19\t6\t6\t3\t17\t0\t29\t0\t0\t0\t123\t138\t-\nO\t29\t1\t19\t5\t0\t6\t6\t0\t19\t0\t0\t0\t0\t0\t116\t140\t-\nO\t30\t1\t20\t1\t20\t6\t6\t0\t0\t0\t31\t0\t0\t0\t147\t152\t-\nO\t31\t1\t20\t2\t21\t6\t6\t0\t20\t0\t0\t0\t0\t0\t147\t158\t-\nO\t32\t1\t22\t1\t22\t6\t6\t0\t0\t0\t33\t0\t0\t1\t154\t158\t-\nO\t33\t1\t22\t2\t21\t6\t6\t0\t22\t0\t0\t0\t0\t0\t147\t158\t-\nO\t34\t1\t23\t5\t0\t6\t6\t0\t21\t0\t0\t0\t0\t0\t140\t160\t-\nO\t35\t1\t24\t1\t23\t6\t6\t0\t0\t0\t36\t0\t0\t1\t167\t171\t-\nO\t36\t1\t24\t2\t24\t6\t6\t0\t23\t0\t0\t0\t0\t0\t167\t178\t-\nO\t37\t1\t26\t1\t25\t6\t6\t0\t0\t0\t38\t0\t0\t0\t173\t178\t-\nO\t38\t1\t26\t2\t24\t6\t6\t0\t25\t0\t0\t0\t0\t0\t167\t178\t-\nO\t39\t1\t27\t5\t0\t6\t6\t0\t24\t0\t0\t0\t0\t0\t160\t180\t-\nO\t40\t1\t28\t1\t26\t6\t6\t0\t0\t0\t41\t0\t0\t1\t187\t191\t-\nO\t41\t1\t28\t2\t27\t6\t6\t0\t26\t0\t0\t0\t0\t0\t187\t197\t-\nO\t42\t1\t30\t1\t28\t6\t6\t0\t0\t0\t43\t0\t0\t1\t193\t197\t-\nO\t43\t1\t30\t2\t27\t6\t6\t0\t28\t0\t0\t0\t0\t0\t187\t197\t-\nO\t44\t1\t31\t5\t0\t6\t6\t0\t27\t0\t0\t0\t0\t0\t180\t199\t-\nO\t45\t1\t32\t1\t29\t1\t1\t0\t0\t0\t0\t0\t1\t0\t206\t207\t0\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-39.fy",
+        "beforeSHA256": "c6eb5199c37fa39c08cf79cb1ce5a92e35cca535c20043d1a81d3ee38928bbcf",
+        "afterSHA256": "c6eb5199c37fa39c08cf79cb1ce5a92e35cca535c20043d1a81d3ee38928bbcf",
+        "bytes": 209
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-and-skips-side-effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-40.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t7\t0\t3\t0\t0\t13\t75\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t6\t0\t0\t47\t52\nL\t4\t1\t0\t6\t0\t0\t47\t64\nL\t5\t1\t0\t1\t0\t0\t57\t58\nL\t6\t1\t0\t6\t0\t0\t59\t63\nL\t7\t1\t0\t1\t0\t0\t72\t73\nB\t1\t1\t1\t4\t3\t3\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t47\t64\nB\t2\t1\t5\t8\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t47\t64\nB\t3\t1\t9\t9\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t65\t74\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t3\t6\t6\t0\t0\t0\t4\t0\t0\t0\t47\t52\t-\nO\t4\t1\t1\t2\t4\t6\t6\t0\t3\t0\t0\t0\t0\t0\t47\t64\t-\nO\t5\t1\t2\t1\t5\t1\t1\t0\t0\t0\t6\t1\t2\t0\t57\t58\t1\nO\t6\t1\t2\t2\t1\t1\t1\t0\t5\t0\t7\t0\t0\t0\t55\t59\t-\nO\t7\t1\t2\t1\t6\t6\t6\t0\t0\t0\t8\t0\t0\t1\t59\t63\t-\nO\t8\t1\t2\t2\t4\t6\t6\t0\t6\t0\t0\t0\t0\t0\t47\t64\t-\nO\t9\t1\t3\t2\t7\t1\t1\t0\t1\t0\t0\t0\t0\t0\t72\t73\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-40.fy",
+        "beforeSHA256": "527b67be53f28549d69a9c26ff38589c3f493388ed9f397d98d4cc6540e692fe",
+        "afterSHA256": "527b67be53f28549d69a9c26ff38589c3f493388ed9f397d98d4cc6540e692fe",
+        "bytes": 75
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-and-takes-side-effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-41.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t7\t0\t3\t0\t0\t13\t75\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t6\t0\t0\t47\t51\nL\t4\t1\t0\t6\t0\t0\t47\t64\nL\t5\t1\t0\t1\t0\t0\t56\t57\nL\t6\t1\t0\t6\t0\t0\t58\t63\nL\t7\t1\t0\t1\t0\t0\t72\t73\nB\t1\t1\t1\t4\t3\t3\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t47\t64\nB\t2\t1\t5\t8\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t47\t64\nB\t3\t1\t9\t9\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t65\t74\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t3\t6\t6\t0\t0\t0\t4\t0\t0\t1\t47\t51\t-\nO\t4\t1\t1\t2\t4\t6\t6\t0\t3\t0\t0\t0\t0\t0\t47\t64\t-\nO\t5\t1\t2\t1\t5\t1\t1\t0\t0\t0\t6\t1\t2\t0\t56\t57\t1\nO\t6\t1\t2\t2\t1\t1\t1\t0\t5\t0\t7\t0\t0\t0\t54\t58\t-\nO\t7\t1\t2\t1\t6\t6\t6\t0\t0\t0\t8\t0\t0\t0\t58\t63\t-\nO\t8\t1\t2\t2\t4\t6\t6\t0\t6\t0\t0\t0\t0\t0\t47\t64\t-\nO\t9\t1\t3\t2\t7\t1\t1\t0\t1\t0\t0\t0\t0\t0\t72\t73\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-41.fy",
+        "beforeSHA256": "37b71f0d84504acd771ec1be9e58c2ee87f803ad7fa1f2ffb41ac8da72ce9403",
+        "afterSHA256": "37b71f0d84504acd771ec1be9e58c2ee87f803ad7fa1f2ffb41ac8da72ce9403",
+        "bytes": 75
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 1,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-or-skips-side-effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-42.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t7\t0\t3\t0\t0\t13\t75\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t6\t0\t0\t47\t51\nL\t4\t1\t0\t6\t0\t0\t47\t64\nL\t5\t1\t0\t1\t0\t0\t56\t57\nL\t6\t1\t0\t6\t0\t0\t58\t63\nL\t7\t1\t0\t1\t0\t0\t72\t73\nB\t1\t1\t1\t4\t3\t3\t0\t0\t0\t6\t3\t2\t0\t0\t0\t0\t0\t0\t47\t64\nB\t2\t1\t5\t8\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t47\t64\nB\t3\t1\t9\t9\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t65\t74\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t3\t6\t6\t0\t0\t0\t4\t0\t0\t1\t47\t51\t-\nO\t4\t1\t1\t2\t4\t6\t6\t0\t3\t0\t0\t0\t0\t0\t47\t64\t-\nO\t5\t1\t2\t1\t5\t1\t1\t0\t0\t0\t6\t1\t2\t0\t56\t57\t1\nO\t6\t1\t2\t2\t1\t1\t1\t0\t5\t0\t7\t0\t0\t0\t54\t58\t-\nO\t7\t1\t2\t1\t6\t6\t6\t0\t0\t0\t8\t0\t0\t0\t58\t63\t-\nO\t8\t1\t2\t2\t4\t6\t6\t0\t6\t0\t0\t0\t0\t0\t47\t64\t-\nO\t9\t1\t3\t2\t7\t1\t1\t0\t1\t0\t0\t0\t0\t0\t72\t73\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-42.fy",
+        "beforeSHA256": "c73f21fc66378564c513adc80241ca5bae3678bf975931022abc34f2c140113e",
+        "afterSHA256": "c73f21fc66378564c513adc80241ca5bae3678bf975931022abc34f2c140113e",
+        "bytes": 75
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-or-takes-side-effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-43.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t7\t0\t3\t0\t0\t13\t75\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t6\t0\t0\t47\t52\nL\t4\t1\t0\t6\t0\t0\t47\t64\nL\t5\t1\t0\t1\t0\t0\t57\t58\nL\t6\t1\t0\t6\t0\t0\t59\t63\nL\t7\t1\t0\t1\t0\t0\t72\t73\nB\t1\t1\t1\t4\t3\t3\t0\t0\t0\t6\t3\t2\t0\t0\t0\t0\t0\t0\t47\t64\nB\t2\t1\t5\t8\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t47\t64\nB\t3\t1\t9\t9\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t65\t74\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t3\t6\t6\t0\t0\t0\t4\t0\t0\t0\t47\t52\t-\nO\t4\t1\t1\t2\t4\t6\t6\t0\t3\t0\t0\t0\t0\t0\t47\t64\t-\nO\t5\t1\t2\t1\t5\t1\t1\t0\t0\t0\t6\t1\t2\t0\t57\t58\t1\nO\t6\t1\t2\t2\t1\t1\t1\t0\t5\t0\t7\t0\t0\t0\t55\t59\t-\nO\t7\t1\t2\t1\t6\t6\t6\t0\t0\t0\t8\t0\t0\t1\t59\t63\t-\nO\t8\t1\t2\t2\t4\t6\t6\t0\t6\t0\t0\t0\t0\t0\t47\t64\t-\nO\t9\t1\t3\t2\t7\t1\t1\t0\t1\t0\t0\t0\t0\t0\t72\t73\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-43.fy",
+        "beforeSHA256": "22dc8c40b8db641f40e443d8711586673619e55e06c913c030159f73f59fc504",
+        "afterSHA256": "22dc8c40b8db641f40e443d8711586673619e55e06c913c030159f73f59fc504",
+        "bytes": 75
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 1,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-and-skips-trapping-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-44.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t6\t0\t0\t67\t71\t0\nF\t1\t1\t1\t0\t4\t0\t4\t0\t0\t13\t59\t0\nF\t2\t2\t5\t4\t1\t4\t3\t0\t0\t59\t101\t0\nL\t1\t1\t0\t6\t0\t0\t35\t40\nL\t2\t1\t0\t6\t0\t0\t35\t48\nL\t3\t1\t0\t6\t0\t0\t42\t48\nL\t4\t1\t0\t1\t0\t0\t56\t57\nL\t5\t2\t0\t6\t0\t0\t81\t86\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t35\t48\nB\t2\t1\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t3\t0\t0\t0\t42\t48\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t49\t58\nB\t4\t1\t3\t3\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t35\t48\nB\t5\t2\t5\t6\t4\t0\t5\t0\t0\t6\t6\t7\t6\t0\t0\t0\t0\t16\t74\t88\nB\t6\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t74\t88\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t74\t88\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t0\t35\t40\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t48\t-\nO\t3\t1\t4\t2\t2\t6\t6\t0\t3\t0\t0\t0\t0\t0\t35\t48\t-\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t0\t1\t0\t56\t57\t0\nO\t5\t2\t5\t1\t5\t6\t6\t0\t0\t0\t6\t0\t0\t0\t81\t86\t-\nO\t6\t2\t5\t5\t0\t6\t6\t0\t5\t0\t0\t0\t0\t0\t74\t88\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-44.fy",
+        "beforeSHA256": "ed0be45bc7b91ed54331db22041740bfcfdc4d43bf1455492d10ecbd218c4eb5",
+        "afterSHA256": "ed0be45bc7b91ed54331db22041740bfcfdc4d43bf1455492d10ecbd218c4eb5",
+        "bytes": 101
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-and-takes-trapping-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-45.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t6\t0\t0\t66\t70\t0\nF\t1\t1\t1\t0\t4\t0\t4\t0\t0\t13\t58\t0\nF\t2\t2\t5\t4\t1\t4\t3\t0\t0\t58\t100\t0\nL\t1\t1\t0\t6\t0\t0\t35\t39\nL\t2\t1\t0\t6\t0\t0\t35\t47\nL\t3\t1\t0\t6\t0\t0\t41\t47\nL\t4\t1\t0\t1\t0\t0\t55\t56\nL\t5\t2\t0\t6\t0\t0\t80\t85\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t35\t47\nB\t2\t1\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t3\t0\t0\t0\t41\t47\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t48\t57\nB\t4\t1\t3\t3\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t35\t47\nB\t5\t2\t5\t6\t4\t0\t5\t0\t0\t6\t6\t7\t6\t0\t0\t0\t0\t16\t73\t87\nB\t6\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t73\t87\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t73\t87\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t1\t35\t39\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t47\t-\nO\t3\t1\t4\t2\t2\t6\t6\t0\t3\t0\t0\t0\t0\t0\t35\t47\t-\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t0\t1\t0\t55\t56\t0\nO\t5\t2\t5\t1\t5\t6\t6\t0\t0\t0\t6\t0\t0\t0\t80\t85\t-\nO\t6\t2\t5\t5\t0\t6\t6\t0\t5\t0\t0\t0\t0\t0\t73\t87\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-45.fy",
+        "beforeSHA256": "b9d496f5d5fc21920653867ffa5041bfa5593b0914ab0958ddbd47f0ff9633f5",
+        "afterSHA256": "b9d496f5d5fc21920653867ffa5041bfa5593b0914ab0958ddbd47f0ff9633f5",
+        "bytes": 100
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "assertion-failed"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-or-skips-trapping-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-46.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t6\t0\t0\t66\t70\t0\nF\t1\t1\t1\t0\t4\t0\t4\t0\t0\t13\t58\t0\nF\t2\t2\t5\t4\t1\t4\t3\t0\t0\t58\t100\t0\nL\t1\t1\t0\t6\t0\t0\t35\t39\nL\t2\t1\t0\t6\t0\t0\t35\t47\nL\t3\t1\t0\t6\t0\t0\t41\t47\nL\t4\t1\t0\t1\t0\t0\t55\t56\nL\t5\t2\t0\t6\t0\t0\t80\t85\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t3\t2\t0\t0\t0\t0\t0\t0\t35\t47\nB\t2\t1\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t3\t0\t0\t0\t41\t47\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t48\t57\nB\t4\t1\t3\t3\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t35\t47\nB\t5\t2\t5\t6\t4\t0\t5\t0\t0\t6\t6\t7\t6\t0\t0\t0\t0\t16\t73\t87\nB\t6\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t73\t87\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t73\t87\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t1\t35\t39\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t47\t-\nO\t3\t1\t4\t2\t2\t6\t6\t0\t3\t0\t0\t0\t0\t0\t35\t47\t-\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t0\t1\t0\t55\t56\t0\nO\t5\t2\t5\t1\t5\t6\t6\t0\t0\t0\t6\t0\t0\t0\t80\t85\t-\nO\t6\t2\t5\t5\t0\t6\t6\t0\t5\t0\t0\t0\t0\t0\t73\t87\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-46.fy",
+        "beforeSHA256": "2a1cf688ac90326bf044133d7f97545cbb3ee7cd478630d932e85b75194e4f0d",
+        "afterSHA256": "2a1cf688ac90326bf044133d7f97545cbb3ee7cd478630d932e85b75194e4f0d",
+        "bytes": 100
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-or-takes-trapping-call",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-47.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t6\t0\t0\t67\t71\t0\nF\t1\t1\t1\t0\t4\t0\t4\t0\t0\t13\t59\t0\nF\t2\t2\t5\t4\t1\t4\t3\t0\t0\t59\t101\t0\nL\t1\t1\t0\t6\t0\t0\t35\t40\nL\t2\t1\t0\t6\t0\t0\t35\t48\nL\t3\t1\t0\t6\t0\t0\t42\t48\nL\t4\t1\t0\t1\t0\t0\t56\t57\nL\t5\t2\t0\t6\t0\t0\t81\t86\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t3\t2\t0\t0\t0\t0\t0\t0\t35\t48\nB\t2\t1\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t3\t0\t0\t0\t42\t48\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t49\t58\nB\t4\t1\t3\t3\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t35\t48\nB\t5\t2\t5\t6\t4\t0\t5\t0\t0\t6\t6\t7\t6\t0\t0\t0\t0\t16\t74\t88\nB\t6\t2\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t74\t88\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t74\t88\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t0\t35\t40\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t48\t-\nO\t3\t1\t4\t2\t2\t6\t6\t0\t3\t0\t0\t0\t0\t0\t35\t48\t-\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t0\t1\t0\t56\t57\t0\nO\t5\t2\t5\t1\t5\t6\t6\t0\t0\t0\t6\t0\t0\t0\t81\t86\t-\nO\t6\t2\t5\t5\t0\t6\t6\t0\t5\t0\t0\t0\t0\t0\t74\t88\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-47.fy",
+        "beforeSHA256": "c0c60b93b28e9b9da82fad7de8d917f45ddd2ee21c2706b5e237016ee2648f28",
+        "afterSHA256": "c0c60b93b28e9b9da82fad7de8d917f45ddd2ee21c2706b5e237016ee2648f28",
+        "bytes": 101
+      },
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "assertion-failed"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-nested-short-circuit",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-48.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t15\t0\t11\t0\t0\t13\t112\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t6\t0\t0\t47\t52\nL\t4\t1\t0\t6\t0\t0\t47\t64\nL\t5\t1\t0\t1\t0\t0\t57\t58\nL\t6\t1\t0\t6\t0\t0\t59\t63\nL\t7\t1\t0\t6\t0\t0\t46\t100\nL\t8\t1\t0\t1\t0\t0\t71\t72\nL\t9\t1\t0\t6\t0\t0\t73\t77\nL\t10\t1\t0\t6\t0\t0\t68\t99\nL\t11\t1\t0\t6\t0\t0\t81\t85\nL\t12\t1\t0\t6\t0\t0\t81\t98\nL\t13\t1\t0\t1\t0\t0\t90\t91\nL\t14\t1\t0\t6\t0\t0\t92\t97\nL\t15\t1\t0\t1\t0\t0\t109\t110\nB\t1\t1\t1\t4\t3\t3\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t47\t64\nB\t2\t1\t5\t8\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t47\t64\nB\t3\t1\t9\t9\t3\t4\t0\t0\t0\t6\t5\t4\t0\t0\t0\t0\t0\t0\t46\t100\nB\t4\t1\t10\t13\t3\t9\t0\t0\t0\t6\t6\t7\t0\t0\t0\t0\t0\t0\t68\t99\nB\t5\t1\t22\t22\t4\t0\t7\t0\t0\t6\t10\t11\t22\t0\t0\t0\t0\t16\t39\t102\nB\t6\t1\t14\t15\t3\t11\t0\t0\t0\t6\t9\t8\t0\t0\t0\t0\t0\t0\t81\t98\nB\t7\t1\t21\t21\t2\t0\t0\t0\t0\t0\t5\t0\t0\t0\t0\t0\t0\t0\t46\t100\nB\t8\t1\t16\t19\t2\t0\t0\t0\t0\t0\t9\t0\t0\t0\t0\t0\t0\t0\t81\t98\nB\t9\t1\t20\t20\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t68\t99\nB\t10\t1\t23\t23\t1\t15\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t102\t111\nB\t11\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t39\t102\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t3\t6\t6\t0\t0\t0\t4\t0\t0\t0\t47\t52\t-\nO\t4\t1\t1\t2\t4\t6\t6\t0\t3\t0\t0\t0\t0\t0\t47\t64\t-\nO\t5\t1\t2\t1\t5\t1\t1\t0\t0\t0\t6\t1\t2\t0\t57\t58\t1\nO\t6\t1\t2\t2\t1\t1\t1\t0\t5\t0\t7\t0\t0\t0\t55\t59\t-\nO\t7\t1\t2\t1\t6\t6\t6\t0\t0\t0\t8\t0\t0\t1\t59\t63\t-\nO\t8\t1\t2\t2\t4\t6\t6\t0\t6\t0\t0\t0\t0\t0\t47\t64\t-\nO\t9\t1\t3\t2\t7\t6\t6\t0\t4\t0\t0\t0\t0\t0\t46\t100\t-\nO\t10\t1\t4\t1\t8\t1\t1\t0\t0\t0\t11\t2\t3\t0\t71\t72\t2\nO\t11\t1\t4\t2\t1\t1\t1\t0\t8\t0\t12\t0\t0\t0\t69\t73\t-\nO\t12\t1\t4\t1\t9\t6\t6\t0\t0\t0\t13\t0\t0\t1\t73\t77\t-\nO\t13\t1\t4\t2\t10\t6\t6\t0\t9\t0\t0\t0\t0\t0\t68\t99\t-\nO\t14\t1\t6\t1\t11\t6\t6\t0\t0\t0\t15\t0\t0\t1\t81\t85\t-\nO\t15\t1\t6\t2\t12\t6\t6\t0\t11\t0\t0\t0\t0\t0\t81\t98\t-\nO\t16\t1\t8\t1\t13\t1\t1\t0\t0\t0\t17\t3\t4\t0\t90\t91\t3\nO\t17\t1\t8\t2\t1\t1\t1\t0\t13\t0\t18\t0\t0\t0\t88\t92\t-\nO\t18\t1\t8\t1\t14\t6\t6\t0\t0\t0\t19\t0\t0\t0\t92\t97\t-\nO\t19\t1\t8\t2\t12\t6\t6\t0\t14\t0\t0\t0\t0\t0\t81\t98\t-\nO\t20\t1\t9\t2\t10\t6\t6\t0\t12\t0\t0\t0\t0\t0\t68\t99\t-\nO\t21\t1\t7\t2\t7\t6\t6\t0\t10\t0\t0\t0\t0\t0\t46\t100\t-\nO\t22\t1\t5\t5\t0\t6\t6\t0\t7\t0\t0\t0\t0\t0\t39\t102\t-\nO\t23\t1\t10\t2\t15\t1\t1\t0\t1\t0\t0\t0\t0\t0\t109\t110\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-48.fy",
+        "beforeSHA256": "6f99b593f8541ffb58b071896476a6380c168da98e40171e1c6a62ee691ed832",
+        "afterSHA256": "6f99b593f8541ffb58b071896476a6380c168da98e40171e1c6a62ee691ed832",
+        "bytes": 112
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 2,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-condition-left-effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-49.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t13\t0\t10\t0\t0\t13\t87\t0\nL\t1\t1\t2\t1\t0\t1\t35\t36\nL\t2\t1\t0\t1\t0\t0\t37\t38\nL\t3\t1\t0\t1\t0\t0\t46\t47\nL\t4\t1\t0\t6\t0\t0\t48\t52\nL\t5\t1\t0\t6\t0\t0\t42\t69\nL\t6\t1\t0\t1\t0\t0\t58\t59\nL\t7\t1\t0\t1\t0\t0\t61\t62\nL\t8\t1\t0\t1\t0\t0\t58\t63\nL\t9\t1\t0\t6\t0\t0\t63\t67\nL\t10\t1\t0\t1\t0\t0\t71\t72\nL\t11\t1\t0\t1\t0\t0\t74\t75\nL\t12\t1\t0\t1\t0\t0\t71\t76\nL\t13\t1\t0\t1\t0\t0\t84\t85\nB\t1\t1\t1\t6\t3\t4\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t42\t69\nB\t2\t1\t7\t9\t4\t0\t6\t7\t1\t1\t4\t5\t9\t0\t0\t0\t0\t1\t58\t63\nB\t3\t1\t0\t0\t3\t5\t0\t0\t0\t6\t6\t7\t0\t0\t0\t0\t0\t0\t39\t77\nB\t4\t1\t10\t13\t2\t0\t0\t0\t0\t0\t3\t0\t0\t0\t0\t0\t0\t0\t42\t69\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t58\t63\nB\t6\t1\t14\t16\t4\t0\t10\t11\t1\t1\t8\t9\t16\t0\t0\t0\t0\t1\t71\t76\nB\t7\t1\t0\t0\t2\t0\t0\t0\t0\t0\t10\t0\t0\t0\t0\t0\t0\t0\t39\t77\nB\t8\t1\t17\t18\t2\t0\t0\t0\t0\t0\t10\t0\t0\t0\t0\t0\t0\t0\t39\t77\nB\t9\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t71\t76\nB\t10\t1\t19\t19\t1\t13\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t77\t86\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t37\t38\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t2\t0\t3\t0\t0\t0\t27\t39\t-\nO\t3\t1\t1\t1\t3\t1\t1\t0\t0\t0\t4\t1\t2\t0\t46\t47\t1\nO\t4\t1\t1\t2\t1\t1\t1\t0\t3\t0\t5\t0\t0\t0\t44\t48\t-\nO\t5\t1\t1\t1\t4\t6\t6\t0\t0\t0\t6\t0\t0\t1\t48\t52\t-\nO\t6\t1\t1\t2\t5\t6\t6\t0\t4\t0\t0\t0\t0\t0\t42\t69\t-\nO\t7\t1\t2\t2\t6\t1\t1\t0\t1\t0\t8\t0\t0\t0\t58\t59\t-\nO\t8\t1\t2\t1\t7\t1\t1\t0\t0\t0\t9\t2\t3\t0\t61\t62\t2\nO\t9\t1\t2\t5\t0\t1\t1\t1\t6\t7\t0\t0\t0\t0\t58\t63\t-\nO\t10\t1\t4\t4\t8\t1\t1\t1\t6\t7\t11\t0\t0\t0\t58\t63\t-\nO\t11\t1\t4\t2\t1\t1\t1\t0\t8\t0\t12\t0\t0\t0\t58\t63\t-\nO\t12\t1\t4\t1\t9\t6\t6\t0\t0\t0\t13\t0\t0\t1\t63\t67\t-\nO\t13\t1\t4\t2\t5\t6\t6\t0\t9\t0\t0\t0\t0\t0\t42\t69\t-\nO\t14\t1\t6\t2\t10\t1\t1\t0\t1\t0\t15\t0\t0\t0\t71\t72\t-\nO\t15\t1\t6\t1\t11\t1\t1\t0\t0\t0\t16\t3\t4\t0\t74\t75\t4\nO\t16\t1\t6\t5\t0\t1\t1\t1\t10\t11\t0\t0\t0\t0\t71\t76\t-\nO\t17\t1\t8\t4\t12\t1\t1\t1\t10\t11\t18\t0\t0\t0\t71\t76\t-\nO\t18\t1\t8\t2\t1\t1\t1\t0\t12\t0\t0\t0\t0\t0\t71\t76\t-\nO\t19\t1\t10\t2\t13\t1\t1\t0\t1\t0\t0\t0\t0\t0\t84\t85\t-\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-49.fy",
+        "beforeSHA256": "9e9de79c91a8744452c35d9186af0b27ff913382c82891f428cad30d75c459c3",
+        "afterSHA256": "9e9de79c91a8744452c35d9186af0b27ff913382c82891f428cad30d75c459c3",
+        "bytes": 87
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-if-condition-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-50.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t1\t0\t1\t0\t0\t13\t68\t0\nL\t1\t1\t0\t1\t0\t0\t38\t39\nB\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t31\t40\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t38\t39\t9\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-50.fy",
+        "beforeSHA256": "1443873b9d756e2a5e19e1d56b6f87b2116c5405d3821cdf1d214745c228545b",
+        "afterSHA256": "1443873b9d756e2a5e19e1d56b6f87b2116c5405d3821cdf1d214745c228545b",
+        "bytes": 68
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-and-rhs-return-skipped",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-51.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t4\t0\t3\t0\t0\t13\t68\t0\nL\t1\t1\t0\t6\t0\t0\t35\t40\nL\t2\t1\t0\t6\t0\t0\t35\t57\nL\t3\t1\t0\t1\t0\t0\t50\t51\nL\t4\t1\t0\t1\t0\t0\t65\t66\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t35\t57\nB\t2\t1\t3\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t43\t52\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t58\t67\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t0\t35\t40\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t57\t-\nO\t3\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t50\t51\t9\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t1\t2\t0\t65\t66\t4\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-51.fy",
+        "beforeSHA256": "ed731dce928f7670b07cb33165b040c055db5a71c59ea20430bb19bc0dd81ecb",
+        "afterSHA256": "ed731dce928f7670b07cb33165b040c055db5a71c59ea20430bb19bc0dd81ecb",
+        "bytes": 68
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 4,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-and-rhs-return-taken",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-52.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t4\t0\t3\t0\t0\t13\t67\t0\nL\t1\t1\t0\t6\t0\t0\t35\t39\nL\t2\t1\t0\t6\t0\t0\t35\t56\nL\t3\t1\t0\t1\t0\t0\t49\t50\nL\t4\t1\t0\t1\t0\t0\t64\t65\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t35\t56\nB\t2\t1\t3\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t42\t51\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t57\t66\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t1\t35\t39\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t56\t-\nO\t3\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t49\t50\t9\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t1\t2\t0\t64\t65\t4\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-52.fy",
+        "beforeSHA256": "4882ee962e56cacec3559183f1b4d0ebe96eea1462e4268d619171dfa68d9abd",
+        "afterSHA256": "4882ee962e56cacec3559183f1b4d0ebe96eea1462e4268d619171dfa68d9abd",
+        "bytes": 67
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-or-rhs-return-skipped",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-53.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t4\t0\t3\t0\t0\t13\t67\t0\nL\t1\t1\t0\t6\t0\t0\t35\t39\nL\t2\t1\t0\t6\t0\t0\t35\t56\nL\t3\t1\t0\t1\t0\t0\t49\t50\nL\t4\t1\t0\t1\t0\t0\t64\t65\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t3\t2\t0\t0\t0\t0\t0\t0\t35\t56\nB\t2\t1\t3\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t42\t51\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t57\t66\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t1\t35\t39\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t56\t-\nO\t3\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t49\t50\t9\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t1\t2\t0\t64\t65\t4\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-53.fy",
+        "beforeSHA256": "10bdaadd5d3e9c3ce26809f13d7ee0051347ab9b3eb2b51fac553d587288de1d",
+        "afterSHA256": "10bdaadd5d3e9c3ce26809f13d7ee0051347ab9b3eb2b51fac553d587288de1d",
+        "bytes": 67
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 4,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-or-rhs-return-taken",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-54.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nF\t1\t1\t1\t0\t4\t0\t3\t0\t0\t13\t68\t0\nL\t1\t1\t0\t6\t0\t0\t35\t40\nL\t2\t1\t0\t6\t0\t0\t35\t57\nL\t3\t1\t0\t1\t0\t0\t50\t51\nL\t4\t1\t0\t1\t0\t0\t65\t66\nB\t1\t1\t1\t2\t3\t1\t0\t0\t0\t6\t3\t2\t0\t0\t0\t0\t0\t0\t35\t57\nB\t2\t1\t3\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t43\t52\nB\t3\t1\t4\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t58\t67\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t2\t0\t0\t0\t35\t40\t-\nO\t2\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t35\t57\t-\nO\t3\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t50\t51\t9\nO\t4\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t1\t2\t0\t65\t66\t4\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-54.fy",
+        "beforeSHA256": "9617f5f762a2c3eca6d9783934ee82ff61b01ec1c3a8c0eb1e5965bd5546510a",
+        "afterSHA256": "9617f5f762a2c3eca6d9783934ee82ff61b01ec1c3a8c0eb1e5965bd5546510a",
+        "bytes": 68
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-call-first-argument-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-55.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t2\t67\t70\t0\nT\t3\t3\t0\t4\t1\t2\t0\t103\t107\t0\nS\t0\t1\nS\t1\t1\nF\t1\t1\t1\t0\t1\t0\t1\t0\t0\t13\t60\t0\nF\t2\t2\t2\t1\t5\t1\t3\t0\t2\t60\t96\t0\nF\t3\t3\t5\t6\t1\t4\t3\t2\t0\t96\t135\t0\nL\t1\t1\t0\t1\t0\t0\t46\t47\nL\t2\t2\t4\t1\t1\t0\t75\t76\nL\t3\t2\t5\t1\t1\t0\t81\t82\nL\t4\t2\t0\t1\t0\t0\t91\t92\nL\t5\t2\t0\t1\t0\t0\t93\t94\nL\t6\t2\t0\t1\t0\t0\t91\t94\nL\t7\t3\t0\t6\t0\t0\t117\t122\nB\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t39\t48\nB\t2\t2\t2\t4\t4\t0\t4\t5\t1\t1\t3\t4\t4\t0\t0\t0\t0\t1\t91\t94\nB\t3\t2\t5\t5\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t84\t95\nB\t4\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t91\t94\nB\t5\t3\t6\t7\t4\t0\t7\t0\t0\t6\t6\t7\t7\t0\t0\t0\t0\t16\t110\t124\nB\t6\t3\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t110\t124\nB\t7\t3\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t110\t124\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t46\t47\t9\nO\t2\t2\t2\t2\t4\t1\t1\t0\t2\t0\t3\t0\t0\t0\t91\t92\t-\nO\t3\t2\t2\t2\t5\t1\t1\t0\t3\t0\t4\t0\t0\t0\t93\t94\t-\nO\t4\t2\t2\t5\t0\t1\t1\t1\t4\t5\t0\t0\t0\t0\t91\t94\t-\nO\t5\t2\t3\t4\t6\t1\t1\t1\t4\t5\t0\t0\t0\t0\t91\t94\t-\nO\t6\t3\t5\t1\t7\t6\t6\t0\t0\t0\t7\t0\t0\t0\t117\t122\t-\nO\t7\t3\t5\t5\t0\t6\t6\t0\t7\t0\t0\t0\t0\t0\t110\t124\t-\nA\t0\t2\nA\t1\t3\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-55.fy",
+        "beforeSHA256": "4707f94573c6d4acfaa909f01319bc2c9b94517e37fbca151e994c8c1ad5362e",
+        "afterSHA256": "4707f94573c6d4acfaa909f01319bc2c9b94517e37fbca151e994c8c1ad5362e",
+        "bytes": 135
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-call-last-argument-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-56.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t1\t66\t68\t0\nT\t3\t3\t0\t4\t1\t1\t2\t93\t96\t0\nS\t0\t1\nS\t1\t1\nS\t2\t1\nF\t1\t1\t1\t0\t3\t0\t2\t0\t0\t13\t59\t0\nF\t2\t2\t3\t3\t2\t2\t1\t1\t1\t59\t86\t0\nF\t3\t3\t4\t5\t5\t3\t3\t2\t2\t86\t122\t0\nL\t1\t1\t0\t1\t0\t0\t41\t42\nL\t2\t1\t0\t1\t0\t0\t38\t43\nL\t3\t1\t0\t1\t0\t0\t52\t53\nL\t4\t2\t4\t1\t1\t0\t73\t74\nL\t5\t2\t0\t1\t0\t0\t83\t84\nL\t6\t3\t5\t1\t1\t0\t101\t102\nL\t7\t3\t6\t1\t1\t0\t107\t108\nL\t8\t3\t0\t1\t0\t0\t117\t118\nL\t9\t3\t0\t1\t0\t0\t119\t120\nL\t10\t3\t0\t1\t0\t0\t117\t120\nB\t1\t1\t1\t1\t5\t0\t0\t0\t0\t0\t2\t0\t0\t2\t2\t0\t1\t0\t38\t43\nB\t2\t1\t2\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t45\t54\nB\t3\t2\t3\t3\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t76\t85\nB\t4\t3\t4\t6\t4\t0\t8\t9\t1\t1\t5\t6\t6\t0\t0\t0\t0\t1\t117\t120\nB\t5\t3\t7\t7\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t110\t121\nB\t6\t3\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t117\t120\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t41\t42\t1\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t1\t2\t0\t52\t53\t9\nO\t3\t2\t3\t2\t5\t1\t1\t0\t4\t0\t0\t0\t0\t0\t83\t84\t-\nO\t4\t3\t4\t2\t8\t1\t1\t0\t6\t0\t5\t0\t0\t0\t117\t118\t-\nO\t5\t3\t4\t2\t9\t1\t1\t0\t7\t0\t6\t0\t0\t0\t119\t120\t-\nO\t6\t3\t4\t5\t0\t1\t1\t1\t8\t9\t0\t0\t0\t0\t117\t120\t-\nO\t7\t3\t5\t4\t10\t1\t1\t1\t8\t9\t0\t0\t0\t0\t117\t120\t-\nA\t0\t1\nA\t1\t4\nA\t2\t6\nA\t3\t7\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-56.fy",
+        "beforeSHA256": "bc8dbf2ac417a40f6f81daf06fffcf4d5f6243c3394cdbec4db28d172d6afe2e",
+        "afterSHA256": "bc8dbf2ac417a40f6f81daf06fffcf4d5f6243c3394cdbec4db28d172d6afe2e",
+        "bytes": 122
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-call-conditional-argument-returns",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-57.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t2\t92\t95\t0\nT\t3\t3\t0\t4\t1\t2\t0\t128\t132\t0\nS\t0\t1\nS\t1\t1\nF\t1\t1\t1\t0\t4\t0\t3\t0\t0\t13\t85\t0\nF\t2\t2\t4\t4\t5\t3\t3\t0\t2\t85\t121\t0\nF\t3\t3\t7\t9\t1\t6\t3\t2\t0\t121\t160\t0\nL\t1\t1\t0\t6\t0\t0\t41\t45\nL\t2\t1\t0\t1\t0\t0\t38\t75\nL\t3\t1\t0\t1\t0\t0\t54\t55\nL\t4\t1\t0\t1\t0\t0\t70\t72\nL\t5\t2\t4\t1\t1\t0\t100\t101\nL\t6\t2\t5\t1\t1\t0\t106\t107\nL\t7\t2\t0\t1\t0\t0\t116\t117\nL\t8\t2\t0\t1\t0\t0\t118\t119\nL\t9\t2\t0\t1\t0\t0\t116\t119\nL\t10\t3\t0\t6\t0\t0\t142\t147\nB\t1\t1\t1\t1\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t38\t75\nB\t2\t1\t2\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t47\t56\nB\t3\t1\t3\t3\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t63\t73\nB\t4\t2\t4\t6\t4\t0\t7\t8\t1\t1\t5\t6\t6\t0\t0\t0\t0\t1\t116\t119\nB\t5\t2\t7\t7\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t109\t120\nB\t6\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t116\t119\nB\t7\t3\t8\t9\t4\t0\t10\t0\t0\t6\t8\t9\t9\t0\t0\t0\t0\t16\t135\t149\nB\t8\t3\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t135\t149\nB\t9\t3\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t135\t149\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t1\t41\t45\t-\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t54\t55\t9\nO\t3\t1\t3\t1\t4\t1\t1\t0\t0\t0\t0\t1\t3\t0\t70\t72\t10\nO\t4\t2\t4\t2\t7\t1\t1\t0\t5\t0\t5\t0\t0\t0\t116\t117\t-\nO\t5\t2\t4\t2\t8\t1\t1\t0\t6\t0\t6\t0\t0\t0\t118\t119\t-\nO\t6\t2\t4\t5\t0\t1\t1\t1\t7\t8\t0\t0\t0\t0\t116\t119\t-\nO\t7\t2\t5\t4\t9\t1\t1\t1\t7\t8\t0\t0\t0\t0\t116\t119\t-\nO\t8\t3\t7\t1\t10\t6\t6\t0\t0\t0\t9\t0\t0\t0\t142\t147\t-\nO\t9\t3\t7\t5\t0\t6\t6\t0\t10\t0\t0\t0\t0\t0\t135\t149\t-\nA\t0\t5\nA\t1\t6\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-57.fy",
+        "beforeSHA256": "92589d95e633cadd89ae1ea036c2e20f01b63d42ae167506f746ee4c91ddc540",
+        "afterSHA256": "92589d95e633cadd89ae1ea036c2e20f01b63d42ae167506f746ee4c91ddc540",
+        "bytes": 160
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "label": "mir-call-conditional-argument-fallthrough",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-58.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t20\t24\t0\nT\t2\t2\t0\t3\t1\t0\t2\t78\t81\t0\nS\t0\t1\nS\t1\t1\nF\t1\t1\t1\t0\t6\t0\t5\t0\t0\t13\t71\t0\nF\t2\t2\t6\t6\t5\t5\t3\t2\t2\t71\t107\t0\nL\t1\t1\t0\t6\t0\t0\t41\t46\nL\t2\t1\t0\t1\t0\t0\t38\t66\nL\t3\t1\t0\t1\t0\t0\t55\t56\nL\t4\t1\t0\t1\t0\t0\t64\t65\nL\t5\t1\t0\t1\t0\t0\t67\t68\nL\t6\t1\t0\t1\t0\t0\t34\t69\nL\t7\t2\t3\t1\t1\t0\t86\t87\nL\t8\t2\t4\t1\t1\t0\t92\t93\nL\t9\t2\t0\t1\t0\t0\t102\t103\nL\t10\t2\t0\t1\t0\t0\t104\t105\nL\t11\t2\t0\t1\t0\t0\t102\t105\nB\t1\t1\t1\t1\t3\t1\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t38\t66\nB\t2\t1\t2\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t48\t57\nB\t3\t1\t3\t4\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t38\t66\nB\t4\t1\t5\t5\t5\t0\t0\t0\t0\t0\t5\t0\t0\t2\t6\t0\t2\t0\t34\t69\nB\t5\t1\t0\t0\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t27\t70\nB\t6\t2\t6\t8\t4\t0\t9\t10\t1\t1\t7\t8\t8\t0\t0\t0\t0\t1\t102\t105\nB\t7\t2\t9\t9\t1\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t95\t106\nB\t8\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t102\t105\nO\t1\t1\t1\t1\t1\t6\t6\t0\t0\t0\t0\t0\t0\t0\t41\t46\t-\nO\t2\t1\t2\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t55\t56\t9\nO\t3\t1\t3\t1\t4\t1\t1\t0\t0\t0\t4\t1\t2\t0\t64\t65\t2\nO\t4\t1\t3\t2\t2\t1\t1\t0\t4\t0\t0\t0\t0\t0\t38\t66\t-\nO\t5\t1\t4\t1\t5\t1\t1\t0\t0\t0\t0\t2\t3\t0\t67\t68\t3\nO\t6\t2\t6\t2\t9\t1\t1\t0\t7\t0\t7\t0\t0\t0\t102\t103\t-\nO\t7\t2\t6\t2\t10\t1\t1\t0\t8\t0\t8\t0\t0\t0\t104\t105\t-\nO\t8\t2\t6\t5\t0\t1\t1\t1\t9\t10\t0\t0\t0\t0\t102\t105\t-\nO\t9\t2\t7\t4\t11\t1\t1\t1\t9\t10\t0\t0\t0\t0\t102\t105\t-\nA\t0\t2\nA\t1\t5\nA\t2\t7\nA\t3\t8\n",
+      "stderr": "",
+      "input": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\mir-control-order-fix\\final-release\\mir-58.fy",
+        "beforeSHA256": "f9f76c673baa169aef664d541ad78716d95fd0919b08faed14d674fb4acf6dfd",
+        "afterSHA256": "f9f76c673baa169aef664d541ad78716d95fd0919b08faed14d674fb4acf6dfd",
+        "bytes": 107
+      },
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 5,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    }
+  ]
+}
