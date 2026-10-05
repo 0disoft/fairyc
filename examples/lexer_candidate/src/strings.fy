@@ -7,6 +7,7 @@ import budget as budget;
 
 pub struct Step { usize end; i32 status; }
 struct EncodedScalar { u8[4] bytes; usize length; }
+struct HexBlock { u8[512] bytes; }
 
 fn Step finish(usize end, i32 status) {
     return Step { .end = end, .status = status };
@@ -188,10 +189,22 @@ pub fn Step scan(ref u8[] input, usize start, u32 kind, usize opener, ref mut by
     if (kind == 9 && !put(ref mut raw, 0)) { return finish(p, 3); }
     let ref u8[] data = bytes::view(ref raw);
     let ref u8[] alphabet = b"0123456789abcdef";
+    var HexBlock block = HexBlock { .bytes = [0; 512] };
     var usize i = 0;
     while (i < data.len) {
-        if (!put(output, alphabet[(data[i] / 16) as usize]) || !put(output, alphabet[(data[i] % 16) as usize])) { return finish(p, 3); }
-        i += 1;
+        let usize count = if (data.len - i > 256) { 256 } else { data.len - i };
+        var usize at = 0;
+        for (let u8 byte in data[i..i+count]) {
+            block.bytes[at] = alphabet[(byte / 16) as usize];
+            block.bytes[at + 1] = alphabet[(byte % 16) as usize];
+            at += 2;
+        }
+        // Reuse the block, publishing only the initialized prefix of this chunk.
+        if (!switch (bytes::append(output, ref block.bytes[..at])) {
+            case .ok(_): { true }
+            case .err(_): { false }
+        }) { return finish(p, 3); }
+        i += count;
     }
     return finish(p, 0);
 }

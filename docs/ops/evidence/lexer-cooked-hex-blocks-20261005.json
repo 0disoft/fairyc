@@ -1,0 +1,102 @@
+{
+  "schema": "fairyc.lexer-cooked-hex-blocks/v1",
+  "date": "2026-10-05",
+  "baseRevision": "06c43eab1fb12dda7a988db1c64005a5ae2bcb7b",
+  "sourceArtifacts": [
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "sha256": "b0b32355646be5f0be30abf75020e21491cfcb99644bef0aac9f0950909768eb"
+    },
+    {
+      "path": "internal/cli/fairy_lexer_stream_test.go",
+      "sha256": "99ca25ad23171ae691233e5177f50514877b99cfe5c30d647361e4006a2d52e5"
+    }
+  ],
+  "implementation": {
+    "rawBytesPerBlock": 256,
+    "stackArrayFieldBytes": 512,
+    "writes": "two lower-case hex digits per byte; append only the current initialized prefix",
+    "appendCalls": "ceil(raw cooked bytes / 256), previously two calls per raw byte",
+    "emptyInput": "no cooked append; empty C string still encodes its terminator",
+    "errorMapping": "Buffer append error returns scan status 3; collect publishes no Stream",
+    "packageVersion": "0.1.2"
+  },
+  "verification": {
+    "target": "Windows AMD64 MSVC",
+    "profiles": [
+      "dev",
+      "release"
+    ],
+    "nativeProgramExecutions": 10,
+    "boundaryCasesPerProfile": 29,
+    "lengths": [
+      0,
+      1,
+      255,
+      256,
+      257,
+      511,
+      512,
+      513,
+      1025
+    ],
+    "oracle": "independent Go encoding/hex for ordinary/byte/C strings, all 256 byte values plus a tail, and UTF-8 crossing a block boundary; source bytes and token spans preserved",
+    "regressionOracle": "Go lexer exact tokens/cooked bytes/diagnostics/recovery spans",
+    "budgetCombinationsPerProfile": 570,
+    "test": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestWindowsFairyLexer(Candidate|CookedHexBlocks|WorkBudget)$/^(escapes|malformed-escapes|string-bytes)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/lexer-cooked-hex-tests.jsonl",
+      "sha256": "c4936b35fc59529bead2d0c29f91dabf859b105ea4e3e364cafa01c4b2a346e5",
+      "passed": [
+        "TestWindowsFairyLexerCandidate",
+        "TestWindowsFairyLexerCookedHexBlocks",
+        "TestWindowsFairyLexerWorkBudget",
+        "TestWindowsFairyLexerWorkBudget/escapes",
+        "TestWindowsFairyLexerWorkBudget/malformed-escapes",
+        "TestWindowsFairyLexerWorkBudget/string-bytes"
+      ],
+      "failed": 0,
+      "skipped": 0
+    },
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/cli"
+      ],
+      "exit": 0,
+      "raw": ".cache/lexer-cooked-hex-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "format": "gofmt and git diff --check passed",
+    "linuxExecution": "deferred by owner for consolidated batch",
+    "performance": "not measured; append call count reduction follows from source",
+    "allocationFailureInjection": "not run; unchanged status mapping reviewed"
+  },
+  "scope": {
+    "newSDKAPI": false,
+    "compilerChanges": false,
+    "runnerChanges": false,
+    "newPS1": false,
+    "push": false
+  }
+}

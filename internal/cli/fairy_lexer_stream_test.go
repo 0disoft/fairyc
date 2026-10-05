@@ -1,12 +1,78 @@
 package cli
 
 import (
+	"encoding/hex"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 )
+
+func TestWindowsFairyLexerCookedHexBlocks(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	root := t.TempDir()
+	copyLexerStreamExample(t, root)
+	var program strings.Builder
+	program.WriteString(`module main;
+import scanner as scanner;
+import std::bytes as bytes;
+fn void check(ref u8[] input, ref u8[] expected, u32 kind) {
+    let bytes::Buffer owned = switch (bytes::copy(input)) { case .ok(value): { value } case .err(_): { assert(false); } };
+    let scanner::Stream stream = switch (scanner::collect(owned, false, 32768, 16, 256, 16777216)) { case .ok(value): { value } case .err(_): { assert(false); } };
+    assert(scanner::token_count(ref stream) == 2 && scanner::diagnostic_count(ref stream) == 0);
+    let scanner::TokenInfo token = scanner::token_info(ref stream, 0);
+    assert(token.kind == kind && token.start == 0 && token.end == input.len);
+    assert(bytes::equal(scanner::source_view(ref stream), input));
+    assert(bytes::equal(scanner::token_raw(ref stream, 0), input));
+    assert(bytes::equal(scanner::token_cooked(ref stream, 0), expected));
+}
+fn i32 main() {
+`)
+	cases := 0
+	appendCase := func(input string, cooked []byte, kind int) {
+		program.WriteString("check(b\"")
+		for _, b := range []byte(input) {
+			fmt.Fprintf(&program, "\\x%02X", b)
+		}
+		fmt.Fprintf(&program, "\", b\"%s\", %d);\n", hex.EncodeToString(cooked), kind)
+		cases++
+	}
+	for _, length := range []int{0, 1, 255, 256, 257, 511, 512, 513, 1025} {
+		body := strings.Repeat("Az09!", (length+4)/5)[:length]
+		for _, literal := range []struct {
+			prefix string
+			kind   int
+		}{{"", 7}, {"b", 8}, {"c", 9}} {
+			cooked := []byte(body)
+			if literal.prefix == "c" {
+				cooked = append(cooked, 0)
+			}
+			appendCase(literal.prefix+`"`+body+`"`, cooked, literal.kind)
+		}
+	}
+	var escaped strings.Builder
+	var allBytes []byte
+	for i := 0; i < 256; i++ {
+		fmt.Fprintf(&escaped, "\\x%02X", i)
+		allBytes = append(allBytes, byte(i))
+	}
+	appendCase(`b"`+escaped.String()+`\x41"`, append(allBytes, 'A'), 8)
+	unicode := strings.Repeat("a", 255) + "한😀Z"
+	appendCase(`"`+unicode+`"`, []byte(unicode), 7)
+	program.WriteString("return 0; }\n")
+	writeTestSource(t, root, "src/main.fy", program.String())
+	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
+		code, stdout, stderr := runForTest(args, root)
+		if code != ExitSuccess || stdout != "" || stderr != "" {
+			t.Fatalf("%v: %d %q %s", args, code, stdout, stderr)
+		}
+	}
+	t.Logf("compared %d cooked-hex boundary cases, original bytes and spans at both profiles", cases)
+}
 
 func copyLexerStreamExample(t *testing.T, root string) {
 	t.Helper()
