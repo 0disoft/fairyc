@@ -2,7 +2,7 @@
 
 Windows AMD64 and Linux GNU amd64 example. It requires a compiler with ADR 0472 support;
 the SDK stage0.86 version alone does not identify that support. Product logic is Fairy C in
-`src/main.fy`, `src/tokens.fy`, and `src/evaluator.fy`.
+`src/main.fy`, `src/tokens.fy`, `src/evaluator.fy`, and `src/arithmetic.fy`.
 
 A bounded ASCII lexer stores every scanned token directly into the fixed array field of
 a plain struct instead of a `Vec`:
@@ -41,12 +41,14 @@ fairyc build
 
 The optional argument is the ASCII source to analyze. Its byte length is limited to 4095
 (`length > 4095` fails; the SDK argument buffer can hold 4096 bytes), and at most 128
-tokens are admitted. The admitted grammar is identifiers `[A-Za-z_][A-Za-z0-9_]*`,
+tokens are admitted. The analysis lexer admits identifiers `[A-Za-z_][A-Za-z0-9_]*`,
 unsigned decimal integers in `0..=i64 max`, the operators `+`, `=` and `;`, and the ASCII
-whitespace SP, HT, LF and CR. The nonnegative i64 literal and the running number sum are
-overflow-checked. In the default analysis mode the program lexes and sums only: it has no
-expression parser and does not evaluate expressions. The separate `--eval` mode below adds
-a bounded assignment evaluator on top of the same lexer.
+whitespace SP, HT, LF and CR; `*`, `(` and `)` are not admitted in analysis mode. The
+nonnegative i64 literal and the running number sum are overflow-checked. In the default
+analysis mode the program lexes and sums only: it has no expression parser and does not
+evaluate expressions. The separate `--eval` mode below adds a bounded assignment evaluator
+over the evaluation scanner entry point `scan_eval`, which wraps the same scan
+implementation with a flag that also admits `*`, `(` and `)`.
 
 Output is eight deterministic TSV rows in this order:
 
@@ -97,8 +99,9 @@ A usage error exits 2 with `usage: token-page-cli [ASCII-source]` on stderr.
 ## Evaluation mode (`--eval`)
 
 `token-page-cli --eval "<ASCII-source>"` evaluates a bounded assignment program instead of
-analyzing it. It reuses the same bounded lexer and the same 4095-byte input limit and
-128-token cap as the analysis mode.
+analyzing it. It reuses the 4095-byte input limit and 128-token cap, over the evaluation
+scanner entry point `scan_eval`, which wraps the same scan implementation with a flag that
+also admits `*`, `(` and `)`; the analysis scan path is unchanged.
 
 ```sh
 fairyc run --locked -- --eval "price = 4000000000 + 7; total = price + 3;"
@@ -116,30 +119,51 @@ price	4000000007
 total	4000000010
 ```
 
+Precedence and parentheses follow:
+
+```sh
+fairyc run --locked -- --eval "a=2+3*4; b=(2+3)*4;"
+```
+
+```text
+a	14
+b	20
+```
+
 The admitted program is a sequence of assignments, each terminated by `;`:
 
 ```text
-program = (identifier '=' term ('+' term)* ';')* ;
-term    = unsigned-i64-literal | earlier-defined-identifier ;
+program = (identifier '=' expr ';')* ;
+expr    = product ('+' product)* ;
+product = primary ('*' primary)* ;
+primary = unsigned-i64-literal | earlier-defined-identifier | '(' expr ')' ;
 ```
 
-Every `;` is required. Terms are unsigned decimal i64 literals, still capped at i64 max by
-the lexer, or identifiers defined earlier; unary `+` and `-`, parentheses, comments,
-subtraction, and every other expression form are rejected, so a value is a sum of
-nonnegative terms only. The lexer scans the whole input before evaluation begins. An empty
-or all-whitespace source succeeds and writes no output.
+Every `;` is required. `*` binds tighter than `+`, and both are left-associative.
+Primaries are unsigned decimal i64 literals still capped at i64 max by the lexer, identifiers
+defined earlier, or a parenthesized `expr`. Unary `+` and `-`, comments, subtraction,
+division, and every other expression form are rejected, so a value is built only from
+nonnegative literals, defined names, `+` and `*`. An empty or all-whitespace source
+succeeds and writes no output. Parentheses nest at most 16 levels deep; a 17th level fails
+with `error: parenthesis limit (16)`, and malformed, empty, or unmatched-parenthesis
+programs report `error: invalid evaluation syntax`. Intermediate operations are checked,
+including inside a parenthesized group even when the group is later multiplied by zero, so a
+value above i64 max fails with `error: evaluation overflow`. The lexer scans the whole input
+before evaluation begins.
 
 A name may be reassigned: the later assignment updates the existing slot, and the first
 definition order is kept in the output. Each right-hand side is evaluated against the
 bindings that existed before its own statement, so `x = x + 1;` fails with
 `error: undefined variable` when `x` is new, while an already-defined `x` may reference
-itself. Addition is checked, and a value above i64 max fails with
-`error: evaluation overflow`. At most 16 distinct names are admitted; a 17th new name
-fails with `error: variable limit (16)`.
+itself. At most 16 distinct names are admitted; a 17th new name fails with
+`error: variable limit (16)`.
 
 No stdout is written until every statement has been evaluated and the whole output buffer is
 complete; that buffer is then written to stdout once. Evaluation uses the unrebased original
-token spans from the lexer.
+token spans from the lexer, and it reduces iteratively with a fixed value stack and operator
+stack of 128 slots each rather than a recursive parser; stack saturation reports
+`error: invalid evaluation syntax`, and exceeding 16 parenthesis levels reports
+`error: parenthesis limit (16)`.
 
 Evaluation-mode failures exit 2 with exactly one of these lines on stderr:
 
@@ -148,6 +172,7 @@ error: invalid evaluation syntax
 error: undefined variable
 error: evaluation overflow
 error: variable limit (16)
+error: parenthesis limit (16)
 ```
 
 The lexical, integer, token-limit, input-limit, allocation, and stdout-write errors above
@@ -175,10 +200,13 @@ Feature locations:
   values and number `7`, then reuses the same page to show an empty input keeps `used = 0`
   and a `;` scan leaves `used = 1`, so no stale prefix is exposed. It passes under the
   interpreter and as a native development and release case.
-- `src/evaluator.fy` holds the evaluation mode: a `Binding[16]` `Environment` records
-  first-seen names in definition order, resolves each right-hand side against the bindings
-  from earlier statements, and `src/main.fy` formats the result as `name<TAB>value` rows
-  for one stdout write.
+- `src/evaluator.fy` holds the evaluation mode: an iterative precedence parser over the
+  `scan_eval` token stream, name lookup, and a `Binding[16]` `Environment` that records
+  first-seen names in definition order; `src/main.fy` formats the result as
+  `name<TAB>value` rows for one stdout write.
+- `src/arithmetic.fy` owns the evaluator's arithmetic: a fixed value stack and a fixed
+  operator stack of 128 slots each, the `+`/`*` reduction with precedence and
+  left-associativity, and the checked add and multiply that raise the overflow result.
 - `tests/evaluation.fy` is a source `@test` (`bindings_and_reuse`): for `'  x=4000000000;
   x=x+7; total=x+3;'` it asserts two bindings whose values `4000000007` and `4000000010`
   exceed i32, that the reassigned name keeps its original unrebased source span `2..3`,
@@ -186,6 +214,11 @@ Feature locations:
   leaves the earlier binding intact (`used = 1`, value `1`) with no CLI output, and that
   reusing the environment for an empty input resets `used` to `0`. It passes under the
   interpreter and as a native development and release case.
+- `tests/arithmetic.fy` is a source `@test` covering `*` precedence over `+`, both
+  left-associative, parenthesized expressions within the depth limit, the
+  `parenthesis limit (16)` and `invalid evaluation syntax` failures, and checked multiply
+  and add overflow. It passes under the interpreter and as a native development and release
+  case.
 
 Token storage uses the fixed array field, so scanning, rebasing and analysis neither
 allocate per token nor copy the whole token array; constructing the page returns a
@@ -196,12 +229,14 @@ no performance claim.
 Portable verification (Python 3.10 or later, standard library only) requires the compiler
 executable and runs `check`, `check --locked`, the locked development and release builds with
 their actual EXEs, the interpreter source tests, and the whole-stdout, error and boundary
-cases for both modes. The suite covers the analysis and evaluation cases and is described by
-what it exercises rather than by a fixed case count. The optional `--receipt PATH` option
-writes a summary plus the development and release raw JSON and retained images (execute
-permission preserved) to that path; without it no extra evidence logs or image copies are
-saved, while the ordinary `check` and `build` outputs (the lock file and the executable)
-are still written:
+cases for the analysis, evaluation, and arithmetic modes. Evaluation outputs are checked
+against an independent recursive-descent oracle written in Python, including 16-level
+parenthesis nesting and mixed-operator stack pressure. The suite is described by what it
+exercises rather than by a fixed case count. The optional `--receipt PATH` option writes a
+summary plus the development and release raw JSON and retained images (execute permission
+preserved) to that path; without it no extra evidence logs or image copies are saved, while
+the ordinary `check` and `build` outputs (the lock file and the executable) are still
+written:
 
 ```sh
 python verify.py --compiler /absolute/path/to/fairyc
@@ -209,15 +244,17 @@ python verify.py --compiler /absolute/path/to/fairyc --receipt /path/to/evidence
 python verify.py --compiler C:\path\to\fairyc.exe --receipt C:\path\to\evidence\receipt.json
 ```
 
-The help-updated full suite passes on Windows amd64 in both the analysis and evaluation
-modes, and the Linux C emission check passes. The focused `TestTokenPageCLIStorage` and
-`go vet` checks pass as well; `TestTokenPageCLIStorage` confirms the tokens module's authored
-workspace MIR has no fixed-array `FieldRead` or `ArrayIndex` copy, exercising the descriptor
-views and stores instead. The recorded runs used the cached compiler
-`.cache/nominal-array-field-view-compiler/fairyc.exe`. Actual Linux execution remains
-deferred to the owner's consolidated batch, so Linux is verified by C emission only. The
-analysis baseline evidence is `docs/ops/evidence/token-page-cli-20261005.json`, and the
-evaluation-mode evidence is `docs/ops/evidence/token-page-eval-cli-20261005.json`; each
-records `.dev.json` and `.release.json` raw logs against the final source hashes. There is
-no PowerShell harness and no performance claim. See
+The full suite passes on Windows amd64 in both analysis and evaluation modes, including the arithmetic extension,
+and the fresh Linux and Windows C emission checks pass. The focused `TestTokenPageCLIStorage`
+and `go vet` checks pass as well; `TestTokenPageCLIStorage` confirms the tokens module's
+authored workspace MIR has no fixed-array `FieldRead` or `ArrayIndex` copy, exercising the
+descriptor views and stores instead. The recorded runs used the cached compiler
+`.cache/nominal-array-field-view-compiler/fairyc.exe`, with no compiler or SDK changes.
+Actual Linux execution remains deferred to the owner's consolidated batch, so Linux is
+verified by C emission only. The analysis baseline evidence is
+`docs/ops/evidence/token-page-cli-20261005.json`, the evaluation-mode evidence is
+`docs/ops/evidence/token-page-eval-cli-20261005.json`, and the arithmetic extension evidence
+is `docs/ops/evidence/token-page-arithmetic-cli-20261005.json`; each records `.dev.json`
+and `.release.json` raw logs against the final source hashes. There is no PowerShell harness
+and no performance claim. See
 [ADR 0472](../../docs/adr/0472-direct-plain-struct-array-field-views-and-iteration.md).

@@ -15,8 +15,15 @@ fn bool letter(u8 c) { return c >= 65 && c <= 90 || c >= 97 && c <= 122 || c == 
 fn bool digit(u8 c) { return c >= 48 && c <= 57; }
 
 /// 1 identifier, 2 decimal integer, 3 plus, 4 equal, 5 semicolon.
+/// Evaluation only: 6 multiply, 7 opening parenthesis, 8 closing parenthesis.
 /// Errors: 1 invalid ASCII, 2 integer overflow, 3 token limit.
 pub fn Result<usize, u32> scan(ref u8[] input, ref mut TokenPage page) {
+    return scan_mode(input, page, false);
+}
+pub fn Result<usize, u32> scan_eval(ref u8[] input, ref mut TokenPage page) {
+    return scan_mode(input, page, true);
+}
+fn Result<usize, u32> scan_mode(ref u8[] input, ref mut TokenPage page, bool evaluation) {
     page.used = 0;
     var usize index = 0;
     while (index < input.len) {
@@ -39,6 +46,9 @@ pub fn Result<usize, u32> scan(ref u8[] input, ref mut TokenPage page) {
             }
         } else {
             kind = if (c == 43) { 3 } else if (c == 61) { 4 } else if (c == 59) { 5 } else { 0 };
+            if (evaluation && kind == 0) {
+                kind = if (c == 42) { 6 } else if (c == 40) { 7 } else if (c == 41) { 8 } else { 0 };
+            }
             if (kind == 0) { return .err(1); }
             index += 1;
         }

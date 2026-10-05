@@ -14,6 +14,7 @@ USAGE = "usage: token-page-cli [ASCII-source]\n"
 HELP = USAGE + "       token-page-cli --eval <ASCII-source>\n"
 MAX_I64 = (1 << 63) - 1
 LEXEME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*|[0-9]+|[+=;]|[ \t\r\n]+")
+EVAL_LEXEME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*|[0-9]+|[+=;*()]|[ \t\r\n]+")
 
 
 def sha(path):
@@ -30,7 +31,7 @@ def oracle(args):
     if args == ["--help"]:
         return 0, HELP, ""
     tokens, position = [], 0
-    for match in LEXEME.finditer(source):
+    for match in (EVAL_LEXEME if evaluation else LEXEME).finditer(source):
         if match.start() != position:
             return 2, "", "error: token limit (128)\n" if len(tokens) == 128 else "error: invalid ASCII input\n"
         text, position = match.group(), match.end()
@@ -60,34 +61,71 @@ def oracle(args):
 
 
 def evaluation_oracle(tokens):
-    # Python arbitrary-precision values and insertion-ordered bindings are the oracle.
-    remaining = iter(tokens)
-    environment = {}
+    # Recursive grammar oracle, independent of the product's iterative stacks.
+    # Python arbitrary-precision values make each i64 overflow check explicit.
+    cursor, environment = 0, {}
 
     def failure(message):
-        return 2, "", f"error: {message}\n"
+        raise ValueError(message)
 
-    while (name := next(remaining, None)) is not None:
-        if name[0] != "identifier" or (equal := next(remaining, None)) is None or equal[0] != "=":
-            return failure("invalid evaluation syntax")
-        total = 0
-        while True:
-            term = next(remaining, None)
-            if term is None or term[0] not in ("identifier", "number"):
-                return failure("invalid evaluation syntax")
-            if term[0] == "identifier" and term[2] not in environment:
-                return failure("undefined variable")
-            total += term[1] if term[0] == "number" else environment[term[2]]
-            if total > MAX_I64:
-                return failure("evaluation overflow")
-            operator = next(remaining, None)
-            if operator is None or operator[0] not in ("+", ";"):
-                return failure("invalid evaluation syntax")
-            if operator[0] == ";":
-                break
-        if name[2] not in environment and len(environment) == 16:
-            return failure("variable limit (16)")
-        environment[name[2]] = total
+    def peek():
+        return tokens[cursor][0] if cursor < len(tokens) else None
+
+    def take(kind):
+        nonlocal cursor
+        if peek() != kind:
+            failure("invalid evaluation syntax")
+        token = tokens[cursor]
+        cursor += 1
+        return token
+
+    def checked(value):
+        if value > MAX_I64:
+            failure("evaluation overflow")
+        return value
+
+    def primary(depth):
+        if peek() == "number":
+            return take("number")[1]
+        if peek() == "identifier":
+            name = take("identifier")[2]
+            if name not in environment:
+                failure("undefined variable")
+            return environment[name]
+        if peek() == "(":
+            if depth == 16:
+                failure("parenthesis limit (16)")
+            take("(")
+            value = expression(depth + 1)
+            take(")")
+            return value
+        failure("invalid evaluation syntax")
+
+    def product(depth):
+        value = primary(depth)
+        while peek() == "*":
+            take("*")
+            value = checked(value * primary(depth))
+        return value
+
+    def expression(depth):
+        value = product(depth)
+        while peek() == "+":
+            take("+")
+            value = checked(value + product(depth))
+        return value
+
+    try:
+        while cursor < len(tokens):
+            name = take("identifier")[2]
+            take("=")
+            value = expression(0)
+            take(";")
+            if name not in environment and len(environment) == 16:
+                failure("variable limit (16)")
+            environment[name] = value
+    except ValueError as error:
+        return 2, "", f"error: {error}\n"
     return 0, "".join(f"{key}\t{value}\n" for key, value in environment.items()), ""
 
 
@@ -109,7 +147,10 @@ def cases():
         ("input-max", ["a" * 4095]), ("input-overflow", ["a" * 4096]),
         ("UTF8-byte-limit", ["가" * 1366]), ("extra-argument", ["a", "b"]),
         ("extra-argument-long-source", ["a" * 4096, "b"]),
-    ] + evaluation_cases()
+        ("analysis-rejects-multiply", ["x=2*3;"]),
+        ("analysis-rejects-open-parenthesis", ["x=(1);"]),
+        ("analysis-rejects-close-parenthesis", ["x=1);"]),
+    ] + evaluation_cases() + arithmetic_cases()
 
 
 def evaluation_cases():
@@ -158,6 +199,46 @@ def evaluation_cases():
     ]
 
 
+def arithmetic_cases():
+    fixtures = [
+        ("precedence", "a=2+3*4;b=(2+3)*4;"),
+        ("multiple-products", "x=2*3+4*5+6;"),
+        ("left-associated-products", "x=2*3*4;"),
+        ("grouped-products", "x=(2+3)*(4+5);"),
+        ("nested", "x=2*(3+(4*5))+1;"),
+        ("reassignment", "a=2+3*4;b=(a+1)*2;a=(a+b)*2;"),
+        ("whitespace", "x = ( 2 + 3 ) *\r\n 4 ;"),
+        ("zero-left", f"x=0*{MAX_I64};"),
+        ("zero-right", f"x={MAX_I64}*0;"),
+        ("multiply-one", f"x={MAX_I64}*1;"),
+        ("exact-product-max", f"x=7*{MAX_I64 // 7};"),
+        ("near-product-max", "x=3037000499*3037000500;"),
+        ("product-overflow", "x=3037000500*3037000500;"),
+        ("late-product-overflow", f"a=1;b={MAX_I64}*2;"),
+        ("reference-overflow", f"a={MAX_I64};b=a*2;"),
+        ("zero-after-overflow", f"x={MAX_I64}*2*0;"),
+        ("zero-times-overflow-group", f"x=0*({MAX_I64}+1);"),
+        ("precedence-avoids-add-overflow", f"x={MAX_I64}+1*0;"),
+        ("grouped-add-overflow", f"x=({MAX_I64}+1)*0;"),
+        ("depth-limit", "x=" + "(" * 16 + "1" + ")" * 16 + ";"),
+        ("depth-overflow", "x=" + "(" * 17 + "1" + ")" * 17 + ";"),
+        ("depth-reset", "x=" + "+".join("(1)" for _ in range(17)) + ";"),
+        ("stack-pressure", "x=" + "(1+2*" * 16 + "1" + ")" * 16 + ";"),
+        ("multiply-token-limit", "x=" + "*".join("0" for _ in range(63)) + ";"),
+        ("multiply-token-overflow", "x=" + "*".join("0" for _ in range(64)) + ";"),
+        ("missing-close", "x=(1+2;"), ("extra-close", "x=1+2);"),
+        ("empty-group", "x=();"), ("trailing-group-operator", "x=(1+);"),
+        ("adjacent-groups", "x=(1)(2);"), ("implicit-multiply", "x=2(3);"),
+        ("leading-multiply", "x=*1;"), ("double-multiply", "x=1**2;"),
+        ("trailing-multiply", "x=1*;"), ("mixed-operators", "x=1+*2;"),
+        ("group-undefined", "x=(missing+1)*0;"),
+        ("late-syntax", "a=14;b=2*(3+);"),
+        ("late-lexical", "a=14;b=2*(3+4);@"),
+        ("division-rejected", "x=6/2;"), ("subtraction-rejected", "x=6-2;"),
+    ]
+    return [("arithmetic-" + name, ["--eval", source]) for name, source in fixtures]
+
+
 def save(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
@@ -186,7 +267,7 @@ def main():
             raise RuntimeError(row)
         if args[0] == "test":
             report = json.loads(row["stdout"])
-            if report["count"] != 2 or report["passed"] != 2 or report["failed"] != 0:
+            if report["count"] != 3 or report["passed"] != 3 or report["failed"] != 0:
                 raise RuntimeError(row)
     for profile, flags in [("dev", []), ("release", ["--release"])]:
         rows = []
@@ -195,7 +276,7 @@ def main():
             raise RuntimeError(row)
         row = run([compiler, "test", "--json", "--native", *flags, "--locked"], rows, "native source tests")
         report = json.loads(row["stdout"]) if row["exit"] == 0 else {}
-        if row["exit"] or report["count"] != 2 or report["passed"] != 2 or report["failed"] != 0:
+        if row["exit"] or report["count"] != 3 or report["passed"] != 3 or report["failed"] != 0:
             raise RuntimeError(row)
         image = ROOT / "build" / ("token-page-cli.exe" if os.name == "nt" else "token-page-cli")
         image_hash = sha(image)

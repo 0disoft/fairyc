@@ -1,5 +1,6 @@
 module evaluator;
 import tokens as tokens;
+import arithmetic as arithmetic;
 
 pub struct Binding { tokens::Span name; i64 value; }
 pub struct Environment { Binding[16] bindings; usize used; }
@@ -30,8 +31,60 @@ fn usize find(ref u8[] source, tokens::Span name, ref Environment environment) {
     return 16;
 }
 
-/// Consume unrebased scanner tokens. Errors: 8 syntax, 9 undefined name,
-/// 10 checked addition overflow, 11 variable limit. Reset bindings on every call.
+struct Expression { i64 value; usize consumed; }
+fn Result<Expression, u32> expression(ref u8[] source, ref tokens::Token[] stream, ref Environment environment) {
+    var arithmetic::Stack stack = arithmetic::empty();
+    var usize cursor = 0;
+    var usize depth = 0;
+    var bool need_value = true;
+    while (cursor < stream.len) {
+        let tokens::Token token = stream[cursor];
+        if (need_value) {
+            if (token.kind == 7) {
+                if (depth == 16) { return .err(12); }
+                if (!arithmetic::push_operator(ref mut stack, 7)) { return .err(8); }
+                depth += 1;
+                cursor += 1;
+                continue;
+            }
+            var i64 value = 0;
+            if (token.kind == 2) { value = token.value; }
+            else if (token.kind == 1) {
+                let usize slot = find(source, token.position, environment);
+                if (slot == 16) { return .err(9); }
+                value = environment.bindings[slot].value;
+            } else { return .err(8); }
+            if (!arithmetic::push_value(ref mut stack, value)) { return .err(8); }
+            need_value = false;
+        } else if (token.kind == 3 || token.kind == 6) {
+            discard switch(arithmetic::reduce_for(ref mut stack, token.kind)) {
+                case .ok(value): { value } case .err(code): { return .err(code); }
+            };
+            if (!arithmetic::push_operator(ref mut stack, token.kind)) { return .err(8); }
+            need_value = true;
+        } else if (token.kind == 8) {
+            if (depth == 0) { return .err(8); }
+            discard switch(arithmetic::reduce_for(ref mut stack, 0)) {
+                case .ok(value): { value } case .err(code): { return .err(code); }
+            };
+            if (arithmetic::top(ref stack) != 7) { return .err(8); }
+            stack.operator_count -= 1;
+            depth -= 1;
+        } else if (token.kind == 5) {
+            if (depth != 0) { return .err(8); }
+            discard switch(arithmetic::reduce_for(ref mut stack, 0)) {
+                case .ok(value): { value } case .err(code): { return .err(code); }
+            };
+            if (stack.value_count != 1) { return .err(8); }
+            return .ok(Expression { .value = stack.values[0], .consumed = cursor + 1 });
+        } else { return .err(8); }
+        cursor += 1;
+    }
+    return .err(8);
+}
+
+/// Consume unrebased evaluation scanner tokens. Errors: 8 syntax, 9 undefined name,
+/// 10 arithmetic overflow, 11 variable limit, 12 parenthesis limit. Reset on each call.
 pub fn Result<usize, u32> evaluate(ref u8[] source, ref tokens::Token[] stream, ref mut Environment environment) {
     environment.used = 0;
     var usize cursor = 0;
@@ -41,26 +94,11 @@ pub fn Result<usize, u32> evaluate(ref u8[] source, ref tokens::Token[] stream, 
         cursor += 1;
         if (cursor == stream.len || stream[cursor].kind != 4) { return .err(8); }
         cursor += 1;
-        var i64 value = 0;
-        while (true) {
-            if (cursor == stream.len) { return .err(8); }
-            let tokens::Token token = stream[cursor];
-            var i64 part = 0;
-            if (token.kind == 2) { part = token.value; }
-            else if (token.kind == 1) {
-                let usize slot = find(source, token.position, environment);
-                if (slot == 16) { return .err(9); }
-                part = environment.bindings[slot].value;
-            } else { return .err(8); }
-            if (part > 9223372036854775807 - value) { return .err(10); }
-            value += part;
-            cursor += 1;
-            if (cursor == stream.len) { return .err(8); }
-            let u32 next = stream[cursor].kind;
-            cursor += 1;
-            if (next == 5) { break; }
-            if (next != 3) { return .err(8); }
-        }
+        let Expression parsed = switch(expression(source, stream[cursor..], environment)) {
+            case .ok(value): { value } case .err(code): { return .err(code); }
+        };
+        let i64 value = parsed.value;
+        cursor += parsed.consumed;
         // Finish the RHS before publication: self-reference sees the prior value.
         let usize slot = find(source, name, environment);
         if (slot == 16) {

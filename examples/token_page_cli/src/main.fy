@@ -27,6 +27,7 @@ fn i32 error(u32 code) {
         else if (code == 9) { "error: undefined variable\n" }
         else if (code == 10) { "error: evaluation overflow\n" }
         else if (code == 11) { "error: variable limit (16)\n" }
+        else if (code == 12) { "error: parenthesis limit (16)\n" }
         else { "usage: token-page-cli [ASCII-source]\n" };
     discard io::write_stderr(message);
     return 2;
@@ -72,7 +73,7 @@ fn i32 analyze_source(ref u8[] source) {
 @effects(console)
 fn i32 evaluate_source(ref u8[] source) {
     var tokens::TokenPage page = tokens::empty();
-    discard switch(tokens::scan(source, ref mut page)) {
+    discard switch(tokens::scan_eval(source, ref mut page)) {
         case .ok(count): { count }
         case .err(code): { return error(code); }
     };
