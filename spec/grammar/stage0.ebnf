@@ -55,6 +55,13 @@ state_field_decl = "cell" type IDENT ";"
 (* Generic aggregate declarations are retained for specialization preparation,
    but ordinary semantic analysis rejects them until aggregate admission. *)
 struct_decl = "struct" IDENT type_parameters? "{" field_decl* "}" ;
+(* ADR 0468 admits bounded inline scalar array fields on non-repr(C) structs:
+   bool, u8, i32, i64, u32 and usize elements with length 1..=4096. Whole-field
+   reads, copies and replacement reuse the existing array value transport. Nested
+   arrays, arrays of nominal structs, resources, raw pointers, borrows and tagged
+   fields stay closed, and @repr(C) keeps rejecting array fields. Direct
+   array-field element stores and ref field views/subviews remain the separate
+   ADR 0469 unit. This adds no grammar production. *)
 field_decl = "pub"? type IDENT ";" ;
 
 resource_decl = "resource" IDENT type_parameters? "{" field_decl* cleanup_decl? "}" ;

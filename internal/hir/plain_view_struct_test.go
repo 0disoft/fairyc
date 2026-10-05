@@ -19,7 +19,9 @@ func TestPlainViewStructGraph(t *testing.T) {
 		{"indirect-cycle", map[Type][]Type{"Root": {"Child"}, "Child": {"Root"}}, false},
 		{"borrow", map[Type][]Type{"Root": {"Child"}, "Child": {SharedBorrow(TypeI32)}}, false},
 		{"pointer", map[Type][]Type{"Root": {"Child"}, "Child": {RawPointer(TypeI32, true)}}, false},
-		{"array", map[Type][]Type{"Root": {"Child"}, "Child": {FixedArray(TypeI32, 2)}}, false},
+		{"array", map[Type][]Type{"Root": {"Child"}, "Child": {FixedArray(TypeI32, 2)}}, true},
+		{"zero-array", map[Type][]Type{"Root": {FixedArray(TypeI32, 0)}}, false},
+		{"nested-array", map[Type][]Type{"Root": {FixedArray(FixedArray(TypeI32, 2), 2)}}, false},
 		{"option", map[Type][]Type{"Root": {"Child"}, "Child": {Option(TypeI32)}}, false},
 	} {
 		t.Run(item.name, func(t *testing.T) {

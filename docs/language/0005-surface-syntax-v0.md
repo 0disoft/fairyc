@@ -143,6 +143,20 @@
   `E2101`: an owner write or exclusive borrow conflicts with a live shared subview,
   and an exclusive subview conflicts with owner reads and writes and every
   competing borrow. Local or by-value views cannot escape (`E2102`).
+- ADR 0468 admits bounded inline scalar fixed-array fields on non-`@repr(C)`
+  structs: `struct Packet { u8[4] bytes; usize length; }`, with element types
+  `bool`, `u8`, `i32`, `i64`, `u32` and `usize` and length `1..=4096`.
+  Fields receive no implicit initialization, so every struct literal supplies
+  each array field explicitly with a list or repeated initializer. Whole-field
+  reads and copies (`let u8[4] bytes = packet.bytes;`) and replacement through a
+  named mutable owner or `ref mut` owner (`packet.bytes = [8, 9, 10, 11];`,
+  `envelope.packet.bytes = [6; 4];`) reuse the existing array value transport,
+  so by-value structs, arrays of structs and `Option` payloads carry independent
+  copies and the copy cost scales with the array contents. Nested arrays, arrays
+  of nominal structs, resources, raw pointers, borrowed, tagged and array-of-array
+  fields stay closed and `@repr(C)` keeps rejecting array fields. Direct
+  array-field element stores and `ref` field views/subviews are the next unit
+  (ADR 0469) and are not admitted here.
 - Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
   immediately and the retained calls execute LIFO when their block exits normally or through
   `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.
@@ -292,9 +306,10 @@ once and copies that scalar or plain struct into each element; the count is an i
 integer constant in `1..=4096`. Empty and zero-count arrays remain unsupported until zero-size
 representation is defined. See [ADR 0416](../adr/0416-repeated-scalar-array-initialization.md).
 Named mutable arrays support checked whole-element replacement. Arrays can produce
-shared/exclusive typed views; slicing is performed through those views. Array fields,
-nested arrays, resource elements, properties other than `.len`, broad array coercions,
-and foreign signatures remain closed. One direct shared borrow of an admitted `u8[N]` place contextually
+shared/exclusive typed views; slicing is performed through those views. Array fields are limited
+to the bounded scalar array fields admitted by ADR 0468; nested arrays, resource
+elements, properties other than `.len`, broad array coercions, and foreign signatures remain
+closed. One direct shared borrow of an admitted `u8[N]` place contextually
 becomes `ref u8[]` when that view type is already expected, as in
 `let ref u8[] bytes = ref array` or an internal `ref u8[]` call argument. A direct exclusive borrow
 of a mutable admitted `u8[N]` place likewise becomes `ref mut u8[]` only where that exact type is

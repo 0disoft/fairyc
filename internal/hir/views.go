@@ -91,7 +91,15 @@ func SharedStructViewElement(value Type) (Type, bool) {
 }
 
 // PlainViewField admits only language scalar fields with no ownership or loans.
-func PlainViewField(value Type) bool { return FixedArrayScalarElement(value) }
+func PlainViewField(value Type) bool {
+	return FixedArrayScalarElement(value) || ScalarArrayField(value)
+}
+
+// ScalarArrayField is the bounded inline, non-owning array field subset.
+func ScalarArrayField(value Type) bool {
+	element, length, array := FixedArrayParts(value)
+	return array && FixedArrayScalarElement(element) && ExecutableFixedArrayShape(element, length)
+}
 
 // PlainViewStruct validates a nonempty, acyclic graph of structs with scalar
 // leaves. The lookup admits only actual struct definitions. An explicit DFS

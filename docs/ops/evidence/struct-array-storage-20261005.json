@@ -1,0 +1,238 @@
+{
+  "schema": "fairyc.struct-array-storage-evidence/v1",
+  "date": "2026-10-05",
+  "baseRevision": "4a2d5863366a95e2ee24a116f5f21c13917daeda",
+  "compiler": {
+    "path": ".cache\\struct-array-storage-compiler\\fairyc.exe",
+    "sha256": "7ccba58935c850bf557431a53d94d0c50855b93a17ec89df60f2e44dfb33ae66",
+    "identity": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004185058-4a2d5863366a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 4a2d5863366a95e2ee24a116f5f21c13917daeda\nmodified: true\n",
+      "stderr": ""
+    },
+    "build": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        ".cache/struct-array-storage-compiler/fairyc.exe",
+        "./cmd/fairyc"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "sourceManifest": {
+    "path": ".cache\\struct-array-storage-compiler\\source-manifest.json",
+    "sha256": "1520ff5133c5fab861dabe9c03179d5506262efb6b11fa4574c7d001fa57b963",
+    "fileCount": 613,
+    "sourceDigest": "83bf84b0a1744d739fde9d691dbf5e5402891ea25d6e64361b78bf917dc150ad"
+  },
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "sourceFileCount": 8,
+    "sourceFileManifestDigest": "01a68c5f4fbea762c6c30c2f3fef103fa1c29310b9157cecd1d73e6ef65dbc9f",
+    "digestAlgorithm": "sha256(path-tab-fileSHA256-LF)"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "docs/adr/0468-inline-scalar-array-fields.md",
+      "sha256": "4e032a8473d10eb319d8e019a1e6f8de6a17fd65fe2a11e953b3ec1d500e9802"
+    },
+    {
+      "path": "docs/compatibility/versioning-v0.md",
+      "sha256": "203111b3a514633e61ea35eabf722f379f19cdbe0d1cfd32637128fd2683e63b"
+    },
+    {
+      "path": "docs/language/0005-surface-syntax-v0.md",
+      "sha256": "2477a2ba35562807eb80073f1a9ac119cad5234e49e313e9e6283592551ae81e"
+    },
+    {
+      "path": "internal/cbackend/aggregate_types.go",
+      "sha256": "b0b231bb04cdd1962efac68edddfd87c733472ff0c8f2066f6702eaf983ac685"
+    },
+    {
+      "path": "internal/cbackend/arrays.go",
+      "sha256": "c4b336199fb1f4a3dbf6028c94a14a71666237e501e3ec009bcb9d17d1e949cd"
+    },
+    {
+      "path": "internal/cbackend/emit.go",
+      "sha256": "6736d633f4f28b72b9cad5e2a34e68afc50da30647366709446af7ef59e40039"
+    },
+    {
+      "path": "internal/cli/struct_array_storage_test.go",
+      "sha256": "0c37c35263cdb8a8d811a211a96b6015dec55f40cf97c5167a5b8921d57392a5"
+    },
+    {
+      "path": "internal/compiler/struct_array_storage_test.go",
+      "sha256": "607e958fb068a88110faaefd74fdadb3dc17dc4e70cf1f935a1c1a3e34841b3b"
+    },
+    {
+      "path": "internal/compiler/testdata/struct_array_storage.fy",
+      "sha256": "d6093780a202e168c79af08a09cdb1c6863e1e764ec96034f6e87c86731dcb1e"
+    },
+    {
+      "path": "internal/hir/plain_view_struct_test.go",
+      "sha256": "2fc066fd7b1af64eae465c92c3f8de27519492b7433696f29e4d1db85f54a0e2"
+    },
+    {
+      "path": "internal/hir/views.go",
+      "sha256": "84787bfb2d61d81cd7ecfbecaa034a781a0c2516bc5cd3326f711c0bf8765567"
+    },
+    {
+      "path": "internal/interpreter/field_store.go",
+      "sha256": "c6fb96ee7c14ca501d04ae5396921fb907ccd1d0311a33dfcd13071a9f6a637b"
+    },
+    {
+      "path": "internal/mir/field_store.go",
+      "sha256": "23934b82ecf3b354289a90b4be8c19e9e56aecf78046e0f78f75a3b26a6bebc4"
+    },
+    {
+      "path": "internal/mir/plain_struct_field_store.go",
+      "sha256": "9c58bb0934d86ccbd7affdb352a51ea3bea38967fbf7b76a5c208ac6ee49aa49"
+    },
+    {
+      "path": "internal/mir/plain_struct_field_store_test.go",
+      "sha256": "2508afbb5842719e4b5ba302413faa0e96a68cc4ee19fac5dbef9b264c5fc626"
+    },
+    {
+      "path": "internal/mir/verify.go",
+      "sha256": "57c29fabe556f6ec1e2311e27dbc6f11900fdb6b52f1d03122b6f488445f876c"
+    },
+    {
+      "path": "internal/semantic/resource_types.go",
+      "sha256": "592320cbc207f52fcfb8f7ea4a1cdb488354507508360af03622a6f88e525e23"
+    },
+    {
+      "path": "internal/semantic/struct_array_storage_test.go",
+      "sha256": "2ec747618bf504d0ce15a253b2e781943bc8f08132af2a2563224b24355a2c3b"
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "10ce00a5a62fab2c1c22c31cf3987e9bab4be829a1be89daa6023edb733a39c3"
+    },
+    {
+      "path": "spec/grammar/stage0.ebnf",
+      "sha256": "76d96dd7f1d03de9000555b87a16b384a2f20a09c8e97fde438efbd5380ba917"
+    }
+  ],
+  "tests": [
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "-run",
+        "^Test(StructArrayStorage.*|PlainViewStruct.*|VerifyPlainStructFieldStore|StructArray.*|ArraySubviewBorrow.*|.*NestedFieldStore.*|.*PlainStructDeref.*)$",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\struct-array-storage-related-final.jsonl",
+      "sha256": "8103f0eadd99ddd08bd890f8fd5055959f913fe399bb939732d407b21a794783",
+      "passed": 195,
+      "skipped": 0
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "-json",
+        "./internal/cli",
+        "-run",
+        "^TestStructArrayStorage",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache\\struct-array-storage-native-final.jsonl",
+      "sha256": "9af58c99dcc5459448721f7c89c3e67cebb1a08cb9b339939c4ee897a1d2eb66",
+      "passed": 4,
+      "skipped": 0
+    }
+  ],
+  "publicCLI": {
+    "path": "docs/ops/evidence/struct-array-storage-20261005.cli.json",
+    "sha256": "2f8aee883a576a04c2ade611dfc79f7af212b6eec924a30789c522daabeb2f5a",
+    "nativeOutcomes": 2
+  },
+  "native": {
+    "path": "docs/ops/evidence/struct-array-storage-20261005.native.json",
+    "sha256": "8b405e48ada5ceb70499e6d7acd2ab2ad2599aef069e1ad0ad82086ca9373c84",
+    "outcomes": 4
+  },
+  "validation": {
+    "format": "passed",
+    "diffCheck": "passed",
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/hir",
+        "./internal/semantic",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "./internal/cli"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit": 0,
+      "raw": ".cache/struct-array-storage-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cEmission": [
+      "Windows MSVC",
+      "Linux C11"
+    ],
+    "linuxExecution": "deferred by owner for consolidated batch"
+  },
+  "limitations": [
+    "Only bounded scalar arrays length1..4096 in non-repr(C) struct fields",
+    "Copying a struct copies its inline arrays, with cost proportional to contents",
+    "Direct array-field element stores and field views/subviews belong to the next implementation unit"
+  ],
+  "compatibility": {
+    "language": "fairyc-language/20",
+    "runtime": "fairyc-runtime/0",
+    "sdkVersion": "0.0.0-stage0.86",
+    "newSDKAPI": false,
+    "newMIROperation": false,
+    "newRuntimeHelper": false
+  },
+  "scope": {
+    "localOnly": true,
+    "push": false,
+    "release": false,
+    "ciChanges": false
+  }
+}

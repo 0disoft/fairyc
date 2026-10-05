@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.struct-array-storage-cli/v1",
+  "compilerSHA256": "7ccba58935c850bf557431a53d94d0c50855b93a17ec89df60f2e44dfb33ae66",
+  "identity": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004185058-4a2d5863366a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 4a2d5863366a95e2ee24a116f5f21c13917daeda\nmodified: true\n",
+    "stderr": ""
+  },
+  "runs": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261004185058-4a2d5863366a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 4a2d5863366a95e2ee24a116f5f21c13917daeda\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\matrix",
+      "exit": 0,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/struct-array-storage-matrix.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-storage-cli\\images\\matrix-dev.exe",
+      "imageSHA256": "c7256be156a0292a6a6c49f788d4539ceb56ee510ab6b00e6f33020860b4af81"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\matrix",
+      "exit": 0,
+      "stdout": "built: build/struct-array-storage-matrix.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": "",
+      "imagePath": ".cache\\struct-array-storage-cli\\images\\matrix-release.exe",
+      "imageSHA256": "cd8d19e302386bd564b615a00d58817cd6662ef74c80a0060cce6bb426995fbe"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "run",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\matrix",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\immutable",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:73: E1008: assignment target is not mutable [bytes 72..79]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\width",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:103: E1006: incompatible expected and actual types [bytes 102..106]\n  expected-type: main.fy:1:95 [bytes 94..101]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\repr-c",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support fixed-array struct field requires a bounded scalar array in a non-repr(C) struct at main.fy [bytes 30..35]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\owner-loan",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:94: E2101: Access conflicts with an active shared or mutable loan. [bytes 93..100]\n  last-use: main.fy:1:115 [bytes 114..118]\n  loan: main.fy:1:88 [bytes 87..92]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\struct-array-storage-cli\\nominal",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support fixed-array struct field requires a bounded scalar array in a non-repr(C) struct at main.fy [bytes 37..41]\n"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "matrix",
+      "source": "module main;\nstruct Packet { u8[4] bytes; i64[2] totals; bool[2] flags; usize length; }\nstruct Envelope { Packet packet; i32[2] codes; u32[2] words; usize[2] sizes; }\nfn Packet copied(Packet p) {\n    return p;\n}\nfn void replace(ref mut Packet p) { p.bytes = [8, 9, 10, 11]; p.totals = [5000000000, 6]; }\nfn i32 main() {\n    var Packet p = Packet { .bytes = [1, 2, 3, 4], .totals = [4000000000, 5], .flags = [true, false], .length = 4 };\n    let Packet original = p;\n    let Packet returned = copied(p);\n    var Packet copy = p;\n    copy.bytes = [7; 4];\n    assert(p.bytes[0] == 1 && original.bytes[0] == 1 && returned.bytes[0] == 1 && copy.bytes[0] == 7);\n    replace(ref mut p);\n    assert(p.bytes[0] == 8 && p.totals[0] == 5000000000 && original.totals[0] == 4000000000);\n    let u8[4] extracted = p.bytes;\n    p.bytes = [0; 4]; assert(extracted[0] == 8 && p.bytes[0] == 0);\n    var Envelope envelope = Envelope { .packet = p, .codes = [-1, 2], .words = [1, 2], .sizes = [3, 4] };\n    envelope.packet.bytes = [6; 4]; envelope.codes = [8, 9];\n    assert(envelope.packet.bytes[3] == 6 && p.bytes[3] == 0 && envelope.codes[0] == 8);\n    assert(envelope.words[1] == 2 && envelope.sizes[1] == 4);\n    let Option<Packet> saved = .some(original);\n    switch(saved) { case .some(value): { assert(value.bytes[1] == 2); } case .none: { assert(false); } };\n    var Packet[2] packets = [original; 2];\n    packets[0] = p; assert(packets[0].bytes[0] == 0 && packets[1].bytes[0] == 1);\n    assert(p.flags[0] && !p.flags[1] && p.bytes.len == 4);\n    return 0;\n}\n",
+      "sourceSHA256": "d6093780a202e168c79af08a09cdb1c6863e1e764ec96034f6e87c86731dcb1e"
+    },
+    {
+      "name": "immutable",
+      "source": "module main;struct P{u8[2] bytes;}fn i32 main(){let P p=P{.bytes=[1,2]};p.bytes=[3,4];return 0;}",
+      "sourceSHA256": "5e82d57fc3dd0fe957b1f7e4d008663803d4c17f5a2b4d9ac340c8b2275829a5"
+    },
+    {
+      "name": "width",
+      "source": "module main;struct P{u8[2] bytes;}fn i32 main(){var P p=P{.bytes=[1,2]};let i32[2] data=[3,4];p.bytes=data;return 0;}",
+      "sourceSHA256": "614a6b513ee9af5078b96635cf7c62ebd780080e869689da587fe9a138971e90"
+    },
+    {
+      "name": "repr-c",
+      "source": "module main;@repr(C) struct P{u8[2] bytes;}fn i32 main(){return 0;}",
+      "sourceSHA256": "1cb1e02ecb772275a38133e97b3e6a6d14dfecb516ae3ce615d024218bda8a4e"
+    },
+    {
+      "name": "owner-loan",
+      "source": "module main;struct P{u8[2] bytes;}fn i32 main(){var P p=P{.bytes=[1,2]};let ref P view=ref p;p.bytes=[3,4];assert(view.bytes[0]==1);return 0;}",
+      "sourceSHA256": "98de08631b664d0dd7aa730273bb0004ed29c7300057dfca81cffbd6097e7f22"
+    },
+    {
+      "name": "nominal",
+      "source": "module main;struct T{i32 x;}struct P{T[2] values;}fn i32 main(){return 0;}",
+      "sourceSHA256": "50538e583e3bfa5e6cf4d9d2a86c6ca62cd7d2a098b040b4eae21cd21ae80783"
+    }
+  ],
+  "nativeOutcomes": 2
+}

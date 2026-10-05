@@ -251,6 +251,9 @@ func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []Ve
 		}
 		fieldNames := make(map[string]struct{}, len(definition.Fields))
 		for _, field := range definition.Fields {
+			if _, _, array := hir.FixedArrayParts(field.Type); array && (definition.ReprC || !hir.ScalarArrayField(field.Type)) {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "invalid inline array struct field"})
+			}
 			if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct definition has an invalid field"})
 				continue

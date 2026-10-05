@@ -270,8 +270,8 @@ func (a *analyzer) prepareStructTypes() {
 					continue
 				}
 				fieldType := a.canonicalType(module, field.Type)
-				if _, _, array := hir.FixedArrayParts(fieldType); array {
-					a.addUnsupported(module.file.Path, field.Type.Span, "fixed-array struct field")
+				if _, _, array := hir.FixedArrayParts(fieldType); array && (info.reprC || !hir.ScalarArrayField(fieldType)) {
+					a.addUnsupported(module.file.Path, field.Type.Span, "fixed-array struct field requires a bounded scalar array in a non-repr(C) struct")
 				}
 				if fieldType == hir.TypeRegion {
 					a.addDiagnostic("E3103", span(module.file.Path, field.Type.Span), RelatedSpan{

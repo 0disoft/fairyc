@@ -1838,3 +1838,29 @@ Linux actual execution is deferred to the owner's batch, so only C emission is
 verified for Linux. Evidence is recorded at
 `docs/ops/evidence/array-subview-borrow-20261005.json` with `.cli.json` and
 `.native.json` companions.
+
+ADR 0468 admits bounded inline scalar fixed-array fields on non-`@repr(C)` structs
+(`struct Packet { u8[64] bytes; usize length; }`) with the
+`bool`/`u8`/`i32`/`i64`/`u32`/`usize` element set and length `1..=4096`.
+Fields receive no implicit initialization; explicit struct-literal list and repeated
+initializers construct them, and whole-field reads, copies and replacement through a
+named mutable owner or `ref mut` owner reuse the existing array value transport.
+By-value structs, arrays of structs and `Option` payloads copy array contents
+independently, so the copy cost scales with the field contents. `PlainViewField`
+now admits the bounded scalar array field shape, and C emission declares the
+matching nominal array wrappers before their containing struct definitions. Nested arrays, arrays
+of nominal structs, resources, raw pointers, borrows and tagged fields stay closed,
+and `@repr(C)` keeps rejecting array fields. No syntax production, MIR opcode, wire
+field, artifact schema, SDK export, runtime symbol or host flag is added; language
+/20, SDK stage0.86, runtime /0, MIR/wire schemas, public ABI and target maturity
+remain unchanged, and exact compiler executable identity separates cached
+generations. The related suite passes 195 tests with no failures or skips, the Windows
+native matrix produced 4 outcomes across the matrix and past-end cases in both dev and
+release profiles, and the standalone public CLI `check`/`build`/`run` recording
+passed 2 normal outcomes for dev and release with the five rejected sources rejecting
+as expected. Compiler build, `go vet` and formatting pass, and both the Windows MSVC
+and Linux C11 profiles emit; Linux actual execution remains deferred to the owner's
+batch, so only C emission is verified for Linux. Evidence is recorded at
+`docs/ops/evidence/struct-array-storage-20261005.json` with `.cli.json` and
+`.native.json` companions. Direct array-field element stores and `ref` field
+views/subviews remain deferred to ADR 0469.

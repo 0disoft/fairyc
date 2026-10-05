@@ -19,7 +19,7 @@ type arrayCType struct {
 	length  uint64
 }
 
-func prepareScalarArrayTypes(functions []mir.Function) ([]arrayCType, map[hir.Type]int, error) {
+func prepareScalarArrayTypes(functions []mir.Function, structures ...[]structCType) ([]arrayCType, map[hir.Type]int, error) {
 	seen := make(map[hir.Type]arrayCType)
 	var record func(hir.Type) error
 	record = func(value hir.Type) error {
@@ -60,6 +60,15 @@ func prepareScalarArrayTypes(functions []mir.Function) ([]arrayCType, map[hir.Ty
 					return nil, nil, err
 				}
 				if err := record(operation.OwnerType); err != nil {
+					return nil, nil, err
+				}
+			}
+		}
+	}
+	for _, definitions := range structures {
+		for _, structure := range definitions {
+			for _, field := range structure.definition.Fields {
+				if err := record(field.Type); err != nil {
 					return nil, nil, err
 				}
 			}

@@ -35,7 +35,7 @@ func TestVerifyPlainStructFieldStore(t *testing.T) {
 				p.Functions[0].ParameterTypes[0] = hir.SharedBorrow(root)
 				p.Functions[0].Blocks[0].Operations[0].OwnerType = hir.SharedBorrow(root)
 			},
-			"array-leaf":         func(p *Program) { p.StructTypes[2].Fields[0].Type = hir.FixedArray(hir.TypeI32, 2) },
+			"invalid-array-leaf": func(p *Program) { p.StructTypes[2].Fields[0].Type = hir.FixedArray(hir.TypeI32, 0) },
 			"borrow-leaf":        func(p *Program) { p.StructTypes[2].Fields[0].Type = hir.SharedBorrow(hir.TypeI64) },
 			"pointer-leaf":       func(p *Program) { p.StructTypes[2].Fields[0].Type = hir.RawPointer(hir.TypeI64, true) },
 			"cycle":              func(p *Program) { p.StructTypes[2].Fields[0].Type = root },
