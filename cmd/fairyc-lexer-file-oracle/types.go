@@ -115,8 +115,7 @@ func writeTypes(destination string) error {
 		}
 	}
 	for _, s := range []struct{ name, input string }{
-		{"if", "module main; fn i32 f() { if(true) { return 1; } return 0; }"},
-		{"while", "module main; fn void f() { while(false) {} }"},
+		{"switch", "module main; fn i32 f() { return switch(1) { case .none: { 0 } }; }"},
 		{"import", "module main; import std::io as io;"},
 		{"struct", "module main; struct S { i32 x; }"},
 	} {

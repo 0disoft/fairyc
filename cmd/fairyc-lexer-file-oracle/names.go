@@ -108,6 +108,15 @@ func writeNames(destination string) error {
 		{"UTF8-comment", "module main; // 한글\nfn i64 f() { return 4000000000; }"},
 		{"name-only-type-error", "module main; fn i64 f() { return true; }"},
 		{"name-only-immutable-assignment", "module main; fn i64 f() { let i64 x=1; x=2; return x; }"},
+		{"if", "module main; fn i64 f(i64 x) { if(x>0) { let i64 y=x; return y; } else { let i64 y=0; return y; } }"},
+		{"else-if", "module main; fn i64 f(i64 x) { return if(x>0) { x } else if(x<0) { -x } else { 0 }; }"},
+		{"while", "module main; fn i64 f(i64 x) { var i64 y=x; while(y>0) { y-=1; if(y==1) { continue; } if(y==0) { break; } } return y; }"},
+		{"for-scope", "module main; fn i64 f(i64 i) { for(var i64 i=i; i<3; i+=1) { let i64 i=i+1; i; } return i; }"},
+		{"for-assignment", "module main; fn i64 f() { var i64 i=0; for(i=1; i<3; i+=1) { i; } return i; }"},
+		{"for-empty", "module main; fn void f() { for(;;) { break; } }"},
+		{"loop-siblings", "module main; fn i64 f() { for(var i64 i=0; i<1; i+=1) { i; } for(var i64 i=0; i<1; i+=1) { i; } return 0; }"},
+		{"assert-discard-defer", "module main; fn void f(i64 x) { assert(x>0); discard x+1; defer g(x); } fn void g(i64 x) {}"},
+		{"break-name-only", "module main; fn void f() { break; }"},
 		{"source-limit", "module main;" + strings.Repeat(" ", 32768-len("module main;"))},
 	} {
 		if err := add(s.name, s.input, "pass"); err != nil {
@@ -125,6 +134,12 @@ func writeNames(destination string) error {
 		{"duplicate-param", "module main; fn i64 f(i64 x,i64 x) { return x; }", "duplicate"},
 		{"duplicate-local", "module main; fn i64 f() { let i64 x=1; let i64 x=2; return x; }", "duplicate"},
 		{"duplicate-function", "module main; fn i64 f() { return 1; } fn i64 f() { return 2; }", "duplicate"},
+		{"branch-leak", "module main; fn i64 f() { if(true) { let i64 x=1; } return x; }", "unresolved"},
+		{"branch-sibling-leak", "module main; fn i64 f() { if(true) { let i64 x=1; } else { x; } return 0; }", "unresolved"},
+		{"while-leak", "module main; fn i64 f() { while(false) { let i64 x=1; } return x; }", "unresolved"},
+		{"for-initializer-leak", "module main; fn i64 f() { for(var i64 i=0; i<1; i+=1) {} return i; }", "unresolved"},
+		{"for-post-body-local", "module main; fn i64 f() { for(var i64 i=0; i<1; i+=x) { let i64 x=1; } return 0; }", "unresolved"},
+		{"for-self-initializer", "module main; fn i64 f() { for(var i64 i=i; i<1; i+=1) {} return 0; }", "unresolved"},
 		{"late-error", "module main; fn i64 good() { return 1; }\nfn i64 bad() { let i64 total=unknown; return total; }", "unresolved"},
 	} {
 		if err := add(s.name, s.input, s.outcome); err != nil {
@@ -140,8 +155,6 @@ func writeNames(destination string) error {
 		{"unsafe", "module main; unsafe fn i64 f() { return 1; }"},
 		{"borrow-type", "module main; fn i64 f(ref i64 x) { return *x; }"},
 		{"user-type", "module main; fn Missing f() { return 0; }"},
-		{"if", "module main; fn i64 f() { if(true) { return 1; } return 0; }"},
-		{"while", "module main; fn i64 f() { while(false) {} return 0; }"},
 		{"string", "module main; fn i64 f() { \"text\"; return 0; }"},
 		{"float", "module main; fn i64 f() { 1.5; return 0; }"},
 		{"null", "module main; fn i64 f() { null; return 0; }"},

@@ -337,6 +337,29 @@ the example is version 0.5.0, with compiler/SDK inputs unchanged. Linux C emissi
 is checked; Linux native execution remains deferred to the owner's batch.
 Allocation/OS fault injection and performance experiments were not run.
 
+## Control-flow name scopes
+
+Version 0.6.0 extends `--check-names-file` and `--bindings-file` to `if/else`,
+`else if`, `while`, classic `for`, `assert`, `discard`, `defer`, `break` and
+`continue`. Branches and loop bodies have independent lexical scopes. A `for`
+initializer has a separate scope visible to its condition, post clause and body;
+the post clause is resolved before body-local declarations, and the initializer
+binding disappears after the loop. Shadow initializers still see the outer name.
+
+```sh
+lexer-candidate --check-names-file samples/control-names-demo.fy
+lexer-candidate --bindings-file samples/control-names-demo.fy
+```
+
+This is name resolution only: condition/operator types, loop-control validity,
+return coverage and defer-call restrictions belong to the following type-phase
+unit. Existing `--check-types-file` rejects newly admitted control-flow syntax
+until that unit is connected. `switch` patterns require the later enum/Option/
+Result type component. File, name-slot, recursion, first-error and no-partial-
+output policies remain the same. Native `tests/name_control.fy` checks the exact
+use targets across outer parameters, loop initializers, body shadows and branches.
+Evidence: `docs/ops/evidence/control-names-cli-20261005.json`.
+
 ## Recognition and limits
 
 Current recognition: leading UTF-8 BOM, ASCII identifiers and exact current

@@ -106,8 +106,58 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         }
         return ok();
     }
+    if (node.kind == 13) {
+        let Problem condition = expression(parsed,context,node.left,depth + 1,symbols,references);
+        if (condition.code != 0) { return condition; }
+        let syntax::Expression branches = syntax::expression_at(parsed,node.right);
+        let Problem consequent = block(parsed,context,branches.left,depth + 1,symbols,references);
+        if (consequent.code != 0) { return consequent; }
+        return expression(parsed,context,branches.right,depth + 1,symbols,references);
+    }
     if (node.kind == 12) { return block(parsed,context,node.left,depth + 1,symbols,references); }
     return fail(3,node.start,node.end);
+}
+fn Problem statement(ref syntax::Parsed parsed, ref mut Context context, usize id, usize depth, ref mut v::Vec<Symbol> symbols, ref mut v::Vec<Reference> references) {
+    if (id == 0) { return ok(); }
+    let syntax::Statement item = syntax::statement_at(parsed,id);
+    if (depth >= 64) { return fail(4,item.start,item.end); }
+    if (item.kind == 2) {
+        let syntax::Entry entry = syntax::entry_at(parsed,item.entry - 1);
+        if (!scalar_type(parsed,entry.type_root,false)) { return fail(3,entry.type_start,entry.type_end); }
+        let Problem value = expression(parsed,context,item.expression,depth,symbols,references);
+        if (value.code != 0) { return value; }
+        return local(parsed,context,entry,item.entry,symbols);
+    }
+    if (item.kind == 3 || item.kind == 4 || item.kind == 6 || item.kind == 11 || item.kind == 12 || item.kind == 13) {
+        if (item.kind == 4) {
+            if (syntax::expression_at(parsed,item.target).kind != 2) { return fail(3,item.start,item.end); }
+            let Problem target = expression(parsed,context,item.target,depth,symbols,references);
+            if (target.code != 0) { return target; }
+        }
+        return expression(parsed,context,item.expression,depth,symbols,references);
+    }
+    if (item.kind == 9 || item.kind == 10) { return ok(); } // Type phase owns loop validity.
+    if (item.kind == 8) {
+        let Problem condition = expression(parsed,context,item.expression,depth,symbols,references);
+        if (condition.code != 0) { return condition; }
+        return block(parsed,context,item.first,depth,symbols,references);
+    }
+    if (item.kind == 14) {
+        let usize base = context.local_count; let usize parent = context.scope;
+        context.scope = context.next_scope; context.next_scope += 1;
+        let syntax::Statement header = syntax::statement_at(parsed,item.second);
+        let Problem initial = statement(parsed,context,header.first,depth + 1,symbols,references);
+        if (initial.code != 0) { return initial; }
+        let Problem condition = expression(parsed,context,item.expression,depth,symbols,references);
+        if (condition.code != 0) { return condition; }
+        // Resolve post before the body's declarations, matching the reference.
+        let Problem post = statement(parsed,context,header.second,depth + 1,symbols,references);
+        if (post.code != 0) { return post; }
+        let Problem body = block(parsed,context,item.first,depth,symbols,references);
+        context.local_count = base; context.scope = parent;
+        return body;
+    }
+    return fail(3,item.start,item.end);
 }
 fn Problem block(ref syntax::Parsed parsed, ref mut Context context, usize id, usize depth, ref mut v::Vec<Symbol> symbols, ref mut v::Vec<Reference> references) {
     let syntax::Statement body = syntax::statement_at(parsed,id);
@@ -116,23 +166,8 @@ fn Problem block(ref syntax::Parsed parsed, ref mut Context context, usize id, u
     context.scope = context.next_scope; context.next_scope += 1;
     var usize index = 0;
     while (index < syntax::block_statement_count(parsed,id)) {
-        let syntax::Statement item = syntax::statement_at(parsed,syntax::block_statement(parsed,id,index));
-        if (item.kind == 2) {
-            let syntax::Entry entry = syntax::entry_at(parsed,item.entry - 1);
-            if (!scalar_type(parsed,entry.type_root,false)) { return fail(3,entry.type_start,entry.type_end); }
-            let Problem value = expression(parsed,context,item.expression,depth + 1,symbols,references);
-            if (value.code != 0) { return value; }
-            let Problem added = local(parsed,context,entry,item.entry,symbols);
-            if (added.code != 0) { return added; }
-        } else if (item.kind == 3 || item.kind == 4 || item.kind == 6) {
-            if (item.kind == 4) {
-                if (syntax::expression_at(parsed,item.target).kind != 2) { return fail(3,item.start,item.end); }
-                let Problem target = expression(parsed,context,item.target,depth + 1,symbols,references);
-                if (target.code != 0) { return target; }
-            }
-            let Problem value = expression(parsed,context,item.expression,depth + 1,symbols,references);
-            if (value.code != 0) { return value; }
-        } else { return fail(3,item.start,item.end); }
+        let Problem checked = statement(parsed,context,syntax::block_statement(parsed,id,index),depth + 1,symbols,references);
+        if (checked.code != 0) { return checked; }
         index += 1;
     }
     let Problem tail = expression(parsed,context,body.expression,depth + 1,symbols,references);
