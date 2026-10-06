@@ -2116,3 +2116,24 @@ Evidence: `docs/ops/evidence/candidate-result-types-20261007.json`.
 Construction/patterns, owned HIR, MIR/C execution, propagation and must-use
 Flow are subsequent numbered units, not claims of this type-only unit.
 The public language, SDK and runtime are unchanged; Linux runs stay deferred.
+
+## Result constructors and patterns
+
+Version 0.35.0 type-checks contextual `.ok(value)` and `.err(error)` with exactly
+one correctly typed payload. A Result switch requires each variant once, with
+one immutable arm-local binding (or `_`) per variant. Success and error captures
+retain their own types even when the arms share the same binding spelling.
+The subject is checked once. Missing/duplicate variants, malformed constructors,
+wrong payloads, escaping bindings and incompatible continuing-arm types fail
+before HIR publication.
+
+Following the Go reference, no-tail arms ending in direct return or literal
+`assert(false);` contribute no join value; when every Result arm terminates,
+the switch has void type. This does not change the narrower Option arm rules.
+Builtin pattern/capture facts now live in `tagged_check.fy` rather than adding
+another independent switch implementation to the general type checker.
+`verify_results.py --phase patterns` covers every scalar pair, both construction
+alternatives and malformed/terminal-arm controls. `tests/result_patterns.fy`
+checks retained capture types and field targets. Evidence:
+`docs/ops/evidence/candidate-result-patterns-20261007.json`.
+Owned Result HIR, MIR/C execution, `?` and must-use Flow remain later units.

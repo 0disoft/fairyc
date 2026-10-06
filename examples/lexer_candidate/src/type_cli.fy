@@ -31,6 +31,12 @@ pub fn i32 errors(ref typing::Typed typed, ref u8[] path) {
     let state::Problem problem = typing::problem(typed);
     if (problem.code != 0) {
         output::prefix(typing::source_view(typed),path,problem.start);
+        if (problem.code >= 36 && problem.code <= 39) {
+            discard io::write_stderr(if (problem.code == 36) { "Result context required" }
+                else if (problem.code == 37) { "invalid Result construction" }
+                else if (problem.code == 38) { "invalid Result pattern" } else { "non-exhaustive Result switch" });
+            output::range(problem.start,problem.end); return 2;
+        }
         discard io::write_stderr(if (problem.code == 1) { "type mismatch" } else if (problem.code == 2) { "integer literal out of range" }
             else if (problem.code == 3) { "expected bool operand" } else if (problem.code == 4) { "assignment target is immutable" }
             else if (problem.code == 5) { "call argument count mismatch" } else if (problem.code == 6) { "expression is not callable" }

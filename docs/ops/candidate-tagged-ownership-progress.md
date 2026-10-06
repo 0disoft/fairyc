@@ -13,7 +13,7 @@ work remain deferred to the owner's consolidated batch.
 | 3 | Option C construction/copy/call/return/switch native execution | Complete: candidate-option-native-20261007.json; 26 normal native runs and 2 injected inactive-payload traps |
 | 4 | Option if/loop/early-return value and control-flow preservation | Complete: candidate-option-flow-20261007.json; joins, subject-once, early exits and payload traps |
 | 5 | Result success/error type identity and type checking | Complete: candidate-result-types-20261007.json; 36 ordered scalar pairs, argument/return/assignment rejection |
-| 6 | Result construction and exhaustive contextual patterns | Pending |
+| 6 | Result construction and exhaustive contextual patterns | Complete: candidate-result-patterns-20261007.json; contextual constructors, both payload types and terminal arms |
 | 7 | Owned Result HIR, payloads, bindings and source locations | Pending |
 | 8 | Result MIR/C execution for both alternatives | Pending |
 | 9 | Postfix ? position and return-error compatibility checks | Pending |

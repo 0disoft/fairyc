@@ -7,7 +7,7 @@ import scanner as scanner;
 import syntax as syntax;
 import std::bytes as bytes;
 
-fn names::Resolved resolved(ref u8[] source) {
+pub fn names::Resolved resolved(ref u8[] source) {
     var bytes::Buffer input = bytes::empty(); assert(bytes::append(ref mut input,source).is_ok);
     let stream = switch(scanner::collect(input,false,32768,1048576,256,16777216)) {
         case .ok(p): { p } case .err(_): { assert(false); return resolved(b"module main;"); }

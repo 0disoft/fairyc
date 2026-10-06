@@ -1,6 +1,7 @@
 module type_check;
 import array_types as arrays;
 import tagged_types as tagged;
+import tagged_check as tagged_check;
 import enum_types as enums;
 import name_resolution as names;
 import syntax as syntax;
@@ -29,13 +30,16 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if(!bytes::equal(op,b"none")){return error(problem,33,node.start,node.end,expected,0);}
         state::set_flags(tables,id-1,state::small_id(tagged::member(parsed,expected,false)));return recorded(tables,id,value(expected,false));
     }
+    if(node.kind==28 && tagged::result(expected)){return error(problem,37,node.start,node.end,expected,0);}
     if(node.kind==6 && syntax::expression_at(parsed,node.left).kind==28){
-        if(!tagged::option(expected)){return error(problem,32,node.start,node.end,0,expected);}
-        if(!bytes::equal(syntax::expression_text(parsed,node.left),b"some") || syntax::call_argument_count(parsed,id)!=1){return error(problem,33,node.start,node.end,expected,0);}
-        let usize argument=syntax::call_argument(parsed,id,0);let u32 child=tagged::inner(expected);
+        let ref u8[] name=syntax::expression_text(parsed,node.left);
+        if(!tagged::builtin(expected)){return error(problem,if(bytes::equal(name,b"ok") || bytes::equal(name,b"err")){36}else{32},node.start,node.end,0,expected);}
+        let bool first=tagged_check::first_name(expected,name);
+        if((!first && !(tagged::result(expected) && tagged_check::second_name(expected,name))) || syntax::call_argument_count(parsed,id)!=1){return error(problem,if(tagged::result(expected)){37}else{33},node.start,node.end,expected,0);}
+        let usize argument=syntax::call_argument(parsed,id,0);let u32 child=tagged::payload_type(expected,first);
         let state::Value actual=expression(resolved,tables,problem,argument,child,result_type,depth+1,loop_depth);
         if(problem.code!=0){return actual;}if(actual.type!=child){let a=syntax::expression_at(parsed,argument);return error(problem,1,a.start,a.end,child,actual.type);}
-        state::set_expressions(tables,node.left-1,expected);state::set_flags(tables,id-1,state::small_id(tagged::member(parsed,expected,true)));
+        state::set_expressions(tables,node.left-1,expected);state::set_flags(tables,id-1,state::small_id(tagged::member(parsed,expected,first)));
         return recorded(tables,id,value(expected,actual.terminates));
     }
     if (node.kind == 1) {
@@ -60,22 +64,19 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if (node.kind == 15) {
         let state::Value subject=expression(resolved,tables,problem,node.left,0,result_type,depth+1,loop_depth);if(problem.code!=0){return subject;}
-        if(tagged::option(subject.type)){
+        if(tagged::builtin(subject.type)){
             var usize link=node.right;var bool some=false;var bool none=false;var u32 join=expected;var bool known=false;var bool terminates=true;
-            while(link!=0){let usize arm_id=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,arm_id);let pattern=syntax::expression_at(parsed,arm.left);let ref u8[] name=syntax::expression_text(parsed,arm.left);
-                let bool is_some=bytes::equal(name,b"some");let bool is_none=bytes::equal(name,b"none");
-                if(pattern.kind!=16 || pattern.right!=0 || (!is_some && !is_none) || is_some && pattern.left==0 || is_none && pattern.left!=0){return error(problem,34,pattern.start,pattern.end,0,0);}
-                if(is_some && some || is_none && none){return error(problem,26,pattern.start,pattern.end,0,0);}some=some || is_some;none=none || is_none;
-                state::set_flags(tables,arm_id-1,state::small_id(tagged::member(parsed,subject.type,is_some)));
-                if(is_some){let u32 child=tagged::inner(subject.type);state::set_expressions(tables,pattern.left-1,child);state::set_flags(tables,pattern.left-1,state::small_id(tagged::payload(parsed,subject.type)));
-                    var usize sid=1;while(sid<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,sid);if(s.kind==8 && s.declaration==pattern.left){state::set_symbols(tables,sid-1,child);}sid+=1;}
-                }
+            while(link!=0){let usize arm_id=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,arm_id);
+                let pattern=tagged_check::pattern(resolved,tables,arm_id,subject.type);
+                if(pattern.problem.code!=0){let p=pattern.problem;return error(problem,p.code,p.start,p.end,p.expected,p.actual);}
+                if(pattern.first && some || !pattern.first && none){let p=syntax::expression_at(parsed,arm.left);return error(problem,26,p.start,p.end,0,0);}some=some || pattern.first;none=none || !pattern.first;
                 let state::Value actual=block(resolved,tables,problem,arm.right,join,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}
-                if(!control::assert_arm(parsed,arm.right)){if(!known){join=actual.type;known=true;}else if(join!=actual.type){return error(problem,1,arm.start,arm.end,join,actual.type);}}
+                if(!tagged_check::no_value_arm(parsed,arm.right,subject.type)){if(!known){join=actual.type;known=true;}else if(join!=actual.type){return error(problem,1,arm.start,arm.end,join,actual.type);}}
                 state::set_expressions(tables,arm_id-1,actual.type);terminates=terminates && actual.terminates;link=syntax::expression_at(parsed,link).right;
             }
-            if(!some || !none){return error(problem,35,node.start,node.end,0,subject.type);}if(!known){return error(problem,34,node.start,node.end,0,0);}
-            link=node.right;while(link!=0){let usize aid=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,aid);if(control::assert_arm(parsed,arm.right)){state::set_expressions(tables,aid-1,join);}link=syntax::expression_at(parsed,link).right;}if(join==9 || join==10 || join==11){return error(problem,34,node.start,node.end,0,join);}
+            if(!some || !none){return error(problem,if(tagged::result(subject.type)){39}else{35},node.start,node.end,0,subject.type);}
+            if(!known){if(tagged::result(subject.type)){join=7;}else{return error(problem,34,node.start,node.end,0,0);}}
+            link=node.right;while(link!=0){let usize aid=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,aid);if(tagged_check::no_value_arm(parsed,arm.right,subject.type)){state::set_expressions(tables,aid-1,join);}link=syntax::expression_at(parsed,link).right;}if(join==9 || join==10 || join==11){return error(problem,if(tagged::result(subject.type)){38}else{34},node.start,node.end,0,join);}
             return recorded(tables,id,value(join,subject.terminates || terminates));
         }
         if(!enums::valid(subject.type)){return error(problem,24,node.start,node.end,0,subject.type);}
@@ -415,7 +416,7 @@ fn state::Value block(ref names::Resolved resolved, ref mut v::Vec<state::Slot> 
 fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Slot> tables) {
     let ref syntax::Parsed parsed = names::parsed(resolved);
     if (names::symbol_count(resolved) > 1152 || syntax::expression_count(parsed) > 4096 || syntax::entry_count(parsed) > 1024 || syntax::declaration_count(parsed) > 512) { return state::fail(10,0,syntax::source_view(parsed).len,0,0); }
-    if(syntax::field_count(parsed)>1024 || tagged::count(parsed)*3>1024-syntax::field_count(parsed)){return state::fail(10,0,syntax::source_view(parsed).len,0,0);}
+    if(syntax::field_count(parsed)>1024 || tagged::field_slots(parsed)>1024-syntax::field_count(parsed)){return state::fail(10,0,syntax::source_view(parsed).len,0,0);}
     if (!state::initialize(tables,names::symbol_count(resolved),syntax::expression_count(parsed),syntax::entry_count(parsed))) { return state::fail(12,0,syntax::source_view(parsed).len,0,0); }
     let state::Problem enumeration = enums::validate(parsed); if (enumeration.code != 0) { return enumeration; }
     let state::Problem declarations = nominal::validate(parsed); if (declarations.code != 0) { return declarations; }

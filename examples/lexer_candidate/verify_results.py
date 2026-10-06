@@ -51,13 +51,62 @@ for index, success in enumerate(SCALARS):
                                f'fn Result<{success},{failure}> f(Result<{success},{changed_error}> x){{return x;}}',
                                'type mismatch'))
 
+VALUES = dict(zip(SCALARS, ('-2147483648', '-9223372036854775808', '255', '4294967295', '18446744073709551615', 'true')))
+PATTERN_POSITIVES = [
+    (f'construct-{success}-{failure}',
+     f'fn Result<{success},{failure}> make(bool yes){{return if(yes){{.ok({VALUES[success]})}}else{{.err({VALUES[failure]})}};}}'
+     f'fn i32 main(){{return switch(make(true)){{case .ok(n):{{assert(n=={VALUES[success]});0}}case .err(e):{{assert(e=={VALUES[failure]});1}}}};}}')
+    for success in SCALARS for failure in SCALARS
+]
+PATTERN_POSITIVES += [
+    ('error-first', 'fn Result<i64,bool> make(){return .err(true);}fn i32 main(){return switch(make()){case .err(e):{if(e){7}else{0}}case .ok(n):{assert(n==0);1}};}'),
+    ('discard-captures', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(_):{1}case .err(_):{2}};}'),
+    ('shadow-captures', 'fn i32 f(Result<i32,bool> r){let i32 n=4;return switch(r){case .ok(n):{n}case .err(n):{if(n){1}else{0}}}+n;}'),
+    ('return-arm-first', 'fn i32 f(Result<i64,bool> r){return switch(r){case .err(e):{return if(e){2}else{3};}case .ok(n):{assert(n==4);7}};}'),
+    ('return-arm-last', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(_):{return 2;}};}'),
+    ('both-return', 'fn i32 f(Result<i32,bool> r){switch(r){case .ok(n):{return n;}case .err(_):{return 2;}};return 3;}'),
+    ('assert-arm-first', 'fn i32 f(Result<i32,bool> r){let n=switch(r){case .err(_):{assert(false);}case .ok(n):{n}};return n;}'),
+    ('assert-arm-last', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(_):{assert(false);}};}'),
+    ('context-argument', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(e):{if(e){1}else{2}}};}fn i32 main(){return f(.err(true));}'),
+    ('context-assignment', 'fn i32 main(){var Result<i32,bool> r=.ok(3);r=.err(true);return switch(r){case .ok(n):{n}case .err(e):{if(e){1}else{2}}};}'),
+    ('option-coexist', 'fn i32 main(){let Option<i32> o=.some(3);let Result<i32,bool> r=.ok(2);return switch(r){case .ok(n):{n}case .err(_):{0}}+switch(o){case .some(n):{n}case .none:{0}};}'),
+]
+PATTERN_NEGATIVES = [
+    ('ok-no-context', 'fn i32 main(){let r=.ok(1);return 0;}', 'Result context required'),
+    ('err-no-context', 'fn i32 main(){let r=.err(true);return 0;}', 'Result context required'),
+    ('ok-bare', 'fn Result<i32,bool> f(){return .ok;}', 'invalid Result construction'),
+    ('err-bare', 'fn Result<i32,bool> f(){return .err;}', 'invalid Result construction'),
+    ('ok-empty', 'fn Result<i32,bool> f(){return .ok();}', 'invalid Result construction'),
+    ('err-two', 'fn Result<i32,bool> f(){return .err(true,false);}', 'invalid Result construction'),
+    ('wrong-ok', 'fn Result<i32,bool> f(){return .ok(true);}', 'type mismatch'),
+    ('wrong-err', 'fn Result<i32,bool> f(){return .err(1);}', 'type mismatch'),
+    ('ok-overflow', 'fn Result<u8,bool> f(){return .ok(256);}', 'integer literal out of range'),
+    ('err-overflow', 'fn Result<bool,u8> f(){return .err(256);}', 'integer literal out of range'),
+    ('unknown-construction', 'fn Result<i32,bool> f(){return .other(1);}', 'invalid Result construction'),
+    ('some-is-not-ok', 'fn Result<i32,bool> f(){return .some(1);}', 'invalid Result construction'),
+    ('none-is-not-err', 'fn Result<i32,bool> f(){return .none;}', 'invalid Result construction'),
+    ('missing-ok', 'fn i32 f(Result<i32,bool> r){return switch(r){case .err(_):{0}};}', 'non-exhaustive Result switch'),
+    ('missing-err', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}};}', 'non-exhaustive Result switch'),
+    ('duplicate-ok', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .ok(_):{1}case .err(_):{0}};}', 'duplicate switch case'),
+    ('ok-no-binding', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok:{0}case .err(_):{1}};}', 'invalid Result pattern'),
+    ('err-no-binding', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err:{1}};}', 'invalid Result pattern'),
+    ('unknown-pattern', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .bad(_):{1}};}', 'invalid Result pattern'),
+    ('immutable-ok', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n=2;n}case .err(_):{0}};}', 'assignment target is immutable'),
+    ('immutable-err', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(e):{e=false;0}};}', 'assignment target is immutable'),
+    ('arm-leak', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(_):{n}};}', 'unresolved name'),
+    ('capture-escapes', 'fn i32 f(Result<i32,bool> r){discard switch(r){case .ok(n):{n}case .err(_):{0}};return n;}', 'unresolved name'),
+    ('join-mismatch', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(e):{e}};}', 'type mismatch'),
+    ('wrong-return-arm', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(e):{return e;}};}', 'type mismatch'),
+    ('assert-true-is-value-less', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(_):{assert(true);}};}', 'type mismatch'),
+]
+
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--images', nargs='+', required=True)
-    parser.add_argument('--phase', choices=['types'], required=True)
+    parser.add_argument('--phase', choices=['types', 'patterns'], required=True)
     parser.add_argument('--receipt', required=True)
     args = parser.parse_args()
     images = [Path(path).resolve() for path in args.images]
@@ -66,7 +115,9 @@ def main():
     rows, fixtures = [], []
     passed = False
     try:
-        for rejected, cases in ((False, TYPE_POSITIVES), (True, TYPE_NEGATIVES)):
+        positives = TYPE_POSITIVES + (PATTERN_POSITIVES if args.phase == 'patterns' else [])
+        negatives = TYPE_NEGATIVES + (PATTERN_NEGATIVES if args.phase == 'patterns' else [])
+        for rejected, cases in ((False, positives), (True, negatives)):
             for case in cases:
                 name, source = case[:2]
                 expected = 2 if rejected else 0

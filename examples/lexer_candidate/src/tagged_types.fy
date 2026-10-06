@@ -43,4 +43,23 @@ pub fn usize payload(ref syntax::Parsed p,u32 type) {
     assert(option(type) && first(p,type)!=0);var usize offset=syntax::field_count(p);var u32 at=196609;
     while(at<type){if(first(p,at)!=0){offset+=3;}at+=1;}return offset+1;
 }
-pub fn usize member(ref syntax::Parsed p,u32 type,bool some) { return payload(p,type)+if(some){1}else{2}; }
+pub fn bool builtin(u32 type) { return option(type) || result(type); }
+pub fn u32 payload_type(u32 type, bool first_variant) {
+    return if (option(type)) { inner(type) } else if (first_variant) { success(type) } else { failure(type) };
+}
+pub fn usize result_count(ref syntax::Parsed p) {
+    var usize n = 0; var u32 type = 262145;
+    while (type <= 262180) { if (first(p,type) != 0) { n += 1; } type += 1; } return n;
+}
+pub fn usize field_slots(ref syntax::Parsed p) { return count(p) * 3 + result_count(p) * 4; }
+pub fn usize payload_for(ref syntax::Parsed p, u32 type, bool first_variant) {
+    if (option(type)) { return payload(p,type); }
+    assert(result(type) && first(p,type) != 0);
+    var usize offset = syntax::field_count(p) + count(p) * 3; var u32 at = 262145;
+    while (at < type) { if (first(p,at) != 0) { offset += 4; } at += 1; }
+    return offset + if (first_variant) { 1 } else { 3 };
+}
+pub fn usize member(ref syntax::Parsed p,u32 type,bool first_variant) {
+    return if (option(type)) { payload(p,type) + if (first_variant) { 1 } else { 2 } }
+        else { payload_for(p,type,first_variant) + 1 };
+}
