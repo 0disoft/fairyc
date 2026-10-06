@@ -2400,8 +2400,8 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 		if path := l.liveResourcePath(argument); path != nil {
 			value = l.materializeMove(path, value, "call-argument", true)
 		} else if index+1 < len(arguments) && value.Kind == OperandLocal &&
-			(hir.FixedArrayScalarElement(argument.Type) || (fixedArray || l.properties.IsStruct(argument.Type)) && !l.properties.NeedsDrop(argument.Type)) {
-			// Capture copyable by-value arrays and structs as well as scalars before later
+			(hir.FixedArrayScalarElement(argument.Type) || (fixedArray || l.properties.IsStruct(argument.Type) || l.properties.Enum(argument.Type) != nil) && !l.properties.NeedsDrop(argument.Type)) {
+			// Capture copyable by-value arrays, structs and enums as well as scalars before later
 			// arguments can overwrite their source locals or nested fields.
 			if _, sourceLocal := l.bindings[hir.SymbolID(value.Local)]; sourceLocal {
 				value = l.freezeScalarOperand(value, argument.Span)
