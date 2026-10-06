@@ -2,11 +2,12 @@ module tagged_encoding;
 
 // Canonical source-independent nested identities. Thirty payload bits encode
 // prefix nodes: 01 + three leaf bits, 10 Option, 11 Result. Leaf 6 escapes
-// to a nine-bit nominal declaration identity. Leaf 7 and tag 00 are closed.
+// to a nine-bit struct identity; leaf 7 escapes to a nine-bit resource identity.
+// The two categories remain disjoint. Tag 00 stays closed.
 // Scalar Option/Result keep their earlier IDs; the marker is nested-only.
 fn u32 size(u32 raw,usize depth) {
     if(depth>=16){return 0;}let u32 kind=raw&3;
-    if(kind==1){return if((raw>>2&7)<=5){5}else if((raw>>2&7)==6){14}else{0};}
+    if(kind==1){return if((raw>>2&7)<=5){5}else{14};}
     if(kind==2){let u32 n=size(raw>>2,depth+1);return if(n!=0 && n<=28){n+2}else{0};}
     if(kind==3){let u32 left=size(raw>>2,depth+1);if(left==0 || left>23){return 0;}
         let u32 right=size(raw>>(left+2),depth+1);return if(right!=0 && left+right<=28){left+right+2}else{0};}
@@ -24,13 +25,14 @@ pub fn bool result(u32 code){return code>=262145 && code<=262180 || valid(code) 
 fn u32 bits(u32 code) {
     if(code>=1 && code<=6){return (code-1)<<2|1;}
     if(code>=256 && code<=767){return 25|(code-256)<<5;}
+    if(code>=98304 && code<=98815){return 29|(code-98304)<<5;}
     if(code>=196609 && code<=196614){return 2|bits(code-196608)<<2;}
     if(code>=262145 && code<=262180){return 3|bits((code-262145)/6+1)<<2|bits((code-262145)%6+1)<<7;}
     return if(valid(code)){code-1073741824}else{0};
 }
 fn u32 decoded(u32 raw) {
     let u32 n=size(raw,0);assert(n!=0);let u32 cut=raw&((1<<n)-1);let u32 kind=cut&3;
-    if(kind==1){return if((cut>>2&7)==6){256+(cut>>5&511)}else{(cut>>2&7)+1};}
+    if(kind==1){return if((cut>>2&7)==7){98304+(cut>>5&511)}else if((cut>>2&7)==6){256+(cut>>5&511)}else{(cut>>2&7)+1};}
     if(kind==2){let u32 child=decoded(cut>>2);return if(child<=6){196608+child}else{1073741824|cut};}
     let u32 left_size=size(cut>>2,1);let u32 left=decoded(cut>>2);let u32 right=decoded(cut>>(left_size+2));
     return if(left<=6 && right<=6){262144+(left-1)*6+right}else{1073741824|cut};

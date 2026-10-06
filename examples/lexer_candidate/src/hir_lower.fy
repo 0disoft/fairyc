@@ -23,7 +23,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     while (i <= names::symbol_count(resolved)) {
         let names::Symbol s = names::symbol_at(resolved,i);
         let h::Type type = state::type(typing::symbol_type(input,i));
-        if (s.kind < 1 || s.kind > 8 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
+        if (s.kind < 1 || s.kind > 9 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
         var usize target_module = module_index; var usize declaration = s.declaration;
         if (s.kind == 5) { let signature = names::external_signature(resolved,i); target_module = signature.module_index; declaration = signature.declaration; }
         let h::Binding binding = h::Binding { .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner = s.owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
@@ -319,7 +319,7 @@ pub fn Result<h::Program,h::Problem> lower(typing::Typed input, usize module_ind
             let usize body = block(ref input,ref bindings,ref links,ref mut c,ref mut expressions,ref mut statements,ref mut blocks,ref mut edges,ref mut payload,d.body,0);
             c.scope_count -= 1; if (c.problem.code != 0) { return .err(c.problem); }
             if (!v::push<h::Function>(ref mut functions,h::Function { .binding = c.owner, .start = d.start, .end = d.end, .scope, .public = d.public, .body, .parameter_start = start, .parameter_count = count }).is_ok) { return .err(h::Problem { .code = 3, .start = d.start, .end = d.end }); }
-        } else if (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
+        } else if (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
         i += 1;
     }
     let h::Program result = switch(h::assemble_nominal(source,payload,functions,bindings,expressions,statements,blocks,edges,signatures,module_index,nominal)) { case .ok(p): { p } case .err(code): { return .err(code); } };

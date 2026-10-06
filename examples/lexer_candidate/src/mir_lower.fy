@@ -456,6 +456,9 @@ fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v:
 }
 
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
+    // Resource type/ownership HIR precedes moves and cleanup execution. Never
+    // publish resource values through the existing copy-only MIR/C operations.
+    if(shapes::has_resources(h::nominal(ref input))){return .err(m::Problem{.code=4,.start=0,.end=h::source_view(ref input).len});}
     let h::Problem proof = views::check(ref input); if (proof.code != 0) { return .err(m::Problem { .code=proof.code,.start=proof.start,.end=proof.end }); }
     let shapes::Table table = switch(shapes::copy(h::nominal(ref input))) { case .ok(value): { value } case .err(code): { return .err(m::Problem { .code, .start = 0, .end = 0 }); } };
     var state::Context c = state::empty(); var bytes::Buffer source = bytes::empty(); var bytes::Buffer payload = bytes::empty();

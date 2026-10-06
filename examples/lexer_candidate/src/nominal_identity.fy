@@ -1,5 +1,6 @@
 module nominal_identity;
 import syntax as syntax;
+import resource_identity as resources;
 import type_state as state;
 import std::bytes as bytes;
 
@@ -14,5 +15,5 @@ pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
         }
         i += 1;
     }
-    return 0;
+    return resources::named(p,spelling);
 }

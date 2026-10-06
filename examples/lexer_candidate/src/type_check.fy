@@ -65,7 +65,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 2) {
         let usize symbol_id = state::uses(tables,id - 1); assert(symbol_id != 0);
         let names::Symbol symbol = names::symbol_at(resolved,symbol_id);
-        if (symbol.kind == 6 || symbol.kind == 7) { return error(problem,16,node.start,node.end,0,0); }
+        if (symbol.kind == 6 || symbol.kind == 7 || symbol.kind==9) { return error(problem,16,node.start,node.end,0,0); }
         let u32 type = if (symbol.kind == 1 || symbol.kind == 5) { 8 } else { state::symbols(tables,symbol_id - 1) };
         return recorded(tables,id,value(type,false));
     }
@@ -442,7 +442,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
     let state::Problem declarations = nominal::validate(parsed); if (declarations.code != 0) { return declarations; }
     var usize id = 1;
     while (id <= names::symbol_count(resolved)) {
-        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = if (symbol.kind == 5) { names::external_signature(resolved,id).result } else if (symbol.kind == 6) { 255 + state::small_id(symbol.declaration) } else if (symbol.kind == 7) { 131071 + state::small_id(symbol.declaration) } else { nominal::resolve(parsed,symbol.type_root) };
+        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = if (symbol.kind == 5) { names::external_signature(resolved,id).result } else if (symbol.kind == 6) { 255 + state::small_id(symbol.declaration) } else if(symbol.kind==9){98303+state::small_id(symbol.declaration)} else if (symbol.kind == 7) { 131071 + state::small_id(symbol.declaration) } else { nominal::resolve(parsed,symbol.type_root) };
         state::set_symbols(tables,id - 1,type);
         if (symbol.entry != 0) { state::set_entries(tables,symbol.entry - 1,id); }
         id += 1;

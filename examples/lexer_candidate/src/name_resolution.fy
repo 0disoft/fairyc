@@ -233,8 +233,10 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
         if (item.kind != 1 && !(context.modules && item.kind == 2)) {
-            if ((item.kind != 3 && item.kind != 4 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
+            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
+            // Cleanup semantics are a later unit; do not silently omit a body.
+            if(item.kind==6 && (item.cleanup_body==0 || item.cleanup_attribute_count!=0 || syntax::block_statement_count(parsed,item.cleanup_body)!=0 || syntax::statement_at(parsed,item.cleanup_body).expression!=0)){return fail(3,item.start,item.end);}
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
             var usize previous = 0;
             while (previous < context.global_count) {
@@ -243,7 +245,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             }
             if (context.global_count >= 128) { return fail(4,item.name_start,item.name_end); }
             let usize slot = context.global_count;
-            let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else if (item.kind == 11) { 7 } else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
+            let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else if (item.kind == 6) { 9 } else if (item.kind == 11) { 7 } else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
                 .owner = 0, .type_root = item.result_type, .entry = 0, .declaration = index + 1 };
             if (!v::push<Symbol>(symbols,value).is_ok) { return fail(5,item.name_start,item.name_end); }
             let usize symbol = v::len<Symbol>(symbols);

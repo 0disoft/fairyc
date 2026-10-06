@@ -5,6 +5,7 @@ import enum_types as enums;
 import literal_types as literals;
 import syntax as syntax;
 import nominal_identity as identity;
+import resource_identity as resources;
 import type_state as state;
 import std::bytes as bytes;
 
@@ -26,9 +27,11 @@ pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     return if (enumeration != 0) { enumeration } else { named(p,spelling) };
 }
 pub fn usize field(ref syntax::Parsed p, u32 type, ref u8[] name) {
-    if (type < 256 || (type - 256) as usize >= syntax::declaration_count(p)) { return 0; }
-    let syntax::Declaration d = syntax::declaration_at(p,(type - 256) as usize);
-    if (d.kind != 4) { return 0; }
+    if(!identity::valid(type) && !resources::valid(type)){return 0;}
+    let usize index=(type-if(resources::valid(type)){98304}else{256}) as usize;
+    if(index>=syntax::declaration_count(p)){return 0;}
+    let syntax::Declaration d = syntax::declaration_at(p,index);
+    if (d.kind != if(resources::valid(type)){6}else{4}) { return 0; }
     var usize i = d.field_start; while (i < d.field_start + d.field_count) {
         let f = syntax::field_at(p,i);
         if (bytes::equal(syntax::source_view(p)[f.name_start..f.name_end],name)) { return i + 1; } i += 1;
@@ -44,6 +47,7 @@ fn state::Problem visit(ref syntax::Parsed p, usize id, ref mut u8[] colors, usi
     while (i < d.field_start + d.field_count) {
         let f = syntax::field_at(p,i); let u32 type = resolve(p,f.type_root);
         if (type == 0 || type == 7 || type == 11 || literals::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
+        if((d.kind==4 || arrays::valid(type)) && contains_resource(p,type,0)){return state::fail(43,f.start,f.end,0,type);}
         var usize j = d.field_start; while (j < i) {
             let previous = syntax::field_at(p,j);
             if (bytes::equal(syntax::source_view(p)[f.name_start..f.name_end],syntax::source_view(p)[previous.name_start..previous.name_end])) { return state::fail(17,f.name_start,f.name_end,0,0); } j += 1;
@@ -56,7 +60,7 @@ fn state::Problem visit(ref syntax::Parsed p, usize id, ref mut u8[] colors, usi
 }
 fn state::Problem visit_type(ref syntax::Parsed p, u32 type, ref mut u8[] colors, usize depth) {
     if(depth>=64){return state::fail(10,0,syntax::source_view(p).len,0,0);}
-    if(identity::valid(type)){return visit(p,(type-256) as usize,colors,depth);}
+    if(identity::valid(type) || resources::valid(type)){return visit(p,(type-if(resources::valid(type)){98304}else{256}) as usize,colors,depth);}
     if(tagged::option(type)){return visit_type(p,tagged::inner(type),colors,depth+1);}
     if(tagged::result(type)){
         let state::Problem success=visit_type(p,tagged::success(type),colors,depth+1);
@@ -82,7 +86,15 @@ pub fn state::Problem validate(ref syntax::Parsed p) {
     var u8[512] colors = [0;512]; var usize i = 0;
     while (i < syntax::declaration_count(p)) {
         let syntax::Declaration d = syntax::declaration_at(p,i);
-        if (d.kind == 4) { let state::Problem problem = visit(p,i,ref mut colors[..],0); if (problem.code != 0) { return problem; } } i += 1;
+        if (d.kind == 4 || d.kind==6) { let state::Problem problem = visit(p,i,ref mut colors[..],0); if (problem.code != 0) { return problem; } } i += 1;
     }
     return state::ok();
+}
+pub fn bool contains_resource(ref syntax::Parsed p,u32 type,usize depth) {
+    if(depth>=64){return true;}
+    if(resources::valid(type)){return true;}
+    if(tagged::option(type)){return contains_resource(p,tagged::inner(type),depth+1);}
+    if(tagged::result(type)){return contains_resource(p,tagged::success(type),depth+1) || contains_resource(p,tagged::failure(type),depth+1);}
+    if(arrays::owned(type)){return contains_resource(p,arrays::source_element(p,type),depth+1);}
+    return false;
 }

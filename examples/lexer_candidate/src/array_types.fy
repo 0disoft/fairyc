@@ -2,6 +2,7 @@ module array_types;
 import syntax as syntax;
 import type_state as state;
 import nominal_identity as nominal;
+import resource_properties as properties;
 import enum_types as enums;
 import tagged_types as tagged;
 
@@ -57,6 +58,7 @@ pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     return make_source(p,element,count(syntax::type_text(p,node.right)));
 }
 pub fn u32 make_source(ref syntax::Parsed p,u32 child,usize count) {
+    if(properties::needs_drop(child)){return 0;}
     let u32 legacy=make(child,count);if(legacy!=0){return legacy;}
     if(count<1 || count>64){return 0;}var u32 k=16384;
     if(nominal::valid(child)){k=child-256;}

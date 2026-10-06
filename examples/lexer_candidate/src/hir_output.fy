@@ -20,6 +20,7 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
         case .Option { .id = id }: { put(out,b"option:") && bytes::append_u32(out,tagged::inner(id)).is_ok }
         case .Result { .id = id }: { put(out,b"result:") && bytes::append_u32(out,tagged::success(id)).is_ok && put(out,b":") && bytes::append_u32(out,tagged::failure(id)).is_ok }
         case .Enumeration { .id = id }: { put(out,b"enum:") && bytes::append_u32(out,id).is_ok }
+        case .Resource { .id = id }: { put(out,b"resource:") && bytes::append_u32(out,id).is_ok }
         case .Nominal { .id = id }: { put(out,b"nominal:") && bytes::append_u32(out,id).is_ok }
     };
 }
@@ -27,7 +28,7 @@ fn bool binding_kind(ref mut bytes::Buffer out, h::BindingKind kind) {
     return tab(out) && switch(kind) {
         case .Function: { put(out,b"function") } case .Parameter: { put(out,b"parameter") }
         case .Let: { put(out,b"let") } case .Var: { put(out,b"var") } case .External: { put(out,b"external") }
-        case .Struct: { put(out,b"struct") } case .Enum: { put(out,b"enum") }
+        case .Resource: { put(out,b"resource") } case .Struct: { put(out,b"struct") } case .Enum: { put(out,b"enum") }
     };
 }
 fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
@@ -73,18 +74,20 @@ pub fn u32 render(ref h::Program p, ref mut bytes::Buffer out) {
     let ref shapes::Table nominal = h::nominal(p);
     var bool array = false; var usize id = 1; while (id <= h::binding_count(p)) { array = array || arrays::valid(h::type_code(h::binding_at(p,id).type)); id += 1; }
     id = 1; while (id <= h::expression_count(p)) { array = array || arrays::valid(h::type_code(h::expression_at(p,id).type)); id += 1; }
-    if (!put(out,if (shapes::has_payloads(nominal)) { b"fairyc.enum-payload-hir/v1\nP" } else if (shapes::has_enums(nominal)) { b"fairyc.enum-hir/v1\nP" } else if (h::has_views(p)) { b"fairyc.view-hir/v1\nP" } else if (h::has_literals(p)) { b"fairyc.literal-hir/v1\nP" } else if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
+    if (!put(out,if(shapes::has_resources(nominal)){b"fairyc.resource-hir/v1\nP"} else if (shapes::has_payloads(nominal)) { b"fairyc.enum-payload-hir/v1\nP" } else if (shapes::has_enums(nominal)) { b"fairyc.enum-hir/v1\nP" } else if (h::has_views(p)) { b"fairyc.view-hir/v1\nP" } else if (h::has_literals(p)) { b"fairyc.literal-hir/v1\nP" } else if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
     var usize index = 0;
     while (index < shapes::count(nominal)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
         let shapes::Shape shape = shapes::at(nominal,index);
-        if (!put(out,b"N") || !number(out,shape.type as usize) || !number(out,shape.binding) || !number(out,shape.field_start) || !number(out,shape.field_count) || !number(out,if (shape.public) { 1 } else { 0 }) || !put(out,b"\n")) { return 3; } index += 1;
+        if (!put(out,b"N") || !number(out,shape.type as usize) || !number(out,shape.binding) || !number(out,shape.field_start) || !number(out,shape.field_count) || !number(out,if (shape.public) { 1 } else { 0 }) || !put(out,b"\n")) { return 3; }
+        if(shapes::has_resources(nominal) && (!put(out,b"O") || !number(out,shape.type as usize) || !number(out,if(shapes::copyable(nominal,shape.type)){1}else{0}) || !number(out,if(shapes::needs_drop(shape.type)){1}else{0}) || !put(out,b"\n"))){return 3;}
+        index += 1;
     }
     index = 1;
     while (index <= shapes::field_count(nominal)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
         let shapes::Field field = shapes::field_at(nominal,index);
-        if (!put(out,b"D") || !number(out,index) || !number(out,field.owner as usize) || !number(out,field.type as usize) || !number(out,field.start) || !number(out,field.end) || (shapes::has_payloads(nominal) && (!number(out,field.payload_start) || !number(out,field.payload_count))) || !put(out,b"\n")) { return 3; } index += 1;
+        if (!put(out,b"D") || !number(out,index) || !number(out,field.owner as usize) || !number(out,field.type as usize) || !number(out,field.start) || !number(out,field.end) || (shapes::has_payloads(nominal) && (!number(out,field.payload_start) || !number(out,field.payload_count))) || (shapes::has_resources(nominal) && (!number(out,if(shapes::copyable(nominal,field.type)){1}else{0}) || !number(out,if(shapes::field_owns_resource(nominal,index)){1}else{0}))) || !put(out,b"\n")) { return 3; } index += 1;
     }
     index = 0;
     while (index < h::function_count(p)) {

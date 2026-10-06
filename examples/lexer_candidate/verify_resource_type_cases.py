@@ -1,0 +1,38 @@
+"""Source cases for unit 15; Fairy owns identity, layouts and ownership facts."""
+# Field expectations are literal fixture facts: (Copyable, NeedsDrop).
+POSITIVES=[
+    ('empty','resource Empty{cleanup{}}fn i32 main(){return 7;}',{}),
+    ('scalar','resource R{i64 amount;bool ready;cleanup{}}fn R forward(R r){return r;}fn i32 main(){return 7;}',{'amount':(1,0),'ready':(1,0)}),
+    ('distinct','resource A{i32 first;cleanup{}}resource B{i32 second;cleanup{}}fn A left(A a){return a;}fn B right(B b){return b;}fn i32 main(){return 7;}',{'first':(1,0),'second':(1,0)}),
+    ('nested','resource R{i64 amount;cleanup{}}resource Box{R owned;cleanup{}}fn i32 main(){return 7;}',{'amount':(1,0),'owned':(0,1)}),
+    ('option-field','resource R{cleanup{}}resource Box{Option<R> owned;cleanup{}}fn i32 main(){return 7;}',{'owned':(0,1)}),
+    ('result-fields','resource R{cleanup{}}resource Box{Result<R,i32> success;Result<i32,R> failure;cleanup{}}fn i32 main(){return 7;}',{'success':(0,1),'failure':(0,1)}),
+    ('copy-field','struct Pair{i64 value;}resource Box{Pair plain;cleanup{}}fn i32 main(){return 7;}',{'value':(1,0),'plain':(1,0)}),
+    ('array-field','resource R{i32[2] values;cleanup{}}fn i32 main(){return 7;}',{'values':(1,0)}),
+    ('enum-field','enum E{One;Two;}resource R{E kind;cleanup{}}fn i32 main(){return 7;}',{'kind':(1,0)}),
+    ('field-read','resource R{i64 amount;cleanup{}}fn i64 inspect(R r){return r.amount;}fn i32 main(){return 7;}',{'amount':(1,0)}),
+    ('forward-declaration','resource Outer{Inner owned;cleanup{}}resource Inner{cleanup{}}fn i32 main(){return 7;}',{'owned':(0,1)}),
+]
+NEGATIVES=[
+    ('missing-cleanup','resource Empty{}fn i32 main(){return 7;}','unsupported'),
+    ('wrong-resource-return','resource A{i32 n;cleanup{}}resource B{i32 n;cleanup{}}fn A wrong(B x){return x;}','type mismatch'),
+    ('wrong-resource-argument','resource A{cleanup{}}resource B{cleanup{}}fn void take(A x){}fn void wrong(B x){take(x);}','type mismatch'),
+    ('resource-struct-identity','struct S{i32 n;}resource R{i32 n;cleanup{}}fn S wrong(R x){return x;}','type mismatch'),
+    ('inert-direct','resource R{cleanup{}}struct Bad{R owned;}fn i32 main(){return 0;}','resource-bearing inert struct'),
+    ('inert-option','resource R{cleanup{}}struct Bad{Option<R> owned;}fn i32 main(){return 0;}','resource-bearing inert struct'),
+    ('inert-result','resource R{cleanup{}}struct Bad{Result<i32,R> owned;}fn i32 main(){return 0;}','resource-bearing inert struct'),
+    ('duplicate-field','resource R{i32 n;i64 n;cleanup{}}fn i32 main(){return 0;}','duplicate field'),
+    ('missing-field-type','resource R{Unknown n;cleanup{}}fn i32 main(){return 0;}','invalid nominal type'),
+    ('safe-borrow-field','resource R{ref u8[] bytes;cleanup{}}fn i32 main(){return 0;}','invalid nominal type'),
+    ('direct-cycle','resource R{R next;cleanup{}}fn i32 main(){return 0;}','recursive value type'),
+    ('tagged-cycle','resource R{Option<R> next;cleanup{}}fn i32 main(){return 0;}','recursive value type'),
+    ('mutual-cycle','resource A{B next;cleanup{}}resource B{A next;cleanup{}}fn i32 main(){return 0;}','recursive value type'),
+    ('resource-array','resource R{cleanup{}}fn i32 main(){let R[1] a=[0];return 0;}','unsupported'),
+    ('tagged-resource-array','resource R{cleanup{}}fn i32 main(){let Option<R>[1] a=[.none];return 0;}','unsupported'),
+    ('inferred-resource-array','resource R{cleanup{}}fn i32 wrong(R r){let a=[r];return 0;}','type mismatch'),
+    ('inferred-tagged-resource-array','resource R{cleanup{}}fn i32 wrong(Option<R> r){let a=[r];return 0;}','type mismatch'),
+    ('nonempty-cleanup','resource R{cleanup{assert(true);}}fn i32 main(){return 0;}','unsupported'),
+    ('abilities-later','@abilities(drop)resource R{cleanup{}}fn i32 main(){return 0;}','unsupported'),
+    ('construction-later','resource R{i32 n;cleanup{}}fn i32 main(){let R r=R{.n=1};return 0;}','invalid nominal type'),
+    ('unknown-field','resource R{i32 n;cleanup{}}fn i32 wrong(R x){return x.other;}','unknown field'),
+]

@@ -16,11 +16,11 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
     var usize index = 0;
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration d = syntax::declaration_at(parsed,index);
-        if (d.kind == 4 || d.kind == 11) {
+        if (d.kind == 4 || d.kind == 6 || d.kind == 11) {
             var usize binding = 0; var usize id = 1;
             while (id <= names::symbol_count(resolved)) {
                 let names::Symbol s = names::symbol_at(resolved,id);
-                if ((s.kind == 6 || s.kind == 7) && s.declaration == index + 1) { binding = id; } id += 1;
+                if ((s.kind == 6 || s.kind == 7 || s.kind==9) && s.declaration == index + 1) { binding = id; } id += 1;
             }
             if (binding == 0 || d.field_start != v::len<shapes::Field>(ref fields)) { return .err(4); }
             let u32 owner = typing::symbol_type(input,binding);

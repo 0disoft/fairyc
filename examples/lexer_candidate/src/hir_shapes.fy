@@ -4,6 +4,8 @@ import enum_types as enums;
 import tagged_types as tagged;
 import literal_types as literals;
 import nominal_identity as nominal;
+import resource_identity as resources;
+import resource_properties as properties;
 import std::vec as v;
 
 // Source-independent nominal layout facts. Field IDs are one-based; shape type
@@ -17,6 +19,13 @@ pub fn bool has_enums(ref Table p) { var usize i=0;while(i<count(p)){if(enums::v
 pub fn bool has_payloads(ref Table p) { var usize i=1;while(i<=field_count(p)){if(field_at(p,i).payload_count!=0){return true;}i+=1;}return false; }
 pub fn bool has_options(ref Table p) { var usize i=0;while(i<count(p)){if(tagged::option(at(p,i).type)){return true;}i+=1;}return false; }
 pub fn bool has_results(ref Table p) { var usize i=0;while(i<count(p)){if(tagged::result(at(p,i).type)){return true;}i+=1;}return false; }
+pub fn bool has_resources(ref Table p) { var usize i=0;while(i<count(p)){if(resources::valid(at(p,i).type)){return true;}i+=1;}return false; }
+// Properties are derived from canonical category/active-payload layouts; they
+// cannot be forged as caller-supplied Copyable or NeedsDrop flags. Inert structs
+// and arrays are separately verified not to contain resource-bearing fields.
+pub fn bool needs_drop(u32 type) { return properties::needs_drop(type); }
+pub fn bool copyable(ref Table p,u32 type) { return valid_type(p,type,false) && type!=11 && !needs_drop(type); }
+pub fn bool field_owns_resource(ref Table p,usize field) { return needs_drop(field_at(p,field).type); }
 pub fn usize member_count(ref Table p,u32 type) { let s=at(p,find(p,type)-1);var usize n=0;var usize i=0;while(i<s.field_count){if(field_at(p,s.field_start+i+1).type==0){n+=1;}i+=1;}return n; }
 pub fn usize member_at(ref Table p,u32 type,usize tag) {
     let usize found=find(p,type);if(found==0){return 0;}let s=at(p,found-1);var usize i=0;var usize ordinal=0;
@@ -38,7 +47,7 @@ pub fn u32 array_element(ref Table p,u32 type) {
     let usize id=find(p,type);return if(id==0){0}else{field_at(p,at(p,id-1).field_start+1).type};
 }
 pub fn bool has_owned_arrays(ref Table p) { var usize i=0;while(i<count(p)){if(arrays::owned(at(p,i).type)){return true;}i+=1;}return false; }
-pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || enums::valid(type)) && find(p,type) != 0); }
+pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
 fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     if (colors[i] == 2) { return true; } if (colors[i] == 1 || depth >= 64) { return false; }
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;
@@ -55,7 +64,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
     var usize offset = 0; var usize i = 0;
     while (i < count(p)) {
         let Shape s = at(p,i);
-        if (!nominal::valid(s.type) && !enums::valid(s.type) && !arrays::owned(s.type) || (!tagged::builtin(s.type) && !arrays::owned(s.type) && s.binding == 0) || s.binding > bindings || s.field_start != offset || s.field_count > field_count(p) - offset) { return false; }
+        if (!nominal::valid(s.type) && !resources::valid(s.type) && !enums::valid(s.type) && !arrays::owned(s.type) || (!tagged::builtin(s.type) && !arrays::owned(s.type) && s.binding == 0) || s.binding > bindings || s.field_start != offset || s.field_count > field_count(p) - offset) { return false; }
         if(arrays::owned(s.type)){
             if(s.binding!=0 || s.public || s.field_count!=1){return false;}
             let u32 child=field_at(p,offset+1).type;let u32 encoded=arrays::encoded_element(s.type);let u32 key=arrays::key(s.type);
@@ -82,7 +91,8 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
                     if(j>f.payload_count && field_at(p,offset+j-f.payload_count).type!=0){return false;}
                 }else if(f.payload_count!=0 || f.payload_start!=0 || j+1==s.field_count){return false;}
             }else if(f.payload_count!=0 || f.payload_start!=0){return false;}
-            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (tagged::builtin(f.type) || nominal::valid(f.type)) && valid_type(p,f.type,false))}else{literals::valid(f.type) || f.type==11 || !valid_type(p,f.type,false)})) { return false; } j += 1;
+            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (tagged::builtin(f.type) || nominal::valid(f.type) || resources::valid(f.type)) && valid_type(p,f.type,false))}else{literals::valid(f.type) || f.type==11 || !valid_type(p,f.type,false)})) { return false; }
+            if(!resources::valid(s.type) && !tagged::builtin(s.type) && needs_drop(f.type)){return false;}j += 1;
         }
         offset += s.field_count; i += 1;
     }

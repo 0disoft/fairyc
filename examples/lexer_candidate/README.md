@@ -2532,3 +2532,31 @@ Builds, API regressions, raw commands, source/SDK/compiler and EXE hashes are in
 The preceding Go tagged-array subset limitations remain separately recorded.
 This completes unit 14 after its execution evidence passes; resource identity and
 ownership are units 15..20. Linux, performance and stage1/stage2 remain deferred.
+
+## Resource type identity and owned HIR
+
+Version 0.46.0 completes unit 15. Resource declaration identities use the disjoint
+98304..98815 range; tagged payload encoding preserves their category separately
+from inert structs. Owned HIR retains resource bindings and field layouts after
+the parsed source owner is removed. Copyability, drop requirements and field
+ownership follow potentially active Option/Result payloads. Inert structs and
+arrays cannot hide resource ownership; missing children, forged ownership and
+nonfinite by-value layouts reject.
+
+This unit requires an explicit empty cleanup block. Missing/nonempty cleanup,
+abilities and resource construction remain closed. Both ordinary lowering and
+the MIR assembly API reject resource tables before the copy-only backend can
+publish them. Native API tests execute compiler logic, not resource programs.
+Construction HIR, moves and lifetime execution follow in units 16..30.
+
+The maintained `verify_resource_types.py` observes 11 positive and 21 negative
+fixtures in dev and release: 256 CLI observations. Five native compiler API tests
+pass in each profile, and a focused prior array regression adds 57 CLI
+observations and 10 generated native executions. Source, lock/SDK, bootstrap and
+image digests plus raw commands are recorded in
+`docs/ops/evidence/candidate-resource-types-20261007.json`.
+Twenty-seven Go reference observations retain the cycle-acceptance difference
+and fixed-array resource-field subset limitation separately. The final receipt
+uses the current required-cleanup fixtures, replacing an earlier stale receipt
+that included implicit cleanup. Linux, performance and stage1/stage2 remain
+deferred.
