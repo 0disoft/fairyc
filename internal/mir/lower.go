@@ -1544,10 +1544,10 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 	if l.blockTerminated(l.current) {
 		return Operand{}, nil
 	}
-	if kind == OperationViewElementBorrow {
-		saved := l.newTemporary()
-		l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[0].Span, DestinationLocal: saved, Operands: []Operand{receiver}})
-		receiver = Operand{Kind: OperandLocal, Local: saved}
+	// Select the descriptor before index-side effects can reassign its binding.
+	// This copies the descriptor, not the underlying borrowed storage.
+	if kind == OperationViewElementBorrow || receiver.Kind == OperandLocal {
+		receiver = l.freezeScalarOperand(receiver, expression.Children[0].Span)
 	}
 	index, err := l.lowerExpression(&expression.Children[1])
 	if err != nil {
@@ -1609,6 +1609,10 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 	if l.blockTerminated(l.current) {
 		return Operand{}, nil
 	}
+	// Bounds may reassign a descriptor binding; keep the receiver selected first.
+	if receiver.Kind == OperandLocal {
+		receiver = l.freezeScalarOperand(receiver, expression.Children[0].Span)
+	}
 	start := Operand{Kind: OperandUSize, U64: 0}
 	if expression.Children[1].Kind == "omitted-range-bound" {
 		if expression.Children[1].Operator != "start" {
@@ -1621,6 +1625,9 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 		}
 		if l.blockTerminated(l.current) {
 			return Operand{}, nil
+		}
+		if start.Kind == OperandLocal {
+			start = l.freezeScalarOperand(start, expression.Children[1].Span)
 		}
 	}
 	var end Operand
