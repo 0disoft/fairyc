@@ -110,11 +110,12 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         if (h::operator_code(operator) == h::operator_code(.None)) { return state::fail(c,4,node.start,node.end); }
         e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
         if (node.kind == 5) { e.right = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.right,depth + 1); }
-    } else if (node.kind == 6 && tagged::option(h::type_code(type)) && syntax::expression_at(parsed,node.left).kind==28) {
+    } else if (node.kind == 6 && tagged::builtin(h::type_code(type)) && syntax::expression_at(parsed,node.left).kind==28) {
         kind=.Variant;e.binding=typing::field_target(input,id);e.edge_count=1;e.edge_start=state::reserve_edges(edges,1,c);
         let usize arg=syntax::call_argument(parsed,id,0);let a=syntax::expression_at(parsed,arg);
         let usize value=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,arg,depth+1);
-        let h::Expression initializer=h::Expression{.kind=.Initializer,.type=state::type(typing::expression_type(input,arg)),.operator=.None,.start=a.start,.end=a.end,.left=value,.right=0,.alternative=0,.block=0,.binding=tagged::payload(parsed,h::type_code(type)),.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false};
+        let bool first=typing::field_target(input,id)==tagged::member(parsed,h::type_code(type),true);
+        let h::Expression initializer=h::Expression{.kind=.Initializer,.type=state::type(typing::expression_type(input,arg)),.operator=.None,.start=a.start,.end=a.end,.left=value,.right=0,.alternative=0,.block=0,.binding=tagged::payload_for(parsed,h::type_code(type),first),.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false};
         let usize child=state::push_expression(expressions,initializer,c);if(child==0){return 0;}state::set_edge(edges,e.edge_start,child);
     } else if (node.kind == 6) {
         kind = .Call; e.binding = state::use(links,node.left);

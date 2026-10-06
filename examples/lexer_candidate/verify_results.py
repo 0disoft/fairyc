@@ -106,7 +106,7 @@ def sha(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--images', nargs='+', required=True)
-    parser.add_argument('--phase', choices=['types', 'patterns'], required=True)
+    parser.add_argument('--phase', choices=['types', 'patterns', 'hir'], required=True)
     parser.add_argument('--receipt', required=True)
     args = parser.parse_args()
     images = [Path(path).resolve() for path in args.images]
@@ -115,8 +115,9 @@ def main():
     rows, fixtures = [], []
     passed = False
     try:
-        positives = TYPE_POSITIVES + (PATTERN_POSITIVES if args.phase == 'patterns' else [])
-        negatives = TYPE_NEGATIVES + (PATTERN_NEGATIVES if args.phase == 'patterns' else [])
+        positives = TYPE_POSITIVES + (PATTERN_POSITIVES if args.phase != 'types' else [])
+        negatives = TYPE_NEGATIVES + (PATTERN_NEGATIVES if args.phase != 'types' else [])
+        modes = ['--check-types-file'] + (['--hir-file'] if args.phase == 'hir' else [])
         for rejected, cases in ((False, positives), (True, negatives)):
             for case in cases:
                 name, source = case[:2]
@@ -126,22 +127,25 @@ def main():
                 path.write_bytes(data)
                 digest = sha(path)
                 fixtures.append(dict(name=name, inputHex=data.hex(), sha256=digest, exit=expected))
-                outputs = []
-                for image in images:
-                    argv = [str(image), '--check-types-file', str(path)]
-                    p = subprocess.run(argv, cwd=ROOT, capture_output=True, encoding='utf-8', timeout=30)
-                    row = dict(argv=argv, cwd=str(ROOT), exit=p.returncode, stdout=p.stdout, stderr=p.stderr)
-                    rows.append(row)
-                    assert p.returncode == expected, row
-                    if rejected:
-                        assert not p.stdout and p.stderr, row
-                        if case[2]:
-                            assert case[2] in p.stderr, row
-                    else:
-                        assert p.stdout == 'types ok\n' and not p.stderr, row
-                    assert sha(path) == digest
-                    outputs.append((p.returncode, p.stdout, p.stderr))
-                assert len(set(outputs)) == 1
+                for mode in modes:
+                    outputs = []
+                    for image in images:
+                        argv = [str(image), mode, str(path)]
+                        p = subprocess.run(argv, cwd=ROOT, capture_output=True, encoding='utf-8', timeout=30)
+                        row = dict(argv=argv, cwd=str(ROOT), exit=p.returncode, stdout=p.stdout, stderr=p.stderr)
+                        rows.append(row)
+                        assert p.returncode == expected, row
+                        if rejected:
+                            assert not p.stdout and p.stderr, row
+                            if case[2]:
+                                assert case[2] in p.stderr, row
+                        elif mode == '--hir-file':
+                            assert p.stdout.startswith('fairyc.enum-payload-hir/v1\n') and 'result:' in p.stdout and not p.stderr, row
+                        else:
+                            assert p.stdout == 'types ok\n' and not p.stderr, row
+                        assert sha(path) == digest
+                        outputs.append((p.returncode, p.stdout, p.stderr))
+                    assert len(set(outputs)) == 1
         passed = True
     finally:
         report = dict(schema='fairyc.result-candidate-verification/v1', phase=args.phase, passed=passed,

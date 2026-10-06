@@ -42,5 +42,16 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
                 || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=0,.start=node.start,.end=node.end,.payload_start=0,.payload_count=0}).is_ok){return .err(3);}
         }type+=1;
     }
+    type=262145;
+    while(type<=262180){let usize root=tagged::first(parsed,type);
+        if(root!=0){let node=syntax::type_at(parsed,root);let usize start=v::len<shapes::Field>(ref fields);
+            if(start>1020 || v::len<shapes::Shape>(ref records)>=512){return .err(2);}
+            if(!v::push<shapes::Shape>(ref mut records,shapes::Shape{.type,.binding=0,.field_start=start,.field_count=4,.public=false}).is_ok
+                || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=tagged::success(type),.start=node.start,.end=node.end,.payload_start=0,.payload_count=0}).is_ok
+                || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=0,.start=node.start,.end=node.end,.payload_start=start,.payload_count=1}).is_ok
+                || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=tagged::failure(type),.start=node.start,.end=node.end,.payload_start=0,.payload_count=0}).is_ok
+                || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=0,.start=node.start,.end=node.end,.payload_start=start+2,.payload_count=1}).is_ok){return .err(3);}
+        }type+=1;
+    }
     return .ok(shapes::assemble(records,fields));
 }

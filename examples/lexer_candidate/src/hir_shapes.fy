@@ -15,6 +15,7 @@ pub fn usize count(ref Table p) { return v::len<Shape>(ref p.shapes); }
 pub fn bool has_enums(ref Table p) { var usize i=0;while(i<count(p)){if(enums::valid(at(p,i).type)){return true;}i+=1;}return false; }
 pub fn bool has_payloads(ref Table p) { var usize i=1;while(i<=field_count(p)){if(field_at(p,i).payload_count!=0){return true;}i+=1;}return false; }
 pub fn bool has_options(ref Table p) { var usize i=0;while(i<count(p)){if(tagged::option(at(p,i).type)){return true;}i+=1;}return false; }
+pub fn bool has_results(ref Table p) { var usize i=0;while(i<count(p)){if(tagged::result(at(p,i).type)){return true;}i+=1;}return false; }
 pub fn usize member_count(ref Table p,u32 type) { let s=at(p,find(p,type)-1);var usize n=0;var usize i=0;while(i<s.field_count){if(field_at(p,s.field_start+i+1).type==0){n+=1;}i+=1;}return n; }
 pub fn usize member_at(ref Table p,u32 type,usize tag) {
     let usize found=find(p,type);if(found==0){return 0;}let s=at(p,found-1);var usize i=0;var usize ordinal=0;
@@ -48,11 +49,16 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
     var usize offset = 0; var usize i = 0;
     while (i < count(p)) {
         let Shape s = at(p,i);
-        if (!(s.type >= 256 && s.type <= 767) && !enums::valid(s.type) || (!tagged::option(s.type) && s.binding == 0) || s.binding > bindings || s.field_start != offset || s.field_count > field_count(p) - offset) { return false; }
+        if (!(s.type >= 256 && s.type <= 767) && !enums::valid(s.type) || (!tagged::builtin(s.type) && s.binding == 0) || s.binding > bindings || s.field_start != offset || s.field_count > field_count(p) - offset) { return false; }
         if(tagged::option(s.type) && (s.binding!=0 || s.public || s.field_count!=3)){return false;}
         if(tagged::option(s.type)){
             let a=field_at(p,offset+1);let b=field_at(p,offset+2);let c=field_at(p,offset+3);
             if(a.type!=tagged::inner(s.type) || b.type!=0 || b.payload_start!=offset || b.payload_count!=1 || c.type!=0 || c.payload_count!=0){return false;}
+        }
+        if(tagged::result(s.type)){
+            if(s.binding!=0 || s.public || s.field_count!=4){return false;}
+            let a=field_at(p,offset+1);let b=field_at(p,offset+2);let c=field_at(p,offset+3);let d=field_at(p,offset+4);
+            if(a.type!=tagged::success(s.type) || c.type!=tagged::failure(s.type) || b.type!=0 || b.payload_start!=offset || b.payload_count!=1 || d.type!=0 || d.payload_start!=offset+2 || d.payload_count!=1){return false;}
         }
         if(enums::valid(s.type) && (member_count(p,s.type)==0 || member_count(p,s.type)>128)){return false;}
         var usize j = 0; while (j < i) { if (at(p,j).type == s.type || s.binding!=0 && at(p,j).binding == s.binding) { return false; } j += 1; }

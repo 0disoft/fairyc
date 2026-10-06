@@ -3,6 +3,7 @@ import hir_model as h;
 import hir_shapes as shapes;
 import array_types as arrays;
 import literal_types as literals;
+import tagged_types as tagged;
 import std::bytes as bytes;
 
 fn bool put(ref mut bytes::Buffer out, ref u8[] text) { return bytes::append(out,text).is_ok; }
@@ -17,6 +18,7 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
         case .Text: { put(out,b"ref-str") } case .Bytes: { put(out,b"ref-u8-slice") } case .MutableBytes: { put(out,b"ref-mut-u8-slice") }
         case .Array { .id = id }: { put(out,b"array:") && bytes::append_u32(out,id).is_ok }
         case .Option { .id = id }: { put(out,b"option:") && bytes::append_u32(out,id-196608).is_ok }
+        case .Result { .id = id }: { put(out,b"result:") && bytes::append_u32(out,tagged::success(id)).is_ok && put(out,b":") && bytes::append_u32(out,tagged::failure(id)).is_ok }
         case .Enumeration { .id = id }: { put(out,b"enum:") && bytes::append_u32(out,id).is_ok }
         case .Nominal { .id = id }: { put(out,b"nominal:") && bytes::append_u32(out,id).is_ok }
     };

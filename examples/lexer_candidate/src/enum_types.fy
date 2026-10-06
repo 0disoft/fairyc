@@ -5,7 +5,7 @@ import type_state as state;
 import std::bytes as bytes;
 
 // Private declaration IDs use a disjoint range; never an integer source type.
-pub fn bool valid(u32 type) { return type >= 131072 && type <= 131583 || tagged::option(type); }
+pub fn bool valid(u32 type) { return type >= 131072 && type <= 131583 || tagged::builtin(type); }
 pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
     var usize i=0; while(i<syntax::declaration_count(p)) {
         let d=syntax::declaration_at(p,i);

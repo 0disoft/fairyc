@@ -2137,3 +2137,28 @@ alternatives and malformed/terminal-arm controls. `tests/result_patterns.fy`
 checks retained capture types and field targets. Evidence:
 `docs/ops/evidence/candidate-result-patterns-20261007.json`.
 Owned Result HIR, MIR/C execution, `?` and must-use Flow remain later units.
+
+## Owned scalar Result HIR
+
+Version 0.36.0 retains a distinct Result type category, canonical success/error
+layout, construction operands, arm-local captures and exact source byte spans.
+Each used ordered pair owns one synthetic four-field shape: success payload,
+ok member, error payload and err member. Repeated spellings share the shape;
+its declaration binding is zero and it cannot acquire user visibility.
+The existing `fairyc.enum-payload-hir/v1` transport carries these owned facts;
+readable types use `result:success:error`. No parsed or typed owner survives
+publication.
+
+`tests/hir_results.fy` reads the retained graph after input-owner destruction,
+checks both payloads/captures and determinism, and rejects seven forged builtin
+layouts plus mismatched Result/enum type categories. `verify_results.py --phase
+hir` compares typed acceptance and HIR bytes in both candidate profiles.
+Evidence: `docs/ops/evidence/candidate-result-hir-20261007.json`.
+Result MIR/native acceptance, propagation and must-use Flow remain later units.
+
+The first two release builds hit the existing bootstrap's 60-second MSVC
+command limit. Release validation uses a separate local bootstrap built with a
+Go overlay changing only that private timeout constant to 120 seconds. The
+original executable and public compiler source are preserved. The evidence
+records both bootstrap identities, the exact overlay change and the failed
+attempts; this is not a release of a new stable build-timeout option.
