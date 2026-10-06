@@ -977,8 +977,14 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 		if err != nil {
 			return Operand{}, err
 		}
+		if l.blockTerminated(l.current) {
+			return Operand{}, nil
+		}
 		if operand.Kind == OperandInvalid {
 			return Operand{}, fmt.Errorf("fixed-array element %d has no executable value", index)
+		}
+		if operand.Kind == OperandLocal {
+			operand = l.freezeScalarOperand(operand, expression.Children[index].Span)
 		}
 		operands = append(operands, operand)
 		sequence = append(sequence, expression.Children[index].Span)
