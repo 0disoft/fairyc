@@ -16,8 +16,13 @@ fn bool definition(ref shapes::Table table, usize index, ref mut u8[] emitted, r
     let shapes::Shape shape = shapes::at(table,index); var usize i = 0;
     // Nested tagged payloads must be fully defined before their parent record.
     while(i<shape.field_count){let f=shapes::field_at(table,shape.field_start+i+1);
-        if(f.type>=256 && !arrays::valid(f.type) && !definition(table,shapes::find(table,f.type)-1,emitted,out,s)){return false;}i+=1;
+        if(f.type>=256 && (!arrays::valid(f.type) || arrays::owned(f.type)) && !definition(table,shapes::find(table,f.type)-1,emitted,out,s)){return false;}i+=1;
     }i=0;
+    if(arrays::owned(shape.type)){
+        if(!w::type(out,s,shape.type) || !w::text(out,s,b"{ ") || !w::type(out,s,shapes::array_element(table,shape.type))
+            || !w::text(out,s,b" fy_items[") || !w::number(out,s,arrays::length(shape.type)) || !w::text(out,s,b"]; };\n")){return false;}
+        emitted[index]=1;return true;
+    }
     if (enums::valid(shape.type)) {
         if (!w::type(out,s,shape.type) || !w::text(out,s,b"{ uint32_t fy_tag;\n")) { return false; }
         var bool payload = false;
@@ -42,7 +47,7 @@ fn bool definition(ref shapes::Table table, usize index, ref mut u8[] emitted, r
     // The verified table is acyclic and has at most 64 nested value levels.
     while (i < shape.field_count) {
         let shapes::Field f = shapes::field_at(table,shape.field_start + i + 1);
-        if (f.type >= 256 && !arrays::valid(f.type) && !definition(table,shapes::find(table,f.type) - 1,emitted,out,s)) { return false; } i += 1;
+        if (f.type >= 256 && (!arrays::valid(f.type) || arrays::owned(f.type)) && !definition(table,shapes::find(table,f.type) - 1,emitted,out,s)) { return false; } i += 1;
     }
     if (!w::type(out,s,shape.type) || !w::text(out,s,b"{\n")) { return false; }
     if (shape.field_count == 0 && !w::text(out,s,b"    uint8_t fy_empty;\n")) { return false; }

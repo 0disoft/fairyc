@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Observe composite-array typing/owned HIR; executable support is a later part."""
+"""Observe composite-array typing/HIR/C; native execution uses its own runner."""
 import argparse
 import hashlib
 import json
@@ -11,6 +11,7 @@ ROOT=Path(__file__).resolve().parent
 def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--receipt',required=True)
+    ap.add_argument('--hir-only-gate',action='store_true',help='Observe the historical 0.44 fail-closed MIR/C milestone')
     args=ap.parse_args();images=[Path(p).resolve() for p in args.images];dest=Path(args.receipt).resolve();dest.parent.mkdir(parents=True,exist_ok=True)
     rows=[];fixtures=[];passed=False
     def run(argv,code):
@@ -31,7 +32,8 @@ def main():
                         outputs[mode].append(row['stdout'])
                     if not rejected:
                         for mode in ['--mir-file','--c-file']:
-                            row=run([image,mode,path],2);assert not row['stdout'] and row['stderr'],row
+                            row=run([image,mode,path],2 if args.hir_only_gate else 0)
+                            assert (not row['stdout'] and row['stderr']) if args.hir_only_gate else (row['stdout'] and not row['stderr']),row
                 assert sha(path)==digest
                 assert all(len(set(v))==1 for v in outputs.values())
         passed=True
@@ -39,6 +41,6 @@ def main():
         dest.write_text(json.dumps(dict(schema='fairyc.tagged-array-hir/v1',unit=14,part='array-types-hir',passed=passed,
             images=[dict(path=str(p),sha256=sha(p)) for p in images],fixtures=fixtures,cli=rows,
             source=[dict(path=str(p.relative_to(ROOT)),sha256=sha(p)) for p in sorted((ROOT/'src').glob('*.fy'))],
-            skipped=['Composite-array MIR and C execution; kept fail-closed until next part','Linux consolidated batch','performance','stage1/stage2','full repository suite']),ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
-    print(f'PASS: composite array HIR; {len(fixtures)} fixtures; {len(rows)} CLI observations; execution pending')
+            historicalHIRGate=args.hir_only_gate,skipped=['Generated composite-array native execution (separate execution runner)','Linux consolidated batch','performance','stage1/stage2','full repository suite']),ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+    print(f'PASS: composite array HIR/C observations; {len(fixtures)} fixtures; {len(rows)} CLI observations; generated native execution separate')
 if __name__=='__main__': main()

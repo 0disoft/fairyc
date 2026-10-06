@@ -2498,3 +2498,37 @@ read controls return its experimental subset-unsupported exit 2; store cases
 instead report E1008. Those differences are recorded, not treated as equivalent
 acceptance or a public Go language change. Unit 14 remains incomplete until the
 candidate's composite-array MIR and native execution work lands.
+
+## Composite array MIR and native execution
+
+Version 0.45.0 connects the preceding owned array layouts to MIR and C execution.
+Enum, Option, Result and copy-only struct elements support construction, repeated
+initializers, indexing, assignment, value copies, calls and returns, and storage
+in struct fields. Each dimension remains 1..64, with at most two dimensions.
+Resource/view elements and higher ranks remain excluded. Rank-two identities now
+pack both lengths and the child key, admitting fully inferred struct arrays.
+
+MIR reads and stores use the owned element type. Checked indexes must dominate
+access, retain the correct array length, and have one definition. The verifier
+rejects attempts to reinterpret array construction or element metadata as nominal
+struct operations. C definitions emit child layouts before containing arrays and
+structs. Direct element assignments avoid recursive aggregate initializers that
+can exceed MSVC's nesting limit. Repeated initializers evaluate once; ordinary
+initializers keep written order. Bounds checks precede assignment RHS evaluation,
+and stores preserve sibling edits made while evaluating that RHS.
+Type-node keys use their own 4096-node bound rather than the 1024-entry
+declaration conversion. A 350-field source with a late nested-tag array reproduces
+the prior assertion exit and now checks, lowers and executes normally.
+
+`verify_result_execution.py --tagged-arrays --images <dev> <release>
+--native-runner <runner> --receipt <path>` checks source diagnostics, HIR/MIR/C
+output and actual generated native programs. Test-only observation of emitted
+`mark` calls measures initializer ordering without replacing product logic.
+`tests/tagged_arrays_native.fy` additionally rejects forged element/index/nominal
+operations before output publication and checks fully inferred rank-two layouts.
+Builds, API regressions, raw commands, source/SDK/compiler and EXE hashes are in
+`docs/ops/evidence/candidate-tagged-array-native-20261007.json`.
+
+The preceding Go tagged-array subset limitations remain separately recorded.
+This completes unit 14 after its execution evidence passes; resource identity and
+ownership are units 15..20. Linux, performance and stage1/stage2 remain deferred.

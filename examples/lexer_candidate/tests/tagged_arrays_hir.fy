@@ -7,6 +7,7 @@ import hir_shapes as shapes;
 import array_types as arrays;
 import tagged_types as tagged;
 import mir_lower as mir;
+import mir_verify as verify;
 import std::vec as v;
 
 @test
@@ -17,7 +18,7 @@ fn void composite_array_hir_owns_element_layouts_and_keeps_scalar_ids() {
     while(i<shapes::count(table)){let s=shapes::at(table,i);if(arrays::owned(s.type)){array=s.type;}i+=1;}
     assert(array!=0 && arrays::length(array)==2 && shapes::array_element(table,array)==tagged::make_option(2));
     assert(arrays::make(1,2)==1041 && arrays::element(1041)==1);
-    assert(switch(mir::lower(p)){case .ok(_):{false}case .err(problem):{problem.code==4}});
+    assert(switch(mir::lower(p)){case .ok(value):{verify::check(ref value).code==0}case .err(_):{false}});
 }
 
 @test

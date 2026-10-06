@@ -59,7 +59,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
         if(arrays::owned(s.type)){
             if(s.binding!=0 || s.public || s.field_count!=1){return false;}
             let u32 child=field_at(p,offset+1).type;let u32 encoded=arrays::encoded_element(s.type);let u32 key=arrays::key(s.type);
-            if(encoded!=0 && child!=encoded || key>=2048 && key<6144 && !(child>=1073741824 && tagged::builtin(child)) || key>=8192 && (!arrays::owned(child) || arrays::key(child)>=8192)){return false;}
+            if(encoded!=0 && child!=encoded || !arrays::rank_two(s.type) && key>=2048 && !(child>=1073741824 && tagged::builtin(child)) || arrays::rank_two(s.type) && (!arrays::owned(child) || arrays::rank_two(child))){return false;}
         }
         if(tagged::option(s.type) && (s.binding!=0 || s.public || s.field_count!=3)){return false;}
         if(tagged::option(s.type)){

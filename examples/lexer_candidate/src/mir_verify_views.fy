@@ -1,6 +1,7 @@
 module mir_verify_views;
 import mir_model as m;
 import array_types as arrays;
+import hir_shapes as shapes;
 import std::vec as v;
 
 fn bool byte_view(u32 type){return type==10 || type==11;}
@@ -8,7 +9,7 @@ fn bool local(ref m::Program p, usize id, usize function, u32 type) { return id>
 pub fn bool operation(ref m::Program p, m::Operation o) {
     if(o.kind==20){return o.result==0 && o.type==3 && o.owner_type==11 && local(p,o.left,o.function,11) && local(p,o.right,o.function,5) && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,3) && o.operator==0 && !o.boolean && o.payload_start==0 && o.payload_end==0;}
     if((o.type!=10 && o.type!=11) || !local(p,o.result,o.function,o.type) || o.operator!=0 || o.boolean || o.payload_start!=0 || o.payload_end!=0){return false;}
-    if(o.kind==18){return arrays::valid(o.owner_type) && arrays::element(o.owner_type)==3 && local(p,o.left,o.function,o.owner_type) && m::local_at(p,o.left).binding!=0 && (o.type!=11 || m::local_at(p,o.left).mutable) && o.right==0 && o.argument_start==0 && o.argument_count==0;}
+    if(o.kind==18){return arrays::valid(o.owner_type) && shapes::array_element(m::nominal(p),o.owner_type)==3 && local(p,o.left,o.function,o.owner_type) && m::local_at(p,o.left).binding!=0 && (o.type!=11 || m::local_at(p,o.left).mutable) && o.right==0 && o.argument_start==0 && o.argument_count==0;}
     return o.kind==19 && o.owner_type==o.type && local(p,o.left,o.function,o.type) && local(p,o.right,o.function,5) && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5);
 }
 fn usize get(ref v::Vec<usize> values, usize id){return *v::at<usize>(values,id);}

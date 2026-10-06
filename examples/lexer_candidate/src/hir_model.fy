@@ -239,11 +239,11 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
             if (e.binding == 0 || e.binding > shapes::field_count(ref nominal) || e.left == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             let shapes::Field f = shapes::field_at(ref nominal,e.binding);
             let u32 left_type = type_code(v::at<Expression>(ref expressions,e.left - 1).type);
-            if (type != f.type || (kind == 10 && left_type != f.owner) || (kind == 11 && left_type != f.type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (arrays::valid(f.owner) || type != f.type || (kind == 10 && left_type != f.owner) || (kind == 11 && left_type != f.type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         }
         if (kind == 9) {
             let usize shape = shapes::find(ref nominal,type);
-            if (shape == 0 || e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (shape == 0 || arrays::valid(type) || e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             let shapes::Shape s = shapes::at(ref nominal,shape - 1);
             if (e.binding != s.binding || binding_code(v::at<Binding>(ref bindings,e.binding - 1).kind) != 6 || e.edge_count != s.field_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             var u8[1024] seen = [0;1024]; var usize j = 0;

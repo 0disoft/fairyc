@@ -11,16 +11,19 @@ import tagged_types as tagged;
 // higher ranks, resource and view elements stay closed.
 pub fn bool flat(u32 type) { return type >= 1033 && type <= 1542 && (type - 1024) % 8 >= 1 && (type - 1024) % 8 <= 6; }
 // Composite arrays own their element facts in HIR. Keys preserve nominal and
-// scalar-tag identities; larger tags/rank-two children use their first type node.
+// scalar-tag identities; larger tags use their first type node. Rank two packs
+// the child key and both dimensions, including fully inferred child arrays.
+fn bool valid_key(u32 key) { return key<1066 || key>=2048 && key<6144; }
+pub fn bool rank_two(u32 type) { return type>=4194304 && type<29360128 && valid_key((type-4194304)/4096); }
 pub fn bool owned(u32 type) {
-    if(type<524288 || type>=1572864){return false;}let u32 key=(type-524288)/64;
-    return key<1066 || key>=2048 && key<6144 || key>=8192 && key<12288;
+    return rank_two(type) || type>=524288 && type<917504 && valid_key((type-524288)/64);
 }
-pub fn u32 key(u32 type) { assert(owned(type)); return (type-524288)/64; }
+pub fn u32 key(u32 type) { assert(owned(type)); return if(rank_two(type)){(type-4194304)/4096}else{(type-524288)/64}; }
 pub fn bool valid(u32 type) { return owned(type) || flat(type) || type >= 5120 && type <= 70150 && (type - 4096) / 1024 >= 1 && (type - 4096) / 1024 <= 64 && flat(1024 + (type - 4096) % 1024); }
 pub fn u32 element(u32 type) { assert(valid(type) && !owned(type)); return if (flat(type)) { (type - 1024) % 8 } else { 1024 + (type - 4096) % 1024 }; }
-pub fn usize length(u32 type) { assert(valid(type)); return if(owned(type)){((type-524288)%64+1) as usize}else if (flat(type)) { ((type - 1024) / 8) as usize } else { ((type - 4096) / 1024) as usize }; }
+pub fn usize length(u32 type) { assert(valid(type)); return if(rank_two(type)){((type-4194304)%64+1) as usize}else if(owned(type)){((type-524288)%64+1) as usize}else if (flat(type)) { ((type - 1024) / 8) as usize } else { ((type - 4096) / 1024) as usize }; }
 pub fn u32 encoded_element(u32 type) {
+    if(rank_two(type)){return 524288+key(type)*64+(type-4194304)/64%64;}
     let u32 k=key(type);return if(k<512){256+k}else if(k<1024){131072+k-512}else if(k<1030){196609+k-1024}else if(k<1066){262145+k-1030}else{0};
 }
 pub fn u32 make(u32 element, usize count) {
@@ -61,18 +64,17 @@ pub fn u32 make_source(ref syntax::Parsed p,u32 child,usize count) {
     else if(child>=196609 && child<=196614){k=1024+child-196609;}
     else if(child>=262145 && child<=262180){k=1030+child-262145;}
     else if(tagged::builtin(child)){
-        let usize first=tagged::first(p,child);if(first>0 && first<=4096){k=2048+state::small_id(first-1);}
-    }else if(owned(child) && key(child)<8192){
-        var usize i=1;while(i<=syntax::type_count(p) && i<=4096){let node=syntax::type_at(p,i);
-            if(node.kind==8 && syntax::type_at(p,node.left).kind!=8 && resolve(p,i)==child){k=8192+state::small_id(i-1);break;}i+=1;
-        }
-    }
+        let usize first=tagged::first(p,child);
+        // Type nodes have a 4096-entry arena, unlike the 1024-entry
+        // declaration/field conversion. Keep narrowing inside this bound.
+        if(first>0 && first<=4096){k=2048;var usize left=first-1;while(left!=0){left-=1;k+=1;}}
+    }else if(owned(child) && !rank_two(child)){return 4194304+key(child)*4096+state::small_id(length(child)-1)*64+state::small_id(count-1);}
     return if(k==16384){0}else{524288+k*64+state::small_id(count-1)};
 }
 pub fn u32 source_element(ref syntax::Parsed p,u32 type) {
     if(!valid(type)){return 0;}if(!owned(type)){return element(type);}
     let u32 simple=encoded_element(type);if(simple!=0){return simple;}
-    let u32 k=key(type);let usize node=(if(k>=8192){k-8192}else{k-2048}) as usize+1;
+    let u32 k=key(type);let usize node=(k-2048) as usize+1;
     if(node>syntax::type_count(p)){return 0;}
-    return if(k>=8192){resolve(p,node)}else{tagged::resolve(p,node)};
+    return tagged::resolve(p,node);
 }

@@ -26,7 +26,7 @@ pub fn Result<v::Vec<Step>,u32> collect(ref h::Program p, usize target) {
 }
 fn usize child(ref h::Program p, Step step, usize owner, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> ops, ref mut state::Context c, usize start, usize end) {
     let e=h::expression_at(p,step.expression);
-    return if(h::expression_code(e.kind)==10){nominal::read(locals,blocks,ops,c,owner,h::type_code(e.type),e.binding,start,end)}else{array::read(locals,blocks,ops,c,h::type_code(h::expression_at(p,e.left).type),owner,step.index,start,end)};
+    return if(h::expression_code(e.kind)==10){nominal::read(locals,blocks,ops,c,owner,h::type_code(e.type),e.binding,start,end)}else{array::read(locals,blocks,ops,c,h::type_code(h::expression_at(p,e.left).type),h::type_code(e.type),owner,step.index,start,end)};
 }
 pub fn usize read(ref h::Program p, ref v::Vec<Step> path, usize owner, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> ops, ref mut state::Context c, usize start, usize end) {
     var usize value=owner;var usize at=v::len<Step>(path);

@@ -8,7 +8,7 @@ import hir_shapes as shapes;
 
 pub fn bool present(ref m::Program p) { return m::has_arrays(p); }
 fn bool mark(u32 type, ref mut bool[] flat, ref mut v::Vec<u32> nested, ref mut w::State s) {
-    if(!arrays::valid(type)){return true;}
+    if(!arrays::valid(type) || arrays::owned(type)){return true;}
     if(arrays::flat(type)){flat[(type-1024) as usize]=true;return true;}
     flat[(arrays::element(type)-1024) as usize]=true;var usize i=0;
     while(i<v::len<u32>(nested)){if(*v::at<u32>(nested,i)==type){return true;}i+=1;}
@@ -30,6 +30,14 @@ pub fn bool definitions(ref m::Program p, ref mut bytes::Buffer out, ref mut w::
     i=0;while(i<v::len<u32>(ref nested)){if(!definition(*v::at<u32>(ref nested,i),out,s)){return false;}i+=1;}return true;
 }
 pub fn bool operation(ref m::Program p, m::Operation o, ref mut bytes::Buffer out, ref mut w::State s) {
+    if(o.kind==9 && arrays::owned(o.type)){
+        // Assign initialized elements directly; recursive compound initializers
+        // can exceed MSVC's aggregate-initializer depth for nested tagged values.
+        var usize i=0;while(i<arrays::length(o.type)){
+            if(!w::text(out,s,b"    ") || !w::local(out,s,o.result) || !w::text(out,s,b".fy_items[") || !w::number(out,s,i)
+                || !w::text(out,s,b"]=") || !w::local(out,s,m::edge_at(p,o.argument_start+if(o.boolean){0}else{i})) || !w::text(out,s,b";\n")){return false;}i+=1;
+        }return true;
+    }
     if (o.kind == 12) {
         // Keep MSVC's reachability analysis from turning a known failing index
         // into C4702 after the trap. The source expression still executes once.

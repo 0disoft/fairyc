@@ -14,6 +14,17 @@ POSITIVES=[
     ('duplicate-type','fn Option<i32>[2] id(Option<i32>[2] a){return a;}fn i32 main(){let Option<i32>[2] a=[.some(7),.none];let b=id(a);return switch(b[0]){case .some(n):{n}case .none:{0}};}',7),
     ('duplicate-nested-type','fn Option<Option<i32>>[2] id(Option<Option<i32>>[2] a){return a;}fn i32 main(){let Option<Option<i32>>[2] a=[.some(.some(7)),.none];let b=id(a);return switch(b[0]){case .some(inner):{switch(inner){case .some(n):{n}case .none:{0}}}case .none:{0}};}',7),
 ]
+POSITIVES += [
+    ('inferred-rank-two','struct T{i32 n;}fn i32 main(){let a=[[T{.n=7},T{.n=8}],[T{.n=9},T{.n=10}]];return a[0][0].n;}',7),
+    ('array-field-element-store','struct Box{Option<i32>[2] a;i32 marker;}fn i32 main(){var b=Box{.a=[.none,.none],.marker=1};b.a[0]={b.marker=9;.some(7)};assert(b.marker==9);return switch(b.a[0]){case .some(n):{n}case .none:{0}};}',7),
+    ('array-rhs-sibling','fn i32 main(){var Option<i32>[2] a=[.none,.none];a[0]={a[1]=.some(9);.some(7)};assert(switch(a[1]){case .some(n):{n==9}case .none:{false}});return switch(a[0]){case .some(n):{n}case .none:{0}};}',7),
+    ('repeat-once','fn void mark(i32 n){}fn i32 main(){let Result<i32,bool>[3] a=[.ok({mark(1);7});3];return switch(a[2]){case .ok(n):{n}case .err(_):{0}};}',7),
+    ('constructor-order','fn void mark(i32 n){}fn i32 main(){let Result<i32,bool>[2] a=[.ok({mark(1);7}),.ok({mark(2);8})];return switch(a[0]){case .ok(n):{n}case .err(_):{0}};}',7),
+]
+deep='Option<'*12+'i32'+'>'*12
+POSITIVES.append(('deep-array','fn i32 main(){let '+deep+'[2] a=[.none;2];discard a;return 7;}',7))
+POSITIVES.append(('large-type-arena','struct Many{'+''.join(f'i32[1] f{i};' for i in range(350))+'}fn i32 main(){let Option<Option<i32>>[1] a=[.none];discard a;return 7;}',7))
+TRACES={'repeat-once':[1],'constructor-order':[1,2]}
 NEGATIVES=[
     ('wrong-option-element','fn i32 main(){let Option<i32>[2] a=[.some(true),.none];return 0;}','type mismatch'),
     ('wrong-result-order','fn i32 main(){let Result<bool,i32> r=.ok(true);let Result<i32,bool>[1] a=[r];return 0;}','type mismatch'),
@@ -29,4 +40,5 @@ NEGATIVES=[
 TRAPS=[
     ('bounds-first','fn i32 main(){let Option<i32>[1] a=[.some(7)];return switch(a[1]){case .some(n):{n}case .none:{0}};}',6),
     ('payload-overflow','fn i32 main(){let Option<i32>[1] a=[.some(2147483647+1)];return 0;}',1),
+    ('bounds-before-rhs','fn i32 main(){var Option<i32>[1] a=[.none];a[1]={let i32 n=2147483647+1;.some(n)};return 0;}',6),
 ]
