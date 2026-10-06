@@ -2304,20 +2304,26 @@ native executions. Both profiles passed check/build and seven selected native AP
 tests each. The 237 earlier positive Result fixtures pass type checking after nine
 fixtures received explicit handling at their previously unchecked positions.
 
-There is one unresolved reference discrepancy. For
+The initial verification exposed one reference discrepancy. For
 `fn Result<i32,bool> f(Result<i32,bool> r){let Result<i32,bool> other=.ok(1);
 let n=r?;discard other;return .ok(n);}`, Go Result Flow transfers only `r` and
 accepts the source. The candidate also checks the implicit error-return edge and
 rejects pending `other`; normal-path discard occurs after that edge. This follows
 the candidate's reading of the earlier-return obligation in
 `docs/language/0004-results-traps-and-control-flow.md`, but does not establish
-differential equivalence with Go. Seven other reference cases agree. Unit 11 is
-not marked differentially accepted and compiler promotion remains blocked until
-this discrepancy is reconciled. Public Go compiler source was not changed.
+differential equivalence with Go. The follow-up fixes Go Result Flow to check the
+implicit error-return edge after transferring the operand and to preserve terminal
+operand reachability. Six regression inputs, the related Go Result tests and all
+24 Result fixtures pass. The old propagation fixture now explicitly handles its
+copyable fallback before `?`; its exact source span expectation was updated.
+All eight reference cases agree in both candidate profiles against a separately
+built corrected Go compiler. The fixed bootstrap EXEs were preserved. Unit 11 is
+complete; full compiler promotion still requires the later self-hosting gates.
 
 Raw commands, the reachable discrepancy reproducer, source/SDK/bootstrap/image
 digests and the existing validation-only release timeout overlay are retained in
-`docs/ops/evidence/candidate-result-handling-20261007.json`. Linux, performance,
+`docs/ops/evidence/candidate-result-handling-20261007.json`; the correction and
+comparison evidence is `candidate-result-handling-alignment-20261007.json`. Linux, performance,
 self-hosting and the full repository suite remain deferred. Nested/aggregate/
 resource payloads and tagged storage remain units 12..20 or later. The remaining
 work inventory is `docs/ops/candidate-remaining-work-20261007.md`.

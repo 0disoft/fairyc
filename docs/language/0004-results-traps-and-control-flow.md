@@ -36,6 +36,10 @@ zero iterations and repeated back edges, so a value produced by one iteration ca
 by the next. These rules do not make every Result move-only: copyability still follows the payload,
 but every new Result evaluation must occupy a handling or transfer position.
 
+The error alternative of `?` is an earlier return edge for these checks. Its
+operand is handled first, then other pending obligations must already have been
+handled or transferred; a `discard` after `?` on the success path is too late.
+
 Stage 0 constructs Option variants with contextual leading-dot forms:
 
 ```fy

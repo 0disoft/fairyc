@@ -180,7 +180,12 @@ func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Exp
 	case syntax.KindPropagate:
 		a.recordPropagateHandling(module, expression)
 		if len(expression.Children) == 1 {
-			a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseTransfer})
+			if !a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseTransfer}) {
+				return false
+			}
+			// The error alternative returns before any later normal-path handling.
+			// Transfer the operand first, then check other pending obligations.
+			a.reportPendingResults(environment)
 		}
 		return true
 	case syntax.KindIf:

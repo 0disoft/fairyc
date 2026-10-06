@@ -1,0 +1,422 @@
+{
+  "schema": "fairyc.candidate-result-handling-alignment/v1",
+  "unit": 11,
+  "passed": true,
+  "priorEvidence": "candidate-result-handling-20261007.json",
+  "resolution": "Check unrelated pending obligations after evaluating and transferring the ? operand on its implicit error return edge; terminal operands do not fall through",
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+    "sha256": "ec8df83b9b7aa135953d0ad6ba6221ffe6ca2660b810fe9df23cd72448d50c46",
+    "version": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261006184314-fbcf1b19c5fe+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: fbcf1b19c5fe7569ddb526e1ad38b814de9b5e15\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "preservedBootstrap": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+      "sha256": "ad49997c82179b8269cf2b07ed07c3469353fae59983511f2c06d2f744635aad"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "sha256": "1e5aa3a20f59f01d905c9331155171882b5ad4b1b2b50d7c9b4bcd4f229b0124"
+    }
+  ],
+  "comparisons": [
+    {
+      "name": "reference-discard-call",
+      "rejected": false,
+      "sourceSHA256": "22a51d5490470eaeefa1b8af973a7c3acaec81549ca0ee30f8d1b11353c720a4",
+      "agree": true
+    },
+    {
+      "name": "reference-is-ok-both",
+      "rejected": false,
+      "sourceSHA256": "c48b8390a3b7abe17ae7893116db8feb93e56650b11b930d3fbe23f7bbf8301f",
+      "agree": true
+    },
+    {
+      "name": "reference-self-assign",
+      "rejected": false,
+      "sourceSHA256": "6ce93f92a96ea3d7537824cb59090ed6da9701e5988df673b220914bda1ae322",
+      "agree": true
+    },
+    {
+      "name": "reference-loop-outer",
+      "rejected": false,
+      "sourceSHA256": "7a4f3b3a0ee106cc45b1bf634874365de96d6819852e2414241af087ba52e9f6",
+      "agree": true
+    },
+    {
+      "name": "reference-bare-call",
+      "rejected": true,
+      "sourceSHA256": "3240331f55fa6bea7cb9372a67a84abf38cc9085a3abcf4c27012ce3785d8f8a",
+      "agree": true
+    },
+    {
+      "name": "reference-branch-one",
+      "rejected": true,
+      "sourceSHA256": "4e4c61921083cadc481e41a08d92de2bef1de08c50a5aa5d11788f279cc2a471",
+      "agree": true
+    },
+    {
+      "name": "reference-loop-backedge",
+      "rejected": true,
+      "sourceSHA256": "d5163ed01deb5ddd208b14ced88f06ce1f048ff1e89747fbbaf22be47521832c",
+      "agree": true
+    },
+    {
+      "name": "reference-propagate-pending",
+      "rejected": true,
+      "sourceSHA256": "b77c5754dd37416e308468f05730eb4b10a045366cba21e3981f6e258e69a1b0",
+      "agree": true
+    }
+  ],
+  "allEquivalent": true,
+  "raw": [
+    {
+      "argv": [
+        "go",
+        "test",
+        "-json",
+        "./internal/semantic",
+        "./internal/resultfixture",
+        "-run",
+        "TestAnalyzeResultPropagation|Test.*Result|TestResultManifestV0",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "{\"Time\":\"2026-10-07T03:48:17.8859226+09:00\",\"Action\":\"start\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\"}\n{\"Time\":\"2026-10-07T03:48:17.8870228+09:00\",\"Action\":\"start\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\"}\n{\"Time\":\"2026-10-07T03:48:17.9124271+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeMatchesBaseline\"}\n{\"Time\":\"2026-10-07T03:48:17.9129708+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeMatchesBaseline\",\"Output\":\"=== RUN   TestScalarResultBackEdgeMatchesBaseline\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9140568+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\"}\n{\"Time\":\"2026-10-07T03:48:17.9140568+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\",\"Output\":\"=== RUN   TestResultManifestV0\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9140568+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\",\"Output\":\"=== PAUSE TestResultManifestV0\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9140568+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\"}\n{\"Time\":\"2026-10-07T03:48:17.9140568+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\"}\n{\"Time\":\"2026-10-07T03:48:17.9140568+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\",\"Output\":\"=== CONT  TestResultManifestV0\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9188942+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeMatchesBaseline\",\"Output\":\"--- PASS: TestScalarResultBackEdgeMatchesBaseline (0.01s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeMatchesBaseline\",\"Elapsed\":0.01}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeGuards\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeGuards\",\"Output\":\"=== RUN   TestScalarResultBackEdgeGuards\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeGuards\",\"Output\":\"--- PASS: TestScalarResultBackEdgeGuards (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestScalarResultBackEdgeGuards\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\",\"Output\":\"=== RUN   TestResultFailureSpanTracksSecondTypeArgument\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\",\"Output\":\"=== PAUSE TestResultFailureSpanTracksSecondTypeArgument\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\"}\n{\"Time\":\"2026-10-07T03:48:17.919444+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\",\"Output\":\"=== RUN   TestResultFailureSpanRejectsNonResultType\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9199871+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\",\"Output\":\"=== PAUSE TestResultFailureSpanRejectsNonResultType\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9199871+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\"}\n{\"Time\":\"2026-10-07T03:48:17.9205253+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope\"}\n{\"Time\":\"2026-10-07T03:48:17.9205253+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope\",\"Output\":\"=== RUN   TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9210746+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/ordinary\"}\n{\"Time\":\"2026-10-07T03:48:17.9210746+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/ordinary\",\"Output\":\"=== RUN   TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/ordinary\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9210746+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/ordinary\",\"Output\":\"--- PASS: TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/ordinary (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9210746+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/ordinary\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9210746+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_function\"}\n{\"Time\":\"2026-10-07T03:48:17.9210746+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_function\",\"Output\":\"=== RUN   TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_function\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_function\",\"Output\":\"--- PASS: TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_function (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_function\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_block\"}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_block\",\"Output\":\"=== RUN   TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_block\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_block\",\"Output\":\"--- PASS: TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_block (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope/unsafe_block\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope\",\"Output\":\"--- PASS: TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9216142+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeFunctionResultTypeDoesNotGrantUnsafeScope\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\"}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\",\"Output\":\"=== RUN   TestAnalyzeResultPropagationChecksOtherPendingObligations\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\",\"Output\":\"=== PAUSE TestAnalyzeResultPropagationChecksOtherPendingObligations\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\"}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\"}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\",\"Output\":\"=== RUN   TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\",\"Output\":\"=== PAUSE TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9227132+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\",\"Output\":\"=== RUN   TestAnalyzeBuildsContextualResultConstructorsAndSwitch\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\",\"Output\":\"=== PAUSE TestAnalyzeBuildsContextualResultConstructorsAndSwitch\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\",\"Output\":\"=== RUN   TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\",\"Output\":\"=== PAUSE TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\",\"Output\":\"=== RUN   TestAnalyzeResultIsOkRequiresPayloadDropEffects\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\",\"Output\":\"=== PAUSE TestAnalyzeResultIsOkRequiresPayloadDropEffects\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\",\"Output\":\"=== RUN   TestAnalyzeResultIsOkRejectsNonDroppablePayload\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\",\"Output\":\"=== PAUSE TestAnalyzeResultIsOkRejectsNonDroppablePayload\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9232594+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\"}\n{\"Time\":\"2026-10-07T03:48:17.9260522+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\"}\n{\"Time\":\"2026-10-07T03:48:17.9260522+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\",\"Output\":\"=== RUN   TestAnalyzeRejectsLocalBorrowInsideResultReturn\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9260522+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\",\"Output\":\"=== PAUSE TestAnalyzeRejectsLocalBorrowInsideResultReturn\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9260522+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\"}\n{\"Time\":\"2026-10-07T03:48:17.9260522+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\"}\n{\"Time\":\"2026-10-07T03:48:17.9260522+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\",\"Output\":\"=== RUN   TestAnalyzeRejectsMultipleOriginsInsideResultReturn\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9260522+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\",\"Output\":\"=== PAUSE TestAnalyzeRejectsMultipleOriginsInsideResultReturn\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9265952+09:00\",\"Action\":\"pause\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\"}\n{\"Time\":\"2026-10-07T03:48:17.9271321+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\"}\n{\"Time\":\"2026-10-07T03:48:17.9271321+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\",\"Output\":\"=== CONT  TestResultFailureSpanTracksSecondTypeArgument\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9271321+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\",\"Output\":\"--- PASS: TestResultFailureSpanTracksSecondTypeArgument (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9271321+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanTracksSecondTypeArgument\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9271321+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\"}\n{\"Time\":\"2026-10-07T03:48:17.9271321+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\",\"Output\":\"=== CONT  TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\",\"Output\":\"=== CONT  TestAnalyzeResultPropagationChecksOtherPendingObligations\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\",\"Output\":\"=== CONT  TestResultFailureSpanRejectsNonResultType\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/local\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/local\",\"Output\":\"=== RUN   TestAnalyzeResultPropagationChecksOtherPendingObligations/local\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\",\"Output\":\"--- PASS: TestResultFailureSpanRejectsNonResultType (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestResultFailureSpanRejectsNonResultType\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\",\"Output\":\"=== CONT  TestAnalyzeRejectsLocalBorrowInsideResultReturn\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\",\"Output\":\"=== CONT  TestAnalyzeRejectsMultipleOriginsInsideResultReturn\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\",\"Output\":\"=== CONT  TestAnalyzeResultIsOkRejectsNonDroppablePayload\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/local\",\"Output\":\"--- PASS: TestAnalyzeResultPropagationChecksOtherPendingObligations/local (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/local\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/branch\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/branch\",\"Output\":\"=== RUN   TestAnalyzeResultPropagationChecksOtherPendingObligations/branch\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\",\"Output\":\"=== CONT  TestAnalyzeResultIsOkRequiresPayloadDropEffects\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\",\"Output\":\"--- PASS: TestAnalyzeResultIsOkRejectsNonDroppablePayload (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9276895+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRejectsNonDroppablePayload\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.928246+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\"}\n{\"Time\":\"2026-10-07T03:48:17.928246+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\",\"Output\":\"=== CONT  TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9287912+09:00\",\"Action\":\"cont\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\"}\n{\"Time\":\"2026-10-07T03:48:17.9287912+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\",\"Output\":\"=== CONT  TestAnalyzeBuildsContextualResultConstructorsAndSwitch\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\",\"Output\":\"--- PASS: TestAnalyzeRejectsLocalBorrowInsideResultReturn (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsLocalBorrowInsideResultReturn\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/branch\",\"Output\":\"--- PASS: TestAnalyzeResultPropagationChecksOtherPendingObligations/branch (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/branch\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\",\"Output\":\"--- PASS: TestAnalyzeRejectsMultipleOriginsInsideResultReturn (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeRejectsMultipleOriginsInsideResultReturn\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\",\"Output\":\"--- PASS: TestAnalyzeResultIsOkConsumesResultIntoExistingMatch (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkConsumesResultIntoExistingMatch\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"run\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/loop\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/loop\",\"Output\":\"=== RUN   TestAnalyzeResultPropagationChecksOtherPendingObligations/loop\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\",\"Output\":\"--- PASS: TestAnalyzeResultIsOkRequiresPayloadDropEffects (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultIsOkRequiresPayloadDropEffects\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\",\"Output\":\"--- PASS: TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9293453+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationPreservesHandledAndUnreachablePaths\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9299004+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\",\"Output\":\"--- PASS: TestAnalyzeBuildsContextualResultConstructorsAndSwitch (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9299004+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeBuildsContextualResultConstructorsAndSwitch\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9299004+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/loop\",\"Output\":\"--- PASS: TestAnalyzeResultPropagationChecksOtherPendingObligations/loop (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9299004+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations/loop\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9299004+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\",\"Output\":\"--- PASS: TestAnalyzeResultPropagationChecksOtherPendingObligations (0.00s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9299004+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Test\":\"TestAnalyzeResultPropagationChecksOtherPendingObligations\",\"Elapsed\":0}\n{\"Time\":\"2026-10-07T03:48:17.9299004+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Output\":\"PASS\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:17.9346692+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Output\":\"ok  \\tgithub.com/0disoft/fairyc/internal/semantic\\t0.048s\\n\"}\n{\"Time\":\"2026-10-07T03:48:17.9346692+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/semantic\",\"Elapsed\":0.049}\n{\"Time\":\"2026-10-07T03:48:18.0838909+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\",\"Output\":\"--- PASS: TestResultManifestV0 (0.17s)\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:18.084475+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Test\":\"TestResultManifestV0\",\"Elapsed\":0.17}\n{\"Time\":\"2026-10-07T03:48:18.084475+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Output\":\"PASS\\n\",\"OutputType\":\"frame\"}\n{\"Time\":\"2026-10-07T03:48:18.087954+09:00\",\"Action\":\"output\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Output\":\"ok  \\tgithub.com/0disoft/fairyc/internal/resultfixture\\t0.201s\\n\"}\n{\"Time\":\"2026-10-07T03:48:18.087954+09:00\",\"Action\":\"pass\",\"Package\":\"github.com/0disoft/fairyc/internal/resultfixture\",\"Elapsed\":0.201}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "check",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 85 source file(s), 1117 MIR function(s), lock verified\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261006184314-fbcf1b19c5fe+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: fbcf1b19c5fe7569ddb526e1ad38b814de9b5e15\nmodified: true\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-discard-call",
+      "exit": 0,
+      "stdout": "semantics ok: main.fy (typed HIR: 2 function(s))\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-discard-call\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-discard-call\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-is-ok-both",
+      "exit": 0,
+      "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-is-ok-both\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-is-ok-both\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-self-assign",
+      "exit": 0,
+      "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-self-assign\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-self-assign\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-outer",
+      "exit": 0,
+      "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-outer\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-outer\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-bare-call",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:69: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 68..74]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-bare-call\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-bare-call\\main.fy:1:69: error: Result value must be handled (bytes 68..74)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-bare-call\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-bare-call\\main.fy:1:69: error: Result value must be handled (bytes 68..74)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-branch-one",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:49: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 48..49]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-branch-one\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-branch-one\\main.fy:1:49: error: Result value must be handled (bytes 48..49)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-branch-one\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-branch-one\\main.fy:1:49: error: Result value must be handled (bytes 48..49)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-backedge",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:92: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 91..97]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-backedge\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-backedge\\main.fy:1:92: error: Result value must be handled (bytes 91..97)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-backedge\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-loop-backedge\\main.fy:1:92: error: Result value must be handled (bytes 91..97)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-result-obligations.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-propagate-pending",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:82: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 81..87]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-propagate-pending\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-propagate-pending\\main.fy:1:82: error: Result value must be handled (bytes 81..87)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-propagate-pending\\main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\result-handling\\reference-propagate-pending\\main.fy:1:82: error: Result value must be handled (bytes 81..87)\n"
+    }
+  ],
+  "files": [
+    {
+      "path": "internal/semantic/result_flow.go",
+      "sha256": "1f3943711eeec4986a8756e2f08b97eec72f2fac260c5053d77a857ac59a6ce5"
+    },
+    {
+      "path": "internal/semantic/result_propagation_obligation_test.go",
+      "sha256": "f4e8824352b8c9f7e5ffc4fffd8202b7cf618bd3656b376a79c2097fdf0622d5"
+    },
+    {
+      "path": "spec/fixtures/result/cases/pass/propagate-result/src/main.fy",
+      "sha256": "0c1b4fe4c515d647d1d6f1c66acfb12042a6ec1be1b3058b211cf75487d0ffcd"
+    },
+    {
+      "path": "spec/fixtures/result/manifest-v0.json",
+      "sha256": "7f3224765e51b57aae90ebb9a1f31a91c68c3e0544af45276e25b9853c67addd"
+    },
+    {
+      "path": "docs/language/0004-results-traps-and-control-flow.md",
+      "sha256": "94ce5abc916b51343772592fe35a0ac253960661765afa77160c2030c7a9b023"
+    }
+  ],
+  "skipped": [
+    "Linux consolidated batch",
+    "performance",
+    "stage1/stage2",
+    "full repository suite"
+  ],
+  "compatibility": "Closes an earlier-return obligation omission within the existing Result contract; no new syntax or payload type"
+}
