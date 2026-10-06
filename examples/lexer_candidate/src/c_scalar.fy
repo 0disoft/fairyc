@@ -2,6 +2,7 @@ module c_scalar;
 import mir_model as m;
 import c_text as w;
 import c_flow as flow;
+import c_nominal as nominal;
 import std::bytes as bytes;
 
 pub fn bool cast_local(ref mut bytes::Buffer out, ref mut w::State s, usize id, u32 type) {
@@ -22,6 +23,7 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
 }
 pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref mut w::State s) {
     let m::Operation o = m::operation_at(p,id);
+    if (o.kind >= 6 && o.kind <= 8) { return nominal::operation(p,o,out,s); }
     if (o.kind == 5) { return true; }
     if (o.kind == 4 && (o.operator == 6 || o.operator == 7)) {
         if (!w::text(out,s,b"    ") || !w::divisor(out,s,o.owner_type) || !w::text(out,s,b" = ") || !w::local(out,s,o.right) || !w::text(out,s,b";\n")) { return false; }

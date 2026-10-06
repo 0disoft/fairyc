@@ -11,7 +11,7 @@ def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def compare(fixture,row):
     assert (row['exit'],row['stderr'])==(0,''),row
     source=bytes.fromhex(fixture['inputHex']);t=read_mir(row['stdout'],source);names=validate(t,source)
-    structs=fixture['program']['StructTypes'];assert len(structs)==len(t['N'])
+    structs=sorted(fixture['program']['StructTypes'],key=lambda s:s['Span']['StartByte']);assert len(structs)==len(t['N'])
     types={**TYPES,**{id:s['Type'] for id,s in zip(t['N'],structs,strict=True)}}
     for n,s in zip(t['N'].values(),structs,strict=True):
         assert n['field_count']==len(s['Fields'] or [])

@@ -4,9 +4,10 @@ This is the first Fairy-written recognition slice, built by the Go stage0
 compiler for Windows AMD64 MSVC. It is not a compiler replacement or stable CLI.
 `src/scanner.fy` recognizes original bytes directly; Go does not supply its tokens.
 
-Example version 0.18.0 adds verified same-file nominal struct MIR (see
-[Owned nominal MIR](#owned-nominal-mir)). Struct C emission and native execution
-of input struct programs remain unsupported.
+Example version 0.19.0 adds C11 emission and native execution verification for
+same-file nominal structs (see [Owned nominal C](#owned-nominal-c)). The candidate
+owns recognition, typing, HIR, MIR and C generation; the native C compiler and
+runtime link the resulting unit. This remains an experimental compiler slice.
 
 ## Owned consumer API
 
@@ -1542,19 +1543,57 @@ early return, copied call arguments, nested/sibling mutation, branches, loops,
 arithmetic traps and defer traces. The separate Go call-argument snapshot fix is
 commit `58350fb9`.
 
-The latest regression runs also passed: **58 nominal CLI runs**, **30 nominal HIR
+The 0.18.0 regression runs also passed: **58 nominal CLI runs**, **30 nominal HIR
 comparisons** and **1256 scalar CLI runs**. Nominal CLI controls now accept HIR
-and MIR and reject C output. Native API final checks passed:
+and MIR and rejected C output. Native API final checks passed:
 `tests/mir_nominal.fy` (2), `tests/hir_nominal.fy` (3) and `tests/mir_verify.fy` (1),
 six tests per development/release profile, including ten nominal MIR mutations.
-The candidate API supports empty structs, but the Go oracle currently has an
-empty-constructor lowering gap, so these comparisons establish no empty-struct
-parity.
+These historical comparisons established no empty-struct parity. Bootstrap
+commit `8bd0e831` subsequently connected private empty construction, copying,
+arguments, returns and nesting through MIR, the interpreter and C execution.
 
-`src/c_emit.fy` still rejects nominal tables; input struct programs have no
-candidate C/native execution yet. Linux native checks remain deferred to the
-owner's consolidated batch. Evidence is recorded in
+Version 0.18.0 still rejected nominal C output. Its evidence is recorded in
 `docs/ops/evidence/nominal-mir-file-cli-20261006.json`.
+
+## Owned nominal C
+
+Version 0.19.0 extends `--c-file` to the same-file plain copy structs admitted by
+nominal MIR. `src/c_nominal.fy` emits dependencies before their by-value owners,
+constructs fields from the already frozen MIR operands, reads fields and copies
+an owner before updating one field. Function signatures, arguments, returns and
+locals retain the nominal type. Forward type references, nested layouts and distinct
+types with identical fields keep their existing source identities.
+
+C symbols use numeric arena IDs rather than source names. Private empty structs
+contain one initialized dummy byte; this byte is not a source field and is not a
+public ABI. Scalar-only units retain `fairyc.candidate-scalar-c/v1`; nominal units
+use `fairyc.candidate-nominal-c/v1`. The existing 2 MiB output bound and 64-bit C11
+target guards remain. Invalid MIR is rejected before appending output.
+
+```text
+fairyc build --release --locked
+build/lexer-candidate.exe --c-file samples/nominal-c-demo.fy
+```
+
+The generated unit still needs the private trap runtime when compiled. The
+portable `verify_c.py --nominal` harness invokes the existing native C runner;
+scripts provide fixtures and observations, not product parsing or C generation.
+It compares Go-interpreter outcomes for constructors, initializer ordering,
+copied arguments, nested/sibling updates, control flow, traps and defer traces.
+An extra fixed native control checks RHS effects when replacing an empty field:
+the Go bootstrap still rejects that field-store shape, so this case is explicitly
+not a Go differential result. `@repr(C)`, resources, arrays/views, enums, generics
+and multi-file nominal types remain outside this candidate component.
+
+Windows MSVC development/release evidence, raw invocations, expected outcomes,
+source and compiler identities and EXE hashes are recorded in
+`docs/ops/evidence/nominal-c-file-cli-20261006.json`. Linux native execution is
+deferred to the owner's consolidated batch; no performance measurement is claimed.
+
+The focused run passed 48 nominal MIR comparisons, 74 nominal C CLI runs,
+56 nominal native executions (24 Go-reference cases plus one fixed control and
+three standalone images across both profiles), 58 nominal type/HIR/MIR/C CLI
+controls, 20 native scalar regressions and three native API tests per profile.
 
 ## Cost baseline
 

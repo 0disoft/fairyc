@@ -4,6 +4,10 @@ package main
 // interpreter. Candidate temporary IDs and operation counts are not goldens.
 func writeNominalMIR(path string) error {
 	seeds := []scalarMIRSeed{
+		{"empty-construct", "struct E{}fn i32 main(){let e=E{};return 1;}", true},
+		{"empty-return", "struct E{}fn E make(){return E{};}fn E id(E e){return e;}fn i32 accept(E e){return 3;}fn i32 main(){return accept(id(make()));}", true},
+		{"empty-nested", "struct E{}struct B{E e;i32 n;}fn B id(B b){return b;}fn i32 main(){var b=id(B{.e=E{},.n=4});b.n=5;return b.n;}", true},
+		{"forward-layout", "struct B{A a;i32 n;}struct A{i32 x;}fn i32 main(){return B{.a=A{.x=7},.n=2}.a.x;}", true},
 		{"construct-read", "struct A{i32 x;}fn i32 main(){return A{.x=17}.x;}", true},
 		{"reordered-frozen", "struct P{i32 x;i32 y;}fn i32 main(){var i32 n=1;let p=P{.y=n,.x={n=3;n}};return p.x*10+p.y;}", true},
 		{"initializer-return", "struct P{i32 x;i32 y;}fn i32 main(){let p=P{.y=1,.x={return 9;2}};return p.x;}", true},

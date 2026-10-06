@@ -9,7 +9,7 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--images',nargs=2,required=True);parser.add_argument('--reference',required=True);parser.add_argument('--receipt',required=True)
     args=parser.parse_args();images=[Path(p).resolve() for p in args.images];reference=Path(args.reference).resolve();receipt=Path(args.receipt).resolve();receipt.parent.mkdir(parents=True,exist_ok=True)
     data=json.loads(reference.read_text(encoding='utf-8'));assert data['schema']=='fairyc.nominal-types-oracle/v1'
-    rows=[];counts=dict(semanticComparisons=0,candidateLayoutRejections=0,candidateValueRejections=0,backendRejections=0,hirAccepted=0,mirAccepted=0)
+    rows=[];counts=dict(semanticComparisons=0,candidateLayoutRejections=0,candidateValueRejections=0,cAccepted=0,hirAccepted=0,mirAccepted=0)
     for f in data['fixtures']:
         path=receipt.parent/(f['name']+'.fy');source=bytes.fromhex(f['inputHex']);path.write_bytes(source);before=sha(path)
         for image in images:
@@ -37,7 +37,7 @@ def main():
             elif mode=='--mir-file':
                 assert p.returncode==0 and row['stdout'].startswith('fairyc.nominal-mir/v1\n') and row['stderr']=='' and row['unchanged'],row;counts['mirAccepted']+=1
             else:
-                assert (p.returncode,row['stdout'],row['stderr'])==(2,'','error: invalid C input\n') and row['unchanged'],row;counts['backendRejections']+=1
+                assert p.returncode==0 and row['stdout'].startswith('/* fairyc.candidate-nominal-c/v1;') and row['stderr']=='' and row['unchanged'],row;counts['cAccepted']+=1
     result=dict(schema='fairyc.nominal-type-cli-verification/v1',passed=True,counts=counts,images=[dict(path=str(p),sha256=sha(p)) for p in images],reference=dict(path=str(reference),sha256=sha(reference)),scriptSHA256=sha(__file__),runs=rows)
     receipt.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n');print(f'PASS: {len(rows)} nominal CLI executions; {counts}')
 if __name__=='__main__':main()

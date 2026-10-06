@@ -34,10 +34,10 @@ fn void nominal_lowering_owns_shapes_and_ordered_operands() {
     var bytes::Buffer first = bytes::empty(); var bytes::Buffer second = bytes::empty();
     assert(output::render(ref p,ref mut first) == 0 && output::render(ref p,ref mut second) == 0);
     assert(bytes::equal(bytes::view(ref first),bytes::view(ref second)) && bytes::equal(bytes::view(ref first)[..22],b"fairyc.nominal-mir/v1\n"));
-    var bytes::Buffer untouched = bytes::empty(); assert(bytes::append(ref mut untouched,b"prefix").is_ok);
-    assert(c::render(ref p,ref mut untouched) == 5 && bytes::equal(bytes::view(ref untouched),b"prefix"));
+    var bytes::Buffer c_output = bytes::empty(); assert(c::render(ref p,ref mut c_output) == 0);
     let m::Program empty = compiled(b"module main;struct E{}fn E id(E x){return x;}fn i32 main(){discard id(E{});return 0;}");
     assert(verify::check(ref empty).code == 0 && shapes::field_count(m::nominal(ref empty)) == 0);
+    var bytes::Buffer empty_c = bytes::empty(); assert(c::render(ref empty,ref mut empty_c) == 0);
 }
 
 fn m::Local local(u32 type) { return m::Local { .function = 1, .binding = 0, .type, .parameter = false, .mutable = true, .start = 0, .end = 1 }; }
@@ -77,5 +77,6 @@ fn void nominal_verifier_rejects_forged_operations_and_uninitialized_fields() {
         let m::Program p = mutated(mutation);assert(verify::check(ref p).code == if (mutation == 1) { 1002 } else { 1001 });
         var bytes::Buffer out = bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);
         assert(output::render(ref p,ref mut out) != 0 && bytes::equal(bytes::view(ref out),b"prefix"));mutation += 1;
+        assert(c::render(ref p,ref mut out) != 0 && bytes::equal(bytes::view(ref out),b"prefix"));
     }
 }
