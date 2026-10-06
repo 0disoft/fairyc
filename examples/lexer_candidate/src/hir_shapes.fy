@@ -38,7 +38,7 @@ fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;
     while (j < s.field_count) {
         let Field f = field_at(p,s.field_start + j + 1);
-        if (!enums::valid(s.type) && f.type >= 256 && !arrays::valid(f.type) && !visit(p,find(p,f.type) - 1,colors,depth + 1)) { return false; } j += 1;
+        if ((!enums::valid(s.type) || tagged::builtin(s.type)) && f.type >= 256 && !arrays::valid(f.type) && !visit(p,find(p,f.type) - 1,colors,depth + 1)) { return false; } j += 1;
     }
     colors[i] = 2; return true;
 }
@@ -71,7 +71,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
                     if(j>f.payload_count && field_at(p,offset+j-f.payload_count).type!=0){return false;}
                 }else if(f.payload_count!=0 || f.payload_start!=0 || j+1==s.field_count){return false;}
             }else if(f.payload_count!=0 || f.payload_start!=0){return false;}
-            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6}else{literals::valid(f.type) || f.type==11 || enums::valid(f.type) || !valid_type(p,f.type,false)})) { return false; } j += 1;
+            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && tagged::builtin(f.type) && valid_type(p,f.type,false))}else{literals::valid(f.type) || f.type==11 || enums::valid(f.type) || !valid_type(p,f.type,false)})) { return false; } j += 1;
         }
         offset += s.field_count; i += 1;
     }

@@ -36,7 +36,7 @@ TYPE_NEGATIVES = [
     ('void-error', 'fn Result<i32,void> f(){return 0;}', None),
     ('unknown', 'fn Result<Missing,bool> f(){return 0;}', None),
     ('qualified', 'fn unknown::Result<i32,bool> f(){return 0;}', None),
-    ('nested', 'fn Result<Option<i32>,bool> f(){return 0;}', None),
+    ('nested-void', 'fn Result<Option<void>,bool> f(){return 0;}', None),
 ]
 # Every admitted pair must differ when either component changes. This checks
 # actual candidate source typing, not only the private numeric encoding helper.

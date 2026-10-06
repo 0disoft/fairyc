@@ -40,7 +40,7 @@ pub fn Pattern pattern(ref names::Resolved resolved, ref mut v::Vec<state::Slot>
         var usize sid = 1;
         while (sid <= names::symbol_count(resolved)) {
             let symbol = names::symbol_at(resolved,sid);
-            if (symbol.kind == 8 && symbol.declaration == pattern.left) { state::set_symbols(tables,sid - 1,child); }
+            if (symbol.kind == 8 && symbol.declaration == pattern.left) { state::set_symbols(tables,sid - 1,child); state::set_uses(tables,pattern.left-1,sid); }
             sid += 1;
         }
     }

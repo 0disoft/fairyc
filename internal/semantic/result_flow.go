@@ -276,6 +276,12 @@ func (a *analyzer) resultFlowMatch(module *moduleScope, expression *ast.Expressi
 	branches := make([]resultBranch, 0, len(expression.Children)-1)
 	for _, arm := range expression.Children[1:] {
 		branchEnvironment := cloneResultEnvironment(baseline)
+		// Edges in loops already enclosing this arm leave its capture scope.
+		// A loop created inside the arm may exit without ending that scope.
+		loopStarts := make([]int, len(a.resultLoops))
+		for index := range loopStarts {
+			loopStarts[index] = len(a.resultLoops[index].edges)
+		}
 		var binding *symbol
 		var body *ast.Expression
 		if arm != nil && arm.Kind == syntax.KindPattern && len(arm.Children) == 2 {
@@ -290,6 +296,13 @@ func (a *analyzer) resultFlowMatch(module *moduleScope, expression *ast.Expressi
 		}
 		reachable := a.resultFlowExpression(module, body, branchEnvironment, branchUse)
 		if binding != nil {
+			for index, start := range loopStarts {
+				for edgeIndex := start; edgeIndex < len(a.resultLoops[index].edges); edgeIndex++ {
+					edge := &a.resultLoops[index].edges[edgeIndex]
+					a.reportResultObligation(edge.environment[binding])
+					delete(edge.environment, binding)
+				}
+			}
 			if reachable {
 				a.reportResultObligation(branchEnvironment[binding])
 			}

@@ -1,4 +1,5 @@
 module c_nominal;
+import tagged_types as tagged;
 import mir_model as m;
 import hir_shapes as shapes;
 import array_types as arrays;
@@ -13,6 +14,10 @@ fn bool field(ref mut bytes::Buffer out, ref mut w::State s, usize id) {
 fn bool definition(ref shapes::Table table, usize index, ref mut u8[] emitted, ref mut bytes::Buffer out, ref mut w::State s) {
     if (emitted[index] != 0) { return true; }
     let shapes::Shape shape = shapes::at(table,index); var usize i = 0;
+    // Nested tagged payloads must be fully defined before their parent record.
+    while(i<shape.field_count){let f=shapes::field_at(table,shape.field_start+i+1);
+        if(f.type>=256 && !arrays::valid(f.type) && !definition(table,shapes::find(table,f.type)-1,emitted,out,s)){return false;}i+=1;
+    }i=0;
     if (enums::valid(shape.type)) {
         if (!w::type(out,s,shape.type) || !w::text(out,s,b"{ uint32_t fy_tag;\n")) { return false; }
         var bool payload = false;
@@ -51,6 +56,19 @@ pub fn bool enum_operation(ref m::Program p, m::Operation o, ref mut bytes::Buff
     let ref shapes::Table table = m::nominal(p);
     let usize member = if (o.kind == 23) { shapes::payload_member(table,o.owner_type,o.operator as usize) }
         else { shapes::member_at(table,o.owner_type,o.operator as usize) };
+    if (o.kind == 21 && o.type >= 1073741824 && tagged::builtin(o.type)) {
+        // Avoid implicit recursive aggregate initialization of inactive arms.
+        if (!w::text(out,s,b"    memset(&") || !w::local(out,s,o.result) || !w::text(out,s,b",0,sizeof(")
+            || !w::local(out,s,o.result) || !w::text(out,s,b"));\n    ") || !w::local(out,s,o.result)
+            || !w::text(out,s,b".fy_tag=UINT32_C(") || !w::number(out,s,o.operator as usize) || !w::text(out,s,b");\n")) { return false; }
+        let f = shapes::field_at(table,member); var usize i = 0;
+        while (i < o.argument_count) {
+            if (!w::text(out,s,b"    ") || !w::local(out,s,o.result) || !w::text(out,s,b".fy_payload.") || !field(out,s,member)
+                || !w::text(out,s,b".") || !field(out,s,f.payload_start+i+1) || !w::text(out,s,b"=")
+                || !w::local(out,s,m::edge_at(p,o.argument_start+i)) || !w::text(out,s,b";\n")) { return false; } i += 1;
+        }
+        return true;
+    }
     if (o.kind == 23) {
         if (!w::text(out,s,b"    if (") || !w::local(out,s,o.left) || !w::text(out,s,b".fy_tag != UINT32_C(")
             || !w::number(out,s,shapes::member_tag(table,o.owner_type,member)) || !w::text(out,s,b")) fy_runtime_trap(7);\n")) { return false; }

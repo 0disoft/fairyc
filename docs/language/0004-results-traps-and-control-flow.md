@@ -92,7 +92,7 @@ loop is `E1012`. Both terminate the reachable portion of their block. In classic
 performs exited-scope cleanup and then executes the post clause before the next condition; `break`
 performs its cleanup and skips the post clause. Resource Flow requires every normal body, break,
 and continue edge to preserve the loop-header state of resources declared outside the loop. Result
-Flow requires pending locals in exited scopes to be handled, and continue edges participate in
+Flow requires pending locals, including Result-valued pattern captures, in exited scopes to be handled, and continue edges participate in
 repeated-iteration overwrite checks. Labelled and value-producing loop exits are not Stage 0.
 
 Compound assignment reuses the same trap categories as its underlying binary operator. It captures

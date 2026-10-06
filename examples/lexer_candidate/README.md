@@ -2324,6 +2324,51 @@ Raw commands, the reachable discrepancy reproducer, source/SDK/bootstrap/image
 digests and the existing validation-only release timeout overlay are retained in
 `docs/ops/evidence/candidate-result-handling-20261007.json`; the correction and
 comparison evidence is `candidate-result-handling-alignment-20261007.json`. Linux, performance,
-self-hosting and the full repository suite remain deferred. Nested/aggregate/
-resource payloads and tagged storage remain units 12..20 or later. The remaining
+self-hosting and the full repository suite remain deferred. Aggregate/resource
+payloads and tagged storage remain units 13..20 or later. The remaining
 work inventory is `docs/ops/candidate-remaining-work-20261007.md`.
+
+## Nested Option and Result values
+
+Version 0.41.0 extends the Fairy candidate to bounded combinations of Option and
+Result with integer/bool leaves. Type identities are canonical across source
+order; earlier scalar identities are preserved. Nested identities use a closed
+30-bit prefix encoding with a separate marker, a resolver depth bound of 16,
+and an encoding-size bound. Twelve successive Option wrappers fit; a thirteenth
+does not. These bounds do not admit arbitrary recursive value types.
+
+The owned HIR retains every instantiated child layout, including children only
+spelled beneath another type annotation. HIR validates child identities and
+acyclic layout dependencies; MIR retains nested constructors, copies, calls,
+returns, switch payloads and Result propagation. Generated C defines children
+before parents. Capturing a nested Result introduces a handling obligation that
+must survive ordinary exits, early returns, break and continue.
+
+The maximum-depth native case exposed MSVC C1054: implicit C aggregate zero
+initialization recursively expanded inactive payloads beyond the C compiler's
+initializer limit. Nested builtin locals and constructors now zero their scalar
+storage with `memset`, set the tag, and assign the active payload from frozen MIR
+operands. This applies only to nested integer/bool tagged layouts; pointer-bearing
+or resource payload initialization is not admitted by this change.
+
+`verify_result_execution.py --nested-tagged` compares type/HIR/MIR/C output in
+development and release, then executes generated C under both MSVC profiles.
+Fixtures cover nested success and error alternatives together, scalar boundary
+values, copy order, nested propagation, capture handling, exhaustive patterns,
+identity mismatches, void rejection and the encoding bound. Exact successful
+observations and the initial backend failure are retained in
+`docs/ops/evidence/candidate-nested-tagged-20261007.json`.
+
+The final lane passes 52 source fixtures, 417 CLI observations and 78 generated
+native executions, plus 16 native API tests across both candidate profiles and
+six existing nominal/array/mutable-view sample executions. Seventeen selected Go
+reference cases agree. The comparison exposed a Go Result Flow omission on
+captured Results when break/continue exits their case scope; the reference now
+checks exactly those exited edges, preserving captures across inner-loop exits.
+Four rejecting controls and five handled/inner-loop controls cover that fix;
+related semantic checks and the existing Result fixture manifest pass. The old
+bootstrap images remain unchanged; the corrected reference is built separately.
+
+Struct/diagnostic/resource payloads, aggregate tagged storage, broader type
+identity representation and compiler self-hosting remain later units. Linux,
+performance and the whole repository suite stay deferred to the owner's batch.

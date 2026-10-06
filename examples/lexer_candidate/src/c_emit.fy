@@ -1,6 +1,7 @@
 module c_emit;
 import mir_model as m;
 import hir_shapes as shapes;
+import tagged_types as tagged;
 import mir_verify as verify;
 import c_text as w;
 import c_scalar as scalar;
@@ -26,7 +27,16 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
     if (!signature(p,plan,f,out,s) || !w::text(out,s,b"{\n")) { return false; }
     var usize id = f.local_start + 1; while (id <= f.local_start + f.local_count) {
         let m::Local l = m::local_at(p,id);
-        if (!l.parameter && (!w::text(out,s,b"    ") || !w::type(out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id) || !w::text(out,s,if (l.type >= 256 || l.type == 9 || l.type == 10 || l.type == 11) { b"={0};\n" } else { b"=0;\n" }))) { return false; }
+        if (!l.parameter) {
+            let bool nested = l.type >= 1073741824 && tagged::builtin(l.type);
+            if (!w::text(out,s,b"    ") || !w::type(out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id)
+                || !w::text(out,s,if(nested){b";\n"}else if(l.type >= 256 || l.type == 9 || l.type == 10 || l.type == 11){b"={0};\n"}else{b"=0;\n"})) { return false; }
+            // MSVC recursively expands aggregate zero initializers and reaches
+            // C1054 before the admitted nested type depth. These layouts hold
+            // only integer/bool tagged values; byte-zeroing has no pointer ABI.
+            if (nested && (!w::text(out,s,b"    memset(&") || !w::local(out,s,id) || !w::text(out,s,b",0,sizeof(")
+                || !w::local(out,s,id) || !w::text(out,s,b"));\n"))) { return false; }
+        }
         if (!w::text(out,s,b"    (void)") || !w::local(out,s,id) || !w::text(out,s,b";\n")) { return false; } id += 1;
     }
     var bool[7] divisors = [false;7]; var bool trapped = false;
