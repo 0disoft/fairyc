@@ -4,17 +4,14 @@ import tagged_types as tagged;
 import enum_types as enums;
 import literal_types as literals;
 import syntax as syntax;
+import nominal_identity as identity;
 import type_state as state;
 import std::bytes as bytes;
 
 // Private nominal ID = 256 + zero-based declaration index. Scalar tags stay
 // unchanged. Identity is declaration based, never structural field equality.
 pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
-    var usize i = 0; while (i < syntax::declaration_count(p)) {
-        let syntax::Declaration d = syntax::declaration_at(p,i);
-        if (d.kind == 4 && bytes::equal(syntax::source_view(p)[d.name_start..d.name_end],spelling)) { return 256 + state::small_id(i); } i += 1;
-    }
-    return 0;
+    return identity::named(p,spelling);
 }
 pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     if (root == 0) { return 0; }

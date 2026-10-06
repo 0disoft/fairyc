@@ -3,6 +3,7 @@ import mir_model as m;
 import hir_shapes as shapes;
 import enum_types as enums;
 import tagged_types as tagged;
+import nominal_identity as nominal;
 
 fn bool local(ref m::Program p, usize id, usize function, u32 type) {
     return id > 0 && id <= m::local_count(p) && m::local_at(p,id).function == function && m::local_at(p,id).type == type;
@@ -16,7 +17,7 @@ pub fn bool operation(ref m::Program p, m::Operation o) {
         let usize field=o.operator as usize;
         if(field==0 || field>shapes::field_count(m::nominal(p)) || o.argument_start!=0 || o.argument_count!=0){return false;}
         let f=shapes::field_at(m::nominal(p),field);
-        return f.owner==o.owner_type && f.type==o.type && (f.type>=1 && f.type<=6 || tagged::builtin(o.owner_type) && tagged::builtin(f.type))
+        return f.owner==o.owner_type && f.type==o.type && (f.type>=1 && f.type<=6 || tagged::builtin(o.owner_type) && (tagged::builtin(f.type) || nominal::valid(f.type)))
             && shapes::payload_member(m::nominal(p),o.owner_type,field)!=0 && local(p,o.left,o.function,o.owner_type);
     }
     let usize member=shapes::member_at(m::nominal(p),o.owner_type,o.operator as usize);if(member==0){return false;}

@@ -33,7 +33,8 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
                 || !w::text(out,s,if(nested){b";\n"}else if(l.type >= 256 || l.type == 9 || l.type == 10 || l.type == 11){b"={0};\n"}else{b"=0;\n"})) { return false; }
             // MSVC recursively expands aggregate zero initializers and reaches
             // C1054 before the admitted nested type depth. These layouts hold
-            // only integer/bool tagged values; byte-zeroing has no pointer ABI.
+            // only integer/bool storage and scalar-field struct payloads;
+            // byte-zeroing has no pointer ABI in this admitted layout graph.
             if (nested && (!w::text(out,s,b"    memset(&") || !w::local(out,s,id) || !w::text(out,s,b",0,sizeof(")
                 || !w::local(out,s,id) || !w::text(out,s,b"));\n"))) { return false; }
         }

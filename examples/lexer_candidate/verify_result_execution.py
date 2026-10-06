@@ -54,6 +54,7 @@ def main():
     parser.add_argument('--propagation', action='store_true')
     parser.add_argument('--must-use', action='store_true')
     parser.add_argument('--nested-tagged', action='store_true')
+    parser.add_argument('--struct-payloads', action='store_true')
     args = parser.parse_args()
     positives, traps, negatives, traces = POSITIVES, TRAPS, PATTERN_NEGATIVES, {}
     if args.propagation:
@@ -62,6 +63,9 @@ def main():
         from verify_result_handling_cases import POSITIVES as positives, TRAPS as traps, NEGATIVES as negatives
     if args.nested_tagged:
         from verify_nested_tagged_cases import POSITIVES as positives, TRAPS as traps, NEGATIVES as negatives
+    if args.struct_payloads:
+        from verify_struct_payload_cases import POSITIVES as positives, TRAPS as traps, NEGATIVES as negatives
+    composite = args.nested_tagged or args.struct_payloads
     images = [Path(p).resolve() for p in args.images]
     runner = Path(args.native_runner).resolve()
     receipt = Path(args.receipt).resolve(); receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -93,10 +97,10 @@ def main():
                 assert all(len(set(values)) == 1 for values in outputs.values())
                 if rejected: continue
                 assert outputs['--mir-file'][0].startswith('fairyc.enum-payload-mir/v1\n')
-                if not args.nested_tagged: assert '\t2621' in outputs['--mir-file'][0] and 'result:' in outputs['--hir-file'][0]
+                if not composite: assert '\t2621' in outputs['--mir-file'][0] and 'result:' in outputs['--hir-file'][0]
                 if args.propagation: assert '\tpropagate\t' in outputs['--hir-file'][0]
                 code = outputs['--c-file'][0]
-                if args.nested_tagged:
+                if composite:
                     assert code.startswith('/* fairyc.candidate-') and ('struct fy_r_' in code or 'struct fy_o_' in code)
                 else: assert code.startswith('/* fairyc.candidate-result-c/v1') and 'struct fy_r_' in code
                 trap = name in {n for n, _, _ in traps}
@@ -140,10 +144,10 @@ def main():
             assert sha(row['image']) == row['imageSHA256'] and sha(row['source']) == row['sourceSHA256'], row
         passed = True
     finally:
-        save(receipt, dict(schema='fairyc.result-candidate-execution/v1', unit=12 if args.nested_tagged else 11 if args.must_use else 10 if args.propagation else 8, passed=passed,
+        save(receipt, dict(schema='fairyc.result-candidate-execution/v1', unit=13 if args.struct_payloads else 12 if args.nested_tagged else 11 if args.must_use else 10 if args.propagation else 8, passed=passed,
             images=[dict(path=str(p), sha256=sha(p)) for p in images],
             nativeRunner=dict(path=str(runner), sha256=sha(runner)), cli=rows, native=native, fixtures=fixtures,
-            faultInjection=None if args.propagation or args.must_use or args.nested_tagged else dict(kind='test-only C tag and branch corruption in both alternatives', validFairySource=False, expectedTrap=7),
+            faultInjection=None if args.propagation or args.must_use or composite else dict(kind='test-only C tag and branch corruption in both alternatives', validFairySource=False, expectedTrap=7),
             cleanupObservation=dict(kind='test-only observation of actual generated-C mark calls', expectedTraces=traces),
             sources=[dict(path=str(p.relative_to(ROOT)), sha256=sha(p)) for p in sorted((ROOT/'src').glob('*.fy'))]))
     print(f'PASS: Result execution; {len(rows)} CLI observations; {len(native)} native executions')

@@ -2,6 +2,7 @@ module tagged_types;
 import syntax as syntax;
 import type_state as state;
 import tagged_encoding as encoding;
+import nominal_identity as nominal;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -16,7 +17,7 @@ pub fn u32 make_result(u32 success,u32 failure){return encoding::make_result(suc
 pub fn u32 make_option(u32 child){return encoding::make_option(child);}
 fn u32 resolved(ref syntax::Parsed p,usize root,usize depth){
     if(root==0 || depth>=16){return 0;}let node=syntax::type_at(p,root);
-    if(node.kind==1){let u32 scalar=state::primitive(p,root);return if(scalar>=1 && scalar<=6){scalar}else{0};}
+    if(node.kind==1){let u32 scalar=state::primitive(p,root);return if(scalar>=1 && scalar<=6){scalar}else{nominal::named(p,syntax::type_text(p,root))};}
     if(node.kind!=6){return 0;}let usize count=syntax::type_argument_count(p,root);
     if(bytes::equal(syntax::type_text(p,node.left),b"Option") && count==1){
         return make_option(resolved(p,syntax::type_argument(p,root,0),depth+1));

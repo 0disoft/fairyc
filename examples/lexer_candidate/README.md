@@ -2372,3 +2372,46 @@ bootstrap images remain unchanged; the corrected reference is built separately.
 Struct/diagnostic/resource payloads, aggregate tagged storage, broader type
 identity representation and compiler self-hosting remain later units. Linux,
 performance and the whole repository suite stay deferred to the owner's batch.
+
+## Struct and diagnostic Option/Result payloads
+
+Version 0.42.0 admits directly named same-file struct leaves in Option and Result.
+Struct identity remains declaration-based: equal field shapes from different
+declarations cannot be substituted. `nominal_identity.fy` shares name resolution
+between ordinary structs and tagged leaves without adding a type-resolution
+import cycle. Earlier scalar and nested-scalar identities are unchanged.
+
+The closed prefix encoding adds a fourteen-bit nominal leaf escape for the 512
+declaration slots. `Result<Token,Problem>` fits the thirty-bit encoding with both
+struct alternatives; nested types still obey its size/depth bounds. For example,
+`Result<Option<Token>,Problem>` needs thirty-two payload bits and is rejected.
+This candidate bound is separate from the public Go compiler's accepted language.
+
+Payload structs may contain the previously admitted scalar, fixed scalar-array,
+and nested ordinary-struct fields. Empty structs work. Pointer/view-bearing
+structs, resource payloads and tagged values stored in struct/array fields remain
+later work. Zeroing these admitted nested layouts still addresses integer/bool
+storage only, including its aggregate containers.
+
+Owned HIR preserves nominal child layouts and exact capture spans after input
+owners are destroyed. HIR rejects missing children or a different nominal payload
+identity; MIR independently checks the extracted field, owner and destination
+type. The existing constructor freezing, by-value copies, ordinary field access,
+switch handling and `?` success/error propagation execute these nominal values.
+Children are emitted before parent C records.
+
+`samples/struct-payload-demo.fy` constructs both a Token and a source-span Problem.
+Emit it with `build/lexer-candidate.exe --c-file samples/struct-payload-demo.fy`.
+`verify_result_execution.py --struct-payloads --images <dev> <release>
+--native-runner <runner> --receipt <path>` verifies the feature. Windows
+check/build/native-test, both candidate profiles, generated-C execution and the
+sample are recorded in `docs/ops/evidence/candidate-struct-payloads-20261007.json`.
+The lane passes 27 fixtures, 217 CLI observations, 30 generated native runs,
+16 native API tests and two sample runs. Existing nested regressions pass
+417 CLI observations and 78 native runs. Go reference checks accept 15 programs
+and reject six with diagnostics; missing-field and unknown-type controls return
+its known experimental-subset unsupported status. Go semantic-only checking also
+accepts a recursive value layout that the candidate rejects at its earlier
+owned-layout boundary. These reference limitations are recorded separately,
+rather than claiming exact diagnostic/phase equivalence for those controls.
+Linux, performance, full-repository validation and stage1/stage2 remain deferred.
