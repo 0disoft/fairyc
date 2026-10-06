@@ -13,6 +13,7 @@ pub fn bool number(ref mut bytes::Buffer out, ref mut State s, usize value) {
     if (!bytes::append_usize(out,value).is_ok) { s.code = 3; return false; } return true;
 }
 pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
+    if (code == 11) { return text(out,s,b"struct fy_bytes_mut"); }
     if (code == 9 || code == 10) { return text(out,s,if (code == 9) { b"struct fy_text" } else { b"struct fy_bytes" }); }
     if (code >= 1024) { return text(out,s,b"struct fy_a_") && number(out,s,code as usize); }
     if (code >= 256) { return text(out,s,b"struct fy_s_") && number(out,s,code as usize); }

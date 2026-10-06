@@ -1794,7 +1794,44 @@ and indexed-store receivers stay live across backedges and RHS evaluation.
 and local-return escape rejection. The initial HIR lane includes 30 positive and
 negative CLI cases. Mutable-to-shared call conversion, mutable text, field/nested
 arrays, mixed/recursive return origins and deferred view arguments remain closed.
-MIR/C writes are the next step; the HIR-only admission does not claim execution.
+Version 0.27.0 connects these retained nodes to execution below.
+
+## Mutable byte views and native C execution
+
+Version 0.27.0 lowers exclusive byte descriptors, mutable slices and indexed
+writes to verified MIR and private C11 transport. `struct fy_bytes_mut` has a
+mutable byte pointer and an element count; shared descriptors keep const
+pointers. A write changes the original array storage. Child writes therefore
+remain visible when the parent and original owner resume after the last use.
+Exact mutable parameters are passed as descriptors; a returned child retains
+the inferred caller origin and suspension checked by HIR.
+
+For an indexed store, MIR freezes the descriptor, evaluates/checks the index,
+then evaluates the RHS and performs the write. Compound assignments load the
+previous value before RHS effects, apply checked byte arithmetic and store only
+on success. Slice bounds evaluate once, left to right, and trap before pointer
+arithmetic unless `start <= end <= len`; an empty end slice is valid.
+
+MIR separately validates mutable backing arrays, store value/descriptor types,
+matching frozen descriptors and checked indices, definite initialization and
+local/parameter return origins. HIR owns exclusive-generation conflicts;
+MIR origin verification does not claim a complete source-independent mutable
+loan analysis. Invalid MIR is rejected before C rendering changes the caller's
+buffer. Public grammar, SDK and runtime contracts are unchanged.
+
+`samples/mutable-view-c-demo.fy` updates a returned payload slice, resumes the
+parent and verifies the original array. Emit it with `build/lexer-candidate.exe
+--c-file samples/mutable-view-c-demo.fy`. `verify_c.py --mutable` compares both
+candidate profiles with independent Go MIR interpreter outcomes and executes the
+C in MSVC low/optimized profiles. The mutable lane covers 20 Go-oracle programs,
+102 C CLI checks and 46 native executions; the sample adds two native runs.
+Exact source/tool hashes, commands and native
+observations are in `docs/ops/evidence/mutable-c-file-cli-20261006.json`.
+
+Mutable-to-shared call conversion, mutable text, field/nested-array borrows,
+view-bearing aggregates, retained mutable siblings and mixed/recursive return
+origins remain closed. Linux native validation stays deferred to the requested
+batch; no performance or self-hosting completion is claimed.
 
 ## Cost baseline
 

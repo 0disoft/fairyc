@@ -4,7 +4,7 @@ import c_text as w;
 import std::bytes as bytes;
 
 pub fn bool definitions(ref m::Program p, ref mut bytes::Buffer out, ref mut w::State s) {
-    return !m::has_literals(p) || w::text(out,s,b"struct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\n");
+    return !(m::has_literals(p) || m::has_views(p)) || w::text(out,s,b"struct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\n");
 }
 pub fn bool operation(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buffer out, ref mut w::State s) {
     if (o.kind == 14) {
