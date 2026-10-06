@@ -2053,7 +2053,7 @@ and shape arenas and validated before publication. See `samples/option-demo.fy`,
 `tests/hir_options.fy` and `verify_options.py --phase mir`.
 
 Evidence: `docs/ops/evidence/candidate-option-mir-20261007.json`. Native Option
-acceptance, structured/resource payloads and Result
+acceptance is recorded below; structured/resource payloads and Result
 remain subsequent units in the owner's numbered plan. Source grammar and SDK
 contracts are unchanged.
 
@@ -2063,3 +2063,20 @@ tags and field ownership, missing or mistyped operands, uninitialized reads,
 and preservation of the output buffer when verification fails. Existing enum
 mutation tests run alongside it. Evidence:
 `docs/ops/evidence/candidate-option-verifier-20261007.json`.
+
+## Scalar Option native execution
+
+Option C transport uses private `struct fy_o_N` names with a tag and payload
+union, preserving ordinary value-copy semantics in assignment, arguments and
+returns. `.none` sets its tag without evaluating or extracting a payload; each
+`.some` capture checks the active tag before a union read. Generated C is
+identified as `fairyc.candidate-option-c/v1`.
+
+`verify_options.py --phase native --images <dev> <release> --native-runner <runner>
+--receipt <path>` compares type/HIR/MIR/C output bytes from both candidate images,
+fixed native return values in both C profiles, source preservation and artifact
+hashes. It also deliberately corrupts a generated tag and branch decision,
+requiring the unchanged extraction guard to trap 7. This is test-only C fault
+injection rather than execution of a valid Fairy source program. Raw evidence:
+`docs/ops/evidence/candidate-option-native-20261007.json`. Linux runs remain
+deferred to the consolidated validation batch.

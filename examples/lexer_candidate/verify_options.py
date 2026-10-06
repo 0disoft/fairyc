@@ -62,6 +62,12 @@ def main():
             assert '\t1966' in outputs['--mir-file'][0] and 'option:' in outputs['--hir-file'][0]
             if args.phase=='native':
                 unit=receipt.parent/(name+'.c');unit.write_text('#define FY_CANDIDATE_NO_MAIN\n#include <inttypes.h>\n#include <stdio.h>\n'+outputs['--c-file'][0]+'int main(void){int32_t (*volatile entry)(void)=fy_candidate_entry;int32_t result=entry();fprintf(stderr,"fairyc-candidate-result/v1:%" PRId32 "\\n",result);return 0;}\n',encoding='utf-8',newline='\n');units.append(dict(name=name,source=str(unit),observe=True))
+                if name=='some':
+                    # Test-only corrupted tag and branch choice. The extraction
+                    # guard is unchanged and must prevent inactive union reads.
+                    code=outputs['--c-file'][0];assert code.count('=UINT32_C(0)')==1 and code.count('.fy_tag == UINT32_C(0)')==1
+                    code=code.replace('=UINT32_C(0)','=UINT32_C(1)',1).replace('.fy_tag == UINT32_C(0)','.fy_tag == UINT32_C(1)',1)
+                    fault=receipt.parent/'none-as-some.c';fault.write_text(code,encoding='utf-8',newline='\n');units.append(dict(name='none-as-some',source=str(fault),observe=False))
         for name,source,message in NEGATIVES:
             path=receipt.parent/(name+'.fy');path.write_bytes(('module main;'+source).encode());digest=sha(path)
             for image in images:
@@ -74,6 +80,10 @@ def main():
             run([Path(args.native_runner).resolve(),request,report],0,300);native=json.loads(report.read_text(encoding='utf-8'));assert len(native)==(2 if sys.platform=='win32' else 4)*len(units)
             expected={name:value for name,_,value in POSITIVES}
             for row in native:
+                if row['name']=='none-as-some':
+                    assert row['trap']==7 and row['exit']!=0 and not row['stdout'] and not row['stderr'],row
+                    assert sha(row['image'])==row['imageSHA256'] and sha(row['source'])==row['sourceSHA256'],row
+                    continue
                 assert row['exit']==0 and row['trap']==0 and row['value']==expected[row['name']] and not row['stdout'],row
                 assert row['stderr'].replace('\r\n','\n')==f"fairyc-candidate-result/v1:{expected[row['name']]}\n",row
                 assert sha(row['image'])==row['imageSHA256'] and sha(row['source'])==row['sourceSHA256'],row
