@@ -365,6 +365,10 @@ pub fn usize call_argument(ref Parsed parsed, usize call, usize index) {
 }
 // A labeled entry retains the identifier token after its opening dot; ordinary
 // entries retain the first value token at entry.start. Value children stay intact.
+pub fn bool call_argument_labeled(ref Parsed parsed, usize entry) {
+    let Expression node = expression_at(parsed,entry);
+    return scanner::token_info(ref parsed.source,node.token).start != node.start;
+}
 pub fn usize call_argument_entry(ref Parsed parsed, usize call, usize index) {
     let usize count = call_argument_count(parsed, call); assert(index < count);
     var usize remaining = count - 1; var usize link = expression_at(parsed, call).right;

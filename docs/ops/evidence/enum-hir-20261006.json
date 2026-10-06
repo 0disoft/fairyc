@@ -1,0 +1,1678 @@
+{
+  "schema": "fairyc.enum-hir-evidence/v1",
+  "phase": "hir",
+  "images": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+      "sha256": "810896e30d3baaff1cf2b9782b2962e8c7441c1620523750c8cee545dc5547d8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+      "sha256": "7d39da2b3e66d438894d0bbb8b42c7e80ce416a1db3c8547fda3ae709b8346a0"
+    }
+  ],
+  "cli": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t91\t1\t3\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t2\treference\tenum:131073\t-\t63\t64\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tinteger\ti32\t-\t86\t87\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t4\tarm\ti32\t-\t77\t88\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t75\t76\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t6\tarm\ti32\t-\t66\t77\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t7\tswitch\ti32\t-\t56\t89\t2\t0\t0\t0\t0\t2\t2\t0\t-\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t49\t90\t2\t7\t0\t0\t-\t0\t0\t0\t0\nK\t1\t85\t88\t2\t3\t2\t4\t0\t3\nK\t2\t74\t77\t2\t4\t2\t4\t0\t5\nK\t3\t37\t91\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t6\nA\t3\t4\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t91\t1\t3\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t2\treference\tenum:131073\t-\t63\t64\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tinteger\ti32\t-\t86\t87\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t4\tarm\ti32\t-\t77\t88\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t75\t76\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t6\tarm\ti32\t-\t66\t77\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t7\tswitch\ti32\t-\t56\t89\t2\t0\t0\t0\t0\t2\t2\t0\t-\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t49\t90\t2\t7\t0\t0\t-\t0\t0\t0\t0\nK\t1\t85\t88\t2\t3\t2\t4\t0\t3\nK\t2\t74\t77\t2\t4\t2\t4\t0\t5\nK\t3\t37\t91\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t6\nA\t3\t4\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t47\t1\t1\t0\t1\t0\nF\t2\t3\t47\t70\t3\t2\t2\t0\t0\nF\t3\t4\t70\t135\t5\t5\t3\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tenum:131073\t29\t31\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\tenum:131073\t52\t56\t0\t0\t0\t4\t1\t0\nB\t4\tfunction\ti32\t77\t81\t0\t0\t0\t5\t1\t0\nB\t5\tparameter\tenum:131073\t34\t35\t2\t1\t0\t0\t1\t0\nE\t1\treference\tenum:131073\t-\t44\t45\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t2\tvariant\tenum:131073\t-\t66\t68\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tcall\tenum:131073\t-\t101\t107\t0\t0\t0\t0\t3\t5\t0\t0\t-\nE\t4\tcall\tenum:131073\t-\t98\t108\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t5\tinteger\ti32\t-\t130\t131\t0\t0\t0\t0\t0\t0\t0\t0\t4\nE\t6\tarm\ti32\t-\t121\t132\t0\t0\t0\t3\t1\t0\t0\t0\t-\nE\t7\tinteger\ti32\t-\t119\t120\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t8\tarm\ti32\t-\t110\t121\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t9\tswitch\ti32\t-\t91\t133\t4\t0\t0\t0\t0\t5\t2\t0\t-\nS\t1\treturn\t37\t46\t2\t1\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t59\t69\t4\t2\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t84\t134\t6\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t47\t2\t2\t1\t1\t1\t0\nK\t2\t58\t70\t3\t4\t3\t2\t1\t0\nK\t3\t129\t132\t4\t7\t6\t7\t0\t5\nK\t4\t118\t121\t4\t8\t6\t7\t0\t7\nK\t5\t83\t135\t4\t6\t5\t3\t1\t0\nA\t0\t5\nA\t1\t1\nA\t2\t2\nA\t3\t3\nA\t4\t3\nA\t5\t8\nA\t6\t6\nT\t0\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t47\t1\t1\t0\t1\t0\nF\t2\t3\t47\t70\t3\t2\t2\t0\t0\nF\t3\t4\t70\t135\t5\t5\t3\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tenum:131073\t29\t31\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\tenum:131073\t52\t56\t0\t0\t0\t4\t1\t0\nB\t4\tfunction\ti32\t77\t81\t0\t0\t0\t5\t1\t0\nB\t5\tparameter\tenum:131073\t34\t35\t2\t1\t0\t0\t1\t0\nE\t1\treference\tenum:131073\t-\t44\t45\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t2\tvariant\tenum:131073\t-\t66\t68\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tcall\tenum:131073\t-\t101\t107\t0\t0\t0\t0\t3\t5\t0\t0\t-\nE\t4\tcall\tenum:131073\t-\t98\t108\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t5\tinteger\ti32\t-\t130\t131\t0\t0\t0\t0\t0\t0\t0\t0\t4\nE\t6\tarm\ti32\t-\t121\t132\t0\t0\t0\t3\t1\t0\t0\t0\t-\nE\t7\tinteger\ti32\t-\t119\t120\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t8\tarm\ti32\t-\t110\t121\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t9\tswitch\ti32\t-\t91\t133\t4\t0\t0\t0\t0\t5\t2\t0\t-\nS\t1\treturn\t37\t46\t2\t1\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t59\t69\t4\t2\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t84\t134\t6\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t47\t2\t2\t1\t1\t1\t0\nK\t2\t58\t70\t3\t4\t3\t2\t1\t0\nK\t3\t129\t132\t4\t7\t6\t7\t0\t5\nK\t4\t118\t121\t4\t8\t6\t7\t0\t7\nK\t5\t83\t135\t4\t6\t5\t3\t1\t0\nA\t0\t5\nA\t1\t1\nA\t2\t2\nA\t3\t3\nA\t4\t3\nA\t5\t8\nA\t6\t6\nT\t0\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t150\t1\t5\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tvar\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nB\t4\tlet\tenum:131073\t53\t61\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t2\treference\tenum:131073\t-\t62\t63\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\treference\tenum:131073\t-\t64\t65\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t4\tvariant\tenum:131073\t-\t66\t68\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\treference\tenum:131073\t-\t83\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t6\tinteger\ti32\t-\t145\t146\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t7\tarm\ti32\t-\t136\t147\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t8\treference\tenum:131073\t-\t109\t110\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t9\tinteger\ti32\t-\t132\t133\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t10\tarm\ti32\t-\t123\t134\t0\t0\t0\t2\t2\t0\t0\t0\t-\nE\t11\tinteger\ti32\t-\t121\t122\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t12\tarm\ti32\t-\t112\t123\t0\t0\t0\t3\t1\t0\t0\t0\t-\nE\t13\tswitch\ti32\t-\t102\t135\t8\t0\t0\t0\t0\t6\t2\t0\t-\nE\t14\tarm\ti32\t-\t93\t136\t0\t0\t0\t4\t1\t0\t0\t0\t-\nE\t15\tswitch\ti32\t-\t76\t148\t5\t0\t0\t0\t0\t4\t2\t0\t-\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t49\t64\t2\t2\t0\t4\t-\t0\t0\t0\t0\nS\t3\tassignment\t64\t69\t2\t4\t3\t0\t=\t0\t0\t0\t0\nS\t4\treturn\t69\t149\t2\t15\t0\t0\t-\t0\t0\t0\t0\nK\t1\t144\t147\t2\t3\t2\t6\t0\t6\nK\t2\t131\t134\t2\t5\t4\t8\t0\t9\nK\t3\t120\t123\t2\t6\t4\t8\t0\t11\nK\t4\t101\t136\t2\t4\t2\t6\t0\t13\nK\t5\t37\t150\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t14\nA\t5\t7\nA\t6\t12\nA\t7\t10\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t150\t1\t5\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tvar\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nB\t4\tlet\tenum:131073\t53\t61\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t2\treference\tenum:131073\t-\t62\t63\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\treference\tenum:131073\t-\t64\t65\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t4\tvariant\tenum:131073\t-\t66\t68\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\treference\tenum:131073\t-\t83\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t6\tinteger\ti32\t-\t145\t146\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t7\tarm\ti32\t-\t136\t147\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t8\treference\tenum:131073\t-\t109\t110\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t9\tinteger\ti32\t-\t132\t133\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t10\tarm\ti32\t-\t123\t134\t0\t0\t0\t2\t2\t0\t0\t0\t-\nE\t11\tinteger\ti32\t-\t121\t122\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t12\tarm\ti32\t-\t112\t123\t0\t0\t0\t3\t1\t0\t0\t0\t-\nE\t13\tswitch\ti32\t-\t102\t135\t8\t0\t0\t0\t0\t6\t2\t0\t-\nE\t14\tarm\ti32\t-\t93\t136\t0\t0\t0\t4\t1\t0\t0\t0\t-\nE\t15\tswitch\ti32\t-\t76\t148\t5\t0\t0\t0\t0\t4\t2\t0\t-\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t49\t64\t2\t2\t0\t4\t-\t0\t0\t0\t0\nS\t3\tassignment\t64\t69\t2\t4\t3\t0\t=\t0\t0\t0\t0\nS\t4\treturn\t69\t149\t2\t15\t0\t0\t-\t0\t0\t0\t0\nK\t1\t144\t147\t2\t3\t2\t6\t0\t6\nK\t2\t131\t134\t2\t5\t4\t8\t0\t9\nK\t3\t120\t123\t2\t6\t4\t8\t0\t11\nK\t4\t101\t136\t2\t4\t2\t6\t0\t13\nK\t5\t37\t150\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t14\nA\t5\t7\nA\t6\t12\nA\t7\t10\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t74\t1\t3\t0\t1\t0\nF\t2\t3\t74\t186\t5\t8\t2\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tenum:131073\t29\t35\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t81\t85\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tbool\t41\t44\t2\t1\t0\t0\t1\t0\nB\t5\tlet\tenum:131073\t94\t95\t3\t6\t0\t0\t1\t0\nE\t1\treference\tbool\t-\t56\t59\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tvariant\tenum:131073\t-\t61\t63\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tvariant\tenum:131073\t-\t69\t71\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t4\tblock\tenum:131073\t-\t68\t72\t0\t0\t0\t2\t0\t0\t0\t0\t-\nE\t5\tif\tenum:131073\t-\t53\t72\t1\t0\t4\t1\t0\t0\t0\t0\t-\nE\t6\tboolean\tbool\t-\t110\t115\t0\t0\t0\t0\t0\t0\t0\t0\t-\nE\t7\tcall\tenum:131073\t-\t103\t116\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t8\tvariant\tenum:131073\t-\t139\t141\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tarm\tenum:131073\t-\t130\t142\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t10\tvariant\tenum:131073\t-\t127\t129\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t11\tarm\tenum:131073\t-\t118\t130\t0\t0\t0\t5\t1\t0\t0\t0\t-\nE\t12\tswitch\tenum:131073\t-\t96\t143\t7\t0\t0\t0\t0\t5\t2\t0\t-\nE\t13\treference\tenum:131073\t-\t158\t159\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t181\t182\t0\t0\t0\t0\t0\t0\t0\t0\t5\nE\t15\tarm\ti32\t-\t172\t183\t0\t0\t0\t6\t1\t0\t0\t0\t-\nE\t16\tinteger\ti32\t-\t170\t171\t0\t0\t0\t0\t0\t0\t0\t0\t9\nE\t17\tarm\ti32\t-\t161\t172\t0\t0\t0\t7\t2\t0\t0\t0\t-\nE\t18\tswitch\ti32\t-\t151\t184\t13\t0\t0\t0\t0\t7\t2\t0\t-\nS\t1\treturn\t46\t73\t2\t5\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t88\t144\t6\t12\t0\t5\t-\t0\t0\t0\t0\nS\t3\treturn\t144\t185\t6\t18\t0\t0\t-\t0\t0\t0\t0\nK\t1\t60\t64\t2\t3\t2\t2\t0\t2\nK\t2\t68\t72\t2\t4\t2\t2\t0\t3\nK\t3\t45\t74\t2\t2\t1\t1\t1\t0\nK\t4\t138\t142\t3\t7\t6\t7\t0\t8\nK\t5\t126\t130\t3\t8\t6\t7\t0\t10\nK\t6\t180\t183\t3\t9\t6\t9\t0\t14\nK\t7\t169\t172\t3\t10\t6\t9\t0\t16\nK\t8\t87\t186\t3\t6\t5\t2\t2\t0\nA\t0\t4\nA\t1\t1\nA\t2\t2\nA\t3\t3\nA\t4\t6\nA\t5\t11\nA\t6\t9\nA\t7\t17\nA\t8\t15\nT\t0\tbool\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t74\t1\t3\t0\t1\t0\nF\t2\t3\t74\t186\t5\t8\t2\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tenum:131073\t29\t35\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t81\t85\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tbool\t41\t44\t2\t1\t0\t0\t1\t0\nB\t5\tlet\tenum:131073\t94\t95\t3\t6\t0\t0\t1\t0\nE\t1\treference\tbool\t-\t56\t59\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tvariant\tenum:131073\t-\t61\t63\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tvariant\tenum:131073\t-\t69\t71\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t4\tblock\tenum:131073\t-\t68\t72\t0\t0\t0\t2\t0\t0\t0\t0\t-\nE\t5\tif\tenum:131073\t-\t53\t72\t1\t0\t4\t1\t0\t0\t0\t0\t-\nE\t6\tboolean\tbool\t-\t110\t115\t0\t0\t0\t0\t0\t0\t0\t0\t-\nE\t7\tcall\tenum:131073\t-\t103\t116\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t8\tvariant\tenum:131073\t-\t139\t141\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tarm\tenum:131073\t-\t130\t142\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t10\tvariant\tenum:131073\t-\t127\t129\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t11\tarm\tenum:131073\t-\t118\t130\t0\t0\t0\t5\t1\t0\t0\t0\t-\nE\t12\tswitch\tenum:131073\t-\t96\t143\t7\t0\t0\t0\t0\t5\t2\t0\t-\nE\t13\treference\tenum:131073\t-\t158\t159\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t181\t182\t0\t0\t0\t0\t0\t0\t0\t0\t5\nE\t15\tarm\ti32\t-\t172\t183\t0\t0\t0\t6\t1\t0\t0\t0\t-\nE\t16\tinteger\ti32\t-\t170\t171\t0\t0\t0\t0\t0\t0\t0\t0\t9\nE\t17\tarm\ti32\t-\t161\t172\t0\t0\t0\t7\t2\t0\t0\t0\t-\nE\t18\tswitch\ti32\t-\t151\t184\t13\t0\t0\t0\t0\t7\t2\t0\t-\nS\t1\treturn\t46\t73\t2\t5\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t88\t144\t6\t12\t0\t5\t-\t0\t0\t0\t0\nS\t3\treturn\t144\t185\t6\t18\t0\t0\t-\t0\t0\t0\t0\nK\t1\t60\t64\t2\t3\t2\t2\t0\t2\nK\t2\t68\t72\t2\t4\t2\t2\t0\t3\nK\t3\t45\t74\t2\t2\t1\t1\t1\t0\nK\t4\t138\t142\t3\t7\t6\t7\t0\t8\nK\t5\t126\t130\t3\t8\t6\t7\t0\t10\nK\t6\t180\t183\t3\t9\t6\t9\t0\t14\nK\t7\t169\t172\t3\t10\t6\t9\t0\t16\nK\t8\t87\t186\t3\t6\t5\t2\t2\t0\nA\t0\t4\nA\t1\t1\nA\t2\t2\nA\t3\t3\nA\t4\t6\nA\t5\t11\nA\t6\t9\nA\t7\t17\nA\t8\t15\nT\t0\tbool\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-effects.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-effects.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t150\t1\t4\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tvar\ti32\t46\t47\t2\t2\t0\t0\t0\t0\nB\t4\tvar\tenum:131073\t56\t57\t2\t2\t0\t0\t0\t0\nB\t5\tlet\ti32\t69\t74\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t48\t49\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tvariant\tenum:131073\t-\t58\t60\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\treference\ti32\t-\t83\t84\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t86\t87\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t5\treference\tenum:131073\t-\t88\t89\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t6\tblock\tenum:131073\t-\t82\t90\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t7\treference\tenum:131073\t-\t119\t120\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t8\tvariant\tenum:131073\t-\t121\t123\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t9\treference\ti32\t-\t124\t125\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t10\tinteger\ti32\t-\t127\t129\t0\t0\t0\t0\t0\t0\t0\t0\t10\nE\t11\tinteger\ti32\t-\t130\t131\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t12\tarm\ti32\t-\t110\t132\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t13\treference\ti32\t-\t101\t102\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t104\t107\t0\t0\t0\t0\t0\t0\t0\t0\t100\nE\t15\tinteger\ti32\t-\t108\t109\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t16\tarm\ti32\t-\t92\t110\t0\t0\t0\t3\t2\t0\t0\t0\t-\nE\t17\tswitch\ti32\t-\t75\t133\t6\t0\t0\t0\t0\t5\t2\t0\t-\nE\t18\treference\ti32\t-\t141\t146\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t19\treference\ti32\t-\t147\t148\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t20\tbinary\ti32\t+\t141\t148\t18\t19\t0\t0\t0\t0\t0\t0\t-\nS\t1\tbinding\t38\t50\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t50\t61\t2\t2\t0\t4\t-\t0\t0\t0\t0\nS\t3\tbinding\t61\t134\t2\t17\t0\t5\t-\t0\t0\t0\t0\nS\t4\tassignment\t83\t88\t3\t4\t3\t0\t+\t0\t0\t0\t0\nS\t5\tassignment\t119\t124\t4\t8\t7\t0\t=\t0\t0\t0\t0\nS\t6\tassignment\t124\t130\t4\t10\t9\t0\t+\t0\t0\t0\t0\nS\t7\tassignment\t101\t108\t5\t14\t13\t0\t+\t0\t0\t0\t0\nS\t8\treturn\t134\t149\t2\t20\t0\t0\t-\t0\t0\t0\t0\nK\t1\t82\t90\t2\t3\t2\t4\t1\t5\nK\t2\t118\t132\t2\t4\t2\t7\t2\t11\nK\t3\t100\t110\t2\t5\t2\t9\t1\t15\nK\t4\t37\t150\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t8\nA\t4\t4\nA\t5\t16\nA\t6\t12\nA\t7\t5\nA\t8\t6\nA\t9\t7\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-effects.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-effects.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t150\t1\t4\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tvar\ti32\t46\t47\t2\t2\t0\t0\t0\t0\nB\t4\tvar\tenum:131073\t56\t57\t2\t2\t0\t0\t0\t0\nB\t5\tlet\ti32\t69\t74\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t48\t49\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tvariant\tenum:131073\t-\t58\t60\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\treference\ti32\t-\t83\t84\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t86\t87\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t5\treference\tenum:131073\t-\t88\t89\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t6\tblock\tenum:131073\t-\t82\t90\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t7\treference\tenum:131073\t-\t119\t120\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t8\tvariant\tenum:131073\t-\t121\t123\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t9\treference\ti32\t-\t124\t125\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t10\tinteger\ti32\t-\t127\t129\t0\t0\t0\t0\t0\t0\t0\t0\t10\nE\t11\tinteger\ti32\t-\t130\t131\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t12\tarm\ti32\t-\t110\t132\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t13\treference\ti32\t-\t101\t102\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t104\t107\t0\t0\t0\t0\t0\t0\t0\t0\t100\nE\t15\tinteger\ti32\t-\t108\t109\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t16\tarm\ti32\t-\t92\t110\t0\t0\t0\t3\t2\t0\t0\t0\t-\nE\t17\tswitch\ti32\t-\t75\t133\t6\t0\t0\t0\t0\t5\t2\t0\t-\nE\t18\treference\ti32\t-\t141\t146\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t19\treference\ti32\t-\t147\t148\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t20\tbinary\ti32\t+\t141\t148\t18\t19\t0\t0\t0\t0\t0\t0\t-\nS\t1\tbinding\t38\t50\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t50\t61\t2\t2\t0\t4\t-\t0\t0\t0\t0\nS\t3\tbinding\t61\t134\t2\t17\t0\t5\t-\t0\t0\t0\t0\nS\t4\tassignment\t83\t88\t3\t4\t3\t0\t+\t0\t0\t0\t0\nS\t5\tassignment\t119\t124\t4\t8\t7\t0\t=\t0\t0\t0\t0\nS\t6\tassignment\t124\t130\t4\t10\t9\t0\t+\t0\t0\t0\t0\nS\t7\tassignment\t101\t108\t5\t14\t13\t0\t+\t0\t0\t0\t0\nS\t8\treturn\t134\t149\t2\t20\t0\t0\t-\t0\t0\t0\t0\nK\t1\t82\t90\t2\t3\t2\t4\t1\t5\nK\t2\t118\t132\t2\t4\t2\t7\t2\t11\nK\t3\t100\t110\t2\t5\t2\t9\t1\t15\nK\t4\t37\t150\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t8\nA\t4\t4\nA\t5\t16\nA\t6\t12\nA\t7\t5\nA\t8\t6\nA\t9\t7\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-early-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-early-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t91\t1\t3\t0\t1\t0\nF\t2\t3\t91\t119\t5\t4\t6\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t32\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t98\t102\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tenum:131073\t35\t36\t2\t1\t0\t0\t1\t0\nE\t1\treference\tenum:131073\t-\t45\t46\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t84\t86\t0\t0\t0\t0\t0\t0\t0\t0\t12\nE\t3\tarm\tvoid\t-\t68\t88\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t64\t66\t0\t0\t0\t0\t0\t0\t0\t0\t11\nE\t5\tarm\tvoid\t-\t48\t68\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t6\tswitch\tvoid\t-\t38\t89\t1\t0\t0\t0\t0\t2\t2\t0\t-\nE\t7\tvariant\tenum:131073\t-\t114\t116\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tcall\ti32\t-\t112\t117\t0\t0\t0\t0\t2\t7\t1\t0\t-\nS\t1\texpression\t38\t90\t2\t6\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t77\t87\t3\t2\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t57\t67\t4\t4\t0\t0\t-\t0\t0\t0\t0\nS\t4\treturn\t105\t118\t6\t8\t0\t0\t-\t0\t0\t0\t0\nK\t1\t76\t88\t2\t3\t2\t4\t1\t0\nK\t2\t56\t68\t2\t4\t2\t5\t1\t0\nK\t3\t37\t91\t2\t2\t1\t1\t1\t0\nK\t4\t104\t119\t3\t6\t5\t6\t1\t0\nA\t0\t4\nA\t1\t1\nA\t2\t5\nA\t3\t3\nA\t4\t2\nA\t5\t3\nA\t6\t4\nA\t7\t7\nT\t0\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-early-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-early-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t91\t1\t3\t0\t1\t0\nF\t2\t3\t91\t119\t5\t4\t6\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t32\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t98\t102\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tenum:131073\t35\t36\t2\t1\t0\t0\t1\t0\nE\t1\treference\tenum:131073\t-\t45\t46\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t84\t86\t0\t0\t0\t0\t0\t0\t0\t0\t12\nE\t3\tarm\tvoid\t-\t68\t88\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t64\t66\t0\t0\t0\t0\t0\t0\t0\t0\t11\nE\t5\tarm\tvoid\t-\t48\t68\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t6\tswitch\tvoid\t-\t38\t89\t1\t0\t0\t0\t0\t2\t2\t0\t-\nE\t7\tvariant\tenum:131073\t-\t114\t116\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tcall\ti32\t-\t112\t117\t0\t0\t0\t0\t2\t7\t1\t0\t-\nS\t1\texpression\t38\t90\t2\t6\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t77\t87\t3\t2\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t57\t67\t4\t4\t0\t0\t-\t0\t0\t0\t0\nS\t4\treturn\t105\t118\t6\t8\t0\t0\t-\t0\t0\t0\t0\nK\t1\t76\t88\t2\t3\t2\t4\t1\t0\nK\t2\t56\t68\t2\t4\t2\t5\t1\t0\nK\t3\t37\t91\t2\t2\t1\t1\t1\t0\nK\t4\t104\t119\t3\t6\t5\t6\t1\t0\nA\t0\t4\nA\t1\t1\nA\t2\t5\nA\t3\t3\nA\t4\t2\nA\t5\t3\nA\t6\t4\nA\t7\t7\nT\t0\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-loop.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-loop.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t158\t1\t6\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tvar\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nB\t4\tvar\ti32\t57\t58\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t59\t60\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t3\treference\ti32\t-\t67\t68\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t69\t70\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t5\tbinary\tbool\t<\t67\t70\t3\t4\t0\t0\t0\t0\t0\t0\t-\nE\t6\treference\tenum:131073\t-\t72\t73\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\treference\tenum:131073\t-\t81\t82\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t8\tvariant\tenum:131073\t-\t105\t107\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tarm\tenum:131073\t-\t96\t108\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t10\tvariant\tenum:131073\t-\t93\t95\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t11\tarm\tenum:131073\t-\t84\t96\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t12\tswitch\tenum:131073\t-\t74\t109\t7\t0\t0\t0\t0\t6\t2\t0\t-\nE\t13\treference\ti32\t-\t110\t111\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t113\t114\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t15\treference\tenum:131073\t-\t130\t131\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t16\tinteger\ti32\t-\t153\t154\t0\t0\t0\t0\t0\t0\t0\t0\t6\nE\t17\tarm\ti32\t-\t144\t155\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t18\tinteger\ti32\t-\t142\t143\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t19\tarm\ti32\t-\t133\t144\t0\t0\t0\t5\t1\t0\t0\t0\t-\nE\t20\tswitch\ti32\t-\t123\t156\t15\t0\t0\t0\t0\t8\t2\t0\t-\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t49\t61\t2\t2\t0\t4\t-\t0\t0\t0\t0\nS\t3\twhile\t61\t116\t2\t5\t0\t0\t-\t3\t0\t0\t0\nS\t4\tassignment\t72\t110\t3\t12\t6\t0\t=\t0\t0\t0\t0\nS\t5\tassignment\t110\t115\t3\t14\t13\t0\t+\t0\t0\t0\t0\nS\t6\treturn\t116\t157\t2\t20\t0\t0\t-\t0\t0\t0\t0\nK\t1\t104\t108\t2\t4\t3\t8\t0\t8\nK\t2\t92\t96\t2\t5\t3\t8\t0\t10\nK\t3\t71\t116\t2\t3\t2\t4\t2\t0\nK\t4\t152\t155\t2\t6\t2\t10\t0\t16\nK\t5\t141\t144\t2\t7\t2\t10\t0\t18\nK\t6\t37\t158\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t6\nA\t4\t4\nA\t5\t5\nA\t6\t11\nA\t7\t9\nA\t8\t19\nA\t9\t17\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-loop.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-loop.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t158\t1\t6\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tvar\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nB\t4\tvar\ti32\t57\t58\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t59\t60\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t3\treference\ti32\t-\t67\t68\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t69\t70\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t5\tbinary\tbool\t<\t67\t70\t3\t4\t0\t0\t0\t0\t0\t0\t-\nE\t6\treference\tenum:131073\t-\t72\t73\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\treference\tenum:131073\t-\t81\t82\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t8\tvariant\tenum:131073\t-\t105\t107\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tarm\tenum:131073\t-\t96\t108\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t10\tvariant\tenum:131073\t-\t93\t95\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t11\tarm\tenum:131073\t-\t84\t96\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t12\tswitch\tenum:131073\t-\t74\t109\t7\t0\t0\t0\t0\t6\t2\t0\t-\nE\t13\treference\ti32\t-\t110\t111\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t113\t114\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t15\treference\tenum:131073\t-\t130\t131\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t16\tinteger\ti32\t-\t153\t154\t0\t0\t0\t0\t0\t0\t0\t0\t6\nE\t17\tarm\ti32\t-\t144\t155\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t18\tinteger\ti32\t-\t142\t143\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t19\tarm\ti32\t-\t133\t144\t0\t0\t0\t5\t1\t0\t0\t0\t-\nE\t20\tswitch\ti32\t-\t123\t156\t15\t0\t0\t0\t0\t8\t2\t0\t-\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t49\t61\t2\t2\t0\t4\t-\t0\t0\t0\t0\nS\t3\twhile\t61\t116\t2\t5\t0\t0\t-\t3\t0\t0\t0\nS\t4\tassignment\t72\t110\t3\t12\t6\t0\t=\t0\t0\t0\t0\nS\t5\tassignment\t110\t115\t3\t14\t13\t0\t+\t0\t0\t0\t0\nS\t6\treturn\t116\t157\t2\t20\t0\t0\t-\t0\t0\t0\t0\nK\t1\t104\t108\t2\t4\t3\t8\t0\t8\nK\t2\t92\t96\t2\t5\t3\t8\t0\t10\nK\t3\t71\t116\t2\t3\t2\t4\t2\t0\nK\t4\t152\t155\t2\t6\t2\t10\t0\t16\nK\t5\t141\t144\t2\t7\t2\t10\t0\t18\nK\t6\t37\t158\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t6\nA\t4\t4\nA\t5\t5\nA\t6\t11\nA\t7\t9\nA\t8\t19\nA\t9\t17\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-separate.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-separate.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nN\t131074\t2\t2\t2\t0\nN\t259\t3\t4\t1\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nD\t3\t131074\t0\t31\t32\nD\t4\t131074\t0\t33\t34\nD\t5\t259\t1\t49\t50\nF\t1\t4\t52\t182\t1\t5\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tenum\tenum:131074\t29\t30\t0\t0\t0\t3\t0\t0\nB\t3\tstruct\tnominal:259\t43\t44\t0\t0\t0\t4\t0\t0\nB\t4\tfunction\ti32\t59\t63\t0\t0\t0\t5\t0\t0\nB\t5\tlet\tenum:131073\t72\t73\t4\t2\t0\t0\t0\t0\nB\t6\tlet\tenum:131074\t83\t84\t4\t2\t0\t0\t0\t0\nB\t7\tlet\tnominal:259\t92\t93\t4\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t74\t76\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t2\tvariant\tenum:131074\t-\t85\t87\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t3\tinteger\ti32\t-\t99\t100\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t4\tinitializer\ti32\t-\t96\t100\t3\t0\t0\t0\t5\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:259\t-\t94\t101\t0\t0\t0\t0\t3\t4\t1\t0\t-\nE\t6\treference\tnominal:259\t-\t109\t110\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t7\tfield\ti32\t-\t109\t112\t6\t0\t0\t0\t5\t0\t0\t0\t-\nE\t8\treference\tenum:131073\t-\t120\t121\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t9\tinteger\ti32\t-\t143\t144\t0\t0\t0\t0\t0\t0\t0\t0\t4\nE\t10\tarm\ti32\t-\t134\t145\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t11\tinteger\ti32\t-\t132\t133\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t12\tarm\ti32\t-\t123\t134\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t13\tswitch\ti32\t-\t113\t146\t8\t0\t0\t0\t0\t5\t2\t0\t-\nE\t14\tbinary\ti32\t+\t109\t146\t7\t13\t0\t0\t0\t0\t0\t0\t-\nE\t15\treference\tenum:131074\t-\t154\t155\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t16\tinteger\ti32\t-\t177\t178\t0\t0\t0\t0\t0\t0\t0\t0\t6\nE\t17\tarm\ti32\t-\t168\t179\t0\t0\t0\t3\t4\t0\t0\t0\t-\nE\t18\tinteger\ti32\t-\t166\t167\t0\t0\t0\t0\t0\t0\t0\t0\t5\nE\t19\tarm\ti32\t-\t157\t168\t0\t0\t0\t4\t3\t0\t0\t0\t-\nE\t20\tswitch\ti32\t-\t147\t180\t15\t0\t0\t0\t0\t7\t2\t0\t-\nE\t21\tbinary\ti32\t+\t109\t180\t14\t20\t0\t0\t0\t0\t0\t0\t-\nS\t1\tbinding\t66\t77\t2\t1\t0\t5\t-\t0\t0\t0\t0\nS\t2\tbinding\t77\t88\t2\t2\t0\t6\t-\t0\t0\t0\t0\nS\t3\tbinding\t88\t102\t2\t5\t0\t7\t-\t0\t0\t0\t0\nS\t4\treturn\t102\t181\t2\t21\t0\t0\t-\t0\t0\t0\t0\nK\t1\t142\t145\t4\t3\t2\t7\t0\t9\nK\t2\t131\t134\t4\t4\t2\t7\t0\t11\nK\t3\t176\t179\t4\t5\t2\t9\t0\t16\nK\t4\t165\t168\t4\t6\t2\t9\t0\t18\nK\t5\t65\t182\t4\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t4\nA\t5\t12\nA\t6\t10\nA\t7\t19\nA\t8\t17\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-separate.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-separate.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nN\t131074\t2\t2\t2\t0\nN\t259\t3\t4\t1\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nD\t3\t131074\t0\t31\t32\nD\t4\t131074\t0\t33\t34\nD\t5\t259\t1\t49\t50\nF\t1\t4\t52\t182\t1\t5\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tenum\tenum:131074\t29\t30\t0\t0\t0\t3\t0\t0\nB\t3\tstruct\tnominal:259\t43\t44\t0\t0\t0\t4\t0\t0\nB\t4\tfunction\ti32\t59\t63\t0\t0\t0\t5\t0\t0\nB\t5\tlet\tenum:131073\t72\t73\t4\t2\t0\t0\t0\t0\nB\t6\tlet\tenum:131074\t83\t84\t4\t2\t0\t0\t0\t0\nB\t7\tlet\tnominal:259\t92\t93\t4\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t74\t76\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t2\tvariant\tenum:131074\t-\t85\t87\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t3\tinteger\ti32\t-\t99\t100\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t4\tinitializer\ti32\t-\t96\t100\t3\t0\t0\t0\t5\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:259\t-\t94\t101\t0\t0\t0\t0\t3\t4\t1\t0\t-\nE\t6\treference\tnominal:259\t-\t109\t110\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t7\tfield\ti32\t-\t109\t112\t6\t0\t0\t0\t5\t0\t0\t0\t-\nE\t8\treference\tenum:131073\t-\t120\t121\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t9\tinteger\ti32\t-\t143\t144\t0\t0\t0\t0\t0\t0\t0\t0\t4\nE\t10\tarm\ti32\t-\t134\t145\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t11\tinteger\ti32\t-\t132\t133\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t12\tarm\ti32\t-\t123\t134\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t13\tswitch\ti32\t-\t113\t146\t8\t0\t0\t0\t0\t5\t2\t0\t-\nE\t14\tbinary\ti32\t+\t109\t146\t7\t13\t0\t0\t0\t0\t0\t0\t-\nE\t15\treference\tenum:131074\t-\t154\t155\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t16\tinteger\ti32\t-\t177\t178\t0\t0\t0\t0\t0\t0\t0\t0\t6\nE\t17\tarm\ti32\t-\t168\t179\t0\t0\t0\t3\t4\t0\t0\t0\t-\nE\t18\tinteger\ti32\t-\t166\t167\t0\t0\t0\t0\t0\t0\t0\t0\t5\nE\t19\tarm\ti32\t-\t157\t168\t0\t0\t0\t4\t3\t0\t0\t0\t-\nE\t20\tswitch\ti32\t-\t147\t180\t15\t0\t0\t0\t0\t7\t2\t0\t-\nE\t21\tbinary\ti32\t+\t109\t180\t14\t20\t0\t0\t0\t0\t0\t0\t-\nS\t1\tbinding\t66\t77\t2\t1\t0\t5\t-\t0\t0\t0\t0\nS\t2\tbinding\t77\t88\t2\t2\t0\t6\t-\t0\t0\t0\t0\nS\t3\tbinding\t88\t102\t2\t5\t0\t7\t-\t0\t0\t0\t0\nS\t4\treturn\t102\t181\t2\t21\t0\t0\t-\t0\t0\t0\t0\nK\t1\t142\t145\t4\t3\t2\t7\t0\t9\nK\t2\t131\t134\t4\t4\t2\t7\t0\t11\nK\t3\t176\t179\t4\t5\t2\t9\t0\t16\nK\t4\t165\t168\t4\t6\t2\t9\t0\t18\nK\t5\t65\t182\t4\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t4\nA\t5\t12\nA\t6\t10\nA\t7\t19\nA\t8\t17\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-call-freeze.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-call-freeze.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t120\t1\t5\t0\t2\t0\nF\t2\t3\t120\t167\t7\t7\t7\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t32\t0\t0\t0\t3\t0\t2\nB\t3\tfunction\ti32\t127\t131\t0\t0\t0\t4\t2\t0\nB\t4\tparameter\tenum:131073\t35\t36\t2\t1\t0\t0\t2\t0\nB\t5\tparameter\tenum:131073\t39\t40\t2\t1\t0\t0\t2\t0\nB\t6\tvar\tenum:131073\t140\t141\t3\t8\t0\t0\t2\t0\nE\t1\treference\tenum:131073\t-\t56\t57\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t80\t82\t0\t0\t0\t0\t0\t0\t0\t0\t20\nE\t3\tarm\ti32\t-\t71\t83\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t68\t70\t0\t0\t0\t0\t0\t0\t0\t0\t10\nE\t5\tarm\ti32\t-\t59\t71\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t6\tswitch\ti32\t-\t49\t84\t1\t0\t0\t0\t0\t3\t2\t0\t-\nE\t7\treference\tenum:131073\t-\t92\t93\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t8\tinteger\ti32\t-\t115\t116\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t9\tarm\ti32\t-\t106\t117\t0\t0\t0\t3\t2\t0\t0\t0\t-\nE\t10\tinteger\ti32\t-\t104\t105\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t11\tarm\ti32\t-\t95\t106\t0\t0\t0\t4\t1\t0\t0\t0\t-\nE\t12\tswitch\ti32\t-\t85\t118\t7\t0\t0\t0\t0\t5\t2\t0\t-\nE\t13\tbinary\ti32\t+\t49\t118\t6\t12\t0\t0\t0\t0\t0\t0\t-\nE\t14\tvariant\tenum:131073\t-\t142\t144\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t15\treference\tenum:131073\t-\t154\t155\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t16\treference\tenum:131073\t-\t157\t158\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t17\tvariant\tenum:131073\t-\t159\t161\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t18\treference\tenum:131073\t-\t162\t163\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t19\tblock\tenum:131073\t-\t156\t164\t0\t0\t0\t6\t0\t0\t0\t0\t-\nE\t20\tcall\ti32\t-\t152\t165\t0\t0\t0\t0\t2\t9\t2\t0\t-\nS\t1\treturn\t42\t119\t2\t13\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t134\t145\t8\t14\t0\t6\t-\t0\t0\t0\t0\nS\t3\treturn\t145\t166\t8\t20\t0\t0\t-\t0\t0\t0\t0\nS\t4\tassignment\t157\t162\t9\t17\t16\t0\t=\t0\t0\t0\t0\nK\t1\t79\t83\t2\t3\t2\t5\t0\t2\nK\t2\t67\t71\t2\t4\t2\t5\t0\t4\nK\t3\t114\t117\t2\t5\t2\t7\t0\t8\nK\t4\t103\t106\t2\t6\t2\t7\t0\t10\nK\t5\t41\t120\t2\t2\t1\t2\t1\t0\nK\t6\t156\t164\t3\t9\t8\t11\t1\t18\nK\t7\t133\t167\t3\t8\t7\t7\t2\t0\nA\t0\t4\nA\t1\t5\nA\t2\t1\nA\t3\t5\nA\t4\t3\nA\t5\t11\nA\t6\t9\nA\t7\t2\nA\t8\t3\nA\t9\t15\nA\t10\t19\nA\t11\t4\nT\t0\tenum:131073\nT\t1\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-call-freeze.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-call-freeze.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t120\t1\t5\t0\t2\t0\nF\t2\t3\t120\t167\t7\t7\t7\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t32\t0\t0\t0\t3\t0\t2\nB\t3\tfunction\ti32\t127\t131\t0\t0\t0\t4\t2\t0\nB\t4\tparameter\tenum:131073\t35\t36\t2\t1\t0\t0\t2\t0\nB\t5\tparameter\tenum:131073\t39\t40\t2\t1\t0\t0\t2\t0\nB\t6\tvar\tenum:131073\t140\t141\t3\t8\t0\t0\t2\t0\nE\t1\treference\tenum:131073\t-\t56\t57\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t80\t82\t0\t0\t0\t0\t0\t0\t0\t0\t20\nE\t3\tarm\ti32\t-\t71\t83\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t4\tinteger\ti32\t-\t68\t70\t0\t0\t0\t0\t0\t0\t0\t0\t10\nE\t5\tarm\ti32\t-\t59\t71\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t6\tswitch\ti32\t-\t49\t84\t1\t0\t0\t0\t0\t3\t2\t0\t-\nE\t7\treference\tenum:131073\t-\t92\t93\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t8\tinteger\ti32\t-\t115\t116\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t9\tarm\ti32\t-\t106\t117\t0\t0\t0\t3\t2\t0\t0\t0\t-\nE\t10\tinteger\ti32\t-\t104\t105\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t11\tarm\ti32\t-\t95\t106\t0\t0\t0\t4\t1\t0\t0\t0\t-\nE\t12\tswitch\ti32\t-\t85\t118\t7\t0\t0\t0\t0\t5\t2\t0\t-\nE\t13\tbinary\ti32\t+\t49\t118\t6\t12\t0\t0\t0\t0\t0\t0\t-\nE\t14\tvariant\tenum:131073\t-\t142\t144\t0\t0\t0\t0\t1\t0\t0\t0\t-\nE\t15\treference\tenum:131073\t-\t154\t155\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t16\treference\tenum:131073\t-\t157\t158\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t17\tvariant\tenum:131073\t-\t159\t161\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t18\treference\tenum:131073\t-\t162\t163\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t19\tblock\tenum:131073\t-\t156\t164\t0\t0\t0\t6\t0\t0\t0\t0\t-\nE\t20\tcall\ti32\t-\t152\t165\t0\t0\t0\t0\t2\t9\t2\t0\t-\nS\t1\treturn\t42\t119\t2\t13\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t134\t145\t8\t14\t0\t6\t-\t0\t0\t0\t0\nS\t3\treturn\t145\t166\t8\t20\t0\t0\t-\t0\t0\t0\t0\nS\t4\tassignment\t157\t162\t9\t17\t16\t0\t=\t0\t0\t0\t0\nK\t1\t79\t83\t2\t3\t2\t5\t0\t2\nK\t2\t67\t71\t2\t4\t2\t5\t0\t4\nK\t3\t114\t117\t2\t5\t2\t7\t0\t8\nK\t4\t103\t106\t2\t6\t2\t7\t0\t10\nK\t5\t41\t120\t2\t2\t1\t2\t1\t0\nK\t6\t156\t164\t3\t9\t8\t11\t1\t18\nK\t7\t133\t167\t3\t8\t7\t7\t2\t0\nA\t0\t4\nA\t1\t5\nA\t2\t1\nA\t3\t5\nA\t4\t3\nA\t5\t11\nA\t6\t9\nA\t7\t2\nA\t8\t3\nA\t9\t15\nA\t10\t19\nA\t11\t4\nT\t0\tenum:131073\nT\t1\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-unsigned-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-unsigned-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t119\t1\t3\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nB\t4\tlet\tu8\t56\t57\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t2\treference\tenum:131073\t-\t65\t66\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tinteger\tu8\t-\t88\t91\t0\t0\t0\t0\t0\t0\t0\t0\t255\nE\t4\tarm\tu8\t-\t79\t92\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t5\tinteger\tu8\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t6\tarm\tu8\t-\t68\t79\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t7\tswitch\tu8\t-\t58\t93\t2\t0\t0\t0\t0\t4\t2\t0\t-\nE\t8\treference\tu8\t-\t101\t102\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t9\tinteger\tu8\t-\t104\t107\t0\t0\t0\t0\t0\t0\t0\t0\t255\nE\t10\tbinary\tbool\t==\t101\t107\t8\t9\t0\t0\t0\t0\t0\t0\t-\nE\t11\tinteger\ti32\t-\t116\t117\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t49\t94\t2\t7\t0\t4\t-\t0\t0\t0\t0\nS\t3\tassert\t94\t109\t2\t10\t0\t0\t-\t0\t0\t0\t0\nS\t4\treturn\t109\t118\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t87\t92\t2\t3\t2\t6\t0\t3\nK\t2\t76\t79\t2\t4\t2\t6\t0\t5\nK\t3\t37\t119\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t6\nA\t5\t4\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-unsigned-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-unsigned-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t119\t1\t3\t0\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t31\t35\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tenum:131073\t44\t45\t2\t2\t0\t0\t0\t0\nB\t4\tlet\tu8\t56\t57\t2\t2\t0\t0\t0\t0\nE\t1\tvariant\tenum:131073\t-\t46\t48\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t2\treference\tenum:131073\t-\t65\t66\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tinteger\tu8\t-\t88\t91\t0\t0\t0\t0\t0\t0\t0\t0\t255\nE\t4\tarm\tu8\t-\t79\t92\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t5\tinteger\tu8\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t6\tarm\tu8\t-\t68\t79\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t7\tswitch\tu8\t-\t58\t93\t2\t0\t0\t0\t0\t4\t2\t0\t-\nE\t8\treference\tu8\t-\t101\t102\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t9\tinteger\tu8\t-\t104\t107\t0\t0\t0\t0\t0\t0\t0\t0\t255\nE\t10\tbinary\tbool\t==\t101\t107\t8\t9\t0\t0\t0\t0\t0\t0\t-\nE\t11\tinteger\ti32\t-\t116\t117\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\tbinding\t38\t49\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\tbinding\t49\t94\t2\t7\t0\t4\t-\t0\t0\t0\t0\nS\t3\tassert\t94\t109\t2\t10\t0\t0\t-\t0\t0\t0\t0\nS\t4\treturn\t109\t118\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t87\t92\t2\t3\t2\t6\t0\t3\nK\t2\t76\t79\t2\t4\t2\t6\t0\t5\nK\t3\t37\t119\t2\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t6\nA\t5\t4\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-defer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-defer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t93\t1\t3\t0\t1\t0\nF\t2\t3\t93\t175\t5\t6\t4\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tvoid\t32\t37\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t100\t104\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tenum:131073\t40\t41\t2\t1\t0\t0\t1\t0\nB\t5\tlet\tenum:131073\t113\t114\t3\t6\t0\t0\t1\t0\nE\t1\treference\tenum:131073\t-\t57\t58\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tboolean\tbool\t-\t84\t88\t0\t0\t0\t0\t0\t0\t0\t1\t-\nE\t3\tarm\tbool\t-\t75\t89\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t4\tboolean\tbool\t-\t69\t74\t0\t0\t0\t0\t0\t0\t0\t0\t-\nE\t5\tarm\tbool\t-\t60\t75\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t6\tswitch\tbool\t-\t50\t90\t1\t0\t0\t0\t0\t2\t2\t0\t-\nE\t7\tvariant\tenum:131073\t-\t115\t117\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\treference\tenum:131073\t-\t125\t126\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t9\treference\tenum:131073\t-\t159\t160\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t10\tcall\tvoid\t-\t153\t161\t0\t0\t0\t0\t2\t10\t1\t0\t-\nE\t11\tarm\tvoid\t-\t138\t163\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t12\tarm\tvoid\t-\t128\t138\t0\t0\t0\t5\t1\t0\t0\t0\t-\nE\t13\tswitch\tvoid\t-\t118\t164\t8\t0\t0\t0\t0\t7\t2\t0\t-\nE\t14\tinteger\ti32\t-\t172\t173\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\tassert\t43\t92\t2\t6\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t107\t118\t6\t7\t0\t5\t-\t0\t0\t0\t0\nS\t3\texpression\t118\t165\t6\t13\t0\t0\t-\t0\t0\t0\t0\nS\t4\tdefer\t147\t162\t7\t10\t0\t0\t-\t0\t0\t0\t0\nS\t5\treturn\t165\t174\t6\t14\t0\t0\t-\t0\t0\t0\t0\nK\t1\t83\t89\t2\t3\t2\t4\t0\t2\nK\t2\t68\t75\t2\t4\t2\t4\t0\t4\nK\t3\t42\t93\t2\t2\t1\t1\t1\t0\nK\t4\t146\t163\t3\t7\t6\t9\t1\t0\nK\t5\t136\t138\t3\t8\t6\t11\t0\t0\nK\t6\t106\t175\t3\t6\t5\t4\t3\t0\nA\t0\t4\nA\t1\t1\nA\t2\t5\nA\t3\t3\nA\t4\t2\nA\t5\t3\nA\t6\t5\nA\t7\t12\nA\t8\t11\nA\t9\t4\nA\t10\t9\nT\t0\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-defer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-defer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-hir/v1\nP\t0\nN\t131073\t1\t0\t2\t0\nD\t1\t131073\t0\t19\t20\nD\t2\t131073\t0\t21\t22\nF\t1\t2\t24\t93\t1\t3\t0\t1\t0\nF\t2\t3\t93\t175\t5\t6\t4\t0\t0\nB\t1\tenum\tenum:131073\t17\t18\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tvoid\t32\t37\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t100\t104\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tenum:131073\t40\t41\t2\t1\t0\t0\t1\t0\nB\t5\tlet\tenum:131073\t113\t114\t3\t6\t0\t0\t1\t0\nE\t1\treference\tenum:131073\t-\t57\t58\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tboolean\tbool\t-\t84\t88\t0\t0\t0\t0\t0\t0\t0\t1\t-\nE\t3\tarm\tbool\t-\t75\t89\t0\t0\t0\t1\t2\t0\t0\t0\t-\nE\t4\tboolean\tbool\t-\t69\t74\t0\t0\t0\t0\t0\t0\t0\t0\t-\nE\t5\tarm\tbool\t-\t60\t75\t0\t0\t0\t2\t1\t0\t0\t0\t-\nE\t6\tswitch\tbool\t-\t50\t90\t1\t0\t0\t0\t0\t2\t2\t0\t-\nE\t7\tvariant\tenum:131073\t-\t115\t117\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\treference\tenum:131073\t-\t125\t126\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t9\treference\tenum:131073\t-\t159\t160\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t10\tcall\tvoid\t-\t153\t161\t0\t0\t0\t0\t2\t10\t1\t0\t-\nE\t11\tarm\tvoid\t-\t138\t163\t0\t0\t0\t4\t2\t0\t0\t0\t-\nE\t12\tarm\tvoid\t-\t128\t138\t0\t0\t0\t5\t1\t0\t0\t0\t-\nE\t13\tswitch\tvoid\t-\t118\t164\t8\t0\t0\t0\t0\t7\t2\t0\t-\nE\t14\tinteger\ti32\t-\t172\t173\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\tassert\t43\t92\t2\t6\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t107\t118\t6\t7\t0\t5\t-\t0\t0\t0\t0\nS\t3\texpression\t118\t165\t6\t13\t0\t0\t-\t0\t0\t0\t0\nS\t4\tdefer\t147\t162\t7\t10\t0\t0\t-\t0\t0\t0\t0\nS\t5\treturn\t165\t174\t6\t14\t0\t0\t-\t0\t0\t0\t0\nK\t1\t83\t89\t2\t3\t2\t4\t0\t2\nK\t2\t68\t75\t2\t4\t2\t4\t0\t4\nK\t3\t42\t93\t2\t2\t1\t1\t1\t0\nK\t4\t146\t163\t3\t7\t6\t9\t1\t0\nK\t5\t136\t138\t3\t8\t6\t11\t0\t0\nK\t6\t106\t175\t3\t6\t5\t4\t3\t0\nA\t0\t4\nA\t1\t1\nA\t2\t5\nA\t3\t3\nA\t4\t2\nA\t5\t3\nA\t6\t5\nA\t7\t12\nA\t8\t11\nA\t9\t4\nA\t10\t9\nT\t0\tenum:131073\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy:1:70: error: unsupported name-check syntax (bytes 69..74)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy:1:70: error: unsupported name-check syntax (bytes 69..74)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy:1:70: error: unsupported name-check syntax (bytes 69..74)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\labeled-argument.fy:1:70: error: unsupported name-check syntax (bytes 69..74)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy:1:13: error: expected nonempty payloadless enum (1..128 members) (bytes 12..20)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy:1:13: error: expected nonempty payloadless enum (1..128 members) (bytes 12..20)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy:1:13: error: expected nonempty payloadless enum (1..128 members) (bytes 12..20)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty.fy:1:13: error: expected nonempty payloadless enum (1..128 members) (bytes 12..20)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy:1:22: error: duplicate enum member (bytes 21..22)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy:1:22: error: duplicate enum member (bytes 21..22)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy:1:22: error: duplicate enum member (bytes 21..22)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-member.fy:1:22: error: duplicate enum member (bytes 21..22)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy:1:22: error: expected nonempty payloadless enum (1..128 members) (bytes 21..27)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy:1:22: error: expected nonempty payloadless enum (1..128 members) (bytes 21..27)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy:1:22: error: expected nonempty payloadless enum (1..128 members) (bytes 21..27)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\payload-closed.fy:1:22: error: expected nonempty payloadless enum (1..128 members) (bytes 21..27)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy:1:20: error: expected nonempty payloadless enum (1..128 members) (bytes 19..23)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy:1:20: error: expected nonempty payloadless enum (1..128 members) (bytes 19..23)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy:1:20: error: expected nonempty payloadless enum (1..128 members) (bytes 19..23)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\empty-payload-closed.fy:1:20: error: expected nonempty payloadless enum (1..128 members) (bytes 19..23)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy:1:45: error: unknown enum member (bytes 44..46)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy:1:45: error: unknown enum member (bytes 44..46)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy:1:45: error: unknown enum member (bytes 44..46)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-member.fy:1:45: error: unknown enum member (bytes 44..46)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy:1:43: error: enum context required (bytes 42..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy:1:43: error: enum context required (bytes 42..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy:1:43: error: enum context required (bytes 42..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\untyped.fy:1:43: error: enum context required (bytes 42..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy:1:57: error: non-exhaustive enum switch (bytes 56..78)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy:1:57: error: non-exhaustive enum switch (bytes 56..78)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy:1:57: error: non-exhaustive enum switch (bytes 56..78)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\missing-case.fy:1:57: error: non-exhaustive enum switch (bytes 56..78)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy:1:72: error: duplicate switch case (bytes 71..73)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy:1:72: error: duplicate switch case (bytes 71..73)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy:1:72: error: duplicate switch case (bytes 71..73)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\duplicate-case.fy:1:72: error: duplicate switch case (bytes 71..73)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy:1:70: error: unknown enum member (bytes 69..71)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy:1:70: error: unknown enum member (bytes 69..71)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy:1:70: error: unknown enum member (bytes 69..71)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\unknown-case.fy:1:70: error: unknown enum member (bytes 69..71)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy:1:66: error: type mismatch (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy:1:66: error: type mismatch (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy:1:66: error: type mismatch (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\different-types.fy:1:66: error: type mismatch (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy:1:45: error: type mismatch (bytes 44..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy:1:45: error: type mismatch (bytes 44..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy:1:45: error: type mismatch (bytes 44..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\integer-coercion.fy:1:45: error: type mismatch (bytes 44..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy:1:55: error: invalid scalar operator (bytes 54..58)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy:1:55: error: invalid scalar operator (bytes 54..58)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy:1:55: error: invalid scalar operator (bytes 54..58)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-equality.fy:1:55: error: invalid scalar operator (bytes 54..58)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy:1:32: error: invalid nominal type (bytes 31..35)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy:1:32: error: invalid nominal type (bytes 31..35)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy:1:32: error: invalid nominal type (bytes 31..35)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-field.fy:1:32: error: invalid nominal type (bytes 31..35)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy:1:41: error: unsupported name-check syntax (bytes 40..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy:1:41: error: unsupported name-check syntax (bytes 40..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy:1:41: error: unsupported name-check syntax (bytes 40..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\enum-array.fy:1:41: error: unsupported name-check syntax (bytes 40..44)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy:1:67: error: type mismatch (bytes 66..77)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy:1:67: error: type mismatch (bytes 66..77)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy:1:67: error: type mismatch (bytes 66..77)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\join-mismatch.fy:1:67: error: type mismatch (bytes 66..77)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy:1:50: error: assignment target is immutable (bytes 49..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy:1:50: error: assignment target is immutable (bytes 49..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy:1:50: error: assignment target is immutable (bytes 49..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\immutable-enum.fy:1:50: error: assignment target is immutable (bytes 49..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy:1:56: error: unsupported enum pattern (bytes 55..80)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy:1:56: error: unsupported enum pattern (bytes 55..80)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy:1:56: error: unsupported enum pattern (bytes 55..80)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\hir\\view-join.fy:1:56: error: unsupported enum pattern (bytes 55..80)\n"
+    }
+  ],
+  "cliExecutions": 116,
+  "native": [],
+  "passed": true,
+  "baseRevision": "002e3fc0c518434fe2bc3a20baaa79b6e9573885",
+  "exampleVersion": "0.30.0",
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\bootstrap.exe",
+    "sha256": "7e98cd5764851dad71a5bc5b132e1ef7cadd9c097d478469049c41996181df8e",
+    "identity": "Fairy C Stage 0\ncompiler: v0.0.0-20261006133647-002e3fc0c518+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 002e3fc0c518434fe2bc3a20baaa79b6e9573885\nmodified: true\n"
+  },
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\bootstrap.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 78 source file(s), 1038 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\bootstrap.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\bootstrap.exe",
+        "test",
+        "--native",
+        "--json",
+        "--file",
+        "tests/hir_enums.fy",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::hir_enums::enum_layout_context_and_written_switch_order_survive_inputs\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\bootstrap.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": ""
+    }
+  ],
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/array_types.fy",
+      "sha256": "e1619e2c4a2814a777b03c08931e486c9fff8c2e806f52a4fa32e56f4a99464d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/binding_output.fy",
+      "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_arrays.fy",
+      "sha256": "3a803ac0be8143eb2432a1a3a941cc8a99b75d5889e477d6c4bb5b91c372221f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_emit.fy",
+      "sha256": "a251957ed7554ceed59234152667e4475cbb214877384e53974b46b8e6d690c1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_flow.fy",
+      "sha256": "93e172ae922e21b87e33d01f203a010b88e5aea9260f3c91bbdaf4e160272f47"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_literals.fy",
+      "sha256": "0851889caa20b841c39c78f4c71e92a17727fffe7288c18312bd4b5ca5e281c0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_nominal.fy",
+      "sha256": "6689dc61f49b2235bc3d616084100e017cfa3a31830fc71efe98334064cc3f09"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_scalar.fy",
+      "sha256": "c5832fa715897259f5a08a3f36f57aae46b01d2c41d3a5b593b259f053196406"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_text.fy",
+      "sha256": "c4296bcac4c59bb934863689b670e70f29ae9c47a32a393a26df6b62fff4be5d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_views.fy",
+      "sha256": "0b2ce428c716d62ce1ac66504dc409fd7c46ef85306dd06b3b6cac87e4af931f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/enum_types.fy",
+      "sha256": "a02698e3392893c6f23305bcb29bbfb173faf87d117971f5adb9af37540ae79f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_cli.fy",
+      "sha256": "8128075037487308d0f212688473400f478e4e1d6e328a56dba153a19ff743d2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_lower.fy",
+      "sha256": "c20cb6f35a80ab7105506111c6bdc52e64ecd3c030eef287b9b05a2babf7fcb1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "sha256": "677534721b359c9aae7a2a96c9acecbaf4a2ef3e92f9353e9c818f0a810c0787"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+      "sha256": "9bfe9a3e8967f3442e327b9f5b0df3b1446e0026710e1cf424b2760c3ae5425a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_output.fy",
+      "sha256": "2f796be56c33adc82a7f7dfea512b5bae0cee3959b1da9a797f5fe6cdf18feb1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shape_lower.fy",
+      "sha256": "7f06576e0ebd4b2e1a904133cce4732309e87f8d3d89c7812e650ce10ce67753"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shapes.fy",
+      "sha256": "914cfb176e84f62338c07c3471d7ab60646b3959c3b0de7b887873ab07eec9cc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_state.fy",
+      "sha256": "2541e9bba9d99213f956eb915947e675abbdcccc19433e06fd5ff7f9b45e3132"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_view_check.fy",
+      "sha256": "97cb3ae84301ec5dd7be101a46f7d634d04fc707eef7a8772987f9c62f5b394d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "examples/lexer_candidate/src/literal_types.fy",
+      "sha256": "33d37658af0f45e89aa009837f0937e7f55ae58f7014231645c90f80f584e0b9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_arrays.fy",
+      "sha256": "3990b54299cbfb764dcdb722e7638ef5963f32cb1936e72e227faeb2c3737f48"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+      "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cli.fy",
+      "sha256": "77fad7857d50b0874b5d1043a4f64bd8f92e403a19746e25ed0d03c99b1e2128"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_lower.fy",
+      "sha256": "e44ee0347643052ad02bc89e2fdfc2f20199aecba25b6319f402d6f09edd6113"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_model.fy",
+      "sha256": "1a2411aedd49e481c8cd26b348818ab62a277a3bbc6f947aec2e5199105948c4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_nominal.fy",
+      "sha256": "e9fc7a50c45270783f1282cc519c5f952073b38d9bf1940106ed8062dd2d1403"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_output.fy",
+      "sha256": "ea5d193b315270ea6bb2f4764324ff285cc6f45d8080e81084ca9c859115eead"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_places.fy",
+      "sha256": "1c1031459ecd4d844fb9a523500277a5683a66fa0f677604e657f34827b5cf20"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_state.fy",
+      "sha256": "5cd00c2df24b33562a2fd022d2e5ae1dd52814a4befccdc1003a8291b1e5b225"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify.fy",
+      "sha256": "b99b8713e1cfcb3080f679a4957529460e7b050b721aee33812e8dca689786be"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_arrays.fy",
+      "sha256": "f566caa138e2f8ba8b11f5f6adf833c6628889e6311ef3634b9cf755f5870a2b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_flow.fy",
+      "sha256": "c1d86790f83b55ea10650fa41d7a2dde09cb3505789a008f3fe62e303add87c4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_literals.fy",
+      "sha256": "92fad4c2db07f67db19a151059b67c2c4e7a0543b5afdc89c8fed4bac1940f5a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_nominal.fy",
+      "sha256": "9610b9c684ae4d13ef1654298d935785386e589eaeb290845ec9649bd047a049"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_shape.fy",
+      "sha256": "1867bb47281e47f28fcbc373dc8c2000adb21b072708555589eb1c1bada99dbc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_views.fy",
+      "sha256": "ead173bb6bfa057e9e086753c7f9988913d81bdad740fd52472b4211c923d917"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_resolution.fy",
+      "sha256": "3e1527261f919f759cf7a2e937a28a4b56f9c877354448e0282c0831af84d18e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_types.fy",
+      "sha256": "739528f0df7440946fd5c6b8ff193e30f3118170dfb882e2c461fa388392bf14"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "97205d98aba7bf26279d11e03778685ab809ddbcd90c8e8f7020bbb34b3b6d4d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_check.fy",
+      "sha256": "34910cbd8ee8b6f09a141e0f6982dc85833e174f2d0951e08d3a60b8eea35e27"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_cli.fy",
+      "sha256": "897bd23ad06d663ea06ba314532117a8583484142f936252655ddca0ef234a03"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_control.fy",
+      "sha256": "9a6e7228e0a64d791678a245dac91a72d90a6762d2b30cac6aa9917d773f886f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "a4d0a814c23cdbfb8b50523ab43020225d2d5a561c6773b07f58ed2e478cee00"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ],
+  "sdk": [
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/alloc.fy",
+      "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    }
+  ],
+  "deferred": [
+    "enum MIR/C execution",
+    "payloads",
+    "comparison",
+    "enum aggregate storage",
+    "Linux",
+    "performance",
+    "self-hosting"
+  ],
+  "sourceDigest": "3dc650e91e17c6a61ee0dbf12e2e170ce8c5a89d9e492fed5d6005c51ad347ed"
+}

@@ -1,5 +1,6 @@
 module hir_model;
 import array_types as arrays;
+import enum_types as enums;
 import literal_types as literals;
 import std::bytes as bytes;
 import std::vec as v;
@@ -10,17 +11,17 @@ import hir_shapes as shapes;
 // Module indexes remain zero-based and declaration IDs retain their source index
 // plus one (including module/import declarations). Binding IDs preserve resolved
 // symbol IDs, but their owner/target/type facts below are independently owned.
-pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; }
-pub enum BindingKind { Function; Parameter; Let; Var; External; Struct; }
-pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; }
+pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; Enumeration { u32 id; }; }
+pub enum BindingKind { Function; Parameter; Let; Var; External; Struct; Enum; }
+pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; }
 pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; }
 pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
 // The fixed SDK/compiler admits enum switching, not enum equality or enum casts.
 // These exhaustive private-format tags also permit exact scalar comparisons.
-pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
-pub fn bool represented_type(Type value) { return switch(value) { case .Invalid: { false } case .Callable: { false } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } }; }
-pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } case .Struct: { 6 } }; }
-pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } }; }
+pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .Enumeration { .id = id }: { id } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
+pub fn bool represented_type(Type value) { return switch(value) { case .Invalid: { false } case .Callable: { false } case .Enumeration { .id = id }: { enums::valid(id) } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } }; }
+pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } case .Struct: { 6 } case .Enum: { 7 } }; }
+pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } case .Variant: { 18 } case .Switch: { 19 } case .Arm: { 20 } }; }
 pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Binding: { 1 } case .Return: { 2 } case .Assignment: { 3 } case .Expression: { 4 } case .While: { 5 } case .For: { 6 } case .Break: { 7 } case .Continue: { 8 } case .Assert: { 9 } case .Discard: { 10 } case .Defer: { 11 } }; }
 pub fn u32 operator_code(Operator value) { return switch(value) { case .None: { 0 } case .Plus: { 1 } case .Minus: { 2 } case .Not: { 3 } case .Complement: { 4 } case .Multiply: { 5 } case .Divide: { 6 } case .Remainder: { 7 } case .BitAnd: { 8 } case .BitOr: { 9 } case .BitXor: { 10 } case .ShiftLeft: { 11 } case .ShiftRight: { 12 } case .Equal: { 13 } case .NotEqual: { 14 } case .Less: { 15 } case .LessEqual: { 16 } case .Greater: { 17 } case .GreaterEqual: { 18 } case .And: { 19 } case .Or: { 20 } case .Assign: { 21 } }; }
 pub struct Problem { u32 code; usize start; usize end; }
@@ -105,16 +106,16 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     while (shape_index < shapes::count(ref nominal)) {
         let shapes::Shape shape = shapes::at(ref nominal,shape_index);
         let Binding b = *v::at<Binding>(ref bindings,shape.binding - 1);
-        if (binding_code(b.kind) != 6 || type_code(b.type) != shape.type || b.declaration != (shape.type - 255) as usize || b.signature_count != 0 || b.module_index != module_index) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (binding_code(b.kind) != if(enums::valid(shape.type)){7}else{6} || type_code(b.type) != shape.type || b.declaration != (shape.type - if(enums::valid(shape.type)){131071}else{255}) as usize || b.signature_count != 0 || b.module_index != module_index) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         shape_index += 1;
     }
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
         if (b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || (binding_code(b.kind) == 6 && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if (binding_code(b.kind) == 6 && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct)) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
+        if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || ((binding_code(b.kind) == 6 || binding_code(b.kind) == 7) && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if ((binding_code(b.kind) == 6 || binding_code(b.kind) == 7) && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
         else if (b.owner == 0 || b.scope == 0 || type_code(b.type) == type_code(.Void) || b.signature_count != 0 || binding_code(v::at<Binding>(ref bindings,b.owner - 1).kind) != binding_code(.Function)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         i += 1;
     }
@@ -139,7 +140,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     while (i < ne) {
         let Expression e = *v::at<Expression>(ref expressions,i);
         let u32 kind = expression_code(e.kind); let u32 type = type_code(e.type);
-        let bool is_field = kind == 10 || kind == 11;
+        let bool is_field = kind == 10 || kind == 11 || kind == 18 || kind == 20;
         if (e.start > e.end || e.end > ns || !represented_type(e.type) || !shapes::valid_type(ref nominal,type,true) || e.left > ne || e.right > ne || e.alternative > ne || e.block > nk || (!is_field && e.binding > nb) || e.edge_start > na || e.edge_count > na - e.edge_start || e.payload_start > e.payload_end || e.payload_end > np) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         // Expression links are postorder and cannot create cycles.
         if (e.left > i || e.right > i || e.alternative > i) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
@@ -152,7 +153,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
         if (expression_code(e.kind) == expression_code(.If) && (e.left == 0 || type_code(v::at<Expression>(ref expressions,e.left - 1).type) != type_code(.Bool))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if (expression_code(e.kind) == expression_code(.Reference) || expression_code(e.kind) == expression_code(.Call)) {
             let Binding b = *v::at<Binding>(ref bindings,e.binding - 1);
-            if (type_code(e.type) != type_code(b.type) || (expression_code(e.kind) == expression_code(.Reference) && (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct))) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (type_code(e.type) != type_code(b.type) || (expression_code(e.kind) == expression_code(.Reference) && (binding_code(b.kind) == binding_code(.Function) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7)) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             if (expression_code(e.kind) == expression_code(.Call)) {
                 if (e.edge_count != b.signature_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
                 var usize j = 0;
@@ -175,7 +176,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
             let u32 owner = type_code(v::at<Expression>(ref expressions,e.left - 1).type);
             if (kind == 13 && (e.right == 0 || type_code(v::at<Expression>(ref expressions,e.right - 1).type) != 5 || type != if (owner == 10 || owner == 11) { 3 } else { arrays::element(owner) } || owner == 9 || e.boolean) || kind == 14 && (e.right != 0 || type != if (e.boolean) { 6 } else { 5 } || e.boolean && !literals::valid(owner) && owner != 11)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         }
-        if (is_field) {
+        if (kind == 10 || kind == 11) {
             if (e.binding == 0 || e.binding > shapes::field_count(ref nominal) || e.left == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             let shapes::Field f = shapes::field_at(ref nominal,e.binding);
             let u32 left_type = type_code(v::at<Expression>(ref expressions,e.left - 1).type);
@@ -193,6 +194,23 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
                 let Expression f = *v::at<Expression>(ref expressions,id - 1);
                 if (expression_code(f.kind) != 11 || f.binding <= s.field_start || f.binding > s.field_start + s.field_count || seen[f.binding - 1] != 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
                 seen[f.binding - 1] = 1; j += 1;
+            }
+        }
+        if (kind == 18 || kind == 20) {
+            if (e.binding == 0 || e.binding > shapes::field_count(ref nominal) || e.left != 0 || e.right != 0 || e.alternative != 0 || e.edge_count != 0 || e.boolean || e.payload_start != 0 || e.payload_end != 0 || operator_code(e.operator) != 0) { return .err(Problem { .code=4,.start=e.start,.end=e.end }); }
+            let shapes::Field member = shapes::field_at(ref nominal,e.binding);
+            if (!enums::valid(member.owner) || member.type != 0 || kind == 18 && (type != member.owner || e.block != 0) || kind == 20 && e.block == 0) { return .err(Problem { .code=4,.start=e.start,.end=e.end }); }
+            if (kind == 20) { let Block arm = *v::at<Block>(ref blocks,e.block-1); if (arm.tail > i) { return .err(Problem { .code=4,.start=e.start,.end=e.end }); } if (type != if(arm.tail==0){7}else{type_code(v::at<Expression>(ref expressions,arm.tail-1).type)}) { return .err(Problem { .code=4,.start=e.start,.end=e.end }); } }
+        }
+        if (kind == 19) {
+            if(e.left==0 || e.right!=0 || e.alternative!=0 || e.block!=0 || e.binding!=0 || e.boolean || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
+            let u32 subject = type_code(v::at<Expression>(ref expressions,e.left-1).type); let usize shape = shapes::find(ref nominal,subject);
+            if(!enums::valid(subject) || shape==0){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
+            let shapes::Shape layout = shapes::at(ref nominal,shape-1);if(e.edge_count!=layout.field_count){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
+            var u8[1024] seen=[0;1024];var usize j=0;
+            while(j<e.edge_count){let usize id=*v::at<usize>(ref edges,e.edge_start+j);if(id==0 || id>i){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
+                let Expression arm=*v::at<Expression>(ref expressions,id-1);if(expression_code(arm.kind)!=20 || type_code(arm.type)!=type || arm.binding<=layout.field_start || arm.binding>layout.field_start+layout.field_count || seen[arm.binding-1]!=0){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
+                seen[arm.binding-1]=1;j+=1;
             }
         }
         i += 1;

@@ -103,7 +103,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         while (index < syntax::call_argument_count(parsed,id)) {
             let usize entry_id = syntax::call_argument_entry(parsed,id,index);
             let syntax::Expression argument = syntax::expression_at(parsed,entry_id);
-            if (syntax::source_view(parsed)[argument.start] == 46) { return fail(3,argument.start,argument.end); }
+            if (syntax::call_argument_labeled(parsed,entry_id)) { return fail(3,argument.start,argument.end); }
             let Problem value = expression(parsed,context,argument.left,depth + 1,symbols,references);
             if (value.code != 0) { return value; } index += 1;
         }
@@ -135,6 +135,13 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
             if (value.code != 0) { return value; } index += 1;
         }
         return ok();
+    }
+    if (node.kind == 28) { return ok(); }
+    if (node.kind == 15) {
+        let Problem subject=expression(parsed,context,node.left,depth + 1,symbols,references);if(subject.code!=0){return subject;}
+        var usize link=node.right;while(link!=0){let arm=syntax::expression_at(parsed,syntax::expression_at(parsed,link).left);let pattern=syntax::expression_at(parsed,arm.left);if(pattern.kind!=16 || pattern.left!=0 || pattern.right!=0){return fail(3,pattern.start,pattern.end);}
+            let Problem checked=block(parsed,context,arm.right,depth + 1,symbols,references);if(checked.code!=0){return checked;}link=syntax::expression_at(parsed,link).right;
+        }return ok();
     }
     if (node.kind == 13) {
         let Problem condition = expression(parsed,context,node.left,depth + 1,symbols,references);
@@ -211,7 +218,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
         if (item.kind != 1 && !(context.modules && item.kind == 2)) {
-            if ((item.kind != 3 && item.kind != 4) || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
+            if ((item.kind != 3 && item.kind != 4 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
             var usize previous = 0;
@@ -221,7 +228,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             }
             if (context.global_count >= 128) { return fail(4,item.name_start,item.name_end); }
             let usize slot = context.global_count;
-            let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
+            let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else if (item.kind == 11) { 7 } else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
                 .owner = 0, .type_root = item.result_type, .entry = 0, .declaration = index + 1 };
             if (!v::push<Symbol>(symbols,value).is_ok) { return fail(5,item.name_start,item.name_end); }
             let usize symbol = v::len<Symbol>(symbols);

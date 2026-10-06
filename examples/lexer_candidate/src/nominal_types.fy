@@ -1,5 +1,6 @@
 module nominal_types;
 import array_types as arrays;
+import enum_types as enums;
 import literal_types as literals;
 import syntax as syntax;
 import type_state as state;
@@ -22,7 +23,8 @@ pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     let ref u8[] spelling = syntax::type_text(p,root);
     let u32 primitive = state::primitive(p,root);
     if (primitive != 7 || bytes::equal(spelling,b"void")) { return primitive; }
-    return named(p,spelling);
+    let u32 enumeration = enums::named(p,spelling);
+    return if (enumeration != 0) { enumeration } else { named(p,spelling) };
 }
 pub fn usize field(ref syntax::Parsed p, u32 type, ref u8[] name) {
     if (type < 256 || (type - 256) as usize >= syntax::declaration_count(p)) { return 0; }
@@ -42,7 +44,7 @@ fn state::Problem visit(ref syntax::Parsed p, usize id, ref mut u8[] colors, usi
     colors[id] = 1; var usize i = d.field_start;
     while (i < d.field_start + d.field_count) {
         let f = syntax::field_at(p,i); let u32 type = resolve(p,f.type_root);
-        if (type == 0 || type == 7 || type == 11 || literals::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
+        if (type == 0 || type == 7 || type == 11 || literals::valid(type) || enums::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
         var usize j = d.field_start; while (j < i) {
             let previous = syntax::field_at(p,j);
             if (bytes::equal(syntax::source_view(p)[f.name_start..f.name_end],syntax::source_view(p)[previous.name_start..previous.name_end])) { return state::fail(17,f.name_start,f.name_end,0,0); } j += 1;

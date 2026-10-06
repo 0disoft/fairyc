@@ -1917,3 +1917,23 @@ directly. Exact CLI diagnostics, unchanged input bytes, both candidate profiles
 and representative native byte/text-metadata results are recorded in
 `docs/ops/evidence/text-access-diagnostic-20261006.json`. This is a diagnostic
 correction, with no new text slice syntax, SDK API or runtime behavior.
+
+
+## Payloadless enum HIR
+
+Version 0.30.0 retains declaration-specific payloadless enums and exhaustive
+shallow switches. Enums have 1..128 distinct members and private type IDs in
+131072..131583, separate from integers, structs and fixed arrays. Contextual
+`.Member` construction works in typed bindings, assignment, parameters, return
+values and conditional/switch joins. Each switch lists every member exactly
+once; written arm order and arm-local scopes survive HIR lowering. Positional
+`.Member` arguments are distinguished from unsupported labeled call arguments.
+
+`tests/hir_enums.fy` checks owned layouts and retained arm order after the input
+arenas are released. `verify_enums.py --phase hir` checks accepted values and
+rejected empty/payload enums, duplicate members/cases, missing/unknown cases,
+integer coercion, distinct declarations, equality, aggregate enum storage,
+immutable assignments and borrowed-view joins. Types, HIR, MIR and C execution
+are separate candidate milestones; this version retains HIR only. Payloads,
+enum comparison and enum arrays/struct fields remain closed. The public grammar,
+SDK/runtime and public ABI are unchanged.

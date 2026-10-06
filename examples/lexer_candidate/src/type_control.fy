@@ -17,6 +17,9 @@ pub fn bool plain_header(ref syntax::Parsed parsed, usize id, usize depth) {
 pub fn bool expression_terminates(ref syntax::Parsed parsed, usize id, usize depth) {
     if (id == 0 || depth >= 64) { return false; }
     let syntax::Expression node = syntax::expression_at(parsed,id);
+    if (node.kind == 15) {
+        if(node.right==0){return false;}var usize link=node.right;while(link!=0){let arm=syntax::expression_at(parsed,syntax::expression_at(parsed,link).left);if(!block_terminates(parsed,arm.right,depth+1)){return false;}link=syntax::expression_at(parsed,link).right;}return true;
+    }
     if (node.kind != 13) { return false; }
     let syntax::Expression branches = syntax::expression_at(parsed,node.right);
     if (branches.right == 0 || !block_terminates(parsed,branches.left,depth + 1)) { return false; }
