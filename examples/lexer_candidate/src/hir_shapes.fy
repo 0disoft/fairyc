@@ -33,13 +33,18 @@ pub fn usize field_count(ref Table p) { return v::len<Field>(ref p.fields); }
 pub fn Shape at(ref Table p, usize i) { assert(i < count(p)); return *v::at<Shape>(ref p.shapes,i); }
 pub fn Field field_at(ref Table p, usize id) { assert(id > 0 && id <= field_count(p)); return *v::at<Field>(ref p.fields,id - 1); }
 pub fn usize find(ref Table p, u32 type) { var usize i = 0; while (i < count(p)) { if (at(p,i).type == type) { return i + 1; } i += 1; } return 0; }
-pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) || (type >= 256 && find(p,type) != 0); }
+pub fn u32 array_element(ref Table p,u32 type) {
+    if(!arrays::valid(type)){return 0;}if(!arrays::owned(type)){return arrays::element(type);}
+    let usize id=find(p,type);return if(id==0){0}else{field_at(p,at(p,id-1).field_start+1).type};
+}
+pub fn bool has_owned_arrays(ref Table p) { var usize i=0;while(i<count(p)){if(arrays::owned(at(p,i).type)){return true;}i+=1;}return false; }
+pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || enums::valid(type)) && find(p,type) != 0); }
 fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     if (colors[i] == 2) { return true; } if (colors[i] == 1 || depth >= 64) { return false; }
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;
     while (j < s.field_count) {
         let Field f = field_at(p,s.field_start + j + 1);
-        if ((!enums::valid(s.type) || tagged::builtin(s.type)) && f.type >= 256 && !arrays::valid(f.type) && !visit(p,find(p,f.type) - 1,colors,depth + 1)) { return false; } j += 1;
+        if ((!enums::valid(s.type) || tagged::builtin(s.type)) && f.type >= 256 && (!arrays::valid(f.type) || arrays::owned(f.type)) && !visit(p,find(p,f.type) - 1,colors,depth + 1)) { return false; } j += 1;
     }
     colors[i] = 2; return true;
 }
@@ -50,7 +55,12 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
     var usize offset = 0; var usize i = 0;
     while (i < count(p)) {
         let Shape s = at(p,i);
-        if (!(s.type >= 256 && s.type <= 767) && !enums::valid(s.type) || (!tagged::builtin(s.type) && s.binding == 0) || s.binding > bindings || s.field_start != offset || s.field_count > field_count(p) - offset) { return false; }
+        if (!nominal::valid(s.type) && !enums::valid(s.type) && !arrays::owned(s.type) || (!tagged::builtin(s.type) && !arrays::owned(s.type) && s.binding == 0) || s.binding > bindings || s.field_start != offset || s.field_count > field_count(p) - offset) { return false; }
+        if(arrays::owned(s.type)){
+            if(s.binding!=0 || s.public || s.field_count!=1){return false;}
+            let u32 child=field_at(p,offset+1).type;let u32 encoded=arrays::encoded_element(s.type);let u32 key=arrays::key(s.type);
+            if(encoded!=0 && child!=encoded || key>=2048 && key<6144 && !(child>=1073741824 && tagged::builtin(child)) || key>=8192 && (!arrays::owned(child) || arrays::key(child)>=8192)){return false;}
+        }
         if(tagged::option(s.type) && (s.binding!=0 || s.public || s.field_count!=3)){return false;}
         if(tagged::option(s.type)){
             let a=field_at(p,offset+1);let b=field_at(p,offset+2);let c=field_at(p,offset+3);

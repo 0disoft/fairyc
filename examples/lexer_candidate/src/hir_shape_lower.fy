@@ -1,6 +1,7 @@
 module hir_shape_lower;
 import hir_shapes as shapes;
 import tagged_types as tagged;
+import hir_array_shapes as arrays;
 import type_check as typing;
 import nominal_types as nominal;
 import name_resolution as names;
@@ -45,5 +46,6 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
         if(!v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=0,.start=node.start,.end=node.end,.payload_start=if(option){0}else{start+2},.payload_count=if(option){0}else{1}}).is_ok){return .err(3);}
         index+=1;
     }
+    let u32 array_code=arrays::collect(input,ref mut records,ref mut fields);if(array_code!=0){return .err(array_code);}
     return .ok(shapes::assemble(records,fields));
 }

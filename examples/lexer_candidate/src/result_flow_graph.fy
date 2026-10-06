@@ -104,6 +104,7 @@ fn void expression(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec
     if(e.kind==6){var usize i=0;while(i<syntax::call_argument_count(p,id)){expression(p,types,columns,nodes,c,syntax::call_argument(p,id,i),2,depth+1);i+=1;}}
     else if(e.kind==10){var usize i=0;while(i<syntax::record_field_count(p,id)){let field=syntax::expression_at(p,syntax::record_field(p,id,i));expression(p,types,columns,nodes,c,field.left,2,depth+1);i+=1;}}
     else if(e.kind==23 || e.kind==24){var usize i=0;while(i<syntax::array_element_count(p,id)){expression(p,types,columns,nodes,c,syntax::array_element(p,id,i),2,depth+1);i+=1;}}
+    else if(e.kind==29){expression(p,types,columns,nodes,c,e.left,2,depth+1);}
     else if(e.kind==26){expression(p,types,columns,nodes,c,e.left,0,depth+1);let bounds=syntax::expression_at(p,e.right);expression(p,types,columns,nodes,c,bounds.left,0,depth+1);expression(p,types,columns,nodes,c,bounds.right,0,depth+1);}
     else if(e.kind!=1 && e.kind!=28){expression(p,types,columns,nodes,c,e.left,0,depth+1);expression(p,types,columns,nodes,c,e.right,0,depth+1);}
     if(c.current!=0){discard take(p,types,columns,nodes,c,id,use);}

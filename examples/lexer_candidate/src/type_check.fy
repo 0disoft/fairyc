@@ -205,7 +205,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 24 || node.kind == 29) {
         let usize count = if (node.kind == 29) { arrays::count(syntax::expression_text(parsed,node.right)) } else { syntax::array_element_count(parsed,id) };
         if (count == 0 || count > 64) { return error(problem,16,node.start,node.end,0,0); }
-        var u32 element = if (arrays::valid(expected)) { arrays::element(expected) } else { 0 };
+        var u32 element = if (arrays::valid(expected)) { arrays::source_element(parsed,expected) } else { 0 };
         if (arrays::valid(expected) && arrays::length(expected) != count) { return error(problem,1,node.start,node.end,expected,0); }
         var usize i = 0; var bool terminates = false;
         while (i < if (node.kind == 29) { 1 } else { count }) {
@@ -213,10 +213,10 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
             let state::Value actual = expression(resolved,tables,problem,child,element,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
             if (i == 0 && element == 0) { element = actual.type; }
-            if (actual.type != element || arrays::make(element,count) == 0) { return error(problem,1,node.start,node.end,element,actual.type); }
+            if (actual.type != element || arrays::make_source(parsed,element,count) == 0) { return error(problem,1,node.start,node.end,element,actual.type); }
             terminates = terminates || actual.terminates; i += 1;
         }
-        return recorded(tables,id,value(arrays::make(element,count),terminates));
+        return recorded(tables,id,value(arrays::make_source(parsed,element,count),terminates));
     }
     if (node.kind == 21 || node.kind == 22) {
         let u32 view_type = if (node.kind == 22) { 11 } else { 10 };
@@ -224,7 +224,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if (syntax::expression_at(parsed,root).kind != 2 || expected != view_type) { return error(problem,16,node.start,node.end,10,0); }
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }
-        if (!arrays::valid(owner.type) || arrays::element(owner.type) != 3) { return error(problem,16,node.start,node.end,10,owner.type); }
+        if (!arrays::valid(owner.type) || arrays::source_element(parsed,owner.type) != 3) { return error(problem,16,node.start,node.end,10,owner.type); }
         if (view_type == 11 && names::symbol_at(resolved,state::uses(tables,root - 1)).kind != 4) { return error(problem,4,node.start,node.end,11,owner.type); }
         return recorded(tables,id,value(view_type,owner.terminates));
     }
@@ -248,7 +248,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         let state::Value index = expression(resolved,tables,problem,node.right,5,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return index; }
         if (index.type != 5) { return error(problem,1,node.start,node.end,5,index.type); }
-        return recorded(tables,id,value(if (owner.type == 10 || owner.type == 11) { 3 } else { arrays::element(owner.type) },owner.terminates || index.terminates));
+        return recorded(tables,id,value(if (owner.type == 10 || owner.type == 11) { 3 } else { arrays::source_element(parsed,owner.type) },owner.terminates || index.terminates));
     }
     if (node.kind == 8) {
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);

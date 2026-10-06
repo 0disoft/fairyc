@@ -163,7 +163,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     var usize shape_index = 0;
     while (shape_index < shapes::count(ref nominal)) {
         let shapes::Shape shape = shapes::at(ref nominal,shape_index);
-        if(tagged::builtin(shape.type)){shape_index+=1;continue;}
+        if(tagged::builtin(shape.type) || arrays::owned(shape.type)){shape_index+=1;continue;}
         let Binding b = *v::at<Binding>(ref bindings,shape.binding - 1);
         if (binding_code(b.kind) != if(enums::valid(shape.type)){7}else{6} || type_code(b.type) != shape.type || b.declaration != (shape.type - if(enums::valid(shape.type)){131071}else{255}) as usize || b.signature_count != 0 || b.module_index != module_index) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         shape_index += 1;
@@ -224,16 +224,16 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
         }
         if (kind == 12) {
             if (!arrays::valid(type) || e.edge_count != if (e.boolean) { 1 } else { arrays::length(type) } || e.left != 0 || e.right != 0 || e.binding != 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-            var usize j = 0; while (j < e.edge_count) { let usize id = *v::at<usize>(ref edges,e.edge_start + j); if (id == 0 || id > i || type_code(v::at<Expression>(ref expressions,id - 1).type) != arrays::element(type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); } j += 1; }
+            var usize j = 0; while (j < e.edge_count) { let usize id = *v::at<usize>(ref edges,e.edge_start + j); if (id == 0 || id > i || type_code(v::at<Expression>(ref expressions,id - 1).type) != shapes::array_element(ref nominal,type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); } j += 1; }
         }
-        if (kind == 16 && ((type != 10 && type != 11) || e.boolean != (type == 11) || e.left == 0 || expression_code(v::at<Expression>(ref expressions,e.left - 1).kind) != 3 || !arrays::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) || arrays::element(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) != 3 || e.right != 0 || e.alternative != 0 || e.edge_count != 0 || e.binding != 0)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+        if (kind == 16 && ((type != 10 && type != 11) || e.boolean != (type == 11) || e.left == 0 || expression_code(v::at<Expression>(ref expressions,e.left - 1).kind) != 3 || !arrays::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) || shapes::array_element(ref nominal,type_code(v::at<Expression>(ref expressions,e.left - 1).type)) != 3 || e.right != 0 || e.alternative != 0 || e.edge_count != 0 || e.binding != 0)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if (kind == 16 && type == 11 && binding_code(v::at<Binding>(ref bindings,v::at<Expression>(ref expressions,e.left - 1).binding - 1).kind) != 4) { return .err(Problem { .code=4,.start=e.start,.end=e.end }); }
         if (kind == 17 && ((type != 10 && type != 11) || e.left == 0 || e.right == 0 || e.alternative == 0 || type_code(v::at<Expression>(ref expressions,e.left - 1).type) != type || type_code(v::at<Expression>(ref expressions,e.right - 1).type) != 5 || type_code(v::at<Expression>(ref expressions,e.alternative - 1).type) != 5 || e.binding != 0 || e.edge_count != 0)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if (kind == 15 && (!literals::valid(type) || type == 9 && !literals::text(bytes::view(ref payload)[e.payload_start..e.payload_end]) || e.left != 0 || e.right != 0 || e.binding != 0 || e.edge_count != 0 || e.block != 0 || e.alternative != 0 || e.boolean || operator_code(e.operator) != 0)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if (kind == 13 || kind == 14) {
             if (e.left == 0 || !(arrays::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) || literals::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) || type_code(v::at<Expression>(ref expressions,e.left - 1).type) == 11) || e.binding != 0 || e.edge_count != 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             let u32 owner = type_code(v::at<Expression>(ref expressions,e.left - 1).type);
-            if (kind == 13 && (e.right == 0 || type_code(v::at<Expression>(ref expressions,e.right - 1).type) != 5 || type != if (owner == 10 || owner == 11) { 3 } else { arrays::element(owner) } || owner == 9 || e.boolean) || kind == 14 && (e.right != 0 || type != if (e.boolean) { 6 } else { 5 } || e.boolean && !literals::valid(owner) && owner != 11)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (kind == 13 && (e.right == 0 || type_code(v::at<Expression>(ref expressions,e.right - 1).type) != 5 || type != if (owner == 10 || owner == 11) { 3 } else { shapes::array_element(ref nominal,owner) } || owner == 9 || e.boolean) || kind == 14 && (e.right != 0 || type != if (e.boolean) { 6 } else { 5 } || e.boolean && !literals::valid(owner) && owner != 11)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         }
         if (kind == 10 || kind == 11) {
             if (e.binding == 0 || e.binding > shapes::field_count(ref nominal) || e.left == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }

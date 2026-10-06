@@ -2459,3 +2459,42 @@ limitations from the preceding unit.
 This completes only the struct-field part of unit 14. Tagged array storage is
 the next part; the progress ledger keeps unit 14 open until that part lands.
 Linux, performance, whole-repository validation and stage1/stage2 remain deferred.
+
+## Composite array type and owned HIR prerequisite
+
+Version 0.44.0 extends the private candidate's array type and HIR paths to named
+copy-only struct, enum, Option and Result elements. Existing scalar rank-one and
+rank-two identities remain unchanged. Each dimension stays within 1..64; views,
+resources and higher ranks are excluded. Composite rank-two arrays currently
+require a written rank-one child type; fully inferred composite rank-two types
+are not admitted by this representation.
+
+`array_types.fy` reserves a disjoint identity range. Direct nominal/enum and
+scalar-tag keys preserve declaration or payload identity; larger tags and
+rank-two children use their first written type node. `hir_array_shapes.fy`
+collects one owned element record per composite array, including inferred
+rank-one arrays and unused declarations. The source-independent shape verifier
+rejects missing child layouts, altered encoded element types and by-value cycles.
+HIR construction/indexing uses these element records rather than a scalar-only
+radix. A repeated Result initializer transfers its handling obligation to storage.
+
+The ordinary source CLI accepts `--check-types-file` and `--hir-file` for the
+cases in `verify_tagged_array_cases.py`. `--mir-file` and `--c-file` deliberately
+return an error without stdout for this new representation: executable array
+lowering and dependency-first C definitions are the next unit-14 part. Existing
+scalar arrays and field behavior keep their executable paths.
+
+`verify_tagged_arrays_hir.py --images <dev> <release> --receipt <path>` observes
+25 source cases and 160 CLI results in both profiles. Four native API tests
+exercise the Fairy type/HIR implementation, including retained element facts,
+wrong/missing layouts, cycles and the temporary MIR gate; these are not native
+executions of the array-element programs. Thirty-two existing field CLI
+observations provide a narrow regression. Builds, locks, source/SDK/tool/image
+hashes and raw commands are in
+`docs/ops/evidence/candidate-tagged-array-hir-20261007.json`.
+
+The pinned Go reference accepts the inferred nominal-array case. Tagged-array
+read controls return its experimental subset-unsupported exit 2; store cases
+instead report E1008. Those differences are recorded, not treated as equivalent
+acceptance or a public Go language change. Unit 14 remains incomplete until the
+candidate's composite-array MIR and native execution work lands.

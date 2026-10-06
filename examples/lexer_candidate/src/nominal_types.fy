@@ -62,12 +62,14 @@ fn state::Problem visit_type(ref syntax::Parsed p, u32 type, ref mut u8[] colors
         let state::Problem success=visit_type(p,tagged::success(type),colors,depth+1);
         return if(success.code!=0){success}else{visit_type(p,tagged::failure(type),colors,depth+1)};
     }
+    if(arrays::owned(type)){return visit_type(p,arrays::source_element(p,type),colors,depth+1);}
     return state::ok(); // Scalar arrays and scalar-only user-enum layouts.
 }
 // The reference admits nested field stores only through a plain stored graph.
 // Tagged-containing structs keep direct field replacement, but not deep stores.
 pub fn bool contains_tagged(ref syntax::Parsed p, u32 type, usize depth) {
     if (enums::valid(type) || tagged::builtin(type) || depth >= 64) { return true; }
+    if(arrays::owned(type)){return contains_tagged(p,arrays::source_element(p,type),depth+1);}
     if (!identity::valid(type)) { return false; }
     let d = syntax::declaration_at(p,(type - 256) as usize); var usize i = d.field_start;
     while (i < d.field_start + d.field_count) {
