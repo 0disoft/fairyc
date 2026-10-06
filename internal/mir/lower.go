@@ -2382,7 +2382,10 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 		argumentSpans = append(argumentSpans, argument.Span)
 		if path := l.liveResourcePath(argument); path != nil {
 			value = l.materializeMove(path, value, "call-argument", true)
-		} else if index+1 < len(arguments) && value.Kind == OperandLocal && hir.FixedArrayScalarElement(argument.Type) {
+		} else if index+1 < len(arguments) && value.Kind == OperandLocal &&
+			(hir.FixedArrayScalarElement(argument.Type) || l.properties.IsStruct(argument.Type) && !l.properties.NeedsDrop(argument.Type)) {
+			// Capture copyable by-value structs as well as scalars before later
+			// arguments can overwrite their source locals or nested fields.
 			if _, sourceLocal := l.bindings[hir.SymbolID(value.Local)]; sourceLocal {
 				value = l.freezeScalarOperand(value, argument.Span)
 			}
