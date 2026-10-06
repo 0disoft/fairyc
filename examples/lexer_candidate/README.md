@@ -2098,3 +2098,21 @@ payload assertion and assertion-arm traps. Both candidate profiles must emit
 identical HIR/MIR/C; emitted code executes in both native C profiles. Evidence:
 `docs/ops/evidence/candidate-option-flow-20261007.json`. Linux execution remains
 deferred to the consolidated batch. Source language, SDK and runtime are unchanged.
+
+## Result scalar type identity
+
+Version 0.34.0 recognizes `Result<T,E>` for the six admitted integer/bool scalar
+types in each position. The 36 ordered pairs use private IDs 262145..262180;
+both the success and error type participate in identity. Repeated spellings
+share an ID, and Option, user enums and structs remain distinct. Parameters,
+locals, assignments, calls and returns preserve these types and reject a
+different success/error component without implicit conversion.
+
+`verify_results.py --phase types --images <dev> <release> --receipt <path>`
+checks all pairs plus changes to either component, malformed arity, invalid
+payload types and existing closed storage boundaries. `tests/result_types.fy`
+also checks the canonical mapping, retained symbol types and field rejection.
+Evidence: `docs/ops/evidence/candidate-result-types-20261007.json`.
+Construction/patterns, owned HIR, MIR/C execution, propagation and must-use
+Flow are subsequent numbered units, not claims of this type-only unit.
+The public language, SDK and runtime are unchanged; Linux runs stay deferred.
