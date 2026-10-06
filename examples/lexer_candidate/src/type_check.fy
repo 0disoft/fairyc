@@ -71,10 +71,11 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
                     var usize sid=1;while(sid<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,sid);if(s.kind==8 && s.declaration==pattern.left){state::set_symbols(tables,sid-1,child);}sid+=1;}
                 }
                 let state::Value actual=block(resolved,tables,problem,arm.right,join,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}
-                if(!known){join=actual.type;known=true;}else if(join!=actual.type){return error(problem,1,arm.start,arm.end,join,actual.type);}
+                if(!control::assert_arm(parsed,arm.right)){if(!known){join=actual.type;known=true;}else if(join!=actual.type){return error(problem,1,arm.start,arm.end,join,actual.type);}}
                 state::set_expressions(tables,arm_id-1,actual.type);terminates=terminates && actual.terminates;link=syntax::expression_at(parsed,link).right;
             }
-            if(!some || !none){return error(problem,35,node.start,node.end,0,subject.type);}if(join==9 || join==10 || join==11){return error(problem,34,node.start,node.end,0,join);}
+            if(!some || !none){return error(problem,35,node.start,node.end,0,subject.type);}if(!known){return error(problem,34,node.start,node.end,0,0);}
+            link=node.right;while(link!=0){let usize aid=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,aid);if(control::assert_arm(parsed,arm.right)){state::set_expressions(tables,aid-1,join);}link=syntax::expression_at(parsed,link).right;}if(join==9 || join==10 || join==11){return error(problem,34,node.start,node.end,0,join);}
             return recorded(tables,id,value(join,subject.terminates || terminates));
         }
         if(!enums::valid(subject.type)){return error(problem,24,node.start,node.end,0,subject.type);}

@@ -11,7 +11,7 @@ work remain deferred to the owner's consolidated batch.
 | 1 | Option types/owned HIR prerequisite and MIR some/none construction | Complete: candidate-option-mir-20261007.json; hir_options native test |
 | 2 | Option MIR owner/type/tag/payload/initialization mutation rejection | Complete: candidate-option-verifier-20261007.json; 5 layout and 15 operation mutations |
 | 3 | Option C construction/copy/call/return/switch native execution | Complete: candidate-option-native-20261007.json; 26 normal native runs and 2 injected inactive-payload traps |
-| 4 | Option if/loop/early-return value and control-flow preservation | Pending |
+| 4 | Option if/loop/early-return value and control-flow preservation | Complete: candidate-option-flow-20261007.json; joins, subject-once, early exits and payload traps |
 | 5 | Result success/error type identity and type checking | Pending |
 | 6 | Result construction and exhaustive contextual patterns | Pending |
 | 7 | Owned Result HIR, payloads, bindings and source locations | Pending |

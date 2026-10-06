@@ -2080,3 +2080,21 @@ requiring the unchanged extraction guard to trap 7. This is test-only C fault
 injection rather than execution of a valid Fairy source program. Raw evidence:
 `docs/ops/evidence/candidate-option-native-20261007.json`. Linux runs remain
 deferred to the consolidated validation batch.
+
+## Option control flow
+
+Version 0.33.1 preserves Option values through if expressions, loop assignments,
+break/continue, calls and early returns. Switch subjects are evaluated once and
+captured payloads remain independent of later subject reassignment. A no-tail
+arm ending in literal `assert(false);` contributes no value to the join, as
+required by the existing language contract; at least one arm must contribute.
+Direct-return Option arms retain the existing rules rather than acquiring the
+separate Result arm exception. No general never type is introduced.
+
+`tests/mir_option_flow.fy` checks that early payload returns publish no orphan
+construction/call edges and that literal-assert arms lower without value joins.
+`verify_options.py` adds normal control-flow outcomes plus overflow, division,
+payload assertion and assertion-arm traps. Both candidate profiles must emit
+identical HIR/MIR/C; emitted code executes in both native C profiles. Evidence:
+`docs/ops/evidence/candidate-option-flow-20261007.json`. Linux execution remains
+deferred to the consolidated batch. Source language, SDK and runtime are unchanged.

@@ -92,7 +92,14 @@ pub fn ref u8[] binding_text(ref Program p, usize id) { let Binding b = binding_
 
 // Keep enum shape/capture checks outside the large general assembly verifier.
 // Earlier expressions have already passed their local shape checks.
-fn bool enum_expression(ref shapes::Table nominal, ref v::Vec<Expression> expressions, ref v::Vec<Block> blocks, ref v::Vec<Binding> bindings, ref v::Vec<usize> edges, Expression e, usize i) {
+fn bool assert_arm(ref v::Vec<Block> blocks,ref v::Vec<Statement> statements,ref v::Vec<Expression> expressions,ref v::Vec<usize> edges,usize id) {
+    if(id==0 || id>v::len<Block>(blocks)){return false;}let b=*v::at<Block>(blocks,id-1);
+    if(b.tail!=0 || b.edge_count==0 || b.edge_start>v::len<usize>(edges) || b.edge_count>v::len<usize>(edges)-b.edge_start){return false;}
+    let usize sid=*v::at<usize>(edges,b.edge_start+b.edge_count-1);if(sid==0 || sid>v::len<Statement>(statements)){return false;}
+    let s=*v::at<Statement>(statements,sid-1);if(statement_code(s.kind)!=9 || s.expression==0 || s.expression>v::len<Expression>(expressions)){return false;}
+    let e=*v::at<Expression>(expressions,s.expression-1);return expression_code(e.kind)==2 && type_code(e.type)==6 && !e.boolean;
+}
+fn bool enum_expression(ref shapes::Table nominal, ref v::Vec<Expression> expressions, ref v::Vec<Block> blocks, ref v::Vec<Statement> statements, ref v::Vec<Binding> bindings, ref v::Vec<usize> edges, Expression e, usize i) {
     let u32 kind=expression_code(e.kind);let u32 type=type_code(e.type);let usize nb=v::len<Binding>(bindings);
         if (kind == 18 || kind == 20) {
             if (e.binding == 0 || e.binding > shapes::field_count(nominal) || e.left != 0 || e.right != 0 || e.alternative != 0 || e.boolean || e.payload_start != 0 || e.payload_end != 0 || operator_code(e.operator) != 0) { return false; }
@@ -106,7 +113,7 @@ fn bool enum_expression(ref shapes::Table nominal, ref v::Vec<Expression> expres
                 if(kind==20 && f.edge_count==1){let usize binding=*v::at<usize>(edges,f.edge_start);let Binding b=*v::at<Binding>(bindings,binding-1);let Block arm=*v::at<Block>(blocks,e.block-1);if(b.scope!=arm.scope || b.owner!=arm.owner){return false;}}
                 n+=1;
             }
-            if (kind == 20) { let Block arm = *v::at<Block>(blocks,e.block-1); if (arm.tail > i) { return false; } if (type != if(arm.tail==0){7}else{type_code(v::at<Expression>(expressions,arm.tail-1).type)}) { return false; } }
+            if (kind == 20) { let Block arm = *v::at<Block>(blocks,e.block-1); if (arm.tail > i) { return false; } if (type != if(arm.tail==0){7}else{type_code(v::at<Expression>(expressions,arm.tail-1).type)} && !(tagged::option(member.owner) && assert_arm(blocks,statements,expressions,edges,e.block))) { return false; } }
         }
         if(kind==21){
             if(e.binding==0 || e.binding>shapes::field_count(nominal) || e.edge_count>1 || e.left!=0 || e.right!=0 || e.alternative!=0 || e.block!=0 || e.boolean || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0){return false;}
@@ -235,7 +242,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
                 seen[f.binding - 1] = 1; j += 1;
             }
         }
-        if(!enum_expression(ref nominal,ref expressions,ref blocks,ref bindings,ref edges,e,i)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
+        if(!enum_expression(ref nominal,ref expressions,ref blocks,ref statements,ref bindings,ref edges,e,i)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
         i += 1;
     }
     i = 0;

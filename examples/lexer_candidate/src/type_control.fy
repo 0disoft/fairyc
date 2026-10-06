@@ -2,6 +2,15 @@ module type_control;
 import syntax as syntax;
 import std::bytes as bytes;
 
+// Only the admitted literal-final-assert arm is exempt from Option value joins.
+// A direct return in an Option arm does not acquire Result's separate rule.
+pub fn bool assert_arm(ref syntax::Parsed parsed,usize id) {
+    let body=syntax::statement_at(parsed,id);let usize count=syntax::block_statement_count(parsed,id);
+    if(body.expression!=0 || count==0){return false;}let last=syntax::statement_at(parsed,syntax::block_statement(parsed,id,count-1));
+    if(last.kind!=11 || last.expression==0){return false;}let e=syntax::expression_at(parsed,last.expression);
+    return e.kind==1 && bytes::equal(syntax::expression_text(parsed,last.expression),b"false");
+}
+
 // ADR 0213: header trees have no calls, borrows, indexing or block effects.
 pub fn bool plain_header(ref syntax::Parsed parsed, usize id, usize depth) {
     if (id == 0 || depth >= 64) { return false; }
