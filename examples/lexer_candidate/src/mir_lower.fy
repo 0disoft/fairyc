@@ -11,6 +11,7 @@ import mir_state as state;
 import mir_cleanup as finalize;
 import mir_verify as verify;
 import mir_nominal as nominal;
+import mir_propagation as propagation;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -58,6 +59,11 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (id == 0 || c.current == 0 || c.problem.code != 0) { return 0; }
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
+    if (kind == 22) {
+        let usize subject = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);
+        if (c.current == 0 || c.problem.code != 0) { return 0; }
+        return propagation::lower(input,e,subject,locals,blocks,operations,edges,c);
+    }
     if (kind == 18) {
         let shapes::Field member=shapes::field_at(h::nominal(input),e.binding);
         var usize[16] values=[0;16];var usize i=0;

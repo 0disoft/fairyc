@@ -2191,8 +2191,8 @@ above i32 range and a bool error. Six additional native executions cover this
 sample and existing Option/user-enum coexistence. Source, SDK/compiler/image
 digests and raw observations are retained in
 `docs/ops/evidence/candidate-result-native-20261007.json`.
-Propagation, must-use, nested/aggregate/resource payloads and tagged aggregate
-storage remain units 9..20 or later. Linux validation stays deferred to the
+At 0.37.0, propagation, must-use, nested/aggregate/resource payloads and tagged
+aggregate storage remained units 9..20 or later. Linux validation stays deferred to the
 consolidated batch; this unit makes no self-hosting or performance claim.
 
 ## Result propagation type checking
@@ -2220,11 +2220,11 @@ Go-bootstrap reference checks independently confirm a compatible differing
 success type, E4102 and E4103. Evidence:
 `docs/ops/evidence/candidate-result-propagation-types-20261007.json`.
 
-This unit implements type checking only. HIR/MIR/C publication still rejects
-accepted propagation syntax explicitly; six boundary checks confirm that it
-cannot silently lose the error path. Unit 10 will connect retained propagation
-and runtime early-return semantics. Linux, performance and self-hosting remain
-deferred.
+Version 0.38.0 implemented type checking only. Its HIR/MIR/C publication rejected
+accepted propagation syntax explicitly; six boundary checks confirmed that it
+could not silently lose the error path. Version 0.39.0 connects retained
+propagation and runtime early-return semantics as described below. Linux,
+performance and self-hosting remain deferred.
 
 The first two release builds hit the existing bootstrap's 60-second MSVC
 command limit. Release validation uses a separate local bootstrap built with a
@@ -2232,3 +2232,47 @@ Go overlay changing only that private timeout constant to 120 seconds. The
 original executable and public compiler source are preserved. The evidence
 records both bootstrap identities, the exact overlay change and the failed
 attempts; this is not a release of a new stable build-timeout option.
+
+## Result propagation execution
+
+Version 0.39.0 retains postfix `?` as owned HIR expression kind 22, with one
+operand and the exact enclosing function binding. Assembly checks the operand,
+success type, error compatibility and unused fields after syntax/type arenas
+are destroyed. `src/mir_propagation.fy` lowers the frozen operand through the
+existing verified tagged construction/test/capture operations 21..23. Success
+extracts the `.ok` payload and continues. Failure captures `.err`, constructs
+the enclosing function's Result type, emits the same lexical `defer` suffix
+as a direct return and returns before later operands or statements execute.
+Registration metadata remains intact for sibling branches. Ordinary traps retain
+the existing trap behavior, including traps during a deferred call.
+
+`tests/mir_propagation.fy` checks retained HIR, eight forged-node/owner/type
+rejections, verified MIR and C rendering. `verify_result_execution.py
+--propagation` checks all 36 ordered scalar pairs, both alternatives, differing
+success types, once-only evaluation, frozen earlier arguments, skipped later
+arguments, conditions, loops, early operand returns and short circuiting.
+Generated native executions also check nested/sibling `defer` order and failed
+registration. The C observer only records actual generated `mark` calls; it
+does not implement propagation or cleanup. Genuine Fairy trap fixtures exercise
+integer overflow, signed division overflow, invalid shifts, an operand assertion
+and a deferred-call assertion. Safe signed/unsigned boundary controls also run.
+All core product logic remains in Fairy and the public SDK.
+
+The optimized MSVC run exposed an always-trapping literal operation whose caller
+continuation was still emitted. `src/c_guard_facts.fy` now proves block-local
+literal/copy/unary guard failures with signed magnitudes, without overflowing the compiler
+at i64/usize boundaries. The existing C reachability plan removes those success
+paths and nonreturning-call continuations. Mutable/parameter/join values keep their
+runtime guards. No warning flags, fixture expectations or runtime trap policies
+are relaxed; fourteen direct facts tests cover failing, safe and unknown values.
+
+Sample: `samples/result-propagation-demo.fy`. Evidence, raw command observations,
+source/SDK/bootstrap/native-image hashes and the validation-only timeout overlay
+are in `docs/ops/evidence/candidate-result-propagation-native-20261007.json`.
+Both candidate profiles passed check/build and three native API tests each.
+The execution lane passed 937 CLI observations and 130 generated native runs;
+the checked-in sample passed two further native runs. The initial MSVC failure
+and its original emitted bytes are retained alongside the passing observations.
+Result handling obligations, nested/aggregate/resource payloads and resource
+cleanup remain subsequent units. Public grammar, SDK/runtime and stable CLI
+contracts are unchanged.

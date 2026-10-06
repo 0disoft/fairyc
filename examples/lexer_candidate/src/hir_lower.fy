@@ -100,6 +100,9 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
             if (!state::integer(payload,syntax::expression_text(parsed,literal),node.kind == 4,c)) { return 0; }
             e.payload_end = bytes::len(payload);
         }
+    } else if (node.kind == 30) {
+        kind = .Propagate; e.binding = c.owner;
+        e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth+1);
     } else if (node.kind == 2) {
         kind = .Reference; e.binding = state::use(links,id);
         if (e.binding == 0) { return state::fail(c,4,node.start,node.end); }

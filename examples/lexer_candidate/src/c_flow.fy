@@ -1,5 +1,6 @@
 module c_flow;
 import mir_model as m;
+import c_guard_facts as guards;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -7,16 +8,10 @@ pub resource Plan { bytes::Buffer nonreturn; bytes::Buffer reachable; cleanup { 
 fn void mark(ref mut bytes::Buffer flags, usize id) { let ref mut u8[] data = bytes::view_mut(flags); data[id] = 1; }
 pub fn bool stops(ref Plan plan, usize target) { return bytes::view(ref plan.nonreturn)[target] != 0; }
 pub fn bool live(ref Plan plan, usize block) { return bytes::view(ref plan.reachable)[block] != 0; }
-// A block-local literal zero divisor proves failure before the operation.
-// Unknown/copy-derived values remain governed by the generated runtime guard.
+// Unique immutable literals/copies can prove a checked trap before the operation.
+// Mutable/parameter/join values remain governed by the generated runtime guard.
 pub fn u32 failure(ref m::Program p, m::Block b) {
-    if (b.kind != 4 || (b.operator != 6 && b.operator != 7)) { return 0; }
-    var usize op = b.first; var usize definition = 0;
-    while (op != 0) {
-        let m::Operation o = m::operation_at(p,op);
-        if (o.result == b.right) { definition = if (o.kind == 1) { op } else { 0 }; } op = o.next;
-    }
-    return if (definition != 0 && bytes::equal(m::literal_text(p,definition),b"0")) { 2 } else { 0 };
+    return guards::failure(p,b);
 }
 // Only the final definition in this block can prove its bool successor.
 pub fn usize selected(ref m::Program p, m::Block b) {

@@ -51,7 +51,11 @@ def main():
     parser.add_argument('--images', nargs='+', required=True)
     parser.add_argument('--native-runner', required=True)
     parser.add_argument('--receipt', required=True)
+    parser.add_argument('--propagation', action='store_true')
     args = parser.parse_args()
+    positives, traps, negatives, traces = POSITIVES, TRAPS, PATTERN_NEGATIVES, {}
+    if args.propagation:
+        from verify_propagation_cases import POSITIVES as positives, TRAPS as traps, NEGATIVES as negatives, TRACES as traces
     images = [Path(p).resolve() for p in args.images]
     runner = Path(args.native_runner).resolve()
     receipt = Path(args.receipt).resolve(); receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -65,7 +69,7 @@ def main():
         return row
     modes = ['--check-types-file', '--hir-file', '--mir-file', '--c-file']
     try:
-        for rejected, cases in ((False, POSITIVES+TRAPS), (True, PATTERN_NEGATIVES)):
+        for rejected, cases in ((False, positives+traps), (True, negatives)):
             for name, source, expected in cases:
                 path = receipt.parent/(name+'.fy'); data = ('module main;'+source).encode('utf-8')
                 path.write_bytes(data); digest = sha(path)
@@ -84,12 +88,24 @@ def main():
                 if rejected: continue
                 assert outputs['--mir-file'][0].startswith('fairyc.enum-payload-mir/v1\n') and '\t2621' in outputs['--mir-file'][0]
                 assert 'result:' in outputs['--hir-file'][0]
+                if args.propagation: assert '\tpropagate\t' in outputs['--hir-file'][0]
                 code = outputs['--c-file'][0]
                 assert code.startswith('/* fairyc.candidate-result-c/v1') and 'struct fy_r_' in code
-                trap = name in {n for n, _, _ in TRAPS}
+                trap = name in {n for n, _, _ in traps}
                 unit = receipt.parent/(name+'.c')
                 wrapper = '#define FY_CANDIDATE_NO_MAIN\n#include <inttypes.h>\n#include <stdio.h>\n'
                 observer = 'int main(void){int32_t (*volatile entry)(void)=fy_candidate_entry;int32_t result=entry();fprintf(stderr,"fairyc-candidate-result/v1:%" PRId32 "\\n",result);return 0;}\n'
+                if name in traces:
+                    # Measurement only: record actual calls to the emitted mark
+                    # function. Product registration, exits and call order stay
+                    # unchanged. Check the trace after native entry returns.
+                    signature = 'void fy_fn_1(int32_t fy_l_1){'
+                    assert code.count(signature) == 1
+                    code = code.replace(signature, signature+'\n    if(fy_trace_count>=8) abort();fy_trace[fy_trace_count++]=fy_l_1;\n', 1)
+                    wrapper += '#include <stdlib.h>\nstatic int32_t fy_trace[8];static int32_t fy_trace_count;\n'
+                    checks = f'if(fy_trace_count!={len(traces[name])}) return 90;'
+                    checks += ''.join(f'if(fy_trace[{i}]!={n}) return 91;' for i,n in enumerate(traces[name]))
+                    observer = observer.replace('fprintf(stderr,', checks+'fprintf(stderr,', 1)
                 unit.write_text(code if trap else wrapper+code+observer, encoding='utf-8', newline='\n')
                 jobs.append(dict(name=name, source=str(unit), observe=not trap))
                 if name in ('ok', 'err'):
@@ -104,8 +120,8 @@ def main():
         run([runner, request, report], timeout=300)
         native = json.loads(report.read_text(encoding='utf-8'))
         assert len(native) == (2 if sys.platform == 'win32' else 4)*len(jobs)
-        expected_values = {name: value for name, _, value in POSITIVES}
-        expected_traps = {name: value for name, _, value in TRAPS} | {'ok-inactive': 7, 'err-inactive': 7}
+        expected_values = {name: value for name, _, value in positives}
+        expected_traps = {name: value for name, _, value in traps} | {'ok-inactive': 7, 'err-inactive': 7}
         for row in native:
             if row['name'] in expected_traps:
                 assert row['trap'] == expected_traps[row['name']] and row['exit'] != 0 and not row['stdout'] and not row['stderr'], row
@@ -116,10 +132,11 @@ def main():
             assert sha(row['image']) == row['imageSHA256'] and sha(row['source']) == row['sourceSHA256'], row
         passed = True
     finally:
-        save(receipt, dict(schema='fairyc.result-candidate-execution/v1', unit=8, passed=passed,
+        save(receipt, dict(schema='fairyc.result-candidate-execution/v1', unit=10 if args.propagation else 8, passed=passed,
             images=[dict(path=str(p), sha256=sha(p)) for p in images],
             nativeRunner=dict(path=str(runner), sha256=sha(runner)), cli=rows, native=native, fixtures=fixtures,
-            faultInjection=dict(kind='test-only C tag and branch corruption in both alternatives', validFairySource=False, expectedTrap=7),
+            faultInjection=None if args.propagation else dict(kind='test-only C tag and branch corruption in both alternatives', validFairySource=False, expectedTrap=7),
+            cleanupObservation=dict(kind='test-only observation of actual generated-C mark calls', expectedTraces=traces),
             sources=[dict(path=str(p.relative_to(ROOT)), sha256=sha(p)) for p in sorted((ROOT/'src').glob('*.fy'))]))
     print(f'PASS: Result execution; {len(rows)} CLI observations; {len(native)} native executions')
 

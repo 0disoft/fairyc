@@ -14,7 +14,7 @@ import hir_shapes as shapes;
 // symbol IDs, but their owner/target/type facts below are independently owned.
 pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; Enumeration { u32 id; }; Option { u32 id; }; Result { u32 id; }; }
 pub enum BindingKind { Function; Parameter; Let; Var; External; Struct; Enum; }
-pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; Capture; }
+pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; Capture; Propagate; }
 pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; }
 pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
 // The fixed SDK/compiler admits enum switching, not enum equality or enum casts.
@@ -22,7 +22,7 @@ pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remain
 pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .Option { .id = id }: { id } case .Result { .id = id }: { id } case .Enumeration { .id = id }: { id } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
 pub fn bool represented_type(Type value) { return switch(value) { case .Invalid: { false } case .Callable: { false } case .Option { .id = id }: { tagged::option(id) } case .Result { .id = id }: { tagged::result(id) } case .Enumeration { .id = id }: { enums::valid(id) && !tagged::builtin(id) } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } }; }
 pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } case .Struct: { 6 } case .Enum: { 7 } }; }
-pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } case .Variant: { 18 } case .Switch: { 19 } case .Arm: { 20 } case .Capture: { 21 } }; }
+pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } case .Variant: { 18 } case .Switch: { 19 } case .Arm: { 20 } case .Capture: { 21 } case .Propagate: { 22 } }; }
 pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Binding: { 1 } case .Return: { 2 } case .Assignment: { 3 } case .Expression: { 4 } case .While: { 5 } case .For: { 6 } case .Break: { 7 } case .Continue: { 8 } case .Assert: { 9 } case .Discard: { 10 } case .Defer: { 11 } }; }
 pub fn u32 operator_code(Operator value) { return switch(value) { case .None: { 0 } case .Plus: { 1 } case .Minus: { 2 } case .Not: { 3 } case .Complement: { 4 } case .Multiply: { 5 } case .Divide: { 6 } case .Remainder: { 7 } case .BitAnd: { 8 } case .BitOr: { 9 } case .BitXor: { 10 } case .ShiftLeft: { 11 } case .ShiftRight: { 12 } case .Equal: { 13 } case .NotEqual: { 14 } case .Less: { 15 } case .LessEqual: { 16 } case .Greater: { 17 } case .GreaterEqual: { 18 } case .And: { 19 } case .Or: { 20 } case .Assign: { 21 } }; }
 pub struct Problem { u32 code; usize start; usize end; }
@@ -101,6 +101,14 @@ fn bool terminal_arm(ref v::Vec<Block> blocks,ref v::Vec<Statement> statements,r
 }
 fn bool enum_expression(ref shapes::Table nominal, ref v::Vec<Expression> expressions, ref v::Vec<Block> blocks, ref v::Vec<Statement> statements, ref v::Vec<Binding> bindings, ref v::Vec<usize> edges, Expression e, usize i) {
     let u32 kind=expression_code(e.kind);let u32 type=type_code(e.type);let usize nb=v::len<Binding>(bindings);
+        if (kind == 22) {
+            if (e.left == 0 || e.binding == 0 || e.binding > nb || e.right != 0 || e.alternative != 0 || e.block != 0
+                || e.edge_count != 0 || e.edge_start != 0 || e.payload_start != 0 || e.payload_end != 0 || e.boolean || operator_code(e.operator) != 0) { return false; }
+            let u32 operand = type_code(v::at<Expression>(expressions,e.left-1).type);
+            let Binding owner = *v::at<Binding>(bindings,e.binding-1); let u32 returned = type_code(owner.type);
+            return tagged::result(operand) && tagged::result(returned) && binding_code(owner.kind) == 1
+                && tagged::failure(operand) == tagged::failure(returned) && type == tagged::success(operand);
+        }
         if (kind == 18 || kind == 20) {
             if (e.binding == 0 || e.binding > shapes::field_count(nominal) || e.left != 0 || e.right != 0 || e.alternative != 0 || e.boolean || e.payload_start != 0 || e.payload_end != 0 || operator_code(e.operator) != 0) { return false; }
             let shapes::Field member = shapes::field_at(nominal,e.binding);
