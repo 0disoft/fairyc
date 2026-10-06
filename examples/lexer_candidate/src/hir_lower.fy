@@ -167,7 +167,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
     } else if (node.kind == 10) {
         let bool variant=syntax::expression_at(parsed,node.left).kind==28;
         kind = if(variant){.Variant}else{.Construct}; e.binding = if(variant){typing::field_target(input,id)}else{state::use(links,node.left)};
-        if (e.binding == 0 || !variant && h::binding_code(v::at<h::Binding>(bindings,e.binding - 1).kind) != 6) { return state::fail(c,4,node.start,node.end); }
+        if (e.binding == 0 || !variant && h::binding_code(v::at<h::Binding>(bindings,e.binding - 1).kind) != 6 && h::binding_code(v::at<h::Binding>(bindings,e.binding - 1).kind) != 8) { return state::fail(c,4,node.start,node.end); }
         e.edge_count = syntax::record_field_count(parsed,id);
         e.edge_start = state::reserve_edges(edges,e.edge_count,c); if (c.problem.code != 0) { return 0; }
         var usize i = 0;

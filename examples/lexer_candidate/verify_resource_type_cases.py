@@ -12,6 +12,7 @@ POSITIVES=[
     ('enum-field','enum E{One;Two;}resource R{E kind;cleanup{}}fn i32 main(){return 7;}',{'kind':(1,0)}),
     ('field-read','resource R{i64 amount;cleanup{}}fn i64 inspect(R r){return r.amount;}fn i32 main(){return 7;}',{'amount':(1,0)}),
     ('forward-declaration','resource Outer{Inner owned;cleanup{}}resource Inner{cleanup{}}fn i32 main(){return 7;}',{'owned':(0,1)}),
+    ('construction','resource R{i32 n;cleanup{}}fn i32 main(){let R r=R{.n=1};return 0;}',{'n':(1,0)}),
 ]
 NEGATIVES=[
     ('missing-cleanup','resource Empty{}fn i32 main(){return 7;}','unsupported'),
@@ -33,6 +34,5 @@ NEGATIVES=[
     ('inferred-tagged-resource-array','resource R{cleanup{}}fn i32 wrong(Option<R> r){let a=[r];return 0;}','type mismatch'),
     ('nonempty-cleanup','resource R{cleanup{assert(true);}}fn i32 main(){return 0;}','unsupported'),
     ('abilities-later','@abilities(drop)resource R{cleanup{}}fn i32 main(){return 0;}','unsupported'),
-    ('construction-later','resource R{i32 n;cleanup{}}fn i32 main(){let R r=R{.n=1};return 0;}','invalid nominal type'),
     ('unknown-field','resource R{i32 n;cleanup{}}fn i32 wrong(R x){return x.other;}','unknown field'),
 ]

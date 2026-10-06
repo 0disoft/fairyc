@@ -40,7 +40,7 @@ pub struct Function { usize binding; usize start; usize end; usize scope; bool p
 // edge_start/count index ordered argument Expression IDs. Reference binding is
 // authoritative; callee syntax and grouping nodes are eliminated. Integer stores
 // canonical decimal ASCII in payload[start..end]; signed-minimum has no child.
-// Construct binding is a Struct Binding ID; its edges retain Initializer
+// Construct binding is a Struct or Resource Binding ID; its edges retain Initializer
 // Expression IDs in written order. Initializer/Field binding is a one-based
 // nominal Field ID. Initializer left is the value; Field left is the owner.
 pub struct Expression { ExpressionKind kind; Type type; Operator operator; usize start; usize end; usize left; usize right; usize alternative; usize block; usize binding; usize edge_start; usize edge_count; usize payload_start; usize payload_end; bool boolean; }
@@ -246,7 +246,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
             let usize shape = shapes::find(ref nominal,type);
             if (shape == 0 || arrays::valid(type) || e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             let shapes::Shape s = shapes::at(ref nominal,shape - 1);
-            if (e.binding != s.binding || binding_code(v::at<Binding>(ref bindings,e.binding - 1).kind) != 6 || e.edge_count != s.field_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (e.binding != s.binding || binding_code(v::at<Binding>(ref bindings,e.binding - 1).kind) != if(resources::valid(type)){8}else{6} || e.edge_count != s.field_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             var u8[1024] seen = [0;1024]; var usize j = 0;
             while (j < e.edge_count) {
                 let usize id = *v::at<usize>(ref edges,e.edge_start + j);

@@ -2560,3 +2560,25 @@ and fixed-array resource-field subset limitation separately. The final receipt
 uses the current required-cleanup fixtures, replacing an earlier stale receipt
 that included implicit cleanup. Linux, performance and stage1/stage2 remain
 deferred.
+
+## Explicit resource factory and construction HIR
+
+Version 0.47.0 connects same-module resource record literals and ordinary
+resource-returning factory calls to owned HIR. Factories returning Result keep
+their success/error payload identities and explicit propagation. Construction
+requires every declared field exactly once, with exact types and declaration
+identity; written initializer order and field spans survive the input owner.
+The existing record shorthand is unchanged. Resource names are not callable
+constructors and no implicit conversion is introduced.
+
+`tests/resource_factories.fy` checks initializer/call order, nested ownership,
+both Result alternatives and six forged construction/layout mutations.
+`verify_resource_factories.py --images <dev> <release> --receipt <path>` observes
+the source fixtures through type/HIR/MIR/C CLI modes. Resource MIR/C publication
+remains closed until movement and cleanup are connected. Cross-module resource
+visibility and imported factories remain part of later module integration;
+this same-module unit makes no imported construction claim.
+
+The sample is `samples/resource-factory-demo.fy`. Final validation evidence is
+`docs/ops/evidence/candidate-resource-factories-20261007.json`, including the
+focused unit-15 regression and separate Go fixed-array resource-field limitation.

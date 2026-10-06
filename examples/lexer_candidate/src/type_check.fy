@@ -7,6 +7,7 @@ import name_resolution as names;
 import syntax as syntax;
 import type_state as state;
 import nominal_types as nominal;
+import resource_identity as resources;
 import type_control as control;
 import result_flow as result_flow;
 import std::bytes as bytes;
@@ -283,9 +284,9 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         let syntax::Expression target = syntax::expression_at(parsed,node.left);
         if (target.kind != 2) { return error(problem,16,target.start,target.end,0,0); }
         let usize symbol_id = state::uses(tables,node.left - 1);
-        if (symbol_id == 0 || names::symbol_at(resolved,symbol_id).kind != 6) { return error(problem,16,target.start,target.end,0,0); }
+        if (symbol_id == 0 || (names::symbol_at(resolved,symbol_id).kind != 6 && names::symbol_at(resolved,symbol_id).kind != 9)) { return error(problem,16,target.start,target.end,0,0); }
         let u32 type = state::symbols(tables,symbol_id - 1);
-        let syntax::Declaration declaration = syntax::declaration_at(parsed,(type - 256) as usize);
+        let syntax::Declaration declaration = syntax::declaration_at(parsed,(type - if(resources::valid(type)){98304}else{256}) as usize);
         var u8[1024] seen = [0;1024]; var bool terminates = false; var usize i = 0;
         while (i < syntax::record_field_count(parsed,id)) {
             let usize entry = syntax::record_field(parsed,id,i); let syntax::Expression field = syntax::expression_at(parsed,entry);
