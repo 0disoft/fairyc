@@ -109,6 +109,13 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         }
         return ok();
     }
+    if (node.kind == 21) { return expression(parsed,context,node.left,depth + 1,symbols,references); }
+    if (node.kind == 26) {
+        let Problem owner = expression(parsed,context,node.left,depth + 1,symbols,references); if (owner.code != 0) { return owner; }
+        let syntax::Expression bounds = syntax::expression_at(parsed,node.right);
+        let Problem start = expression(parsed,context,bounds.left,depth + 1,symbols,references);
+        return if (start.code != 0) { start } else { expression(parsed,context,bounds.right,depth + 1,symbols,references) };
+    }
     if (node.kind == 9) {
         let Problem left = expression(parsed,context,node.left,depth + 1,symbols,references);
         return if (left.code != 0) { left } else { expression(parsed,context,node.right,depth + 1,symbols,references) };

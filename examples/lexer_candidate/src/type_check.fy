@@ -139,6 +139,25 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         }
         return recorded(tables,id,value(arrays::make(element,count),terminates));
     }
+    if (node.kind == 21) {
+        var usize root = node.left; while (syntax::expression_at(parsed,root).kind == 3) { root = syntax::expression_at(parsed,root).left; }
+        if (syntax::expression_at(parsed,root).kind != 2 || expected != 10) { return error(problem,16,node.start,node.end,10,0); }
+        let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
+        if (problem.code != 0) { return owner; }
+        if (!arrays::valid(owner.type) || arrays::element(owner.type) != 3) { return error(problem,16,node.start,node.end,10,owner.type); }
+        return recorded(tables,id,value(10,owner.terminates));
+    }
+    if (node.kind == 26) {
+        let state::Value owner = expression(resolved,tables,problem,node.left,10,result_type,depth + 1,loop_depth);
+        if (problem.code != 0) { return owner; }
+        if (owner.type != 10) { return error(problem,16,node.start,node.end,10,owner.type); }
+        let syntax::Expression bounds = syntax::expression_at(parsed,node.right); var bool terminates = owner.terminates; var usize i = 0;
+        while (i < 2) { let usize child = if (i == 0) { bounds.left } else { bounds.right }; if (child != 0) {
+            let state::Value bound = expression(resolved,tables,problem,child,5,result_type,depth + 1,loop_depth);
+            if (problem.code != 0) { return bound; } if (bound.type != 5) { return error(problem,1,node.start,node.end,5,bound.type); } terminates = terminates || bound.terminates;
+        } i += 1; }
+        return recorded(tables,id,value(10,terminates));
+    }
     if (node.kind == 9) {
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }

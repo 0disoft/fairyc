@@ -1724,6 +1724,18 @@ batch. No performance or self-hosting completion is claimed.
 
 ## Cost baseline
 
+Version 0.24.0 adds owned HIR for shared `u8[N]` array borrows in an expected
+`ref u8[]` context and for half-open slicing of byte views. Bounds may be
+omitted. Array places must be named, lengths remain 1..64, and text, mutable,
+temporary-array and field-array borrows remain closed. HIR origin checking
+rejects local escapes and mutation while a shared alias or call argument is
+still used. A loop-held descriptor remains live across its backedge.
+Non-Static local descriptors must be `let`; mixed-origin or recursive
+view-return summaries are not yet admitted. Parameter-derived returns preserve
+the single inferred parameter origin. MIR/C execution is the following step.
+The HIR lane passed 17 positive/negative CLI cases and the retained-graph native
+API test in development/release profiles.
+
 `scanner::storage` reports source, separately owned cooked and diagnostic-token
 bytes plus record counts. It does not report allocator capacity or peak heap/RSS.
 The opt-in `fairyc_go_measure_lexer_stream` lane records five native driver

@@ -32,7 +32,8 @@ fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
         case .Reference: { put(out,b"reference") } case .Unary: { put(out,b"unary") }
         case .Binary: { put(out,b"binary") } case .Call: { put(out,b"call") }
         case .Block: { put(out,b"block") } case .If: { put(out,b"if") }
-        case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") } case .Array: { put(out,b"array") } case .Index: { put(out,b"index") } case .Length: { put(out,b"length") } case .Literal: { put(out,b"literal") }
+        case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") } case .Array: { put(out,b"array") } case .Index: { put(out,b"index") } case .Length: { put(out,b"length") } case .Borrow: { put(out,b"borrow-array") } case .Slice: { put(out,b"slice") }
+        case .Literal: { put(out,b"literal") }
     };
 }
 fn bool statement_kind(ref mut bytes::Buffer out, h::StatementKind kind) {
@@ -65,7 +66,7 @@ pub fn u32 render(ref h::Program p, ref mut bytes::Buffer out) {
     let ref shapes::Table nominal = h::nominal(p);
     var bool array = false; var usize id = 1; while (id <= h::binding_count(p)) { array = array || arrays::valid(h::type_code(h::binding_at(p,id).type)); id += 1; }
     id = 1; while (id <= h::expression_count(p)) { array = array || arrays::valid(h::type_code(h::expression_at(p,id).type)); id += 1; }
-    if (!put(out,if (h::has_literals(p)) { b"fairyc.literal-hir/v1\nP" } else if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
+    if (!put(out,if (h::has_views(p)) { b"fairyc.view-hir/v1\nP" } else if (h::has_literals(p)) { b"fairyc.literal-hir/v1\nP" } else if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
     var usize index = 0;
     while (index < shapes::count(nominal)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }

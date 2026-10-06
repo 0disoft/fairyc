@@ -32,7 +32,7 @@ pub fn Result<m::Program,i32> compile(scanner::Stream stream, ref u8[] path) {
     if (names::problem(ref resolved).code != 0) { return .err(name_output::errors(ref resolved,path)); }
     let typing::Typed typed = typing::check(resolved);
     if (typing::problem(ref typed).code != 0) { return .err(type_output::errors(ref typed,path)); }
-    let h::Program input = switch(hir::lower(typed,0)) { case .ok(value): { value } case .err(_): { discard io::write_stderr("error: HIR lowering failed\n"); return .err(2); } };
+    let h::Program input = switch(hir::lower(typed,0)) { case .ok(value): { value } case .err(problem): { discard io::write_stderr(if(problem.code==2101){"error: HIR E2101 active shared array loan\n"}else if(problem.code==2102){"error: HIR E2102 local view escape or mutable descriptor\n"}else if(problem.code==2103){"error: HIR ambiguous or recursive view return origin\n"}else{"error: HIR lowering failed\n"}); return .err(2); } };
     let m::Program program = switch(lower::lower(input)) {
         case .ok(value): { value }
         case .err(problem): { verification_error(problem.code); return .err(2); }
