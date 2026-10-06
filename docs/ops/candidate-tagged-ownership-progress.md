@@ -27,8 +27,22 @@ work remain deferred to the owner's consolidated batch.
 | 17 | Whole-value moves in assignments, calls and returns | Complete: candidate-resource-moves-20261007.json; 19 fixtures / 152 CLI observations, 3 native compiler API tests per profile, 19 agreeing Go comparisons, and the 24-fixture unit-16 regression. Typed consumption flags lower to owned Move expressions with exact root binding/span; field inspection and assignment places stay nonconsuming. Partial resource-field movement rejects E1103. Use-after-move and branch/loop liveness remain units 18..20; resource MIR/C stays closed. |
 | 18 | Use-after-move rejection | Complete: candidate-resource-dead-20261007.json; 18 fixtures / 144 CLI observations, 3 native API tests per profile and the 19-fixture unit-17 regression. Dead roots reject E1101 with exact use/first-transfer spans; fresh replacement, separate shadow roots and unreachable uses are preserved. Go's missing propagation consumption accepted a reused resource Result: the Go resource-flow handler is fixed, focused Resource/Result propagation tests pass, and a newly hashed reference rejects the same control. Prior tool images and raw before/after observations remain separate. Branch join and loop-edge equality gates remain 19/20; resource MIR/C is still closed. |
 | 19 | Branch-sensitive moved state and subsequent use | Complete: candidate-resource-branches-20261007.json; 17 fixtures / 136 CLI observations, 3 native compiler API tests per profile, 17 Go acceptance/rejection comparisons, and the 18-fixture unit-18 regression. Reachable Live/Dead joins reject E1104 even without a later use; exited branches and restored owners retain exact transfer spans. Go short-circuit Resource/Result paths now preserve the skipped alternative, with focused regression tests and separately hashed before/after tools. Go may report additional Result obligations; comparisons claim acceptance/rejection and ownership-code presence, not identical complete diagnostic lists. Loop-edge equality remains unit 20; resource MIR/C stays closed. |
-| 20 | Loop/backedge-sensitive moved state and subsequent use | Pending |
+| 20 | Loop/backedge-sensitive moved state and subsequent use | Complete: candidate-resource-loops-20261007.json; 33 fixtures / 264 CLI observations, 5 native compiler API tests per profile, 33 Go acceptance/rejection and ownership-code comparisons, the unit-19/18 regressions, and all 12 Resource / 24 Result reference fixtures. Normal body, break and continue edges preserve post-condition root state after exited scopes are killed. Restored roots, body-local generations, nested targets, terminal returns and propagation exits are distinguished; E1105 retains loop-header/transfer ranges. Repeated consumption by a while condition rejects E1101; the Go reference's missing re-evaluation check is fixed with separate before/after identity and focused regression. Resource MIR/C and cleanup execution remain later work. |
 
 Completion requires actual source behavior and matching verification, rather
 than parser coverage or Go-bootstrap-only behavior. Cleanup and broader SDK
 integration remain later numbered work; these rows do not claim them complete.
+
+## Requested sequence closure
+
+All requested units 1..20 have implementation and unit evidence. The final
+`candidate-units-1-20-audit-20261007.json` checks each requirement against its
+retained receipt, unit commit, fixture bytes, compiler image hashes and native
+artifact hashes. Earlier full suites were inspected rather than rerun. The final
+source set and lock match the unit-20 receipt; ten selected existing tagged,
+array, struct and propagation programs execute under both native C profiles,
+with three rejection controls, using the same final candidate images.
+
+This closes the requested sequence, not compiler self-hosting or resource
+execution. Resource cleanup/MIR/C, SDK and module integration, stage1/stage2,
+Linux and build-cost work remain in `candidate-remaining-work-20261007.md`.

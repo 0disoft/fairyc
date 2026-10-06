@@ -6,11 +6,19 @@ import std::vec as v;
 
 // Reachable inputs are Live=1, Dead=2 or their conservative union=3. All
 // roots start Dead; parameter/initializer production installs a live value.
-// Reachable branch joins require equal states; loop-edge equality is unit 20.
+// Reachable branch joins and each normal/break/continue loop edge require equal
+// states. A loop baseline is after its condition; exited locals are already dead.
 pub struct Cell { u8 states; usize move; }
 fn void put(ref mut v::Vec<Cell> values,usize index,Cell value){let ref mut Cell slot=v::at_mut<Cell>(values,index);*slot=value;}
 fn void byte(ref mut v::Vec<u8> values,usize index,u8 value){let ref mut u8 slot=v::at_mut<u8>(values,index);*slot=value;}
 fn usize earlier(ref graph::Graph g,usize a,usize b){if(a==0){return b;}if(b==0){return a;}let x=graph::at(g,a);let y=graph::at(g,b);return if(x.start<y.start || x.start==y.start && x.end<=y.end){a}else{b};}
+fn usize loop_error(ref graph::Graph g,usize a,usize b,usize old_move,usize new_move){
+    if(a!=0 && old_move==new_move){let x=graph::at(g,a);let y=graph::at(g,b);
+        // One inner mismatch can contaminate an enclosing edge's fixed point.
+        // Preserve the smallest responsible loop for that same transfer site.
+        if(x.start<=y.start && y.end<=x.end){return b;}if(y.start<=x.start && x.end<=y.end){return a;}}
+    return earlier(g,a,b);
+}
 fn state::Problem analyze(ref graph::Graph g){
     let usize count=graph::count(g);let usize width=graph::width(g);if(width==0 || count==0){return state::ok();}
     if(count>262144/width){return state::fail(10,0,0,0,0);}
@@ -35,17 +43,20 @@ fn state::Problem analyze(ref graph::Graph g){
             if(changed && *v::at<u8>(ref queued,successor-1)==0){if(!v::push<usize>(ref mut queue,successor).is_ok){return state::fail(12,n.start,n.end,0,0);}byte(ref mut queued,successor-1,1);}
         }
     }
-    var usize error=0;var usize move=0;var u32 code=45;i=1;
+    var usize error=0;var usize move=0;var usize header=0;var u32 code=45;i=1;
     while(i<=count){let n=graph::at(g,i);
         if(*v::at<u8>(ref seen,i-1)!=0 && n.column!=0 && (n.kind==1 || n.kind==7)){
             let cell=*v::at<Cell>(ref input,(i-1)*width+n.column-1);
-            if(cell.states!=1){let chosen=earlier(g,error,i);if(chosen==i){error=i;move=cell.move;code=45;}}
+            if(cell.states!=1){let chosen=earlier(g,error,i);if(chosen==i){error=i;move=cell.move;header=0;code=45;}}
         }
-        if(*v::at<u8>(ref seen,i-1)!=0 && n.kind==8){var usize col=0;while(col<width){let cell=*v::at<Cell>(ref input,(i-1)*width+col);if(cell.states==3){let chosen=earlier(g,error,i);if(chosen==i){error=i;move=cell.move;code=46;}}col+=1;}}
+        if(*v::at<u8>(ref seen,i-1)!=0 && (n.kind==8 || n.kind==9)){var usize col=0;while(col<width){let cell=*v::at<Cell>(ref input,(i-1)*width+col);
+            let before=if(n.kind==9){*v::at<Cell>(ref input,(n.column-1)*width+col)}else{cell};
+            if(cell.states==3 || before.states==3 || cell.states!=before.states){let usize transfer=earlier(g,cell.move,before.move);let chosen=if(n.kind==9 && code==47){loop_error(g,error,i,move,transfer)}else{earlier(g,error,i)};if(chosen==i){error=i;move=transfer;header=if(n.kind==9){n.column}else{0};code=if(n.kind==9){47}else{46};}}col+=1;}}
         i+=1;
     }
     if(error==0){return state::ok();}let use=graph::at(g,error);var problem=state::fail(code,use.start,use.end,0,0);
-    if(move!=0){let at=graph::at(g,move);problem.move_start=at.start;problem.move_end=at.end;}return problem;
+    if(move!=0){let at=graph::at(g,move);problem.move_start=at.start;problem.move_end=at.end;}
+    if(header!=0){let at=graph::at(g,header);problem.loop_start=at.start;problem.loop_end=at.end;}return problem;
 }
 pub fn state::Problem check(ref names::Resolved resolved,ref v::Vec<state::Slot> types){
     var usize i=1;var state::Problem first=state::ok();

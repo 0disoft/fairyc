@@ -2658,3 +2658,38 @@ The receipt retains raw observations and the pre-fix tool identity.
 Loop/backedge/exit equality remains unit 20. Resource source execution remains
 closed before MIR/C publication; the native tests above execute compiler logic.
 Linux, performance and stage1/stage2 promotion remain deferred.
+
+## Resource loop edges
+
+Version 0.51.0 records each reachable normal-body, `break` and `continue` edge
+against the resource state immediately after its loop condition. Exited local
+and capture scopes are killed before comparison, so newly created body owners
+do not masquerade as mismatches of enclosing owners. Classic `for` continues
+still reach the post clause; breaks skip it. Returns and propagation error exits
+do not re-enter a loop. Restoring a moved owner preserves its live state without
+requiring the same allocation generation on every iteration.
+
+E1105 includes the responsible loop range, loop-header range and available move
+provenance. A nested mismatch retains the smallest responsible loop for that
+transfer instead of reporting only a contaminated outer fixed point. Reading a
+condition-consumed owner on the next iteration remains E1101 at the exact use.
+
+`tests/resource_loops.fy` executes five native compiler API tests per profile;
+`verify_resource_loops.py` observes 33 accepted/rejected source fixtures in both
+profiles and all four CLI modes (264 observations). Unit-19 branch and unit-18
+use-after-move regressions retain their own raw observations with these images.
+Evidence is `docs/ops/evidence/candidate-resource-loops-20261007.json`.
+
+The Go reference previously evaluated an ownership-consuming `while` condition
+only once during analysis. It now checks the next condition evaluation on
+fallthrough/continue edges after loop-state validation, excluding exited locals.
+Break and return paths do not perform that extra evaluation. Focused regressions
+and all 12 Resource / 24 Result fixtures pass; the newly hashed reference agrees
+on acceptance/rejection and the required ownership code for all 33 controls.
+Full diagnostic lists need not be identical. Pre-fix observations stay separate.
+
+The requested units 1..20 are complete in the progress ledger. The final audit
+retains their individual commit/evidence identities and a bounded native smoke
+using the final images. Resource source execution still rejects before MIR/C
+publication until cleanup is integrated; these native API tests execute compiler
+logic. Linux, performance and stage1/stage2 promotion remain later work.

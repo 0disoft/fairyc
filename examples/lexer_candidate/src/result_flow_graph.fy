@@ -10,12 +10,14 @@ import std::bytes as bytes;
 // Obligations have columns only for exact Result locals/parameters. Nodes:
 // 0 control, 1 take, 2 produce, 3 overwrite check, 4 scope check/kill,
 // 5 normal exit, 6 unhandled evaluation, 7 owner read, 8 ownership branch join.
+// 9 loop edge: column identifies its post-condition baseline node, not a root.
 // Zero successors are terminal.
 pub struct Node { u32 kind; usize column; usize start; usize end; usize next; usize alternative; }
 pub resource Graph { v::Vec<Node> nodes; v::Vec<usize> columns; usize width; cleanup {} }
 struct Context {
     usize current; usize[64] scopes; usize[64] captures; usize scope_depth;
-    usize[64] breaks; usize[64] continues; usize[64] loop_base; usize loops;
+    usize[64] breaks; usize[64] continues; usize[64] loop_base;
+    usize[64] loop_states; usize[64] loop_ends; usize loops;
     usize work; bool ownership; state::Problem problem;
 }
 fn void fail(ref mut Context c,u32 code,usize start,usize end){if(c.problem.code==0){c.problem=state::fail(code,start,end,0,0);}}
@@ -35,6 +37,9 @@ fn void fork(ref mut v::Vec<Node> nodes,usize from,usize left,usize right){
     if(from==0){return;}let ref mut Node node=v::at_mut<Node>(nodes,from-1);node.next=left;node.alternative=right;
 }
 fn usize column(ref v::Vec<usize> columns,usize symbol){return if(symbol==0){0}else{*v::at<usize>(columns,symbol)};}
+fn void loop_edge(ref mut v::Vec<Node> nodes,ref mut Context c,usize frame){
+    if(c.ownership && c.current!=0 && c.problem.code==0 && c.loop_states[frame]!=0){let usize target=c.loop_states[frame];let usize end=c.loop_ends[frame];let baseline=*v::at<Node>(nodes,target-1);discard emit(nodes,c,9,target,baseline.start,end);}
+}
 fn u32 take(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec<usize> columns,ref mut v::Vec<Node> nodes,ref mut Context c,usize id,u32 use){
     if(c.ownership){let e=syntax::expression_at(p,id);if(e.kind==2 && resources::needs_drop(state::expressions(types,id-1))){discard emit(nodes,c,if(state::moving(types,id-1)){1}else{7},column(columns,state::uses(types,id-1)),e.start,e.end);}return use;}
     if(!tagged::result(state::expressions(types,id-1))){return use;}
@@ -131,17 +136,18 @@ fn void statement(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec<
     if(s.kind==9 || s.kind==10){
         if(c.loops==0){fail(c,13,s.start,s.end);return;}let usize frame=c.loops-1;var usize scope=c.loop_base[frame];
         while(scope<c.scope_depth){let usize scope_id=c.scopes[scope];leave(p,types,columns,nodes,c,scope_id);scope+=1;}
-        let usize destination=if(s.kind==9){c.breaks[frame]}else{c.continues[frame]};jump(nodes,c,destination);return;
+        loop_edge(nodes,c,frame);let usize destination=if(s.kind==9){c.breaks[frame]}else{c.continues[frame]};jump(nodes,c,destination);return;
     }
     if(s.kind==8 || s.kind==14){
         let header=syntax::statement_at(p,if(s.kind==14){s.second}else{id});
         if(s.kind==14){statement(p,types,columns,nodes,c,header.first,depth+1);}
         let usize test=fresh(nodes,c,0,0,s.start,s.end);jump(nodes,c,test);c.current=test;
         expression(p,types,columns,nodes,c,s.expression,0,depth+1);
-        let usize split=emit(nodes,c,0,0,s.start,s.end);let usize body=fresh(nodes,c,0,0,s.start,s.end);
+        let usize header_end=if(s.kind==14){header.end}else{syntax::expression_at(p,s.expression).end};
+        let usize split=emit(nodes,c,0,0,s.start,header_end);let usize body=fresh(nodes,c,0,0,s.start,s.end);
         let usize after=fresh(nodes,c,0,0,s.start,s.end);let usize post=if(s.kind==14){fresh(nodes,c,0,0,s.start,s.end)}else{test};fork(nodes,split,body,after);
-        if(c.loops>=64){fail(c,10,s.start,s.end);return;}let usize frame=c.loops;let usize base=c.scope_depth;c.breaks[frame]=after;c.continues[frame]=post;c.loop_base[frame]=base;c.loops+=1;
-        c.current=body;block(p,types,columns,nodes,c,s.first,0,0,depth+1);jump(nodes,c,post);
+        if(c.loops>=64){fail(c,10,s.start,s.end);return;}let usize frame=c.loops;let usize base=c.scope_depth;c.breaks[frame]=after;c.continues[frame]=post;c.loop_base[frame]=base;c.loop_states[frame]=split;c.loop_ends[frame]=s.end;c.loops+=1;
+        c.current=body;block(p,types,columns,nodes,c,s.first,0,0,depth+1);loop_edge(nodes,c,frame);jump(nodes,c,post);
         if(s.kind==14){c.current=post;statement(p,types,columns,nodes,c,header.second,depth+1);jump(nodes,c,test);}
         c.loops-=1;c.current=after;
         if(s.kind==14 && header.first!=0){let initial=syntax::statement_at(p,header.first);if(initial.kind==2){let usize col=column(columns,state::entries(types,initial.entry-1));if(col!=0){discard emit(nodes,c,4,col,initial.start,initial.end);}}}return;
@@ -156,7 +162,7 @@ fn Result<Graph,state::Problem> build_kind(ref names::Resolved resolved,ref v::V
         if(!v::push<usize>(ref mut columns,col).is_ok){return .err(state::fail(12,0,0,0,0));}i+=1;
     }
     var v::Vec<Node> nodes=v::empty<Node>();if(ownership && width==0){return .ok(Graph{.nodes,.columns,.width});}
-    var Context c=Context{.current=0,.scopes=[0;64],.captures=[0;64],.scope_depth=0,.breaks=[0;64],.continues=[0;64],.loop_base=[0;64],.loops=0,.work=0,.ownership,.problem=state::ok()};
+    var Context c=Context{.current=0,.scopes=[0;64],.captures=[0;64],.scope_depth=0,.breaks=[0;64],.continues=[0;64],.loop_base=[0;64],.loop_states=[0;64],.loop_ends=[0;64],.loops=0,.work=0,.ownership,.problem=state::ok()};
     c.current=fresh(ref mut nodes,ref mut c,0,0,0,0);i=1;
     while(i<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,i);let usize col=column(ref columns,i);if(col!=0 && s.kind==2){discard emit(ref mut nodes,ref mut c,2,col,s.start,s.end);}i+=1;}
     let d=syntax::declaration_at(p,names::symbol_at(resolved,function).declaration-1);

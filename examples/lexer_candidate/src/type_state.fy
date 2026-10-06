@@ -4,7 +4,7 @@ import std::bytes as bytes;
 import std::vec as v;
 
 // 0 absent, 1 i32, 2 i64, 3 u8, 4 u32, 5 usize, 6 bool, 7 void, 8 callable.
-pub struct Problem { u32 code; usize start; usize end; u32 expected; u32 actual; usize move_start; usize move_end; }
+pub struct Problem { u32 code; usize start; usize end; u32 expected; u32 actual; usize move_start; usize move_end; usize loop_start; usize loop_end; }
 pub struct Value { u32 type; bool terminates; }
 // Initialized, bounded heap slots keep large value copies off the native stack.
 pub struct Slot { u32 symbol; u32 expression; u32 flag; usize use; usize entry; bool flexible; bool moving; }
@@ -18,9 +18,9 @@ pub fn bool initialize(ref mut v::Vec<Slot> tables, usize symbols, usize express
     }
     return true;
 }
-pub fn Problem ok() { return Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .actual = 0, .move_start = 0, .move_end = 0 }; }
+pub fn Problem ok() { return Problem { .code = 0, .start = 0, .end = 0, .expected = 0, .actual = 0, .move_start = 0, .move_end = 0, .loop_start=0, .loop_end=0 }; }
 pub fn Problem fail(u32 code, usize start, usize end, u32 expected, u32 actual) {
-    return Problem { .code, .start, .end, .expected, .actual, .move_start=0, .move_end=0 };
+    return Problem { .code, .start, .end, .expected, .actual, .move_start=0, .move_end=0, .loop_start=0, .loop_end=0 };
 }
 pub fn bool integer(u32 type) { return type >= 1 && type <= 5; }
 // Declaration/field arenas have at most 1024 entries; no unchecked narrowing.

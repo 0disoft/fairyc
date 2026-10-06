@@ -36,6 +36,7 @@ type resourceBranch struct {
 
 type resourceLoopEdge struct {
 	environment resourceEnvironment
+	back        bool
 }
 
 type resourceLoopFrame struct {
@@ -153,7 +154,7 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			a.resourceExpression(module, statement.Expression, environment, resourceMove)
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
 			a.checkResourceLoopExitEffects(environment, span(module.file.Path, statement.Span))
-			a.captureResourceLoopEdge(environment)
+			a.captureResourceLoopEdge(environment, statement.Kind == syntax.KindContinue)
 			reachable = false
 		default:
 			a.resourceExpression(module, statement.Expression, environment, resourceRead)
@@ -540,18 +541,40 @@ func (a *analyzer) resourceWhile(module *moduleScope, expression *ast.Expression
 	a.resourceLoops = a.resourceLoops[:len(a.resourceLoops)-1]
 	if bodyReachable {
 		a.validateResourceLoopEdge(span(module.file.Path, expression.Span), frame, bodyEnvironment)
+		a.checkResourceLoopCondition(module, condition, frame, bodyEnvironment)
 	}
 	for _, edge := range frame.edges {
 		a.validateResourceLoopEdge(span(module.file.Path, expression.Span), frame, edge.environment)
+		if edge.back {
+			a.checkResourceLoopCondition(module, condition, frame, edge.environment)
+		}
 	}
 }
 
-func (a *analyzer) captureResourceLoopEdge(environment resourceEnvironment) {
+func (a *analyzer) captureResourceLoopEdge(environment resourceEnvironment, back bool) {
 	if len(a.resourceLoops) == 0 {
 		return
 	}
 	index := len(a.resourceLoops) - 1
-	a.resourceLoops[index].edges = append(a.resourceLoops[index].edges, resourceLoopEdge{environment: cloneResourceEnvironment(environment)})
+	a.resourceLoops[index].edges = append(a.resourceLoops[index].edges, resourceLoopEdge{environment: cloneResourceEnvironment(environment), back: back})
+}
+
+// An unchanged post-condition state can still contain a consumed condition
+// operand. Check its next evaluation only on re-entry edges, with exited locals
+// removed. A mismatched edge already has E1105 and is not a valid re-entry.
+func (a *analyzer) checkResourceLoopCondition(module *moduleScope, condition *ast.Expression, frame resourceLoopFrame, actual resourceEnvironment) {
+	environment := cloneResourceEnvironment(frame.baseline)
+	for value, before := range frame.baseline {
+		after, found := actual[value]
+		if !found {
+			after = before
+		}
+		if after.state != before.state {
+			return
+		}
+		environment[value] = after
+	}
+	a.resourceExpression(module, condition, environment, resourceRead)
 }
 
 func (a *analyzer) validateResourceLoopEdge(loopSpan hir.Span, frame resourceLoopFrame, actual resourceEnvironment) {
