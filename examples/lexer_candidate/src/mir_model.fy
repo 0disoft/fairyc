@@ -5,6 +5,8 @@ import std::bytes as bytes;
 import std::vec as v;
 import hir_shapes as shapes;
 
+// Enum operations: 21 constructs a tag; 22 tests a tag. Operator is the
+// zero-based declaration-relative ordinal, never an arithmetic operator.
 // Private mutable-local scalar MIR. IDs are one-based; zero is absent.
 // Ranges and edge/signature indexes are zero-based. No HIR tree is retained.
 // Scalar type tags match hir_model: 1 i32, 2 i64, 3 u8, 4 u32, 5 usize,
@@ -50,7 +52,7 @@ pub fn usize local_count(ref Program p) { assert(p.success); return v::len<Local
 pub fn usize block_count(ref Program p) { assert(p.success); return v::len<Block>(ref p.blocks); }
 pub fn usize operation_count(ref Program p) { assert(p.success); return v::len<Operation>(ref p.operations); }
 pub fn usize edge_count(ref Program p) { assert(p.success); return v::len<usize>(ref p.edges); }
-pub fn bool has_views(ref Program p) { var usize i=1;while(i<=local_count(p)){if(local_at(p,i).type==11){return true;}i+=1;}i=1;while(i<=operation_count(p)){if(operation_at(p,i).kind>=18){return true;}i+=1;}return false; }
+pub fn bool has_views(ref Program p) { var usize i=1;while(i<=local_count(p)){if(local_at(p,i).type==11){return true;}i+=1;}i=1;while(i<=operation_count(p)){if(operation_at(p,i).kind>=18 && operation_at(p,i).kind<=20){return true;}i+=1;}return false; }
 pub fn bool has_literals(ref Program p) { var usize i = 1; while (i <= local_count(p)) { if (literals::valid(local_at(p,i).type)) { return true; } i += 1; } i = 1; while (i <= target_count(p)) { if (literals::valid(target_at(p,i).result)) { return true; } i += 1; } return false; }
 pub fn bool has_arrays(ref Program p) {
     var usize i = 1; while (i <= local_count(p)) { if (arrays::valid(local_at(p,i).type)) { return true; } i += 1; }
@@ -133,7 +135,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     i = 0;
     while (i < no) {
         let Operation o = *v::at<Operation>(ref operations,i);
-        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 20 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
+        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 22 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
         if ((o.kind != 5 && o.kind != 20 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
     }
     return .ok(Program { .nominal, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });

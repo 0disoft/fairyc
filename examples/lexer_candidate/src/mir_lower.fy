@@ -1,5 +1,6 @@
 module mir_lower;
 import array_types as arrays;
+import type_state as ids;
 import mir_arrays as array;
 import mir_places as places;
 import hir_model as h;
@@ -57,6 +58,42 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (id == 0 || c.current == 0 || c.problem.code != 0) { return 0; }
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
+    if (kind == 18) {
+        let shapes::Shape shape = shapes::at(h::nominal(input),shapes::find(h::nominal(input),type) - 1);
+        let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
+        let u32 tag = ids::small_id(e.binding - shape.field_start - 1);
+        if (state::emit(operations,blocks,c,state::operation(21,result,type,type,tag,0,0,e.start,e.end)) == 0) { return 0; } return result;
+    }
+    if (kind == 19) {
+        // Evaluate the subject once. The final exhaustive arm needs no test.
+        let usize subject = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth + 1);
+        if (c.current == 0 || c.problem.code != 0) { return 0; }
+        let u32 owner = h::type_code(h::expression_at(input,e.left).type);
+        let shapes::Shape shape = shapes::at(h::nominal(input),shapes::find(h::nominal(input),owner) - 1);
+        let usize result = if (type == 7) { 0 } else { state::local(locals,c,type,0,false,false,e.start,e.end) };
+        var v::Vec<usize> ends = v::empty<usize>(); var usize i = 0;
+        while (i < e.edge_count) {
+            let h::Expression arm = h::expression_at(input,h::edge_at(input,e.edge_start + i)); var usize next = 0;
+            if (i + 1 < e.edge_count) {
+                let usize condition = state::local(locals,c,6,0,false,false,arm.start,arm.end);
+                let u32 tag = ids::small_id(arm.binding - shape.field_start - 1);
+                if (state::emit(operations,blocks,c,state::operation(22,condition,6,owner,tag,subject,0,arm.start,arm.end)) == 0) { return 0; }
+                let usize body = state::new_block(blocks,c,arm.start,arm.end); next = state::new_block(blocks,c,e.start,e.end);
+                if (!state::branch(blocks,c,condition,body,next,arm.start,arm.end)) { return 0; } c.current = body;
+            }
+            let usize value = block(input,locals,blocks,operations,edges,payload,c,arm.block,depth + 1);
+            if (c.problem.code != 0) { return 0; }
+            if (c.current != 0) {
+                if (result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,value,0,arm.start,arm.end)) == 0) { return 0; }
+                if (!v::push<usize>(ref mut ends,c.current).is_ok) { return state::fail(c,3,arm.start,arm.end); }
+            }
+            c.current = next; i += 1;
+        }
+        if (v::len<usize>(ref ends) == 0) { c.current = 0; return 0; }
+        let usize join = state::new_block(blocks,c,e.start,e.end); i = 0;
+        while (i < v::len<usize>(ref ends)) { c.current = *v::at<usize>(ref ends,i); if (!state::jump(blocks,c,join,e.start,e.end)) { return 0; } i += 1; }
+        c.current = join; return result;
+    }
     if (kind == 1 || kind == 2) {
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         var m::Operation o = state::operation(1,result,type,type,0,0,0,e.start,e.end); o.boolean = e.boolean;

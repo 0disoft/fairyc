@@ -2,6 +2,7 @@ module c_nominal;
 import mir_model as m;
 import hir_shapes as shapes;
 import array_types as arrays;
+import enum_types as enums;
 import c_text as w;
 import std::bytes as bytes;
 
@@ -12,6 +13,9 @@ fn bool field(ref mut bytes::Buffer out, ref mut w::State s, usize id) {
 fn bool definition(ref shapes::Table table, usize index, ref mut u8[] emitted, ref mut bytes::Buffer out, ref mut w::State s) {
     if (emitted[index] != 0) { return true; }
     let shapes::Shape shape = shapes::at(table,index); var usize i = 0;
+    if (enums::valid(shape.type)) {
+        if (!w::type(out,s,shape.type) || !w::text(out,s,b"{ uint32_t fy_tag; };\n")) { return false; } emitted[index] = 1; return true;
+    }
     // The verified table is acyclic and has at most 64 nested value levels.
     while (i < shape.field_count) {
         let shapes::Field f = shapes::field_at(table,shape.field_start + i + 1);

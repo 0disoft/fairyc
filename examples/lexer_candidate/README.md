@@ -1934,6 +1934,36 @@ arenas are released. `verify_enums.py --phase hir` checks accepted values and
 rejected empty/payload enums, duplicate members/cases, missing/unknown cases,
 integer coercion, distinct declarations, equality, aggregate enum storage,
 immutable assignments and borrowed-view joins. Types, HIR, MIR and C execution
-are separate candidate milestones; this version retains HIR only. Payloads,
+are separate candidate milestones; version 0.30.0 retains HIR only. Payloads,
 enum comparison and enum arrays/struct fields remain closed. The public grammar,
 SDK/runtime and public ABI are unchanged.
+
+
+## Payloadless enum native execution
+
+Version 0.31.0 connects enum values and switches to verified MIR and C11.
+Operation 21 constructs a declaration-relative tag and operation 22 tests one
+member; exact enum types remain distinct in copies, parameters and return values.
+The private C representation is a separate struct per enum containing a
+`uint32_t` tag. Source enum comparison stays unsupported. Switch subjects are
+frozen once, only the selected arm executes, and live arm results join through
+exactly typed locals. Returning arms have no fallthrough edge. Existing lexical
+defer/loop cleanup applies to each arm; defer still captures scalar arguments,
+and direct enum defer arguments are rejected explicitly.
+
+`tests/mir_enums.fy` checks retained tags/branches and rejects forged tags,
+wrong declarations/operands, non-bool tests and uninitialized values. Failed MIR
+or C rendering preserves existing output bytes. `verify_enums.py --phase full`
+checks all four CLI modes in both candidate profiles and runs emitted C in both
+native profiles. Fixed expectations are independently compared with Go MIR
+interpreter results produced by the test-only `--enum-mir` oracle. This work also
+fixed Go MIR call lowering: earlier by-value enum arguments are now copied
+before later arguments can overwrite their source local (including inert payload
+enums). No parsing or lowering in the Fairy CLI is delegated to that oracle.
+
+Emit `samples/enum-c-demo.fy` with `--c-file`. The evidence file is
+`docs/ops/evidence/enum-native-20261006.json`. Payload enums, enum equality,
+enum arrays/struct fields and borrowed-view switch joins remain outside this
+candidate slice. Public grammar, SDK/runtime and public ABI are unchanged.
+Linux native validation and performance measurement remain deferred. These
+checks do not constitute completed compiler self-hosting.

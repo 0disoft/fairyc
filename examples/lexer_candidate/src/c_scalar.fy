@@ -26,6 +26,11 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
 }
 pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref mut w::State s) {
     let m::Operation o = m::operation_at(p,id);
+    if (o.kind >= 21) {
+        if (!w::text(out,s,b"    ") || !w::local(out,s,o.result) || !w::text(out,s,b" = ")) { return false; }
+        if (o.kind == 21) { return w::text(out,s,b"(") && w::type(out,s,o.type) && w::text(out,s,b"){UINT32_C(") && w::number(out,s,o.operator as usize) && w::text(out,s,b")};\n"); }
+        return w::local(out,s,o.left) && w::text(out,s,b".fy_tag == UINT32_C(") && w::number(out,s,o.operator as usize) && w::text(out,s,b");\n");
+    }
     if (o.kind >= 18) { return views::operation(p,o,out,s); }
     if (o.kind >= 14) { return literals::operation(p,id,o,out,s); }
     if (o.kind >= 9) { return arrays::operation(p,o,out,s); }

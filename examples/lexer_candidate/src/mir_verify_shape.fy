@@ -7,6 +7,7 @@ import mir_verify_nominal as nominal;
 import mir_verify_arrays as arrays;
 import mir_verify_literals as literals;
 import mir_verify_views as views;
+import mir_verify_enums as enums;
 
 pub fn m::Problem problem(u32 code, usize start, usize end) { return m::Problem { .code, .start, .end }; }
 pub fn bool local(ref m::Program p, usize id, usize function, u32 type) {
@@ -48,6 +49,7 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if (o.kind >= 21) { return enums::operation(p,o); }
     if (o.kind >= 18) { return views::operation(p,o); }
     if (o.kind >= 14) { return literals::operation(p,id,o); }
     if (o.kind >= 9) { return arrays::operation(p,o); }

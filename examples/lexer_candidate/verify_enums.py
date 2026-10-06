@@ -13,14 +13,15 @@ POSITIVES = [
     ('enum-assignment', 'enum E{A;B;}fn i32 main(){var E e=.A;let original=e;e=.B;return switch(original){case .A:{switch(e){case .A:{1}case .B:{8}}}case .B:{2}};}', 8),
     ('enum-join', 'enum E{A;B;}fn E choose(bool yes){return if(yes){.A}else{.B};}fn i32 main(){let E e=switch(choose(false)){case .A:{.B}case .B:{.A}};return switch(e){case .B:{9}case .A:{5}};}', 5),
     ('enum-effects', 'enum E{A;B;}fn i32 main(){var i32 n=1;var E e=.A;let i32 value=switch({n+=1;e}){case .B:{n+=100;8}case .A:{e=.B;n+=10;3}};return value+n;}', 15),
-    ('enum-early-return', 'enum E{A;B;}fn i32 f(E e){switch(e){case .A:{return 11;}case .B:{return 12;}};}fn i32 main(){return f(.B);}', 12),
+    ('enum-early-return', 'enum E{A;B;}fn i32 f(E e){switch(e){case .A:{return 11;}case .B:{return 12;}};return 99;}fn i32 main(){return f(.B);}', 12),
     ('enum-loop', 'enum E{A;B;}fn i32 main(){var E e=.A;var i32 n=0;while(n<3){e=switch(e){case .A:{.B}case .B:{.A}};n+=1;}return switch(e){case .A:{1}case .B:{6}};}', 6),
     ('enum-separate', 'enum E{A;B;}enum F{A;B;}struct P{i32 x;}fn i32 main(){let E e=.A;let F f=.B;let p=P{.x=2};return p.x+switch(e){case .A:{3}case .B:{4}}+switch(f){case .A:{5}case .B:{6}};}', 11),
     ('enum-call-freeze', 'enum E{A;B;}fn i32 f(E a,E b){return switch(a){case .A:{10}case .B:{20}}+switch(b){case .A:{1}case .B:{2}};}fn i32 main(){var E e=.A;return f(e,{e=.B;e});}', 12),
     ('enum-unsigned-join', 'enum E{A;B;}fn i32 main(){let E e=.B;let u8 n=switch(e){case .A:{1}case .B:{255}};assert(n==255);return 0;}', 0),
-    ('enum-defer', 'enum E{A;B;}fn void check(E e){assert(switch(e){case .A:{false}case .B:{true}});}fn i32 main(){let E e=.B;switch(e){case .A:{}case .B:{defer check(e);}};return 0;}', 0),
+    ('enum-defer', 'enum E{A;B;}fn void check(bool ok){assert(ok);}fn i32 main(){let E e=.B;switch(e){case .A:{}case .B:{defer check(switch(e){case .A:{false}case .B:{true}});}};return 0;}', 0),
 ]
 NEGATIVES = [
+    ('enum-defer-closed', 'enum E{A;}fn void f(E e){}fn i32 main(){defer f(.A);return 0;}', 'enum defer arguments are not supported'),
     ('labeled-argument', 'enum E{A;}fn i32 f(E e){return 0;}fn i32 main(){return f(.e=.A);}', 'unsupported name-check syntax'),
     ('empty', 'enum E{}fn i32 main(){return 0;}', 'expected nonempty payloadless enum'),
     ('duplicate-member', 'enum E{A;A;}fn i32 main(){return 0;}', 'duplicate enum member'),
@@ -62,7 +63,7 @@ def verify(images, directory, phase, rows):
             assert sha(path)==before
         if outputs:
             assert len(set(outputs))==1
-            unit=directory/(name+'.c');unit.write_text(outputs[0],encoding='utf-8',newline='\n');units.append(dict(name=name,source=str(unit),expected=expected))
+            unit=directory/(name+'.c');unit.write_text('#define FY_CANDIDATE_NO_MAIN\n#include <inttypes.h>\n#include <stdio.h>\n'+outputs[0]+'int main(void){int32_t (*volatile entry)(void)=fy_candidate_entry;int32_t result=entry();fprintf(stderr,"fairyc-candidate-result/v1:%" PRId32 "\\n",result);return 0;}\n',encoding='utf-8',newline='\n');units.append(dict(name=name,source=str(unit),expected=expected))
     for name, source, message in NEGATIVES:
         path=directory/(name+'.fy');path.write_bytes(('module main;'+source).encode());before=sha(path)
         for image in images:
@@ -73,19 +74,28 @@ def verify(images, directory, phase, rows):
     return units
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--images',nargs='+',required=True);parser.add_argument('--phase',choices=['hir','full'],required=True);parser.add_argument('--receipt',required=True);parser.add_argument('--native-runner');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--images',nargs='+',required=True);parser.add_argument('--phase',choices=['hir','full'],required=True);parser.add_argument('--receipt',required=True);parser.add_argument('--native-runner');parser.add_argument('--reference');args=parser.parse_args()
     images=[Path(p).resolve() for p in args.images];receipt=Path(args.receipt).resolve();rows=[]
     try:
         units=verify(images,receipt.parent,args.phase,rows);native=[]
         if args.phase=='full':
-            assert args.native_runner
+            assert args.native_runner and args.reference
+            reference=Path(args.reference).resolve();fixtures=json.loads(reference.read_text(encoding='utf-8'))['fixtures']
+            assert len(fixtures)==len(POSITIVES)
+            for name,source,expected in POSITIVES:
+                f=next(f for f in fixtures if f['name']==name)
+                assert bytes.fromhex(f['inputHex']).decode().split('module main;',1)[1].strip()==source
+                assert f['outcomeOrigin']=='go-mir-interpreter' and f['outcome']['Kind']=='return' and not f['outcome']['TrapCategory'] and f['outcome']['Value']==expected,f
             request=receipt.parent/'native-request.json';native_report=receipt.parent/'native.json'
-            save(request,dict(schema='fairyc.candidate-c-native-request/v1',output=str(receipt.parent/'native'),jobs=[dict(name=u['name'],source=u['source']) for u in units]))
+            save(request,dict(schema='fairyc.candidate-c-native-request/v1',output=str(receipt.parent/'native'),jobs=[dict(name=u['name'],source=u['source'],observe=True) for u in units]))
             argv=[str(Path(args.native_runner).resolve()),str(request),str(native_report)];p=subprocess.run(argv,cwd=ROOT,capture_output=True,timeout=300);row=dict(argv=argv,cwd=str(ROOT),exit=p.returncode,stdout=p.stdout.decode('utf-8'),stderr=p.stderr.decode('utf-8'));rows.append(row);assert p.returncode==0,row
             native=json.loads(native_report.read_text(encoding='utf-8'));assert len(native)==2*len(units)
             expected={u['name']:u['expected'] for u in units}
-            for row in native:assert row['trap']==0 and row['value']==expected[row['name']] and sha(row['image'])==row['imageSHA256'],row
-        save(receipt,dict(schema='fairyc.enum-candidate-verification/v1',phase=args.phase,images=[dict(path=str(p),sha256=sha(p)) for p in images],cli=rows,cliExecutions=len(images)*(len(POSITIVES)+len(NEGATIVES))*len(['types','hir'] if args.phase=='hir' else ['types','hir','mir','c']),native=native,passed=True))
+            for row in native:
+                assert row['trap']==0 and row['exit']==0 and row['value']==expected[row['name']] and not row['stdout'],row
+                assert row['stderr'].replace('\r\n','\n')==f"fairyc-candidate-result/v1:{expected[row['name']]}\n",row
+                assert sha(row['image'])==row['imageSHA256'] and sha(row['source'])==row['sourceSHA256'],row
+        save(receipt,dict(schema='fairyc.enum-candidate-verification/v1',phase=args.phase,images=[dict(path=str(p),sha256=sha(p)) for p in images],cli=rows,cliExecutions=len(images)*(len(POSITIVES)+len(NEGATIVES))*len(['types','hir'] if args.phase=='hir' else ['types','hir','mir','c']),native=native,reference=(dict(path=str(reference),sha256=sha(reference)) if args.phase=='full' else None),passed=True))
         print(f'PASS: {args.phase}; {len(rows)} invocations; {len(native)} native executions')
     except Exception:
         save(receipt.with_suffix('.failure.json'),dict(cli=rows,passed=False));raise

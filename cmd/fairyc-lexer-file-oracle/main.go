@@ -31,6 +31,9 @@ type fixture struct {
 }
 
 func run() error {
+	if len(os.Args) == 3 && os.Args[1] == "--enum-mir" {
+		return writeEnumMIR(os.Args[2])
+	}
 	if len(os.Args) == 3 && os.Args[1] == "--aggregate-array-cases" {
 		return writeAggregateArrayCases(os.Args[2])
 	}
@@ -74,7 +77,7 @@ func run() error {
 		return writeDeclarations(os.Args[2])
 	}
 	if len(os.Args) != 2 {
-		return fmt.Errorf("usage: fairyc-lexer-file-oracle [--declarations|--names|--types|--modules|--hir|--mir|--nominal|--nominal-hir|--nominal-mir|--array-mir|--literal-mir|--view-mir|--mutable-mir] <output.json>")
+		return fmt.Errorf("usage: fairyc-lexer-file-oracle [--declarations|--names|--types|--modules|--hir|--mir|--nominal|--nominal-hir|--nominal-mir|--enum-mir|--array-mir|--literal-mir|--view-mir|--mutable-mir] <output.json>")
 	}
 	var fixtures []fixture
 	add := func(name string, input []byte) error {

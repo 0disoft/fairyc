@@ -294,6 +294,12 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             if (item.kind == 13 && (syntax::expression_at(parsed,item.expression).kind != 6 || actual.type != 7)) {
                 return error(problem,15,item.start,item.end,7,actual.type);
             }
+            if (item.kind == 13) {
+                var usize i = 0; while (i < syntax::call_argument_count(parsed,item.expression)) {
+                    let usize argument = syntax::call_argument(parsed,item.expression,i);
+                    if (enums::valid(state::expressions(tables,argument - 1))) { return error(problem,29,item.start,item.end,0,0); } i += 1;
+                }
+            }
             return value(7,actual.terminates);
         }
 

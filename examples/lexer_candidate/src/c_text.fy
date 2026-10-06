@@ -1,5 +1,6 @@
 module c_text;
 import std::bytes as bytes;
+import enum_types as enums;
 
 pub struct State { u32 code; }
 pub fn bool text(ref mut bytes::Buffer out, ref mut State s, ref u8[] value) {
@@ -15,6 +16,7 @@ pub fn bool number(ref mut bytes::Buffer out, ref mut State s, usize value) {
 pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
     if (code == 11) { return text(out,s,b"struct fy_bytes_mut"); }
     if (code == 9 || code == 10) { return text(out,s,if (code == 9) { b"struct fy_text" } else { b"struct fy_bytes" }); }
+    if (enums::valid(code)) { return text(out,s,b"struct fy_e_") && number(out,s,code as usize); }
     if (code >= 1024) { return text(out,s,b"struct fy_a_") && number(out,s,code as usize); }
     if (code >= 256) { return text(out,s,b"struct fy_s_") && number(out,s,code as usize); }
     return text(out,s,if (code == 1 || code == 6) { b"int32_t" } else if (code == 2) { b"int64_t" }
