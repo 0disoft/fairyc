@@ -816,7 +816,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if definition == nil {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(operation.Type), Detail: "struct construction type has no definition"})
 				}
-				if operation.DestinationLocal == NoLocal || operation.Type == "" || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
+				if operation.DestinationLocal == NoLocal || operation.Type == "" || operation.Type == hir.TypeInvalid || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct construction shape is invalid"})
 				}
 				if definition != nil && !slices.Equal(operation.Fields, structFieldNames(definition.Fields)) {

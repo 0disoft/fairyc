@@ -152,7 +152,12 @@ func (r *aggregateLayoutResolver) resolve(typ hir.Type) (layout.Type, error) {
 
 func (r *aggregateLayoutResolver) resolveStruct(definition mir.StructType) (layout.Type, error) {
 	if len(definition.Fields) == 0 {
-		return layout.Type{}, CapabilityError{Feature: "empty struct type " + strconv.Quote(string(definition.Type))}
+		if definition.ReprC {
+			return layout.Type{}, CapabilityError{Feature: "empty repr(C) struct type " + strconv.Quote(string(definition.Type))}
+		}
+		// Private C11 transport needs storage, even for a fieldless source value.
+		// This byte is not a source field and does not change the public C ABI.
+		return layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{{Name: "f_0", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u8"}}}}, nil
 	}
 	fields := make([]layout.Field, 0, len(definition.Fields))
 	for index, field := range definition.Fields {
@@ -524,6 +529,9 @@ func (e *emitter) emitStructType(output *strings.Builder, index int) error {
 		fmt.Fprintf(output, "struct %s {\n", structure.definition.Name)
 	} else {
 		output.WriteString("typedef struct {\n")
+	}
+	if len(structure.definition.Fields) == 0 {
+		output.WriteString("    uint8_t f_0;\n")
 	}
 	for fieldIndex, field := range structure.definition.Fields {
 		cType, err := e.cValueType(field.Type)

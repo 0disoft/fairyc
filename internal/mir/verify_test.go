@@ -304,6 +304,13 @@ func TestVerifyRejectsStructConstructionFieldMismatch(t *testing.T) {
 	if len(failures) != 1 || failures[0].Code != "V1001" {
 		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
 	}
+	// An empty constructor is valid only for an actually fieldless definition.
+	program.Functions[0].Blocks[0].Operations[0].Fields = nil
+	program.Functions[0].Blocks[0].Operations[0].Operands = nil
+	failures = Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("empty constructor for nonempty type: %+v", failures)
+	}
 }
 
 func TestVerifyRejectsPayloadMoveOnNonPayloadOperation(t *testing.T) {

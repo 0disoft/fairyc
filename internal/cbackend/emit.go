@@ -3505,6 +3505,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return CapabilityError{Function: function, Feature: "struct construction type " + strconv.Quote(string(operation.Type))}
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ ", operation.DestinationLocal, e.structCTypeName(index))
+		if len(operation.Operands) == 0 {
+			output.WriteString("0")
+		}
 		for fieldIndex, operand := range operation.Operands {
 			if fieldIndex != 0 {
 				output.WriteString(", ")

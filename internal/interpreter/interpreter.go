@@ -486,7 +486,7 @@ func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtime
 }
 
 func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValue, error) {
-	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) == 0 || len(definition.Fields) != len(values) {
+	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) != len(values) {
 		return runtimeValue{}, fmt.Errorf("invalid struct construction definition")
 	}
 	state := &structState{definition: definition, fields: make(map[string]runtimeValue, len(definition.Fields))}

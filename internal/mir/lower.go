@@ -1395,11 +1395,14 @@ func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand,
 }
 
 func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression) (Operand, error) {
-	if len(expression.Children) == 0 || len(expression.Children) != len(expression.Fields) || expression.Type == hir.TypeInvalid {
+	if len(expression.Children) != len(expression.Fields) || expression.Type == hir.TypeInvalid {
 		return Operand{}, fmt.Errorf("malformed aggregate construction with %d values and %d fields", len(expression.Children), len(expression.Fields))
 	}
 	isResource := l.properties.IsResource(expression.Type)
 	isStruct := l.properties.IsStruct(expression.Type)
+	if isResource && len(expression.Children) == 0 {
+		return Operand{}, fmt.Errorf("empty resource construction has no MIR support")
+	}
 	if !isResource && !isStruct {
 		return Operand{}, fmt.Errorf("aggregate construction type %q has no MIR definition", expression.Type)
 	}

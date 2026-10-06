@@ -110,6 +110,12 @@ parameters. The interpreter remains fail-closed on every foreign call.
 
 ## C-representable types
 
+Fieldless structs without `@repr(C)` use a private one-byte C11 transport with an
+initialized dummy member. The member is not a Fairy field; constructors, value
+copies, arguments, returns and nesting retain the nominal type. This representation
+does not admit empty `@repr(C)` records or change the target layout engine's empty
+aggregate rejection.
+
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
