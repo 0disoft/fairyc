@@ -2603,3 +2603,31 @@ profiles. Evidence is `docs/ops/evidence/candidate-resource-moves-20261007.json`
 This is unit 17 transfer representation, not liveness or cleanup execution:
 units 18..20 add use-after-move and branch/loop flow, and resource MIR/C remains
 closed until the later cleanup units. Linux and stage1/stage2 remain deferred.
+
+## Resource use-after-move and transfer provenance
+
+Version 0.49.0 checks resource-root liveness after exact type/consumption
+classification. A shared control-graph builder preserves ordinary evaluation,
+returns, propagation error exits, lexical scope exit and capture installation
+for both the existing Result-handling analysis and the new ownership analysis.
+A moved root cannot be read, inspected through a copy field, returned or used
+as a second argument/initializer. Fresh reassignment reinstalls a live value;
+shadowed bindings keep separate identities and unreachable uses are ignored.
+
+The bounded worklist retains Live/Dead reachability and the earliest transfer
+span. E1101 diagnostics identify both the rejected use and original move.
+`tests/resource_dead.fy` checks exact spans, replacement, shadowing, argument
+order, propagation and consuming Result inspection. `verify_resource_dead.py`
+observes the source CLI and requires the related move range in each rejection.
+Evidence is `docs/ops/evidence/candidate-resource-dead-20261007.json`.
+Unit 18 establishes root-use rejection. Units 19/20 add explicit rejection of
+ambiguous branch joins even without a later use, and equality at loop back/exit
+edges. The conservative dataflow union is not a runtime conditional drop flag;
+resource MIR/C publication stays closed until later cleanup integration.
+
+The pinned Go reference incorrectly accepted returning a resource-bearing Result
+after extracting it with `?`. Its resource flow now consumes the operand on both
+alternatives and checks cleanup effects at the possible error return. Focused Go
+Resource/Result propagation tests and a newly built reference reproduce the
+correct E1101 rejection; the candidate source still checks with that reference.
+The receipt keeps original images and before/after tool identities separately.

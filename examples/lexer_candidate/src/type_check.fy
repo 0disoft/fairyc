@@ -11,6 +11,7 @@ import resource_identity as resources;
 import type_control as control;
 import result_flow as result_flow;
 import resource_use as resource_use;
+import resource_flow as resource_flow;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -474,7 +475,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
         }
         index += 1;
     }
-    if(problem.code!=0){return problem;}let ownership=resource_use::classify(resolved,tables);return if(ownership.code!=0){ownership}else{result_flow::check(resolved,tables)};
+    if(problem.code!=0){return problem;}let ownership=resource_use::classify(resolved,tables);if(ownership.code!=0){return ownership;}let flow=resource_flow::check(resolved,tables);return if(flow.code!=0){flow}else{result_flow::check(resolved,tables)};
 }
 pub fn Typed check(names::Resolved resolved) {
     assert(names::problem(ref resolved).code == 0);

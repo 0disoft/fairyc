@@ -270,6 +270,15 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 		}
 	case syntax.KindCall:
 		a.resourceCall(module, expression, environment)
+	case syntax.KindPropagate:
+		if len(expression.Children) == 1 {
+			reachable = a.resourceExpression(module, expression.Children[0], environment, resourceMove)
+			if reachable {
+				// The error alternative returns before any subsequent success-path
+				// transfer. The operand is consumed on both alternatives.
+				a.checkResourceEnvironmentEffects(environment, at, nil)
+			}
+		}
 	case ast.PrivateStoragePut:
 		if len(expression.Children) == 2 {
 			a.resourceExpression(module, expression.Children[0], environment, resourceRead)

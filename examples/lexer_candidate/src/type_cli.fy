@@ -31,6 +31,7 @@ pub fn i32 errors(ref typing::Typed typed, ref u8[] path) {
     let state::Problem problem = typing::problem(typed);
     if (problem.code != 0) {
         output::prefix(typing::source_view(typed),path,problem.start);
+        if(problem.code==45){discard io::write_stderr("E1101 resource used after move");output::range(problem.start,problem.end);if(problem.move_end!=0){discard io::write_stderr("  move: ");output::prefix(typing::source_view(typed),path,problem.move_start);output::range(problem.move_start,problem.move_end);}return 2;}
         if(problem.code==43){discard io::write_stderr("resource-bearing inert struct or array field");output::range(problem.start,problem.end);return 2;}
         if(problem.code==42){discard io::write_stderr("Result value must be handled");output::range(problem.start,problem.end);return 2;}
         if (problem.code == 40 || problem.code == 41) {

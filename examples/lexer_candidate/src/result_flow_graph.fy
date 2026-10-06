@@ -3,6 +3,7 @@ import syntax as syntax;
 import name_resolution as names;
 import type_state as state;
 import tagged_types as tagged;
+import resource_properties as resources;
 import std::vec as v;
 import std::bytes as bytes;
 
@@ -14,7 +15,7 @@ pub resource Graph { v::Vec<Node> nodes; v::Vec<usize> columns; usize width; cle
 struct Context {
     usize current; usize[64] scopes; usize[64] captures; usize scope_depth;
     usize[64] breaks; usize[64] continues; usize[64] loop_base; usize loops;
-    usize work; state::Problem problem;
+    usize work; bool ownership; state::Problem problem;
 }
 fn void fail(ref mut Context c,u32 code,usize start,usize end){if(c.problem.code==0){c.problem=state::fail(code,start,end,0,0);}}
 fn usize fresh(ref mut v::Vec<Node> nodes,ref mut Context c,u32 kind,usize column,usize start,usize end){
@@ -34,6 +35,7 @@ fn void fork(ref mut v::Vec<Node> nodes,usize from,usize left,usize right){
 }
 fn usize column(ref v::Vec<usize> columns,usize symbol){return if(symbol==0){0}else{*v::at<usize>(columns,symbol)};}
 fn u32 take(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec<usize> columns,ref mut v::Vec<Node> nodes,ref mut Context c,usize id,u32 use){
+    if(c.ownership){let e=syntax::expression_at(p,id);if(e.kind==2 && resources::needs_drop(state::expressions(types,id-1))){discard emit(nodes,c,if(state::moving(types,id-1)){1}else{7},column(columns,state::uses(types,id-1)),e.start,e.end);}return use;}
     if(!tagged::result(state::expressions(types,id-1))){return use;}
     let e=syntax::expression_at(p,id);
     if(e.kind==2){discard emit(nodes,c,1,column(columns,state::uses(types,id-1)),e.start,e.end);}
@@ -145,15 +147,15 @@ fn void statement(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec<
     }
     expression(p,types,columns,nodes,c,s.expression,if(s.kind==12){4}else if(s.kind==6){3}else{0},depth+1);
 }
-pub fn Result<Graph,state::Problem> build(ref names::Resolved resolved,ref v::Vec<state::Slot> types,usize function){
+fn Result<Graph,state::Problem> build_kind(ref names::Resolved resolved,ref v::Vec<state::Slot> types,usize function,bool ownership){
     let ref syntax::Parsed p=names::parsed(resolved);
     var v::Vec<usize> columns=v::empty<usize>();var usize width=0;var usize i=0;
     while(i<=names::symbol_count(resolved)){
-        var usize col=0;if(i!=0){let s=names::symbol_at(resolved,i);if(s.owner==function && tagged::result(state::symbols(types,i-1))){width+=1;col=width;}}
+        var usize col=0;if(i!=0){let s=names::symbol_at(resolved,i);if(s.owner==function && if(ownership){resources::needs_drop(state::symbols(types,i-1))}else{tagged::result(state::symbols(types,i-1))}){width+=1;col=width;}}
         if(!v::push<usize>(ref mut columns,col).is_ok){return .err(state::fail(12,0,0,0,0));}i+=1;
     }
-    var v::Vec<Node> nodes=v::empty<Node>();
-    var Context c=Context{.current=0,.scopes=[0;64],.captures=[0;64],.scope_depth=0,.breaks=[0;64],.continues=[0;64],.loop_base=[0;64],.loops=0,.work=0,.problem=state::ok()};
+    var v::Vec<Node> nodes=v::empty<Node>();if(ownership && width==0){return .ok(Graph{.nodes,.columns,.width});}
+    var Context c=Context{.current=0,.scopes=[0;64],.captures=[0;64],.scope_depth=0,.breaks=[0;64],.continues=[0;64],.loop_base=[0;64],.loops=0,.work=0,.ownership,.problem=state::ok()};
     c.current=fresh(ref mut nodes,ref mut c,0,0,0,0);i=1;
     while(i<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,i);let usize col=column(ref columns,i);if(col!=0 && s.kind==2){discard emit(ref mut nodes,ref mut c,2,col,s.start,s.end);}i+=1;}
     let d=syntax::declaration_at(p,names::symbol_at(resolved,function).declaration-1);
@@ -164,3 +166,8 @@ pub fn Result<Graph,state::Problem> build(ref names::Resolved resolved,ref v::Ve
 pub fn usize count(ref Graph p){return v::len<Node>(ref p.nodes);}
 pub fn usize width(ref Graph p){return p.width;}
 pub fn Node at(ref Graph p,usize id){return *v::at<Node>(ref p.nodes,id-1);}
+
+// The same control graph owns expression order and abrupt edges for both
+// analyses; ownership emits root reads/moves from the typed consumption flags.
+pub fn Result<Graph,state::Problem> build(ref names::Resolved resolved,ref v::Vec<state::Slot> types,usize function){return build_kind(resolved,types,function,false);}
+pub fn Result<Graph,state::Problem> build_resources(ref names::Resolved resolved,ref v::Vec<state::Slot> types,usize function){return build_kind(resolved,types,function,true);}
