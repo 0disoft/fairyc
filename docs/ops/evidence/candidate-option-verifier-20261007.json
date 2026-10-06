@@ -1,0 +1,32 @@
+{
+  "schema": "fairyc.option-mir-verifier-evidence/v1",
+  "unit": 2,
+  "passed": true,
+  "layoutMutations": 5,
+  "operationMutations": 15,
+  "baselineEvidence": "candidate-option-mir-20261007.json",
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "test",
+        "--native",
+        "--json",
+        "--file",
+        "tests/mir_options.fy",
+        "--file",
+        "tests/mir_enums.fy",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::mir_enums::enum_mir_rejects_bad_tags_types_and_uninitialized_values\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir_enums::enum_switch_lowers_to_owned_tags_and_checked_branches\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir_options::option_layouts_cannot_forge_payload_type_or_members\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::mir_options::option_mir_rejects_wrong_instances_tags_payloads_and_initialization\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":4,\"passed\":4,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    }
+  ],
+  "source": "examples/lexer_candidate/tests/mir_options.fy",
+  "deferred": [
+    "native Option acceptance",
+    "Linux execution"
+  ]
+}

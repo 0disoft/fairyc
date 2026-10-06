@@ -2053,6 +2053,13 @@ and shape arenas and validated before publication. See `samples/option-demo.fy`,
 `tests/hir_options.fy` and `verify_options.py --phase mir`.
 
 Evidence: `docs/ops/evidence/candidate-option-mir-20261007.json`. Native Option
-acceptance, extended mutation tests, structured/resource payloads and Result
+acceptance, structured/resource payloads and Result
 remain subsequent units in the owner's numbered plan. Source grammar and SDK
 contracts are unchanged.
+
+`tests/mir_options.fy` independently forges 5 invalid builtin layouts and 15
+invalid operations/reads. It checks different Option instances, wrong member
+tags and field ownership, missing or mistyped operands, uninitialized reads,
+and preservation of the output buffer when verification fails. Existing enum
+mutation tests run alongside it. Evidence:
+`docs/ops/evidence/candidate-option-verifier-20261007.json`.

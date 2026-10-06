@@ -9,7 +9,7 @@ work remain deferred to the owner's consolidated batch.
 | Unit | Required result | State / evidence |
 | --- | --- | --- |
 | 1 | Option types/owned HIR prerequisite and MIR some/none construction | Complete: candidate-option-mir-20261007.json; hir_options native test |
-| 2 | Option MIR owner/type/tag/payload/initialization mutation rejection | Pending |
+| 2 | Option MIR owner/type/tag/payload/initialization mutation rejection | Complete: candidate-option-verifier-20261007.json; 5 layout and 15 operation mutations |
 | 3 | Option C construction/copy/call/return/switch native execution | Pending |
 | 4 | Option if/loop/early-return value and control-flow preservation | Pending |
 | 5 | Result success/error type identity and type checking | Pending |
