@@ -16,6 +16,7 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
         case .Void: { put(out,b"void") } case .Callable: { put(out,b"callable") }
         case .Text: { put(out,b"ref-str") } case .Bytes: { put(out,b"ref-u8-slice") } case .MutableBytes: { put(out,b"ref-mut-u8-slice") }
         case .Array { .id = id }: { put(out,b"array:") && bytes::append_u32(out,id).is_ok }
+        case .Option { .id = id }: { put(out,b"option:") && bytes::append_u32(out,id-196608).is_ok }
         case .Enumeration { .id = id }: { put(out,b"enum:") && bytes::append_u32(out,id).is_ok }
         case .Nominal { .id = id }: { put(out,b"nominal:") && bytes::append_u32(out,id).is_ok }
     };

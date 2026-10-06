@@ -1,5 +1,6 @@
 module nominal_types;
 import array_types as arrays;
+import tagged_types as tagged;
 import enum_types as enums;
 import literal_types as literals;
 import syntax as syntax;
@@ -17,6 +18,7 @@ pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
 }
 pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     if (root == 0) { return 0; }
+    if (syntax::type_at(p,root).kind == 6) { return tagged::resolve(p,root); }
     if ((syntax::type_at(p,root).kind == 2 || syntax::type_at(p,root).kind == 3)) { return literals::resolve(p,root); }
     if (syntax::type_at(p,root).kind == 8) { return arrays::resolve(p,root); }
     if (syntax::type_at(p,root).kind != 1) { return 0; }

@@ -96,9 +96,9 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         return if (node.kind == 5) { expression(parsed,context,node.right,depth + 1,symbols,references) } else { ok() };
     }
     if (node.kind == 6) {
-        if (syntax::expression_at(parsed,node.left).kind != 2) { return fail(3,node.start,node.end); }
-        let Problem callee = expression(parsed,context,node.left,depth + 1,symbols,references);
-        if (callee.code != 0) { return callee; }
+        let u32 callee_kind=syntax::expression_at(parsed,node.left).kind;
+        if (callee_kind != 2 && callee_kind != 28) { return fail(3,node.start,node.end); }
+        if(callee_kind==2){let Problem callee = expression(parsed,context,node.left,depth + 1,symbols,references);if (callee.code != 0) { return callee; }}
         var usize index = 0;
         while (index < syntax::call_argument_count(parsed,id)) {
             let usize entry_id = syntax::call_argument_entry(parsed,id,index);
@@ -139,7 +139,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
     if (node.kind == 28) { return ok(); }
     if (node.kind == 15) {
         let Problem subject=expression(parsed,context,node.left,depth + 1,symbols,references);if(subject.code!=0){return subject;}
-        var usize link=node.right;while(link!=0){let arm=syntax::expression_at(parsed,syntax::expression_at(parsed,link).left);let pattern=syntax::expression_at(parsed,arm.left);if((pattern.kind!=16 || pattern.left!=0 || pattern.right!=0) && pattern.kind!=32){return fail(3,pattern.start,pattern.end);}
+        var usize link=node.right;while(link!=0){let arm=syntax::expression_at(parsed,syntax::expression_at(parsed,link).left);let pattern=syntax::expression_at(parsed,arm.left);if((pattern.kind!=16 || pattern.right!=0) && pattern.kind!=32){return fail(3,pattern.start,pattern.end);}
             let Problem checked=scoped_block(parsed,context,arm.right,depth + 1,symbols,references,arm.left);if(checked.code!=0){return checked;}link=syntax::expression_at(parsed,link).right;
         }return ok();
     }
@@ -204,14 +204,14 @@ fn Problem scoped_block(ref syntax::Parsed parsed, ref mut Context context, usiz
     if (depth >= 64) { return fail(4,body.start,body.end); }
     let usize base = context.local_count; let usize parent = context.scope;
     context.scope = context.next_scope; context.next_scope += 1;
-    if(pattern!=0 && syntax::expression_at(parsed,pattern).kind==32){
-        var usize i=0;while(i<syntax::pattern_field_count(parsed,pattern)){
-            let field=syntax::expression_at(parsed,syntax::pattern_field(parsed,pattern,i));let name=syntax::expression_at(parsed,field.left);
-            if(!bytes::equal(syntax::expression_text(parsed,field.left),b"_")){
-                if(!simple(syntax::expression_text(parsed,field.left))){return fail(3,name.start,name.end);}
+    if(pattern!=0){let pat=syntax::expression_at(parsed,pattern);let usize count=if(pat.kind==32){syntax::pattern_field_count(parsed,pattern)}else if(pat.left!=0){1}else{0};
+        var usize i=0;while(i<count){
+            let usize name_id=if(pat.kind==32){syntax::expression_at(parsed,syntax::pattern_field(parsed,pattern,i)).left}else{pat.left};let name=syntax::expression_at(parsed,name_id);
+            if(!bytes::equal(syntax::expression_text(parsed,name_id),b"_")){
+                if(!simple(syntax::expression_text(parsed,name_id))){return fail(3,name.start,name.end);}
                 var usize j=base;while(j<context.local_count){if(same(syntax::source_view(parsed),context.locals[j],name.start,name.end)){return fail(2,name.start,name.end);}j+=1;}
                 if(context.local_count>=128){return fail(4,name.start,name.end);}
-                if(!v::push<Symbol>(symbols,Symbol{.kind=8,.start=name.start,.end=name.end,.scope=context.scope,.owner=context.owner,.type_root=0,.entry=0,.declaration=field.left}).is_ok){return fail(5,name.start,name.end);}
+                if(!v::push<Symbol>(symbols,Symbol{.kind=8,.start=name.start,.end=name.end,.scope=context.scope,.owner=context.owner,.type_root=0,.entry=0,.declaration=name_id}).is_ok){return fail(5,name.start,name.end);}
                 let usize slot=context.local_count;let usize scope=context.scope;context.locals[slot]=Name{.start=name.start,.end=name.end,.scope,.symbol=v::len<Symbol>(symbols)};context.local_count+=1;
             }i+=1;
         }

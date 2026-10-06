@@ -1,5 +1,6 @@
 module hir_shape_lower;
 import hir_shapes as shapes;
+import tagged_types as tagged;
 import type_check as typing;
 import nominal_types as nominal;
 import name_resolution as names;
@@ -30,6 +31,16 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
             }
         } else if (d.kind != 1 && d.kind != 2 && d.kind != 3) { return .err(4); }
         index += 1;
+    }
+    var u32 type=196609;
+    while(type<=196614){let usize root=tagged::first(parsed,type);
+        if(root!=0){let node=syntax::type_at(parsed,root);let usize start=v::len<shapes::Field>(ref fields);
+            if(start>1021 || v::len<shapes::Shape>(ref records)>=512){return .err(2);}
+            if(!v::push<shapes::Shape>(ref mut records,shapes::Shape{.type,.binding=0,.field_start=start,.field_count=3,.public=false}).is_ok
+                || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=tagged::inner(type),.start=node.start,.end=node.end,.payload_start=0,.payload_count=0}).is_ok
+                || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=0,.start=node.start,.end=node.end,.payload_start=start,.payload_count=1}).is_ok
+                || !v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=type,.type=0,.start=node.start,.end=node.end,.payload_start=0,.payload_count=0}).is_ok){return .err(3);}
+        }type+=1;
     }
     return .ok(shapes::assemble(records,fields));
 }

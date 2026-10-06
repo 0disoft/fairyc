@@ -1,5 +1,6 @@
 module hir_lower;
 import hir_model as h;
+import tagged_types as tagged;
 import hir_view_check as views;
 import hir_state as state;
 import hir_shapes as shapes;
@@ -109,6 +110,12 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         if (h::operator_code(operator) == h::operator_code(.None)) { return state::fail(c,4,node.start,node.end); }
         e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
         if (node.kind == 5) { e.right = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.right,depth + 1); }
+    } else if (node.kind == 6 && tagged::option(h::type_code(type)) && syntax::expression_at(parsed,node.left).kind==28) {
+        kind=.Variant;e.binding=typing::field_target(input,id);e.edge_count=1;e.edge_start=state::reserve_edges(edges,1,c);
+        let usize arg=syntax::call_argument(parsed,id,0);let a=syntax::expression_at(parsed,arg);
+        let usize value=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,arg,depth+1);
+        let h::Expression initializer=h::Expression{.kind=.Initializer,.type=state::type(typing::expression_type(input,arg)),.operator=.None,.start=a.start,.end=a.end,.left=value,.right=0,.alternative=0,.block=0,.binding=tagged::payload(parsed,h::type_code(type)),.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false};
+        let usize child=state::push_expression(expressions,initializer,c);if(child==0){return 0;}state::set_edge(edges,e.edge_start,child);
     } else if (node.kind == 6) {
         kind = .Call; e.binding = state::use(links,node.left);
         if (e.binding == 0) { return state::fail(c,4,node.start,node.end); }
@@ -173,11 +180,11 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         e.edge_start=state::reserve_edges(edges,e.edge_count,c);if(c.problem.code!=0){return 0;}
         link=node.right;var usize remaining=e.edge_count;
         while(link!=0){let usize arm_id=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,arm_id);
-            let pattern=syntax::expression_at(parsed,arm.left);let usize count=if(pattern.kind==32){syntax::pattern_field_count(parsed,arm.left)}else{0};
+            let pattern=syntax::expression_at(parsed,arm.left);let usize count=if(pattern.kind==32){syntax::pattern_field_count(parsed,arm.left)}else if(pattern.left!=0){1}else{0};
             let usize captures=state::reserve_edges(edges,count,c);if(c.problem.code!=0){return 0;}
-            var usize n=0;while(n<count){let usize field_id=syntax::pattern_field(parsed,arm.left,n);let f=syntax::expression_at(parsed,field_id);let usize binding=state::use(links,f.left);
+            var usize n=0;while(n<count){let usize field_id=if(pattern.kind==32){syntax::pattern_field(parsed,arm.left,n)}else{pattern.left};let f=syntax::expression_at(parsed,field_id);let usize name=if(pattern.kind==32){f.left}else{field_id};let usize binding=state::use(links,name);
                 let usize start=if(binding==0){0}else{state::reserve_edges(edges,1,c)};if(binding!=0){state::set_edge(edges,start,binding);}
-                let h::Expression capture=h::Expression{.kind=.Capture,.type=state::type(typing::expression_type(input,f.left)),.operator=.None,.start=f.start,.end=f.end,.left=0,.right=0,.alternative=0,.block=0,.binding=typing::field_target(input,field_id),.edge_start=start,.edge_count=if(binding==0){0}else{1},.payload_start=0,.payload_end=0,.boolean=false};
+                let h::Expression capture=h::Expression{.kind=.Capture,.type=state::type(typing::expression_type(input,name)),.operator=.None,.start=f.start,.end=f.end,.left=0,.right=0,.alternative=0,.block=0,.binding=typing::field_target(input,field_id),.edge_start=start,.edge_count=if(binding==0){0}else{1},.payload_start=0,.payload_end=0,.boolean=false};
                 let usize id=state::push_expression(expressions,capture,c);if(id==0){return 0;}state::set_edge(edges,captures+n,id);n+=1;
             }
             let usize body=block(input,bindings,links,c,expressions,statements,blocks,edges,payload,arm.right,depth+1);

@@ -2035,3 +2035,24 @@ Enum comparisons, nested/resource/view payloads, enum array/struct storage,
 borrowed-view switch joins, complete self-hosting, Linux validation and
 performance measurement remain outside this slice. Stable compiler, public
 language/SDK APIs and runner implementation are unchanged.
+
+## Scalar Option type, HIR and MIR
+
+Builtin `Option<i32|i64|u8|u32|usize|bool>` uses contextual `.some(value)` and
+`.none`, with exactly one `.some(binding)` and `.none` switch arm. `_` discards
+the capture; named captures are immutable and confined to their arm. The six
+canonical private IDs 196609..196614 are disjoint from user enum declarations.
+Each used instance owns a synthetic, declaration-free shape (binding 0), with
+one payload field and two members. Repeated spellings share the same shape.
+
+HIR retains `Option` as a distinct type category; its readable tag is `option:N`.
+The owned payload HIR/MIR wire formats remain `fairyc.enum-payload-hir/v1` and
+`fairyc.enum-payload-mir/v1`. MIR operations 21/22/23 preserve construction,
+tag tests and typed captures. Synthetic layouts are bounded by the same field
+and shape arenas and validated before publication. See `samples/option-demo.fy`,
+`tests/hir_options.fy` and `verify_options.py --phase mir`.
+
+Evidence: `docs/ops/evidence/candidate-option-mir-20261007.json`. Native Option
+acceptance, extended mutation tests, structured/resource payloads and Result
+remain subsequent units in the owner's numbered plan. Source grammar and SDK
+contracts are unchanged.

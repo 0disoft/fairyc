@@ -1,6 +1,7 @@
 module hir_model;
 import array_types as arrays;
 import enum_types as enums;
+import tagged_types as tagged;
 import literal_types as literals;
 import std::bytes as bytes;
 import std::vec as v;
@@ -11,15 +12,15 @@ import hir_shapes as shapes;
 // Module indexes remain zero-based and declaration IDs retain their source index
 // plus one (including module/import declarations). Binding IDs preserve resolved
 // symbol IDs, but their owner/target/type facts below are independently owned.
-pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; Enumeration { u32 id; }; }
+pub enum Type { Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; Enumeration { u32 id; }; Option { u32 id; }; }
 pub enum BindingKind { Function; Parameter; Let; Var; External; Struct; Enum; }
 pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; Capture; }
 pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; }
 pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
 // The fixed SDK/compiler admits enum switching, not enum equality or enum casts.
 // These exhaustive private-format tags also permit exact scalar comparisons.
-pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .Enumeration { .id = id }: { id } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
-pub fn bool represented_type(Type value) { return switch(value) { case .Invalid: { false } case .Callable: { false } case .Enumeration { .id = id }: { enums::valid(id) } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } }; }
+pub fn u32 type_code(Type value) { return switch(value) { case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .Option { .id = id }: { id } case .Enumeration { .id = id }: { id } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
+pub fn bool represented_type(Type value) { return switch(value) { case .Invalid: { false } case .Callable: { false } case .Option { .id = id }: { tagged::option(id) } case .Enumeration { .id = id }: { enums::valid(id) && !tagged::option(id) } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } }; }
 pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } case .Struct: { 6 } case .Enum: { 7 } }; }
 pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } case .Variant: { 18 } case .Switch: { 19 } case .Arm: { 20 } case .Capture: { 21 } }; }
 pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Binding: { 1 } case .Return: { 2 } case .Assignment: { 3 } case .Expression: { 4 } case .While: { 5 } case .For: { 6 } case .Break: { 7 } case .Continue: { 8 } case .Assert: { 9 } case .Discard: { 10 } case .Defer: { 11 } }; }
@@ -142,6 +143,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     var usize shape_index = 0;
     while (shape_index < shapes::count(ref nominal)) {
         let shapes::Shape shape = shapes::at(ref nominal,shape_index);
+        if(tagged::option(shape.type)){shape_index+=1;continue;}
         let Binding b = *v::at<Binding>(ref bindings,shape.binding - 1);
         if (binding_code(b.kind) != if(enums::valid(shape.type)){7}else{6} || type_code(b.type) != shape.type || b.declaration != (shape.type - if(enums::valid(shape.type)){131071}else{255}) as usize || b.signature_count != 0 || b.module_index != module_index) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         shape_index += 1;
