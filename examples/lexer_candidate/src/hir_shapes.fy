@@ -20,7 +20,7 @@ fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;
     while (j < s.field_count) {
         let Field f = field_at(p,s.field_start + j + 1);
-        if (f.type >= 256 && !visit(p,find(p,f.type) - 1,colors,depth + 1)) { return false; } j += 1;
+        if (f.type >= 256 && !arrays::valid(f.type) && !visit(p,find(p,f.type) - 1,colors,depth + 1)) { return false; } j += 1;
     }
     colors[i] = 2; return true;
 }
@@ -35,7 +35,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
         var usize j = 0; while (j < i) { if (at(p,j).type == s.type || at(p,j).binding == s.binding) { return false; } j += 1; }
         j = 0; while (j < s.field_count) {
             let Field f = field_at(p,offset + j + 1);
-            if (f.owner != s.type || literals::valid(f.type) || arrays::valid(f.type) || !valid_type(p,f.type,false) || f.start >= f.end || f.end > source_bytes) { return false; } j += 1;
+            if (f.owner != s.type || literals::valid(f.type) || f.type == 11 || !valid_type(p,f.type,false) || f.start >= f.end || f.end > source_bytes) { return false; } j += 1;
         }
         offset += s.field_count; i += 1;
     }

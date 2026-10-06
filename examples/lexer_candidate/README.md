@@ -1851,3 +1851,19 @@ The [sparse cooked-storage comparison](sparse-storage-2026-09-10.md) preserves t
 old baseline and records a 41.06% reduction in peak requested heap bytes for the
 same token-heavy input, with a small allocation-count increase. The private token
 layout changed; the Stream consumer API and logical payload metrics did not.
+
+## Array fields and rank-two array HIR
+
+Version 0.28.0 retains rank-one and rank-two scalar arrays in local values,
+function signatures and acyclic struct fields. Each dimension stays 1..64.
+Postfix type constructors apply left to right: `u8[2][3]` is three rows of two
+bytes. Nested literals and repeated rows retain ordered, context-typed children;
+repeated values are evaluated once and copied. Array IDs preserve existing
+rank-one IDs and use a disjoint canonical encoding for rank two.
+
+Field/index assignment paths must end at a mutable named local; let bindings,
+parameters and temporaries stay immutable. Whole-row and whole-field replacement
+require exact type equality, and compound operators require scalar integers.
+`tests/hir_aggregate_arrays.fy` checks retained layouts and child types.
+Rank three, arrays of structs/views and field/index byte-view borrows remain
+closed. MIR/C execution of these newly admitted paths follows separately.

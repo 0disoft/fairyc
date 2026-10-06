@@ -42,12 +42,12 @@ fn state::Problem visit(ref syntax::Parsed p, usize id, ref mut u8[] colors, usi
     colors[id] = 1; var usize i = d.field_start;
     while (i < d.field_start + d.field_count) {
         let f = syntax::field_at(p,i); let u32 type = resolve(p,f.type_root);
-        if (type == 0 || type == 7 || arrays::valid(type) || literals::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
+        if (type == 0 || type == 7 || type == 11 || literals::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
         var usize j = d.field_start; while (j < i) {
             let previous = syntax::field_at(p,j);
             if (bytes::equal(syntax::source_view(p)[f.name_start..f.name_end],syntax::source_view(p)[previous.name_start..previous.name_end])) { return state::fail(17,f.name_start,f.name_end,0,0); } j += 1;
         }
-        if (type >= 256) { let state::Problem problem = visit(p,(type - 256) as usize,colors,depth + 1); if (problem.code != 0) { return problem; } }
+        if (type >= 256 && !arrays::valid(type)) { let state::Problem problem = visit(p,(type - 256) as usize,colors,depth + 1); if (problem.code != 0) { return problem; } }
         i += 1;
     }
     colors[id] = 2; return state::ok();

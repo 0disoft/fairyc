@@ -134,7 +134,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
             let state::Value actual = expression(resolved,tables,problem,child,element,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
             if (i == 0 && element == 0) { element = actual.type; }
-            if (actual.type != element || element < 1 || element > 6) { return error(problem,1,node.start,node.end,element,actual.type); }
+            if (actual.type != element || arrays::make(element,count) == 0) { return error(problem,1,node.start,node.end,element,actual.type); }
             terminates = terminates || actual.terminates; i += 1;
         }
         return recorded(tables,id,value(arrays::make(element,count),terminates));
@@ -254,11 +254,6 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             var usize root = item.target;
             while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3 || syntax::expression_at(parsed,root).kind == 9) { root = syntax::expression_at(parsed,root).left; }
             let usize symbol_id = if (syntax::expression_at(parsed,root).kind == 2) { state::uses(tables,root - 1) } else { 0 };
-            if (syntax::expression_at(parsed,item.target).kind == 9) {
-                var usize owner = syntax::expression_at(parsed,item.target).left;
-                while (syntax::expression_at(parsed,owner).kind == 3) { owner = syntax::expression_at(parsed,owner).left; }
-                if (syntax::expression_at(parsed,owner).kind != 2) { return error(problem,4,item.start,item.end,0,0); }
-            }
             let u32 expected = target.type;
             let state::Value actual = expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
