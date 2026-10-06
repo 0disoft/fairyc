@@ -1603,6 +1603,21 @@ digests, reused candidate/compiler identities and fresh native EXE hashes are in
 `docs/ops/evidence/empty-struct-field-store-20261006.json`; the original evidence
 above retains its historical fixed-control classification.
 
+## Owned scalar fixed arrays
+
+Version 0.20.0 admits scalar fixed-array types and literals into name resolution,
+type checking and owned HIR. Elements are `i32`, `i64`, `u8`, `u32`, `usize` or
+`bool`, with literal lengths 1..64. Ordinary and repeated initializers preserve
+written order; the repeated value is represented once. Exact element types and
+lengths govern copies, function arguments and returns. Indexes use `usize` and
+`.len` returns `usize`. Indexed assignment requires a mutable named array local.
+Empty, oversized, nested or nominal-element arrays, array fields, slices and
+borrowed arrays remain outside this component. At this revision array MIR/C
+execution is still closed; it is the next implementation step.
+
+`tests/hir_arrays.fy` checks retained types, element order, repeat representation,
+index/length nodes and type-ID limits alongside existing nominal HIR controls.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token

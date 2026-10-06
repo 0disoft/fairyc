@@ -1,4 +1,5 @@
 module nominal_types;
+import array_types as arrays;
 import syntax as syntax;
 import type_state as state;
 import std::bytes as bytes;
@@ -14,6 +15,7 @@ pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
 }
 pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     if (root == 0) { return 0; }
+    if (syntax::type_at(p,root).kind == 8) { return arrays::resolve(p,root); }
     if (syntax::type_at(p,root).kind != 1) { return 0; }
     let ref u8[] spelling = syntax::type_text(p,root);
     let u32 primitive = state::primitive(p,root);
@@ -38,7 +40,7 @@ fn state::Problem visit(ref syntax::Parsed p, usize id, ref mut u8[] colors, usi
     colors[id] = 1; var usize i = d.field_start;
     while (i < d.field_start + d.field_count) {
         let f = syntax::field_at(p,i); let u32 type = resolve(p,f.type_root);
-        if (type == 0 || type == 7) { return state::fail(16,f.start,f.end,0,type); }
+        if (type == 0 || type == 7 || arrays::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
         var usize j = d.field_start; while (j < i) {
             let previous = syntax::field_at(p,j);
             if (bytes::equal(syntax::source_view(p)[f.name_start..f.name_end],syntax::source_view(p)[previous.name_start..previous.name_end])) { return state::fail(17,f.name_start,f.name_end,0,0); } j += 1;

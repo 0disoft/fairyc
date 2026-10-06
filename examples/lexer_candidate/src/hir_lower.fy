@@ -115,6 +115,19 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
             let usize argument = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,i),depth + 1);
             if (argument == 0) { return 0; } state::set_edge(edges,e.edge_start + i,argument); i += 1;
         }
+    } else if (node.kind == 24 || node.kind == 29) {
+        kind = .Array; e.boolean = node.kind == 29;
+        e.edge_count = if (e.boolean) { 1 } else { syntax::array_element_count(parsed,id) };
+        e.edge_start = state::reserve_edges(edges,e.edge_count,c); if (c.problem.code != 0) { return 0; }
+        var usize i = 0; while (i < e.edge_count) {
+            let usize child = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,if (e.boolean) { node.left } else { syntax::array_element(parsed,id,i) },depth + 1);
+            if (child == 0) { return 0; } state::set_edge(edges,e.edge_start + i,child); i += 1;
+        }
+    } else if (node.kind == 9) {
+        kind = .Index; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
+        e.right = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.right,depth + 1);
+    } else if (node.kind == 8 && typing::field_target(input,id) == 0) {
+        kind = .Length; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
     } else if (node.kind == 8) {
         kind = .Field; e.binding = typing::field_target(input,id);
         e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);

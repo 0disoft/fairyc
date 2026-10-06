@@ -12,6 +12,7 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
         case .I64: { put(out,b"i64") } case .U8: { put(out,b"u8") } case .U32: { put(out,b"u32") }
         case .Usize: { put(out,b"usize") } case .Bool: { put(out,b"bool") }
         case .Void: { put(out,b"void") } case .Callable: { put(out,b"callable") }
+        case .Array { .id = id }: { put(out,b"array:") && bytes::append_u32(out,id).is_ok }
         case .Nominal { .id = id }: { put(out,b"nominal:") && bytes::append_u32(out,id).is_ok }
     };
 }
@@ -28,7 +29,7 @@ fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
         case .Reference: { put(out,b"reference") } case .Unary: { put(out,b"unary") }
         case .Binary: { put(out,b"binary") } case .Call: { put(out,b"call") }
         case .Block: { put(out,b"block") } case .If: { put(out,b"if") }
-        case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") }
+        case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") } case .Array: { put(out,b"array") } case .Index: { put(out,b"index") } case .Length: { put(out,b"length") }
     };
 }
 fn bool statement_kind(ref mut bytes::Buffer out, h::StatementKind kind) {

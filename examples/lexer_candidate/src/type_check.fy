@@ -1,4 +1,5 @@
 module type_check;
+import array_types as arrays;
 import name_resolution as names;
 import syntax as syntax;
 import type_state as state;
@@ -120,9 +121,35 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         }
         let u32 type = state::symbols(tables,callee_id - 1); return recorded(tables,id,value(type,terminates));
     }
+    if (node.kind == 24 || node.kind == 29) {
+        let usize count = if (node.kind == 29) { arrays::count(syntax::expression_text(parsed,node.right)) } else { syntax::array_element_count(parsed,id) };
+        if (count == 0 || count > 64) { return error(problem,16,node.start,node.end,0,0); }
+        var u32 element = if (arrays::valid(expected)) { arrays::element(expected) } else { 0 };
+        if (arrays::valid(expected) && arrays::length(expected) != count) { return error(problem,1,node.start,node.end,expected,0); }
+        var usize i = 0; var bool terminates = false;
+        while (i < if (node.kind == 29) { 1 } else { count }) {
+            let usize child = if (node.kind == 29) { node.left } else { syntax::array_element(parsed,id,i) };
+            let state::Value actual = expression(resolved,tables,problem,child,element,result_type,depth + 1,loop_depth);
+            if (problem.code != 0) { return actual; }
+            if (i == 0 && element == 0) { element = actual.type; }
+            if (actual.type != element || element < 1 || element > 6) { return error(problem,1,node.start,node.end,element,actual.type); }
+            terminates = terminates || actual.terminates; i += 1;
+        }
+        return recorded(tables,id,value(arrays::make(element,count),terminates));
+    }
+    if (node.kind == 9) {
+        let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
+        if (problem.code != 0) { return owner; }
+        if (!arrays::valid(owner.type)) { return error(problem,16,node.start,node.end,0,owner.type); }
+        let state::Value index = expression(resolved,tables,problem,node.right,5,result_type,depth + 1,loop_depth);
+        if (problem.code != 0) { return index; }
+        if (index.type != 5) { return error(problem,1,node.start,node.end,5,index.type); }
+        return recorded(tables,id,value(arrays::element(owner.type),owner.terminates || index.terminates));
+    }
     if (node.kind == 8) {
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }
+        if (arrays::valid(owner.type) && bytes::equal(op,b"len")) { return recorded(tables,id,value(5,owner.terminates)); }
         let usize field = nominal::field(parsed,owner.type,op);
         if (field == 0) { return error(problem,18,node.end - op.len,node.end,owner.type,0); }
         let u32 type = nominal::resolve(parsed,syntax::field_at(parsed,field - 1).type_root);
@@ -197,8 +224,13 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             let state::Value target = expression(resolved,tables,problem,item.target,0,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return target; }
             var usize root = item.target;
-            while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3) { root = syntax::expression_at(parsed,root).left; }
+            while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3 || syntax::expression_at(parsed,root).kind == 9) { root = syntax::expression_at(parsed,root).left; }
             let usize symbol_id = if (syntax::expression_at(parsed,root).kind == 2) { state::uses(tables,root - 1) } else { 0 };
+            if (syntax::expression_at(parsed,item.target).kind == 9) {
+                var usize owner = syntax::expression_at(parsed,item.target).left;
+                while (syntax::expression_at(parsed,owner).kind == 3) { owner = syntax::expression_at(parsed,owner).left; }
+                if (syntax::expression_at(parsed,owner).kind != 2) { return error(problem,4,item.start,item.end,0,0); }
+            }
             let u32 expected = target.type;
             let state::Value actual = expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }

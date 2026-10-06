@@ -1,4 +1,5 @@
 module hir_shapes;
+import array_types as arrays;
 import std::vec as v;
 
 // Source-independent nominal layout facts. Field IDs are one-based; shape type
@@ -12,7 +13,7 @@ pub fn usize field_count(ref Table p) { return v::len<Field>(ref p.fields); }
 pub fn Shape at(ref Table p, usize i) { assert(i < count(p)); return *v::at<Shape>(ref p.shapes,i); }
 pub fn Field field_at(ref Table p, usize id) { assert(id > 0 && id <= field_count(p)); return *v::at<Field>(ref p.fields,id - 1); }
 pub fn usize find(ref Table p, u32 type) { var usize i = 0; while (i < count(p)) { if (at(p,i).type == type) { return i + 1; } i += 1; } return 0; }
-pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || (type >= 256 && find(p,type) != 0); }
+pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || arrays::valid(type) || (type >= 256 && find(p,type) != 0); }
 fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     if (colors[i] == 2) { return true; } if (colors[i] == 1 || depth >= 64) { return false; }
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;
@@ -33,7 +34,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
         var usize j = 0; while (j < i) { if (at(p,j).type == s.type || at(p,j).binding == s.binding) { return false; } j += 1; }
         j = 0; while (j < s.field_count) {
             let Field f = field_at(p,offset + j + 1);
-            if (f.owner != s.type || !valid_type(p,f.type,false) || f.start >= f.end || f.end > source_bytes) { return false; } j += 1;
+            if (f.owner != s.type || arrays::valid(f.type) || !valid_type(p,f.type,false) || f.start >= f.end || f.end > source_bytes) { return false; } j += 1;
         }
         offset += s.field_count; i += 1;
     }

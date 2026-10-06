@@ -109,6 +109,15 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         }
         return ok();
     }
+    if (node.kind == 9) {
+        let Problem left = expression(parsed,context,node.left,depth + 1,symbols,references);
+        return if (left.code != 0) { left } else { expression(parsed,context,node.right,depth + 1,symbols,references) };
+    }
+    if (node.kind == 24 || node.kind == 29) {
+        var usize i = 0; let usize count = if (node.kind == 29) { 1 } else { syntax::array_element_count(parsed,id) };
+        while (i < count) { let Problem p = expression(parsed,context,if (node.kind == 29) { node.left } else { syntax::array_element(parsed,id,i) },depth + 1,symbols,references); if (p.code != 0) { return p; } i += 1; }
+        return ok();
+    }
     if (node.kind == 8) { return expression(parsed,context,node.left,depth + 1,symbols,references); }
     if (node.kind == 10) {
         let Problem target = expression(parsed,context,node.left,depth + 1,symbols,references);
@@ -144,7 +153,7 @@ fn Problem statement(ref syntax::Parsed parsed, ref mut Context context, usize i
     }
     if (item.kind == 3 || item.kind == 4 || item.kind == 6 || item.kind == 11 || item.kind == 12 || item.kind == 13) {
         if (item.kind == 4) {
-            if (syntax::expression_at(parsed,item.target).kind != 2 && syntax::expression_at(parsed,item.target).kind != 8) { return fail(3,item.start,item.end); }
+            if (syntax::expression_at(parsed,item.target).kind != 2 && syntax::expression_at(parsed,item.target).kind != 8 && syntax::expression_at(parsed,item.target).kind != 9) { return fail(3,item.start,item.end); }
             let Problem target = expression(parsed,context,item.target,depth,symbols,references);
             if (target.code != 0) { return target; }
         }
