@@ -31,6 +31,9 @@ type fixture struct {
 }
 
 func run() error {
+	if len(os.Args) == 3 && os.Args[1] == "--literal-mir" {
+		return writeLiteralMIR(os.Args[2])
+	}
 	if len(os.Args) == 3 && os.Args[1] == "--array-mir" {
 		return writeArrayMIR(os.Args[2])
 	}
@@ -62,7 +65,7 @@ func run() error {
 		return writeDeclarations(os.Args[2])
 	}
 	if len(os.Args) != 2 {
-		return fmt.Errorf("usage: fairyc-lexer-file-oracle [--declarations|--names|--types|--modules|--hir|--mir|--nominal|--nominal-hir|--nominal-mir] <output.json>")
+		return fmt.Errorf("usage: fairyc-lexer-file-oracle [--declarations|--names|--types|--modules|--hir|--mir|--nominal|--nominal-hir|--nominal-mir|--array-mir|--literal-mir] <output.json>")
 	}
 	var fixtures []fixture
 	add := func(name string, input []byte) error {

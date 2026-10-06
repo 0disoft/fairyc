@@ -15,9 +15,9 @@ def run(argv,rows,case):
     row=dict(case=case,argv=list(map(str,argv)),cwd=str(ROOT),exit=p.returncode,stdout=p.stdout.decode('utf-8'),stderr=p.stderr.decode('utf-8'))
     rows.append(row);return row
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--images',nargs=2,required=True);parser.add_argument('--reference',required=True);parser.add_argument('--native-runner',required=True);parser.add_argument('--receipt',required=True);parser.add_argument('--nominal',action='store_true');parser.add_argument('--arrays',action='store_true')
+    parser=argparse.ArgumentParser();parser.add_argument('--images',nargs=2,required=True);parser.add_argument('--reference',required=True);parser.add_argument('--native-runner',required=True);parser.add_argument('--receipt',required=True);parser.add_argument('--nominal',action='store_true');parser.add_argument('--arrays',action='store_true');parser.add_argument('--literals',action='store_true')
     args=parser.parse_args(); images=list(map(lambda x:Path(x).resolve(),args.images)); reference=Path(args.reference).resolve();runner=Path(args.native_runner).resolve();receipt=Path(args.receipt).resolve();directory=receipt.parent;directory.mkdir(parents=True,exist_ok=True)
-    data=json.loads(reference.read_text(encoding='utf-8'));fixtures=data['fixtures'];assert data['schema']==('fairyc.array-mir-oracle/v1' if args.arrays else 'fairyc.nominal-mir-oracle/v1' if args.nominal else 'fairyc.mir-file-oracle/v1');assert len(fixtures)<=120 and all(f['admitted'] for f in fixtures)
+    data=json.loads(reference.read_text(encoding='utf-8'));fixtures=data['fixtures'];assert data['schema']==('fairyc.literal-mir-oracle/v1' if args.literals else 'fairyc.array-mir-oracle/v1' if args.arrays else 'fairyc.nominal-mir-oracle/v1' if args.nominal else 'fairyc.mir-file-oracle/v1');assert len(fixtures)<=120 and all(f['admitted'] for f in fixtures)
     rows=[];jobs=[];expected={};units=[]
     for fixture in fixtures:
         source=bytes.fromhex(fixture['inputHex']);path=directory/(fixture['name']+'.fy');path.write_bytes(source);before=sha(path)
@@ -27,7 +27,7 @@ def main():
             outputs.append(row['stdout']);row['input']=dict(path=str(path),sha256=before,unchanged=True)
         assert outputs[0]==outputs[1],fixture['name']
         emitted=directory/(fixture['name']+'.c');emitted.write_text(outputs[0],encoding='utf-8',newline='\n')
-        unit=outputs[0];assert unit.startswith('/* fairyc.candidate-'+('array' if args.arrays else 'nominal' if args.nominal else 'scalar')+'-c/v1;')
+        unit=outputs[0];assert unit.startswith('/* fairyc.candidate-'+('literal' if args.literals else 'array' if args.arrays else 'nominal' if args.nominal else 'scalar')+'-c/v1;')
         adapted='#define FY_CANDIDATE_NO_MAIN\n#include <inttypes.h>\n#include <stdio.h>\n'+unit
         trace=fixture.get('traceCalls',False)
         if trace:
@@ -49,7 +49,7 @@ def main():
         jobs.append(dict(name=fixture['name'],source=str(instrumented),observe=True));expected[fixture['name']]=fixture['outcome']
         units.append(dict(case=fixture['name'],source=str(path),sourceSHA256=before,emitted=str(emitted),emittedSHA256=sha(emitted),observed=str(instrumented),observedSHA256=sha(instrumented),traceHook=trace,outcomeOrigin=fixture['outcomeOrigin']))
     # The ordinary generated main is also compiled and run without the observer.
-    standalone=[('standalone-main','array-copy'),('standalone-trap','array-bounds-read'),('standalone-return','array-return')] if args.arrays else [('standalone-main','construct-read'),('standalone-trap','field-overflow'),('standalone-empty','empty-return')] if args.nominal else [('standalone-main','constant'),('standalone-trap','overflow-i32')]
+    standalone=[('standalone-main','literal-bytes'),('standalone-trap','literal-bounds'),('standalone-return','literal-return')] if args.literals else [('standalone-main','array-copy'),('standalone-trap','array-bounds-read'),('standalone-return','array-return')] if args.arrays else [('standalone-main','construct-read'),('standalone-trap','field-overflow'),('standalone-empty','empty-return')] if args.nominal else [('standalone-main','constant'),('standalone-trap','overflow-i32')]
     for name,fixture_name in standalone:
         plain=next(f for f in fixtures if f['name']==fixture_name);jobs.append(dict(name=name,source=str(directory/(fixture_name+'.c')),observe=False));expected[name]=plain['outcome']
     controls=[('no-main',b'module main;fn i32 f(){return 0;}', 'error: C entry requires fn i32 main()\n'),('void-main',b'module main;fn void main(){}','error: C entry requires fn i32 main()\n'),('parameter-main',b'module main;fn i32 main(i32 x){return x;}','error: C entry requires fn i32 main()\n'),('empty-program',b'module main;','error: C entry requires fn i32 main()\n'),('bad-utf8',b'module main;\xff',None),('bad-field',b'module main;fn i32 main(){return absent;}',None),('bad-number',b'module main;fn i32 main(){return 9223372036854775808;}',None),('missing',None,'error: input file read failed\n')]
@@ -57,6 +57,8 @@ def main():
         controls += [('unknown-member',b'module main;struct A{i32 x;}fn i32 main(){return A{.x=1}.bad;}',None),('missing-member',b'module main;struct A{i32 x;}fn i32 main(){let a=A{};return 0;}',None),('wrong-nominal',b'module main;struct A{i32 x;}struct B{i32 x;}fn i32 f(A a){return a.x;}fn i32 main(){return f(B{.x=1});}',None),('cyclic-layout',b'module main;struct A{B b;}struct B{A a;}fn i32 main(){return 0;}',None)]
     if args.arrays:
         controls += [('empty-array',b'module main;fn i32 main(){let a=[];return 0;}',None),('large-array',b'module main;fn i32 main(){let i32[65] a=[1;65];return 0;}',None),('wrong-length',b'module main;fn i32 main(){let i32[2] a=[1];return 0;}',None),('wrong-element',b'module main;fn i32 main(){let i32[2] a=[1,true];return 0;}',None),('immutable-array',b'module main;fn i32 main(){let a=[1];a[0]=2;return 0;}',None),('negative-index',b'module main;fn i32 main(){let a=[1];return a[-1];}',None),('nested-array',b'module main;fn i32 main(){let a=[[1]];return 0;}',None),('array-field',b'module main;struct A{i32[1] x;}fn i32 main(){return 0;}',None),('named-count',b'module main;fn i32 main(){let A=1;let a=[1;A];return 0;}',None)]
+    if args.literals:
+        controls += [('text-index',rb'module main;fn i32 main(){discard "a"[0];return 0;}',None),('byte-write',rb'module main;fn i32 main(){var b=b"a";b[0]=1;return 0;}',None),('group-byte-write',rb'module main;fn i32 main(){var b=b"a";(b[0])=1;return 0;}',None),('metadata-write',rb'module main;fn i32 main(){var b=b"a";b.len=1;return 0;}',None),('wrong-literal-type',rb'module main;fn i32 main(){let ref str s=b"a";return 0;}',None),('bad-escape',rb'module main;fn i32 main(){let s="\q";return 0;}',None),('bad-text-utf8',rb'module main;fn i32 main(){let s="\xff";return 0;}',None),('surrogate',rb'module main;fn i32 main(){let s="\u{d800}";return 0;}',None),('byte-unicode-escape',rb'module main;fn i32 main(){let s=b"\u{41}";return 0;}',None),('c-string-closed',rb'module main;fn i32 main(){let s=c"a";return 0;}',None),('literal-field',rb'module main;struct A{ref str s;}fn i32 main(){return 0;}',None),('oversize',rb'module main;fn i32 main(){let s="'+b'A'*32769+b'";return 0;}',None)]
     for name,source,message in controls:
         path=directory/(name+'.fy')
         if source is not None:path.write_bytes(source)

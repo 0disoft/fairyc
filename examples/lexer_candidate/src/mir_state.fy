@@ -1,5 +1,6 @@
 module mir_state;
 import array_types as arrays;
+import literal_types as literals;
 import mir_model as m;
 import std::vec as v;
 
@@ -15,7 +16,7 @@ pub fn bool edge(ref mut v::Vec<usize> edges, usize id, ref mut Context c) {
 }
 pub fn usize local(ref mut v::Vec<m::Local> locals, ref mut Context c, u32 type, usize binding, bool parameter, bool mutable, usize start, usize end) {
     if (c.problem.code != 0) { return 0; }
-    if (!(type >= 1 && type <= 6 || type >= 256 && type <= 767 || arrays::valid(type)) || c.function == 0 || start >= end) { return fail(c,4,start,end); }
+    if (!(type >= 1 && type <= 6 || literals::valid(type) || type >= 256 && type <= 767 || arrays::valid(type)) || c.function == 0 || start >= end) { return fail(c,4,start,end); }
     if (v::len<m::Local>(locals) >= 16384) { return fail(c,2,start,end); }
     if (!v::push<m::Local>(locals,m::Local { .function = c.function, .binding, .type, .parameter, .mutable, .start, .end }).is_ok) { return fail(c,3,start,end); }
     return v::len<m::Local>(locals);

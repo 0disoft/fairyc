@@ -1680,11 +1680,47 @@ byte views expose byte `.len` and `.is_empty`; only byte views admit indexed
 reads with `usize` indexes. Text indexing, writes through byte views and implicit
 text/byte conversion are rejected. HIR stores cooked bytes, not source spelling,
 and `fairyc.literal-hir/v1` uses hex payloads so embedded NUL, tabs and newlines
-cannot split records. At version 0.22.0, their MIR/C execution is still closed.
+cannot split records. Version 0.23.0 connects these retained values to MIR/C below.
 
 `tests/hir_literals.fy` checks parser-independent ownership, distinct types,
 Unicode escapes, empty text and embedded binary bytes. Windows native development
 and release checks cover this retained HIR step; Linux runs remain deferred.
+
+## Static literal MIR and native C execution
+
+Version 0.23.0 executes immutable Static text and byte descriptors through
+verified MIR and private C11 transport. `--mir-file` uses `fairyc.literal-mir/v1`
+with hex literal payloads; `--c-file` emits static byte arrays and distinct
+pointer/length structs for text and bytes. Empty values have length zero, and
+embedded NUL does not terminate either type. Descriptors may be copied, passed,
+returned and reassigned without copying their static storage.
+
+Byte reads freeze the receiver before index effects, check `usize` bounds, then
+load the byte. `.len` counts bytes and `.is_empty` tests length zero. The MIR
+verifier requires the checked index and frozen descriptor to match, with one
+definition each and initialization dominating the load. Invalid MIR is rejected
+before C rendering changes the caller's buffer. Public grammar, SDK and runtime
+contracts are unchanged.
+
+`samples/literal-c-demo.fy` demonstrates Korean text, binary bytes and a
+literal-returning function. For example, `build/lexer-candidate.exe --c-file
+samples/literal-c-demo.fy` emits its C unit. `verify_c.py --literals` compares
+development/release candidate output and Windows native execution with the Go
+MIR interpreter. Exact observations are recorded in
+`docs/ops/evidence/literal-c-file-cli-20261006.json`.
+
+The run covers 16 programs, 72 C CLI checks and 38 native executions across
+MSVC low/optimized profiles, plus array, nominal and scalar regressions.
+Three native API tests per candidate profile cover HIR ownership, seven malformed
+literal MIR mutations and C output preservation. The independent comparison
+exposed the Go bootstrap's delayed descriptor selection; commit `4d5afa17`
+fixes indexed reads and slice bounds, with five interpreter/native regressions.
+The pinned compiler used to build the candidate remains unchanged.
+
+C strings, view slicing, local-array borrows, mutable views, literal-bearing
+struct fields, text indexing and writes through byte views remain outside this
+candidate slice. Linux native validation remains deferred to the consolidated
+batch. No performance or self-hosting completion is claimed.
 
 ## Cost baseline
 

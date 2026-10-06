@@ -62,6 +62,21 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         if (state::emit(operations,blocks,c,state::operation(2,result,type,type,0,original,0,e.start,e.end)) == 0) { return 0; } return result;
     }
+    if (kind == 15) {
+        let ref u8[] data = h::literal_bytes(input,id);
+        if (bytes::len(payload) > 688128 || data.len > 688128 - bytes::len(payload)) { return state::fail(c,2,e.start,e.end); }
+        let usize result = state::local(locals,c,type,0,false,false,e.start,e.end); var m::Operation o = state::operation(14,result,type,type,0,0,0,e.start,e.end);
+        o.payload_start = bytes::len(payload); if (!bytes::append(payload,data).is_ok) { return state::fail(c,3,e.start,e.end); } o.payload_end = bytes::len(payload);
+        if (state::emit(operations,blocks,c,o) == 0) { return 0; } return result;
+    }
+    if ((kind == 13 || kind == 14) && h::type_code(h::expression_at(input,e.left).type) < 256) {
+        let u32 owner_type = h::type_code(h::expression_at(input,e.left).type);
+        let usize owner = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1); if (c.current == 0 || c.problem.code != 0) { return 0; }
+        if (kind == 14) { let usize result = state::local(locals,c,type,0,false,false,e.start,e.end); var m::Operation o = state::operation(15,result,type,owner_type,0,owner,0,e.start,e.end); o.boolean = e.boolean; if (state::emit(operations,blocks,c,o) == 0) { return 0; } return result; }
+        let usize raw = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth+1); if (c.current == 0 || c.problem.code != 0) { return 0; }
+        let usize index = state::local(locals,c,5,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(16,index,5,owner_type,0,owner,raw,e.start,e.end)) == 0) { return 0; }
+        let usize result = state::local(locals,c,3,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(17,result,3,owner_type,0,owner,index,e.start,e.end)) == 0) { return 0; } return result;
+    }
     if (kind == 12) {
         var v::Vec<usize> values = v::empty<usize>(); var usize i = 0;
         while (i < e.edge_count) { let usize value = expression(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,e.edge_start+i),depth+1); if (c.current == 0 || c.problem.code != 0) { return 0; } if (!v::push<usize>(ref mut values,value).is_ok) { return state::fail(c,3,e.start,e.end); } i += 1; }

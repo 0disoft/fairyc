@@ -8,6 +8,7 @@ import c_guard as guard;
 import c_flow as flow;
 import c_nominal as nominal;
 import c_arrays as arrays;
+import c_literals as literals;
 import std::bytes as bytes;
 
 fn bool signature(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut bytes::Buffer out, ref mut w::State s) {
@@ -25,7 +26,7 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
     if (!signature(p,plan,f,out,s) || !w::text(out,s,b"{\n")) { return false; }
     var usize id = f.local_start + 1; while (id <= f.local_start + f.local_count) {
         let m::Local l = m::local_at(p,id);
-        if (!l.parameter && (!w::text(out,s,b"    ") || !w::type(out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id) || !w::text(out,s,if (l.type >= 256) { b"={0};\n" } else { b"=0;\n" }))) { return false; }
+        if (!l.parameter && (!w::text(out,s,b"    ") || !w::type(out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id) || !w::text(out,s,if (l.type >= 256 || l.type == 9 || l.type == 10) { b"={0};\n" } else { b"=0;\n" }))) { return false; }
         if (!w::text(out,s,b"    (void)") || !w::local(out,s,id) || !w::text(out,s,b";\n")) { return false; } id += 1;
     }
     var bool[7] divisors = [false;7]; var bool trapped = false;
@@ -85,9 +86,9 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     if (entry == 0) { return 1; }
     let flow::Plan plan = switch(flow::build(p)) { case .ok(value): { value } case .err(code): { return code; } };
     var w::State s = w::State { .code = 0 };
-    if (!w::text(out,ref mut s,if (arrays::present(p)) { b"/* fairyc.candidate-array-c/v1; C11, 64-bit transport */\n" } else if (shapes::count(m::nominal(p)) != 0) { b"/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n" } else { b"/* fairyc.candidate-scalar-c/v1; C11, 64-bit transport */\n" })
+    if (!w::text(out,ref mut s,if (m::has_literals(p)) { b"/* fairyc.candidate-literal-c/v1; C11, 64-bit transport */\n" } else if (arrays::present(p)) { b"/* fairyc.candidate-array-c/v1; C11, 64-bit transport */\n" } else if (shapes::count(m::nominal(p)) != 0) { b"/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n" } else { b"/* fairyc.candidate-scalar-c/v1; C11, 64-bit transport */\n" })
         || !w::text(out,ref mut s,b"#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\n")
-        || !arrays::definitions(p,out,ref mut s) || !nominal::definitions(p,out,ref mut s) || !scalar::helpers(p,ref plan,out,ref mut s)) { return s.code; }
+        || !literals::definitions(p,out,ref mut s) || !arrays::definitions(p,out,ref mut s) || !nominal::definitions(p,out,ref mut s) || !scalar::helpers(p,ref plan,out,ref mut s)) { return s.code; }
     id = 1; while (id <= m::function_count(p)) { if (!signature(p,ref plan,m::function_at(p,id),out,ref mut s) || !w::text(out,ref mut s,b";\n")) { return s.code; } id += 1; }
     id = 1; while (id <= m::function_count(p)) { if (!function(p,ref plan,m::function_at(p,id),out,ref mut s)) { return s.code; } id += 1; }
     if (!w::text(out,ref mut s,if (flow::stops(ref plan,entry)) { b"int32_t fy_candidate_entry(void){" } else { b"int32_t fy_candidate_entry(void){return " }) || !w::function(out,ref mut s,entry) || !w::text(out,ref mut s,b"();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n")) { return s.code; }
