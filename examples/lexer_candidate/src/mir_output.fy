@@ -17,7 +17,8 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     let m::Problem problem = verify::check(p);
     if (problem.code != 0) { return problem.code; }
     let ref shapes::Table table = m::nominal(p); let bool nominal = shapes::count(table) != 0;
-    if (!bytes::append(out,if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
+    let bool array = m::has_arrays(p);
+    if (!bytes::append(out,if (array) { b"fairyc.array-mir/v1\nP\t" } else if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
     var usize index = 0;
     while (index < shapes::count(table)) {
         let shapes::Shape shape = shapes::at(table,index);

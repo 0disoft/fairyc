@@ -31,6 +31,9 @@ type fixture struct {
 }
 
 func run() error {
+	if len(os.Args) == 3 && os.Args[1] == "--array-mir" {
+		return writeArrayMIR(os.Args[2])
+	}
 	if len(os.Args) == 3 && os.Args[1] == "--nominal-mir" {
 		return writeNominalMIR(os.Args[2])
 	}

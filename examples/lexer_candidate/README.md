@@ -1584,7 +1584,8 @@ The initial run used a fixed native expectation for an empty-field RHS because
 the Go bootstrap rejected that store. The field-store correction now admits it,
 and `verify_c.py` takes that expectation from the Go MIR interpreter, alongside
 empty-field early return and nested replacement. `@repr(C)`, resources, arrays/views, enums, generics
-and multi-file nominal types remain outside this candidate component.
+and multi-file nominal types remained outside version 0.19.0. Version 0.21.0
+adds the scalar fixed arrays described below; views remain a separate step.
 
 Windows MSVC development/release evidence, raw invocations, expected outcomes,
 source and compiler identities and EXE hashes are recorded in
@@ -1612,11 +1613,58 @@ written order; the repeated value is represented once. Exact element types and
 lengths govern copies, function arguments and returns. Indexes use `usize` and
 `.len` returns `usize`. Indexed assignment requires a mutable named array local.
 Empty, oversized, nested or nominal-element arrays, array fields, slices and
-borrowed arrays remain outside this component. At this revision array MIR/C
-execution is still closed; it is the next implementation step.
+borrowed arrays remain outside this component. Version 0.20.0 retained these
+forms in HIR; version 0.21.0 connects them to verified MIR and native C execution.
 
 `tests/hir_arrays.fy` checks retained types, element order, repeat representation,
 index/length nodes and type-ID limits alongside existing nominal HIR controls.
+
+Version 0.21.0 lowers construction, value copies, arguments, returns, length,
+indexed reads and indexed assignment through `src/mir_arrays.fy` and
+`src/mir_lower.fy`. Initializer operands are frozen in written order. A repeated
+initializer evaluates its expression once, including any effects or early return.
+An indexed store freezes and checks its index before evaluating its RHS; a
+compound store also freezes the old element before the RHS. Replacing the whole
+array during the RHS preserves the replacement's other elements.
+
+`src/mir_verify_arrays.fy` checks exact element and length types. Indexed loads
+and stores require a single-definition checked-index temporary for the same
+array type, with definite initialization proving that the check dominates use.
+`tests/mir_arrays.fy` rejects nine malformed MIR variants and confirms that a
+rejected render preserves an existing output buffer.
+
+`src/c_arrays.fy` emits each used array type as a private C struct with a fixed
+`fy_items` field. Struct assignment preserves by-value array copies. Bounds trap
+with category 6 before indexing; arithmetic uses the existing checked scalar
+operations. Array units use `fairyc.candidate-array-c/v1`, array HIR/MIR dumps
+use `fairyc.array-hir/v1` and `fairyc.array-mir/v1`. The scalar and nominal C
+formats remain unchanged for programs without arrays. This transport retains
+the existing 64-bit C11 guards and 2 MiB output bound; it adds no public ABI.
+
+```text
+fairyc build --release --locked
+build/lexer-candidate.exe --c-file samples/array-c-demo.fy
+```
+
+The sample copies an array, updates the original and returns 3 from the copy.
+Generated C still requires the private trap runtime when compiled. The portable
+`verify_c.py --arrays` harness compares output from separate development/release
+candidate images and runs emitted C against Go MIR-interpreter expectations.
+It covers all six scalar elements, lengths 1 and 64, evaluation order, early
+returns, loops, bounds and overflow traps. Scripts supply fixtures and observe
+results; Fairy C owns parsing, lowering, verification and C generation.
+
+Windows MSVC results and source/compiler/SDK identities are recorded in
+`docs/ops/evidence/scalar-array-c-file-cli-20261006.json`. The run passed 68 array
+CLI checks, 17 identical C units and 40 native executions, plus 54 nominal and
+20 scalar native regressions. Three native API tests per candidate profile cover
+HIR retention, temporary-array dump identity, nine MIR mutations and C output
+controls. The Go bootstrap's array-call argument snapshot defect was corrected
+in `5945ae28`; the reference now agrees with the candidate's by-value result.
+Linux native validation
+remains deferred to the owner's consolidated batch. No build-cost or performance
+measurement is claimed. Array fields, nested or nominal-element arrays, borrowed
+arrays, slices/views and array iteration remain separate candidate work.
 
 ## Cost baseline
 

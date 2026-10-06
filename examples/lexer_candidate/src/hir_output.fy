@@ -1,6 +1,7 @@
 module hir_output;
 import hir_model as h;
 import hir_shapes as shapes;
+import array_types as arrays;
 import std::bytes as bytes;
 
 fn bool put(ref mut bytes::Buffer out, ref u8[] text) { return bytes::append(out,text).is_ok; }
@@ -60,7 +61,9 @@ fn bool operator(ref mut bytes::Buffer out, h::Operator op) {
 // 3 allocation failure, 4 output limit. Enum names and IDs are private v1 data.
 pub fn u32 render(ref h::Program p, ref mut bytes::Buffer out) {
     let ref shapes::Table nominal = h::nominal(p);
-    if (!put(out,if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
+    var bool array = false; var usize id = 1; while (id <= h::binding_count(p)) { array = array || arrays::valid(h::type_code(h::binding_at(p,id).type)); id += 1; }
+    id = 1; while (id <= h::expression_count(p)) { array = array || arrays::valid(h::type_code(h::expression_at(p,id).type)); id += 1; }
+    if (!put(out,if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
     var usize index = 0;
     while (index < shapes::count(nominal)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }

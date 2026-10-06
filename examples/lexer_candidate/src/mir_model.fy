@@ -1,4 +1,5 @@
 module mir_model;
+import array_types as arrays;
 import std::bytes as bytes;
 import std::vec as v;
 import hir_shapes as shapes;
@@ -14,6 +15,9 @@ pub struct Function { usize target; usize entry; usize local_start; usize local_
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
 // Operation kinds: 1 constant, 2 copy/assignment, 3 unary, 4 binary, 5 check,
 // 6 construct (declaration-order operands), 7 field read, 8 functional update.
+// 9 array construct (boolean means repeat once), 10 indexed read, 11 array
+// update (one value edge), 12 checked index, 13 array length. Checked indexes
+// freeze usize operands and trap bounds before loads or RHS/store effects.
 // A check defines no local. It must end its block immediately before a matching
 // checked terminator. Actual arithmetic occurs only in the success block.
 pub struct Operation { usize function; usize block; u32 kind; usize result; u32 type; u32 owner_type; u32 operator; usize left; usize right; usize next; usize payload_start; usize payload_end; bool boolean; usize start; usize end; usize argument_start; usize argument_count; }
@@ -42,6 +46,10 @@ pub fn usize local_count(ref Program p) { assert(p.success); return v::len<Local
 pub fn usize block_count(ref Program p) { assert(p.success); return v::len<Block>(ref p.blocks); }
 pub fn usize operation_count(ref Program p) { assert(p.success); return v::len<Operation>(ref p.operations); }
 pub fn usize edge_count(ref Program p) { assert(p.success); return v::len<usize>(ref p.edges); }
+pub fn bool has_arrays(ref Program p) {
+    var usize i = 1; while (i <= local_count(p)) { if (arrays::valid(local_at(p,i).type)) { return true; } i += 1; }
+    i = 1; while (i <= target_count(p)) { if (arrays::valid(target_at(p,i).result)) { return true; } i += 1; } return false;
+}
 pub fn ref shapes::Table nominal(ref Program p) { assert(p.success); return ref p.nominal; }
 pub fn usize module_index(ref Program p) { assert(p.success); return p.module_index; }
 pub fn Target target_at(ref Program p, usize id) { assert(id > 0 && id <= target_count(p)); return *v::at<Target>(ref p.targets,id - 1); }
@@ -118,7 +126,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     i = 0;
     while (i < no) {
         let Operation o = *v::at<Operation>(ref operations,i);
-        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 8 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
+        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 13 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
         if ((o.kind != 5 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || (o.kind == 5 && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
     }
     return .ok(Program { .nominal, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });

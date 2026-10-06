@@ -2,6 +2,8 @@ module tests::hir_arrays;
 import tests::hir_nominal as support;
 import hir_model as h;
 import array_types as arrays;
+import hir_output as output;
+import std::bytes as bytes;
 
 @test
 fn void owned_array_types_and_ordered_elements() {
@@ -22,4 +24,8 @@ fn void owned_array_types_and_ordered_elements() {
     assert(arrays::make(1,0)==0 && arrays::make(1,65)==0 && arrays::make(256,2)==0);
     assert(arrays::count(b"A")==0 && arrays::count(b"-1")==0 && arrays::count(b"0xff")==0);
     assert(arrays::count(b"64")==64 && arrays::count(b"0x40")==64);
+    let h::Program temporary = support::retained(b"module main;fn i32 main(){return [1][0];}");
+    var bytes::Buffer rendered = bytes::empty();
+    assert(output::render(ref temporary,ref mut rendered)==0);
+    assert(bytes::equal(bytes::view(ref rendered)[..20],b"fairyc.array-hir/v1\n"));
 }
