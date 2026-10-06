@@ -1901,3 +1901,19 @@ Ranks above two, arrays of structs/views, and field/index byte-view borrows
 remain closed. Public grammar, SDK/runtime and public ABI are unchanged. Linux
 native execution remains deferred; this step makes no performance or completed
 self-hosting claim.
+
+## Text access diagnostic
+
+Version 0.29.1 reports `text indexing and slicing are not supported` for a
+`ref str` receiver, instead of the unrelated `invalid nominal type` message.
+This follows the existing surface-syntax contract: text `.len` and `.is_empty`
+remain byte metadata; only byte views support bracket indexing and slicing.
+The private type diagnostic is 21 and spans the complete access expression.
+Type, HIR, MIR and C CLI modes report the same error before publishing output,
+including literals, local aliases, parameters and text-returning calls.
+
+`tests/types.fy::text_access_has_a_distinct_diagnostic` exercises the type checker
+directly. Exact CLI diagnostics, unchanged input bytes, both candidate profiles
+and representative native byte/text-metadata results are recorded in
+`docs/ops/evidence/text-access-diagnostic-20261006.json`. This is a diagnostic
+correction, with no new text slice syntax, SDK API or runtime behavior.

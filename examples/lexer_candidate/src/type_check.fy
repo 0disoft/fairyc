@@ -152,6 +152,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 26) {
         let state::Value owner = expression(resolved,tables,problem,node.left,10,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }
+        if (owner.type == 9) { return error(problem,21,node.start,node.end,0,9); }
         if (owner.type != 10 && owner.type != 11) { return error(problem,16,node.start,node.end,10,owner.type); }
         let syntax::Expression bounds = syntax::expression_at(parsed,node.right); var bool terminates = owner.terminates; var usize i = 0;
         while (i < 2) { let usize child = if (i == 0) { bounds.left } else { bounds.right }; if (child != 0) {
@@ -163,6 +164,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 9) {
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }
+        if (owner.type == 9) { return error(problem,21,node.start,node.end,0,9); }
         if (!arrays::valid(owner.type) && owner.type != 10 && owner.type != 11) { return error(problem,16,node.start,node.end,0,owner.type); }
         let state::Value index = expression(resolved,tables,problem,node.right,5,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return index; }

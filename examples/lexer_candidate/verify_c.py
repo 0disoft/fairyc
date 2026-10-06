@@ -114,6 +114,9 @@ def main():
         for image in images:
             row=run([image,'--c-file',path],rows,name);assert row['exit']==2 and row['stdout']=='' and row['stderr'],row
             if message is not None:assert row['stderr']==message,row
+            if name in ('text-index','text-slice'):
+                access=b'"a"[0]' if name=='text-index' else b'"A"[..]';start=source.index(access);end=start+len(access)
+                assert row['stderr']==f'{path}:1:{start+1}: error: text indexing and slicing are not supported (bytes {start}..{end})\n',row
             if source is not None:assert path.read_bytes()==source
     request=directory/'native-request.json';native_report=directory/'native.json';output=directory/'native';save(request,dict(schema='fairyc.candidate-c-native-request/v1',output=str(output),jobs=jobs))
     command=[str(runner),str(request),str(native_report)];p=subprocess.run(command,cwd=ROOT,capture_output=True,timeout=600)

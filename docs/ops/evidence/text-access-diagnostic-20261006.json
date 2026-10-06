@@ -1,0 +1,1529 @@
+{
+  "schema": "fairyc.text-access-diagnostic-evidence/v1",
+  "date": "2026-10-06",
+  "baseRevision": "d3e196f898b734f34461c16e693a7ad6dfb31f60",
+  "exampleVersion": "0.29.1",
+  "compiler": {
+    "path": ".cache/nominal-array-field-view-compiler/fairyc.exe",
+    "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf"
+  },
+  "compilerSourceManifest": {
+    "path": ".cache/nominal-array-field-view-compiler/source-manifest.json",
+    "sha256": "62763a51977d82a18255f07af3c424ddc988a1e1b8f96cd3afabfaeafc302107",
+    "bytes": 93469
+  },
+  "compilerSourceDigest": "6de6ed7dc29d60d5c47ddbc59863341c4a80f98cb1559cb0b0010b280704e0f4",
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "unchanged": true,
+    "files": [
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/alloc.fy",
+        "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/num.fy",
+        "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "internal/sdkstdlib/stdlib.go",
+        "sha256": "418b24a10b443b784275c886c7b87d3f9b97e72923406b567335b26569ac6f3b"
+      },
+      {
+        "path": "internal/sdkstdlib/vector.go",
+        "sha256": "bb8fc2b90fa40fcc578e11d0f54f996bf07608d7fd72f437f692a685776931e2"
+      }
+    ]
+  },
+  "sourceArtifacts": [
+    {
+      "path": "examples/lexer_candidate/src/array_types.fy",
+      "sha256": "e1619e2c4a2814a777b03c08931e486c9fff8c2e806f52a4fa32e56f4a99464d",
+      "bytes": 2559
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6",
+      "bytes": 3955
+    },
+    {
+      "path": "examples/lexer_candidate/src/binding_output.fy",
+      "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb",
+      "bytes": 2612
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc",
+      "bytes": 29681
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa",
+      "bytes": 4420
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494",
+      "bytes": 374
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_arrays.fy",
+      "sha256": "3a803ac0be8143eb2432a1a3a941cc8a99b75d5889e477d6c4bb5b91c372221f",
+      "bytes": 4316
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2",
+      "bytes": 1065
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_emit.fy",
+      "sha256": "a251957ed7554ceed59234152667e4475cbb214877384e53974b46b8e6d690c1",
+      "bytes": 7920
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_flow.fy",
+      "sha256": "93e172ae922e21b87e33d01f203a010b88e5aea9260f3c91bbdaf4e160272f47",
+      "bytes": 4001
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd",
+      "bytes": 3878
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_literals.fy",
+      "sha256": "0851889caa20b841c39c78f4c71e92a17727fffe7288c18312bd4b5ca5e281c0",
+      "bytes": 2117
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_nominal.fy",
+      "sha256": "6689dc61f49b2235bc3d616084100e017cfa3a31830fc71efe98334064cc3f09",
+      "bytes": 3072
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_scalar.fy",
+      "sha256": "c5832fa715897259f5a08a3f36f57aae46b01d2c41d3a5b593b259f053196406",
+      "bytes": 7258
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_text.fy",
+      "sha256": "c4296bcac4c59bb934863689b670e70f29ae9c47a32a393a26df6b62fff4be5d",
+      "bytes": 3163
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_views.fy",
+      "sha256": "0b2ce428c716d62ce1ac66504dc409fd7c46ef85306dd06b3b6cac87e4af931f",
+      "bytes": 1942
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f",
+      "bytes": 1563
+    },
+    {
+      "path": "examples/lexer_candidate/src/declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd",
+      "bytes": 4580
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b",
+      "bytes": 3801
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870",
+      "bytes": 6756
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc",
+      "bytes": 3787
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_cli.fy",
+      "sha256": "8128075037487308d0f212688473400f478e4e1d6e328a56dba153a19ff743d2",
+      "bytes": 2394
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_lower.fy",
+      "sha256": "2f7dbc79d283a483c162a9472c2418c207d65aee42a394fd43c19584d451ea58",
+      "bytes": 26689
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "sha256": "a13ef396fbf7bd08e7df5ecf6433ab131a479d7813231ddbfc6ecd900b6a481a",
+      "bytes": 27291
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+      "sha256": "9bfe9a3e8967f3442e327b9f5b0df3b1446e0026710e1cf424b2760c3ae5425a",
+      "bytes": 9220
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_output.fy",
+      "sha256": "21da159dc0cb33d533bc9131b2fde3d8c8868ff7375abc0613cd03098e29dd20",
+      "bytes": 9605
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shape_lower.fy",
+      "sha256": "60bd05be0b971bc60af90c20c6d4c276b892eb89c63c9c11d28baaa062de3742",
+      "bytes": 1881
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shapes.fy",
+      "sha256": "c2358f9331957a086f1f21ff4a5f7d4446a40ed017e27038c259ee499cefd527",
+      "bytes": 3628
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_state.fy",
+      "sha256": "f5bd91d24dfdf95b924c0415365f469c701dfc5eee06d14cb9b7d48667807b65",
+      "bytes": 7469
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_view_check.fy",
+      "sha256": "97cb3ae84301ec5dd7be101a46f7d634d04fc707eef7a8772987f9c62f5b394d",
+      "bytes": 11592
+    },
+    {
+      "path": "examples/lexer_candidate/src/integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83",
+      "bytes": 14934
+    },
+    {
+      "path": "examples/lexer_candidate/src/literal_types.fy",
+      "sha256": "33d37658af0f45e89aa009837f0937e7f55ae58f7014231645c90f80f584e0b9",
+      "bytes": 2241
+    },
+    {
+      "path": "examples/lexer_candidate/src/main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0",
+      "bytes": 3052
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_arrays.fy",
+      "sha256": "3990b54299cbfb764dcdb722e7638ef5963f32cb1936e72e227faeb2c3737f48",
+      "bytes": 1143
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+      "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19",
+      "bytes": 1541
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cli.fy",
+      "sha256": "77fad7857d50b0874b5d1043a4f64bd8f92e403a19746e25ed0d03c99b1e2128",
+      "bytes": 3047
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_lower.fy",
+      "sha256": "e44ee0347643052ad02bc89e2fdfc2f20199aecba25b6319f402d6f09edd6113",
+      "bytes": 34652
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_model.fy",
+      "sha256": "1a2411aedd49e481c8cd26b348818ab62a277a3bbc6f947aec2e5199105948c4",
+      "bytes": 14351
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_nominal.fy",
+      "sha256": "e9fc7a50c45270783f1282cc519c5f952073b38d9bf1940106ed8062dd2d1403",
+      "bytes": 3178
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_output.fy",
+      "sha256": "ea5d193b315270ea6bb2f4764324ff285cc6f45d8080e81084ca9c859115eead",
+      "bytes": 5789
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_places.fy",
+      "sha256": "1c1031459ecd4d844fb9a523500277a5683a66fa0f677604e657f34827b5cf20",
+      "bytes": 3812
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_state.fy",
+      "sha256": "5cd00c2df24b33562a2fd022d2e5ae1dd52814a4befccdc1003a8291b1e5b225",
+      "bytes": 7462
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify.fy",
+      "sha256": "b99b8713e1cfcb3080f679a4957529460e7b050b721aee33812e8dca689786be",
+      "bytes": 979
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_arrays.fy",
+      "sha256": "f566caa138e2f8ba8b11f5f6adf833c6628889e6311ef3634b9cf755f5870a2b",
+      "bytes": 3041
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_flow.fy",
+      "sha256": "c1d86790f83b55ea10650fa41d7a2dde09cb3505789a008f3fe62e303add87c4",
+      "bytes": 8732
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_literals.fy",
+      "sha256": "92fad4c2db07f67db19a151059b67c2c4e7a0543b5afdc89c8fed4bac1940f5a",
+      "bytes": 2740
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_nominal.fy",
+      "sha256": "9610b9c684ae4d13ef1654298d935785386e589eaeb290845ec9649bd047a049",
+      "bytes": 1673
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_shape.fy",
+      "sha256": "1867bb47281e47f28fcbc373dc8c2000adb21b072708555589eb1c1bada99dbc",
+      "bytes": 13872
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_views.fy",
+      "sha256": "ead173bb6bfa057e9e086753c7f9988913d81bdad740fd52472b4211c923d917",
+      "bytes": 5968
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d",
+      "bytes": 2036
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f",
+      "bytes": 6647
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06",
+      "bytes": 12585
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343",
+      "bytes": 1809
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_resolution.fy",
+      "sha256": "61405d75bb04726bea81a023ccaccef77a1acad9008ea180b63b2ed622f33043",
+      "bytes": 20649
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_types.fy",
+      "sha256": "06c99fa2e95b3285e6354f05e6f2d459e80b9d5cf7cdfa62693574cd0325cab6",
+      "bytes": 3465
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556",
+      "bytes": 9126
+    },
+    {
+      "path": "examples/lexer_candidate/src/pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87",
+      "bytes": 4413
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6",
+      "bytes": 5256
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd",
+      "bytes": 5961
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f",
+      "bytes": 20111
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521",
+      "bytes": 9556
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "2d3e266d6753eaf70b1ab939b3ebc7d0a3e430d3c4189651c419947912e8c8e5",
+      "bytes": 32065
+    },
+    {
+      "path": "examples/lexer_candidate/src/token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b",
+      "bytes": 4999
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_check.fy",
+      "sha256": "1a3d70e0f655bd181e11b691eafbf4a5fa0d8566419423b12bf1bfa457821f0f",
+      "bytes": 30577
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_cli.fy",
+      "sha256": "4fcba745c17de2eef0a310ae6315ced2f340b5e2d7fcfa6f1976880f26c84eb6",
+      "bytes": 2829
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_control.fy",
+      "sha256": "dcc5732b46bc14a366dd21c57b9b03415e25f8552e33e0a0f55d246895b92cb2",
+      "bytes": 2343
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "a4d0a814c23cdbfb8b50523ab43020225d2d5a561c6773b07f58ed2e478cee00",
+      "bytes": 5499
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a",
+      "bytes": 10832
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d",
+      "bytes": 807
+    }
+  ],
+  "testArtifact": {
+    "path": "examples/lexer_candidate/tests/types.fy",
+    "sha256": "02788bc978da9f485a0254bef2ea4ffb5185edbddcea9abb1b634920c169c2be"
+  },
+  "images": [
+    {
+      "path": ".cache/candidate-text-access/dev.exe",
+      "sha256": "9259759ceb02efb40013f89ab48b969a33b5addf3744f54b28d7930b4b43b997"
+    },
+    {
+      "path": ".cache/candidate-text-access/release.exe",
+      "sha256": "04d8ecb5aa5b9bcc523830b68c016d5aa4db2ecaae2a10e72ba41097209b73a2"
+    }
+  ],
+  "negativeCases": [
+    [
+      "literal-index",
+      "module main;fn i32 main(){discard \"한글\"[0];return 0;}",
+      "\"한글\"[0]"
+    ],
+    [
+      "literal-slice",
+      "module main;fn i32 main(){discard \"abc\"[..];return 0;}",
+      "\"abc\"[..]"
+    ],
+    [
+      "local-full",
+      "module main;fn i32 main(){let s=\"abc\";discard s[..];return 0;}",
+      "s[..]"
+    ],
+    [
+      "local-range",
+      "module main;fn i32 main(){let s=\"abc\";discard s[1..2];return 0;}",
+      "s[1..2]"
+    ],
+    [
+      "local-prefix",
+      "module main;fn i32 main(){let s=\"abc\";discard s[..2];return 0;}",
+      "s[..2]"
+    ],
+    [
+      "local-tail",
+      "module main;fn i32 main(){let s=\"abc\";discard s[1..];return 0;}",
+      "s[1..]"
+    ],
+    [
+      "parameter",
+      "module main;fn void read(ref str s){discard (s)[0];}fn i32 main(){return 0;}",
+      "(s)[0]"
+    ],
+    [
+      "call",
+      "module main;fn ref str text(){return \"abc\";}fn i32 main(){discard text()[..];return 0;}",
+      "text()[..]"
+    ]
+  ],
+  "positiveCases": [
+    [
+      "bytes",
+      "module main;fn i32 main(){let b=b\"abc\";assert(b[1..2][0]==98);return 0;}"
+    ],
+    [
+      "text-metadata",
+      "module main;fn usize length(ref str s){return s.len;}fn i32 main(){let s=\"한글\\0\";assert(length(s)==7 && !s.is_empty);return 0;}"
+    ]
+  ],
+  "cliExecutions": 80,
+  "nativeAPITests": 2,
+  "nativeObservations": [
+    {
+      "name": "bytes",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.c",
+      "sourceSHA256": "9c884fc1a57bcbcd4fc1e89a5f3eae8fde85b58fa3c089b77488eaa75a8f1c7e",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\native\\bytes-msvc-low.exe",
+      "imageSHA256": "1da1eed6d220f46da176c176966f05b225f046ea12b09c455475900d48809bf6",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 0
+    },
+    {
+      "name": "bytes",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.c",
+      "sourceSHA256": "9c884fc1a57bcbcd4fc1e89a5f3eae8fde85b58fa3c089b77488eaa75a8f1c7e",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\native\\bytes-msvc-optimized.exe",
+      "imageSHA256": "35b55ced296e518b7fd2d1a275477c6ac670c677f2f9ee6e23e0fcc89eb9c0db",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 0
+    },
+    {
+      "name": "text-metadata",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.c",
+      "sourceSHA256": "ddcde9464fc3168401e5f6345527e10bd49fd1e0145c3003dd3c6602e305ec51",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\native\\text-metadata-msvc-low.exe",
+      "imageSHA256": "2f1565a7f012227030bb7f0086357d58f389d36833bff32535c9ed9e39049094",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 0
+    },
+    {
+      "name": "text-metadata",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.c",
+      "sourceSHA256": "ddcde9464fc3168401e5f6345527e10bd49fd1e0145c3003dd3c6602e305ec51",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\native\\text-metadata-msvc-optimized.exe",
+      "imageSHA256": "9ab6875a41a1dd99b1bfae617eae2009cac7aa09d29655ae8fa116e904a932a7",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 0
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 77 source file(s), 1032 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "test",
+        "--native",
+        "--json",
+        "--exact",
+        "tests::types::text_access_has_a_distinct_diagnostic",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::types::text_access_has_a_distinct_diagnostic\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-array-field-view-compiler\\fairyc.exe",
+        "test",
+        "--native",
+        "--release",
+        "--json",
+        "--exact",
+        "tests::types::text_access_has_a_distinct_diagnostic",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"release\",\"tests\":[{\"identity\":\"tests::types::text_access_has_a_distinct_diagnostic\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-index.fy:1:35: error: text indexing and slicing are not supported (bytes 34..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\literal-slice.fy:1:35: error: text indexing and slicing are not supported (bytes 34..43)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-full.fy:1:47: error: text indexing and slicing are not supported (bytes 46..51)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-range.fy:1:47: error: text indexing and slicing are not supported (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-prefix.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\local-tail.fy:1:47: error: text indexing and slicing are not supported (bytes 46..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\parameter.fy:1:45: error: text indexing and slicing are not supported (bytes 44..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\call.fy:1:67: error: text indexing and slicing are not supported (bytes 66..76)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.view-hir/v1\nP\t0\nF\t1\t1\t12\t72\t1\t1\t0\t0\t0\nB\t1\tfunction\ti32\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tlet\tref-u8-slice\t30\t31\t1\t2\t0\t0\t0\t0\nE\t1\tliteral\tref-u8-slice\t-\t32\t38\t0\t0\t0\t0\t0\t0\t0\t0\t616263\nE\t2\treference\tref-u8-slice\t-\t46\t47\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\tusize\t-\t48\t49\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t4\tinteger\tusize\t-\t51\t52\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tslice\tref-u8-slice\t-\t46\t53\t2\t3\t4\t0\t0\t0\t0\t0\t-\nE\t6\tinteger\tusize\t-\t54\t55\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t7\tindex\tu8\t-\t46\t56\t5\t6\t0\t0\t0\t0\t0\t0\t-\nE\t8\tinteger\tu8\t-\t58\t60\t0\t0\t0\t0\t0\t0\t0\t0\t98\nE\t9\tbinary\tbool\t==\t46\t60\t7\t8\t0\t0\t0\t0\t0\t0\t-\nE\t10\tinteger\ti32\t-\t69\t70\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\tbinding\t26\t39\t2\t1\t0\t2\t-\t0\t0\t0\t0\nS\t2\tassert\t39\t62\t2\t9\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t62\t71\t2\t10\t0\t0\t-\t0\t0\t0\t0\nK\t1\t25\t72\t1\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.view-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t19\t23\t0\nF\t1\t1\t1\t0\t13\t0\t3\t0\t0\t12\t72\t0\nL\t1\t1\t2\t10\t0\t0\t30\t31\nL\t2\t1\t0\t10\t0\t0\t32\t38\nL\t3\t1\t0\t10\t0\t0\t46\t47\nL\t4\t1\t0\t5\t0\t0\t48\t49\nL\t5\t1\t0\t5\t0\t0\t46\t53\nL\t6\t1\t0\t5\t0\t0\t51\t52\nL\t7\t1\t0\t10\t0\t0\t46\t53\nL\t8\t1\t0\t5\t0\t0\t54\t55\nL\t9\t1\t0\t5\t0\t0\t46\t56\nL\t10\t1\t0\t3\t0\t0\t46\t56\nL\t11\t1\t0\t3\t0\t0\t58\t60\nL\t12\t1\t0\t6\t0\t0\t46\t60\nL\t13\t1\t0\t1\t0\t0\t69\t70\nB\t1\t1\t1\t13\t4\t0\t12\t0\t0\t6\t2\t3\t13\t0\t0\t0\t0\t16\t39\t62\nB\t2\t1\t14\t14\t1\t13\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t62\t71\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t39\t62\nO\t1\t1\t1\t14\t2\t10\t10\t0\t0\t0\t2\t0\t3\t0\t32\t38\t616263\t0\t0\nO\t2\t1\t1\t2\t1\t10\t10\t0\t2\t0\t3\t0\t0\t0\t26\t39\t-\t0\t0\nO\t3\t1\t1\t2\t3\t10\t10\t0\t1\t0\t4\t0\t0\t0\t46\t47\t-\t0\t0\nO\t4\t1\t1\t1\t4\t5\t5\t0\t0\t0\t5\t3\t4\t0\t48\t49\t1\t0\t0\nO\t5\t1\t1\t2\t5\t5\t5\t0\t4\t0\t6\t0\t0\t0\t46\t53\t-\t0\t0\nO\t6\t1\t1\t1\t6\t5\t5\t0\t0\t0\t7\t4\t5\t0\t51\t52\t2\t0\t0\nO\t7\t1\t1\t19\t7\t10\t10\t0\t3\t5\t8\t0\t0\t0\t46\t53\t-\t0\t1\nO\t8\t1\t1\t1\t8\t5\t5\t0\t0\t0\t9\t5\t6\t0\t54\t55\t0\t0\t0\nO\t9\t1\t1\t16\t9\t5\t10\t0\t7\t8\t10\t0\t0\t0\t46\t56\t-\t0\t0\nO\t10\t1\t1\t17\t10\t3\t10\t0\t7\t9\t11\t0\t0\t0\t46\t56\t-\t0\t0\nO\t11\t1\t1\t1\t11\t3\t3\t0\t0\t0\t12\t6\t8\t0\t58\t60\t98\t0\t0\nO\t12\t1\t1\t4\t12\t6\t3\t13\t10\t11\t13\t0\t0\t0\t46\t60\t-\t0\t0\nO\t13\t1\t1\t5\t0\t6\t6\t0\t12\t0\t0\t0\t0\t0\t39\t62\t-\t0\t0\nO\t14\t1\t2\t1\t13\t1\t1\t0\t0\t0\t0\t8\t9\t0\t69\t70\t0\t0\t0\nA\t0\t6\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-view-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_bytes fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_bytes fy_l_2={0};\n    (void)fy_l_2;\n    struct fy_bytes fy_l_3={0};\n    (void)fy_l_3;\n    uintptr_t fy_l_4=0;\n    (void)fy_l_4;\n    uintptr_t fy_l_5=0;\n    (void)fy_l_5;\n    uintptr_t fy_l_6=0;\n    (void)fy_l_6;\n    struct fy_bytes fy_l_7={0};\n    (void)fy_l_7;\n    uintptr_t fy_l_8=0;\n    (void)fy_l_8;\n    uintptr_t fy_l_9=0;\n    (void)fy_l_9;\n    uint8_t fy_l_10=0;\n    (void)fy_l_10;\n    uint8_t fy_l_11=0;\n    (void)fy_l_11;\n    int32_t fy_l_12=0;\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    uint32_t fy_pending_trap=UINT32_C(7);\n    goto fy_b_1;\nfy_b_1:;\n    static const uint8_t fy_literal_1[]={97,98,99};\n    fy_l_2=(struct fy_bytes){fy_literal_1,((uintptr_t)3)};\n    fy_l_1 = fy_l_2;\n    fy_l_3 = fy_l_1;\n    fy_l_4 = ((uintptr_t)UINT64_C(1));\n    fy_l_5 = fy_l_4;\n    fy_l_6 = ((uintptr_t)UINT64_C(2));\n    volatile uintptr_t fy_start_7=fy_l_5,fy_end_7=fy_l_6;\n    if(fy_start_7>fy_end_7||fy_end_7>fy_l_3.fy_length)fy_runtime_trap(UINT32_C(6));\n    fy_l_7=(struct fy_bytes){fy_l_3.fy_data+fy_start_7,fy_end_7-fy_start_7};\n    fy_l_8 = ((uintptr_t)UINT64_C(0));\n    volatile uintptr_t fy_index_9=fy_l_8;\n    if(fy_index_9>=fy_l_7.fy_length)fy_runtime_trap(UINT32_C(6));\n    fy_l_9=fy_index_9;\n    fy_l_10=fy_l_7.fy_data[fy_l_9];\n    fy_l_11 = ((uint8_t)UINT32_C(98));\n    fy_l_12 = (fy_l_10==fy_l_11) ? INT32_C(1) : INT32_C(0);\n    if(!fy_l_12){fy_pending_trap=UINT32_C(5);goto fy_b_3;\n}\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_13 = INT32_C(0);\n    return fy_l_13;\nfy_b_3:;\n    fy_runtime_trap(fy_pending_trap);\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.view-hir/v1\nP\t0\nF\t1\t1\t12\t72\t1\t1\t0\t0\t0\nB\t1\tfunction\ti32\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tlet\tref-u8-slice\t30\t31\t1\t2\t0\t0\t0\t0\nE\t1\tliteral\tref-u8-slice\t-\t32\t38\t0\t0\t0\t0\t0\t0\t0\t0\t616263\nE\t2\treference\tref-u8-slice\t-\t46\t47\t0\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\tusize\t-\t48\t49\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t4\tinteger\tusize\t-\t51\t52\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tslice\tref-u8-slice\t-\t46\t53\t2\t3\t4\t0\t0\t0\t0\t0\t-\nE\t6\tinteger\tusize\t-\t54\t55\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t7\tindex\tu8\t-\t46\t56\t5\t6\t0\t0\t0\t0\t0\t0\t-\nE\t8\tinteger\tu8\t-\t58\t60\t0\t0\t0\t0\t0\t0\t0\t0\t98\nE\t9\tbinary\tbool\t==\t46\t60\t7\t8\t0\t0\t0\t0\t0\t0\t-\nE\t10\tinteger\ti32\t-\t69\t70\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\tbinding\t26\t39\t2\t1\t0\t2\t-\t0\t0\t0\t0\nS\t2\tassert\t39\t62\t2\t9\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t62\t71\t2\t10\t0\t0\t-\t0\t0\t0\t0\nK\t1\t25\t72\t1\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.view-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t19\t23\t0\nF\t1\t1\t1\t0\t13\t0\t3\t0\t0\t12\t72\t0\nL\t1\t1\t2\t10\t0\t0\t30\t31\nL\t2\t1\t0\t10\t0\t0\t32\t38\nL\t3\t1\t0\t10\t0\t0\t46\t47\nL\t4\t1\t0\t5\t0\t0\t48\t49\nL\t5\t1\t0\t5\t0\t0\t46\t53\nL\t6\t1\t0\t5\t0\t0\t51\t52\nL\t7\t1\t0\t10\t0\t0\t46\t53\nL\t8\t1\t0\t5\t0\t0\t54\t55\nL\t9\t1\t0\t5\t0\t0\t46\t56\nL\t10\t1\t0\t3\t0\t0\t46\t56\nL\t11\t1\t0\t3\t0\t0\t58\t60\nL\t12\t1\t0\t6\t0\t0\t46\t60\nL\t13\t1\t0\t1\t0\t0\t69\t70\nB\t1\t1\t1\t13\t4\t0\t12\t0\t0\t6\t2\t3\t13\t0\t0\t0\t0\t16\t39\t62\nB\t2\t1\t14\t14\t1\t13\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t62\t71\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t39\t62\nO\t1\t1\t1\t14\t2\t10\t10\t0\t0\t0\t2\t0\t3\t0\t32\t38\t616263\t0\t0\nO\t2\t1\t1\t2\t1\t10\t10\t0\t2\t0\t3\t0\t0\t0\t26\t39\t-\t0\t0\nO\t3\t1\t1\t2\t3\t10\t10\t0\t1\t0\t4\t0\t0\t0\t46\t47\t-\t0\t0\nO\t4\t1\t1\t1\t4\t5\t5\t0\t0\t0\t5\t3\t4\t0\t48\t49\t1\t0\t0\nO\t5\t1\t1\t2\t5\t5\t5\t0\t4\t0\t6\t0\t0\t0\t46\t53\t-\t0\t0\nO\t6\t1\t1\t1\t6\t5\t5\t0\t0\t0\t7\t4\t5\t0\t51\t52\t2\t0\t0\nO\t7\t1\t1\t19\t7\t10\t10\t0\t3\t5\t8\t0\t0\t0\t46\t53\t-\t0\t1\nO\t8\t1\t1\t1\t8\t5\t5\t0\t0\t0\t9\t5\t6\t0\t54\t55\t0\t0\t0\nO\t9\t1\t1\t16\t9\t5\t10\t0\t7\t8\t10\t0\t0\t0\t46\t56\t-\t0\t0\nO\t10\t1\t1\t17\t10\t3\t10\t0\t7\t9\t11\t0\t0\t0\t46\t56\t-\t0\t0\nO\t11\t1\t1\t1\t11\t3\t3\t0\t0\t0\t12\t6\t8\t0\t58\t60\t98\t0\t0\nO\t12\t1\t1\t4\t12\t6\t3\t13\t10\t11\t13\t0\t0\t0\t46\t60\t-\t0\t0\nO\t13\t1\t1\t5\t0\t6\t6\t0\t12\t0\t0\t0\t0\t0\t39\t62\t-\t0\t0\nO\t14\t1\t2\t1\t13\t1\t1\t0\t0\t0\t0\t8\t9\t0\t69\t70\t0\t0\t0\nA\t0\t6\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\bytes.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-view-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_bytes fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_bytes fy_l_2={0};\n    (void)fy_l_2;\n    struct fy_bytes fy_l_3={0};\n    (void)fy_l_3;\n    uintptr_t fy_l_4=0;\n    (void)fy_l_4;\n    uintptr_t fy_l_5=0;\n    (void)fy_l_5;\n    uintptr_t fy_l_6=0;\n    (void)fy_l_6;\n    struct fy_bytes fy_l_7={0};\n    (void)fy_l_7;\n    uintptr_t fy_l_8=0;\n    (void)fy_l_8;\n    uintptr_t fy_l_9=0;\n    (void)fy_l_9;\n    uint8_t fy_l_10=0;\n    (void)fy_l_10;\n    uint8_t fy_l_11=0;\n    (void)fy_l_11;\n    int32_t fy_l_12=0;\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    uint32_t fy_pending_trap=UINT32_C(7);\n    goto fy_b_1;\nfy_b_1:;\n    static const uint8_t fy_literal_1[]={97,98,99};\n    fy_l_2=(struct fy_bytes){fy_literal_1,((uintptr_t)3)};\n    fy_l_1 = fy_l_2;\n    fy_l_3 = fy_l_1;\n    fy_l_4 = ((uintptr_t)UINT64_C(1));\n    fy_l_5 = fy_l_4;\n    fy_l_6 = ((uintptr_t)UINT64_C(2));\n    volatile uintptr_t fy_start_7=fy_l_5,fy_end_7=fy_l_6;\n    if(fy_start_7>fy_end_7||fy_end_7>fy_l_3.fy_length)fy_runtime_trap(UINT32_C(6));\n    fy_l_7=(struct fy_bytes){fy_l_3.fy_data+fy_start_7,fy_end_7-fy_start_7};\n    fy_l_8 = ((uintptr_t)UINT64_C(0));\n    volatile uintptr_t fy_index_9=fy_l_8;\n    if(fy_index_9>=fy_l_7.fy_length)fy_runtime_trap(UINT32_C(6));\n    fy_l_9=fy_index_9;\n    fy_l_10=fy_l_7.fy_data[fy_l_9];\n    fy_l_11 = ((uint8_t)UINT32_C(98));\n    fy_l_12 = (fy_l_10==fy_l_11) ? INT32_C(1) : INT32_C(0);\n    if(!fy_l_12){fy_pending_trap=UINT32_C(5);goto fy_b_3;\n}\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_13 = INT32_C(0);\n    return fy_l_13;\nfy_b_3:;\n    fy_runtime_trap(fy_pending_trap);\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.literal-hir/v1\nP\t0\nF\t1\t1\t12\t53\t1\t1\t0\t1\t0\nF\t2\t2\t53\t130\t3\t2\t2\t0\t0\nB\t1\tfunction\tusize\t21\t27\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\ti32\t60\t64\t0\t0\t0\t3\t1\t0\nB\t3\tparameter\tref-str\t36\t37\t1\t1\t0\t0\t1\t0\nB\t4\tlet\tref-str\t71\t72\t2\t4\t0\t0\t1\t0\nE\t1\treference\tref-str\t-\t46\t47\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tlength\tusize\t-\t46\t51\t1\t0\t0\t0\t0\t0\t0\t0\t-\nE\t3\tliteral\tref-str\t-\t73\t83\t0\t0\t0\t0\t0\t0\t0\t0\ted959ceab88000\nE\t4\treference\tref-str\t-\t98\t99\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t5\tcall\tusize\t-\t91\t100\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t6\tinteger\tusize\t-\t102\t103\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t7\tbinary\tbool\t==\t91\t103\t5\t6\t0\t0\t0\t0\t0\t0\t-\nE\t8\treference\tref-str\t-\t108\t109\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t9\tlength\tbool\t-\t108\t118\t8\t0\t0\t0\t0\t0\t0\t1\t-\nE\t10\tunary\tbool\t!\t107\t118\t9\t0\t0\t0\t0\t0\t0\t0\t-\nE\t11\tbinary\tbool\t&&\t91\t118\t7\t10\t0\t0\t0\t0\t0\t0\t-\nE\t12\tinteger\ti32\t-\t127\t128\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\treturn\t39\t52\t2\t2\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t67\t84\t4\t3\t0\t4\t-\t0\t0\t0\t0\nS\t3\tassert\t84\t120\t4\t11\t0\t0\t-\t0\t0\t0\t0\nS\t4\treturn\t120\t129\t4\t12\t0\t0\t-\t0\t0\t0\t0\nK\t1\t38\t53\t1\t2\t1\t1\t1\t0\nK\t2\t66\t130\t2\t4\t3\t2\t3\t0\nA\t0\t3\nA\t1\t1\nA\t2\t2\nA\t3\t3\nA\t4\t4\nA\t5\t4\nT\t0\tref-str\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.literal-mir/v1\nP\t0\nT\t1\t1\t0\t2\t5\t0\t1\t21\t27\t0\nT\t2\t2\t0\t3\t1\t1\t0\t60\t64\t0\nS\t0\t9\nF\t1\t1\t1\t0\t3\t0\t1\t0\t1\t12\t53\t0\nF\t2\t2\t2\t3\t11\t1\t6\t1\t0\t53\t130\t0\nL\t1\t1\t3\t9\t1\t0\t36\t37\nL\t2\t1\t0\t9\t0\t0\t46\t47\nL\t3\t1\t0\t5\t0\t0\t46\t51\nL\t4\t2\t4\t9\t0\t0\t71\t72\nL\t5\t2\t0\t9\t0\t0\t73\t83\nL\t6\t2\t0\t9\t0\t0\t98\t99\nL\t7\t2\t0\t5\t0\t0\t91\t100\nL\t8\t2\t0\t5\t0\t0\t102\t103\nL\t9\t2\t0\t6\t0\t0\t91\t103\nL\t10\t2\t0\t6\t0\t0\t91\t118\nL\t11\t2\t0\t9\t0\t0\t108\t109\nL\t12\t2\t0\t6\t0\t0\t108\t118\nL\t13\t2\t0\t6\t0\t0\t107\t118\nL\t14\t2\t0\t1\t0\t0\t127\t128\nB\t1\t1\t1\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t39\t52\nB\t2\t2\t3\t5\t5\t0\t0\t0\t0\t0\t3\t0\t0\t1\t7\t1\t1\t0\t91\t100\nB\t3\t2\t6\t8\t3\t9\t0\t0\t0\t6\t4\t5\t0\t0\t0\t0\t0\t0\t91\t118\nB\t4\t2\t9\t12\t2\t0\t0\t0\t0\t0\t5\t0\t0\t0\t0\t0\t0\t0\t91\t118\nB\t5\t2\t13\t13\t4\t0\t10\t0\t0\t6\t6\t7\t13\t0\t0\t0\t0\t16\t84\t120\nB\t6\t2\t14\t14\t1\t14\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t120\t129\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t84\t120\nO\t1\t1\t1\t2\t2\t9\t9\t0\t1\t0\t2\t0\t0\t0\t46\t47\t-\nO\t2\t1\t1\t15\t3\t5\t9\t0\t2\t0\t0\t0\t0\t0\t46\t51\t-\nO\t3\t2\t2\t14\t5\t9\t9\t0\t0\t0\t4\t0\t7\t0\t73\t83\ted959ceab88000\nO\t4\t2\t2\t2\t4\t9\t9\t0\t5\t0\t5\t0\t0\t0\t67\t84\t-\nO\t5\t2\t2\t2\t6\t9\t9\t0\t4\t0\t0\t0\t0\t0\t98\t99\t-\nO\t6\t2\t3\t1\t8\t5\t5\t0\t0\t0\t7\t7\t8\t0\t102\t103\t7\nO\t7\t2\t3\t4\t9\t6\t5\t13\t7\t8\t8\t0\t0\t0\t91\t103\t-\nO\t8\t2\t3\t2\t10\t6\t6\t0\t9\t0\t0\t0\t0\t0\t91\t118\t-\nO\t9\t2\t4\t2\t11\t9\t9\t0\t4\t0\t10\t0\t0\t0\t108\t109\t-\nO\t10\t2\t4\t15\t12\t6\t9\t0\t11\t0\t11\t0\t0\t1\t108\t118\t-\nO\t11\t2\t4\t3\t13\t6\t6\t3\t12\t0\t12\t0\t0\t0\t107\t118\t-\nO\t12\t2\t4\t2\t10\t6\t6\t0\t13\t0\t0\t0\t0\t0\t91\t118\t-\nO\t13\t2\t5\t5\t0\t6\t6\t0\t10\t0\t0\t0\t0\t0\t84\t120\t-\nO\t14\t2\t6\t1\t14\t1\t1\t0\t0\t0\t0\t8\t9\t0\t127\t128\t0\nA\t0\t1\nA\t1\t6\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-literal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nuintptr_t fy_fn_1(struct fy_text fy_l_1);\nint32_t fy_fn_2(void);\nuintptr_t fy_fn_1(struct fy_text fy_l_1){\n    (void)fy_l_1;\n    struct fy_text fy_l_2={0};\n    (void)fy_l_2;\n    uintptr_t fy_l_3=0;\n    (void)fy_l_3;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = fy_l_1;\n    fy_l_3=fy_l_2.fy_length;\n    return fy_l_3;\n}\nint32_t fy_fn_2(void){\n    struct fy_text fy_l_4={0};\n    (void)fy_l_4;\n    struct fy_text fy_l_5={0};\n    (void)fy_l_5;\n    struct fy_text fy_l_6={0};\n    (void)fy_l_6;\n    uintptr_t fy_l_7=0;\n    (void)fy_l_7;\n    uintptr_t fy_l_8=0;\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    int32_t fy_l_10=0;\n    (void)fy_l_10;\n    struct fy_text fy_l_11={0};\n    (void)fy_l_11;\n    int32_t fy_l_12=0;\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    int32_t fy_l_14=0;\n    (void)fy_l_14;\n    uint32_t fy_pending_trap=UINT32_C(7);\n    goto fy_b_2;\nfy_b_2:;\n    static const uint8_t fy_literal_3[]={237,149,156,234,184,128,0};\n    fy_l_5=(struct fy_text){fy_literal_3,((uintptr_t)7)};\n    fy_l_4 = fy_l_5;\n    fy_l_6 = fy_l_4;\n    fy_l_7=fy_fn_1(fy_l_6);\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_8 = ((uintptr_t)UINT64_C(7));\n    fy_l_9 = (fy_l_7==fy_l_8) ? INT32_C(1) : INT32_C(0);\n    fy_l_10 = fy_l_9;\n    if(fy_l_9){ goto fy_b_4;\n}else{ goto fy_b_5;\n}\nfy_b_4:;\n    fy_l_11 = fy_l_4;\n    fy_l_12=fy_l_11.fy_length==0;\n    fy_l_13 = (!fy_l_12) ? INT32_C(1) : INT32_C(0);\n    fy_l_10 = fy_l_13;\n    goto fy_b_5;\nfy_b_5:;\n    if(!fy_l_10){fy_pending_trap=UINT32_C(5);goto fy_b_7;\n}\n    goto fy_b_6;\nfy_b_6:;\n    fy_l_14 = INT32_C(0);\n    return fy_l_14;\nfy_b_7:;\n    fy_runtime_trap(fy_pending_trap);\n}\nint32_t fy_candidate_entry(void){return fy_fn_2();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.literal-hir/v1\nP\t0\nF\t1\t1\t12\t53\t1\t1\t0\t1\t0\nF\t2\t2\t53\t130\t3\t2\t2\t0\t0\nB\t1\tfunction\tusize\t21\t27\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\ti32\t60\t64\t0\t0\t0\t3\t1\t0\nB\t3\tparameter\tref-str\t36\t37\t1\t1\t0\t0\t1\t0\nB\t4\tlet\tref-str\t71\t72\t2\t4\t0\t0\t1\t0\nE\t1\treference\tref-str\t-\t46\t47\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tlength\tusize\t-\t46\t51\t1\t0\t0\t0\t0\t0\t0\t0\t-\nE\t3\tliteral\tref-str\t-\t73\t83\t0\t0\t0\t0\t0\t0\t0\t0\ted959ceab88000\nE\t4\treference\tref-str\t-\t98\t99\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t5\tcall\tusize\t-\t91\t100\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t6\tinteger\tusize\t-\t102\t103\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t7\tbinary\tbool\t==\t91\t103\t5\t6\t0\t0\t0\t0\t0\t0\t-\nE\t8\treference\tref-str\t-\t108\t109\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t9\tlength\tbool\t-\t108\t118\t8\t0\t0\t0\t0\t0\t0\t1\t-\nE\t10\tunary\tbool\t!\t107\t118\t9\t0\t0\t0\t0\t0\t0\t0\t-\nE\t11\tbinary\tbool\t&&\t91\t118\t7\t10\t0\t0\t0\t0\t0\t0\t-\nE\t12\tinteger\ti32\t-\t127\t128\t0\t0\t0\t0\t0\t0\t0\t0\t0\nS\t1\treturn\t39\t52\t2\t2\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t67\t84\t4\t3\t0\t4\t-\t0\t0\t0\t0\nS\t3\tassert\t84\t120\t4\t11\t0\t0\t-\t0\t0\t0\t0\nS\t4\treturn\t120\t129\t4\t12\t0\t0\t-\t0\t0\t0\t0\nK\t1\t38\t53\t1\t2\t1\t1\t1\t0\nK\t2\t66\t130\t2\t4\t3\t2\t3\t0\nA\t0\t3\nA\t1\t1\nA\t2\t2\nA\t3\t3\nA\t4\t4\nA\t5\t4\nT\t0\tref-str\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.literal-mir/v1\nP\t0\nT\t1\t1\t0\t2\t5\t0\t1\t21\t27\t0\nT\t2\t2\t0\t3\t1\t1\t0\t60\t64\t0\nS\t0\t9\nF\t1\t1\t1\t0\t3\t0\t1\t0\t1\t12\t53\t0\nF\t2\t2\t2\t3\t11\t1\t6\t1\t0\t53\t130\t0\nL\t1\t1\t3\t9\t1\t0\t36\t37\nL\t2\t1\t0\t9\t0\t0\t46\t47\nL\t3\t1\t0\t5\t0\t0\t46\t51\nL\t4\t2\t4\t9\t0\t0\t71\t72\nL\t5\t2\t0\t9\t0\t0\t73\t83\nL\t6\t2\t0\t9\t0\t0\t98\t99\nL\t7\t2\t0\t5\t0\t0\t91\t100\nL\t8\t2\t0\t5\t0\t0\t102\t103\nL\t9\t2\t0\t6\t0\t0\t91\t103\nL\t10\t2\t0\t6\t0\t0\t91\t118\nL\t11\t2\t0\t9\t0\t0\t108\t109\nL\t12\t2\t0\t6\t0\t0\t108\t118\nL\t13\t2\t0\t6\t0\t0\t107\t118\nL\t14\t2\t0\t1\t0\t0\t127\t128\nB\t1\t1\t1\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t39\t52\nB\t2\t2\t3\t5\t5\t0\t0\t0\t0\t0\t3\t0\t0\t1\t7\t1\t1\t0\t91\t100\nB\t3\t2\t6\t8\t3\t9\t0\t0\t0\t6\t4\t5\t0\t0\t0\t0\t0\t0\t91\t118\nB\t4\t2\t9\t12\t2\t0\t0\t0\t0\t0\t5\t0\t0\t0\t0\t0\t0\t0\t91\t118\nB\t5\t2\t13\t13\t4\t0\t10\t0\t0\t6\t6\t7\t13\t0\t0\t0\t0\t16\t84\t120\nB\t6\t2\t14\t14\t1\t14\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t120\t129\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t84\t120\nO\t1\t1\t1\t2\t2\t9\t9\t0\t1\t0\t2\t0\t0\t0\t46\t47\t-\nO\t2\t1\t1\t15\t3\t5\t9\t0\t2\t0\t0\t0\t0\t0\t46\t51\t-\nO\t3\t2\t2\t14\t5\t9\t9\t0\t0\t0\t4\t0\t7\t0\t73\t83\ted959ceab88000\nO\t4\t2\t2\t2\t4\t9\t9\t0\t5\t0\t5\t0\t0\t0\t67\t84\t-\nO\t5\t2\t2\t2\t6\t9\t9\t0\t4\t0\t0\t0\t0\t0\t98\t99\t-\nO\t6\t2\t3\t1\t8\t5\t5\t0\t0\t0\t7\t7\t8\t0\t102\t103\t7\nO\t7\t2\t3\t4\t9\t6\t5\t13\t7\t8\t8\t0\t0\t0\t91\t103\t-\nO\t8\t2\t3\t2\t10\t6\t6\t0\t9\t0\t0\t0\t0\t0\t91\t118\t-\nO\t9\t2\t4\t2\t11\t9\t9\t0\t4\t0\t10\t0\t0\t0\t108\t109\t-\nO\t10\t2\t4\t15\t12\t6\t9\t0\t11\t0\t11\t0\t0\t1\t108\t118\t-\nO\t11\t2\t4\t3\t13\t6\t6\t3\t12\t0\t12\t0\t0\t0\t107\t118\t-\nO\t12\t2\t4\t2\t10\t6\t6\t0\t13\t0\t0\t0\t0\t0\t91\t118\t-\nO\t13\t2\t5\t5\t0\t6\t6\t0\t10\t0\t0\t0\t0\t0\t84\t120\t-\nO\t14\t2\t6\t1\t14\t1\t1\t0\t0\t0\t0\t8\t9\t0\t127\t128\t0\nA\t0\t1\nA\t1\t6\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\text-metadata.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-literal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nuintptr_t fy_fn_1(struct fy_text fy_l_1);\nint32_t fy_fn_2(void);\nuintptr_t fy_fn_1(struct fy_text fy_l_1){\n    (void)fy_l_1;\n    struct fy_text fy_l_2={0};\n    (void)fy_l_2;\n    uintptr_t fy_l_3=0;\n    (void)fy_l_3;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = fy_l_1;\n    fy_l_3=fy_l_2.fy_length;\n    return fy_l_3;\n}\nint32_t fy_fn_2(void){\n    struct fy_text fy_l_4={0};\n    (void)fy_l_4;\n    struct fy_text fy_l_5={0};\n    (void)fy_l_5;\n    struct fy_text fy_l_6={0};\n    (void)fy_l_6;\n    uintptr_t fy_l_7=0;\n    (void)fy_l_7;\n    uintptr_t fy_l_8=0;\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    int32_t fy_l_10=0;\n    (void)fy_l_10;\n    struct fy_text fy_l_11={0};\n    (void)fy_l_11;\n    int32_t fy_l_12=0;\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    int32_t fy_l_14=0;\n    (void)fy_l_14;\n    uint32_t fy_pending_trap=UINT32_C(7);\n    goto fy_b_2;\nfy_b_2:;\n    static const uint8_t fy_literal_3[]={237,149,156,234,184,128,0};\n    fy_l_5=(struct fy_text){fy_literal_3,((uintptr_t)7)};\n    fy_l_4 = fy_l_5;\n    fy_l_6 = fy_l_4;\n    fy_l_7=fy_fn_1(fy_l_6);\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_8 = ((uintptr_t)UINT64_C(7));\n    fy_l_9 = (fy_l_7==fy_l_8) ? INT32_C(1) : INT32_C(0);\n    fy_l_10 = fy_l_9;\n    if(fy_l_9){ goto fy_b_4;\n}else{ goto fy_b_5;\n}\nfy_b_4:;\n    fy_l_11 = fy_l_4;\n    fy_l_12=fy_l_11.fy_length==0;\n    fy_l_13 = (!fy_l_12) ? INT32_C(1) : INT32_C(0);\n    fy_l_10 = fy_l_13;\n    goto fy_b_5;\nfy_b_5:;\n    if(!fy_l_10){fy_pending_trap=UINT32_C(5);goto fy_b_7;\n}\n    goto fy_b_6;\nfy_b_6:;\n    fy_l_14 = INT32_C(0);\n    return fy_l_14;\nfy_b_7:;\n    fy_runtime_trap(fy_pending_trap);\n}\nint32_t fy_candidate_entry(void){return fy_fn_2();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\native-request.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-text-access\\native.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "PASS: 4 native C executions\n",
+      "stderr": ""
+    }
+  ],
+  "nativeRunner": {
+    "path": ".cache/nominal-c-file-cli/native-runner.exe",
+    "sha256": "995d9b5410aad2e22a622e18c0aaeeb00e6e362b030cfc2415ff9558938c659a"
+  },
+  "scope": {
+    "publicGrammarChanged": false,
+    "sdkChanged": false,
+    "runtimeChanged": false,
+    "linuxNative": false,
+    "performanceClaim": false,
+    "selfHostingComplete": false
+  },
+  "passed": true,
+  "verificationUtility": {
+    "path": "examples/lexer_candidate/verify_c.py",
+    "sha256": "b2c6c6c12f5596a3f07fbaa2f01bb0cc403cd76fb8d29f41721fb94417b64cf8"
+  }
+}
