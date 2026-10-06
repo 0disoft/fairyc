@@ -74,7 +74,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
     if (depth >= 64) { return fail(4,node.start,node.end); }
     let ref u8[] spelling = syntax::expression_text(parsed,id);
     if (node.kind == 1) {
-        return if (syntax::literal_kind(parsed,id) == 5 || bytes::equal(spelling,b"true") || bytes::equal(spelling,b"false"))
+        return if ((syntax::literal_kind(parsed,id) == 5 || syntax::literal_kind(parsed,id) == 7 || syntax::literal_kind(parsed,id) == 8) || bytes::equal(spelling,b"true") || bytes::equal(spelling,b"false"))
             { ok() } else { fail(3,node.start,node.end) };
     }
     if (node.kind == 2) {

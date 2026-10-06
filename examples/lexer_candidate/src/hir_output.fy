@@ -2,6 +2,7 @@ module hir_output;
 import hir_model as h;
 import hir_shapes as shapes;
 import array_types as arrays;
+import literal_types as literals;
 import std::bytes as bytes;
 
 fn bool put(ref mut bytes::Buffer out, ref u8[] text) { return bytes::append(out,text).is_ok; }
@@ -13,6 +14,7 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
         case .I64: { put(out,b"i64") } case .U8: { put(out,b"u8") } case .U32: { put(out,b"u32") }
         case .Usize: { put(out,b"usize") } case .Bool: { put(out,b"bool") }
         case .Void: { put(out,b"void") } case .Callable: { put(out,b"callable") }
+        case .Text: { put(out,b"ref-str") } case .Bytes: { put(out,b"ref-u8-slice") }
         case .Array { .id = id }: { put(out,b"array:") && bytes::append_u32(out,id).is_ok }
         case .Nominal { .id = id }: { put(out,b"nominal:") && bytes::append_u32(out,id).is_ok }
     };
@@ -30,7 +32,7 @@ fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
         case .Reference: { put(out,b"reference") } case .Unary: { put(out,b"unary") }
         case .Binary: { put(out,b"binary") } case .Call: { put(out,b"call") }
         case .Block: { put(out,b"block") } case .If: { put(out,b"if") }
-        case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") } case .Array: { put(out,b"array") } case .Index: { put(out,b"index") } case .Length: { put(out,b"length") }
+        case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") } case .Array: { put(out,b"array") } case .Index: { put(out,b"index") } case .Length: { put(out,b"length") } case .Literal: { put(out,b"literal") }
     };
 }
 fn bool statement_kind(ref mut bytes::Buffer out, h::StatementKind kind) {
@@ -63,7 +65,7 @@ pub fn u32 render(ref h::Program p, ref mut bytes::Buffer out) {
     let ref shapes::Table nominal = h::nominal(p);
     var bool array = false; var usize id = 1; while (id <= h::binding_count(p)) { array = array || arrays::valid(h::type_code(h::binding_at(p,id).type)); id += 1; }
     id = 1; while (id <= h::expression_count(p)) { array = array || arrays::valid(h::type_code(h::expression_at(p,id).type)); id += 1; }
-    if (!put(out,if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
+    if (!put(out,if (h::has_literals(p)) { b"fairyc.literal-hir/v1\nP" } else if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
     var usize index = 0;
     while (index < shapes::count(nominal)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
@@ -94,8 +96,10 @@ pub fn u32 render(ref h::Program p, ref mut bytes::Buffer out) {
     while (index <= h::expression_count(p)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
         let h::Expression e = h::expression_at(p,index);
+        if (h::expression_code(e.kind) == 15 && h::literal_bytes(p,index).len > (2097152 - bytes::len(out) - 1024) / 2) { return 4; }
         if (!put(out,b"E") || !number(out,index) || !expression_kind(out,e.kind) || !type_name(out,e.type) || !operator(out,e.operator) || !number(out,e.start) || !number(out,e.end) || !number(out,e.left) || !number(out,e.right) || !number(out,e.alternative) || !number(out,e.block) || !number(out,e.binding) || !number(out,e.edge_start) || !number(out,e.edge_count) || !number(out,if (e.boolean) { 1 } else { 0 }) || !tab(out)) { return 3; }
         if (h::expression_code(e.kind) == h::expression_code(.Integer)) { if (!put(out,h::integer_text(p,index))) { return 3; } }
+        else if (h::expression_code(e.kind) == 15) { if (!literals::hex(out,h::literal_bytes(p,index))) { return 3; } }
         else if (!put(out,b"-")) { return 3; }
         if (!put(out,b"\n")) { return 3; } index += 1;
     }

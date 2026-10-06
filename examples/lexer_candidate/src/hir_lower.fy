@@ -4,6 +4,7 @@ import hir_state as state;
 import hir_shapes as shapes;
 import hir_shape_lower as shape_lower;
 import type_check as typing;
+import literal_types as literals;
 import name_resolution as names;
 import syntax as syntax;
 import std::bytes as bytes;
@@ -85,7 +86,11 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
     var h::ExpressionKind kind = .Integer; var h::Operator operator = .None;
     if (h::type_code(type) == h::type_code(.Invalid)) { return state::fail(c,4,node.start,node.end); }
     if (node.kind == 1 || (node.kind == 4 && typing::signed_minimum(input,id))) {
-        if (h::type_code(type) == h::type_code(.Bool)) { kind = .Boolean; e.boolean = bytes::equal(syntax::expression_text(parsed,id),b"true"); }
+        if (h::type_code(type) == 9 || h::type_code(type) == 10) {
+            kind = .Literal; let ref u8[] cooked = syntax::literal_cooked(parsed,id);
+            e.payload_start = bytes::len(payload); let u32 code = literals::decode(payload,cooked);
+            if (code != 0) { return state::fail(c,code,node.start,node.end); } e.payload_end = bytes::len(payload);
+        } else if (h::type_code(type) == h::type_code(.Bool)) { kind = .Boolean; e.boolean = bytes::equal(syntax::expression_text(parsed,id),b"true"); }
         else {
             kind = .Integer; e.payload_start = bytes::len(payload);
             let usize literal = if (node.kind == 4) { node.left } else { id };
@@ -127,7 +132,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         kind = .Index; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
         e.right = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.right,depth + 1);
     } else if (node.kind == 8 && typing::field_target(input,id) == 0) {
-        kind = .Length; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
+        kind = .Length; e.boolean = bytes::equal(syntax::expression_text(parsed,id),b"is_empty"); e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
     } else if (node.kind == 8) {
         kind = .Field; e.binding = typing::field_target(input,id);
         e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);

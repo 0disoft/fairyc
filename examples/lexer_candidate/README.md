@@ -1666,6 +1666,26 @@ remains deferred to the owner's consolidated batch. No build-cost or performance
 measurement is claimed. Array fields, nested or nominal-element arrays, borrowed
 arrays, slices/views and array iteration remain separate candidate work.
 
+## Owned static text and byte literals
+
+Version 0.22.0 retains decoded `"..."` and `b"..."` bytes in owned HIR after the
+parser and scanner are released. Their exact types are immutable `ref str` and
+`ref u8[]`, with Static origins. Text remains UTF-8; byte literals may contain
+any octet, including NUL and invalid UTF-8. Existing scanner escape validation
+owns decoding. C strings, mutable views, local array borrows and literal-bearing
+struct fields remain closed in this candidate slice.
+
+Locals, arguments and literal-returning functions retain those types. Text and
+byte views expose byte `.len` and `.is_empty`; only byte views admit indexed
+reads with `usize` indexes. Text indexing, writes through byte views and implicit
+text/byte conversion are rejected. HIR stores cooked bytes, not source spelling,
+and `fairyc.literal-hir/v1` uses hex payloads so embedded NUL, tabs and newlines
+cannot split records. At version 0.22.0, their MIR/C execution is still closed.
+
+`tests/hir_literals.fy` checks parser-independent ownership, distinct types,
+Unicode escapes, empty text and embedded binary bytes. Windows native development
+and release checks cover this retained HIR step; Linux runs remain deferred.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token
