@@ -82,7 +82,7 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     let usize nt = v::len<Target>(ref targets); let usize ng = v::len<Signature>(ref signatures); let usize nf = v::len<Function>(ref functions);
     let usize nl = v::len<Local>(ref locals); let usize nb = v::len<Block>(ref blocks); let usize no = v::len<Operation>(ref operations); let usize ne = v::len<usize>(ref edges);
     if (ns > 32768 || np > 688128 || nt > 512 || nf > 512 || nl > 16384 || nb > 16384 || no > 32768 || ne > 65536 || ng > 65536) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
-    if (!shapes::valid(ref nominal,ns,1152)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
+    if (!shapes::valid(ref nominal,ns,1152) || shapes::has_payloads(ref nominal)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
     var usize i = 0;
     while (i < nt) {
         let Target t = *v::at<Target>(ref targets,i);

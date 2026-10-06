@@ -1931,11 +1931,12 @@ once; written arm order and arm-local scopes survive HIR lowering. Positional
 
 `tests/hir_enums.fy` checks owned layouts and retained arm order after the input
 arenas are released. `verify_enums.py --phase hir` checks accepted values and
-rejected empty/payload enums, duplicate members/cases, missing/unknown cases,
+rejected empty enums and unsupported payload field types, duplicate members/cases, missing/unknown cases,
 integer coercion, distinct declarations, equality, aggregate enum storage,
 immutable assignments and borrowed-view joins. Types, HIR, MIR and C execution
-are separate candidate milestones; version 0.30.0 retains HIR only. Payloads,
-enum comparison and enum arrays/struct fields remain closed. The public grammar,
+are separate candidate milestones; version 0.30.0 retains HIR only. That milestone excluded payloads;
+version 0.32.0 adds scalar payload HIR below. Enum comparison and enum
+arrays/struct fields remain closed. The public grammar,
 SDK/runtime and public ABI are unchanged.
 
 
@@ -1967,3 +1968,38 @@ enum arrays/struct fields and borrowed-view switch joins remain outside this
 candidate slice. Public grammar, SDK/runtime and public ABI are unchanged.
 Linux native validation and performance measurement remain deferred. These
 checks do not constitute completed compiler self-hosting.
+
+
+## Integer and bool payload enum HIR
+
+Version 0.32.0 extends the Fairy-written candidate's type checking and owned HIR
+with named payloads of `i32`, `i64`, `u8`, `u32`, `usize`, and `bool`. Each enum
+has 1..128 members; a payload member has 1..16 fields. The shared parser field
+arena remains capped at 1024 entries, including member records and payload fields.
+Empty payload braces, nested aggregates, resource/view payloads, positional
+patterns, enum equality, and enum storage inside arrays/structs remain closed.
+
+Construction uses contextual `.Value { .amount = n, .valid = true }`; every field
+must appear exactly once. Written initializer order is retained, and literal
+bounds use the declared field type. An exhaustive switch binds every field with
+`case .Value { .amount = amount, .valid = valid }: { ... }`. Bindings are immutable,
+scoped to that arm block, and can shadow outer locals. `_` discards one selected
+field; it creates no local binding. Payloadless members retain their existing
+construction and pattern syntax.
+
+Owned shape records preserve payload ranges and scalar types after syntax/type
+arenas are released. Variant edges contain ordered Initializer expressions; Arm
+edges contain ordered Capture expressions. A Capture identifies its payload field
+and has zero (discard) or one immutable Binding ID in its edge range. The private
+payload dump is `fairyc.enum-payload-hir/v1`; its D rows add payload start/count.
+Payloadless dumps keep their previous format and output bytes.
+
+Use `--check-types-file` or `--hir-file` with `samples/enum-payload-demo.fy`.
+Payload MIR and C execution are the next implementation slice: both lowering and
+MIR assembly reject payload layouts now, including unused declarations, rather
+than publishing a tag-only image. This stage does not claim payload execution.
+`tests/hir_enum_payloads.fy` checks retained data and malformed ranges;
+`verify_enum_payloads.py --images <dev-image> <release-image> --receipt <path>`
+checks accepted/rejected inputs, deterministic HIR, input preservation and the
+closed execution boundary. Evidence: `docs/ops/evidence/enum-payload-hir-20261007.json`.
+The public language grammar and SDK contracts are unchanged.

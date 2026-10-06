@@ -46,7 +46,7 @@ fn m::Program mutated(u32 mutation) {
     var bytes::Buffer payload = bytes::empty(); assert(bytes::append(ref mut payload,b"1").is_ok);
     var v::Vec<shapes::Shape> records = v::empty<shapes::Shape>(); var v::Vec<shapes::Field> fields = v::empty<shapes::Field>();
     assert(v::push<shapes::Shape>(ref mut records,shapes::Shape { .type = 257, .binding = 1, .field_start = 0, .field_count = 1, .public = false }).is_ok);
-    assert(v::push<shapes::Field>(ref mut fields,shapes::Field { .owner = 257, .type = 1, .start = 1, .end = 2 }).is_ok);
+    assert(v::push<shapes::Field>(ref mut fields,shapes::Field { .owner = 257, .type = 1, .start = 1, .end = 2, .payload_start = 0, .payload_count = 0 }).is_ok);
     var v::Vec<m::Target> targets = v::empty<m::Target>();
     assert(v::push<m::Target>(ref mut targets,m::Target { .binding = 2, .module_index = 0, .declaration = 1, .result = 1, .signature_start = 0, .signature_count = 0, .start = 0, .end = 1, .external = false }).is_ok);
     var v::Vec<m::Function> functions = v::empty<m::Function>();

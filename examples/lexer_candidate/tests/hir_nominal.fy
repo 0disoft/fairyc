@@ -53,7 +53,7 @@ fn void owned_layout_and_written_initializers_survive_input() {
 fn shapes::Table malformed(u32 owner, u32 type) {
     var v::Vec<shapes::Shape> records = v::empty<shapes::Shape>(); var v::Vec<shapes::Field> fields = v::empty<shapes::Field>();
     assert(v::push<shapes::Shape>(ref mut records,shapes::Shape { .type = 257, .binding = 1, .field_start = 0, .field_count = 1, .public = false }).is_ok);
-    assert(v::push<shapes::Field>(ref mut fields,shapes::Field { .owner, .type, .start = 1, .end = 2 }).is_ok);
+    assert(v::push<shapes::Field>(ref mut fields,shapes::Field { .owner, .type, .start = 1, .end = 2, .payload_start = 0, .payload_count = 0 }).is_ok);
     return shapes::assemble(records,fields);
 }
 @test

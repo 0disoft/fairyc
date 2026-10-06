@@ -9,7 +9,7 @@ import attributes as attributes;
 import cleanup_syntax as cleanups;
 
 // Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,
-// 8 static_assert, 9 unsafe extern C function, 10 state, 11 payloadless enum; problem 4 is
+// 8 static_assert, 9 unsafe extern C function, 10 state, 11 user enum; problem 4 is
 // outside the admitted subset. These are not public compiler diagnostic IDs.
 pub struct Declaration { usize cleanup_attribute_start; usize cleanup_attribute_count; usize unsafe_start; usize unsafe_end; usize owner_start; usize owner_end; u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; usize generic_parameters; usize generic_start; usize generic_end; }
 // Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.

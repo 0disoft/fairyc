@@ -22,11 +22,12 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     while (i <= names::symbol_count(resolved)) {
         let names::Symbol s = names::symbol_at(resolved,i);
         let h::Type type = state::type(typing::symbol_type(input,i));
-        if (s.kind < 1 || s.kind > 7 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
+        if (s.kind < 1 || s.kind > 8 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
         var usize target_module = module_index; var usize declaration = s.declaration;
         if (s.kind == 5) { let signature = names::external_signature(resolved,i); target_module = signature.module_index; declaration = signature.declaration; }
-        let h::Binding binding = h::Binding { .kind = state::binding_kind(s.kind), .type, .start = s.start, .end = s.end, .owner = s.owner, .scope = s.scope, .module_index = target_module, .declaration, .signature_start = 0, .signature_count = 0 };
+        let h::Binding binding = h::Binding { .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner = s.owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
         if (!v::push<h::Binding>(bindings,binding).is_ok) { discard state::fail(c,3,s.start,s.end); return false; }
+        if(s.kind==8){if(s.declaration==0 || s.declaration>length){discard state::fail(c,4,s.start,s.end);return false;}let ref mut state::Link link=v::at_mut<state::Link>(links,s.declaration-1);link.use=i;}
         if (s.entry != 0) {
             if (s.entry > length || state::entry(links,s.entry) != 0) { discard state::fail(c,4,s.start,s.end); return false; }
             let ref mut state::Link link = v::at_mut<state::Link>(links,s.entry - 1); link.entry = i;
@@ -151,8 +152,9 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         kind = .Field; e.binding = typing::field_target(input,id);
         e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
     } else if (node.kind == 10) {
-        kind = .Construct; e.binding = state::use(links,node.left);
-        if (e.binding == 0 || h::binding_code(v::at<h::Binding>(bindings,e.binding - 1).kind) != 6) { return state::fail(c,4,node.start,node.end); }
+        let bool variant=syntax::expression_at(parsed,node.left).kind==28;
+        kind = if(variant){.Variant}else{.Construct}; e.binding = if(variant){typing::field_target(input,id)}else{state::use(links,node.left)};
+        if (e.binding == 0 || !variant && h::binding_code(v::at<h::Binding>(bindings,e.binding - 1).kind) != 6) { return state::fail(c,4,node.start,node.end); }
         e.edge_count = syntax::record_field_count(parsed,id);
         e.edge_start = state::reserve_edges(edges,e.edge_count,c); if (c.problem.code != 0) { return 0; }
         var usize i = 0;
@@ -171,8 +173,15 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         e.edge_start=state::reserve_edges(edges,e.edge_count,c);if(c.problem.code!=0){return 0;}
         link=node.right;var usize remaining=e.edge_count;
         while(link!=0){let usize arm_id=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,arm_id);
+            let pattern=syntax::expression_at(parsed,arm.left);let usize count=if(pattern.kind==32){syntax::pattern_field_count(parsed,arm.left)}else{0};
+            let usize captures=state::reserve_edges(edges,count,c);if(c.problem.code!=0){return 0;}
+            var usize n=0;while(n<count){let usize field_id=syntax::pattern_field(parsed,arm.left,n);let f=syntax::expression_at(parsed,field_id);let usize binding=state::use(links,f.left);
+                let usize start=if(binding==0){0}else{state::reserve_edges(edges,1,c)};if(binding!=0){state::set_edge(edges,start,binding);}
+                let h::Expression capture=h::Expression{.kind=.Capture,.type=state::type(typing::expression_type(input,f.left)),.operator=.None,.start=f.start,.end=f.end,.left=0,.right=0,.alternative=0,.block=0,.binding=typing::field_target(input,field_id),.edge_start=start,.edge_count=if(binding==0){0}else{1},.payload_start=0,.payload_end=0,.boolean=false};
+                let usize id=state::push_expression(expressions,capture,c);if(id==0){return 0;}state::set_edge(edges,captures+n,id);n+=1;
+            }
             let usize body=block(input,bindings,links,c,expressions,statements,blocks,edges,payload,arm.right,depth+1);
-            let h::Expression child=h::Expression{.kind=.Arm,.type=state::type(typing::expression_type(input,arm_id)),.operator=.None,.start=arm.start,.end=arm.end,.block=body,.binding=typing::field_target(input,arm_id),.left=0,.right=0,.alternative=0,.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false};
+            let h::Expression child=h::Expression{.kind=.Arm,.type=state::type(typing::expression_type(input,arm_id)),.operator=.None,.start=arm.start,.end=arm.end,.block=body,.binding=typing::field_target(input,arm_id),.left=0,.right=0,.alternative=0,.edge_start=captures,.edge_count=count,.payload_start=0,.payload_end=0,.boolean=false};
             let usize lowered=state::push_expression(expressions,child,c);if(lowered==0){return 0;}remaining-=1;state::set_edge(edges,e.edge_start+remaining,lowered);link=syntax::expression_at(parsed,link).right;
         }
     } else if (node.kind == 12) {

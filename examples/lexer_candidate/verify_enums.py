@@ -23,10 +23,10 @@ POSITIVES = [
 NEGATIVES = [
     ('enum-defer-closed', 'enum E{A;}fn void f(E e){}fn i32 main(){defer f(.A);return 0;}', 'enum defer arguments are not supported'),
     ('labeled-argument', 'enum E{A;}fn i32 f(E e){return 0;}fn i32 main(){return f(.e=.A);}', 'unsupported name-check syntax'),
-    ('empty', 'enum E{}fn i32 main(){return 0;}', 'expected nonempty payloadless enum'),
+    ('empty', 'enum E{}fn i32 main(){return 0;}', 'expected nonempty enum'),
     ('duplicate-member', 'enum E{A;A;}fn i32 main(){return 0;}', 'duplicate enum member'),
-    ('payload-closed', 'enum E{A{i32 n;};}fn i32 main(){return 0;}', 'expected nonempty payloadless enum'),
-    ('empty-payload-closed', 'enum E{A{};}fn i32 main(){return 0;}', 'expected nonempty payloadless enum'),
+    ('payload-unsupported', 'enum E{A{ref str n;};}fn i32 main(){return 0;}', 'enum payload requires'),
+    ('empty-payload-closed', 'enum E{A{};}fn i32 main(){return 0;}', 'enum payload requires'),
     ('unknown-member', 'enum E{A;}fn i32 main(){let E e=.B;return 0;}', 'unknown enum member'),
     ('untyped', 'enum E{A;}fn i32 main(){let e=.A;return 0;}', 'enum context required'),
     ('missing-case', 'enum E{A;B;}fn i32 main(){let E e=.A;return switch(e){case .A:{0}};}', 'non-exhaustive enum switch'),

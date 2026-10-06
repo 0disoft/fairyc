@@ -7,11 +7,13 @@ import std::vec as v;
 // Source-independent nominal layout facts. Field IDs are one-based; shape type
 // IDs preserve 256 + declaration index. Every name/span indexes owned HIR bytes.
 pub struct Shape { u32 type; usize binding; usize field_start; usize field_count; bool public; }
-pub struct Field { u32 owner; u32 type; usize start; usize end; }
+pub struct Field { u32 owner; u32 type; usize start; usize end; usize payload_start; usize payload_count; }
 pub resource Table { v::Vec<Shape> shapes; v::Vec<Field> fields; cleanup { } }
 pub fn Table empty() { return Table { .shapes = v::empty<Shape>(), .fields = v::empty<Field>() }; }
 pub fn usize count(ref Table p) { return v::len<Shape>(ref p.shapes); }
 pub fn bool has_enums(ref Table p) { var usize i=0;while(i<count(p)){if(enums::valid(at(p,i).type)){return true;}i+=1;}return false; }
+pub fn bool has_payloads(ref Table p) { var usize i=1;while(i<=field_count(p)){if(field_at(p,i).payload_count!=0){return true;}i+=1;}return false; }
+pub fn usize member_count(ref Table p,u32 type) { let s=at(p,find(p,type)-1);var usize n=0;var usize i=0;while(i<s.field_count){if(field_at(p,s.field_start+i+1).type==0){n+=1;}i+=1;}return n; }
 pub fn usize field_count(ref Table p) { return v::len<Field>(ref p.fields); }
 pub fn Shape at(ref Table p, usize i) { assert(i < count(p)); return *v::at<Shape>(ref p.shapes,i); }
 pub fn Field field_at(ref Table p, usize id) { assert(id > 0 && id <= field_count(p)); return *v::at<Field>(ref p.fields,id - 1); }
@@ -34,11 +36,18 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
     while (i < count(p)) {
         let Shape s = at(p,i);
         if (!(s.type >= 256 && s.type <= 767) && !enums::valid(s.type) || s.binding == 0 || s.binding > bindings || s.field_start != offset || s.field_count > field_count(p) - offset) { return false; }
-        if(enums::valid(s.type) && (s.field_count==0 || s.field_count>128)){return false;}
+        if(enums::valid(s.type) && (member_count(p,s.type)==0 || member_count(p,s.type)>128)){return false;}
         var usize j = 0; while (j < i) { if (at(p,j).type == s.type || at(p,j).binding == s.binding) { return false; } j += 1; }
         j = 0; while (j < s.field_count) {
             let Field f = field_at(p,offset + j + 1);
-            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type!=0}else{literals::valid(f.type) || f.type==11 || enums::valid(f.type) || !valid_type(p,f.type,false)})) { return false; } j += 1;
+            if(enums::valid(s.type)){
+                if(f.type==0){
+                    if(f.payload_count==0 && f.payload_start!=0 || f.payload_count>16 || f.payload_count>j || f.payload_count!=0 && f.payload_start!=offset+j-f.payload_count){return false;}
+                    var usize k=0;while(k<f.payload_count){if(field_at(p,f.payload_start+k+1).type==0){return false;}k+=1;}
+                    if(j>f.payload_count && field_at(p,offset+j-f.payload_count).type!=0){return false;}
+                }else if(f.payload_count!=0 || f.payload_start!=0 || j+1==s.field_count){return false;}
+            }else if(f.payload_count!=0 || f.payload_start!=0){return false;}
+            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6}else{literals::valid(f.type) || f.type==11 || enums::valid(f.type) || !valid_type(p,f.type,false)})) { return false; } j += 1;
         }
         offset += s.field_count; i += 1;
     }

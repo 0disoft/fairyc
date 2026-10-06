@@ -41,6 +41,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 28) {
         if(!enums::valid(expected)){return error(problem,24,node.start,node.end,0,expected);}
         let usize member=enums::member(parsed,expected,op);if(member==0){return error(problem,25,node.start,node.end,expected,0);}
+        if(syntax::field_at(parsed,member-1).payload_count!=0){return error(problem,31,node.start,node.end,expected,0);}
         state::set_flags(tables,id-1,state::small_id(member));return recorded(tables,id,value(expected,false));
     }
     if (node.kind == 15) {
@@ -49,15 +50,23 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         let d=syntax::declaration_at(parsed,(subject.type-131072) as usize);var u8[1024] seen=[0;1024];var usize count=0;var usize link=node.right;
         var u32 join=expected;var bool known=false;var bool terminates=true;
         while(link!=0){let usize arm_id=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,arm_id);let pattern=syntax::expression_at(parsed,arm.left);
-            if(pattern.kind!=16 || pattern.left!=0 || pattern.right!=0){return error(problem,28,pattern.start,pattern.end,0,0);}
+            if((pattern.kind!=16 || pattern.left!=0 || pattern.right!=0) && pattern.kind!=32){return error(problem,28,pattern.start,pattern.end,0,0);}
             let usize member=enums::member(parsed,subject.type,syntax::expression_text(parsed,arm.left));if(member==0){return error(problem,25,pattern.start,pattern.end,subject.type,0);}
             if(seen[member-1]!=0){return error(problem,26,pattern.start,pattern.end,0,0);}seen[member-1]=1;count+=1;
             state::set_flags(tables,arm_id-1,state::small_id(member));
+            let m=syntax::field_at(parsed,member-1);let usize fields=if(pattern.kind==32){syntax::pattern_field_count(parsed,arm.left)}else{0};
+            if(fields!=m.payload_count || (pattern.kind==32)!=(m.payload_count!=0)){return error(problem,31,pattern.start,pattern.end,0,0);}
+            var u8[1024] bound=[0;1024];var usize n=0;while(n<fields){let usize field_id=syntax::pattern_field(parsed,arm.left,n);let f=syntax::expression_at(parsed,field_id);
+                let usize target=enums::payload_field(parsed,member,syntax::expression_text(parsed,field_id));if(target==0){return error(problem,18,f.start,f.end,0,0);}
+                if(bound[target-1]!=0){return error(problem,17,f.start,f.end,0,0);}bound[target-1]=1;state::set_flags(tables,field_id-1,state::small_id(target));
+                let u32 type=state::primitive(parsed,syntax::field_at(parsed,target-1).type_root);state::set_expressions(tables,f.left-1,type);
+                var usize symbol_id=1;while(symbol_id<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,symbol_id);if(s.kind==8 && s.declaration==f.left){state::set_symbols(tables,symbol_id-1,type);}symbol_id+=1;}n+=1;
+            }
             let state::Value actual=block(resolved,tables,problem,arm.right,join,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}
             if(!known){join=actual.type;known=true;}else if(join!=actual.type){return error(problem,1,arm.start,arm.end,join,actual.type);}
             state::set_expressions(tables,arm_id-1,actual.type);terminates=terminates && actual.terminates;link=syntax::expression_at(parsed,link).right;
         }
-        if(count!=d.field_count){return error(problem,27,node.start,node.end,0,subject.type);}
+        if(count!=enums::member_count(parsed,subject.type)){return error(problem,27,node.start,node.end,0,subject.type);}
         if(join==9 || join==10 || join==11){return error(problem,28,node.start,node.end,0,join);}
         return recorded(tables,id,value(join,subject.terminates || terminates));
     }
@@ -205,6 +214,21 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         let u32 type = nominal::resolve(parsed,syntax::field_at(parsed,field - 1).type_root);
         state::set_flags(tables,id - 1,state::small_id(field));
         return recorded(tables,id,value(type,owner.terminates));
+    }
+    if (node.kind == 10 && syntax::expression_at(parsed,node.left).kind==28) {
+        if(!enums::valid(expected)){return error(problem,24,node.start,node.end,0,expected);}
+        let usize member=enums::member(parsed,expected,syntax::expression_text(parsed,node.left));if(member==0){return error(problem,25,node.start,node.end,expected,0);}
+        let m=syntax::field_at(parsed,member-1);let usize count=syntax::record_field_count(parsed,id);
+        if(m.payload_count==0 || count!=m.payload_count){return error(problem,31,node.start,node.end,expected,0);}
+        var u8[1024] seen=[0;1024];var usize i=0;var bool terminates=false;
+        while(i<count){let usize entry=syntax::record_field(parsed,id,i);let f=syntax::expression_at(parsed,entry);
+            let usize target=enums::payload_field(parsed,member,syntax::expression_text(parsed,entry));if(target==0){return error(problem,18,f.start,f.end,expected,0);}
+            if(seen[target-1]!=0){return error(problem,17,f.start,f.end,0,0);}seen[target-1]=1;
+            let u32 type=state::primitive(parsed,syntax::field_at(parsed,target-1).type_root);let state::Value actual=expression(resolved,tables,problem,f.left,type,result_type,depth+1,loop_depth);
+            if(problem.code!=0){return actual;}if(actual.type!=type){return error(problem,1,f.start,f.end,type,actual.type);}
+            state::set_flags(tables,entry-1,state::small_id(target));state::set_expressions(tables,entry-1,type);terminates=terminates || actual.terminates;i+=1;
+        }
+        state::set_flags(tables,id-1,state::small_id(member));return recorded(tables,id,value(expected,terminates));
     }
     if (node.kind == 10) {
         let syntax::Expression target = syntax::expression_at(parsed,node.left);

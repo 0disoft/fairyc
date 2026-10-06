@@ -26,7 +26,7 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
             var usize j = 0;
             while (j < d.field_count) {
                 let f = syntax::field_at(parsed,d.field_start + j);
-                if (!v::push<shapes::Field>(ref mut fields,shapes::Field { .owner, .type = nominal::resolve(parsed,f.type_root), .start = f.name_start, .end = f.name_end }).is_ok) { return .err(3); } j += 1;
+                if (!v::push<shapes::Field>(ref mut fields,shapes::Field { .owner, .type = nominal::resolve(parsed,f.type_root), .start = f.name_start, .end = f.name_end, .payload_start = f.payload_start, .payload_count = f.payload_count }).is_ok) { return .err(3); } j += 1;
             }
         } else if (d.kind != 1 && d.kind != 2 && d.kind != 3) { return .err(4); }
         index += 1;
