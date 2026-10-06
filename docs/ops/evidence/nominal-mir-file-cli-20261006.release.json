@@ -1,0 +1,1022 @@
+{
+  "profile": "release",
+  "runs": [
+    {
+      "case": "fields",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\fields.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t2\t25\t26\nD\t2\t257\t6\t32\t33\nF\t1\t2\t35\t89\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti64\t42\t43\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tnominal:257\t50\t51\t2\t2\t0\t0\t0\t0\nE\t1\tboolean\tbool\t-\t57\t61\t0\t0\t0\t0\t0\t0\t0\t1\t-\nE\t2\tinitializer\tbool\t-\t54\t61\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\ti64\t-\t65\t75\t0\t0\t0\t0\t0\t0\t0\t0\t4000000000\nE\t4\tinitializer\ti64\t-\t62\t75\t3\t0\t0\t0\t1\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t52\t76\t0\t0\t0\t0\t1\t2\t2\t0\t-\nE\t6\treference\tnominal:257\t-\t84\t85\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\tfield\ti64\t-\t84\t87\t6\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t46\t77\t2\t5\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t77\t88\t2\t7\t0\t0\t-\t0\t0\t0\t0\nK\t1\t45\t89\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t2\nA\t3\t4\n",
+      "stderr": "",
+      "inputSHA256": "f29e8bb3c6a4ad7644c79129af1a044d9767ca43cf0fdb44215da5747297d293",
+      "unchanged": true
+    },
+    {
+      "case": "nested",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\nested.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t257\t39\t40\nF\t1\t3\t42\t110\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\ti32\t49\t50\t0\t0\t0\t4\t0\t0\nB\t4\tvar\tnominal:258\t57\t58\t3\t2\t0\t0\t0\t0\nB\t5\tlet\tnominal:258\t86\t90\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t69\t70\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t66\t70\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t64\t71\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t4\tinitializer\tnominal:257\t-\t61\t71\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:258\t-\t59\t72\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t6\treference\tnominal:258\t-\t73\t74\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t7\tfield\tnominal:257\t-\t73\t76\t6\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tfield\ti32\t-\t73\t78\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t10\treference\tnominal:258\t-\t91\t92\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t11\treference\tnominal:258\t-\t100\t104\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t12\tfield\tnominal:257\t-\t100\t106\t11\t0\t0\t0\t2\t0\t0\t0\t-\nE\t13\tfield\ti32\t-\t100\t108\t12\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t53\t73\t2\t5\t0\t4\t-\t0\t0\t0\t0\nS\t2\tassignment\t73\t82\t2\t9\t8\t0\t+\t0\t0\t0\t0\nS\t3\tbinding\t82\t93\t2\t10\t0\t5\t-\t0\t0\t0\t0\nS\t4\treturn\t93\t109\t2\t13\t0\t0\t-\t0\t0\t0\t0\nK\t1\t52\t110\t3\t2\t1\t0\t4\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t4\nA\t5\t2\n",
+      "stderr": "",
+      "inputSHA256": "d824db4df9d475dea5409c8fba94b0f7d127fce2f046872fdd15d573d0dbb9a7",
+      "unchanged": true
+    },
+    {
+      "case": "forward",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\forward.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t258\t23\t24\nD\t2\t258\t1\t39\t40\nF\t1\t3\t42\t73\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t33\t34\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\tnominal:257\t47\t48\t0\t0\t0\t4\t0\t0\nE\t1\tinteger\ti32\t-\t68\t69\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t2\tinitializer\ti32\t-\t65\t69\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:258\t-\t63\t70\t0\t0\t0\t0\t2\t2\t1\t0\t-\nE\t4\tinitializer\tnominal:258\t-\t60\t70\t3\t0\t0\t0\t1\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t58\t71\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t51\t72\t2\t5\t0\t0\t-\t0\t0\t0\t0\nK\t1\t50\t73\t3\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t4\nA\t2\t2\n",
+      "stderr": "",
+      "inputSHA256": "1136c26795a01dd2d79d4f9b5fcb34513726a187268b3872c210bf3c3a22b3d4",
+      "unchanged": true
+    },
+    {
+      "case": "parameter-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\parameter-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t51\t1\t1\t0\t1\t0\nF\t2\t3\t51\t84\t3\t2\t2\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t35\t0\t0\t0\t3\t0\t1\nB\t3\tfunction\ti32\t58\t59\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\tnominal:257\t38\t39\t2\t1\t0\t0\t1\t0\nE\t1\treference\tnominal:257\t-\t48\t49\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t4\nE\t3\tinitializer\ti32\t-\t74\t78\t2\t0\t0\t0\t1\t0\t0\t0\t-\nE\t4\tconstruct\tnominal:257\t-\t72\t79\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t5\tcall\tnominal:257\t-\t69\t80\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t6\tfield\ti32\t-\t69\t82\t5\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\treturn\t41\t50\t2\t1\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t62\t83\t4\t6\t0\t0\t-\t0\t0\t0\t0\nK\t1\t40\t51\t2\t2\t1\t1\t1\t0\nK\t2\t61\t84\t3\t4\t3\t2\t1\t0\nA\t0\t4\nA\t1\t1\nA\t2\t2\nA\t3\t4\nA\t4\t3\nT\t0\tnominal:257\n",
+      "stderr": "",
+      "inputSHA256": "c1ea223bdbfef5394a569a2637504388c7a4181667e6b3b86decb6740d737d57",
+      "unchanged": true
+    },
+    {
+      "case": "empty",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\empty.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nF\t1\t2\t22\t43\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t27\t28\t0\t0\t0\t3\t0\t0\nE\t1\tconstruct\tnominal:257\t-\t38\t41\t0\t0\t0\t0\t1\t1\t0\t0\t-\nS\t1\treturn\t31\t42\t2\t1\t0\t0\t-\t0\t0\t0\t0\nK\t1\t30\t43\t2\t2\t1\t0\t1\t0\nA\t0\t1\n",
+      "stderr": "",
+      "inputSHA256": "57cebc5d4ebcfb132603f73be7288bbd8a2871358eb760b0a5ff40c758269303",
+      "unchanged": true
+    },
+    {
+      "case": "shorthand",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\shorthand.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t25\t26\nD\t2\t257\t6\t32\t33\nF\t1\t2\t35\t73\t1\t1\t0\t2\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t40\t41\t0\t0\t0\t3\t0\t2\nB\t3\tparameter\ti32\t46\t47\t2\t1\t0\t0\t2\t0\nB\t4\tparameter\tbool\t53\t54\t2\t1\t0\t0\t2\t0\nE\t1\treference\ti32\t-\t66\t67\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tinitializer\ti32\t-\t65\t67\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\treference\tbool\t-\t69\t70\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t4\tinitializer\tbool\t-\t68\t70\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:257\t-\t63\t71\t0\t0\t0\t0\t1\t3\t2\t0\t-\nS\t1\treturn\t56\t72\t2\t5\t0\t0\t-\t0\t0\t0\t0\nK\t1\t55\t73\t2\t2\t1\t2\t1\t0\nA\t0\t3\nA\t1\t4\nA\t2\t1\nA\t3\t2\nA\t4\t4\nT\t0\ti32\nT\t1\tbool\n",
+      "stderr": "",
+      "inputSHA256": "46da102fe19570f46d79cbfdc9255d80cc3c01313c3f5a58af9b852a448dc670",
+      "unchanged": true
+    },
+    {
+      "case": "branch",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\branch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t79\t1\t3\t0\t1\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t1\nB\t3\tparameter\tbool\t40\t41\t2\t1\t0\t0\t1\t0\nE\t1\treference\tbool\t-\t53\t54\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tinteger\ti32\t-\t61\t62\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t3\tinitializer\ti32\t-\t58\t62\t2\t0\t0\t0\t1\t0\t0\t0\t-\nE\t4\tconstruct\tnominal:257\t-\t56\t63\t0\t0\t0\t0\t1\t2\t1\t0\t-\nE\t5\tinteger\ti32\t-\t74\t75\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t6\tinitializer\ti32\t-\t71\t75\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t69\t76\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t8\tblock\tnominal:257\t-\t68\t77\t0\t0\t0\t2\t0\t0\t0\t0\t-\nE\t9\tif\tnominal:257\t-\t50\t77\t1\t0\t8\t1\t0\t0\t0\t0\t-\nS\t1\treturn\t43\t78\t2\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t55\t64\t2\t3\t2\t2\t0\t4\nK\t2\t68\t77\t2\t4\t2\t3\t0\t7\nK\t3\t42\t79\t2\t2\t1\t1\t1\t0\nA\t0\t3\nA\t1\t1\nA\t2\t3\nA\t3\t6\nT\t0\tbool\n",
+      "stderr": "",
+      "inputSHA256": "62af2dc96c5aafca4cbc76a30dab11f4ff0df3748659d600ff51b2d99c869bd2",
+      "unchanged": true
+    },
+    {
+      "case": "whole-assignment",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\whole-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t25\t26\nF\t1\t2\t28\t71\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t0\nB\t3\tvar\tnominal:257\t41\t42\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t48\t49\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t45\t49\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t43\t50\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t4\treference\tnominal:257\t-\t51\t52\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t58\t59\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t6\tinitializer\ti32\t-\t55\t59\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t53\t60\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t8\treference\tnominal:257\t-\t68\t69\t0\t0\t0\t0\t3\t0\t0\t0\t-\nS\t1\tbinding\t37\t51\t2\t3\t0\t3\t-\t0\t0\t0\t0\nS\t2\tassignment\t51\t61\t2\t7\t4\t0\t=\t0\t0\t0\t0\nS\t3\treturn\t61\t70\t2\t8\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t71\t2\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t2\nA\t4\t6\n",
+      "stderr": "",
+      "inputSHA256": "cf7dc9e15319142a1131d824a9234a93ddd3d35247dae29b5eccb25b3ff63901",
+      "unchanged": true
+    },
+    {
+      "case": "context-minimum",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\context-minimum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t2\t25\t26\nF\t1\t2\t28\t72\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t33\t34\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti64\t-\t49\t69\t0\t0\t0\t0\t0\t0\t0\t0\t-9223372036854775808\nE\t2\tinitializer\ti64\t-\t46\t69\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t44\t70\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t37\t71\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t36\t72\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+      "stderr": "",
+      "inputSHA256": "0977beb18e4f4f51ed9a848fda31a3f6ad446e218adcb3e28e2055d9020c4576",
+      "unchanged": true
+    },
+    {
+      "case": "CRLF-UTF8",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\CRLF-UTF8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t37\t38\nF\t1\t2\t40\t65\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t31\t32\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t45\t46\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t61\t62\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t2\tinitializer\ti32\t-\t58\t62\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t56\t63\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t49\t64\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t48\t65\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+      "stderr": "",
+      "inputSHA256": "a544838febd5bd8d98d9391c290e94379dad088a01556bd88082d703ea4eb4f4",
+      "unchanged": true
+    },
+    {
+      "case": "public-struct",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\public-struct.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t1\nD\t1\t257\t1\t29\t30\nF\t1\t2\t32\t57\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t23\t24\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t37\t38\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t53\t54\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t50\t54\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t48\t55\t0\t0\t0\t0\t1\t1\t1\t0\t-\nS\t1\treturn\t41\t56\t2\t3\t0\t0\t-\t0\t0\t0\t0\nK\t1\t40\t57\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+      "stderr": "",
+      "inputSHA256": "55dea5857897e4982990e60991f665b65ebe0c77978eeeb4b520c14ad5ececcc",
+      "unchanged": true
+    },
+    {
+      "case": "initializer-order",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\initializer-order.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t28\t29\nD\t2\t257\t1\t34\t35\nF\t1\t2\t37\t91\t1\t2\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\tnominal:257\t45\t46\t0\t0\t0\t3\t0\t0\nB\t3\tvar\ti32\t57\t58\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t59\t60\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\treference\ti32\t-\t76\t77\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tinitializer\ti32\t-\t73\t77\t2\t0\t0\t0\t2\t0\t0\t0\t-\nE\t4\treference\ti32\t-\t82\t83\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t5\tinteger\ti32\t-\t84\t85\t0\t0\t0\t0\t0\t0\t0\t0\t3\nE\t6\treference\ti32\t-\t86\t87\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\tblock\ti32\t-\t81\t88\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t8\tinitializer\ti32\t-\t78\t88\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tconstruct\tnominal:257\t-\t68\t89\t0\t0\t0\t0\t1\t2\t2\t0\t-\nS\t1\tbinding\t49\t61\t2\t1\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t61\t90\t2\t9\t0\t0\t-\t0\t0\t0\t0\nS\t3\tassignment\t82\t86\t3\t5\t4\t0\t=\t0\t0\t0\t0\nK\t1\t81\t88\t2\t3\t2\t4\t1\t6\nK\t2\t48\t91\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t8\nA\t4\t3\n",
+      "stderr": "",
+      "inputSHA256": "399fb6b46864b44830c8432602b1a745f008fbe498b0917c854cbe8f0e41ebd9",
+      "unchanged": true
+    },
+    {
+      "case": "initializer-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\initializer-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t28\t29\nD\t2\t257\t1\t34\t35\nF\t1\t2\t37\t93\t1\t2\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t44\t45\t0\t0\t0\t3\t0\t0\nB\t3\tlet\tnominal:257\t52\t53\t2\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t62\t63\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t59\t63\t1\t0\t0\t0\t2\t0\t0\t0\t-\nE\t3\tinteger\ti32\t-\t75\t76\t0\t0\t0\t0\t0\t0\t0\t0\t9\nE\t4\tinteger\ti32\t-\t77\t78\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tblock\ti32\t-\t67\t79\t0\t0\t0\t1\t0\t0\t0\t0\t-\nE\t6\tinitializer\ti32\t-\t64\t79\t5\t0\t0\t0\t1\t0\t0\t0\t-\nE\t7\tconstruct\tnominal:257\t-\t54\t80\t0\t0\t0\t0\t1\t2\t2\t0\t-\nE\t8\treference\tnominal:257\t-\t88\t89\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t9\tfield\ti32\t-\t88\t91\t8\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\tbinding\t48\t81\t2\t7\t0\t3\t-\t0\t0\t0\t0\nS\t2\treturn\t68\t77\t3\t3\t0\t0\t-\t0\t0\t0\t0\nS\t3\treturn\t81\t92\t2\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t67\t79\t2\t3\t2\t4\t1\t4\nK\t2\t47\t93\t2\t2\t1\t0\t2\t0\nA\t0\t1\nA\t1\t3\nA\t2\t2\nA\t3\t6\nA\t4\t2\n",
+      "stderr": "",
+      "inputSHA256": "67f314d81c971db39c5058ca25d091faa1b197e31581871b48907916837146c7",
+      "unchanged": true
+    },
+    {
+      "case": "nested-assignment",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\nested-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t257\t39\t40\nF\t1\t3\t42\t93\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\tnominal:258\t47\t48\t0\t0\t0\t4\t0\t0\nB\t4\tvar\tnominal:258\t55\t56\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t67\t68\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t64\t68\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t62\t69\t0\t0\t0\t0\t1\t4\t1\t0\t-\nE\t4\tinitializer\tnominal:257\t-\t59\t69\t3\t0\t0\t0\t2\t0\t0\t0\t-\nE\t5\tconstruct\tnominal:258\t-\t57\t70\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t6\treference\tnominal:258\t-\t71\t72\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t7\tfield\tnominal:257\t-\t71\t74\t6\t0\t0\t0\t2\t0\t0\t0\t-\nE\t8\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t9\tinitializer\ti32\t-\t77\t81\t8\t0\t0\t0\t1\t0\t0\t0\t-\nE\t10\tconstruct\tnominal:257\t-\t75\t82\t0\t0\t0\t0\t1\t5\t1\t0\t-\nE\t11\treference\tnominal:258\t-\t90\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nS\t1\tbinding\t51\t71\t2\t5\t0\t4\t-\t0\t0\t0\t0\nS\t2\tassignment\t71\t83\t2\t10\t7\t0\t=\t0\t0\t0\t0\nS\t3\treturn\t83\t92\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t50\t93\t3\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t2\nA\t5\t9\n",
+      "stderr": "",
+      "inputSHA256": "c1200375b35f514cf0e1372adf1dec11980eff0a07c3b0d97cd3db1e84d582ce",
+      "unchanged": true
+    },
+    {
+      "case": "distinct-identities",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\hir\\distinct-identities.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t25\t26\nD\t2\t258\t1\t41\t42\nF\t1\t3\t44\t99\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t20\t0\t0\t0\t2\t0\t0\nB\t2\tstruct\tnominal:258\t35\t36\t0\t0\t0\t3\t0\t0\nB\t3\tfunction\ti32\t51\t52\t0\t0\t0\t4\t0\t0\nB\t4\tlet\tnominal:257\t59\t60\t3\t2\t0\t0\t0\t0\nB\t5\tlet\tnominal:258\t73\t74\t3\t2\t0\t0\t0\t0\nE\t1\tinteger\ti32\t-\t66\t67\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t63\t67\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t61\t68\t0\t0\t0\t0\t1\t3\t1\t0\t-\nE\t4\tinteger\ti32\t-\t80\t81\t0\t0\t0\t0\t0\t0\t0\t0\t2\nE\t5\tinitializer\ti32\t-\t77\t81\t4\t0\t0\t0\t2\t0\t0\t0\t-\nE\t6\tconstruct\tnominal:258\t-\t75\t82\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t7\treference\tnominal:257\t-\t90\t91\t0\t0\t0\t0\t4\t0\t0\t0\t-\nE\t8\tfield\ti32\t-\t90\t93\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\treference\tnominal:258\t-\t94\t95\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t10\tfield\ti32\t-\t94\t97\t9\t0\t0\t0\t2\t0\t0\t0\t-\nE\t11\tbinary\ti32\t+\t90\t97\t8\t10\t0\t0\t0\t0\t0\t0\t-\nS\t1\tbinding\t55\t69\t2\t3\t0\t4\t-\t0\t0\t0\t0\nS\t2\tbinding\t69\t83\t2\t6\t0\t5\t-\t0\t0\t0\t0\nS\t3\treturn\t83\t98\t2\t11\t0\t0\t-\t0\t0\t0\t0\nK\t1\t54\t99\t3\t2\t1\t0\t3\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t2\nA\t4\t5\n",
+      "stderr": "",
+      "inputSHA256": "ac528d8103ae482effb8cc3328c9b2181502a83d2df4dcad2ec6b7638813bea7",
+      "unchanged": true
+    },
+    {
+      "case": "fields",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\fields.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "f29e8bb3c6a4ad7644c79129af1a044d9767ca43cf0fdb44215da5747297d293",
+      "unchanged": true
+    },
+    {
+      "case": "nested",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\nested.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "d824db4df9d475dea5409c8fba94b0f7d127fce2f046872fdd15d573d0dbb9a7",
+      "unchanged": true
+    },
+    {
+      "case": "forward",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\forward.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "1136c26795a01dd2d79d4f9b5fcb34513726a187268b3872c210bf3c3a22b3d4",
+      "unchanged": true
+    },
+    {
+      "case": "parameter-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\parameter-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "c1ea223bdbfef5394a569a2637504388c7a4181667e6b3b86decb6740d737d57",
+      "unchanged": true
+    },
+    {
+      "case": "empty",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\empty.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "57cebc5d4ebcfb132603f73be7288bbd8a2871358eb760b0a5ff40c758269303",
+      "unchanged": true
+    },
+    {
+      "case": "shorthand",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\shorthand.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "46da102fe19570f46d79cbfdc9255d80cc3c01313c3f5a58af9b852a448dc670",
+      "unchanged": true
+    },
+    {
+      "case": "branch",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\branch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "62af2dc96c5aafca4cbc76a30dab11f4ff0df3748659d600ff51b2d99c869bd2",
+      "unchanged": true
+    },
+    {
+      "case": "whole-assignment",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\whole-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "cf7dc9e15319142a1131d824a9234a93ddd3d35247dae29b5eccb25b3ff63901",
+      "unchanged": true
+    },
+    {
+      "case": "context-minimum",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\context-minimum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "0977beb18e4f4f51ed9a848fda31a3f6ad446e218adcb3e28e2055d9020c4576",
+      "unchanged": true
+    },
+    {
+      "case": "CRLF-UTF8",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\CRLF-UTF8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": "",
+      "inputSHA256": "a544838febd5bd8d98d9391c290e94379dad088a01556bd88082d703ea4eb4f4",
+      "unchanged": true
+    },
+    {
+      "case": "nominal-mismatch",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\nominal-mismatch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\nominal-mismatch.fy:1:64: error: type mismatch (bytes 63..64)\n",
+      "inputSHA256": "bea4f7c67fc6e93454046abb0effc6471d09fa7dd62ae46247aa4984e89f7c93",
+      "unchanged": true
+    },
+    {
+      "case": "field-type",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\field-type.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\field-type.fy:1:50: error: type mismatch (bytes 49..53)\n",
+      "inputSHA256": "41d1d77331672a7f2cc42d6893a55c50fa2bc4b4ed55bca85a43d8fc1b25540b",
+      "unchanged": true
+    },
+    {
+      "case": "missing-field",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\missing-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\missing-field.fy:1:45: error: missing struct fields (bytes 44..47)\n",
+      "inputSHA256": "95934e40f2be190609d6b62b0c02c0a85168b2e5b1318e9cf9d90dbc5844e4b1",
+      "unchanged": true
+    },
+    {
+      "case": "duplicate-initializer",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\duplicate-initializer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\duplicate-initializer.fy:1:52: error: duplicate field (bytes 51..55)\n",
+      "inputSHA256": "025353ce16062377c369e90d792182ccb9872f54518e5d6793625bf26e450086",
+      "unchanged": true
+    },
+    {
+      "case": "unknown-initializer",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\unknown-initializer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\unknown-initializer.fy:1:47: error: unknown field (bytes 46..50)\n",
+      "inputSHA256": "df0c82c17a423633d0998cc849738fd8d975ad414c3e5d5e4f376d687080330b",
+      "unchanged": true
+    },
+    {
+      "case": "unknown-member",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\unknown-member.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\unknown-member.fy:1:52: error: unknown field (bytes 51..52)\n",
+      "inputSHA256": "90889736f3065882f9315d9e0f10f24b4fa47475f70d756e61714a5ae45effb7",
+      "unchanged": true
+    },
+    {
+      "case": "immutable-parameter",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\immutable-parameter.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\immutable-parameter.fy:1:44: error: assignment target is immutable (bytes 43..46)\n",
+      "inputSHA256": "38739f43f5b007b7ab8f4b52cf7dd9fc37ba2fd9306409a78d4ccfe4804efabd",
+      "unchanged": true
+    },
+    {
+      "case": "immutable-let",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\immutable-let.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\immutable-let.fy:1:55: error: assignment target is immutable (bytes 54..57)\n",
+      "inputSHA256": "ef0e4b8d48a4dd1f96ae12a1e39a9ec04682a32962c7b14419115c0b07a763be",
+      "unchanged": true
+    },
+    {
+      "case": "temporary-place",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\temporary-place.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\temporary-place.fy:1:69: error: assignment target is immutable (bytes 68..76)\n",
+      "inputSHA256": "0ac34e7224460f30fffa635d70810d9462d5adee81e172fc1849e4892730e4cb",
+      "unchanged": true
+    },
+    {
+      "case": "duplicate-field",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\duplicate-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\duplicate-field.fy:1:32: error: duplicate field (bytes 31..32)\n",
+      "inputSHA256": "ca2b8e80ab2975fdc24b597549d9b20b3946fc2ac56ad529dbb2702944cb4c9a",
+      "unchanged": true
+    },
+    {
+      "case": "direct-cycle",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\direct-cycle.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\direct-cycle.fy:1:20: error: recursive value type (bytes 19..20)\n",
+      "inputSHA256": "89f2224daeaa4a6c57dd6ecb4d36b765e9faefbd1201a75db7bda5895ff99adc",
+      "unchanged": true
+    },
+    {
+      "case": "indirect-cycle",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\indirect-cycle.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\indirect-cycle.fy:1:20: error: recursive value type (bytes 19..20)\n",
+      "inputSHA256": "248969f1f71a24a7befe259387e0025b8ce702c7ac390af99e55918400e342be",
+      "unchanged": true
+    },
+    {
+      "case": "unknown-type",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\unknown-type.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\unknown-type.fy:1:22: error: invalid nominal type (bytes 21..31)\n",
+      "inputSHA256": "ecd854161d262fd0936a10c28187b0251cfb7c04da3d5ee131db2647362148a3",
+      "unchanged": true
+    },
+    {
+      "case": "bare-type-value",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\bare-type-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\bare-type-value.fy:1:45: error: invalid nominal type (bytes 44..45)\n",
+      "inputSHA256": "87be363e6ba96b04036d7666138e1ed64c3e8392f73d00b67dd71f668f3b205b",
+      "unchanged": true
+    },
+    {
+      "case": "aggregate-operator",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\aggregate-operator.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\aggregate-operator.fy:1:55: error: invalid scalar operator (bytes 54..58)\n",
+      "inputSHA256": "2cfc24f2188bbc1a989c7872f59cd92d6e6030f74081c8f917aba0ec75ce842c",
+      "unchanged": true
+    },
+    {
+      "case": "literal-range",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\literal-range.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\literal-range.fy:1:49: error: integer literal out of range (bytes 48..51)\n",
+      "inputSHA256": "2e2c9103e19a5803a2afd77a5cad874e4de9fea68baabe4d1d2feb3d36a6dae7",
+      "unchanged": true
+    },
+    {
+      "case": "backend-boundary",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\backend-boundary.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-hir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t28\t29\nF\t1\t2\t31\t66\t1\t1\t0\t0\t0\nB\t1\tstruct\tnominal:257\t19\t23\t0\t0\t0\t2\t0\t0\nB\t2\tfunction\ti32\t38\t42\t0\t0\t0\t3\t0\t0\nE\t1\tinteger\ti32\t-\t60\t61\t0\t0\t0\t0\t0\t0\t0\t0\t1\nE\t2\tinitializer\ti32\t-\t57\t61\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tconstruct\tnominal:257\t-\t52\t62\t0\t0\t0\t0\t1\t1\t1\t0\t-\nE\t4\tfield\ti32\t-\t52\t64\t3\t0\t0\t0\t1\t0\t0\t0\t-\nS\t1\treturn\t45\t65\t2\t4\t0\t0\t-\t0\t0\t0\t0\nK\t1\t44\t66\t2\t2\t1\t0\t1\t0\nA\t0\t1\nA\t1\t2\n",
+      "stderr": "",
+      "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+      "unchanged": true
+    },
+    {
+      "case": "backend-boundary",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\backend-boundary.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t28\t29\nT\t1\t2\t0\t3\t1\t0\t0\t38\t42\t0\nF\t1\t1\t1\t0\t3\t0\t1\t0\t0\t31\t66\t0\nL\t1\t1\t0\t1\t0\t0\t60\t61\nL\t2\t1\t0\t257\t0\t0\t52\t62\nL\t3\t1\t0\t1\t0\t0\t52\t64\nB\t1\t1\t1\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t45\t65\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t2\t0\t1\t0\t60\t61\t1\t0\t0\nO\t2\t1\t1\t6\t2\t257\t257\t0\t0\t0\t3\t0\t0\t0\t52\t62\t-\t0\t1\nO\t3\t1\t1\t7\t3\t1\t257\t1\t2\t0\t0\t0\t0\t0\t52\t64\t-\t0\t0\nA\t0\t1\n",
+      "stderr": "",
+      "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+      "unchanged": true
+    },
+    {
+      "case": "backend-boundary",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\types\\backend-boundary.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid C input\n",
+      "inputSHA256": "c18a7cc6a42e7ab032f64b00e59622286131f6531fc60936b2440213d70729a7",
+      "unchanged": true
+    },
+    {
+      "case": "construct-read",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\construct-read.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t3\t0\t1\t0\t0\t29\t62\t0\nL\t1\t1\t0\t1\t0\t0\t55\t57\nL\t2\t1\t0\t257\t0\t0\t50\t58\nL\t3\t1\t0\t1\t0\t0\t50\t60\nB\t1\t1\t1\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t43\t61\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t2\t0\t2\t0\t55\t57\t17\t0\t0\nO\t2\t1\t1\t6\t2\t257\t257\t0\t0\t0\t3\t0\t0\t0\t50\t58\t-\t0\t1\nO\t3\t1\t1\t7\t3\t1\t257\t1\t2\t0\t0\t0\t0\t0\t50\t60\t-\t0\t0\nA\t0\t1\n",
+      "stderr": "",
+      "inputSHA256": "912da4101368f78e95a47bcf01ada5fc2be86f2cdbed1addc38b31ae5a958dee",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 17,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "reordered-frozen",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\reordered-frozen.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t26\t27\nD\t2\t257\t1\t32\t33\nT\t1\t2\t0\t3\t1\t0\t0\t42\t46\t0\nF\t1\t1\t1\t0\t14\t0\t5\t0\t0\t35\t105\t0\nL\t1\t1\t3\t1\t0\t1\t57\t58\nL\t2\t1\t4\t257\t0\t0\t65\t66\nL\t3\t1\t0\t1\t0\t0\t59\t60\nL\t4\t1\t0\t1\t0\t0\t72\t73\nL\t5\t1\t0\t1\t0\t0\t80\t81\nL\t6\t1\t0\t1\t0\t0\t82\t83\nL\t7\t1\t0\t257\t0\t0\t67\t85\nL\t8\t1\t0\t257\t0\t0\t93\t94\nL\t9\t1\t0\t1\t0\t0\t93\t96\nL\t10\t1\t0\t1\t0\t0\t97\t99\nL\t11\t1\t0\t1\t0\t0\t93\t99\nL\t12\t1\t0\t257\t0\t0\t100\t101\nL\t13\t1\t0\t1\t0\t0\t100\t103\nL\t14\t1\t0\t1\t0\t0\t93\t103\nB\t1\t1\t1\t12\t4\t0\t9\t10\t5\t1\t2\t3\t12\t0\t0\t0\t0\t1\t93\t99\nB\t2\t1\t13\t16\t4\t0\t11\t13\t1\t1\t4\t5\t16\t0\t0\t0\t0\t1\t93\t103\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t93\t99\nB\t4\t1\t17\t17\t1\t14\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t86\t104\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t93\t103\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t1\t0\t59\t60\t1\t0\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t3\t0\t3\t0\t0\t0\t49\t61\t-\t0\t0\nO\t3\t1\t1\t2\t4\t1\t1\t0\t1\t0\t4\t0\t0\t0\t72\t73\t-\t0\t0\nO\t4\t1\t1\t1\t5\t1\t1\t0\t0\t0\t5\t1\t2\t0\t80\t81\t3\t0\t0\nO\t5\t1\t1\t2\t1\t1\t1\t0\t5\t0\t6\t0\t0\t0\t78\t82\t-\t0\t0\nO\t6\t1\t1\t2\t6\t1\t1\t0\t1\t0\t7\t0\t0\t0\t82\t83\t-\t0\t0\nO\t7\t1\t1\t6\t7\t257\t257\t0\t0\t0\t8\t0\t0\t0\t67\t85\t-\t0\t2\nO\t8\t1\t1\t2\t2\t257\t257\t0\t7\t0\t9\t0\t0\t0\t61\t86\t-\t0\t0\nO\t9\t1\t1\t2\t8\t257\t257\t0\t2\t0\t10\t0\t0\t0\t93\t94\t-\t0\t0\nO\t10\t1\t1\t7\t9\t1\t257\t1\t8\t0\t11\t0\t0\t0\t93\t96\t-\t0\t0\nO\t11\t1\t1\t1\t10\t1\t1\t0\t0\t0\t12\t2\t4\t0\t97\t99\t10\t0\t0\nO\t12\t1\t1\t5\t0\t1\t1\t5\t9\t10\t0\t0\t0\t0\t93\t99\t-\t0\t0\nO\t13\t1\t2\t4\t11\t1\t1\t5\t9\t10\t14\t0\t0\t0\t93\t99\t-\t0\t0\nO\t14\t1\t2\t2\t12\t257\t257\t0\t2\t0\t15\t0\t0\t0\t100\t101\t-\t0\t0\nO\t15\t1\t2\t7\t13\t1\t257\t2\t12\t0\t16\t0\t0\t0\t100\t103\t-\t0\t0\nO\t16\t1\t2\t5\t0\t1\t1\t1\t11\t13\t0\t0\t0\t0\t93\t103\t-\t0\t0\nO\t17\t1\t4\t4\t14\t1\t1\t1\t11\t13\t0\t0\t0\t0\t93\t103\t-\t0\t0\nA\t0\t6\nA\t1\t4\n",
+      "stderr": "",
+      "inputSHA256": "e38b557dc0fa70e3fde9d3a6f388d0444285452a4bec7de78789fb6a1b6fd4f6",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 31,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "initializer-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\initializer-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t26\t27\nD\t2\t257\t1\t32\t33\nT\t1\t2\t0\t3\t1\t0\t0\t42\t46\t0\nF\t1\t1\t1\t0\t3\t0\t1\t0\t0\t35\t91\t0\nL\t1\t1\t3\t257\t0\t0\t53\t54\nL\t2\t1\t0\t1\t0\t0\t60\t61\nL\t3\t1\t0\t1\t0\t0\t73\t74\nB\t1\t1\t1\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t66\t75\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t60\t61\t1\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t0\t1\t2\t0\t73\t74\t9\t0\t0\n",
+      "stderr": "",
+      "inputSHA256": "8587dd1fb16a383c72e5ef6228793cc531e97918afe254de01e248288611d0d3",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "forward-type",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\forward-type.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t259\t3\t0\t1\t0\nD\t1\t259\t1\t85\t86\nT\t1\t1\t0\t2\t259\t0\t1\t18\t20\t0\nT\t2\t2\t0\t3\t1\t1\t0\t43\t47\t0\nS\t0\t259\nF\t1\t1\t1\t0\t2\t0\t1\t0\t1\t13\t36\t0\nF\t2\t2\t2\t2\t4\t1\t2\t1\t0\t36\t72\t0\nL\t1\t1\t4\t259\t1\t0\t23\t24\nL\t2\t1\t0\t259\t0\t0\t33\t34\nL\t3\t2\t0\t1\t0\t0\t65\t66\nL\t4\t2\t0\t259\t0\t0\t60\t67\nL\t5\t2\t0\t259\t0\t0\t57\t68\nL\t6\t2\t0\t1\t0\t0\t57\t70\nB\t1\t1\t1\t1\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t26\t35\nB\t2\t2\t2\t3\t5\t0\t0\t0\t0\t0\t3\t0\t0\t1\t5\t2\t1\t0\t57\t68\nB\t3\t2\t4\t4\t1\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t50\t71\nO\t1\t1\t1\t2\t2\t259\t259\t0\t1\t0\t0\t0\t0\t0\t33\t34\t-\t0\t0\nO\t2\t2\t2\t1\t3\t1\t1\t0\t0\t0\t3\t0\t1\t0\t65\t66\t7\t0\t0\nO\t3\t2\t2\t6\t4\t259\t259\t0\t0\t0\t0\t0\t0\t0\t60\t67\t-\t1\t1\nO\t4\t2\t3\t7\t6\t1\t259\t1\t5\t0\t0\t0\t0\t0\t57\t70\t-\t0\t0\nA\t0\t1\nA\t1\t3\nA\t2\t4\n",
+      "stderr": "",
+      "inputSHA256": "a457f10915ad62e530ddbe9a09d56f321149e0de6aa3837b35d9f78b94cc15ed",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "nested-call-copy",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\nested-call-copy.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nN\t258\t2\t2\t2\t0\nD\t1\t257\t2\t26\t27\nD\t2\t257\t6\t33\t35\nD\t3\t258\t257\t48\t49\nD\t4\t258\t1\t54\t55\nT\t1\t3\t0\t4\t258\t0\t1\t62\t64\t0\nT\t2\t4\t0\t5\t1\t1\t0\t87\t91\t0\nS\t0\t258\nF\t1\t1\t1\t0\t2\t0\t1\t0\t1\t57\t80\t0\nF\t2\t2\t2\t2\t32\t1\t10\t1\t0\t80\t237\t0\nL\t1\t1\t5\t258\t1\t0\t67\t68\nL\t2\t1\t0\t258\t0\t0\t77\t78\nL\t3\t2\t6\t258\t0\t1\t98\t99\nL\t4\t2\t7\t258\t0\t0\t141\t142\nL\t5\t2\t0\t1\t0\t0\t105\t106\nL\t6\t2\t0\t6\t0\t0\t116\t120\nL\t7\t2\t0\t2\t0\t0\t124\t134\nL\t8\t2\t0\t257\t0\t0\t110\t135\nL\t9\t2\t0\t258\t0\t0\t100\t136\nL\t10\t2\t0\t258\t0\t0\t146\t147\nL\t11\t2\t0\t258\t0\t0\t143\t148\nL\t12\t2\t0\t258\t0\t0\t149\t150\nL\t13\t2\t0\t257\t0\t0\t149\t152\nL\t14\t2\t0\t2\t0\t0\t149\t154\nL\t15\t2\t0\t2\t0\t0\t156\t157\nL\t16\t2\t0\t2\t0\t0\t149\t158\nL\t17\t2\t0\t257\t0\t0\t149\t158\nL\t18\t2\t0\t257\t0\t0\t149\t158\nL\t19\t2\t0\t258\t0\t0\t149\t158\nL\t20\t2\t0\t258\t0\t0\t165\t166\nL\t21\t2\t0\t257\t0\t0\t165\t168\nL\t22\t2\t0\t2\t0\t0\t165\t170\nL\t23\t2\t0\t2\t0\t0\t172\t182\nL\t24\t2\t0\t6\t0\t0\t165\t182\nL\t25\t2\t0\t258\t0\t0\t191\t192\nL\t26\t2\t0\t257\t0\t0\t191\t194\nL\t27\t2\t0\t2\t0\t0\t191\t196\nL\t28\t2\t0\t2\t0\t0\t198\t208\nL\t29\t2\t0\t6\t0\t0\t191\t208\nL\t30\t2\t0\t258\t0\t0\t217\t218\nL\t31\t2\t0\t257\t0\t0\t217\t220\nL\t32\t2\t0\t6\t0\t0\t217\t223\nL\t33\t2\t0\t258\t0\t0\t232\t233\nL\t34\t2\t0\t1\t0\t0\t232\t235\nB\t1\t1\t1\t1\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t70\t79\nB\t2\t2\t2\t8\t5\t0\t0\t0\t0\t0\t3\t0\t0\t1\t11\t5\t1\t0\t143\t148\nB\t3\t2\t9\t14\t4\t0\t14\t15\t1\t2\t4\t5\t14\t0\t0\t0\t0\t1\t149\t158\nB\t4\t2\t15\t25\t4\t0\t24\t0\t0\t6\t6\t7\t25\t0\t0\t0\t0\t16\t158\t184\nB\t5\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t149\t158\nB\t6\t2\t26\t31\t4\t0\t29\t0\t0\t6\t8\t9\t31\t0\t0\t0\t0\t16\t184\t210\nB\t7\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t158\t184\nB\t8\t2\t32\t35\t4\t0\t32\t0\t0\t6\t10\t11\t35\t0\t0\t0\t0\t16\t210\t225\nB\t9\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t184\t210\nB\t10\t2\t36\t37\t1\t34\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t225\t236\nB\t11\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t210\t225\nO\t1\t1\t1\t2\t2\t258\t258\t0\t1\t0\t0\t0\t0\t0\t77\t78\t-\t0\t0\nO\t2\t2\t2\t1\t5\t1\t1\t0\t0\t0\t3\t0\t1\t0\t105\t106\t2\t0\t0\nO\t3\t2\t2\t1\t6\t6\t6\t0\t0\t0\t4\t0\t0\t1\t116\t120\t-\t0\t0\nO\t4\t2\t2\t1\t7\t2\t2\t0\t0\t0\t5\t1\t11\t0\t124\t134\t4000000000\t0\t0\nO\t5\t2\t2\t6\t8\t257\t257\t0\t0\t0\t6\t0\t0\t0\t110\t135\t-\t1\t2\nO\t6\t2\t2\t6\t9\t258\t258\t0\t0\t0\t7\t0\t0\t0\t100\t136\t-\t3\t2\nO\t7\t2\t2\t2\t3\t258\t258\t0\t9\t0\t8\t0\t0\t0\t94\t137\t-\t0\t0\nO\t8\t2\t2\t2\t10\t258\t258\t0\t3\t0\t0\t0\t0\t0\t146\t147\t-\t0\t0\nO\t9\t2\t3\t2\t4\t258\t258\t0\t11\t0\t10\t0\t0\t0\t137\t149\t-\t0\t0\nO\t10\t2\t3\t2\t12\t258\t258\t0\t3\t0\t11\t0\t0\t0\t149\t150\t-\t0\t0\nO\t11\t2\t3\t7\t13\t257\t258\t3\t12\t0\t12\t0\t0\t0\t149\t152\t-\t0\t0\nO\t12\t2\t3\t7\t14\t2\t257\t1\t13\t0\t13\t0\t0\t0\t149\t154\t-\t0\t0\nO\t13\t2\t3\t1\t15\t2\t2\t0\t0\t0\t14\t11\t12\t0\t156\t157\t3\t0\t0\nO\t14\t2\t3\t5\t0\t2\t2\t1\t14\t15\t0\t0\t0\t0\t149\t158\t-\t0\t0\nO\t15\t2\t4\t4\t16\t2\t2\t1\t14\t15\t16\t0\t0\t0\t149\t158\t-\t0\t0\nO\t16\t2\t4\t7\t17\t257\t258\t3\t3\t0\t17\t0\t0\t0\t149\t158\t-\t0\t0\nO\t17\t2\t4\t8\t18\t257\t257\t1\t17\t16\t18\t0\t0\t0\t149\t158\t-\t0\t0\nO\t18\t2\t4\t8\t19\t258\t258\t3\t3\t18\t19\t0\t0\t0\t149\t158\t-\t0\t0\nO\t19\t2\t4\t2\t3\t258\t258\t0\t19\t0\t20\t0\t0\t0\t149\t158\t-\t0\t0\nO\t20\t2\t4\t2\t20\t258\t258\t0\t4\t0\t21\t0\t0\t0\t165\t166\t-\t0\t0\nO\t21\t2\t4\t7\t21\t257\t258\t3\t20\t0\t22\t0\t0\t0\t165\t168\t-\t0\t0\nO\t22\t2\t4\t7\t22\t2\t257\t1\t21\t0\t23\t0\t0\t0\t165\t170\t-\t0\t0\nO\t23\t2\t4\t1\t23\t2\t2\t0\t0\t0\t24\t12\t22\t0\t172\t182\t4000000000\t0\t0\nO\t24\t2\t4\t4\t24\t6\t2\t13\t22\t23\t25\t0\t0\t0\t165\t182\t-\t0\t0\nO\t25\t2\t4\t5\t0\t6\t6\t0\t24\t0\t0\t0\t0\t0\t158\t184\t-\t0\t0\nO\t26\t2\t6\t2\t25\t258\t258\t0\t3\t0\t27\t0\t0\t0\t191\t192\t-\t0\t0\nO\t27\t2\t6\t7\t26\t257\t258\t3\t25\t0\t28\t0\t0\t0\t191\t194\t-\t0\t0\nO\t28\t2\t6\t7\t27\t2\t257\t1\t26\t0\t29\t0\t0\t0\t191\t196\t-\t0\t0\nO\t29\t2\t6\t1\t28\t2\t2\t0\t0\t0\t30\t22\t32\t0\t198\t208\t4000000003\t0\t0\nO\t30\t2\t6\t4\t29\t6\t2\t13\t27\t28\t31\t0\t0\t0\t191\t208\t-\t0\t0\nO\t31\t2\t6\t5\t0\t6\t6\t0\t29\t0\t0\t0\t0\t0\t184\t210\t-\t0\t0\nO\t32\t2\t8\t2\t30\t258\t258\t0\t4\t0\t33\t0\t0\t0\t217\t218\t-\t0\t0\nO\t33\t2\t8\t7\t31\t257\t258\t3\t30\t0\t34\t0\t0\t0\t217\t220\t-\t0\t0\nO\t34\t2\t8\t7\t32\t6\t257\t2\t31\t0\t35\t0\t0\t0\t217\t223\t-\t0\t0\nO\t35\t2\t8\t5\t0\t6\t6\t0\t32\t0\t0\t0\t0\t0\t210\t225\t-\t0\t0\nO\t36\t2\t10\t2\t33\t258\t258\t0\t4\t0\t37\t0\t0\t0\t232\t233\t-\t0\t0\nO\t37\t2\t10\t7\t34\t1\t258\t4\t33\t0\t0\t0\t0\t0\t232\t235\t-\t0\t0\nA\t0\t1\nA\t1\t7\nA\t2\t6\nA\t3\t8\nA\t4\t5\nA\t5\t10\n",
+      "stderr": "",
+      "inputSHA256": "d9e0be4e61bb78ed8cd445ed935eae09b590105eaf1525935a0c3ca9fb098f60",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 2,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "whole-assignment",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\whole-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t7\t0\t1\t0\t0\t29\t79\t0\nL\t1\t1\t3\t257\t0\t1\t47\t48\nL\t2\t1\t0\t1\t0\t0\t54\t55\nL\t3\t1\t0\t257\t0\t0\t49\t56\nL\t4\t1\t0\t1\t0\t0\t64\t65\nL\t5\t1\t0\t257\t0\t0\t59\t66\nL\t6\t1\t0\t257\t0\t0\t74\t75\nL\t7\t1\t0\t1\t0\t0\t74\t77\nB\t1\t1\t1\t8\t1\t7\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t67\t78\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t54\t55\t1\t0\t0\nO\t2\t1\t1\t6\t3\t257\t257\t0\t0\t0\t3\t0\t0\t0\t49\t56\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t3\t0\t4\t0\t0\t0\t43\t57\t-\t0\t0\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t5\t1\t2\t0\t64\t65\t8\t0\t0\nO\t5\t1\t1\t6\t5\t257\t257\t0\t0\t0\t6\t0\t0\t0\t59\t66\t-\t1\t1\nO\t6\t1\t1\t2\t1\t257\t257\t0\t5\t0\t7\t0\t0\t0\t57\t67\t-\t0\t0\nO\t7\t1\t1\t2\t6\t257\t257\t0\t1\t0\t8\t0\t0\t0\t74\t75\t-\t0\t0\nO\t8\t1\t1\t7\t7\t1\t257\t1\t6\t0\t0\t0\t0\t0\t74\t77\t-\t0\t0\nA\t0\t2\nA\t1\t4\n",
+      "stderr": "",
+      "inputSHA256": "a1b1b6b9fdf6509fec78d12ba5a3922bba8fe643ff1ff9d39dba3cb74349f7d1",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "nested-assignment",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\nested-assignment.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t2\t0\nD\t1\t257\t1\t26\t27\nD\t2\t258\t257\t40\t41\nD\t3\t258\t1\t46\t47\nT\t1\t3\t0\t4\t1\t0\t0\t56\t60\t0\nF\t1\t1\t1\t0\t14\t0\t3\t0\t0\t49\t118\t0\nL\t1\t1\t4\t258\t0\t1\t67\t68\nL\t2\t1\t0\t1\t0\t0\t79\t80\nL\t3\t1\t0\t257\t0\t0\t74\t81\nL\t4\t1\t0\t1\t0\t0\t85\t86\nL\t5\t1\t0\t258\t0\t0\t69\t87\nL\t6\t1\t0\t1\t0\t0\t97\t98\nL\t7\t1\t0\t257\t0\t0\t92\t99\nL\t8\t1\t0\t258\t0\t0\t88\t100\nL\t9\t1\t0\t258\t0\t0\t107\t108\nL\t10\t1\t0\t257\t0\t0\t107\t110\nL\t11\t1\t0\t1\t0\t0\t107\t112\nL\t12\t1\t0\t258\t0\t0\t113\t114\nL\t13\t1\t0\t1\t0\t0\t113\t116\nL\t14\t1\t0\t1\t0\t0\t107\t116\nB\t1\t1\t1\t15\t4\t0\t11\t13\t1\t1\t2\t3\t15\t0\t0\t0\t0\t1\t107\t116\nB\t2\t1\t16\t16\t1\t14\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t100\t117\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t107\t116\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t79\t80\t1\t0\t0\nO\t2\t1\t1\t6\t3\t257\t257\t0\t0\t0\t3\t0\t0\t0\t74\t81\t-\t0\t1\nO\t3\t1\t1\t1\t4\t1\t1\t0\t0\t0\t4\t1\t2\t0\t85\t86\t3\t0\t0\nO\t4\t1\t1\t6\t5\t258\t258\t0\t0\t0\t5\t0\t0\t0\t69\t87\t-\t1\t2\nO\t5\t1\t1\t2\t1\t258\t258\t0\t5\t0\t6\t0\t0\t0\t63\t88\t-\t0\t0\nO\t6\t1\t1\t1\t6\t1\t1\t0\t0\t0\t7\t2\t3\t0\t97\t98\t8\t0\t0\nO\t7\t1\t1\t6\t7\t257\t257\t0\t0\t0\t8\t0\t0\t0\t92\t99\t-\t3\t1\nO\t8\t1\t1\t8\t8\t258\t258\t2\t1\t7\t9\t0\t0\t0\t88\t100\t-\t0\t0\nO\t9\t1\t1\t2\t1\t258\t258\t0\t8\t0\t10\t0\t0\t0\t88\t100\t-\t0\t0\nO\t10\t1\t1\t2\t9\t258\t258\t0\t1\t0\t11\t0\t0\t0\t107\t108\t-\t0\t0\nO\t11\t1\t1\t7\t10\t257\t258\t2\t9\t0\t12\t0\t0\t0\t107\t110\t-\t0\t0\nO\t12\t1\t1\t7\t11\t1\t257\t1\t10\t0\t13\t0\t0\t0\t107\t112\t-\t0\t0\nO\t13\t1\t1\t2\t12\t258\t258\t0\t1\t0\t14\t0\t0\t0\t113\t114\t-\t0\t0\nO\t14\t1\t1\t7\t13\t1\t258\t3\t12\t0\t15\t0\t0\t0\t113\t116\t-\t0\t0\nO\t15\t1\t1\t5\t0\t1\t1\t1\t11\t13\t0\t0\t0\t0\t107\t116\t-\t0\t0\nO\t16\t1\t2\t4\t14\t1\t1\t1\t11\t13\t0\t0\t0\t0\t107\t116\t-\t0\t0\nA\t0\t2\nA\t1\t3\nA\t2\t4\nA\t3\t6\n",
+      "stderr": "",
+      "inputSHA256": "340ba3761155a624b4b3889b908f1a40f1e168d3cc83c1558f6b1d7d50e90528",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 11,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "sibling-rhs",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\sibling-rhs.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t26\t27\nD\t2\t257\t1\t32\t33\nT\t1\t2\t0\t3\t1\t0\t0\t42\t46\t0\nF\t1\t1\t1\t0\t15\t0\t5\t0\t0\t35\t101\t0\nL\t1\t1\t3\t257\t0\t1\t53\t54\nL\t2\t1\t0\t1\t0\t0\t60\t61\nL\t3\t1\t0\t1\t0\t0\t65\t66\nL\t4\t1\t0\t257\t0\t0\t55\t67\nL\t5\t1\t0\t1\t0\t0\t77\t78\nL\t6\t1\t0\t257\t0\t0\t73\t79\nL\t7\t1\t0\t1\t0\t0\t79\t80\nL\t8\t1\t0\t257\t0\t0\t68\t82\nL\t9\t1\t0\t257\t0\t0\t89\t90\nL\t10\t1\t0\t1\t0\t0\t89\t92\nL\t11\t1\t0\t1\t0\t0\t93\t95\nL\t12\t1\t0\t1\t0\t0\t89\t95\nL\t13\t1\t0\t257\t0\t0\t96\t97\nL\t14\t1\t0\t1\t0\t0\t96\t99\nL\t15\t1\t0\t1\t0\t0\t89\t99\nB\t1\t1\t1\t14\t4\t0\t10\t11\t5\t1\t2\t3\t14\t0\t0\t0\t0\t1\t89\t95\nB\t2\t1\t15\t18\t4\t0\t12\t14\t1\t1\t4\t5\t18\t0\t0\t0\t0\t1\t89\t99\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t89\t95\nB\t4\t1\t19\t19\t1\t15\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t82\t100\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t89\t99\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t60\t61\t5\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t3\t1\t2\t0\t65\t66\t1\t0\t0\nO\t3\t1\t1\t6\t4\t257\t257\t0\t0\t0\t4\t0\t0\t0\t55\t67\t-\t0\t2\nO\t4\t1\t1\t2\t1\t257\t257\t0\t4\t0\t5\t0\t0\t0\t49\t68\t-\t0\t0\nO\t5\t1\t1\t1\t5\t1\t1\t0\t0\t0\t6\t2\t3\t0\t77\t78\t9\t0\t0\nO\t6\t1\t1\t8\t6\t257\t257\t2\t1\t5\t7\t0\t0\t0\t73\t79\t-\t0\t0\nO\t7\t1\t1\t2\t1\t257\t257\t0\t6\t0\t8\t0\t0\t0\t73\t79\t-\t0\t0\nO\t8\t1\t1\t1\t7\t1\t1\t0\t0\t0\t9\t3\t4\t0\t79\t80\t3\t0\t0\nO\t9\t1\t1\t8\t8\t257\t257\t1\t1\t7\t10\t0\t0\t0\t68\t82\t-\t0\t0\nO\t10\t1\t1\t2\t1\t257\t257\t0\t8\t0\t11\t0\t0\t0\t68\t82\t-\t0\t0\nO\t11\t1\t1\t2\t9\t257\t257\t0\t1\t0\t12\t0\t0\t0\t89\t90\t-\t0\t0\nO\t12\t1\t1\t7\t10\t1\t257\t1\t9\t0\t13\t0\t0\t0\t89\t92\t-\t0\t0\nO\t13\t1\t1\t1\t11\t1\t1\t0\t0\t0\t14\t4\t6\t0\t93\t95\t10\t0\t0\nO\t14\t1\t1\t5\t0\t1\t1\t5\t10\t11\t0\t0\t0\t0\t89\t95\t-\t0\t0\nO\t15\t1\t2\t4\t12\t1\t1\t5\t10\t11\t16\t0\t0\t0\t89\t95\t-\t0\t0\nO\t16\t1\t2\t2\t13\t257\t257\t0\t1\t0\t17\t0\t0\t0\t96\t97\t-\t0\t0\nO\t17\t1\t2\t7\t14\t1\t257\t2\t13\t0\t18\t0\t0\t0\t96\t99\t-\t0\t0\nO\t18\t1\t2\t5\t0\t1\t1\t1\t12\t14\t0\t0\t0\t0\t89\t99\t-\t0\t0\nO\t19\t1\t4\t4\t15\t1\t1\t1\t12\t14\t0\t0\t0\t0\t89\t99\t-\t0\t0\nA\t0\t2\nA\t1\t3\n",
+      "stderr": "",
+      "inputSHA256": "ef67157e29160dd41903fe06871ec9912af7d635461f16b68c4d8ba0332331b5",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 39,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "compound-frozen",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\compound-frozen.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nD\t1\t257\t1\t26\t27\nD\t2\t257\t1\t32\t33\nT\t1\t2\t0\t3\t1\t0\t0\t42\t46\t0\nF\t1\t1\t1\t0\t20\t0\t7\t0\t0\t35\t108\t0\nL\t1\t1\t3\t257\t0\t1\t53\t54\nL\t2\t1\t0\t1\t0\t0\t60\t61\nL\t3\t1\t0\t1\t0\t0\t65\t66\nL\t4\t1\t0\t257\t0\t0\t55\t67\nL\t5\t1\t0\t257\t0\t0\t68\t69\nL\t6\t1\t0\t1\t0\t0\t68\t71\nL\t7\t1\t0\t1\t0\t0\t78\t79\nL\t8\t1\t0\t257\t0\t0\t74\t80\nL\t9\t1\t0\t1\t0\t0\t84\t85\nL\t10\t1\t0\t257\t0\t0\t80\t86\nL\t11\t1\t0\t1\t0\t0\t86\t87\nL\t12\t1\t0\t1\t0\t0\t68\t89\nL\t13\t1\t0\t257\t0\t0\t68\t89\nL\t14\t1\t0\t257\t0\t0\t96\t97\nL\t15\t1\t0\t1\t0\t0\t96\t99\nL\t16\t1\t0\t1\t0\t0\t100\t102\nL\t17\t1\t0\t1\t0\t0\t96\t102\nL\t18\t1\t0\t257\t0\t0\t103\t104\nL\t19\t1\t0\t1\t0\t0\t103\t106\nL\t20\t1\t0\t1\t0\t0\t96\t106\nB\t1\t1\t1\t14\t4\t0\t6\t11\t1\t1\t2\t3\t14\t0\t0\t0\t0\t1\t68\t89\nB\t2\t1\t15\t21\t4\t0\t15\t16\t5\t1\t4\t5\t21\t0\t0\t0\t0\t1\t96\t102\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t68\t89\nB\t4\t1\t22\t25\t4\t0\t17\t19\t1\t1\t6\t7\t25\t0\t0\t0\t0\t1\t96\t106\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t96\t102\nB\t6\t1\t26\t26\t1\t20\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t89\t107\nB\t7\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t96\t106\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t60\t61\t5\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t3\t1\t2\t0\t65\t66\t1\t0\t0\nO\t3\t1\t1\t6\t4\t257\t257\t0\t0\t0\t4\t0\t0\t0\t55\t67\t-\t0\t2\nO\t4\t1\t1\t2\t1\t257\t257\t0\t4\t0\t5\t0\t0\t0\t49\t68\t-\t0\t0\nO\t5\t1\t1\t2\t5\t257\t257\t0\t1\t0\t6\t0\t0\t0\t68\t69\t-\t0\t0\nO\t6\t1\t1\t7\t6\t1\t257\t1\t5\t0\t7\t0\t0\t0\t68\t71\t-\t0\t0\nO\t7\t1\t1\t1\t7\t1\t1\t0\t0\t0\t8\t2\t3\t0\t78\t79\t2\t0\t0\nO\t8\t1\t1\t8\t8\t257\t257\t1\t1\t7\t9\t0\t0\t0\t74\t80\t-\t0\t0\nO\t9\t1\t1\t2\t1\t257\t257\t0\t8\t0\t10\t0\t0\t0\t74\t80\t-\t0\t0\nO\t10\t1\t1\t1\t9\t1\t1\t0\t0\t0\t11\t3\t4\t0\t84\t85\t9\t0\t0\nO\t11\t1\t1\t8\t10\t257\t257\t2\t1\t9\t12\t0\t0\t0\t80\t86\t-\t0\t0\nO\t12\t1\t1\t2\t1\t257\t257\t0\t10\t0\t13\t0\t0\t0\t80\t86\t-\t0\t0\nO\t13\t1\t1\t1\t11\t1\t1\t0\t0\t0\t14\t4\t5\t0\t86\t87\t3\t0\t0\nO\t14\t1\t1\t5\t0\t1\t1\t1\t6\t11\t0\t0\t0\t0\t68\t89\t-\t0\t0\nO\t15\t1\t2\t4\t12\t1\t1\t1\t6\t11\t16\t0\t0\t0\t68\t89\t-\t0\t0\nO\t16\t1\t2\t8\t13\t257\t257\t1\t1\t12\t17\t0\t0\t0\t68\t89\t-\t0\t0\nO\t17\t1\t2\t2\t1\t257\t257\t0\t13\t0\t18\t0\t0\t0\t68\t89\t-\t0\t0\nO\t18\t1\t2\t2\t14\t257\t257\t0\t1\t0\t19\t0\t0\t0\t96\t97\t-\t0\t0\nO\t19\t1\t2\t7\t15\t1\t257\t1\t14\t0\t20\t0\t0\t0\t96\t99\t-\t0\t0\nO\t20\t1\t2\t1\t16\t1\t1\t0\t0\t0\t21\t5\t7\t0\t100\t102\t10\t0\t0\nO\t21\t1\t2\t5\t0\t1\t1\t5\t15\t16\t0\t0\t0\t0\t96\t102\t-\t0\t0\nO\t22\t1\t4\t4\t17\t1\t1\t5\t15\t16\t23\t0\t0\t0\t96\t102\t-\t0\t0\nO\t23\t1\t4\t2\t18\t257\t257\t0\t1\t0\t24\t0\t0\t0\t103\t104\t-\t0\t0\nO\t24\t1\t4\t7\t19\t1\t257\t2\t18\t0\t25\t0\t0\t0\t103\t106\t-\t0\t0\nO\t25\t1\t4\t5\t0\t1\t1\t1\t17\t19\t0\t0\t0\t0\t96\t106\t-\t0\t0\nO\t26\t1\t6\t4\t20\t1\t1\t1\t17\t19\t0\t0\t0\t0\t96\t106\t-\t0\t0\nA\t0\t2\nA\t1\t3\n",
+      "stderr": "",
+      "inputSHA256": "b45e1e37b1a343fd82162136e29df7aed6f8bf051e63fc1182ad9e5cf62ee30b",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 89,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "nested-rhs-owner",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\nested-rhs-owner.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t2\t0\nN\t258\t2\t2\t2\t0\nD\t1\t257\t1\t26\t27\nD\t2\t257\t1\t32\t33\nD\t3\t258\t257\t46\t47\nD\t4\t258\t1\t52\t53\nT\t1\t3\t0\t4\t1\t0\t0\t62\t66\t0\nF\t1\t1\t1\t0\t34\t0\t11\t0\t0\t55\t164\t0\nL\t1\t1\t4\t258\t0\t1\t73\t74\nL\t2\t1\t0\t1\t0\t0\t85\t86\nL\t3\t1\t0\t1\t0\t0\t90\t91\nL\t4\t1\t0\t257\t0\t0\t80\t92\nL\t5\t1\t0\t1\t0\t0\t96\t97\nL\t6\t1\t0\t258\t0\t0\t75\t98\nL\t7\t1\t0\t258\t0\t0\t99\t100\nL\t8\t1\t0\t257\t0\t0\t99\t102\nL\t9\t1\t0\t1\t0\t0\t99\t104\nL\t10\t1\t0\t1\t0\t0\t116\t117\nL\t11\t1\t0\t1\t0\t0\t121\t122\nL\t12\t1\t0\t257\t0\t0\t111\t123\nL\t13\t1\t0\t258\t0\t0\t107\t124\nL\t14\t1\t0\t1\t0\t0\t128\t129\nL\t15\t1\t0\t258\t0\t0\t124\t130\nL\t16\t1\t0\t1\t0\t0\t130\t131\nL\t17\t1\t0\t1\t0\t0\t99\t133\nL\t18\t1\t0\t257\t0\t0\t99\t133\nL\t19\t1\t0\t257\t0\t0\t99\t133\nL\t20\t1\t0\t258\t0\t0\t99\t133\nL\t21\t1\t0\t258\t0\t0\t140\t141\nL\t22\t1\t0\t257\t0\t0\t140\t143\nL\t23\t1\t0\t1\t0\t0\t140\t145\nL\t24\t1\t0\t1\t0\t0\t146\t149\nL\t25\t1\t0\t1\t0\t0\t140\t149\nL\t26\t1\t0\t258\t0\t0\t150\t151\nL\t27\t1\t0\t257\t0\t0\t150\t153\nL\t28\t1\t0\t1\t0\t0\t150\t155\nL\t29\t1\t0\t1\t0\t0\t156\t158\nL\t30\t1\t0\t1\t0\t0\t150\t158\nL\t31\t1\t0\t1\t0\t0\t140\t158\nL\t32\t1\t0\t258\t0\t0\t159\t160\nL\t33\t1\t0\t1\t0\t0\t159\t162\nL\t34\t1\t0\t1\t0\t0\t140\t162\nB\t1\t1\t1\t19\t4\t0\t9\t16\t1\t1\t2\t3\t19\t0\t0\t0\t0\t1\t99\t133\nB\t2\t1\t20\t29\t4\t0\t23\t24\t5\t1\t4\t5\t29\t0\t0\t0\t0\t1\t140\t149\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t99\t133\nB\t4\t1\t30\t35\t4\t0\t28\t29\t5\t1\t6\t7\t35\t0\t0\t0\t0\t1\t150\t158\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t140\t149\nB\t6\t1\t36\t37\t4\t0\t25\t30\t1\t1\t8\t9\t37\t0\t0\t0\t0\t1\t140\t158\nB\t7\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t150\t158\nB\t8\t1\t38\t41\t4\t0\t31\t33\t1\t1\t10\t11\t41\t0\t0\t0\t0\t1\t140\t162\nB\t9\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t140\t158\nB\t10\t1\t42\t42\t1\t34\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t133\t163\nB\t11\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t140\t162\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t85\t86\t5\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t3\t1\t2\t0\t90\t91\t1\t0\t0\nO\t3\t1\t1\t6\t4\t257\t257\t0\t0\t0\t4\t0\t0\t0\t80\t92\t-\t0\t2\nO\t4\t1\t1\t1\t5\t1\t1\t0\t0\t0\t5\t2\t3\t0\t96\t97\t2\t0\t0\nO\t5\t1\t1\t6\t6\t258\t258\t0\t0\t0\t6\t0\t0\t0\t75\t98\t-\t2\t2\nO\t6\t1\t1\t2\t1\t258\t258\t0\t6\t0\t7\t0\t0\t0\t69\t99\t-\t0\t0\nO\t7\t1\t1\t2\t7\t258\t258\t0\t1\t0\t8\t0\t0\t0\t99\t100\t-\t0\t0\nO\t8\t1\t1\t7\t8\t257\t258\t3\t7\t0\t9\t0\t0\t0\t99\t102\t-\t0\t0\nO\t9\t1\t1\t7\t9\t1\t257\t1\t8\t0\t10\t0\t0\t0\t99\t104\t-\t0\t0\nO\t10\t1\t1\t1\t10\t1\t1\t0\t0\t0\t11\t3\t4\t0\t116\t117\t2\t0\t0\nO\t11\t1\t1\t1\t11\t1\t1\t0\t0\t0\t12\t4\t5\t0\t121\t122\t9\t0\t0\nO\t12\t1\t1\t6\t12\t257\t257\t0\t0\t0\t13\t0\t0\t0\t111\t123\t-\t4\t2\nO\t13\t1\t1\t8\t13\t258\t258\t3\t1\t12\t14\t0\t0\t0\t107\t124\t-\t0\t0\nO\t14\t1\t1\t2\t1\t258\t258\t0\t13\t0\t15\t0\t0\t0\t107\t124\t-\t0\t0\nO\t15\t1\t1\t1\t14\t1\t1\t0\t0\t0\t16\t5\t6\t0\t128\t129\t7\t0\t0\nO\t16\t1\t1\t8\t15\t258\t258\t4\t1\t14\t17\t0\t0\t0\t124\t130\t-\t0\t0\nO\t17\t1\t1\t2\t1\t258\t258\t0\t15\t0\t18\t0\t0\t0\t124\t130\t-\t0\t0\nO\t18\t1\t1\t1\t16\t1\t1\t0\t0\t0\t19\t6\t7\t0\t130\t131\t3\t0\t0\nO\t19\t1\t1\t5\t0\t1\t1\t1\t9\t16\t0\t0\t0\t0\t99\t133\t-\t0\t0\nO\t20\t1\t2\t4\t17\t1\t1\t1\t9\t16\t21\t0\t0\t0\t99\t133\t-\t0\t0\nO\t21\t1\t2\t7\t18\t257\t258\t3\t1\t0\t22\t0\t0\t0\t99\t133\t-\t0\t0\nO\t22\t1\t2\t8\t19\t257\t257\t1\t18\t17\t23\t0\t0\t0\t99\t133\t-\t0\t0\nO\t23\t1\t2\t8\t20\t258\t258\t3\t1\t19\t24\t0\t0\t0\t99\t133\t-\t0\t0\nO\t24\t1\t2\t2\t1\t258\t258\t0\t20\t0\t25\t0\t0\t0\t99\t133\t-\t0\t0\nO\t25\t1\t2\t2\t21\t258\t258\t0\t1\t0\t26\t0\t0\t0\t140\t141\t-\t0\t0\nO\t26\t1\t2\t7\t22\t257\t258\t3\t21\t0\t27\t0\t0\t0\t140\t143\t-\t0\t0\nO\t27\t1\t2\t7\t23\t1\t257\t1\t22\t0\t28\t0\t0\t0\t140\t145\t-\t0\t0\nO\t28\t1\t2\t1\t24\t1\t1\t0\t0\t0\t29\t7\t10\t0\t146\t149\t100\t0\t0\nO\t29\t1\t2\t5\t0\t1\t1\t5\t23\t24\t0\t0\t0\t0\t140\t149\t-\t0\t0\nO\t30\t1\t4\t4\t25\t1\t1\t5\t23\t24\t31\t0\t0\t0\t140\t149\t-\t0\t0\nO\t31\t1\t4\t2\t26\t258\t258\t0\t1\t0\t32\t0\t0\t0\t150\t151\t-\t0\t0\nO\t32\t1\t4\t7\t27\t257\t258\t3\t26\t0\t33\t0\t0\t0\t150\t153\t-\t0\t0\nO\t33\t1\t4\t7\t28\t1\t257\t2\t27\t0\t34\t0\t0\t0\t150\t155\t-\t0\t0\nO\t34\t1\t4\t1\t29\t1\t1\t0\t0\t0\t35\t10\t12\t0\t156\t158\t10\t0\t0\nO\t35\t1\t4\t5\t0\t1\t1\t5\t28\t29\t0\t0\t0\t0\t150\t158\t-\t0\t0\nO\t36\t1\t6\t4\t30\t1\t1\t5\t28\t29\t37\t0\t0\t0\t150\t158\t-\t0\t0\nO\t37\t1\t6\t5\t0\t1\t1\t1\t25\t30\t0\t0\t0\t0\t140\t158\t-\t0\t0\nO\t38\t1\t8\t4\t31\t1\t1\t1\t25\t30\t39\t0\t0\t0\t140\t158\t-\t0\t0\nO\t39\t1\t8\t2\t32\t258\t258\t0\t1\t0\t40\t0\t0\t0\t159\t160\t-\t0\t0\nO\t40\t1\t8\t7\t33\t1\t258\t4\t32\t0\t41\t0\t0\t0\t159\t162\t-\t0\t0\nO\t41\t1\t8\t5\t0\t1\t1\t1\t31\t33\t0\t0\t0\t0\t140\t162\t-\t0\t0\nO\t42\t1\t10\t4\t34\t1\t1\t1\t31\t33\t0\t0\t0\t0\t140\t162\t-\t0\t0\nA\t0\t2\nA\t1\t3\nA\t2\t4\nA\t3\t5\nA\t4\t10\nA\t5\t11\n",
+      "stderr": "",
+      "inputSHA256": "87901a7bed7a693329d854bac2c2bed2099a828dc9dd8a6dea7fb0747d0d3574",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 897,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "frozen-call-args",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\frozen-call-args.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t2\t36\t39\t0\nT\t2\t3\t0\t4\t1\t2\t0\t75\t79\t0\nS\t0\t257\nS\t1\t257\nF\t1\t1\t1\t0\t9\t0\t5\t0\t2\t29\t68\t0\nF\t2\t2\t6\t9\t8\t5\t2\t2\t0\t68\t125\t0\nL\t1\t1\t4\t257\t1\t0\t42\t43\nL\t2\t1\t5\t257\t1\t0\t46\t47\nL\t3\t1\t0\t257\t0\t0\t56\t57\nL\t4\t1\t0\t1\t0\t0\t56\t59\nL\t5\t1\t0\t1\t0\t0\t60\t62\nL\t6\t1\t0\t1\t0\t0\t56\t62\nL\t7\t1\t0\t257\t0\t0\t63\t64\nL\t8\t1\t0\t1\t0\t0\t63\t66\nL\t9\t1\t0\t1\t0\t0\t56\t66\nL\t10\t2\t6\t257\t0\t1\t86\t87\nL\t11\t2\t0\t1\t0\t0\t93\t94\nL\t12\t2\t0\t257\t0\t0\t88\t95\nL\t13\t2\t0\t257\t0\t0\t107\t108\nL\t14\t2\t0\t1\t0\t0\t117\t118\nL\t15\t2\t0\t257\t0\t0\t112\t119\nL\t16\t2\t0\t257\t0\t0\t120\t121\nL\t17\t2\t0\t1\t0\t0\t103\t123\nB\t1\t1\t1\t4\t4\t0\t4\t5\t5\t1\t2\t3\t4\t0\t0\t0\t0\t1\t56\t62\nB\t2\t1\t5\t8\t4\t0\t6\t8\t1\t1\t4\t5\t8\t0\t0\t0\t0\t1\t56\t66\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t56\t62\nB\t4\t1\t9\t9\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t49\t67\nB\t5\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t56\t66\nB\t6\t2\t10\t17\t5\t0\t0\t0\t0\t0\t7\t0\t0\t1\t17\t4\t2\t0\t103\t123\nB\t7\t2\t0\t0\t1\t17\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t96\t124\nO\t1\t1\t1\t2\t3\t257\t257\t0\t1\t0\t2\t0\t0\t0\t56\t57\t-\t0\t0\nO\t2\t1\t1\t7\t4\t1\t257\t1\t3\t0\t3\t0\t0\t0\t56\t59\t-\t0\t0\nO\t3\t1\t1\t1\t5\t1\t1\t0\t0\t0\t4\t0\t2\t0\t60\t62\t10\t0\t0\nO\t4\t1\t1\t5\t0\t1\t1\t5\t4\t5\t0\t0\t0\t0\t56\t62\t-\t0\t0\nO\t5\t1\t2\t4\t6\t1\t1\t5\t4\t5\t6\t0\t0\t0\t56\t62\t-\t0\t0\nO\t6\t1\t2\t2\t7\t257\t257\t0\t2\t0\t7\t0\t0\t0\t63\t64\t-\t0\t0\nO\t7\t1\t2\t7\t8\t1\t257\t1\t7\t0\t8\t0\t0\t0\t63\t66\t-\t0\t0\nO\t8\t1\t2\t5\t0\t1\t1\t1\t6\t8\t0\t0\t0\t0\t56\t66\t-\t0\t0\nO\t9\t1\t4\t4\t9\t1\t1\t1\t6\t8\t0\t0\t0\t0\t56\t66\t-\t0\t0\nO\t10\t2\t6\t1\t11\t1\t1\t0\t0\t0\t11\t2\t3\t0\t93\t94\t1\t0\t0\nO\t11\t2\t6\t6\t12\t257\t257\t0\t0\t0\t12\t0\t0\t0\t88\t95\t-\t2\t1\nO\t12\t2\t6\t2\t10\t257\t257\t0\t12\t0\t13\t0\t0\t0\t82\t96\t-\t0\t0\nO\t13\t2\t6\t2\t13\t257\t257\t0\t10\t0\t14\t0\t0\t0\t107\t108\t-\t0\t0\nO\t14\t2\t6\t1\t14\t1\t1\t0\t0\t0\t15\t3\t4\t0\t117\t118\t3\t0\t0\nO\t15\t2\t6\t6\t15\t257\t257\t0\t0\t0\t16\t0\t0\t0\t112\t119\t-\t3\t1\nO\t16\t2\t6\t2\t10\t257\t257\t0\t15\t0\t17\t0\t0\t0\t110\t120\t-\t0\t0\nO\t17\t2\t6\t2\t16\t257\t257\t0\t10\t0\t0\t0\t0\t0\t120\t121\t-\t0\t0\nA\t0\t1\nA\t1\t2\nA\t2\t11\nA\t3\t14\nA\t4\t13\nA\t5\t16\n",
+      "stderr": "",
+      "inputSHA256": "00fc723ccdecf791b1fcab1df2af5fc47f1034c0fccbbf9021f66990cbf0b9bd",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 13,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "struct-branch",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\struct-branch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t257\t0\t1\t34\t40\t0\nT\t2\t3\t0\t4\t1\t1\t0\t96\t100\t0\nS\t0\t6\nF\t1\t1\t1\t0\t7\t0\t4\t0\t1\t29\t89\t0\nF\t2\t2\t5\t7\t3\t4\t2\t3\t0\t89\t127\t0\nL\t1\t1\t4\t6\t1\t0\t46\t49\nL\t2\t1\t0\t6\t0\t0\t61\t64\nL\t3\t1\t0\t257\t0\t0\t58\t87\nL\t4\t1\t0\t1\t0\t0\t71\t72\nL\t5\t1\t0\t257\t0\t0\t66\t73\nL\t6\t1\t0\t1\t0\t0\t84\t85\nL\t7\t1\t0\t257\t0\t0\t79\t86\nL\t8\t2\t0\t6\t0\t0\t117\t122\nL\t9\t2\t0\t257\t0\t0\t110\t123\nL\t10\t2\t0\t1\t0\t0\t110\t125\nB\t1\t1\t1\t1\t3\t2\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t58\t87\nB\t2\t1\t2\t4\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t58\t87\nB\t3\t1\t5\t7\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t58\t87\nB\t4\t1\t0\t0\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t51\t88\nB\t5\t2\t8\t8\t5\t0\t0\t0\t0\t0\t6\t0\t0\t1\t9\t3\t1\t0\t110\t123\nB\t6\t2\t9\t9\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t103\t126\nO\t1\t1\t1\t2\t2\t6\t6\t0\t1\t0\t0\t0\t0\t0\t61\t64\t-\t0\t0\nO\t2\t1\t2\t1\t4\t1\t1\t0\t0\t0\t3\t0\t1\t0\t71\t72\t2\t0\t0\nO\t3\t1\t2\t6\t5\t257\t257\t0\t0\t0\t4\t0\t0\t0\t66\t73\t-\t1\t1\nO\t4\t1\t2\t2\t3\t257\t257\t0\t5\t0\t0\t0\t0\t0\t58\t87\t-\t0\t0\nO\t5\t1\t3\t1\t6\t1\t1\t0\t0\t0\t6\t1\t2\t0\t84\t85\t9\t0\t0\nO\t6\t1\t3\t6\t7\t257\t257\t0\t0\t0\t7\t0\t0\t0\t79\t86\t-\t2\t1\nO\t7\t1\t3\t2\t3\t257\t257\t0\t7\t0\t0\t0\t0\t0\t58\t87\t-\t0\t0\nO\t8\t2\t5\t1\t8\t6\t6\t0\t0\t0\t0\t0\t0\t0\t117\t122\t-\t0\t0\nO\t9\t2\t6\t7\t10\t1\t257\t1\t9\t0\t0\t0\t0\t0\t110\t125\t-\t0\t0\nA\t0\t1\nA\t1\t4\nA\t2\t6\nA\t3\t8\n",
+      "stderr": "",
+      "inputSHA256": "5f45e75c6025738707c2ba4cc5c4af441887f64680267ae48a33925cb701eba2",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "loop-update",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\loop-update.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t18\t0\t9\t0\t0\t29\t103\t0\nL\t1\t1\t3\t257\t0\t1\t47\t48\nL\t2\t1\t4\t1\t0\t1\t69\t70\nL\t3\t1\t0\t1\t0\t0\t54\t55\nL\t4\t1\t0\t257\t0\t0\t49\t56\nL\t5\t1\t0\t1\t0\t0\t71\t72\nL\t6\t1\t0\t1\t0\t0\t73\t74\nL\t7\t1\t0\t1\t0\t0\t75\t76\nL\t8\t1\t0\t6\t0\t0\t73\t76\nL\t9\t1\t0\t257\t0\t0\t83\t84\nL\t10\t1\t0\t1\t0\t0\t83\t86\nL\t11\t1\t0\t1\t0\t0\t88\t89\nL\t12\t1\t0\t1\t0\t0\t83\t90\nL\t13\t1\t0\t257\t0\t0\t83\t90\nL\t14\t1\t0\t1\t0\t0\t77\t78\nL\t15\t1\t0\t1\t0\t0\t80\t81\nL\t16\t1\t0\t1\t0\t0\t77\t81\nL\t17\t1\t0\t257\t0\t0\t98\t99\nL\t18\t1\t0\t1\t0\t0\t98\t101\nB\t1\t1\t1\t5\t2\t0\t0\t0\t0\t0\t2\t0\t0\t0\t0\t0\t0\t0\t57\t91\nB\t2\t1\t6\t8\t3\t8\t0\t0\t0\t6\t3\t4\t0\t0\t0\t0\t0\t0\t57\t91\nB\t3\t1\t9\t12\t4\t0\t10\t11\t1\t1\t5\t6\t12\t0\t0\t0\t0\t1\t83\t90\nB\t4\t1\t21\t22\t1\t18\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t91\t102\nB\t5\t1\t13\t15\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t57\t91\nB\t6\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t83\t90\nB\t7\t1\t16\t18\t4\t0\t14\t15\t1\t1\t8\t9\t18\t0\t0\t0\t0\t1\t77\t81\nB\t8\t1\t19\t20\t2\t0\t0\t0\t0\t0\t2\t0\t0\t0\t0\t0\t0\t0\t57\t91\nB\t9\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t77\t81\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t1\t0\t54\t55\t0\t0\t0\nO\t2\t1\t1\t6\t4\t257\t257\t0\t0\t0\t3\t0\t0\t0\t49\t56\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t4\t0\t4\t0\t0\t0\t43\t57\t-\t0\t0\nO\t4\t1\t1\t1\t5\t1\t1\t0\t0\t0\t5\t1\t2\t0\t71\t72\t0\t0\t0\nO\t5\t1\t1\t2\t2\t1\t1\t0\t5\t0\t0\t0\t0\t0\t61\t73\t-\t0\t0\nO\t6\t1\t2\t2\t6\t1\t1\t0\t2\t0\t7\t0\t0\t0\t73\t74\t-\t0\t0\nO\t7\t1\t2\t1\t7\t1\t1\t0\t0\t0\t8\t2\t3\t0\t75\t76\t3\t0\t0\nO\t8\t1\t2\t4\t8\t6\t1\t15\t6\t7\t0\t0\t0\t0\t73\t76\t-\t0\t0\nO\t9\t1\t3\t2\t9\t257\t257\t0\t1\t0\t10\t0\t0\t0\t83\t84\t-\t0\t0\nO\t10\t1\t3\t7\t10\t1\t257\t1\t9\t0\t11\t0\t0\t0\t83\t86\t-\t0\t0\nO\t11\t1\t3\t1\t11\t1\t1\t0\t0\t0\t12\t3\t4\t0\t88\t89\t2\t0\t0\nO\t12\t1\t3\t5\t0\t1\t1\t1\t10\t11\t0\t0\t0\t0\t83\t90\t-\t0\t0\nO\t13\t1\t5\t4\t12\t1\t1\t1\t10\t11\t14\t0\t0\t0\t83\t90\t-\t0\t0\nO\t14\t1\t5\t8\t13\t257\t257\t1\t1\t12\t15\t0\t0\t0\t83\t90\t-\t0\t0\nO\t15\t1\t5\t2\t1\t257\t257\t0\t13\t0\t0\t0\t0\t0\t83\t90\t-\t0\t0\nO\t16\t1\t7\t2\t14\t1\t1\t0\t2\t0\t17\t0\t0\t0\t77\t78\t-\t0\t0\nO\t17\t1\t7\t1\t15\t1\t1\t0\t0\t0\t18\t4\t5\t0\t80\t81\t1\t0\t0\nO\t18\t1\t7\t5\t0\t1\t1\t1\t14\t15\t0\t0\t0\t0\t77\t81\t-\t0\t0\nO\t19\t1\t8\t4\t16\t1\t1\t1\t14\t15\t20\t0\t0\t0\t77\t81\t-\t0\t0\nO\t20\t1\t8\t2\t2\t1\t1\t0\t16\t0\t0\t0\t0\t0\t77\t81\t-\t0\t0\nO\t21\t1\t4\t2\t17\t257\t257\t0\t1\t0\t22\t0\t0\t0\t98\t99\t-\t0\t0\nO\t22\t1\t4\t7\t18\t1\t257\t1\t17\t0\t0\t0\t0\t0\t98\t101\t-\t0\t0\nA\t0\t3\n",
+      "stderr": "",
+      "inputSHA256": "15eca621f2ad678aac9e14760d7e6e7f7b21ac7a6d837912b1717604d5f16d84",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 6,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "branch-update",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\branch-update.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t1\t36\t37\t0\nT\t2\t3\t0\t4\t1\t1\t0\t104\t108\t0\nS\t0\t6\nF\t1\t1\t1\t0\t11\t0\t4\t0\t1\t29\t97\t0\nF\t2\t2\t5\t11\t5\t4\t5\t2\t0\t97\t136\t0\nL\t1\t1\t4\t6\t1\t0\t43\t44\nL\t2\t1\t5\t257\t0\t1\t50\t51\nL\t3\t1\t0\t1\t0\t0\t57\t58\nL\t4\t1\t0\t257\t0\t0\t52\t59\nL\t5\t1\t0\t6\t0\t0\t63\t64\nL\t6\t1\t0\t1\t0\t0\t70\t71\nL\t7\t1\t0\t257\t0\t0\t66\t72\nL\t8\t1\t0\t1\t0\t0\t82\t83\nL\t9\t1\t0\t257\t0\t0\t78\t84\nL\t10\t1\t0\t257\t0\t0\t92\t93\nL\t11\t1\t0\t1\t0\t0\t92\t95\nL\t12\t2\t0\t6\t0\t0\t120\t124\nL\t13\t2\t0\t1\t0\t0\t118\t125\nL\t14\t2\t0\t6\t0\t0\t128\t133\nL\t15\t2\t0\t1\t0\t0\t126\t134\nL\t16\t2\t0\t1\t0\t0\t118\t134\nB\t1\t1\t1\t4\t3\t5\t0\t0\t0\t6\t2\t3\t0\t0\t0\t0\t0\t0\t60\t85\nB\t2\t1\t5\t7\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t60\t85\nB\t3\t1\t8\t10\t2\t0\t0\t0\t0\t0\t4\t0\t0\t0\t0\t0\t0\t0\t60\t85\nB\t4\t1\t11\t12\t1\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t85\t96\nB\t5\t2\t13\t13\t5\t0\t0\t0\t0\t0\t6\t0\t0\t1\t13\t2\t1\t0\t118\t125\nB\t6\t2\t14\t14\t5\t0\t0\t0\t0\t0\t7\t0\t0\t1\t15\t3\t1\t0\t126\t134\nB\t7\t2\t15\t15\t4\t0\t13\t15\t1\t1\t8\t9\t15\t0\t0\t0\t0\t1\t118\t134\nB\t8\t2\t16\t16\t1\t16\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t111\t135\nB\t9\t2\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t118\t134\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t1\t0\t57\t58\t1\t0\t0\nO\t2\t1\t1\t6\t4\t257\t257\t0\t0\t0\t3\t0\t0\t0\t52\t59\t-\t1\t1\nO\t3\t1\t1\t2\t2\t257\t257\t0\t4\t0\t4\t0\t0\t0\t46\t60\t-\t0\t0\nO\t4\t1\t1\t2\t5\t6\t6\t0\t1\t0\t0\t0\t0\t0\t63\t64\t-\t0\t0\nO\t5\t1\t2\t1\t6\t1\t1\t0\t0\t0\t6\t1\t2\t0\t70\t71\t3\t0\t0\nO\t6\t1\t2\t8\t7\t257\t257\t1\t2\t6\t7\t0\t0\t0\t66\t72\t-\t0\t0\nO\t7\t1\t2\t2\t2\t257\t257\t0\t7\t0\t0\t0\t0\t0\t66\t72\t-\t0\t0\nO\t8\t1\t3\t1\t8\t1\t1\t0\t0\t0\t9\t2\t3\t0\t82\t83\t5\t0\t0\nO\t9\t1\t3\t8\t9\t257\t257\t1\t2\t8\t10\t0\t0\t0\t78\t84\t-\t0\t0\nO\t10\t1\t3\t2\t2\t257\t257\t0\t9\t0\t0\t0\t0\t0\t78\t84\t-\t0\t0\nO\t11\t1\t4\t2\t10\t257\t257\t0\t2\t0\t12\t0\t0\t0\t92\t93\t-\t0\t0\nO\t12\t1\t4\t7\t11\t1\t257\t1\t10\t0\t0\t0\t0\t0\t92\t95\t-\t0\t0\nO\t13\t2\t5\t1\t12\t6\t6\t0\t0\t0\t0\t0\t0\t1\t120\t124\t-\t0\t0\nO\t14\t2\t6\t1\t14\t6\t6\t0\t0\t0\t0\t0\t0\t0\t128\t133\t-\t0\t0\nO\t15\t2\t7\t5\t0\t1\t1\t1\t13\t15\t0\t0\t0\t0\t118\t134\t-\t0\t0\nO\t16\t2\t8\t4\t16\t1\t1\t1\t13\t15\t0\t0\t0\t0\t118\t134\t-\t0\t0\nA\t0\t1\nA\t1\t3\nA\t2\t12\nA\t3\t14\n",
+      "stderr": "",
+      "inputSHA256": "4166458941357367566650f46af9f3b93a017e37740cb0197c2c426613beccdb",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "distinct-identities",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\distinct-identities.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nN\t258\t2\t1\t1\t0\nD\t1\t257\t1\t26\t27\nD\t2\t258\t1\t42\t43\nT\t1\t3\t0\t4\t1\t0\t0\t52\t56\t0\nF\t1\t1\t1\t0\t11\t0\t3\t0\t0\t45\t103\t0\nL\t1\t1\t4\t257\t0\t0\t63\t64\nL\t2\t1\t5\t258\t0\t0\t77\t78\nL\t3\t1\t0\t1\t0\t0\t70\t71\nL\t4\t1\t0\t257\t0\t0\t65\t72\nL\t5\t1\t0\t1\t0\t0\t84\t85\nL\t6\t1\t0\t258\t0\t0\t79\t86\nL\t7\t1\t0\t257\t0\t0\t94\t95\nL\t8\t1\t0\t1\t0\t0\t94\t97\nL\t9\t1\t0\t258\t0\t0\t98\t99\nL\t10\t1\t0\t1\t0\t0\t98\t101\nL\t11\t1\t0\t1\t0\t0\t94\t101\nB\t1\t1\t1\t11\t4\t0\t8\t10\t1\t1\t2\t3\t11\t0\t0\t0\t0\t1\t94\t101\nB\t2\t1\t12\t12\t1\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t87\t102\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t94\t101\nO\t1\t1\t1\t1\t3\t1\t1\t0\t0\t0\t2\t0\t1\t0\t70\t71\t1\t0\t0\nO\t2\t1\t1\t6\t4\t257\t257\t0\t0\t0\t3\t0\t0\t0\t65\t72\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t4\t0\t4\t0\t0\t0\t59\t73\t-\t0\t0\nO\t4\t1\t1\t1\t5\t1\t1\t0\t0\t0\t5\t1\t2\t0\t84\t85\t2\t0\t0\nO\t5\t1\t1\t6\t6\t258\t258\t0\t0\t0\t6\t0\t0\t0\t79\t86\t-\t1\t1\nO\t6\t1\t1\t2\t2\t258\t258\t0\t6\t0\t7\t0\t0\t0\t73\t87\t-\t0\t0\nO\t7\t1\t1\t2\t7\t257\t257\t0\t1\t0\t8\t0\t0\t0\t94\t95\t-\t0\t0\nO\t8\t1\t1\t7\t8\t1\t257\t1\t7\t0\t9\t0\t0\t0\t94\t97\t-\t0\t0\nO\t9\t1\t1\t2\t9\t258\t258\t0\t2\t0\t10\t0\t0\t0\t98\t99\t-\t0\t0\nO\t10\t1\t1\t7\t10\t1\t258\t2\t9\t0\t11\t0\t0\t0\t98\t101\t-\t0\t0\nO\t11\t1\t1\t5\t0\t1\t1\t1\t8\t10\t0\t0\t0\t0\t94\t101\t-\t0\t0\nO\t12\t1\t2\t4\t11\t1\t1\t1\t8\t10\t0\t0\t0\t0\t94\t101\t-\t0\t0\nA\t0\t3\nA\t1\t5\n",
+      "stderr": "",
+      "inputSHA256": "bbd711aedc06f54514f5fa881a88682a3639ad79e2a55dbe7a8f6ccb9c474a9b",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 3,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "shorthand",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\shorthand.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t2\t1\nD\t1\t257\t1\t30\t31\nD\t2\t257\t6\t37\t38\nT\t1\t2\t0\t3\t1\t0\t0\t47\t51\t0\nF\t1\t1\t1\t0\t12\t0\t3\t0\t0\t40\t121\t0\nL\t1\t1\t3\t1\t0\t0\t62\t63\nL\t2\t1\t4\t6\t0\t0\t75\t76\nL\t3\t1\t5\t257\t0\t0\t86\t87\nL\t4\t1\t0\t1\t0\t0\t64\t65\nL\t5\t1\t0\t6\t0\t0\t77\t81\nL\t6\t1\t0\t6\t0\t0\t91\t92\nL\t7\t1\t0\t1\t0\t0\t94\t95\nL\t8\t1\t0\t257\t0\t0\t88\t96\nL\t9\t1\t0\t257\t0\t0\t104\t105\nL\t10\t1\t0\t6\t0\t0\t104\t107\nL\t11\t1\t0\t257\t0\t0\t116\t117\nL\t12\t1\t0\t1\t0\t0\t116\t119\nB\t1\t1\t1\t11\t4\t0\t10\t0\t0\t6\t2\t3\t11\t0\t0\t0\t0\t16\t97\t109\nB\t2\t1\t12\t13\t1\t12\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t109\t120\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t16\t97\t109\nO\t1\t1\t1\t1\t4\t1\t1\t0\t0\t0\t2\t0\t1\t0\t64\t65\t4\t0\t0\nO\t2\t1\t1\t2\t1\t1\t1\t0\t4\t0\t3\t0\t0\t0\t54\t66\t-\t0\t0\nO\t3\t1\t1\t1\t5\t6\t6\t0\t0\t0\t4\t0\t0\t1\t77\t81\t-\t0\t0\nO\t4\t1\t1\t2\t2\t6\t6\t0\t5\t0\t5\t0\t0\t0\t66\t82\t-\t0\t0\nO\t5\t1\t1\t2\t6\t6\t6\t0\t2\t0\t6\t0\t0\t0\t91\t92\t-\t0\t0\nO\t6\t1\t1\t2\t7\t1\t1\t0\t1\t0\t7\t0\t0\t0\t94\t95\t-\t0\t0\nO\t7\t1\t1\t6\t8\t257\t257\t0\t0\t0\t8\t0\t0\t0\t88\t96\t-\t0\t2\nO\t8\t1\t1\t2\t3\t257\t257\t0\t8\t0\t9\t0\t0\t0\t82\t97\t-\t0\t0\nO\t9\t1\t1\t2\t9\t257\t257\t0\t3\t0\t10\t0\t0\t0\t104\t105\t-\t0\t0\nO\t10\t1\t1\t7\t10\t6\t257\t2\t9\t0\t11\t0\t0\t0\t104\t107\t-\t0\t0\nO\t11\t1\t1\t5\t0\t6\t6\t0\t10\t0\t0\t0\t0\t0\t97\t109\t-\t0\t0\nO\t12\t1\t2\t2\t11\t257\t257\t0\t3\t0\t13\t0\t0\t0\t116\t117\t-\t0\t0\nO\t13\t1\t2\t7\t12\t1\t257\t1\t11\t0\t0\t0\t0\t0\t116\t119\t-\t0\t0\nA\t0\t7\nA\t1\t6\n",
+      "stderr": "",
+      "inputSHA256": "b0fc9714535186009ba093b6b1e4cc49df0f9ef54f718a57823aeb0ad62ccab4",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 4,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "field-overflow",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\field-overflow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t2\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t9\t0\t3\t0\t0\t29\t92\t0\nL\t1\t1\t3\t257\t0\t1\t47\t48\nL\t2\t1\t0\t2\t0\t0\t54\t73\nL\t3\t1\t0\t257\t0\t0\t49\t74\nL\t4\t1\t0\t257\t0\t0\t75\t76\nL\t5\t1\t0\t2\t0\t0\t75\t78\nL\t6\t1\t0\t2\t0\t0\t80\t81\nL\t7\t1\t0\t2\t0\t0\t75\t82\nL\t8\t1\t0\t257\t0\t0\t75\t82\nL\t9\t1\t0\t1\t0\t0\t89\t90\nB\t1\t1\t1\t7\t4\t0\t5\t6\t1\t2\t2\t3\t7\t0\t0\t0\t0\t1\t75\t82\nB\t2\t1\t8\t11\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t82\t91\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t75\t82\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t19\t0\t54\t73\t9223372036854775807\t0\t0\nO\t2\t1\t1\t6\t3\t257\t257\t0\t0\t0\t3\t0\t0\t0\t49\t74\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t3\t0\t4\t0\t0\t0\t43\t75\t-\t0\t0\nO\t4\t1\t1\t2\t4\t257\t257\t0\t1\t0\t5\t0\t0\t0\t75\t76\t-\t0\t0\nO\t5\t1\t1\t7\t5\t2\t257\t1\t4\t0\t6\t0\t0\t0\t75\t78\t-\t0\t0\nO\t6\t1\t1\t1\t6\t2\t2\t0\t0\t0\t7\t19\t20\t0\t80\t81\t1\t0\t0\nO\t7\t1\t1\t5\t0\t2\t2\t1\t5\t6\t0\t0\t0\t0\t75\t82\t-\t0\t0\nO\t8\t1\t2\t4\t7\t2\t2\t1\t5\t6\t9\t0\t0\t0\t75\t82\t-\t0\t0\nO\t9\t1\t2\t8\t8\t257\t257\t1\t1\t7\t10\t0\t0\t0\t75\t82\t-\t0\t0\nO\t10\t1\t2\t2\t1\t257\t257\t0\t8\t0\t11\t0\t0\t0\t75\t82\t-\t0\t0\nO\t11\t1\t2\t1\t9\t1\t1\t0\t0\t0\t0\t20\t21\t0\t89\t90\t0\t0\t0\nA\t0\t2\n",
+      "stderr": "",
+      "inputSHA256": "e856264f3178aaa342f39578125f6753833da9770fc22ff09c723e5f16da91c3",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "integer-overflow"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "field-division",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\field-division.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t9\t0\t3\t0\t0\t29\t74\t0\nL\t1\t1\t3\t257\t0\t1\t47\t48\nL\t2\t1\t0\t1\t0\t0\t54\t55\nL\t3\t1\t0\t257\t0\t0\t49\t56\nL\t4\t1\t0\t257\t0\t0\t57\t58\nL\t5\t1\t0\t1\t0\t0\t57\t60\nL\t6\t1\t0\t1\t0\t0\t62\t63\nL\t7\t1\t0\t1\t0\t0\t57\t64\nL\t8\t1\t0\t257\t0\t0\t57\t64\nL\t9\t1\t0\t1\t0\t0\t71\t72\nB\t1\t1\t1\t7\t4\t0\t5\t6\t6\t1\t2\t3\t7\t0\t0\t0\t0\t6\t57\t64\nB\t2\t1\t8\t11\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t64\t73\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t6\t57\t64\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t54\t55\t7\t0\t0\nO\t2\t1\t1\t6\t3\t257\t257\t0\t0\t0\t3\t0\t0\t0\t49\t56\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t3\t0\t4\t0\t0\t0\t43\t57\t-\t0\t0\nO\t4\t1\t1\t2\t4\t257\t257\t0\t1\t0\t5\t0\t0\t0\t57\t58\t-\t0\t0\nO\t5\t1\t1\t7\t5\t1\t257\t1\t4\t0\t6\t0\t0\t0\t57\t60\t-\t0\t0\nO\t6\t1\t1\t1\t6\t1\t1\t0\t0\t0\t7\t1\t2\t0\t62\t63\t0\t0\t0\nO\t7\t1\t1\t5\t0\t1\t1\t6\t5\t6\t0\t0\t0\t0\t57\t64\t-\t0\t0\nO\t8\t1\t2\t4\t7\t1\t1\t6\t5\t6\t9\t0\t0\t0\t57\t64\t-\t0\t0\nO\t9\t1\t2\t8\t8\t257\t257\t1\t1\t7\t10\t0\t0\t0\t57\t64\t-\t0\t0\nO\t10\t1\t2\t2\t1\t257\t257\t0\t8\t0\t11\t0\t0\t0\t57\t64\t-\t0\t0\nO\t11\t1\t2\t1\t9\t1\t1\t0\t0\t0\t0\t2\t3\t0\t71\t72\t0\t0\t0\nA\t0\t2\n",
+      "stderr": "",
+      "inputSHA256": "c34639fcd8719bb6cab12ee099a0ebe12eb09b4492dd07b960d80379959a4074",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "division-by-zero"
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "rhs-return",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\rhs-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t4\t0\t1\t0\t0\t29\t86\t0\nL\t1\t1\t3\t257\t0\t1\t47\t48\nL\t2\t1\t0\t1\t0\t0\t54\t55\nL\t3\t1\t0\t257\t0\t0\t49\t56\nL\t4\t1\t0\t1\t0\t0\t69\t70\nB\t1\t1\t1\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t62\t71\nO\t1\t1\t1\t1\t2\t1\t1\t0\t0\t0\t2\t0\t1\t0\t54\t55\t1\t0\t0\nO\t2\t1\t1\t6\t3\t257\t257\t0\t0\t0\t3\t0\t0\t0\t49\t56\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t3\t0\t4\t0\t0\t0\t43\t57\t-\t0\t0\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t0\t1\t2\t0\t69\t70\t6\t0\t0\nA\t0\t2\n",
+      "stderr": "",
+      "inputSHA256": "83ebc68983d9e21b29b9a776f3e1148bec1a0dec99f52b63091311644a7975b8",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 6,
+        "TrapCategory": ""
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "case": "defer-trace-nominal",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-mir-file-cli\\mir\\defer-trace-nominal.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t1\t36\t47\t0\nT\t2\t3\t0\t4\t7\t1\t1\t83\t87\t0\nT\t3\t4\t0\t5\t1\t2\t0\t126\t130\t0\nS\t0\t1\nS\t1\t1\nF\t1\t1\t1\t0\t3\t0\t1\t0\t1\t29\t75\t0\nF\t2\t2\t2\t3\t3\t1\t2\t1\t1\t75\t119\t0\nF\t3\t3\t4\t6\t10\t3\t3\t3\t0\t119\t197\t0\nL\t1\t1\t5\t1\t1\t0\t52\t53\nL\t2\t1\t0\t1\t0\t0\t63\t64\nL\t3\t1\t0\t1\t0\t0\t72\t73\nL\t4\t2\t6\t1\t1\t0\t92\t93\nL\t5\t2\t0\t1\t0\t0\t115\t116\nL\t6\t2\t0\t1\t0\t0\t103\t117\nL\t7\t3\t7\t257\t0\t1\t137\t138\nL\t8\t3\t0\t1\t0\t0\t144\t146\nL\t9\t3\t0\t257\t0\t0\t139\t147\nL\t10\t3\t0\t257\t0\t0\t159\t160\nL\t11\t3\t0\t1\t0\t0\t159\t162\nL\t12\t3\t0\t1\t0\t0\t168\t170\nL\t13\t3\t0\t257\t0\t0\t164\t171\nL\t14\t3\t0\t257\t0\t0\t182\t183\nL\t15\t3\t0\t1\t0\t0\t182\t185\nL\t16\t3\t0\t1\t0\t0\t194\t195\nB\t1\t1\t1\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t65\t74\nB\t2\t2\t3\t3\t5\t0\t0\t0\t0\t0\t3\t0\t0\t1\t6\t2\t1\t0\t103\t117\nB\t3\t2\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t75\t119\nB\t4\t3\t4\t14\t5\t0\t0\t0\t0\t0\t5\t0\t0\t2\t0\t4\t1\t0\t171\t187\nB\t5\t3\t0\t0\t5\t0\t0\t0\t0\t0\t6\t0\t0\t2\t0\t5\t1\t0\t148\t164\nB\t6\t3\t0\t0\t1\t16\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t187\t196\nO\t1\t1\t1\t2\t2\t1\t1\t0\t1\t0\t2\t0\t0\t0\t63\t64\t-\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t0\t0\t1\t0\t72\t73\t1\t0\t0\nO\t3\t2\t2\t2\t5\t1\t1\t0\t4\t0\t0\t0\t0\t0\t115\t116\t-\t0\t0\nO\t4\t3\t4\t1\t8\t1\t1\t0\t0\t0\t5\t1\t3\t0\t144\t146\t65\t0\t0\nO\t5\t3\t4\t6\t9\t257\t257\t0\t0\t0\t6\t0\t0\t0\t139\t147\t-\t3\t1\nO\t6\t3\t4\t2\t7\t257\t257\t0\t9\t0\t7\t0\t0\t0\t133\t148\t-\t0\t0\nO\t7\t3\t4\t2\t10\t257\t257\t0\t7\t0\t8\t0\t0\t0\t159\t160\t-\t0\t0\nO\t8\t3\t4\t7\t11\t1\t257\t1\t10\t0\t9\t0\t0\t0\t159\t162\t-\t0\t0\nO\t9\t3\t4\t1\t12\t1\t1\t0\t0\t0\t10\t3\t5\t0\t168\t170\t66\t0\t0\nO\t10\t3\t4\t8\t13\t257\t257\t1\t7\t12\t11\t0\t0\t0\t164\t171\t-\t0\t0\nO\t11\t3\t4\t2\t7\t257\t257\t0\t13\t0\t12\t0\t0\t0\t164\t171\t-\t0\t0\nO\t12\t3\t4\t2\t14\t257\t257\t0\t7\t0\t13\t0\t0\t0\t182\t183\t-\t0\t0\nO\t13\t3\t4\t7\t15\t1\t257\t1\t14\t0\t14\t0\t0\t0\t182\t185\t-\t0\t0\nO\t14\t3\t4\t1\t16\t1\t1\t0\t0\t0\t0\t5\t6\t0\t194\t195\t0\t0\t0\nA\t0\t1\nA\t1\t4\nA\t2\t5\nA\t3\t8\nA\t4\t15\nA\t5\t11\n",
+      "stderr": "",
+      "inputSHA256": "dbb82c2d784809ca575d51db63de836e0bdeb70bf81fdeb3f0dfb4b308604d33",
+      "unchanged": true,
+      "mirObservation": {
+        "Kind": "return",
+        "Value": 0,
+        "TrapCategory": "",
+        "Stdout": "QkE="
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    }
+  ]
+}

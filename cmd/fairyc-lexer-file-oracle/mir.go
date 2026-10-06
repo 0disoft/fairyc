@@ -24,6 +24,10 @@ type scalarMIRSeed struct {
 }
 
 func writeMIR(destination string) error {
+	return writeMIRSeeds(destination, scalarMIRInventory(), "fairyc.mir-file-oracle/v1")
+}
+
+func writeMIRSeeds(destination string, seeds []scalarMIRSeed, schema string) error {
 	type fixture struct {
 		Name          string              `json:"name"`
 		InputHex      string              `json:"inputHex"`
@@ -34,35 +38,6 @@ func writeMIR(destination string) error {
 		TraceCalls    bool                `json:"traceCalls,omitempty"`
 	}
 	var fixtures []fixture
-	seeds := []scalarMIRSeed{
-		{"constant", "fn i32 main(){return 17;}", true},
-		{"i64-and-forward-call", "fn i32 main(){var i64 x=4000000000; x+=add(1,2); assert(x==4000000003); return 0;} fn i64 add(i64 a,i64 b){return a+b;}", true},
-		{"signed-minima", "fn i32 main(){let i32 x=-2147483648; let i64 y=-0x8000000000000000; assert(x==-2147483648); assert(y==-9223372036854775808); return 0;}", true},
-		{"unsigned-limits", "fn i32 main(){let usize x=18446744073709551615; let u32 y=4294967295; let u8 z=255; assert(x==0xffffffffffffffff); assert(y==0xffffffff); assert(z==0xff); return 0;}", true},
-		{"all-operators", "fn i32 main(){var i32 x=17; x+=2; x-=1; x*=2; x/=3; x%=7; x&=3; x|=4; x^=1; x<<=1; x>>=1; assert(x==4); assert(+x==4); assert(~x==-5); assert(-x==-4); assert(!(x==3)); assert(x!=3); assert(x<5); assert(x<=4); assert(x>3); assert(x>=4); return x;}", true},
-		{"ordered-nested-calls", "fn i32 main(){return sum(id(1),sum(id(2),id(3)));} fn i32 id(i32 x){return x;} fn i32 sum(i32 a,i32 b){return a+b;}", true},
-		{"void-call", "fn i32 main(){observe(2); discard observe(1); return 0;} fn void observe(i32 x){discard x;}", true},
-		{"lexical-blocks", "fn i32 main(){var i32 x=2; let i32 y={let i32 x=3; x+1}; x=y; return x;}", true},
-		{"compound-read-frozen", "fn i32 main(){var i32 x=5; x+={x=2; 3}; return x;}", true},
-		{"overflow-i32", "fn i32 main(){var i32 x=2147483647; return x+1;}", true},
-		{"overflow-i64", "fn i32 main(){let i64 x=9223372036854775807; discard x+1; return 0;}", true},
-		{"negate-minimum", "fn i32 main(){let i64 x=-9223372036854775808; discard -x; return 0;}", true},
-		{"division-zero", "fn i32 main(){let i64 x=5; discard x/0; return 0;}", true},
-		{"signed-division-overflow", "fn i32 main(){let i64 x=-9223372036854775808; discard x/-1; return 0;}", true},
-		{"signed-remainder-overflow", "fn i32 main(){let i32 x=-2147483648; discard x%-1; return 0;}", true},
-		{"shift-negative", "fn i32 main(){let i32 x=2; return x>>-1;}", true},
-		{"shift-width", "fn i32 main(){let u8 x=1; discard x<<8; return 0;}", true},
-		{"shift-overflow", "fn i32 main(){let u32 x=4294967295; discard x<<1; return 0;}", true},
-		{"assertion", "fn i32 main(){assert(false); return 0;}", true},
-		{"if-simple", "fn i32 main(){return if(true){1}else{2};}", true},
-		{"short-circuit-simple", "fn i32 main(){assert(false || true); return 0;}", true},
-		{"while-basic", "fn i32 main(){var i32 x=0; while(x<2){x+=1;} return x;}", true},
-		{"for-basic", "fn i32 main(){var i32 x=0; for(var i32 i=0;i<2;i+=1){x+=1;} return x;}", true},
-		{"defer-basic", "fn i32 main(){defer observe(1); return 0;} fn void observe(i32 x){discard x;}", true},
-	}
-	seeds = append(seeds, scalarMIRControlSeeds()...)
-	seeds = append(seeds, scalarMIRLoopSeeds()...)
-	seeds = append(seeds, scalarMIRDeferSeeds()...)
 	for _, seed := range seeds {
 		input := "module main; " + seed.input
 		file := source.NewFile("main.fy", []byte(input))
@@ -100,7 +75,7 @@ func writeMIR(destination string) error {
 	data, err := json.MarshalIndent(struct {
 		Schema   string    `json:"schema"`
 		Fixtures []fixture `json:"fixtures"`
-	}{"fairyc.mir-file-oracle/v1", fixtures}, "", "  ")
+	}{schema, fixtures}, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -108,4 +83,37 @@ func writeMIR(destination string) error {
 		return err
 	}
 	return os.WriteFile(destination, append(data, '\n'), 0o644)
+}
+
+func scalarMIRInventory() []scalarMIRSeed {
+	seeds := []scalarMIRSeed{
+		{"constant", "fn i32 main(){return 17;}", true},
+		{"i64-and-forward-call", "fn i32 main(){var i64 x=4000000000; x+=add(1,2); assert(x==4000000003); return 0;} fn i64 add(i64 a,i64 b){return a+b;}", true},
+		{"signed-minima", "fn i32 main(){let i32 x=-2147483648; let i64 y=-0x8000000000000000; assert(x==-2147483648); assert(y==-9223372036854775808); return 0;}", true},
+		{"unsigned-limits", "fn i32 main(){let usize x=18446744073709551615; let u32 y=4294967295; let u8 z=255; assert(x==0xffffffffffffffff); assert(y==0xffffffff); assert(z==0xff); return 0;}", true},
+		{"all-operators", "fn i32 main(){var i32 x=17; x+=2; x-=1; x*=2; x/=3; x%=7; x&=3; x|=4; x^=1; x<<=1; x>>=1; assert(x==4); assert(+x==4); assert(~x==-5); assert(-x==-4); assert(!(x==3)); assert(x!=3); assert(x<5); assert(x<=4); assert(x>3); assert(x>=4); return x;}", true},
+		{"ordered-nested-calls", "fn i32 main(){return sum(id(1),sum(id(2),id(3)));} fn i32 id(i32 x){return x;} fn i32 sum(i32 a,i32 b){return a+b;}", true},
+		{"void-call", "fn i32 main(){observe(2); discard observe(1); return 0;} fn void observe(i32 x){discard x;}", true},
+		{"lexical-blocks", "fn i32 main(){var i32 x=2; let i32 y={let i32 x=3; x+1}; x=y; return x;}", true},
+		{"compound-read-frozen", "fn i32 main(){var i32 x=5; x+={x=2; 3}; return x;}", true},
+		{"overflow-i32", "fn i32 main(){var i32 x=2147483647; return x+1;}", true},
+		{"overflow-i64", "fn i32 main(){let i64 x=9223372036854775807; discard x+1; return 0;}", true},
+		{"negate-minimum", "fn i32 main(){let i64 x=-9223372036854775808; discard -x; return 0;}", true},
+		{"division-zero", "fn i32 main(){let i64 x=5; discard x/0; return 0;}", true},
+		{"signed-division-overflow", "fn i32 main(){let i64 x=-9223372036854775808; discard x/-1; return 0;}", true},
+		{"signed-remainder-overflow", "fn i32 main(){let i32 x=-2147483648; discard x%-1; return 0;}", true},
+		{"shift-negative", "fn i32 main(){let i32 x=2; return x>>-1;}", true},
+		{"shift-width", "fn i32 main(){let u8 x=1; discard x<<8; return 0;}", true},
+		{"shift-overflow", "fn i32 main(){let u32 x=4294967295; discard x<<1; return 0;}", true},
+		{"assertion", "fn i32 main(){assert(false); return 0;}", true},
+		{"if-simple", "fn i32 main(){return if(true){1}else{2};}", true},
+		{"short-circuit-simple", "fn i32 main(){assert(false || true); return 0;}", true},
+		{"while-basic", "fn i32 main(){var i32 x=0; while(x<2){x+=1;} return x;}", true},
+		{"for-basic", "fn i32 main(){var i32 x=0; for(var i32 i=0;i<2;i+=1){x+=1;} return x;}", true},
+		{"defer-basic", "fn i32 main(){defer observe(1); return 0;} fn void observe(i32 x){discard x;}", true},
+	}
+	seeds = append(seeds, scalarMIRControlSeeds()...)
+	seeds = append(seeds, scalarMIRLoopSeeds()...)
+	seeds = append(seeds, scalarMIRDeferSeeds()...)
+	return seeds
 }

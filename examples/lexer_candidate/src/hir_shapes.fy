@@ -42,3 +42,10 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
     while (i < count(p)) { if (!visit(p,i,ref mut colors[..],0)) { return false; } i += 1; } return true;
 }
 pub fn Table assemble(v::Vec<Shape> shapes, v::Vec<Field> fields) { return Table { .shapes, .fields }; }
+pub fn Result<Table,u32> copy(ref Table p) {
+    var v::Vec<Shape> records = v::empty<Shape>(); var v::Vec<Field> fields = v::empty<Field>();
+    var usize i = 0;
+    while (i < count(p)) { if (!v::push<Shape>(ref mut records,at(p,i)).is_ok) { return .err(3); } i += 1; }
+    i = 1; while (i <= field_count(p)) { if (!v::push<Field>(ref mut fields,field_at(p,i)).is_ok) { return .err(3); } i += 1; }
+    return .ok(assemble(records,fields));
+}

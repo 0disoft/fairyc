@@ -1,6 +1,7 @@
 module mir_output;
 import mir_model as m;
 import mir_verify as verify;
+import hir_shapes as shapes;
 import std::bytes as bytes;
 
 fn bool row(ref mut bytes::Buffer out, ref u8[] tag, usize[20] values, usize count) {
@@ -15,7 +16,22 @@ fn bool end(ref mut bytes::Buffer out) { return bytes::append_byte(out,10).is_ok
 pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     let m::Problem problem = verify::check(p);
     if (problem.code != 0) { return problem.code; }
-    if (!bytes::append(out,b"fairyc.scalar-mir/v1\nP\t").is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
+    let ref shapes::Table table = m::nominal(p); let bool nominal = shapes::count(table) != 0;
+    if (!bytes::append(out,if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
+    var usize index = 0;
+    while (index < shapes::count(table)) {
+        let shapes::Shape shape = shapes::at(table,index);
+        let usize[20] fields = [shape.type as usize,shape.binding,shape.field_start,shape.field_count,if (shape.public) { 1 } else { 0 },0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        if (bytes::len(out) > 2097152 - 1024) { return 4; }
+        if (!row(out,b"N",fields,5) || !end(out)) { return 3; } index += 1;
+    }
+    index = 1;
+    while (index <= shapes::field_count(table)) {
+        let shapes::Field field = shapes::field_at(table,index);
+        let usize[20] fields = [index,field.owner as usize,field.type as usize,field.start,field.end,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        if (bytes::len(out) > 2097152 - 1024) { return 4; }
+        if (!row(out,b"D",fields,5) || !end(out)) { return 3; } index += 1;
+    }
     var usize id = 1;
     while (id <= m::target_count(p)) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
@@ -58,6 +74,7 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
         if (!row(out,b"O",fields,16) || !bytes::append_byte(out,9).is_ok) { return 3; }
         if (o.payload_end > o.payload_start) { if (!bytes::append(out,m::literal_text(p,id)).is_ok) { return 3; } }
         else if (!bytes::append_byte(out,45).is_ok) { return 3; }
+        if (nominal && (!bytes::append_byte(out,9).is_ok || !bytes::append_usize(out,o.argument_start).is_ok || !bytes::append_byte(out,9).is_ok || !bytes::append_usize(out,o.argument_count).is_ok)) { return 3; }
         if (!end(out)) { return 3; } id += 1;
     }
     id = 0;

@@ -2,6 +2,8 @@ module mir_verify_shape;
 import mir_model as m;
 import std::bytes as bytes;
 import std::vec as v;
+import hir_shapes as shapes;
+import mir_verify_nominal as nominal;
 
 pub fn m::Problem problem(u32 code, usize start, usize end) { return m::Problem { .code, .start, .end }; }
 pub fn bool local(ref m::Program p, usize id, usize function, u32 type) {
@@ -43,6 +45,9 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if (o.kind >= 6) { return nominal::operation(p,o); }
+    if (o.argument_start != 0 || o.argument_count != 0) { return false; }
+    if (o.kind == 2) { return local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.type) && o.owner_type == o.type && o.operator == 0 && o.right == 0 && o.payload_start == 0 && o.payload_end == 0 && !o.boolean; }
     if (o.owner_type < 1 || o.owner_type > 6 || o.type < 1 || o.type > 6) { return false; }
     if (o.kind != 5 && !local(p,o.result,o.function,o.type)) { return false; }
     if (o.kind == 1) {
@@ -51,7 +56,6 @@ fn bool operation(ref m::Program p, usize id, m::Operation o) {
         return !o.boolean && integer(m::literal_text(p,id),o.type);
     }
     if (o.payload_start != 0 || o.payload_end != 0 || o.boolean || !local(p,o.left,o.function,o.owner_type)) { return false; }
-    if (o.kind == 2) { return o.type == o.owner_type && o.operator == 0 && o.right == 0; }
     if (o.kind == 3) { return o.type == o.owner_type && o.right == 0 && unary(o.operator,o.owner_type); }
     if (o.kind == 4) { return binary(o.operator,o.owner_type) && local(p,o.right,o.function,o.owner_type) && o.type == if (o.operator >= 13) { 6 } else { o.owner_type }; }
     return o.type == o.owner_type && (if (o.right == 0) { o.operator == 0 && o.owner_type == 6 || unary(o.operator,o.owner_type) }
@@ -115,6 +119,7 @@ pub fn m::Problem check(ref m::Program p) {
         while (op != 0) {
             let m::Operation o = m::operation_at(p,op);
             if (!mark(ref mut ops,op) || !operation(p,op,o) || o.kind == 5 && (op != b.last || b.kind != 4 || b.check != op)) { return problem(1001,o.start,o.end); }
+            if (o.kind == 6) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
             if (o.result != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,o.result); *count += 1; }
             if (o.kind == 1 && o.type == 6 && !o.boolean) { let ref mut u8[] flags = bytes::view_mut(ref mut false_constants); flags[o.result] = 1; }
             op = o.next;

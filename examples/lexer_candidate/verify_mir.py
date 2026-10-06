@@ -14,6 +14,8 @@ FIELDS = {
     'B': 'id function first last kind value left right operator type target alternative check callee destination argument_start argument_count trap_mask start end'.split(),
     'O': 'id function block kind result type owner_type operator left right next payload_start payload_end boolean start end literal'.split(),
     'A': 'id value'.split(),
+    'N': 'id binding field_start field_count public'.split(),
+    'D': 'id owner type start end'.split(),
 }
 TYPES = {1:'i32',2:'i64',3:'u8',4:'u32',5:'usize',6:'bool',7:'void'}
 OPS = {1:'+',2:'-',3:'!',4:'~',5:'*',6:'/',7:'%',8:'&',9:'|',10:'^',11:'<<',12:'>>',13:'==',14:'!=',15:'<',16:'<=',17:'>',18:'>='}
@@ -26,23 +28,37 @@ def mask(operator,type,unary=False):
     return {11:9,12:8}.get(operator,0)
 
 def read_mir(stdout,source):
-    lines=stdout.splitlines(); assert lines[:2]==['fairyc.scalar-mir/v1','P\t0']
+    lines=stdout.splitlines(); assert lines[0] in ('fairyc.scalar-mir/v1','fairyc.nominal-mir/v1') and lines[1]=='P\t0'
+    nominal=lines[0]=='fairyc.nominal-mir/v1'
     tables={tag:{} for tag in FIELDS}
     for line in lines[2:]:
-        parts=line.split('\t');tag=parts.pop(0);assert tag in FIELDS and len(parts)==len(FIELDS[tag]),line
-        row={key:value if key=='literal' else int(value) for key,value in zip(FIELDS[tag],parts)}
+        parts=line.split('\t');tag=parts.pop(0);assert tag in FIELDS,line
+        fields=FIELDS[tag]+(['argument_start','argument_count'] if nominal and tag=='O' else [])
+        assert len(parts)==len(fields) and (nominal or tag not in ('N','D')),line
+        row={key:value if key=='literal' else int(value) for key,value in zip(fields,parts)}
+        if tag=='O' and not nominal: row.update(argument_start=0,argument_count=0)
         assert row['id'] not in tables[tag] and all(v>=0 for k,v in row.items() if k!='literal'),row
         if 'start' in row: assert 0<=row['start']<row['end']<=len(source),row
         tables[tag][row['id']]=row
     for tag,table in tables.items():
+        if tag=='N':
+            assert all(256<=id<=767 for id in table);continue
         base=0 if tag in ('A','S') else 1
         assert sorted(table)==list(range(base,base+len(table))),tag
     return tables
 
 def validate(t,source):
     used_ops=set();used_edges=set();used_blocks=set();target_names={}
+    def valid_type(type,void=False): return type in range(1,8 if void else 7) or type in t['N']
+    offset=0
+    for id,n in t['N'].items():
+        assert n['binding']>0 and n['public'] in (0,1) and n['field_start']==offset
+        for j in range(n['field_count']):
+            field=t['D'][offset+j+1];assert field['owner']==id and valid_type(field['type'])
+        offset+=n['field_count']
+    assert offset==len(t['D'])
     def local(id,function,type=None):
-        row=t['L'][id]; assert row['function']==function and row['type'] in range(1,7),row
+        row=t['L'][id]; assert row['function']==function and valid_type(row['type']),row
         if type is not None: assert row['type']==type,row
         return row
     def edge(start,count):
@@ -51,7 +67,7 @@ def validate(t,source):
         return values
     for id,target in t['T'].items():
         name=source[target['start']:target['end']].decode('ascii');assert re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*',name)
-        assert target['external']==0 and target['module']==0 and target['declaration']>0 and target['result'] in range(1,8)
+        assert target['external']==0 and target['module']==0 and target['declaration']>0 and valid_type(target['result'],True)
         target_names[id]='main::'+name
     for fid,f in t['F'].items():
         target=t['T'][f['target']]
@@ -70,11 +86,22 @@ def validate(t,source):
             op=b['first'];last=0
             while op:
                 assert op>last and op not in used_ops
-                o=t['O'][op];used_ops.add(op);assert o['block']==bid and o['function']==fid and o['kind'] in range(1,6)
-                kind=o['kind'];type=o['type'];owner=o['owner_type'];assert owner in range(1,7)
+                o=t['O'][op];used_ops.add(op);assert o['block']==bid and o['function']==fid and o['kind'] in range(1,9)
+                kind=o['kind'];type=o['type'];owner=o['owner_type'];assert valid_type(owner)
                 if kind!=5: local(o['result'],fid,type)
                 else: assert o['result']==0 and op==b['last'] and b['kind']==4 and b['check']==op
-                if kind==1:
+                if kind>=6:
+                    assert o['literal']=='-' and o['payload_start']==o['payload_end']==o['boolean']==0
+                    if kind==6:
+                        n=t['N'][type];assert owner==type and o['left']==o['right']==o['operator']==0 and o['argument_count']==n['field_count']
+                        args=edge(o['argument_start'],o['argument_count'])
+                        for j,arg in enumerate(args):local(arg,fid,t['D'][n['field_start']+j+1]['type'])
+                    else:
+                        field=t['D'][o['operator']];local(o['left'],fid,field['owner'])
+                        assert owner==field['owner'] and o['argument_start']==o['argument_count']==0
+                        if kind==7:assert type==field['type'] and o['right']==0
+                        else:assert type==owner;local(o['right'],fid,field['type'])
+                elif kind==1:
                     assert o['left']==o['right']==o['operator']==0 and owner==type
                     if type==6: assert o['literal']=='-' and o['boolean'] in (0,1)
                     else: assert re.fullmatch(r'-?(0|[1-9][0-9]*)',o['literal']) and o['payload_end']-o['payload_start']==len(o['literal'])
@@ -84,6 +111,7 @@ def validate(t,source):
                     if kind==2: assert owner==type and o['right']==o['operator']==0
                     if kind==3: assert o['operator'] in (1,2,3,4) and o['right']==0
                     if kind==4: assert o['operator'] in OPS and o['right'] and type==(6 if o['operator']>=13 else owner)
+                if kind<6:assert o['argument_start']==o['argument_count']==0
                 last=op;op=o['next']
             assert last==b['last']
             if b['kind']==1:
@@ -170,6 +198,9 @@ def execute(t,names,trace_calls=False):
                 if kind==1:values[o['result']]=bool(o['boolean']) if type==6 else int(o['literal'])
                 elif kind==2:values[o['result']]=values[o['left']]
                 elif kind in (3,4):values[o['result']]=arithmetic(o['operator'],values[o['left']],values[o['right']] if o['right'] else 0,o['owner_type'],kind==3)
+                elif kind==6:values[o['result']]={t['D'][t['N'][type]['field_start']+i+1]['id']:values[t['A'][o['argument_start']+i]['value']] for i in range(o['argument_count'])}
+                elif kind==7:values[o['result']]=values[o['left']][o['operator']]
+                elif kind==8:values[o['result']]={**values[o['left']],o['operator']:values[o['right']]}
                 else:assert kind==5
                 op=o['next']
             if b['kind']==1:return values[b['value']] if b['value'] else None,''

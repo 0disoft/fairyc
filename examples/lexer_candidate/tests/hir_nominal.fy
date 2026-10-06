@@ -11,7 +11,7 @@ import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
 
-fn h::Program retained(ref u8[] source) {
+pub fn h::Program retained(ref u8[] source) {
     var bytes::Buffer input = bytes::empty(); assert(bytes::append(ref mut input,source).is_ok);
     let scanner::Stream stream = switch(scanner::collect(input,false,32768,1048576,256,16777216)) { case .ok(value): { value } case .err(_): { assert(false); return retained(b"module main;"); } };
     let syntax::Parsed parsed = switch(syntax::parse(stream,512)) { case .ok(value): { value } case .err(_): { assert(false); return retained(b"module main;"); } };
@@ -46,7 +46,7 @@ fn void owned_layout_and_written_initializers_survive_input() {
     assert(output::render(ref p,ref mut first) == 0 && output::render(ref p,ref mut second) == 0);
     assert(bytes::equal(bytes::view(ref first),bytes::view(ref second)));
     assert(bytes::equal(bytes::view(ref first)[..22],b"fairyc.nominal-hir/v1\n"));
-    assert(switch(mir::lower(retained(source))) { case .ok(_): { false } case .err(problem): { problem.code == 4 } });
+    assert(switch(mir::lower(retained(source))) { case .ok(_): { true } case .err(_): { false } });
     let h::Program empty = retained(b"module main;struct Empty{}fn Empty make(){return Empty{};}");
     assert(shapes::count(h::nominal(ref empty)) == 1 && shapes::field_count(h::nominal(ref empty)) == 0);
 }

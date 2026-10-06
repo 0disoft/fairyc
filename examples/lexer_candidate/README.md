@@ -4,6 +4,10 @@ This is the first Fairy-written recognition slice, built by the Go stage0
 compiler for Windows AMD64 MSVC. It is not a compiler replacement or stable CLI.
 `src/scanner.fy` recognizes original bytes directly; Go does not supply its tokens.
 
+Example version 0.18.0 adds verified same-file nominal struct MIR (see
+[Owned nominal MIR](#owned-nominal-mir)). Struct C emission and native execution
+of input struct programs remain unsupported.
+
 ## Owned consumer API
 
 `scanner::collect` consumes an input `bytes::Buffer` and the same explicit revision
@@ -1387,7 +1391,10 @@ Compiler/SDK inputs are unchanged. Compound values, ownership/cleanup lowering,
 complete verifier coverage, package linking and a self-compiling compiler remain
 subsequent work. No self-hosting promotion or performance claim is made.
 
-## Same-file nominal struct type checking
+## Same-file nominal struct type checking (historical: 0.16.0)
+
+This section records the 0.16.0 scope and verification. Later HIR/MIR admission
+is described in the versioned sections below.
 
 Version 0.16.0 connects plain struct declarations to the existing name and type
 checker. Named identity is the defining declaration, so equal field shapes do not
@@ -1409,8 +1416,8 @@ The existing 128-global, 512-declaration, 1024-field and depth-64 bounds apply.
 Resources, borrowed/array fields, generic structs, methods, attributes and imported
 nominal definitions require subsequent components. At version 0.16.0 the scalar
 HIR/MIR/C modes rejected nominal input with empty stdout. Version 0.17.0 below
-admits nominal HIR; MIR/C still reject it. The type-checking unit does not execute
-input struct operations.
+admitted nominal HIR while MIR/C still rejected it. The type-checking unit does
+not execute input struct operations.
 
 ```sh
 go run ./cmd/fairyc-lexer-file-oracle --nominal .cache/nominal-types-file-cli/reference.json
@@ -1439,7 +1446,10 @@ only construction operands; an initializer return stops remaining construction.
 
 Evidence: `docs/ops/evidence/nominal-types-file-cli-20261006.json`.
 
-## Owned nominal HIR
+## Owned nominal HIR (historical: 0.17.0)
+
+This section records the 0.17.0 scope and verification, including its then-current
+MIR/C rejection controls. Version 0.18.0 MIR admission is described below.
 
 Version 0.17.0 retains same-file plain struct layouts and semantic trees after
 the parsed, resolved and typed input owners are destroyed. The candidate owns
@@ -1447,8 +1457,8 @@ declaration-based type IDs, field types/name spans, constructor targets, written
 initializer order, field accesses, nested assignment places and nominal function
 signatures. It supports scalar and acyclic nested struct fields, empty structs,
 forward declarations, shorthand, whole-value assignment and struct-valued
-branches/calls/returns. Input struct code does not execute yet: MIR lowering
-rejects the nominal table before publishing a program; MIR/C errors publish no
+branches/calls/returns. At 0.17.0, input struct code did not execute: MIR lowering
+rejected the nominal table before publishing a program; MIR/C errors published no
 stdout.
 
 `src/hir_shapes.fy` owns checked layout tables: at most 512 shapes, 1024 fields
@@ -1480,9 +1490,71 @@ check retained owners, deterministic rendering and malformed layout rejection.
 The 1256 scalar CLI regression executions remain unchanged.
 Sample: `samples/nominal_hir.fy`.
 
-Evidence: `docs/ops/evidence/nominal-hir-file-cli-20261006.json`. Struct MIR,
-verification and C execution remain next; Linux native execution stays deferred
-to the consolidated batch. No self-hosting promotion is claimed.
+Evidence: `docs/ops/evidence/nominal-hir-file-cli-20261006.json`. At 0.17.0, struct
+MIR, verification and C execution remained next; Linux native execution was
+deferred to the consolidated batch. No self-hosting promotion is claimed.
+
+## Owned nominal MIR
+
+Example version 0.18.0 extends `--mir-file` to same-file plain, acyclic copy
+structs with scalar or nested struct fields. `src/mir_lower.fy` consumes HIR;
+`src/mir_model.fy` owns copied nominal layouts, source bytes and MIR arenas after
+HIR destruction. Declaration-based identities remain distinct. Nominal function
+signatures, ordered calls, struct-valued branches/returns, whole-value assignment
+and nested field assignment lower into the existing control-flow graph.
+Resources, borrowed/array fields, generic structs and imported nominal definitions
+remain outside this subset. The existing 512-shape, 1024-field and depth-64 limits
+apply alongside the scalar MIR budgets.
+
+Three operation kinds carry struct values:
+
+- **6, construct:** evaluate initializers in written order and freeze their
+  values, then append operands in declaration order. A returning initializer
+  stops construction. Call arguments are likewise frozen before later arguments
+  can mutate their source.
+- **7, field read:** copy a field from an evaluated, frozen owner value.
+- **8, functional update:** produce a replacement owner value. `src/mir_nominal.fy`
+  rereads the current assignment root and nested owners after RHS evaluation,
+  preserving sibling changes made by that RHS. Compound assignment freezes the
+  old target field before the RHS, computes the checked result, rebuilds the
+  containing structs and copies the replacement into the mutable root.
+
+`src/mir_verify_nominal.fy` checks constructor arity and declaration-order field
+types, field ownership, operand/result types and unused payload slots. The
+existing verifier checks edge ownership, calls/returns and definite initialization,
+including every constructor operand. Lowering and rendering both require a valid
+graph; invalid rendering preserves the caller's Buffer.
+
+`src/mir_output.fy` emits private `fairyc.nominal-mir/v1`: `N` rows contain type,
+binding, field start/count and visibility; `D` rows contain field ID, owner/type
+and name span. Nominal `O` rows append `argument_start` and `argument_count` after
+the literal payload column; constructor operands use the existing `A` edge arena.
+Scalar-only output keeps `fairyc.scalar-mir/v1` and its columns unchanged.
+Version 0.18.0 belongs to this example; it adds no public SDK, stable CLI or ABI
+change.
+
+`verify_nominal_mir.py` compares 20 Go oracle seeds across development/release
+candidate images: **40 comparisons passed**. The candidate is native compiled
+Fairy C. The script checks layouts and signatures, then independently executes
+emitted MIR through the test-only Python observer against expected Go MIR
+interpreter outcomes. Cases cover initializer order and
+early return, copied call arguments, nested/sibling mutation, branches, loops,
+arithmetic traps and defer traces. The separate Go call-argument snapshot fix is
+commit `58350fb9`.
+
+The latest regression runs also passed: **58 nominal CLI runs**, **30 nominal HIR
+comparisons** and **1256 scalar CLI runs**. Nominal CLI controls now accept HIR
+and MIR and reject C output. Native API final checks passed:
+`tests/mir_nominal.fy` (2), `tests/hir_nominal.fy` (3) and `tests/mir_verify.fy` (1),
+six tests per development/release profile, including ten nominal MIR mutations.
+The candidate API supports empty structs, but the Go oracle currently has an
+empty-constructor lowering gap, so these comparisons establish no empty-struct
+parity.
+
+`src/c_emit.fy` still rejects nominal tables; input struct programs have no
+candidate C/native execution yet. Linux native checks remain deferred to the
+owner's consolidated batch. Evidence is recorded in
+`docs/ops/evidence/nominal-mir-file-cli-20261006.json`.
 
 ## Cost baseline
 

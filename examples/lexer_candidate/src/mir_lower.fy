@@ -5,6 +5,7 @@ import mir_model as m;
 import mir_state as state;
 import mir_cleanup as finalize;
 import mir_verify as verify;
+import mir_nominal as nominal;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -58,6 +59,31 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         // Freeze source reads before later child expressions can assign/call.
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         if (state::emit(operations,blocks,c,state::operation(2,result,type,type,0,original,0,e.start,e.end)) == 0) { return 0; } return result;
+    }
+    if (kind == 10) {
+        let usize owner = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth + 1);
+        if (c.current == 0 || c.problem.code != 0) { return 0; }
+        return nominal::read(locals,blocks,operations,c,owner,type,e.binding,e.start,e.end);
+    }
+    if (kind == 9) {
+        let ref shapes::Table table = h::nominal(input); let usize index = shapes::find(table,type);
+        if (index == 0 || e.edge_count > 65536 - v::len<usize>(edges)) { return state::fail(c,4,e.start,e.end); }
+        let shapes::Shape shape = shapes::at(table,index - 1);
+        var v::Vec<usize> values = v::empty<usize>(); var usize i = 0;
+        while (i < shape.field_count) { if (!v::push<usize>(ref mut values,0).is_ok) { return state::fail(c,3,e.start,e.end); } i += 1; }
+        i = 0;
+        while (i < e.edge_count) {
+            let h::Expression initializer = h::expression_at(input,h::edge_at(input,e.edge_start + i));
+            let usize value = expression(input,locals,blocks,operations,edges,payload,c,initializer.left,depth + 1);
+            if (c.current == 0 || c.problem.code != 0) { return 0; }
+            { let ref mut usize slot = v::at_mut<usize>(ref mut values,initializer.binding - shape.field_start - 1); *slot = value; }
+            i += 1;
+        }
+        let usize start = v::len<usize>(edges); i = 0;
+        while (i < shape.field_count) { if (!state::edge(edges,*v::at<usize>(ref values,i),c)) { return 0; } i += 1; }
+        let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
+        var m::Operation o = state::operation(6,result,type,type,0,0,0,e.start,e.end); o.argument_start = start; o.argument_count = shape.field_count;
+        if (state::emit(operations,blocks,c,o) == 0) { return 0; } return result;
     }
     if (kind == 4 || kind == 5) {
         let usize left = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth + 1);
@@ -209,9 +235,9 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         c.current = exit; return true;
     }
     if (kind == 1 || kind == 3) {
-        let usize binding = if (kind == 1) { s.binding } else { h::expression_at(input,s.target).binding };
+        let usize binding = if (kind == 1) { s.binding } else { nominal::root(input,s.target) };
         let usize destination = c.locals[binding]; if (destination == 0) { discard state::fail(c,4,s.start,s.end); return false; }
-        let u32 type = v::at<m::Local>(locals,destination - 1).type; let u32 operator = h::operator_code(s.operator);
+        let u32 type = if (kind == 1) { v::at<m::Local>(locals,destination - 1).type } else { h::type_code(h::expression_at(input,s.target).type) }; let u32 operator = h::operator_code(s.operator);
         var usize left = 0;
         if (kind == 3 && operator != 21) {
             let h::Expression target = h::expression_at(input,s.target);
@@ -221,7 +247,9 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         var usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
         if (kind == 3 && operator != 21) { value = binary(locals,blocks,operations,c,type,type,operator,left,value,s.start,s.end); }
-        return state::emit(operations,blocks,c,state::operation(2,destination,type,type,0,value,0,s.start,s.end)) != 0;
+        if (kind == 3) { value = nominal::store(input,s.target,destination,value,locals,blocks,operations,c,s.start,s.end); if (value == 0) { return false; } }
+        let u32 destination_type = v::at<m::Local>(locals,destination - 1).type;
+        return state::emit(operations,blocks,c,state::operation(2,destination,destination_type,destination_type,0,value,0,s.start,s.end)) != 0;
     }
     if (kind == 2) {
         let usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1);
@@ -261,7 +289,7 @@ fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v:
 }
 
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
-    if (shapes::count(h::nominal(ref input)) != 0) { return .err(m::Problem { .code = 4, .start = 0, .end = h::source_view(ref input).len }); }
+    let shapes::Table table = switch(shapes::copy(h::nominal(ref input))) { case .ok(value): { value } case .err(code): { return .err(m::Problem { .code, .start = 0, .end = 0 }); } };
     var state::Context c = state::empty(); var bytes::Buffer source = bytes::empty(); var bytes::Buffer payload = bytes::empty();
     var v::Vec<m::Target> targets = v::empty<m::Target>(); var v::Vec<m::Signature> signatures = v::empty<m::Signature>();
     var v::Vec<m::Function> functions = v::empty<m::Function>(); var v::Vec<m::Local> locals = v::empty<m::Local>();
@@ -291,7 +319,7 @@ pub fn Result<m::Program,m::Problem> lower(h::Program input) {
         if (!v::push<m::Function>(ref mut functions,m::Function { .target = c.targets[f.binding], .entry, .local_start, .local_count = v::len<m::Local>(ref locals) - local_start, .block_start, .block_count = v::len<m::Block>(ref blocks) - block_start, .parameter_start, .parameter_count = f.parameter_count, .start = f.start, .end = f.end, .public = f.public }).is_ok) { return .err(m::Problem { .code = 3, .start = f.start, .end = f.end }); }
         index += 1;
     }
-    let m::Program result = switch(m::assemble(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input))) {
+    let m::Program result = switch(m::assemble_nominal(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input),table)) {
         case .ok(value): { value } case .err(problem): { return .err(problem); }
     };
     let m::Problem problem = verify::check(ref result);

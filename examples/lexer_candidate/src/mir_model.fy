@@ -1,6 +1,7 @@
 module mir_model;
 import std::bytes as bytes;
 import std::vec as v;
+import hir_shapes as shapes;
 
 // Private mutable-local scalar MIR. IDs are one-based; zero is absent.
 // Ranges and edge/signature indexes are zero-based. No HIR tree is retained.
@@ -11,10 +12,11 @@ pub struct Signature { u32 type; }
 pub struct Target { usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
 pub struct Function { usize target; usize entry; usize local_start; usize local_count; usize block_start; usize block_count; usize parameter_start; usize parameter_count; usize start; usize end; bool public; }
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
-// Operation kinds: 1 constant, 2 copy/assignment, 3 unary, 4 binary, 5 check.
+// Operation kinds: 1 constant, 2 copy/assignment, 3 unary, 4 binary, 5 check,
+// 6 construct (declaration-order operands), 7 field read, 8 functional update.
 // A check defines no local. It must end its block immediately before a matching
 // checked terminator. Actual arithmetic occurs only in the success block.
-pub struct Operation { usize function; usize block; u32 kind; usize result; u32 type; u32 owner_type; u32 operator; usize left; usize right; usize next; usize payload_start; usize payload_end; bool boolean; usize start; usize end; }
+pub struct Operation { usize function; usize block; u32 kind; usize result; u32 type; u32 owner_type; u32 operator; usize left; usize right; usize next; usize payload_start; usize payload_end; bool boolean; usize start; usize end; usize argument_start; usize argument_count; }
 // Terminators: 1 return, 2 goto, 3 bool branch, 4 checked switch, 5 call,
 // 6 trap, 7 unreachable. Calls have one normal successor, no unwind edge.
 // Checked switches name check Operation ID plus frozen local operands.
@@ -22,6 +24,7 @@ pub struct Operation { usize function; usize block; u32 kind; usize result; u32 
 // 8 invalid-shift, 16 assertion-failed. Trap blocks have no successor/cleanup.
 pub struct Block { usize function; usize first; usize last; u32 kind; usize value; usize left; usize right; u32 operator; u32 type; usize target; usize alternative; usize check; usize callee; usize destination; usize argument_start; usize argument_count; u32 trap_mask; usize start; usize end; }
 pub resource Program {
+    shapes::Table nominal;
     bytes::Buffer source; bytes::Buffer payload;
     v::Vec<Target> targets; v::Vec<Signature> signatures;
     v::Vec<Function> functions; v::Vec<Local> locals; v::Vec<Block> blocks;
@@ -39,6 +42,7 @@ pub fn usize local_count(ref Program p) { assert(p.success); return v::len<Local
 pub fn usize block_count(ref Program p) { assert(p.success); return v::len<Block>(ref p.blocks); }
 pub fn usize operation_count(ref Program p) { assert(p.success); return v::len<Operation>(ref p.operations); }
 pub fn usize edge_count(ref Program p) { assert(p.success); return v::len<usize>(ref p.edges); }
+pub fn ref shapes::Table nominal(ref Program p) { assert(p.success); return ref p.nominal; }
 pub fn usize module_index(ref Program p) { assert(p.success); return p.module_index; }
 pub fn Target target_at(ref Program p, usize id) { assert(id > 0 && id <= target_count(p)); return *v::at<Target>(ref p.targets,id - 1); }
 pub fn Function function_at(ref Program p, usize id) { assert(id > 0 && id <= function_count(p)); return *v::at<Function>(ref p.functions,id - 1); }
@@ -54,17 +58,21 @@ pub fn ref u8[] literal_text(ref Program p, usize id) { let Operation o = operat
 // This is a checked construction boundary, not the future complete MIR verifier.
 // It rejects unfinished blocks, malformed links and ownership/range drift.
 pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index) {
+    return assemble_nominal(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,shapes::empty());
+}
+pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal) {
     let usize ns = bytes::len(ref source); let usize np = bytes::len(ref payload);
     let usize nt = v::len<Target>(ref targets); let usize ng = v::len<Signature>(ref signatures); let usize nf = v::len<Function>(ref functions);
     let usize nl = v::len<Local>(ref locals); let usize nb = v::len<Block>(ref blocks); let usize no = v::len<Operation>(ref operations); let usize ne = v::len<usize>(ref edges);
     if (ns > 32768 || np > 688128 || nt > 512 || nf > 512 || nl > 16384 || nb > 16384 || no > 32768 || ne > 65536 || ng > 65536) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
+    if (!shapes::valid(ref nominal,ns,1152)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
     var usize i = 0;
     while (i < nt) {
         let Target t = *v::at<Target>(ref targets,i);
-        if (t.binding == 0 || t.declaration == 0 || t.result < 1 || t.result > 7 || t.start >= t.end || t.end > ns || t.signature_start > ng || t.signature_count > ng - t.signature_start) { return .err(Problem { .code = 4, .start = t.start, .end = t.end }); }
+        if (t.binding == 0 || t.declaration == 0 || !shapes::valid_type(ref nominal,t.result,true) || t.start >= t.end || t.end > ns || t.signature_start > ng || t.signature_count > ng - t.signature_start) { return .err(Problem { .code = 4, .start = t.start, .end = t.end }); }
         i += 1;
     }
-    i = 0; while (i < ng) { let u32 type = v::at<Signature>(ref signatures,i).type; if (type < 1 || type > 6) { return .err(Problem { .code = 4, .start = 0, .end = 0 }); } i += 1; }
+    i = 0; while (i < ng) { let u32 type = v::at<Signature>(ref signatures,i).type; if (!shapes::valid_type(ref nominal,type,false)) { return .err(Problem { .code = 4, .start = 0, .end = 0 }); } i += 1; }
     i = 0;
     while (i < nf) {
         let Function f = *v::at<Function>(ref functions,i);
@@ -83,7 +91,7 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
     i = 0;
     while (i < nl) {
         let Local l = *v::at<Local>(ref locals,i);
-        if (l.function == 0 || l.function > nf || l.type < 1 || l.type > 6 || l.start >= l.end || l.end > ns) { return .err(Problem { .code = 4, .start = l.start, .end = l.end }); }
+        if (l.function == 0 || l.function > nf || !shapes::valid_type(ref nominal,l.type,false) || l.start >= l.end || l.end > ns) { return .err(Problem { .code = 4, .start = l.start, .end = l.end }); }
         let Function f = *v::at<Function>(ref functions,l.function - 1);
         if (i < f.local_start || i >= f.local_start + f.local_count) { return .err(Problem { .code = 4, .start = l.start, .end = l.end }); } i += 1;
     }
@@ -110,8 +118,8 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
     i = 0;
     while (i < no) {
         let Operation o = *v::at<Operation>(ref operations,i);
-        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 5 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
-        if ((o.kind != 5 && (o.result == 0 || o.type < 1 || o.type > 6)) || (o.kind == 5 && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
+        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 8 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
+        if ((o.kind != 5 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || (o.kind == 5 && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
     }
-    return .ok(Program { .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });
+    return .ok(Program { .nominal, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });
 }

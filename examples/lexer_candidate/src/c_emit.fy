@@ -1,5 +1,6 @@
 module c_emit;
 import mir_model as m;
+import hir_shapes as shapes;
 import mir_verify as verify;
 import c_text as w;
 import c_scalar as scalar;
@@ -70,6 +71,7 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
 // Verified scalar C11 transport for 64-bit Windows/Linux. No source identifiers
 // or paths are interpolated; all C symbols come from private numeric arena IDs.
 pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
+    if (shapes::count(m::nominal(p)) != 0) { return 5; }
     let m::Problem problem = verify::check(p); if (problem.code != 0) { return problem.code; }
     var usize entry = 0; var usize id = 1;
     while (id <= m::target_count(p)) {

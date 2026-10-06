@@ -14,7 +14,7 @@ pub fn bool edge(ref mut v::Vec<usize> edges, usize id, ref mut Context c) {
 }
 pub fn usize local(ref mut v::Vec<m::Local> locals, ref mut Context c, u32 type, usize binding, bool parameter, bool mutable, usize start, usize end) {
     if (c.problem.code != 0) { return 0; }
-    if (type < 1 || type > 6 || c.function == 0 || start >= end) { return fail(c,4,start,end); }
+    if (!(type >= 1 && type <= 6 || type >= 256 && type <= 767) || c.function == 0 || start >= end) { return fail(c,4,start,end); }
     if (v::len<m::Local>(locals) >= 16384) { return fail(c,2,start,end); }
     if (!v::push<m::Local>(locals,m::Local { .function = c.function, .binding, .type, .parameter, .mutable, .start, .end }).is_ok) { return fail(c,3,start,end); }
     return v::len<m::Local>(locals);
@@ -26,14 +26,14 @@ pub fn usize new_block(ref mut v::Vec<m::Block> blocks, ref mut Context c, usize
     if (!v::push<m::Block>(blocks,block(c.function,start,end)).is_ok) { return fail(c,3,start,end); } return v::len<m::Block>(blocks);
 }
 pub fn m::Operation operation(u32 kind, usize result, u32 type, u32 owner_type, u32 operator, usize left, usize right, usize start, usize end) {
-    return m::Operation { .function = 0, .block = 0, .kind, .result, .type, .owner_type, .operator, .left, .right, .next = 0, .payload_start = 0, .payload_end = 0, .boolean = false, .start, .end };
+    return m::Operation { .function = 0, .block = 0, .kind, .result, .type, .owner_type, .operator, .left, .right, .next = 0, .payload_start = 0, .payload_end = 0, .boolean = false, .start, .end, .argument_start = 0, .argument_count = 0 };
 }
 pub fn usize emit(ref mut v::Vec<m::Operation> operations, ref mut v::Vec<m::Block> blocks, ref mut Context c, m::Operation value) {
     if (c.problem.code != 0) { return 0; }
     if (c.current == 0 || c.current > v::len<m::Block>(blocks) || v::at<m::Block>(blocks,c.current - 1).kind != 0) { return fail(c,4,value.start,value.end); }
     if (v::len<m::Operation>(operations) >= 32768) { return fail(c,2,value.start,value.end); }
     let usize previous = v::at<m::Block>(blocks,c.current - 1).last;
-    if (!v::push<m::Operation>(operations,m::Operation { .function = c.function, .block = c.current, .kind = value.kind, .result = value.result, .type = value.type, .owner_type = value.owner_type, .operator = value.operator, .left = value.left, .right = value.right, .next = 0, .payload_start = value.payload_start, .payload_end = value.payload_end, .boolean = value.boolean, .start = value.start, .end = value.end }).is_ok) { return fail(c,3,value.start,value.end); }
+    if (!v::push<m::Operation>(operations,m::Operation { .function = c.function, .block = c.current, .kind = value.kind, .result = value.result, .type = value.type, .owner_type = value.owner_type, .operator = value.operator, .left = value.left, .right = value.right, .next = 0, .payload_start = value.payload_start, .payload_end = value.payload_end, .boolean = value.boolean, .start = value.start, .end = value.end, .argument_start = value.argument_start, .argument_count = value.argument_count }).is_ok) { return fail(c,3,value.start,value.end); }
     let usize id = v::len<m::Operation>(operations);
     if (previous != 0) { let ref mut m::Operation p = v::at_mut<m::Operation>(operations,previous - 1); p.next = id; }
     let ref mut m::Block b = v::at_mut<m::Block>(blocks,c.current - 1);

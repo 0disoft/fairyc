@@ -32,6 +32,12 @@ fn u32 transfer(ref m::Program p, m::Block b, usize base, ref mut bytes::Buffer 
         let m::Operation o = m::operation_at(p,op);
         if (!charge(budget,1)) { return 2; }
         if (inspect && (!read(initialized,o.left,base) || !read(initialized,o.right,base))) { return 1002; }
+        if (o.kind == 6) {
+            var usize j = 0; while (j < o.argument_count) {
+                if (!charge(budget,1)) { return 2; }
+                if (inspect && !read(initialized,m::edge_at(p,o.argument_start + j),base)) { return 1002; } j += 1;
+            }
+        }
         if (o.result != 0) { set(initialized,o.result - base - 1); } op = o.next;
     }
     if (inspect && (!read(initialized,b.value,base) || !read(initialized,b.left,base) || !read(initialized,b.right,base))) { return 1002; }
