@@ -16,7 +16,7 @@ pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
 }
 pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     if (root == 0) { return 0; }
-    if (syntax::type_at(p,root).kind == 2) { return literals::resolve(p,root); }
+    if ((syntax::type_at(p,root).kind == 2 || syntax::type_at(p,root).kind == 3)) { return literals::resolve(p,root); }
     if (syntax::type_at(p,root).kind == 8) { return arrays::resolve(p,root); }
     if (syntax::type_at(p,root).kind != 1) { return 0; }
     let ref u8[] spelling = syntax::type_text(p,root);

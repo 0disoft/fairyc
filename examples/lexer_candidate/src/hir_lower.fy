@@ -129,7 +129,8 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
             let usize child = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,if (e.boolean) { node.left } else { syntax::array_element(parsed,id,i) },depth + 1);
             if (child == 0) { return 0; } state::set_edge(edges,e.edge_start + i,child); i += 1;
         }
-    } else if (node.kind == 21) {
+    } else if (node.kind == 21 || node.kind == 22) {
+        e.boolean = node.kind == 22;
         kind = .Borrow; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
     } else if (node.kind == 26) {
         kind = .Slice; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);

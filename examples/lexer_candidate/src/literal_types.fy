@@ -3,15 +3,15 @@ import syntax as syntax;
 import std::bytes as bytes;
 import utf8 as utf8;
 
-// Private tags 9/10 are immutable descriptors. This candidate admits only
-// Static literal origins; array/heap borrows and mutable descriptors stay closed.
+// Private tags 9/10 are immutable literal-capable descriptors. Tag 11
+// resolves mutable byte-view annotations, but is never a literal value.
 pub fn bool valid(u32 type) { return type == 9 || type == 10; }
 pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     let n = syntax::type_at(p,root);
-    if (n.kind != 2) { return 0; }
+    if (n.kind != 2 && n.kind != 3) { return 0; }
     let child = syntax::type_at(p,n.left);
-    if (child.kind == 1 && bytes::equal(syntax::type_text(p,n.left),b"str")) { return 9; }
-    if (child.kind == 4 && syntax::type_at(p,child.left).kind == 1 && bytes::equal(syntax::type_text(p,child.left),b"u8")) { return 10; }
+    if (n.kind == 2 && child.kind == 1 && bytes::equal(syntax::type_text(p,n.left),b"str")) { return 9; }
+    if (child.kind == 4 && syntax::type_at(p,child.left).kind == 1 && bytes::equal(syntax::type_text(p,child.left),b"u8")) { return if (n.kind == 3) { 11 } else { 10 }; }
     return 0;
 }
 pub fn bool text(ref u8[] cooked) {

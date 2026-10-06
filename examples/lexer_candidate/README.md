@@ -1773,6 +1773,29 @@ outside this candidate slice. Public grammar, SDK and runtime are unchanged.
 Linux execution remains deferred to the requested consolidated batch;
 performance and self-hosting have not been measured here.
 
+## Mutable byte-view HIR
+
+Version 0.26.0 retains `ref mut u8[]` separately from immutable byte descriptors.
+An explicit expected mutable-view type permits `ref mut` of a named mutable
+`u8[N]` local. Named immutable descriptors support byte reads, plain/compound
+indexed writes, metadata and mutable child slices. Descriptors themselves cannot
+be reassigned; temporary-array and field-array borrows remain closed.
+
+Exclusive generation checking rejects owner reads/writes while a mutable loan
+is live, shared/exclusive conflicts in either order, parent/parent-alias access
+while a child remains used, and retained siblings even for disjoint intervals.
+Exact mutable call arguments create bounded reborrows held through later
+arguments. A mutable return preserves one inferred parameter origin and keeps
+the caller's parent frozen until its last use. Child uses extend ancestor holds;
+parent and owner access resumes after the appropriate last use. Loop-held loans
+and indexed-store receivers stay live across backedges and RHS evaluation.
+
+`tests/hir_mutable.fy` covers retained mutable nodes, parent/sibling/call conflicts
+and local-return escape rejection. The initial HIR lane includes 30 positive and
+negative CLI cases. Mutable-to-shared call conversion, mutable text, field/nested
+arrays, mixed/recursive return origins and deferred view arguments remain closed.
+MIR/C writes are the next step; the HIR-only admission does not claim execution.
+
 ## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token

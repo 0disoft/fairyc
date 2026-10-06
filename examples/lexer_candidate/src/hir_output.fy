@@ -14,7 +14,7 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
         case .I64: { put(out,b"i64") } case .U8: { put(out,b"u8") } case .U32: { put(out,b"u32") }
         case .Usize: { put(out,b"usize") } case .Bool: { put(out,b"bool") }
         case .Void: { put(out,b"void") } case .Callable: { put(out,b"callable") }
-        case .Text: { put(out,b"ref-str") } case .Bytes: { put(out,b"ref-u8-slice") }
+        case .Text: { put(out,b"ref-str") } case .Bytes: { put(out,b"ref-u8-slice") } case .MutableBytes: { put(out,b"ref-mut-u8-slice") }
         case .Array { .id = id }: { put(out,b"array:") && bytes::append_u32(out,id).is_ok }
         case .Nominal { .id = id }: { put(out,b"nominal:") && bytes::append_u32(out,id).is_ok }
     };
