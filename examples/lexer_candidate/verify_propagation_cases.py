@@ -21,7 +21,7 @@ POSITIVES += [
     ('propagate-in-while-condition', 'fn Result<i32,bool> f(Result<bool,bool> r){while(r?){return .ok(7);}return .ok(8);}fn i32 main(){return switch(f(.err(true))){case .ok(_):{99}case .err(e):{if(e){7}else{0}}};}', 7),
     ('propagate-loop-success', 'fn Result<i32,bool> f(){var i32 n=0;while(n<3){let Result<i32,bool> r=.ok(1);n+=r?;}return .ok(n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{99}};}', 3),
     ('propagate-loop-error', 'fn Result<i32,bool> f(){var i32 n=0;while(n<3){let Result<i32,bool> r=if(n==1){.err(true)}else{.ok(1)};n+=r?;}return .ok(99);}fn i32 main(){return switch(f()){case .ok(_):{99}case .err(e):{if(e){7}else{0}}};}', 7),
-    ('propagate-early-operand-return', 'fn Result<i32,bool> f(Result<i32,bool> r){let n={return .err(true);r}?;return .ok(n);}fn i32 main(){return switch(f(.ok(3))){case .ok(_):{99}case .err(e):{if(e){7}else{0}}};}', 7),
+    ('propagate-early-operand-return', 'fn Result<i32,bool> f(Result<i32,bool> r){let n={discard r;return .err(true);r}?;return .ok(n);}fn i32 main(){return switch(f(.ok(3))){case .ok(_):{99}case .err(e):{if(e){7}else{0}}};}', 7),
     ('propagate-short-circuit', 'fn Result<bool,bool> fail(){return .err(true);}fn Result<bool,bool> f(){return .ok(false && fail()?);}fn i32 main(){return switch(f()){case .ok(n):{if(n){99}else{7}}case .err(_):{99}};}', 7),
 ]
 MARK = 'fn void mark(i32 tag){assert(tag>0);}'

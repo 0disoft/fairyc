@@ -157,6 +157,8 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
     } else if (node.kind == 9) {
         kind = .Index; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
         e.right = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.right,depth + 1);
+    } else if (node.kind == 8 && typing::result_is_ok(input,id)) {
+        kind = .IsOk; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
     } else if (node.kind == 8 && typing::field_target(input,id) == 0) {
         kind = .Length; e.boolean = bytes::equal(syntax::expression_text(parsed,id),b"is_empty"); e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
     } else if (node.kind == 8) {

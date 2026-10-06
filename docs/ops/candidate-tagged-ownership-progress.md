@@ -18,7 +18,7 @@ work remain deferred to the owner's consolidated batch.
 | 8 | Result MIR/C execution for both alternatives | Complete: candidate-result-native-20261007.json; 36 ordered pairs in both arms, 36 MIR mutations, 116 native executions and 6 sample/coexistence executions |
 | 9 | Postfix ? position and return-error compatibility checks | Complete: candidate-result-propagation-types-20261007.json; 190 CLI observations, 6 native API tests, exact question spans and error identity, 3 Go reference checks |
 | 10 | Postfix ? success extraction and early error return execution | Complete: candidate-result-propagation-native-20261007.json; 8 forged HIR controls, 14 literal-guard facts, 6 native API tests, 937 CLI observations, 130 native executions and 2 sample executions; optimized always-trapping caller emission fixed |
-| 11 | Result must-use handling obligations | Pending |
+| 11 | Result must-use handling obligations | Candidate implemented/verified: candidate-result-handling-20261007.json; 449 CLI observations, 58 native runs, 14 native API tests and 237 prior positive fixture checks. Differential acceptance pending: Go accepts an unrelated pending Result across a ? error return; candidate rejects it. Seven reference cases agree; one mismatch blocks promotion. |
 | 12 | Nested Option/Result combinations needed by compiler sources | Pending |
 | 13 | Struct/diagnostic payloads in Option and Result | Pending |
 | 14 | Required enum/Option/Result storage in struct fields and arrays | Pending |

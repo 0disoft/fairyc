@@ -15,8 +15,8 @@ TYPE_POSITIVES = [
 ]
 TYPE_POSITIVES += [
     ('calls', 'fn Result<i64,bool> id(Result<i64,bool> x){return x;}fn Result<i64,bool> call(Result<i64,bool> x){return id(x);}'),
-    ('if', 'fn Result<i32,bool> choose(bool b,Result<i32,bool> x,Result<i32,bool> y){return if(b){x}else{y};}'),
-    ('assignment', 'fn Result<i32,bool> f(Result<i32,bool> x){var Result<i32,bool> y=x;y=x;return y;}'),
+    ('if', 'fn Result<i32,bool> choose(bool b,Result<i32,bool> x,Result<i32,bool> y){return if(b){discard y;x}else{discard x;y};}'),
+    ('assignment', 'fn Result<i32,bool> f(Result<i32,bool> x){var Result<i32,bool> y=x;discard y;y=x;return y;}'),
     ('coexist', 'enum E{A;}struct S{i32 n;}fn Option<i32> o(Option<i32> x){return x;}fn Result<i32,i32> r(Result<i32,i32> x){return x;}'),
 ]
 TYPE_NEGATIVES = [
@@ -68,7 +68,7 @@ PATTERN_POSITIVES += [
     ('assert-arm-first', 'fn i32 f(Result<i32,bool> r){let n=switch(r){case .err(_):{assert(false);}case .ok(n):{n}};return n;}'),
     ('assert-arm-last', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(_):{assert(false);}};}'),
     ('context-argument', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(e):{if(e){1}else{2}}};}fn i32 main(){return f(.err(true));}'),
-    ('context-assignment', 'fn i32 main(){var Result<i32,bool> r=.ok(3);r=.err(true);return switch(r){case .ok(n):{n}case .err(e):{if(e){1}else{2}}};}'),
+    ('context-assignment', 'fn i32 main(){var Result<i32,bool> r=.ok(3);discard r;r=.err(true);return switch(r){case .ok(n):{n}case .err(e):{if(e){1}else{2}}};}'),
     ('option-coexist', 'fn i32 main(){let Option<i32> o=.some(3);let Result<i32,bool> r=.ok(2);return switch(r){case .ok(n):{n}case .err(_):{0}}+switch(o){case .some(n):{n}case .none:{0}};}'),
 ]
 PATTERN_NEGATIVES = [
@@ -109,8 +109,8 @@ PROPAGATION_POSITIVES += [
     ('propagate-call', 'fn Result<i64,bool> value(){return .ok(4000000000);}fn Result<i64,bool> f(){return .ok(value()?);}'),
     ('propagate-group', 'fn Result<i32,bool> f(Result<i32,bool> r){return .ok((r)?);}'),
     ('propagate-argument', 'fn i32 id(i32 n){return n;}fn Result<i32,bool> f(Result<i32,bool> r){return .ok(id(r?));}'),
-    ('propagate-branch', 'fn Result<i32,bool> f(Result<i32,bool> r,bool yes){return .ok(if(yes){r?}else{0});}'),
-    ('propagate-loop', 'fn Result<i32,bool> f(Result<i32,bool> r){var i32 n=0;while(n<1){n=r?;}return .ok(n);}'),
+    ('propagate-branch', 'fn Result<i32,bool> f(Result<i32,bool> r,bool yes){return .ok(if(yes){r?}else{discard r;0});}'),
+    ('propagate-loop', 'fn Result<i32,bool> f(Result<i32,bool> r){var i32 n=0;while(n<1){n=r?;}discard r;return .ok(n);}'),
     ('propagate-defer-capture', 'fn void log(i32 n){}fn Result<i32,bool> f(Result<i32,bool> r){defer log(r?);return .ok(0);}'),
     ('propagate-condition', 'fn Result<i32,bool> f(Result<bool,bool> r){if(r?){return .ok(1);}return .ok(0);}'),
 ]

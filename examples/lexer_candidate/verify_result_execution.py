@@ -21,10 +21,10 @@ for success in SCALARS:
 POSITIVES += [
     ('ok', 'fn i32 main(){let Result<i32,bool> r=.ok(7);return switch(r){case .ok(n):{n}case .err(e):{if(e){1}else{0}}};}', 7),
     ('err', 'fn i32 main(){let Result<i32,bool> r=.err(true);return switch(r){case .err(e):{if(e){7}else{0}}case .ok(n):{n}};}', 7),
-    ('copy', 'fn Result<i32,bool> id(Result<i32,bool> r){return r;}fn i32 main(){var Result<i32,bool> r=.ok(7);let saved=id(r);r=.err(false);return switch(saved){case .ok(n):{n}case .err(_):{0}};}', 7),
-    ('early-argument-frozen', 'fn i32 read(Result<i32,bool> r,bool ignored){return switch(r){case .ok(n):{n}case .err(_):{0}};}fn i32 main(){var Result<i32,bool> r=.ok(7);return read(r,{r=.err(true);false});}', 7),
+    ('copy', 'fn Result<i32,bool> id(Result<i32,bool> r){return r;}fn i32 main(){var Result<i32,bool> r=.ok(7);let saved=id(r);r=.err(false);discard r;return switch(saved){case .ok(n):{n}case .err(_):{0}};}', 7),
+    ('early-argument-frozen', 'fn i32 read(Result<i32,bool> r,bool ignored){return switch(r){case .ok(n):{n}case .err(_):{0}};}fn i32 main(){var Result<i32,bool> r=.ok(7);return read(r,{r=.err(true);discard r;false});}', 7),
     ('discard', 'fn i32 main(){let Result<i32,bool> r=.err(true);return switch(r){case .ok(_):{1}case .err(_):{7}};}', 7),
-    ('subject-once', 'fn i32 main(){var i32 count=0;var Result<i32,bool> r=.ok(8);return switch({count+=1;r}){case .ok(n):{r=.err(false);count+=2;n+count}case .err(_):{0}};}', 11),
+    ('subject-once', 'fn i32 main(){var i32 count=0;var Result<i32,bool> r=.ok(8);return switch({count+=1;r}){case .ok(n):{r=.err(false);discard r;count+=2;n+count}case .err(_):{0}};}', 11),
     ('return-arm-first', 'fn i32 read(Result<i32,bool> r){return switch(r){case .err(e):{return if(e){2}else{3};}case .ok(n):{n}};}fn i32 main(){return read(.ok(7))+read(.err(true))+read(.err(false));}', 12),
     ('return-arm-last', 'fn i32 read(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(_):{return 2;}};}fn i32 main(){return read(.ok(7))+read(.err(false));}', 9),
     ('both-return', 'fn i32 read(Result<i32,bool> r){switch(r){case .ok(n):{return n;}case .err(_):{return 2;}};return 99;}fn i32 main(){return read(.ok(7))+read(.err(true));}', 9),
@@ -52,10 +52,13 @@ def main():
     parser.add_argument('--native-runner', required=True)
     parser.add_argument('--receipt', required=True)
     parser.add_argument('--propagation', action='store_true')
+    parser.add_argument('--must-use', action='store_true')
     args = parser.parse_args()
     positives, traps, negatives, traces = POSITIVES, TRAPS, PATTERN_NEGATIVES, {}
     if args.propagation:
         from verify_propagation_cases import POSITIVES as positives, TRAPS as traps, NEGATIVES as negatives, TRACES as traces
+    if args.must_use:
+        from verify_result_handling_cases import POSITIVES as positives, TRAPS as traps, NEGATIVES as negatives
     images = [Path(p).resolve() for p in args.images]
     runner = Path(args.native_runner).resolve()
     receipt = Path(args.receipt).resolve(); receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -132,10 +135,10 @@ def main():
             assert sha(row['image']) == row['imageSHA256'] and sha(row['source']) == row['sourceSHA256'], row
         passed = True
     finally:
-        save(receipt, dict(schema='fairyc.result-candidate-execution/v1', unit=10 if args.propagation else 8, passed=passed,
+        save(receipt, dict(schema='fairyc.result-candidate-execution/v1', unit=11 if args.must_use else 10 if args.propagation else 8, passed=passed,
             images=[dict(path=str(p), sha256=sha(p)) for p in images],
             nativeRunner=dict(path=str(runner), sha256=sha(runner)), cli=rows, native=native, fixtures=fixtures,
-            faultInjection=None if args.propagation else dict(kind='test-only C tag and branch corruption in both alternatives', validFairySource=False, expectedTrap=7),
+            faultInjection=None if args.propagation or args.must_use else dict(kind='test-only C tag and branch corruption in both alternatives', validFairySource=False, expectedTrap=7),
             cleanupObservation=dict(kind='test-only observation of actual generated-C mark calls', expectedTraces=traces),
             sources=[dict(path=str(p.relative_to(ROOT)), sha256=sha(p)) for p in sorted((ROOT/'src').glob('*.fy'))]))
     print(f'PASS: Result execution; {len(rows)} CLI observations; {len(native)} native executions')

@@ -8,6 +8,7 @@ import syntax as syntax;
 import type_state as state;
 import nominal_types as nominal;
 import type_control as control;
+import result_flow as result_flow;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -252,6 +253,9 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 8) {
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }
+        if (tagged::result(owner.type) && bytes::equal(op,b"is_ok")) {
+            state::set_flags(tables,id-1,2048); return recorded(tables,id,value(6,owner.terminates));
+        }
         if ((owner.type == 9 || owner.type == 10 || owner.type == 11) && (bytes::equal(op,b"len") || bytes::equal(op,b"is_empty"))) { return recorded(tables,id,value(if (bytes::equal(op,b"len")) { 5 } else { 6 },owner.terminates)); }
         if (arrays::valid(owner.type) && bytes::equal(op,b"len")) { return recorded(tables,id,value(5,owner.terminates)); }
         let usize field = nominal::field(parsed,owner.type,op);
@@ -464,7 +468,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
         }
         index += 1;
     }
-    return problem;
+    return if(problem.code!=0){problem}else{result_flow::check(resolved,tables)};
 }
 pub fn Typed check(names::Resolved resolved) {
     assert(names::problem(ref resolved).code == 0);
@@ -476,5 +480,6 @@ pub fn ref u8[] source_view(ref Typed typed) { return names::source_view(ref typ
 pub fn ref names::Resolved resolved(ref Typed typed) { return ref typed.source; }
 pub fn u32 symbol_type(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= names::symbol_count(ref typed.source)); return state::symbols(ref typed.tables,id - 1); }
 pub fn u32 expression_type(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return state::expressions(ref typed.tables,id - 1); }
-pub fn usize field_target(ref Typed typed, usize id) { assert(typed.problem.code == 0); return state::flags(ref typed.tables,id - 1) as usize; }
+pub fn usize field_target(ref Typed typed, usize id) { assert(typed.problem.code == 0); let u32 flag=state::flags(ref typed.tables,id-1); return if(flag==2048){0}else{flag as usize}; }
+pub fn bool result_is_ok(ref Typed typed, usize id) { assert(typed.problem.code==0); return state::flags(ref typed.tables,id-1)==2048; }
 pub fn bool signed_minimum(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return syntax::expression_at(names::parsed(ref typed.source),id).kind == 4 && state::flags(ref typed.tables,id - 1) == 1; }

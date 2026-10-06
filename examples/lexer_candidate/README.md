@@ -2276,3 +2276,48 @@ and its original emitted bytes are retained alongside the passing observations.
 Result handling obligations, nested/aggregate/resource payloads and resource
 cleanup remain subsequent units. Public grammar, SDK/runtime and stable CLI
 contracts are unchanged.
+
+## Scalar Result handling obligations
+
+Version 0.40.0 tracks pending obligations for exact scalar Result parameters and
+locals. Return, discard, exhaustive switch, `.is_ok`, `?`, local transfer and
+by-value call arguments handle or transfer them. Reassignment checks the old
+destination before producing a new generation; copyable payloads remain copyable.
+Normal scope/function exits, explicit returns, branch joins, zero-iteration paths
+and loop backedges cannot silently lose pending obligations. Private type problem
+42 points to the earliest pending producer or unhandled evaluation. `.is_ok` owns
+one HIR operand and emits the existing verified MIR tag test, with no payload read.
+
+`result_flow_graph.fy` constructs a bounded control graph; `result_flow.fy` computes
+reachable pending producers to a fixed point. Limits are depth 64, 8192 graph
+nodes, 262144 analysis cells and 16777216 propagation-cell visits per function;
+allocation/limit errors fail closed. Bare Result calls are checked even in a
+function without Result locals. The existing conservative literal-condition and
+ordinary-trap handling rules remain visible rather than being optimized away.
+
+`tests/result_handling.fy` covers exact diagnostic spans, branch/loop obligations,
+propagation exits and retained `.is_ok` HIR/MIR. `verify_result_execution.py
+--must-use` checks both candidate images in all four semantic/HIR/MIR/C modes and
+compiles their actual generated C through the shared native driver. The 29 normal
+fixtures and 27 rejection fixtures passed 449 CLI observations and 58 low/optimized
+native executions. Both profiles passed check/build and seven selected native API
+tests each. The 237 earlier positive Result fixtures pass type checking after nine
+fixtures received explicit handling at their previously unchecked positions.
+
+There is one unresolved reference discrepancy. For
+`fn Result<i32,bool> f(Result<i32,bool> r){let Result<i32,bool> other=.ok(1);
+let n=r?;discard other;return .ok(n);}`, Go Result Flow transfers only `r` and
+accepts the source. The candidate also checks the implicit error-return edge and
+rejects pending `other`; normal-path discard occurs after that edge. This follows
+the candidate's reading of the earlier-return obligation in
+`docs/language/0004-results-traps-and-control-flow.md`, but does not establish
+differential equivalence with Go. Seven other reference cases agree. Unit 11 is
+not marked differentially accepted and compiler promotion remains blocked until
+this discrepancy is reconciled. Public Go compiler source was not changed.
+
+Raw commands, the reachable discrepancy reproducer, source/SDK/bootstrap/image
+digests and the existing validation-only release timeout overlay are retained in
+`docs/ops/evidence/candidate-result-handling-20261007.json`. Linux, performance,
+self-hosting and the full repository suite remain deferred. Nested/aggregate/
+resource payloads and tagged storage remain units 12..20 or later. The remaining
+work inventory is `docs/ops/candidate-remaining-work-20261007.md`.

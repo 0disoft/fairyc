@@ -59,6 +59,14 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (id == 0 || c.current == 0 || c.problem.code != 0) { return 0; }
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
+    if (kind == 23) {
+        let usize subject = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);
+        if (c.current == 0 || c.problem.code != 0) { return 0; }
+        let u32 owner = h::type_code(h::expression_at(input,e.left).type);
+        let usize result = state::local(locals,c,6,0,false,false,e.start,e.end);
+        if (result == 0 || state::emit(operations,blocks,c,state::operation(22,result,6,owner,0,subject,0,e.start,e.end)) == 0) { return 0; }
+        return result;
+    }
     if (kind == 22) {
         let usize subject = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);
         if (c.current == 0 || c.problem.code != 0) { return 0; }
