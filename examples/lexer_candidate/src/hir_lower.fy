@@ -104,7 +104,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         kind = .Propagate; e.binding = c.owner;
         e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth+1);
     } else if (node.kind == 2) {
-        kind = .Reference; e.binding = state::use(links,id);
+        kind = if(typing::moving(input,id)){.Move}else{.Reference}; e.binding = state::use(links,id);
         if (e.binding == 0) { return state::fail(c,4,node.start,node.end); }
         let h::Binding b = *v::at<h::Binding>(bindings,e.binding - 1);
         if (!state::visible(c,b) || h::type_code(b.type) != h::type_code(type) || h::binding_code(b.kind) == h::binding_code(.Function) || h::binding_code(b.kind) == h::binding_code(.External)) { return state::fail(c,4,node.start,node.end); }

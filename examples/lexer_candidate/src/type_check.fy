@@ -10,6 +10,7 @@ import nominal_types as nominal;
 import resource_identity as resources;
 import type_control as control;
 import result_flow as result_flow;
+import resource_use as resource_use;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -473,7 +474,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
         }
         index += 1;
     }
-    return if(problem.code!=0){problem}else{result_flow::check(resolved,tables)};
+    if(problem.code!=0){return problem;}let ownership=resource_use::classify(resolved,tables);return if(ownership.code!=0){ownership}else{result_flow::check(resolved,tables)};
 }
 pub fn Typed check(names::Resolved resolved) {
     assert(names::problem(ref resolved).code == 0);
@@ -487,4 +488,5 @@ pub fn u32 symbol_type(ref Typed typed, usize id) { assert(typed.problem.code ==
 pub fn u32 expression_type(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return state::expressions(ref typed.tables,id - 1); }
 pub fn usize field_target(ref Typed typed, usize id) { assert(typed.problem.code == 0); let u32 flag=state::flags(ref typed.tables,id-1); return if(flag==2048){0}else{flag as usize}; }
 pub fn bool result_is_ok(ref Typed typed, usize id) { assert(typed.problem.code==0); return state::flags(ref typed.tables,id-1)==2048; }
+pub fn bool moving(ref Typed typed, usize id) { assert(typed.problem.code==0); return state::moving(ref typed.tables,id-1); }
 pub fn bool signed_minimum(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return syntax::expression_at(names::parsed(ref typed.source),id).kind == 4 && state::flags(ref typed.tables,id - 1) == 1; }

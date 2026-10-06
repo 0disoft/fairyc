@@ -7,14 +7,14 @@ import std::vec as v;
 pub struct Problem { u32 code; usize start; usize end; u32 expected; u32 actual; }
 pub struct Value { u32 type; bool terminates; }
 // Initialized, bounded heap slots keep large value copies off the native stack.
-pub struct Slot { u32 symbol; u32 expression; u32 flag; usize use; usize entry; bool flexible; }
+pub struct Slot { u32 symbol; u32 expression; u32 flag; usize use; usize entry; bool flexible; bool moving; }
 pub fn v::Vec<Slot> empty() { return v::empty<Slot>(); }
 pub fn bool initialize(ref mut v::Vec<Slot> tables, usize symbols, usize expressions, usize entries) {
     let usize length = if (symbols > expressions) { if (symbols > entries) { symbols } else { entries } }
         else { if (expressions > entries) { expressions } else { entries } };
     if (!v::reserve<Slot>(tables,length).is_ok) { return false; }
     while (v::len<Slot>(tables) < length) {
-        if (!v::push<Slot>(tables,Slot { .symbol = 0, .expression = 0, .flag = 0, .use = 0, .entry = 0, .flexible = false }).is_ok) { return false; }
+        if (!v::push<Slot>(tables,Slot { .symbol = 0, .expression = 0, .flag = 0, .use = 0, .entry = 0, .flexible = false, .moving = false }).is_ok) { return false; }
     }
     return true;
 }
@@ -81,3 +81,5 @@ pub fn usize entries(ref v::Vec<Slot> tables, usize index) { return v::at<Slot>(
 pub fn void set_entries(ref mut v::Vec<Slot> tables, usize index, usize value) { let ref mut Slot slot = v::at_mut<Slot>(tables,index); slot.entry = value; }
 pub fn bool flexible(ref v::Vec<Slot> tables, usize index) { return v::at<Slot>(tables,index).flexible; }
 pub fn void set_flexible(ref mut v::Vec<Slot> tables, usize index, bool value) { let ref mut Slot slot = v::at_mut<Slot>(tables,index); slot.flexible = value; }
+pub fn bool moving(ref v::Vec<Slot> tables, usize index) { return v::at<Slot>(tables,index).moving; }
+pub fn void set_moving(ref mut v::Vec<Slot> tables, usize index, bool value) { let ref mut Slot slot = v::at_mut<Slot>(tables,index); slot.moving = value; }

@@ -2582,3 +2582,24 @@ this same-module unit makes no imported construction claim.
 The sample is `samples/resource-factory-demo.fy`. Final validation evidence is
 `docs/ops/evidence/candidate-resource-factories-20261007.json`, including the
 focused unit-15 regression and separate Go fixed-array resource-field limitation.
+
+## Whole-root resource transfer HIR
+
+Version 0.48.0 records typed whole-root ownership transfer as an owned `Move`
+expression. Binding initializers, replacement RHS values, by-value arguments,
+returns, record payload installation, consuming tagged switches, propagation and
+resource-bearing Result `is_ok` retain the exact donor binding and source span.
+Copy-field inspection and assignment places retain nonconsuming references.
+The new source classifier uses a separate slot flag, preserving field/member
+identity metadata. There is no source-level move keyword or implicit copy.
+
+Partial resource-field transfers reject as E1103 at the consuming field span;
+nested copy-field reads remain admitted. HIR assembly refuses Move records with
+copyable types, missing/non-value donor bindings or forged operand metadata.
+`tests/resource_moves.fy` exercises ownership classification after the source
+owner is discarded and checks partial-field diagnostics.
+`verify_resource_moves.py` observes source CLI acceptance and rejection in both
+profiles. Evidence is `docs/ops/evidence/candidate-resource-moves-20261007.json`.
+This is unit 17 transfer representation, not liveness or cleanup execution:
+units 18..20 add use-after-move and branch/loop flow, and resource MIR/C remains
+closed until the later cleanup units. Linux and stage1/stage2 remain deferred.
