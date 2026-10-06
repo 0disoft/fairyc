@@ -112,7 +112,13 @@ fn void statement(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec<
     if(id==0 || c.current==0 || c.problem.code!=0){return;}let s=syntax::statement_at(p,id);
     if(depth>=64){fail(c,10,s.start,s.end);return;}
     if(s.kind==2 || s.kind==4){
-        if(s.kind==4 && syntax::expression_at(p,s.target).kind!=2){expression(p,types,columns,nodes,c,s.target,0,depth+1);}
+        if(s.kind==4){let target=syntax::expression_at(p,s.target);
+            // Evaluating a place visits receivers/index effects without reading
+            // its final Result value as an unhandled temporary.
+            if(target.kind==8 || target.kind==9){expression(p,types,columns,nodes,c,target.left,0,depth+1);
+                if(target.kind==9){expression(p,types,columns,nodes,c,target.right,0,depth+1);}}
+            else if(target.kind!=2){expression(p,types,columns,nodes,c,s.target,0,depth+1);}
+        }
         expression(p,types,columns,nodes,c,s.expression,1,depth+1);
         let usize col=column(columns,if(s.kind==2){state::entries(types,s.entry-1)}else{state::uses(types,s.target-1)});
         if(col!=0 && c.current!=0){let e=syntax::expression_at(p,s.expression);if(s.kind==4){discard emit(nodes,c,3,col,s.start,s.end);}discard emit(nodes,c,2,col,e.start,e.end);}return;

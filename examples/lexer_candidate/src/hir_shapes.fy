@@ -72,7 +72,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
                     if(j>f.payload_count && field_at(p,offset+j-f.payload_count).type!=0){return false;}
                 }else if(f.payload_count!=0 || f.payload_start!=0 || j+1==s.field_count){return false;}
             }else if(f.payload_count!=0 || f.payload_start!=0){return false;}
-            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (tagged::builtin(f.type) || nominal::valid(f.type)) && valid_type(p,f.type,false))}else{literals::valid(f.type) || f.type==11 || enums::valid(f.type) || !valid_type(p,f.type,false)})) { return false; } j += 1;
+            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (tagged::builtin(f.type) || nominal::valid(f.type)) && valid_type(p,f.type,false))}else{literals::valid(f.type) || f.type==11 || !valid_type(p,f.type,false)})) { return false; } j += 1;
         }
         offset += s.field_count; i += 1;
     }

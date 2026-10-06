@@ -350,8 +350,12 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             while (syntax::expression_at(parsed,place_id).kind == 3) { place_id = syntax::expression_at(parsed,place_id).left; }
             let syntax::Expression checked_place = syntax::expression_at(parsed,place_id);
             if (checked_place.kind == 9 && state::expressions(tables,checked_place.left - 1) == 10 || checked_place.kind == 8 && state::flags(tables,place_id - 1) == 0) { return error(problem,4,checked_place.start,checked_place.end,0,target.type); }
-            var usize root = item.target;
-            while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3 || syntax::expression_at(parsed,root).kind == 9) { root = syntax::expression_at(parsed,root).left; }
+            var usize root = item.target; var usize fields = 0;
+            while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3 || syntax::expression_at(parsed,root).kind == 9) {
+                if (syntax::expression_at(parsed,root).kind == 8) { fields += 1; }
+                root = syntax::expression_at(parsed,root).left;
+            }
+            if (fields > 1 && nominal::contains_tagged(parsed,state::expressions(tables,root - 1),0)) { return error(problem,4,checked_place.start,checked_place.end,0,target.type); }
             let usize symbol_id = if (syntax::expression_at(parsed,root).kind == 2) { state::uses(tables,root - 1) } else { 0 };
             let u32 expected = target.type;
             let state::Value actual = expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);

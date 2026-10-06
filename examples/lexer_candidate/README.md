@@ -2415,3 +2415,47 @@ accepts a recursive value layout that the candidate rejects at its earlier
 owned-layout boundary. These reference limitations are recorded separately,
 rather than claiming exact diagnostic/phase equivalence for those controls.
 Linux, performance, full-repository validation and stage1/stage2 remain deferred.
+
+## Tagged struct fields
+
+Version 0.43.0 admits same-file enum, Option and Result fields in the existing
+copy-only struct subset. Construction, whole-struct copies, field reads and
+writes, selected enum payloads, and Result propagation retain declaration-based
+type identity. As in the Go reference, a tagged-containing struct permits direct
+field replacement; deeper stores stay outside the plain stored-struct boundary.
+Nested tagged values may be read and copied, edited in a local copy, then put back
+by replacing the direct outer field. A field assignment evaluates its receiver without treating the
+target Result value as an unhandled read; an ordinary unused Result field read
+still fails the handling check. RHS effects on sibling fields remain visible.
+
+`nominal_types.fy` follows nominal children through both Result alternatives and
+Option payloads, rejecting direct and indirect by-value cycles. Owned HIR admits
+the tagged child layouts and existing MIR verifies field owner and value types.
+Generated C zeroes the admitted pointer-free aggregate locals with `memset`,
+including structs containing deep tagged fields, to avoid MSVC's recursive
+initializer limit. Resource and pointer-bearing layouts remain outside this
+subset and need their own construction and ownership rules.
+
+`tests/tagged_fields.fy` checks retained layouts, MIR field operations, recursive
+types and unused Result reads. `verify_result_execution.py --tagged-fields`
+uses `verify_tagged_field_cases.py` to observe both candidate profiles and actual
+generated-C native execution. Its normal cases cover nominal enum identity,
+copies, i64 values, nested ordinary structs, RHS sibling mutation, propagation
+and a twelve-deep Option field; errors cover mismatched payloads, reversed Result
+alternatives, missing fields and cycles. Checked arithmetic overflow remains a
+native trap. Raw commands and tool/source/SDK/image hashes are recorded in
+`docs/ops/evidence/candidate-tagged-fields-20261007.json`, including the existing
+struct-payload regression and the validation-only bootstrap timeout overlay.
+
+The field lane passes 20 fixtures, 161 CLI observations, 20 generated native runs,
+four native API tests and fifteen aligned Go reference cases. Existing struct
+payloads pass 217 CLI observations and thirty native runs. The initial reference
+comparison exposed candidate overacceptance of a deep tagged field store; the
+candidate now rejects it and a scalar deep store whose root also contains a tag.
+The positive nested case uses the admitted copy/edit/replace path. Recursive
+layouts and missing-field checks retain the separately recorded Go reference
+limitations from the preceding unit.
+
+This completes only the struct-field part of unit 14. Tagged array storage is
+the next part; the progress ledger keeps unit 14 open until that part lands.
+Linux, performance, whole-repository validation and stage1/stage2 remain deferred.
