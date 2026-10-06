@@ -1,0 +1,45 @@
+module tests::mir_aggregate_arrays;
+import tests::hir_nominal as fixture;
+import hir_shapes as shapes;
+import array_types as arrays;
+import mir_model as m;
+import mir_lower as lower;
+import mir_verify as verify;
+import c_emit as c;
+import std::bytes as bytes;
+import std::vec as v;
+
+fn m::Program compiled() {
+    let source=b"module main;struct T{u8[2][2] a;bool b;}fn i32 main(){var t=T{.a=[[1,2],[3,4]],.b=false};t.a[1][0]+={t.b=true;2};assert(t.a[1][0]==5 && t.b);return 0;}";
+    return switch(lower::lower(fixture::retained(source))){case .ok(p):{p}case .err(_):{assert(false);return compiled();}};
+}
+fn m::Program changed(ref m::Program p, u32 mutation) {
+    var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,m::source_view(p)).is_ok);
+    var bytes::Buffer payload=bytes::empty();var v::Vec<m::Operation> ops=v::empty<m::Operation>();var usize id=1;var bool altered=false;var usize edge=65536;var usize scalar=0;var usize raw=0;
+    while(id<=m::local_count(p)){if(m::local_at(p,id).type==3){scalar=id;}id+=1;}
+    id=1;while(id<=m::operation_count(p)){let o=m::operation_at(p,id);if(o.kind==12 && raw==0){raw=o.left;}id+=1;}
+    id=1;while(id<=m::operation_count(p)){
+        var m::Operation o=m::operation_at(p,id);
+        if(o.payload_end>o.payload_start){assert(bytes::len(ref payload)==o.payload_start);assert(bytes::append(ref mut payload,m::literal_text(p,id)).is_ok);}
+        if(!altered){
+            if(mutation==1 && o.kind==9 && arrays::valid(arrays::element(o.type))){edge=o.argument_start;altered=true;}
+            else if(mutation==2 && o.kind==10 && arrays::valid(arrays::element(o.owner_type))){o.right=raw;altered=true;}
+            else if(mutation==3 && o.kind==11 && arrays::valid(arrays::element(o.owner_type))){edge=o.argument_start;altered=true;}
+            else if(mutation==4 && o.kind==7){o.right=scalar;altered=true;}
+        }
+        assert(v::push<m::Operation>(ref mut ops,o).is_ok);id+=1;
+    }assert(altered && scalar!=0 && raw!=0);
+    var v::Vec<m::Target> targets=v::empty<m::Target>();id=1;while(id<=m::target_count(p)){assert(v::push<m::Target>(ref mut targets,m::target_at(p,id)).is_ok);id+=1;}
+    var v::Vec<m::Signature> signatures=v::empty<m::Signature>();id=0;while(id<m::signature_count(p)){assert(v::push<m::Signature>(ref mut signatures,m::Signature{.type=m::signature_at(p,id)}).is_ok);id+=1;}
+    var v::Vec<m::Function> functions=v::empty<m::Function>();id=1;while(id<=m::function_count(p)){assert(v::push<m::Function>(ref mut functions,m::function_at(p,id)).is_ok);id+=1;}
+    var v::Vec<m::Local> locals=v::empty<m::Local>();id=1;while(id<=m::local_count(p)){assert(v::push<m::Local>(ref mut locals,m::local_at(p,id)).is_ok);id+=1;}
+    var v::Vec<m::Block> blocks=v::empty<m::Block>();id=1;while(id<=m::block_count(p)){assert(v::push<m::Block>(ref mut blocks,m::block_at(p,id)).is_ok);id+=1;}
+    var v::Vec<usize> edges=v::empty<usize>();id=0;while(id<m::edge_count(p)){assert(v::push<usize>(ref mut edges,if(id==edge){scalar}else{m::edge_at(p,id)}).is_ok);id+=1;}
+    let shapes::Table table=switch(shapes::copy(m::nominal(p))){case .ok(t):{t}case .err(_):{assert(false);return changed(p,mutation);}};
+    return switch(m::assemble_nominal(source,payload,targets,signatures,functions,locals,blocks,ops,edges,0,table)){case .ok(p):{p}case .err(_):{assert(false);return changed(p,mutation);}};
+}
+@test
+fn void rank_two_field_types_bounds_and_failed_render_preserve_output() {
+    let p=compiled();assert(verify::check(ref p).code==0);var bytes::Buffer out=bytes::empty();assert(c::render(ref p,ref mut out)==0);
+    var u32 mutation=1;while(mutation<=4){let bad=changed(ref p,mutation);assert(verify::check(ref bad).code==if(mutation==2){1501}else{1001});var bytes::Buffer preserved=bytes::empty();assert(bytes::append(ref mut preserved,b"prefix").is_ok);assert(c::render(ref bad,ref mut preserved)!=0 && bytes::equal(bytes::view(ref preserved),b"prefix"));mutation+=1;}
+}

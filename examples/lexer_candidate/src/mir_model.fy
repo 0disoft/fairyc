@@ -54,7 +54,8 @@ pub fn bool has_views(ref Program p) { var usize i=1;while(i<=local_count(p)){if
 pub fn bool has_literals(ref Program p) { var usize i = 1; while (i <= local_count(p)) { if (literals::valid(local_at(p,i).type)) { return true; } i += 1; } i = 1; while (i <= target_count(p)) { if (literals::valid(target_at(p,i).result)) { return true; } i += 1; } return false; }
 pub fn bool has_arrays(ref Program p) {
     var usize i = 1; while (i <= local_count(p)) { if (arrays::valid(local_at(p,i).type)) { return true; } i += 1; }
-    i = 1; while (i <= target_count(p)) { if (arrays::valid(target_at(p,i).result)) { return true; } i += 1; } return false;
+    i = 1; while (i <= target_count(p)) { if (arrays::valid(target_at(p,i).result)) { return true; } i += 1; }
+    i = 1; while (i <= shapes::field_count(nominal(p))) { if (arrays::valid(shapes::field_at(nominal(p),i).type)) { return true; } i += 1; } return false;
 }
 pub fn ref shapes::Table nominal(ref Program p) { assert(p.success); return ref p.nominal; }
 pub fn usize module_index(ref Program p) { assert(p.success); return p.module_index; }

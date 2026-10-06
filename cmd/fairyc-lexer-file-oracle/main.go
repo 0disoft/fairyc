@@ -31,6 +31,9 @@ type fixture struct {
 }
 
 func run() error {
+	if len(os.Args) == 3 && os.Args[1] == "--aggregate-array-cases" {
+		return writeAggregateArrayCases(os.Args[2])
+	}
 	if len(os.Args) == 3 && os.Args[1] == "--mutable-mir" {
 		return writeMutableMIR(os.Args[2])
 	}

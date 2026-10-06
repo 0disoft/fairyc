@@ -19,7 +19,7 @@ func copyLexerFileCLIExample(t *testing.T, root string) {
 		"src/type_control.fy", "src/type_state.fy", "src/array_types.fy", "src/literal_types.fy", "src/nominal_types.fy", "src/type_check.fy", "src/type_cli.fy",
 		"src/module_registry.fy", "src/module_cli.fy", "src/module_check.fy",
 		"src/hir_model.fy", "src/hir_shapes.fy", "src/hir_shape_lower.fy", "src/hir_state.fy", "src/hir_lower.fy", "src/hir_view_check.fy", "src/hir_mutable_check.fy", "src/hir_cli.fy", "src/hir_output.fy",
-		"src/mir_model.fy", "src/mir_state.fy", "src/mir_nominal.fy", "src/mir_arrays.fy", "src/mir_cleanup.fy", "src/mir_verify.fy", "src/mir_verify_shape.fy", "src/mir_verify_nominal.fy", "src/mir_verify_arrays.fy", "src/mir_verify_literals.fy", "src/mir_verify_views.fy", "src/mir_verify_flow.fy", "src/mir_lower.fy", "src/mir_cli.fy", "src/mir_output.fy",
+		"src/mir_model.fy", "src/mir_state.fy", "src/mir_nominal.fy", "src/mir_arrays.fy", "src/mir_places.fy", "src/mir_cleanup.fy", "src/mir_verify.fy", "src/mir_verify_shape.fy", "src/mir_verify_nominal.fy", "src/mir_verify_arrays.fy", "src/mir_verify_literals.fy", "src/mir_verify_views.fy", "src/mir_verify_flow.fy", "src/mir_lower.fy", "src/mir_cli.fy", "src/mir_output.fy",
 		"src/c_flow.fy", "src/c_text.fy", "src/c_nominal.fy", "src/c_arrays.fy", "src/c_literals.fy", "src/c_views.fy", "src/c_scalar.fy", "src/c_guard.fy", "src/c_emit.fy", "src/c_cli.fy",
 		"src/syntax.fy", "src/types.fy", "src/records.fy", "src/bodies.fy", "src/body_state.fy", "src/attributes.fy", "src/cleanup_syntax.fy", "src/parse_tokens.fy"} {
 		data, err := os.ReadFile(filepath.Join(example, name))

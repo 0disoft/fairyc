@@ -1,6 +1,7 @@
 module c_nominal;
 import mir_model as m;
 import hir_shapes as shapes;
+import array_types as arrays;
 import c_text as w;
 import std::bytes as bytes;
 
@@ -14,7 +15,7 @@ fn bool definition(ref shapes::Table table, usize index, ref mut u8[] emitted, r
     // The verified table is acyclic and has at most 64 nested value levels.
     while (i < shape.field_count) {
         let shapes::Field f = shapes::field_at(table,shape.field_start + i + 1);
-        if (f.type >= 256 && !definition(table,shapes::find(table,f.type) - 1,emitted,out,s)) { return false; } i += 1;
+        if (f.type >= 256 && !arrays::valid(f.type) && !definition(table,shapes::find(table,f.type) - 1,emitted,out,s)) { return false; } i += 1;
     }
     if (!w::type(out,s,shape.type) || !w::text(out,s,b"{\n")) { return false; }
     if (shape.field_count == 0 && !w::text(out,s,b"    uint8_t fy_empty;\n")) { return false; }

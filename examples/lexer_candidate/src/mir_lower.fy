@@ -1,6 +1,7 @@
 module mir_lower;
 import array_types as arrays;
 import mir_arrays as array;
+import mir_places as places;
 import hir_model as h;
 import hir_view_check as views;
 import hir_shapes as shapes;
@@ -40,6 +41,16 @@ fn usize binary(ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks
     if (mask != 0 && !state::guard(operations,blocks,c,owner_type,operator,left,right,mask,start,end)) { return 0; }
     let usize result = state::local(locals,c,type,0,false,false,start,end);
     if (result == 0 || state::emit(operations,blocks,c,state::operation(4,result,type,owner_type,operator,left,right,start,end)) == 0) { return 0; } return result;
+}
+
+fn bool prepare_place(ref h::Program input, ref mut v::Vec<places::Step> path, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize depth) {
+    var usize at=v::len<places::Step>(path);
+    while(at!=0){at-=1;let places::Step step=*v::at<places::Step>(path,at);let e=h::expression_at(input,step.expression);
+        if(h::expression_code(e.kind)==13){let usize raw=expression(input,locals,blocks,operations,edges,payload,c,e.right,depth+1);if(c.current==0 || c.problem.code!=0){return false;}
+            let usize index=array::index(locals,blocks,operations,c,h::type_code(h::expression_at(input,e.left).type),raw,e.start,e.end);if(index==0){return false;}
+            let ref mut places::Step slot=v::at_mut<places::Step>(path,at);slot.index=index;
+        }
+    }return true;
 }
 
 fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, usize depth) {
@@ -105,6 +116,11 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         var m::Operation o = state::operation(9,result,type,type,0,0,0,e.start,e.end); o.argument_start=first; o.argument_count=e.edge_count; o.boolean=e.boolean;
         if (state::emit(operations,blocks,c,o)==0) { return 0; } return result;
+    }
+    if (kind == 13 && places::root(input,id,false)!=0) {
+        var v::Vec<places::Step> path=switch(places::collect(input,id)){case .ok(p):{p}case .err(code):{return state::fail(c,code,e.start,e.end);}};
+        if(!prepare_place(input,ref mut path,locals,blocks,operations,edges,payload,c,depth)){return 0;}
+        return places::read(input,ref path,c.locals[places::root(input,id,false)],locals,blocks,operations,c,e.start,e.end);
     }
     if (kind == 13 || kind == 14) {
         let h::Expression root = h::expression_at(input,e.left);
@@ -308,22 +324,17 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         return state::edge(edges,value,c) && state::emit(operations,blocks,c,o) != 0;
     }
     if (kind == 3 && h::expression_code(h::expression_at(input,s.target).kind) == 13) {
-        let h::Expression target = h::expression_at(input,s.target);
-        let h::Expression root = h::expression_at(input,target.left); let usize destination = c.locals[root.binding];
-        if (h::expression_code(root.kind) != 3 || destination == 0) { discard state::fail(c,4,s.start,s.end); return false; }
-        let u32 owner = h::type_code(root.type); let u32 element = arrays::element(owner); let u32 operator = h::operator_code(s.operator);
-        let usize raw = expression(input,locals,blocks,operations,edges,payload,c,target.right,depth+1);
-        if (c.current==0 || c.problem.code!=0) { return c.problem.code==0; }
-        let usize index = array::index(locals,blocks,operations,c,owner,raw,s.start,s.end);
-        var usize prior = 0;
-        if (operator != 21) { prior = array::read(locals,blocks,operations,c,owner,destination,index,s.start,s.end); }
-        var usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth+1);
-        if (c.current==0 || c.problem.code!=0) { return c.problem.code==0; }
-        if (operator != 21) { value = binary(locals,blocks,operations,c,element,element,operator,prior,value,s.start,s.end); }
-        let usize first = v::len<usize>(edges); if (!state::edge(edges,value,c)) { return false; }
-        let usize updated = state::local(locals,c,owner,0,false,false,s.start,s.end);
-        var m::Operation o = state::operation(11,updated,owner,owner,0,destination,index,s.start,s.end); o.argument_start=first; o.argument_count=1;
-        return state::emit(operations,blocks,c,o)!=0 && state::emit(operations,blocks,c,state::operation(2,destination,owner,owner,0,updated,0,s.start,s.end))!=0;
+        let usize binding=places::root(input,s.target,true);let usize destination=c.locals[binding];
+        if(binding==0 || destination==0){discard state::fail(c,4,s.start,s.end);return false;}
+        var v::Vec<places::Step> path=switch(places::collect(input,s.target)){case .ok(p):{p}case .err(code):{discard state::fail(c,code,s.start,s.end);return false;}};
+        if(!prepare_place(input,ref mut path,locals,blocks,operations,edges,payload,c,depth)){return c.problem.code==0;}
+        let u32 type=h::type_code(h::expression_at(input,s.target).type);let u32 operator=h::operator_code(s.operator);var usize prior=0;
+        if(operator!=21){prior=places::read(input,ref path,destination,locals,blocks,operations,c,s.start,s.end);}
+        var usize value=expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth+1);if(c.current==0 || c.problem.code!=0){return c.problem.code==0;}
+        if(operator!=21){value=binary(locals,blocks,operations,c,type,type,operator,prior,value,s.start,s.end);}
+        value=places::store(input,ref path,destination,value,locals,blocks,operations,edges,c,s.start,s.end);if(value==0){return false;}
+        let u32 owner=v::at<m::Local>(locals,destination-1).type;
+        return state::emit(operations,blocks,c,state::operation(2,destination,owner,owner,0,value,0,s.start,s.end))!=0;
     }
     if (kind == 1 || kind == 3) {
         let usize binding = if (kind == 1) { s.binding } else { nominal::root(input,s.target) };

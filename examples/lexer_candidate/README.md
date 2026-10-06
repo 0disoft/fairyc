@@ -1866,4 +1866,38 @@ parameters and temporaries stay immutable. Whole-row and whole-field replacement
 require exact type equality, and compound operators require scalar integers.
 `tests/hir_aggregate_arrays.fy` checks retained layouts and child types.
 Rank three, arrays of structs/views and field/index byte-view borrows remain
-closed. MIR/C execution of these newly admitted paths follows separately.
+closed. Version 0.29.0 connects these paths to native C execution below.
+
+## Array fields and rank-two native execution
+
+Version 0.29.0 lowers field/index paths through `mir_places.fy`. Index operands
+are evaluated once from outer to inner and each dimension is checked before
+later index expressions, reads or RHS effects. Named value paths read their
+current root after index effects; temporary receivers retain frozen values.
+Compound writes load the previous element before RHS evaluation and perform
+checked scalar arithmetic. Stores then rebuild the selected path from the
+current root, preserving other rows and sibling fields changed by the RHS.
+Whole-row/array-field copies and function arguments remain independent values.
+
+C array wrappers are emitted with inner types before outer types and before
+structs, including types referenced only by unused struct declarations.
+The writer keeps its 2 MiB output limit and admits at most 1024 distinct
+rank-two wrapper types in a unit. MIR validation reuses exact aggregate operand
+types, checked-index provenance and definite initialization for each layer.
+`tests/mir_aggregate_arrays.fy` mutates row operands, bound provenance, update
+values and field-read shapes; failed rendering preserves the existing buffer.
+
+Emit `samples/aggregate-array-c-demo.fy` using `--c-file`. The
+`verify_c.py --aggregate-arrays` lane uses explicit fixed expectations and
+source assertions from `--aggregate-array-cases` in the test utility: 21
+programs, 106 CLI checks and 48 native runs; the sample adds two native runs.
+These are
+not Go MIR interpreter outcomes: the Go reference does not admit rank-two source
+types. The existing rank-one/nominal/mutable lanes retain their Go interpreter
+oracles. Exact command, source, SDK/tool and native image hashes are recorded in
+`docs/ops/evidence/aggregate-array-c-file-cli-20261006.json`.
+
+Ranks above two, arrays of structs/views, and field/index byte-view borrows
+remain closed. Public grammar, SDK/runtime and public ABI are unchanged. Linux
+native execution remains deferred; this step makes no performance or completed
+self-hosting claim.
