@@ -13,11 +13,13 @@ import (
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
-func TestArrayInitializersFreezeValuesAndStopOnReturn(t *testing.T) {
+func TestArrayEvaluationFreezesValuesAndStopsOnReturn(t *testing.T) {
 	for name, source := range map[string]string{
-		"scalar": `module main;fn i32 main(){var i32 n=1;let a=[n,{n=3;n},n];assert(a[0]==1 && a[1]==3 && a[2]==3);return 0;}`,
-		"wide":   `module main;fn i32 main(){var i64 n=4000000000;let i64[2] a=[n,{n+=1;n}];assert(a[0]==4000000000 && a[1]==4000000001);return 0;}`,
-		"return": `module main;fn i32 main(){let i32[2] a=[1,{return 0;2}];return 9;}`,
+		"scalar":              `module main;fn i32 main(){var i32 n=1;let a=[n,{n=3;n},n];assert(a[0]==1 && a[1]==3 && a[2]==3);return 0;}`,
+		"wide":                `module main;fn i32 main(){var i64 n=4000000000;let i64[2] a=[n,{n+=1;n}];assert(a[0]==4000000000 && a[1]==4000000001);return 0;}`,
+		"return":              `module main;fn i32 main(){let i32[2] a=[1,{return 0;2}];return 9;}`,
+		"call-arguments":      `module main;fn i32 first(i32[2] a,i32[2] b){return a[0]*10+b[0];}fn i32 main(){var a=[1,2];assert(first(a,{a=[3,4];a})==13);return 0;}`,
+		"call-wide-arguments": `module main;fn i64 first(i64[1] a,i64[1] b){return a[0]+b[0];}fn i32 main(){var i64[1] a=[4000000000];assert(first(a,{a[0]=7;a})==4000000007);return 0;}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			checked, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", source)})
