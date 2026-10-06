@@ -59,10 +59,19 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
     if (kind == 18) {
-        let shapes::Shape shape = shapes::at(h::nominal(input),shapes::find(h::nominal(input),type) - 1);
+        let shapes::Field member=shapes::field_at(h::nominal(input),e.binding);
+        var usize[16] values=[0;16];var usize i=0;
+        // Evaluate in written order, then arrange frozen operands by declaration.
+        while(i<e.edge_count){let initializer=h::expression_at(input,h::edge_at(input,e.edge_start+i));
+            let usize value=expression(input,locals,blocks,operations,edges,payload,c,initializer.left,depth+1);
+            if(c.current==0 || c.problem.code!=0){return 0;}values[initializer.binding-member.payload_start-1]=value;i+=1;
+        }
+        let usize start=if(e.edge_count==0){0}else{v::len<usize>(edges)};i=0;
+        while(i<e.edge_count){if(!state::edge(edges,values[i],c)){return 0;}i+=1;}
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
-        let u32 tag = ids::small_id(e.binding - shape.field_start - 1);
-        if (state::emit(operations,blocks,c,state::operation(21,result,type,type,tag,0,0,e.start,e.end)) == 0) { return 0; } return result;
+        let u32 tag=ids::small_id(shapes::member_tag(h::nominal(input),type,e.binding));
+        var m::Operation o=state::operation(21,result,type,type,tag,0,0,e.start,e.end);o.argument_start=start;o.argument_count=e.edge_count;
+        if(state::emit(operations,blocks,c,o)==0){return 0;}return result;
     }
     if (kind == 19) {
         // Evaluate the subject once. The final exhaustive arm needs no test.
@@ -76,10 +85,15 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
             let h::Expression arm = h::expression_at(input,h::edge_at(input,e.edge_start + i)); var usize next = 0;
             if (i + 1 < e.edge_count) {
                 let usize condition = state::local(locals,c,6,0,false,false,arm.start,arm.end);
-                let u32 tag = ids::small_id(arm.binding - shape.field_start - 1);
+                let u32 tag = ids::small_id(shapes::member_tag(h::nominal(input),owner,arm.binding));
                 if (state::emit(operations,blocks,c,state::operation(22,condition,6,owner,tag,subject,0,arm.start,arm.end)) == 0) { return 0; }
                 let usize body = state::new_block(blocks,c,arm.start,arm.end); next = state::new_block(blocks,c,e.start,e.end);
                 if (!state::branch(blocks,c,condition,body,next,arm.start,arm.end)) { return 0; } c.current = body;
+            }
+            var usize capture=0;while(capture<arm.edge_count){let field=h::expression_at(input,h::edge_at(input,arm.edge_start+capture));
+                if(field.edge_count==1){let usize binding=h::edge_at(input,field.edge_start);let usize local=c.locals[binding];let u32 field_type=h::type_code(field.type);
+                    if(local==0 || state::emit(operations,blocks,c,state::operation(23,local,field_type,owner,ids::small_id(field.binding),subject,0,field.start,field.end))==0){return 0;}
+                }capture+=1;
             }
             let usize value = block(input,locals,blocks,operations,edges,payload,c,arm.block,depth + 1);
             if (c.problem.code != 0) { return 0; }
@@ -428,7 +442,6 @@ fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v:
 }
 
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
-    if(shapes::has_payloads(h::nominal(ref input))){return .err(m::Problem{.code=4,.start=0,.end=0});}
     let h::Problem proof = views::check(ref input); if (proof.code != 0) { return .err(m::Problem { .code=proof.code,.start=proof.start,.end=proof.end }); }
     let shapes::Table table = switch(shapes::copy(h::nominal(ref input))) { case .ok(value): { value } case .err(code): { return .err(m::Problem { .code, .start = 0, .end = 0 }); } };
     var state::Context c = state::empty(); var bytes::Buffer source = bytes::empty(); var bytes::Buffer payload = bytes::empty();

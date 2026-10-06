@@ -1994,12 +1994,44 @@ and has zero (discard) or one immutable Binding ID in its edge range. The privat
 payload dump is `fairyc.enum-payload-hir/v1`; its D rows add payload start/count.
 Payloadless dumps keep their previous format and output bytes.
 
-Use `--check-types-file` or `--hir-file` with `samples/enum-payload-demo.fy`.
-Payload MIR and C execution are the next implementation slice: both lowering and
-MIR assembly reject payload layouts now, including unused declarations, rather
-than publishing a tag-only image. This stage does not claim payload execution.
+Version 0.32.0 initially rejected payload layouts at the MIR boundary. Version
+0.33.0 connects these retained layouts to MIR and native execution as described
+below. The original HIR-only evidence remains a historical record.
 `tests/hir_enum_payloads.fy` checks retained data and malformed ranges;
-`verify_enum_payloads.py --images <dev-image> <release-image> --receipt <path>`
-checks accepted/rejected inputs, deterministic HIR, input preservation and the
-closed execution boundary. Evidence: `docs/ops/evidence/enum-payload-hir-20261007.json`.
+HIR evidence: `docs/ops/evidence/enum-payload-hir-20261007.json`.
 The public language grammar and SDK contracts are unchanged.
+
+## Integer and bool payload enum execution
+
+Version 0.33.0 lowers payload construction to operation 21 with declaration-order
+operands, tag tests to 22, and scalar captures to 23. Initializers run in written
+order and freeze each value before the next initializer. A switch evaluates its
+subject once and copies only the selected arm's named captures. Early return
+during construction leaves no unused parent edges. `_` never reads union storage.
+
+The owned MIR dump is `fairyc.enum-payload-mir/v1`; D rows retain payload ranges.
+Member tags are dense declaration ordinals excluding payload-field records.
+The verifier checks owner, field membership/type, argument count/type, unique
+edge ownership and definite initialization before either dump or C publication.
+`tests/mir_enum_payloads.fy` includes malformed-operation and read mutations.
+
+The C transport uses one struct per enum declaration, a `uint32_t fy_tag`, and
+named payload structs inside a union. Construction, assignment, arguments and
+return use value copies. Each capture tests the active tag before accessing the
+union and calls `fy_runtime_trap(7)` on mismatch. This dynamic guard covers a
+structurally valid MIR extraction whose active member differs at runtime.
+
+Use `--mir-file` or `--c-file` on `samples/enum-payload-demo.fy`. As with the
+existing C entry contract, native main returns i32; i64 payload computations
+remain available inside functions. The sample asserts its i64 result then
+returns 0. Run `verify_enum_payloads.py --images <dev-image> <release-image>
+--phase full --native-runner <native-runner> --receipt <path>` for deterministic
+HIR/MIR/C, malformed inputs, fixed expected native results, and a test-only
+corrupted C active-tag case. The latter must trap 7 in both native profiles and
+is explicitly not a valid Fairy source program. Raw CLI/native observations and
+digests are in `docs/ops/evidence/enum-payload-native-20261007.json`.
+
+Enum comparisons, nested/resource/view payloads, enum array/struct storage,
+borrowed-view switch joins, complete self-hosting, Linux validation and
+performance measurement remain outside this slice. Stable compiler, public
+language/SDK APIs and runner implementation are unchanged.

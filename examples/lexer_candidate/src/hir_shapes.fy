@@ -14,6 +14,17 @@ pub fn usize count(ref Table p) { return v::len<Shape>(ref p.shapes); }
 pub fn bool has_enums(ref Table p) { var usize i=0;while(i<count(p)){if(enums::valid(at(p,i).type)){return true;}i+=1;}return false; }
 pub fn bool has_payloads(ref Table p) { var usize i=1;while(i<=field_count(p)){if(field_at(p,i).payload_count!=0){return true;}i+=1;}return false; }
 pub fn usize member_count(ref Table p,u32 type) { let s=at(p,find(p,type)-1);var usize n=0;var usize i=0;while(i<s.field_count){if(field_at(p,s.field_start+i+1).type==0){n+=1;}i+=1;}return n; }
+pub fn usize member_at(ref Table p,u32 type,usize tag) {
+    let usize found=find(p,type);if(found==0){return 0;}let s=at(p,found-1);var usize i=0;var usize ordinal=0;
+    while(i<s.field_count){let usize id=s.field_start+i+1;if(field_at(p,id).type==0){if(ordinal==tag){return id;}ordinal+=1;}i+=1;}return 0;
+}
+pub fn usize member_tag(ref Table p,u32 type,usize member) {
+    var usize tag=0;while(tag<member_count(p,type)){if(member_at(p,type,tag)==member){return tag;}tag+=1;}return tag;
+}
+pub fn usize payload_member(ref Table p,u32 type,usize field) {
+    let usize found=find(p,type);if(found==0){return 0;}let s=at(p,found-1);var usize i=0;
+    while(i<s.field_count){let usize id=s.field_start+i+1;let f=field_at(p,id);if(f.type==0 && field>f.payload_start && field<=f.payload_start+f.payload_count){return id;}i+=1;}return 0;
+}
 pub fn usize field_count(ref Table p) { return v::len<Field>(ref p.fields); }
 pub fn Shape at(ref Table p, usize i) { assert(i < count(p)); return *v::at<Shape>(ref p.shapes,i); }
 pub fn Field field_at(ref Table p, usize id) { assert(id > 0 && id <= field_count(p)); return *v::at<Field>(ref p.fields,id - 1); }

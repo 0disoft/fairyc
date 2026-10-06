@@ -23,8 +23,7 @@ fn void owned_payloads_keep_types_order_bindings_and_discard() {
         i+=1;
     }assert(captures==2 && discards==1 && variants==1);
     var bytes::Buffer a=bytes::empty();var bytes::Buffer b=bytes::empty();assert(output::render(ref p,ref mut a)==0 && output::render(ref p,ref mut b)==0);assert(bytes::equal(bytes::view(ref a),bytes::view(ref b)));
-    // Until the execution slice lands, do not silently lower away payloads.
-    assert(switch(mir::lower(support::retained(source))){case .ok(_):{false}case .err(problem):{problem.code==4}});
+    assert(switch(mir::lower(support::retained(source))){case .ok(_):{true}case .err(_):{false}});
 }
 
 fn shapes::Table forged(usize start,usize count,u32 type) {

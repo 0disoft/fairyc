@@ -19,7 +19,7 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     if (problem.code != 0) { return problem.code; }
     let ref shapes::Table table = m::nominal(p); let bool nominal = shapes::count(table) != 0;
     let bool array = m::has_arrays(p);
-    if (!bytes::append(out,if (shapes::has_enums(table)) { b"fairyc.enum-mir/v1\nP\t" } else if (m::has_views(p)) { b"fairyc.view-mir/v1\nP\t" } else if (m::has_literals(p)) { b"fairyc.literal-mir/v1\nP\t" } else if (array) { b"fairyc.array-mir/v1\nP\t" } else if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
+    if (!bytes::append(out,if (shapes::has_payloads(table)) { b"fairyc.enum-payload-mir/v1\nP\t" } else if (shapes::has_enums(table)) { b"fairyc.enum-mir/v1\nP\t" } else if (m::has_views(p)) { b"fairyc.view-mir/v1\nP\t" } else if (m::has_literals(p)) { b"fairyc.literal-mir/v1\nP\t" } else if (array) { b"fairyc.array-mir/v1\nP\t" } else if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
     var usize index = 0;
     while (index < shapes::count(table)) {
         let shapes::Shape shape = shapes::at(table,index);
@@ -30,9 +30,9 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     index = 1;
     while (index <= shapes::field_count(table)) {
         let shapes::Field field = shapes::field_at(table,index);
-        let usize[20] fields = [index,field.owner as usize,field.type as usize,field.start,field.end,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        let usize[20] fields = [index,field.owner as usize,field.type as usize,field.start,field.end,field.payload_start,field.payload_count,0,0,0,0,0,0,0,0,0,0,0,0,0];
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
-        if (!row(out,b"D",fields,5) || !end(out)) { return 3; } index += 1;
+        if (!row(out,b"D",fields,if(shapes::has_payloads(table)){7}else{5}) || !end(out)) { return 3; } index += 1;
     }
     var usize id = 1;
     while (id <= m::target_count(p)) {
