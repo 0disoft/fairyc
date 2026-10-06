@@ -1,0 +1,3279 @@
+{
+  "schema": "fairyc.result-candidate-verification/v1",
+  "phase": "propagation-types",
+  "passed": true,
+  "images": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+      "sha256": "549b7e0ac06c774f8971bb71e6a73c700ebfafe8a4b5e699972a562ff39ad921"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+      "sha256": "da5bfc4176344c4f3a624641f5156f1fa84ee874b863979369436796e0213072"
+    }
+  ],
+  "cli": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-i64-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u8-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-u32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-usize-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-bool-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-group.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-group.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-argument.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-argument.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-branch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-branch.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-loop.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-loop.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-defer-capture.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-defer-capture.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-condition.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-condition.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar.fy:1:54: error: ? requires Result operand (bytes 53..54)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar.fy:1:54: error: ? requires Result operand (bytes 53..54)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option.fy:1:62: error: ? requires Result operand (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option.fy:1:62: error: ? requires Result operand (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-enum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-enum.fy:1:59: error: ? requires Result operand (bytes 58..59)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-enum.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-enum.fy:1:59: error: ? requires Result operand (bytes 58..59)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar-return.fy:1:50: error: ? requires enclosing Result with identical error type (bytes 49..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-scalar-return.fy:1:50: error: ? requires enclosing Result with identical error type (bytes 49..50)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-void-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-void-return.fy:1:52: error: ? requires enclosing Result with identical error type (bytes 51..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-void-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-void-return.fy:1:52: error: ? requires enclosing Result with identical error type (bytes 51..52)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option-return.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-option-return.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-reversed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-reversed.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-reversed.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-reversed.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-coercion.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-coercion.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-coercion.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-coercion.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-return-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-return-value.fy:1:62: error: type mismatch (bytes 61..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-return-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-return-value.fy:1:62: error: type mismatch (bytes 61..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-wrong-binding.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-wrong-binding.fy:1:65: error: type mismatch (bytes 64..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-wrong-binding.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-wrong-binding.fy:1:65: error: type mismatch (bytes 64..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-twice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-twice.fy:1:68: error: ? requires Result operand (bytes 67..68)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-twice.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-twice.fy:1:68: error: ? requires Result operand (bytes 67..68)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-inference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-inference.fy:1:48: error: Result context required (bytes 47..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-inference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-no-inference.fy:1:48: error: Result context required (bytes 47..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-init.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-init.fy:1:59: error: unsupported for header (bytes 58..70)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-init.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-init.fy:1:59: error: unsupported for header (bytes 58..70)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-condition.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-condition.fy:1:72: error: unsupported for header (bytes 71..73)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-condition.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-condition.fy:1:72: error: unsupported for header (bytes 71..73)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-post.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-post.fy:1:75: error: unsupported for header (bytes 74..78)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-post.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-for-post.fy:1:75: error: unsupported for header (bytes 74..78)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-unresolved.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-unresolved.fy:1:48: error: unresolved name (bytes 47..54)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-unresolved.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-unresolved.fy:1:48: error: unresolved name (bytes 47..54)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i64.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-i64.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u8.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u8.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-u32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-usize.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-usize.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-bool.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i32-bool.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i64.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-i64.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u8.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u8.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-u32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-usize.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-usize.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-bool.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-i64-bool.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i32.fy:1:60: error: ? requires enclosing Result with identical error type (bytes 59..60)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i32.fy:1:60: error: ? requires enclosing Result with identical error type (bytes 59..60)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i64.fy:1:59: error: ? requires enclosing Result with identical error type (bytes 58..59)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-i64.fy:1:59: error: ? requires enclosing Result with identical error type (bytes 58..59)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u8.fy:1:59: error: ? requires enclosing Result with identical error type (bytes 58..59)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u8.fy:1:59: error: ? requires enclosing Result with identical error type (bytes 58..59)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-u32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-usize.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-usize.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-bool.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u8-bool.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i32.fy:1:62: error: ? requires enclosing Result with identical error type (bytes 61..62)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i64.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-i64.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u8.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u8.fy:1:61: error: ? requires enclosing Result with identical error type (bytes 60..61)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-u32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-usize.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-usize.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-bool.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-u32-bool.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i32.fy:1:66: error: ? requires enclosing Result with identical error type (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i32.fy:1:66: error: ? requires enclosing Result with identical error type (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i64.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-i64.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u8.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u8.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u32.fy:1:68: error: ? requires enclosing Result with identical error type (bytes 67..68)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-u32.fy:1:68: error: ? requires enclosing Result with identical error type (bytes 67..68)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-usize.fy:1:69: error: ? requires enclosing Result with identical error type (bytes 68..69)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-usize.fy:1:69: error: ? requires enclosing Result with identical error type (bytes 68..69)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-bool.fy:1:67: error: ? requires enclosing Result with identical error type (bytes 66..67)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-usize-bool.fy:1:67: error: ? requires enclosing Result with identical error type (bytes 66..67)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i32.fy:1:64: error: ? requires enclosing Result with identical error type (bytes 63..64)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i64.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i64.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-i64.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u8.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u8.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u8.fy:1:63: error: ? requires enclosing Result with identical error type (bytes 62..63)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u32.fy:1:66: error: ? requires enclosing Result with identical error type (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u32.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-u32.fy:1:66: error: ? requires enclosing Result with identical error type (bytes 65..66)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-usize.fy:1:67: error: ? requires enclosing Result with identical error type (bytes 66..67)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-usize.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-usize.fy:1:67: error: ? requires enclosing Result with identical error type (bytes 66..67)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-bool.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-bool.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\propagate-error-bool-bool.fy:1:65: error: ? requires enclosing Result with identical error type (bytes 64..65)\n"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "propagate-i32-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c6933322c6933323e2072297b6c657420693332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "f27b92f2dfada67c502fccfea7e390fa8c0185cdb7bc06cea98db56df5542119",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i32-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6936343e206628526573756c743c6933322c6936343e2072297b6c657420693332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "8bd64d21a31fa541c333ebd96df9d28bbe7d88f2c4399ab4037562bb5e1ff127",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i32-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c75383e206628526573756c743c6933322c75383e2072297b6c657420693332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "cd53a990057f1f09a8f1c35b439e8a8a078b2f6a2e1d5419c0f22e1ee3eac685",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i32-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7533323e206628526573756c743c6933322c7533323e2072297b6c657420693332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "e03f845316b5ed8fa2cb48605e61ebb46a0cf3a7f09883d219a3ae52d4c85422",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i32-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7573697a653e206628526573756c743c6933322c7573697a653e2072297b6c657420693332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "2b0d5d47c43eafea464d9bb174fbcd0fe7874c171f55b69013cfe63e701cdac4",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i32-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b6c657420693332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "1f30ab128f332c9cc5b75490cc8fb40941864e91c5fe6d8dca2af312f6228300",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i64-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c6936342c6933323e2072297b6c657420693634206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "ee5bd3f27d3eb52287d9d144067a72c7ac36a4577655f59ccfb47b787234737f",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i64-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6936343e206628526573756c743c6936342c6936343e2072297b6c657420693634206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "593b379004a2aa930e036fe2119599d8ef5309e8f041d2fc72a2b9ce13ebfe72",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i64-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c75383e206628526573756c743c6936342c75383e2072297b6c657420693634206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "ff80fd2f688c422771f10f63a63b2d14ba6f19f96a6f5fd26c90b08ef0fe9ac6",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i64-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7533323e206628526573756c743c6936342c7533323e2072297b6c657420693634206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "d0fda76bff2ec0aea31bc5669b70e8739ab07afc6f143a280ce447724112d74d",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i64-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7573697a653e206628526573756c743c6936342c7573697a653e2072297b6c657420693634206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "5dc27132c5bde00729648e680b5715a751e2da9fc26fb41463f04163d20f1bec",
+      "exit": 0
+    },
+    {
+      "name": "propagate-i64-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c626f6f6c3e206628526573756c743c6936342c626f6f6c3e2072297b6c657420693634206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "b03dff4385d905c978f98f1f4b5fdd84d69ebc8bed68162831a7ed784d82a37e",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u8-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c75382c6933323e2072297b6c6574207538206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "f44c01df90e829d57081ae9bcad2e48404f76d46fa48fdb94e52abd7ff5ce926",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u8-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6936343e206628526573756c743c75382c6936343e2072297b6c6574207538206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "34d0fa80fac9b16b34a43105d91027948cf46dc123d4fbd9db15fd5abd64aacc",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u8-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c75383e206628526573756c743c75382c75383e2072297b6c6574207538206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "6be69fd215a2765d552c5bdf968d4ca800366d582df73ee9d79038896341afa1",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u8-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7533323e206628526573756c743c75382c7533323e2072297b6c6574207538206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "dcb6ba323eb17aa36910bfb974157960229ee378f11cb222cf39fdd8884ffe91",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u8-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7573697a653e206628526573756c743c75382c7573697a653e2072297b6c6574207538206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "0d6bda4994e3a6bbcbfd67c006a34dd94f434fa3c872a2c4ddd1c9828453536d",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u8-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c626f6f6c3e206628526573756c743c75382c626f6f6c3e2072297b6c6574207538206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "b43d19b0c89bd1efc0a2be9e5e06e6fc7bac2dcce3a2d60069009975afa314d9",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u32-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c7533322c6933323e2072297b6c657420753332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "206222d8a3d4f7c54643c08a7bec0a411432189082ab1225a971c7c30ed17675",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u32-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6936343e206628526573756c743c7533322c6936343e2072297b6c657420753332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "2d5774ee23c13f5acba999b36543c8a43b2bd77922d267118addfa637df987ca",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u32-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c75383e206628526573756c743c7533322c75383e2072297b6c657420753332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "fcc33f417ca3165cd1d90b446b49723422cdd91aa63fe2dc43e436ecf74080b9",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u32-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7533323e206628526573756c743c7533322c7533323e2072297b6c657420753332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "770be6a7c39f87375cc46d233dddf3121da7a9332ce7607df3269eeb9ad98434",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u32-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7573697a653e206628526573756c743c7533322c7573697a653e2072297b6c657420753332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "907cb5de84f914a498cc66079271c98408781448d406adb6ddd880f1fdc83ee0",
+      "exit": 0
+    },
+    {
+      "name": "propagate-u32-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c626f6f6c3e206628526573756c743c7533322c626f6f6c3e2072297b6c657420753332206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "8dd1c7e780d995c3f7f539a8c20ec4721f515112562aabc1ebebc38705e28685",
+      "exit": 0
+    },
+    {
+      "name": "propagate-usize-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c7573697a652c6933323e2072297b6c6574207573697a65206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "d7457a6bc2c8ea0fa9c2339e8dd2fe777e9f0d22572f0d2c698a8796d87119e2",
+      "exit": 0
+    },
+    {
+      "name": "propagate-usize-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6936343e206628526573756c743c7573697a652c6936343e2072297b6c6574207573697a65206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "e2b57766ffa6e17e943d999b0507d02a9f42a8186bb040cd39f02078e76edcaf",
+      "exit": 0
+    },
+    {
+      "name": "propagate-usize-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c75383e206628526573756c743c7573697a652c75383e2072297b6c6574207573697a65206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "118f4c51a8860e0c3582e801645b04dd773301a4d8b65eaf769403064f9434e9",
+      "exit": 0
+    },
+    {
+      "name": "propagate-usize-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7533323e206628526573756c743c7573697a652c7533323e2072297b6c6574207573697a65206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "99e63ad7962878dc03863c840199c661301121039a45ae37d7b4a59bf505841d",
+      "exit": 0
+    },
+    {
+      "name": "propagate-usize-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7573697a653e206628526573756c743c7573697a652c7573697a653e2072297b6c6574207573697a65206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "de2bc8b3774fc24069e83d136b1610d2de6e87ead234671449a17249cdb1dca7",
+      "exit": 0
+    },
+    {
+      "name": "propagate-usize-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c626f6f6c3e206628526573756c743c7573697a652c626f6f6c3e2072297b6c6574207573697a65206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "84da93f79392b597ab611c8a9b02bdf57a674c0395d4e0613d74a8665b1bfec5",
+      "exit": 0
+    },
+    {
+      "name": "propagate-bool-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c626f6f6c2c6933323e2072297b6c657420626f6f6c206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "8de41ceab9b616934f3f24e6059aa56d9c5c64c6b953c42165af8f4b1e3b07c6",
+      "exit": 0
+    },
+    {
+      "name": "propagate-bool-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6936343e206628526573756c743c626f6f6c2c6936343e2072297b6c657420626f6f6c206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "11686c90a42132842f1b34907f69e1673534b979ae6c79da67cf67b2c0754933",
+      "exit": 0
+    },
+    {
+      "name": "propagate-bool-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c75383e206628526573756c743c626f6f6c2c75383e2072297b6c657420626f6f6c206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "ad2aeb7da7ccdf8dead4e6a942f01b720ec14f825a5e300a8695f0db3541200f",
+      "exit": 0
+    },
+    {
+      "name": "propagate-bool-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7533323e206628526573756c743c626f6f6c2c7533323e2072297b6c657420626f6f6c206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "5ea6b6e9605672df969088bdcb915b0fa0cfc3d4fa318290b3bbf31a65e7c1c9",
+      "exit": 0
+    },
+    {
+      "name": "propagate-bool-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7573697a653e206628526573756c743c626f6f6c2c7573697a653e2072297b6c657420626f6f6c206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "b329f1b23635bb5c9bb506a737c8476bec7495e76a6bf84514c454a2cd79bfa6",
+      "exit": 0
+    },
+    {
+      "name": "propagate-bool-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c626f6f6c3e206628526573756c743c626f6f6c2c626f6f6c3e2072297b6c657420626f6f6c206e3d723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "27bd0d70603a2e3a7f0fd8be195b29ee4dd40e27e3fe795d3f97eeca0db7a117",
+      "exit": 0
+    },
+    {
+      "name": "propagate-call",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6936342c626f6f6c3e2076616c756528297b72657475726e202e6f6b2834303030303030303030293b7d666e20526573756c743c6936342c626f6f6c3e206628297b72657475726e202e6f6b2876616c756528293f293b7d",
+      "sha256": "267ef30613a4ec50c063469f32841980d8493c0133d0f5267b9c144c2c66aa77",
+      "exit": 0
+    },
+    {
+      "name": "propagate-group",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b72657475726e202e6f6b282872293f293b7d",
+      "sha256": "b0ac90c9291c3e75402e4c84583656a899594475ab5451eb841f44da6b82754a",
+      "exit": 0
+    },
+    {
+      "name": "propagate-argument",
+      "inputHex": "6d6f64756c65206d61696e3b666e2069333220696428693332206e297b72657475726e206e3b7d666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b72657475726e202e6f6b28696428723f29293b7d",
+      "sha256": "13e9162b2014cbfc620904054f04418a32cf0121345b82bb1ca7f75ba8f3b5ee",
+      "exit": 0
+    },
+    {
+      "name": "propagate-branch",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e20722c626f6f6c20796573297b72657475726e202e6f6b28696628796573297b723f7d656c73657b307d293b7d",
+      "sha256": "6820f8bda96fd057908d581ba1dbb08e163e7328835350ad1d19080c0d991922",
+      "exit": 0
+    },
+    {
+      "name": "propagate-loop",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b76617220693332206e3d303b7768696c65286e3c31297b6e3d723f3b7d72657475726e202e6f6b286e293b7d",
+      "sha256": "ec18e9ac359f52b9853f989fa0fe4e5ae06d7aa17e524e684f95beefc78c6a55",
+      "exit": 0
+    },
+    {
+      "name": "propagate-defer-capture",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206c6f6728693332206e297b7d666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b6465666572206c6f6728723f293b72657475726e202e6f6b2830293b7d",
+      "sha256": "e330158e7d1d34991b2f8a3ca0a5322ede021b397393b9c2ea5ad4e832eec935",
+      "exit": 0
+    },
+    {
+      "name": "propagate-condition",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c626f6f6c2c626f6f6c3e2072297b696628723f297b72657475726e202e6f6b2831293b7d72657475726e202e6f6b2830293b7d",
+      "sha256": "5d2adc2c9cc9de6d8cb517cc3610b53f24c435afa3e194d6baf26c3161f7d6dd",
+      "exit": 0
+    },
+    {
+      "name": "propagate-scalar",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628693332206e297b72657475726e202e6f6b286e3f293b7d",
+      "sha256": "4ba832ddae3f3fb7c3ef77f326ecdfef3c93099475eaff41cb977a169f5c06de",
+      "exit": 2
+    },
+    {
+      "name": "propagate-option",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e2066284f7074696f6e3c6933323e2072297b72657475726e202e6f6b28723f293b7d",
+      "sha256": "c48c5d43a6246e22face8ef7a81852f2ab1e0f3944652b1173394f29bdbc4e40",
+      "exit": 2
+    },
+    {
+      "name": "propagate-enum",
+      "inputHex": "6d6f64756c65206d61696e3b656e756d20457b413b7d666e20526573756c743c6933322c626f6f6c3e206628452072297b6469736361726420723f3b72657475726e202e6f6b2830293b7d",
+      "sha256": "26d2b6c60cb5e45b9eac91b554d46b991b81dc0e6a380d936c2245d7fdcfb981",
+      "exit": 2
+    },
+    {
+      "name": "propagate-scalar-return",
+      "inputHex": "6d6f64756c65206d61696e3b666e20693332206628526573756c743c6933322c626f6f6c3e2072297b72657475726e20723f3b7d",
+      "sha256": "f050b16eacbd1882b7d4efc2d263e427fadb119e10f4f5fa106df3b84f246243",
+      "exit": 2
+    },
+    {
+      "name": "propagate-void-return",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206628526573756c743c6933322c626f6f6c3e2072297b6469736361726420723f3b7d",
+      "sha256": "31fb139c7eaf71973ace8fe2e2e59c1e6c6f47e1f224625e7346d67f99b90c4b",
+      "exit": 2
+    },
+    {
+      "name": "propagate-option-return",
+      "inputHex": "6d6f64756c65206d61696e3b666e204f7074696f6e3c6933323e206628526573756c743c6933322c626f6f6c3e2072297b72657475726e202e736f6d6528723f293b7d",
+      "sha256": "2d9079e93f4e9ec4a31233b4f5f6259d148ee1ea043cabd2c4bca8e8918b8efe",
+      "exit": 2
+    },
+    {
+      "name": "propagate-reversed",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c6933322c626f6f6c3e2072297b6469736361726420723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "d0cd313951f45aa05d22a6a6e6203dd8610bd58db14f9fa7b70b07245240a75d",
+      "exit": 2
+    },
+    {
+      "name": "propagate-no-coercion",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c6936343e206628526573756c743c6933322c6933323e2072297b72657475726e202e6f6b28723f293b7d",
+      "sha256": "6a7d54f517cfc1d86668d300c9c7419bc190a06175dad7accb5e71ca9e6335a1",
+      "exit": 2
+    },
+    {
+      "name": "propagate-return-value",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b72657475726e20723f3b7d",
+      "sha256": "416135a83e076cced15c52e17063ce29e007a74aa84596afada7df01971a8053",
+      "exit": 2
+    },
+    {
+      "name": "propagate-wrong-binding",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6936342c626f6f6c3e2072297b6c657420693332206e3d723f3b72657475726e202e6f6b286e293b7d",
+      "sha256": "f8026b23432420b1194248e7000e715a312567ad2948fd29979ec5706ed95688",
+      "exit": 2
+    },
+    {
+      "name": "propagate-twice",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b72657475726e202e6f6b28723f3f293b7d",
+      "sha256": "352dab43fc99faca3dda6393d82a40f1856e8afcf5f39c8b0e41180d1604c9cb",
+      "exit": 2
+    },
+    {
+      "name": "propagate-no-inference",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628297b72657475726e202e6f6b282e6f6b2831293f293b7d",
+      "sha256": "cc4cdd77e0673b72e20ccb87ffd692a760ce84a33982ee71f5878ef19cdc418c",
+      "exit": 2
+    },
+    {
+      "name": "propagate-for-init",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b666f72286c657420693332206e3d723f3b6e3c313b6e2b3d31297b7d72657475726e202e6f6b2830293b7d",
+      "sha256": "5407afff28831ed318384dcf0bcdfdce2073f11a1f656d37c087609f775bbefa",
+      "exit": 2
+    },
+    {
+      "name": "propagate-for-condition",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c626f6f6c2c626f6f6c3e2072297b666f72286c657420693332206e3d303b723f3b6e2b3d31297b7d72657475726e202e6f6b2830293b7d",
+      "sha256": "bf87fdddb25366ea855cd32228b5c6ed686661fa0d968c93fbacdaebb72250ea",
+      "exit": 2
+    },
+    {
+      "name": "propagate-for-post",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c626f6f6c3e2072297b666f722876617220693332206e3d303b6e3c313b6e3d723f297b7d72657475726e202e6f6b2830293b7d",
+      "sha256": "84cca3d3b52e77fc310459d9d1f4ad3ec90dc586243bfe507405320ef530f9ba",
+      "exit": 2
+    },
+    {
+      "name": "propagate-unresolved",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628297b72657475726e202e6f6b286d697373696e673f293b7d",
+      "sha256": "431ddb2ec4b270d426343c9b58f2bfbbb9fa1d0498a64d8a7d8e7e24a8e4a1ee",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i32-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c6936343e206628526573756c743c6933322c6933323e2072297b6469736361726420723f3b72657475726e202e6f6b282d32313437343833363438293b7d",
+      "sha256": "33bab6f5d908d1d506774e9ade1f3a4eb615963b3c1b1809a46fe95247fc3b57",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i32-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c75383e206628526573756c743c6933322c6936343e2072297b6469736361726420723f3b72657475726e202e6f6b282d32313437343833363438293b7d",
+      "sha256": "17789e10e3e88ba3414f19e0533b84a5821baa494c5b260c6bde028a378ad059",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i32-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c7533323e206628526573756c743c6933322c75383e2072297b6469736361726420723f3b72657475726e202e6f6b282d32313437343833363438293b7d",
+      "sha256": "fdfa31455b6637c90cfca971f949dc1589274659b34ed982ec21f84bc2367c2f",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i32-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c7573697a653e206628526573756c743c6933322c7533323e2072297b6469736361726420723f3b72657475726e202e6f6b282d32313437343833363438293b7d",
+      "sha256": "899a4ffc2dcd6e86669082560e078582f62a2b5b46b89694ae294b834aae282d",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i32-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c626f6f6c3e206628526573756c743c6933322c7573697a653e2072297b6469736361726420723f3b72657475726e202e6f6b282d32313437343833363438293b7d",
+      "sha256": "f53e09d968de2110bc5364ca0a622d7215350c5def00b9478712bd2631c2e272",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i32-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6933322c6933323e206628526573756c743c6933322c626f6f6c3e2072297b6469736361726420723f3b72657475726e202e6f6b282d32313437343833363438293b7d",
+      "sha256": "bd76668e717c994dee26186e52ea2bfd37e7d3d82b240fbb4da896faa20272cb",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i64-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6936342c6936343e206628526573756c743c6936342c6933323e2072297b6469736361726420723f3b72657475726e202e6f6b282d39323233333732303336383534373735383038293b7d",
+      "sha256": "6e087e7baaa4d6b520daef44f40cb3f0840ceb8c2ca50dca0669d54eadd471d9",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i64-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6936342c75383e206628526573756c743c6936342c6936343e2072297b6469736361726420723f3b72657475726e202e6f6b282d39323233333732303336383534373735383038293b7d",
+      "sha256": "1eaf4528263dbdbaa764f3959e51a3d524cb5811f1f99e873f123b6dddf4a6ea",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i64-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6936342c7533323e206628526573756c743c6936342c75383e2072297b6469736361726420723f3b72657475726e202e6f6b282d39323233333732303336383534373735383038293b7d",
+      "sha256": "f1528b39e6f81956b556f157ffb9609ae87ed4dd744cee767bdc454005678364",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i64-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6936342c7573697a653e206628526573756c743c6936342c7533323e2072297b6469736361726420723f3b72657475726e202e6f6b282d39323233333732303336383534373735383038293b7d",
+      "sha256": "721d3a8b1e4372576781da365042f030774090baf3799069b0b8f5a6c5b18ac9",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i64-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6936342c626f6f6c3e206628526573756c743c6936342c7573697a653e2072297b6469736361726420723f3b72657475726e202e6f6b282d39323233333732303336383534373735383038293b7d",
+      "sha256": "d85eaaf712028d6470d35c28dbb50193b6894c7ac61c5f8b8036cbff7b36e5b3",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-i64-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c6936342c6933323e206628526573756c743c6936342c626f6f6c3e2072297b6469736361726420723f3b72657475726e202e6f6b282d39323233333732303336383534373735383038293b7d",
+      "sha256": "9ec1dda7f008b30d12104382c5fbb4b97606148fa0c820d368f43f03a0d2f4c0",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u8-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c75382c6936343e206628526573756c743c75382c6933323e2072297b6469736361726420723f3b72657475726e202e6f6b28323535293b7d",
+      "sha256": "52c391b40a20b14c912133ad181644f2f2e2ffdad3d25751e03206c47f7077c3",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u8-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c75382c75383e206628526573756c743c75382c6936343e2072297b6469736361726420723f3b72657475726e202e6f6b28323535293b7d",
+      "sha256": "4e0decf5d22b95e7da7fc176fca955cda32d718512619b30b8f6a3b3c2ca4afc",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u8-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c75382c7533323e206628526573756c743c75382c75383e2072297b6469736361726420723f3b72657475726e202e6f6b28323535293b7d",
+      "sha256": "aefdfcc3c5bff42cf794ad42181b579f7b7c600536c32b99b45f24a8b41e1ae2",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u8-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c75382c7573697a653e206628526573756c743c75382c7533323e2072297b6469736361726420723f3b72657475726e202e6f6b28323535293b7d",
+      "sha256": "8a2e38e2f759c79760d82291e352fbbd9650c25b3c23835043ca8c0f66d5df20",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u8-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c75382c626f6f6c3e206628526573756c743c75382c7573697a653e2072297b6469736361726420723f3b72657475726e202e6f6b28323535293b7d",
+      "sha256": "44e62c7f2e37404cead89811f52f270e0c5f762291023b8db16e8017d5a72ea8",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u8-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c75382c6933323e206628526573756c743c75382c626f6f6c3e2072297b6469736361726420723f3b72657475726e202e6f6b28323535293b7d",
+      "sha256": "d20825a403c99e7354dca705e35ee35495afb11bf065c00f1a2358902c9835ca",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u32-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7533322c6936343e206628526573756c743c7533322c6933323e2072297b6469736361726420723f3b72657475726e202e6f6b2834323934393637323935293b7d",
+      "sha256": "a06fcfadc3b313713434a0a06dd6bf7522699ff2290399e86dc6434e38231c1d",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u32-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7533322c75383e206628526573756c743c7533322c6936343e2072297b6469736361726420723f3b72657475726e202e6f6b2834323934393637323935293b7d",
+      "sha256": "66a2f272ab40d17f6629824a443b6839e9887718bdb0ea088b8b1db8ba7ea018",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u32-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7533322c7533323e206628526573756c743c7533322c75383e2072297b6469736361726420723f3b72657475726e202e6f6b2834323934393637323935293b7d",
+      "sha256": "0ad3c2f40ba4138d67f970fc10ebd3e39fdac736cdeae30b39b19c83c6c25e4d",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u32-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7533322c7573697a653e206628526573756c743c7533322c7533323e2072297b6469736361726420723f3b72657475726e202e6f6b2834323934393637323935293b7d",
+      "sha256": "edddcfb65b9f8c1810faf6d487427aa881e3ad5ebd513908da3524fe2c17d139",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u32-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7533322c626f6f6c3e206628526573756c743c7533322c7573697a653e2072297b6469736361726420723f3b72657475726e202e6f6b2834323934393637323935293b7d",
+      "sha256": "6aadef7fecd3b26253ba99a3db4ff3b3992a29ce1540ce9ffef02e5a7a698b38",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-u32-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7533322c6933323e206628526573756c743c7533322c626f6f6c3e2072297b6469736361726420723f3b72657475726e202e6f6b2834323934393637323935293b7d",
+      "sha256": "3bdba6bc386755247b09badd5920c27461bfa5a9af8d68340d757fa039d13411",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-usize-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7573697a652c6936343e206628526573756c743c7573697a652c6933323e2072297b6469736361726420723f3b72657475726e202e6f6b283138343436373434303733373039353531363135293b7d",
+      "sha256": "bbdc0bd10f87a2ce3078a91832ef69154b3b7e61d982b5ae029aedf1afed8856",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-usize-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7573697a652c75383e206628526573756c743c7573697a652c6936343e2072297b6469736361726420723f3b72657475726e202e6f6b283138343436373434303733373039353531363135293b7d",
+      "sha256": "34ea5da2017d20bac9815f604f244edc79e3b2e52dbc1a52fdfad0970040f32c",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-usize-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7573697a652c7533323e206628526573756c743c7573697a652c75383e2072297b6469736361726420723f3b72657475726e202e6f6b283138343436373434303733373039353531363135293b7d",
+      "sha256": "e4aa9fe0e3f5cede045e48026f33f504fb04217ac577753cd8f6241b61738610",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-usize-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7573697a652c7573697a653e206628526573756c743c7573697a652c7533323e2072297b6469736361726420723f3b72657475726e202e6f6b283138343436373434303733373039353531363135293b7d",
+      "sha256": "b5d4561ed0ac80d4f5c7fa695f764acad5ec3c84752e96ecdd870bac7515f663",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-usize-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7573697a652c626f6f6c3e206628526573756c743c7573697a652c7573697a653e2072297b6469736361726420723f3b72657475726e202e6f6b283138343436373434303733373039353531363135293b7d",
+      "sha256": "ff29179107ff8ada7ab16fc0dd102e295913919fa13a3cac8d65c5043c200c42",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-usize-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c7573697a652c6933323e206628526573756c743c7573697a652c626f6f6c3e2072297b6469736361726420723f3b72657475726e202e6f6b283138343436373434303733373039353531363135293b7d",
+      "sha256": "d67956ff4d410a53ba6db0158df67d5bb7d803e452cda9a2d476d56ace07350e",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-bool-i32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6936343e206628526573756c743c626f6f6c2c6933323e2072297b6469736361726420723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "36bdb0017b14cbf8663418179bb6fbc7f17b1525966c6272171444f5c601a475",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-bool-i64",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c75383e206628526573756c743c626f6f6c2c6936343e2072297b6469736361726420723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "4fdad0c5ff01365366fe2d9d422efab305e636faa0ffebd4b129932398e2d54b",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-bool-u8",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7533323e206628526573756c743c626f6f6c2c75383e2072297b6469736361726420723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "1b4b551cb5b6fa44424837c44230dfe8b8fb41e3df5a6340426544c5bb7ffd5e",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-bool-u32",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c7573697a653e206628526573756c743c626f6f6c2c7533323e2072297b6469736361726420723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "9c9b9705b3e949e21cdef91d7a8454ec9cc09d330b09c251abb1a860ceabaff1",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-bool-usize",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c626f6f6c3e206628526573756c743c626f6f6c2c7573697a653e2072297b6469736361726420723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "33f83d9dc7c95a997de9635383a24ec5cf78185cf8132a54518af6c54559b165",
+      "exit": 2
+    },
+    {
+      "name": "propagate-error-bool-bool",
+      "inputHex": "6d6f64756c65206d61696e3b666e20526573756c743c626f6f6c2c6933323e206628526573756c743c626f6f6c2c626f6f6c3e2072297b6469736361726420723f3b72657475726e202e6f6b2874727565293b7d",
+      "sha256": "6c4286ecba9d1a6ae5ec4642342894b80c8d287b3751629a9c0d449aceb7270c",
+      "exit": 2
+    }
+  ],
+  "sources": [
+    {
+      "path": "src\\array_types.fy",
+      "sha256": "e1619e2c4a2814a777b03c08931e486c9fff8c2e806f52a4fa32e56f4a99464d"
+    },
+    {
+      "path": "src\\attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "src\\binding_output.fy",
+      "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb"
+    },
+    {
+      "path": "src\\bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "src\\body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "src\\budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "src\\c_arrays.fy",
+      "sha256": "3a803ac0be8143eb2432a1a3a941cc8a99b75d5889e477d6c4bb5b91c372221f"
+    },
+    {
+      "path": "src\\c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "src\\c_emit.fy",
+      "sha256": "a29f7bc55fa5f70a1d139cf1b694b87be17b34893353df3160bc546f331d508b"
+    },
+    {
+      "path": "src\\c_flow.fy",
+      "sha256": "93e172ae922e21b87e33d01f203a010b88e5aea9260f3c91bbdaf4e160272f47"
+    },
+    {
+      "path": "src\\c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "src\\c_literals.fy",
+      "sha256": "0851889caa20b841c39c78f4c71e92a17727fffe7288c18312bd4b5ca5e281c0"
+    },
+    {
+      "path": "src\\c_nominal.fy",
+      "sha256": "34245fda2bef8df98c0879ab9739dffa0747549860f0f47664111390078e6e5f"
+    },
+    {
+      "path": "src\\c_scalar.fy",
+      "sha256": "85fae5d5e4b5918ac996f8fa597e5f5d9852c6777cbdc93681cc188345e07e6e"
+    },
+    {
+      "path": "src\\c_text.fy",
+      "sha256": "058054bc0b1213b26690eeff6f0e8bb11a64ab2fed427d8e4169e02fb8f42f4d"
+    },
+    {
+      "path": "src\\c_views.fy",
+      "sha256": "0b2ce428c716d62ce1ac66504dc409fd7c46ef85306dd06b3b6cac87e4af931f"
+    },
+    {
+      "path": "src\\cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "src\\declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "src\\diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "src\\enum_types.fy",
+      "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+    },
+    {
+      "path": "src\\file_cli.fy",
+      "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870"
+    },
+    {
+      "path": "src\\file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "src\\hir_cli.fy",
+      "sha256": "8128075037487308d0f212688473400f478e4e1d6e328a56dba153a19ff743d2"
+    },
+    {
+      "path": "src\\hir_lower.fy",
+      "sha256": "ca2359c8dcc992390e47ee9d0f7ce2b746b9738ec6915ff3873c88388c926012"
+    },
+    {
+      "path": "src\\hir_model.fy",
+      "sha256": "06471f176f51f51d0ec3ccfd5949d5448992c395b849afb1b8567cc7ecce1ab2"
+    },
+    {
+      "path": "src\\hir_mutable_check.fy",
+      "sha256": "9bfe9a3e8967f3442e327b9f5b0df3b1446e0026710e1cf424b2760c3ae5425a"
+    },
+    {
+      "path": "src\\hir_output.fy",
+      "sha256": "e6b8f248fc8a75b0b00159b3725d65fa37cb70626903e608e9447757b89041d7"
+    },
+    {
+      "path": "src\\hir_shape_lower.fy",
+      "sha256": "cbb22b2107e9ab62a415e6484a16aa192de2d6cf067962789aa34bf597723a12"
+    },
+    {
+      "path": "src\\hir_shapes.fy",
+      "sha256": "ac91ff9a9424a2942976daf5d6c3bc029e2829509fd96ff021cbec6a4c49e786"
+    },
+    {
+      "path": "src\\hir_state.fy",
+      "sha256": "64847906af061446da36e3b907aa66708e5fe6a5df4f177a472d507c8cd4d621"
+    },
+    {
+      "path": "src\\hir_view_check.fy",
+      "sha256": "97cb3ae84301ec5dd7be101a46f7d634d04fc707eef7a8772987f9c62f5b394d"
+    },
+    {
+      "path": "src\\integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "src\\literal_types.fy",
+      "sha256": "33d37658af0f45e89aa009837f0937e7f55ae58f7014231645c90f80f584e0b9"
+    },
+    {
+      "path": "src\\main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "src\\mir_arrays.fy",
+      "sha256": "3990b54299cbfb764dcdb722e7638ef5963f32cb1936e72e227faeb2c3737f48"
+    },
+    {
+      "path": "src\\mir_cleanup.fy",
+      "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19"
+    },
+    {
+      "path": "src\\mir_cli.fy",
+      "sha256": "77fad7857d50b0874b5d1043a4f64bd8f92e403a19746e25ed0d03c99b1e2128"
+    },
+    {
+      "path": "src\\mir_lower.fy",
+      "sha256": "36b8ac750071f43ee4ed98b935c0638515676a89550204f1eb113810ecbc6c01"
+    },
+    {
+      "path": "src\\mir_model.fy",
+      "sha256": "e68cd445fcb52e68068458b750036fe8c7a2cce27851009523d1bc519a5f1c6f"
+    },
+    {
+      "path": "src\\mir_nominal.fy",
+      "sha256": "e9fc7a50c45270783f1282cc519c5f952073b38d9bf1940106ed8062dd2d1403"
+    },
+    {
+      "path": "src\\mir_output.fy",
+      "sha256": "77d96e70e538a38d4a3ab1b6974145abfb7c722a3b86935aba36b42322eaf297"
+    },
+    {
+      "path": "src\\mir_places.fy",
+      "sha256": "1c1031459ecd4d844fb9a523500277a5683a66fa0f677604e657f34827b5cf20"
+    },
+    {
+      "path": "src\\mir_state.fy",
+      "sha256": "18eb5e5f0827a10099a12bf032d46909064e986a7d0b1154cbc239a51cf32fad"
+    },
+    {
+      "path": "src\\mir_verify.fy",
+      "sha256": "b99b8713e1cfcb3080f679a4957529460e7b050b721aee33812e8dca689786be"
+    },
+    {
+      "path": "src\\mir_verify_arrays.fy",
+      "sha256": "f566caa138e2f8ba8b11f5f6adf833c6628889e6311ef3634b9cf755f5870a2b"
+    },
+    {
+      "path": "src\\mir_verify_enums.fy",
+      "sha256": "7ec4586827243b056387c7b0bd747fefe338d7ab4b6f2bfe50578d5d4b245673"
+    },
+    {
+      "path": "src\\mir_verify_flow.fy",
+      "sha256": "aa0e87f6b689d1466be0f4f894fe5e07b3e41aaf95c149d931b7277b16220b4f"
+    },
+    {
+      "path": "src\\mir_verify_literals.fy",
+      "sha256": "92fad4c2db07f67db19a151059b67c2c4e7a0543b5afdc89c8fed4bac1940f5a"
+    },
+    {
+      "path": "src\\mir_verify_nominal.fy",
+      "sha256": "c63bcc6ce476daf18a888a976f407053cb8d9fb04ff3959247c43db629396c02"
+    },
+    {
+      "path": "src\\mir_verify_shape.fy",
+      "sha256": "c7d8176bd226705001bafa5ebf3e2077b4aea6c156864988b5de7adf02ff8d1d"
+    },
+    {
+      "path": "src\\mir_verify_views.fy",
+      "sha256": "ead173bb6bfa057e9e086753c7f9988913d81bdad740fd52472b4211c923d917"
+    },
+    {
+      "path": "src\\module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+    },
+    {
+      "path": "src\\module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+    },
+    {
+      "path": "src\\module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+    },
+    {
+      "path": "src\\name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+    },
+    {
+      "path": "src\\name_resolution.fy",
+      "sha256": "2028f239c556125ed1750876a80077e8da7deb663f98510f541e369d9906a147"
+    },
+    {
+      "path": "src\\nominal_types.fy",
+      "sha256": "777d8501d735143f120a72612082a9e17ddbbdb2059d9b4820a1207b878a167c"
+    },
+    {
+      "path": "src\\numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "src\\pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "src\\parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "src\\records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "src\\scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+    },
+    {
+      "path": "src\\strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "src\\syntax.fy",
+      "sha256": "2dcb64d8b7272b1adba8d82ab1658775010b567687bab1cbe00bc707edd0a373"
+    },
+    {
+      "path": "src\\tagged_check.fy",
+      "sha256": "d2f828b34aa1f1bec306c3bb85225006b130c526242bf610a20b5e3dbc20696e"
+    },
+    {
+      "path": "src\\tagged_types.fy",
+      "sha256": "2384b3c24ef882d110698bb8a6493f7917e6e4e90c10f73dd129666e90cbf19b"
+    },
+    {
+      "path": "src\\token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "src\\type_check.fy",
+      "sha256": "ad664e0ed0867e2353e6e8cf4e240c5c369f144f84c3f7180f238966d9279360"
+    },
+    {
+      "path": "src\\type_cli.fy",
+      "sha256": "007d880b74628a38284fc4184b53b0e8f98a7af44958d5376ee1b6c138794baf"
+    },
+    {
+      "path": "src\\type_control.fy",
+      "sha256": "2ebd9714228e5711657d496591b579fb9c13799ffa8729b1c40af7a244aac626"
+    },
+    {
+      "path": "src\\type_state.fy",
+      "sha256": "a4d0a814c23cdbfb8b50523ab43020225d2d5a561c6773b07f58ed2e478cee00"
+    },
+    {
+      "path": "src\\types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "src\\utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ],
+  "unit": 9,
+  "buildAndTests": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 81 source file(s), 1075 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "test",
+        "--native",
+        "--json",
+        "--file",
+        "tests/result_propagation_types.fy",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::result_propagation_types::propagation_errors_point_to_question_and_preserve_ordered_error_identity\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::result_propagation_types::propagation_is_allowed_in_function_body_but_not_classic_for_header\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::result_propagation_types::propagation_records_success_type_without_requiring_same_success_return\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "test",
+        "--native",
+        "--release",
+        "--json",
+        "--file",
+        "tests/result_propagation_types.fy",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"release\",\"tests\":[{\"identity\":\"tests::result_propagation_types::propagation_errors_point_to_question_and_preserve_ordered_error_identity\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::result_propagation_types::propagation_is_allowed_in_function_body_but_not_classic_for_header\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::result_propagation_types::propagation_records_success_type_without_requiring_same_success_return\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    }
+  ],
+  "referenceChecks": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\reference-compatible",
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 1 function(s), 0 foreign declaration(s))\n",
+      "stderr": "",
+      "source": "module main;fn Result<bool,bool> f(Result<i64,bool> r){let i64 n=r?;return .ok(n>0);}"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\reference-non-result",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:49: E4102: postfix ? requires a Result value [bytes 48..49]\n  result-expression: main.fy:1:48 [bytes 47..48]\n",
+      "source": "module main;fn Result<i32,bool> f(i32 r){let n=r?;return .ok(n);}"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\reference-wrong-error",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:60: E4103: propagated Result error type does not match the enclosing return type [bytes 59..60]\n  actual-error: main.fy:1:45 [bytes 44..47]\n  expected-error: main.fy:1:27 [bytes 26..29]\n",
+      "source": "module main;fn Result<i32,i64> f(Result<i32,i32> r){let n=r?;return .ok(n);}"
+    }
+  ],
+  "loweringBoundary": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\valid-not-yet-lowered.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\valid-not-yet-lowered.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\valid-not-yet-lowered.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\valid-not-yet-lowered.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\valid-not-yet-lowered.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types-release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\propagation-types\\valid-not-yet-lowered.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    }
+  ],
+  "bootstrap": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+      "sha256": "ad49997c82179b8269cf2b07ed07c3469353fae59983511f2c06d2f744635aad",
+      "version": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "exit": 0,
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261006143643-54043147dcbd+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 54043147dcbd688b1f6e658813a32051b9181d2a\nmodified: true\n",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "sha256": "1e5aa3a20f59f01d905c9331155171882b5ad4b1b2b50d7c9b4bcd4f229b0124",
+      "version": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+          "--version"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "exit": 0,
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261006170008-d8662146284a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: d8662146284a9bde870c0f774683fb994adf3d18\nmodified: true\n",
+        "stderr": ""
+      }
+    }
+  ],
+  "validationTimeoutOverride": {
+    "schema": "fairyc.validation-bootstrap-timeout/v1",
+    "reason": "MSVC release compilation exceeded the unchanged 60-second bootstrap command timeout twice",
+    "timeoutSeconds": 120,
+    "argv": [
+      "go",
+      "build",
+      "-overlay",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\bootstrap-build-timeout-overlay.json",
+      "-o",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "./cmd/fairyc"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "originalPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\cdriver\\driver.go",
+    "originalSHA256": "f0d7aa82ac0db1720cebb1d548a1d4d10d3dcb66d80d572d84b32df198d131ac",
+    "overlayPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\driver-build-timeout.go",
+    "overlaySHA256": "d2af53ab5c5e85c9d5c21159aa88b34a5a498523f79e4d62f5ae3ac896bc6d31",
+    "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+    "imageSHA256": "1e5aa3a20f59f01d905c9331155171882b5ad4b1b2b50d7c9b4bcd4f229b0124",
+    "version": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261006170008-d8662146284a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: d8662146284a9bde870c0f774683fb994adf3d18\nmodified: true\n",
+      "stderr": ""
+    }
+  },
+  "sdkAndPackageLock": {
+    "sha256": "320763e7775ac0e2c77ea6301f30c5f6594844c98cc717450b8a63df28784d0d",
+    "content": {
+      "schema": "fairyc.lock/v1",
+      "packageInstanceAlgorithm": "fairyc.package-instance/v1",
+      "sourceDigestAlgorithm": "fairyc.package-source/v1",
+      "language": "fairyc-language/20",
+      "root": "fypi1-sha256-a802435a7586d46a2adfea57d9d858468de80e5964ca956c56c28857b3a66d5a",
+      "packages": [
+        {
+          "id": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406",
+          "role": "standard-library",
+          "packageUid": "fairyc.std",
+          "sourceKind": "sdk",
+          "localPath": "",
+          "sdkIdentity": "fairyc-sdk-stdlib/0",
+          "runtimeAbi": "fairyc-runtime/0",
+          "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+          "sourceDigest": "fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+          "version": "0.0.0-stage0.86",
+          "features": []
+        },
+        {
+          "id": "fypi1-sha256-a802435a7586d46a2adfea57d9d858468de80e5964ca956c56c28857b3a66d5a",
+          "role": "root",
+          "packageUid": "example.lexer-candidate",
+          "sourceKind": "local",
+          "localPath": ".",
+          "sdkIdentity": "",
+          "runtimeAbi": "",
+          "sourceIdentity": "fysrc1-sha256-397f20b04b1cb00c4e6e73c13bb5e83f6f8ac40bf8942b2c794e877590c30975",
+          "sourceDigest": "fysrc1-sha256-397f20b04b1cb00c4e6e73c13bb5e83f6f8ac40bf8942b2c794e877590c30975",
+          "version": "0.38.0",
+          "features": []
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "fypi1-sha256-a802435a7586d46a2adfea57d9d858468de80e5964ca956c56c28857b3a66d5a",
+          "binding": "stdlib",
+          "target": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406"
+        }
+      ]
+    }
+  },
+  "artifacts": [
+    {
+      "path": "examples\\lexer_candidate\\fairy.toml",
+      "sha256": "6b7aae360a8606c0914b58c4c98fb3d5391028e466783fe007244f6b3096ecc9"
+    },
+    {
+      "path": "examples\\lexer_candidate\\tests\\result_propagation_types.fy",
+      "sha256": "3525c0a6af862ab8d94c64031976506d570fd82af441449ae13adba94889b490"
+    },
+    {
+      "path": "examples\\lexer_candidate\\verify_results.py",
+      "sha256": "6ac1e8a4d83c4a03cecc7dfc78c97f2236dd39a3cda1aa84045487088da95589"
+    }
+  ],
+  "skipped": [
+    "propagation HIR/MIR/native execution is unit 10",
+    "Linux consolidated batch",
+    "performance measurements",
+    "self-hosting stage1/stage2",
+    "full repository suite"
+  ]
+}

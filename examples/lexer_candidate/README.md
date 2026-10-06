@@ -2195,6 +2195,37 @@ Propagation, must-use, nested/aggregate/resource payloads and tagged aggregate
 storage remain units 9..20 or later. Linux validation stays deferred to the
 consolidated batch; this unit makes no self-hosting or performance claim.
 
+## Result propagation type checking
+
+Version 0.38.0 resolves and type-checks postfix `?` in admitted function bodies.
+The operand must already have an exact scalar `Result<T,E>` type; the operator
+does not infer a contextual Result for `.ok(...)` or apply to Option. The
+enclosing function must return a Result with exactly the same error type.
+Its success type may differ: `Result<i64,bool>` can supply an i64 to a function
+returning `Result<bool,bool>`. The propagated expression retains the operand's
+success type; it is not an unconditional return and does not satisfy a missing
+return obligation. Function arguments, conditions, while bodies and immediately
+evaluated scalar defer arguments are admitted. Classic for headers retain their
+existing pure-expression restriction and reject propagation in every clause.
+
+Private type errors 40/41 identify a non-Result operand or an incompatible
+enclosing return and point to the single question-mark byte. The retained
+expected/actual fields record the exact error components; integer widening does
+not make them compatible. `tests/result_propagation_types.fy` verifies these
+facts and spans through native API tests in both candidate profiles.
+`verify_results.py --phase propagation-types` covers 43 accepted and 52 rejected
+inputs in both profiles (190 CLI observations), including all ordered scalar
+pairs, error mismatches, calls, repeated `?`, and header positions. Three actual
+Go-bootstrap reference checks independently confirm a compatible differing
+success type, E4102 and E4103. Evidence:
+`docs/ops/evidence/candidate-result-propagation-types-20261007.json`.
+
+This unit implements type checking only. HIR/MIR/C publication still rejects
+accepted propagation syntax explicitly; six boundary checks confirm that it
+cannot silently lose the error path. Unit 10 will connect retained propagation
+and runtime early-return semantics. Linux, performance and self-hosting remain
+deferred.
+
 The first two release builds hit the existing bootstrap's 60-second MSVC
 command limit. Release validation uses a separate local bootstrap built with a
 Go overlay changing only that private timeout constant to 120 seconds. The

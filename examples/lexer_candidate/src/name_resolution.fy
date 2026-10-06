@@ -109,7 +109,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         }
         return ok();
     }
-    if (node.kind == 21 || node.kind == 22) { return expression(parsed,context,node.left,depth + 1,symbols,references); }
+    if (node.kind == 21 || node.kind == 22 || node.kind == 30) { return expression(parsed,context,node.left,depth + 1,symbols,references); }
     if (node.kind == 26) {
         let Problem owner = expression(parsed,context,node.left,depth + 1,symbols,references); if (owner.code != 0) { return owner; }
         let syntax::Expression bounds = syntax::expression_at(parsed,node.right);

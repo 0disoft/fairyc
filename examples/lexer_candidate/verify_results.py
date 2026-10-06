@@ -100,13 +100,52 @@ PATTERN_NEGATIVES = [
     ('assert-true-is-value-less', 'fn i32 f(Result<i32,bool> r){return switch(r){case .ok(n):{n}case .err(_):{assert(true);}};}', 'type mismatch'),
 ]
 
+PROPAGATION_POSITIVES = [
+    (f'propagate-{success}-{failure}',
+     f'fn Result<bool,{failure}> f(Result<{success},{failure}> r){{let {success} n=r?;return .ok(true);}}')
+    for success in SCALARS for failure in SCALARS
+]
+PROPAGATION_POSITIVES += [
+    ('propagate-call', 'fn Result<i64,bool> value(){return .ok(4000000000);}fn Result<i64,bool> f(){return .ok(value()?);}'),
+    ('propagate-group', 'fn Result<i32,bool> f(Result<i32,bool> r){return .ok((r)?);}'),
+    ('propagate-argument', 'fn i32 id(i32 n){return n;}fn Result<i32,bool> f(Result<i32,bool> r){return .ok(id(r?));}'),
+    ('propagate-branch', 'fn Result<i32,bool> f(Result<i32,bool> r,bool yes){return .ok(if(yes){r?}else{0});}'),
+    ('propagate-loop', 'fn Result<i32,bool> f(Result<i32,bool> r){var i32 n=0;while(n<1){n=r?;}return .ok(n);}'),
+    ('propagate-defer-capture', 'fn void log(i32 n){}fn Result<i32,bool> f(Result<i32,bool> r){defer log(r?);return .ok(0);}'),
+    ('propagate-condition', 'fn Result<i32,bool> f(Result<bool,bool> r){if(r?){return .ok(1);}return .ok(0);}'),
+]
+PROPAGATION_NEGATIVES = [
+    ('propagate-scalar', 'fn Result<i32,bool> f(i32 n){return .ok(n?);}', '? requires Result operand'),
+    ('propagate-option', 'fn Result<i32,bool> f(Option<i32> r){return .ok(r?);}', '? requires Result operand'),
+    ('propagate-enum', 'enum E{A;}fn Result<i32,bool> f(E r){discard r?;return .ok(0);}', '? requires Result operand'),
+    ('propagate-scalar-return', 'fn i32 f(Result<i32,bool> r){return r?;}', '? requires enclosing Result with identical error type'),
+    ('propagate-void-return', 'fn void f(Result<i32,bool> r){discard r?;}', '? requires enclosing Result with identical error type'),
+    ('propagate-option-return', 'fn Option<i32> f(Result<i32,bool> r){return .some(r?);}', '? requires enclosing Result with identical error type'),
+    ('propagate-reversed', 'fn Result<bool,i32> f(Result<i32,bool> r){discard r?;return .ok(true);}', '? requires enclosing Result with identical error type'),
+    ('propagate-no-coercion', 'fn Result<i32,i64> f(Result<i32,i32> r){return .ok(r?);}', '? requires enclosing Result with identical error type'),
+    ('propagate-return-value', 'fn Result<i32,bool> f(Result<i32,bool> r){return r?;}', 'type mismatch'),
+    ('propagate-wrong-binding', 'fn Result<i32,bool> f(Result<i64,bool> r){let i32 n=r?;return .ok(n);}', 'type mismatch'),
+    ('propagate-twice', 'fn Result<i32,bool> f(Result<i32,bool> r){return .ok(r??);}', '? requires Result operand'),
+    ('propagate-no-inference', 'fn Result<i32,bool> f(){return .ok(.ok(1)?);}', 'Result context required'),
+    ('propagate-for-init', 'fn Result<i32,bool> f(Result<i32,bool> r){for(let i32 n=r?;n<1;n+=1){}return .ok(0);}', 'unsupported for header'),
+    ('propagate-for-condition', 'fn Result<i32,bool> f(Result<bool,bool> r){for(let i32 n=0;r?;n+=1){}return .ok(0);}', 'unsupported for header'),
+    ('propagate-for-post', 'fn Result<i32,bool> f(Result<i32,bool> r){for(var i32 n=0;n<1;n=r?){}return .ok(0);}', 'unsupported for header'),
+    ('propagate-unresolved', 'fn Result<i32,bool> f(){return .ok(missing?);}', 'unresolved name'),
+]
+for success in SCALARS:
+    for index, failure in enumerate(SCALARS):
+        other = SCALARS[(index+1) % len(SCALARS)]
+        PROPAGATION_NEGATIVES.append((f'propagate-error-{success}-{failure}',
+            f'fn Result<{success},{other}> f(Result<{success},{failure}> r){{discard r?;return .ok({VALUES[success]});}}',
+            '? requires enclosing Result with identical error type'))
+
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--images', nargs='+', required=True)
-    parser.add_argument('--phase', choices=['types', 'patterns', 'hir'], required=True)
+    parser.add_argument('--phase', choices=['types', 'patterns', 'hir', 'propagation-types'], required=True)
     parser.add_argument('--receipt', required=True)
     args = parser.parse_args()
     images = [Path(path).resolve() for path in args.images]
@@ -117,6 +156,8 @@ def main():
     try:
         positives = TYPE_POSITIVES + (PATTERN_POSITIVES if args.phase != 'types' else [])
         negatives = TYPE_NEGATIVES + (PATTERN_NEGATIVES if args.phase != 'types' else [])
+        if args.phase == 'propagation-types':
+            positives, negatives = PROPAGATION_POSITIVES, PROPAGATION_NEGATIVES
         modes = ['--check-types-file'] + (['--hir-file'] if args.phase == 'hir' else [])
         for rejected, cases in ((False, positives), (True, negatives)):
             for case in cases:

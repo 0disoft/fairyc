@@ -26,6 +26,18 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     let syntax::Expression node = syntax::expression_at(parsed,id);
     if (depth >= 64) { return error(problem,10,node.start,node.end,0,0); }
     let ref u8[] op = syntax::expression_text(parsed,id);
+    if (node.kind == 30) {
+        // Match the reference: the operand has no contextual Result inference.
+        // Only the error component must match the enclosing Result, exactly.
+        let state::Value operand = expression(resolved,tables,problem,node.left,0,result_type,depth+1,loop_depth);
+        if (problem.code != 0) { return operand; }
+        if (!tagged::result(operand.type)) { return error(problem,40,node.end-1,node.end,0,operand.type); }
+        let u32 actual_error = tagged::failure(operand.type);
+        if (!tagged::result(result_type)) { return error(problem,41,node.end-1,node.end,0,actual_error); }
+        let u32 expected_error = tagged::failure(result_type);
+        if (actual_error != expected_error) { return error(problem,41,node.end-1,node.end,expected_error,actual_error); }
+        return recorded(tables,id,value(tagged::success(operand.type),operand.terminates));
+    }
     if(node.kind==28 && tagged::option(expected)){
         if(!bytes::equal(op,b"none")){return error(problem,33,node.start,node.end,expected,0);}
         state::set_flags(tables,id-1,state::small_id(tagged::member(parsed,expected,false)));return recorded(tables,id,value(expected,false));

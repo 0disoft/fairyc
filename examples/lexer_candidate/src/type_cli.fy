@@ -31,6 +31,11 @@ pub fn i32 errors(ref typing::Typed typed, ref u8[] path) {
     let state::Problem problem = typing::problem(typed);
     if (problem.code != 0) {
         output::prefix(typing::source_view(typed),path,problem.start);
+        if (problem.code == 40 || problem.code == 41) {
+            discard io::write_stderr(if (problem.code == 40) { "? requires Result operand" }
+                else { "? requires enclosing Result with identical error type" });
+            output::range(problem.start,problem.end); return 2;
+        }
         if (problem.code >= 36 && problem.code <= 39) {
             discard io::write_stderr(if (problem.code == 36) { "Result context required" }
                 else if (problem.code == 37) { "invalid Result construction" }
