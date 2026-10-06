@@ -10,17 +10,7 @@ func ResolveNestedFieldStore(op Operation, lookup func(hir.Type) *StructType) ([
 		return nil, false
 	}
 	root := fieldAggregateType(op.OwnerType)
-	if !hir.PlainViewStruct(root, func(typ hir.Type) ([]hir.Type, bool) {
-		info := lookup(typ)
-		if info == nil {
-			return nil, false
-		}
-		fields := make([]hir.Type, len(info.Fields))
-		for i, field := range info.Fields {
-			fields[i] = field.Type
-		}
-		return fields, true
-	}) {
+	if !plainStoredStruct(root, lookup) {
 		return nil, false
 	}
 	path := make([]StructField, 0, len(op.Fields)+1)

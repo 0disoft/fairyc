@@ -1,0 +1,2155 @@
+{
+  "schema": "fairyc.empty-struct-field-store-evidence/v1",
+  "date": "2026-10-06",
+  "baseRevision": "c68f9dc636ca74fd296ebf514e9b13368266ec67",
+  "passed": true,
+  "sourceArtifacts": [
+    {
+      "path": "cmd/fairyc-lexer-file-oracle/nominal_mir.go",
+      "sha256": "f373466a38452885a81e07b26203359338ebeae3131dab7de6278415b4200221",
+      "bytes": 3912
+    },
+    {
+      "path": "docs/abi/c-abi-v0.md",
+      "sha256": "83449d749964c0ce19ae1138180968e076203ed027df862d78e7543a64cde87b",
+      "bytes": 31828
+    },
+    {
+      "path": "docs/adr/0443-plain-struct-field-replacement.md",
+      "sha256": "6aff66c727d90151539a90057ebd4e49bb01ca2f9cdb8b74f639f8f3cd9f6168",
+      "bytes": 5446
+    },
+    {
+      "path": "examples/lexer_candidate/README.md",
+      "sha256": "329046cfa1b585bd893f1784997986c3aa7f97c258dfe05028aff69b3b94a822",
+      "bytes": 104774
+    },
+    {
+      "path": "examples/lexer_candidate/verify_c.py",
+      "sha256": "bf58c15b59693a2221855d8d43619ef581cf94f3667348ed9c239b0d53c93561",
+      "bytes": 8580
+    },
+    {
+      "path": "internal/compiler/empty_struct_test.go",
+      "sha256": "e0e337f2231218679c79cbc7936f8697b974ff7a1a788a1a0a8b732260915aca",
+      "bytes": 4331
+    },
+    {
+      "path": "internal/hir/plain_view_struct_test.go",
+      "sha256": "497dbc41d47c525dfd1e65e88fef650d4319bf8c6fdc839434b2886de9d7de00",
+      "bytes": 2383
+    },
+    {
+      "path": "internal/hir/views.go",
+      "sha256": "121eb611fbd095141385a9cc8474695ad2d3571ed70b370218d7d7adb1c8effd",
+      "bytes": 6684
+    },
+    {
+      "path": "internal/mir/field_store.go",
+      "sha256": "60e093d27fdcdf8469a695939c8fc79e5113860a5130418fa00002f39c8326e2",
+      "bytes": 7375
+    },
+    {
+      "path": "internal/mir/nested_field_store.go",
+      "sha256": "8d8ee207689cc25397c50d36ff501a2fd39372da6f251b82c51666cf45c939c6",
+      "bytes": 1019
+    },
+    {
+      "path": "internal/mir/plain_struct_field_store.go",
+      "sha256": "26616a23e67884f1cfd3f27758e63b563500d286bdd670dec8de0824b7ac7482",
+      "bytes": 1434
+    },
+    {
+      "path": "internal/mir/plain_struct_field_store_test.go",
+      "sha256": "ba6928fbebb4e8fd306f4432267bcb37682d51e004aa25e20b14e166b80d44ce",
+      "bytes": 3962
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "sha256": "8bd3f45e31bb293839ff0764a7281366a0053d9d78ea63f6a9dbd06daf8c21e1",
+      "bytes": 91421
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6",
+      "bytes": 3955
+    },
+    {
+      "path": "examples/lexer_candidate/src/binding_output.fy",
+      "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb",
+      "bytes": 2612
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc",
+      "bytes": 29681
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa",
+      "bytes": 4420
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494",
+      "bytes": 374
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2",
+      "bytes": 1065
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_emit.fy",
+      "sha256": "47928054eb286837dbc2360822001e015ffedbbdda2c0d29969bd14644d78a06",
+      "bytes": 7448
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_flow.fy",
+      "sha256": "93e172ae922e21b87e33d01f203a010b88e5aea9260f3c91bbdaf4e160272f47",
+      "bytes": 4001
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd",
+      "bytes": 3878
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_nominal.fy",
+      "sha256": "e7d248d7da2bede7641d22dd9d7dc011d50cfe4c4a165d0b466f974f7dd574cd",
+      "bytes": 3016
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_scalar.fy",
+      "sha256": "c618dd663c5fc231608205b9e999b871fa3e4dfe82f87cdaf598be17bbcee55a",
+      "bytes": 6983
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_text.fy",
+      "sha256": "0b527c99d630a94f6fa2f3c070eb0acb6f63c65e064a8ca0b080d63e2430bb16",
+      "bytes": 2881
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f",
+      "bytes": 1563
+    },
+    {
+      "path": "examples/lexer_candidate/src/declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd",
+      "bytes": 4580
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b",
+      "bytes": 3801
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870",
+      "bytes": 6756
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc",
+      "bytes": 3787
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_cli.fy",
+      "sha256": "d7a103f978b6e6cf9df2695bc44f6af5be3a999046a775a458f4430f1fcd48cf",
+      "bytes": 2128
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_lower.fy",
+      "sha256": "bca8065f5285cfc73b0cf1d0a813b900715fdf2ccc38e4557aa446c9526f4175",
+      "bytes": 23274
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "sha256": "a7ab66919e2691a8e378e901db1922e1d6feeebdcc6bd3ef91ca4ffa460be56b",
+      "bytes": 23001
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_output.fy",
+      "sha256": "2ea8d8a43f75512ed0b9c87a8cce68f75e0ad0bbe828c88b962228ab1623e1ba",
+      "bytes": 8360
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shape_lower.fy",
+      "sha256": "60bd05be0b971bc60af90c20c6d4c276b892eb89c63c9c11d28baaa062de3742",
+      "bytes": 1881
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_shapes.fy",
+      "sha256": "183c1a38eb81dc83a59593a1913422541e7709f2f056b99a8acccc5098b4c8e1",
+      "bytes": 3433
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_state.fy",
+      "sha256": "610ff02450b8ea2378472b1c9f3f8c074f8d65c17149a6132044675fcb854b05",
+      "bytes": 7282
+    },
+    {
+      "path": "examples/lexer_candidate/src/integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83",
+      "bytes": 14934
+    },
+    {
+      "path": "examples/lexer_candidate/src/main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0",
+      "bytes": 3052
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+      "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19",
+      "bytes": 1541
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_cli.fy",
+      "sha256": "be70f56701979bf30ab6e352a5148908361247de5c97c07fd1ca69fbb41c6741",
+      "bytes": 2795
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_lower.fy",
+      "sha256": "eb7a10b07e25e28338927f6a28771f86a107ba148bcd0b0f1ae3f6b817485bbf",
+      "bytes": 24366
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_model.fy",
+      "sha256": "068ada0cc8891302fafa52f8851ad415e6098b67ef95e6774aac218ba4ce9d01",
+      "bytes": 12852
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_nominal.fy",
+      "sha256": "e9fc7a50c45270783f1282cc519c5f952073b38d9bf1940106ed8062dd2d1403",
+      "bytes": 3178
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_output.fy",
+      "sha256": "677a0dafdc882e2baf0b6e4c50142332b03da5b3f82bc31bddc311240788ce17",
+      "bytes": 5321
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_state.fy",
+      "sha256": "7a687b19ac37fbadc440ecde6be5c19859b5c0df555e4f80dc47ca03cf1b0c80",
+      "bytes": 7336
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify.fy",
+      "sha256": "d912593c798d04d3bcd7d80d1e5147d4060eb870f167f499b1363829d04ff8d9",
+      "bytes": 699
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_flow.fy",
+      "sha256": "0786ad7697674c8ad54ce8a5bff74905639c881af62cc261d7672e8d9b37f08f",
+      "bytes": 8667
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_nominal.fy",
+      "sha256": "9610b9c684ae4d13ef1654298d935785386e589eaeb290845ec9649bd047a049",
+      "bytes": 1673
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_shape.fy",
+      "sha256": "856c15239c64e20fd48f3a5deac5eb87d4d716246a0606b5c828ed782cac8cc1",
+      "bytes": 13523
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d",
+      "bytes": 2036
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f",
+      "bytes": 6647
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06",
+      "bytes": 12585
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343",
+      "bytes": 1809
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_resolution.fy",
+      "sha256": "675002ec1c9a4ed5406896c2935582fb806cd7af31f80347d2f8da95b697b917",
+      "bytes": 19259
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_types.fy",
+      "sha256": "aa92b01f7025a626e5d587a2fb6ffcee30c23bd08b7508aa63ad90f9398ac03e",
+      "bytes": 3139
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556",
+      "bytes": 9126
+    },
+    {
+      "path": "examples/lexer_candidate/src/pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87",
+      "bytes": 4413
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6",
+      "bytes": 5256
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd",
+      "bytes": 5961
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f",
+      "bytes": 20111
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521",
+      "bytes": 9556
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "2d3e266d6753eaf70b1ab939b3ebc7d0a3e430d3c4189651c419947912e8c8e5",
+      "bytes": 32065
+    },
+    {
+      "path": "examples/lexer_candidate/src/token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b",
+      "bytes": 4999
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_check.fy",
+      "sha256": "413f03780cec199b1ee6d29c9251915fd983ba51468621a485a071e916f2e257",
+      "bytes": 25241
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_cli.fy",
+      "sha256": "a6b9d25be4db61ac370aaf1b185bc1f3a7c00c4a1c392281f70d10d006923bb2",
+      "bytes": 2750
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_control.fy",
+      "sha256": "dcc5732b46bc14a366dd21c57b9b03415e25f8552e33e0a0f55d246895b92cb2",
+      "bytes": 2343
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "a4d0a814c23cdbfb8b50523ab43020225d2d5a561c6773b07f58ed2e478cee00",
+      "bytes": 5499
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a",
+      "bytes": 10832
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d",
+      "bytes": 807
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "sha256": "78bf6ab44dcadc773d0f9cdc9bf05e5a4f0e43ad21cd3c96392cdf84b324860c",
+      "bytes": 163
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "0f84310e99bf2635746c85081fd18472087dc6224218fc23b227db764d49cdc3",
+      "bytes": 1698
+    },
+    {
+      "path": "examples/lexer_candidate/verify_nominal_mir.py",
+      "sha256": "16a2d0f928faea5f71c4dabb2e7d882bd5f09beec047e92837cae5c541d7e621",
+      "bytes": 3737
+    },
+    {
+      "path": "examples/lexer_candidate/verify_mir.py",
+      "sha256": "b7b6297dc221dbba6323ce9361c00b653896f49b5800914c6c132b2e03585db0",
+      "bytes": 15537
+    },
+    {
+      "path": "examples/lexer_candidate/verify_hir.py",
+      "sha256": "65182e7637fd78da0029e8f4c1c04af6ed7a4ae8ead2983c2934419d820b6e98",
+      "bytes": 22380
+    }
+  ],
+  "oracle": {
+    "path": ".cache/empty-struct-field-store/oracle.exe",
+    "sha256": "0a05c63a5e97b6f488cb21db1f10ee8c88913e4572b0bfc5ef9825aef86c4bd5",
+    "bytes": 9036800,
+    "sourceManifest": {
+      "path": ".cache/empty-struct-field-store/oracle-source-manifest.json",
+      "sha256": "d81fbdd12729f9f6aca04aee53bf720d97557ce09542264a9412d2e42f5f09cb",
+      "bytes": 95863
+    },
+    "inputCount": 619
+  },
+  "candidateCompiler": {
+    "path": ".cache/nominal-array-field-view-compiler/fairyc.exe",
+    "sha256": "ecd282255fa2fe96c7dc5d41b65a7986a77e015954bd895c758df6d810415fbf",
+    "bytes": 17408000
+  },
+  "candidateCompilerSourceDigest": "6de6ed7dc29d60d5c47ddbc59863341c4a80f98cb1559cb0b0010b280704e0f4",
+  "sdk": {
+    "version": "0.0.0-stage0.86",
+    "unchanged": true,
+    "files": [
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/alloc.fy",
+        "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/num.fy",
+        "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "internal/sdkstdlib/stdlib.go",
+        "sha256": "418b24a10b443b784275c886c7b87d3f9b97e72923406b567335b26569ac6f3b"
+      },
+      {
+        "path": "internal/sdkstdlib/vector.go",
+        "sha256": "bb8fc2b90fa40fcc578e11d0f54f996bf07608d7fd72f437f692a685776931e2"
+      }
+    ]
+  },
+  "candidateImagesReusedUnchanged": true,
+  "nativeRunner": {
+    "path": ".cache/nominal-c-file-cli/native-runner.exe",
+    "sha256": "995d9b5410aad2e22a622e18c0aaeeb00e6e362b030cfc2415ff9558938c659a",
+    "bytes": 5543936
+  },
+  "expectedFixtures": [
+    {
+      "name": "empty-return",
+      "inputHex": "6d6f64756c65206d61696e3b2073747275637420457b7d666e2045206d616b6528297b72657475726e20457b7d3b7d666e204520696428452065297b72657475726e20653b7d666e206933322061636365707428452065297b72657475726e20333b7d666e20693332206d61696e28297b72657475726e20616363657074286964286d616b65282929293b7d",
+      "outcome": {
+        "Kind": "return",
+        "Value": 3,
+        "TrapCategory": "",
+        "DropTrace": null,
+        "RegionTrace": null,
+        "Stdout": null,
+        "Stderr": null,
+        "IOTrace": null
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "name": "empty-field-rhs-effects",
+      "inputHex": "6d6f64756c65206d61696e3b2073747275637420457b7d73747275637420427b4520653b693332206e3b7d666e20693332206d61696e28297b76617220623d427b2e653d457b7d2c2e6e3d317d3b622e653d7b622e6e3d393b457b7d7d3b72657475726e20622e6e3b7d",
+      "outcome": {
+        "Kind": "return",
+        "Value": 9,
+        "TrapCategory": "",
+        "DropTrace": null,
+        "RegionTrace": null,
+        "Stdout": null,
+        "Stderr": null,
+        "IOTrace": null
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "name": "empty-field-rhs-return",
+      "inputHex": "6d6f64756c65206d61696e3b2073747275637420457b7d73747275637420427b4520653b7d666e20693332206d61696e28297b76617220623d427b2e653d457b7d7d3b622e653d7b72657475726e20373b457b7d7d3b72657475726e20303b7d",
+      "outcome": {
+        "Kind": "return",
+        "Value": 7,
+        "TrapCategory": "",
+        "DropTrace": null,
+        "RegionTrace": null,
+        "Stdout": null,
+        "Stderr": null,
+        "IOTrace": null
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "name": "empty-nested-field",
+      "inputHex": "6d6f64756c65206d61696e3b2073747275637420457b7d73747275637420427b4520653b693332206e3b7d73747275637420437b4220623b7d666e20693332206d61696e28297b76617220633d437b2e623d427b2e653d457b7d2c2e6e3d317d7d3b632e622e653d7b632e622e6e3d383b457b7d7d3b72657475726e20632e622e6e3b7d",
+      "outcome": {
+        "Kind": "return",
+        "Value": 8,
+        "TrapCategory": "",
+        "DropTrace": null,
+        "RegionTrace": null,
+        "Stdout": null,
+        "Stderr": null,
+        "IOTrace": null
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "name": "construct-read",
+      "inputHex": "6d6f64756c65206d61696e3b2073747275637420417b69333220783b7d666e20693332206d61696e28297b72657475726e20417b2e783d31377d2e783b7d",
+      "outcome": {
+        "Kind": "return",
+        "Value": 17,
+        "TrapCategory": "",
+        "DropTrace": null,
+        "RegionTrace": null,
+        "Stdout": null,
+        "Stderr": null,
+        "IOTrace": null
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    },
+    {
+      "name": "field-overflow",
+      "inputHex": "6d6f64756c65206d61696e3b2073747275637420417b69363420783b7d666e20693332206d61696e28297b76617220613d417b2e783d393232333337323033363835343737353830377d3b612e782b3d313b72657475726e20303b7d",
+      "outcome": {
+        "Kind": "trap",
+        "Value": 0,
+        "TrapCategory": "integer-overflow",
+        "DropTrace": null,
+        "RegionTrace": null,
+        "Stdout": null,
+        "Stderr": null,
+        "IOTrace": null
+      },
+      "outcomeOrigin": "go-mir-interpreter"
+    }
+  ],
+  "nominalMIR": {
+    "schema": "fairyc.nominal-mir-cli-verification/v1",
+    "passed": true,
+    "semanticComparisons": 12,
+    "images": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+        "sha256": "b13199fe26d46e8af7a73f7d38663a92dfd97cbdec0d040b0ce3b07b5b89dab4"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+        "sha256": "2d5d825b49ef149c2ad689be7c12b4901194472caeb951f3d7d02089423b5232"
+      }
+    ],
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\reference.json",
+      "sha256": "f9d4963d59ae6f5111692f111fea0e7b7fb6e70ed168634a4184c6273cd73cdb"
+    },
+    "sources": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_nominal_mir.py",
+        "sha256": "16a2d0f928faea5f71c4dabb2e7d882bd5f09beec047e92837cae5c541d7e621"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_mir.py",
+        "sha256": "b7b6297dc221dbba6323ce9361c00b653896f49b5800914c6c132b2e03585db0"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_hir.py",
+        "sha256": "65182e7637fd78da0029e8f4c1c04af6ed7a4ae8ead2983c2934419d820b6e98"
+      }
+    ],
+    "runs": [
+      {
+        "case": "empty-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nT\t1\t2\t0\t3\t257\t0\t0\t28\t32\t0\nT\t2\t3\t0\t4\t257\t0\t1\t52\t54\t0\nT\t3\t4\t0\t5\t1\t1\t1\t77\t83\t0\nT\t4\t5\t0\t6\t1\t2\t0\t106\t110\t0\nS\t0\t257\nS\t1\t257\nF\t1\t1\t1\t0\t1\t0\t1\t0\t0\t23\t47\t0\nF\t2\t2\t2\t1\t2\t1\t1\t0\t1\t47\t70\t0\nF\t3\t3\t3\t3\t2\t2\t1\t1\t1\t70\t99\t0\nF\t4\t4\t4\t5\t3\t3\t4\t2\t0\t99\t140\t0\nL\t1\t1\t0\t257\t0\t0\t42\t45\nL\t2\t2\t6\t257\t1\t0\t57\t58\nL\t3\t2\t0\t257\t0\t0\t67\t68\nL\t4\t3\t7\t257\t1\t0\t86\t87\nL\t5\t3\t0\t1\t0\t0\t96\t97\nL\t6\t4\t0\t257\t0\t0\t130\t136\nL\t7\t4\t0\t257\t0\t0\t127\t137\nL\t8\t4\t0\t1\t0\t0\t120\t138\nB\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t35\t46\nB\t2\t2\t2\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t60\t69\nB\t3\t3\t3\t3\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t89\t98\nB\t4\t4\t0\t0\t5\t0\t0\t0\t0\t0\t5\t0\t0\t1\t6\t2\t0\t0\t130\t136\nB\t5\t4\t0\t0\t5\t0\t0\t0\t0\t0\t6\t0\t0\t2\t7\t2\t1\t0\t127\t137\nB\t6\t4\t0\t0\t5\t0\t0\t0\t0\t0\t7\t0\t0\t3\t8\t3\t1\t0\t120\t138\nB\t7\t4\t0\t0\t1\t8\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t113\t139\nO\t1\t1\t1\t6\t1\t257\t257\t0\t0\t0\t0\t0\t0\t0\t42\t45\t-\t0\t0\nO\t2\t2\t2\t2\t3\t257\t257\t0\t2\t0\t0\t0\t0\t0\t67\t68\t-\t0\t0\nO\t3\t3\t3\t1\t5\t1\t1\t0\t0\t0\t0\t0\t1\t0\t96\t97\t3\t0\t0\nA\t0\t2\nA\t1\t4\nA\t2\t6\nA\t3\t7\n",
+        "stderr": "",
+        "inputSHA256": "1f8fa8ba833b74a5c008f8108096fcf7f5c6af1490b021bd4b69a5ce2d0e5a94",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 3,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nT\t1\t2\t0\t3\t257\t0\t0\t28\t32\t0\nT\t2\t3\t0\t4\t257\t0\t1\t52\t54\t0\nT\t3\t4\t0\t5\t1\t1\t1\t77\t83\t0\nT\t4\t5\t0\t6\t1\t2\t0\t106\t110\t0\nS\t0\t257\nS\t1\t257\nF\t1\t1\t1\t0\t1\t0\t1\t0\t0\t23\t47\t0\nF\t2\t2\t2\t1\t2\t1\t1\t0\t1\t47\t70\t0\nF\t3\t3\t3\t3\t2\t2\t1\t1\t1\t70\t99\t0\nF\t4\t4\t4\t5\t3\t3\t4\t2\t0\t99\t140\t0\nL\t1\t1\t0\t257\t0\t0\t42\t45\nL\t2\t2\t6\t257\t1\t0\t57\t58\nL\t3\t2\t0\t257\t0\t0\t67\t68\nL\t4\t3\t7\t257\t1\t0\t86\t87\nL\t5\t3\t0\t1\t0\t0\t96\t97\nL\t6\t4\t0\t257\t0\t0\t130\t136\nL\t7\t4\t0\t257\t0\t0\t127\t137\nL\t8\t4\t0\t1\t0\t0\t120\t138\nB\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t35\t46\nB\t2\t2\t2\t2\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t60\t69\nB\t3\t3\t3\t3\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t89\t98\nB\t4\t4\t0\t0\t5\t0\t0\t0\t0\t0\t5\t0\t0\t1\t6\t2\t0\t0\t130\t136\nB\t5\t4\t0\t0\t5\t0\t0\t0\t0\t0\t6\t0\t0\t2\t7\t2\t1\t0\t127\t137\nB\t6\t4\t0\t0\t5\t0\t0\t0\t0\t0\t7\t0\t0\t3\t8\t3\t1\t0\t120\t138\nB\t7\t4\t0\t0\t1\t8\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t113\t139\nO\t1\t1\t1\t6\t1\t257\t257\t0\t0\t0\t0\t0\t0\t0\t42\t45\t-\t0\t0\nO\t2\t2\t2\t2\t3\t257\t257\t0\t2\t0\t0\t0\t0\t0\t67\t68\t-\t0\t0\nO\t3\t3\t3\t1\t5\t1\t1\t0\t0\t0\t0\t0\t1\t0\t96\t97\t3\t0\t0\nA\t0\t2\nA\t1\t4\nA\t2\t6\nA\t3\t7\n",
+        "stderr": "",
+        "inputSHA256": "1f8fa8ba833b74a5c008f8108096fcf7f5c6af1490b021bd4b69a5ce2d0e5a94",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 3,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-field-rhs-effects",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-field-rhs-effects.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nN\t258\t2\t0\t2\t0\nD\t1\t258\t257\t34\t35\nD\t2\t258\t1\t40\t41\nT\t1\t3\t0\t4\t1\t0\t0\t50\t54\t0\nF\t1\t1\t1\t0\t10\t0\t1\t0\t0\t43\t106\t0\nL\t1\t1\t4\t258\t0\t1\t61\t62\nL\t2\t1\t0\t257\t0\t0\t68\t71\nL\t3\t1\t0\t1\t0\t0\t75\t76\nL\t4\t1\t0\t258\t0\t0\t63\t77\nL\t5\t1\t0\t1\t0\t0\t87\t88\nL\t6\t1\t0\t258\t0\t0\t83\t89\nL\t7\t1\t0\t257\t0\t0\t89\t92\nL\t8\t1\t0\t258\t0\t0\t78\t94\nL\t9\t1\t0\t258\t0\t0\t101\t102\nL\t10\t1\t0\t1\t0\t0\t101\t104\nB\t1\t1\t1\t12\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t94\t105\nO\t1\t1\t1\t6\t2\t257\t257\t0\t0\t0\t2\t0\t0\t0\t68\t71\t-\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t3\t0\t1\t0\t75\t76\t1\t0\t0\nO\t3\t1\t1\t6\t4\t258\t258\t0\t0\t0\t4\t0\t0\t0\t63\t77\t-\t0\t2\nO\t4\t1\t1\t2\t1\t258\t258\t0\t4\t0\t5\t0\t0\t0\t57\t78\t-\t0\t0\nO\t5\t1\t1\t1\t5\t1\t1\t0\t0\t0\t6\t1\t2\t0\t87\t88\t9\t0\t0\nO\t6\t1\t1\t8\t6\t258\t258\t2\t1\t5\t7\t0\t0\t0\t83\t89\t-\t0\t0\nO\t7\t1\t1\t2\t1\t258\t258\t0\t6\t0\t8\t0\t0\t0\t83\t89\t-\t0\t0\nO\t8\t1\t1\t6\t7\t257\t257\t0\t0\t0\t9\t0\t0\t0\t89\t92\t-\t2\t0\nO\t9\t1\t1\t8\t8\t258\t258\t1\t1\t7\t10\t0\t0\t0\t78\t94\t-\t0\t0\nO\t10\t1\t1\t2\t1\t258\t258\t0\t8\t0\t11\t0\t0\t0\t78\t94\t-\t0\t0\nO\t11\t1\t1\t2\t9\t258\t258\t0\t1\t0\t12\t0\t0\t0\t101\t102\t-\t0\t0\nO\t12\t1\t1\t7\t10\t1\t258\t2\t9\t0\t0\t0\t0\t0\t101\t104\t-\t0\t0\nA\t0\t2\nA\t1\t3\n",
+        "stderr": "",
+        "inputSHA256": "940a0ac52aad91ab55e39a7f175b0b8b2fef0f4d12c6f938cfbd86c2cf0daab2",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 9,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-field-rhs-effects",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-field-rhs-effects.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nN\t258\t2\t0\t2\t0\nD\t1\t258\t257\t34\t35\nD\t2\t258\t1\t40\t41\nT\t1\t3\t0\t4\t1\t0\t0\t50\t54\t0\nF\t1\t1\t1\t0\t10\t0\t1\t0\t0\t43\t106\t0\nL\t1\t1\t4\t258\t0\t1\t61\t62\nL\t2\t1\t0\t257\t0\t0\t68\t71\nL\t3\t1\t0\t1\t0\t0\t75\t76\nL\t4\t1\t0\t258\t0\t0\t63\t77\nL\t5\t1\t0\t1\t0\t0\t87\t88\nL\t6\t1\t0\t258\t0\t0\t83\t89\nL\t7\t1\t0\t257\t0\t0\t89\t92\nL\t8\t1\t0\t258\t0\t0\t78\t94\nL\t9\t1\t0\t258\t0\t0\t101\t102\nL\t10\t1\t0\t1\t0\t0\t101\t104\nB\t1\t1\t1\t12\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t94\t105\nO\t1\t1\t1\t6\t2\t257\t257\t0\t0\t0\t2\t0\t0\t0\t68\t71\t-\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t3\t0\t1\t0\t75\t76\t1\t0\t0\nO\t3\t1\t1\t6\t4\t258\t258\t0\t0\t0\t4\t0\t0\t0\t63\t77\t-\t0\t2\nO\t4\t1\t1\t2\t1\t258\t258\t0\t4\t0\t5\t0\t0\t0\t57\t78\t-\t0\t0\nO\t5\t1\t1\t1\t5\t1\t1\t0\t0\t0\t6\t1\t2\t0\t87\t88\t9\t0\t0\nO\t6\t1\t1\t8\t6\t258\t258\t2\t1\t5\t7\t0\t0\t0\t83\t89\t-\t0\t0\nO\t7\t1\t1\t2\t1\t258\t258\t0\t6\t0\t8\t0\t0\t0\t83\t89\t-\t0\t0\nO\t8\t1\t1\t6\t7\t257\t257\t0\t0\t0\t9\t0\t0\t0\t89\t92\t-\t2\t0\nO\t9\t1\t1\t8\t8\t258\t258\t1\t1\t7\t10\t0\t0\t0\t78\t94\t-\t0\t0\nO\t10\t1\t1\t2\t1\t258\t258\t0\t8\t0\t11\t0\t0\t0\t78\t94\t-\t0\t0\nO\t11\t1\t1\t2\t9\t258\t258\t0\t1\t0\t12\t0\t0\t0\t101\t102\t-\t0\t0\nO\t12\t1\t1\t7\t10\t1\t258\t2\t9\t0\t0\t0\t0\t0\t101\t104\t-\t0\t0\nA\t0\t2\nA\t1\t3\n",
+        "stderr": "",
+        "inputSHA256": "940a0ac52aad91ab55e39a7f175b0b8b2fef0f4d12c6f938cfbd86c2cf0daab2",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 9,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-field-rhs-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-field-rhs-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nN\t258\t2\t0\t1\t0\nD\t1\t258\t257\t34\t35\nT\t1\t3\t0\t4\t1\t0\t0\t44\t48\t0\nF\t1\t1\t1\t0\t4\t0\t1\t0\t0\t37\t96\t0\nL\t1\t1\t4\t258\t0\t1\t55\t56\nL\t2\t1\t0\t257\t0\t0\t62\t65\nL\t3\t1\t0\t258\t0\t0\t57\t66\nL\t4\t1\t0\t1\t0\t0\t79\t80\nB\t1\t1\t1\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t72\t81\nO\t1\t1\t1\t6\t2\t257\t257\t0\t0\t0\t2\t0\t0\t0\t62\t65\t-\t0\t0\nO\t2\t1\t1\t6\t3\t258\t258\t0\t0\t0\t3\t0\t0\t0\t57\t66\t-\t0\t1\nO\t3\t1\t1\t2\t1\t258\t258\t0\t3\t0\t4\t0\t0\t0\t51\t67\t-\t0\t0\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t0\t0\t1\t0\t79\t80\t7\t0\t0\nA\t0\t2\n",
+        "stderr": "",
+        "inputSHA256": "a629fe6e2f83de0c6d5a8585a445721527e23f3af86b76ea6a4dd84b8df28298",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 7,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-field-rhs-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-field-rhs-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nN\t258\t2\t0\t1\t0\nD\t1\t258\t257\t34\t35\nT\t1\t3\t0\t4\t1\t0\t0\t44\t48\t0\nF\t1\t1\t1\t0\t4\t0\t1\t0\t0\t37\t96\t0\nL\t1\t1\t4\t258\t0\t1\t55\t56\nL\t2\t1\t0\t257\t0\t0\t62\t65\nL\t3\t1\t0\t258\t0\t0\t57\t66\nL\t4\t1\t0\t1\t0\t0\t79\t80\nB\t1\t1\t1\t4\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t72\t81\nO\t1\t1\t1\t6\t2\t257\t257\t0\t0\t0\t2\t0\t0\t0\t62\t65\t-\t0\t0\nO\t2\t1\t1\t6\t3\t258\t258\t0\t0\t0\t3\t0\t0\t0\t57\t66\t-\t0\t1\nO\t3\t1\t1\t2\t1\t258\t258\t0\t3\t0\t4\t0\t0\t0\t51\t67\t-\t0\t0\nO\t4\t1\t1\t1\t4\t1\t1\t0\t0\t0\t0\t0\t1\t0\t79\t80\t7\t0\t0\nA\t0\t2\n",
+        "stderr": "",
+        "inputSHA256": "a629fe6e2f83de0c6d5a8585a445721527e23f3af86b76ea6a4dd84b8df28298",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 7,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-nested-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-nested-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nN\t258\t2\t0\t2\t0\nN\t259\t3\t2\t1\t0\nD\t1\t258\t257\t34\t35\nD\t2\t258\t1\t40\t41\nD\t3\t259\t258\t54\t55\nT\t1\t4\t0\t5\t1\t0\t0\t64\t68\t0\nF\t1\t1\t1\t0\t16\t0\t1\t0\t0\t57\t132\t0\nL\t1\t1\t5\t259\t0\t1\t75\t76\nL\t2\t1\t0\t257\t0\t0\t87\t90\nL\t3\t1\t0\t1\t0\t0\t94\t95\nL\t4\t1\t0\t258\t0\t0\t82\t96\nL\t5\t1\t0\t259\t0\t0\t77\t97\nL\t6\t1\t0\t1\t0\t0\t111\t112\nL\t7\t1\t0\t258\t0\t0\t105\t113\nL\t8\t1\t0\t258\t0\t0\t105\t113\nL\t9\t1\t0\t259\t0\t0\t105\t113\nL\t10\t1\t0\t257\t0\t0\t113\t116\nL\t11\t1\t0\t258\t0\t0\t98\t118\nL\t12\t1\t0\t258\t0\t0\t98\t118\nL\t13\t1\t0\t259\t0\t0\t98\t118\nL\t14\t1\t0\t259\t0\t0\t125\t126\nL\t15\t1\t0\t258\t0\t0\t125\t128\nL\t16\t1\t0\t1\t0\t0\t125\t130\nB\t1\t1\t1\t18\t1\t16\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t118\t131\nO\t1\t1\t1\t6\t2\t257\t257\t0\t0\t0\t2\t0\t0\t0\t87\t90\t-\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t3\t0\t1\t0\t94\t95\t1\t0\t0\nO\t3\t1\t1\t6\t4\t258\t258\t0\t0\t0\t4\t0\t0\t0\t82\t96\t-\t0\t2\nO\t4\t1\t1\t6\t5\t259\t259\t0\t0\t0\t5\t0\t0\t0\t77\t97\t-\t2\t1\nO\t5\t1\t1\t2\t1\t259\t259\t0\t5\t0\t6\t0\t0\t0\t71\t98\t-\t0\t0\nO\t6\t1\t1\t1\t6\t1\t1\t0\t0\t0\t7\t1\t2\t0\t111\t112\t8\t0\t0\nO\t7\t1\t1\t7\t7\t258\t259\t3\t1\t0\t8\t0\t0\t0\t105\t113\t-\t0\t0\nO\t8\t1\t1\t8\t8\t258\t258\t2\t7\t6\t9\t0\t0\t0\t105\t113\t-\t0\t0\nO\t9\t1\t1\t8\t9\t259\t259\t3\t1\t8\t10\t0\t0\t0\t105\t113\t-\t0\t0\nO\t10\t1\t1\t2\t1\t259\t259\t0\t9\t0\t11\t0\t0\t0\t105\t113\t-\t0\t0\nO\t11\t1\t1\t6\t10\t257\t257\t0\t0\t0\t12\t0\t0\t0\t113\t116\t-\t3\t0\nO\t12\t1\t1\t7\t11\t258\t259\t3\t1\t0\t13\t0\t0\t0\t98\t118\t-\t0\t0\nO\t13\t1\t1\t8\t12\t258\t258\t1\t11\t10\t14\t0\t0\t0\t98\t118\t-\t0\t0\nO\t14\t1\t1\t8\t13\t259\t259\t3\t1\t12\t15\t0\t0\t0\t98\t118\t-\t0\t0\nO\t15\t1\t1\t2\t1\t259\t259\t0\t13\t0\t16\t0\t0\t0\t98\t118\t-\t0\t0\nO\t16\t1\t1\t2\t14\t259\t259\t0\t1\t0\t17\t0\t0\t0\t125\t126\t-\t0\t0\nO\t17\t1\t1\t7\t15\t258\t259\t3\t14\t0\t18\t0\t0\t0\t125\t128\t-\t0\t0\nO\t18\t1\t1\t7\t16\t1\t258\t2\t15\t0\t0\t0\t0\t0\t125\t130\t-\t0\t0\nA\t0\t2\nA\t1\t3\nA\t2\t4\n",
+        "stderr": "",
+        "inputSHA256": "92c922f63961b2e1e7983d7bff6fb2bca7051a9188489a8831f93765478508b6",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 8,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-nested-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\empty-nested-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t0\t0\nN\t258\t2\t0\t2\t0\nN\t259\t3\t2\t1\t0\nD\t1\t258\t257\t34\t35\nD\t2\t258\t1\t40\t41\nD\t3\t259\t258\t54\t55\nT\t1\t4\t0\t5\t1\t0\t0\t64\t68\t0\nF\t1\t1\t1\t0\t16\t0\t1\t0\t0\t57\t132\t0\nL\t1\t1\t5\t259\t0\t1\t75\t76\nL\t2\t1\t0\t257\t0\t0\t87\t90\nL\t3\t1\t0\t1\t0\t0\t94\t95\nL\t4\t1\t0\t258\t0\t0\t82\t96\nL\t5\t1\t0\t259\t0\t0\t77\t97\nL\t6\t1\t0\t1\t0\t0\t111\t112\nL\t7\t1\t0\t258\t0\t0\t105\t113\nL\t8\t1\t0\t258\t0\t0\t105\t113\nL\t9\t1\t0\t259\t0\t0\t105\t113\nL\t10\t1\t0\t257\t0\t0\t113\t116\nL\t11\t1\t0\t258\t0\t0\t98\t118\nL\t12\t1\t0\t258\t0\t0\t98\t118\nL\t13\t1\t0\t259\t0\t0\t98\t118\nL\t14\t1\t0\t259\t0\t0\t125\t126\nL\t15\t1\t0\t258\t0\t0\t125\t128\nL\t16\t1\t0\t1\t0\t0\t125\t130\nB\t1\t1\t1\t18\t1\t16\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t118\t131\nO\t1\t1\t1\t6\t2\t257\t257\t0\t0\t0\t2\t0\t0\t0\t87\t90\t-\t0\t0\nO\t2\t1\t1\t1\t3\t1\t1\t0\t0\t0\t3\t0\t1\t0\t94\t95\t1\t0\t0\nO\t3\t1\t1\t6\t4\t258\t258\t0\t0\t0\t4\t0\t0\t0\t82\t96\t-\t0\t2\nO\t4\t1\t1\t6\t5\t259\t259\t0\t0\t0\t5\t0\t0\t0\t77\t97\t-\t2\t1\nO\t5\t1\t1\t2\t1\t259\t259\t0\t5\t0\t6\t0\t0\t0\t71\t98\t-\t0\t0\nO\t6\t1\t1\t1\t6\t1\t1\t0\t0\t0\t7\t1\t2\t0\t111\t112\t8\t0\t0\nO\t7\t1\t1\t7\t7\t258\t259\t3\t1\t0\t8\t0\t0\t0\t105\t113\t-\t0\t0\nO\t8\t1\t1\t8\t8\t258\t258\t2\t7\t6\t9\t0\t0\t0\t105\t113\t-\t0\t0\nO\t9\t1\t1\t8\t9\t259\t259\t3\t1\t8\t10\t0\t0\t0\t105\t113\t-\t0\t0\nO\t10\t1\t1\t2\t1\t259\t259\t0\t9\t0\t11\t0\t0\t0\t105\t113\t-\t0\t0\nO\t11\t1\t1\t6\t10\t257\t257\t0\t0\t0\t12\t0\t0\t0\t113\t116\t-\t3\t0\nO\t12\t1\t1\t7\t11\t258\t259\t3\t1\t0\t13\t0\t0\t0\t98\t118\t-\t0\t0\nO\t13\t1\t1\t8\t12\t258\t258\t1\t11\t10\t14\t0\t0\t0\t98\t118\t-\t0\t0\nO\t14\t1\t1\t8\t13\t259\t259\t3\t1\t12\t15\t0\t0\t0\t98\t118\t-\t0\t0\nO\t15\t1\t1\t2\t1\t259\t259\t0\t13\t0\t16\t0\t0\t0\t98\t118\t-\t0\t0\nO\t16\t1\t1\t2\t14\t259\t259\t0\t1\t0\t17\t0\t0\t0\t125\t126\t-\t0\t0\nO\t17\t1\t1\t7\t15\t258\t259\t3\t14\t0\t18\t0\t0\t0\t125\t128\t-\t0\t0\nO\t18\t1\t1\t7\t16\t1\t258\t2\t15\t0\t0\t0\t0\t0\t125\t130\t-\t0\t0\nA\t0\t2\nA\t1\t3\nA\t2\t4\n",
+        "stderr": "",
+        "inputSHA256": "92c922f63961b2e1e7983d7bff6fb2bca7051a9188489a8831f93765478508b6",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 8,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "construct-read",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\construct-read.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t3\t0\t1\t0\t0\t29\t62\t0\nL\t1\t1\t0\t1\t0\t0\t55\t57\nL\t2\t1\t0\t257\t0\t0\t50\t58\nL\t3\t1\t0\t1\t0\t0\t50\t60\nB\t1\t1\t1\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t43\t61\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t2\t0\t2\t0\t55\t57\t17\t0\t0\nO\t2\t1\t1\t6\t2\t257\t257\t0\t0\t0\t3\t0\t0\t0\t50\t58\t-\t0\t1\nO\t3\t1\t1\t7\t3\t1\t257\t1\t2\t0\t0\t0\t0\t0\t50\t60\t-\t0\t0\nA\t0\t1\n",
+        "stderr": "",
+        "inputSHA256": "912da4101368f78e95a47bcf01ada5fc2be86f2cdbed1addc38b31ae5a958dee",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 17,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "construct-read",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\construct-read.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t1\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t3\t0\t1\t0\t0\t29\t62\t0\nL\t1\t1\t0\t1\t0\t0\t55\t57\nL\t2\t1\t0\t257\t0\t0\t50\t58\nL\t3\t1\t0\t1\t0\t0\t50\t60\nB\t1\t1\t1\t3\t1\t3\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t43\t61\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t2\t0\t2\t0\t55\t57\t17\t0\t0\nO\t2\t1\t1\t6\t2\t257\t257\t0\t0\t0\t3\t0\t0\t0\t50\t58\t-\t0\t1\nO\t3\t1\t1\t7\t3\t1\t257\t1\t2\t0\t0\t0\t0\t0\t50\t60\t-\t0\t0\nA\t0\t1\n",
+        "stderr": "",
+        "inputSHA256": "912da4101368f78e95a47bcf01ada5fc2be86f2cdbed1addc38b31ae5a958dee",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "return",
+          "Value": 17,
+          "TrapCategory": ""
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "field-overflow",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\field-overflow.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t2\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t9\t0\t3\t0\t0\t29\t92\t0\nL\t1\t1\t3\t257\t0\t1\t47\t48\nL\t2\t1\t0\t2\t0\t0\t54\t73\nL\t3\t1\t0\t257\t0\t0\t49\t74\nL\t4\t1\t0\t257\t0\t0\t75\t76\nL\t5\t1\t0\t2\t0\t0\t75\t78\nL\t6\t1\t0\t2\t0\t0\t80\t81\nL\t7\t1\t0\t2\t0\t0\t75\t82\nL\t8\t1\t0\t257\t0\t0\t75\t82\nL\t9\t1\t0\t1\t0\t0\t89\t90\nB\t1\t1\t1\t7\t4\t0\t5\t6\t1\t2\t2\t3\t7\t0\t0\t0\t0\t1\t75\t82\nB\t2\t1\t8\t11\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t82\t91\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t75\t82\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t19\t0\t54\t73\t9223372036854775807\t0\t0\nO\t2\t1\t1\t6\t3\t257\t257\t0\t0\t0\t3\t0\t0\t0\t49\t74\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t3\t0\t4\t0\t0\t0\t43\t75\t-\t0\t0\nO\t4\t1\t1\t2\t4\t257\t257\t0\t1\t0\t5\t0\t0\t0\t75\t76\t-\t0\t0\nO\t5\t1\t1\t7\t5\t2\t257\t1\t4\t0\t6\t0\t0\t0\t75\t78\t-\t0\t0\nO\t6\t1\t1\t1\t6\t2\t2\t0\t0\t0\t7\t19\t20\t0\t80\t81\t1\t0\t0\nO\t7\t1\t1\t5\t0\t2\t2\t1\t5\t6\t0\t0\t0\t0\t75\t82\t-\t0\t0\nO\t8\t1\t2\t4\t7\t2\t2\t1\t5\t6\t9\t0\t0\t0\t75\t82\t-\t0\t0\nO\t9\t1\t2\t8\t8\t257\t257\t1\t1\t7\t10\t0\t0\t0\t75\t82\t-\t0\t0\nO\t10\t1\t2\t2\t1\t257\t257\t0\t8\t0\t11\t0\t0\t0\t75\t82\t-\t0\t0\nO\t11\t1\t2\t1\t9\t1\t1\t0\t0\t0\t0\t20\t21\t0\t89\t90\t0\t0\t0\nA\t0\t2\n",
+        "stderr": "",
+        "inputSHA256": "e856264f3178aaa342f39578125f6753833da9770fc22ff09c723e5f16da91c3",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "trap",
+          "Value": 0,
+          "TrapCategory": "integer-overflow"
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "field-overflow",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--mir-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\field-overflow.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "fairyc.nominal-mir/v1\nP\t0\nN\t257\t1\t0\t1\t0\nD\t1\t257\t2\t26\t27\nT\t1\t2\t0\t3\t1\t0\t0\t36\t40\t0\nF\t1\t1\t1\t0\t9\t0\t3\t0\t0\t29\t92\t0\nL\t1\t1\t3\t257\t0\t1\t47\t48\nL\t2\t1\t0\t2\t0\t0\t54\t73\nL\t3\t1\t0\t257\t0\t0\t49\t74\nL\t4\t1\t0\t257\t0\t0\t75\t76\nL\t5\t1\t0\t2\t0\t0\t75\t78\nL\t6\t1\t0\t2\t0\t0\t80\t81\nL\t7\t1\t0\t2\t0\t0\t75\t82\nL\t8\t1\t0\t257\t0\t0\t75\t82\nL\t9\t1\t0\t1\t0\t0\t89\t90\nB\t1\t1\t1\t7\t4\t0\t5\t6\t1\t2\t2\t3\t7\t0\t0\t0\t0\t1\t75\t82\nB\t2\t1\t8\t11\t1\t9\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t82\t91\nB\t3\t1\t0\t0\t6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t1\t75\t82\nO\t1\t1\t1\t1\t2\t2\t2\t0\t0\t0\t2\t0\t19\t0\t54\t73\t9223372036854775807\t0\t0\nO\t2\t1\t1\t6\t3\t257\t257\t0\t0\t0\t3\t0\t0\t0\t49\t74\t-\t0\t1\nO\t3\t1\t1\t2\t1\t257\t257\t0\t3\t0\t4\t0\t0\t0\t43\t75\t-\t0\t0\nO\t4\t1\t1\t2\t4\t257\t257\t0\t1\t0\t5\t0\t0\t0\t75\t76\t-\t0\t0\nO\t5\t1\t1\t7\t5\t2\t257\t1\t4\t0\t6\t0\t0\t0\t75\t78\t-\t0\t0\nO\t6\t1\t1\t1\t6\t2\t2\t0\t0\t0\t7\t19\t20\t0\t80\t81\t1\t0\t0\nO\t7\t1\t1\t5\t0\t2\t2\t1\t5\t6\t0\t0\t0\t0\t75\t82\t-\t0\t0\nO\t8\t1\t2\t4\t7\t2\t2\t1\t5\t6\t9\t0\t0\t0\t75\t82\t-\t0\t0\nO\t9\t1\t2\t8\t8\t257\t257\t1\t1\t7\t10\t0\t0\t0\t75\t82\t-\t0\t0\nO\t10\t1\t2\t2\t1\t257\t257\t0\t8\t0\t11\t0\t0\t0\t75\t82\t-\t0\t0\nO\t11\t1\t2\t1\t9\t1\t1\t0\t0\t0\t0\t20\t21\t0\t89\t90\t0\t0\t0\nA\t0\t2\n",
+        "stderr": "",
+        "inputSHA256": "e856264f3178aaa342f39578125f6753833da9770fc22ff09c723e5f16da91c3",
+        "unchanged": true,
+        "mirObservation": {
+          "Kind": "trap",
+          "Value": 0,
+          "TrapCategory": "integer-overflow"
+        },
+        "outcomeOrigin": "go-mir-interpreter"
+      }
+    ]
+  },
+  "nominalC": {
+    "schema": "fairyc.candidate-c-file-verification/v1",
+    "images": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+        "sha256": "b13199fe26d46e8af7a73f7d38663a92dfd97cbdec0d040b0ce3b07b5b89dab4"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+        "sha256": "2d5d825b49ef149c2ad689be7c12b4901194472caeb951f3d7d02089423b5232"
+      }
+    ],
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\reference.json",
+      "sha256": "f9d4963d59ae6f5111692f111fea0e7b7fb6e70ed168634a4184c6273cd73cdb"
+    },
+    "sources": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\attributes.fy",
+        "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\binding_output.fy",
+        "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\bodies.fy",
+        "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\body_state.fy",
+        "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\budget.fy",
+        "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_cli.fy",
+        "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_emit.fy",
+        "sha256": "47928054eb286837dbc2360822001e015ffedbbdda2c0d29969bd14644d78a06"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_flow.fy",
+        "sha256": "93e172ae922e21b87e33d01f203a010b88e5aea9260f3c91bbdaf4e160272f47"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_guard.fy",
+        "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_nominal.fy",
+        "sha256": "e7d248d7da2bede7641d22dd9d7dc011d50cfe4c4a165d0b466f974f7dd574cd"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_scalar.fy",
+        "sha256": "c618dd663c5fc231608205b9e999b871fa3e4dfe82f87cdaf598be17bbcee55a"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_text.fy",
+        "sha256": "0b527c99d630a94f6fa2f3c070eb0acb6f63c65e064a8ca0b080d63e2430bb16"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\cleanup_syntax.fy",
+        "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\declaration_output.fy",
+        "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\diagnostics.fy",
+        "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\file_cli.fy",
+        "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\file_syntax.fy",
+        "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_cli.fy",
+        "sha256": "d7a103f978b6e6cf9df2695bc44f6af5be3a999046a775a458f4430f1fcd48cf"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_lower.fy",
+        "sha256": "bca8065f5285cfc73b0cf1d0a813b900715fdf2ccc38e4557aa446c9526f4175"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_model.fy",
+        "sha256": "a7ab66919e2691a8e378e901db1922e1d6feeebdcc6bd3ef91ca4ffa460be56b"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_output.fy",
+        "sha256": "2ea8d8a43f75512ed0b9c87a8cce68f75e0ad0bbe828c88b962228ab1623e1ba"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_shape_lower.fy",
+        "sha256": "60bd05be0b971bc60af90c20c6d4c276b892eb89c63c9c11d28baaa062de3742"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_shapes.fy",
+        "sha256": "183c1a38eb81dc83a59593a1913422541e7709f2f056b99a8acccc5098b4c8e1"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_state.fy",
+        "sha256": "610ff02450b8ea2378472b1c9f3f8c074f8d65c17149a6132044675fcb854b05"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\integrity.fy",
+        "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\main.fy",
+        "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_cleanup.fy",
+        "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_cli.fy",
+        "sha256": "be70f56701979bf30ab6e352a5148908361247de5c97c07fd1ca69fbb41c6741"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_lower.fy",
+        "sha256": "eb7a10b07e25e28338927f6a28771f86a107ba148bcd0b0f1ae3f6b817485bbf"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_model.fy",
+        "sha256": "068ada0cc8891302fafa52f8851ad415e6098b67ef95e6774aac218ba4ce9d01"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_nominal.fy",
+        "sha256": "e9fc7a50c45270783f1282cc519c5f952073b38d9bf1940106ed8062dd2d1403"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_output.fy",
+        "sha256": "677a0dafdc882e2baf0b6e4c50142332b03da5b3f82bc31bddc311240788ce17"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_state.fy",
+        "sha256": "7a687b19ac37fbadc440ecde6be5c19859b5c0df555e4f80dc47ca03cf1b0c80"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify.fy",
+        "sha256": "d912593c798d04d3bcd7d80d1e5147d4060eb870f167f499b1363829d04ff8d9"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_flow.fy",
+        "sha256": "0786ad7697674c8ad54ce8a5bff74905639c881af62cc261d7672e8d9b37f08f"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_nominal.fy",
+        "sha256": "9610b9c684ae4d13ef1654298d935785386e589eaeb290845ec9649bd047a049"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_shape.fy",
+        "sha256": "856c15239c64e20fd48f3a5deac5eb87d4d716246a0606b5c828ed782cac8cc1"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_check.fy",
+        "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_cli.fy",
+        "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_registry.fy",
+        "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\name_cli.fy",
+        "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\name_resolution.fy",
+        "sha256": "675002ec1c9a4ed5406896c2935582fb806cd7af31f80347d2f8da95b697b917"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\nominal_types.fy",
+        "sha256": "aa92b01f7025a626e5d587a2fb6ffcee30c23bd08b7508aa63ad90f9398ac03e"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\numbers.fy",
+        "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\pages.fy",
+        "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\parse_tokens.fy",
+        "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\records.fy",
+        "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scanner.fy",
+        "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\strings.fy",
+        "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\syntax.fy",
+        "sha256": "2d3e266d6753eaf70b1ab939b3ebc7d0a3e430d3c4189651c419947912e8c8e5"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\token_output.fy",
+        "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_check.fy",
+        "sha256": "413f03780cec199b1ee6d29c9251915fd983ba51468621a485a071e916f2e257"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_cli.fy",
+        "sha256": "a6b9d25be4db61ac370aaf1b185bc1f3a7c00c4a1c392281f70d10d006923bb2"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_control.fy",
+        "sha256": "dcc5732b46bc14a366dd21c57b9b03415e25f8552e33e0a0f55d246895b92cb2"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_state.fy",
+        "sha256": "a4d0a814c23cdbfb8b50523ab43020225d2d5a561c6773b07f58ed2e478cee00"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\types.fy",
+        "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\utf8.fy",
+        "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      }
+    ],
+    "units": [
+      {
+        "case": "empty-return",
+        "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.fy",
+        "sourceSHA256": "1f8fa8ba833b74a5c008f8108096fcf7f5c6af1490b021bd4b69a5ce2d0e5a94",
+        "emitted": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.c",
+        "emittedSHA256": "e9cc1f52e5d709785b14e0afe0ed342fafcc25995f60bc78cdc810c1a020aad8",
+        "observed": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.observed.c",
+        "observedSHA256": "77f5560f6075849077ad182fbad57654d801525efc4ff96689ec7a36bf16e1ef",
+        "traceHook": false,
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-field-rhs-effects",
+        "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.fy",
+        "sourceSHA256": "940a0ac52aad91ab55e39a7f175b0b8b2fef0f4d12c6f938cfbd86c2cf0daab2",
+        "emitted": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.c",
+        "emittedSHA256": "767203d9e8004f663760569df1f3d105893a6a85f76be33785248e646ce7c759",
+        "observed": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.observed.c",
+        "observedSHA256": "500f777e96a4e046b505608b26894e132770f52ef95baea9f43c90b3e4a94b83",
+        "traceHook": false,
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-field-rhs-return",
+        "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.fy",
+        "sourceSHA256": "a629fe6e2f83de0c6d5a8585a445721527e23f3af86b76ea6a4dd84b8df28298",
+        "emitted": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.c",
+        "emittedSHA256": "7744545332d9044d2dd1e21ab0b953c93fb9f911995c84484a3a3c033ebb24be",
+        "observed": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.observed.c",
+        "observedSHA256": "fb4b859c02e7c91d12ed93d6ad7d1562c711a52980c8fe499f54b1d633042a7a",
+        "traceHook": false,
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "empty-nested-field",
+        "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.fy",
+        "sourceSHA256": "92c922f63961b2e1e7983d7bff6fb2bca7051a9188489a8831f93765478508b6",
+        "emitted": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.c",
+        "emittedSHA256": "2d736422d523d06e52de37e2de380ec960ac156f37edfc2b57ce2fc0522f2efc",
+        "observed": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.observed.c",
+        "observedSHA256": "2a040bf1ced61f49489558a08724886d71881d50b9f4d6ae7fcb70108fdb3b68",
+        "traceHook": false,
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "construct-read",
+        "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.fy",
+        "sourceSHA256": "912da4101368f78e95a47bcf01ada5fc2be86f2cdbed1addc38b31ae5a958dee",
+        "emitted": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.c",
+        "emittedSHA256": "ed89570fe24ac928681d88524870e5c46fc8e4d3c84286fec65390ee34b39bb7",
+        "observed": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.observed.c",
+        "observedSHA256": "5e64a41e509098efd25a1aa992f0dd00e0c9516ee418df0d86a9b2f18c8b55eb",
+        "traceHook": false,
+        "outcomeOrigin": "go-mir-interpreter"
+      },
+      {
+        "case": "field-overflow",
+        "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.fy",
+        "sourceSHA256": "e856264f3178aaa342f39578125f6753833da9770fc22ff09c723e5f16da91c3",
+        "emitted": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.c",
+        "emittedSHA256": "bb0a092472017e61acd7346d7e57817816fa079656bd1fd1f1765567f4c544f6",
+        "observed": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.observed.c",
+        "observedSHA256": "13f11c7cf6be42e0eb23392d97dd59c13ae54ce5c71d76dd34ad692b95a35d21",
+        "traceHook": false,
+        "outcomeOrigin": "go-mir-interpreter"
+      }
+    ],
+    "cli": [
+      {
+        "case": "empty-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_257 fy_fn_1(void);\nstruct fy_s_257 fy_fn_2(struct fy_s_257 fy_l_2);\nint32_t fy_fn_3(struct fy_s_257 fy_l_4);\nint32_t fy_fn_4(void);\nstruct fy_s_257 fy_fn_1(void){\n    struct fy_s_257 fy_l_1={0};\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = (struct fy_s_257){0};\n    return fy_l_1;\n}\nstruct fy_s_257 fy_fn_2(struct fy_s_257 fy_l_2){\n    (void)fy_l_2;\n    struct fy_s_257 fy_l_3={0};\n    (void)fy_l_3;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_3 = fy_l_2;\n    return fy_l_3;\n}\nint32_t fy_fn_3(struct fy_s_257 fy_l_4){\n    (void)fy_l_4;\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_5 = INT32_C(3);\n    return fy_l_5;\n}\nint32_t fy_fn_4(void){\n    struct fy_s_257 fy_l_6={0};\n    (void)fy_l_6;\n    struct fy_s_257 fy_l_7={0};\n    (void)fy_l_7;\n    int32_t fy_l_8=0;\n    (void)fy_l_8;\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_6=fy_fn_1();\n    goto fy_b_5;\nfy_b_5:;\n    fy_l_7=fy_fn_2(fy_l_6);\n    goto fy_b_6;\nfy_b_6:;\n    fy_l_8=fy_fn_3(fy_l_7);\n    goto fy_b_7;\nfy_b_7:;\n    return fy_l_8;\n}\nint32_t fy_candidate_entry(void){return fy_fn_4();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.fy",
+          "sha256": "1f8fa8ba833b74a5c008f8108096fcf7f5c6af1490b021bd4b69a5ce2d0e5a94",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "empty-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_257 fy_fn_1(void);\nstruct fy_s_257 fy_fn_2(struct fy_s_257 fy_l_2);\nint32_t fy_fn_3(struct fy_s_257 fy_l_4);\nint32_t fy_fn_4(void);\nstruct fy_s_257 fy_fn_1(void){\n    struct fy_s_257 fy_l_1={0};\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = (struct fy_s_257){0};\n    return fy_l_1;\n}\nstruct fy_s_257 fy_fn_2(struct fy_s_257 fy_l_2){\n    (void)fy_l_2;\n    struct fy_s_257 fy_l_3={0};\n    (void)fy_l_3;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_3 = fy_l_2;\n    return fy_l_3;\n}\nint32_t fy_fn_3(struct fy_s_257 fy_l_4){\n    (void)fy_l_4;\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_5 = INT32_C(3);\n    return fy_l_5;\n}\nint32_t fy_fn_4(void){\n    struct fy_s_257 fy_l_6={0};\n    (void)fy_l_6;\n    struct fy_s_257 fy_l_7={0};\n    (void)fy_l_7;\n    int32_t fy_l_8=0;\n    (void)fy_l_8;\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_6=fy_fn_1();\n    goto fy_b_5;\nfy_b_5:;\n    fy_l_7=fy_fn_2(fy_l_6);\n    goto fy_b_6;\nfy_b_6:;\n    fy_l_8=fy_fn_3(fy_l_7);\n    goto fy_b_7;\nfy_b_7:;\n    return fy_l_8;\n}\nint32_t fy_candidate_entry(void){return fy_fn_4();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.fy",
+          "sha256": "1f8fa8ba833b74a5c008f8108096fcf7f5c6af1490b021bd4b69a5ce2d0e5a94",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "empty-field-rhs-effects",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_258{\n    struct fy_s_257 fy_f_1;\n    int32_t fy_f_2;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_258 fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    int32_t fy_l_3=0;\n    (void)fy_l_3;\n    struct fy_s_258 fy_l_4={0};\n    (void)fy_l_4;\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    struct fy_s_258 fy_l_6={0};\n    (void)fy_l_6;\n    struct fy_s_257 fy_l_7={0};\n    (void)fy_l_7;\n    struct fy_s_258 fy_l_8={0};\n    (void)fy_l_8;\n    struct fy_s_258 fy_l_9={0};\n    (void)fy_l_9;\n    int32_t fy_l_10=0;\n    (void)fy_l_10;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = (struct fy_s_257){0};\n    fy_l_3 = INT32_C(1);\n    fy_l_4 = (struct fy_s_258){.fy_f_1=fy_l_2,.fy_f_2=fy_l_3};\n    fy_l_1 = fy_l_4;\n    fy_l_5 = INT32_C(9);\n    fy_l_6 = fy_l_1;\n    fy_l_6.fy_f_2 = fy_l_5;\n    fy_l_1 = fy_l_6;\n    fy_l_7 = (struct fy_s_257){0};\n    fy_l_8 = fy_l_1;\n    fy_l_8.fy_f_1 = fy_l_7;\n    fy_l_1 = fy_l_8;\n    fy_l_9 = fy_l_1;\n    fy_l_10 = fy_l_9.fy_f_2;\n    return fy_l_10;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.fy",
+          "sha256": "940a0ac52aad91ab55e39a7f175b0b8b2fef0f4d12c6f938cfbd86c2cf0daab2",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "empty-field-rhs-effects",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_258{\n    struct fy_s_257 fy_f_1;\n    int32_t fy_f_2;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_258 fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    int32_t fy_l_3=0;\n    (void)fy_l_3;\n    struct fy_s_258 fy_l_4={0};\n    (void)fy_l_4;\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    struct fy_s_258 fy_l_6={0};\n    (void)fy_l_6;\n    struct fy_s_257 fy_l_7={0};\n    (void)fy_l_7;\n    struct fy_s_258 fy_l_8={0};\n    (void)fy_l_8;\n    struct fy_s_258 fy_l_9={0};\n    (void)fy_l_9;\n    int32_t fy_l_10=0;\n    (void)fy_l_10;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = (struct fy_s_257){0};\n    fy_l_3 = INT32_C(1);\n    fy_l_4 = (struct fy_s_258){.fy_f_1=fy_l_2,.fy_f_2=fy_l_3};\n    fy_l_1 = fy_l_4;\n    fy_l_5 = INT32_C(9);\n    fy_l_6 = fy_l_1;\n    fy_l_6.fy_f_2 = fy_l_5;\n    fy_l_1 = fy_l_6;\n    fy_l_7 = (struct fy_s_257){0};\n    fy_l_8 = fy_l_1;\n    fy_l_8.fy_f_1 = fy_l_7;\n    fy_l_1 = fy_l_8;\n    fy_l_9 = fy_l_1;\n    fy_l_10 = fy_l_9.fy_f_2;\n    return fy_l_10;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.fy",
+          "sha256": "940a0ac52aad91ab55e39a7f175b0b8b2fef0f4d12c6f938cfbd86c2cf0daab2",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "empty-field-rhs-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_258{\n    struct fy_s_257 fy_f_1;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_258 fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    struct fy_s_258 fy_l_3={0};\n    (void)fy_l_3;\n    int32_t fy_l_4=0;\n    (void)fy_l_4;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = (struct fy_s_257){0};\n    fy_l_3 = (struct fy_s_258){.fy_f_1=fy_l_2};\n    fy_l_1 = fy_l_3;\n    fy_l_4 = INT32_C(7);\n    return fy_l_4;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.fy",
+          "sha256": "a629fe6e2f83de0c6d5a8585a445721527e23f3af86b76ea6a4dd84b8df28298",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "empty-field-rhs-return",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_258{\n    struct fy_s_257 fy_f_1;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_258 fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    struct fy_s_258 fy_l_3={0};\n    (void)fy_l_3;\n    int32_t fy_l_4=0;\n    (void)fy_l_4;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = (struct fy_s_257){0};\n    fy_l_3 = (struct fy_s_258){.fy_f_1=fy_l_2};\n    fy_l_1 = fy_l_3;\n    fy_l_4 = INT32_C(7);\n    return fy_l_4;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.fy",
+          "sha256": "a629fe6e2f83de0c6d5a8585a445721527e23f3af86b76ea6a4dd84b8df28298",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "empty-nested-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_258{\n    struct fy_s_257 fy_f_1;\n    int32_t fy_f_2;\n};\nstruct fy_s_259{\n    struct fy_s_258 fy_f_3;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_259 fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    int32_t fy_l_3=0;\n    (void)fy_l_3;\n    struct fy_s_258 fy_l_4={0};\n    (void)fy_l_4;\n    struct fy_s_259 fy_l_5={0};\n    (void)fy_l_5;\n    int32_t fy_l_6=0;\n    (void)fy_l_6;\n    struct fy_s_258 fy_l_7={0};\n    (void)fy_l_7;\n    struct fy_s_258 fy_l_8={0};\n    (void)fy_l_8;\n    struct fy_s_259 fy_l_9={0};\n    (void)fy_l_9;\n    struct fy_s_257 fy_l_10={0};\n    (void)fy_l_10;\n    struct fy_s_258 fy_l_11={0};\n    (void)fy_l_11;\n    struct fy_s_258 fy_l_12={0};\n    (void)fy_l_12;\n    struct fy_s_259 fy_l_13={0};\n    (void)fy_l_13;\n    struct fy_s_259 fy_l_14={0};\n    (void)fy_l_14;\n    struct fy_s_258 fy_l_15={0};\n    (void)fy_l_15;\n    int32_t fy_l_16=0;\n    (void)fy_l_16;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = (struct fy_s_257){0};\n    fy_l_3 = INT32_C(1);\n    fy_l_4 = (struct fy_s_258){.fy_f_1=fy_l_2,.fy_f_2=fy_l_3};\n    fy_l_5 = (struct fy_s_259){.fy_f_3=fy_l_4};\n    fy_l_1 = fy_l_5;\n    fy_l_6 = INT32_C(8);\n    fy_l_7 = fy_l_1.fy_f_3;\n    fy_l_8 = fy_l_7;\n    fy_l_8.fy_f_2 = fy_l_6;\n    fy_l_9 = fy_l_1;\n    fy_l_9.fy_f_3 = fy_l_8;\n    fy_l_1 = fy_l_9;\n    fy_l_10 = (struct fy_s_257){0};\n    fy_l_11 = fy_l_1.fy_f_3;\n    fy_l_12 = fy_l_11;\n    fy_l_12.fy_f_1 = fy_l_10;\n    fy_l_13 = fy_l_1;\n    fy_l_13.fy_f_3 = fy_l_12;\n    fy_l_1 = fy_l_13;\n    fy_l_14 = fy_l_1;\n    fy_l_15 = fy_l_14.fy_f_3;\n    fy_l_16 = fy_l_15.fy_f_2;\n    return fy_l_16;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.fy",
+          "sha256": "92c922f63961b2e1e7983d7bff6fb2bca7051a9188489a8831f93765478508b6",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "empty-nested-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    uint8_t fy_empty;\n};\nstruct fy_s_258{\n    struct fy_s_257 fy_f_1;\n    int32_t fy_f_2;\n};\nstruct fy_s_259{\n    struct fy_s_258 fy_f_3;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_259 fy_l_1={0};\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    int32_t fy_l_3=0;\n    (void)fy_l_3;\n    struct fy_s_258 fy_l_4={0};\n    (void)fy_l_4;\n    struct fy_s_259 fy_l_5={0};\n    (void)fy_l_5;\n    int32_t fy_l_6=0;\n    (void)fy_l_6;\n    struct fy_s_258 fy_l_7={0};\n    (void)fy_l_7;\n    struct fy_s_258 fy_l_8={0};\n    (void)fy_l_8;\n    struct fy_s_259 fy_l_9={0};\n    (void)fy_l_9;\n    struct fy_s_257 fy_l_10={0};\n    (void)fy_l_10;\n    struct fy_s_258 fy_l_11={0};\n    (void)fy_l_11;\n    struct fy_s_258 fy_l_12={0};\n    (void)fy_l_12;\n    struct fy_s_259 fy_l_13={0};\n    (void)fy_l_13;\n    struct fy_s_259 fy_l_14={0};\n    (void)fy_l_14;\n    struct fy_s_258 fy_l_15={0};\n    (void)fy_l_15;\n    int32_t fy_l_16=0;\n    (void)fy_l_16;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = (struct fy_s_257){0};\n    fy_l_3 = INT32_C(1);\n    fy_l_4 = (struct fy_s_258){.fy_f_1=fy_l_2,.fy_f_2=fy_l_3};\n    fy_l_5 = (struct fy_s_259){.fy_f_3=fy_l_4};\n    fy_l_1 = fy_l_5;\n    fy_l_6 = INT32_C(8);\n    fy_l_7 = fy_l_1.fy_f_3;\n    fy_l_8 = fy_l_7;\n    fy_l_8.fy_f_2 = fy_l_6;\n    fy_l_9 = fy_l_1;\n    fy_l_9.fy_f_3 = fy_l_8;\n    fy_l_1 = fy_l_9;\n    fy_l_10 = (struct fy_s_257){0};\n    fy_l_11 = fy_l_1.fy_f_3;\n    fy_l_12 = fy_l_11;\n    fy_l_12.fy_f_1 = fy_l_10;\n    fy_l_13 = fy_l_1;\n    fy_l_13.fy_f_3 = fy_l_12;\n    fy_l_1 = fy_l_13;\n    fy_l_14 = fy_l_1;\n    fy_l_15 = fy_l_14.fy_f_3;\n    fy_l_16 = fy_l_15.fy_f_2;\n    return fy_l_16;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.fy",
+          "sha256": "92c922f63961b2e1e7983d7bff6fb2bca7051a9188489a8831f93765478508b6",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "construct-read",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    int32_t fy_f_1;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    int32_t fy_l_1=0;\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    int32_t fy_l_3=0;\n    (void)fy_l_3;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = INT32_C(17);\n    fy_l_2 = (struct fy_s_257){.fy_f_1=fy_l_1};\n    fy_l_3 = fy_l_2.fy_f_1;\n    return fy_l_3;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.fy",
+          "sha256": "912da4101368f78e95a47bcf01ada5fc2be86f2cdbed1addc38b31ae5a958dee",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "construct-read",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    int32_t fy_f_1;\n};\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    int32_t fy_l_1=0;\n    (void)fy_l_1;\n    struct fy_s_257 fy_l_2={0};\n    (void)fy_l_2;\n    int32_t fy_l_3=0;\n    (void)fy_l_3;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = INT32_C(17);\n    fy_l_2 = (struct fy_s_257){.fy_f_1=fy_l_1};\n    fy_l_3 = fy_l_2.fy_f_1;\n    return fy_l_3;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.fy",
+          "sha256": "912da4101368f78e95a47bcf01ada5fc2be86f2cdbed1addc38b31ae5a958dee",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "field-overflow",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    int64_t fy_f_1;\n};\nstatic inline int64_t fy_bits_to_i64(uint64_t bits){int64_t value;memcpy(&value,&bits,sizeof value);return value;}\nstatic inline int fy_i64_add_overflow(int64_t left,int64_t right){return(right>0&&left>INT64_MAX-right)||(right<0&&left<INT64_MIN-right);}\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_257 fy_l_1={0};\n    (void)fy_l_1;\n    int64_t fy_l_2=0;\n    (void)fy_l_2;\n    struct fy_s_257 fy_l_3={0};\n    (void)fy_l_3;\n    struct fy_s_257 fy_l_4={0};\n    (void)fy_l_4;\n    int64_t fy_l_5=0;\n    (void)fy_l_5;\n    int64_t fy_l_6=0;\n    (void)fy_l_6;\n    int64_t fy_l_7=0;\n    (void)fy_l_7;\n    struct fy_s_257 fy_l_8={0};\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    uint32_t fy_pending_trap=UINT32_C(7);\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = INT64_C(9223372036854775807);\n    fy_l_3 = (struct fy_s_257){.fy_f_1=fy_l_2};\n    fy_l_1 = fy_l_3;\n    fy_l_4 = fy_l_1;\n    fy_l_5 = fy_l_4.fy_f_1;\n    fy_l_6 = INT64_C(1);\n    if(fy_i64_add_overflow(fy_l_5,fy_l_6)){fy_pending_trap=UINT32_C(1);goto fy_b_3;\n}\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_7 = fy_bits_to_i64(((uint64_t)fy_l_5)+((uint64_t)fy_l_6));\n    fy_l_8 = fy_l_1;\n    fy_l_8.fy_f_1 = fy_l_7;\n    fy_l_1 = fy_l_8;\n    fy_l_9 = INT32_C(0);\n    return fy_l_9;\nfy_b_3:;\n    fy_runtime_trap(fy_pending_trap);\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.fy",
+          "sha256": "e856264f3178aaa342f39578125f6753833da9770fc22ff09c723e5f16da91c3",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "field-overflow",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 0,
+        "stdout": "/* fairyc.candidate-nominal-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_s_257{\n    int64_t fy_f_1;\n};\nstatic inline int64_t fy_bits_to_i64(uint64_t bits){int64_t value;memcpy(&value,&bits,sizeof value);return value;}\nstatic inline int fy_i64_add_overflow(int64_t left,int64_t right){return(right>0&&left>INT64_MAX-right)||(right<0&&left<INT64_MIN-right);}\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    struct fy_s_257 fy_l_1={0};\n    (void)fy_l_1;\n    int64_t fy_l_2=0;\n    (void)fy_l_2;\n    struct fy_s_257 fy_l_3={0};\n    (void)fy_l_3;\n    struct fy_s_257 fy_l_4={0};\n    (void)fy_l_4;\n    int64_t fy_l_5=0;\n    (void)fy_l_5;\n    int64_t fy_l_6=0;\n    (void)fy_l_6;\n    int64_t fy_l_7=0;\n    (void)fy_l_7;\n    struct fy_s_257 fy_l_8={0};\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    uint32_t fy_pending_trap=UINT32_C(7);\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_2 = INT64_C(9223372036854775807);\n    fy_l_3 = (struct fy_s_257){.fy_f_1=fy_l_2};\n    fy_l_1 = fy_l_3;\n    fy_l_4 = fy_l_1;\n    fy_l_5 = fy_l_4.fy_f_1;\n    fy_l_6 = INT64_C(1);\n    if(fy_i64_add_overflow(fy_l_5,fy_l_6)){fy_pending_trap=UINT32_C(1);goto fy_b_3;\n}\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_7 = fy_bits_to_i64(((uint64_t)fy_l_5)+((uint64_t)fy_l_6));\n    fy_l_8 = fy_l_1;\n    fy_l_8.fy_f_1 = fy_l_7;\n    fy_l_1 = fy_l_8;\n    fy_l_9 = INT32_C(0);\n    return fy_l_9;\nfy_b_3:;\n    fy_runtime_trap(fy_pending_trap);\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+        "stderr": "",
+        "input": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.fy",
+          "sha256": "e856264f3178aaa342f39578125f6753833da9770fc22ff09c723e5f16da91c3",
+          "unchanged": true
+        }
+      },
+      {
+        "case": "no-main",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\no-main.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "no-main",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\no-main.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "void-main",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\void-main.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "void-main",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\void-main.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "parameter-main",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\parameter-main.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "parameter-main",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\parameter-main.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "empty-program",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-program.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "empty-program",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-program.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: C entry requires fn i32 main()\n"
+      },
+      {
+        "case": "bad-utf8",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-utf8.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-utf8.fy:1:13: error: E0001 (bytes 12..13)\n"
+      },
+      {
+        "case": "bad-utf8",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-utf8.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-utf8.fy:1:13: error: E0001 (bytes 12..13)\n"
+      },
+      {
+        "case": "bad-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-field.fy:1:34: error: unresolved name (bytes 33..39)\n"
+      },
+      {
+        "case": "bad-field",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-field.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-field.fy:1:34: error: unresolved name (bytes 33..39)\n"
+      },
+      {
+        "case": "bad-number",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-number.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-number.fy:1:34: error: integer literal out of range (bytes 33..52)\n"
+      },
+      {
+        "case": "bad-number",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-number.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\bad-number.fy:1:34: error: integer literal out of range (bytes 33..52)\n"
+      },
+      {
+        "case": "missing",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\missing.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "case": "missing",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\missing.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "case": "unknown-member",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\unknown-member.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\unknown-member.fy:1:58: error: unknown field (bytes 57..60)\n"
+      },
+      {
+        "case": "unknown-member",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\unknown-member.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\unknown-member.fy:1:58: error: unknown field (bytes 57..60)\n"
+      },
+      {
+        "case": "missing-member",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\missing-member.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\missing-member.fy:1:49: error: missing struct fields (bytes 48..51)\n"
+      },
+      {
+        "case": "missing-member",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\missing-member.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\missing-member.fy:1:49: error: missing struct fields (bytes 48..51)\n"
+      },
+      {
+        "case": "wrong-nominal",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\wrong-nominal.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\wrong-nominal.fy:1:94: error: type mismatch (bytes 93..100)\n"
+      },
+      {
+        "case": "wrong-nominal",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\wrong-nominal.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\wrong-nominal.fy:1:94: error: type mismatch (bytes 93..100)\n"
+      },
+      {
+        "case": "cyclic-layout",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\cyclic-layout.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\cyclic-layout.fy:1:20: error: recursive value type (bytes 19..20)\n"
+      },
+      {
+        "case": "cyclic-layout",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+          "--c-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\cyclic-layout.fy"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\cyclic-layout.fy:1:20: error: recursive value type (bytes 19..20)\n"
+      }
+    ],
+    "controls": 12,
+    "cliExecutions": 36,
+    "nativeRunner": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+      "sha256": "995d9b5410aad2e22a622e18c0aaeeb00e6e362b030cfc2415ff9558938c659a"
+    },
+    "nativeInvocation": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native-request.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "PASS: 18 native C executions\n",
+      "stderr": ""
+    },
+    "nativeReport": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native.json",
+      "sha256": "9ad51cdaf84e30c5dde85cd134977a7e587d43120bd1a94cd416b3ec67ab365e"
+    },
+    "nativeExecutions": 18,
+    "compilerProfiles": [
+      [
+        "msvc",
+        "low"
+      ],
+      [
+        "msvc",
+        "optimized"
+      ]
+    ],
+    "passed": true
+  },
+  "nativeObservations": [
+    {
+      "name": "empty-return",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.observed.c",
+      "sourceSHA256": "77f5560f6075849077ad182fbad57654d801525efc4ff96689ec7a36bf16e1ef",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-return-msvc-low.exe",
+      "imageSHA256": "e76bd3fabcd604bd57d15b6e7ccfc2e23ccf4003600b566936698e8ae9058bba",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:3\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Mw0K",
+      "trap": 0,
+      "value": 3
+    },
+    {
+      "name": "empty-return",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.observed.c",
+      "sourceSHA256": "77f5560f6075849077ad182fbad57654d801525efc4ff96689ec7a36bf16e1ef",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-return-msvc-optimized.exe",
+      "imageSHA256": "2f5fbcf10aec9c7347f3201c8c186eed1473e15ad84e20aca110c72d572533eb",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:3\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Mw0K",
+      "trap": 0,
+      "value": 3
+    },
+    {
+      "name": "empty-field-rhs-effects",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.observed.c",
+      "sourceSHA256": "500f777e96a4e046b505608b26894e132770f52ef95baea9f43c90b3e4a94b83",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-field-rhs-effects-msvc-low.exe",
+      "imageSHA256": "f1691cf3420b15bbaa54da382c1e5d0088854e4018af0840011a3fbdef651115",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:9\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6OQ0K",
+      "trap": 0,
+      "value": 9
+    },
+    {
+      "name": "empty-field-rhs-effects",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-effects.observed.c",
+      "sourceSHA256": "500f777e96a4e046b505608b26894e132770f52ef95baea9f43c90b3e4a94b83",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-field-rhs-effects-msvc-optimized.exe",
+      "imageSHA256": "62d7304616132de4778c74ab6a299e670bd3da67a3f3f7b89bf39346e9b055e8",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:9\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6OQ0K",
+      "trap": 0,
+      "value": 9
+    },
+    {
+      "name": "empty-field-rhs-return",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.observed.c",
+      "sourceSHA256": "fb4b859c02e7c91d12ed93d6ad7d1562c711a52980c8fe499f54b1d633042a7a",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-field-rhs-return-msvc-low.exe",
+      "imageSHA256": "1147bdbef33ae537cb4b6abfe3846e277ea4d0db0149e2693b68346ab03e345a",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "empty-field-rhs-return",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-field-rhs-return.observed.c",
+      "sourceSHA256": "fb4b859c02e7c91d12ed93d6ad7d1562c711a52980c8fe499f54b1d633042a7a",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-field-rhs-return-msvc-optimized.exe",
+      "imageSHA256": "54f62b8f0dd6bbdbf4161e50b656f2c277f7713c77306bb4c355b4bc2f5d174e",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "empty-nested-field",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.observed.c",
+      "sourceSHA256": "2a040bf1ced61f49489558a08724886d71881d50b9f4d6ae7fcb70108fdb3b68",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-nested-field-msvc-low.exe",
+      "imageSHA256": "16d072ae9d4773c54272d8dd6bf9b7dea5f2c19e21a8e9e57ad8285eb3694f89",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:8\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6OA0K",
+      "trap": 0,
+      "value": 8
+    },
+    {
+      "name": "empty-nested-field",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-nested-field.observed.c",
+      "sourceSHA256": "2a040bf1ced61f49489558a08724886d71881d50b9f4d6ae7fcb70108fdb3b68",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\empty-nested-field-msvc-optimized.exe",
+      "imageSHA256": "588c7dada75f51c31222eab7060a1294dcf1112d65b9ebcf13aab7c3155b1df4",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:8\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6OA0K",
+      "trap": 0,
+      "value": 8
+    },
+    {
+      "name": "construct-read",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.observed.c",
+      "sourceSHA256": "5e64a41e509098efd25a1aa992f0dd00e0c9516ee418df0d86a9b2f18c8b55eb",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\construct-read-msvc-low.exe",
+      "imageSHA256": "8097b81e4640e4414aa41fad4ddeb20da389af8f241c013d36182aabe238c902",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:17\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6MTcNCg==",
+      "trap": 0,
+      "value": 17
+    },
+    {
+      "name": "construct-read",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.observed.c",
+      "sourceSHA256": "5e64a41e509098efd25a1aa992f0dd00e0c9516ee418df0d86a9b2f18c8b55eb",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\construct-read-msvc-optimized.exe",
+      "imageSHA256": "8798164ac3ae0d83dbc1b76ccb18db8ef3e0b26996e4f539ca6c0c4d6962cc41",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:17\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6MTcNCg==",
+      "trap": 0,
+      "value": 17
+    },
+    {
+      "name": "field-overflow",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.observed.c",
+      "sourceSHA256": "13f11c7cf6be42e0eb23392d97dd59c13ae54ce5c71d76dd34ad692b95a35d21",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\field-overflow-msvc-low.exe",
+      "imageSHA256": "cd17331144595a7989bfacb67ffe782d74c7084ab029103e3b82ede73f4df0ee",
+      "exit": 121,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 1,
+      "value": 0
+    },
+    {
+      "name": "field-overflow",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.observed.c",
+      "sourceSHA256": "13f11c7cf6be42e0eb23392d97dd59c13ae54ce5c71d76dd34ad692b95a35d21",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\field-overflow-msvc-optimized.exe",
+      "imageSHA256": "2b6f27940e8a75683ec849d42ac2b41db5b0d8f7208152e92a9ca4d4347c2fa8",
+      "exit": 121,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 1,
+      "value": 0
+    },
+    {
+      "name": "standalone-main",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.c",
+      "sourceSHA256": "ed89570fe24ac928681d88524870e5c46fc8e4d3c84286fec65390ee34b39bb7",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\standalone-main-msvc-low.exe",
+      "imageSHA256": "1525444dde7f3effd05eddb1184d202c7207b872288d050a8dc10d26af2162e8",
+      "exit": 17,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 17
+    },
+    {
+      "name": "standalone-main",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\construct-read.c",
+      "sourceSHA256": "ed89570fe24ac928681d88524870e5c46fc8e4d3c84286fec65390ee34b39bb7",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\standalone-main-msvc-optimized.exe",
+      "imageSHA256": "1e339c9e8fc675cd2d62b7ef8aabe2fb4c724416e1ea658d3cb2c5888771cb7d",
+      "exit": 17,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 17
+    },
+    {
+      "name": "standalone-trap",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.c",
+      "sourceSHA256": "bb0a092472017e61acd7346d7e57817816fa079656bd1fd1f1765567f4c544f6",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\standalone-trap-msvc-low.exe",
+      "imageSHA256": "676717a4516f11a53e1ca71834b5f398110b2fb0a994446d81b1f6b0b399a10e",
+      "exit": 121,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 1,
+      "value": 0
+    },
+    {
+      "name": "standalone-trap",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\field-overflow.c",
+      "sourceSHA256": "bb0a092472017e61acd7346d7e57817816fa079656bd1fd1f1765567f4c544f6",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\standalone-trap-msvc-optimized.exe",
+      "imageSHA256": "630886563f81dd579ca6d193cc372cae98bd3c9df76729dd06dec0f7e385bba2",
+      "exit": 121,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 1,
+      "value": 0
+    },
+    {
+      "name": "standalone-empty",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.c",
+      "sourceSHA256": "e9cc1f52e5d709785b14e0afe0ed342fafcc25995f60bc78cdc810c1a020aad8",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\standalone-empty-msvc-low.exe",
+      "imageSHA256": "88d723947cc8cbf7e8b30014e2c7f434eec837d9441a5b66b73e326c8eeccba2",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 3
+    },
+    {
+      "name": "standalone-empty",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\empty-return.c",
+      "sourceSHA256": "e9cc1f52e5d709785b14e0afe0ed342fafcc25995f60bc78cdc810c1a020aad8",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\native\\standalone-empty-msvc-optimized.exe",
+      "imageSHA256": "6a4a70e2e885df11bb1e90d0e79e968631e8c108b3d57377cd674b65e754b153",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 3
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\.bun\\bin\\bun.EXE",
+        "tools/run-go.ts",
+        "build",
+        "-o",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\oracle.exe",
+        "./cmd/fairyc-lexer-file-oracle"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\oracle.exe",
+        "--nominal-mir",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\full-reference.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_nominal_mir.py",
+        "--images",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+        "--reference",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\reference.json",
+        "--receipt",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\mir\\receipt.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "PASS: 12 nominal MIR interpreter comparisons\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_c.py",
+        "--nominal",
+        "--images",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\dev.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\release.exe",
+        "--reference",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\reference.json",
+        "--native-runner",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+        "--receipt",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-struct-field-store\\c\\receipt.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "PASS: 36 C CLI executions; 6 identical C units; 18 native executions\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\.bun\\bin\\bun.EXE",
+        "tools/run-go.ts",
+        "test",
+        "./internal/compiler",
+        "-run",
+        "TestEmptyStruct|TestPlainStructFieldStore|TestNestedFieldStore",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/compiler\t20.151s\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\.bun\\bin\\bun.EXE",
+        "tools/run-go.ts",
+        "test",
+        "./internal/hir",
+        "./internal/mir",
+        "./internal/interpreter",
+        "./internal/cbackend",
+        "./internal/semantic",
+        "-run",
+        "Test.*(FieldStore|PlainViewStruct|PlainStruct|EmptyStruct|StructView|StructDeref|MutableStruct)",
+        "-count=1"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/hir\t0.074s\nok  \tgithub.com/0disoft/fairyc/internal/mir\t0.048s\nok  \tgithub.com/0disoft/fairyc/internal/interpreter\t0.050s\nok  \tgithub.com/0disoft/fairyc/internal/cbackend\t0.046s\nok  \tgithub.com/0disoft/fairyc/internal/semantic\t0.072s\n",
+      "stderr": ""
+    }
+  ],
+  "additionalValidation": {
+    "vet": {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "vet",
+        "./internal/hir",
+        "./internal/mir",
+        "./internal/compiler",
+        "./internal/semantic",
+        "./cmd/fairyc-lexer-file-oracle"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "diffCheck": {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "scope": {
+    "goInterpreterReferenceCases": 6,
+    "newReferenceCases": 3,
+    "fixedNativeControls": 0,
+    "windowsNativeProfiles": [
+      "low",
+      "optimized"
+    ],
+    "goNativeConstructionCases": 11,
+    "storedValueGraphAllowsPrivateEmpty": true,
+    "arrayAndViewElementAdmissionUnchanged": true,
+    "emptyReprCRejected": true,
+    "sdkExportsUnchanged": true,
+    "grammarUnchanged": true,
+    "runtimeUnchanged": true,
+    "linuxNativeDeferred": true,
+    "performanceMeasured": false,
+    "fullRepositoryTestsRun": false,
+    "remaining": [
+      "candidate arrays/strings/views are the next separate unit",
+      "Linux consolidated verification remains deferred"
+    ]
+  }
+}

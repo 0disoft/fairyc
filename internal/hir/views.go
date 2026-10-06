@@ -139,13 +139,23 @@ func InlineArrayField(value Type, fields func(Type) ([]Type, bool)) bool {
 // stack and completed-node memoization bound work by the reachable type graph,
 // including deep chains and repeated sibling types in untrusted MIR.
 func PlainViewStruct(element Type, fields func(Type) ([]Type, bool)) bool {
+	return plainStructGraph(element, fields, false)
+}
+
+// PlainStoredStruct uses the same acyclic graph for field replacement, but
+// admits fieldless private values. View element admission remains nonempty.
+func PlainStoredStruct(element Type, fields func(Type) ([]Type, bool)) bool {
+	return plainStructGraph(element, fields, true)
+}
+
+func plainStructGraph(element Type, fields func(Type) ([]Type, bool), allowEmpty bool) bool {
 	type frame struct {
 		typ    Type
 		fields []Type
 		next   int
 	}
 	first, ok := fields(element)
-	if !ok || len(first) == 0 {
+	if !ok || !allowEmpty && len(first) == 0 {
 		return false
 	}
 	stack := []frame{{typ: element, fields: first}}
@@ -181,7 +191,7 @@ func PlainViewStruct(element Type, fields func(Type) ([]Type, bool)) bool {
 			continue
 		}
 		nested, ok := fields(child)
-		if !ok || len(nested) == 0 {
+		if !ok || !allowEmpty && len(nested) == 0 {
 			return false
 		}
 		state[child] = 1

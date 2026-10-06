@@ -112,7 +112,7 @@ parameters. The interpreter remains fail-closed on every foreign call.
 
 Fieldless structs without `@repr(C)` use a private one-byte C11 transport with an
 initialized dummy member. The member is not a Fairy field; constructors, value
-copies, arguments, returns and nesting retain the nominal type. This representation
+copies, arguments, returns, nesting and plain-struct field replacement retain the nominal type. This representation
 does not admit empty `@repr(C)` records or change the target layout engine's empty
 aggregate rejection.
 

@@ -18,11 +18,6 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--images',nargs=2,required=True);parser.add_argument('--reference',required=True);parser.add_argument('--native-runner',required=True);parser.add_argument('--receipt',required=True);parser.add_argument('--nominal',action='store_true')
     args=parser.parse_args(); images=list(map(lambda x:Path(x).resolve(),args.images)); reference=Path(args.reference).resolve();runner=Path(args.native_runner).resolve();receipt=Path(args.receipt).resolve();directory=receipt.parent;directory.mkdir(parents=True,exist_ok=True)
     data=json.loads(reference.read_text(encoding='utf-8'));fixtures=data['fixtures'];assert data['schema']==('fairyc.nominal-mir-oracle/v1' if args.nominal else 'fairyc.mir-file-oracle/v1');assert len(fixtures)<=120 and all(f['admitted'] for f in fixtures)
-    if args.nominal:
-        # The Go bootstrap currently rejects empty-struct field stores. Use an
-        # explicit fixed expectation for this extra native control, not a Go claim.
-        source=b'module main;struct E{}struct B{E e;i32 n;}fn i32 main(){var b=B{.e=E{},.n=1};b.e={b.n=9;E{}};return b.n;}'
-        fixtures.append(dict(name='empty-field-rhs-effects',inputHex=source.hex(),admitted=True,outcome=dict(Kind='return',Value=9),outcomeOrigin='fixed-native-control'))
     rows=[];jobs=[];expected={};units=[]
     for fixture in fixtures:
         source=bytes.fromhex(fixture['inputHex']);path=directory/(fixture['name']+'.fy');path.write_bytes(source);before=sha(path)

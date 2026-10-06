@@ -77,3 +77,20 @@ The new native trap case uses a mutable local initialized from a function input
 and passes dev/release; it validates runtime failure before final replacement.
 Exact baseline/current sources, argv, output and hashes are retained in the review
 receipt. Linux execution remains deferred.
+
+## Fieldless value correction (2026-10-06)
+
+After private fieldless construction became executable, field replacement still
+rejected the same values. Field-store admission now includes private empty leaves
+and structs containing them, through direct or nested plain-struct fields.
+The shared acyclic graph walker has a separate stored-value entry point; array
+and view element admission, field borrowing and dereference stores keep their
+existing nonempty graph. Empty `@repr(C)` records remain rejected.
+
+The selected receiver is retained before RHS effects. Sibling writes, root
+replacement and early returns use the existing field-store execution paths.
+The interpreter and C backend required no new representation or runtime code.
+Focused compiler/MIR tests and Windows low/optimized native execution passed;
+candidate empty-field checks now use Go-interpreter outcomes rather than a fixed
+native expectation. Evidence: `docs/ops/evidence/empty-struct-field-store-20261006.json`.
+SDK, language, grammar and wire versions are unchanged. Linux remains deferred.

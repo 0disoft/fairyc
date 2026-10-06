@@ -26,6 +26,11 @@ func TestVerifyPlainStructFieldStore(t *testing.T) {
 		if failures := Verify(p); len(failures) != 0 {
 			t.Fatalf("valid nested=%v: %+v", nested, failures)
 		}
+		empty := makeProgram(nested)
+		empty.StructTypes[2].Fields = nil
+		if failures := Verify(empty); len(failures) != 0 {
+			t.Fatalf("valid private empty leaf nested=%v: %+v", nested, failures)
+		}
 		for name, mutate := range map[string]func(*Program){
 			"missing-field":  func(p *Program) { p.Functions[0].Blocks[0].Operations[0].Field = "missing" },
 			"wrong-receiver": func(p *Program) { p.Functions[0].Blocks[0].Operations[0].Operands[0].Local = 6 },
@@ -39,7 +44,10 @@ func TestVerifyPlainStructFieldStore(t *testing.T) {
 			"borrow-leaf":        func(p *Program) { p.StructTypes[2].Fields[0].Type = hir.SharedBorrow(hir.TypeI64) },
 			"pointer-leaf":       func(p *Program) { p.StructTypes[2].Fields[0].Type = hir.RawPointer(hir.TypeI64, true) },
 			"cycle":              func(p *Program) { p.StructTypes[2].Fields[0].Type = root },
-			"empty-struct":       func(p *Program) { p.StructTypes[2].Fields = nil },
+			"empty-repr-c": func(p *Program) {
+				p.StructTypes[2].Fields = nil
+				p.StructTypes[2].ReprC = true
+			},
 			"missing-definition": func(p *Program) { p.StructTypes = p.StructTypes[:2] },
 			"immediate-aggregate": func(p *Program) {
 				p.Functions[0].Blocks[0].Operations[0].Operands[1] = Operand{Kind: OperandI64, I64: 42}

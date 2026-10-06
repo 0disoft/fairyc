@@ -14,6 +14,7 @@ func TestPlainViewStructGraph(t *testing.T) {
 		{"scalar", map[Type][]Type{"Root": {TypeBool, TypeU8, TypeI32, TypeI64, TypeU32, TypeUSize}}, true},
 		{"diamond", map[Type][]Type{"Root": {"Left", "Right"}, "Left": {"Leaf"}, "Right": {"Leaf", "Leaf"}, "Leaf": {TypeI64}}, true},
 		{"empty", map[Type][]Type{"Root": {}}, false},
+		{"nested-empty", map[Type][]Type{"Root": {"Child", "Child"}, "Child": {}}, false},
 		{"missing", map[Type][]Type{"Root": {"Missing"}}, false},
 		{"self-cycle", map[Type][]Type{"Root": {"Root"}}, false},
 		{"indirect-cycle", map[Type][]Type{"Root": {"Child"}, "Child": {"Root"}}, false},
@@ -29,6 +30,10 @@ func TestPlainViewStructGraph(t *testing.T) {
 			got := PlainViewStruct("Root", func(value Type) ([]Type, bool) { calls[value]++; fields, ok := item.graph[value]; return fields, ok })
 			if got != item.want {
 				t.Fatalf("got %v want %v", got, item.want)
+			}
+			stored := PlainStoredStruct("Root", func(value Type) ([]Type, bool) { fields, ok := item.graph[value]; return fields, ok })
+			if want := item.want || item.name == "empty" || item.name == "nested-empty"; stored != want {
+				t.Fatalf("stored graph got %v want %v", stored, want)
 			}
 			for value, count := range calls {
 				if count != 1 {

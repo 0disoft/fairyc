@@ -1580,9 +1580,10 @@ portable `verify_c.py --nominal` harness invokes the existing native C runner;
 scripts provide fixtures and observations, not product parsing or C generation.
 It compares Go-interpreter outcomes for constructors, initializer ordering,
 copied arguments, nested/sibling updates, control flow, traps and defer traces.
-An extra fixed native control checks RHS effects when replacing an empty field:
-the Go bootstrap still rejects that field-store shape, so this case is explicitly
-not a Go differential result. `@repr(C)`, resources, arrays/views, enums, generics
+The initial run used a fixed native expectation for an empty-field RHS because
+the Go bootstrap rejected that store. The field-store correction now admits it,
+and `verify_c.py` takes that expectation from the Go MIR interpreter, alongside
+empty-field early return and nested replacement. `@repr(C)`, resources, arrays/views, enums, generics
 and multi-file nominal types remain outside this candidate component.
 
 Windows MSVC development/release evidence, raw invocations, expected outcomes,
@@ -1590,10 +1591,17 @@ source and compiler identities and EXE hashes are recorded in
 `docs/ops/evidence/nominal-c-file-cli-20261006.json`. Linux native execution is
 deferred to the owner's consolidated batch; no performance measurement is claimed.
 
-The focused run passed 48 nominal MIR comparisons, 74 nominal C CLI runs,
+The initial focused run passed 48 nominal MIR comparisons, 74 nominal C CLI runs,
 56 nominal native executions (24 Go-reference cases plus one fixed control and
 three standalone images across both profiles), 58 nominal type/HIR/MIR/C CLI
 controls, 20 native scalar regressions and three native API tests per profile.
+
+The field-store follow-up passed 12 MIR comparisons, 36 C CLI runs and 18 Windows
+native executions, restricted to three corrected cases and three prior controls.
+All six expected outcomes came from the Go interpreter. Raw invocations, source
+digests, reused candidate/compiler identities and fresh native EXE hashes are in
+`docs/ops/evidence/empty-struct-field-store-20261006.json`; the original evidence
+above retains its historical fixed-control classification.
 
 ## Cost baseline
 

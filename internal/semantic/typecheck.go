@@ -935,7 +935,7 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		if borrowed {
 			rootType, _, _ = hir.BorrowElement(rootType)
 		}
-		if depth > 1 && ((!hir.PlainViewField(target.Type) && !c.analyzer.inlineArrayField(target.Type) && !c.analyzer.plainViewStruct(target.Type)) || !c.analyzer.plainViewStruct(rootType)) {
+		if depth > 1 && ((!hir.PlainViewField(target.Type) && !c.analyzer.inlineArrayField(target.Type) && !hir.PlainStoredStruct(target.Type, c.analyzer.plainStructFields)) || !hir.PlainStoredStruct(rootType, c.analyzer.plainStructFields)) {
 			return false
 		}
 		if borrowed {

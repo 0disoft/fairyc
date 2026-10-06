@@ -47,7 +47,7 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	if _, mutable, borrowed := hir.BorrowElement(owner.Type); borrowed && !mutable {
 		return unsupported
 	}
-	if len(fields) > 0 && ((!hir.PlainViewField(target.Type) && !l.properties.inlineArrayField(target.Type) && !l.properties.plainViewStruct(target.Type)) || !l.properties.plainViewStruct(fieldAggregateType(owner.Type))) {
+	if len(fields) > 0 && ((!hir.PlainViewField(target.Type) && !l.properties.inlineArrayField(target.Type) && !plainStoredStruct(target.Type, l.properties.Struct)) || !plainStoredStruct(fieldAggregateType(owner.Type), l.properties.Struct)) {
 		return unsupported
 	}
 	receiver, err := l.lowerExpression(owner)
@@ -57,7 +57,7 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	if l.blockTerminated(l.current) {
 		return nil
 	}
-	if len(fields) > 0 || l.properties.inlineArrayField(target.Type) || l.properties.plainViewStruct(target.Type) {
+	if len(fields) > 0 || l.properties.inlineArrayField(target.Type) || plainStoredStruct(target.Type, l.properties.Struct) {
 		if _, _, borrowed := hir.BorrowElement(owner.Type); borrowed {
 			saved := l.newTemporary()
 			l.appendOperation(Operation{Kind: OperationAssign, Span: target.Span, DestinationLocal: saved, Operands: []Operand{receiver}})
