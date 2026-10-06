@@ -2154,7 +2154,46 @@ checks both payloads/captures and determinism, and rejects seven forged builtin
 layouts plus mismatched Result/enum type categories. `verify_results.py --phase
 hir` compares typed acceptance and HIR bytes in both candidate profiles.
 Evidence: `docs/ops/evidence/candidate-result-hir-20261007.json`.
-Result MIR/native acceptance, propagation and must-use Flow remain later units.
+Version 0.36.0 retained HIR only; the following unit adds MIR/native acceptance.
+Propagation and must-use Flow remain later units.
+
+## Scalar Result MIR and native execution
+
+Version 0.37.0 executes both alternatives of the 36 ordered scalar
+`Result<T,E>` instances. The owned layouts survive HIR destruction and use the
+existing verified tagged operations: 21 constructs, 22 tests a member and 23
+captures its typed payload. Tag 0 is `.ok`, tag 1 is `.err`. The MIR wire format
+remains `fairyc.enum-payload-mir/v1`; no duplicate Result-only operation set is
+introduced. Copies, assignments, arguments, return values, if/switch joins and
+loop-carried values retain the exact ordered Result type. Subjects and earlier
+call arguments are frozen before subsequent effects. An early return during
+payload evaluation emits neither the parent construction nor unused edges.
+
+The private C representation is `struct fy_r_<success-type>_<error-type>` with
+a tag and independently typed union members. Captures check the active tag
+before reading the union and trap with category 7 on mismatch. Discarded
+captures do not read payload storage. Option and declaration-owned enums retain
+their separate C types. This is internal C11 transport, not a public tagged ABI.
+
+`tests/mir_results.fy` rejects 18 executable MIR mutations for each alternative,
+covering instance/tag/payload/type and initialization errors, and verifies that
+failed MIR/C output preserves the existing buffer. Both development and release
+native API tests pass. `verify_result_execution.py` observes both candidate
+profiles in all four CLI modes, then executes the generated C in low/optimized
+MSVC profiles. Its 657 CLI observations and 116 native executions cover all 36
+pairs in both alternatives, copy/call/return, written arm order, frozen subjects,
+terminal arms, loops, scalar boundary values and payload traps. Four of those
+native executions are deliberately corrupted generated-C tag/branch controls:
+both inactive-payload directions trap 7. They are not valid Fairy source tests.
+
+Emit `samples/result-c-demo.fy` with `--c-file`; the sample asserts an i64 value
+above i32 range and a bool error. Six additional native executions cover this
+sample and existing Option/user-enum coexistence. Source, SDK/compiler/image
+digests and raw observations are retained in
+`docs/ops/evidence/candidate-result-native-20261007.json`.
+Propagation, must-use, nested/aggregate/resource payloads and tagged aggregate
+storage remain units 9..20 or later. Linux validation stays deferred to the
+consolidated batch; this unit makes no self-hosting or performance claim.
 
 The first two release builds hit the existing bootstrap's 60-second MSVC
 command limit. Release validation uses a separate local bootstrap built with a

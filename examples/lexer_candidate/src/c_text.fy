@@ -18,6 +18,7 @@ pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
     if (code == 11) { return text(out,s,b"struct fy_bytes_mut"); }
     if (code == 9 || code == 10) { return text(out,s,if (code == 9) { b"struct fy_text" } else { b"struct fy_bytes" }); }
     if (tagged::option(code)) { return text(out,s,b"struct fy_o_") && number(out,s,tagged::inner(code) as usize); }
+    if (tagged::result(code)) { return text(out,s,b"struct fy_r_") && number(out,s,tagged::success(code) as usize) && text(out,s,b"_") && number(out,s,tagged::failure(code) as usize); }
     if (enums::valid(code)) { return text(out,s,b"struct fy_e_") && number(out,s,code as usize); }
     if (code >= 1024) { return text(out,s,b"struct fy_a_") && number(out,s,code as usize); }
     if (code >= 256) { return text(out,s,b"struct fy_s_") && number(out,s,code as usize); }

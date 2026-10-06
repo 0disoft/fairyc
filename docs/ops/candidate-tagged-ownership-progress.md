@@ -15,7 +15,7 @@ work remain deferred to the owner's consolidated batch.
 | 5 | Result success/error type identity and type checking | Complete: candidate-result-types-20261007.json; 36 ordered scalar pairs, argument/return/assignment rejection |
 | 6 | Result construction and exhaustive contextual patterns | Complete: candidate-result-patterns-20261007.json; contextual constructors, both payload types and terminal arms |
 | 7 | Owned Result HIR, payloads, bindings and source locations | Complete: candidate-result-hir-20261007.json; owned four-field layouts, captures/spans and seven forged layouts |
-| 8 | Result MIR/C execution for both alternatives | Pending |
+| 8 | Result MIR/C execution for both alternatives | Complete: candidate-result-native-20261007.json; 36 ordered pairs in both arms, 36 MIR mutations, 116 native executions and 6 sample/coexistence executions |
 | 9 | Postfix ? position and return-error compatibility checks | Pending |
 | 10 | Postfix ? success extraction and early error return execution | Pending |
 | 11 | Result must-use handling obligations | Pending |
