@@ -85,6 +85,26 @@ fn usize loop_end(ref h::Program p, h::Expression e) {
         }
     } return end;
 }
+fn usize held_end(ref h::Program p, usize id, h::Expression e) {
+    var usize end=loop_end(p,e);var usize i=1;
+    while(i<=h::expression_count(p)){
+        let parent=h::expression_at(p,i);let u32 kind=h::expression_code(parent.kind);
+        if((kind==13 || kind==17) && parent.left==id && parent.end>end){end=parent.end;}
+        if(kind==6){var usize j=0;while(j<parent.edge_count){if(h::edge_at(p,parent.edge_start+j)==id && parent.end>end){end=parent.end;}j+=1;}}i+=1;
+    }return end;
+}
+fn usize first(ref h::Program p, ref mut Context c, usize id, usize depth) {
+    let e=h::expression_at(p,id);let u32 kind=h::expression_code(e.kind);
+    if(depth>=64){discard fail(c,2,e.start,e.end);return e.start;}
+    if(kind==17){return first(p,c,e.left,depth+1);}
+    if(kind==7){let usize tail=h::block_at(p,e.block).tail;return if(tail==0){e.start}else{first(p,c,tail,depth+1)};}
+    if(kind==8){let usize yes=h::block_at(p,e.block).tail;if(yes==0 || e.alternative==0){return e.start;}let usize a=first(p,c,yes,depth+1);let usize b=first(p,c,e.alternative,depth+1);return if(a<b){a}else{b};}
+    if(kind==6){
+        let usize returned=summary(p,c,e.binding,depth+1);var usize i=0;while(i<h::function_count(p)){
+            let f=h::function_at(p,i);if(f.binding==e.binding){var usize j=0;while(j<f.parameter_count){if(h::edge_at(p,f.parameter_start+j)==returned){return first(p,c,h::edge_at(p,e.edge_start+j),depth+1);}j+=1;}}i+=1;
+        }
+    }return e.start;
+}
 fn usize root(ref h::Program p, usize id) {
     var usize current = id; var usize depth = 0; while (current != 0 && depth < 64) {
         let e = h::expression_at(p,current); let u32 kind = h::expression_code(e.kind);
@@ -93,13 +113,22 @@ fn usize root(ref h::Program p, usize id) {
     } return 0;
 }
 pub fn h::Problem check(ref h::Program p) {
+    // Parameter-origin summaries also apply when no explicit borrow/slice
+    // occurs in this module. Static literals alone retain the previous lane.
+    var bool needed = h::has_views(p); var usize parameter = 1;
+    while (!needed && parameter <= h::binding_count(p)) {
+        let b = h::binding_at(p,parameter);
+        needed = h::binding_code(b.kind) == 2 && h::type_code(b.type) == 10;
+        parameter += 1;
+    }
+    if (!needed) { return h::Problem { .code=0,.start=0,.end=0 }; }
     var Context c = Context { .initial=[0;1153],.last=[0;1153],.summary=[0;1153],.color=[0;1153],.work=0,.problem=h::Problem { .code=0,.start=0,.end=0 } };
     var usize i = 1; while (i <= h::statement_count(p)) {
         let s = h::statement_at(p,i); if (h::statement_code(s.kind) == 1) { c.initial[s.binding] = s.expression; } i += 1;
     }
     i = 1; while (i <= h::expression_count(p)) {
         let e = h::expression_at(p,i); if (h::expression_code(e.kind) == 3 && h::type_code(e.type) == 10) {
-            let usize end = loop_end(p,e); if (end > c.last[e.binding]) { c.last[e.binding] = end; }
+            let usize end = held_end(p,i,e); if (end > c.last[e.binding]) { c.last[e.binding] = end; }
         } i += 1;
     }
     i = 0; while (i < h::function_count(p)) {
@@ -117,13 +146,14 @@ pub fn h::Problem check(ref h::Program p) {
     }
     i = 1; while (i <= h::statement_count(p) && c.problem.code == 0) {
         let s = h::statement_at(p,i);
+        if(h::statement_code(s.kind)==11){let call=h::expression_at(p,s.expression);var usize j=0;while(j<call.edge_count){let arg=h::expression_at(p,h::edge_at(p,call.edge_start+j));let u32 type=h::type_code(arg.type);if(type==9 || type==10){discard fail(ref mut c,4,arg.start,arg.end);}j+=1;}}
         if (h::statement_code(s.kind) == 3) {
             let usize owner = root(p,s.target);
             if (origin(p,ref mut c,s.expression,0) != 0 && h::type_code(h::expression_at(p,s.target).type) == 10) { discard fail(ref mut c,2102,s.start,s.end); }
             var usize j = 1; while (j <= h::expression_count(p) && c.problem.code == 0) {
                 let e = h::expression_at(p,j); let usize loan = origin(p,ref mut c,j,0);
                 if (loan != 0 && loan == owner) {
-                    var usize end = loop_end(p,e); var usize k = 1;
+                    let usize start=first(p,ref mut c,j,0);var usize end = held_end(p,j,e); var usize k = 1;
                     while (k <= h::binding_count(p)) { if (c.initial[k] == j && c.last[k] > end) { end = c.last[k]; } k += 1; }
                     // Arguments stay held through later arguments and the call.
                     k = 1; while (k <= h::expression_count(p)) {
@@ -131,7 +161,9 @@ pub fn h::Problem check(ref h::Program p) {
                             var usize a = 0; while (a < call.edge_count) { if (h::edge_at(p,call.edge_start + a) == j && call.end > end) { end = call.end; } a += 1; }
                         } k += 1;
                     }
-                    if (e.start <= s.end && end >= s.start) { discard fail(ref mut c,2101,s.start,s.end); }
+                    // Source spans are half-open: an assignment ending at the borrow
+                    // start completes before the loan begins.
+                    if (start < s.end && end > s.start) { discard fail(ref mut c,2101,s.start,s.end); }
                 } j += 1;
             }
         } i += 1;

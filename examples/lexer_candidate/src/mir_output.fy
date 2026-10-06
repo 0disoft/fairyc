@@ -19,7 +19,7 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     if (problem.code != 0) { return problem.code; }
     let ref shapes::Table table = m::nominal(p); let bool nominal = shapes::count(table) != 0;
     let bool array = m::has_arrays(p);
-    if (!bytes::append(out,if (m::has_literals(p)) { b"fairyc.literal-mir/v1\nP\t" } else if (array) { b"fairyc.array-mir/v1\nP\t" } else if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
+    if (!bytes::append(out,if (m::has_views(p)) { b"fairyc.view-mir/v1\nP\t" } else if (m::has_literals(p)) { b"fairyc.literal-mir/v1\nP\t" } else if (array) { b"fairyc.array-mir/v1\nP\t" } else if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
     var usize index = 0;
     while (index < shapes::count(table)) {
         let shapes::Shape shape = shapes::at(table,index);
@@ -78,7 +78,7 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
         if (o.kind == 14) { if (!literals::hex(out,m::literal_text(p,id))) { return 3; } }
         else if (o.payload_end > o.payload_start) { if (!bytes::append(out,m::literal_text(p,id)).is_ok) { return 3; } }
         else if (!bytes::append_byte(out,45).is_ok) { return 3; }
-        if (nominal && (!bytes::append_byte(out,9).is_ok || !bytes::append_usize(out,o.argument_start).is_ok || !bytes::append_byte(out,9).is_ok || !bytes::append_usize(out,o.argument_count).is_ok)) { return 3; }
+        if ((nominal || m::has_views(p)) && (!bytes::append_byte(out,9).is_ok || !bytes::append_usize(out,o.argument_start).is_ok || !bytes::append_byte(out,9).is_ok || !bytes::append_usize(out,o.argument_count).is_ok)) { return 3; }
         if (!end(out)) { return 3; } id += 1;
     }
     id = 0;

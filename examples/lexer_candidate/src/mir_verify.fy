@@ -4,6 +4,7 @@ import mir_verify_shape as shape;
 import mir_verify_flow as flow;
 import mir_verify_arrays as arrays;
 import mir_verify_literals as literals;
+import mir_verify_views as views;
 
 // Scalar invariants V1001, V1002 and V1501. Ownership/borrow/Region/unsafe
 // invariants remain closed until the corresponding value forms are admitted.
@@ -17,5 +18,5 @@ pub fn m::Problem check(ref m::Program p) {
         let m::Problem result = flow::function(p,fid,ref mut budget);
         if (result.code != 0) { return result; } fid += 1;
     }
-    return shape::problem(0,0,0);
+    return views::check(p);
 }

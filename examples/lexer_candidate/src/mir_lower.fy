@@ -2,6 +2,7 @@ module mir_lower;
 import array_types as arrays;
 import mir_arrays as array;
 import hir_model as h;
+import hir_view_check as views;
 import hir_shapes as shapes;
 import mir_model as m;
 import mir_state as state;
@@ -61,6 +62,25 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         // Freeze source reads before later child expressions can assign/call.
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         if (state::emit(operations,blocks,c,state::operation(2,result,type,type,0,original,0,e.start,e.end)) == 0) { return 0; } return result;
+    }
+    if (kind == 16) {
+        let usize owner = c.locals[h::expression_at(input,e.left).binding];
+        if (owner == 0) { return state::fail(c,4,e.start,e.end); }
+        let u32 array_type = h::type_code(h::expression_at(input,e.left).type);
+        let usize result = state::local(locals,c,10,0,false,false,e.start,e.end);
+        if (state::emit(operations,blocks,c,state::operation(18,result,10,array_type,0,owner,0,e.start,e.end)) == 0) { return 0; } return result;
+    }
+    if (kind == 17) {
+        let usize owner = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth + 1); if (c.current == 0 || c.problem.code != 0) { return 0; }
+        let usize raw = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth + 1); if (c.current == 0 || c.problem.code != 0) { return 0; }
+        let usize start = state::local(locals,c,5,0,false,false,e.start,e.end);
+        if (state::emit(operations,blocks,c,state::operation(2,start,5,5,0,raw,0,e.start,e.end)) == 0) { return 0; }
+        var usize end = 0;
+        if (e.boolean) { end = state::local(locals,c,5,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(15,end,5,10,0,owner,0,e.start,e.end)) == 0) { return 0; } }
+        else { end = expression(input,locals,blocks,operations,edges,payload,c,e.alternative,depth + 1); if (c.current == 0 || c.problem.code != 0) { return 0; } }
+        let usize result = state::local(locals,c,10,0,false,false,e.start,e.end); var m::Operation o = state::operation(19,result,10,10,0,owner,start,e.start,e.end);
+        o.argument_start = v::len<usize>(edges); o.argument_count = 1;
+        if (!state::edge(edges,end,c) || state::emit(operations,blocks,c,o) == 0) { return 0; } return result;
     }
     if (kind == 15) {
         let ref u8[] data = h::literal_bytes(input,id);
@@ -344,6 +364,7 @@ fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v:
 }
 
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
+    let h::Problem proof = views::check(ref input); if (proof.code != 0) { return .err(m::Problem { .code=proof.code,.start=proof.start,.end=proof.end }); }
     let shapes::Table table = switch(shapes::copy(h::nominal(ref input))) { case .ok(value): { value } case .err(code): { return .err(m::Problem { .code, .start = 0, .end = 0 }); } };
     var state::Context c = state::empty(); var bytes::Buffer source = bytes::empty(); var bytes::Buffer payload = bytes::empty();
     var v::Vec<m::Target> targets = v::empty<m::Target>(); var v::Vec<m::Signature> signatures = v::empty<m::Signature>();

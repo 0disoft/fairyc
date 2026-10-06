@@ -1722,7 +1722,7 @@ struct fields, text indexing and writes through byte views remain outside this
 candidate slice. Linux native validation remains deferred to the consolidated
 batch. No performance or self-hosting completion is claimed.
 
-## Cost baseline
+## Shared array view HIR
 
 Version 0.24.0 adds owned HIR for shared `u8[N]` array borrows in an expected
 `ref u8[]` context and for half-open slicing of byte views. Bounds may be
@@ -1732,9 +1732,48 @@ rejects local escapes and mutation while a shared alias or call argument is
 still used. A loop-held descriptor remains live across its backedge.
 Non-Static local descriptors must be `let`; mixed-origin or recursive
 view-return summaries are not yet admitted. Parameter-derived returns preserve
-the single inferred parameter origin. MIR/C execution is the following step.
+the single inferred parameter origin. Version 0.25.0 connects these values to
+MIR/C execution below.
 The HIR lane passed 17 positive/negative CLI cases and the retained-graph native
 API test in development/release profiles.
+
+## Shared array views, slices and native C execution
+
+Version 0.25.0 executes shared byte-array borrows and half-open byte slices
+through verified MIR and private C11 transport. `--mir-file` publishes
+`fairyc.view-mir/v1`; `--c-file` emits pointer/length descriptors backed by the
+original named `u8[N]` array. Slice bounds are evaluated once, left to right,
+and checked before pointer arithmetic. Reversed and out-of-range slices trap
+with category 6; empty and one-past slices are valid.
+
+HIR tracks aliases, loop-held loans and descriptors held through later call
+arguments, index expressions and slice bounds. Writes before the borrow or
+after its last use are accepted. Half-open source spans keep adjacent completed
+writes separate from the borrow that follows. MIR independently recomputes
+Static, local-array and parameter origins; local-backed returns, unknown
+consumed descriptors and mixed return origins are rejected before C output.
+Invalid operation shapes and uninitialized bounds are rejected by the existing
+shape and flow checks. Failed rendering preserves the caller's output buffer.
+
+`samples/shared-view-c-demo.fy` demonstrates a local array, a parameter-derived
+return and slicing. Run `build/lexer-candidate.exe --c-file
+samples/shared-view-c-demo.fy` to emit its C unit. `verify_c.py --views` compares
+both candidate profiles with the Go MIR interpreter and runs the emitted C in
+MSVC low/optimized profiles. The source, tool hashes and exact observations
+are recorded in `docs/ops/evidence/view-c-file-cli-20261006.json`.
+The view lane covers 24 Go-oracle programs, 96 C CLI checks and 54 native
+executions, including reversed/out-of-range slices and early returns from bounds.
+Three native API tests per candidate profile check retained HIR, five malformed
+MIR controls and output preservation. Literal, array, nominal and scalar lanes
+provide the scoped regressions; the sample also runs in both C profiles.
+
+Mutable views, field/nested-array borrows, text slicing, C strings,
+view-bearing aggregate fields and mixed/recursive view-return origins remain
+outside this candidate slice. Public grammar, SDK and runtime are unchanged.
+Linux execution remains deferred to the requested consolidated batch;
+performance and self-hosting have not been measured here.
+
+## Cost baseline
 
 `scanner::storage` reports source, separately owned cooked and diagnostic-token
 bytes plus record counts. It does not report allocator capacity or peak heap/RSS.

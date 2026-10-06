@@ -6,6 +6,7 @@ import hir_shapes as shapes;
 import mir_verify_nominal as nominal;
 import mir_verify_arrays as arrays;
 import mir_verify_literals as literals;
+import mir_verify_views as views;
 
 pub fn m::Problem problem(u32 code, usize start, usize end) { return m::Problem { .code, .start, .end }; }
 pub fn bool local(ref m::Program p, usize id, usize function, u32 type) {
@@ -47,6 +48,7 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if (o.kind >= 18) { return views::operation(p,o); }
     if (o.kind >= 14) { return literals::operation(p,id,o); }
     if (o.kind >= 9) { return arrays::operation(p,o); }
     if (o.kind >= 6) { return nominal::operation(p,o); }
@@ -123,7 +125,7 @@ pub fn m::Problem check(ref m::Program p) {
         while (op != 0) {
             let m::Operation o = m::operation_at(p,op);
             if (!mark(ref mut ops,op) || !operation(p,op,o) || o.kind == 5 && (op != b.last || b.kind != 4 || b.check != op)) { return problem(1001,o.start,o.end); }
-            if (o.kind == 6 || o.kind == 9 || o.kind == 11) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
+            if (o.kind == 6 || o.kind == 9 || o.kind == 11 || o.kind == 19) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
             if (o.result != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,o.result); *count += 1; }
             if (o.kind == 1 && o.type == 6 && !o.boolean) { let ref mut u8[] flags = bytes::view_mut(ref mut false_constants); flags[o.result] = 1; }
             op = o.next;
