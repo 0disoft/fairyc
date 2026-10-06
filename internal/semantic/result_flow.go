@@ -190,6 +190,23 @@ func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Exp
 		return true
 	case syntax.KindIf:
 		return a.resultFlowIf(module, expression, environment, use)
+	case syntax.KindBinary:
+		if len(expression.Children) == 2 && (expression.Text == "&&" || expression.Text == "||") {
+			if !a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseIgnore}) {
+				return false
+			}
+			baseline := cloneResultEnvironment(environment)
+			right := cloneResultEnvironment(baseline)
+			rightReachable := a.resultFlowExpression(module, expression.Children[1], right, resultUse{kind: resultUseIgnore})
+			return mergeResultBranches(environment, baseline, []resultBranch{
+				{environment: baseline, reachable: true},
+				{environment: right, reachable: rightReachable},
+			})
+		}
+		for _, child := range expression.Children {
+			a.resultFlowExpression(module, child, environment, resultUse{kind: resultUseIgnore})
+		}
+		return true
 	case syntax.KindSwitch:
 		return a.resultFlowMatch(module, expression, environment, use)
 	case syntax.KindFieldExpr:

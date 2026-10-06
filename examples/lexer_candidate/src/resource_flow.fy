@@ -6,7 +6,7 @@ import std::vec as v;
 
 // Reachable inputs are Live=1, Dead=2 or their conservative union=3. All
 // roots start Dead; parameter/initializer production installs a live value.
-// Branch joins and loop-header equality receive their dedicated later gates.
+// Reachable branch joins require equal states; loop-edge equality is unit 20.
 pub struct Cell { u8 states; usize move; }
 fn void put(ref mut v::Vec<Cell> values,usize index,Cell value){let ref mut Cell slot=v::at_mut<Cell>(values,index);*slot=value;}
 fn void byte(ref mut v::Vec<u8> values,usize index,u8 value){let ref mut u8 slot=v::at_mut<u8>(values,index);*slot=value;}
@@ -35,14 +35,16 @@ fn state::Problem analyze(ref graph::Graph g){
             if(changed && *v::at<u8>(ref queued,successor-1)==0){if(!v::push<usize>(ref mut queue,successor).is_ok){return state::fail(12,n.start,n.end,0,0);}byte(ref mut queued,successor-1,1);}
         }
     }
-    var usize error=0;var usize move=0;i=1;
+    var usize error=0;var usize move=0;var u32 code=45;i=1;
     while(i<=count){let n=graph::at(g,i);
         if(*v::at<u8>(ref seen,i-1)!=0 && n.column!=0 && (n.kind==1 || n.kind==7)){
             let cell=*v::at<Cell>(ref input,(i-1)*width+n.column-1);
-            if(cell.states!=1){let chosen=earlier(g,error,i);if(chosen==i){error=i;move=cell.move;}}
-        }i+=1;
+            if(cell.states!=1){let chosen=earlier(g,error,i);if(chosen==i){error=i;move=cell.move;code=45;}}
+        }
+        if(*v::at<u8>(ref seen,i-1)!=0 && n.kind==8){var usize col=0;while(col<width){let cell=*v::at<Cell>(ref input,(i-1)*width+col);if(cell.states==3){let chosen=earlier(g,error,i);if(chosen==i){error=i;move=cell.move;code=46;}}col+=1;}}
+        i+=1;
     }
-    if(error==0){return state::ok();}let use=graph::at(g,error);var problem=state::fail(45,use.start,use.end,0,0);
+    if(error==0){return state::ok();}let use=graph::at(g,error);var problem=state::fail(code,use.start,use.end,0,0);
     if(move!=0){let at=graph::at(g,move);problem.move_start=at.start;problem.move_end=at.end;}return problem;
 }
 pub fn state::Problem check(ref names::Resolved resolved,ref v::Vec<state::Slot> types){

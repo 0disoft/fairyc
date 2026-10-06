@@ -2631,3 +2631,30 @@ alternatives and checks cleanup effects at the possible error return. Focused Go
 Resource/Result propagation tests and a newly built reference reproduce the
 correct E1101 rejection; the candidate source still checks with that reference.
 The receipt keeps original images and before/after tool identities separately.
+
+## Resource branch joins
+
+Version 0.50.0 marks `if`, `switch`, `&&` and `||` ownership joins in the
+shared control graph. All reachable incoming root states must agree, even when
+there is no subsequent read. A Live/Dead disagreement rejects E1104 at the join
+and retains the original transfer range. Both-moved branches, fresh replacement,
+branch-local owners and terminal alternatives are handled separately; an exited
+path does not participate in the join.
+
+`tests/resource_branches.fy` executes three compiler API tests per native profile
+for exact join/move spans, equal or exited paths and short-circuit consumption.
+`verify_resource_branches.py` checks 17 source fixtures across both profiles and
+all four check/HIR/MIR/C observation modes (136 observations). The unit-18 lane
+passes another 18 fixtures / 144 observations with the same images.
+Evidence is `docs/ops/evidence/candidate-resource-branches-20261007.json`.
+
+The Go reference previously treated a short-circuit right-hand side as always
+evaluated. Its Resource and Result analyses now merge the skipped and evaluated
+paths. Focused Go regressions pass, and a newly hashed reference agrees on all
+17 acceptance/rejection controls. It can emit additional E4101 Result obligations
+alongside E1104; this is not a claim of identical full diagnostic lists.
+The receipt retains raw observations and the pre-fix tool identity.
+
+Loop/backedge/exit equality remains unit 20. Resource source execution remains
+closed before MIR/C publication; the native tests above execute compiler logic.
+Linux, performance and stage1/stage2 promotion remain deferred.

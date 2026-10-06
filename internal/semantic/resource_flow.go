@@ -302,6 +302,23 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 		}
 	case syntax.KindIf:
 		reachable = a.resourceIf(module, expression, environment, mode)
+	case syntax.KindBinary:
+		if len(expression.Children) == 2 && (expression.Text == "&&" || expression.Text == "||") {
+			reachable = a.resourceExpression(module, expression.Children[0], environment, resourceRead)
+			if reachable {
+				baseline := cloneResourceEnvironment(environment)
+				right := cloneResourceEnvironment(baseline)
+				rightReachable := a.resourceExpression(module, expression.Children[1], right, resourceRead)
+				reachable = a.mergeResourceBranches(at, environment, baseline, []resourceBranch{
+					{environment: baseline, reachable: true},
+					{environment: right, reachable: rightReachable},
+				})
+			}
+		} else {
+			for _, child := range expression.Children {
+				a.resourceExpression(module, child, environment, resourceRead)
+			}
+		}
 	case syntax.KindWhile:
 		a.resourceWhile(module, expression, environment)
 	case syntax.KindSwitch:
