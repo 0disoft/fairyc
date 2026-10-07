@@ -167,6 +167,21 @@ REJECTIONS[31] = [
  ('ref-field-storage','struct S{ref i32 p;}fn i32 main(){return 0;}'),
 ]
 
+CASES[32]=[
+ ('shared-field','struct S{i32 n;}fn i32 main(){let S s=S{.n=7};let ref i32 p=ref s.n;return *p;}', '',7,0),
+ ('shared-nested','struct S{i32 n;}struct T{S s;}fn ref i32 field(ref T t){return ref t.s.n;}fn i32 main(){let T t=T{.s=S{.n=7}};return *field(ref t);}', '',7,0),
+ ('shared-index','fn i32 main(){let i64[2] a=[4000000000,7];let ref i64 p=ref a[0];assert(*p==4000000000);return 0;}', '',0,0),
+ ('shared-index-field','struct S{i32 n;}fn i32 main(){let S[2] a=[S{.n=7};2];let ref i32 p=ref a[1].n;return *p;}', '',7,0),
+ ('shared-resource-field','resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R r=R{.n=65};let ref i32 p=ref r.n;return *p;}', 'A',65,0),
+ ('shared-index-bounds','fn i32 main(){let i32[2] a=[1,2];let usize i=2;let ref i32 p=ref a[i];return *p;}', '',0,6),
+]
+REJECTIONS[32]=[
+ ('shared-field-owner-write','struct S{i32 n;}fn i32 main(){var S s=S{.n=7};let ref i32 p=ref s.n;s.n=9;return *p;}', 'E2101'),
+ ('shared-index-owner-write','fn i32 main(){var i32[2] a=[1,2];let ref i32 p=ref a[0];a[1]=9;return *p;}', 'E2101'),
+ ('shared-field-escape','struct S{i32 n;}fn ref i32 bad(){let S s=S{.n=7};return ref s.n;}fn i32 main(){return 0;}', 'E2102'),
+ ('shared-field-temporary','struct S{i32 n;}fn S make(){return S{.n=7};}fn i32 main(){let ref i32 p=ref make().n;return *p;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

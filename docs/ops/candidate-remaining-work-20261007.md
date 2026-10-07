@@ -63,7 +63,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 ## C. 자기 소스에 필요한 borrow·뷰 확장
 
 31. 완료: 스칼라·구조체·resource의 명시적 참조와 역참조, 스칼라 필드 읽기 및 함수 인자 실행. high-half 타입 ID와 MIR 주소/읽기 검증을 연결하고 지역·값 인자 반환, 대여 중 수정·이동을 거부. 14개 fixture, native 14회. 근거: `evidence/candidate-resource-references-20261007.json`. 필드 주소·참조 수정은 다음 단위에서 연결.
-32. 필드·인덱스 공유 대여에서 실제 소유자 추적.
+32. 완료: 중첩 구조체 필드·이름 있는 배열 원소 및 원소 필드의 공유 주소를 실제 저장 위치에서 생성. whole-owner origin과 검사한 인덱스를 유지하며 지역 escape·대여 중 수정·임시 root를 거부. 10개 fixture, native 12회와 주소 HIR/MIR API test. 필드 배열·다차원 원소의 주소는 현재 명시적 거부. 근거: `evidence/candidate-resource-projections-20261007.json`.
 33. 필드·인덱스 가변 대여와 참조를 통한 수정 지원.
 34. 공유 재대여, 소유자 수정 제한, 마지막 사용 이후 대여 종료 연결.
 35. 가변 재대여 중 부모 사용 제한과 종료 후 부모 사용 재개.

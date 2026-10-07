@@ -32,6 +32,17 @@ fn bool prepare_place(ref h::Program input, ref mut v::Vec<places::Step> path, r
     }return true;
 }
 
+// Project addresses into original storage, never into by-value field snapshots.
+fn usize address(ref h::Program p,ref mut v::Vec<m::Local> locals,ref mut v::Vec<m::Block> blocks,ref mut v::Vec<m::Operation> ops,ref mut v::Vec<usize> edges,ref mut bytes::Buffer payload,ref mut state::Context c,usize id,bool mutable,usize depth){
+    let e=h::expression_at(p,id);if(depth>=64){return state::fail(c,2,e.start,e.end);}let u32 type=h::type_code(e.type);let u32 kind=h::expression_code(e.kind);
+    if(kind==3 && refs::valid(type)){return expression(p,locals,blocks,ops,edges,payload,c,id,depth+1);}
+    let u32 borrowed=refs::make(type,mutable);if(borrowed==0){return state::fail(c,4,e.start,e.end);}var usize owner=0;var usize index=0;var u32 op=28;var u32 field=0;var u32 owner_type=type;
+    if(kind==3){owner=c.locals[e.binding];}
+    else if(kind==10){owner=address(p,locals,blocks,ops,edges,payload,c,e.left,mutable,depth+1);if(owner==0){return 0;}owner_type=v::at<m::Local>(locals,owner-1).type;op=32;field=ids::small_id(e.binding);}
+    else if(kind==13 && h::expression_code(h::expression_at(p,e.left).kind)==3 && arrays::valid(h::type_code(h::expression_at(p,e.left).type))){owner=c.locals[h::expression_at(p,e.left).binding];owner_type=h::type_code(h::expression_at(p,e.left).type);let usize raw=expression(p,locals,blocks,ops,edges,payload,c,e.right,depth+1);if(c.current==0 || c.problem.code!=0){return 0;}index=array::index(locals,blocks,ops,c,owner_type,raw,e.start,e.end);op=33;}
+    else{return state::fail(c,4,e.start,e.end);}if(owner==0){return state::fail(c,4,e.start,e.end);}let usize result=state::local(locals,c,borrowed,0,false,false,e.start,e.end);
+    return if(state::emit(ops,blocks,c,state::operation(op,result,borrowed,owner_type,field,owner,index,e.start,e.end))!=0){result}else{0};
+}
 fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, usize depth) {
     if (id == 0 || c.current == 0 || c.problem.code != 0) { return 0; }
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
@@ -136,7 +147,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         if(shapes::needs_drop(type)){return state::fail(c,4,e.start,e.end);}let usize owner=expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);let u32 owner_type=h::type_code(h::expression_at(input,e.left).type);return if(state::emit(operations,blocks,c,state::operation(29,result,type,owner_type,0,owner,0,e.start,e.end))!=0){result}else{0};
     }
     if (kind == 16) {
-        if(refs::valid(type)){let e_owner=h::expression_at(input,e.left);let usize owner=c.locals[e_owner.binding];if(owner==0){return state::fail(c,4,e.start,e.end);}let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(28,result,type,refs::inner(type),0,owner,0,e.start,e.end))!=0){result}else{0};}
+        if(refs::valid(type)){return address(input,locals,blocks,operations,edges,payload,c,e.left,e.boolean,depth+1);}
         let usize owner = c.locals[h::expression_at(input,e.left).binding];
         if (owner == 0) { return state::fail(c,4,e.start,e.end); }
         let u32 array_type = h::type_code(h::expression_at(input,e.left).type);

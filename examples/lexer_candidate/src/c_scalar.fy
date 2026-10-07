@@ -27,7 +27,7 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
 }
 pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref mut w::State s) {
     let m::Operation o = m::operation_at(p,id);
-    if(o.kind>=28){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b" = ") && (if(o.kind==28){w::text(out,s,b"&") && w::local(out,s,o.left)}else if(o.kind==29){w::text(out,s,b"*") && w::local(out,s,o.left)}else{w::local(out,s,o.left) && w::text(out,s,b"->fy_f_") && w::number(out,s,o.operator as usize)}) && w::text(out,s,b";\n");}
+    if(o.kind>=28){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b" = ") && (if(o.kind==28){w::text(out,s,b"&") && w::local(out,s,o.left)}else if(o.kind==29){w::text(out,s,b"*") && w::local(out,s,o.left)}else if(o.kind==33){w::text(out,s,b"&") && w::local(out,s,o.left) && w::text(out,s,b".fy_items[") && w::local(out,s,o.right) && w::text(out,s,b"]")}else{(o.kind!=32 || w::text(out,s,b"&")) && w::local(out,s,o.left) && w::text(out,s,b"->fy_f_") && w::number(out,s,o.operator as usize)}) && w::text(out,s,b";\n");}
     if(o.kind==26){return owned::operation(p,o,out,s);}
     if(o.kind==25 || o.kind==27){return true;}
     if(o.kind==24){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b" = ") && w::local(out,s,o.left) && w::text(out,s,b";\n");}

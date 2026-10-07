@@ -2780,3 +2780,9 @@ copyable field reads through references. Canonical reference IDs occupy a separa
 high-half namespace; MIR address/load validation and C pointers retain the
 original storage. Local/by-value parameter escape, owner mutation/move during
 a retained loan, and borrowed fields in ordinary records remain rejected.
+
+Unit 32 projects shared addresses through nested records and named fixed-array
+elements (including struct-element fields), without copying intermediate records.
+Checked index dominance and whole-root origins are verified before C emission.
+Temporary roots, field-array addresses and multi-dimensional element addresses
+remain explicitly unsupported in this bounded lane.

@@ -226,7 +226,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if (node.kind == 21 || node.kind == 22) {
         let u32 view_type = if (node.kind == 22) { 11 } else { 10 };
-        var usize root = node.left; while (syntax::expression_at(parsed,root).kind == 3) { root = syntax::expression_at(parsed,root).left; }
+        var usize root = node.left; while (syntax::expression_at(parsed,root).kind == 3 || node.kind==21 && (syntax::expression_at(parsed,root).kind==8 || syntax::expression_at(parsed,root).kind==9)) { root = syntax::expression_at(parsed,root).left; }
         if (syntax::expression_at(parsed,root).kind != 2) { return error(problem,16,node.start,node.end,10,0); }
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }

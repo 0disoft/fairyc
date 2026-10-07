@@ -34,7 +34,7 @@ pub fn m::Problem check(ref m::Program p) {
     i = 1; while (i <= m::block_count(p)) { let b = m::block_at(p,i); if (b.destination != 0) { let ref mut usize n = v::at_mut<usize>(ref mut definitions,b.destination); *n += 1; } i += 1; }
     i = 1; while (i <= m::operation_count(p)) {
         let o = m::operation_at(p,i);
-        if ((o.kind == 10 || o.kind == 11) && (*v::at<u32>(ref owners,o.right) != o.owner_type || *v::at<usize>(ref definitions,o.right) != 1 || m::local_at(p,o.right).parameter)) { return m::Problem { .code = 1501, .start = o.start, .end = o.end }; } i += 1;
+        if ((o.kind == 10 || o.kind == 11 || o.kind==33) && (*v::at<u32>(ref owners,o.right) != o.owner_type || *v::at<usize>(ref definitions,o.right) != 1 || m::local_at(p,o.right).parameter)) { return m::Problem { .code = 1501, .start = o.start, .end = o.end }; } i += 1;
     }
     return m::Problem { .code = 0, .start = 0, .end = 0 };
 }

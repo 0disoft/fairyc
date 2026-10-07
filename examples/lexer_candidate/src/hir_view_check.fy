@@ -32,7 +32,7 @@ fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
     c.work += 1; if (depth >= 64 || c.work > 1048576) { return fail(c,2,e.start,e.end); }
     if (!byte_view(h::type_code(e.type)) || kind == 15) { return 0; }
-    if (kind == 16) { return h::expression_at(p,e.left).binding; }
+    if (kind == 16) { let usize owner=root(p,e.left); if(owner!=0 && byte_view(h::type_code(h::binding_at(p,owner).type))){return origin(p,c,base(p,e.left),depth+1);}return owner; }
     if (kind == 17) { return origin(p,c,e.left,depth + 1); }
     if (kind == 3) {
         let b = h::binding_at(p,e.binding);
@@ -117,6 +117,7 @@ fn usize first(ref h::Program p, ref mut Context c, usize id, usize depth) {
         }
     }return e.start;
 }
+pub fn usize base(ref h::Program p,usize id){var usize at=id;var usize depth=0;while(at!=0 && depth<64){let e=h::expression_at(p,at);let u32 kind=h::expression_code(e.kind);if(kind==3){return at;}if(kind!=10 && kind!=13){return 0;}at=e.left;depth+=1;}return 0;}
 fn usize root(ref h::Program p, usize id) {
     var usize current = id; var usize depth = 0; while (current != 0 && depth < 64) {
         let e = h::expression_at(p,current); let u32 kind = h::expression_code(e.kind);
