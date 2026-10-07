@@ -117,7 +117,7 @@ fn usize first(ref h::Program p, ref mut Context c, usize id, usize depth) {
         }
     }return e.start;
 }
-pub fn usize base(ref h::Program p,usize id){var usize at=id;var usize depth=0;while(at!=0 && depth<64){let e=h::expression_at(p,at);let u32 kind=h::expression_code(e.kind);if(kind==3){return at;}if(kind!=10 && kind!=13){return 0;}at=e.left;depth+=1;}return 0;}
+pub fn usize base(ref h::Program p,usize id){var usize at=id;var usize depth=0;while(at!=0 && depth<64){let e=h::expression_at(p,at);let u32 kind=h::expression_code(e.kind);if(kind==3){return at;}if(kind!=10 && kind!=13 && !(kind==4 && h::operator_code(e.operator)==5)){return 0;}at=e.left;depth+=1;}return 0;}
 fn usize root(ref h::Program p, usize id) {
     var usize current = id; var usize depth = 0; while (current != 0 && depth < 64) {
         let e = h::expression_at(p,current); let u32 kind = h::expression_code(e.kind);

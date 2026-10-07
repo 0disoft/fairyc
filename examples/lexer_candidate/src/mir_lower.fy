@@ -35,6 +35,7 @@ fn bool prepare_place(ref h::Program input, ref mut v::Vec<places::Step> path, r
 // Project addresses into original storage, never into by-value field snapshots.
 fn usize address(ref h::Program p,ref mut v::Vec<m::Local> locals,ref mut v::Vec<m::Block> blocks,ref mut v::Vec<m::Operation> ops,ref mut v::Vec<usize> edges,ref mut bytes::Buffer payload,ref mut state::Context c,usize id,bool mutable,usize depth){
     let e=h::expression_at(p,id);if(depth>=64){return state::fail(c,2,e.start,e.end);}let u32 type=h::type_code(e.type);let u32 kind=h::expression_code(e.kind);
+    if(kind==4 && h::operator_code(e.operator)==5){let usize parent=expression(p,locals,blocks,ops,edges,payload,c,e.left,depth+1);if(parent==0){return 0;}let u32 old=v::at<m::Local>(locals,parent-1).type;if(mutable || !refs::mutable(old)){return parent;}let u32 shared=refs::make(type,false);let usize result=state::local(locals,c,shared,0,false,false,e.start,e.end);return if(state::emit(ops,blocks,c,state::operation(34,result,shared,old,0,parent,0,e.start,e.end))!=0){result}else{0};}
     if(kind==3 && refs::valid(type)){return expression(p,locals,blocks,ops,edges,payload,c,id,depth+1);}
     let u32 borrowed=refs::make(type,mutable);if(borrowed==0){return state::fail(c,4,e.start,e.end);}var usize owner=0;var usize index=0;var u32 op=28;var u32 field=0;var u32 owner_type=type;
     if(kind==3){owner=c.locals[e.binding];}

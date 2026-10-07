@@ -210,6 +210,19 @@ REJECTIONS[34]=[
  ('shared-implicit-binding','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref i32 child=p;return *child;}'),
 ]
 
+CASES[35]=[
+ ('mut-child-resume','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=ref mut *p;*child=8;let i32 value=*child;*p=9;return value+n;}', '',17,0),
+ ('mut-descendant-resume','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=ref mut *p;let ref mut i32 grand=ref mut *child;*grand=8;let i32 value=*grand;*child=9;*p=10;return value+n;}', '',18,0),
+ ('mut-call-return-resume','fn ref mut i32 id(ref mut i32 p){return p;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=id(p);*child=8;let i32 value=*child;*p=9;return value+n;}', '',17,0),
+ ('shared-explicit-deref','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref i32 child=ref *p;let i32 value=*child;*p=9;return value+n;}', '',16,0),
+]
+REJECTIONS[35]=[
+ ('mut-child-parent-write','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=ref mut *p;*p=9;return *child;}', 'E2101'),
+ ('mut-child-parent-read','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=ref mut *p;let i32 value=*p;return value+*child;}', 'E2101'),
+ ('mut-child-parent-alias','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 alias=p;let ref mut i32 child=ref mut *p;*alias=9;return *child;}', 'E2101'),
+ ('mut-from-shared-deref','fn i32 main(){var i32 n=7;var ref i32 p=ref n;let ref mut i32 child=ref mut *p;return *child;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

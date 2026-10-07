@@ -226,13 +226,13 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if (node.kind == 21 || node.kind == 22) {
         let u32 view_type = if (node.kind == 22) { 11 } else { 10 };
-        var usize root = node.left; while (syntax::expression_at(parsed,root).kind == 3 || (syntax::expression_at(parsed,root).kind==8 || syntax::expression_at(parsed,root).kind==9)) { root = syntax::expression_at(parsed,root).left; }
+        var usize root = node.left; while (syntax::expression_at(parsed,root).kind == 3 || (syntax::expression_at(parsed,root).kind==8 || syntax::expression_at(parsed,root).kind==9 || syntax::expression_at(parsed,root).kind==4 && bytes::equal(syntax::expression_text(parsed,root),b"*"))) { root = syntax::expression_at(parsed,root).left; }
         if (syntax::expression_at(parsed,root).kind != 2) { return error(problem,16,node.start,node.end,10,0); }
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }
         if(refs::referent(owner.type)){
             let u32 type=refs::make(owner.type,node.kind==22);if(expected!=0 && expected!=type){return error(problem,1,node.start,node.end,expected,type);}
-            if(node.kind==22 && (names::symbol_at(resolved,state::uses(tables,root-1)).kind!=4 && !refs::mutable(state::expressions(tables,root-1)) || node.left!=root && resources::valid(state::expressions(tables,root-1)))){return error(problem,4,node.start,node.end,0,owner.type);}return recorded(tables,id,value(type,owner.terminates));
+            if(node.kind==22 && (names::symbol_at(resolved,state::uses(tables,root-1)).kind!=4 && !refs::mutable(state::expressions(tables,root-1)) || node.left!=root && (resources::valid(state::expressions(tables,root-1)) || refs::valid(state::expressions(tables,root-1)) && (!refs::mutable(state::expressions(tables,root-1)) || resources::valid(refs::inner(state::expressions(tables,root-1))))))){return error(problem,4,node.start,node.end,0,owner.type);}return recorded(tables,id,value(type,owner.terminates));
         }
         if (expected!=view_type || !arrays::valid(owner.type) || arrays::source_element(parsed,owner.type) != 3) { return error(problem,16,node.start,node.end,10,owner.type); }
         if (view_type == 11 && names::symbol_at(resolved,state::uses(tables,root - 1)).kind != 4) { return error(problem,4,node.start,node.end,11,owner.type); }

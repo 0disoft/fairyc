@@ -24,7 +24,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     let Slot old = *v::at<Slot>(slots,id); if (old.generation != 0) { return old.generation; }
     var usize base = 0; var usize parent = 0; var usize receiver = old.receiver;
     var bool fresh = old.fresh; var usize start = e.start;
-    if (kind == 16) { base = id; fresh = true; receiver = e.left;var usize root=e.left;var usize steps=0;while(steps<64 && (h::expression_code(h::expression_at(p,root).kind)==10 || h::expression_code(h::expression_at(p,root).kind)==13)){root=h::expression_at(p,root).left;steps+=1;}if(refs::valid(h::type_code(h::expression_at(p,root).type))){parent=generation(p,c,slots,initial,summaries,root,depth+1);} }
+    if (kind == 16) { base = id; fresh = true; receiver = e.left;var usize root=e.left;var usize steps=0;while(steps<64 && (h::expression_code(h::expression_at(p,root).kind)==10 || h::expression_code(h::expression_at(p,root).kind)==13 || h::expression_code(h::expression_at(p,root).kind)==4 && h::operator_code(h::expression_at(p,root).operator)==5)){root=h::expression_at(p,root).left;steps+=1;}if(refs::valid(h::type_code(h::expression_at(p,root).type))){parent=generation(p,c,slots,initial,summaries,root,depth+1);} }
     else if(kind==25){parent=generation(p,c,slots,initial,summaries,e.left,depth+1);base=id;fresh=true;receiver=e.left;start=e.end;}
     else if (kind == 17) { parent = generation(p,c,slots,initial,summaries,e.left,depth+1); base = if (mutable) { id } else { parent }; fresh = mutable; receiver = e.left; start = e.end; }
     else if (kind == 3) {
