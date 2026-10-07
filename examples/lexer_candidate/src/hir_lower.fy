@@ -11,15 +11,17 @@ import name_resolution as names;
 import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
+import type_state as typing_ids;
 
 fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::Binding> bindings, ref mut v::Vec<h::Signature> signatures, ref mut v::Vec<state::Link> links, ref mut state::Context c) {
     let ref names::Resolved resolved = typing::resolved(input);
     let ref syntax::Parsed parsed = names::parsed(resolved);
-    var usize declaration=0;while(declaration<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,declaration);
-        // Typed cleanup is unit 21; until glue is owned by HIR, fail closed.
-        if(d.kind==6 && (syntax::block_statement_count(parsed,d.cleanup_body)!=0 || syntax::statement_at(parsed,d.cleanup_body).expression!=0)){discard state::fail(c,4,d.cleanup_start,d.cleanup_end);return false;}
-        declaration+=1;}
     if (syntax::source_view(parsed).len > 32768 || syntax::declaration_count(parsed) > 512 || names::symbol_count(resolved) > 1152 || syntax::expression_count(parsed) > 4096 || syntax::entry_count(parsed) > 1024 || syntax::statement_count(parsed) > 8192 || names::reference_count(resolved) > 4096) { discard state::fail(c,2,0,syntax::source_view(parsed).len); return false; }
+    var usize[513] dropping=[0;513];var usize declaration=0;var usize synthetic=names::symbol_count(resolved);
+    while(declaration<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,declaration);
+        if(d.kind==6 && (syntax::block_statement_count(parsed,d.cleanup_body)!=0 || syntax::statement_at(parsed,d.cleanup_body).expression!=0)){synthetic+=1;dropping[declaration+1]=synthetic;}
+        declaration+=1;}
+    if(synthetic>1152){discard state::fail(c,2,0,syntax::source_view(parsed).len);return false;}
     let usize length = if (syntax::expression_count(parsed) > 1024) { syntax::expression_count(parsed) } else { 1024 };
     var usize i = 0;
     while (i < length) { if (!v::push<state::Link>(links,state::Link { .use = 0, .entry = 0, .function = 0 }).is_ok) { discard state::fail(c,3,0,0); return false; } i += 1; }
@@ -27,10 +29,11 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     while (i <= names::symbol_count(resolved)) {
         let names::Symbol s = names::symbol_at(resolved,i);
         let h::Type type = state::type(typing::symbol_type(input,i));
-        if (s.kind < 1 || s.kind > 9 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
+        if (s.kind < 1 || s.kind > 10 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
         var usize target_module = module_index; var usize declaration = s.declaration;
         if (s.kind == 5) { let signature = names::external_signature(resolved,i); target_module = signature.module_index; declaration = signature.declaration; }
-        let h::Binding binding = h::Binding { .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner = s.owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
+        let usize owner=if(s.owner!=0 && names::symbol_at(resolved,s.owner).kind==9){dropping[names::symbol_at(resolved,s.owner).declaration]}else{s.owner};
+        let h::Binding binding = h::Binding { .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8 || s.kind==10){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
         if (!v::push<h::Binding>(bindings,binding).is_ok) { discard state::fail(c,3,s.start,s.end); return false; }
         if(s.kind==8){if(s.declaration==0 || s.declaration>length){discard state::fail(c,4,s.start,s.end);return false;}let ref mut state::Link link=v::at_mut<state::Link>(links,s.declaration-1);link.use=i;}
         if (s.entry != 0) {
@@ -44,10 +47,15 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
         if ((s.kind == 2 || s.kind == 3 || s.kind == 4) && (s.owner == 0 || s.scope == 0 || s.entry == 0 || h::type_code(type) == h::type_code(.Void))) { discard state::fail(c,4,s.start,s.end); return false; }
         i += 1;
     }
+    declaration=0;while(declaration<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,declaration);let usize target=dropping[declaration+1];
+        if(target!=0){
+            if(target!=v::len<h::Binding>(bindings)+1 || !v::push<h::Binding>(bindings,h::Binding{.kind=.DropFunction,.type=.Void,.start=d.cleanup_start,.end=d.cleanup_end,.owner=0,.scope=0,.module_index,.declaration=declaration+1,.signature_start=0,.signature_count=0}).is_ok){discard state::fail(c,3,d.cleanup_start,d.cleanup_end);return false;}
+            let ref mut state::Link link=v::at_mut<state::Link>(links,declaration);link.function=target;
+        }declaration+=1;}
     i = 1;
-    while (i <= v::len<h::Binding>(bindings)) {
+    while (i <= names::symbol_count(resolved)) {
         let names::Symbol s = names::symbol_at(resolved,i); let h::Binding b = *v::at<h::Binding>(bindings,i - 1);
-        if (b.owner != 0 && h::binding_code(v::at<h::Binding>(bindings,b.owner - 1).kind) != h::binding_code(.Function)) { discard state::fail(c,4,b.start,b.end); return false; }
+        if (b.owner != 0 && !h::function_kind(v::at<h::Binding>(bindings,b.owner - 1).kind)) { discard state::fail(c,4,b.start,b.end); return false; }
         let usize start = v::len<h::Signature>(signatures);
         if (s.kind == 1) {
             let syntax::Declaration function = syntax::declaration_at(parsed,s.declaration - 1); var usize entry = function.entry_start;
@@ -71,6 +79,14 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
         }
         let ref mut h::Binding stored = v::at_mut<h::Binding>(bindings,i - 1); stored.signature_start = start; stored.signature_count = v::len<h::Signature>(signatures) - start;
         i += 1;
+    }
+    i=names::symbol_count(resolved)+1;while(i<=v::len<h::Binding>(bindings)){
+        let h::Binding b=*v::at<h::Binding>(bindings,i-1);let usize start=v::len<h::Signature>(signatures);var usize receiver=0;var usize n=1;
+        while(n<=names::symbol_count(resolved)){let h::Binding candidate=*v::at<h::Binding>(bindings,n-1);if(h::binding_code(candidate.kind)==10 && candidate.owner==i){receiver=n;}n+=1;}
+        if(receiver==0 || v::len<h::Signature>(signatures)>=32768){discard state::fail(c,4,b.start,b.end);return false;}
+        let h::Type type=v::at<h::Binding>(bindings,receiver-1).type;
+        if(!v::push<h::Signature>(signatures,h::Signature{.type}).is_ok){discard state::fail(c,3,b.start,b.end);return false;}
+        let ref mut h::Binding stored=v::at_mut<h::Binding>(bindings,i-1);stored.signature_start=start;stored.signature_count=1;i+=1;
     }
     i = 0;
     while (i < names::reference_count(resolved)) {
@@ -298,6 +314,7 @@ pub fn Result<h::Program,h::Problem> lower(typing::Typed input, usize module_ind
     if (syntax::problem_count(parsed) != 0) { return .err(h::Problem { .code = 1, .start = 0, .end = syntax::source_view(parsed).len }); }
     var state::Context c = state::empty();
     var v::Vec<h::Function> functions = v::empty<h::Function>(); var v::Vec<h::Binding> bindings = v::empty<h::Binding>();
+    var v::Vec<h::Drop> drops=v::empty<h::Drop>();
     var v::Vec<h::Signature> signatures = v::empty<h::Signature>(); var v::Vec<state::Link> links = v::empty<state::Link>();
     var v::Vec<h::Expression> expressions = v::empty<h::Expression>(); var v::Vec<h::Statement> statements = v::empty<h::Statement>();
     var v::Vec<h::Block> blocks = v::empty<h::Block>(); var v::Vec<usize> edges = v::empty<usize>();
@@ -308,11 +325,13 @@ pub fn Result<h::Program,h::Problem> lower(typing::Typed input, usize module_ind
     var usize i = 0;
     while (i < syntax::declaration_count(parsed)) {
         let syntax::Declaration d = syntax::declaration_at(parsed,i);
-        if (d.kind == 3) {
+        let bool drop_body=d.kind==6 && state::function(ref links,i+1)!=0;
+        var usize receiver=0;
+        if (d.kind == 3 || drop_body) {
             c.owner = state::function(ref links,i + 1); c.loop_target = 0;
             if (c.owner == 0 || !state::enter(ref mut c)) { if (c.problem.code == 0) { discard state::fail(ref mut c,4,d.start,d.end); } return .err(c.problem); }
             let usize scope = state::scope(ref c); let usize start = v::len<usize>(ref edges); var usize entry = d.entry_start; var usize count = 0;
-            while (entry < d.entry_start + d.entry_count) {
+            while (!drop_body && entry < d.entry_start + d.entry_count) {
                 if (syntax::entry_at(parsed,entry).kind == 1) {
                     let usize binding = state::entry(ref links,entry + 1);
                     if (binding == 0 || v::at<h::Binding>(ref bindings,binding - 1).scope != scope) { discard state::fail(ref mut c,4,d.start,d.end); return .err(c.problem); }
@@ -320,12 +339,18 @@ pub fn Result<h::Program,h::Problem> lower(typing::Typed input, usize module_ind
                 }
                 entry += 1;
             }
-            let usize body = block(ref input,ref bindings,ref links,ref mut c,ref mut expressions,ref mut statements,ref mut blocks,ref mut edges,ref mut payload,d.body,0);
+            if(drop_body){var usize n=1;while(n<=v::len<h::Binding>(ref bindings)){let b=*v::at<h::Binding>(ref bindings,n-1);if(h::binding_code(b.kind)==10 && b.owner==c.owner){receiver=n;}n+=1;}
+                if(receiver==0 || v::at<h::Binding>(ref bindings,receiver-1).scope!=scope || !state::edge(ref mut edges,receiver,ref mut c)){return .err(h::Problem{.code=4,.start=d.cleanup_start,.end=d.cleanup_end});}count=1;
+            }
+            let usize body = block(ref input,ref bindings,ref links,ref mut c,ref mut expressions,ref mut statements,ref mut blocks,ref mut edges,ref mut payload,if(drop_body){d.cleanup_body}else{d.body},0);
             c.scope_count -= 1; if (c.problem.code != 0) { return .err(c.problem); }
-            if (!v::push<h::Function>(ref mut functions,h::Function { .binding = c.owner, .start = d.start, .end = d.end, .scope, .public = d.public, .body, .parameter_start = start, .parameter_count = count }).is_ok) { return .err(h::Problem { .code = 3, .start = d.start, .end = d.end }); }
+            if (!v::push<h::Function>(ref mut functions,h::Function { .binding = c.owner, .start = if(drop_body){d.cleanup_start}else{d.start}, .end = if(drop_body){d.cleanup_end}else{d.end}, .scope, .public = !drop_body && d.public, .body, .parameter_start = start, .parameter_count = count }).is_ok) { return .err(h::Problem { .code = 3, .start = d.start, .end = d.end }); }
         } else if (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
+        if(d.kind==6){let u32 type=98303+typing_ids::small_id(i+1);
+            if(!v::push<h::Drop>(ref mut drops,h::Drop{.type,.function=if(drop_body){c.owner}else{0},.receiver,.start=d.cleanup_start,.end=d.cleanup_end,.nonempty=drop_body}).is_ok){return .err(h::Problem{.code=3,.start=d.start,.end=d.end});}
+        }
         i += 1;
     }
-    let h::Program result = switch(h::assemble_nominal(source,payload,functions,bindings,expressions,statements,blocks,edges,signatures,module_index,nominal)) { case .ok(p): { p } case .err(code): { return .err(code); } };
+    let h::Program result = switch(h::assemble_resources(source,payload,functions,bindings,expressions,statements,blocks,edges,signatures,module_index,nominal,drops)) { case .ok(p): { p } case .err(code): { return .err(code); } };
     let h::Problem proof = views::check(ref result); if (proof.code != 0) { return .err(proof); } return .ok(result);
 }
