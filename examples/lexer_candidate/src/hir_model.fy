@@ -207,7 +207,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
-        if(binding_code(b.kind)==11){if(!b.unsafe_call || b.link_start>=b.link_end || b.link_end>ns || !ffi::valid(bytes::view(ref source)[b.link_start..b.link_end]) || !ffi::scalar(type_code(b.type),true)){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
+        if(binding_code(b.kind)==11){if(!b.unsafe_call || b.link_start>=b.link_end || b.link_end>ns || !ffi::valid(bytes::view(ref source)[b.link_start..b.link_end]) || !shapes::foreign_result(ref nominal,type_code(b.type))){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
             var usize n=0;while(n<b.signature_count){if(b.signature_start+n>=ntypes || !ffi::scalar(type_code(v::at<Signature>(ref signatures,b.signature_start+n).type),false)){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}n+=1;}
             var usize other=0;while(other<i){let old=*v::at<Binding>(ref bindings,other);if(binding_code(old.kind)==11 && old.link_end<=ns && bytes::equal(bytes::view(ref source)[old.link_start..old.link_end],bytes::view(ref source)[b.link_start..b.link_end])){if(type_code(old.type)!=type_code(b.type) || old.signature_count!=b.signature_count){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n=0;while(n<b.signature_count){if(type_code(v::at<Signature>(ref signatures,old.signature_start+n).type)!=type_code(v::at<Signature>(ref signatures,b.signature_start+n).type)){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n+=1;}}other+=1;}
         }else if(b.link_start!=0 || b.link_end!=0){return .err(Problem{.code=4,.start=b.start,.end=b.end});}

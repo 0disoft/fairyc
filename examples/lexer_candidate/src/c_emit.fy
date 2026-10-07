@@ -14,15 +14,15 @@ import c_literals as literals;
 import std::bytes as bytes;
 
 fn bool target(ref m::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){return if(m::target_at(p,id).foreign){w::text(out,s,m::foreign_text(p,id))}else{w::function(out,s,id)};}
-fn bool foreign_signature(ref m::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){let t=m::target_at(p,id);if(!w::text(out,s,b"extern ") || !w::type(out,s,t.result) || !w::text(out,s,b" ") || !target(p,id,out,s) || !w::text(out,s,b"(")){return false;}var usize i=0;while(i<t.signature_count){if(i!=0 && !w::text(out,s,b",")){return false;}if(!w::type(out,s,m::signature_at(p,t.signature_start+i))){return false;}i+=1;}return (t.signature_count!=0 || w::text(out,s,b"void")) && w::text(out,s,b");\n");}
+fn bool foreign_signature(ref m::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){let t=m::target_at(p,id);if(!w::text(out,s,b"extern ") || !w::owned_type(m::nominal(p),m::source_view(p),out,s,t.result) || !w::text(out,s,b" ") || !target(p,id,out,s) || !w::text(out,s,b"(")){return false;}var usize i=0;while(i<t.signature_count){if(i!=0 && !w::text(out,s,b",")){return false;}if(!w::owned_type(m::nominal(p),m::source_view(p),out,s,m::signature_at(p,t.signature_start+i))){return false;}i+=1;}return (t.signature_count!=0 || w::text(out,s,b"void")) && w::text(out,s,b");\n");}
 fn bool signature(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut bytes::Buffer out, ref mut w::State s) {
     if (flow::stops(plan,f.target) && !w::text(out,s,b"_Noreturn ")) { return false; }
-    if (!w::type(out,s,if (flow::stops(plan,f.target)) { 7 } else { m::target_at(p,f.target).result }) || !w::text(out,s,b" ") || !w::function(out,s,f.target) || !w::text(out,s,b"(")) { return false; }
+    if (!w::owned_type(m::nominal(p),m::source_view(p),out,s,if (flow::stops(plan,f.target)) { 7 } else { m::target_at(p,f.target).result }) || !w::text(out,s,b" ") || !w::function(out,s,f.target) || !w::text(out,s,b"(")) { return false; }
     if (f.parameter_count == 0) { if (!w::text(out,s,b"void")) { return false; } }
     var usize i = 0; while (i < f.parameter_count) {
         let usize id = m::edge_at(p,f.parameter_start + i);
         if (i != 0 && !w::text(out,s,b",")) { return false; }
-        if (!w::type(out,s,m::local_at(p,id).type) || !w::text(out,s,b" ") || !w::local(out,s,id)) { return false; } i += 1;
+        if (!w::owned_type(m::nominal(p),m::source_view(p),out,s,m::local_at(p,id).type) || !w::text(out,s,b" ") || !w::local(out,s,id)) { return false; } i += 1;
     }
     return w::text(out,s,b")");
 }
@@ -32,7 +32,7 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
         let m::Local l = m::local_at(p,id);
         if (!l.parameter) {
             let bool aggregate = l.type >= 256 && !pointers::valid(l.type);
-            if (!w::text(out,s,b"    ") || !w::type(out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id)
+            if (!w::text(out,s,b"    ") || !w::owned_type(m::nominal(p),m::source_view(p),out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id)
                 || !w::text(out,s,if(aggregate){b";\n"}else if(l.type == 9 || l.type == 10 || l.type == 11){b"={0};\n"}else{b"=0;\n"})) { return false; }
             // MSVC recursively expands aggregate zero initializers and reaches
             // C1054 before the admitted nested type depth. These layouts hold
@@ -51,7 +51,7 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
     }
     if (trapped && !w::text(out,s,b"    uint32_t fy_pending_trap=UINT32_C(7);\n")) { return false; }
     id = 1; while (id <= 5) {
-        if (divisors[id] && (!w::text(out,s,b"    volatile ") || !w::type(out,s,if (id == 1) { 1 } else if (id == 2) { 2 } else if (id == 3) { 3 } else if (id == 4) { 4 } else { 5 })
+        if (divisors[id] && (!w::text(out,s,b"    volatile ") || !w::owned_type(m::nominal(p),m::source_view(p),out,s,if (id == 1) { 1 } else if (id == 2) { 2 } else if (id == 3) { 3 } else if (id == 4) { 4 } else { 5 })
             || !w::text(out,s,b" ") || !w::text(out,s,b"fy_div_") || !w::number(out,s,id) || !w::text(out,s,b"=0;\n"))) { return false; } id += 1;
     }
     if (!w::text(out,s,b"    ") || !w::jump(out,s,f.entry)) { return false; }

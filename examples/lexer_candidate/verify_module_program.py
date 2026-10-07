@@ -18,10 +18,16 @@ CLI_CASES = (
      'module provider;@effects(console)@link_name("fixture_drop")unsafe extern C fn void dropped(i32 n);@effects(console)pub resource Owner{i32 n;cleanup{unsafe{dropped(this.n);}}}pub fn Owner make(){return Owner{.n=65};}pub fn i32 value(ref Owner x){return x.n-58;}', "A", 7),
     ("enum", "module main;import provider as p;import provider as q;fn i32 main(){let p::Kind k=q::make();return p::value(k);}",
      "module provider;pub enum Kind{Off;On;}pub fn Kind make(){return .On;}pub fn i32 value(Kind k){return switch(k){case .Off:{0}case .On:{7}};}", "", 7),
+    ("repr-provider", "module main;import provider as p;fn i32 main(){let p::Packet t=p::make();assert(t.code==41 && t.amount==1);return 7;}",
+     "module provider;@repr(C)pub struct Packet{u32 code;u32 amount;}unsafe extern C fn Packet fixture_packet();pub fn Packet make(){return unsafe{fixture_packet()};}", "", 7),
+    ("repr-import-result", "module main;import provider as p;unsafe extern C fn p::Packet fixture_packet();fn i32 main(){let p::Packet t=unsafe{fixture_packet()};return p::value(ref t);}",
+     "module provider;@repr(C)pub struct Packet{u32 code;u32 amount;}pub fn i32 value(ref Packet p){assert(p.code==41 && p.amount==1);return 7;}", "", 7),
+    ("branch-stack", "module main;struct Large{u32 a;u32 b;u32 c;u32 d;u32 e;}fn i32 main(){let Large p=Large{.a=1,.b=2,.c=3,.d=4,.e=5};assert(p.a==1 && p.b==2 && p.c==3 && p.d==4 && p.e==5);return 7;}",
+     "module provider;", "", 7),
 )
 
 
-def verify_cli(images, runner, compiler, bootstrap_receipt):
+def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None):
     output = ROOT / ".cache/candidate-module-cli"
     output.mkdir(parents=True, exist_ok=True)
     rows, fixtures, jobs = [], [], []
@@ -54,7 +60,7 @@ def verify_cli(images, runner, compiler, bootstrap_receipt):
     run([compiler, "check", "--locked"])
 
     provider = output / "provider.c"
-    provider.write_text('#include <stdint.h>\n#include <stdio.h>\nvoid fixture_drop(int32_t n){(void)fputc(n,stdout);}\n', encoding="utf-8", newline="\n")
+    provider.write_text('#include <stdint.h>\n#include <stdio.h>\nvoid fixture_drop(int32_t n){(void)fputc(n,stdout);}\nstruct Packet{uint32_t code;uint32_t amount;};\nstruct Packet fixture_packet(void){struct Packet p={41,1};return p;}\n', encoding="utf-8", newline="\n")
     for name, first, second, trace, value in CLI_CASES:
         path = manifest(name, first, second)
         emitted = [run([image, "--c-modules-file", path]) for image in images]
@@ -75,6 +81,10 @@ def verify_cli(images, runner, compiler, bootstrap_receipt):
         ("provider-error", "module main;import provider as p;fn i32 main(){return p::value();}",
          "module provider;pub fn i32 value(){return missing;}", "-provider.fy:1:"),
         ("no-entry", "module main;fn i32 value(){return 7;}", "module provider;", "exactly one fn i32 main"),
+        ("repr-import-plain", "module main;import provider as p;unsafe extern C fn p::Packet fixture_packet();fn i32 main(){return 7;}",
+         "module provider;pub struct Packet{u32 code;u32 amount;}", "code 5102"),
+        ("repr-private", "module main;import provider as p;unsafe extern C fn p::Packet fixture_packet();fn i32 main(){return 7;}",
+         "module provider;@repr(C)struct Packet{u32 code;u32 amount;}", "code 6"),
     )
     for name, first, second, diagnostic in rejections:
         path = manifest(name, first, second)
@@ -102,7 +112,7 @@ def verify_cli(images, runner, compiler, bootstrap_receipt):
         replacement = ("commandTimeout   = " + str(bootstrap["timeoutSeconds"]) + " * time.Second").encode("ascii")
         assert overlay.read_bytes() == original.read_bytes().replace(
             b"commandTimeout   = 60 * time.Second", replacement)
-    save(ROOT / "docs/ops/evidence/candidate-module-cli-20261008.json",
+    save(receipt or ROOT / "docs/ops/evidence/candidate-module-cli-20261008.json",
          dict(schema="fairyc.candidate-module-cli/v1", passed=True, validation=rows,
               images=[dict(path=str(p), sha256=digest(p)) for p in images],
               compiler=dict(path=str(compiler), sha256=digest(compiler)),
@@ -113,7 +123,7 @@ def verify_cli(images, runner, compiler, bootstrap_receipt):
               lockSHA256=digest(PROJECT / "fairy.lock"),
               limits=["explicit source-list CLI, not workspace manifest resolution",
                       "SDK/generic imports pending", "Linux deferred"]))
-    print(f"module CLI: 4 programs, 4 errors, {len(native)} native C executions passed", flush=True)
+    print(f"module CLI: {len(CLI_CASES)} programs, {len(rejections)} errors, {len(native)} native C executions passed", flush=True)
 
 
 def main():
@@ -122,12 +132,13 @@ def main():
     parser.add_argument("--images", type=Path, nargs="+")
     parser.add_argument("--native-runner", type=Path)
     parser.add_argument("--bootstrap-receipt", type=Path)
+    parser.add_argument("--receipt", type=Path)
     parser.add_argument("--phase", choices=("join", "program", "cli", "repr"), required=True)
     args = parser.parse_args()
     if args.phase == "cli":
         if not args.images or len(args.images) != 2 or not args.native_runner or not args.compiler:
             parser.error("cli phase requires two --images, --native-runner and --compiler")
-        verify_cli([p.resolve() for p in args.images], args.native_runner.resolve(), args.compiler.resolve(), args.bootstrap_receipt)
+        verify_cli([p.resolve() for p in args.images], args.native_runner.resolve(), args.compiler.resolve(), args.bootstrap_receipt, args.receipt)
         return
     if not args.compiler:
         parser.error("API phases require --compiler")

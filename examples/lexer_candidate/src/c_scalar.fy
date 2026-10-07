@@ -19,7 +19,7 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
     let ref u8[] value = m::literal_text(p,id);
     if (o.type == 1 && bytes::equal(value,b"-2147483648") || o.type == 2 && bytes::equal(value,b"-9223372036854775808")) { return w::minimum(out,s,o.type); }
     let bool negative = value[0] == 45;
-    if (o.type == 3 || o.type == 5) { if (!w::text(out,s,b"((") || !w::type(out,s,o.type) || !w::text(out,s,b")")) { return false; } }
+    if (o.type == 3 || o.type == 5) { if (!w::text(out,s,b"((") || !w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) || !w::text(out,s,b")")) { return false; } }
     if (negative && !w::text(out,s,b"(-")) { return false; }
     if (!w::text(out,s,if (o.type == 1) { b"INT32_C(" } else if (o.type == 2) { b"INT64_C(" } else if (o.type == 5) { b"UINT64_C(" } else { b"UINT32_C(" })
         || !w::text(out,s,value[if (negative) { 1 } else { 0 }..]) || !w::text(out,s,b")")) { return false; }
@@ -27,11 +27,11 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
 }
 pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref mut w::State s) {
     let m::Operation o = m::operation_at(p,id);
-    if(o.kind==37){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::type(out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && (o.owner_type!=9 && o.owner_type!=10 && o.owner_type!=11 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
+    if(o.kind==37){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && (o.owner_type!=9 && o.owner_type!=10 && o.owner_type!=11 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
     if(o.kind==36){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=0;\n");}
-    if(o.kind==35){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::type(out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && w::text(out,s,b";\n");}
+    if(o.kind==35){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && w::text(out,s,b";\n");}
     if(o.kind==30){return w::text(out,s,b"    *") && w::local(out,s,o.left) && w::text(out,s,b" = ") && w::local(out,s,o.right) && w::text(out,s,b";\n");}
-    if(o.kind>=28){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b" = ") && (if(o.kind==28){w::text(out,s,b"&") && w::local(out,s,o.left)}else if(o.kind==29){w::text(out,s,b"*") && w::local(out,s,o.left)}else if(o.kind==34){w::local(out,s,o.left)}else if(o.kind==33){w::text(out,s,b"&") && w::local(out,s,o.left) && w::text(out,s,b".fy_items[") && w::local(out,s,o.right) && w::text(out,s,b"]")}else{(o.kind!=32 || w::text(out,s,b"&")) && w::local(out,s,o.left) && w::text(out,s,b"->fy_f_") && w::number(out,s,o.operator as usize)}) && w::text(out,s,b";\n");}
+    if(o.kind>=28){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b" = ") && (if(o.kind==28){w::text(out,s,b"&") && w::local(out,s,o.left)}else if(o.kind==29){w::text(out,s,b"*") && w::local(out,s,o.left)}else if(o.kind==34){w::local(out,s,o.left)}else if(o.kind==33){w::text(out,s,b"&") && w::local(out,s,o.left) && w::text(out,s,b".fy_items[") && w::local(out,s,o.right) && w::text(out,s,b"]")}else{(o.kind!=32 || w::text(out,s,b"&")) && w::local(out,s,o.left) && w::text(out,s,b"->") && w::field(m::nominal(p),m::source_view(p),out,s,o.operator as usize)}) && w::text(out,s,b";\n");}
     if(o.kind==26){return owned::operation(p,o,out,s);}
     if(o.kind==25 || o.kind==27){return true;}
     if(o.kind==24){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b" = ") && w::local(out,s,o.left) && w::text(out,s,b";\n");}
@@ -53,7 +53,7 @@ pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref
         else if (o.owner_type == 1 || o.owner_type == 2) {
             if (!bits(out,s,o.owner_type) || !w::text(out,s,if (o.operator == 2) { b"0 - " } else { b"~" }) || !cast_local(out,s,o.left,o.owner_type) || !w::text(out,s,b")")) { return false; }
         } else {
-            if (!w::text(out,s,b"(") || !w::type(out,s,o.type) || !w::text(out,s,b")~") || !cast_local(out,s,o.left,o.owner_type)) { return false; }
+            if (!w::text(out,s,b"(") || !w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) || !w::text(out,s,b")~") || !cast_local(out,s,o.left,o.owner_type)) { return false; }
         }
     } else if (o.operator >= 13) {
         if (!w::text(out,s,b"(") || !w::local(out,s,o.left) || !w::operator(out,s,o.operator) || !w::local(out,s,o.right) || !w::text(out,s,b") ? INT32_C(1) : INT32_C(0)")) { return false; }
@@ -64,7 +64,7 @@ pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref
     } else {
         let bool signed = o.owner_type == 1 || o.owner_type == 2;
         if (signed) { if (!bits(out,s,o.owner_type)) { return false; } }
-        else { if (!w::text(out,s,b"(") || !w::type(out,s,o.type) || !w::text(out,s,b")(")) { return false; } }
+        else { if (!w::text(out,s,b"(") || !w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) || !w::text(out,s,b")(")) { return false; } }
         if (!cast_local(out,s,o.left,o.owner_type) || !w::operator(out,s,o.operator) || !cast_local(out,s,o.right,o.owner_type) || !w::text(out,s,b")")) { return false; }
     }
     return w::text(out,s,b";\n");

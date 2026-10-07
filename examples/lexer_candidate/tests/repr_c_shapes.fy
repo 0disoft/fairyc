@@ -9,6 +9,7 @@ import hir_shapes as shapes;
 import mir_lower as lower;
 import mir_model as m;
 import mir_verify as verify;
+import c_emit as c;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -19,6 +20,28 @@ fn h::Program owned(ref u8[] input){
     let resolved=names::resolve(parsed);assert(names::problem(ref resolved).code==0);
     let typed=typing::check(resolved);assert(typing::problem(ref typed).code==0);
     return switch(hir::lower(typed,0)){case .ok(p):{p}case .err(_):{assert(false);owned(b"module main;")}};
+}
+fn m::Program without_abi(ref m::Program p){
+    var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,m::source_view(p)).is_ok);
+    var bytes::Buffer payload=bytes::empty();var v::Vec<m::Operation> ops=v::empty<m::Operation>();var usize i=1;
+    while(i<=m::operation_count(p)){let o=m::operation_at(p,i);if(o.payload_end>o.payload_start){assert(bytes::append(ref mut payload,m::literal_text(p,i)).is_ok);}assert(v::push<m::Operation>(ref mut ops,o).is_ok);i+=1;}
+    var v::Vec<m::Target> targets=v::empty<m::Target>();i=1;while(i<=m::target_count(p)){assert(v::push<m::Target>(ref mut targets,m::target_at(p,i)).is_ok);i+=1;}
+    var v::Vec<m::Signature> signatures=v::empty<m::Signature>();i=0;while(i<m::signature_count(p)){assert(v::push<m::Signature>(ref mut signatures,m::Signature{.type=m::signature_at(p,i)}).is_ok);i+=1;}
+    var v::Vec<m::Function> functions=v::empty<m::Function>();i=1;while(i<=m::function_count(p)){assert(v::push<m::Function>(ref mut functions,m::function_at(p,i)).is_ok);i+=1;}
+    var v::Vec<m::Local> locals=v::empty<m::Local>();i=1;while(i<=m::local_count(p)){assert(v::push<m::Local>(ref mut locals,m::local_at(p,i)).is_ok);i+=1;}
+    var v::Vec<m::Block> blocks=v::empty<m::Block>();i=1;while(i<=m::block_count(p)){assert(v::push<m::Block>(ref mut blocks,m::block_at(p,i)).is_ok);i+=1;}
+    var v::Vec<usize> edges=v::empty<usize>();i=0;while(i<m::edge_count(p)){assert(v::push<usize>(ref mut edges,m::edge_at(p,i)).is_ok);i+=1;}
+    var v::Vec<shapes::Shape> records=v::empty<shapes::Shape>();i=0;while(i<shapes::count(m::nominal(p))){assert(v::push<shapes::Shape>(ref mut records,shapes::at(m::nominal(p),i)).is_ok);i+=1;}
+    var v::Vec<shapes::Field> fields=v::empty<shapes::Field>();i=1;while(i<=shapes::field_count(m::nominal(p))){assert(v::push<shapes::Field>(ref mut fields,shapes::field_at(m::nominal(p),i)).is_ok);i+=1;}
+    return switch(m::assemble_nominal(source,payload,targets,signatures,functions,locals,blocks,ops,edges,0,shapes::assemble(records,fields))){case .ok(p):{p}case .err(_):{assert(false);return without_abi(p);}};
+}
+@test fn void repr_c_foreign_result_requires_owned_permission(){
+    let p=switch(lower::lower(owned(b"module main;@repr(C)struct Packet{u32 code;}unsafe extern C fn Packet fixture_packet();fn i32 main(){let Packet p=unsafe{fixture_packet()};return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref p).code==0);
+    var bytes::Buffer good=bytes::empty();assert(c::render(ref p,ref mut good)==0);
+    let bad=without_abi(ref p);assert(verify::check(ref bad).code==5106);
+    var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);
+    assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));
 }
 fn shapes::Table forged(u32 field_type,usize marker_end){
     var v::Vec<shapes::Shape> records=v::empty<shapes::Shape>();var v::Vec<shapes::Field> fields=v::empty<shapes::Field>();var v::Vec<shapes::Abi> abi=v::empty<shapes::Abi>();

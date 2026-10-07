@@ -146,3 +146,34 @@ owner teardown, HIR-to-MIR survival, missing/wrong marker bytes and forged field
 lanes. Evidence: `evidence/candidate-module-repr-20261008.json`.
 By-value foreign results and C names/layout transport are the next unit; this
 declaration unit does not claim them. Linux remains deferred.
+
+## repr(C) foreign results and C transport
+
+Extern C results may now name a provider-owned repr(C) struct. Ordinary struct
+parameters remain outside the closed foreign lane. Imported result annotations
+resolve to the actual module/declaration before admission; a same-spelled plain
+struct cannot grant ABI permission. Owned HIR and independently checked MIR
+require the matching ABI record, and C output retains the verified external tag
+and field names in definitions, prototypes, local values, constructors and
+borrowed field access. Internal nominal names remain private numeric identities.
+
+The separate C provider returns 8-byte and 20-byte records, plus mixed-width,
+C-double and pointer fields. Development and release candidates emit identical C;
+the low and optimized native executions verify all returned field values, aliases,
+borrowed reads and nested ordinary wrappers. Nine invalid single-file fixtures
+and two imported repr errors fail without output. Removing a valid MIR owner's
+ABI proof fails verification and leaves an existing output buffer unchanged.
+
+The larger field predicate exposed development-candidate stack exhaustion in
+recursive MIR expression lowering; it also reproduces with a plain struct.
+Switch, if and logical-expression snapshots now live in dedicated helpers rather
+than every recursive expression frame. Source-depth accounting and ownership
+joins stay unchanged. The unchanged five-field conjunction now executes through
+the module CLI. This targeted repair does not establish a global stack bound.
+
+Evidence: `evidence/candidate-module-repr-results-20261008.json` (six programs,
+nine errors, twelve native executions), `evidence/candidate-module-repr-cli-20261008.json`
+(seven module programs, six errors, fourteen native executions), plus three
+development-native API checks. Both candidate build profiles succeeded with the
+validation-only 240-second bootstrap. SDK symbols, nested repr(C) layouts,
+by-value struct parameters and Linux execution remain subsequent work.

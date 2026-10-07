@@ -24,6 +24,33 @@ void fixture_emit(int32_t n){(void)fputc((unsigned char)n,stdout);(void)fflush(s
 '''
 PROVIDER += '\n#include <stddef.h>\n_Bool fixture_make_bool(void){return 1;}\nint32_t fixture_consume_bool(_Bool n){return n==1?7:0;}\nchar fixture_make_char(void){return -3;}\nint32_t fixture_consume_char(char n){return n==-3?7:0;}\ndouble fixture_make_double(void){return 1.25;}\nint32_t fixture_consume_double(double n){return n==1.25?7:0;}\nfloat fixture_make_float(void){return 1.25f;}\nint32_t fixture_consume_float(float n){return n==1.25f?7:0;}\nint fixture_make_int(void){return -7;}\nint32_t fixture_consume_int(int n){return n==-7?7:0;}\nlong fixture_make_long(void){return -9L;}\nint32_t fixture_consume_long(long n){return n==-9L?7:0;}\nlong long fixture_make_longlong(void){return -11LL;}\nint32_t fixture_consume_longlong(long long n){return n==-11LL?7:0;}\nsigned char fixture_make_schar(void){return -13;}\nint32_t fixture_consume_schar(signed char n){return n==-13?7:0;}\nshort fixture_make_short(void){return -15;}\nint32_t fixture_consume_short(short n){return n==-15?7:0;}\nsize_t fixture_make_size_t(void){return 17;}\nint32_t fixture_consume_size_t(size_t n){return n==17?7:0;}\nunsigned char fixture_make_uchar(void){return 19;}\nint32_t fixture_consume_uchar(unsigned char n){return n==19?7:0;}\nunsigned int fixture_make_uint(void){return 23U;}\nint32_t fixture_consume_uint(unsigned int n){return n==23U?7:0;}\nunsigned long fixture_make_ulong(void){return 29UL;}\nint32_t fixture_consume_ulong(unsigned long n){return n==29UL?7:0;}\nunsigned long long fixture_make_ulonglong(void){return 31ULL;}\nint32_t fixture_consume_ulonglong(unsigned long long n){return n==31ULL?7:0;}\nunsigned short fixture_make_ushort(void){return 37;}\nint32_t fixture_consume_ushort(unsigned short n){return n==37?7:0;}\n'
 PROVIDER += 'int32_t fixture_slot(void **out){static int32_t n=7;*out=&n;return 7;}\nvoid fixture_clear_slot(void **out){*out=NULL;}\nint32_t fixture_mut_opaque(void *p){return *(int32_t*)p;}\n'
+PROVIDER += '''
+struct Packet{uint32_t code;uint32_t amount;};
+struct Large{uint32_t a;uint32_t b;uint32_t c;uint32_t d;uint32_t e;};
+struct Mixed{uint8_t byte;uint32_t word;double real;const int32_t *address;};
+struct Packet fixture_packet(void){struct Packet p={41,1};return p;}
+struct Large fixture_large(void){struct Large p={1,2,3,4,5};return p;}
+struct Mixed fixture_mixed(void){static const int32_t n=7;struct Mixed p={255,4294967295U,1.25,&n};return p;}
+'''
+REPR_CASES=[
+ ('repr-small','@repr(C)struct Packet{u32 code;u32 amount;}unsafe extern C fn Packet fixture_packet();fn i32 main(){let Packet p=unsafe{fixture_packet()};assert(p.code==41 && p.amount==1);return 7;}','',7),
+ ('repr-large','@repr(C)struct Large{u32 a;u32 b;u32 c;u32 d;u32 e;}unsafe extern C fn Large fixture_large();fn i32 main(){let Large p=unsafe{fixture_large()};assert(p.a==1 && p.b==2 && p.c==3 && p.d==4 && p.e==5);return 7;}','',7),
+ ('repr-alias','@repr(C)struct Packet{u32 code;u32 amount;}@link_name("fixture_packet")unsafe extern C fn Packet make();@link_name("fixture_packet")unsafe extern C fn Packet again();fn i32 main(){let Packet p=unsafe{make()};let Packet q=unsafe{again()};assert(p.code==q.code);return 7;}','',7),
+ ('repr-borrow','@repr(C)struct Packet{u32 code;u32 amount;}unsafe extern C fn Packet fixture_packet();fn u32 read(ref Packet p){return p.code;}fn i32 main(){var Packet p=unsafe{fixture_packet()};p.amount=2;assert(read(ref p)==41 && p.amount==2);return 7;}','',7),
+ ('repr-nested-private','@repr(C)struct Packet{u32 code;u32 amount;}struct Wrap{Packet p;}unsafe extern C fn Packet fixture_packet();fn i32 main(){let Wrap w=Wrap{.p=unsafe{fixture_packet()}};assert(w.p.code==41);return 7;}','',7),
+ ('repr-mixed','@repr(C)struct Mixed{u8 byte;u32 word;c::double real;ptr i32 address;}unsafe extern C fn Mixed fixture_mixed();unsafe extern C fn i32 fixture_consume_double(c::double n);unsafe extern C fn i32 fixture_read(ptr i32 p);fn i32 main(){let Mixed p=unsafe{fixture_mixed()};assert(p.byte==255 && p.word==4294967295);return unsafe{if(fixture_consume_double(p.real)==7 && fixture_read(p.address)==7){7}else{0}};}','',7),
+]
+REPR_REJECTIONS=[
+ ('repr-plain','struct Packet{u32 code;u32 amount;}unsafe extern C fn Packet fixture_packet();fn i32 main(){return 7;}','E5102'),
+ ('repr-parameter','@repr(C)struct Packet{u32 code;u32 amount;}unsafe extern C fn i32 accept(Packet p);fn i32 main(){return 7;}','E5102'),
+ ('repr-empty','@repr(C)struct Packet{}fn i32 main(){return 7;}','E5102'),
+ ('repr-array','@repr(C)struct Packet{u8[2] x;}fn i32 main(){return 7;}','E5102'),
+ ('repr-view','@repr(C)struct Packet{ref u8[] x;}fn i32 main(){return 7;}','E5102'),
+ ('repr-nested','@repr(C)struct Packet{u32 n;}@repr(C)struct Wrap{Packet p;}fn i32 main(){return 7;}','E5102'),
+ ('repr-marker','@repr(D)struct Packet{u32 n;}fn i32 main(){return 7;}','E5106'),
+ ('repr-conflict','@repr(C)struct Packet{u32 n;}@link_name("fixture_packet")unsafe extern C fn Packet make();@link_name("fixture_packet")unsafe extern C fn i32 wrong();fn i32 main(){return 7;}','E5106'),
+ ('repr-unsafe','@repr(C)struct Packet{u32 n;}unsafe extern C fn Packet fixture_packet();fn i32 main(){let Packet p=fixture_packet();return 7;}','E5101'),
+]
 CASES=[
  ('default-symbol','unsafe extern C fn i32 fixture_add(i32 n);fn i32 main(){return unsafe{fixture_add(6)};}','',7),
  ('linked-alias','@link_name("fixture_add")unsafe extern C fn i32 foreign(i32 n);fn i32 main(){return unsafe{foreign(6)};}','',7),
@@ -121,8 +148,8 @@ REJECTIONS=[
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def save(p,data):p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi','slot'],default='scalar');args=ap.parse_args()
- cases=SLOT_CASES if args.lane=='slot' else ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=SLOT_REJECTIONS if args.lane=='slot' else ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
+ ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi','slot','repr'],default='scalar');args=ap.parse_args()
+ cases=REPR_CASES if args.lane=='repr' else SLOT_CASES if args.lane=='slot' else ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=REPR_REJECTIONS if args.lane=='repr' else SLOT_REJECTIONS if args.lane=='slot' else ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
  images=[Path(s).resolve() for s in args.images];runner=Path(args.native_runner).resolve();receipt=Path(args.receipt).resolve();receipt.parent.mkdir(parents=True,exist_ok=True);rows=[];fixtures=[];jobs=[];native=[];passed=False
  def run(argv,expected=0):
   q=subprocess.run(list(map(str,argv)),cwd=ROOT,capture_output=True,encoding='utf-8',timeout=360);row=dict(argv=list(map(str,argv)),cwd=str(ROOT),exit=q.returncode,stdout=q.stdout,stderr=q.stderr);rows.append(row);save(receipt.parent/'raw.json',rows);assert q.returncode==expected,row;return row

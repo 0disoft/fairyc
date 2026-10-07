@@ -4,6 +4,7 @@ import module_types as types;
 import syntax as syntax;
 import effect_declarations as effects;
 import foreign_declarations as foreign;
+import repr_c_declarations as repr;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -31,8 +32,11 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
             if(d.owner_end!=0 || d.generic_parameters!=0){return .err(fail(4501,module_index,d.start,d.end));}
             let contract=effects::read(p,index);if(contract.code!=0){return .err(fail(contract.code,module_index,contract.start,contract.end));}
             var usize link_start=0;var usize link_end=0;
-            if(d.kind==9){let ffi=foreign::read(p,index);if(ffi.code!=0){return .err(fail(ffi.code,module_index,ffi.start,ffi.end));}link_start=bytes::len(ref links);let name=syntax::source_view(p)[ffi.link_start..ffi.link_end];if(name.len>1048576-bytes::len(ref links) || !bytes::append(ref mut links,name).is_ok){return .err(fail(11,module_index,d.start,d.end));}link_end=bytes::len(ref links);}
             let result=types::resolve(ref c,p,module_index,d.result_type,ref mut graph);if(result.problem.code!=0){return .err(fail(result.problem.code,module_index,result.problem.start,result.problem.end));}
+            if(d.kind==9){let t=types::at(ref graph,result.type);
+                let bool repr_result=t.kind==2 && repr::read(v::at<syntax::Parsed>(sources,t.module_index),t.declaration-1).repr_c;
+                let ffi=foreign::read_result(p,index,repr_result || foreign::result_type(p,d.result_type));
+                if(ffi.code!=0){return .err(fail(ffi.code,module_index,ffi.start,ffi.end));}link_start=bytes::len(ref links);let name=syntax::source_view(p)[ffi.link_start..ffi.link_end];if(name.len>1048576-bytes::len(ref links) || !bytes::append(ref mut links,name).is_ok){return .err(fail(11,module_index,d.start,d.end));}link_end=bytes::len(ref links);}
             let result_type=types::at(ref graph,result.type);if(contract.must_use && (result_type.kind==1 && result_type.scalar==7 || result_type.kind!=1 && result_type.kind!=2 && result_type.kind!=4 && result_type.kind!=12)){return .err(fail(4201,module_index,contract.must_start,contract.must_end));}
             let usize parameter_start=v::len<usize>(ref parameters);var usize e=d.entry_start;
             while(e<d.entry_start+d.entry_count){let entry=syntax::entry_at(p,e);if(entry.kind==1){let type=types::resolve(ref c,p,module_index,entry.type_root,ref mut graph);if(type.problem.code!=0){return .err(fail(type.problem.code,module_index,type.problem.start,type.problem.end));}let t=types::at(ref graph,type.type);if(t.kind==1 && t.scalar==7){return .err(fail(9,module_index,entry.type_start,entry.type_end));}if(v::len<usize>(ref parameters)>=32768 || !v::push<usize>(ref mut parameters,type.type).is_ok){return .err(fail(10,module_index,entry.start,entry.end));}}e+=1;}

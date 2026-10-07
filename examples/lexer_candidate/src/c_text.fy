@@ -6,6 +6,7 @@ import std::bytes as bytes;
 import enum_types as enums;
 import tagged_types as tagged;
 import resource_identity as resources;
+import hir_shapes as shapes;
 
 pub struct State { u32 code; }
 pub fn bool text(ref mut bytes::Buffer out, ref mut State s, ref u8[] value) {
@@ -35,6 +36,18 @@ pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
 }
 pub fn bool unsigned_type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
     return text(out,s,if (code == 2) { b"uint64_t" } else if (code == 5) { b"uintptr_t" } else { b"uint32_t" });
+}
+// Only verified owned shape facts provide external C tag/field spellings.
+// Ordinary nominal names remain private IDs, including inside nested records.
+pub fn bool owned_type(ref shapes::Table table,ref u8[] source,ref mut bytes::Buffer out,ref mut State s,u32 code){
+    if(refs::valid(code)){return owned_type(table,source,out,s,refs::inner(code)) && text(out,s,if(refs::mutable(code)){b" *"}else{b" const *"});}
+    let usize slot=shapes::abi_find(table,code);
+    if(slot==0){return type(out,s,code);}let a=shapes::abi_at(table,slot-1);
+    return text(out,s,b"struct ") && text(out,s,source[a.name_start..a.name_end]);
+}
+pub fn bool field(ref shapes::Table table,ref u8[] source,ref mut bytes::Buffer out,ref mut State s,usize id){
+    let f=shapes::field_at(table,id);
+    return if(shapes::abi_find(table,f.owner)!=0){text(out,s,source[f.start..f.end])}else{text(out,s,b"fy_f_") && number(out,s,id)};
 }
 pub fn bool local(ref mut bytes::Buffer out, ref mut State s, usize id) { return text(out,s,b"fy_l_") && number(out,s,id); }
 pub fn bool function(ref mut bytes::Buffer out, ref mut State s, usize id) { return text(out,s,b"fy_fn_") && number(out,s,id); }
