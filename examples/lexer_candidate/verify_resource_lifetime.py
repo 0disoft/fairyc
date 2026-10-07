@@ -349,6 +349,40 @@ REJECTIONS[43]=[
  ('shared-escalation','fn i32 main(){let ref u8[] p=b"abc";let ref mut u8[] q=p[..];return 0;}'),
 ]
 
+CASES[44]=[
+ ('identity','fn T id<T>(T n){return n;}fn i32 main(){return id<i32>(7);}', '',7,0),
+ ('two-types','fn T id<T>(T n){return n;}fn i32 main(){assert(id<bool>(true));let usize n=id<usize>(7);return if(n==7){7}else{1};}', '',7,0),
+ ('ordered-parameters','fn B second<A,B>(A a,B b){return b;}fn i32 main(){return second<bool,i32>(true,7);}', '',7,0),
+ ('forward','fn T id<T>(T n){return n;}fn T forward<T>(T n){return id<T>(n);}fn i32 main(){return forward<i32>(7);}', '',7,0),
+ ('generic-loop','fn T repeat<T>(T n){var T total=n;var i32 i=0;while(i<2){total+=n;i+=1;}return total;}fn i32 main(){return repeat<i32>(7);}', '',21,0),
+ ('generic-if','fn T select<T>(bool yes,T a,T b){return if(yes){a}else{b};}fn i32 main(){return select<i32>(true,7,9)+select<i32>(false,7,9);}', '',16,0),
+ ('generic-u8','fn T id<T>(T n){return n;}fn i32 main(){let u8 n=id<u8>(255);return if(n==255){7}else{1};}', '',7,0),
+ ('generic-u32','fn T id<T>(T n){return n;}fn i32 main(){let u32 n=id<u32>(4294967295);return if(n==4294967295){7}else{1};}', '',7,0),
+ ('generic-i64','fn T id<T>(T n){return n;}fn i32 main(){let i64 n=id<i64>(4000000000);return if(n==4000000000){7}else{1};}', '',7,0),
+ ('unused-template','fn T unused<T>(T n){return unknown(n);}fn i32 main(){return 7;}', '',7,0),
+]
+REJECTIONS[44]=[
+ ('arity','fn T id<T>(T n){return n;}fn i32 main(){return id<i32,bool>(7);}', 'E4501'),
+ ('nominal-argument','struct S{i32 n;}fn T id<T>(T n){return n;}fn i32 main(){let S s=id<S>(S{.n=7});return s.n;}', 'E4502'),
+ ('recursive-request','fn T recurse<T>(T n){return recurse<T>(n);}fn i32 main(){return recurse<i32>(7);}', 'E4503'),
+ ('mutual-recursion','fn T a<T>(T n){return b<T>(n);}fn T b<T>(T n){return a<T>(n);}fn i32 main(){return a<i32>(7);}', 'E4503'),
+ ('implicit-inference','fn T id<T>(T n){return n;}fn i32 main(){return id(7);}'),
+ ('inference-after-explicit','fn T id<T>(T n){return n;}fn i32 main(){discard id<i32>(1);return id(7);}', 'E4501'),
+ ('template-shadow','fn T id<T>(T n){return n;}fn i32 main(){let i32 id=7;return id;}', 'E4501'),
+ ('template-collision','fn T id<T>(T n){return n;}fn i32 id(i32 n){return n;}fn i32 main(){return id<i32>(7);}'),
+ ('bad-concrete-body','fn T add<T>(T n){return n+1;}fn i32 main(){assert(add<bool>(true));return 0;}'),
+ ('duplicate-parameters','fn T id<T,T>(T n){return n;}fn i32 main(){return id<i32,i32>(7);}', 'E4501'),
+]
+
+CASES[45]=[
+ ('dedup-keeps-calls','fn T id<T>(T n){mark(65);return n;}fn i32 main(){return id<i32>(3)+id<i32>(4);}', 'AA',7,0),
+ ('two-definitions','fn T a<T>(T n){return n;}fn T b<T>(T n){return n+1;}fn i32 main(){return a<i32>(3)+b<i32>(3);}', '',7,0),
+]
+REJECTIONS[45]=[
+ ('depth-limit',''.join('fn T f%d<T>(T n){return f%d<T>(n);}'%(i,i+1) for i in range(33))+'fn T f33<T>(T n){return n;}fn i32 main(){return f0<i32>(7);}', 'E4503'),
+ ('per-declaration-limit','fn i32 many<A,B,C,D,E>(A a){return 7;}fn i32 main(){'+''.join('discard many<'+','.join('bool' if (i>>j)&1 else 'i32' for j in range(5))+'>'+(' (true);' if i&1 else '(7);') for i in range(17))+'return 0;}', 'E4503'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

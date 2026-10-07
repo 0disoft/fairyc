@@ -472,3 +472,6 @@ pub fn types::Node generic_parameter_at(ref Parsed parsed, usize declaration, us
     while (remaining > index) { link = type_at(parsed,link).right; remaining -= 1; }
     return type_at(parsed,type_at(parsed,link).left);
 }
+
+// Compiler-private owner publication; source/arenas are transferred as whole values.
+pub fn Parsed assemble(scanner::Stream source,v::Vec<Declaration> declarations,v::Vec<Problem> problems,v::Vec<state::Node> expressions,v::Vec<bodies::Entry> entries,v::Vec<state::Statement> statements,v::Vec<types::Node> types,v::Vec<records::Field> fields,v::Vec<attributes::Attribute> attributes,v::Vec<attributes::Argument> attribute_arguments){return Parsed{.source,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments};}

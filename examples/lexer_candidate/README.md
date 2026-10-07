@@ -2844,3 +2844,7 @@ See `docs/ops/evidence/candidate-resource-borrow-flow-joins-20261007.json`,
 ### Stored byte-array field views (unit 42)
 
 `ref value.field` and `ref mut value.field` borrow stored rank-one `u8[N]` fields, including nested plain struct fields. MIR projects an address into original storage before constructing the descriptor; writes are visible in the owner. Shared struct-reference parameters can return a field view with the parameter origin. Temporary roots remain rejected, and retained mutable siblings keep the ADR0415 whole-owner restriction. SDK text conversion is still pending its unsafe/cast and module dependencies.
+
+### Explicit scalar function specialization (units 44–45)
+
+Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before ordinary name/type/HIR/MIR checks. Ordered bool/u8/i32/i64/u32/usize arguments and forwarding to another template are supported. The key is the original declaration and exact ordered types; repeated calls execute even when the function is emitted once. Cloning preserves the original source/token stream and spans in independent arenas. Unused templates remain catalog entries and are not claimed as checked executable bodies. Inference, template-name shadowing, user nominal arguments, recursive expansion and duplicate type parameters are rejected. Expansion is bounded by depth 32, 16 instances per declaration, 64 total, a 1048576-work budget, and existing arena limits. Cross-module/package identity and the authenticated SDK Vec nominal exception remain pending their dedicated units.

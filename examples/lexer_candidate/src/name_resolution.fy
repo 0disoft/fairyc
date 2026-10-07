@@ -1,5 +1,6 @@
 module name_resolution;
 import syntax as syntax;
+import generic_expand as generics;
 import nominal_types as nominal;
 import module_registry as modules;
 import std::bytes as bytes;
@@ -21,6 +22,7 @@ fn Context empty() {
     return Context { .globals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .global_count = 0,
         .locals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .local_count = 0, .scope = 0, .next_scope = 1, .owner = 0, .receiver = 0, .modules = false };
 }
+fn ref u8[] source_name(ref syntax::Parsed p,syntax::Declaration d){return syntax::source_view(p)[d.name_start..d.name_end];}
 fn bool simple(ref u8[] name) {
     if (name.len == 0) { return false; }
     for (let u8 byte in name) {
@@ -88,7 +90,9 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
             while (index < v::len<Reference>(references)) { if (v::at<Reference>(references,index).expression == id) { return ok(); } index += 1; }
         }
         if (!simple(spelling)) { return fail(3,node.start,node.end); }
-        let usize symbol = known(parsed,context,node.start,node.end);
+        var usize symbol=0;
+        if(node.right!=0){var usize n=0;while(n<v::len<Symbol>(symbols)){if(v::at<Symbol>(symbols,n).kind==1 && v::at<Symbol>(symbols,n).declaration==node.right){symbol=n+1;}n+=1;}}
+        else{var usize n=0;while(n<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,n);if(d.kind==12 && bytes::equal(source_name(parsed,d),spelling)){return fail(4501,node.start,node.end);}n+=1;}symbol=known(parsed,context,node.start,node.end);}
         if (symbol == 0) { return fail(1,node.start,node.end); }
         let Reference value = Reference { .expression = id, .start = node.start, .end = node.end, .symbol };
         if (!v::push<Reference>(references,value).is_ok) { return fail(5,node.start,node.end); }
@@ -232,12 +236,12 @@ fn Problem scoped_block(ref syntax::Parsed parsed, ref mut Context context, usiz
     return tail;
 }
 fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v::Vec<Symbol> symbols, ref mut v::Vec<Reference> references) {
-    if (syntax::problem_count(parsed) != 0) { return fail(6,0,0); }
+    if (syntax::problem_count(parsed) != 0) {let p=syntax::problem_at(parsed,0);return if(p.code>=4501 || p.code==2){fail(p.code,p.start,p.end)}else{fail(6,0,0)}; }
     let ref u8[] source = syntax::source_view(parsed);
     var usize index = 0;
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
-        if (item.kind != 1 && !(context.modules && item.kind == 2)) {
+        if (item.kind != 1 && item.kind!=12 && !(context.modules && item.kind == 2)) {
             if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || (item.attribute_count != 0 && item.kind!=6) ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
             // Effects/attributes remain closed until their own implementation.
@@ -245,7 +249,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
             var usize previous = 0;
             while (previous < context.global_count) {
-                if (same(source,context.globals[previous],item.name_start,item.name_end)) { return fail(2,item.name_start,item.name_end); }
+                if (same(source,context.globals[previous],item.name_start,item.name_end)) {let old=syntax::declaration_at(parsed,v::at<Symbol>(symbols,context.globals[previous].symbol-1).declaration-1);if(item.generic_start==0 || item.generic_start!=old.generic_start || item.generic_end==0 || old.generic_end==0){return fail(2,item.name_start,item.name_end);} }
                 previous += 1;
             }
             if (context.global_count >= 128) { return fail(4,item.name_start,item.name_end); }
@@ -264,7 +268,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
         if (item.kind == 3) {
             context.receiver = 0;
             context.local_count = 0; context.scope = context.next_scope; context.next_scope += 1;
-            context.owner = known(parsed,context,item.name_start,item.name_end);
+            context.owner=0;var usize n=0;while(n<v::len<Symbol>(symbols)){if(v::at<Symbol>(symbols,n).kind==1 && v::at<Symbol>(symbols,n).declaration==index+1){context.owner=n+1;}n+=1;}
             var usize entry_index = item.entry_start;
             while (entry_index < item.entry_start + item.entry_count) {
                 let syntax::Entry entry = syntax::entry_at(parsed,entry_index);
@@ -299,10 +303,11 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
 /// Keep source, syntax and declaration-use links in one owner. Failure retains
 /// only diagnostic authority; table queries cannot publish partial resolution.
 pub fn Resolved resolve(syntax::Parsed parsed) {
+    let syntax::Parsed prepared=generics::expand(parsed);
     var Context context = empty();
     var v::Vec<Symbol> symbols = v::empty<Symbol>(); var v::Vec<Reference> references = v::empty<Reference>();
-    let Problem problem = collect(ref parsed,ref mut context,ref mut symbols,ref mut references);
-    return Resolved { .source = parsed, .context, .symbols, .references, .external = v::empty<modules::Item>(), .parameters = v::empty<u32>(), .problem };
+    let Problem problem = collect(ref prepared,ref mut context,ref mut symbols,ref mut references);
+    return Resolved { .source = prepared, .context, .symbols, .references, .external = v::empty<modules::Item>(), .parameters = v::empty<u32>(), .problem };
 }
 // Registry lookup binds actual qualified expression IDs to copied signatures.
 // The result owns all type facts; it borrows neither the registry nor other files.

@@ -349,7 +349,7 @@ pub fn Result<h::Program,h::Problem> lower(typing::Typed input, usize module_ind
             let usize body = block(ref input,ref bindings,ref links,ref mut c,ref mut expressions,ref mut statements,ref mut blocks,ref mut edges,ref mut payload,if(drop_body){d.cleanup_body}else{d.body},0);
             c.scope_count -= 1; if (c.problem.code != 0) { return .err(c.problem); }
             if (!v::push<h::Function>(ref mut functions,h::Function { .binding = c.owner, .start = if(drop_body){d.cleanup_start}else{d.start}, .end = if(drop_body){d.cleanup_end}else{d.end}, .scope, .public = !drop_body && d.public, .body, .parameter_start = start, .parameter_count = count }).is_ok) { return .err(h::Problem { .code = 3, .start = d.start, .end = d.end }); }
-        } else if (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
+        } else if (d.kind != 12 && d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
         if(d.kind==6){let u32 type=98303+typing_ids::small_id(i+1);
             if(!v::push<h::Drop>(ref mut drops,h::Drop{.abilities=abilities::mask(parsed,i),.type,.function=if(drop_body){c.owner}else{0},.receiver,.start=d.cleanup_start,.end=d.cleanup_end,.nonempty=drop_body}).is_ok){return .err(h::Problem{.code=3,.start=d.start,.end=d.end});}
         }
