@@ -1,6 +1,7 @@
 module hir_model;
 import borrow_shapes as borrows;
 import scalar_casts as casts;
+import must_use_flow as must_use;
 import reference_types as refs;
 import array_types as arrays;
 import resource_identity as resources;
@@ -34,7 +35,7 @@ pub struct Signature { Type type; }
 // Binding owner is the enclosing Function Binding ID; scope is its lexical scope
 // ID. Function/External use module_index+declaration as authoritative call target.
 // Callable result is type; signature_start/count index the Type signature arena.
-pub struct Binding { u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
+pub struct Binding { bool must_use; u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
 pub struct Function { usize binding; usize start; usize end; usize scope; bool public; usize body; usize parameter_start; usize parameter_count; }
 // An empty body has no callable/receiver. Every resource owns exactly one
 // classified drop definition; a nonempty body links one private typed function.
@@ -200,7 +201,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
-        if (b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5 && binding_code(b.kind)!=8) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (b.must_use && (binding_code(b.kind)!=1 && binding_code(b.kind)!=5 || !must_use::eligible(type_code(b.type))) || b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5 && binding_code(b.kind)!=8) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (function_kind(b.kind) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }

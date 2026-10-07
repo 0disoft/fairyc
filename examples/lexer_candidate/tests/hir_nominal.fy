@@ -71,7 +71,7 @@ fn void duplicate_declaration_identity_cannot_enter_program() {
     var v::Vec<h::Binding> bindings = v::empty<h::Binding>();
     var usize i = 0;
     while (i < 2) {
-        assert(v::push<h::Binding>(ref mut bindings,h::Binding { .effects = 0, .kind = .Struct, .type = .Nominal { .id = 257 }, .start = i, .end = i + 1, .owner = 0, .scope = 0, .module_index = 0, .declaration = 2, .signature_start = 0, .signature_count = 0 }).is_ok); i += 1;
+        assert(v::push<h::Binding>(ref mut bindings,h::Binding { .must_use = false, .effects = 0, .kind = .Struct, .type = .Nominal { .id = 257 }, .start = i, .end = i + 1, .owner = 0, .scope = 0, .module_index = 0, .declaration = 2, .signature_start = 0, .signature_count = 0 }).is_ok); i += 1;
     }
     var v::Vec<shapes::Shape> records = v::empty<shapes::Shape>();
     assert(v::push<shapes::Shape>(ref mut records,shapes::Shape { .type = 257, .binding = 1, .field_start = 0, .field_count = 0, .public = false }).is_ok);

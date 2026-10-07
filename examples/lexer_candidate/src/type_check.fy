@@ -9,6 +9,7 @@ import name_resolution as names;
 import syntax as syntax;
 import scalar_casts as casts;
 import effect_declarations as effects;
+import must_use_flow as must_use;
 import type_state as state;
 import nominal_types as nominal;
 import resource_identity as resources;
@@ -471,6 +472,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
         if (symbol.entry != 0) { state::set_entries(tables,symbol.entry - 1,id); }
         id += 1;
     }
+    let state::Problem attributes=must_use::declarations(resolved,tables);if(attributes.code!=0){return attributes;}
     var usize index = 0;
     while (index < names::reference_count(resolved)) { let names::Reference use = names::reference_at(resolved,index); state::set_uses(tables,use.expression - 1,use.symbol); index += 1; }
     id = 1;
@@ -500,7 +502,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
         }
         index += 1;
     }
-    if(problem.code!=0){return problem;}let ownership=resource_use::classify(resolved,tables);if(ownership.code!=0){return ownership;}let flow=resource_flow::check(resolved,tables);return if(flow.code!=0){flow}else{result_flow::check(resolved,tables)};
+    if(problem.code!=0){return problem;}let uses=must_use::check(resolved,tables);if(uses.code!=0){return uses;}let ownership=resource_use::classify(resolved,tables);if(ownership.code!=0){return ownership;}let flow=resource_flow::check(resolved,tables);return if(flow.code!=0){flow}else{result_flow::check(resolved,tables)};
 }
 pub fn Typed check(names::Resolved resolved) {
     assert(names::problem(ref resolved).code == 0);

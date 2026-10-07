@@ -2860,3 +2860,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 ### 후보 53b: 자원 정리 효과
 
 자원 선언의 `@effects`는 비어 있지 않은 cleanup에만 붙인다. 실제로 정리되는 root·임시값·중첩 자원·Option/Result payload의 권한 union을 검사한다. 반환/전달하는 sender, 비-unwind trap과 no-drop burn에는 자동 정리 권한을 요구하지 않는다. `@abilities`와 `@effects`는 순서와 무관하게 해석한다. owned HIR의 resource와 cleanup 함수 권한이 일치해야 하며, MIR은 직접 cleanup call과 tagged/중첩 drop op의 권한을 독립 검증한다. source flow는 root의 Live/Dead 상태를 쓰고 최종 MIR은 부분 임시값까지 확인한다. 증거는 `docs/ops/evidence/candidate-resource-effects-cleanup-20261007.json`. 최초 assertion trap 기대값 1은 실제 계약의 5로 수정했다. 고정 Go 기준 도구는 literal assert(false) 뒤에도 정리 효과를 요구하는 차이가 있다. 후보의 기존 30번 trap 규칙은 유지했고 이를 일치로 세지 않았다.
+
+### 후보 56a: must-use 호출 계약
+
+단일 무인자 `@must_use`는 inert 반환 함수에만 붙인다. 직접 무시한 호출 및 괄호·블록·if/switch의 무시된 끝값은 E4202로 거부한다. binding/return/argument/operator/cast/condition/aggregate 또는 명시 `discard`는 호출 값의 처리로 인정한다. 일반 함수와 scalar generic 특수화의 HIR binding에 marker를 소유하며 MIR/C에는 실행 비용을 추가하지 않는다. resource/Result/safe borrow/void 반환과 malformed 선언은 E4201이다. @test/@const_eval과 import marker 연결은 아직 남았다. 증거: `docs/ops/evidence/candidate-resource-must-use-20261007.json`. tagged .some 생성자를 함수로 잘못 분류하던 초기 walker 오류는 수정했고 정상 Option 처리 fixture로 검증했다.

@@ -446,6 +446,32 @@ REJECTIONS[153]=[
  ('tagged-none-still-requires','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn i32 main(){let Option<R> r=.none;return 7;}','E7102'),
 ]
 
+CASES[56]=[
+ ('must-use-discard-once','@must_use fn i32 token(){mark(65);return 7;}fn i32 main(){discard token();return 7;}','A',7,0),
+ ('must-use-bound','@must_use fn i32 token(){return 7;}fn i32 main(){let i32 n=token();return n;}','',7,0),
+ ('must-use-operator','@must_use fn i32 token(){return 7;}fn i32 main(){token()+1;return 7;}','',7,0),
+ ('must-use-condition','@must_use fn bool test(){return true;}fn i32 main(){return if(test()){7}else{0};}','',7,0),
+ ('must-use-argument','@must_use fn i32 token(){return 7;}fn i32 id(i32 n){return n;}fn i32 main(){return id(token());}','',7,0),
+ ('must-use-cast','@must_use fn u8 token(){return 7;}fn i32 main(){return token() as i32;}','',7,0),
+ ('must-use-aggregate','struct P{i32 n;}@must_use fn i32 token(){return 7;}fn i32 main(){let P p=P{.n=token()};return p.n;}','',7,0),
+ ('must-use-option','@must_use fn Option<i32> token(){return .some(7);}fn i32 main(){return switch(token()){case .some(n):{n}case .none:{0}};}','',7,0),
+ ('must-use-generic-effects','@must_use @effects(clock)fn T id<T>(T n){return n;}@effects(clock)fn i32 main(){return id<i32>(7);}','',7,0),
+]
+REJECTIONS[56]=[
+ ('must-use-ignored','@must_use fn i32 token(){return 7;}fn i32 main(){token();return 0;}','E4202'),
+ ('must-use-group','@must_use fn i32 token(){return 7;}fn i32 main(){((token()));return 0;}','E4202'),
+ ('must-use-block','@must_use fn i32 token(){return 7;}fn i32 main(){{token()};return 0;}','E4202'),
+ ('must-use-if-tail','@must_use fn i32 token(){return 7;}fn i32 main(){if(true){token()}else{0};return 0;}','E4202'),
+ ('must-use-switch-tail','enum E{A;B;}@must_use fn i32 token(){return 7;}fn i32 main(){let E e=.A;switch(e){case .A:{token()}case .B:{0}};return 0;}','E4202'),
+ ('must-use-resource','resource R{cleanup{}}@must_use fn R token(){return R{};}fn i32 main(){return 0;}','E4201'),
+ ('must-use-borrow','@must_use fn ref u8[] token(){return b"x";}fn i32 main(){return 0;}','E4201'),
+ ('must-use-result','@must_use fn Result<i32,i32> token(){return .ok(7);}fn i32 main(){return 0;}','E4201'),
+ ('must-use-void','@must_use fn void token(){}fn i32 main(){return 0;}','E4201'),
+ ('must-use-arguments','@must_use(1)fn i32 token(){return 7;}fn i32 main(){return 0;}','E4201'),
+ ('must-use-duplicate','@must_use @must_use fn i32 token(){return 7;}fn i32 main(){return 0;}','E4201'),
+ ('must-use-wrong-target','@must_use resource R{cleanup{}}fn i32 main(){return 0;}','E4201'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

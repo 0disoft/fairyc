@@ -31,6 +31,7 @@ pub fn i32 errors(ref typing::Typed typed, ref u8[] path) {
     let state::Problem problem = typing::problem(typed);
     if (problem.code != 0) {
         output::prefix(typing::source_view(typed),path,problem.start);
+        if(problem.code==4201 || problem.code==4202){discard io::write_stderr(if(problem.code==4201){"E4201 invalid must_use result"}else{"E4202 ignored must_use call"});output::range(problem.start,problem.end);if(problem.move_end!=0){discard io::write_stderr("  must-use-declaration: ");output::range(problem.move_start,problem.move_end);}return 2;}
         if(problem.code==7102){discard io::write_stderr("E7102 caller lacks required effects");output::range(problem.start,problem.end);return 2;}
         if(problem.code>=49 && problem.code<=51){discard io::write_stderr(if(problem.code==49){"E1107 invalid resource abilities"}else if(problem.code==50){"E1108 implicit destruction of no-drop resource"}else{"E1109 unauthorized burn"});output::range(problem.start,problem.end);if(problem.move_end!=0){discard io::write_stderr("  ability-declaration: ");output::range(problem.move_start,problem.move_end);}return 2;}
         if(problem.code==48){discard io::write_stderr("E1102 cleanup receiver cannot transfer or replace its obligation");output::range(problem.start,problem.end);return 2;}

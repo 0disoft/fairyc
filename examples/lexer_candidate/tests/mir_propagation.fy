@@ -25,7 +25,7 @@ fn Result<h::Program,h::Problem> rebuilt(u32 mutation) {
     i=1;while(i<=h::binding_count(ref p)){
         let h::Binding b=h::binding_at(ref p,i);
         let h::Type type=if(mutation==8 && h::binding_code(b.kind)==1){.I32}else{b.type};
-        assert(v::push<h::Binding>(ref mut bindings,h::Binding{.effects=b.effects,.kind=b.kind,.type=type,.start=b.start,.end=b.end,.owner=b.owner,.scope=b.scope,.module_index=b.module_index,.declaration=b.declaration,.signature_start=b.signature_start,.signature_count=b.signature_count}).is_ok);i+=1;
+        assert(v::push<h::Binding>(ref mut bindings,h::Binding{.must_use=b.must_use,.effects=b.effects,.kind=b.kind,.type=type,.start=b.start,.end=b.end,.owner=b.owner,.scope=b.scope,.module_index=b.module_index,.declaration=b.declaration,.signature_start=b.signature_start,.signature_count=b.signature_count}).is_ok);i+=1;
     }
     i=1;while(i<=h::expression_count(ref p)){
         let h::Expression original=h::expression_at(ref p,i);
