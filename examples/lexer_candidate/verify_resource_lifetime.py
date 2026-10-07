@@ -223,6 +223,20 @@ REJECTIONS[35]=[
  ('mut-from-shared-deref','fn i32 main(){var i32 n=7;var ref i32 p=ref n;let ref mut i32 child=ref mut *p;return *child;}'),
 ]
 
+CASES[36]=[
+ ('args-source-order','fn i32 read(ref i32 p){return *p;}fn i32 value(i32 n){mark(n);return n-65;}fn i32 pair(ref i32 p,i32 n){return *p+n;}fn i32 main(){let i32 n=7;return pair(ref n,value(65));}', 'A',7,0),
+ ('arg-read-before-edit','fn i32 pair(i32 a,i32 b){return a+b;}fn i32 edit(ref mut i32 p){*p=9;return 1;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return pair(*p,edit(p));}', '',8,0),
+ ('nested-returned-arg','fn ref i32 id(ref i32 p){return p;}fn i32 pair(ref i32 p,i32 n){return *p+n;}fn i32 main(){let i32 n=7;return pair(id(ref n),1);}', '',8,0),
+ ('distinct-arg-owners','fn i32 pair(ref i32 p,ref mut i32 q){*q=9;return *p+*q;}fn i32 main(){var i32 a=7;var i32 b=1;return pair(ref a,ref mut b);}', '',16,0),
+]
+REJECTIONS[36]=[
+ ('arg-shared-then-mutable','fn i32 pair(ref i32 a,ref mut i32 b){return *a+*b;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return pair(p,p);}', 'E2101'),
+ ('arg-mutable-then-shared','fn i32 pair(ref mut i32 a,ref i32 b){return *a+*b;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return pair(p,p);}', 'E2101'),
+ ('arg-first-then-nested-edit','fn i32 pair(ref i32 p,i32 n){return *p+n;}fn i32 edit(ref mut i32 p){*p=9;return 1;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return pair(p,edit(p));}', 'E2101'),
+ ('arg-returned-then-edit','fn ref i32 id(ref i32 p){return p;}fn i32 pair(ref i32 p,i32 n){return *p+n;}fn i32 edit(ref mut i32 p){*p=9;return 1;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return pair(id(p),edit(p));}', 'E2101'),
+ ('arg-exclusive-parent-read','fn i32 pair(ref mut i32 p,i32 n){return *p+n;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return pair(p,*p);}', 'E2101'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

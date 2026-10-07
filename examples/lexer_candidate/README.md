@@ -2792,3 +2792,5 @@ Unit 33: lower mutable reference stores and projections. See `docs/ops/evidence/
 Unit 34: preserve shared reborrow generations through calls. See `docs/ops/evidence/candidate-resource-shared-reborrows-20261007.json` for the bounded executable fixtures and current profile identities.
 
 Unit 35: retain mutable reborrow ancestry and last use. See `docs/ops/evidence/candidate-resource-mutable-reborrows-20261007.json` for the bounded executable fixtures and current profile identities.
+
+Unit 36: hold reference arguments through later evaluation. See `docs/ops/evidence/candidate-resource-argument-loans-20261007.json` for the bounded executable fixtures and current profile identities.

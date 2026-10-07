@@ -63,7 +63,7 @@ fn usize held_end(ref h::Program p, usize id) {
     let e = h::expression_at(p,id); var usize end = e.end; var usize i = 1;
     while (i <= h::expression_count(p)) {
         let x = h::expression_at(p,i); let u32 kind = h::expression_code(x.kind);
-        if ((kind == 13 || kind == 17) && x.left == id && x.end > end) { end = x.end; }
+        if ((kind == 13 || kind == 17 || kind==25 || kind==4 || kind==10 || kind==14) && x.left == id && x.end > end) { end = x.end; }
         if (kind == 6) { var usize j = 0; while (j < x.edge_count) { if (h::edge_at(p,x.edge_start+j) == id && x.end > end) { end = x.end; } j += 1; } }
         i += 1;
     }
